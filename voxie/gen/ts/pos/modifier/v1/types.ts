@@ -2,47 +2,177 @@
 
 export interface Modifier {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
-price_delta?: number;
-group_name?: string;
-is_required?: boolean;
-created_at?: string;
-updated_at?: string;
+priceDelta?: number;
+groupName?: string;
+isRequired?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeModifier(v: any): Modifier {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+priceDelta: v.price_delta,
+groupName: v.group_name,
+isRequired: v.is_required,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeModifier(v: Modifier): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.priceDelta !== undefined) { out.price_delta = v.priceDelta; }
+if (v.groupName !== undefined) { out.group_name = v.groupName; }
+if (v.isRequired !== undefined) { out.is_required = v.isRequired; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface CreateModifierRequest {
 name?: string;
-price_delta?: number;
-group_name?: string;
-is_required?: boolean;
+priceDelta?: number;
+groupName?: string;
+isRequired?: boolean;
+}
+
+export function decodeCreateModifierRequest(v: any): CreateModifierRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+priceDelta: v.price_delta,
+groupName: v.group_name,
+isRequired: v.is_required,
+};
+}
+
+export function encodeCreateModifierRequest(v: CreateModifierRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.priceDelta !== undefined) { out.price_delta = v.priceDelta; }
+if (v.groupName !== undefined) { out.group_name = v.groupName; }
+if (v.isRequired !== undefined) { out.is_required = v.isRequired; }
+return out;
 }
 
 export interface CreateModifierResponse {
-modifier_id?: string;
+modifierId?: string;
 message?: string;
+}
+
+export function decodeCreateModifierResponse(v: any): CreateModifierResponse {
+if (v === null || v === undefined) return v;
+return {
+modifierId: v.modifier_id,
+message: v.message,
+};
+}
+
+export function encodeCreateModifierResponse(v: CreateModifierResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.modifierId !== undefined) { out.modifier_id = v.modifierId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface DeleteModifierRequest {
 id?: string;
 }
 
+export function decodeDeleteModifierRequest(v: any): DeleteModifierRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteModifierRequest(v: DeleteModifierRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteModifierResponse {
 message?: string;
 }
 
+export function decodeDeleteModifierResponse(v: any): DeleteModifierResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteModifierResponse(v: DeleteModifierResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListModifiersRequest {
+}
+
+export function decodeListModifiersRequest(v: any): ListModifiersRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListModifiersRequest(v: ListModifiersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListModifiersResponse {
 modifiers?: (Modifier)[];
 }
 
+export function decodeListModifiersResponse(v: any): ListModifiersResponse {
+if (v === null || v === undefined) return v;
+return {
+modifiers: (v.modifiers !== undefined ? (v.modifiers as any[]).map(decodeModifier) : v.modifiers),
+};
+}
+
+export function encodeListModifiersResponse(v: ListModifiersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.modifiers !== undefined) { out.modifiers = (v.modifiers as any[]).map(encodeModifier); }
+return out;
+}
+
 export interface UpdateModifierBody {
 name?: string;
-price_delta?: number;
-group_name?: string;
-is_required?: boolean;
+priceDelta?: number;
+groupName?: string;
+isRequired?: boolean;
+}
+
+export function decodeUpdateModifierBody(v: any): UpdateModifierBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+priceDelta: v.price_delta,
+groupName: v.group_name,
+isRequired: v.is_required,
+};
+}
+
+export function encodeUpdateModifierBody(v: UpdateModifierBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.priceDelta !== undefined) { out.price_delta = v.priceDelta; }
+if (v.groupName !== undefined) { out.group_name = v.groupName; }
+if (v.isRequired !== undefined) { out.is_required = v.isRequired; }
+return out;
 }
 
 export interface UpdateModifierRequest {
@@ -50,7 +180,35 @@ id?: string;
 body?: UpdateModifierBody;
 }
 
+export function decodeUpdateModifierRequest(v: any): UpdateModifierRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateModifierBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateModifierRequest(v: UpdateModifierRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateModifierBody(v.body); }
+return out;
+}
+
 export interface UpdateModifierResponse {
 message?: string;
+}
+
+export function decodeUpdateModifierResponse(v: any): UpdateModifierResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateModifierResponse(v: UpdateModifierResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

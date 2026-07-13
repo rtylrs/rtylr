@@ -4,7 +4,7 @@ export interface Business {
 id?: string;
 name?: string;
 type?: string;
-logo_url?: string;
+logoUrl?: string;
 address?: string;
 phone?: string;
 email?: string;
@@ -13,16 +13,76 @@ timezone?: string;
 currency?: string;
 country?: string;
 plan?: string;
-created_at?: string;
+createdAt?: string;
 slug?: string;
+}
+
+export function decodeBusiness(v: any): Business {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+type: v.type,
+logoUrl: v.logo_url,
+address: v.address,
+phone: v.phone,
+email: v.email,
+website: v.website,
+timezone: v.timezone,
+currency: v.currency,
+country: v.country,
+plan: v.plan,
+createdAt: v.created_at,
+slug: v.slug,
+};
+}
+
+export function encodeBusiness(v: Business): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.logoUrl !== undefined) { out.logo_url = v.logoUrl; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.website !== undefined) { out.website = v.website; }
+if (v.timezone !== undefined) { out.timezone = v.timezone; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.country !== undefined) { out.country = v.country; }
+if (v.plan !== undefined) { out.plan = v.plan; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.slug !== undefined) { out.slug = v.slug; }
+return out;
 }
 
 export interface BusinessEntry {
 id?: string;
 name?: string;
-logo_url?: string;
-parent_id?: string;
-is_active?: boolean;
+logoUrl?: string;
+parentId?: string;
+isActive?: boolean;
+}
+
+export function decodeBusinessEntry(v: any): BusinessEntry {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+logoUrl: v.logo_url,
+parentId: v.parent_id,
+isActive: v.is_active,
+};
+}
+
+export function encodeBusinessEntry(v: BusinessEntry): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.logoUrl !== undefined) { out.logo_url = v.logoUrl; }
+if (v.parentId !== undefined) { out.parent_id = v.parentId; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface PublicLocation {
@@ -31,77 +91,315 @@ name?: string;
 slug?: string;
 address?: string;
 timezone?: string;
-is_active?: boolean;
+isActive?: boolean;
+}
+
+export function decodePublicLocation(v: any): PublicLocation {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+slug: v.slug,
+address: v.address,
+timezone: v.timezone,
+isActive: v.is_active,
+};
+}
+
+export function encodePublicLocation(v: PublicLocation): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.slug !== undefined) { out.slug = v.slug; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.timezone !== undefined) { out.timezone = v.timezone; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface PublicBusinessSummary {
 id?: string;
 name?: string;
 slug?: string;
-logo_url?: string;
+logoUrl?: string;
 currency?: string;
 type?: string;
 timezone?: string;
 }
 
+export function decodePublicBusinessSummary(v: any): PublicBusinessSummary {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+slug: v.slug,
+logoUrl: v.logo_url,
+currency: v.currency,
+type: v.type,
+timezone: v.timezone,
+};
+}
+
+export function encodePublicBusinessSummary(v: PublicBusinessSummary): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.slug !== undefined) { out.slug = v.slug; }
+if (v.logoUrl !== undefined) { out.logo_url = v.logoUrl; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.timezone !== undefined) { out.timezone = v.timezone; }
+return out;
+}
+
 export interface PublicBusinessProfile {
 id?: string;
 name?: string;
-logo_url?: string;
+logoUrl?: string;
 currency?: string;
 timezone?: string;
 }
 
+export function decodePublicBusinessProfile(v: any): PublicBusinessProfile {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+logoUrl: v.logo_url,
+currency: v.currency,
+timezone: v.timezone,
+};
+}
+
+export function encodePublicBusinessProfile(v: PublicBusinessProfile): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.logoUrl !== undefined) { out.logo_url = v.logoUrl; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.timezone !== undefined) { out.timezone = v.timezone; }
+return out;
+}
+
 export interface GetBusinessRequest {
-business_id?: string;
+businessId?: string;
+}
+
+export function decodeGetBusinessRequest(v: any): GetBusinessRequest {
+if (v === null || v === undefined) return v;
+return {
+businessId: v.business_id,
+};
+}
+
+export function encodeGetBusinessRequest(v: GetBusinessRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+return out;
 }
 
 export interface GetBusinessResponse {
 business?: Business;
 }
 
+export function decodeGetBusinessResponse(v: any): GetBusinessResponse {
+if (v === null || v === undefined) return v;
+return {
+business: (v.business !== undefined ? decodeBusiness(v.business) : v.business),
+};
+}
+
+export function encodeGetBusinessResponse(v: GetBusinessResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.business !== undefined) { out.business = encodeBusiness(v.business); }
+return out;
+}
+
 export interface CreateSubBusinessRequest {
 name?: string;
-parent_business_id?: string;
+parentBusinessId?: string;
+}
+
+export function decodeCreateSubBusinessRequest(v: any): CreateSubBusinessRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+parentBusinessId: v.parent_business_id,
+};
+}
+
+export function encodeCreateSubBusinessRequest(v: CreateSubBusinessRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.parentBusinessId !== undefined) { out.parent_business_id = v.parentBusinessId; }
+return out;
 }
 
 export interface CreateSubBusinessResponse {
 id?: string;
 }
 
+export function decodeCreateSubBusinessResponse(v: any): CreateSubBusinessResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeCreateSubBusinessResponse(v: CreateSubBusinessResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface OnboardBusinessRequest {
 name?: string;
+}
+
+export function decodeOnboardBusinessRequest(v: any): OnboardBusinessRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+};
+}
+
+export function encodeOnboardBusinessRequest(v: OnboardBusinessRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+return out;
 }
 
 export interface OnboardBusinessResponse {
 token?: string;
 }
 
+export function decodeOnboardBusinessResponse(v: any): OnboardBusinessResponse {
+if (v === null || v === undefined) return v;
+return {
+token: v.token,
+};
+}
+
+export function encodeOnboardBusinessResponse(v: OnboardBusinessResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.token !== undefined) { out.token = v.token; }
+return out;
+}
+
 export interface CheckBusinessNameExistsRequest {
 name?: string;
+}
+
+export function decodeCheckBusinessNameExistsRequest(v: any): CheckBusinessNameExistsRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+};
+}
+
+export function encodeCheckBusinessNameExistsRequest(v: CheckBusinessNameExistsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+return out;
 }
 
 export interface CheckBusinessNameExistsResponse {
 exists?: boolean;
 }
 
+export function decodeCheckBusinessNameExistsResponse(v: any): CheckBusinessNameExistsResponse {
+if (v === null || v === undefined) return v;
+return {
+exists: v.exists,
+};
+}
+
+export function encodeCheckBusinessNameExistsResponse(v: CheckBusinessNameExistsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.exists !== undefined) { out.exists = v.exists; }
+return out;
+}
+
 export interface GetPublicBusinessRequest {
-business_id?: string;
+businessId?: string;
+}
+
+export function decodeGetPublicBusinessRequest(v: any): GetPublicBusinessRequest {
+if (v === null || v === undefined) return v;
+return {
+businessId: v.business_id,
+};
+}
+
+export function encodeGetPublicBusinessRequest(v: GetPublicBusinessRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+return out;
 }
 
 export interface GetPublicBusinessResponse {
 business?: PublicBusinessProfile;
 }
 
+export function decodeGetPublicBusinessResponse(v: any): GetPublicBusinessResponse {
+if (v === null || v === undefined) return v;
+return {
+business: (v.business !== undefined ? decodePublicBusinessProfile(v.business) : v.business),
+};
+}
+
+export function encodeGetPublicBusinessResponse(v: GetPublicBusinessResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.business !== undefined) { out.business = encodePublicBusinessProfile(v.business); }
+return out;
+}
+
 export interface ListMyBusinessesRequest {
+}
+
+export function decodeListMyBusinessesRequest(v: any): ListMyBusinessesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListMyBusinessesRequest(v: ListMyBusinessesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListMyBusinessesResponse {
 businesses?: (BusinessEntry)[];
 }
 
+export function decodeListMyBusinessesResponse(v: any): ListMyBusinessesResponse {
+if (v === null || v === undefined) return v;
+return {
+businesses: (v.businesses !== undefined ? (v.businesses as any[]).map(decodeBusinessEntry) : v.businesses),
+};
+}
+
+export function encodeListMyBusinessesResponse(v: ListMyBusinessesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.businesses !== undefined) { out.businesses = (v.businesses as any[]).map(encodeBusinessEntry); }
+return out;
+}
+
 export interface LookupBusinessBySlugRequest {
 slug?: string;
+}
+
+export function decodeLookupBusinessBySlugRequest(v: any): LookupBusinessBySlugRequest {
+if (v === null || v === undefined) return v;
+return {
+slug: v.slug,
+};
+}
+
+export function encodeLookupBusinessBySlugRequest(v: LookupBusinessBySlugRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.slug !== undefined) { out.slug = v.slug; }
+return out;
 }
 
 export interface LookupBusinessBySlugResponse {
@@ -109,16 +407,57 @@ business?: PublicBusinessSummary;
 locations?: (PublicLocation)[];
 }
 
+export function decodeLookupBusinessBySlugResponse(v: any): LookupBusinessBySlugResponse {
+if (v === null || v === undefined) return v;
+return {
+business: (v.business !== undefined ? decodePublicBusinessSummary(v.business) : v.business),
+locations: (v.locations !== undefined ? (v.locations as any[]).map(decodePublicLocation) : v.locations),
+};
+}
+
+export function encodeLookupBusinessBySlugResponse(v: LookupBusinessBySlugResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.business !== undefined) { out.business = encodePublicBusinessSummary(v.business); }
+if (v.locations !== undefined) { out.locations = (v.locations as any[]).map(encodePublicLocation); }
+return out;
+}
+
 export interface SetSlugRequest {
 slug?: string;
+}
+
+export function decodeSetSlugRequest(v: any): SetSlugRequest {
+if (v === null || v === undefined) return v;
+return {
+slug: v.slug,
+};
+}
+
+export function encodeSetSlugRequest(v: SetSlugRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.slug !== undefined) { out.slug = v.slug; }
+return out;
 }
 
 export interface SetSlugResponse {
 slug?: string;
 }
 
+export function decodeSetSlugResponse(v: any): SetSlugResponse {
+if (v === null || v === undefined) return v;
+return {
+slug: v.slug,
+};
+}
+
+export function encodeSetSlugResponse(v: SetSlugResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.slug !== undefined) { out.slug = v.slug; }
+return out;
+}
+
 export interface UpdateBusinessRequest {
-business_id?: string;
+businessId?: string;
 name?: string;
 type?: string;
 address?: string;
@@ -130,7 +469,51 @@ currency?: string;
 slug?: string;
 }
 
+export function decodeUpdateBusinessRequest(v: any): UpdateBusinessRequest {
+if (v === null || v === undefined) return v;
+return {
+businessId: v.business_id,
+name: v.name,
+type: v.type,
+address: v.address,
+phone: v.phone,
+email: v.email,
+website: v.website,
+timezone: v.timezone,
+currency: v.currency,
+slug: v.slug,
+};
+}
+
+export function encodeUpdateBusinessRequest(v: UpdateBusinessRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.website !== undefined) { out.website = v.website; }
+if (v.timezone !== undefined) { out.timezone = v.timezone; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.slug !== undefined) { out.slug = v.slug; }
+return out;
+}
+
 export interface UpdateBusinessResponse {
 business?: Business;
+}
+
+export function decodeUpdateBusinessResponse(v: any): UpdateBusinessResponse {
+if (v === null || v === undefined) return v;
+return {
+business: (v.business !== undefined ? decodeBusiness(v.business) : v.business),
+};
+}
+
+export function encodeUpdateBusinessResponse(v: UpdateBusinessResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.business !== undefined) { out.business = encodeBusiness(v.business); }
+return out;
 }
 

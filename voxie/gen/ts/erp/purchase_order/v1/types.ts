@@ -2,75 +2,271 @@
 
 export interface PurchaseOrderItem {
 id?: string;
-purchase_order_id?: string;
-product_id?: string;
-quantity_ordered?: number;
-quantity_received?: number;
-unit_cost?: number;
-total_cost?: number;
+purchaseOrderId?: string;
+productId?: string;
+quantityOrdered?: number;
+quantityReceived?: number;
+unitCost?: number;
+totalCost?: number;
+}
+
+export function decodePurchaseOrderItem(v: any): PurchaseOrderItem {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+purchaseOrderId: v.purchase_order_id,
+productId: v.product_id,
+quantityOrdered: v.quantity_ordered,
+quantityReceived: v.quantity_received,
+unitCost: v.unit_cost,
+totalCost: v.total_cost,
+};
+}
+
+export function encodePurchaseOrderItem(v: PurchaseOrderItem): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.purchaseOrderId !== undefined) { out.purchase_order_id = v.purchaseOrderId; }
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.quantityOrdered !== undefined) { out.quantity_ordered = v.quantityOrdered; }
+if (v.quantityReceived !== undefined) { out.quantity_received = v.quantityReceived; }
+if (v.unitCost !== undefined) { out.unit_cost = v.unitCost; }
+if (v.totalCost !== undefined) { out.total_cost = v.totalCost; }
+return out;
 }
 
 export interface PurchaseOrder {
 id?: string;
-owner_id?: string;
-supplier_id?: string;
-po_number?: string;
+ownerId?: string;
+supplierId?: string;
+poNumber?: string;
 status?: string;
 subtotal?: number;
-tax_amount?: number;
+taxAmount?: number;
 total?: number;
-expected_delivery?: string;
-received_at?: string;
+expectedDelivery?: string;
+receivedAt?: string;
 notes?: string;
-created_by?: string;
-created_at?: string;
-updated_at?: string;
+createdBy?: string;
+createdAt?: string;
+updatedAt?: string;
 items?: (PurchaseOrderItem)[];
 }
 
+export function decodePurchaseOrder(v: any): PurchaseOrder {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+supplierId: v.supplier_id,
+poNumber: v.po_number,
+status: v.status,
+subtotal: v.subtotal,
+taxAmount: v.tax_amount,
+total: v.total,
+expectedDelivery: v.expected_delivery,
+receivedAt: v.received_at,
+notes: v.notes,
+createdBy: v.created_by,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+items: (v.items !== undefined ? (v.items as any[]).map(decodePurchaseOrderItem) : v.items),
+};
+}
+
+export function encodePurchaseOrder(v: PurchaseOrder): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.supplierId !== undefined) { out.supplier_id = v.supplierId; }
+if (v.poNumber !== undefined) { out.po_number = v.poNumber; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.subtotal !== undefined) { out.subtotal = v.subtotal; }
+if (v.taxAmount !== undefined) { out.tax_amount = v.taxAmount; }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.expectedDelivery !== undefined) { out.expected_delivery = v.expectedDelivery; }
+if (v.receivedAt !== undefined) { out.received_at = v.receivedAt; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.createdBy !== undefined) { out.created_by = v.createdBy; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodePurchaseOrderItem); }
+return out;
+}
+
 export interface CreatePurchaseOrderItemRequest {
-product_id?: string;
-quantity_ordered?: number;
-unit_cost?: number;
+productId?: string;
+quantityOrdered?: number;
+unitCost?: number;
+}
+
+export function decodeCreatePurchaseOrderItemRequest(v: any): CreatePurchaseOrderItemRequest {
+if (v === null || v === undefined) return v;
+return {
+productId: v.product_id,
+quantityOrdered: v.quantity_ordered,
+unitCost: v.unit_cost,
+};
+}
+
+export function encodeCreatePurchaseOrderItemRequest(v: CreatePurchaseOrderItemRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.quantityOrdered !== undefined) { out.quantity_ordered = v.quantityOrdered; }
+if (v.unitCost !== undefined) { out.unit_cost = v.unitCost; }
+return out;
 }
 
 export interface ListPurchaseOrdersRequest {
 status?: string;
 page?: number;
-page_size?: number;
+pageSize?: number;
+}
+
+export function decodeListPurchaseOrdersRequest(v: any): ListPurchaseOrdersRequest {
+if (v === null || v === undefined) return v;
+return {
+status: v.status,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListPurchaseOrdersRequest(v: ListPurchaseOrdersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.status !== undefined) { out.status = v.status; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
 }
 
 export interface ListPurchaseOrdersResponse {
-purchase_orders?: (PurchaseOrder)[];
-has_more?: boolean;
+purchaseOrders?: (PurchaseOrder)[];
+hasMore?: boolean;
 page?: number;
-page_size?: number;
+pageSize?: number;
+}
+
+export function decodeListPurchaseOrdersResponse(v: any): ListPurchaseOrdersResponse {
+if (v === null || v === undefined) return v;
+return {
+purchaseOrders: (v.purchase_orders !== undefined ? (v.purchase_orders as any[]).map(decodePurchaseOrder) : v.purchase_orders),
+hasMore: v.has_more,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListPurchaseOrdersResponse(v: ListPurchaseOrdersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.purchaseOrders !== undefined) { out.purchase_orders = (v.purchaseOrders as any[]).map(encodePurchaseOrder); }
+if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
 }
 
 export interface CreatePurchaseOrderRequest {
-supplier_id?: string;
-po_number?: string;
-tax_amount?: number;
-expected_delivery?: string;
+supplierId?: string;
+poNumber?: string;
+taxAmount?: number;
+expectedDelivery?: string;
 notes?: string;
 items?: (CreatePurchaseOrderItemRequest)[];
 }
 
+export function decodeCreatePurchaseOrderRequest(v: any): CreatePurchaseOrderRequest {
+if (v === null || v === undefined) return v;
+return {
+supplierId: v.supplier_id,
+poNumber: v.po_number,
+taxAmount: v.tax_amount,
+expectedDelivery: v.expected_delivery,
+notes: v.notes,
+items: (v.items !== undefined ? (v.items as any[]).map(decodeCreatePurchaseOrderItemRequest) : v.items),
+};
+}
+
+export function encodeCreatePurchaseOrderRequest(v: CreatePurchaseOrderRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.supplierId !== undefined) { out.supplier_id = v.supplierId; }
+if (v.poNumber !== undefined) { out.po_number = v.poNumber; }
+if (v.taxAmount !== undefined) { out.tax_amount = v.taxAmount; }
+if (v.expectedDelivery !== undefined) { out.expected_delivery = v.expectedDelivery; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeCreatePurchaseOrderItemRequest); }
+return out;
+}
+
 export interface CreatePurchaseOrderResponse {
-purchase_order_id?: string;
+purchaseOrderId?: string;
 message?: string;
+}
+
+export function decodeCreatePurchaseOrderResponse(v: any): CreatePurchaseOrderResponse {
+if (v === null || v === undefined) return v;
+return {
+purchaseOrderId: v.purchase_order_id,
+message: v.message,
+};
+}
+
+export function encodeCreatePurchaseOrderResponse(v: CreatePurchaseOrderResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.purchaseOrderId !== undefined) { out.purchase_order_id = v.purchaseOrderId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface GetPurchaseOrderRequest {
 id?: string;
 }
 
+export function decodeGetPurchaseOrderRequest(v: any): GetPurchaseOrderRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetPurchaseOrderRequest(v: GetPurchaseOrderRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface GetPurchaseOrderResponse {
-purchase_order?: PurchaseOrder;
+purchaseOrder?: PurchaseOrder;
+}
+
+export function decodeGetPurchaseOrderResponse(v: any): GetPurchaseOrderResponse {
+if (v === null || v === undefined) return v;
+return {
+purchaseOrder: (v.purchase_order !== undefined ? decodePurchaseOrder(v.purchase_order) : v.purchase_order),
+};
+}
+
+export function encodeGetPurchaseOrderResponse(v: GetPurchaseOrderResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.purchaseOrder !== undefined) { out.purchase_order = encodePurchaseOrder(v.purchaseOrder); }
+return out;
 }
 
 export interface UpdatePurchaseOrderStatusBody {
 status?: string;
+}
+
+export function decodeUpdatePurchaseOrderStatusBody(v: any): UpdatePurchaseOrderStatusBody {
+if (v === null || v === undefined) return v;
+return {
+status: v.status,
+};
+}
+
+export function encodeUpdatePurchaseOrderStatusBody(v: UpdatePurchaseOrderStatusBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface UpdatePurchaseOrderStatusRequest {
@@ -78,15 +274,69 @@ id?: string;
 body?: UpdatePurchaseOrderStatusBody;
 }
 
+export function decodeUpdatePurchaseOrderStatusRequest(v: any): UpdatePurchaseOrderStatusRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdatePurchaseOrderStatusBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdatePurchaseOrderStatusRequest(v: UpdatePurchaseOrderStatusRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdatePurchaseOrderStatusBody(v.body); }
+return out;
+}
+
 export interface UpdatePurchaseOrderStatusResponse {
 message?: string;
+}
+
+export function decodeUpdatePurchaseOrderStatusResponse(v: any): UpdatePurchaseOrderStatusResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdatePurchaseOrderStatusResponse(v: UpdatePurchaseOrderStatusResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface ApprovePurchaseOrderRequest {
 id?: string;
 }
 
+export function decodeApprovePurchaseOrderRequest(v: any): ApprovePurchaseOrderRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeApprovePurchaseOrderRequest(v: ApprovePurchaseOrderRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface ApprovePurchaseOrderResponse {
 message?: string;
+}
+
+export function decodeApprovePurchaseOrderResponse(v: any): ApprovePurchaseOrderResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeApprovePurchaseOrderResponse(v: ApprovePurchaseOrderResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

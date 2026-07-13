@@ -2,54 +2,198 @@
 
 export interface MenuItem {
 id?: string;
-owner_id?: string;
-category_id?: string;
+ownerId?: string;
+categoryId?: string;
 name?: string;
 sku?: string;
-sale_price?: number;
-is_active?: boolean;
-created_at?: string;
-updated_at?: string;
-image_url?: string;
+salePrice?: number;
+isActive?: boolean;
+createdAt?: string;
+updatedAt?: string;
+imageUrl?: string;
 category?: string;
 barcode?: string;
 description?: string;
-tax_rate?: number;
+taxRate?: number;
 stock?: number;
+}
+
+export function decodeMenuItem(v: any): MenuItem {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+categoryId: v.category_id,
+name: v.name,
+sku: v.sku,
+salePrice: v.sale_price,
+isActive: v.is_active,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+imageUrl: v.image_url,
+category: v.category,
+barcode: v.barcode,
+description: v.description,
+taxRate: v.tax_rate,
+stock: v.stock,
+};
+}
+
+export function encodeMenuItem(v: MenuItem): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.categoryId !== undefined) { out.category_id = v.categoryId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.sku !== undefined) { out.sku = v.sku; }
+if (v.salePrice !== undefined) { out.sale_price = v.salePrice; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+if (v.imageUrl !== undefined) { out.image_url = v.imageUrl; }
+if (v.category !== undefined) { out.category = v.category; }
+if (v.barcode !== undefined) { out.barcode = v.barcode; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.taxRate !== undefined) { out.tax_rate = v.taxRate; }
+if (v.stock !== undefined) { out.stock = v.stock; }
+return out;
 }
 
 export interface CreateMenuItemRequest {
 name?: string;
 sku?: string;
-sale_price?: number;
+salePrice?: number;
+}
+
+export function decodeCreateMenuItemRequest(v: any): CreateMenuItemRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+sku: v.sku,
+salePrice: v.sale_price,
+};
+}
+
+export function encodeCreateMenuItemRequest(v: CreateMenuItemRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.sku !== undefined) { out.sku = v.sku; }
+if (v.salePrice !== undefined) { out.sale_price = v.salePrice; }
+return out;
 }
 
 export interface CreateMenuItemResponse {
-item_id?: string;
+itemId?: string;
 message?: string;
 }
 
+export function decodeCreateMenuItemResponse(v: any): CreateMenuItemResponse {
+if (v === null || v === undefined) return v;
+return {
+itemId: v.item_id,
+message: v.message,
+};
+}
+
+export function encodeCreateMenuItemResponse(v: CreateMenuItemResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.itemId !== undefined) { out.item_id = v.itemId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListMenuItemsRequest {
+}
+
+export function decodeListMenuItemsRequest(v: any): ListMenuItemsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListMenuItemsRequest(v: ListMenuItemsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListMenuItemsResponse {
 items?: (MenuItem)[];
 }
 
+export function decodeListMenuItemsResponse(v: any): ListMenuItemsResponse {
+if (v === null || v === undefined) return v;
+return {
+items: (v.items !== undefined ? (v.items as any[]).map(decodeMenuItem) : v.items),
+};
+}
+
+export function encodeListMenuItemsResponse(v: ListMenuItemsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeMenuItem); }
+return out;
+}
+
 export interface ListPublicMenuItemsRequest {
-business_id?: string;
-location_id?: string;
+businessId?: string;
+locationId?: string;
+}
+
+export function decodeListPublicMenuItemsRequest(v: any): ListPublicMenuItemsRequest {
+if (v === null || v === undefined) return v;
+return {
+businessId: v.business_id,
+locationId: v.location_id,
+};
+}
+
+export function encodeListPublicMenuItemsRequest(v: ListPublicMenuItemsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+return out;
 }
 
 export interface ListPublicMenuItemsResponse {
 items?: (MenuItem)[];
 }
 
+export function decodeListPublicMenuItemsResponse(v: any): ListPublicMenuItemsResponse {
+if (v === null || v === undefined) return v;
+return {
+items: (v.items !== undefined ? (v.items as any[]).map(decodeMenuItem) : v.items),
+};
+}
+
+export function encodeListPublicMenuItemsResponse(v: ListPublicMenuItemsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeMenuItem); }
+return out;
+}
+
 export interface UpdateMenuItemBody {
 name?: string;
-sale_price?: number;
-is_active?: boolean;
+salePrice?: number;
+isActive?: boolean;
 stock?: number;
+}
+
+export function decodeUpdateMenuItemBody(v: any): UpdateMenuItemBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+salePrice: v.sale_price,
+isActive: v.is_active,
+stock: v.stock,
+};
+}
+
+export function encodeUpdateMenuItemBody(v: UpdateMenuItemBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.salePrice !== undefined) { out.sale_price = v.salePrice; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.stock !== undefined) { out.stock = v.stock; }
+return out;
 }
 
 export interface UpdateMenuItemRequest {
@@ -57,7 +201,35 @@ id?: string;
 body?: UpdateMenuItemBody;
 }
 
+export function decodeUpdateMenuItemRequest(v: any): UpdateMenuItemRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateMenuItemBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateMenuItemRequest(v: UpdateMenuItemRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateMenuItemBody(v.body); }
+return out;
+}
+
 export interface UpdateMenuItemResponse {
 message?: string;
+}
+
+export function decodeUpdateMenuItemResponse(v: any): UpdateMenuItemResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateMenuItemResponse(v: UpdateMenuItemResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

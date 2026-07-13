@@ -2,40 +2,153 @@
 
 export interface TaxConfig {
 id?: string;
-owner_id?: string;
-tax_name?: string;
-tax_rate?: number;
-is_inclusive?: boolean;
-is_active?: boolean;
-created_at?: string;
-updated_at?: string;
+ownerId?: string;
+taxName?: string;
+taxRate?: number;
+isInclusive?: boolean;
+isActive?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeTaxConfig(v: any): TaxConfig {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+taxName: v.tax_name,
+taxRate: v.tax_rate,
+isInclusive: v.is_inclusive,
+isActive: v.is_active,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeTaxConfig(v: TaxConfig): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.taxName !== undefined) { out.tax_name = v.taxName; }
+if (v.taxRate !== undefined) { out.tax_rate = v.taxRate; }
+if (v.isInclusive !== undefined) { out.is_inclusive = v.isInclusive; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface GetTaxConfigRequest {
+}
+
+export function decodeGetTaxConfigRequest(v: any): GetTaxConfigRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetTaxConfigRequest(v: GetTaxConfigRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface GetTaxConfigResponse {
 config?: TaxConfig;
 }
 
+export function decodeGetTaxConfigResponse(v: any): GetTaxConfigResponse {
+if (v === null || v === undefined) return v;
+return {
+config: (v.config !== undefined ? decodeTaxConfig(v.config) : v.config),
+};
+}
+
+export function encodeGetTaxConfigResponse(v: GetTaxConfigResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.config !== undefined) { out.config = encodeTaxConfig(v.config); }
+return out;
+}
+
 export interface UpdateTaxConfigRequest {
-tax_name?: string;
-tax_rate?: number;
-is_inclusive?: boolean;
-is_active?: boolean;
+taxName?: string;
+taxRate?: number;
+isInclusive?: boolean;
+isActive?: boolean;
+}
+
+export function decodeUpdateTaxConfigRequest(v: any): UpdateTaxConfigRequest {
+if (v === null || v === undefined) return v;
+return {
+taxName: v.tax_name,
+taxRate: v.tax_rate,
+isInclusive: v.is_inclusive,
+isActive: v.is_active,
+};
+}
+
+export function encodeUpdateTaxConfigRequest(v: UpdateTaxConfigRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.taxName !== undefined) { out.tax_name = v.taxName; }
+if (v.taxRate !== undefined) { out.tax_rate = v.taxRate; }
+if (v.isInclusive !== undefined) { out.is_inclusive = v.isInclusive; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface UpdateTaxConfigResponse {
 message?: string;
 }
 
+export function decodeUpdateTaxConfigResponse(v: any): UpdateTaxConfigResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateTaxConfigResponse(v: UpdateTaxConfigResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface GetPLReportRequest {
 }
 
+export function decodeGetPLReportRequest(v: any): GetPLReportRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetPLReportRequest(v: GetPLReportRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface GetPLReportResponse {
-total_revenue?: number;
-total_expenses?: number;
-gross_profit?: number;
-net_profit?: number;
+totalRevenue?: number;
+totalExpenses?: number;
+grossProfit?: number;
+netProfit?: number;
+}
+
+export function decodeGetPLReportResponse(v: any): GetPLReportResponse {
+if (v === null || v === undefined) return v;
+return {
+totalRevenue: v.total_revenue,
+totalExpenses: v.total_expenses,
+grossProfit: v.gross_profit,
+netProfit: v.net_profit,
+};
+}
+
+export function encodeGetPLReportResponse(v: GetPLReportResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.totalRevenue !== undefined) { out.total_revenue = v.totalRevenue; }
+if (v.totalExpenses !== undefined) { out.total_expenses = v.totalExpenses; }
+if (v.grossProfit !== undefined) { out.gross_profit = v.grossProfit; }
+if (v.netProfit !== undefined) { out.net_profit = v.netProfit; }
+return out;
 }
 

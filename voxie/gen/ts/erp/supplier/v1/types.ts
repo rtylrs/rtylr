@@ -2,19 +2,58 @@
 
 export interface Supplier {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 email?: string;
 phone?: string;
 address?: string;
 city?: string;
 country?: string;
-tax_id?: string;
-payment_terms?: string;
+taxId?: string;
+paymentTerms?: string;
 notes?: string;
-is_active?: boolean;
-created_at?: string;
-updated_at?: string;
+isActive?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeSupplier(v: any): Supplier {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+email: v.email,
+phone: v.phone,
+address: v.address,
+city: v.city,
+country: v.country,
+taxId: v.tax_id,
+paymentTerms: v.payment_terms,
+notes: v.notes,
+isActive: v.is_active,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeSupplier(v: Supplier): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.city !== undefined) { out.city = v.city; }
+if (v.country !== undefined) { out.country = v.country; }
+if (v.taxId !== undefined) { out.tax_id = v.taxId; }
+if (v.paymentTerms !== undefined) { out.payment_terms = v.paymentTerms; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface CreateSupplierRequest {
@@ -24,35 +63,141 @@ phone?: string;
 address?: string;
 city?: string;
 country?: string;
-tax_id?: string;
-payment_terms?: string;
+taxId?: string;
+paymentTerms?: string;
 notes?: string;
-is_active?: boolean;
+isActive?: boolean;
+}
+
+export function decodeCreateSupplierRequest(v: any): CreateSupplierRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+email: v.email,
+phone: v.phone,
+address: v.address,
+city: v.city,
+country: v.country,
+taxId: v.tax_id,
+paymentTerms: v.payment_terms,
+notes: v.notes,
+isActive: v.is_active,
+};
+}
+
+export function encodeCreateSupplierRequest(v: CreateSupplierRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.city !== undefined) { out.city = v.city; }
+if (v.country !== undefined) { out.country = v.country; }
+if (v.taxId !== undefined) { out.tax_id = v.taxId; }
+if (v.paymentTerms !== undefined) { out.payment_terms = v.paymentTerms; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface CreateSupplierResponse {
-supplier_id?: string;
+supplierId?: string;
 message?: string;
+}
+
+export function decodeCreateSupplierResponse(v: any): CreateSupplierResponse {
+if (v === null || v === undefined) return v;
+return {
+supplierId: v.supplier_id,
+message: v.message,
+};
+}
+
+export function encodeCreateSupplierResponse(v: CreateSupplierResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.supplierId !== undefined) { out.supplier_id = v.supplierId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface DeleteSupplierRequest {
 id?: string;
 }
 
+export function decodeDeleteSupplierRequest(v: any): DeleteSupplierRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteSupplierRequest(v: DeleteSupplierRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteSupplierResponse {
 message?: string;
 }
 
+export function decodeDeleteSupplierResponse(v: any): DeleteSupplierResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteSupplierResponse(v: DeleteSupplierResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListSuppliersRequest {
 page?: number;
-page_size?: number;
+pageSize?: number;
+}
+
+export function decodeListSuppliersRequest(v: any): ListSuppliersRequest {
+if (v === null || v === undefined) return v;
+return {
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListSuppliersRequest(v: ListSuppliersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
 }
 
 export interface ListSuppliersResponse {
 suppliers?: (Supplier)[];
-has_more?: boolean;
+hasMore?: boolean;
 page?: number;
-page_size?: number;
+pageSize?: number;
+}
+
+export function decodeListSuppliersResponse(v: any): ListSuppliersResponse {
+if (v === null || v === undefined) return v;
+return {
+suppliers: (v.suppliers !== undefined ? (v.suppliers as any[]).map(decodeSupplier) : v.suppliers),
+hasMore: v.has_more,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListSuppliersResponse(v: ListSuppliersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.suppliers !== undefined) { out.suppliers = (v.suppliers as any[]).map(encodeSupplier); }
+if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
 }
 
 export interface UpdateSupplierBody {
@@ -62,10 +207,41 @@ phone?: string;
 address?: string;
 city?: string;
 country?: string;
-tax_id?: string;
-payment_terms?: string;
+taxId?: string;
+paymentTerms?: string;
 notes?: string;
-is_active?: boolean;
+isActive?: boolean;
+}
+
+export function decodeUpdateSupplierBody(v: any): UpdateSupplierBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+email: v.email,
+phone: v.phone,
+address: v.address,
+city: v.city,
+country: v.country,
+taxId: v.tax_id,
+paymentTerms: v.payment_terms,
+notes: v.notes,
+isActive: v.is_active,
+};
+}
+
+export function encodeUpdateSupplierBody(v: UpdateSupplierBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.city !== undefined) { out.city = v.city; }
+if (v.country !== undefined) { out.country = v.country; }
+if (v.taxId !== undefined) { out.tax_id = v.taxId; }
+if (v.paymentTerms !== undefined) { out.payment_terms = v.paymentTerms; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface UpdateSupplierRequest {
@@ -73,7 +249,35 @@ id?: string;
 body?: UpdateSupplierBody;
 }
 
+export function decodeUpdateSupplierRequest(v: any): UpdateSupplierRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateSupplierBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateSupplierRequest(v: UpdateSupplierRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateSupplierBody(v.body); }
+return out;
+}
+
 export interface UpdateSupplierResponse {
 message?: string;
+}
+
+export function decodeUpdateSupplierResponse(v: any): UpdateSupplierResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateSupplierResponse(v: UpdateSupplierResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

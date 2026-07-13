@@ -2,56 +2,216 @@
 
 export interface KDSItem {
 id?: string;
-order_id?: string;
+orderId?: string;
 name?: string;
 quantity?: number;
 notes?: string;
 status?: string;
 }
 
+export function decodeKDSItem(v: any): KDSItem {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+orderId: v.order_id,
+name: v.name,
+quantity: v.quantity,
+notes: v.notes,
+status: v.status,
+};
+}
+
+export function encodeKDSItem(v: KDSItem): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.quantity !== undefined) { out.quantity = v.quantity; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.status !== undefined) { out.status = v.status; }
+return out;
+}
+
 export interface KDSOrder {
 id?: string;
-order_number?: string;
+orderNumber?: string;
 type?: string;
 status?: string;
-table_id?: string;
-customer_name?: string;
-kitchen_notes?: string;
-created_at?: string;
+tableId?: string;
+customerName?: string;
+kitchenNotes?: string;
+createdAt?: string;
 items?: (KDSItem)[];
 }
 
+export function decodeKDSOrder(v: any): KDSOrder {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+orderNumber: v.order_number,
+type: v.type,
+status: v.status,
+tableId: v.table_id,
+customerName: v.customer_name,
+kitchenNotes: v.kitchen_notes,
+createdAt: v.created_at,
+items: (v.items !== undefined ? (v.items as any[]).map(decodeKDSItem) : v.items),
+};
+}
+
+export function encodeKDSOrder(v: KDSOrder): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.orderNumber !== undefined) { out.order_number = v.orderNumber; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.tableId !== undefined) { out.table_id = v.tableId; }
+if (v.customerName !== undefined) { out.customer_name = v.customerName; }
+if (v.kitchenNotes !== undefined) { out.kitchen_notes = v.kitchenNotes; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeKDSItem); }
+return out;
+}
+
 export interface ListKDSOrdersRequest {
+}
+
+export function decodeListKDSOrdersRequest(v: any): ListKDSOrdersRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListKDSOrdersRequest(v: ListKDSOrdersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListKDSOrdersResponse {
 orders?: (KDSOrder)[];
 }
 
+export function decodeListKDSOrdersResponse(v: any): ListKDSOrdersResponse {
+if (v === null || v === undefined) return v;
+return {
+orders: (v.orders !== undefined ? (v.orders as any[]).map(decodeKDSOrder) : v.orders),
+};
+}
+
+export function encodeListKDSOrdersResponse(v: ListKDSOrdersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orders !== undefined) { out.orders = (v.orders as any[]).map(encodeKDSOrder); }
+return out;
+}
+
 export interface UpdateKDSItemByIDBody {
 status?: string;
 }
 
+export function decodeUpdateKDSItemByIDBody(v: any): UpdateKDSItemByIDBody {
+if (v === null || v === undefined) return v;
+return {
+status: v.status,
+};
+}
+
+export function encodeUpdateKDSItemByIDBody(v: UpdateKDSItemByIDBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.status !== undefined) { out.status = v.status; }
+return out;
+}
+
 export interface UpdateKDSItemByIDRequest {
-item_id?: string;
+itemId?: string;
 body?: UpdateKDSItemByIDBody;
+}
+
+export function decodeUpdateKDSItemByIDRequest(v: any): UpdateKDSItemByIDRequest {
+if (v === null || v === undefined) return v;
+return {
+itemId: v.item_id,
+body: (v.body !== undefined ? decodeUpdateKDSItemByIDBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateKDSItemByIDRequest(v: UpdateKDSItemByIDRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.itemId !== undefined) { out.item_id = v.itemId; }
+if (v.body !== undefined) { out.body = encodeUpdateKDSItemByIDBody(v.body); }
+return out;
 }
 
 export interface UpdateKDSItemByIDResponse {
 message?: string;
 }
 
+export function decodeUpdateKDSItemByIDResponse(v: any): UpdateKDSItemByIDResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateKDSItemByIDResponse(v: UpdateKDSItemByIDResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface UpdateKDSItemStatusBody {
 status?: string;
 }
 
+export function decodeUpdateKDSItemStatusBody(v: any): UpdateKDSItemStatusBody {
+if (v === null || v === undefined) return v;
+return {
+status: v.status,
+};
+}
+
+export function encodeUpdateKDSItemStatusBody(v: UpdateKDSItemStatusBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.status !== undefined) { out.status = v.status; }
+return out;
+}
+
 export interface UpdateKDSItemStatusRequest {
-order_id?: string;
-item_id?: string;
+orderId?: string;
+itemId?: string;
 body?: UpdateKDSItemStatusBody;
+}
+
+export function decodeUpdateKDSItemStatusRequest(v: any): UpdateKDSItemStatusRequest {
+if (v === null || v === undefined) return v;
+return {
+orderId: v.order_id,
+itemId: v.item_id,
+body: (v.body !== undefined ? decodeUpdateKDSItemStatusBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateKDSItemStatusRequest(v: UpdateKDSItemStatusRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.itemId !== undefined) { out.item_id = v.itemId; }
+if (v.body !== undefined) { out.body = encodeUpdateKDSItemStatusBody(v.body); }
+return out;
 }
 
 export interface UpdateKDSItemStatusResponse {
 message?: string;
+}
+
+export function decodeUpdateKDSItemStatusResponse(v: any): UpdateKDSItemStatusResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateKDSItemStatusResponse(v: UpdateKDSItemStatusResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

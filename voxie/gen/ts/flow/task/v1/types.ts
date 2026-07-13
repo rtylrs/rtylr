@@ -2,54 +2,173 @@
 
 export interface Task {
 id?: string;
-project_id?: string;
-workspace_id?: string;
-owner_id?: string;
-parent_task_id?: string;
+projectId?: string;
+workspaceId?: string;
+ownerId?: string;
+parentTaskId?: string;
 title?: string;
 description?: string;
 status?: string;
 priority?: string;
-assignee_id?: string;
-reporter_id?: string;
-due_date?: string;
-start_date?: string;
-completed_at?: string;
-estimated_hours?: number;
-actual_hours?: number;
-sort_order?: string;
+assigneeId?: string;
+reporterId?: string;
+dueDate?: string;
+startDate?: string;
+completedAt?: string;
+estimatedHours?: number;
+actualHours?: number;
+sortOrder?: string;
 labels?: (string)[];
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
 identifier?: string;
-project_name?: string;
-project_color?: string;
-assignee_name?: string;
-assignee_initials?: string;
-subtask_count?: number;
-section_id?: string;
-cycle_id?: string;
-milestone_id?: string;
+projectName?: string;
+projectColor?: string;
+assigneeName?: string;
+assigneeInitials?: string;
+subtaskCount?: number;
+sectionId?: string;
+cycleId?: string;
+milestoneId?: string;
+}
+
+export function decodeTask(v: any): Task {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+projectId: v.project_id,
+workspaceId: v.workspace_id,
+ownerId: v.owner_id,
+parentTaskId: v.parent_task_id,
+title: v.title,
+description: v.description,
+status: v.status,
+priority: v.priority,
+assigneeId: v.assignee_id,
+reporterId: v.reporter_id,
+dueDate: v.due_date,
+startDate: v.start_date,
+completedAt: v.completed_at,
+estimatedHours: v.estimated_hours,
+actualHours: v.actual_hours,
+sortOrder: v.sort_order,
+labels: v.labels,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+identifier: v.identifier,
+projectName: v.project_name,
+projectColor: v.project_color,
+assigneeName: v.assignee_name,
+assigneeInitials: v.assignee_initials,
+subtaskCount: v.subtask_count,
+sectionId: v.section_id,
+cycleId: v.cycle_id,
+milestoneId: v.milestone_id,
+};
+}
+
+export function encodeTask(v: Task): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.parentTaskId !== undefined) { out.parent_task_id = v.parentTaskId; }
+if (v.title !== undefined) { out.title = v.title; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.priority !== undefined) { out.priority = v.priority; }
+if (v.assigneeId !== undefined) { out.assignee_id = v.assigneeId; }
+if (v.reporterId !== undefined) { out.reporter_id = v.reporterId; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.completedAt !== undefined) { out.completed_at = v.completedAt; }
+if (v.estimatedHours !== undefined) { out.estimated_hours = v.estimatedHours; }
+if (v.actualHours !== undefined) { out.actual_hours = v.actualHours; }
+if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
+if (v.labels !== undefined) { out.labels = v.labels; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+if (v.identifier !== undefined) { out.identifier = v.identifier; }
+if (v.projectName !== undefined) { out.project_name = v.projectName; }
+if (v.projectColor !== undefined) { out.project_color = v.projectColor; }
+if (v.assigneeName !== undefined) { out.assignee_name = v.assigneeName; }
+if (v.assigneeInitials !== undefined) { out.assignee_initials = v.assigneeInitials; }
+if (v.subtaskCount !== undefined) { out.subtask_count = v.subtaskCount; }
+if (v.sectionId !== undefined) { out.section_id = v.sectionId; }
+if (v.cycleId !== undefined) { out.cycle_id = v.cycleId; }
+if (v.milestoneId !== undefined) { out.milestone_id = v.milestoneId; }
+return out;
 }
 
 export interface TaskComment {
 id?: string;
-task_id?: string;
-user_id?: string;
+taskId?: string;
+userId?: string;
 content?: string;
-is_edited?: boolean;
-created_at?: string;
-updated_at?: string;
+isEdited?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeTaskComment(v: any): TaskComment {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+taskId: v.task_id,
+userId: v.user_id,
+content: v.content,
+isEdited: v.is_edited,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeTaskComment(v: TaskComment): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.content !== undefined) { out.content = v.content; }
+if (v.isEdited !== undefined) { out.is_edited = v.isEdited; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface TaskActivity {
 id?: string;
-task_id?: string;
-user_id?: string;
+taskId?: string;
+userId?: string;
 action?: string;
-old_value?: string;
-new_value?: string;
-created_at?: string;
+oldValue?: string;
+newValue?: string;
+createdAt?: string;
+}
+
+export function decodeTaskActivity(v: any): TaskActivity {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+taskId: v.task_id,
+userId: v.user_id,
+action: v.action,
+oldValue: v.old_value,
+newValue: v.new_value,
+createdAt: v.created_at,
+};
+}
+
+export function encodeTaskActivity(v: TaskActivity): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.action !== undefined) { out.action = v.action; }
+if (v.oldValue !== undefined) { out.old_value = v.oldValue; }
+if (v.newValue !== undefined) { out.new_value = v.newValue; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface TaskPayloadCompact {
@@ -57,86 +176,330 @@ id?: string;
 title?: string;
 status?: string;
 priority?: string;
-due_date?: string;
-created_at?: string;
+dueDate?: string;
+createdAt?: string;
+}
+
+export function decodeTaskPayloadCompact(v: any): TaskPayloadCompact {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+title: v.title,
+status: v.status,
+priority: v.priority,
+dueDate: v.due_date,
+createdAt: v.created_at,
+};
+}
+
+export function encodeTaskPayloadCompact(v: TaskPayloadCompact): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.title !== undefined) { out.title = v.title; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.priority !== undefined) { out.priority = v.priority; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface Attachment {
 id?: string;
-task_id?: string;
+taskId?: string;
 name?: string;
 url?: string;
 size?: string;
-uploaded_by?: string;
-created_at?: string;
+uploadedBy?: string;
+createdAt?: string;
+}
+
+export function decodeAttachment(v: any): Attachment {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+taskId: v.task_id,
+name: v.name,
+url: v.url,
+size: v.size,
+uploadedBy: v.uploaded_by,
+createdAt: v.created_at,
+};
+}
+
+export function encodeAttachment(v: Attachment): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.url !== undefined) { out.url = v.url; }
+if (v.size !== undefined) { out.size = v.size; }
+if (v.uploadedBy !== undefined) { out.uploaded_by = v.uploadedBy; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface TimeLog {
 id?: string;
-task_id?: string;
-user_id?: string;
-duration_minutes?: string;
+taskId?: string;
+userId?: string;
+durationMinutes?: string;
 description?: string;
-logged_at?: string;
-created_at?: string;
+loggedAt?: string;
+createdAt?: string;
+}
+
+export function decodeTimeLog(v: any): TimeLog {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+taskId: v.task_id,
+userId: v.user_id,
+durationMinutes: v.duration_minutes,
+description: v.description,
+loggedAt: v.logged_at,
+createdAt: v.created_at,
+};
+}
+
+export function encodeTimeLog(v: TimeLog): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.durationMinutes !== undefined) { out.duration_minutes = v.durationMinutes; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.loggedAt !== undefined) { out.logged_at = v.loggedAt; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface ListTasksRequest {
-project_id?: string;
+projectId?: string;
 status?: string;
-assignee_id?: string;
+assigneeId?: string;
 priority?: string;
-workspace_id?: string;
+workspaceId?: string;
+}
+
+export function decodeListTasksRequest(v: any): ListTasksRequest {
+if (v === null || v === undefined) return v;
+return {
+projectId: v.project_id,
+status: v.status,
+assigneeId: v.assignee_id,
+priority: v.priority,
+workspaceId: v.workspace_id,
+};
+}
+
+export function encodeListTasksRequest(v: ListTasksRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.assigneeId !== undefined) { out.assignee_id = v.assigneeId; }
+if (v.priority !== undefined) { out.priority = v.priority; }
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+return out;
 }
 
 export interface ListTasksResponse {
 tasks?: (Task)[];
 }
 
+export function decodeListTasksResponse(v: any): ListTasksResponse {
+if (v === null || v === undefined) return v;
+return {
+tasks: (v.tasks !== undefined ? (v.tasks as any[]).map(decodeTask) : v.tasks),
+};
+}
+
+export function encodeListTasksResponse(v: ListTasksResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.tasks !== undefined) { out.tasks = (v.tasks as any[]).map(encodeTask); }
+return out;
+}
+
 export interface GetMyTasksRequest {
+}
+
+export function decodeGetMyTasksRequest(v: any): GetMyTasksRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetMyTasksRequest(v: GetMyTasksRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface GetMyTasksResponse {
 tasks?: (Task)[];
 }
 
+export function decodeGetMyTasksResponse(v: any): GetMyTasksResponse {
+if (v === null || v === undefined) return v;
+return {
+tasks: (v.tasks !== undefined ? (v.tasks as any[]).map(decodeTask) : v.tasks),
+};
+}
+
+export function encodeGetMyTasksResponse(v: GetMyTasksResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.tasks !== undefined) { out.tasks = (v.tasks as any[]).map(encodeTask); }
+return out;
+}
+
 export interface GetMyTasksProjectRequest {
 }
 
+export function decodeGetMyTasksProjectRequest(v: any): GetMyTasksProjectRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetMyTasksProjectRequest(v: GetMyTasksProjectRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface GetMyTasksProjectResponse {
-project_id?: string;
-workspace_id?: string;
+projectId?: string;
+workspaceId?: string;
+}
+
+export function decodeGetMyTasksProjectResponse(v: any): GetMyTasksProjectResponse {
+if (v === null || v === undefined) return v;
+return {
+projectId: v.project_id,
+workspaceId: v.workspace_id,
+};
+}
+
+export function encodeGetMyTasksProjectResponse(v: GetMyTasksProjectResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+return out;
 }
 
 export interface SearchTasksRequest {
 q?: string;
-workspace_id?: string;
+workspaceId?: string;
+}
+
+export function decodeSearchTasksRequest(v: any): SearchTasksRequest {
+if (v === null || v === undefined) return v;
+return {
+q: v.q,
+workspaceId: v.workspace_id,
+};
+}
+
+export function encodeSearchTasksRequest(v: SearchTasksRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.q !== undefined) { out.q = v.q; }
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+return out;
 }
 
 export interface SearchTasksResponse {
 tasks?: (Task)[];
 }
 
+export function decodeSearchTasksResponse(v: any): SearchTasksResponse {
+if (v === null || v === undefined) return v;
+return {
+tasks: (v.tasks !== undefined ? (v.tasks as any[]).map(decodeTask) : v.tasks),
+};
+}
+
+export function encodeSearchTasksResponse(v: SearchTasksResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.tasks !== undefined) { out.tasks = (v.tasks as any[]).map(encodeTask); }
+return out;
+}
+
 export interface CreateTaskRequest {
-project_id?: string;
-workspace_id?: string;
-parent_task_id?: string;
+projectId?: string;
+workspaceId?: string;
+parentTaskId?: string;
 title?: string;
 description?: string;
 priority?: string;
-assignee_id?: string;
-due_date?: string;
-start_date?: string;
-estimated_hours?: number;
+assigneeId?: string;
+dueDate?: string;
+startDate?: string;
+estimatedHours?: number;
 labels?: (string)[];
+}
+
+export function decodeCreateTaskRequest(v: any): CreateTaskRequest {
+if (v === null || v === undefined) return v;
+return {
+projectId: v.project_id,
+workspaceId: v.workspace_id,
+parentTaskId: v.parent_task_id,
+title: v.title,
+description: v.description,
+priority: v.priority,
+assigneeId: v.assignee_id,
+dueDate: v.due_date,
+startDate: v.start_date,
+estimatedHours: v.estimated_hours,
+labels: v.labels,
+};
+}
+
+export function encodeCreateTaskRequest(v: CreateTaskRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.parentTaskId !== undefined) { out.parent_task_id = v.parentTaskId; }
+if (v.title !== undefined) { out.title = v.title; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.priority !== undefined) { out.priority = v.priority; }
+if (v.assigneeId !== undefined) { out.assignee_id = v.assigneeId; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.estimatedHours !== undefined) { out.estimated_hours = v.estimatedHours; }
+if (v.labels !== undefined) { out.labels = v.labels; }
+return out;
 }
 
 export interface CreateTaskResponse {
 task?: Task;
 }
 
+export function decodeCreateTaskResponse(v: any): CreateTaskResponse {
+if (v === null || v === undefined) return v;
+return {
+task: (v.task !== undefined ? decodeTask(v.task) : v.task),
+};
+}
+
+export function encodeCreateTaskResponse(v: CreateTaskResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.task !== undefined) { out.task = encodeTask(v.task); }
+return out;
+}
+
 export interface GetTaskDetailRequest {
 id?: string;
+}
+
+export function decodeGetTaskDetailRequest(v: any): GetTaskDetailRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetTaskDetailRequest(v: GetTaskDetailRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface GetTaskDetailResponse {
@@ -146,15 +509,61 @@ comments?: (TaskComment)[];
 activity?: (TaskActivity)[];
 }
 
+export function decodeGetTaskDetailResponse(v: any): GetTaskDetailResponse {
+if (v === null || v === undefined) return v;
+return {
+task: (v.task !== undefined ? decodeTask(v.task) : v.task),
+subtasks: (v.subtasks !== undefined ? (v.subtasks as any[]).map(decodeTask) : v.subtasks),
+comments: (v.comments !== undefined ? (v.comments as any[]).map(decodeTaskComment) : v.comments),
+activity: (v.activity !== undefined ? (v.activity as any[]).map(decodeTaskActivity) : v.activity),
+};
+}
+
+export function encodeGetTaskDetailResponse(v: GetTaskDetailResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.task !== undefined) { out.task = encodeTask(v.task); }
+if (v.subtasks !== undefined) { out.subtasks = (v.subtasks as any[]).map(encodeTask); }
+if (v.comments !== undefined) { out.comments = (v.comments as any[]).map(encodeTaskComment); }
+if (v.activity !== undefined) { out.activity = (v.activity as any[]).map(encodeTaskActivity); }
+return out;
+}
+
 export interface UpdateTaskBody {
 title?: string;
 description?: string;
 status?: string;
 priority?: string;
-assignee_id?: string;
-due_date?: string;
-start_date?: string;
+assigneeId?: string;
+dueDate?: string;
+startDate?: string;
 labels?: (string)[];
+}
+
+export function decodeUpdateTaskBody(v: any): UpdateTaskBody {
+if (v === null || v === undefined) return v;
+return {
+title: v.title,
+description: v.description,
+status: v.status,
+priority: v.priority,
+assigneeId: v.assignee_id,
+dueDate: v.due_date,
+startDate: v.start_date,
+labels: v.labels,
+};
+}
+
+export function encodeUpdateTaskBody(v: UpdateTaskBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.title !== undefined) { out.title = v.title; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.priority !== undefined) { out.priority = v.priority; }
+if (v.assigneeId !== undefined) { out.assignee_id = v.assigneeId; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.labels !== undefined) { out.labels = v.labels; }
+return out;
 }
 
 export interface UpdateTaskRequest {
@@ -162,12 +571,53 @@ id?: string;
 body?: UpdateTaskBody;
 }
 
+export function decodeUpdateTaskRequest(v: any): UpdateTaskRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateTaskBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateTaskRequest(v: UpdateTaskRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateTaskBody(v.body); }
+return out;
+}
+
 export interface UpdateTaskResponse {
 message?: string;
 }
 
+export function decodeUpdateTaskResponse(v: any): UpdateTaskResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateTaskResponse(v: UpdateTaskResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface UpdateTaskStatusBody {
 status?: string;
+}
+
+export function decodeUpdateTaskStatusBody(v: any): UpdateTaskStatusBody {
+if (v === null || v === undefined) return v;
+return {
+status: v.status,
+};
+}
+
+export function encodeUpdateTaskStatusBody(v: UpdateTaskStatusBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface UpdateTaskStatusRequest {
@@ -175,121 +625,497 @@ id?: string;
 body?: UpdateTaskStatusBody;
 }
 
+export function decodeUpdateTaskStatusRequest(v: any): UpdateTaskStatusRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateTaskStatusBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateTaskStatusRequest(v: UpdateTaskStatusRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateTaskStatusBody(v.body); }
+return out;
+}
+
 export interface UpdateTaskStatusResponse {
 message?: string;
+}
+
+export function decodeUpdateTaskStatusResponse(v: any): UpdateTaskStatusResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateTaskStatusResponse(v: UpdateTaskStatusResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface DeleteTaskRequest {
 id?: string;
 }
 
+export function decodeDeleteTaskRequest(v: any): DeleteTaskRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteTaskRequest(v: DeleteTaskRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteTaskResponse {
 message?: string;
 }
 
+export function decodeDeleteTaskResponse(v: any): DeleteTaskResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteTaskResponse(v: DeleteTaskResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface CreateSubtaskRequest {
-parent_task_id?: string;
-project_id?: string;
-workspace_id?: string;
+parentTaskId?: string;
+projectId?: string;
+workspaceId?: string;
 title?: string;
 description?: string;
 priority?: string;
-assignee_id?: string;
-due_date?: string;
-start_date?: string;
-estimated_hours?: number;
+assigneeId?: string;
+dueDate?: string;
+startDate?: string;
+estimatedHours?: number;
+}
+
+export function decodeCreateSubtaskRequest(v: any): CreateSubtaskRequest {
+if (v === null || v === undefined) return v;
+return {
+parentTaskId: v.parent_task_id,
+projectId: v.project_id,
+workspaceId: v.workspace_id,
+title: v.title,
+description: v.description,
+priority: v.priority,
+assigneeId: v.assignee_id,
+dueDate: v.due_date,
+startDate: v.start_date,
+estimatedHours: v.estimated_hours,
+};
+}
+
+export function encodeCreateSubtaskRequest(v: CreateSubtaskRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.parentTaskId !== undefined) { out.parent_task_id = v.parentTaskId; }
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.title !== undefined) { out.title = v.title; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.priority !== undefined) { out.priority = v.priority; }
+if (v.assigneeId !== undefined) { out.assignee_id = v.assigneeId; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.estimatedHours !== undefined) { out.estimated_hours = v.estimatedHours; }
+return out;
 }
 
 export interface CreateSubtaskResponse {
-task_id?: string;
+taskId?: string;
 message?: string;
 }
 
+export function decodeCreateSubtaskResponse(v: any): CreateSubtaskResponse {
+if (v === null || v === undefined) return v;
+return {
+taskId: v.task_id,
+message: v.message,
+};
+}
+
+export function encodeCreateSubtaskResponse(v: CreateSubtaskResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface GetSubtasksRequest {
-task_id?: string;
+taskId?: string;
+}
+
+export function decodeGetSubtasksRequest(v: any): GetSubtasksRequest {
+if (v === null || v === undefined) return v;
+return {
+taskId: v.task_id,
+};
+}
+
+export function encodeGetSubtasksRequest(v: GetSubtasksRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+return out;
 }
 
 export interface GetSubtasksResponse {
 subtasks?: (TaskPayloadCompact)[];
 }
 
+export function decodeGetSubtasksResponse(v: any): GetSubtasksResponse {
+if (v === null || v === undefined) return v;
+return {
+subtasks: (v.subtasks !== undefined ? (v.subtasks as any[]).map(decodeTaskPayloadCompact) : v.subtasks),
+};
+}
+
+export function encodeGetSubtasksResponse(v: GetSubtasksResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.subtasks !== undefined) { out.subtasks = (v.subtasks as any[]).map(encodeTaskPayloadCompact); }
+return out;
+}
+
 export interface AddCommentRequest {
-task_id?: string;
+taskId?: string;
 content?: string;
+}
+
+export function decodeAddCommentRequest(v: any): AddCommentRequest {
+if (v === null || v === undefined) return v;
+return {
+taskId: v.task_id,
+content: v.content,
+};
+}
+
+export function encodeAddCommentRequest(v: AddCommentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.content !== undefined) { out.content = v.content; }
+return out;
 }
 
 export interface AddCommentResponse {
 comment?: TaskComment;
 }
 
+export function decodeAddCommentResponse(v: any): AddCommentResponse {
+if (v === null || v === undefined) return v;
+return {
+comment: (v.comment !== undefined ? decodeTaskComment(v.comment) : v.comment),
+};
+}
+
+export function encodeAddCommentResponse(v: AddCommentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.comment !== undefined) { out.comment = encodeTaskComment(v.comment); }
+return out;
+}
+
 export interface DeleteCommentRequest {
 id?: string;
+}
+
+export function decodeDeleteCommentRequest(v: any): DeleteCommentRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteCommentRequest(v: DeleteCommentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteCommentResponse {
 message?: string;
 }
 
+export function decodeDeleteCommentResponse(v: any): DeleteCommentResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteCommentResponse(v: DeleteCommentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface GetTaskActivityRequest {
-task_id?: string;
+taskId?: string;
+}
+
+export function decodeGetTaskActivityRequest(v: any): GetTaskActivityRequest {
+if (v === null || v === undefined) return v;
+return {
+taskId: v.task_id,
+};
+}
+
+export function encodeGetTaskActivityRequest(v: GetTaskActivityRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+return out;
 }
 
 export interface GetTaskActivityResponse {
 activity?: (TaskActivity)[];
 }
 
+export function decodeGetTaskActivityResponse(v: any): GetTaskActivityResponse {
+if (v === null || v === undefined) return v;
+return {
+activity: (v.activity !== undefined ? (v.activity as any[]).map(decodeTaskActivity) : v.activity),
+};
+}
+
+export function encodeGetTaskActivityResponse(v: GetTaskActivityResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.activity !== undefined) { out.activity = (v.activity as any[]).map(encodeTaskActivity); }
+return out;
+}
+
 export interface CreateAttachmentRequest {
-task_id?: string;
+taskId?: string;
 name?: string;
 url?: string;
 size?: string;
 }
 
+export function decodeCreateAttachmentRequest(v: any): CreateAttachmentRequest {
+if (v === null || v === undefined) return v;
+return {
+taskId: v.task_id,
+name: v.name,
+url: v.url,
+size: v.size,
+};
+}
+
+export function encodeCreateAttachmentRequest(v: CreateAttachmentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.url !== undefined) { out.url = v.url; }
+if (v.size !== undefined) { out.size = v.size; }
+return out;
+}
+
 export interface CreateAttachmentResponse {
-attachment_id?: string;
+attachmentId?: string;
 message?: string;
 }
 
+export function decodeCreateAttachmentResponse(v: any): CreateAttachmentResponse {
+if (v === null || v === undefined) return v;
+return {
+attachmentId: v.attachment_id,
+message: v.message,
+};
+}
+
+export function encodeCreateAttachmentResponse(v: CreateAttachmentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.attachmentId !== undefined) { out.attachment_id = v.attachmentId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface GetAttachmentsRequest {
-task_id?: string;
+taskId?: string;
+}
+
+export function decodeGetAttachmentsRequest(v: any): GetAttachmentsRequest {
+if (v === null || v === undefined) return v;
+return {
+taskId: v.task_id,
+};
+}
+
+export function encodeGetAttachmentsRequest(v: GetAttachmentsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+return out;
 }
 
 export interface GetAttachmentsResponse {
 attachments?: (Attachment)[];
 }
 
+export function decodeGetAttachmentsResponse(v: any): GetAttachmentsResponse {
+if (v === null || v === undefined) return v;
+return {
+attachments: (v.attachments !== undefined ? (v.attachments as any[]).map(decodeAttachment) : v.attachments),
+};
+}
+
+export function encodeGetAttachmentsResponse(v: GetAttachmentsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.attachments !== undefined) { out.attachments = (v.attachments as any[]).map(encodeAttachment); }
+return out;
+}
+
 export interface DeleteAttachmentRequest {
 id?: string;
+}
+
+export function decodeDeleteAttachmentRequest(v: any): DeleteAttachmentRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteAttachmentRequest(v: DeleteAttachmentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteAttachmentResponse {
 message?: string;
 }
 
+export function decodeDeleteAttachmentResponse(v: any): DeleteAttachmentResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteAttachmentResponse(v: DeleteAttachmentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface CreateTimeLogRequest {
-duration_minutes?: string;
+durationMinutes?: string;
 description?: string;
-task_id?: string;
+taskId?: string;
+}
+
+export function decodeCreateTimeLogRequest(v: any): CreateTimeLogRequest {
+if (v === null || v === undefined) return v;
+return {
+durationMinutes: v.duration_minutes,
+description: v.description,
+taskId: v.task_id,
+};
+}
+
+export function encodeCreateTimeLogRequest(v: CreateTimeLogRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.durationMinutes !== undefined) { out.duration_minutes = v.durationMinutes; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+return out;
 }
 
 export interface CreateTimeLogResponse {
-time_log_id?: string;
+timeLogId?: string;
 message?: string;
 }
 
+export function decodeCreateTimeLogResponse(v: any): CreateTimeLogResponse {
+if (v === null || v === undefined) return v;
+return {
+timeLogId: v.time_log_id,
+message: v.message,
+};
+}
+
+export function encodeCreateTimeLogResponse(v: CreateTimeLogResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.timeLogId !== undefined) { out.time_log_id = v.timeLogId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface GetTimeLogsRequest {
-task_id?: string;
+taskId?: string;
+}
+
+export function decodeGetTimeLogsRequest(v: any): GetTimeLogsRequest {
+if (v === null || v === undefined) return v;
+return {
+taskId: v.task_id,
+};
+}
+
+export function encodeGetTimeLogsRequest(v: GetTimeLogsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+return out;
 }
 
 export interface GetTimeLogsResponse {
-time_logs?: (TimeLog)[];
+timeLogs?: (TimeLog)[];
+}
+
+export function decodeGetTimeLogsResponse(v: any): GetTimeLogsResponse {
+if (v === null || v === undefined) return v;
+return {
+timeLogs: (v.time_logs !== undefined ? (v.time_logs as any[]).map(decodeTimeLog) : v.time_logs),
+};
+}
+
+export function encodeGetTimeLogsResponse(v: GetTimeLogsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.timeLogs !== undefined) { out.time_logs = (v.timeLogs as any[]).map(encodeTimeLog); }
+return out;
 }
 
 export interface DeleteTimeLogRequest {
 id?: string;
 }
 
+export function decodeDeleteTimeLogRequest(v: any): DeleteTimeLogRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteTimeLogRequest(v: DeleteTimeLogRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteTimeLogResponse {
 message?: string;
+}
+
+export function decodeDeleteTimeLogResponse(v: any): DeleteTimeLogResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteTimeLogResponse(v: DeleteTimeLogResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

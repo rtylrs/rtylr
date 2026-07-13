@@ -2,41 +2,144 @@
 
 export interface POSUser {
 id?: string;
-business_id?: string;
-location_id?: string;
+businessId?: string;
+locationId?: string;
 name?: string;
 role?: string;
-is_active?: boolean;
-max_discount_pct?: number;
-can_void?: boolean;
-can_refund?: boolean;
-can_open_drawer?: boolean;
-can_apply_discount?: boolean;
+isActive?: boolean;
+maxDiscountPct?: number;
+canVoid?: boolean;
+canRefund?: boolean;
+canOpenDrawer?: boolean;
+canApplyDiscount?: boolean;
+}
+
+export function decodePOSUser(v: any): POSUser {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+businessId: v.business_id,
+locationId: v.location_id,
+name: v.name,
+role: v.role,
+isActive: v.is_active,
+maxDiscountPct: v.max_discount_pct,
+canVoid: v.can_void,
+canRefund: v.can_refund,
+canOpenDrawer: v.can_open_drawer,
+canApplyDiscount: v.can_apply_discount,
+};
+}
+
+export function encodePOSUser(v: POSUser): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.role !== undefined) { out.role = v.role; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.maxDiscountPct !== undefined) { out.max_discount_pct = v.maxDiscountPct; }
+if (v.canVoid !== undefined) { out.can_void = v.canVoid; }
+if (v.canRefund !== undefined) { out.can_refund = v.canRefund; }
+if (v.canOpenDrawer !== undefined) { out.can_open_drawer = v.canOpenDrawer; }
+if (v.canApplyDiscount !== undefined) { out.can_apply_discount = v.canApplyDiscount; }
+return out;
 }
 
 export interface ListPOSUsersRequest {
-location_id?: string;
+locationId?: string;
+}
+
+export function decodeListPOSUsersRequest(v: any): ListPOSUsersRequest {
+if (v === null || v === undefined) return v;
+return {
+locationId: v.location_id,
+};
+}
+
+export function encodeListPOSUsersRequest(v: ListPOSUsersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+return out;
 }
 
 export interface ListPOSUsersResponse {
 users?: (POSUser)[];
 }
 
+export function decodeListPOSUsersResponse(v: any): ListPOSUsersResponse {
+if (v === null || v === undefined) return v;
+return {
+users: (v.users !== undefined ? (v.users as any[]).map(decodePOSUser) : v.users),
+};
+}
+
+export function encodeListPOSUsersResponse(v: ListPOSUsersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.users !== undefined) { out.users = (v.users as any[]).map(encodePOSUser); }
+return out;
+}
+
 export interface CreatePOSUserRequest {
-location_id?: string;
+locationId?: string;
 name?: string;
 pin?: string;
 role?: string;
-hourly_rate?: number;
-max_discount_pct?: number;
-can_void?: boolean;
-can_refund?: boolean;
-can_open_drawer?: boolean;
-can_apply_discount?: boolean;
+hourlyRate?: number;
+maxDiscountPct?: number;
+canVoid?: boolean;
+canRefund?: boolean;
+canOpenDrawer?: boolean;
+canApplyDiscount?: boolean;
+}
+
+export function decodeCreatePOSUserRequest(v: any): CreatePOSUserRequest {
+if (v === null || v === undefined) return v;
+return {
+locationId: v.location_id,
+name: v.name,
+pin: v.pin,
+role: v.role,
+hourlyRate: v.hourly_rate,
+maxDiscountPct: v.max_discount_pct,
+canVoid: v.can_void,
+canRefund: v.can_refund,
+canOpenDrawer: v.can_open_drawer,
+canApplyDiscount: v.can_apply_discount,
+};
+}
+
+export function encodeCreatePOSUserRequest(v: CreatePOSUserRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.pin !== undefined) { out.pin = v.pin; }
+if (v.role !== undefined) { out.role = v.role; }
+if (v.hourlyRate !== undefined) { out.hourly_rate = v.hourlyRate; }
+if (v.maxDiscountPct !== undefined) { out.max_discount_pct = v.maxDiscountPct; }
+if (v.canVoid !== undefined) { out.can_void = v.canVoid; }
+if (v.canRefund !== undefined) { out.can_refund = v.canRefund; }
+if (v.canOpenDrawer !== undefined) { out.can_open_drawer = v.canOpenDrawer; }
+if (v.canApplyDiscount !== undefined) { out.can_apply_discount = v.canApplyDiscount; }
+return out;
 }
 
 export interface CreatePOSUserResponse {
 id?: string;
+}
+
+export function decodeCreatePOSUserResponse(v: any): CreatePOSUserResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeCreatePOSUserResponse(v: CreatePOSUserResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface UpdatePOSUserRequest {
@@ -44,54 +147,206 @@ id?: string;
 name?: string;
 pin?: string;
 role?: string;
-is_active?: boolean;
-hourly_rate?: number;
-max_discount_pct?: number;
-can_void?: boolean;
-can_refund?: boolean;
-can_open_drawer?: boolean;
-can_apply_discount?: boolean;
+isActive?: boolean;
+hourlyRate?: number;
+maxDiscountPct?: number;
+canVoid?: boolean;
+canRefund?: boolean;
+canOpenDrawer?: boolean;
+canApplyDiscount?: boolean;
+}
+
+export function decodeUpdatePOSUserRequest(v: any): UpdatePOSUserRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+pin: v.pin,
+role: v.role,
+isActive: v.is_active,
+hourlyRate: v.hourly_rate,
+maxDiscountPct: v.max_discount_pct,
+canVoid: v.can_void,
+canRefund: v.can_refund,
+canOpenDrawer: v.can_open_drawer,
+canApplyDiscount: v.can_apply_discount,
+};
+}
+
+export function encodeUpdatePOSUserRequest(v: UpdatePOSUserRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.pin !== undefined) { out.pin = v.pin; }
+if (v.role !== undefined) { out.role = v.role; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.hourlyRate !== undefined) { out.hourly_rate = v.hourlyRate; }
+if (v.maxDiscountPct !== undefined) { out.max_discount_pct = v.maxDiscountPct; }
+if (v.canVoid !== undefined) { out.can_void = v.canVoid; }
+if (v.canRefund !== undefined) { out.can_refund = v.canRefund; }
+if (v.canOpenDrawer !== undefined) { out.can_open_drawer = v.canOpenDrawer; }
+if (v.canApplyDiscount !== undefined) { out.can_apply_discount = v.canApplyDiscount; }
+return out;
 }
 
 export interface UpdatePOSUserResponse {
 success?: boolean;
 }
 
+export function decodeUpdatePOSUserResponse(v: any): UpdatePOSUserResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeUpdatePOSUserResponse(v: UpdatePOSUserResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
 export interface DeactivatePOSUserRequest {
 id?: string;
+}
+
+export function decodeDeactivatePOSUserRequest(v: any): DeactivatePOSUserRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeactivatePOSUserRequest(v: DeactivatePOSUserRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeactivatePOSUserResponse {
 success?: boolean;
 }
 
+export function decodeDeactivatePOSUserResponse(v: any): DeactivatePOSUserResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeDeactivatePOSUserResponse(v: DeactivatePOSUserResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
 export interface VerifyPOSUserPINRequest {
-location_id?: string;
-user_id?: string;
+locationId?: string;
+userId?: string;
 pin?: string;
 }
 
+export function decodeVerifyPOSUserPINRequest(v: any): VerifyPOSUserPINRequest {
+if (v === null || v === undefined) return v;
+return {
+locationId: v.location_id,
+userId: v.user_id,
+pin: v.pin,
+};
+}
+
+export function encodeVerifyPOSUserPINRequest(v: VerifyPOSUserPINRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.pin !== undefined) { out.pin = v.pin; }
+return out;
+}
+
 export interface VerifyPOSUserPINResponse {
-user_id?: string;
-pos_user_id?: string;
-location_id?: string;
+userId?: string;
+posUserId?: string;
+locationId?: string;
 role?: string;
-display_name?: string;
-can_void?: boolean;
-can_refund?: boolean;
-can_open_drawer?: boolean;
-can_apply_discount?: boolean;
-max_discount_pct?: number;
+displayName?: string;
+canVoid?: boolean;
+canRefund?: boolean;
+canOpenDrawer?: boolean;
+canApplyDiscount?: boolean;
+maxDiscountPct?: number;
+}
+
+export function decodeVerifyPOSUserPINResponse(v: any): VerifyPOSUserPINResponse {
+if (v === null || v === undefined) return v;
+return {
+userId: v.user_id,
+posUserId: v.pos_user_id,
+locationId: v.location_id,
+role: v.role,
+displayName: v.display_name,
+canVoid: v.can_void,
+canRefund: v.can_refund,
+canOpenDrawer: v.can_open_drawer,
+canApplyDiscount: v.can_apply_discount,
+maxDiscountPct: v.max_discount_pct,
+};
+}
+
+export function encodeVerifyPOSUserPINResponse(v: VerifyPOSUserPINResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.posUserId !== undefined) { out.pos_user_id = v.posUserId; }
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+if (v.role !== undefined) { out.role = v.role; }
+if (v.displayName !== undefined) { out.display_name = v.displayName; }
+if (v.canVoid !== undefined) { out.can_void = v.canVoid; }
+if (v.canRefund !== undefined) { out.can_refund = v.canRefund; }
+if (v.canOpenDrawer !== undefined) { out.can_open_drawer = v.canOpenDrawer; }
+if (v.canApplyDiscount !== undefined) { out.can_apply_discount = v.canApplyDiscount; }
+if (v.maxDiscountPct !== undefined) { out.max_discount_pct = v.maxDiscountPct; }
+return out;
 }
 
 export interface SetPINRequest {
-user_id?: string;
-location_id?: string;
+userId?: string;
+locationId?: string;
 name?: string;
 pin?: string;
 }
 
+export function decodeSetPINRequest(v: any): SetPINRequest {
+if (v === null || v === undefined) return v;
+return {
+userId: v.user_id,
+locationId: v.location_id,
+name: v.name,
+pin: v.pin,
+};
+}
+
+export function encodeSetPINRequest(v: SetPINRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.userId !== undefined) { out.user_id = v.userId; }
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.pin !== undefined) { out.pin = v.pin; }
+return out;
+}
+
 export interface SetPINResponse {
 success?: boolean;
+}
+
+export function decodeSetPINResponse(v: any): SetPINResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeSetPINResponse(v: SetPINResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
 }
 

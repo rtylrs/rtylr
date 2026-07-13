@@ -2,29 +2,98 @@
 
 export interface ShiftPayload {
 id?: string;
-owner_id?: string;
-location_id?: string;
+ownerId?: string;
+locationId?: string;
 name?: string;
-start_time?: string;
-end_time?: string;
+startTime?: string;
+endTime?: string;
 color?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeShiftPayload(v: any): ShiftPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+locationId: v.location_id,
+name: v.name,
+startTime: v.start_time,
+endTime: v.end_time,
+color: v.color,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeShiftPayload(v: ShiftPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.startTime !== undefined) { out.start_time = v.startTime; }
+if (v.endTime !== undefined) { out.end_time = v.endTime; }
+if (v.color !== undefined) { out.color = v.color; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ShiftAssignmentPayload {
 id?: string;
-owner_id?: string;
-employee_id?: string;
-shift_id?: string;
+ownerId?: string;
+employeeId?: string;
+shiftId?: string;
 date?: string;
 status?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeShiftAssignmentPayload(v: any): ShiftAssignmentPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+employeeId: v.employee_id,
+shiftId: v.shift_id,
+date: v.date,
+status: v.status,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeShiftAssignmentPayload(v: ShiftAssignmentPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.shiftId !== undefined) { out.shift_id = v.shiftId; }
+if (v.date !== undefined) { out.date = v.date; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ListShiftsRequest {
-location_id?: string;
+locationId?: string;
+}
+
+export function decodeListShiftsRequest(v: any): ListShiftsRequest {
+if (v === null || v === undefined) return v;
+return {
+locationId: v.location_id,
+};
+}
+
+export function encodeListShiftsRequest(v: ListShiftsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+return out;
 }
 
 export interface ListShiftsResponse {
@@ -34,31 +103,129 @@ limit?: number;
 offset?: number;
 }
 
+export function decodeListShiftsResponse(v: any): ListShiftsResponse {
+if (v === null || v === undefined) return v;
+return {
+shifts: (v.shifts !== undefined ? (v.shifts as any[]).map(decodeShiftPayload) : v.shifts),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListShiftsResponse(v: ListShiftsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.shifts !== undefined) { out.shifts = (v.shifts as any[]).map(encodeShiftPayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
 export interface CreateShiftRequest {
-location_id?: string;
+locationId?: string;
 name?: string;
-start_time?: string;
-end_time?: string;
+startTime?: string;
+endTime?: string;
 color?: string;
+}
+
+export function decodeCreateShiftRequest(v: any): CreateShiftRequest {
+if (v === null || v === undefined) return v;
+return {
+locationId: v.location_id,
+name: v.name,
+startTime: v.start_time,
+endTime: v.end_time,
+color: v.color,
+};
+}
+
+export function encodeCreateShiftRequest(v: CreateShiftRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.startTime !== undefined) { out.start_time = v.startTime; }
+if (v.endTime !== undefined) { out.end_time = v.endTime; }
+if (v.color !== undefined) { out.color = v.color; }
+return out;
 }
 
 export interface CreateShiftResponse {
 shift?: ShiftPayload;
 }
 
+export function decodeCreateShiftResponse(v: any): CreateShiftResponse {
+if (v === null || v === undefined) return v;
+return {
+shift: (v.shift !== undefined ? decodeShiftPayload(v.shift) : v.shift),
+};
+}
+
+export function encodeCreateShiftResponse(v: CreateShiftResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.shift !== undefined) { out.shift = encodeShiftPayload(v.shift); }
+return out;
+}
+
 export interface CreateShiftAssignmentRequest {
-employee_id?: string;
-shift_id?: string;
+employeeId?: string;
+shiftId?: string;
 date?: string;
+}
+
+export function decodeCreateShiftAssignmentRequest(v: any): CreateShiftAssignmentRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+shiftId: v.shift_id,
+date: v.date,
+};
+}
+
+export function encodeCreateShiftAssignmentRequest(v: CreateShiftAssignmentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.shiftId !== undefined) { out.shift_id = v.shiftId; }
+if (v.date !== undefined) { out.date = v.date; }
+return out;
 }
 
 export interface CreateShiftAssignmentResponse {
 assignment?: ShiftAssignmentPayload;
 }
 
+export function decodeCreateShiftAssignmentResponse(v: any): CreateShiftAssignmentResponse {
+if (v === null || v === undefined) return v;
+return {
+assignment: (v.assignment !== undefined ? decodeShiftAssignmentPayload(v.assignment) : v.assignment),
+};
+}
+
+export function encodeCreateShiftAssignmentResponse(v: CreateShiftAssignmentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.assignment !== undefined) { out.assignment = encodeShiftAssignmentPayload(v.assignment); }
+return out;
+}
+
 export interface GetRosterRequest {
-location_id?: string;
-week_start?: string;
+locationId?: string;
+weekStart?: string;
+}
+
+export function decodeGetRosterRequest(v: any): GetRosterRequest {
+if (v === null || v === undefined) return v;
+return {
+locationId: v.location_id,
+weekStart: v.week_start,
+};
+}
+
+export function encodeGetRosterRequest(v: GetRosterRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+if (v.weekStart !== undefined) { out.week_start = v.weekStart; }
+return out;
 }
 
 export interface GetRosterResponse {
@@ -66,12 +233,55 @@ assignments?: (ShiftAssignmentPayload)[];
 conflicts?: (string)[];
 }
 
+export function decodeGetRosterResponse(v: any): GetRosterResponse {
+if (v === null || v === undefined) return v;
+return {
+assignments: (v.assignments !== undefined ? (v.assignments as any[]).map(decodeShiftAssignmentPayload) : v.assignments),
+conflicts: v.conflicts,
+};
+}
+
+export function encodeGetRosterResponse(v: GetRosterResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.assignments !== undefined) { out.assignments = (v.assignments as any[]).map(encodeShiftAssignmentPayload); }
+if (v.conflicts !== undefined) { out.conflicts = v.conflicts; }
+return out;
+}
+
 export interface PublishRosterRequest {
-location_id?: string;
-week_start?: string;
+locationId?: string;
+weekStart?: string;
+}
+
+export function decodePublishRosterRequest(v: any): PublishRosterRequest {
+if (v === null || v === undefined) return v;
+return {
+locationId: v.location_id,
+weekStart: v.week_start,
+};
+}
+
+export function encodePublishRosterRequest(v: PublishRosterRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.locationId !== undefined) { out.location_id = v.locationId; }
+if (v.weekStart !== undefined) { out.week_start = v.weekStart; }
+return out;
 }
 
 export interface PublishRosterResponse {
 success?: boolean;
+}
+
+export function decodePublishRosterResponse(v: any): PublishRosterResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodePublishRosterResponse(v: PublishRosterResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
 }
 

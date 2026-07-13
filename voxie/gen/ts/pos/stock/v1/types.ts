@@ -2,110 +2,408 @@
 
 export interface StockMovement {
 id?: string;
-business_id?: string;
-branch_id?: string;
-product_id?: string;
+businessId?: string;
+branchId?: string;
+productId?: string;
 type?: string;
 quantity?: number;
-reference_id?: string;
-reference_type?: string;
+referenceId?: string;
+referenceType?: string;
 note?: string;
-employee_id?: string;
-created_at?: string;
+employeeId?: string;
+createdAt?: string;
+}
+
+export function decodeStockMovement(v: any): StockMovement {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+businessId: v.business_id,
+branchId: v.branch_id,
+productId: v.product_id,
+type: v.type,
+quantity: v.quantity,
+referenceId: v.reference_id,
+referenceType: v.reference_type,
+note: v.note,
+employeeId: v.employee_id,
+createdAt: v.created_at,
+};
+}
+
+export function encodeStockMovement(v: StockMovement): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.quantity !== undefined) { out.quantity = v.quantity; }
+if (v.referenceId !== undefined) { out.reference_id = v.referenceId; }
+if (v.referenceType !== undefined) { out.reference_type = v.referenceType; }
+if (v.note !== undefined) { out.note = v.note; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface BranchInventory {
 id?: string;
-business_id?: string;
-branch_id?: string;
-product_id?: string;
+businessId?: string;
+branchId?: string;
+productId?: string;
 quantity?: number;
-reorder_point?: number;
-reorder_quantity?: number;
-updated_at?: string;
-item_id?: string;
+reorderPoint?: number;
+reorderQuantity?: number;
+updatedAt?: string;
+itemId?: string;
 name?: string;
 sku?: string;
 unit?: string;
-current_qty?: number;
-low_stock_threshold?: number;
+currentQty?: number;
+lowStockThreshold?: number;
+}
+
+export function decodeBranchInventory(v: any): BranchInventory {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+businessId: v.business_id,
+branchId: v.branch_id,
+productId: v.product_id,
+quantity: v.quantity,
+reorderPoint: v.reorder_point,
+reorderQuantity: v.reorder_quantity,
+updatedAt: v.updated_at,
+itemId: v.item_id,
+name: v.name,
+sku: v.sku,
+unit: v.unit,
+currentQty: v.current_qty,
+lowStockThreshold: v.low_stock_threshold,
+};
+}
+
+export function encodeBranchInventory(v: BranchInventory): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.quantity !== undefined) { out.quantity = v.quantity; }
+if (v.reorderPoint !== undefined) { out.reorder_point = v.reorderPoint; }
+if (v.reorderQuantity !== undefined) { out.reorder_quantity = v.reorderQuantity; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+if (v.itemId !== undefined) { out.item_id = v.itemId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.sku !== undefined) { out.sku = v.sku; }
+if (v.unit !== undefined) { out.unit = v.unit; }
+if (v.currentQty !== undefined) { out.current_qty = v.currentQty; }
+if (v.lowStockThreshold !== undefined) { out.low_stock_threshold = v.lowStockThreshold; }
+return out;
 }
 
 export interface AdjustStockRequest {
-branch_id?: string;
-product_id?: string;
+branchId?: string;
+productId?: string;
 quantity?: number;
 note?: string;
-employee_id?: string;
+employeeId?: string;
+}
+
+export function decodeAdjustStockRequest(v: any): AdjustStockRequest {
+if (v === null || v === undefined) return v;
+return {
+branchId: v.branch_id,
+productId: v.product_id,
+quantity: v.quantity,
+note: v.note,
+employeeId: v.employee_id,
+};
+}
+
+export function encodeAdjustStockRequest(v: AdjustStockRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.quantity !== undefined) { out.quantity = v.quantity; }
+if (v.note !== undefined) { out.note = v.note; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+return out;
 }
 
 export interface AdjustStockResponse {
-movement_id?: string;
+movementId?: string;
 message?: string;
 }
 
+export function decodeAdjustStockResponse(v: any): AdjustStockResponse {
+if (v === null || v === undefined) return v;
+return {
+movementId: v.movement_id,
+message: v.message,
+};
+}
+
+export function encodeAdjustStockResponse(v: AdjustStockResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.movementId !== undefined) { out.movement_id = v.movementId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListInventoryRequest {
-branch_id?: string;
+branchId?: string;
+}
+
+export function decodeListInventoryRequest(v: any): ListInventoryRequest {
+if (v === null || v === undefined) return v;
+return {
+branchId: v.branch_id,
+};
+}
+
+export function encodeListInventoryRequest(v: ListInventoryRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+return out;
 }
 
 export interface ListInventoryResponse {
 inventory?: (BranchInventory)[];
 }
 
+export function decodeListInventoryResponse(v: any): ListInventoryResponse {
+if (v === null || v === undefined) return v;
+return {
+inventory: (v.inventory !== undefined ? (v.inventory as any[]).map(decodeBranchInventory) : v.inventory),
+};
+}
+
+export function encodeListInventoryResponse(v: ListInventoryResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.inventory !== undefined) { out.inventory = (v.inventory as any[]).map(encodeBranchInventory); }
+return out;
+}
+
 export interface ListStockMovementsRequest {
-branch_id?: string;
-product_id?: string;
+branchId?: string;
+productId?: string;
+}
+
+export function decodeListStockMovementsRequest(v: any): ListStockMovementsRequest {
+if (v === null || v === undefined) return v;
+return {
+branchId: v.branch_id,
+productId: v.product_id,
+};
+}
+
+export function encodeListStockMovementsRequest(v: ListStockMovementsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+if (v.productId !== undefined) { out.product_id = v.productId; }
+return out;
 }
 
 export interface ListStockMovementsResponse {
 movements?: (StockMovement)[];
 }
 
+export function decodeListStockMovementsResponse(v: any): ListStockMovementsResponse {
+if (v === null || v === undefined) return v;
+return {
+movements: (v.movements !== undefined ? (v.movements as any[]).map(decodeStockMovement) : v.movements),
+};
+}
+
+export function encodeListStockMovementsResponse(v: ListStockMovementsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.movements !== undefined) { out.movements = (v.movements as any[]).map(encodeStockMovement); }
+return out;
+}
+
 export interface LowStockRequest {
-branch_id?: string;
+branchId?: string;
+}
+
+export function decodeLowStockRequest(v: any): LowStockRequest {
+if (v === null || v === undefined) return v;
+return {
+branchId: v.branch_id,
+};
+}
+
+export function encodeLowStockRequest(v: LowStockRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+return out;
 }
 
 export interface LowStockResponse {
 items?: (BranchInventory)[];
 }
 
+export function decodeLowStockResponse(v: any): LowStockResponse {
+if (v === null || v === undefined) return v;
+return {
+items: (v.items !== undefined ? (v.items as any[]).map(decodeBranchInventory) : v.items),
+};
+}
+
+export function encodeLowStockResponse(v: LowStockResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeBranchInventory); }
+return out;
+}
+
 export interface ReceiveStockRequest {
-branch_id?: string;
-product_id?: string;
+branchId?: string;
+productId?: string;
 quantity?: number;
 note?: string;
-employee_id?: string;
+employeeId?: string;
+}
+
+export function decodeReceiveStockRequest(v: any): ReceiveStockRequest {
+if (v === null || v === undefined) return v;
+return {
+branchId: v.branch_id,
+productId: v.product_id,
+quantity: v.quantity,
+note: v.note,
+employeeId: v.employee_id,
+};
+}
+
+export function encodeReceiveStockRequest(v: ReceiveStockRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.quantity !== undefined) { out.quantity = v.quantity; }
+if (v.note !== undefined) { out.note = v.note; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+return out;
 }
 
 export interface ReceiveStockResponse {
-movement_id?: string;
+movementId?: string;
 message?: string;
+}
+
+export function decodeReceiveStockResponse(v: any): ReceiveStockResponse {
+if (v === null || v === undefined) return v;
+return {
+movementId: v.movement_id,
+message: v.message,
+};
+}
+
+export function encodeReceiveStockResponse(v: ReceiveStockResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.movementId !== undefined) { out.movement_id = v.movementId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface TransferStockRequest {
-from_branch_id?: string;
-to_branch_id?: string;
-product_id?: string;
+fromBranchId?: string;
+toBranchId?: string;
+productId?: string;
 quantity?: number;
 note?: string;
-employee_id?: string;
+employeeId?: string;
+}
+
+export function decodeTransferStockRequest(v: any): TransferStockRequest {
+if (v === null || v === undefined) return v;
+return {
+fromBranchId: v.from_branch_id,
+toBranchId: v.to_branch_id,
+productId: v.product_id,
+quantity: v.quantity,
+note: v.note,
+employeeId: v.employee_id,
+};
+}
+
+export function encodeTransferStockRequest(v: TransferStockRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.fromBranchId !== undefined) { out.from_branch_id = v.fromBranchId; }
+if (v.toBranchId !== undefined) { out.to_branch_id = v.toBranchId; }
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.quantity !== undefined) { out.quantity = v.quantity; }
+if (v.note !== undefined) { out.note = v.note; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+return out;
 }
 
 export interface TransferStockResponse {
-movement_id?: string;
+movementId?: string;
 message?: string;
+}
+
+export function decodeTransferStockResponse(v: any): TransferStockResponse {
+if (v === null || v === undefined) return v;
+return {
+movementId: v.movement_id,
+message: v.message,
+};
+}
+
+export function encodeTransferStockResponse(v: TransferStockResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.movementId !== undefined) { out.movement_id = v.movementId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface WasteStockRequest {
-branch_id?: string;
-product_id?: string;
+branchId?: string;
+productId?: string;
 quantity?: number;
 note?: string;
-employee_id?: string;
+employeeId?: string;
+}
+
+export function decodeWasteStockRequest(v: any): WasteStockRequest {
+if (v === null || v === undefined) return v;
+return {
+branchId: v.branch_id,
+productId: v.product_id,
+quantity: v.quantity,
+note: v.note,
+employeeId: v.employee_id,
+};
+}
+
+export function encodeWasteStockRequest(v: WasteStockRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.quantity !== undefined) { out.quantity = v.quantity; }
+if (v.note !== undefined) { out.note = v.note; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+return out;
 }
 
 export interface WasteStockResponse {
-movement_id?: string;
+movementId?: string;
 message?: string;
+}
+
+export function decodeWasteStockResponse(v: any): WasteStockResponse {
+if (v === null || v === undefined) return v;
+return {
+movementId: v.movement_id,
+message: v.message,
+};
+}
+
+export function encodeWasteStockResponse(v: WasteStockResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.movementId !== undefined) { out.movement_id = v.movementId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

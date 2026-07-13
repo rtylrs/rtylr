@@ -3,12 +3,46 @@
 export interface GetKPIsRequest {
 }
 
+export function decodeGetKPIsRequest(v: any): GetKPIsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetKPIsRequest(v: GetKPIsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface GetKPIsResponse {
 revenue?: number;
-order_count?: string;
-staff_count?: string;
-customer_count?: string;
-low_stock_count?: string;
-active_apps?: string;
+orderCount?: string;
+staffCount?: string;
+customerCount?: string;
+lowStockCount?: string;
+activeApps?: string;
+}
+
+export function decodeGetKPIsResponse(v: any): GetKPIsResponse {
+if (v === null || v === undefined) return v;
+return {
+revenue: v.revenue,
+orderCount: v.order_count,
+staffCount: v.staff_count,
+customerCount: v.customer_count,
+lowStockCount: v.low_stock_count,
+activeApps: v.active_apps,
+};
+}
+
+export function encodeGetKPIsResponse(v: GetKPIsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.revenue !== undefined) { out.revenue = v.revenue; }
+if (v.orderCount !== undefined) { out.order_count = v.orderCount; }
+if (v.staffCount !== undefined) { out.staff_count = v.staffCount; }
+if (v.customerCount !== undefined) { out.customer_count = v.customerCount; }
+if (v.lowStockCount !== undefined) { out.low_stock_count = v.lowStockCount; }
+if (v.activeApps !== undefined) { out.active_apps = v.activeApps; }
+return out;
 }
 

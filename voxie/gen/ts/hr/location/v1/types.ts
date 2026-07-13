@@ -2,18 +2,60 @@
 
 export interface LocationPayload {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 address?: string;
 timezone?: string;
-is_active?: boolean;
-created_at?: string;
-updated_at?: string;
+isActive?: boolean;
+createdAt?: string;
+updatedAt?: string;
 slug?: string;
+}
+
+export function decodeLocationPayload(v: any): LocationPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+address: v.address,
+timezone: v.timezone,
+isActive: v.is_active,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+slug: v.slug,
+};
+}
+
+export function encodeLocationPayload(v: LocationPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.timezone !== undefined) { out.timezone = v.timezone; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+if (v.slug !== undefined) { out.slug = v.slug; }
+return out;
 }
 
 export interface ListLocationsResponse {
 locations?: (LocationPayload)[];
+}
+
+export function decodeListLocationsResponse(v: any): ListLocationsResponse {
+if (v === null || v === undefined) return v;
+return {
+locations: (v.locations !== undefined ? (v.locations as any[]).map(decodeLocationPayload) : v.locations),
+};
+}
+
+export function encodeListLocationsResponse(v: ListLocationsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.locations !== undefined) { out.locations = (v.locations as any[]).map(encodeLocationPayload); }
+return out;
 }
 
 export interface CreateLocationRequest {
@@ -23,16 +65,69 @@ timezone?: string;
 slug?: string;
 }
 
+export function decodeCreateLocationRequest(v: any): CreateLocationRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+address: v.address,
+timezone: v.timezone,
+slug: v.slug,
+};
+}
+
+export function encodeCreateLocationRequest(v: CreateLocationRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.timezone !== undefined) { out.timezone = v.timezone; }
+if (v.slug !== undefined) { out.slug = v.slug; }
+return out;
+}
+
 export interface CreateLocationResponse {
 location?: LocationPayload;
+}
+
+export function decodeCreateLocationResponse(v: any): CreateLocationResponse {
+if (v === null || v === undefined) return v;
+return {
+location: (v.location !== undefined ? decodeLocationPayload(v.location) : v.location),
+};
+}
+
+export function encodeCreateLocationResponse(v: CreateLocationResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.location !== undefined) { out.location = encodeLocationPayload(v.location); }
+return out;
 }
 
 export interface UpdateLocationBody {
 name?: string;
 address?: string;
 timezone?: string;
-is_active?: boolean;
+isActive?: boolean;
 slug?: string;
+}
+
+export function decodeUpdateLocationBody(v: any): UpdateLocationBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+address: v.address,
+timezone: v.timezone,
+isActive: v.is_active,
+slug: v.slug,
+};
+}
+
+export function encodeUpdateLocationBody(v: UpdateLocationBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.timezone !== undefined) { out.timezone = v.timezone; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.slug !== undefined) { out.slug = v.slug; }
+return out;
 }
 
 export interface UpdateLocationRequest {
@@ -40,7 +135,35 @@ id?: string;
 body?: UpdateLocationBody;
 }
 
+export function decodeUpdateLocationRequest(v: any): UpdateLocationRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateLocationBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateLocationRequest(v: UpdateLocationRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateLocationBody(v.body); }
+return out;
+}
+
 export interface UpdateLocationResponse {
 location?: LocationPayload;
+}
+
+export function decodeUpdateLocationResponse(v: any): UpdateLocationResponse {
+if (v === null || v === undefined) return v;
+return {
+location: (v.location !== undefined ? decodeLocationPayload(v.location) : v.location),
+};
+}
+
+export function encodeUpdateLocationResponse(v: UpdateLocationResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.location !== undefined) { out.location = encodeLocationPayload(v.location); }
+return out;
 }
 

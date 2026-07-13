@@ -2,23 +2,75 @@
 
 export interface BenefitPlan {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 type?: string;
 provider?: string;
-cost_employer?: number;
-cost_employee?: number;
-is_active?: boolean;
-created_at?: string;
+costEmployer?: number;
+costEmployee?: number;
+isActive?: boolean;
+createdAt?: string;
+}
+
+export function decodeBenefitPlan(v: any): BenefitPlan {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+type: v.type,
+provider: v.provider,
+costEmployer: v.cost_employer,
+costEmployee: v.cost_employee,
+isActive: v.is_active,
+createdAt: v.created_at,
+};
+}
+
+export function encodeBenefitPlan(v: BenefitPlan): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.provider !== undefined) { out.provider = v.provider; }
+if (v.costEmployer !== undefined) { out.cost_employer = v.costEmployer; }
+if (v.costEmployee !== undefined) { out.cost_employee = v.costEmployee; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface CreateBenefitRequest {
 name?: string;
 type?: string;
 provider?: string;
-cost_employer?: number;
-cost_employee?: number;
-is_active?: boolean;
+costEmployer?: number;
+costEmployee?: number;
+isActive?: boolean;
+}
+
+export function decodeCreateBenefitRequest(v: any): CreateBenefitRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+type: v.type,
+provider: v.provider,
+costEmployer: v.cost_employer,
+costEmployee: v.cost_employee,
+isActive: v.is_active,
+};
+}
+
+export function encodeCreateBenefitRequest(v: CreateBenefitRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.provider !== undefined) { out.provider = v.provider; }
+if (v.costEmployer !== undefined) { out.cost_employer = v.costEmployer; }
+if (v.costEmployee !== undefined) { out.cost_employee = v.costEmployee; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface CreateBenefitResponse {
@@ -26,10 +78,49 @@ id?: string;
 message?: string;
 }
 
+export function decodeCreateBenefitResponse(v: any): CreateBenefitResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+message: v.message,
+};
+}
+
+export function encodeCreateBenefitResponse(v: CreateBenefitResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListBenefitsRequest {
+}
+
+export function decodeListBenefitsRequest(v: any): ListBenefitsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListBenefitsRequest(v: ListBenefitsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListBenefitsResponse {
 plans?: (BenefitPlan)[];
+}
+
+export function decodeListBenefitsResponse(v: any): ListBenefitsResponse {
+if (v === null || v === undefined) return v;
+return {
+plans: (v.plans !== undefined ? (v.plans as any[]).map(decodeBenefitPlan) : v.plans),
+};
+}
+
+export function encodeListBenefitsResponse(v: ListBenefitsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.plans !== undefined) { out.plans = (v.plans as any[]).map(encodeBenefitPlan); }
+return out;
 }
 

@@ -2,19 +2,58 @@
 
 export interface TimeOffRequest {
 id?: string;
-owner_id?: string;
-staff_id?: string;
+ownerId?: string;
+staffId?: string;
 type?: string;
-start_date?: string;
-end_date?: string;
-days_count?: number;
+startDate?: string;
+endDate?: string;
+daysCount?: number;
 status?: string;
 reason?: string;
-approved_by?: string;
-approved_at?: string;
+approvedBy?: string;
+approvedAt?: string;
 notes?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeTimeOffRequest(v: any): TimeOffRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+staffId: v.staff_id,
+type: v.type,
+startDate: v.start_date,
+endDate: v.end_date,
+daysCount: v.days_count,
+status: v.status,
+reason: v.reason,
+approvedBy: v.approved_by,
+approvedAt: v.approved_at,
+notes: v.notes,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeTimeOffRequest(v: TimeOffRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.endDate !== undefined) { out.end_date = v.endDate; }
+if (v.daysCount !== undefined) { out.days_count = v.daysCount; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.reason !== undefined) { out.reason = v.reason; }
+if (v.approvedBy !== undefined) { out.approved_by = v.approvedBy; }
+if (v.approvedAt !== undefined) { out.approved_at = v.approvedAt; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ApproveTimeOffRequestMsg {
@@ -23,28 +62,120 @@ status?: string;
 notes?: string;
 }
 
+export function decodeApproveTimeOffRequestMsg(v: any): ApproveTimeOffRequestMsg {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+status: v.status,
+notes: v.notes,
+};
+}
+
+export function encodeApproveTimeOffRequestMsg(v: ApproveTimeOffRequestMsg): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+return out;
+}
+
 export interface ApproveTimeOffResponse {
 success?: boolean;
 }
 
+export function decodeApproveTimeOffResponse(v: any): ApproveTimeOffResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeApproveTimeOffResponse(v: ApproveTimeOffResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
 export interface ListTimeOffRequest {
+}
+
+export function decodeListTimeOffRequest(v: any): ListTimeOffRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListTimeOffRequest(v: ListTimeOffRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListTimeOffResponse {
 requests?: (TimeOffRequest)[];
 }
 
+export function decodeListTimeOffResponse(v: any): ListTimeOffResponse {
+if (v === null || v === undefined) return v;
+return {
+requests: (v.requests !== undefined ? (v.requests as any[]).map(decodeTimeOffRequest) : v.requests),
+};
+}
+
+export function encodeListTimeOffResponse(v: ListTimeOffResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.requests !== undefined) { out.requests = (v.requests as any[]).map(encodeTimeOffRequest); }
+return out;
+}
+
 export interface SubmitTimeOffRequest {
-staff_id?: string;
+staffId?: string;
 type?: string;
-start_date?: string;
-end_date?: string;
-days_count?: number;
+startDate?: string;
+endDate?: string;
+daysCount?: number;
 reason?: string;
 notes?: string;
 }
 
+export function decodeSubmitTimeOffRequest(v: any): SubmitTimeOffRequest {
+if (v === null || v === undefined) return v;
+return {
+staffId: v.staff_id,
+type: v.type,
+startDate: v.start_date,
+endDate: v.end_date,
+daysCount: v.days_count,
+reason: v.reason,
+notes: v.notes,
+};
+}
+
+export function encodeSubmitTimeOffRequest(v: SubmitTimeOffRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.endDate !== undefined) { out.end_date = v.endDate; }
+if (v.daysCount !== undefined) { out.days_count = v.daysCount; }
+if (v.reason !== undefined) { out.reason = v.reason; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+return out;
+}
+
 export interface SubmitTimeOffResponse {
 id?: string;
+}
+
+export function decodeSubmitTimeOffResponse(v: any): SubmitTimeOffResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeSubmitTimeOffResponse(v: SubmitTimeOffResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 

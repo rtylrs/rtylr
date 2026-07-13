@@ -4,9 +4,39 @@ export interface VerifyPINRequest {
 pin?: string;
 }
 
+export function decodeVerifyPINRequest(v: any): VerifyPINRequest {
+if (v === null || v === undefined) return v;
+return {
+pin: v.pin,
+};
+}
+
+export function encodeVerifyPINRequest(v: VerifyPINRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.pin !== undefined) { out.pin = v.pin; }
+return out;
+}
+
 export interface VerifyPINResponse {
 valid?: boolean;
-staff_id?: string;
+staffId?: string;
 message?: string;
+}
+
+export function decodeVerifyPINResponse(v: any): VerifyPINResponse {
+if (v === null || v === undefined) return v;
+return {
+valid: v.valid,
+staffId: v.staff_id,
+message: v.message,
+};
+}
+
+export function encodeVerifyPINResponse(v: VerifyPINResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.valid !== undefined) { out.valid = v.valid; }
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

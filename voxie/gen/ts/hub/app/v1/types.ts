@@ -5,7 +5,28 @@ id?: string;
 name?: string;
 description?: string;
 icon?: string;
-is_enabled?: boolean;
+isEnabled?: boolean;
+}
+
+export function decodeApp(v: any): App {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+description: v.description,
+icon: v.icon,
+isEnabled: v.is_enabled,
+};
+}
+
+export function encodeApp(v: App): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.isEnabled !== undefined) { out.is_enabled = v.isEnabled; }
+return out;
 }
 
 export interface Addon {
@@ -14,47 +35,202 @@ name?: string;
 description?: string;
 icon?: string;
 price?: number;
-is_free?: boolean;
-is_enabled?: boolean;
-enabled_at?: string;
-disabled_at?: string;
+isFree?: boolean;
+isEnabled?: boolean;
+enabledAt?: string;
+disabledAt?: string;
+}
+
+export function decodeAddon(v: any): Addon {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+description: v.description,
+icon: v.icon,
+price: v.price,
+isFree: v.is_free,
+isEnabled: v.is_enabled,
+enabledAt: v.enabled_at,
+disabledAt: v.disabled_at,
+};
+}
+
+export function encodeAddon(v: Addon): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.price !== undefined) { out.price = v.price; }
+if (v.isFree !== undefined) { out.is_free = v.isFree; }
+if (v.isEnabled !== undefined) { out.is_enabled = v.isEnabled; }
+if (v.enabledAt !== undefined) { out.enabled_at = v.enabledAt; }
+if (v.disabledAt !== undefined) { out.disabled_at = v.disabledAt; }
+return out;
 }
 
 export interface ListAppsRequest {
+}
+
+export function decodeListAppsRequest(v: any): ListAppsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListAppsRequest(v: ListAppsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListAppsResponse {
 apps?: (App)[];
 }
 
+export function decodeListAppsResponse(v: any): ListAppsResponse {
+if (v === null || v === undefined) return v;
+return {
+apps: (v.apps !== undefined ? (v.apps as any[]).map(decodeApp) : v.apps),
+};
+}
+
+export function encodeListAppsResponse(v: ListAppsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.apps !== undefined) { out.apps = (v.apps as any[]).map(encodeApp); }
+return out;
+}
+
 export interface ListAddonsRequest {
+}
+
+export function decodeListAddonsRequest(v: any): ListAddonsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListAddonsRequest(v: ListAddonsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListAddonsResponse {
 addons?: (Addon)[];
 }
 
+export function decodeListAddonsResponse(v: any): ListAddonsResponse {
+if (v === null || v === undefined) return v;
+return {
+addons: (v.addons !== undefined ? (v.addons as any[]).map(decodeAddon) : v.addons),
+};
+}
+
+export function encodeListAddonsResponse(v: ListAddonsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.addons !== undefined) { out.addons = (v.addons as any[]).map(encodeAddon); }
+return out;
+}
+
 export interface AddonStatusRequest {
-addon_id?: string;
+addonId?: string;
+}
+
+export function decodeAddonStatusRequest(v: any): AddonStatusRequest {
+if (v === null || v === undefined) return v;
+return {
+addonId: v.addon_id,
+};
+}
+
+export function encodeAddonStatusRequest(v: AddonStatusRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.addonId !== undefined) { out.addon_id = v.addonId; }
+return out;
 }
 
 export interface AddonStatusResponse {
-is_enabled?: boolean;
+isEnabled?: boolean;
+}
+
+export function decodeAddonStatusResponse(v: any): AddonStatusResponse {
+if (v === null || v === undefined) return v;
+return {
+isEnabled: v.is_enabled,
+};
+}
+
+export function encodeAddonStatusResponse(v: AddonStatusResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.isEnabled !== undefined) { out.is_enabled = v.isEnabled; }
+return out;
 }
 
 export interface EnableAddonRequest {
-addon_id?: string;
+addonId?: string;
+}
+
+export function decodeEnableAddonRequest(v: any): EnableAddonRequest {
+if (v === null || v === undefined) return v;
+return {
+addonId: v.addon_id,
+};
+}
+
+export function encodeEnableAddonRequest(v: EnableAddonRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.addonId !== undefined) { out.addon_id = v.addonId; }
+return out;
 }
 
 export interface EnableAddonResponse {
 message?: string;
 }
 
+export function decodeEnableAddonResponse(v: any): EnableAddonResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeEnableAddonResponse(v: EnableAddonResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DisableAddonRequest {
-addon_id?: string;
+addonId?: string;
+}
+
+export function decodeDisableAddonRequest(v: any): DisableAddonRequest {
+if (v === null || v === undefined) return v;
+return {
+addonId: v.addon_id,
+};
+}
+
+export function encodeDisableAddonRequest(v: DisableAddonRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.addonId !== undefined) { out.addon_id = v.addonId; }
+return out;
 }
 
 export interface DisableAddonResponse {
 message?: string;
+}
+
+export function decodeDisableAddonResponse(v: any): DisableAddonResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDisableAddonResponse(v: DisableAddonResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

@@ -2,64 +2,228 @@
 
 export interface Variant {
 id?: string;
-owner_id?: string;
-business_id?: string;
-product_id?: string;
+ownerId?: string;
+businessId?: string;
+productId?: string;
 name?: string;
 sku?: string;
 barcode?: string;
-cost_price?: number;
-sale_price?: number;
-stock_quantity?: number;
+costPrice?: number;
+salePrice?: number;
+stockQuantity?: number;
 attributes?: string;
-is_active?: boolean;
-created_at?: string;
-updated_at?: string;
+isActive?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeVariant(v: any): Variant {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+businessId: v.business_id,
+productId: v.product_id,
+name: v.name,
+sku: v.sku,
+barcode: v.barcode,
+costPrice: v.cost_price,
+salePrice: v.sale_price,
+stockQuantity: v.stock_quantity,
+attributes: v.attributes,
+isActive: v.is_active,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeVariant(v: Variant): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.sku !== undefined) { out.sku = v.sku; }
+if (v.barcode !== undefined) { out.barcode = v.barcode; }
+if (v.costPrice !== undefined) { out.cost_price = v.costPrice; }
+if (v.salePrice !== undefined) { out.sale_price = v.salePrice; }
+if (v.stockQuantity !== undefined) { out.stock_quantity = v.stockQuantity; }
+if (v.attributes !== undefined) { out.attributes = v.attributes; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface CreateVariantRequest {
-product_id?: string;
+productId?: string;
 name?: string;
 sku?: string;
 barcode?: string;
-cost_price?: number;
-sale_price?: number;
-stock_quantity?: number;
+costPrice?: number;
+salePrice?: number;
+stockQuantity?: number;
 attributes?: string;
-is_active?: boolean;
+isActive?: boolean;
+}
+
+export function decodeCreateVariantRequest(v: any): CreateVariantRequest {
+if (v === null || v === undefined) return v;
+return {
+productId: v.product_id,
+name: v.name,
+sku: v.sku,
+barcode: v.barcode,
+costPrice: v.cost_price,
+salePrice: v.sale_price,
+stockQuantity: v.stock_quantity,
+attributes: v.attributes,
+isActive: v.is_active,
+};
+}
+
+export function encodeCreateVariantRequest(v: CreateVariantRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.sku !== undefined) { out.sku = v.sku; }
+if (v.barcode !== undefined) { out.barcode = v.barcode; }
+if (v.costPrice !== undefined) { out.cost_price = v.costPrice; }
+if (v.salePrice !== undefined) { out.sale_price = v.salePrice; }
+if (v.stockQuantity !== undefined) { out.stock_quantity = v.stockQuantity; }
+if (v.attributes !== undefined) { out.attributes = v.attributes; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface CreateVariantResponse {
-variant_id?: string;
+variantId?: string;
 message?: string;
+}
+
+export function decodeCreateVariantResponse(v: any): CreateVariantResponse {
+if (v === null || v === undefined) return v;
+return {
+variantId: v.variant_id,
+message: v.message,
+};
+}
+
+export function encodeCreateVariantResponse(v: CreateVariantResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.variantId !== undefined) { out.variant_id = v.variantId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface DeleteVariantRequest {
 id?: string;
 }
 
+export function decodeDeleteVariantRequest(v: any): DeleteVariantRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteVariantRequest(v: DeleteVariantRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteVariantResponse {
 message?: string;
 }
 
+export function decodeDeleteVariantResponse(v: any): DeleteVariantResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteVariantResponse(v: DeleteVariantResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListVariantsRequest {
-product_id?: string;
+productId?: string;
+}
+
+export function decodeListVariantsRequest(v: any): ListVariantsRequest {
+if (v === null || v === undefined) return v;
+return {
+productId: v.product_id,
+};
+}
+
+export function encodeListVariantsRequest(v: ListVariantsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.productId !== undefined) { out.product_id = v.productId; }
+return out;
 }
 
 export interface ListVariantsResponse {
 variants?: (Variant)[];
 }
 
+export function decodeListVariantsResponse(v: any): ListVariantsResponse {
+if (v === null || v === undefined) return v;
+return {
+variants: (v.variants !== undefined ? (v.variants as any[]).map(decodeVariant) : v.variants),
+};
+}
+
+export function encodeListVariantsResponse(v: ListVariantsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.variants !== undefined) { out.variants = (v.variants as any[]).map(encodeVariant); }
+return out;
+}
+
 export interface UpdateVariantBody {
-product_id?: string;
+productId?: string;
 name?: string;
 sku?: string;
 barcode?: string;
-cost_price?: number;
-sale_price?: number;
-stock_quantity?: number;
+costPrice?: number;
+salePrice?: number;
+stockQuantity?: number;
 attributes?: string;
-is_active?: boolean;
+isActive?: boolean;
+}
+
+export function decodeUpdateVariantBody(v: any): UpdateVariantBody {
+if (v === null || v === undefined) return v;
+return {
+productId: v.product_id,
+name: v.name,
+sku: v.sku,
+barcode: v.barcode,
+costPrice: v.cost_price,
+salePrice: v.sale_price,
+stockQuantity: v.stock_quantity,
+attributes: v.attributes,
+isActive: v.is_active,
+};
+}
+
+export function encodeUpdateVariantBody(v: UpdateVariantBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.sku !== undefined) { out.sku = v.sku; }
+if (v.barcode !== undefined) { out.barcode = v.barcode; }
+if (v.costPrice !== undefined) { out.cost_price = v.costPrice; }
+if (v.salePrice !== undefined) { out.sale_price = v.salePrice; }
+if (v.stockQuantity !== undefined) { out.stock_quantity = v.stockQuantity; }
+if (v.attributes !== undefined) { out.attributes = v.attributes; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface UpdateVariantRequest {
@@ -67,7 +231,35 @@ id?: string;
 body?: UpdateVariantBody;
 }
 
+export function decodeUpdateVariantRequest(v: any): UpdateVariantRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateVariantBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateVariantRequest(v: UpdateVariantRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateVariantBody(v.body); }
+return out;
+}
+
 export interface UpdateVariantResponse {
 message?: string;
+}
+
+export function decodeUpdateVariantResponse(v: any): UpdateVariantResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateVariantResponse(v: UpdateVariantResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

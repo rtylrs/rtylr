@@ -2,44 +2,168 @@
 
 export interface DepartmentPayload {
 id?: string;
-owner_id?: string;
-business_id?: string;
+ownerId?: string;
+businessId?: string;
 name?: string;
 description?: string;
-manager_staff_id?: string;
-created_at?: string;
-updated_at?: string;
+managerStaffId?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeDepartmentPayload(v: any): DepartmentPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+businessId: v.business_id,
+name: v.name,
+description: v.description,
+managerStaffId: v.manager_staff_id,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeDepartmentPayload(v: DepartmentPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.managerStaffId !== undefined) { out.manager_staff_id = v.managerStaffId; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface CreateDepartmentRequest {
 name?: string;
 description?: string;
-manager_staff_id?: string;
+managerStaffId?: string;
+}
+
+export function decodeCreateDepartmentRequest(v: any): CreateDepartmentRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+description: v.description,
+managerStaffId: v.manager_staff_id,
+};
+}
+
+export function encodeCreateDepartmentRequest(v: CreateDepartmentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.managerStaffId !== undefined) { out.manager_staff_id = v.managerStaffId; }
+return out;
 }
 
 export interface CreateDepartmentResponse {
 id?: string;
 }
 
+export function decodeCreateDepartmentResponse(v: any): CreateDepartmentResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeCreateDepartmentResponse(v: CreateDepartmentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteDepartmentRequest {
 id?: string;
+}
+
+export function decodeDeleteDepartmentRequest(v: any): DeleteDepartmentRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteDepartmentRequest(v: DeleteDepartmentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteDepartmentResponse {
 success?: boolean;
 }
 
+export function decodeDeleteDepartmentResponse(v: any): DeleteDepartmentResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeDeleteDepartmentResponse(v: DeleteDepartmentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
 export interface ListDepartmentsRequest {
+}
+
+export function decodeListDepartmentsRequest(v: any): ListDepartmentsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListDepartmentsRequest(v: ListDepartmentsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListDepartmentsResponse {
 departments?: (DepartmentPayload)[];
 }
 
+export function decodeListDepartmentsResponse(v: any): ListDepartmentsResponse {
+if (v === null || v === undefined) return v;
+return {
+departments: (v.departments !== undefined ? (v.departments as any[]).map(decodeDepartmentPayload) : v.departments),
+};
+}
+
+export function encodeListDepartmentsResponse(v: ListDepartmentsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.departments !== undefined) { out.departments = (v.departments as any[]).map(encodeDepartmentPayload); }
+return out;
+}
+
 export interface UpdateDepartmentBody {
 name?: string;
 description?: string;
-manager_staff_id?: string;
+managerStaffId?: string;
+}
+
+export function decodeUpdateDepartmentBody(v: any): UpdateDepartmentBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+description: v.description,
+managerStaffId: v.manager_staff_id,
+};
+}
+
+export function encodeUpdateDepartmentBody(v: UpdateDepartmentBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.managerStaffId !== undefined) { out.manager_staff_id = v.managerStaffId; }
+return out;
 }
 
 export interface UpdateDepartmentRequest {
@@ -47,7 +171,35 @@ id?: string;
 body?: UpdateDepartmentBody;
 }
 
+export function decodeUpdateDepartmentRequest(v: any): UpdateDepartmentRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateDepartmentBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateDepartmentRequest(v: UpdateDepartmentRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateDepartmentBody(v.body); }
+return out;
+}
+
 export interface UpdateDepartmentResponse {
 success?: boolean;
+}
+
+export function decodeUpdateDepartmentResponse(v: any): UpdateDepartmentResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeUpdateDepartmentResponse(v: UpdateDepartmentResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
 }
 
