@@ -1,0 +1,7 @@
+package hub.team.permissions.v1
+
+/// PermissionsService defines hub team permission endpoints.
+service PermissionsService {
+  /// Assigns apps and role for a team member.
+  updatePermissions(UpdatePermissionsRequest) -> UpdatePermissionsResponse @put("/permissions/{user_id}")
+}

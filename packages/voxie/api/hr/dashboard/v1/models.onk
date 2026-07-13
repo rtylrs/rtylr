@@ -1,0 +1,71 @@
+package hr.dashboard.v1
+
+message DashboardStats {
+  /// total_staff is the total staff value for this contract.
+  total_staff: int64
+  /// on_shift_today is the on shift today value for this contract.
+  on_shift_today: int64
+  /// pending_time_off is the pending time off value for this contract.
+  pending_time_off: int64
+  /// payroll_draft is the payroll draft value for this contract.
+  payroll_draft: int64
+}
+
+/// DashboardWidgetPayload is a widget layout definition on the HR dashboard.
+message DashboardWidgetPayload {
+  /// Unique identifier for the widget.
+  id: int64
+  /// Tenant owner this widget belongs to.
+  owner_id: int64
+  /// Role that owns this widget layout.
+  role_id: int64
+  /// Widget type identifier (e.g. headcount_chart, leave_summary).
+  widget_type: string
+  /// Horizontal grid position.
+  position_x: int32
+  /// Vertical grid position.
+  position_y: int32
+  /// Widget width in grid units.
+  width: int32
+  /// Widget height in grid units.
+  height: int32
+  /// Widget-specific configuration serialised as JSON.
+  config: bytes
+  /// Unix timestamp when this widget was created.
+  created_at: int64
+  /// Unix timestamp when this widget was last updated.
+  updated_at: int64
+}
+
+/// DashboardDataPayload is pre-loaded widget data keyed by widget type.
+message DashboardDataPayload {
+  /// Widget type this data corresponds to.
+  widget_type: string
+  /// Serialised widget data as JSON.
+  data: bytes
+}
+
+message GetHRDashboardRequest {}
+
+message GetHRDashboardResponse {
+  stats: DashboardStats
+}
+
+message GetDashboardWidgetsRequest {}
+
+message GetDashboardWidgetsResponse {
+  /// Widget layout definitions for the requesting user's dashboard.
+  widgets: DashboardWidgetPayload[]
+  /// Pre-loaded data keyed by widget type.
+  data: map[string, DashboardDataPayload]
+}
+
+message UpdateDashboardWidgetsRequest {
+  /// Updated widget positions and sizes.
+  widgets: DashboardWidgetPayload[] @min_items(1)
+}
+
+message UpdateDashboardWidgetsResponse {
+  /// success indicates whether the operation completed.
+  success: bool
+}

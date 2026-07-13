@@ -1,0 +1,7 @@
+package hr.training.v1
+
+service TrainingService {
+  listTrainingCourses(ListTrainingCoursesRequest) -> ListTrainingCoursesResponse @get("/courses")
+
+  createTrainingCourse(CreateTrainingCourseRequest) -> CreateTrainingCourseResponse @post("/courses")
+}

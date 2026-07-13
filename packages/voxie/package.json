@@ -1,7 +1,7 @@
 {
   "name": "@voxire/voxie",
   "version": "0.0.1",
-  "description": "Generated TypeScript contracts and clients from voxie protobuf definitions",
+  "description": "Generated TypeScript contracts and clients from Voxie's onekit .onk definitions",
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit"
@@ -20,7 +20,6 @@
     }
   },
   "devDependencies": {
-    "ts-proto": "^2.11.6",
     "typescript": "^5.9.3"
   }
 }

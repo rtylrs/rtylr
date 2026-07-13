@@ -1,0 +1,10 @@
+package hub.menu.v1
+
+/// MenuService defines hub navigation menu endpoints.
+service MenuService {
+  /// Returns the navigation menu for the current user.
+  listMenu(ListMenuRequest) -> ListMenuResponse @get("/menu")
+
+  /// Replaces the navigation menu items.
+  updateMenu(UpdateMenuRequest) -> UpdateMenuResponse @put("/menu")
+}

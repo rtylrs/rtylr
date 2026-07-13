@@ -1,0 +1,28 @@
+package hr.onboarding.v1
+
+/// OnboardingService defines HR onboarding checklist endpoints.
+service OnboardingService {
+  /// ListChecklistTemplates returns checklist templates with optional filters.
+  listChecklistTemplates(ListChecklistTemplatesRequest) -> ListChecklistTemplatesResponse @get("/templates")
+
+  /// CreateChecklistTemplate creates a checklist template.
+  createChecklistTemplate(CreateChecklistTemplateRequest) -> CreateChecklistTemplateResponse @post("/templates")
+
+  /// UpdateChecklistTemplate updates a checklist template.
+  updateChecklistTemplate(UpdateChecklistTemplateRequest) -> UpdateChecklistTemplateResponse @put("/templates/{role_id}") @body("body")
+
+  /// AddItemToChecklistTemplate adds an item to a checklist template.
+  addItemToChecklistTemplate(AddItemToChecklistTemplateRequest) -> AddItemToChecklistTemplateResponse @post("/templates/{role_id}/items")
+
+  /// ListEmployeeChecklists returns employee checklists with optional filters.
+  listEmployeeChecklists(ListEmployeeChecklistsRequest) -> ListEmployeeChecklistsResponse @get("/checklists")
+
+  /// GetEmployeeChecklist returns a single employee checklist.
+  getEmployeeChecklist(GetEmployeeChecklistRequest) -> GetEmployeeChecklistResponse @get("/employees/{employee_id}")
+
+  /// TriggerChecklist triggers onboarding for an employee.
+  triggerChecklist(TriggerChecklistRequest) -> TriggerChecklistResponse @post("/checklists/trigger")
+
+  /// CompleteChecklistItem marks a checklist item complete.
+  completeChecklistItem(CompleteChecklistItemRequest) -> CompleteChecklistItemResponse @post("/checklists/items/complete")
+}

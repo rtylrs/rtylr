@@ -1,0 +1,5 @@
+package pos.orders.payments.v1
+
+service OrderPaymentService {
+  processPayment(ProcessPaymentRequest) -> ProcessPaymentResponse @post("/orders/{order_id}/payment")
+}

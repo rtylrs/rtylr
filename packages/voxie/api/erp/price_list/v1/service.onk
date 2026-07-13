@@ -1,0 +1,7 @@
+package erp.price_list.v1
+
+service PriceListService {
+  listPriceLists(ListPriceListsRequest) -> ListPriceListsResponse @get("/price-lists")
+
+  createPriceList(CreatePriceListRequest) -> CreatePriceListResponse @post("/price-lists")
+}

@@ -1,0 +1,5 @@
+package pos.orders.refunds.v1
+
+service OrderRefundService {
+  processRefund(ProcessRefundRequest) -> ProcessRefundResponse @post("/orders/{order_id}/refund")
+}

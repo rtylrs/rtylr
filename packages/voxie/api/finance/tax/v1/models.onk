@@ -1,0 +1,45 @@
+package finance.tax.v1
+
+/// Renamed from TaxConfig to avoid a name collision with the distinct
+/// finance.report.v1.TaxConfig - onk message names are unique across the
+/// whole schema tree, unlike proto's per-package scoping.
+message TaxConfig {
+  id: int64
+  owner_id: int64
+  tax_name: string
+  tax_rate: float64
+  is_inclusive: bool
+  is_active: bool
+  created_at: string
+  updated_at: string
+}
+
+message GetTaxConfigRequest {}
+
+message GetTaxConfigResponse {
+  config: TaxConfig
+}
+
+message UpdateTaxConfigRequest {
+  tax_name: string @required
+  tax_rate: float64 @gte(0)
+  is_inclusive: bool
+  is_active: bool
+}
+
+message UpdateTaxConfigResponse {
+  message: string
+}
+
+/// Renamed from GetPLReportRequest to avoid a name collision with the
+/// distinct finance.report.v1.GetPLReportRequest.
+message GetPLReportRequest {}
+
+/// Renamed from GetPLReportResponse to avoid a name collision with the
+/// distinct finance.report.v1.GetPLReportResponse.
+message GetPLReportResponse {
+  total_revenue: float64
+  total_expenses: float64
+  gross_profit: float64
+  net_profit: float64
+}

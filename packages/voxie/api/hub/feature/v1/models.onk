@@ -1,0 +1,159 @@
+package hub.feature.v1
+
+message FeatureResolution {
+  key: string
+  enabled: bool
+  variant: string
+}
+
+message FeatureFlag {
+  key: string
+  description: string
+  enabled: bool
+  rollout_percentage: int32
+  variant_on: string
+  variant_off: string
+}
+
+message FeatureTarget {
+  feature_key: string
+  owner_id: int64
+  enabled: bool
+  variant: string
+}
+
+message FeatureCondition {
+  attribute: string
+  operator: string
+  value: string
+}
+
+message FeatureRule {
+  id: int64
+  feature_key: string
+  priority: int32
+  description: string
+  variant: string
+  rollout_percentage: int32
+  enabled: bool
+  conditions: FeatureCondition[]
+}
+
+message ListFlagsRequest {}
+
+message ListFlagsResponse {
+  flags: FeatureFlag[]
+}
+
+message UpsertFlagRequest {
+  key: string @required
+  description: string
+  enabled: bool
+  rollout_percentage: int32
+  variant_on: string
+  variant_off: string
+}
+
+message UpsertFlagResponse {
+  message: string
+}
+
+message DeleteFlagRequest {
+  key: string @required
+}
+
+message DeleteFlagResponse {
+  message: string
+}
+
+message ResolveFeaturesRequest {
+  subject: string
+  attributes: map[string, string]
+}
+
+message ResolveFeaturesResponse {
+  features: map[string, FeatureResolution]
+  variant: string
+}
+
+message ResolveMyFeaturesRequest {
+  attributes: map[string, string]
+}
+
+message ResolveMyFeaturesResponse {
+  features: map[string, FeatureResolution]
+  variant: string
+}
+
+message ListRulesRequest {
+  feature_key: string @required @query("feature_key")
+}
+
+message ListRulesResponse {
+  rules: FeatureRule[]
+}
+
+message CreateRuleRequest {
+  feature_key: string @required
+  priority: int32
+  description: string
+  variant: string
+  rollout_percentage: int32
+  enabled: bool
+  conditions: FeatureCondition[]
+}
+
+message CreateRuleResponse {
+  rule_id: int64
+  message: string
+}
+
+message UpdateRuleRequest {
+  id: int64
+  priority: int32
+  description: string
+  variant: string
+  rollout_percentage: int32
+  enabled: bool
+  conditions: FeatureCondition[]
+}
+
+message UpdateRuleResponse {
+  message: string
+}
+
+message DeleteRuleRequest {
+  id: int64
+}
+
+message DeleteRuleResponse {
+  message: string
+}
+
+message ListTargetsRequest {
+  feature_key: string @required @query("feature_key")
+}
+
+message ListTargetsResponse {
+  targets: FeatureTarget[]
+}
+
+message UpsertTargetRequest {
+  feature_key: string @required
+  owner_id: int64
+  enabled: bool
+  variant: string
+}
+
+message UpsertTargetResponse {
+  message: string
+}
+
+message DeleteTargetRequest {
+  feature_key: string @required
+  owner_id: int64
+}
+
+message DeleteTargetResponse {
+  message: string
+}

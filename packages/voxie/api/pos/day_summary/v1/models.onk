@@ -1,0 +1,14 @@
+package pos.day_summary.v1
+
+message DaySummaryRequest {
+  date: string @required @query("date")
+}
+
+message DaySummaryResponse {
+  total_sales: float64
+  total_tax: float64
+  total_tips: float64
+  total_refunds: float64
+  total_orders: int32
+  payment_breakdown: map[string, float64]
+}

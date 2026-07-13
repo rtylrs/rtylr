@@ -1,0 +1,19 @@
+package hub.app.v1
+
+/// AppService defines hub app and addon endpoints.
+service AppService {
+  /// Returns installed apps for the active business.
+  listApps(ListAppsRequest) -> ListAppsResponse @get("/apps")
+
+  /// Returns available addons.
+  listAddons(ListAddonsRequest) -> ListAddonsResponse @get("/addons")
+
+  /// Returns the enabled state of an addon.
+  addonStatus(AddonStatusRequest) -> AddonStatusResponse @get("/addons/{addon_id}/status")
+
+  /// Enables an addon for the active business.
+  enableAddon(EnableAddonRequest) -> EnableAddonResponse @patch("/addons/{addon_id}/enable")
+
+  /// Disables an addon for the active business.
+  disableAddon(DisableAddonRequest) -> DisableAddonResponse @patch("/addons/{addon_id}/disable")
+}

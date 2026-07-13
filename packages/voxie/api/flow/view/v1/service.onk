@@ -1,0 +1,11 @@
+package flow.view.v1
+
+service ViewService {
+  listViews(ListViewsRequest) -> ListViewsResponse @get("/views")
+
+  createView(CreateViewRequest) -> CreateViewResponse @post("/views")
+
+  updateView(UpdateViewRequest) -> UpdateViewResponse @put("/views/{id}")
+
+  deleteView(DeleteViewRequest) -> DeleteViewResponse @delete("/views/{id}")
+}

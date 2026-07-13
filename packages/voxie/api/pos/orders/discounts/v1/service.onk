@@ -1,0 +1,5 @@
+package pos.orders.discounts.v1
+
+service OrderDiscountService {
+  discountOrder(DiscountOrderRequest) -> DiscountOrderResponse @post("/orders/{order_id}/discount")
+}

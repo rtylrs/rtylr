@@ -1,0 +1,13 @@
+package hub.integration.v1
+
+/// IntegrationService defines hub integration endpoints.
+service IntegrationService {
+  /// Returns connected integrations.
+  listIntegrations(ListIntegrationsRequest) -> ListIntegrationsResponse @get("/integrations")
+
+  /// Connects a third-party integration.
+  connectIntegration(ConnectIntegrationRequest) -> ConnectIntegrationResponse @post("/integrations/connect")
+
+  /// Disconnects a third-party integration.
+  disconnectIntegration(DisconnectIntegrationRequest) -> DisconnectIntegrationResponse @post("/integrations/disconnect")
+}

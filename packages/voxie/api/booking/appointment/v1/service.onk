@@ -1,0 +1,13 @@
+package booking.appointment.v1
+
+service AppointmentService {
+  listAppointments(ListAppointmentsRequest) -> ListAppointmentsResponse @get("/appointments")
+
+  listTodayAppointments(ListTodayAppointmentsRequest) -> ListTodayAppointmentsResponse @get("/appointments/today")
+
+  createAppointment(CreateAppointmentRequest) -> CreateAppointmentResponse @post("/appointments")
+
+  updateAppointment(UpdateAppointmentRequest) -> UpdateAppointmentResponse @put("/appointments/{id}")
+
+  deleteAppointment(DeleteAppointmentRequest) -> DeleteAppointmentResponse @delete("/appointments/{id}")
+}

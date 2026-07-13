@@ -1,0 +1,32 @@
+package support.inbox.v1
+
+message InboxItem {
+  ticket_id: int64 @encode(number)
+  customer_name: string
+  customer_email: string
+  subject: string
+  status: string
+  priority: string
+  channel: string
+  last_message: string
+  last_message_at: string
+  message_count: int32
+}
+
+message ListInboxRequest {
+  page: int32 @query("page")
+  page_size: int32 @query("page_size")
+}
+
+message ListInboxResponse {
+  inbox: InboxItem[]
+  total: int32
+  page: int32
+  page_size: int32
+}
+
+message GetUnreadCountRequest {}
+
+message GetUnreadCountResponse {
+  count: int32
+}
