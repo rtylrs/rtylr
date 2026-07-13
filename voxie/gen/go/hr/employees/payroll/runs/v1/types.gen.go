@@ -101,6 +101,110 @@ func (m *PayrollEntryPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *PayrollEntryPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *PayrollEntryPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *PayrollEntryPayload) GetPayrollRunId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PayrollRunId
+}
+
+func (x *PayrollEntryPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *PayrollEntryPayload) GetBasePay() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.BasePay
+}
+
+func (x *PayrollEntryPayload) GetOvertimePay() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OvertimePay
+}
+
+func (x *PayrollEntryPayload) GetDeductions() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Deductions
+}
+
+func (x *PayrollEntryPayload) GetBonuses() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Bonuses
+}
+
+func (x *PayrollEntryPayload) GetNetPay() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.NetPay
+}
+
+func (x *PayrollEntryPayload) GetHoursWorked() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.HoursWorked
+}
+
+func (x *PayrollEntryPayload) GetOvertimeHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OvertimeHours
+}
+
+func (x *PayrollEntryPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *PayrollEntryPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type PayrollRunPayload struct {
 	Id          int64                  `json:"id,omitempty"`
 	OwnerId     int64                  `json:"owner_id,omitempty"`
@@ -186,6 +290,118 @@ func (m *PayrollRunPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *PayrollRunPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *PayrollRunPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *PayrollRunPayload) GetPeriodStart() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodStart
+}
+
+func (x *PayrollRunPayload) GetPeriodEnd() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodEnd
+}
+
+func (x *PayrollRunPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *PayrollRunPayload) GetCreatedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedBy
+}
+
+func (x *PayrollRunPayload) GetApprovedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ApprovedBy == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ApprovedBy
+}
+
+func (x *PayrollRunPayload) GetExportedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ExportedAt == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ExportedAt
+}
+
+func (x *PayrollRunPayload) GetTotalGross() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalGross
+}
+
+func (x *PayrollRunPayload) GetTotalNet() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalNet
+}
+
+func (x *PayrollRunPayload) GetEntries() []*PayrollEntryPayload {
+	if x == nil {
+		var zero []*PayrollEntryPayload
+		return zero
+	}
+	return x.Entries
+}
+
+func (x *PayrollRunPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *PayrollRunPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListPayrollRunsRequest struct {
 }
 
@@ -196,13 +412,69 @@ type ListPayrollRunsResponse struct {
 	Offset int32                `json:"offset,omitempty"`
 }
 
+func (x *ListPayrollRunsResponse) GetRuns() []*PayrollRunPayload {
+	if x == nil {
+		var zero []*PayrollRunPayload
+		return zero
+	}
+	return x.Runs
+}
+
+func (x *ListPayrollRunsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListPayrollRunsResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListPayrollRunsResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
+}
+
 type TriggerPayrollRunRequest struct {
 	PeriodStart string `json:"period_start,omitempty"`
 	PeriodEnd   string `json:"period_end,omitempty"`
 }
 
+func (x *TriggerPayrollRunRequest) GetPeriodStart() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodStart
+}
+
+func (x *TriggerPayrollRunRequest) GetPeriodEnd() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodEnd
+}
+
 type TriggerPayrollRunResponse struct {
 	Run *PayrollRunPayload `json:"run,omitempty"`
+}
+
+func (x *TriggerPayrollRunResponse) GetRun() *PayrollRunPayload {
+	if x == nil {
+		var zero *PayrollRunPayload
+		return zero
+	}
+	return x.Run
 }
 
 type ApprovePayrollRunRequest struct {
@@ -238,8 +510,24 @@ func (m *ApprovePayrollRunRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ApprovePayrollRunRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type ApprovePayrollRunResponse struct {
 	Run *PayrollRunPayload `json:"run,omitempty"`
+}
+
+func (x *ApprovePayrollRunResponse) GetRun() *PayrollRunPayload {
+	if x == nil {
+		var zero *PayrollRunPayload
+		return zero
+	}
+	return x.Run
 }
 
 type ExportPayrollRequest struct {
@@ -275,6 +563,22 @@ func (m *ExportPayrollRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ExportPayrollRequest) GetRunId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RunId
+}
+
 type ExportPayrollResponse struct {
 	BatchId string `json:"batch_id,omitempty"`
+}
+
+func (x *ExportPayrollResponse) GetBatchId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BatchId
 }

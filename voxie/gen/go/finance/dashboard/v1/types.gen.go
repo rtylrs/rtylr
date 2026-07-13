@@ -10,3 +10,35 @@ type GetFinanceDashboardResponse struct {
 	TotalExpensesMtd float64 `json:"total_expenses_mtd,omitempty"`
 	NetProfitMtd     float64 `json:"net_profit_mtd,omitempty"`
 }
+
+func (x *GetFinanceDashboardResponse) GetTotalReceivable() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalReceivable
+}
+
+func (x *GetFinanceDashboardResponse) GetOverdueAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OverdueAmount
+}
+
+func (x *GetFinanceDashboardResponse) GetTotalExpensesMtd() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalExpensesMtd
+}
+
+func (x *GetFinanceDashboardResponse) GetNetProfitMtd() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.NetProfitMtd
+}

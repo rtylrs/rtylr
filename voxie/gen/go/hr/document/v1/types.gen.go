@@ -66,6 +66,70 @@ func (m *Document) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Document) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Document) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Document) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *Document) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Document) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *Document) GetFileUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FileUrl
+}
+
+func (x *Document) GetExpiryDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ExpiryDate
+}
+
+func (x *Document) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type EmployeeDocumentPayload struct {
 	Id           int64   `json:"id,omitempty"`
 	OwnerId      int64   `json:"owner_id,omitempty"`
@@ -170,6 +234,106 @@ func (m *EmployeeDocumentPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *EmployeeDocumentPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *EmployeeDocumentPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *EmployeeDocumentPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *EmployeeDocumentPayload) GetDocumentType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DocumentType
+}
+
+func (x *EmployeeDocumentPayload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *EmployeeDocumentPayload) GetStorageMode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StorageMode
+}
+
+func (x *EmployeeDocumentPayload) GetFileUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FileUrl
+}
+
+func (x *EmployeeDocumentPayload) GetExpiryDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ExpiryDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.ExpiryDate
+}
+
+func (x *EmployeeDocumentPayload) GetUploadedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UploadedBy
+}
+
+func (x *EmployeeDocumentPayload) GetUploadedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UploadedAt
+}
+
+func (x *EmployeeDocumentPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *EmployeeDocumentPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateDocumentRequest struct {
 	StaffId    int64  `json:"staff_id,omitempty"`
 	Name       string `json:"name,omitempty"`
@@ -207,6 +371,46 @@ func (m *CreateDocumentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateDocumentRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *CreateDocumentRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateDocumentRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *CreateDocumentRequest) GetFileUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FileUrl
+}
+
+func (x *CreateDocumentRequest) GetExpiryDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ExpiryDate
+}
+
 type CreateDocumentResponse struct {
 	Id      int64  `json:"id,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -239,6 +443,22 @@ func (m *CreateDocumentResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *CreateDocumentResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateDocumentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteDocumentRequest struct {
@@ -274,8 +494,24 @@ func (m *DeleteDocumentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteDocumentRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteDocumentResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteDocumentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListDocumentsRequest struct {
@@ -283,4 +519,12 @@ type ListDocumentsRequest struct {
 
 type ListDocumentsResponse struct {
 	Documents []*Document `json:"documents,omitempty"`
+}
+
+func (x *ListDocumentsResponse) GetDocuments() []*Document {
+	if x == nil {
+		var zero []*Document
+		return zero
+	}
+	return x.Documents
 }

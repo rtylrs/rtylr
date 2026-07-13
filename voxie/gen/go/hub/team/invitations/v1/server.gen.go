@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type InvitationsServiceServer interface {
 	InviteUser(ctx context.Context, req *InviteUserRequest) (*InviteUserResponse, error)
 	BulkInvite(ctx context.Context, req *BulkInviteRequest) (*BulkInviteResponse, error)
@@ -29,7 +41,15 @@ type InvitationsServiceServer interface {
 	AcceptInvite(ctx context.Context, req *AcceptInviteRequest) (*AcceptInviteResponse, error)
 }
 
-func RegisterInvitationsServiceServer(mux *http.ServeMux, srv InvitationsServiceServer) {
+func RegisterInvitationsServiceServer(srv InvitationsServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterInvitationsServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("POST /hub/team/invitations/v1/invitations", func(w http.ResponseWriter, r *http.Request) {
 		req := new(InviteUserRequest)
 		if r.Body != nil {
@@ -118,4 +138,5 @@ func RegisterInvitationsServiceServer(mux *http.ServeMux, srv InvitationsService
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

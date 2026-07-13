@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type RunsServiceServer interface {
 	ListPayrollRuns(ctx context.Context, req *ListPayrollRunsRequest) (*ListPayrollRunsResponse, error)
 	TriggerPayrollRun(ctx context.Context, req *TriggerPayrollRunRequest) (*TriggerPayrollRunResponse, error)
@@ -29,7 +41,15 @@ type RunsServiceServer interface {
 	ExportPayroll(ctx context.Context, req *ExportPayrollRequest) (*ExportPayrollResponse, error)
 }
 
-func RegisterRunsServiceServer(mux *http.ServeMux, srv RunsServiceServer) {
+func RegisterRunsServiceServer(srv RunsServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterRunsServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /hr/employees/payroll/runs/v1/runs", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListPayrollRunsRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -113,4 +133,5 @@ func RegisterRunsServiceServer(mux *http.ServeMux, srv RunsServiceServer) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

@@ -3,7 +3,7 @@ package finance.tax.v1
 /// Renamed from TaxConfig to avoid a name collision with the distinct
 /// finance.report.v1.TaxConfig - onk message names are unique across the
 /// whole schema tree, unlike proto's per-package scoping.
-message TaxSetting {
+message TaxConfig {
   id: int64
   owner_id: int64
   tax_name: string
@@ -17,7 +17,7 @@ message TaxSetting {
 message GetTaxConfigRequest {}
 
 message GetTaxConfigResponse {
-  config: TaxSetting
+  config: TaxConfig
 }
 
 message UpdateTaxConfigRequest {
@@ -33,11 +33,11 @@ message UpdateTaxConfigResponse {
 
 /// Renamed from GetPLReportRequest to avoid a name collision with the
 /// distinct finance.report.v1.GetPLReportRequest.
-message GetTaxPLReportRequest {}
+message GetPLReportRequest {}
 
 /// Renamed from GetPLReportResponse to avoid a name collision with the
 /// distinct finance.report.v1.GetPLReportResponse.
-message GetTaxPLReportResponse {
+message GetPLReportResponse {
   total_revenue: float64
   total_expenses: float64
   gross_profit: float64

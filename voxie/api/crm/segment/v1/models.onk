@@ -43,7 +43,7 @@ message GetSegmentCustomersResponse {
   /// Uses the full crm.customer.v1 Customer (not pos.customer.v1's minimal
   /// projection) so consumers can render loyalty tier/points without a
   /// second lookup.
-  customers: Customer[]
+  customers: crm.customer.v1.Customer[]
   total: int64
   page: int64
   page_size: int64
@@ -58,7 +58,7 @@ message GetSegmentDetailResponse {
   /// Uses the full crm.customer.v1 Customer (not pos.customer.v1's minimal
   /// projection) so consumers can render loyalty tier/points without a
   /// second lookup.
-  customers: Customer[]
+  customers: crm.customer.v1.Customer[]
 }
 
 message ListSegmentsRequest {}

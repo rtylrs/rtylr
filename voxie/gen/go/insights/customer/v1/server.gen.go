@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type CustomerServiceServer interface {
 	GetCustomerAnalytics(ctx context.Context, req *GetCustomerAnalyticsRequest) (*GetCustomerAnalyticsResponse, error)
 	GetChurnAnalysis(ctx context.Context, req *GetChurnAnalysisRequest) (*GetChurnAnalysisResponse, error)
@@ -29,7 +41,15 @@ type CustomerServiceServer interface {
 	GetTopCustomers(ctx context.Context, req *GetTopCustomersRequest) (*GetTopCustomersResponse, error)
 }
 
-func RegisterCustomerServiceServer(mux *http.ServeMux, srv CustomerServiceServer) {
+func RegisterCustomerServiceServer(srv CustomerServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterCustomerServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /insights/customer/v1/analytics", func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetCustomerAnalyticsRequest)
 		if r.URL.Query().Get("period") != "" {
@@ -115,4 +135,5 @@ func RegisterCustomerServiceServer(mux *http.ServeMux, srv CustomerServiceServer
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

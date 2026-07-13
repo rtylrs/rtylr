@@ -22,11 +22,15 @@ brand_id?: string;
 message?: string;
 }
 
-export interface UpdateBrandRequest {
-id?: string;
+export interface UpdateBrandBody {
 name?: string;
 logo_url?: string;
 description?: string;
+}
+
+export interface UpdateBrandRequest {
+id?: string;
+body?: UpdateBrandBody;
 }
 
 export interface UpdateBrandResponse {

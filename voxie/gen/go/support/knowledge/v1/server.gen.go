@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type KnowledgeServiceServer interface {
 	ListArticles(ctx context.Context, req *ListArticlesRequest) (*ListArticlesResponse, error)
 	CreateArticle(ctx context.Context, req *CreateArticleRequest) (*CreateArticleResponse, error)
@@ -29,7 +41,15 @@ type KnowledgeServiceServer interface {
 	DeleteArticle(ctx context.Context, req *DeleteArticleRequest) (*DeleteArticleResponse, error)
 }
 
-func RegisterKnowledgeServiceServer(mux *http.ServeMux, srv KnowledgeServiceServer) {
+func RegisterKnowledgeServiceServer(srv KnowledgeServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterKnowledgeServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /support/knowledge/v1/articles", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListArticlesRequest)
 		if r.URL.Query().Get("page") != "" {
@@ -114,4 +134,5 @@ func RegisterKnowledgeServiceServer(mux *http.ServeMux, srv KnowledgeServiceServ
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

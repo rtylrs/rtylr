@@ -82,6 +82,118 @@ func (m *TimeOffRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TimeOffRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TimeOffRequest) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *TimeOffRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *TimeOffRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *TimeOffRequest) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *TimeOffRequest) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndDate
+}
+
+func (x *TimeOffRequest) GetDaysCount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DaysCount
+}
+
+func (x *TimeOffRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *TimeOffRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
+func (x *TimeOffRequest) GetApprovedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ApprovedBy
+}
+
+func (x *TimeOffRequest) GetApprovedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ApprovedAt
+}
+
+func (x *TimeOffRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *TimeOffRequest) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *TimeOffRequest) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ApproveTimeOffRequestMsg struct {
 	Id     int64  `json:"id,omitempty"`
 	Status string `json:"status,omitempty"`
@@ -117,8 +229,40 @@ func (m *ApproveTimeOffRequestMsg) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ApproveTimeOffRequestMsg) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ApproveTimeOffRequestMsg) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *ApproveTimeOffRequestMsg) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
 type ApproveTimeOffResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *ApproveTimeOffResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }
 
 type ListTimeOffRequest struct {
@@ -126,6 +270,14 @@ type ListTimeOffRequest struct {
 
 type ListTimeOffResponse struct {
 	Requests []*TimeOffRequest `json:"requests,omitempty"`
+}
+
+func (x *ListTimeOffResponse) GetRequests() []*TimeOffRequest {
+	if x == nil {
+		var zero []*TimeOffRequest
+		return zero
+	}
+	return x.Requests
 }
 
 type SubmitTimeOffRequest struct {
@@ -167,6 +319,62 @@ func (m *SubmitTimeOffRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *SubmitTimeOffRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *SubmitTimeOffRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *SubmitTimeOffRequest) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *SubmitTimeOffRequest) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndDate
+}
+
+func (x *SubmitTimeOffRequest) GetDaysCount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DaysCount
+}
+
+func (x *SubmitTimeOffRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
+func (x *SubmitTimeOffRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
 type SubmitTimeOffResponse struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -198,4 +406,12 @@ func (m *SubmitTimeOffResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *SubmitTimeOffResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
 }

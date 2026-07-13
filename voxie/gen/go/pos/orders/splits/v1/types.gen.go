@@ -41,6 +41,22 @@ func (m *SplitOrderRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *SplitOrderRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *SplitOrderRequest) GetSplits() []*pos_orders_v1.SplitGroup {
+	if x == nil {
+		var zero []*pos_orders_v1.SplitGroup
+		return zero
+	}
+	return x.Splits
+}
+
 type SplitOrderResponse struct {
 	OrderIds []int64 `json:"order_ids,omitempty"`
 	Message  string  `json:"message,omitempty"`
@@ -79,4 +95,20 @@ func (m *SplitOrderResponse) UnmarshalJSON(data []byte) error {
 		}
 	}
 	return nil
+}
+
+func (x *SplitOrderResponse) GetOrderIds() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.OrderIds
+}
+
+func (x *SplitOrderResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

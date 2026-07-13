@@ -113,6 +113,126 @@ func (m *LoyaltyConfig) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *LoyaltyConfig) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *LoyaltyConfig) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *LoyaltyConfig) GetIsEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsEnabled
+}
+
+func (x *LoyaltyConfig) GetPointsPerCurrencyUnit() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.PointsPerCurrencyUnit
+}
+
+func (x *LoyaltyConfig) GetCurrencyPerPoint() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CurrencyPerPoint
+}
+
+func (x *LoyaltyConfig) GetBronzeMin() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BronzeMin
+}
+
+func (x *LoyaltyConfig) GetSilverMin() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SilverMin
+}
+
+func (x *LoyaltyConfig) GetGoldMin() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.GoldMin
+}
+
+func (x *LoyaltyConfig) GetPlatinumMin() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PlatinumMin
+}
+
+func (x *LoyaltyConfig) GetBronzeDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.BronzeDiscountPct
+}
+
+func (x *LoyaltyConfig) GetSilverDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SilverDiscountPct
+}
+
+func (x *LoyaltyConfig) GetGoldDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.GoldDiscountPct
+}
+
+func (x *LoyaltyConfig) GetPlatinumDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.PlatinumDiscountPct
+}
+
+func (x *LoyaltyConfig) GetPointsExpiryDays() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PointsExpiryDays
+}
+
+func (x *LoyaltyConfig) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type LoyaltyTransaction struct {
 	Id            int64  `json:"id,omitempty"`
 	OwnerId       int64  `json:"owner_id,omitempty"`
@@ -206,6 +326,98 @@ func (m *LoyaltyTransaction) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *LoyaltyTransaction) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *LoyaltyTransaction) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *LoyaltyTransaction) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *LoyaltyTransaction) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *LoyaltyTransaction) GetPoints() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Points
+}
+
+func (x *LoyaltyTransaction) GetBalanceBefore() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BalanceBefore
+}
+
+func (x *LoyaltyTransaction) GetBalanceAfter() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BalanceAfter
+}
+
+func (x *LoyaltyTransaction) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *LoyaltyTransaction) GetReferenceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ReferenceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ReferenceId
+}
+
+func (x *LoyaltyTransaction) GetReferenceType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReferenceType
+}
+
+func (x *LoyaltyTransaction) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type LoyaltyTier struct {
 	Id          int64   `json:"id,omitempty"`
 	OwnerId     int64   `json:"owner_id,omitempty"`
@@ -277,6 +489,78 @@ func (m *LoyaltyTier) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *LoyaltyTier) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *LoyaltyTier) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *LoyaltyTier) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *LoyaltyTier) GetMinPoints() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MinPoints
+}
+
+func (x *LoyaltyTier) GetDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountPct
+}
+
+func (x *LoyaltyTier) GetPerks() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Perks
+}
+
+func (x *LoyaltyTier) GetSortOrder() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SortOrder
+}
+
+func (x *LoyaltyTier) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *LoyaltyTier) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type AwardPointsRequest struct {
 	CustomerId    int64  `json:"customer_id,omitempty"`
 	Points        int64  `json:"points,omitempty"`
@@ -324,8 +608,60 @@ func (m *AwardPointsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AwardPointsRequest) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *AwardPointsRequest) GetPoints() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Points
+}
+
+func (x *AwardPointsRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *AwardPointsRequest) GetReferenceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ReferenceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ReferenceId
+}
+
+func (x *AwardPointsRequest) GetReferenceType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReferenceType
+}
+
 type AwardPointsResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *AwardPointsResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type CreateLoyaltyTierRequest struct {
@@ -375,6 +711,46 @@ func (m *CreateLoyaltyTierRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateLoyaltyTierRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateLoyaltyTierRequest) GetMinPoints() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MinPoints
+}
+
+func (x *CreateLoyaltyTierRequest) GetDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountPct
+}
+
+func (x *CreateLoyaltyTierRequest) GetPerks() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Perks
+}
+
+func (x *CreateLoyaltyTierRequest) GetSortOrder() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SortOrder
+}
+
 type CreateLoyaltyTierResponse struct {
 	TierId  int64  `json:"tier_id,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -409,6 +785,22 @@ func (m *CreateLoyaltyTierResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateLoyaltyTierResponse) GetTierId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TierId
+}
+
+func (x *CreateLoyaltyTierResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type GetLoyaltyConfigRequest struct {
 }
 
@@ -416,11 +808,27 @@ type GetLoyaltyConfigResponse struct {
 	Config *LoyaltyConfig `json:"config,omitempty"`
 }
 
+func (x *GetLoyaltyConfigResponse) GetConfig() *LoyaltyConfig {
+	if x == nil {
+		var zero *LoyaltyConfig
+		return zero
+	}
+	return x.Config
+}
+
 type ListLoyaltyTiersRequest struct {
 }
 
 type ListLoyaltyTiersResponse struct {
 	Tiers []*LoyaltyTier `json:"tiers,omitempty"`
+}
+
+func (x *ListLoyaltyTiersResponse) GetTiers() []*LoyaltyTier {
+	if x == nil {
+		var zero []*LoyaltyTier
+		return zero
+	}
+	return x.Tiers
 }
 
 type ListLoyaltyTransactionsRequest struct {
@@ -476,6 +884,30 @@ func (m *ListLoyaltyTransactionsRequest) UnmarshalJSON(data []byte) error {
 		m.PageSize = v
 	}
 	return nil
+}
+
+func (x *ListLoyaltyTransactionsRequest) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *ListLoyaltyTransactionsRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListLoyaltyTransactionsRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
 }
 
 type ListLoyaltyTransactionsResponse struct {
@@ -534,6 +966,38 @@ func (m *ListLoyaltyTransactionsResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListLoyaltyTransactionsResponse) GetTransactions() []*LoyaltyTransaction {
+	if x == nil {
+		var zero []*LoyaltyTransaction
+		return zero
+	}
+	return x.Transactions
+}
+
+func (x *ListLoyaltyTransactionsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListLoyaltyTransactionsResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListLoyaltyTransactionsResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
 type RedeemPointsRequest struct {
 	CustomerId    int64  `json:"customer_id,omitempty"`
 	Points        int64  `json:"points,omitempty"`
@@ -581,8 +1045,60 @@ func (m *RedeemPointsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RedeemPointsRequest) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *RedeemPointsRequest) GetPoints() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Points
+}
+
+func (x *RedeemPointsRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *RedeemPointsRequest) GetReferenceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ReferenceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ReferenceId
+}
+
+func (x *RedeemPointsRequest) GetReferenceType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReferenceType
+}
+
 type RedeemPointsResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *RedeemPointsResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateLoyaltyConfigRequest struct {
@@ -669,8 +1185,112 @@ func (m *UpdateLoyaltyConfigRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateLoyaltyConfigRequest) GetIsEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsEnabled
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetPointsPerCurrencyUnit() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.PointsPerCurrencyUnit
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetCurrencyPerPoint() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CurrencyPerPoint
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetBronzeMin() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BronzeMin
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetSilverMin() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SilverMin
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetGoldMin() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.GoldMin
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetPlatinumMin() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PlatinumMin
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetBronzeDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.BronzeDiscountPct
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetSilverDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SilverDiscountPct
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetGoldDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.GoldDiscountPct
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetPlatinumDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.PlatinumDiscountPct
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetPointsExpiryDays() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PointsExpiryDays
+}
+
 type UpdateLoyaltyConfigResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateLoyaltyConfigResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateLoyaltyTierBody struct {
@@ -720,6 +1340,46 @@ func (m *UpdateLoyaltyTierBody) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateLoyaltyTierBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateLoyaltyTierBody) GetMinPoints() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MinPoints
+}
+
+func (x *UpdateLoyaltyTierBody) GetDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.DiscountPct
+}
+
+func (x *UpdateLoyaltyTierBody) GetPerks() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Perks
+}
+
+func (x *UpdateLoyaltyTierBody) GetSortOrder() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SortOrder
+}
+
 type UpdateLoyaltyTierRequest struct {
 	Id   int64                  `json:"id,omitempty"`
 	Body *UpdateLoyaltyTierBody `json:"body,omitempty"`
@@ -754,6 +1414,30 @@ func (m *UpdateLoyaltyTierRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateLoyaltyTierRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateLoyaltyTierRequest) GetBody() *UpdateLoyaltyTierBody {
+	if x == nil {
+		var zero *UpdateLoyaltyTierBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateLoyaltyTierResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateLoyaltyTierResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

@@ -66,6 +66,74 @@ func (m *RecurringInvoice) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RecurringInvoice) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *RecurringInvoice) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *RecurringInvoice) GetTemplateInvoiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TemplateInvoiceId
+}
+
+func (x *RecurringInvoice) GetFrequency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Frequency
+}
+
+func (x *RecurringInvoice) GetNextInvoiceDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NextInvoiceDate
+}
+
+func (x *RecurringInvoice) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.EndDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.EndDate
+}
+
+func (x *RecurringInvoice) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *RecurringInvoice) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type CreateRecurringInvoiceRequest struct {
 	TemplateInvoiceId int64   `json:"template_invoice_id,omitempty"`
 	Frequency         string  `json:"frequency,omitempty"`
@@ -103,6 +171,54 @@ func (m *CreateRecurringInvoiceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateRecurringInvoiceRequest) GetTemplateInvoiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TemplateInvoiceId
+}
+
+func (x *CreateRecurringInvoiceRequest) GetFrequency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Frequency
+}
+
+func (x *CreateRecurringInvoiceRequest) GetNextInvoiceDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NextInvoiceDate
+}
+
+func (x *CreateRecurringInvoiceRequest) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.EndDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.EndDate
+}
+
+func (x *CreateRecurringInvoiceRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.IsActive == nil {
+		var zero bool
+		return zero
+	}
+	return *x.IsActive
+}
+
 type CreateRecurringInvoiceResponse struct {
 	Id      int64  `json:"id,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -135,6 +251,22 @@ func (m *CreateRecurringInvoiceResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *CreateRecurringInvoiceResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateRecurringInvoiceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetRecurringInvoiceRequest struct {
@@ -170,8 +302,24 @@ func (m *GetRecurringInvoiceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetRecurringInvoiceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetRecurringInvoiceResponse struct {
 	Invoice *RecurringInvoice `json:"invoice,omitempty"`
+}
+
+func (x *GetRecurringInvoiceResponse) GetInvoice() *RecurringInvoice {
+	if x == nil {
+		var zero *RecurringInvoice
+		return zero
+	}
+	return x.Invoice
 }
 
 type ListRecurringInvoicesRequest struct {
@@ -179,6 +327,14 @@ type ListRecurringInvoicesRequest struct {
 
 type ListRecurringInvoicesResponse struct {
 	RecurringInvoices []*RecurringInvoice `json:"recurring_invoices,omitempty"`
+}
+
+func (x *ListRecurringInvoicesResponse) GetRecurringInvoices() []*RecurringInvoice {
+	if x == nil {
+		var zero []*RecurringInvoice
+		return zero
+	}
+	return x.RecurringInvoices
 }
 
 type PauseRecurringInvoiceRequest struct {
@@ -214,8 +370,24 @@ func (m *PauseRecurringInvoiceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *PauseRecurringInvoiceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type PauseRecurringInvoiceResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *PauseRecurringInvoiceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ResumeRecurringInvoiceRequest struct {
@@ -251,8 +423,24 @@ func (m *ResumeRecurringInvoiceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ResumeRecurringInvoiceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type ResumeRecurringInvoiceResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *ResumeRecurringInvoiceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateRecurringInvoiceBody struct {
@@ -261,6 +449,58 @@ type UpdateRecurringInvoiceBody struct {
 	NextInvoiceDate   string  `json:"next_invoice_date,omitempty"`
 	EndDate           *string `json:"end_date,omitempty"`
 	IsActive          *bool   `json:"is_active,omitempty"`
+}
+
+func (x *UpdateRecurringInvoiceBody) GetTemplateInvoiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.TemplateInvoiceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TemplateInvoiceId
+}
+
+func (x *UpdateRecurringInvoiceBody) GetFrequency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Frequency
+}
+
+func (x *UpdateRecurringInvoiceBody) GetNextInvoiceDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NextInvoiceDate
+}
+
+func (x *UpdateRecurringInvoiceBody) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.EndDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.EndDate
+}
+
+func (x *UpdateRecurringInvoiceBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.IsActive == nil {
+		var zero bool
+		return zero
+	}
+	return *x.IsActive
 }
 
 type UpdateRecurringInvoiceRequest struct {
@@ -297,6 +537,30 @@ func (m *UpdateRecurringInvoiceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateRecurringInvoiceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateRecurringInvoiceRequest) GetBody() *UpdateRecurringInvoiceBody {
+	if x == nil {
+		var zero *UpdateRecurringInvoiceBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateRecurringInvoiceResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateRecurringInvoiceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

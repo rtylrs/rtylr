@@ -89,6 +89,182 @@ func (m *Customer) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Customer) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Customer) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Customer) GetFirstName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FirstName
+}
+
+func (x *Customer) GetLastName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastName
+}
+
+func (x *Customer) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *Customer) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *Customer) GetDateOfBirth() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DateOfBirth == nil {
+		var zero string
+		return zero
+	}
+	return *x.DateOfBirth
+}
+
+func (x *Customer) GetGender() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Gender
+}
+
+func (x *Customer) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *Customer) GetCity() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.City
+}
+
+func (x *Customer) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *Customer) GetLoyaltyPoints() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LoyaltyPoints
+}
+
+func (x *Customer) GetTotalSpent() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalSpent
+}
+
+func (x *Customer) GetVisitCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.VisitCount
+}
+
+func (x *Customer) GetLastVisitAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.LastVisitAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.LastVisitAt
+}
+
+func (x *Customer) GetLoyaltyTier() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LoyaltyTier
+}
+
+func (x *Customer) GetTags() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Tags
+}
+
+func (x *Customer) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *Customer) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Customer) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Customer) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateCustomerRequest struct {
 	FirstName   string   `json:"first_name,omitempty"`
 	LastName    string   `json:"last_name,omitempty"`
@@ -101,6 +277,94 @@ type CreateCustomerRequest struct {
 	Country     string   `json:"country,omitempty"`
 	Tags        []string `json:"tags,omitempty"`
 	Notes       string   `json:"notes,omitempty"`
+}
+
+func (x *CreateCustomerRequest) GetFirstName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FirstName
+}
+
+func (x *CreateCustomerRequest) GetLastName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastName
+}
+
+func (x *CreateCustomerRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *CreateCustomerRequest) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *CreateCustomerRequest) GetDateOfBirth() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DateOfBirth
+}
+
+func (x *CreateCustomerRequest) GetGender() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Gender
+}
+
+func (x *CreateCustomerRequest) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *CreateCustomerRequest) GetCity() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.City
+}
+
+func (x *CreateCustomerRequest) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *CreateCustomerRequest) GetTags() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Tags
+}
+
+func (x *CreateCustomerRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
 }
 
 type CreateCustomerResponse struct {
@@ -137,6 +401,22 @@ func (m *CreateCustomerResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateCustomerResponse) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *CreateCustomerResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type DeleteCustomerRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -170,8 +450,24 @@ func (m *DeleteCustomerRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteCustomerRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteCustomerResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteCustomerResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetCustomerRequest struct {
@@ -207,8 +503,24 @@ func (m *GetCustomerRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetCustomerRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetCustomerResponse struct {
 	Customer *Customer `json:"customer,omitempty"`
+}
+
+func (x *GetCustomerResponse) GetCustomer() *Customer {
+	if x == nil {
+		var zero *Customer
+		return zero
+	}
+	return x.Customer
 }
 
 type ListCustomersRequest struct {
@@ -256,6 +568,46 @@ func (m *ListCustomersRequest) UnmarshalJSON(data []byte) error {
 		m.PageSize = v
 	}
 	return nil
+}
+
+func (x *ListCustomersRequest) GetSearch() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Search
+}
+
+func (x *ListCustomersRequest) GetTier() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Tier
+}
+
+func (x *ListCustomersRequest) GetTag() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Tag
+}
+
+func (x *ListCustomersRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListCustomersRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
 }
 
 type ListCustomersResponse struct {
@@ -314,6 +666,38 @@ func (m *ListCustomersResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListCustomersResponse) GetCustomers() []*Customer {
+	if x == nil {
+		var zero []*Customer
+		return zero
+	}
+	return x.Customers
+}
+
+func (x *ListCustomersResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListCustomersResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListCustomersResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
 type UpdateCustomerBody struct {
 	FirstName   string   `json:"first_name,omitempty"`
 	LastName    string   `json:"last_name,omitempty"`
@@ -327,6 +711,106 @@ type UpdateCustomerBody struct {
 	Tags        []string `json:"tags,omitempty"`
 	Notes       string   `json:"notes,omitempty"`
 	IsActive    *bool    `json:"is_active,omitempty"`
+}
+
+func (x *UpdateCustomerBody) GetFirstName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FirstName
+}
+
+func (x *UpdateCustomerBody) GetLastName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastName
+}
+
+func (x *UpdateCustomerBody) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *UpdateCustomerBody) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *UpdateCustomerBody) GetDateOfBirth() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DateOfBirth
+}
+
+func (x *UpdateCustomerBody) GetGender() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Gender
+}
+
+func (x *UpdateCustomerBody) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *UpdateCustomerBody) GetCity() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.City
+}
+
+func (x *UpdateCustomerBody) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *UpdateCustomerBody) GetTags() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Tags
+}
+
+func (x *UpdateCustomerBody) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *UpdateCustomerBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.IsActive == nil {
+		var zero bool
+		return zero
+	}
+	return *x.IsActive
 }
 
 type UpdateCustomerRequest struct {
@@ -363,6 +847,30 @@ func (m *UpdateCustomerRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateCustomerRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateCustomerRequest) GetBody() *UpdateCustomerBody {
+	if x == nil {
+		var zero *UpdateCustomerBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateCustomerResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateCustomerResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

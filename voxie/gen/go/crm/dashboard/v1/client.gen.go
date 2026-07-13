@@ -20,7 +20,7 @@ func NewDashboardServiceClient(baseURL string) *DashboardServiceClient {
 	return &DashboardServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}}
 }
 
-func (c *DashboardServiceClient) GetDashboard(ctx context.Context, req *GetCrmDashboardRequest) (*GetCrmDashboardResponse, error) {
+func (c *DashboardServiceClient) GetDashboard(ctx context.Context, req *GetDashboardRequest) (*GetDashboardResponse, error) {
 	path := "/crm/dashboard/v1/dashboard"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -43,7 +43,7 @@ func (c *DashboardServiceClient) GetDashboard(ctx context.Context, req *GetCrmDa
 		respBody, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
-	result := new(GetCrmDashboardResponse)
+	result := new(GetDashboardResponse)
 	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}

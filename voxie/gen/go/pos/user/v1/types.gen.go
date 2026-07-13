@@ -69,6 +69,94 @@ func (m *POSUser) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *POSUser) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *POSUser) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *POSUser) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *POSUser) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *POSUser) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *POSUser) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *POSUser) GetMaxDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.MaxDiscountPct
+}
+
+func (x *POSUser) GetCanVoid() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanVoid
+}
+
+func (x *POSUser) GetCanRefund() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanRefund
+}
+
+func (x *POSUser) GetCanOpenDrawer() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanOpenDrawer
+}
+
+func (x *POSUser) GetCanApplyDiscount() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanApplyDiscount
+}
+
 type ListPOSUsersRequest struct {
 	LocationId int64 `json:"location_id,omitempty"`
 }
@@ -102,8 +190,24 @@ func (m *ListPOSUsersRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListPOSUsersRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
 type ListPOSUsersResponse struct {
 	Users []*POSUser `json:"users,omitempty"`
+}
+
+func (x *ListPOSUsersResponse) GetUsers() []*POSUser {
+	if x == nil {
+		var zero []*POSUser
+		return zero
+	}
+	return x.Users
 }
 
 type CreatePOSUserRequest struct {
@@ -148,6 +252,86 @@ func (m *CreatePOSUserRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreatePOSUserRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *CreatePOSUserRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreatePOSUserRequest) GetPin() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Pin
+}
+
+func (x *CreatePOSUserRequest) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *CreatePOSUserRequest) GetHourlyRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.HourlyRate
+}
+
+func (x *CreatePOSUserRequest) GetMaxDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.MaxDiscountPct
+}
+
+func (x *CreatePOSUserRequest) GetCanVoid() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanVoid
+}
+
+func (x *CreatePOSUserRequest) GetCanRefund() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanRefund
+}
+
+func (x *CreatePOSUserRequest) GetCanOpenDrawer() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanOpenDrawer
+}
+
+func (x *CreatePOSUserRequest) GetCanApplyDiscount() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanApplyDiscount
+}
+
 type CreatePOSUserResponse struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -179,6 +363,14 @@ func (m *CreatePOSUserResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *CreatePOSUserResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
 }
 
 type UpdatePOSUserRequest struct {
@@ -224,8 +416,104 @@ func (m *UpdatePOSUserRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdatePOSUserRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdatePOSUserRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdatePOSUserRequest) GetPin() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Pin
+}
+
+func (x *UpdatePOSUserRequest) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *UpdatePOSUserRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *UpdatePOSUserRequest) GetHourlyRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.HourlyRate
+}
+
+func (x *UpdatePOSUserRequest) GetMaxDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.MaxDiscountPct
+}
+
+func (x *UpdatePOSUserRequest) GetCanVoid() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanVoid
+}
+
+func (x *UpdatePOSUserRequest) GetCanRefund() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanRefund
+}
+
+func (x *UpdatePOSUserRequest) GetCanOpenDrawer() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanOpenDrawer
+}
+
+func (x *UpdatePOSUserRequest) GetCanApplyDiscount() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanApplyDiscount
+}
+
 type UpdatePOSUserResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *UpdatePOSUserResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }
 
 type DeactivatePOSUserRequest struct {
@@ -261,8 +549,24 @@ func (m *DeactivatePOSUserRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeactivatePOSUserRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeactivatePOSUserResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *DeactivatePOSUserResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }
 
 type VerifyPOSUserPINRequest struct {
@@ -308,6 +612,30 @@ func (m *VerifyPOSUserPINRequest) UnmarshalJSON(data []byte) error {
 		m.UserId = v
 	}
 	return nil
+}
+
+func (x *VerifyPOSUserPINRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *VerifyPOSUserPINRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *VerifyPOSUserPINRequest) GetPin() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Pin
 }
 
 type VerifyPOSUserPINResponse struct {
@@ -372,6 +700,86 @@ func (m *VerifyPOSUserPINResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *VerifyPOSUserPINResponse) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *VerifyPOSUserPINResponse) GetPosUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PosUserId
+}
+
+func (x *VerifyPOSUserPINResponse) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *VerifyPOSUserPINResponse) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *VerifyPOSUserPINResponse) GetDisplayName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DisplayName
+}
+
+func (x *VerifyPOSUserPINResponse) GetCanVoid() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanVoid
+}
+
+func (x *VerifyPOSUserPINResponse) GetCanRefund() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanRefund
+}
+
+func (x *VerifyPOSUserPINResponse) GetCanOpenDrawer() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanOpenDrawer
+}
+
+func (x *VerifyPOSUserPINResponse) GetCanApplyDiscount() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CanApplyDiscount
+}
+
+func (x *VerifyPOSUserPINResponse) GetMaxDiscountPct() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.MaxDiscountPct
+}
+
 type SetPINRequest struct {
 	UserId     int64  `json:"user_id,omitempty"`
 	LocationId int64  `json:"location_id,omitempty"`
@@ -418,6 +826,46 @@ func (m *SetPINRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *SetPINRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *SetPINRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *SetPINRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *SetPINRequest) GetPin() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Pin
+}
+
 type SetPINResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *SetPINResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

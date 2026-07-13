@@ -78,10 +78,106 @@ func (m *ActivityEntry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ActivityEntry) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ActivityEntry) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *ActivityEntry) GetApp() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.App
+}
+
+func (x *ActivityEntry) GetEntityType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EntityType
+}
+
+func (x *ActivityEntry) GetEntityId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EntityId
+}
+
+func (x *ActivityEntry) GetAction() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Action
+}
+
+func (x *ActivityEntry) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *ActivityEntry) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *ActivityEntry) GetUserName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UserName
+}
+
+func (x *ActivityEntry) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type ListActivityRequest struct {
 	Limit int32 `json:"limit,omitempty"`
 }
 
+func (x *ListActivityRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
 type ListActivityResponse struct {
 	Activities []*ActivityEntry `json:"activities,omitempty"`
+}
+
+func (x *ListActivityResponse) GetActivities() []*ActivityEntry {
+	if x == nil {
+		var zero []*ActivityEntry
+		return zero
+	}
+	return x.Activities
 }

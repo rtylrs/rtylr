@@ -219,8 +219,7 @@ message ListProductAttributesResponse {
   attributes: ProductAttribute[]
 }
 
-message UpdateProductRequest {
-  id: int64 @required @gt(0)
+message UpdateProductBody {
   category_id: int64 @required @gt(0)
   supplier_id: int64 @required @gt(0)
   name: string @required
@@ -252,6 +251,11 @@ message UpdateProductRequest {
   allow_backorder: bool
   lead_time_days: int32 @gte(0)
   image_url: string
+}
+
+message UpdateProductRequest {
+  id: int64 @required @gt(0)
+  body: UpdateProductBody
 }
 
 message UpdateProductResponse {

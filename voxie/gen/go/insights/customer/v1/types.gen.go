@@ -16,10 +16,82 @@ type CustomerAnalytics struct {
 	Growth           []*CustomerGrowthPoint `json:"growth,omitempty"`
 }
 
+func (x *CustomerAnalytics) GetTotal() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Total
+}
+
+func (x *CustomerAnalytics) GetNewThisPeriod() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.NewThisPeriod
+}
+
+func (x *CustomerAnalytics) GetRetentionRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.RetentionRate
+}
+
+func (x *CustomerAnalytics) GetAvgLifetimeValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AvgLifetimeValue
+}
+
+func (x *CustomerAnalytics) GetChurnRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ChurnRate
+}
+
+func (x *CustomerAnalytics) GetGrowth() []*CustomerGrowthPoint {
+	if x == nil {
+		var zero []*CustomerGrowthPoint
+		return zero
+	}
+	return x.Growth
+}
+
 type CustomerGrowthPoint struct {
 	Date         string `json:"date,omitempty"`
 	NewCustomers int32  `json:"new_customers,omitempty"`
 	Total        int32  `json:"total,omitempty"`
+}
+
+func (x *CustomerGrowthPoint) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *CustomerGrowthPoint) GetNewCustomers() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.NewCustomers
+}
+
+func (x *CustomerGrowthPoint) GetTotal() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Total
 }
 
 type TopCustomerEntry struct {
@@ -59,10 +131,74 @@ func (m *TopCustomerEntry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TopCustomerEntry) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TopCustomerEntry) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *TopCustomerEntry) GetTotalSpent() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalSpent
+}
+
+func (x *TopCustomerEntry) GetOrderCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.OrderCount
+}
+
+func (x *TopCustomerEntry) GetLastOrderAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastOrderAt
+}
+
 type ChurnAnalysis struct {
 	ChurnRate    float64        `json:"churn_rate,omitempty"`
 	ChurnedCount int32          `json:"churned_count,omitempty"`
 	Reasons      []*ChurnReason `json:"reasons,omitempty"`
+}
+
+func (x *ChurnAnalysis) GetChurnRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ChurnRate
+}
+
+func (x *ChurnAnalysis) GetChurnedCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.ChurnedCount
+}
+
+func (x *ChurnAnalysis) GetReasons() []*ChurnReason {
+	if x == nil {
+		var zero []*ChurnReason
+		return zero
+	}
+	return x.Reasons
 }
 
 type ChurnReason struct {
@@ -71,10 +207,58 @@ type ChurnReason struct {
 	Percentage float64 `json:"percentage,omitempty"`
 }
 
+func (x *ChurnReason) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
+func (x *ChurnReason) GetCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Count
+}
+
+func (x *ChurnReason) GetPercentage() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Percentage
+}
+
 type LTVAnalysis struct {
 	Average  float64       `json:"average,omitempty"`
 	Median   float64       `json:"median,omitempty"`
 	Segments []*LTVSegment `json:"segments,omitempty"`
+}
+
+func (x *LTVAnalysis) GetAverage() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Average
+}
+
+func (x *LTVAnalysis) GetMedian() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Median
+}
+
+func (x *LTVAnalysis) GetSegments() []*LTVSegment {
+	if x == nil {
+		var zero []*LTVSegment
+		return zero
+	}
+	return x.Segments
 }
 
 type LTVSegment struct {
@@ -83,20 +267,76 @@ type LTVSegment struct {
 	CustomerCount int32   `json:"customer_count,omitempty"`
 }
 
+func (x *LTVSegment) GetSegment() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Segment
+}
+
+func (x *LTVSegment) GetAvgLtv() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AvgLtv
+}
+
+func (x *LTVSegment) GetCustomerCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.CustomerCount
+}
+
 type GetCustomerAnalyticsRequest struct {
 	Period string `json:"period,omitempty"`
+}
+
+func (x *GetCustomerAnalyticsRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
 }
 
 type GetCustomerAnalyticsResponse struct {
 	Analytics *CustomerAnalytics `json:"analytics,omitempty"`
 }
 
+func (x *GetCustomerAnalyticsResponse) GetAnalytics() *CustomerAnalytics {
+	if x == nil {
+		var zero *CustomerAnalytics
+		return zero
+	}
+	return x.Analytics
+}
+
 type GetChurnAnalysisRequest struct {
 	Period string `json:"period,omitempty"`
 }
 
+func (x *GetChurnAnalysisRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
+}
+
 type GetChurnAnalysisResponse struct {
 	Analysis *ChurnAnalysis `json:"analysis,omitempty"`
+}
+
+func (x *GetChurnAnalysisResponse) GetAnalysis() *ChurnAnalysis {
+	if x == nil {
+		var zero *ChurnAnalysis
+		return zero
+	}
+	return x.Analysis
 }
 
 type GetLTVAnalysisRequest struct {
@@ -104,6 +344,14 @@ type GetLTVAnalysisRequest struct {
 
 type GetLTVAnalysisResponse struct {
 	Analysis *LTVAnalysis `json:"analysis,omitempty"`
+}
+
+func (x *GetLTVAnalysisResponse) GetAnalysis() *LTVAnalysis {
+	if x == nil {
+		var zero *LTVAnalysis
+		return zero
+	}
+	return x.Analysis
 }
 
 type GetTopCustomersRequest struct {
@@ -114,7 +362,63 @@ type GetTopCustomersRequest struct {
 	Period  string `json:"period,omitempty"`
 }
 
+func (x *GetTopCustomersRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *GetTopCustomersRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *GetTopCustomersRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *GetTopCustomersRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
+func (x *GetTopCustomersRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
+}
+
 type GetTopCustomersResponse struct {
 	Customers  []*TopCustomerEntry                      `json:"customers,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
+}
+
+func (x *GetTopCustomersResponse) GetCustomers() []*TopCustomerEntry {
+	if x == nil {
+		var zero []*TopCustomerEntry
+		return zero
+	}
+	return x.Customers
+}
+
+func (x *GetTopCustomersResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }

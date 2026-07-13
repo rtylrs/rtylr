@@ -21,7 +21,7 @@ func NewSettingsServiceClient(baseURL string) *SettingsServiceClient {
 	return &SettingsServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}}
 }
 
-func (c *SettingsServiceClient) GetSettings(ctx context.Context, req *GetSupportSettingsRequest) (*GetSupportSettingsResponse, error) {
+func (c *SettingsServiceClient) GetSettings(ctx context.Context, req *GetSettingsRequest) (*GetSettingsResponse, error) {
 	path := "/support/settings/v1/settings"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -44,14 +44,14 @@ func (c *SettingsServiceClient) GetSettings(ctx context.Context, req *GetSupport
 		respBody, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
-	result := new(GetSupportSettingsResponse)
+	result := new(GetSettingsResponse)
 	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
 }
 
-func (c *SettingsServiceClient) UpdateSettings(ctx context.Context, req *UpdateSupportSettingsRequest) (*UpdateSupportSettingsResponse, error) {
+func (c *SettingsServiceClient) UpdateSettings(ctx context.Context, req *UpdateSettingsRequest) (*UpdateSettingsResponse, error) {
 	path := "/support/settings/v1/settings"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -75,7 +75,7 @@ func (c *SettingsServiceClient) UpdateSettings(ctx context.Context, req *UpdateS
 		respBody, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
-	result := new(UpdateSupportSettingsResponse)
+	result := new(UpdateSettingsResponse)
 	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}

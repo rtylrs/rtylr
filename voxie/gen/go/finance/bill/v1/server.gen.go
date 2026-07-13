@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type BillServiceServer interface {
 	ListBills(ctx context.Context, req *ListBillsRequest) (*ListBillsResponse, error)
 	CreateBill(ctx context.Context, req *CreateBillRequest) (*CreateBillResponse, error)
@@ -30,7 +42,15 @@ type BillServiceServer interface {
 	DeleteBill(ctx context.Context, req *DeleteBillRequest) (*DeleteBillResponse, error)
 }
 
-func RegisterBillServiceServer(mux *http.ServeMux, srv BillServiceServer) {
+func RegisterBillServiceServer(srv BillServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterBillServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /finance/bill/v1/bills", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListBillsRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -126,4 +146,5 @@ func RegisterBillServiceServer(mux *http.ServeMux, srv BillServiceServer) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

@@ -57,6 +57,78 @@ func (m *Account) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Account) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Account) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Account) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Account) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *Account) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *Account) GetBalance() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Balance
+}
+
+func (x *Account) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Account) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Account) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
 type ChartOfAccountsNode struct {
 	Id       int64                  `json:"id,omitempty"`
 	Name     string                 `json:"name,omitempty"`
@@ -94,6 +166,46 @@ func (m *ChartOfAccountsNode) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ChartOfAccountsNode) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ChartOfAccountsNode) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ChartOfAccountsNode) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
+func (x *ChartOfAccountsNode) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *ChartOfAccountsNode) GetChildren() []*ChartOfAccountsNode {
+	if x == nil {
+		var zero []*ChartOfAccountsNode
+		return zero
+	}
+	return x.Children
+}
+
 type CreateAccountRequest struct {
 	Name     string  `json:"name,omitempty"`
 	Type     string  `json:"type,omitempty"`
@@ -101,6 +213,54 @@ type CreateAccountRequest struct {
 	Balance  float64 `json:"balance,omitempty"`
 	IsActive bool    `json:"is_active,omitempty"`
 	Code     string  `json:"code,omitempty"`
+}
+
+func (x *CreateAccountRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateAccountRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *CreateAccountRequest) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *CreateAccountRequest) GetBalance() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Balance
+}
+
+func (x *CreateAccountRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *CreateAccountRequest) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
 }
 
 type CreateAccountResponse struct {
@@ -137,6 +297,22 @@ func (m *CreateAccountResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateAccountResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateAccountResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type DeleteAccountRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -170,8 +346,24 @@ func (m *DeleteAccountRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteAccountRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteAccountResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteAccountResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetChartOfAccountsRequest struct {
@@ -181,11 +373,27 @@ type GetChartOfAccountsResponse struct {
 	Tree []*ChartOfAccountsNode `json:"tree,omitempty"`
 }
 
+func (x *GetChartOfAccountsResponse) GetTree() []*ChartOfAccountsNode {
+	if x == nil {
+		var zero []*ChartOfAccountsNode
+		return zero
+	}
+	return x.Tree
+}
+
 type ListAccountsRequest struct {
 }
 
 type ListAccountsResponse struct {
 	Accounts []*Account `json:"accounts,omitempty"`
+}
+
+func (x *ListAccountsResponse) GetAccounts() []*Account {
+	if x == nil {
+		var zero []*Account
+		return zero
+	}
+	return x.Accounts
 }
 
 type UpdateAccountBody struct {
@@ -195,6 +403,54 @@ type UpdateAccountBody struct {
 	Balance  float64 `json:"balance,omitempty"`
 	IsActive bool    `json:"is_active,omitempty"`
 	Code     string  `json:"code,omitempty"`
+}
+
+func (x *UpdateAccountBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateAccountBody) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *UpdateAccountBody) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *UpdateAccountBody) GetBalance() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Balance
+}
+
+func (x *UpdateAccountBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *UpdateAccountBody) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
 }
 
 type UpdateAccountRequest struct {
@@ -231,6 +487,30 @@ func (m *UpdateAccountRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateAccountRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateAccountRequest) GetBody() *UpdateAccountBody {
+	if x == nil {
+		var zero *UpdateAccountBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateAccountResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateAccountResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

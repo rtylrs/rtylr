@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-type SupportCustomer struct {
+type Customer struct {
 	Id           int64  `json:"id,omitempty"`
 	BusinessId   int64  `json:"business_id,omitempty"`
 	Name         string `json:"name,omitempty"`
@@ -17,8 +17,8 @@ type SupportCustomer struct {
 	CreatedAt    string `json:"created_at,omitempty"`
 }
 
-func (m *SupportCustomer) MarshalJSON() ([]byte, error) {
-	type alias SupportCustomer
+func (m *Customer) MarshalJSON() ([]byte, error) {
+	type alias Customer
 	aux := struct {
 		*alias
 		Id         string `json:"id,omitempty"`
@@ -29,8 +29,8 @@ func (m *SupportCustomer) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-func (m *SupportCustomer) UnmarshalJSON(data []byte) error {
-	type alias SupportCustomer
+func (m *Customer) UnmarshalJSON(data []byte) error {
+	type alias Customer
 	aux := struct {
 		*alias
 		Id         string `json:"id,omitempty"`
@@ -56,24 +56,136 @@ func (m *SupportCustomer) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type ListSupportCustomersRequest struct {
+func (x *Customer) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Customer) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *Customer) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Customer) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *Customer) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *Customer) GetTotalTickets() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TotalTickets
+}
+
+func (x *Customer) GetLastTicketAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastTicketAt
+}
+
+func (x *Customer) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+type ListCustomersRequest struct {
 	Page     int32 `json:"page,omitempty"`
 	PageSize int32 `json:"page_size,omitempty"`
 }
 
-type ListSupportCustomersResponse struct {
-	Customers []*SupportCustomer `json:"customers,omitempty"`
-	Total     int32              `json:"total,omitempty"`
-	Page      int32              `json:"page,omitempty"`
-	PageSize  int32              `json:"page_size,omitempty"`
+func (x *ListCustomersRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
 }
 
-type GetSupportCustomerRequest struct {
+func (x *ListCustomersRequest) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
+}
+
+type ListCustomersResponse struct {
+	Customers []*Customer `json:"customers,omitempty"`
+	Total     int32       `json:"total,omitempty"`
+	Page      int32       `json:"page,omitempty"`
+	PageSize  int32       `json:"page_size,omitempty"`
+}
+
+func (x *ListCustomersResponse) GetCustomers() []*Customer {
+	if x == nil {
+		var zero []*Customer
+		return zero
+	}
+	return x.Customers
+}
+
+func (x *ListCustomersResponse) GetTotal() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListCustomersResponse) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListCustomersResponse) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
+}
+
+type GetCustomerRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
 
-func (m *GetSupportCustomerRequest) MarshalJSON() ([]byte, error) {
-	type alias GetSupportCustomerRequest
+func (m *GetCustomerRequest) MarshalJSON() ([]byte, error) {
+	type alias GetCustomerRequest
 	aux := struct {
 		*alias
 		Id string `json:"id,omitempty"`
@@ -82,8 +194,8 @@ func (m *GetSupportCustomerRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-func (m *GetSupportCustomerRequest) UnmarshalJSON(data []byte) error {
-	type alias GetSupportCustomerRequest
+func (m *GetCustomerRequest) UnmarshalJSON(data []byte) error {
+	type alias GetCustomerRequest
 	aux := struct {
 		*alias
 		Id string `json:"id,omitempty"`
@@ -101,6 +213,22 @@ func (m *GetSupportCustomerRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type GetSupportCustomerResponse struct {
-	Customer *SupportCustomer `json:"customer,omitempty"`
+func (x *GetCustomerRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+type GetCustomerResponse struct {
+	Customer *Customer `json:"customer,omitempty"`
+}
+
+func (x *GetCustomerResponse) GetCustomer() *Customer {
+	if x == nil {
+		var zero *Customer
+		return zero
+	}
+	return x.Customer
 }

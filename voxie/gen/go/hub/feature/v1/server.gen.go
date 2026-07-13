@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type FeatureServiceServer interface {
 	ResolveFeatures(ctx context.Context, req *ResolveFeaturesRequest) (*ResolveFeaturesResponse, error)
 	ResolveMyFeatures(ctx context.Context, req *ResolveMyFeaturesRequest) (*ResolveMyFeaturesResponse, error)
@@ -37,7 +49,15 @@ type FeatureServiceServer interface {
 	DeleteRule(ctx context.Context, req *DeleteRuleRequest) (*DeleteRuleResponse, error)
 }
 
-func RegisterFeatureServiceServer(mux *http.ServeMux, srv FeatureServiceServer) {
+func RegisterFeatureServiceServer(srv FeatureServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterFeatureServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("POST /hub/feature/v1/features", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ResolveFeaturesRequest)
 		if r.Body != nil {
@@ -276,4 +296,5 @@ func RegisterFeatureServiceServer(mux *http.ServeMux, srv FeatureServiceServer) 
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

@@ -52,6 +52,118 @@ func (m *Business) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Business) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Business) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Business) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *Business) GetLogoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LogoUrl
+}
+
+func (x *Business) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *Business) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *Business) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *Business) GetWebsite() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Website
+}
+
+func (x *Business) GetTimezone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Timezone
+}
+
+func (x *Business) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *Business) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *Business) GetPlan() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Plan
+}
+
+func (x *Business) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Business) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
 type BusinessEntry struct {
 	Id       int64  `json:"id,omitempty"`
 	Name     string `json:"name,omitempty"`
@@ -99,6 +211,46 @@ func (m *BusinessEntry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *BusinessEntry) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *BusinessEntry) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *BusinessEntry) GetLogoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LogoUrl
+}
+
+func (x *BusinessEntry) GetParentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ParentId
+}
+
+func (x *BusinessEntry) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type PublicLocation struct {
 	Id       int64  `json:"id,omitempty"`
 	Name     string `json:"name,omitempty"`
@@ -135,6 +287,54 @@ func (m *PublicLocation) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *PublicLocation) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *PublicLocation) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *PublicLocation) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
+func (x *PublicLocation) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *PublicLocation) GetTimezone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Timezone
+}
+
+func (x *PublicLocation) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
 }
 
 type PublicBusinessSummary struct {
@@ -176,6 +376,62 @@ func (m *PublicBusinessSummary) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *PublicBusinessSummary) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *PublicBusinessSummary) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *PublicBusinessSummary) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
+func (x *PublicBusinessSummary) GetLogoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LogoUrl
+}
+
+func (x *PublicBusinessSummary) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *PublicBusinessSummary) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *PublicBusinessSummary) GetTimezone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Timezone
+}
+
 type PublicBusinessProfile struct {
 	Id       int64  `json:"id,omitempty"`
 	Name     string `json:"name,omitempty"`
@@ -213,6 +469,46 @@ func (m *PublicBusinessProfile) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *PublicBusinessProfile) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *PublicBusinessProfile) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *PublicBusinessProfile) GetLogoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LogoUrl
+}
+
+func (x *PublicBusinessProfile) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *PublicBusinessProfile) GetTimezone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Timezone
+}
+
 type GetBusinessRequest struct {
 	BusinessId int64 `json:"business_id,omitempty"`
 }
@@ -246,8 +542,24 @@ func (m *GetBusinessRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetBusinessRequest) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
 type GetBusinessResponse struct {
 	Business *Business `json:"business,omitempty"`
+}
+
+func (x *GetBusinessResponse) GetBusiness() *Business {
+	if x == nil {
+		var zero *Business
+		return zero
+	}
+	return x.Business
 }
 
 type CreateSubBusinessRequest struct {
@@ -284,6 +596,22 @@ func (m *CreateSubBusinessRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateSubBusinessRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateSubBusinessRequest) GetParentBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ParentBusinessId
+}
+
 type CreateSubBusinessResponse struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -317,20 +645,60 @@ func (m *CreateSubBusinessResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateSubBusinessResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type OnboardBusinessRequest struct {
 	Name string `json:"name,omitempty"`
+}
+
+func (x *OnboardBusinessRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
 }
 
 type OnboardBusinessResponse struct {
 	Token string `json:"token,omitempty"`
 }
 
+func (x *OnboardBusinessResponse) GetToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Token
+}
+
 type CheckBusinessNameExistsRequest struct {
 	Name string `json:"name,omitempty"`
 }
 
+func (x *CheckBusinessNameExistsRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
 type CheckBusinessNameExistsResponse struct {
 	Exists bool `json:"exists,omitempty"`
+}
+
+func (x *CheckBusinessNameExistsResponse) GetExists() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Exists
 }
 
 type GetPublicBusinessRequest struct {
@@ -366,8 +734,24 @@ func (m *GetPublicBusinessRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetPublicBusinessRequest) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
 type GetPublicBusinessResponse struct {
 	Business *PublicBusinessProfile `json:"business,omitempty"`
+}
+
+func (x *GetPublicBusinessResponse) GetBusiness() *PublicBusinessProfile {
+	if x == nil {
+		var zero *PublicBusinessProfile
+		return zero
+	}
+	return x.Business
 }
 
 type ListMyBusinessesRequest struct {
@@ -377,8 +761,24 @@ type ListMyBusinessesResponse struct {
 	Businesses []*BusinessEntry `json:"businesses,omitempty"`
 }
 
+func (x *ListMyBusinessesResponse) GetBusinesses() []*BusinessEntry {
+	if x == nil {
+		var zero []*BusinessEntry
+		return zero
+	}
+	return x.Businesses
+}
+
 type LookupBusinessBySlugRequest struct {
 	Slug string `json:"slug,omitempty"`
+}
+
+func (x *LookupBusinessBySlugRequest) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
 }
 
 type LookupBusinessBySlugResponse struct {
@@ -386,12 +786,44 @@ type LookupBusinessBySlugResponse struct {
 	Locations []*PublicLocation      `json:"locations,omitempty"`
 }
 
+func (x *LookupBusinessBySlugResponse) GetBusiness() *PublicBusinessSummary {
+	if x == nil {
+		var zero *PublicBusinessSummary
+		return zero
+	}
+	return x.Business
+}
+
+func (x *LookupBusinessBySlugResponse) GetLocations() []*PublicLocation {
+	if x == nil {
+		var zero []*PublicLocation
+		return zero
+	}
+	return x.Locations
+}
+
 type SetSlugRequest struct {
 	Slug string `json:"slug,omitempty"`
 }
 
+func (x *SetSlugRequest) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
 type SetSlugResponse struct {
 	Slug string `json:"slug,omitempty"`
+}
+
+func (x *SetSlugResponse) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
 }
 
 type UpdateBusinessRequest struct {
@@ -436,6 +868,98 @@ func (m *UpdateBusinessRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateBusinessRequest) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *UpdateBusinessRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateBusinessRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *UpdateBusinessRequest) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *UpdateBusinessRequest) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+func (x *UpdateBusinessRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *UpdateBusinessRequest) GetWebsite() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Website
+}
+
+func (x *UpdateBusinessRequest) GetTimezone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Timezone
+}
+
+func (x *UpdateBusinessRequest) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *UpdateBusinessRequest) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Slug == nil {
+		var zero string
+		return zero
+	}
+	return *x.Slug
+}
+
 type UpdateBusinessResponse struct {
 	Business *Business `json:"business,omitempty"`
+}
+
+func (x *UpdateBusinessResponse) GetBusiness() *Business {
+	if x == nil {
+		var zero *Business
+		return zero
+	}
+	return x.Business
 }

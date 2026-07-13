@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type SupplierServiceServer interface {
 	ListSuppliers(ctx context.Context, req *ListSuppliersRequest) (*ListSuppliersResponse, error)
 	CreateSupplier(ctx context.Context, req *CreateSupplierRequest) (*CreateSupplierResponse, error)
@@ -29,7 +41,15 @@ type SupplierServiceServer interface {
 	DeleteSupplier(ctx context.Context, req *DeleteSupplierRequest) (*DeleteSupplierResponse, error)
 }
 
-func RegisterSupplierServiceServer(mux *http.ServeMux, srv SupplierServiceServer) {
+func RegisterSupplierServiceServer(srv SupplierServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterSupplierServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /erp/supplier/v1/suppliers", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListSuppliersRequest)
 		if r.URL.Query().Get("page") != "" {
@@ -114,4 +134,5 @@ func RegisterSupplierServiceServer(mux *http.ServeMux, srv SupplierServiceServer
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

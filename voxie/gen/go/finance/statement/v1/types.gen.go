@@ -13,8 +13,64 @@ type GetBalanceSheetResponse struct {
 	AccountsPayable    float64 `json:"accounts_payable,omitempty"`
 }
 
+func (x *GetBalanceSheetResponse) GetTotalAssets() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalAssets
+}
+
+func (x *GetBalanceSheetResponse) GetTotalLiabilities() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalLiabilities
+}
+
+func (x *GetBalanceSheetResponse) GetTotalEquity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalEquity
+}
+
+func (x *GetBalanceSheetResponse) GetCashBalance() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CashBalance
+}
+
+func (x *GetBalanceSheetResponse) GetAccountsReceivable() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AccountsReceivable
+}
+
+func (x *GetBalanceSheetResponse) GetAccountsPayable() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AccountsPayable
+}
+
 type GetCashFlowRequest struct {
 	Period string `json:"period,omitempty"`
+}
+
+func (x *GetCashFlowRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
 }
 
 type GetCashFlowResponse struct {
@@ -23,4 +79,44 @@ type GetCashFlowResponse struct {
 	OperatingOutflow float64 `json:"operating_outflow,omitempty"`
 	NetOperating     float64 `json:"net_operating,omitempty"`
 	NetCashFlow      float64 `json:"net_cash_flow,omitempty"`
+}
+
+func (x *GetCashFlowResponse) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
+}
+
+func (x *GetCashFlowResponse) GetOperatingInflow() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OperatingInflow
+}
+
+func (x *GetCashFlowResponse) GetOperatingOutflow() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OperatingOutflow
+}
+
+func (x *GetCashFlowResponse) GetNetOperating() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.NetOperating
+}
+
+func (x *GetCashFlowResponse) GetNetCashFlow() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.NetCashFlow
 }

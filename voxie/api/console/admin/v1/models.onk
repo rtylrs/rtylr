@@ -12,7 +12,7 @@ message User {
   created_at: string
 }
 
-message AdminBusiness {
+message Business {
   id: int64
   owner_id: int64
   name: string
@@ -164,16 +164,16 @@ message ListBusinessesRequest {
 }
 
 message ListBusinessesResponse {
-  businesses: AdminBusiness[]
+  businesses: Business[]
   total: int64
 }
 
-message AdminUpdateBusinessRequest {
+message UpdateBusinessRequest {
   id: int64 @gt(0)
   name: string
 }
 
-message AdminUpdateBusinessResponse {
+message UpdateBusinessResponse {
   message: string
 }
 
@@ -202,7 +202,7 @@ message CreateBusinessOwnerRequest {
 
 message CreateBusinessOwnerResponse {
   owner: User
-  business: AdminBusiness
+  business: Business
   subscription: Subscription?
   message: string
 }

@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type FloorServiceServer interface {
 	ListFloors(ctx context.Context, req *ListFloorsRequest) (*ListFloorsResponse, error)
 	CreateFloor(ctx context.Context, req *CreateFloorRequest) (*CreateFloorResponse, error)
@@ -29,7 +41,15 @@ type FloorServiceServer interface {
 	DeleteFloor(ctx context.Context, req *DeleteFloorRequest) (*DeleteFloorResponse, error)
 }
 
-func RegisterFloorServiceServer(mux *http.ServeMux, srv FloorServiceServer) {
+func RegisterFloorServiceServer(srv FloorServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterFloorServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /pos/floor/v1/floors", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListFloorsRequest)
 		if r.URL.Query().Get("branch_id") != "" {
@@ -111,4 +131,5 @@ func RegisterFloorServiceServer(mux *http.ServeMux, srv FloorServiceServer) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

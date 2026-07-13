@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-type SupportSettings struct {
+type Settings struct {
 	Id                int64  `json:"id,omitempty"`
 	BusinessId        int64  `json:"business_id,omitempty"`
 	AutoAssign        bool   `json:"auto_assign,omitempty"`
@@ -17,8 +17,8 @@ type SupportSettings struct {
 	UpdatedAt         string `json:"updated_at,omitempty"`
 }
 
-func (m *SupportSettings) MarshalJSON() ([]byte, error) {
-	type alias SupportSettings
+func (m *Settings) MarshalJSON() ([]byte, error) {
+	type alias Settings
 	aux := struct {
 		*alias
 		Id         string `json:"id,omitempty"`
@@ -29,8 +29,8 @@ func (m *SupportSettings) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aux)
 }
 
-func (m *SupportSettings) UnmarshalJSON(data []byte) error {
-	type alias SupportSettings
+func (m *Settings) UnmarshalJSON(data []byte) error {
+	type alias Settings
 	aux := struct {
 		*alias
 		Id         string `json:"id,omitempty"`
@@ -56,20 +56,132 @@ func (m *SupportSettings) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type GetSupportSettingsRequest struct {
+func (x *Settings) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
 }
 
-type GetSupportSettingsResponse struct {
-	Settings *SupportSettings `json:"settings,omitempty"`
+func (x *Settings) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
 }
 
-type UpdateSupportSettingsRequest struct {
+func (x *Settings) GetAutoAssign() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.AutoAssign
+}
+
+func (x *Settings) GetSlaHours() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SlaHours
+}
+
+func (x *Settings) GetBusinessHours() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BusinessHours
+}
+
+func (x *Settings) GetNotificationEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NotificationEmail
+}
+
+func (x *Settings) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Settings) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+type GetSettingsRequest struct {
+}
+
+type GetSettingsResponse struct {
+	Settings *Settings `json:"settings,omitempty"`
+}
+
+func (x *GetSettingsResponse) GetSettings() *Settings {
+	if x == nil {
+		var zero *Settings
+		return zero
+	}
+	return x.Settings
+}
+
+type UpdateSettingsRequest struct {
 	AutoAssign        bool   `json:"auto_assign,omitempty"`
 	SlaHours          int32  `json:"sla_hours,omitempty"`
 	BusinessHours     string `json:"business_hours,omitempty"`
 	NotificationEmail string `json:"notification_email,omitempty"`
 }
 
-type UpdateSupportSettingsResponse struct {
+func (x *UpdateSettingsRequest) GetAutoAssign() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.AutoAssign
+}
+
+func (x *UpdateSettingsRequest) GetSlaHours() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SlaHours
+}
+
+func (x *UpdateSettingsRequest) GetBusinessHours() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BusinessHours
+}
+
+func (x *UpdateSettingsRequest) GetNotificationEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NotificationEmail
+}
+
+type UpdateSettingsResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateSettingsResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

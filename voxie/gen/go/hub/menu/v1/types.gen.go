@@ -12,10 +12,34 @@ type ListMenuResponse struct {
 	Items []*pos_menu_item_v1.MenuItem `json:"items,omitempty"`
 }
 
+func (x *ListMenuResponse) GetItems() []*pos_menu_item_v1.MenuItem {
+	if x == nil {
+		var zero []*pos_menu_item_v1.MenuItem
+		return zero
+	}
+	return x.Items
+}
+
 type UpdateMenuRequest struct {
 	Items []*pos_menu_item_v1.MenuItem `json:"items,omitempty"`
 }
 
+func (x *UpdateMenuRequest) GetItems() []*pos_menu_item_v1.MenuItem {
+	if x == nil {
+		var zero []*pos_menu_item_v1.MenuItem
+		return zero
+	}
+	return x.Items
+}
+
 type UpdateMenuResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *UpdateMenuResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

@@ -96,6 +96,178 @@ func (m *TimeEntryPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TimeEntryPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TimeEntryPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *TimeEntryPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *TimeEntryPayload) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
+}
+
+func (x *TimeEntryPayload) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.TaskId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TaskId
+}
+
+func (x *TimeEntryPayload) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CategoryId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CategoryId
+}
+
+func (x *TimeEntryPayload) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *TimeEntryPayload) GetDurationMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DurationMinutes
+}
+
+func (x *TimeEntryPayload) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.StartTime == nil {
+		var zero string
+		return zero
+	}
+	return *x.StartTime
+}
+
+func (x *TimeEntryPayload) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.EndTime == nil {
+		var zero string
+		return zero
+	}
+	return *x.EndTime
+}
+
+func (x *TimeEntryPayload) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *TimeEntryPayload) GetIsBillable() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsBillable
+}
+
+func (x *TimeEntryPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *TimeEntryPayload) GetRejectionReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.RejectionReason == nil {
+		var zero string
+		return zero
+	}
+	return *x.RejectionReason
+}
+
+func (x *TimeEntryPayload) GetApprovedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ApprovedBy == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ApprovedBy
+}
+
+func (x *TimeEntryPayload) GetSource() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Source
+}
+
+func (x *TimeEntryPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *TimeEntryPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type TimesheetPayload struct {
 	Id                   int64               `json:"id,omitempty"`
 	OwnerId              int64               `json:"owner_id,omitempty"`
@@ -180,9 +352,133 @@ func (m *TimesheetPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TimesheetPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TimesheetPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *TimesheetPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *TimesheetPayload) GetPeriodStart() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodStart
+}
+
+func (x *TimesheetPayload) GetPeriodEnd() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodEnd
+}
+
+func (x *TimesheetPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *TimesheetPayload) GetCurrentApprovalLevel() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.CurrentApprovalLevel
+}
+
+func (x *TimesheetPayload) GetSubmittedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.SubmittedAt == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SubmittedAt
+}
+
+func (x *TimesheetPayload) GetTotalMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TotalMinutes
+}
+
+func (x *TimesheetPayload) GetEntries() []*TimeEntryPayload {
+	if x == nil {
+		var zero []*TimeEntryPayload
+		return zero
+	}
+	return x.Entries
+}
+
+func (x *TimesheetPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *TimesheetPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListTimeEntriesRequest struct {
 	EmployeeId *int64  `json:"employee_id,omitempty"`
 	Date       *string `json:"date,omitempty"`
+}
+
+func (x *ListTimeEntriesRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
+}
+
+func (x *ListTimeEntriesRequest) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Date == nil {
+		var zero string
+		return zero
+	}
+	return *x.Date
 }
 
 type ListTimeEntriesResponse struct {
@@ -190,6 +486,38 @@ type ListTimeEntriesResponse struct {
 	Total   int64               `json:"total,omitempty"`
 	Limit   int32               `json:"limit,omitempty"`
 	Offset  int32               `json:"offset,omitempty"`
+}
+
+func (x *ListTimeEntriesResponse) GetEntries() []*TimeEntryPayload {
+	if x == nil {
+		var zero []*TimeEntryPayload
+		return zero
+	}
+	return x.Entries
+}
+
+func (x *ListTimeEntriesResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListTimeEntriesResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListTimeEntriesResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type CreateTimeEntryRequest struct {
@@ -235,8 +563,124 @@ func (m *CreateTimeEntryRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateTimeEntryRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *CreateTimeEntryRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
+}
+
+func (x *CreateTimeEntryRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.TaskId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TaskId
+}
+
+func (x *CreateTimeEntryRequest) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CategoryId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CategoryId
+}
+
+func (x *CreateTimeEntryRequest) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *CreateTimeEntryRequest) GetDurationMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DurationMinutes
+}
+
+func (x *CreateTimeEntryRequest) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.StartTime == nil {
+		var zero string
+		return zero
+	}
+	return *x.StartTime
+}
+
+func (x *CreateTimeEntryRequest) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.EndTime == nil {
+		var zero string
+		return zero
+	}
+	return *x.EndTime
+}
+
+func (x *CreateTimeEntryRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateTimeEntryRequest) GetIsBillable() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsBillable
+}
+
+func (x *CreateTimeEntryRequest) GetSource() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Source
+}
+
 type CreateTimeEntryResponse struct {
 	Entry *TimeEntryPayload `json:"entry,omitempty"`
+}
+
+func (x *CreateTimeEntryResponse) GetEntry() *TimeEntryPayload {
+	if x == nil {
+		var zero *TimeEntryPayload
+		return zero
+	}
+	return x.Entry
 }
 
 type ListTimesheetsRequest struct {
@@ -244,11 +688,67 @@ type ListTimesheetsRequest struct {
 	Status     *string `json:"status,omitempty"`
 }
 
+func (x *ListTimesheetsRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
+}
+
+func (x *ListTimesheetsRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Status == nil {
+		var zero string
+		return zero
+	}
+	return *x.Status
+}
+
 type ListTimesheetsResponse struct {
 	Timesheets []*TimesheetPayload `json:"timesheets,omitempty"`
 	Total      int64               `json:"total,omitempty"`
 	Limit      int32               `json:"limit,omitempty"`
 	Offset     int32               `json:"offset,omitempty"`
+}
+
+func (x *ListTimesheetsResponse) GetTimesheets() []*TimesheetPayload {
+	if x == nil {
+		var zero []*TimesheetPayload
+		return zero
+	}
+	return x.Timesheets
+}
+
+func (x *ListTimesheetsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListTimesheetsResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListTimesheetsResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type SubmitTimesheetRequest struct {
@@ -284,13 +784,49 @@ func (m *SubmitTimesheetRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *SubmitTimesheetRequest) GetTimesheetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TimesheetId
+}
+
 type SubmitTimesheetResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *SubmitTimesheetResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }
 
 type ApproveTimesheetBody struct {
 	Approved        bool    `json:"approved,omitempty"`
 	RejectionReason *string `json:"rejection_reason,omitempty"`
+}
+
+func (x *ApproveTimesheetBody) GetApproved() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Approved
+}
+
+func (x *ApproveTimesheetBody) GetRejectionReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.RejectionReason == nil {
+		var zero string
+		return zero
+	}
+	return *x.RejectionReason
 }
 
 type ApproveTimesheetRequest struct {
@@ -327,6 +863,30 @@ func (m *ApproveTimesheetRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ApproveTimesheetRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ApproveTimesheetRequest) GetBody() *ApproveTimesheetBody {
+	if x == nil {
+		var zero *ApproveTimesheetBody
+		return zero
+	}
+	return x.Body
+}
+
 type ApproveTimesheetResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *ApproveTimesheetResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

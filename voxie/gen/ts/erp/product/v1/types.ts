@@ -210,8 +210,7 @@ export interface ListProductAttributesResponse {
 attributes?: (ProductAttribute)[];
 }
 
-export interface UpdateProductRequest {
-id?: string;
+export interface UpdateProductBody {
 category_id?: string;
 supplier_id?: string;
 name?: string;
@@ -241,6 +240,11 @@ hs_code?: string;
 allow_backorder?: boolean;
 lead_time_days?: number;
 image_url?: string;
+}
+
+export interface UpdateProductRequest {
+id?: string;
+body?: UpdateProductBody;
 }
 
 export interface UpdateProductResponse {

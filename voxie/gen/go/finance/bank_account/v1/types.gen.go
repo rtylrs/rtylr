@@ -48,6 +48,78 @@ func (m *BankAccount) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *BankAccount) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *BankAccount) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *BankAccount) GetBankName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BankName
+}
+
+func (x *BankAccount) GetAccountType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AccountType
+}
+
+func (x *BankAccount) GetLastFour() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastFour
+}
+
+func (x *BankAccount) GetBalance() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Balance
+}
+
+func (x *BankAccount) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *BankAccount) GetIsPrimary() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsPrimary
+}
+
+func (x *BankAccount) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type CreateBankAccountRequest struct {
 	Name        string  `json:"name,omitempty"`
 	BankName    string  `json:"bank_name,omitempty"`
@@ -58,8 +130,72 @@ type CreateBankAccountRequest struct {
 	IsPrimary   bool    `json:"is_primary,omitempty"`
 }
 
+func (x *CreateBankAccountRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateBankAccountRequest) GetBankName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BankName
+}
+
+func (x *CreateBankAccountRequest) GetAccountType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AccountType
+}
+
+func (x *CreateBankAccountRequest) GetLastFour() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastFour
+}
+
+func (x *CreateBankAccountRequest) GetBalance() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Balance
+}
+
+func (x *CreateBankAccountRequest) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *CreateBankAccountRequest) GetIsPrimary() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsPrimary
+}
+
 type CreateBankAccountResponse struct {
 	Account *BankAccount `json:"account,omitempty"`
+}
+
+func (x *CreateBankAccountResponse) GetAccount() *BankAccount {
+	if x == nil {
+		var zero *BankAccount
+		return zero
+	}
+	return x.Account
 }
 
 type GetBankAccountRequest struct {
@@ -95,8 +231,24 @@ func (m *GetBankAccountRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetBankAccountRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetBankAccountResponse struct {
 	Account *BankAccount `json:"account,omitempty"`
+}
+
+func (x *GetBankAccountResponse) GetAccount() *BankAccount {
+	if x == nil {
+		var zero *BankAccount
+		return zero
+	}
+	return x.Account
 }
 
 type ListBankAccountsRequest struct {
@@ -106,7 +258,55 @@ type ListBankAccountsRequest struct {
 	SortDir string `json:"sort_dir,omitempty"`
 }
 
+func (x *ListBankAccountsRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListBankAccountsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListBankAccountsRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListBankAccountsRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListBankAccountsResponse struct {
 	Accounts   []*BankAccount                           `json:"accounts,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
+}
+
+func (x *ListBankAccountsResponse) GetAccounts() []*BankAccount {
+	if x == nil {
+		var zero []*BankAccount
+		return zero
+	}
+	return x.Accounts
+}
+
+func (x *ListBankAccountsResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }

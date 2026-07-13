@@ -20,7 +20,7 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
-func (m *UpdateSupportSettingsRequest) Validate() error {
+func (m *UpdateSettingsRequest) Validate() error {
 	var violations []string
 	if m.SlaHours <= 0 {
 		violations = append(violations, "sla_hours must be greater than 0")

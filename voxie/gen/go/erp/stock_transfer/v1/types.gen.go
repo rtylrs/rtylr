@@ -63,6 +63,46 @@ func (m *StockTransferItem) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *StockTransferItem) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *StockTransferItem) GetTransferId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TransferId
+}
+
+func (x *StockTransferItem) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *StockTransferItem) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *StockTransferItem) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type StockTransfer struct {
 	Id              int64                `json:"id,omitempty"`
 	OwnerId         int64                `json:"owner_id,omitempty"`
@@ -134,6 +174,78 @@ func (m *StockTransfer) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *StockTransfer) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *StockTransfer) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *StockTransfer) GetFromWarehouseId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.FromWarehouseId
+}
+
+func (x *StockTransfer) GetToWarehouseId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ToWarehouseId
+}
+
+func (x *StockTransfer) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *StockTransfer) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *StockTransfer) GetItems() []*StockTransferItem {
+	if x == nil {
+		var zero []*StockTransferItem
+		return zero
+	}
+	return x.Items
+}
+
+func (x *StockTransfer) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *StockTransfer) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateStockTransferItemRequest struct {
 	ProductId int64   `json:"product_id,omitempty"`
 	Quantity  float64 `json:"quantity,omitempty"`
@@ -166,6 +278,22 @@ func (m *CreateStockTransferItemRequest) UnmarshalJSON(data []byte) error {
 		m.ProductId = v
 	}
 	return nil
+}
+
+func (x *CreateStockTransferItemRequest) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *CreateStockTransferItemRequest) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
 }
 
 type CreateStockTransferRequest struct {
@@ -214,6 +342,38 @@ func (m *CreateStockTransferRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateStockTransferRequest) GetFromWarehouseId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.FromWarehouseId
+}
+
+func (x *CreateStockTransferRequest) GetToWarehouseId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ToWarehouseId
+}
+
+func (x *CreateStockTransferRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *CreateStockTransferRequest) GetItems() []*CreateStockTransferItemRequest {
+	if x == nil {
+		var zero []*CreateStockTransferItemRequest
+		return zero
+	}
+	return x.Items
+}
+
 type CreateStockTransferResponse struct {
 	TransferId int64  `json:"transfer_id,omitempty"`
 	Message    string `json:"message,omitempty"`
@@ -248,9 +408,41 @@ func (m *CreateStockTransferResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateStockTransferResponse) GetTransferId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TransferId
+}
+
+func (x *CreateStockTransferResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type ListStockTransfersRequest struct {
 	Page     int64 `json:"page,omitempty"`
 	PageSize int64 `json:"page_size,omitempty"`
+}
+
+func (x *ListStockTransfersRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListStockTransfersRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
 }
 
 type ListStockTransfersResponse struct {
@@ -260,8 +452,48 @@ type ListStockTransfersResponse struct {
 	PageSize       int64            `json:"page_size,omitempty"`
 }
 
+func (x *ListStockTransfersResponse) GetStockTransfers() []*StockTransfer {
+	if x == nil {
+		var zero []*StockTransfer
+		return zero
+	}
+	return x.StockTransfers
+}
+
+func (x *ListStockTransfersResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *ListStockTransfersResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListStockTransfersResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
 type UpdateStockTransferStatusBody struct {
 	Status string `json:"status,omitempty"`
+}
+
+func (x *UpdateStockTransferStatusBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type UpdateStockTransferStatusRequest struct {
@@ -298,6 +530,30 @@ func (m *UpdateStockTransferStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateStockTransferStatusRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateStockTransferStatusRequest) GetBody() *UpdateStockTransferStatusBody {
+	if x == nil {
+		var zero *UpdateStockTransferStatusBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateStockTransferStatusResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateStockTransferStatusResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

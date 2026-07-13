@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,11 +23,30 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type OrderItemServiceServer interface {
 	UpdateOrderItemStatus(ctx context.Context, req *UpdateOrderItemStatusRequest) (*UpdateOrderItemStatusResponse, error)
 }
 
-func RegisterOrderItemServiceServer(mux *http.ServeMux, srv OrderItemServiceServer) {
+func RegisterOrderItemServiceServer(srv OrderItemServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterOrderItemServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("PUT /pos/orders/items/v1/orders/{order_id}/items/{item_id}/status", func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateOrderItemStatusRequest)
 		if r.Body != nil {
@@ -51,4 +71,5 @@ func RegisterOrderItemServiceServer(mux *http.ServeMux, srv OrderItemServiceServ
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

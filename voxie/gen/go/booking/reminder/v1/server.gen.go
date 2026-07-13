@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,12 +23,31 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type ReminderServiceServer interface {
 	ListReminders(ctx context.Context, req *ListRemindersRequest) (*ListRemindersResponse, error)
 	CreateReminder(ctx context.Context, req *CreateReminderRequest) (*CreateReminderResponse, error)
 }
 
-func RegisterReminderServiceServer(mux *http.ServeMux, srv ReminderServiceServer) {
+func RegisterReminderServiceServer(srv ReminderServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterReminderServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /booking/reminder/v1/reminders", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListRemindersRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -66,4 +86,5 @@ func RegisterReminderServiceServer(mux *http.ServeMux, srv ReminderServiceServer
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

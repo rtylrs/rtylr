@@ -79,6 +79,110 @@ func (m *StockMovement) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *StockMovement) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *StockMovement) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *StockMovement) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *StockMovement) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *StockMovement) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *StockMovement) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *StockMovement) GetReferenceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ReferenceId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ReferenceId
+}
+
+func (x *StockMovement) GetReferenceType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ReferenceType == nil {
+		var zero string
+		return zero
+	}
+	return *x.ReferenceType
+}
+
+func (x *StockMovement) GetNote() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Note == nil {
+		var zero string
+		return zero
+	}
+	return *x.Note
+}
+
+func (x *StockMovement) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
+}
+
+func (x *StockMovement) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type BranchInventory struct {
 	Id                int64   `json:"id,omitempty"`
 	BusinessId        int64   `json:"business_id,omitempty"`
@@ -165,6 +269,118 @@ func (m *BranchInventory) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *BranchInventory) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *BranchInventory) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *BranchInventory) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *BranchInventory) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *BranchInventory) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *BranchInventory) GetReorderPoint() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ReorderPoint
+}
+
+func (x *BranchInventory) GetReorderQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ReorderQuantity
+}
+
+func (x *BranchInventory) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *BranchInventory) GetItemId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ItemId
+}
+
+func (x *BranchInventory) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *BranchInventory) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *BranchInventory) GetUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Unit
+}
+
+func (x *BranchInventory) GetCurrentQty() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CurrentQty
+}
+
+func (x *BranchInventory) GetLowStockThreshold() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.LowStockThreshold
+}
+
 type AdjustStockRequest struct {
 	BranchId   int64   `json:"branch_id,omitempty"`
 	ProductId  int64   `json:"product_id,omitempty"`
@@ -222,6 +438,46 @@ func (m *AdjustStockRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AdjustStockRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *AdjustStockRequest) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *AdjustStockRequest) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *AdjustStockRequest) GetNote() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Note
+}
+
+func (x *AdjustStockRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
 type AdjustStockResponse struct {
 	MovementId int64  `json:"movement_id,omitempty"`
 	Message    string `json:"message,omitempty"`
@@ -254,6 +510,22 @@ func (m *AdjustStockResponse) UnmarshalJSON(data []byte) error {
 		m.MovementId = v
 	}
 	return nil
+}
+
+func (x *AdjustStockResponse) GetMovementId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MovementId
+}
+
+func (x *AdjustStockResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListInventoryRequest struct {
@@ -289,8 +561,24 @@ func (m *ListInventoryRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListInventoryRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
 type ListInventoryResponse struct {
 	Inventory []*BranchInventory `json:"inventory,omitempty"`
+}
+
+func (x *ListInventoryResponse) GetInventory() []*BranchInventory {
+	if x == nil {
+		var zero []*BranchInventory
+		return zero
+	}
+	return x.Inventory
 }
 
 type ListStockMovementsRequest struct {
@@ -337,8 +625,32 @@ func (m *ListStockMovementsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListStockMovementsRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *ListStockMovementsRequest) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
 type ListStockMovementsResponse struct {
 	Movements []*StockMovement `json:"movements,omitempty"`
+}
+
+func (x *ListStockMovementsResponse) GetMovements() []*StockMovement {
+	if x == nil {
+		var zero []*StockMovement
+		return zero
+	}
+	return x.Movements
 }
 
 type LowStockRequest struct {
@@ -374,8 +686,24 @@ func (m *LowStockRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *LowStockRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
 type LowStockResponse struct {
 	Items []*BranchInventory `json:"items,omitempty"`
+}
+
+func (x *LowStockResponse) GetItems() []*BranchInventory {
+	if x == nil {
+		var zero []*BranchInventory
+		return zero
+	}
+	return x.Items
 }
 
 type ReceiveStockRequest struct {
@@ -435,6 +763,46 @@ func (m *ReceiveStockRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ReceiveStockRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *ReceiveStockRequest) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *ReceiveStockRequest) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *ReceiveStockRequest) GetNote() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Note
+}
+
+func (x *ReceiveStockRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
 type ReceiveStockResponse struct {
 	MovementId int64  `json:"movement_id,omitempty"`
 	Message    string `json:"message,omitempty"`
@@ -467,6 +835,22 @@ func (m *ReceiveStockResponse) UnmarshalJSON(data []byte) error {
 		m.MovementId = v
 	}
 	return nil
+}
+
+func (x *ReceiveStockResponse) GetMovementId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MovementId
+}
+
+func (x *ReceiveStockResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type TransferStockRequest struct {
@@ -537,6 +921,54 @@ func (m *TransferStockRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TransferStockRequest) GetFromBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.FromBranchId
+}
+
+func (x *TransferStockRequest) GetToBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ToBranchId
+}
+
+func (x *TransferStockRequest) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *TransferStockRequest) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *TransferStockRequest) GetNote() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Note
+}
+
+func (x *TransferStockRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
 type TransferStockResponse struct {
 	MovementId int64  `json:"movement_id,omitempty"`
 	Message    string `json:"message,omitempty"`
@@ -569,6 +1001,22 @@ func (m *TransferStockResponse) UnmarshalJSON(data []byte) error {
 		m.MovementId = v
 	}
 	return nil
+}
+
+func (x *TransferStockResponse) GetMovementId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MovementId
+}
+
+func (x *TransferStockResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type WasteStockRequest struct {
@@ -628,6 +1076,46 @@ func (m *WasteStockRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *WasteStockRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *WasteStockRequest) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *WasteStockRequest) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *WasteStockRequest) GetNote() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Note
+}
+
+func (x *WasteStockRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
 type WasteStockResponse struct {
 	MovementId int64  `json:"movement_id,omitempty"`
 	Message    string `json:"message,omitempty"`
@@ -660,4 +1148,20 @@ func (m *WasteStockResponse) UnmarshalJSON(data []byte) error {
 		m.MovementId = v
 	}
 	return nil
+}
+
+func (x *WasteStockResponse) GetMovementId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.MovementId
+}
+
+func (x *WasteStockResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

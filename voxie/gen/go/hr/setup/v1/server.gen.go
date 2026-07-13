@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,11 +23,30 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type SetupServiceServer interface {
 	CompleteSetupStep(ctx context.Context, req *CompleteSetupStepRequest) (*CompleteSetupStepResponse, error)
 }
 
-func RegisterSetupServiceServer(mux *http.ServeMux, srv SetupServiceServer) {
+func RegisterSetupServiceServer(srv SetupServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterSetupServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("POST /hr/setup/v1/steps", func(w http.ResponseWriter, r *http.Request) {
 		req := new(CompleteSetupStepRequest)
 		if r.Body != nil {
@@ -49,4 +69,5 @@ func RegisterSetupServiceServer(mux *http.ServeMux, srv SetupServiceServer) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

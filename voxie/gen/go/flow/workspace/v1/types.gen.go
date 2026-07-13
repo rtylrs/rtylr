@@ -70,6 +70,102 @@ func (m *Workspace) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Workspace) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Workspace) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Workspace) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Workspace) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Workspace) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
+}
+
+func (x *Workspace) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *Workspace) GetIsDefault() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsDefault
+}
+
+func (x *Workspace) GetCreatedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedBy
+}
+
+func (x *Workspace) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Workspace) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *Workspace) GetMemberCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MemberCount
+}
+
+func (x *Workspace) GetIsPersonal() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsPersonal
+}
+
 type WorkspaceMember struct {
 	Id          int64  `json:"id,omitempty"`
 	WorkspaceId int64  `json:"workspace_id,omitempty"`
@@ -140,11 +236,83 @@ func (m *WorkspaceMember) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *WorkspaceMember) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *WorkspaceMember) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *WorkspaceMember) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *WorkspaceMember) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *WorkspaceMember) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *WorkspaceMember) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *WorkspaceMember) GetInvitedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.InvitedBy
+}
+
+func (x *WorkspaceMember) GetJoinedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.JoinedAt
+}
+
 type ListWorkspacesRequest struct {
 }
 
 type ListWorkspacesResponse struct {
 	Workspaces []*Workspace `json:"workspaces,omitempty"`
+}
+
+func (x *ListWorkspacesResponse) GetWorkspaces() []*Workspace {
+	if x == nil {
+		var zero []*Workspace
+		return zero
+	}
+	return x.Workspaces
 }
 
 type CreateWorkspaceRequest struct {
@@ -154,8 +322,48 @@ type CreateWorkspaceRequest struct {
 	Color       string `json:"color,omitempty"`
 }
 
+func (x *CreateWorkspaceRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateWorkspaceRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateWorkspaceRequest) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
+}
+
+func (x *CreateWorkspaceRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
 type CreateWorkspaceResponse struct {
 	Workspace *Workspace `json:"workspace,omitempty"`
+}
+
+func (x *CreateWorkspaceResponse) GetWorkspace() *Workspace {
+	if x == nil {
+		var zero *Workspace
+		return zero
+	}
+	return x.Workspace
 }
 
 type UpdateWorkspaceBody struct {
@@ -163,6 +371,38 @@ type UpdateWorkspaceBody struct {
 	Description string `json:"description,omitempty"`
 	Icon        string `json:"icon,omitempty"`
 	Color       string `json:"color,omitempty"`
+}
+
+func (x *UpdateWorkspaceBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateWorkspaceBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateWorkspaceBody) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
+}
+
+func (x *UpdateWorkspaceBody) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
 }
 
 type UpdateWorkspaceRequest struct {
@@ -199,8 +439,32 @@ func (m *UpdateWorkspaceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateWorkspaceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateWorkspaceRequest) GetBody() *UpdateWorkspaceBody {
+	if x == nil {
+		var zero *UpdateWorkspaceBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateWorkspaceResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateWorkspaceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteWorkspaceRequest struct {
@@ -236,8 +500,24 @@ func (m *DeleteWorkspaceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteWorkspaceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteWorkspaceResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteWorkspaceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListWorkspaceMembersRequest struct {
@@ -273,8 +553,24 @@ func (m *ListWorkspaceMembersRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListWorkspaceMembersRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type ListWorkspaceMembersResponse struct {
 	Members []*WorkspaceMember `json:"members,omitempty"`
+}
+
+func (x *ListWorkspaceMembersResponse) GetMembers() []*WorkspaceMember {
+	if x == nil {
+		var zero []*WorkspaceMember
+		return zero
+	}
+	return x.Members
 }
 
 type AddWorkspaceMemberRequest struct {
@@ -322,8 +618,40 @@ func (m *AddWorkspaceMemberRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AddWorkspaceMemberRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *AddWorkspaceMemberRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *AddWorkspaceMemberRequest) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
 type AddWorkspaceMemberResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *AddWorkspaceMemberResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type RemoveWorkspaceMemberRequest struct {
@@ -370,8 +698,32 @@ func (m *RemoveWorkspaceMemberRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RemoveWorkspaceMemberRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *RemoveWorkspaceMemberRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
 type RemoveWorkspaceMemberResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *RemoveWorkspaceMemberResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateWorkspaceMemberRoleRequest struct {
@@ -419,6 +771,38 @@ func (m *UpdateWorkspaceMemberRoleRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateWorkspaceMemberRoleRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *UpdateWorkspaceMemberRoleRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *UpdateWorkspaceMemberRoleRequest) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
 type UpdateWorkspaceMemberRoleResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateWorkspaceMemberRoleResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

@@ -74,6 +74,58 @@ func (m *SetupWizardStepPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *SetupWizardStepPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *SetupWizardStepPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *SetupWizardStepPayload) GetStepKey() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StepKey
+}
+
+func (x *SetupWizardStepPayload) GetCompletedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CompletedAt == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CompletedAt
+}
+
+func (x *SetupWizardStepPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *SetupWizardStepPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type HRCompanyConfigPayload struct {
 	Id                int64    `json:"id,omitempty"`
 	OwnerId           int64    `json:"owner_id,omitempty"`
@@ -147,16 +199,148 @@ func (m *HRCompanyConfigPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *HRCompanyConfigPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *HRCompanyConfigPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *HRCompanyConfigPayload) GetTimeTrackingModel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TimeTrackingModel
+}
+
+func (x *HRCompanyConfigPayload) GetTimesheetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TimesheetPeriod
+}
+
+func (x *HRCompanyConfigPayload) GetPayrollPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PayrollPeriod
+}
+
+func (x *HRCompanyConfigPayload) GetPayrollGrossModel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PayrollGrossModel
+}
+
+func (x *HRCompanyConfigPayload) GetSetupCompletedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.SetupCompletedAt == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SetupCompletedAt
+}
+
+func (x *HRCompanyConfigPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *HRCompanyConfigPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *HRCompanyConfigPayload) GetClockInMethods() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.ClockInMethods
+}
+
+func (x *HRCompanyConfigPayload) GetSubscribedApps() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.SubscribedApps
+}
+
 type GetSetupStatusResponse struct {
 	Steps      []*SetupWizardStepPayload `json:"steps,omitempty"`
 	Config     *HRCompanyConfigPayload   `json:"config,omitempty"`
 	IsComplete bool                      `json:"is_complete,omitempty"`
 }
 
+func (x *GetSetupStatusResponse) GetSteps() []*SetupWizardStepPayload {
+	if x == nil {
+		var zero []*SetupWizardStepPayload
+		return zero
+	}
+	return x.Steps
+}
+
+func (x *GetSetupStatusResponse) GetConfig() *HRCompanyConfigPayload {
+	if x == nil {
+		var zero *HRCompanyConfigPayload
+		return zero
+	}
+	return x.Config
+}
+
+func (x *GetSetupStatusResponse) GetIsComplete() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsComplete
+}
+
 type CompleteSetupStepRequest struct {
 	StepKey string `json:"step_key,omitempty"`
 }
 
+func (x *CompleteSetupStepRequest) GetStepKey() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StepKey
+}
+
 type CompleteSetupStepResponse struct {
 	Step *SetupWizardStepPayload `json:"step,omitempty"`
+}
+
+func (x *CompleteSetupStepResponse) GetStep() *SetupWizardStepPayload {
+	if x == nil {
+		var zero *SetupWizardStepPayload
+		return zero
+	}
+	return x.Step
 }

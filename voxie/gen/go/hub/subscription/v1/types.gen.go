@@ -53,6 +53,138 @@ func (m *Subscription) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Subscription) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Subscription) GetPlanName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PlanName
+}
+
+func (x *Subscription) GetPlanSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PlanSlug
+}
+
+func (x *Subscription) GetApps() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Apps
+}
+
+func (x *Subscription) GetPricePerSeatCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PricePerSeatCents
+}
+
+func (x *Subscription) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Subscription) GetIsGranted() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsGranted
+}
+
+func (x *Subscription) GetSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SeatCount
+}
+
+func (x *Subscription) GetIncludedSeatLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.IncludedSeatLimit
+}
+
+func (x *Subscription) GetIncludedSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.IncludedSeatCount
+}
+
+func (x *Subscription) GetBillableSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.BillableSeatCount
+}
+
+func (x *Subscription) GetGrantExpiresAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.GrantExpiresAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.GrantExpiresAt
+}
+
+func (x *Subscription) GetTrialEndsAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.TrialEndsAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.TrialEndsAt
+}
+
+func (x *Subscription) GetNextBillingDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.NextBillingDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.NextBillingDate
+}
+
+func (x *Subscription) GetPaddleSubscriptionId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaddleSubscriptionId
+}
+
 type Plan struct {
 	Id                      int64    `json:"id,omitempty"`
 	Name                    string   `json:"name,omitempty"`
@@ -101,6 +233,142 @@ func (m *Plan) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Plan) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Plan) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Plan) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
+func (x *Plan) GetApps() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Apps
+}
+
+func (x *Plan) GetPricePerSeatCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PricePerSeatCents
+}
+
+func (x *Plan) GetAnnualPricePerSeatCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.AnnualPricePerSeatCents
+}
+
+func (x *Plan) GetTrialDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TrialDays
+}
+
+func (x *Plan) GetTagline() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Tagline
+}
+
+func (x *Plan) GetMaxSeats() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.MaxSeats == nil {
+		var zero int32
+		return zero
+	}
+	return *x.MaxSeats
+}
+
+func (x *Plan) GetMaxLocations() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.MaxLocations == nil {
+		var zero int32
+		return zero
+	}
+	return *x.MaxLocations
+}
+
+func (x *Plan) GetAiCreditsPerMonth() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.AiCreditsPerMonth
+}
+
+func (x *Plan) GetFeatures() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Features
+}
+
+func (x *Plan) GetTierOrder() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TierOrder
+}
+
+func (x *Plan) GetIsSolo() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsSolo
+}
+
+func (x *Plan) GetIsFeatured() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsFeatured
+}
+
+func (x *Plan) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type BillingLineItem struct {
 	PeriodStart       string  `json:"period_start,omitempty"`
 	PeriodEnd         *string `json:"period_end,omitempty"`
@@ -118,6 +386,142 @@ type BillingLineItem struct {
 	AddonId           string  `json:"addon_id,omitempty"`
 	Quantity          int32   `json:"quantity,omitempty"`
 	UnitPriceCents    int32   `json:"unit_price_cents,omitempty"`
+}
+
+func (x *BillingLineItem) GetPeriodStart() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PeriodStart
+}
+
+func (x *BillingLineItem) GetPeriodEnd() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.PeriodEnd == nil {
+		var zero string
+		return zero
+	}
+	return *x.PeriodEnd
+}
+
+func (x *BillingLineItem) GetSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SeatCount
+}
+
+func (x *BillingLineItem) GetIncludedSeatLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.IncludedSeatLimit
+}
+
+func (x *BillingLineItem) GetIncludedSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.IncludedSeatCount
+}
+
+func (x *BillingLineItem) GetBillableSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.BillableSeatCount
+}
+
+func (x *BillingLineItem) GetIncludedCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.IncludedCents
+}
+
+func (x *BillingLineItem) GetPricePerSeatCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PricePerSeatCents
+}
+
+func (x *BillingLineItem) GetAmountCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.AmountCents
+}
+
+func (x *BillingLineItem) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *BillingLineItem) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *BillingLineItem) GetIsGranted() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsGranted
+}
+
+func (x *BillingLineItem) GetGrantExpiresAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.GrantExpiresAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.GrantExpiresAt
+}
+
+func (x *BillingLineItem) GetAddonId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AddonId
+}
+
+func (x *BillingLineItem) GetQuantity() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *BillingLineItem) GetUnitPriceCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.UnitPriceCents
 }
 
 type BillingDetail struct {
@@ -139,11 +543,183 @@ type BillingDetail struct {
 	PaddleSubscriptionId string             `json:"paddle_subscription_id,omitempty"`
 }
 
+func (x *BillingDetail) GetBillingMonth() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BillingMonth
+}
+
+func (x *BillingDetail) GetNextBillingDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.NextBillingDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.NextBillingDate
+}
+
+func (x *BillingDetail) GetLineItems() []*BillingLineItem {
+	if x == nil {
+		var zero []*BillingLineItem
+		return zero
+	}
+	return x.LineItems
+}
+
+func (x *BillingDetail) GetTotalCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TotalCents
+}
+
+func (x *BillingDetail) GetPlanName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PlanName
+}
+
+func (x *BillingDetail) GetPricePerSeatCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PricePerSeatCents
+}
+
+func (x *BillingDetail) GetCurrentSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.CurrentSeatCount
+}
+
+func (x *BillingDetail) GetIncludedSeatLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.IncludedSeatLimit
+}
+
+func (x *BillingDetail) GetIncludedSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.IncludedSeatCount
+}
+
+func (x *BillingDetail) GetBillableSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.BillableSeatCount
+}
+
+func (x *BillingDetail) GetSeatDiscountCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SeatDiscountCents
+}
+
+func (x *BillingDetail) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *BillingDetail) GetIsGranted() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsGranted
+}
+
+func (x *BillingDetail) GetGrantExpiresAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.GrantExpiresAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.GrantExpiresAt
+}
+
+func (x *BillingDetail) GetTrialEndsAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.TrialEndsAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.TrialEndsAt
+}
+
+func (x *BillingDetail) GetPaddleSubscriptionId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaddleSubscriptionId
+}
+
 type BillingHistoryMonth struct {
 	Month      string             `json:"month,omitempty"`
 	TotalCents int32              `json:"total_cents,omitempty"`
 	LineItems  []*BillingLineItem `json:"line_items,omitempty"`
 	Status     string             `json:"status,omitempty"`
+}
+
+func (x *BillingHistoryMonth) GetMonth() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Month
+}
+
+func (x *BillingHistoryMonth) GetTotalCents() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TotalCents
+}
+
+func (x *BillingHistoryMonth) GetLineItems() []*BillingLineItem {
+	if x == nil {
+		var zero []*BillingLineItem
+		return zero
+	}
+	return x.LineItems
+}
+
+func (x *BillingHistoryMonth) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type GetMySubscriptionRequest struct {
@@ -153,11 +729,27 @@ type GetMySubscriptionResponse struct {
 	Subscription *Subscription `json:"subscription,omitempty"`
 }
 
+func (x *GetMySubscriptionResponse) GetSubscription() *Subscription {
+	if x == nil {
+		var zero *Subscription
+		return zero
+	}
+	return x.Subscription
+}
+
 type ListPlansRequest struct {
 }
 
 type ListPlansResponse struct {
 	Plans []*Plan `json:"plans,omitempty"`
+}
+
+func (x *ListPlansResponse) GetPlans() []*Plan {
+	if x == nil {
+		var zero []*Plan
+		return zero
+	}
+	return x.Plans
 }
 
 type GetBillingDetailRequest struct {
@@ -167,6 +759,14 @@ type GetBillingDetailResponse struct {
 	Billing *BillingDetail `json:"billing,omitempty"`
 }
 
+func (x *GetBillingDetailResponse) GetBilling() *BillingDetail {
+	if x == nil {
+		var zero *BillingDetail
+		return zero
+	}
+	return x.Billing
+}
+
 type GetBillingHistoryRequest struct {
 }
 
@@ -174,12 +774,36 @@ type GetBillingHistoryResponse struct {
 	History []*BillingHistoryMonth `json:"history,omitempty"`
 }
 
+func (x *GetBillingHistoryResponse) GetHistory() []*BillingHistoryMonth {
+	if x == nil {
+		var zero []*BillingHistoryMonth
+		return zero
+	}
+	return x.History
+}
+
 type UpsertSubscriptionRequest struct {
 	PlanSlug string `json:"plan_slug,omitempty"`
 }
 
+func (x *UpsertSubscriptionRequest) GetPlanSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PlanSlug
+}
+
 type UpsertSubscriptionResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpsertSubscriptionResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type CreateCheckoutRequest struct {
@@ -187,6 +811,30 @@ type CreateCheckoutRequest struct {
 	Email    string `json:"email,omitempty"`
 }
 
+func (x *CreateCheckoutRequest) GetPlanSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PlanSlug
+}
+
+func (x *CreateCheckoutRequest) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
 type CreateCheckoutResponse struct {
 	CheckoutUrl string `json:"checkout_url,omitempty"`
+}
+
+func (x *CreateCheckoutResponse) GetCheckoutUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CheckoutUrl
 }

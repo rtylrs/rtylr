@@ -11,11 +11,59 @@ type PermissionMatrix struct {
 	Roles []string         `json:"roles,omitempty"`
 }
 
+func (x *PermissionMatrix) GetRows() []*PermissionRow {
+	if x == nil {
+		var zero []*PermissionRow
+		return zero
+	}
+	return x.Rows
+}
+
+func (x *PermissionMatrix) GetRoles() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Roles
+}
+
 type PermissionRow struct {
 	Key        string          `json:"key,omitempty"`
 	Category   string          `json:"category,omitempty"`
 	Label      string          `json:"label,omitempty"`
 	RoleValues map[string]bool `json:"role_values,omitempty"`
+}
+
+func (x *PermissionRow) GetKey() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Key
+}
+
+func (x *PermissionRow) GetCategory() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Category
+}
+
+func (x *PermissionRow) GetLabel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Label
+}
+
+func (x *PermissionRow) GetRoleValues() map[string]bool {
+	if x == nil {
+		var zero map[string]bool
+		return zero
+	}
+	return x.RoleValues
 }
 
 type CustomRole struct {
@@ -56,11 +104,67 @@ func (m *CustomRole) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CustomRole) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CustomRole) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CustomRole) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CustomRole) GetPermissions() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Permissions
+}
+
+func (x *CustomRole) GetMemberCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MemberCount
+}
+
+func (x *CustomRole) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type GetPermissionsRequest struct {
 }
 
 type GetPermissionsResponse struct {
 	Matrix *PermissionMatrix `json:"matrix,omitempty"`
+}
+
+func (x *GetPermissionsResponse) GetMatrix() *PermissionMatrix {
+	if x == nil {
+		var zero *PermissionMatrix
+		return zero
+	}
+	return x.Matrix
 }
 
 type ListRolesRequest struct {
@@ -70,14 +174,54 @@ type ListRolesResponse struct {
 	Roles []*CustomRole `json:"roles,omitempty"`
 }
 
+func (x *ListRolesResponse) GetRoles() []*CustomRole {
+	if x == nil {
+		var zero []*CustomRole
+		return zero
+	}
+	return x.Roles
+}
+
 type CreateRoleRequest struct {
 	Name        string   `json:"name,omitempty"`
 	Description string   `json:"description,omitempty"`
 	Permissions []string `json:"permissions,omitempty"`
 }
 
+func (x *CreateRoleRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateRoleRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateRoleRequest) GetPermissions() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Permissions
+}
+
 type CreateRoleResponse struct {
 	Role *CustomRole `json:"role,omitempty"`
+}
+
+func (x *CreateRoleResponse) GetRole() *CustomRole {
+	if x == nil {
+		var zero *CustomRole
+		return zero
+	}
+	return x.Role
 }
 
 type DeleteRoleRequest struct {
@@ -113,13 +257,45 @@ func (m *DeleteRoleRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteRoleRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteRoleResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteRoleResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateRoleBody struct {
 	Name        string   `json:"name,omitempty"`
 	Permissions []string `json:"permissions,omitempty"`
+}
+
+func (x *UpdateRoleBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateRoleBody) GetPermissions() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Permissions
 }
 
 type UpdateRoleRequest struct {
@@ -156,8 +332,32 @@ func (m *UpdateRoleRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateRoleRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateRoleRequest) GetBody() *UpdateRoleBody {
+	if x == nil {
+		var zero *UpdateRoleBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateRoleResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateRoleResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdatePermissionMatrixRequest struct {
@@ -166,6 +366,38 @@ type UpdatePermissionMatrixRequest struct {
 	Enabled       bool   `json:"enabled,omitempty"`
 }
 
+func (x *UpdatePermissionMatrixRequest) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *UpdatePermissionMatrixRequest) GetPermissionKey() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PermissionKey
+}
+
+func (x *UpdatePermissionMatrixRequest) GetEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Enabled
+}
+
 type UpdatePermissionMatrixResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *UpdatePermissionMatrixResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

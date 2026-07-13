@@ -66,10 +66,98 @@ func (m *Brand) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Brand) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Brand) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Brand) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Brand) GetLogoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LogoUrl
+}
+
+func (x *Brand) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Brand) GetProductCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductCount
+}
+
+func (x *Brand) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Brand) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateBrandRequest struct {
 	Name        string `json:"name,omitempty"`
 	LogoUrl     string `json:"logo_url,omitempty"`
 	Description string `json:"description,omitempty"`
+}
+
+func (x *CreateBrandRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateBrandRequest) GetLogoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LogoUrl
+}
+
+func (x *CreateBrandRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
 }
 
 type CreateBrandResponse struct {
@@ -106,11 +194,55 @@ func (m *CreateBrandResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type UpdateBrandRequest struct {
-	Id          int64  `json:"id,omitempty"`
+func (x *CreateBrandResponse) GetBrandId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BrandId
+}
+
+func (x *CreateBrandResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
+type UpdateBrandBody struct {
 	Name        string `json:"name,omitempty"`
 	LogoUrl     string `json:"logo_url,omitempty"`
 	Description string `json:"description,omitempty"`
+}
+
+func (x *UpdateBrandBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateBrandBody) GetLogoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LogoUrl
+}
+
+func (x *UpdateBrandBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+type UpdateBrandRequest struct {
+	Id   int64            `json:"id,omitempty"`
+	Body *UpdateBrandBody `json:"body,omitempty"`
 }
 
 func (m *UpdateBrandRequest) MarshalJSON() ([]byte, error) {
@@ -142,8 +274,32 @@ func (m *UpdateBrandRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateBrandRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateBrandRequest) GetBody() *UpdateBrandBody {
+	if x == nil {
+		var zero *UpdateBrandBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateBrandResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateBrandResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteBrandRequest struct {
@@ -179,8 +335,24 @@ func (m *DeleteBrandRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteBrandRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteBrandResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteBrandResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListBrandsRequest struct {
@@ -188,4 +360,12 @@ type ListBrandsRequest struct {
 
 type ListBrandsResponse struct {
 	Brands []*Brand `json:"brands,omitempty"`
+}
+
+func (x *ListBrandsResponse) GetBrands() []*Brand {
+	if x == nil {
+		var zero []*Brand
+		return zero
+	}
+	return x.Brands
 }

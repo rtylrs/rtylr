@@ -53,6 +53,46 @@ func (m *Label) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Label) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Label) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *Label) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Label) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *Label) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type ListLabelsRequest struct {
 	WorkspaceId int64 `json:"workspace_id,omitempty"`
 }
@@ -86,8 +126,24 @@ func (m *ListLabelsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListLabelsRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type ListLabelsResponse struct {
 	Labels []*Label `json:"labels,omitempty"`
+}
+
+func (x *ListLabelsResponse) GetLabels() []*Label {
+	if x == nil {
+		var zero []*Label
+		return zero
+	}
+	return x.Labels
 }
 
 type CreateLabelRequest struct {
@@ -125,8 +181,40 @@ func (m *CreateLabelRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateLabelRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *CreateLabelRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateLabelRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
 type CreateLabelResponse struct {
 	Label *Label `json:"label,omitempty"`
+}
+
+func (x *CreateLabelResponse) GetLabel() *Label {
+	if x == nil {
+		var zero *Label
+		return zero
+	}
+	return x.Label
 }
 
 type UpdateLabelRequest struct {
@@ -164,8 +252,40 @@ func (m *UpdateLabelRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateLabelRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateLabelRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateLabelRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
 type UpdateLabelResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateLabelResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteLabelRequest struct {
@@ -201,8 +321,24 @@ func (m *DeleteLabelRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteLabelRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteLabelResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteLabelResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type SetTaskLabelsRequest struct {
@@ -255,6 +391,30 @@ func (m *SetTaskLabelsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *SetTaskLabelsRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *SetTaskLabelsRequest) GetLabelIds() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.LabelIds
+}
+
 type SetTaskLabelsResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *SetTaskLabelsResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

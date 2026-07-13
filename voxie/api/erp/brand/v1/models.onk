@@ -22,11 +22,15 @@ message CreateBrandResponse {
   message: string
 }
 
-message UpdateBrandRequest {
-  id: int64 @required @gt(0)
+message UpdateBrandBody {
   name: string @required
   logo_url: string
   description: string
+}
+
+message UpdateBrandRequest {
+  id: int64 @required @gt(0)
+  body: UpdateBrandBody
 }
 
 message UpdateBrandResponse {

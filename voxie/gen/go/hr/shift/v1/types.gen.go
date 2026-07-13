@@ -87,6 +87,78 @@ func (m *ShiftPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ShiftPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ShiftPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *ShiftPayload) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *ShiftPayload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ShiftPayload) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartTime
+}
+
+func (x *ShiftPayload) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndTime
+}
+
+func (x *ShiftPayload) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *ShiftPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *ShiftPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ShiftAssignmentPayload struct {
 	Id         int64  `json:"id,omitempty"`
 	OwnerId    int64  `json:"owner_id,omitempty"`
@@ -177,8 +249,84 @@ func (m *ShiftAssignmentPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ShiftAssignmentPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ShiftAssignmentPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *ShiftAssignmentPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *ShiftAssignmentPayload) GetShiftId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ShiftId
+}
+
+func (x *ShiftAssignmentPayload) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *ShiftAssignmentPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *ShiftAssignmentPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *ShiftAssignmentPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListShiftsRequest struct {
 	LocationId *int64 `json:"location_id,omitempty"`
+}
+
+func (x *ListShiftsRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
 }
 
 type ListShiftsResponse struct {
@@ -186,6 +334,38 @@ type ListShiftsResponse struct {
 	Total  int64           `json:"total,omitempty"`
 	Limit  int32           `json:"limit,omitempty"`
 	Offset int32           `json:"offset,omitempty"`
+}
+
+func (x *ListShiftsResponse) GetShifts() []*ShiftPayload {
+	if x == nil {
+		var zero []*ShiftPayload
+		return zero
+	}
+	return x.Shifts
+}
+
+func (x *ListShiftsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListShiftsResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListShiftsResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type CreateShiftRequest struct {
@@ -225,8 +405,56 @@ func (m *CreateShiftRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateShiftRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *CreateShiftRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateShiftRequest) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartTime
+}
+
+func (x *CreateShiftRequest) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndTime
+}
+
+func (x *CreateShiftRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
 type CreateShiftResponse struct {
 	Shift *ShiftPayload `json:"shift,omitempty"`
+}
+
+func (x *CreateShiftResponse) GetShift() *ShiftPayload {
+	if x == nil {
+		var zero *ShiftPayload
+		return zero
+	}
+	return x.Shift
 }
 
 type CreateShiftAssignmentRequest struct {
@@ -274,8 +502,40 @@ func (m *CreateShiftAssignmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateShiftAssignmentRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *CreateShiftAssignmentRequest) GetShiftId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ShiftId
+}
+
+func (x *CreateShiftAssignmentRequest) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
 type CreateShiftAssignmentResponse struct {
 	Assignment *ShiftAssignmentPayload `json:"assignment,omitempty"`
+}
+
+func (x *CreateShiftAssignmentResponse) GetAssignment() *ShiftAssignmentPayload {
+	if x == nil {
+		var zero *ShiftAssignmentPayload
+		return zero
+	}
+	return x.Assignment
 }
 
 type GetRosterRequest struct {
@@ -312,9 +572,41 @@ func (m *GetRosterRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetRosterRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *GetRosterRequest) GetWeekStart() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WeekStart
+}
+
 type GetRosterResponse struct {
 	Assignments []*ShiftAssignmentPayload `json:"assignments,omitempty"`
 	Conflicts   []string                  `json:"conflicts,omitempty"`
+}
+
+func (x *GetRosterResponse) GetAssignments() []*ShiftAssignmentPayload {
+	if x == nil {
+		var zero []*ShiftAssignmentPayload
+		return zero
+	}
+	return x.Assignments
+}
+
+func (x *GetRosterResponse) GetConflicts() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Conflicts
 }
 
 type PublishRosterRequest struct {
@@ -351,6 +643,30 @@ func (m *PublishRosterRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *PublishRosterRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *PublishRosterRequest) GetWeekStart() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WeekStart
+}
+
 type PublishRosterResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *PublishRosterResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

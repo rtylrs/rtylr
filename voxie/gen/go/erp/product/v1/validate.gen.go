@@ -129,11 +129,8 @@ func (m *ListProductAttributesRequest) Validate() error {
 	return nil
 }
 
-func (m *UpdateProductRequest) Validate() error {
+func (m *UpdateProductBody) Validate() error {
 	var violations []string
-	if m.Id <= 0 {
-		violations = append(violations, "id must be greater than 0")
-	}
 	if m.CategoryId <= 0 {
 		violations = append(violations, "category_id must be greater than 0")
 	}
@@ -190,6 +187,17 @@ func (m *UpdateProductRequest) Validate() error {
 	}
 	if m.LeadTimeDays < 0 {
 		violations = append(violations, "lead_time_days must be greater than or equal to 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateProductRequest) Validate() error {
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

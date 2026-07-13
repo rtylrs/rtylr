@@ -14,7 +14,7 @@ service ProductService {
 
   listProductAttributes(ListProductAttributesRequest) -> ListProductAttributesResponse @get("/products/{id}/attributes")
 
-  updateProduct(UpdateProductRequest) -> UpdateProductResponse @put("/products/{id}")
+  updateProduct(UpdateProductRequest) -> UpdateProductResponse @put("/products/{id}") @body("body")
 
   deleteProduct(DeleteProductRequest) -> DeleteProductResponse @delete("/products/{id}")
 

@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,13 +23,32 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type LocationServiceServer interface {
 	ListLocations(ctx context.Context, req *ListLocationsRequest) (*ListLocationsResponse, error)
 	CreateLocation(ctx context.Context, req *CreateLocationRequest) (*CreateLocationResponse, error)
 	UpdateLocation(ctx context.Context, req *UpdateLocationRequest) (*UpdateLocationResponse, error)
 }
 
-func RegisterLocationServiceServer(mux *http.ServeMux, srv LocationServiceServer) {
+func RegisterLocationServiceServer(srv LocationServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterLocationServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /pos/location/v1/locations", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListLocationsRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -90,4 +110,5 @@ func RegisterLocationServiceServer(mux *http.ServeMux, srv LocationServiceServer
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

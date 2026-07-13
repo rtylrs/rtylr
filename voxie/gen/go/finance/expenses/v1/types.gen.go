@@ -60,6 +60,106 @@ func (m *Expense) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Expense) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Expense) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Expense) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CategoryId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CategoryId
+}
+
+func (x *Expense) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *Expense) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *Expense) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Expense) GetVendor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Vendor
+}
+
+func (x *Expense) GetReceiptUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReceiptUrl
+}
+
+func (x *Expense) GetExpenseDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ExpenseDate
+}
+
+func (x *Expense) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Expense) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Expense) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ExpenseCategory struct {
 	Id        int64  `json:"id,omitempty"`
 	OwnerId   int64  `json:"owner_id,omitempty"`
@@ -107,6 +207,46 @@ func (m *ExpenseCategory) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ExpenseCategory) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ExpenseCategory) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *ExpenseCategory) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ExpenseCategory) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *ExpenseCategory) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type CreateExpenseRequest struct {
 	CategoryId  *int64  `json:"category_id,omitempty"`
 	Amount      float64 `json:"amount,omitempty"`
@@ -115,6 +255,66 @@ type CreateExpenseRequest struct {
 	Vendor      string  `json:"vendor,omitempty"`
 	ReceiptUrl  string  `json:"receipt_url,omitempty"`
 	ExpenseDate string  `json:"expense_date,omitempty"`
+}
+
+func (x *CreateExpenseRequest) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CategoryId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CategoryId
+}
+
+func (x *CreateExpenseRequest) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *CreateExpenseRequest) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *CreateExpenseRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateExpenseRequest) GetVendor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Vendor
+}
+
+func (x *CreateExpenseRequest) GetReceiptUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReceiptUrl
+}
+
+func (x *CreateExpenseRequest) GetExpenseDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ExpenseDate
 }
 
 type CreateExpenseResponse struct {
@@ -151,6 +351,22 @@ func (m *CreateExpenseResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateExpenseResponse) GetExpenseId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ExpenseId
+}
+
+func (x *CreateExpenseResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type DeleteExpenseRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -184,8 +400,24 @@ func (m *DeleteExpenseRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteExpenseRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteExpenseResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteExpenseResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetExpenseRequest struct {
@@ -221,8 +453,24 @@ func (m *GetExpenseRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetExpenseRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetExpenseResponse struct {
 	Expense *Expense `json:"expense,omitempty"`
+}
+
+func (x *GetExpenseResponse) GetExpense() *Expense {
+	if x == nil {
+		var zero *Expense
+		return zero
+	}
+	return x.Expense
 }
 
 type ListExpenseCategoriesRequest struct {
@@ -232,11 +480,27 @@ type ListExpenseCategoriesResponse struct {
 	Categories []*ExpenseCategory `json:"categories,omitempty"`
 }
 
+func (x *ListExpenseCategoriesResponse) GetCategories() []*ExpenseCategory {
+	if x == nil {
+		var zero []*ExpenseCategory
+		return zero
+	}
+	return x.Categories
+}
+
 type ListExpensesRequest struct {
 }
 
 type ListExpensesResponse struct {
 	Expenses []*Expense `json:"expenses,omitempty"`
+}
+
+func (x *ListExpensesResponse) GetExpenses() []*Expense {
+	if x == nil {
+		var zero []*Expense
+		return zero
+	}
+	return x.Expenses
 }
 
 type UpdateExpenseBody struct {
@@ -247,6 +511,66 @@ type UpdateExpenseBody struct {
 	Vendor      string  `json:"vendor,omitempty"`
 	ReceiptUrl  string  `json:"receipt_url,omitempty"`
 	ExpenseDate string  `json:"expense_date,omitempty"`
+}
+
+func (x *UpdateExpenseBody) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CategoryId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CategoryId
+}
+
+func (x *UpdateExpenseBody) GetAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Amount
+}
+
+func (x *UpdateExpenseBody) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *UpdateExpenseBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateExpenseBody) GetVendor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Vendor
+}
+
+func (x *UpdateExpenseBody) GetReceiptUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReceiptUrl
+}
+
+func (x *UpdateExpenseBody) GetExpenseDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ExpenseDate
 }
 
 type UpdateExpenseRequest struct {
@@ -283,12 +607,44 @@ func (m *UpdateExpenseRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateExpenseRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateExpenseRequest) GetBody() *UpdateExpenseBody {
+	if x == nil {
+		var zero *UpdateExpenseBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateExpenseResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (x *UpdateExpenseResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type UpdateExpenseStatusBody struct {
 	Status string `json:"status,omitempty"`
+}
+
+func (x *UpdateExpenseStatusBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type UpdateExpenseStatusRequest struct {
@@ -325,6 +681,30 @@ func (m *UpdateExpenseStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateExpenseStatusRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateExpenseStatusRequest) GetBody() *UpdateExpenseStatusBody {
+	if x == nil {
+		var zero *UpdateExpenseStatusBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateExpenseStatusResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateExpenseStatusResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

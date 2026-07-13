@@ -11,6 +11,22 @@ type MilestoneProject struct {
 	Color string `json:"color,omitempty"`
 }
 
+func (x *MilestoneProject) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *MilestoneProject) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
 type Milestone struct {
 	Id               int64             `json:"id,omitempty"`
 	ProjectId        int64             `json:"project_id,omitempty"`
@@ -64,13 +80,125 @@ func (m *Milestone) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Milestone) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Milestone) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *Milestone) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Milestone) GetTargetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TargetDate
+}
+
+func (x *Milestone) GetProgress() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Progress
+}
+
+func (x *Milestone) GetComputedProgress() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.ComputedProgress
+}
+
+func (x *Milestone) GetDoneCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DoneCount
+}
+
+func (x *Milestone) GetTaskCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TaskCount
+}
+
+func (x *Milestone) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Milestone) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Milestone) GetProject() *MilestoneProject {
+	if x == nil {
+		var zero *MilestoneProject
+		return zero
+	}
+	return x.Project
+}
+
 type ListMilestonesRequest struct {
 	ProjectId   string `json:"project_id,omitempty"`
 	WorkspaceId string `json:"workspace_id,omitempty"`
 }
 
+func (x *ListMilestonesRequest) GetProjectId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *ListMilestonesRequest) GetWorkspaceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type ListMilestonesResponse struct {
 	Milestones []*Milestone `json:"milestones,omitempty"`
+}
+
+func (x *ListMilestonesResponse) GetMilestones() []*Milestone {
+	if x == nil {
+		var zero []*Milestone
+		return zero
+	}
+	return x.Milestones
 }
 
 type CreateMilestoneRequest struct {
@@ -120,8 +248,56 @@ func (m *CreateMilestoneRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateMilestoneRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *CreateMilestoneRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *CreateMilestoneRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateMilestoneRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateMilestoneRequest) GetTargetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TargetDate
+}
+
 type CreateMilestoneResponse struct {
 	Milestone *Milestone `json:"milestone,omitempty"`
+}
+
+func (x *CreateMilestoneResponse) GetMilestone() *Milestone {
+	if x == nil {
+		var zero *Milestone
+		return zero
+	}
+	return x.Milestone
 }
 
 type UpdateMilestoneRequest struct {
@@ -159,6 +335,46 @@ func (m *UpdateMilestoneRequest) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *UpdateMilestoneRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateMilestoneRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateMilestoneRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateMilestoneRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *UpdateMilestoneRequest) GetTargetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TargetDate
 }
 
 type UpdateMilestoneResponse struct {

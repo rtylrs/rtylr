@@ -12,7 +12,7 @@ banned_at?: string;
 created_at?: string;
 }
 
-export interface AdminBusiness {
+export interface Business {
 id?: string;
 owner_id?: string;
 name?: string;
@@ -165,16 +165,16 @@ owner_id?: string;
 }
 
 export interface ListBusinessesResponse {
-businesses?: (AdminBusiness)[];
+businesses?: (Business)[];
 total?: string;
 }
 
-export interface AdminUpdateBusinessRequest {
+export interface UpdateBusinessRequest {
 id?: string;
 name?: string;
 }
 
-export interface AdminUpdateBusinessResponse {
+export interface UpdateBusinessResponse {
 message?: string;
 }
 
@@ -203,7 +203,7 @@ grant_days?: number;
 
 export interface CreateBusinessOwnerResponse {
 owner?: User;
-business?: AdminBusiness;
+business?: Business;
 subscription?: Subscription;
 message?: string;
 }

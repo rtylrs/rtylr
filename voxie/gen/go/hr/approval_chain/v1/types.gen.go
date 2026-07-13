@@ -91,6 +91,126 @@ func (m *ApprovalChainLevelPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ApprovalChainLevelPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ApprovalChainLevelPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *ApprovalChainLevelPayload) GetChainId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ChainId
+}
+
+func (x *ApprovalChainLevelPayload) GetLevelOrder() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.LevelOrder
+}
+
+func (x *ApprovalChainLevelPayload) GetApproverType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ApproverType
+}
+
+func (x *ApprovalChainLevelPayload) GetApproverRoleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ApproverRoleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ApproverRoleId
+}
+
+func (x *ApprovalChainLevelPayload) GetApproverEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ApproverEmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ApproverEmployeeId
+}
+
+func (x *ApprovalChainLevelPayload) GetThresholdMinValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.ThresholdMinValue == nil {
+		var zero float64
+		return zero
+	}
+	return *x.ThresholdMinValue
+}
+
+func (x *ApprovalChainLevelPayload) GetThresholdMaxValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.ThresholdMaxValue == nil {
+		var zero float64
+		return zero
+	}
+	return *x.ThresholdMaxValue
+}
+
+func (x *ApprovalChainLevelPayload) GetTimeoutDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TimeoutDays
+}
+
+func (x *ApprovalChainLevelPayload) GetTimeoutAction() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TimeoutAction
+}
+
+func (x *ApprovalChainLevelPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *ApprovalChainLevelPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ApprovalChainPayload struct {
 	Id                int64                        `json:"id,omitempty"`
 	OwnerId           int64                        `json:"owner_id,omitempty"`
@@ -161,6 +281,70 @@ func (m *ApprovalChainPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ApprovalChainPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ApprovalChainPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *ApprovalChainPayload) GetRequestType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RequestType
+}
+
+func (x *ApprovalChainPayload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ApprovalChainPayload) GetDelegationEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.DelegationEnabled
+}
+
+func (x *ApprovalChainPayload) GetLevels() []*ApprovalChainLevelPayload {
+	if x == nil {
+		var zero []*ApprovalChainLevelPayload
+		return zero
+	}
+	return x.Levels
+}
+
+func (x *ApprovalChainPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *ApprovalChainPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type UpsertApprovalChainRequest struct {
 	Id                int64                        `json:"id,omitempty"`
 	RequestType       string                       `json:"request_type,omitempty"`
@@ -198,6 +382,54 @@ func (m *UpsertApprovalChainRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpsertApprovalChainRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpsertApprovalChainRequest) GetRequestType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RequestType
+}
+
+func (x *UpsertApprovalChainRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpsertApprovalChainRequest) GetDelegationEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.DelegationEnabled
+}
+
+func (x *UpsertApprovalChainRequest) GetLevels() []*ApprovalChainLevelPayload {
+	if x == nil {
+		var zero []*ApprovalChainLevelPayload
+		return zero
+	}
+	return x.Levels
+}
+
 type UpsertApprovalChainResponse struct {
 	Chain *ApprovalChainPayload `json:"chain,omitempty"`
+}
+
+func (x *UpsertApprovalChainResponse) GetChain() *ApprovalChainPayload {
+	if x == nil {
+		var zero *ApprovalChainPayload
+		return zero
+	}
+	return x.Chain
 }

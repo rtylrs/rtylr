@@ -16,6 +16,62 @@ type UtilizationMetrics struct {
 	ByStaff        []*StaffUtilization `json:"by_staff,omitempty"`
 }
 
+func (x *UtilizationMetrics) GetAvgUtilization() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AvgUtilization
+}
+
+func (x *UtilizationMetrics) GetTotalStaff() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TotalStaff
+}
+
+func (x *UtilizationMetrics) GetActiveToday() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.ActiveToday
+}
+
+func (x *UtilizationMetrics) GetTotalHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalHours
+}
+
+func (x *UtilizationMetrics) GetAvailableHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AvailableHours
+}
+
+func (x *UtilizationMetrics) GetOvertimeHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.OvertimeHours
+}
+
+func (x *UtilizationMetrics) GetByStaff() []*StaffUtilization {
+	if x == nil {
+		var zero []*StaffUtilization
+		return zero
+	}
+	return x.ByStaff
+}
+
 type StaffUtilization struct {
 	StaffId        int64   `json:"staff_id,omitempty"`
 	Name           string  `json:"name,omitempty"`
@@ -53,6 +109,46 @@ func (m *StaffUtilization) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *StaffUtilization) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *StaffUtilization) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *StaffUtilization) GetHoursWorked() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.HoursWorked
+}
+
+func (x *StaffUtilization) GetHoursScheduled() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.HoursScheduled
+}
+
+func (x *StaffUtilization) GetUtilization() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Utilization
+}
+
 type ShiftMetrics struct {
 	TotalShifts  int32          `json:"total_shifts,omitempty"`
 	Covered      int32          `json:"covered,omitempty"`
@@ -61,10 +157,74 @@ type ShiftMetrics struct {
 	ByDay        []*ShiftsByDay `json:"by_day,omitempty"`
 }
 
+func (x *ShiftMetrics) GetTotalShifts() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TotalShifts
+}
+
+func (x *ShiftMetrics) GetCovered() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Covered
+}
+
+func (x *ShiftMetrics) GetMissed() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Missed
+}
+
+func (x *ShiftMetrics) GetCoverageRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CoverageRate
+}
+
+func (x *ShiftMetrics) GetByDay() []*ShiftsByDay {
+	if x == nil {
+		var zero []*ShiftsByDay
+		return zero
+	}
+	return x.ByDay
+}
+
 type ShiftsByDay struct {
 	Day       string `json:"day,omitempty"`
 	Scheduled int32  `json:"scheduled,omitempty"`
 	Completed int32  `json:"completed,omitempty"`
+}
+
+func (x *ShiftsByDay) GetDay() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Day
+}
+
+func (x *ShiftsByDay) GetScheduled() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Scheduled
+}
+
+func (x *ShiftsByDay) GetCompleted() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Completed
 }
 
 type TimeOffMetrics struct {
@@ -75,10 +235,74 @@ type TimeOffMetrics struct {
 	ByType        []*TimeOffByType `json:"by_type,omitempty"`
 }
 
+func (x *TimeOffMetrics) GetTotalRequests() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TotalRequests
+}
+
+func (x *TimeOffMetrics) GetApproved() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Approved
+}
+
+func (x *TimeOffMetrics) GetPending() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Pending
+}
+
+func (x *TimeOffMetrics) GetRejected() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Rejected
+}
+
+func (x *TimeOffMetrics) GetByType() []*TimeOffByType {
+	if x == nil {
+		var zero []*TimeOffByType
+		return zero
+	}
+	return x.ByType
+}
+
 type TimeOffByType struct {
 	Type     string `json:"type,omitempty"`
 	Days     int32  `json:"days,omitempty"`
 	Requests int32  `json:"requests,omitempty"`
+}
+
+func (x *TimeOffByType) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *TimeOffByType) GetDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Days
+}
+
+func (x *TimeOffByType) GetRequests() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Requests
 }
 
 type HeadcountMetrics struct {
@@ -89,17 +313,89 @@ type HeadcountMetrics struct {
 	Trend              []*HeadcountPoint `json:"trend,omitempty"`
 }
 
+func (x *HeadcountMetrics) GetCurrent() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Current
+}
+
+func (x *HeadcountMetrics) GetHiredThisPeriod() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.HiredThisPeriod
+}
+
+func (x *HeadcountMetrics) GetDepartedThisPeriod() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DepartedThisPeriod
+}
+
+func (x *HeadcountMetrics) GetTurnoverRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TurnoverRate
+}
+
+func (x *HeadcountMetrics) GetTrend() []*HeadcountPoint {
+	if x == nil {
+		var zero []*HeadcountPoint
+		return zero
+	}
+	return x.Trend
+}
+
 type HeadcountPoint struct {
 	Date  string `json:"date,omitempty"`
 	Count int32  `json:"count,omitempty"`
+}
+
+func (x *HeadcountPoint) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *HeadcountPoint) GetCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Count
 }
 
 type GetHeadcountMetricsRequest struct {
 	Period string `json:"period,omitempty"`
 }
 
+func (x *GetHeadcountMetricsRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
+}
+
 type GetHeadcountMetricsResponse struct {
 	Metrics *HeadcountMetrics `json:"metrics,omitempty"`
+}
+
+func (x *GetHeadcountMetricsResponse) GetMetrics() *HeadcountMetrics {
+	if x == nil {
+		var zero *HeadcountMetrics
+		return zero
+	}
+	return x.Metrics
 }
 
 type GetOperationsSummaryRequest struct {
@@ -171,26 +467,106 @@ func (m *GetOperationsSummaryResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetOperationsSummaryResponse) GetActiveStaff() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ActiveStaff
+}
+
+func (x *GetOperationsSummaryResponse) GetShiftsThisWeek() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ShiftsThisWeek
+}
+
+func (x *GetOperationsSummaryResponse) GetPendingTimeOff() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PendingTimeOff
+}
+
+func (x *GetOperationsSummaryResponse) GetOpenLeaveRequests() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OpenLeaveRequests
+}
+
 type GetShiftMetricsRequest struct {
 	Period string `json:"period,omitempty"`
+}
+
+func (x *GetShiftMetricsRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
 }
 
 type GetShiftMetricsResponse struct {
 	Metrics *ShiftMetrics `json:"metrics,omitempty"`
 }
 
+func (x *GetShiftMetricsResponse) GetMetrics() *ShiftMetrics {
+	if x == nil {
+		var zero *ShiftMetrics
+		return zero
+	}
+	return x.Metrics
+}
+
 type GetTimeOffMetricsRequest struct {
 	Period string `json:"period,omitempty"`
+}
+
+func (x *GetTimeOffMetricsRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
 }
 
 type GetTimeOffMetricsResponse struct {
 	Metrics *TimeOffMetrics `json:"metrics,omitempty"`
 }
 
+func (x *GetTimeOffMetricsResponse) GetMetrics() *TimeOffMetrics {
+	if x == nil {
+		var zero *TimeOffMetrics
+		return zero
+	}
+	return x.Metrics
+}
+
 type GetUtilizationRequest struct {
 	Period string `json:"period,omitempty"`
 }
 
+func (x *GetUtilizationRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
+}
+
 type GetUtilizationResponse struct {
 	Metrics *UtilizationMetrics `json:"metrics,omitempty"`
+}
+
+func (x *GetUtilizationResponse) GetMetrics() *UtilizationMetrics {
+	if x == nil {
+		var zero *UtilizationMetrics
+		return zero
+	}
+	return x.Metrics
 }

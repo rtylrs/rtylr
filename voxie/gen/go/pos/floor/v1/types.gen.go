@@ -65,6 +65,62 @@ func (m *Floor) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Floor) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Floor) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *Floor) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *Floor) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Floor) GetSortOrder() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SortOrder
+}
+
+func (x *Floor) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Floor) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type CreateFloorRequest struct {
 	BranchId  int64  `json:"branch_id,omitempty"`
 	Name      string `json:"name,omitempty"`
@@ -98,6 +154,30 @@ func (m *CreateFloorRequest) UnmarshalJSON(data []byte) error {
 		m.BranchId = v
 	}
 	return nil
+}
+
+func (x *CreateFloorRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *CreateFloorRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateFloorRequest) GetSortOrder() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SortOrder
 }
 
 type CreateFloorResponse struct {
@@ -134,9 +214,41 @@ func (m *CreateFloorResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateFloorResponse) GetFloorId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.FloorId
+}
+
+func (x *CreateFloorResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type UpdateFloorBody struct {
 	Name      string `json:"name,omitempty"`
 	SortOrder int32  `json:"sort_order,omitempty"`
+}
+
+func (x *UpdateFloorBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateFloorBody) GetSortOrder() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SortOrder
 }
 
 type UpdateFloorRequest struct {
@@ -173,8 +285,32 @@ func (m *UpdateFloorRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateFloorRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateFloorRequest) GetBody() *UpdateFloorBody {
+	if x == nil {
+		var zero *UpdateFloorBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateFloorResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateFloorResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteFloorRequest struct {
@@ -210,8 +346,24 @@ func (m *DeleteFloorRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteFloorRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteFloorResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteFloorResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListFloorsRequest struct {
@@ -247,6 +399,22 @@ func (m *ListFloorsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListFloorsRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
 type ListFloorsResponse struct {
 	Floors []*Floor `json:"floors,omitempty"`
+}
+
+func (x *ListFloorsResponse) GetFloors() []*Floor {
+	if x == nil {
+		var zero []*Floor
+		return zero
+	}
+	return x.Floors
 }

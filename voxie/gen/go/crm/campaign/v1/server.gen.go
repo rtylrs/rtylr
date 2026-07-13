@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type CampaignServiceServer interface {
 	ListCampaigns(ctx context.Context, req *ListCampaignsRequest) (*ListCampaignsResponse, error)
 	CreateCampaign(ctx context.Context, req *CreateCampaignRequest) (*CreateCampaignResponse, error)
@@ -31,7 +43,15 @@ type CampaignServiceServer interface {
 	UpdateCampaignStatus(ctx context.Context, req *UpdateCampaignStatusRequest) (*UpdateCampaignStatusResponse, error)
 }
 
-func RegisterCampaignServiceServer(mux *http.ServeMux, srv CampaignServiceServer) {
+func RegisterCampaignServiceServer(srv CampaignServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterCampaignServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /crm/campaign/v1/campaigns", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListCampaignsRequest)
 		if r.URL.Query().Get("status") != "" {
@@ -152,4 +172,5 @@ func RegisterCampaignServiceServer(mux *http.ServeMux, srv CampaignServiceServer
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

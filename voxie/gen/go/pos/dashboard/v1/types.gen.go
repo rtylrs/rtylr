@@ -10,3 +10,35 @@ type DashboardResponse struct {
 	AvgOrder      float64 `json:"avg_order,omitempty"`
 	TableTurnover float64 `json:"table_turnover,omitempty"`
 }
+
+func (x *DashboardResponse) GetTotalSales() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalSales
+}
+
+func (x *DashboardResponse) GetOrderCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.OrderCount
+}
+
+func (x *DashboardResponse) GetAvgOrder() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AvgOrder
+}
+
+func (x *DashboardResponse) GetTableTurnover() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TableTurnover
+}

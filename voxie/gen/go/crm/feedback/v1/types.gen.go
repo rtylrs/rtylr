@@ -67,6 +67,78 @@ func (m *Feedback) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Feedback) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Feedback) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Feedback) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *Feedback) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *Feedback) GetScore() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Score
+}
+
+func (x *Feedback) GetComment() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Comment
+}
+
+func (x *Feedback) GetSource() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Source
+}
+
+func (x *Feedback) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Feedback) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
 type CreateFeedbackRequest struct {
 	CustomerId int64  `json:"customer_id,omitempty"`
 	Type       string `json:"type,omitempty"`
@@ -104,6 +176,46 @@ func (m *CreateFeedbackRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateFeedbackRequest) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *CreateFeedbackRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *CreateFeedbackRequest) GetScore() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Score
+}
+
+func (x *CreateFeedbackRequest) GetComment() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Comment
+}
+
+func (x *CreateFeedbackRequest) GetSource() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Source
+}
+
 type CreateFeedbackResponse struct {
 	FeedbackId int64  `json:"feedback_id,omitempty"`
 	Message    string `json:"message,omitempty"`
@@ -138,6 +250,22 @@ func (m *CreateFeedbackResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateFeedbackResponse) GetFeedbackId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.FeedbackId
+}
+
+func (x *CreateFeedbackResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type ListFeedbackRequest struct {
 	Type     string `json:"type,omitempty"`
 	Source   string `json:"source,omitempty"`
@@ -147,9 +275,97 @@ type ListFeedbackRequest struct {
 	PageSize int32  `json:"page_size,omitempty"`
 }
 
+func (x *ListFeedbackRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *ListFeedbackRequest) GetSource() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Source
+}
+
+func (x *ListFeedbackRequest) GetMinScore() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.MinScore == nil {
+		var zero int32
+		return zero
+	}
+	return *x.MinScore
+}
+
+func (x *ListFeedbackRequest) GetMaxScore() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.MaxScore == nil {
+		var zero int32
+		return zero
+	}
+	return *x.MaxScore
+}
+
+func (x *ListFeedbackRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListFeedbackRequest) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
+}
+
 type ListFeedbackResponse struct {
 	Feedback []*Feedback `json:"feedback,omitempty"`
 	Total    int32       `json:"total,omitempty"`
 	Page     int32       `json:"page,omitempty"`
 	PageSize int32       `json:"page_size,omitempty"`
+}
+
+func (x *ListFeedbackResponse) GetFeedback() []*Feedback {
+	if x == nil {
+		var zero []*Feedback
+		return zero
+	}
+	return x.Feedback
+}
+
+func (x *ListFeedbackResponse) GetTotal() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListFeedbackResponse) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListFeedbackResponse) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
 }

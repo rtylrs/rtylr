@@ -1,10 +1,10 @@
 package pos.customer.v1
 
-/// PosCustomer is a lightweight customer record for POS lookups. Named
+/// Customer is a lightweight customer record for POS lookups. Named
 /// distinctly from crm.customer.v1's Customer (a genuine cross-directory
 /// name collision - see crm/segment/v1/models.onk which references the
 /// unqualified "Customer" name expecting the full crm.customer.v1 record).
-message PosCustomer {
+message Customer {
   id: int64
   first_name: string
   last_name: string
@@ -18,5 +18,5 @@ message SearchCustomersRequest {
 }
 
 message SearchCustomersResponse {
-  customers: PosCustomer[]
+  customers: Customer[]
 }

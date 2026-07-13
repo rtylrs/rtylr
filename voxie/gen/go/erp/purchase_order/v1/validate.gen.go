@@ -71,13 +71,21 @@ func (m *GetPurchaseOrderRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdatePurchaseOrderStatusBody) Validate() error {
+	var violations []string
+	if m.Status == "" {
+		violations = append(violations, "status is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdatePurchaseOrderStatusRequest) Validate() error {
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
-	}
-	if m.Status == "" {
-		violations = append(violations, "status is required")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

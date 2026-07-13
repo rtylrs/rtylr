@@ -122,6 +122,278 @@ func (m *Product) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Product) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Product) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Product) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CategoryId
+}
+
+func (x *Product) GetSupplierId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SupplierId
+}
+
+func (x *Product) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Product) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *Product) GetBarcode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Barcode
+}
+
+func (x *Product) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Product) GetUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Unit
+}
+
+func (x *Product) GetCostPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostPrice
+}
+
+func (x *Product) GetSalePrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SalePrice
+}
+
+func (x *Product) GetStockQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.StockQuantity
+}
+
+func (x *Product) GetLowStockThreshold() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.LowStockThreshold
+}
+
+func (x *Product) GetReorderQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ReorderQuantity
+}
+
+func (x *Product) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Product) GetTrackInventory() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.TrackInventory
+}
+
+func (x *Product) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Product) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *Product) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *Product) GetBrandId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BrandId
+}
+
+func (x *Product) GetCompareAtPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CompareAtPrice
+}
+
+func (x *Product) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *Product) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *Product) GetWeight() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Weight
+}
+
+func (x *Product) GetWeightUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WeightUnit
+}
+
+func (x *Product) GetLength() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Length
+}
+
+func (x *Product) GetWidth() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Width
+}
+
+func (x *Product) GetHeight() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Height
+}
+
+func (x *Product) GetDimensionUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DimensionUnit
+}
+
+func (x *Product) GetCountryOfOrigin() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CountryOfOrigin
+}
+
+func (x *Product) GetHsCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.HsCode
+}
+
+func (x *Product) GetAllowBackorder() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.AllowBackorder
+}
+
+func (x *Product) GetLeadTimeDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.LeadTimeDays
+}
+
+func (x *Product) GetImageUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ImageUrl
+}
+
 type FullProduct struct {
 	Id                int64   `json:"id,omitempty"`
 	OwnerId           int64   `json:"owner_id,omitempty"`
@@ -238,6 +510,278 @@ func (m *FullProduct) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *FullProduct) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *FullProduct) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *FullProduct) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *FullProduct) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CategoryId
+}
+
+func (x *FullProduct) GetSupplierId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SupplierId
+}
+
+func (x *FullProduct) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *FullProduct) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *FullProduct) GetBarcode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Barcode
+}
+
+func (x *FullProduct) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *FullProduct) GetUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Unit
+}
+
+func (x *FullProduct) GetCostPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostPrice
+}
+
+func (x *FullProduct) GetSalePrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SalePrice
+}
+
+func (x *FullProduct) GetStockQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.StockQuantity
+}
+
+func (x *FullProduct) GetLowStockThreshold() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.LowStockThreshold
+}
+
+func (x *FullProduct) GetReorderQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ReorderQuantity
+}
+
+func (x *FullProduct) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *FullProduct) GetTrackInventory() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.TrackInventory
+}
+
+func (x *FullProduct) GetBrandId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BrandId
+}
+
+func (x *FullProduct) GetCompareAtPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CompareAtPrice
+}
+
+func (x *FullProduct) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *FullProduct) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *FullProduct) GetWeight() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Weight
+}
+
+func (x *FullProduct) GetWeightUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WeightUnit
+}
+
+func (x *FullProduct) GetLength() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Length
+}
+
+func (x *FullProduct) GetWidth() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Width
+}
+
+func (x *FullProduct) GetHeight() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Height
+}
+
+func (x *FullProduct) GetDimensionUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DimensionUnit
+}
+
+func (x *FullProduct) GetCountryOfOrigin() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CountryOfOrigin
+}
+
+func (x *FullProduct) GetHsCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.HsCode
+}
+
+func (x *FullProduct) GetAllowBackorder() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.AllowBackorder
+}
+
+func (x *FullProduct) GetLeadTimeDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.LeadTimeDays
+}
+
+func (x *FullProduct) GetImageUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ImageUrl
+}
+
+func (x *FullProduct) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *FullProduct) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ProductAttribute struct {
 	Id       int64  `json:"id,omitempty"`
 	Name     string `json:"name,omitempty"`
@@ -272,6 +816,38 @@ func (m *ProductAttribute) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *ProductAttribute) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ProductAttribute) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ProductAttribute) GetValue() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Value
+}
+
+func (x *ProductAttribute) GetPosition() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Position
 }
 
 type DashboardLowStockItem struct {
@@ -312,6 +888,54 @@ func (m *DashboardLowStockItem) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DashboardLowStockItem) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *DashboardLowStockItem) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *DashboardLowStockItem) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *DashboardLowStockItem) GetCurrentStock() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CurrentStock
+}
+
+func (x *DashboardLowStockItem) GetReorderPoint() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ReorderPoint
+}
+
+func (x *DashboardLowStockItem) GetWarehouseName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WarehouseName
+}
+
 type DashboardRecentOrder struct {
 	Id           int64   `json:"id,omitempty"`
 	PoNumber     string  `json:"po_number,omitempty"`
@@ -350,9 +974,73 @@ func (m *DashboardRecentOrder) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DashboardRecentOrder) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *DashboardRecentOrder) GetPoNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PoNumber
+}
+
+func (x *DashboardRecentOrder) GetSupplierName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SupplierName
+}
+
+func (x *DashboardRecentOrder) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *DashboardRecentOrder) GetTotal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *DashboardRecentOrder) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type DashboardTopCategory struct {
 	Name         string `json:"name,omitempty"`
 	ProductCount int32  `json:"product_count,omitempty"`
+}
+
+func (x *DashboardTopCategory) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *DashboardTopCategory) GetProductCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.ProductCount
 }
 
 type ExpiringItem struct {
@@ -392,6 +1080,62 @@ func (m *ExpiringItem) UnmarshalJSON(data []byte) error {
 		m.ProductId = v
 	}
 	return nil
+}
+
+func (x *ExpiringItem) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *ExpiringItem) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ExpiringItem) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *ExpiringItem) GetBatchId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BatchId
+}
+
+func (x *ExpiringItem) GetExpiryDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ExpiryDate
+}
+
+func (x *ExpiringItem) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *ExpiringItem) GetWarehouseName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WarehouseName
 }
 
 type ReorderSuggestion struct {
@@ -435,6 +1179,78 @@ func (m *ReorderSuggestion) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ReorderSuggestion) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *ReorderSuggestion) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ReorderSuggestion) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *ReorderSuggestion) GetCurrentStock() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CurrentStock
+}
+
+func (x *ReorderSuggestion) GetReorderPoint() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ReorderPoint
+}
+
+func (x *ReorderSuggestion) GetSuggestedQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SuggestedQuantity
+}
+
+func (x *ReorderSuggestion) GetAvgDailySales() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AvgDailySales
+}
+
+func (x *ReorderSuggestion) GetLeadTimeDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.LeadTimeDays
+}
+
+func (x *ReorderSuggestion) GetConfidence() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Confidence
+}
+
 type ListProductsRequest struct {
 	Search     string `json:"search,omitempty"`
 	CategoryId int64  `json:"category_id,omitempty"`
@@ -471,12 +1287,84 @@ func (m *ListProductsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListProductsRequest) GetSearch() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Search
+}
+
+func (x *ListProductsRequest) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CategoryId
+}
+
+func (x *ListProductsRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListProductsRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
 type ListProductsResponse struct {
 	Products []*Product `json:"products,omitempty"`
 	HasMore  bool       `json:"has_more,omitempty"`
 	Page     int64      `json:"page,omitempty"`
 	PageSize int64      `json:"page_size,omitempty"`
 	Total    int64      `json:"total,omitempty"`
+}
+
+func (x *ListProductsResponse) GetProducts() []*Product {
+	if x == nil {
+		var zero []*Product
+		return zero
+	}
+	return x.Products
+}
+
+func (x *ListProductsResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *ListProductsResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListProductsResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
+func (x *ListProductsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
 }
 
 type CreateProductRequest struct {
@@ -560,6 +1448,238 @@ func (m *CreateProductRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateProductRequest) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CategoryId
+}
+
+func (x *CreateProductRequest) GetSupplierId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SupplierId
+}
+
+func (x *CreateProductRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateProductRequest) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *CreateProductRequest) GetBarcode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Barcode
+}
+
+func (x *CreateProductRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateProductRequest) GetUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Unit
+}
+
+func (x *CreateProductRequest) GetCostPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostPrice
+}
+
+func (x *CreateProductRequest) GetSalePrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SalePrice
+}
+
+func (x *CreateProductRequest) GetLowStockThreshold() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.LowStockThreshold
+}
+
+func (x *CreateProductRequest) GetReorderQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ReorderQuantity
+}
+
+func (x *CreateProductRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *CreateProductRequest) GetTrackInventory() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.TrackInventory
+}
+
+func (x *CreateProductRequest) GetStockQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.StockQuantity
+}
+
+func (x *CreateProductRequest) GetBrandId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BrandId
+}
+
+func (x *CreateProductRequest) GetCompareAtPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CompareAtPrice
+}
+
+func (x *CreateProductRequest) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *CreateProductRequest) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *CreateProductRequest) GetWeight() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Weight
+}
+
+func (x *CreateProductRequest) GetWeightUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WeightUnit
+}
+
+func (x *CreateProductRequest) GetLength() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Length
+}
+
+func (x *CreateProductRequest) GetWidth() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Width
+}
+
+func (x *CreateProductRequest) GetHeight() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Height
+}
+
+func (x *CreateProductRequest) GetDimensionUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DimensionUnit
+}
+
+func (x *CreateProductRequest) GetCountryOfOrigin() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CountryOfOrigin
+}
+
+func (x *CreateProductRequest) GetHsCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.HsCode
+}
+
+func (x *CreateProductRequest) GetAllowBackorder() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.AllowBackorder
+}
+
+func (x *CreateProductRequest) GetLeadTimeDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.LeadTimeDays
+}
+
+func (x *CreateProductRequest) GetImageUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ImageUrl
+}
+
 type CreateProductResponse struct {
 	ProductId int64  `json:"product_id,omitempty"`
 	Message   string `json:"message,omitempty"`
@@ -594,12 +1714,44 @@ func (m *CreateProductResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateProductResponse) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *CreateProductResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type GetProductByBarcodeRequest struct {
 	Code string `json:"code,omitempty"`
 }
 
+func (x *GetProductByBarcodeRequest) GetCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Code
+}
+
 type GetProductByBarcodeResponse struct {
 	Product *Product `json:"product,omitempty"`
+}
+
+func (x *GetProductByBarcodeResponse) GetProduct() *Product {
+	if x == nil {
+		var zero *Product
+		return zero
+	}
+	return x.Product
 }
 
 type GetProductRequest struct {
@@ -635,8 +1787,24 @@ func (m *GetProductRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetProductRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetProductResponse struct {
 	Product *Product `json:"product,omitempty"`
+}
+
+func (x *GetProductResponse) GetProduct() *Product {
+	if x == nil {
+		var zero *Product
+		return zero
+	}
+	return x.Product
 }
 
 type GetProductFullRequest struct {
@@ -672,8 +1840,24 @@ func (m *GetProductFullRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetProductFullRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetProductFullResponse struct {
 	Product *FullProduct `json:"product,omitempty"`
+}
+
+func (x *GetProductFullResponse) GetProduct() *FullProduct {
+	if x == nil {
+		var zero *FullProduct
+		return zero
+	}
+	return x.Product
 }
 
 type ListProductAttributesRequest struct {
@@ -709,12 +1893,27 @@ func (m *ListProductAttributesRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListProductAttributesRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type ListProductAttributesResponse struct {
 	Attributes []*ProductAttribute `json:"attributes,omitempty"`
 }
 
-type UpdateProductRequest struct {
-	Id                int64   `json:"id,omitempty"`
+func (x *ListProductAttributesResponse) GetAttributes() []*ProductAttribute {
+	if x == nil {
+		var zero []*ProductAttribute
+		return zero
+	}
+	return x.Attributes
+}
+
+type UpdateProductBody struct {
 	CategoryId        int64   `json:"category_id,omitempty"`
 	SupplierId        int64   `json:"supplier_id,omitempty"`
 	Name              string  `json:"name,omitempty"`
@@ -746,40 +1945,30 @@ type UpdateProductRequest struct {
 	ImageUrl          string  `json:"image_url,omitempty"`
 }
 
-func (m *UpdateProductRequest) MarshalJSON() ([]byte, error) {
-	type alias UpdateProductRequest
+func (m *UpdateProductBody) MarshalJSON() ([]byte, error) {
+	type alias UpdateProductBody
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
 		CategoryId string `json:"category_id,omitempty"`
 		SupplierId string `json:"supplier_id,omitempty"`
 		BrandId    string `json:"brand_id,omitempty"`
 	}{alias: (*alias)(m)}
-	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.CategoryId = strconv.FormatInt(m.CategoryId, 10)
 	aux.SupplierId = strconv.FormatInt(m.SupplierId, 10)
 	aux.BrandId = strconv.FormatInt(m.BrandId, 10)
 	return json.Marshal(aux)
 }
 
-func (m *UpdateProductRequest) UnmarshalJSON(data []byte) error {
-	type alias UpdateProductRequest
+func (m *UpdateProductBody) UnmarshalJSON(data []byte) error {
+	type alias UpdateProductBody
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
 		CategoryId string `json:"category_id,omitempty"`
 		SupplierId string `json:"supplier_id,omitempty"`
 		BrandId    string `json:"brand_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
-	}
-	if aux.Id != "" {
-		v, err := strconv.ParseInt(aux.Id, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.Id = v
 	}
 	if aux.CategoryId != "" {
 		v, err := strconv.ParseInt(aux.CategoryId, 10, 64)
@@ -805,8 +1994,298 @@ func (m *UpdateProductRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateProductBody) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CategoryId
+}
+
+func (x *UpdateProductBody) GetSupplierId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SupplierId
+}
+
+func (x *UpdateProductBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateProductBody) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *UpdateProductBody) GetBarcode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Barcode
+}
+
+func (x *UpdateProductBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateProductBody) GetUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Unit
+}
+
+func (x *UpdateProductBody) GetCostPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CostPrice
+}
+
+func (x *UpdateProductBody) GetSalePrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SalePrice
+}
+
+func (x *UpdateProductBody) GetLowStockThreshold() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.LowStockThreshold
+}
+
+func (x *UpdateProductBody) GetReorderQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ReorderQuantity
+}
+
+func (x *UpdateProductBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *UpdateProductBody) GetTrackInventory() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.TrackInventory
+}
+
+func (x *UpdateProductBody) GetStockQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.StockQuantity
+}
+
+func (x *UpdateProductBody) GetBrandId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BrandId
+}
+
+func (x *UpdateProductBody) GetCompareAtPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CompareAtPrice
+}
+
+func (x *UpdateProductBody) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *UpdateProductBody) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *UpdateProductBody) GetWeight() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Weight
+}
+
+func (x *UpdateProductBody) GetWeightUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WeightUnit
+}
+
+func (x *UpdateProductBody) GetLength() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Length
+}
+
+func (x *UpdateProductBody) GetWidth() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Width
+}
+
+func (x *UpdateProductBody) GetHeight() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Height
+}
+
+func (x *UpdateProductBody) GetDimensionUnit() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DimensionUnit
+}
+
+func (x *UpdateProductBody) GetCountryOfOrigin() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CountryOfOrigin
+}
+
+func (x *UpdateProductBody) GetHsCode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.HsCode
+}
+
+func (x *UpdateProductBody) GetAllowBackorder() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.AllowBackorder
+}
+
+func (x *UpdateProductBody) GetLeadTimeDays() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.LeadTimeDays
+}
+
+func (x *UpdateProductBody) GetImageUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ImageUrl
+}
+
+type UpdateProductRequest struct {
+	Id   int64              `json:"id,omitempty"`
+	Body *UpdateProductBody `json:"body,omitempty"`
+}
+
+func (m *UpdateProductRequest) MarshalJSON() ([]byte, error) {
+	type alias UpdateProductRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	return json.Marshal(aux)
+}
+
+func (m *UpdateProductRequest) UnmarshalJSON(data []byte) error {
+	type alias UpdateProductRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	return nil
+}
+
+func (x *UpdateProductRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateProductRequest) GetBody() *UpdateProductBody {
+	if x == nil {
+		var zero *UpdateProductBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateProductResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateProductResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteProductRequest struct {
@@ -842,8 +2321,24 @@ func (m *DeleteProductRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteProductRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteProductResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteProductResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetDashboardRequest struct {
@@ -860,6 +2355,70 @@ type GetDashboardResponse struct {
 	TopCategories  []*DashboardTopCategory  `json:"top_categories,omitempty"`
 }
 
+func (x *GetDashboardResponse) GetTotalProducts() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TotalProducts
+}
+
+func (x *GetDashboardResponse) GetLowStockCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.LowStockCount
+}
+
+func (x *GetDashboardResponse) GetPendingOrders() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PendingOrders
+}
+
+func (x *GetDashboardResponse) GetTotalSuppliers() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TotalSuppliers
+}
+
+func (x *GetDashboardResponse) GetInventoryValue() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.InventoryValue
+}
+
+func (x *GetDashboardResponse) GetLowStockItems() []*DashboardLowStockItem {
+	if x == nil {
+		var zero []*DashboardLowStockItem
+		return zero
+	}
+	return x.LowStockItems
+}
+
+func (x *GetDashboardResponse) GetRecentOrders() []*DashboardRecentOrder {
+	if x == nil {
+		var zero []*DashboardRecentOrder
+		return zero
+	}
+	return x.RecentOrders
+}
+
+func (x *GetDashboardResponse) GetTopCategories() []*DashboardTopCategory {
+	if x == nil {
+		var zero []*DashboardTopCategory
+		return zero
+	}
+	return x.TopCategories
+}
+
 type ListReorderSuggestionsRequest struct {
 }
 
@@ -867,10 +2426,34 @@ type ListReorderSuggestionsResponse struct {
 	Suggestions []*ReorderSuggestion `json:"suggestions,omitempty"`
 }
 
+func (x *ListReorderSuggestionsResponse) GetSuggestions() []*ReorderSuggestion {
+	if x == nil {
+		var zero []*ReorderSuggestion
+		return zero
+	}
+	return x.Suggestions
+}
+
 type ListExpiringItemsRequest struct {
 	DaysAhead int32 `json:"days_ahead,omitempty"`
 }
 
+func (x *ListExpiringItemsRequest) GetDaysAhead() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DaysAhead
+}
+
 type ListExpiringItemsResponse struct {
 	Items []*ExpiringItem `json:"items,omitempty"`
+}
+
+func (x *ListExpiringItemsResponse) GetItems() []*ExpiringItem {
+	if x == nil {
+		var zero []*ExpiringItem
+		return zero
+	}
+	return x.Items
 }

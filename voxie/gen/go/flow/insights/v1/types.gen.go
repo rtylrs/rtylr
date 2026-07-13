@@ -8,10 +8,66 @@ type VelocityPoint struct {
 	CompletionRate float64 `json:"completion_rate,omitempty"`
 }
 
+func (x *VelocityPoint) GetCycle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Cycle
+}
+
+func (x *VelocityPoint) GetCompleted() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Completed
+}
+
+func (x *VelocityPoint) GetTotal() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Total
+}
+
+func (x *VelocityPoint) GetCompletionRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CompletionRate
+}
+
 type BurndownPoint struct {
 	Day    int32   `json:"day,omitempty"`
 	Ideal  float64 `json:"ideal,omitempty"`
 	Actual float64 `json:"actual,omitempty"`
+}
+
+func (x *BurndownPoint) GetDay() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Day
+}
+
+func (x *BurndownPoint) GetIdeal() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Ideal
+}
+
+func (x *BurndownPoint) GetActual() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Actual
 }
 
 type MemberTime struct {
@@ -20,9 +76,49 @@ type MemberTime struct {
 	Hours float64 `json:"hours,omitempty"`
 }
 
+func (x *MemberTime) GetId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Id
+}
+
+func (x *MemberTime) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *MemberTime) GetHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Hours
+}
+
 type ThroughputPoint struct {
 	Week      string `json:"week,omitempty"`
 	Completed int32  `json:"completed,omitempty"`
+}
+
+func (x *ThroughputPoint) GetWeek() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Week
+}
+
+func (x *ThroughputPoint) GetCompleted() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Completed
 }
 
 type TeamTaskSummary struct {
@@ -33,6 +129,46 @@ type TeamTaskSummary struct {
 	DueDate  string `json:"due_date,omitempty"`
 }
 
+func (x *TeamTaskSummary) GetId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TeamTaskSummary) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *TeamTaskSummary) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *TeamTaskSummary) GetPriority() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Priority
+}
+
+func (x *TeamTaskSummary) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
 type TeamMemberWorkload struct {
 	Id            string             `json:"id,omitempty"`
 	Name          string             `json:"name,omitempty"`
@@ -41,6 +177,62 @@ type TeamMemberWorkload struct {
 	AssignedHours float64            `json:"assigned_hours,omitempty"`
 	Load          float64            `json:"load,omitempty"`
 	Tasks         []*TeamTaskSummary `json:"tasks,omitempty"`
+}
+
+func (x *TeamMemberWorkload) GetId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TeamMemberWorkload) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *TeamMemberWorkload) GetInitials() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Initials
+}
+
+func (x *TeamMemberWorkload) GetCapacity() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Capacity
+}
+
+func (x *TeamMemberWorkload) GetAssignedHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.AssignedHours
+}
+
+func (x *TeamMemberWorkload) GetLoad() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Load
+}
+
+func (x *TeamMemberWorkload) GetTasks() []*TeamTaskSummary {
+	if x == nil {
+		var zero []*TeamTaskSummary
+		return zero
+	}
+	return x.Tasks
 }
 
 type RoadmapProject struct {
@@ -56,8 +248,96 @@ type RoadmapProject struct {
 	WorkspaceId string `json:"workspace_id,omitempty"`
 }
 
+func (x *RoadmapProject) GetId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Id
+}
+
+func (x *RoadmapProject) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *RoadmapProject) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *RoadmapProject) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *RoadmapProject) GetTargetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TargetDate
+}
+
+func (x *RoadmapProject) GetProgress() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Progress
+}
+
+func (x *RoadmapProject) GetDoneCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DoneCount
+}
+
+func (x *RoadmapProject) GetTaskCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TaskCount
+}
+
+func (x *RoadmapProject) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *RoadmapProject) GetWorkspaceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type GetInsightsRequest struct {
 	WorkspaceId string `json:"workspace_id,omitempty"`
+}
+
+func (x *GetInsightsRequest) GetWorkspaceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WorkspaceId
 }
 
 type GetInsightsResponse struct {
@@ -70,18 +350,106 @@ type GetInsightsResponse struct {
 	DoneTasks    int32              `json:"done_tasks,omitempty"`
 }
 
+func (x *GetInsightsResponse) GetVelocity() []*VelocityPoint {
+	if x == nil {
+		var zero []*VelocityPoint
+		return zero
+	}
+	return x.Velocity
+}
+
+func (x *GetInsightsResponse) GetBurndown() []*BurndownPoint {
+	if x == nil {
+		var zero []*BurndownPoint
+		return zero
+	}
+	return x.Burndown
+}
+
+func (x *GetInsightsResponse) GetCycleTime() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.CycleTime
+}
+
+func (x *GetInsightsResponse) GetTimeByMember() []*MemberTime {
+	if x == nil {
+		var zero []*MemberTime
+		return zero
+	}
+	return x.TimeByMember
+}
+
+func (x *GetInsightsResponse) GetThroughput() []*ThroughputPoint {
+	if x == nil {
+		var zero []*ThroughputPoint
+		return zero
+	}
+	return x.Throughput
+}
+
+func (x *GetInsightsResponse) GetTotalTasks() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.TotalTasks
+}
+
+func (x *GetInsightsResponse) GetDoneTasks() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DoneTasks
+}
+
 type GetTeamWorkloadRequest struct {
 	WorkspaceId string `json:"workspace_id,omitempty"`
+}
+
+func (x *GetTeamWorkloadRequest) GetWorkspaceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WorkspaceId
 }
 
 type GetTeamWorkloadResponse struct {
 	Members []*TeamMemberWorkload `json:"members,omitempty"`
 }
 
+func (x *GetTeamWorkloadResponse) GetMembers() []*TeamMemberWorkload {
+	if x == nil {
+		var zero []*TeamMemberWorkload
+		return zero
+	}
+	return x.Members
+}
+
 type GetRoadmapRequest struct {
 	WorkspaceId string `json:"workspace_id,omitempty"`
 }
 
+func (x *GetRoadmapRequest) GetWorkspaceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type GetRoadmapResponse struct {
 	Projects []*RoadmapProject `json:"projects,omitempty"`
+}
+
+func (x *GetRoadmapResponse) GetProjects() []*RoadmapProject {
+	if x == nil {
+		var zero []*RoadmapProject
+		return zero
+	}
+	return x.Projects
 }

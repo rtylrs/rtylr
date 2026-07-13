@@ -55,10 +55,90 @@ func (m *PriceList) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *PriceList) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *PriceList) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *PriceList) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *PriceList) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *PriceList) GetIsDefault() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsDefault
+}
+
+func (x *PriceList) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *PriceList) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreatePriceListRequest struct {
 	Name      string `json:"name,omitempty"`
 	Currency  string `json:"currency,omitempty"`
 	IsDefault bool   `json:"is_default,omitempty"`
+}
+
+func (x *CreatePriceListRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreatePriceListRequest) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *CreatePriceListRequest) GetIsDefault() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsDefault
 }
 
 type CreatePriceListResponse struct {
@@ -95,9 +175,33 @@ func (m *CreatePriceListResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreatePriceListResponse) GetPriceListId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PriceListId
+}
+
+func (x *CreatePriceListResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type ListPriceListsRequest struct {
 }
 
 type ListPriceListsResponse struct {
 	PriceLists []*PriceList `json:"price_lists,omitempty"`
+}
+
+func (x *ListPriceListsResponse) GetPriceLists() []*PriceList {
+	if x == nil {
+		var zero []*PriceList
+		return zero
+	}
+	return x.PriceLists
 }

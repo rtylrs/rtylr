@@ -45,12 +45,84 @@ func (m *View) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *View) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *View) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *View) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
+}
+
+func (x *View) GetFilters() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Filters
+}
+
+func (x *View) GetGroupBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.GroupBy
+}
+
+func (x *View) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *View) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListViewsRequest struct {
 	WorkspaceId string `json:"workspace_id,omitempty"`
 }
 
+func (x *ListViewsRequest) GetWorkspaceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type ListViewsResponse struct {
 	Views []*View `json:"views,omitempty"`
+}
+
+func (x *ListViewsResponse) GetViews() []*View {
+	if x == nil {
+		var zero []*View
+		return zero
+	}
+	return x.Views
 }
 
 type CreateViewRequest struct {
@@ -63,8 +135,72 @@ type CreateViewRequest struct {
 	SortDir     string `json:"sort_dir,omitempty"`
 }
 
+func (x *CreateViewRequest) GetWorkspaceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *CreateViewRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateViewRequest) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
+}
+
+func (x *CreateViewRequest) GetFilters() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Filters
+}
+
+func (x *CreateViewRequest) GetGroupBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.GroupBy
+}
+
+func (x *CreateViewRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *CreateViewRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type CreateViewResponse struct {
 	View *View `json:"view,omitempty"`
+}
+
+func (x *CreateViewResponse) GetView() *View {
+	if x == nil {
+		var zero *View
+		return zero
+	}
+	return x.View
 }
 
 type UpdateViewRequest struct {
@@ -106,6 +242,62 @@ func (m *UpdateViewRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateViewRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateViewRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateViewRequest) GetIcon() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Icon
+}
+
+func (x *UpdateViewRequest) GetFilters() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Filters
+}
+
+func (x *UpdateViewRequest) GetGroupBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.GroupBy
+}
+
+func (x *UpdateViewRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *UpdateViewRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type UpdateViewResponse struct {
 }
 
@@ -140,6 +332,14 @@ func (m *DeleteViewRequest) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *DeleteViewRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
 }
 
 type DeleteViewResponse struct {

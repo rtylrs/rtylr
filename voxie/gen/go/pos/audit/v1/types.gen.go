@@ -79,6 +79,110 @@ func (m *AuditLog) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AuditLog) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *AuditLog) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *AuditLog) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *AuditLog) GetTerminalId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.TerminalId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.TerminalId
+}
+
+func (x *AuditLog) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *AuditLog) GetAction() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Action
+}
+
+func (x *AuditLog) GetEntityType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EntityType
+}
+
+func (x *AuditLog) GetEntityId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EntityId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EntityId
+}
+
+func (x *AuditLog) GetDetails() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Details == nil {
+		var zero string
+		return zero
+	}
+	return *x.Details
+}
+
+func (x *AuditLog) GetIpAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.IpAddress == nil {
+		var zero string
+		return zero
+	}
+	return *x.IpAddress
+}
+
+func (x *AuditLog) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type CreateAuditRequest struct {
 	BranchId   int64  `json:"branch_id,omitempty"`
 	TerminalId int64  `json:"terminal_id,omitempty"`
@@ -149,6 +253,70 @@ func (m *CreateAuditRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateAuditRequest) GetBranchId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BranchId
+}
+
+func (x *CreateAuditRequest) GetTerminalId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TerminalId
+}
+
+func (x *CreateAuditRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *CreateAuditRequest) GetAction() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Action
+}
+
+func (x *CreateAuditRequest) GetEntityType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EntityType
+}
+
+func (x *CreateAuditRequest) GetEntityId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EntityId
+}
+
+func (x *CreateAuditRequest) GetDetails() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Details
+}
+
+func (x *CreateAuditRequest) GetIpAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.IpAddress
+}
+
 type CreateAuditResponse struct {
 	AuditLogId int64  `json:"audit_log_id,omitempty"`
 	Message    string `json:"message,omitempty"`
@@ -181,6 +349,22 @@ func (m *CreateAuditResponse) UnmarshalJSON(data []byte) error {
 		m.AuditLogId = v
 	}
 	return nil
+}
+
+func (x *CreateAuditResponse) GetAuditLogId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AuditLogId
+}
+
+func (x *CreateAuditResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListAuditRequest struct {
@@ -220,6 +404,54 @@ func (m *ListAuditRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListAuditRequest) GetAction() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Action
+}
+
+func (x *ListAuditRequest) GetEntityType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EntityType
+}
+
+func (x *ListAuditRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *ListAuditRequest) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *ListAuditRequest) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndDate
+}
+
 type ListAuditResponse struct {
 	Logs []*AuditLog `json:"logs,omitempty"`
+}
+
+func (x *ListAuditResponse) GetLogs() []*AuditLog {
+	if x == nil {
+		var zero []*AuditLog
+		return zero
+	}
+	return x.Logs
 }

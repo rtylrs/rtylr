@@ -69,9 +69,13 @@ export interface GetPurchaseOrderResponse {
 purchase_order?: PurchaseOrder;
 }
 
+export interface UpdatePurchaseOrderStatusBody {
+status?: string;
+}
+
 export interface UpdatePurchaseOrderStatusRequest {
 id?: string;
-status?: string;
+body?: UpdatePurchaseOrderStatusBody;
 }
 
 export interface UpdatePurchaseOrderStatusResponse {

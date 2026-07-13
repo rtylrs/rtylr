@@ -56,6 +56,74 @@ func (m *Table) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Table) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Table) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Table) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
+}
+
+func (x *Table) GetLabel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Label
+}
+
+func (x *Table) GetSeats() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Seats
+}
+
+func (x *Table) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Table) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Table) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListTablesRequest struct {
 }
 
@@ -63,10 +131,46 @@ type ListTablesResponse struct {
 	Tables []*Table `json:"tables,omitempty"`
 }
 
+func (x *ListTablesResponse) GetTables() []*Table {
+	if x == nil {
+		var zero []*Table
+		return zero
+	}
+	return x.Tables
+}
+
 type CreateTableRequest struct {
 	LocationId *int64 `json:"location_id,omitempty"`
 	Label      string `json:"label,omitempty"`
 	Seats      int32  `json:"seats,omitempty"`
+}
+
+func (x *CreateTableRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
+}
+
+func (x *CreateTableRequest) GetLabel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Label
+}
+
+func (x *CreateTableRequest) GetSeats() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Seats
 }
 
 type CreateTableResponse struct {
@@ -103,11 +207,63 @@ func (m *CreateTableResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateTableResponse) GetTableId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TableId
+}
+
+func (x *CreateTableResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type UpdateTableBody struct {
 	LocationId *int64 `json:"location_id,omitempty"`
 	Label      string `json:"label,omitempty"`
 	Seats      int32  `json:"seats,omitempty"`
 	Status     string `json:"status,omitempty"`
+}
+
+func (x *UpdateTableBody) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
+}
+
+func (x *UpdateTableBody) GetLabel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Label
+}
+
+func (x *UpdateTableBody) GetSeats() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Seats
+}
+
+func (x *UpdateTableBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type UpdateTableRequest struct {
@@ -144,12 +300,44 @@ func (m *UpdateTableRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateTableRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateTableRequest) GetBody() *UpdateTableBody {
+	if x == nil {
+		var zero *UpdateTableBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateTableResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (x *UpdateTableResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type UpdateTableStatusBody struct {
 	Status string `json:"status,omitempty"`
+}
+
+func (x *UpdateTableStatusBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type UpdateTableStatusRequest struct {
@@ -186,8 +374,32 @@ func (m *UpdateTableStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateTableStatusRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateTableStatusRequest) GetBody() *UpdateTableStatusBody {
+	if x == nil {
+		var zero *UpdateTableStatusBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateTableStatusResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateTableStatusResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteTableRequest struct {
@@ -223,6 +435,22 @@ func (m *DeleteTableRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteTableRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteTableResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteTableResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

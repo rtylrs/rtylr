@@ -56,6 +56,70 @@ func (m *LoyaltyConfig) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *LoyaltyConfig) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *LoyaltyConfig) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *LoyaltyConfig) GetIsEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsEnabled
+}
+
+func (x *LoyaltyConfig) GetPointsPerDollar() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.PointsPerDollar
+}
+
+func (x *LoyaltyConfig) GetRedemptionRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.RedemptionRate
+}
+
+func (x *LoyaltyConfig) GetMinRedeemPoints() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MinRedeemPoints
+}
+
+func (x *LoyaltyConfig) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *LoyaltyConfig) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type LoyaltyTransaction struct {
 	Id           int64  `json:"id,omitempty"`
 	BusinessId   int64  `json:"business_id,omitempty"`
@@ -127,6 +191,78 @@ func (m *LoyaltyTransaction) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *LoyaltyTransaction) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *LoyaltyTransaction) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *LoyaltyTransaction) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *LoyaltyTransaction) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *LoyaltyTransaction) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *LoyaltyTransaction) GetPoints() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Points
+}
+
+func (x *LoyaltyTransaction) GetBalanceAfter() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.BalanceAfter
+}
+
+func (x *LoyaltyTransaction) GetNote() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Note
+}
+
+func (x *LoyaltyTransaction) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type EarnPointsRequest struct {
 	CustomerId int64 `json:"customer_id,omitempty"`
 	OrderId    int64 `json:"order_id,omitempty"`
@@ -172,6 +308,30 @@ func (m *EarnPointsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *EarnPointsRequest) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *EarnPointsRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *EarnPointsRequest) GetPoints() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Points
+}
+
 type EarnPointsResponse struct {
 	TransactionId int64  `json:"transaction_id,omitempty"`
 	Message       string `json:"message,omitempty"`
@@ -206,6 +366,22 @@ func (m *EarnPointsResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *EarnPointsResponse) GetTransactionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TransactionId
+}
+
+func (x *EarnPointsResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type GetLoyaltyBalanceRequest struct {
 	CustomerId int64 `json:"customer_id,omitempty"`
 }
@@ -237,6 +413,14 @@ func (m *GetLoyaltyBalanceRequest) UnmarshalJSON(data []byte) error {
 		m.CustomerId = v
 	}
 	return nil
+}
+
+func (x *GetLoyaltyBalanceRequest) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
 }
 
 type GetLoyaltyBalanceResponse struct {
@@ -273,11 +457,35 @@ func (m *GetLoyaltyBalanceResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetLoyaltyBalanceResponse) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *GetLoyaltyBalanceResponse) GetBalance() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Balance
+}
+
 type GetLoyaltyConfigRequest struct {
 }
 
 type GetLoyaltyConfigResponse struct {
 	Config *LoyaltyConfig `json:"config,omitempty"`
+}
+
+func (x *GetLoyaltyConfigResponse) GetConfig() *LoyaltyConfig {
+	if x == nil {
+		var zero *LoyaltyConfig
+		return zero
+	}
+	return x.Config
 }
 
 type ListLoyaltyTransactionsRequest struct {
@@ -313,8 +521,24 @@ func (m *ListLoyaltyTransactionsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListLoyaltyTransactionsRequest) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
 type ListLoyaltyTransactionsResponse struct {
 	Transactions []*LoyaltyTransaction `json:"transactions,omitempty"`
+}
+
+func (x *ListLoyaltyTransactionsResponse) GetTransactions() []*LoyaltyTransaction {
+	if x == nil {
+		var zero []*LoyaltyTransaction
+		return zero
+	}
+	return x.Transactions
 }
 
 type RedeemPointsRequest struct {
@@ -351,6 +575,22 @@ func (m *RedeemPointsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RedeemPointsRequest) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CustomerId
+}
+
+func (x *RedeemPointsRequest) GetPoints() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Points
+}
+
 type RedeemPointsResponse struct {
 	TransactionId int64  `json:"transaction_id,omitempty"`
 	Message       string `json:"message,omitempty"`
@@ -385,6 +625,22 @@ func (m *RedeemPointsResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *RedeemPointsResponse) GetTransactionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TransactionId
+}
+
+func (x *RedeemPointsResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type UpdateLoyaltyConfigRequest struct {
 	IsEnabled       bool    `json:"is_enabled,omitempty"`
 	PointsPerDollar float64 `json:"points_per_dollar,omitempty"`
@@ -392,6 +648,46 @@ type UpdateLoyaltyConfigRequest struct {
 	MinRedeemPoints int32   `json:"min_redeem_points,omitempty"`
 }
 
+func (x *UpdateLoyaltyConfigRequest) GetIsEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsEnabled
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetPointsPerDollar() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.PointsPerDollar
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetRedemptionRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.RedemptionRate
+}
+
+func (x *UpdateLoyaltyConfigRequest) GetMinRedeemPoints() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MinRedeemPoints
+}
+
 type UpdateLoyaltyConfigResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateLoyaltyConfigResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

@@ -5,7 +5,7 @@ service CategoryService {
 
   createCategory(CreateCategoryRequest) -> CreateCategoryResponse @post("/categories")
 
-  updateCategory(UpdateCategoryRequest) -> UpdateCategoryResponse @put("/categories/{id}")
+  updateCategory(UpdateCategoryRequest) -> UpdateCategoryResponse @put("/categories/{id}") @body("body")
 
   deleteCategory(DeleteCategoryRequest) -> DeleteCategoryResponse @delete("/categories/{id}")
 }

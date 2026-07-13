@@ -49,11 +49,107 @@ func (m *Notification) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Notification) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Notification) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *Notification) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *Notification) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Notification) GetTaskId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *Notification) GetTaskTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TaskTitle
+}
+
+func (x *Notification) GetActorInitials() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ActorInitials
+}
+
+func (x *Notification) GetProject() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Project
+}
+
+func (x *Notification) GetProjectColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ProjectColor
+}
+
+func (x *Notification) GetRead() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Read
+}
+
+func (x *Notification) GetTimestamp() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Timestamp
+}
+
 type ListNotificationsRequest struct {
 }
 
 type ListNotificationsResponse struct {
 	Notifications []*Notification `json:"notifications,omitempty"`
+}
+
+func (x *ListNotificationsResponse) GetNotifications() []*Notification {
+	if x == nil {
+		var zero []*Notification
+		return zero
+	}
+	return x.Notifications
 }
 
 type MarkNotificationReadRequest struct {
@@ -87,6 +183,14 @@ func (m *MarkNotificationReadRequest) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *MarkNotificationReadRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
 }
 
 type MarkNotificationReadResponse struct {

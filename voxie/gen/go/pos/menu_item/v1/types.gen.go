@@ -73,10 +73,154 @@ func (m *MenuItem) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *MenuItem) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *MenuItem) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *MenuItem) GetCategoryId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CategoryId
+}
+
+func (x *MenuItem) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *MenuItem) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *MenuItem) GetSalePrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SalePrice
+}
+
+func (x *MenuItem) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *MenuItem) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *MenuItem) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *MenuItem) GetImageUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ImageUrl
+}
+
+func (x *MenuItem) GetCategory() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Category
+}
+
+func (x *MenuItem) GetBarcode() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Barcode
+}
+
+func (x *MenuItem) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *MenuItem) GetTaxRate() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxRate
+}
+
+func (x *MenuItem) GetStock() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Stock
+}
+
 type CreateMenuItemRequest struct {
 	Name      string  `json:"name,omitempty"`
 	Sku       string  `json:"sku,omitempty"`
 	SalePrice float64 `json:"sale_price,omitempty"`
+}
+
+func (x *CreateMenuItemRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateMenuItemRequest) GetSku() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Sku
+}
+
+func (x *CreateMenuItemRequest) GetSalePrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SalePrice
 }
 
 type CreateMenuItemResponse struct {
@@ -113,11 +257,35 @@ func (m *CreateMenuItemResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateMenuItemResponse) GetItemId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ItemId
+}
+
+func (x *CreateMenuItemResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type ListMenuItemsRequest struct {
 }
 
 type ListMenuItemsResponse struct {
 	Items []*MenuItem `json:"items,omitempty"`
+}
+
+func (x *ListMenuItemsResponse) GetItems() []*MenuItem {
+	if x == nil {
+		var zero []*MenuItem
+		return zero
+	}
+	return x.Items
 }
 
 type ListPublicMenuItemsRequest struct {
@@ -164,8 +332,32 @@ func (m *ListPublicMenuItemsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ListPublicMenuItemsRequest) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *ListPublicMenuItemsRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
 type ListPublicMenuItemsResponse struct {
 	Items []*MenuItem `json:"items,omitempty"`
+}
+
+func (x *ListPublicMenuItemsResponse) GetItems() []*MenuItem {
+	if x == nil {
+		var zero []*MenuItem
+		return zero
+	}
+	return x.Items
 }
 
 type UpdateMenuItemBody struct {
@@ -173,6 +365,38 @@ type UpdateMenuItemBody struct {
 	SalePrice float64 `json:"sale_price,omitempty"`
 	IsActive  bool    `json:"is_active,omitempty"`
 	Stock     float64 `json:"stock,omitempty"`
+}
+
+func (x *UpdateMenuItemBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateMenuItemBody) GetSalePrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SalePrice
+}
+
+func (x *UpdateMenuItemBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *UpdateMenuItemBody) GetStock() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Stock
 }
 
 type UpdateMenuItemRequest struct {
@@ -209,6 +433,30 @@ func (m *UpdateMenuItemRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateMenuItemRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateMenuItemRequest) GetBody() *UpdateMenuItemBody {
+	if x == nil {
+		var zero *UpdateMenuItemBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateMenuItemResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateMenuItemResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

@@ -116,6 +116,162 @@ func (m *Campaign) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Campaign) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Campaign) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Campaign) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Campaign) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Campaign) GetChannel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Channel
+}
+
+func (x *Campaign) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Campaign) GetSegmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.SegmentId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SegmentId
+}
+
+func (x *Campaign) GetSubject() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Subject
+}
+
+func (x *Campaign) GetContent() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Content
+}
+
+func (x *Campaign) GetScheduledAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ScheduledAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.ScheduledAt
+}
+
+func (x *Campaign) GetSentAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SentAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.SentAt
+}
+
+func (x *Campaign) GetAudienceCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AudienceCount
+}
+
+func (x *Campaign) GetSentCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SentCount
+}
+
+func (x *Campaign) GetDeliveredCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.DeliveredCount
+}
+
+func (x *Campaign) GetOpenedCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OpenedCount
+}
+
+func (x *Campaign) GetClickedCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ClickedCount
+}
+
+func (x *Campaign) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Campaign) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CampaignStats struct {
 	CampaignId     int64 `json:"campaign_id,omitempty"`
 	AudienceCount  int64 `json:"audience_count,omitempty"`
@@ -226,6 +382,70 @@ func (m *CampaignStats) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CampaignStats) GetCampaignId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CampaignId
+}
+
+func (x *CampaignStats) GetAudienceCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AudienceCount
+}
+
+func (x *CampaignStats) GetSentCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SentCount
+}
+
+func (x *CampaignStats) GetDeliveredCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.DeliveredCount
+}
+
+func (x *CampaignStats) GetOpenedCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OpenedCount
+}
+
+func (x *CampaignStats) GetClickedCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ClickedCount
+}
+
+func (x *CampaignStats) GetBouncedCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BouncedCount
+}
+
+func (x *CampaignStats) GetFailedCount() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.FailedCount
+}
+
 type CreateCampaignRequest struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
@@ -234,6 +454,66 @@ type CreateCampaignRequest struct {
 	Subject     string `json:"subject,omitempty"`
 	Content     string `json:"content,omitempty"`
 	ScheduledAt string `json:"scheduled_at,omitempty"`
+}
+
+func (x *CreateCampaignRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateCampaignRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateCampaignRequest) GetChannel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Channel
+}
+
+func (x *CreateCampaignRequest) GetSegmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.SegmentId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SegmentId
+}
+
+func (x *CreateCampaignRequest) GetSubject() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Subject
+}
+
+func (x *CreateCampaignRequest) GetContent() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Content
+}
+
+func (x *CreateCampaignRequest) GetScheduledAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ScheduledAt
 }
 
 type CreateCampaignResponse struct {
@@ -270,6 +550,22 @@ func (m *CreateCampaignResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateCampaignResponse) GetCampaignId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CampaignId
+}
+
+func (x *CreateCampaignResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type GetCampaignDetailRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -303,9 +599,33 @@ func (m *GetCampaignDetailRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetCampaignDetailRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetCampaignDetailResponse struct {
 	Campaign *Campaign      `json:"campaign,omitempty"`
 	Stats    *CampaignStats `json:"stats,omitempty"`
+}
+
+func (x *GetCampaignDetailResponse) GetCampaign() *Campaign {
+	if x == nil {
+		var zero *Campaign
+		return zero
+	}
+	return x.Campaign
+}
+
+func (x *GetCampaignDetailResponse) GetStats() *CampaignStats {
+	if x == nil {
+		var zero *CampaignStats
+		return zero
+	}
+	return x.Stats
 }
 
 type GetCampaignStatsRequest struct {
@@ -341,16 +661,48 @@ func (m *GetCampaignStatsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetCampaignStatsRequest) GetCampaignId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CampaignId
+}
+
 type GetCampaignStatsResponse struct {
 	Stats *CampaignStats `json:"stats,omitempty"`
+}
+
+func (x *GetCampaignStatsResponse) GetStats() *CampaignStats {
+	if x == nil {
+		var zero *CampaignStats
+		return zero
+	}
+	return x.Stats
 }
 
 type ListCampaignsRequest struct {
 	Status string `json:"status,omitempty"`
 }
 
+func (x *ListCampaignsRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
 type ListCampaignsResponse struct {
 	Campaigns []*Campaign `json:"campaigns,omitempty"`
+}
+
+func (x *ListCampaignsResponse) GetCampaigns() []*Campaign {
+	if x == nil {
+		var zero []*Campaign
+		return zero
+	}
+	return x.Campaigns
 }
 
 type UpdateCampaignBody struct {
@@ -361,6 +713,66 @@ type UpdateCampaignBody struct {
 	Subject     string `json:"subject,omitempty"`
 	Content     string `json:"content,omitempty"`
 	ScheduledAt string `json:"scheduled_at,omitempty"`
+}
+
+func (x *UpdateCampaignBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateCampaignBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateCampaignBody) GetChannel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Channel
+}
+
+func (x *UpdateCampaignBody) GetSegmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.SegmentId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SegmentId
+}
+
+func (x *UpdateCampaignBody) GetSubject() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Subject
+}
+
+func (x *UpdateCampaignBody) GetContent() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Content
+}
+
+func (x *UpdateCampaignBody) GetScheduledAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ScheduledAt
 }
 
 type UpdateCampaignRequest struct {
@@ -397,8 +809,32 @@ func (m *UpdateCampaignRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateCampaignRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateCampaignRequest) GetBody() *UpdateCampaignBody {
+	if x == nil {
+		var zero *UpdateCampaignBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateCampaignResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateCampaignResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateCampaignStatusRequest struct {
@@ -435,6 +871,30 @@ func (m *UpdateCampaignStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateCampaignStatusRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateCampaignStatusRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
 type UpdateCampaignStatusResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateCampaignStatusResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

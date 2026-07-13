@@ -46,6 +46,62 @@ func (m *ReportTemplate) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ReportTemplate) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ReportTemplate) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ReportTemplate) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *ReportTemplate) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *ReportTemplate) GetMetrics() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Metrics
+}
+
+func (x *ReportTemplate) GetFormat() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Format
+}
+
+func (x *ReportTemplate) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type ScheduledReport struct {
 	Id             int64  `json:"id,omitempty"`
 	TemplateId     int64  `json:"template_id,omitempty"`
@@ -98,6 +154,86 @@ func (m *ScheduledReport) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ScheduledReport) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *ScheduledReport) GetTemplateId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TemplateId
+}
+
+func (x *ScheduledReport) GetTemplateName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TemplateName
+}
+
+func (x *ScheduledReport) GetFrequency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Frequency
+}
+
+func (x *ScheduledReport) GetRecipientEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RecipientEmail
+}
+
+func (x *ScheduledReport) GetChannel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Channel
+}
+
+func (x *ScheduledReport) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *ScheduledReport) GetLastSentAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastSentAt
+}
+
+func (x *ScheduledReport) GetNextSendAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NextSendAt
+}
+
+func (x *ScheduledReport) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type ListReportTemplatesRequest struct {
 	Page    int32  `json:"page,omitempty"`
 	Limit   int32  `json:"limit,omitempty"`
@@ -106,9 +242,65 @@ type ListReportTemplatesRequest struct {
 	Type    string `json:"type,omitempty"`
 }
 
+func (x *ListReportTemplatesRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListReportTemplatesRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListReportTemplatesRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListReportTemplatesRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
+func (x *ListReportTemplatesRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
 type ListReportTemplatesResponse struct {
 	Templates  []*ReportTemplate                        `json:"templates,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
+}
+
+func (x *ListReportTemplatesResponse) GetTemplates() []*ReportTemplate {
+	if x == nil {
+		var zero []*ReportTemplate
+		return zero
+	}
+	return x.Templates
+}
+
+func (x *ListReportTemplatesResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type CreateReportTemplateRequest struct {
@@ -119,8 +311,56 @@ type CreateReportTemplateRequest struct {
 	Format      string   `json:"format,omitempty"`
 }
 
+func (x *CreateReportTemplateRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateReportTemplateRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateReportTemplateRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *CreateReportTemplateRequest) GetMetrics() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Metrics
+}
+
+func (x *CreateReportTemplateRequest) GetFormat() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Format
+}
+
 type CreateReportTemplateResponse struct {
 	Template *ReportTemplate `json:"template,omitempty"`
+}
+
+func (x *CreateReportTemplateResponse) GetTemplate() *ReportTemplate {
+	if x == nil {
+		var zero *ReportTemplate
+		return zero
+	}
+	return x.Template
 }
 
 type GetReportTemplateRequest struct {
@@ -156,8 +396,24 @@ func (m *GetReportTemplateRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetReportTemplateRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetReportTemplateResponse struct {
 	Template *ReportTemplate `json:"template,omitempty"`
+}
+
+func (x *GetReportTemplateResponse) GetTemplate() *ReportTemplate {
+	if x == nil {
+		var zero *ReportTemplate
+		return zero
+	}
+	return x.Template
 }
 
 type ListScheduledReportsRequest struct {
@@ -167,9 +423,57 @@ type ListScheduledReportsRequest struct {
 	SortDir string `json:"sort_dir,omitempty"`
 }
 
+func (x *ListScheduledReportsRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListScheduledReportsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListScheduledReportsRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListScheduledReportsRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListScheduledReportsResponse struct {
 	Reports    []*ScheduledReport                       `json:"reports,omitempty"`
 	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
+}
+
+func (x *ListScheduledReportsResponse) GetReports() []*ScheduledReport {
+	if x == nil {
+		var zero []*ScheduledReport
+		return zero
+	}
+	return x.Reports
+}
+
+func (x *ListScheduledReportsResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type CreateScheduledReportRequest struct {
@@ -180,8 +484,56 @@ type CreateScheduledReportRequest struct {
 	IsActive       bool   `json:"is_active,omitempty"`
 }
 
+func (x *CreateScheduledReportRequest) GetTemplateSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TemplateSlug
+}
+
+func (x *CreateScheduledReportRequest) GetFrequency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Frequency
+}
+
+func (x *CreateScheduledReportRequest) GetChannel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Channel
+}
+
+func (x *CreateScheduledReportRequest) GetRecipientEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RecipientEmail
+}
+
+func (x *CreateScheduledReportRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type CreateScheduledReportResponse struct {
 	Report *ScheduledReport `json:"report,omitempty"`
+}
+
+func (x *CreateScheduledReportResponse) GetReport() *ScheduledReport {
+	if x == nil {
+		var zero *ScheduledReport
+		return zero
+	}
+	return x.Report
 }
 
 type UpdateScheduledReportRequest struct {
@@ -222,8 +574,64 @@ func (m *UpdateScheduledReportRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateScheduledReportRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateScheduledReportRequest) GetTemplateSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TemplateSlug
+}
+
+func (x *UpdateScheduledReportRequest) GetFrequency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Frequency
+}
+
+func (x *UpdateScheduledReportRequest) GetChannel() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Channel
+}
+
+func (x *UpdateScheduledReportRequest) GetRecipientEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.RecipientEmail
+}
+
+func (x *UpdateScheduledReportRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type UpdateScheduledReportResponse struct {
 	Report *ScheduledReport `json:"report,omitempty"`
+}
+
+func (x *UpdateScheduledReportResponse) GetReport() *ScheduledReport {
+	if x == nil {
+		var zero *ScheduledReport
+		return zero
+	}
+	return x.Report
 }
 
 type DeleteScheduledReportRequest struct {
@@ -259,8 +667,24 @@ func (m *DeleteScheduledReportRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteScheduledReportRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteScheduledReportResponse struct {
 	Deleted bool `json:"deleted,omitempty"`
+}
+
+func (x *DeleteScheduledReportResponse) GetDeleted() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Deleted
 }
 
 type GenerateRevenueReportRequest struct {
@@ -269,15 +693,79 @@ type GenerateRevenueReportRequest struct {
 	Format string `json:"format,omitempty"`
 }
 
+func (x *GenerateRevenueReportRequest) GetFrom() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.From
+}
+
+func (x *GenerateRevenueReportRequest) GetTo() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.To
+}
+
+func (x *GenerateRevenueReportRequest) GetFormat() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Format
+}
+
 type GenerateRevenueReportResponse struct {
 	ReportId string `json:"report_id,omitempty"`
 	Url      string `json:"url,omitempty"`
 	Status   string `json:"status,omitempty"`
 }
 
+func (x *GenerateRevenueReportResponse) GetReportId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReportId
+}
+
+func (x *GenerateRevenueReportResponse) GetUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Url
+}
+
+func (x *GenerateRevenueReportResponse) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
 type ExportRevenueReportRequest struct {
 	From string `json:"from,omitempty"`
 	To   string `json:"to,omitempty"`
+}
+
+func (x *ExportRevenueReportRequest) GetFrom() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.From
+}
+
+func (x *ExportRevenueReportRequest) GetTo() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.To
 }
 
 type ExportRevenueRow struct {
@@ -314,9 +802,57 @@ func (m *ExportRevenueRow) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ExportRevenueRow) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *ExportRevenueRow) GetAmountMinorUnits() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AmountMinorUnits
+}
+
 type ExportRevenueReportResponse struct {
 	Filename    string              `json:"filename,omitempty"`
 	ContentType string              `json:"content_type,omitempty"`
 	Csv         string              `json:"csv,omitempty"`
 	Rows        []*ExportRevenueRow `json:"rows,omitempty"`
+}
+
+func (x *ExportRevenueReportResponse) GetFilename() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Filename
+}
+
+func (x *ExportRevenueReportResponse) GetContentType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ContentType
+}
+
+func (x *ExportRevenueReportResponse) GetCsv() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Csv
+}
+
+func (x *ExportRevenueReportResponse) GetRows() []*ExportRevenueRow {
+	if x == nil {
+		var zero []*ExportRevenueRow
+		return zero
+	}
+	return x.Rows
 }

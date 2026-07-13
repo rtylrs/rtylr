@@ -79,10 +79,14 @@ message GetPurchaseOrderResponse {
   purchase_order: PurchaseOrder
 }
 
-message UpdatePurchaseOrderStatusRequest {
-  id: int64 @required @gt(0)
+message UpdatePurchaseOrderStatusBody {
   /// Current lifecycle state.
   status: string @required
+}
+
+message UpdatePurchaseOrderStatusRequest {
+  id: int64 @required @gt(0)
+  body: UpdatePurchaseOrderStatusBody
 }
 
 message UpdatePurchaseOrderStatusResponse {

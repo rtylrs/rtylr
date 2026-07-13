@@ -19,10 +19,14 @@ message CreateCategoryResponse {
   message: string
 }
 
-message UpdateCategoryRequest {
-  id: int64 @required @gt(0)
+message UpdateCategoryBody {
   name: string @required
   description: string
+}
+
+message UpdateCategoryRequest {
+  id: int64 @required @gt(0)
+  body: UpdateCategoryBody
 }
 
 message UpdateCategoryResponse {

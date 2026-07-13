@@ -57,12 +57,124 @@ func (m *Combo) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Combo) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Combo) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Combo) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Combo) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Combo) GetPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Price
+}
+
+func (x *Combo) GetItems() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Items
+}
+
+func (x *Combo) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Combo) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Combo) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateComboRequest struct {
 	Name        string  `json:"name,omitempty"`
 	Description string  `json:"description,omitempty"`
 	Price       float64 `json:"price,omitempty"`
 	Items       string  `json:"items,omitempty"`
 	IsActive    bool    `json:"is_active,omitempty"`
+}
+
+func (x *CreateComboRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateComboRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateComboRequest) GetPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Price
+}
+
+func (x *CreateComboRequest) GetItems() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Items
+}
+
+func (x *CreateComboRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
 }
 
 type CreateComboResponse struct {
@@ -99,12 +211,68 @@ func (m *CreateComboResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateComboResponse) GetComboId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ComboId
+}
+
+func (x *CreateComboResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type UpdateComboBody struct {
 	Name        string  `json:"name,omitempty"`
 	Description string  `json:"description,omitempty"`
 	Price       float64 `json:"price,omitempty"`
 	Items       string  `json:"items,omitempty"`
 	IsActive    bool    `json:"is_active,omitempty"`
+}
+
+func (x *UpdateComboBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateComboBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateComboBody) GetPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Price
+}
+
+func (x *UpdateComboBody) GetItems() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Items
+}
+
+func (x *UpdateComboBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
 }
 
 type UpdateComboRequest struct {
@@ -141,8 +309,32 @@ func (m *UpdateComboRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateComboRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateComboRequest) GetBody() *UpdateComboBody {
+	if x == nil {
+		var zero *UpdateComboBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateComboResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateComboResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteComboRequest struct {
@@ -178,8 +370,24 @@ func (m *DeleteComboRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteComboRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteComboResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteComboResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListCombosRequest struct {
@@ -187,4 +395,12 @@ type ListCombosRequest struct {
 
 type ListCombosResponse struct {
 	Combos []*Combo `json:"combos,omitempty"`
+}
+
+func (x *ListCombosResponse) GetCombos() []*Combo {
+	if x == nil {
+		var zero []*Combo
+		return zero
+	}
+	return x.Combos
 }

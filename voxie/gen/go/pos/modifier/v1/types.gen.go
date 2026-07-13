@@ -56,11 +56,107 @@ func (m *Modifier) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Modifier) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Modifier) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Modifier) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Modifier) GetPriceDelta() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.PriceDelta
+}
+
+func (x *Modifier) GetGroupName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.GroupName
+}
+
+func (x *Modifier) GetIsRequired() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsRequired
+}
+
+func (x *Modifier) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Modifier) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateModifierRequest struct {
 	Name       string  `json:"name,omitempty"`
 	PriceDelta float64 `json:"price_delta,omitempty"`
 	GroupName  string  `json:"group_name,omitempty"`
 	IsRequired bool    `json:"is_required,omitempty"`
+}
+
+func (x *CreateModifierRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateModifierRequest) GetPriceDelta() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.PriceDelta
+}
+
+func (x *CreateModifierRequest) GetGroupName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.GroupName
+}
+
+func (x *CreateModifierRequest) GetIsRequired() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsRequired
 }
 
 type CreateModifierResponse struct {
@@ -97,6 +193,22 @@ func (m *CreateModifierResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateModifierResponse) GetModifierId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ModifierId
+}
+
+func (x *CreateModifierResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type DeleteModifierRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -130,8 +242,24 @@ func (m *DeleteModifierRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteModifierRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteModifierResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteModifierResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListModifiersRequest struct {
@@ -141,11 +269,51 @@ type ListModifiersResponse struct {
 	Modifiers []*Modifier `json:"modifiers,omitempty"`
 }
 
+func (x *ListModifiersResponse) GetModifiers() []*Modifier {
+	if x == nil {
+		var zero []*Modifier
+		return zero
+	}
+	return x.Modifiers
+}
+
 type UpdateModifierBody struct {
 	Name       string  `json:"name,omitempty"`
 	PriceDelta float64 `json:"price_delta,omitempty"`
 	GroupName  string  `json:"group_name,omitempty"`
 	IsRequired bool    `json:"is_required,omitempty"`
+}
+
+func (x *UpdateModifierBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateModifierBody) GetPriceDelta() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.PriceDelta
+}
+
+func (x *UpdateModifierBody) GetGroupName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.GroupName
+}
+
+func (x *UpdateModifierBody) GetIsRequired() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsRequired
 }
 
 type UpdateModifierRequest struct {
@@ -182,6 +350,30 @@ func (m *UpdateModifierRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateModifierRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateModifierRequest) GetBody() *UpdateModifierBody {
+	if x == nil {
+		var zero *UpdateModifierBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateModifierResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateModifierResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

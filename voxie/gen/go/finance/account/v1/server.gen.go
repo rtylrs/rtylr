@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,6 +23,17 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type AccountServiceServer interface {
 	ListAccounts(ctx context.Context, req *ListAccountsRequest) (*ListAccountsResponse, error)
 	CreateAccount(ctx context.Context, req *CreateAccountRequest) (*CreateAccountResponse, error)
@@ -30,7 +42,15 @@ type AccountServiceServer interface {
 	GetChartOfAccounts(ctx context.Context, req *GetChartOfAccountsRequest) (*GetChartOfAccountsResponse, error)
 }
 
-func RegisterAccountServiceServer(mux *http.ServeMux, srv AccountServiceServer) {
+func RegisterAccountServiceServer(srv AccountServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterAccountServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /finance/account/v1/accounts", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListAccountsRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -125,4 +145,5 @@ func RegisterAccountServiceServer(mux *http.ServeMux, srv AccountServiceServer) 
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

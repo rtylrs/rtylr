@@ -56,12 +56,92 @@ func (m *Cycle) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Cycle) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Cycle) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *Cycle) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Cycle) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *Cycle) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndDate
+}
+
+func (x *Cycle) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Cycle) GetScope() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Scope
+}
+
+func (x *Cycle) GetCompleted() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Completed
+}
+
 type ListCyclesRequest struct {
 	WorkspaceId string `json:"workspace_id,omitempty"`
 }
 
+func (x *ListCyclesRequest) GetWorkspaceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type ListCyclesResponse struct {
 	Cycles []*Cycle `json:"cycles,omitempty"`
+}
+
+func (x *ListCyclesResponse) GetCycles() []*Cycle {
+	if x == nil {
+		var zero []*Cycle
+		return zero
+	}
+	return x.Cycles
 }
 
 type CreateCycleRequest struct {
@@ -71,8 +151,48 @@ type CreateCycleRequest struct {
 	EndDate     string `json:"end_date,omitempty"`
 }
 
+func (x *CreateCycleRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateCycleRequest) GetWorkspaceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *CreateCycleRequest) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *CreateCycleRequest) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndDate
+}
+
 type CreateCycleResponse struct {
 	Cycle *Cycle `json:"cycle,omitempty"`
+}
+
+func (x *CreateCycleResponse) GetCycle() *Cycle {
+	if x == nil {
+		var zero *Cycle
+		return zero
+	}
+	return x.Cycle
 }
 
 type UpdateCycleRequest struct {
@@ -109,6 +229,38 @@ func (m *UpdateCycleRequest) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *UpdateCycleRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateCycleRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateCycleRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *UpdateCycleRequest) GetEndDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndDate
 }
 
 type UpdateCycleResponse struct {

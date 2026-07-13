@@ -81,11 +81,123 @@ func (m *Review) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Review) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Review) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Review) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *Review) GetReviewerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ReviewerId
+}
+
+func (x *Review) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
+}
+
+func (x *Review) GetRating() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Rating
+}
+
+func (x *Review) GetGoalsRating() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.GoalsRating
+}
+
+func (x *Review) GetValuesRating() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ValuesRating
+}
+
+func (x *Review) GetSkillsRating() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SkillsRating
+}
+
+func (x *Review) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *Review) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Review) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Review) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListReviewsRequest struct {
 }
 
 type ListReviewsResponse struct {
 	Reviews []*Review `json:"reviews,omitempty"`
+}
+
+func (x *ListReviewsResponse) GetReviews() []*Review {
+	if x == nil {
+		var zero []*Review
+		return zero
+	}
+	return x.Reviews
 }
 
 type CreateReviewRequest struct {
@@ -139,6 +251,78 @@ func (m *CreateReviewRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateReviewRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *CreateReviewRequest) GetReviewerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ReviewerId
+}
+
+func (x *CreateReviewRequest) GetPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Period
+}
+
+func (x *CreateReviewRequest) GetRating() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Rating
+}
+
+func (x *CreateReviewRequest) GetGoalsRating() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.GoalsRating
+}
+
+func (x *CreateReviewRequest) GetValuesRating() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.ValuesRating
+}
+
+func (x *CreateReviewRequest) GetSkillsRating() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.SkillsRating
+}
+
+func (x *CreateReviewRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *CreateReviewRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
 type CreateReviewResponse struct {
 	Id      int64  `json:"id,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -171,4 +355,20 @@ func (m *CreateReviewResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *CreateReviewResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateReviewResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

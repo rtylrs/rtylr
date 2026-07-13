@@ -58,9 +58,105 @@ func (m *Article) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Article) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Article) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *Article) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *Article) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
+func (x *Article) GetBody() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Body
+}
+
+func (x *Article) GetCategory() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Category
+}
+
+func (x *Article) GetIsPublished() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsPublished
+}
+
+func (x *Article) GetViews() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Views
+}
+
+func (x *Article) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Article) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListArticlesRequest struct {
 	Page     int32 `json:"page,omitempty"`
 	PageSize int32 `json:"page_size,omitempty"`
+}
+
+func (x *ListArticlesRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListArticlesRequest) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
 }
 
 type ListArticlesResponse struct {
@@ -70,12 +166,84 @@ type ListArticlesResponse struct {
 	PageSize int32      `json:"page_size,omitempty"`
 }
 
+func (x *ListArticlesResponse) GetArticles() []*Article {
+	if x == nil {
+		var zero []*Article
+		return zero
+	}
+	return x.Articles
+}
+
+func (x *ListArticlesResponse) GetTotal() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListArticlesResponse) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListArticlesResponse) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
+}
+
 type CreateArticleRequest struct {
 	Title       string `json:"title,omitempty"`
 	Slug        string `json:"slug,omitempty"`
 	Body        string `json:"body,omitempty"`
 	Category    string `json:"category,omitempty"`
 	IsPublished bool   `json:"is_published,omitempty"`
+}
+
+func (x *CreateArticleRequest) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *CreateArticleRequest) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
+func (x *CreateArticleRequest) GetBody() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Body
+}
+
+func (x *CreateArticleRequest) GetCategory() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Category
+}
+
+func (x *CreateArticleRequest) GetIsPublished() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsPublished
 }
 
 type CreateArticleResponse struct {
@@ -110,6 +278,22 @@ func (m *CreateArticleResponse) UnmarshalJSON(data []byte) error {
 		m.ArticleId = v
 	}
 	return nil
+}
+
+func (x *CreateArticleResponse) GetArticleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ArticleId
+}
+
+func (x *CreateArticleResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type UpdateArticleRequest struct {
@@ -150,8 +334,64 @@ func (m *UpdateArticleRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateArticleRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateArticleRequest) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *UpdateArticleRequest) GetSlug() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Slug
+}
+
+func (x *UpdateArticleRequest) GetBody() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Body
+}
+
+func (x *UpdateArticleRequest) GetCategory() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Category
+}
+
+func (x *UpdateArticleRequest) GetIsPublished() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsPublished
+}
+
 type UpdateArticleResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateArticleResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteArticleRequest struct {
@@ -187,6 +427,22 @@ func (m *DeleteArticleRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteArticleRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteArticleResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteArticleResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

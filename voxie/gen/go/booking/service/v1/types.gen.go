@@ -69,6 +69,94 @@ func (m *BookingService) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *BookingService) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *BookingService) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *BookingService) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *BookingService) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *BookingService) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *BookingService) GetDurationMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DurationMinutes
+}
+
+func (x *BookingService) GetPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Price
+}
+
+func (x *BookingService) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *BookingService) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *BookingService) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *BookingService) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateServiceRequest struct {
 	Name            string  `json:"name,omitempty"`
 	Description     string  `json:"description,omitempty"`
@@ -76,6 +164,54 @@ type CreateServiceRequest struct {
 	Price           float64 `json:"price,omitempty"`
 	Color           string  `json:"color,omitempty"`
 	IsActive        bool    `json:"is_active,omitempty"`
+}
+
+func (x *CreateServiceRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateServiceRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateServiceRequest) GetDurationMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DurationMinutes
+}
+
+func (x *CreateServiceRequest) GetPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Price
+}
+
+func (x *CreateServiceRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *CreateServiceRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
 }
 
 type CreateServiceResponse struct {
@@ -112,6 +248,22 @@ func (m *CreateServiceResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateServiceResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateServiceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type DeleteServiceRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -145,8 +297,24 @@ func (m *DeleteServiceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteServiceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteServiceResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteServiceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListServicesRequest struct {
@@ -154,6 +322,14 @@ type ListServicesRequest struct {
 
 type ListServicesResponse struct {
 	Services []*BookingService `json:"services,omitempty"`
+}
+
+func (x *ListServicesResponse) GetServices() []*BookingService {
+	if x == nil {
+		var zero []*BookingService
+		return zero
+	}
+	return x.Services
 }
 
 type UpdateServiceRequest struct {
@@ -195,6 +371,70 @@ func (m *UpdateServiceRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateServiceRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateServiceRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateServiceRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateServiceRequest) GetDurationMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DurationMinutes
+}
+
+func (x *UpdateServiceRequest) GetPrice() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Price
+}
+
+func (x *UpdateServiceRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Color
+}
+
+func (x *UpdateServiceRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type UpdateServiceResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateServiceResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

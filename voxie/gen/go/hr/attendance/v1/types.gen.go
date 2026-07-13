@@ -114,6 +114,150 @@ func (m *AttendanceRecordPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AttendanceRecordPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *AttendanceRecordPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *AttendanceRecordPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *AttendanceRecordPayload) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *AttendanceRecordPayload) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *AttendanceRecordPayload) GetClockInAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ClockInAt
+}
+
+func (x *AttendanceRecordPayload) GetClockOutAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ClockOutAt == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ClockOutAt
+}
+
+func (x *AttendanceRecordPayload) GetDurationMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.DurationMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DurationMinutes
+}
+
+func (x *AttendanceRecordPayload) GetClockInMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClockInMethod
+}
+
+func (x *AttendanceRecordPayload) GetClockInLat() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.ClockInLat == nil {
+		var zero float64
+		return zero
+	}
+	return *x.ClockInLat
+}
+
+func (x *AttendanceRecordPayload) GetClockInLng() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.ClockInLng == nil {
+		var zero float64
+		return zero
+	}
+	return *x.ClockInLng
+}
+
+func (x *AttendanceRecordPayload) GetIsLate() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsLate
+}
+
+func (x *AttendanceRecordPayload) GetLateMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.LateMinutes
+}
+
+func (x *AttendanceRecordPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *AttendanceRecordPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *AttendanceRecordPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type AttendanceClockInRequest struct {
 	Method     string   `json:"method,omitempty"`
 	LocationId int64    `json:"location_id,omitempty"`
@@ -152,8 +296,80 @@ func (m *AttendanceClockInRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AttendanceClockInRequest) GetMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Method
+}
+
+func (x *AttendanceClockInRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.LocationId
+}
+
+func (x *AttendanceClockInRequest) GetLat() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.Lat == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Lat
+}
+
+func (x *AttendanceClockInRequest) GetLng() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.Lng == nil {
+		var zero float64
+		return zero
+	}
+	return *x.Lng
+}
+
+func (x *AttendanceClockInRequest) GetQrToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.QrToken == nil {
+		var zero string
+		return zero
+	}
+	return *x.QrToken
+}
+
+func (x *AttendanceClockInRequest) GetPin() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Pin == nil {
+		var zero string
+		return zero
+	}
+	return *x.Pin
+}
+
 type AttendanceClockInResponse struct {
 	Record *AttendanceRecordPayload `json:"record,omitempty"`
+}
+
+func (x *AttendanceClockInResponse) GetRecord() *AttendanceRecordPayload {
+	if x == nil {
+		var zero *AttendanceRecordPayload
+		return zero
+	}
+	return x.Record
 }
 
 type AttendanceClockOutRequest struct {
@@ -189,8 +405,24 @@ func (m *AttendanceClockOutRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AttendanceClockOutRequest) GetAttendanceRecordId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AttendanceRecordId
+}
+
 type AttendanceClockOutResponse struct {
 	Record *AttendanceRecordPayload `json:"record,omitempty"`
+}
+
+func (x *AttendanceClockOutResponse) GetRecord() *AttendanceRecordPayload {
+	if x == nil {
+		var zero *AttendanceRecordPayload
+		return zero
+	}
+	return x.Record
 }
 
 type ListAttendanceRequest struct {
@@ -198,9 +430,65 @@ type ListAttendanceRequest struct {
 	Date       *string `json:"date,omitempty"`
 }
 
+func (x *ListAttendanceRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
+}
+
+func (x *ListAttendanceRequest) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Date == nil {
+		var zero string
+		return zero
+	}
+	return *x.Date
+}
+
 type ListAttendanceResponse struct {
 	Records []*AttendanceRecordPayload `json:"records,omitempty"`
 	Total   int64                      `json:"total,omitempty"`
 	Limit   int32                      `json:"limit,omitempty"`
 	Offset  int32                      `json:"offset,omitempty"`
+}
+
+func (x *ListAttendanceResponse) GetRecords() []*AttendanceRecordPayload {
+	if x == nil {
+		var zero []*AttendanceRecordPayload
+		return zero
+	}
+	return x.Records
+}
+
+func (x *ListAttendanceResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListAttendanceResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListAttendanceResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }

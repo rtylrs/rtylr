@@ -41,5 +41,29 @@ func (m *UpdatePermissionsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdatePermissionsRequest) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *UpdatePermissionsRequest) GetApps() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Apps
+}
+
+func (x *UpdatePermissionsRequest) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
 type UpdatePermissionsResponse struct {
 }

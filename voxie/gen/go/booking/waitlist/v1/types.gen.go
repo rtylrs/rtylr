@@ -79,6 +79,94 @@ func (m *WaitlistEntry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *WaitlistEntry) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *WaitlistEntry) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *WaitlistEntry) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *WaitlistEntry) GetServiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ServiceId
+}
+
+func (x *WaitlistEntry) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *WaitlistEntry) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *WaitlistEntry) GetCustomerPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerPhone
+}
+
+func (x *WaitlistEntry) GetPreferredDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PreferredDate
+}
+
+func (x *WaitlistEntry) GetPreferredTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PreferredTime
+}
+
+func (x *WaitlistEntry) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *WaitlistEntry) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type CreateEntryRequest struct {
 	ServiceId     int64  `json:"service_id,omitempty"`
 	CustomerName  string `json:"customer_name,omitempty"`
@@ -117,6 +205,54 @@ func (m *CreateEntryRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateEntryRequest) GetServiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ServiceId
+}
+
+func (x *CreateEntryRequest) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *CreateEntryRequest) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *CreateEntryRequest) GetCustomerPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerPhone
+}
+
+func (x *CreateEntryRequest) GetPreferredDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PreferredDate
+}
+
+func (x *CreateEntryRequest) GetPreferredTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PreferredTime
+}
+
 type CreateEntryResponse struct {
 	Id      int64  `json:"id,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -151,11 +287,35 @@ func (m *CreateEntryResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateEntryResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CreateEntryResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type ListEntriesRequest struct {
 }
 
 type ListEntriesResponse struct {
 	Entries []*WaitlistEntry `json:"entries,omitempty"`
+}
+
+func (x *ListEntriesResponse) GetEntries() []*WaitlistEntry {
+	if x == nil {
+		var zero []*WaitlistEntry
+		return zero
+	}
+	return x.Entries
 }
 
 type UpdateEntryRequest struct {
@@ -208,6 +368,78 @@ func (m *UpdateEntryRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateEntryRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateEntryRequest) GetServiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ServiceId
+}
+
+func (x *UpdateEntryRequest) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *UpdateEntryRequest) GetCustomerEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerEmail
+}
+
+func (x *UpdateEntryRequest) GetCustomerPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerPhone
+}
+
+func (x *UpdateEntryRequest) GetPreferredDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PreferredDate
+}
+
+func (x *UpdateEntryRequest) GetPreferredTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PreferredTime
+}
+
+func (x *UpdateEntryRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
 type UpdateEntryResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateEntryResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

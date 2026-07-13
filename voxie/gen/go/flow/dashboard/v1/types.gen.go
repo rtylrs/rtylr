@@ -40,6 +40,14 @@ func (m *GetFlowDashboardRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetFlowDashboardRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type GetFlowDashboardResponse struct {
 	OpenTasks         int64                `json:"open_tasks,omitempty"`
 	InProgressTasks   int64                `json:"in_progress_tasks,omitempty"`
@@ -105,4 +113,44 @@ func (m *GetFlowDashboardResponse) UnmarshalJSON(data []byte) error {
 		m.OverdueTasks = v
 	}
 	return nil
+}
+
+func (x *GetFlowDashboardResponse) GetOpenTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OpenTasks
+}
+
+func (x *GetFlowDashboardResponse) GetInProgressTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.InProgressTasks
+}
+
+func (x *GetFlowDashboardResponse) GetCompletedThisWeek() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CompletedThisWeek
+}
+
+func (x *GetFlowDashboardResponse) GetOverdueTasks() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OverdueTasks
+}
+
+func (x *GetFlowDashboardResponse) GetMyTasks() []*flow_task_v1.Task {
+	if x == nil {
+		var zero []*flow_task_v1.Task
+		return zero
+	}
+	return x.MyTasks
 }

@@ -90,9 +90,137 @@ func (m *OvertimeRequestPayload) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *OvertimeRequestPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *OvertimeRequestPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *OvertimeRequestPayload) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *OvertimeRequestPayload) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *OvertimeRequestPayload) GetPlannedExtraMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PlannedExtraMinutes
+}
+
+func (x *OvertimeRequestPayload) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
+func (x *OvertimeRequestPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *OvertimeRequestPayload) GetCurrentApprovalLevel() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.CurrentApprovalLevel
+}
+
+func (x *OvertimeRequestPayload) GetApprovedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ApprovedBy == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ApprovedBy
+}
+
+func (x *OvertimeRequestPayload) GetMultiplierApplied() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.MultiplierApplied == nil {
+		var zero float64
+		return zero
+	}
+	return *x.MultiplierApplied
+}
+
+func (x *OvertimeRequestPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *OvertimeRequestPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type ListOvertimeRequestsRequest struct {
 	EmployeeId *int64  `json:"employee_id,omitempty"`
 	Status     *string `json:"status,omitempty"`
+}
+
+func (x *ListOvertimeRequestsRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.EmployeeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.EmployeeId
+}
+
+func (x *ListOvertimeRequestsRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Status == nil {
+		var zero string
+		return zero
+	}
+	return *x.Status
 }
 
 type ListOvertimeRequestsResponse struct {
@@ -100,6 +228,38 @@ type ListOvertimeRequestsResponse struct {
 	Total    int64                     `json:"total,omitempty"`
 	Limit    int32                     `json:"limit,omitempty"`
 	Offset   int32                     `json:"offset,omitempty"`
+}
+
+func (x *ListOvertimeRequestsResponse) GetRequests() []*OvertimeRequestPayload {
+	if x == nil {
+		var zero []*OvertimeRequestPayload
+		return zero
+	}
+	return x.Requests
+}
+
+func (x *ListOvertimeRequestsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListOvertimeRequestsResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListOvertimeRequestsResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type CreateOvertimeRequestRequest struct {
@@ -138,14 +298,86 @@ func (m *CreateOvertimeRequestRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateOvertimeRequestRequest) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *CreateOvertimeRequestRequest) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Date
+}
+
+func (x *CreateOvertimeRequestRequest) GetPlannedExtraMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PlannedExtraMinutes
+}
+
+func (x *CreateOvertimeRequestRequest) GetReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Reason
+}
+
 type CreateOvertimeRequestResponse struct {
 	Request *OvertimeRequestPayload `json:"request,omitempty"`
+}
+
+func (x *CreateOvertimeRequestResponse) GetRequest() *OvertimeRequestPayload {
+	if x == nil {
+		var zero *OvertimeRequestPayload
+		return zero
+	}
+	return x.Request
 }
 
 type ApproveOvertimeBody struct {
 	Approved          bool     `json:"approved,omitempty"`
 	MultiplierApplied *float64 `json:"multiplier_applied,omitempty"`
 	RejectionReason   *string  `json:"rejection_reason,omitempty"`
+}
+
+func (x *ApproveOvertimeBody) GetApproved() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Approved
+}
+
+func (x *ApproveOvertimeBody) GetMultiplierApplied() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.MultiplierApplied == nil {
+		var zero float64
+		return zero
+	}
+	return *x.MultiplierApplied
+}
+
+func (x *ApproveOvertimeBody) GetRejectionReason() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.RejectionReason == nil {
+		var zero string
+		return zero
+	}
+	return *x.RejectionReason
 }
 
 type ApproveOvertimeRequest struct {
@@ -182,6 +414,30 @@ func (m *ApproveOvertimeRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *ApproveOvertimeRequest) GetOvertimeRequestId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OvertimeRequestId
+}
+
+func (x *ApproveOvertimeRequest) GetBody() *ApproveOvertimeBody {
+	if x == nil {
+		var zero *ApproveOvertimeBody
+		return zero
+	}
+	return x.Body
+}
+
 type ApproveOvertimeResponse struct {
 	Success bool `json:"success,omitempty"`
+}
+
+func (x *ApproveOvertimeResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }

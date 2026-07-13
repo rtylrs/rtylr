@@ -133,6 +133,278 @@ func (m *Task) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Task) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Task) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *Task) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *Task) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Task) GetParentTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ParentTaskId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ParentTaskId
+}
+
+func (x *Task) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *Task) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *Task) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *Task) GetPriority() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Priority
+}
+
+func (x *Task) GetAssigneeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.AssigneeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.AssigneeId
+}
+
+func (x *Task) GetReporterId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ReporterId
+}
+
+func (x *Task) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DueDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.DueDate
+}
+
+func (x *Task) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.StartDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.StartDate
+}
+
+func (x *Task) GetCompletedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.CompletedAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.CompletedAt
+}
+
+func (x *Task) GetEstimatedHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.EstimatedHours == nil {
+		var zero float64
+		return zero
+	}
+	return *x.EstimatedHours
+}
+
+func (x *Task) GetActualHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.ActualHours == nil {
+		var zero float64
+		return zero
+	}
+	return *x.ActualHours
+}
+
+func (x *Task) GetSortOrder() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.SortOrder
+}
+
+func (x *Task) GetLabels() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.Labels
+}
+
+func (x *Task) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Task) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+func (x *Task) GetIdentifier() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Identifier
+}
+
+func (x *Task) GetProjectName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ProjectName
+}
+
+func (x *Task) GetProjectColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ProjectColor
+}
+
+func (x *Task) GetAssigneeName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AssigneeName
+}
+
+func (x *Task) GetAssigneeInitials() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.AssigneeInitials
+}
+
+func (x *Task) GetSubtaskCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SubtaskCount
+}
+
+func (x *Task) GetSectionId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.SectionId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.SectionId
+}
+
+func (x *Task) GetCycleId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CycleId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CycleId
+}
+
+func (x *Task) GetMilestoneId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.MilestoneId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.MilestoneId
+}
+
 type TaskComment struct {
 	Id        int64  `json:"id,omitempty"`
 	TaskId    int64  `json:"task_id,omitempty"`
@@ -190,6 +462,62 @@ func (m *TaskComment) UnmarshalJSON(data []byte) error {
 		m.UserId = v
 	}
 	return nil
+}
+
+func (x *TaskComment) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TaskComment) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *TaskComment) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *TaskComment) GetContent() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Content
+}
+
+func (x *TaskComment) GetIsEdited() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsEdited
+}
+
+func (x *TaskComment) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *TaskComment) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
 }
 
 type TaskActivity struct {
@@ -251,6 +579,62 @@ func (m *TaskActivity) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TaskActivity) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TaskActivity) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *TaskActivity) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *TaskActivity) GetAction() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Action
+}
+
+func (x *TaskActivity) GetOldValue() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OldValue
+}
+
+func (x *TaskActivity) GetNewValue() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NewValue
+}
+
+func (x *TaskActivity) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type TaskPayloadCompact struct {
 	Id        int64  `json:"id,omitempty"`
 	Title     string `json:"title,omitempty"`
@@ -287,6 +671,54 @@ func (m *TaskPayloadCompact) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *TaskPayloadCompact) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TaskPayloadCompact) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *TaskPayloadCompact) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *TaskPayloadCompact) GetPriority() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Priority
+}
+
+func (x *TaskPayloadCompact) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *TaskPayloadCompact) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
 }
 
 type Attachment struct {
@@ -358,6 +790,62 @@ func (m *Attachment) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Attachment) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Attachment) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *Attachment) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Attachment) GetUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Url
+}
+
+func (x *Attachment) GetSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Size
+}
+
+func (x *Attachment) GetUploadedBy() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UploadedBy
+}
+
+func (x *Attachment) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type TimeLog struct {
 	Id              int64  `json:"id,omitempty"`
 	TaskId          int64  `json:"task_id,omitempty"`
@@ -427,6 +915,62 @@ func (m *TimeLog) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *TimeLog) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *TimeLog) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *TimeLog) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UserId
+}
+
+func (x *TimeLog) GetDurationMinutes() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.DurationMinutes
+}
+
+func (x *TimeLog) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *TimeLog) GetLoggedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LoggedAt
+}
+
+func (x *TimeLog) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
 type ListTasksRequest struct {
 	ProjectId   *int64  `json:"project_id,omitempty"`
 	Status      string  `json:"status,omitempty"`
@@ -435,8 +979,68 @@ type ListTasksRequest struct {
 	WorkspaceId *string `json:"workspace_id,omitempty"`
 }
 
+func (x *ListTasksRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
+}
+
+func (x *ListTasksRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *ListTasksRequest) GetAssigneeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.AssigneeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.AssigneeId
+}
+
+func (x *ListTasksRequest) GetPriority() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Priority
+}
+
+func (x *ListTasksRequest) GetWorkspaceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.WorkspaceId == nil {
+		var zero string
+		return zero
+	}
+	return *x.WorkspaceId
+}
+
 type ListTasksResponse struct {
 	Tasks []*Task `json:"tasks,omitempty"`
+}
+
+func (x *ListTasksResponse) GetTasks() []*Task {
+	if x == nil {
+		var zero []*Task
+		return zero
+	}
+	return x.Tasks
 }
 
 type GetMyTasksRequest struct {
@@ -444,6 +1048,14 @@ type GetMyTasksRequest struct {
 
 type GetMyTasksResponse struct {
 	Tasks []*Task `json:"tasks,omitempty"`
+}
+
+func (x *GetMyTasksResponse) GetTasks() []*Task {
+	if x == nil {
+		var zero []*Task
+		return zero
+	}
+	return x.Tasks
 }
 
 type GetMyTasksProjectRequest struct {
@@ -493,13 +1105,53 @@ func (m *GetMyTasksProjectResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetMyTasksProjectResponse) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *GetMyTasksProjectResponse) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type SearchTasksRequest struct {
 	Q           string `json:"q,omitempty"`
 	WorkspaceId string `json:"workspace_id,omitempty"`
 }
 
+func (x *SearchTasksRequest) GetQ() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Q
+}
+
+func (x *SearchTasksRequest) GetWorkspaceId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WorkspaceId
+}
+
 type SearchTasksResponse struct {
 	Tasks []*Task `json:"tasks,omitempty"`
+}
+
+func (x *SearchTasksResponse) GetTasks() []*Task {
+	if x == nil {
+		var zero []*Task
+		return zero
+	}
+	return x.Tasks
 }
 
 type CreateTaskRequest struct {
@@ -571,8 +1223,116 @@ func (m *CreateTaskRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateTaskRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *CreateTaskRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *CreateTaskRequest) GetParentTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ParentTaskId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ParentTaskId
+}
+
+func (x *CreateTaskRequest) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *CreateTaskRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateTaskRequest) GetPriority() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Priority
+}
+
+func (x *CreateTaskRequest) GetAssigneeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.AssigneeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.AssigneeId
+}
+
+func (x *CreateTaskRequest) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *CreateTaskRequest) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *CreateTaskRequest) GetEstimatedHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.EstimatedHours == nil {
+		var zero float64
+		return zero
+	}
+	return *x.EstimatedHours
+}
+
+func (x *CreateTaskRequest) GetLabels() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.Labels
+}
+
 type CreateTaskResponse struct {
 	Task *Task `json:"task,omitempty"`
+}
+
+func (x *CreateTaskResponse) GetTask() *Task {
+	if x == nil {
+		var zero *Task
+		return zero
+	}
+	return x.Task
 }
 
 type GetTaskDetailRequest struct {
@@ -608,11 +1368,51 @@ func (m *GetTaskDetailRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetTaskDetailRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type GetTaskDetailResponse struct {
 	Task     *Task           `json:"task,omitempty"`
 	Subtasks []*Task         `json:"subtasks,omitempty"`
 	Comments []*TaskComment  `json:"comments,omitempty"`
 	Activity []*TaskActivity `json:"activity,omitempty"`
+}
+
+func (x *GetTaskDetailResponse) GetTask() *Task {
+	if x == nil {
+		var zero *Task
+		return zero
+	}
+	return x.Task
+}
+
+func (x *GetTaskDetailResponse) GetSubtasks() []*Task {
+	if x == nil {
+		var zero []*Task
+		return zero
+	}
+	return x.Subtasks
+}
+
+func (x *GetTaskDetailResponse) GetComments() []*TaskComment {
+	if x == nil {
+		var zero []*TaskComment
+		return zero
+	}
+	return x.Comments
+}
+
+func (x *GetTaskDetailResponse) GetActivity() []*TaskActivity {
+	if x == nil {
+		var zero []*TaskActivity
+		return zero
+	}
+	return x.Activity
 }
 
 type UpdateTaskBody struct {
@@ -661,6 +1461,74 @@ func (m *UpdateTaskBody) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateTaskBody) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *UpdateTaskBody) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UpdateTaskBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *UpdateTaskBody) GetPriority() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Priority
+}
+
+func (x *UpdateTaskBody) GetAssigneeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.AssigneeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.AssigneeId
+}
+
+func (x *UpdateTaskBody) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *UpdateTaskBody) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *UpdateTaskBody) GetLabels() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.Labels
+}
+
 type UpdateTaskRequest struct {
 	Id   int64           `json:"id,omitempty"`
 	Body *UpdateTaskBody `json:"body,omitempty"`
@@ -695,12 +1563,44 @@ func (m *UpdateTaskRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateTaskRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateTaskRequest) GetBody() *UpdateTaskBody {
+	if x == nil {
+		var zero *UpdateTaskBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateTaskResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (x *UpdateTaskResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type UpdateTaskStatusBody struct {
 	Status string `json:"status,omitempty"`
+}
+
+func (x *UpdateTaskStatusBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type UpdateTaskStatusRequest struct {
@@ -737,8 +1637,32 @@ func (m *UpdateTaskStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateTaskStatusRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateTaskStatusRequest) GetBody() *UpdateTaskStatusBody {
+	if x == nil {
+		var zero *UpdateTaskStatusBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateTaskStatusResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateTaskStatusResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteTaskRequest struct {
@@ -774,8 +1698,24 @@ func (m *DeleteTaskRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteTaskRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteTaskResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteTaskResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type CreateSubtaskRequest struct {
@@ -840,6 +1780,94 @@ func (m *CreateSubtaskRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateSubtaskRequest) GetParentTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ParentTaskId
+}
+
+func (x *CreateSubtaskRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *CreateSubtaskRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *CreateSubtaskRequest) GetTitle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Title
+}
+
+func (x *CreateSubtaskRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateSubtaskRequest) GetPriority() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Priority
+}
+
+func (x *CreateSubtaskRequest) GetAssigneeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.AssigneeId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.AssigneeId
+}
+
+func (x *CreateSubtaskRequest) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
+}
+
+func (x *CreateSubtaskRequest) GetStartDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartDate
+}
+
+func (x *CreateSubtaskRequest) GetEstimatedHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.EstimatedHours == nil {
+		var zero float64
+		return zero
+	}
+	return *x.EstimatedHours
+}
+
 type CreateSubtaskResponse struct {
 	TaskId  int64  `json:"task_id,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -872,6 +1900,22 @@ func (m *CreateSubtaskResponse) UnmarshalJSON(data []byte) error {
 		m.TaskId = v
 	}
 	return nil
+}
+
+func (x *CreateSubtaskResponse) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *CreateSubtaskResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetSubtasksRequest struct {
@@ -907,8 +1951,24 @@ func (m *GetSubtasksRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetSubtasksRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
 type GetSubtasksResponse struct {
 	Subtasks []*TaskPayloadCompact `json:"subtasks,omitempty"`
+}
+
+func (x *GetSubtasksResponse) GetSubtasks() []*TaskPayloadCompact {
+	if x == nil {
+		var zero []*TaskPayloadCompact
+		return zero
+	}
+	return x.Subtasks
 }
 
 type AddCommentRequest struct {
@@ -945,8 +2005,32 @@ func (m *AddCommentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *AddCommentRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *AddCommentRequest) GetContent() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Content
+}
+
 type AddCommentResponse struct {
 	Comment *TaskComment `json:"comment,omitempty"`
+}
+
+func (x *AddCommentResponse) GetComment() *TaskComment {
+	if x == nil {
+		var zero *TaskComment
+		return zero
+	}
+	return x.Comment
 }
 
 type DeleteCommentRequest struct {
@@ -982,8 +2066,24 @@ func (m *DeleteCommentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteCommentRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteCommentResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteCommentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetTaskActivityRequest struct {
@@ -1019,8 +2119,24 @@ func (m *GetTaskActivityRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetTaskActivityRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
 type GetTaskActivityResponse struct {
 	Activity []*TaskActivity `json:"activity,omitempty"`
+}
+
+func (x *GetTaskActivityResponse) GetActivity() []*TaskActivity {
+	if x == nil {
+		var zero []*TaskActivity
+		return zero
+	}
+	return x.Activity
 }
 
 type CreateAttachmentRequest struct {
@@ -1069,6 +2185,38 @@ func (m *CreateAttachmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateAttachmentRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *CreateAttachmentRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateAttachmentRequest) GetUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Url
+}
+
+func (x *CreateAttachmentRequest) GetSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Size
+}
+
 type CreateAttachmentResponse struct {
 	AttachmentId int64  `json:"attachment_id,omitempty"`
 	Message      string `json:"message,omitempty"`
@@ -1101,6 +2249,22 @@ func (m *CreateAttachmentResponse) UnmarshalJSON(data []byte) error {
 		m.AttachmentId = v
 	}
 	return nil
+}
+
+func (x *CreateAttachmentResponse) GetAttachmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AttachmentId
+}
+
+func (x *CreateAttachmentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetAttachmentsRequest struct {
@@ -1136,8 +2300,24 @@ func (m *GetAttachmentsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetAttachmentsRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
 type GetAttachmentsResponse struct {
 	Attachments []*Attachment `json:"attachments,omitempty"`
+}
+
+func (x *GetAttachmentsResponse) GetAttachments() []*Attachment {
+	if x == nil {
+		var zero []*Attachment
+		return zero
+	}
+	return x.Attachments
 }
 
 type DeleteAttachmentRequest struct {
@@ -1173,8 +2353,24 @@ func (m *DeleteAttachmentRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteAttachmentRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteAttachmentResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteAttachmentResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type CreateTimeLogRequest struct {
@@ -1222,6 +2418,30 @@ func (m *CreateTimeLogRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateTimeLogRequest) GetDurationMinutes() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.DurationMinutes
+}
+
+func (x *CreateTimeLogRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *CreateTimeLogRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
 type CreateTimeLogResponse struct {
 	TimeLogId int64  `json:"time_log_id,omitempty"`
 	Message   string `json:"message,omitempty"`
@@ -1254,6 +2474,22 @@ func (m *CreateTimeLogResponse) UnmarshalJSON(data []byte) error {
 		m.TimeLogId = v
 	}
 	return nil
+}
+
+func (x *CreateTimeLogResponse) GetTimeLogId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TimeLogId
+}
+
+func (x *CreateTimeLogResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type GetTimeLogsRequest struct {
@@ -1289,8 +2525,24 @@ func (m *GetTimeLogsRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *GetTimeLogsRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
 type GetTimeLogsResponse struct {
 	TimeLogs []*TimeLog `json:"time_logs,omitempty"`
+}
+
+func (x *GetTimeLogsResponse) GetTimeLogs() []*TimeLog {
+	if x == nil {
+		var zero []*TimeLog
+		return zero
+	}
+	return x.TimeLogs
 }
 
 type DeleteTimeLogRequest struct {
@@ -1326,6 +2578,22 @@ func (m *DeleteTimeLogRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteTimeLogRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteTimeLogResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteTimeLogResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

@@ -54,6 +54,54 @@ func (m *KDSItem) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *KDSItem) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *KDSItem) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *KDSItem) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *KDSItem) GetQuantity() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Quantity
+}
+
+func (x *KDSItem) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
+}
+
+func (x *KDSItem) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
 type KDSOrder struct {
 	Id           int64      `json:"id,omitempty"`
 	OrderNumber  string     `json:"order_number,omitempty"`
@@ -105,6 +153,78 @@ func (m *KDSOrder) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *KDSOrder) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *KDSOrder) GetOrderNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OrderNumber
+}
+
+func (x *KDSOrder) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *KDSOrder) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *KDSOrder) GetTableId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TableId
+}
+
+func (x *KDSOrder) GetCustomerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CustomerName
+}
+
+func (x *KDSOrder) GetKitchenNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.KitchenNotes
+}
+
+func (x *KDSOrder) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *KDSOrder) GetItems() []*KDSItem {
+	if x == nil {
+		var zero []*KDSItem
+		return zero
+	}
+	return x.Items
+}
+
 type ListKDSOrdersRequest struct {
 }
 
@@ -112,8 +232,24 @@ type ListKDSOrdersResponse struct {
 	Orders []*KDSOrder `json:"orders,omitempty"`
 }
 
+func (x *ListKDSOrdersResponse) GetOrders() []*KDSOrder {
+	if x == nil {
+		var zero []*KDSOrder
+		return zero
+	}
+	return x.Orders
+}
+
 type UpdateKDSItemByIDBody struct {
 	Status string `json:"status,omitempty"`
+}
+
+func (x *UpdateKDSItemByIDBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type UpdateKDSItemByIDRequest struct {
@@ -150,12 +286,44 @@ func (m *UpdateKDSItemByIDRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateKDSItemByIDRequest) GetItemId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ItemId
+}
+
+func (x *UpdateKDSItemByIDRequest) GetBody() *UpdateKDSItemByIDBody {
+	if x == nil {
+		var zero *UpdateKDSItemByIDBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateKDSItemByIDResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
+func (x *UpdateKDSItemByIDResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type UpdateKDSItemStatusBody struct {
 	Status string `json:"status,omitempty"`
+}
+
+func (x *UpdateKDSItemStatusBody) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
 }
 
 type UpdateKDSItemStatusRequest struct {
@@ -203,6 +371,38 @@ func (m *UpdateKDSItemStatusRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateKDSItemStatusRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
+}
+
+func (x *UpdateKDSItemStatusRequest) GetItemId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ItemId
+}
+
+func (x *UpdateKDSItemStatusRequest) GetBody() *UpdateKDSItemStatusBody {
+	if x == nil {
+		var zero *UpdateKDSItemStatusBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateKDSItemStatusResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateKDSItemStatusResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

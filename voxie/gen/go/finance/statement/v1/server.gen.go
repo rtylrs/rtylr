@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -22,12 +23,31 @@ func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return 
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
 
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
+
 type StatementServiceServer interface {
 	GetBalanceSheet(ctx context.Context, req *GetBalanceSheetRequest) (*GetBalanceSheetResponse, error)
 	GetCashFlow(ctx context.Context, req *GetCashFlowRequest) (*GetCashFlowResponse, error)
 }
 
-func RegisterStatementServiceServer(mux *http.ServeMux, srv StatementServiceServer) {
+func RegisterStatementServiceServer(srv StatementServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterStatementServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /finance/statement/v1/balance-sheet", func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetBalanceSheetRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
@@ -63,4 +83,5 @@ func RegisterStatementServiceServer(mux *http.ServeMux, srv StatementServiceServ
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

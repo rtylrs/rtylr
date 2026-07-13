@@ -58,6 +58,86 @@ func (m *Template) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Template) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Template) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Template) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Template) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *Template) GetSubject() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Subject
+}
+
+func (x *Template) GetBody() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Body
+}
+
+func (x *Template) GetVariables() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Variables
+}
+
+func (x *Template) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Template) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Template) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateTemplateRequest struct {
 	Name      string `json:"name,omitempty"`
 	Type      string `json:"type,omitempty"`
@@ -65,6 +145,54 @@ type CreateTemplateRequest struct {
 	Body      string `json:"body,omitempty"`
 	Variables string `json:"variables,omitempty"`
 	IsActive  bool   `json:"is_active,omitempty"`
+}
+
+func (x *CreateTemplateRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateTemplateRequest) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *CreateTemplateRequest) GetSubject() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Subject
+}
+
+func (x *CreateTemplateRequest) GetBody() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Body
+}
+
+func (x *CreateTemplateRequest) GetVariables() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Variables
+}
+
+func (x *CreateTemplateRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
 }
 
 type CreateTemplateResponse struct {
@@ -101,6 +229,22 @@ func (m *CreateTemplateResponse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateTemplateResponse) GetTemplateId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TemplateId
+}
+
+func (x *CreateTemplateResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
 type DeleteTemplateRequest struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -134,8 +278,24 @@ func (m *DeleteTemplateRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteTemplateRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteTemplateResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteTemplateResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListTemplatesRequest struct {
@@ -145,6 +305,14 @@ type ListTemplatesResponse struct {
 	Templates []*Template `json:"templates,omitempty"`
 }
 
+func (x *ListTemplatesResponse) GetTemplates() []*Template {
+	if x == nil {
+		var zero []*Template
+		return zero
+	}
+	return x.Templates
+}
+
 type UpdateTemplateBody struct {
 	Name      string `json:"name,omitempty"`
 	Type      string `json:"type,omitempty"`
@@ -152,6 +320,54 @@ type UpdateTemplateBody struct {
 	Body      string `json:"body,omitempty"`
 	Variables string `json:"variables,omitempty"`
 	IsActive  bool   `json:"is_active,omitempty"`
+}
+
+func (x *UpdateTemplateBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateTemplateBody) GetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Type
+}
+
+func (x *UpdateTemplateBody) GetSubject() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Subject
+}
+
+func (x *UpdateTemplateBody) GetBody() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Body
+}
+
+func (x *UpdateTemplateBody) GetVariables() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Variables
+}
+
+func (x *UpdateTemplateBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
 }
 
 type UpdateTemplateRequest struct {
@@ -188,6 +404,30 @@ func (m *UpdateTemplateRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateTemplateRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateTemplateRequest) GetBody() *UpdateTemplateBody {
+	if x == nil {
+		var zero *UpdateTemplateBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateTemplateResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateTemplateResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

@@ -18,6 +18,78 @@ type POSFeatureSettings struct {
 	CashDrawer     bool `json:"cash_drawer,omitempty"`
 }
 
+func (x *POSFeatureSettings) GetTables() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Tables
+}
+
+func (x *POSFeatureSettings) GetKitchenDisplay() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.KitchenDisplay
+}
+
+func (x *POSFeatureSettings) GetModifiers() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Modifiers
+}
+
+func (x *POSFeatureSettings) GetCombos() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Combos
+}
+
+func (x *POSFeatureSettings) GetTips() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Tips
+}
+
+func (x *POSFeatureSettings) GetGiftCards() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.GiftCards
+}
+
+func (x *POSFeatureSettings) GetCustomers() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Customers
+}
+
+func (x *POSFeatureSettings) GetInventory() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Inventory
+}
+
+func (x *POSFeatureSettings) GetCashDrawer() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.CashDrawer
+}
+
 type POSBusinessSettings struct {
 	Id              int64               `json:"id,omitempty"`
 	BusinessId      int64               `json:"business_id,omitempty"`
@@ -68,11 +140,83 @@ func (m *POSBusinessSettings) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *POSBusinessSettings) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *POSBusinessSettings) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *POSBusinessSettings) GetBusinessProfile() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BusinessProfile
+}
+
+func (x *POSBusinessSettings) GetTheme() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Theme
+}
+
+func (x *POSBusinessSettings) GetFeatures() *POSFeatureSettings {
+	if x == nil {
+		var zero *POSFeatureSettings
+		return zero
+	}
+	return x.Features
+}
+
+func (x *POSBusinessSettings) GetReceiptFooter() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReceiptFooter
+}
+
+func (x *POSBusinessSettings) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *POSBusinessSettings) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type GetPOSSettingsRequest struct {
 }
 
 type GetPOSSettingsResponse struct {
 	Settings *POSBusinessSettings `json:"settings,omitempty"`
+}
+
+func (x *GetPOSSettingsResponse) GetSettings() *POSBusinessSettings {
+	if x == nil {
+		var zero *POSBusinessSettings
+		return zero
+	}
+	return x.Settings
 }
 
 type UpdatePOSSettingsRequest struct {
@@ -82,7 +226,55 @@ type UpdatePOSSettingsRequest struct {
 	ReceiptFooter   string              `json:"receipt_footer,omitempty"`
 }
 
+func (x *UpdatePOSSettingsRequest) GetBusinessProfile() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.BusinessProfile
+}
+
+func (x *UpdatePOSSettingsRequest) GetTheme() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Theme
+}
+
+func (x *UpdatePOSSettingsRequest) GetFeatures() *POSFeatureSettings {
+	if x == nil {
+		var zero *POSFeatureSettings
+		return zero
+	}
+	return x.Features
+}
+
+func (x *UpdatePOSSettingsRequest) GetReceiptFooter() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReceiptFooter
+}
+
 type UpdatePOSSettingsResponse struct {
 	Settings *POSBusinessSettings `json:"settings,omitempty"`
 	Message  string               `json:"message,omitempty"`
+}
+
+func (x *UpdatePOSSettingsResponse) GetSettings() *POSBusinessSettings {
+	if x == nil {
+		var zero *POSBusinessSettings
+		return zero
+	}
+	return x.Settings
+}
+
+func (x *UpdatePOSSettingsResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

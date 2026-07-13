@@ -70,6 +70,102 @@ func (m *Warehouse) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *Warehouse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *Warehouse) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *Warehouse) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *Warehouse) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *Warehouse) GetCity() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.City
+}
+
+func (x *Warehouse) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *Warehouse) GetManagerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ManagerName
+}
+
+func (x *Warehouse) GetCapacity() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Capacity
+}
+
+func (x *Warehouse) GetIsDefault() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsDefault
+}
+
+func (x *Warehouse) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
+func (x *Warehouse) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *Warehouse) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
 type CreateWarehouseRequest struct {
 	Name        string `json:"name,omitempty"`
 	Address     string `json:"address,omitempty"`
@@ -110,6 +206,70 @@ func (m *CreateWarehouseRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *CreateWarehouseRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *CreateWarehouseRequest) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *CreateWarehouseRequest) GetCity() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.City
+}
+
+func (x *CreateWarehouseRequest) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *CreateWarehouseRequest) GetManagerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ManagerName
+}
+
+func (x *CreateWarehouseRequest) GetCapacity() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Capacity
+}
+
+func (x *CreateWarehouseRequest) GetIsDefault() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsDefault
+}
+
+func (x *CreateWarehouseRequest) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type CreateWarehouseResponse struct {
 	WarehouseId int64  `json:"warehouse_id,omitempty"`
 	Message     string `json:"message,omitempty"`
@@ -142,6 +302,22 @@ func (m *CreateWarehouseResponse) UnmarshalJSON(data []byte) error {
 		m.WarehouseId = v
 	}
 	return nil
+}
+
+func (x *CreateWarehouseResponse) GetWarehouseId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WarehouseId
+}
+
+func (x *CreateWarehouseResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type DeleteWarehouseRequest struct {
@@ -177,8 +353,24 @@ func (m *DeleteWarehouseRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *DeleteWarehouseRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
 type DeleteWarehouseResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteWarehouseResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
 
 type ListWarehousesRequest struct {
@@ -186,6 +378,14 @@ type ListWarehousesRequest struct {
 
 type ListWarehousesResponse struct {
 	Warehouses []*Warehouse `json:"warehouses,omitempty"`
+}
+
+func (x *ListWarehousesResponse) GetWarehouses() []*Warehouse {
+	if x == nil {
+		var zero []*Warehouse
+		return zero
+	}
+	return x.Warehouses
 }
 
 type UpdateWarehouseBody struct {
@@ -228,6 +428,70 @@ func (m *UpdateWarehouseBody) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateWarehouseBody) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *UpdateWarehouseBody) GetAddress() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Address
+}
+
+func (x *UpdateWarehouseBody) GetCity() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.City
+}
+
+func (x *UpdateWarehouseBody) GetCountry() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Country
+}
+
+func (x *UpdateWarehouseBody) GetManagerName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ManagerName
+}
+
+func (x *UpdateWarehouseBody) GetCapacity() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Capacity
+}
+
+func (x *UpdateWarehouseBody) GetIsDefault() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsDefault
+}
+
+func (x *UpdateWarehouseBody) GetIsActive() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsActive
+}
+
 type UpdateWarehouseRequest struct {
 	Id   int64                `json:"id,omitempty"`
 	Body *UpdateWarehouseBody `json:"body,omitempty"`
@@ -262,6 +526,30 @@ func (m *UpdateWarehouseRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UpdateWarehouseRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateWarehouseRequest) GetBody() *UpdateWarehouseBody {
+	if x == nil {
+		var zero *UpdateWarehouseBody
+		return zero
+	}
+	return x.Body
+}
+
 type UpdateWarehouseResponse struct {
 	Message string `json:"message,omitempty"`
+}
+
+func (x *UpdateWarehouseResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

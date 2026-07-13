@@ -9,6 +9,46 @@ type InsightsSettings struct {
 	FavoriteReports  []string `json:"favorite_reports,omitempty"`
 }
 
+func (x *InsightsSettings) GetDefaultPeriod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DefaultPeriod
+}
+
+func (x *InsightsSettings) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *InsightsSettings) GetComparePrevious() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.ComparePrevious
+}
+
+func (x *InsightsSettings) GetDashboardWidgets() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.DashboardWidgets
+}
+
+func (x *InsightsSettings) GetFavoriteReports() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.FavoriteReports
+}
+
 type GetInsightsSettingsRequest struct {
 }
 
@@ -16,10 +56,34 @@ type GetInsightsSettingsResponse struct {
 	Settings *InsightsSettings `json:"settings,omitempty"`
 }
 
+func (x *GetInsightsSettingsResponse) GetSettings() *InsightsSettings {
+	if x == nil {
+		var zero *InsightsSettings
+		return zero
+	}
+	return x.Settings
+}
+
 type UpdateInsightsSettingsRequest struct {
 	Settings *InsightsSettings `json:"settings,omitempty"`
 }
 
+func (x *UpdateInsightsSettingsRequest) GetSettings() *InsightsSettings {
+	if x == nil {
+		var zero *InsightsSettings
+		return zero
+	}
+	return x.Settings
+}
+
 type UpdateInsightsSettingsResponse struct {
 	Settings *InsightsSettings `json:"settings,omitempty"`
+}
+
+func (x *UpdateInsightsSettingsResponse) GetSettings() *InsightsSettings {
+	if x == nil {
+		var zero *InsightsSettings
+		return zero
+	}
+	return x.Settings
 }

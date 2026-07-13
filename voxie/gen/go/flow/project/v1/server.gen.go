@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -21,6 +22,17 @@ func parseUint64(s string) uint64   { v, _ := strconv.ParseUint(s, 10, 64); retu
 func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return float32(v) }
 func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
 func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
+
+type ServerOption func(*serverOptions)
+
+type serverOptions struct {
+	mux *http.ServeMux
+}
+
+// WithMux supplies the http.ServeMux to register routes onto - required.
+func WithMux(mux *http.ServeMux) ServerOption {
+	return func(o *serverOptions) { o.mux = mux }
+}
 
 type ProjectServiceServer interface {
 	ListProjects(ctx context.Context, req *ListProjectsRequest) (*ListProjectsResponse, error)
@@ -41,7 +53,15 @@ type ProjectServiceServer interface {
 	MoveProject(ctx context.Context, req *MoveProjectRequest) (*MoveProjectResponse, error)
 }
 
-func RegisterProjectServiceServer(mux *http.ServeMux, srv ProjectServiceServer) {
+func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption) error {
+	var o serverOptions
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.mux == nil {
+		return fmt.Errorf("RegisterProjectServiceServer: WithMux option is required")
+	}
+	mux := o.mux
 	mux.HandleFunc("GET /flow/project/v1/projects", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListProjectsRequest)
 		if r.URL.Query().Get("workspace_id") != "" {
@@ -377,4 +397,5 @@ func RegisterProjectServiceServer(mux *http.ServeMux, srv ProjectServiceServer) 
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	})
+	return nil
 }

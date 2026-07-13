@@ -65,6 +65,62 @@ func (m *UnmatchedBankTransaction) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *UnmatchedBankTransaction) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UnmatchedBankTransaction) GetBankAccountId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BankAccountId
+}
+
+func (x *UnmatchedBankTransaction) GetAmountMinorUnits() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AmountMinorUnits
+}
+
+func (x *UnmatchedBankTransaction) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *UnmatchedBankTransaction) GetOccurredAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.OccurredAt
+}
+
+func (x *UnmatchedBankTransaction) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
+}
+
+func (x *UnmatchedBankTransaction) GetExternalId() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ExternalId
+}
+
 type UnmatchedInvoice struct {
 	Id               int64  `json:"id,omitempty"`
 	InvoiceNumber    string `json:"invoice_number,omitempty"`
@@ -112,6 +168,62 @@ func (m *UnmatchedInvoice) UnmarshalJSON(data []byte) error {
 		m.AmountMinorUnits = v
 	}
 	return nil
+}
+
+func (x *UnmatchedInvoice) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UnmatchedInvoice) GetInvoiceNumber() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.InvoiceNumber
+}
+
+func (x *UnmatchedInvoice) GetClientName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ClientName
+}
+
+func (x *UnmatchedInvoice) GetAmountMinorUnits() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AmountMinorUnits
+}
+
+func (x *UnmatchedInvoice) GetCurrency() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Currency
+}
+
+func (x *UnmatchedInvoice) GetIssueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.IssueDate
+}
+
+func (x *UnmatchedInvoice) GetDueDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DueDate
 }
 
 type MatchSuggestion struct {
@@ -172,6 +284,54 @@ func (m *MatchSuggestion) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *MatchSuggestion) GetBankFeedId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BankFeedId
+}
+
+func (x *MatchSuggestion) GetTargetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TargetType
+}
+
+func (x *MatchSuggestion) GetTargetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TargetId
+}
+
+func (x *MatchSuggestion) GetAmountMinorUnits() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.AmountMinorUnits
+}
+
+func (x *MatchSuggestion) GetDaysApart() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.DaysApart
+}
+
+func (x *MatchSuggestion) GetScore() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.Score
+}
+
 type GetOverviewRequest struct {
 }
 
@@ -179,6 +339,30 @@ type GetOverviewResponse struct {
 	UnmatchedBankTxns []*UnmatchedBankTransaction `json:"unmatched_bank_txns,omitempty"`
 	UnmatchedInvoices []*UnmatchedInvoice         `json:"unmatched_invoices,omitempty"`
 	Suggestions       []*MatchSuggestion          `json:"suggestions,omitempty"`
+}
+
+func (x *GetOverviewResponse) GetUnmatchedBankTxns() []*UnmatchedBankTransaction {
+	if x == nil {
+		var zero []*UnmatchedBankTransaction
+		return zero
+	}
+	return x.UnmatchedBankTxns
+}
+
+func (x *GetOverviewResponse) GetUnmatchedInvoices() []*UnmatchedInvoice {
+	if x == nil {
+		var zero []*UnmatchedInvoice
+		return zero
+	}
+	return x.UnmatchedInvoices
+}
+
+func (x *GetOverviewResponse) GetSuggestions() []*MatchSuggestion {
+	if x == nil {
+		var zero []*MatchSuggestion
+		return zero
+	}
+	return x.Suggestions
 }
 
 type MatchRequest struct {
@@ -226,6 +410,30 @@ func (m *MatchRequest) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (x *MatchRequest) GetBankFeedId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BankFeedId
+}
+
+func (x *MatchRequest) GetTargetType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.TargetType
+}
+
+func (x *MatchRequest) GetTargetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TargetId
+}
+
 type MatchResponse struct {
 	Id      int64  `json:"id,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -258,4 +466,20 @@ func (m *MatchResponse) UnmarshalJSON(data []byte) error {
 		m.Id = v
 	}
 	return nil
+}
+
+func (x *MatchResponse) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *MatchResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }
