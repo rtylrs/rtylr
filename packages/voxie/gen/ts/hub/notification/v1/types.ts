@@ -6,37 +6,162 @@ title?: string;
 body?: string;
 type?: string;
 read?: boolean;
-created_at?: string;
+createdAt?: string;
 link?: string;
 }
 
+export function decodeNotification(v: any): Notification {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+title: v.title,
+body: v.body,
+type: v.type,
+read: v.read,
+createdAt: v.created_at,
+link: v.link,
+};
+}
+
+export function encodeNotification(v: Notification): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.title !== undefined) { out.title = v.title; }
+if (v.body !== undefined) { out.body = v.body; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.read !== undefined) { out.read = v.read; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.link !== undefined) { out.link = v.link; }
+return out;
+}
+
 export interface ListNotificationsRequest {
+}
+
+export function decodeListNotificationsRequest(v: any): ListNotificationsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListNotificationsRequest(v: ListNotificationsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListNotificationsResponse {
 notifications?: (Notification)[];
 }
 
+export function decodeListNotificationsResponse(v: any): ListNotificationsResponse {
+if (v === null || v === undefined) return v;
+return {
+notifications: (v.notifications !== undefined ? (v.notifications as any[]).map(decodeNotification) : v.notifications),
+};
+}
+
+export function encodeListNotificationsResponse(v: ListNotificationsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.notifications !== undefined) { out.notifications = (v.notifications as any[]).map(encodeNotification); }
+return out;
+}
+
 export interface MarkAllReadRequest {
+}
+
+export function decodeMarkAllReadRequest(v: any): MarkAllReadRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeMarkAllReadRequest(v: MarkAllReadRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface MarkAllReadResponse {
 message?: string;
 }
 
+export function decodeMarkAllReadResponse(v: any): MarkAllReadResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeMarkAllReadResponse(v: MarkAllReadResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface MarkNotificationReadRequest {
 id?: string;
+}
+
+export function decodeMarkNotificationReadRequest(v: any): MarkNotificationReadRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeMarkNotificationReadRequest(v: MarkNotificationReadRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface MarkNotificationReadResponse {
 message?: string;
 }
 
+export function decodeMarkNotificationReadResponse(v: any): MarkNotificationReadResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeMarkNotificationReadResponse(v: MarkNotificationReadResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface MarkNotificationsReadRequest {
 ids?: (string)[];
 }
 
+export function decodeMarkNotificationsReadRequest(v: any): MarkNotificationsReadRequest {
+if (v === null || v === undefined) return v;
+return {
+ids: v.ids,
+};
+}
+
+export function encodeMarkNotificationsReadRequest(v: MarkNotificationsReadRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.ids !== undefined) { out.ids = v.ids; }
+return out;
+}
+
 export interface MarkNotificationsReadResponse {
 message?: string;
+}
+
+export function decodeMarkNotificationsReadResponse(v: any): MarkNotificationsReadResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeMarkNotificationsReadResponse(v: MarkNotificationsReadResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

@@ -2,80 +2,308 @@
 
 export interface LoyaltyConfig {
 id?: string;
-business_id?: string;
-is_enabled?: boolean;
-points_per_dollar?: number;
-redemption_rate?: number;
-min_redeem_points?: number;
-created_at?: string;
-updated_at?: string;
+businessId?: string;
+isEnabled?: boolean;
+pointsPerDollar?: number;
+redemptionRate?: number;
+minRedeemPoints?: number;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeLoyaltyConfig(v: any): LoyaltyConfig {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+businessId: v.business_id,
+isEnabled: v.is_enabled,
+pointsPerDollar: v.points_per_dollar,
+redemptionRate: v.redemption_rate,
+minRedeemPoints: v.min_redeem_points,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeLoyaltyConfig(v: LoyaltyConfig): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.isEnabled !== undefined) { out.is_enabled = v.isEnabled; }
+if (v.pointsPerDollar !== undefined) { out.points_per_dollar = v.pointsPerDollar; }
+if (v.redemptionRate !== undefined) { out.redemption_rate = v.redemptionRate; }
+if (v.minRedeemPoints !== undefined) { out.min_redeem_points = v.minRedeemPoints; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface LoyaltyTransaction {
 id?: string;
-business_id?: string;
-customer_id?: string;
-order_id?: string;
+businessId?: string;
+customerId?: string;
+orderId?: string;
 type?: string;
 points?: number;
-balance_after?: number;
+balanceAfter?: number;
 note?: string;
-created_at?: string;
+createdAt?: string;
+}
+
+export function decodeLoyaltyTransaction(v: any): LoyaltyTransaction {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+businessId: v.business_id,
+customerId: v.customer_id,
+orderId: v.order_id,
+type: v.type,
+points: v.points,
+balanceAfter: v.balance_after,
+note: v.note,
+createdAt: v.created_at,
+};
+}
+
+export function encodeLoyaltyTransaction(v: LoyaltyTransaction): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.points !== undefined) { out.points = v.points; }
+if (v.balanceAfter !== undefined) { out.balance_after = v.balanceAfter; }
+if (v.note !== undefined) { out.note = v.note; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface EarnPointsRequest {
-customer_id?: string;
-order_id?: string;
+customerId?: string;
+orderId?: string;
 points?: number;
 }
 
+export function decodeEarnPointsRequest(v: any): EarnPointsRequest {
+if (v === null || v === undefined) return v;
+return {
+customerId: v.customer_id,
+orderId: v.order_id,
+points: v.points,
+};
+}
+
+export function encodeEarnPointsRequest(v: EarnPointsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
+if (v.points !== undefined) { out.points = v.points; }
+return out;
+}
+
 export interface EarnPointsResponse {
-transaction_id?: string;
+transactionId?: string;
 message?: string;
 }
 
+export function decodeEarnPointsResponse(v: any): EarnPointsResponse {
+if (v === null || v === undefined) return v;
+return {
+transactionId: v.transaction_id,
+message: v.message,
+};
+}
+
+export function encodeEarnPointsResponse(v: EarnPointsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.transactionId !== undefined) { out.transaction_id = v.transactionId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface GetLoyaltyBalanceRequest {
-customer_id?: string;
+customerId?: string;
+}
+
+export function decodeGetLoyaltyBalanceRequest(v: any): GetLoyaltyBalanceRequest {
+if (v === null || v === undefined) return v;
+return {
+customerId: v.customer_id,
+};
+}
+
+export function encodeGetLoyaltyBalanceRequest(v: GetLoyaltyBalanceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
+return out;
 }
 
 export interface GetLoyaltyBalanceResponse {
-customer_id?: string;
+customerId?: string;
 balance?: number;
 }
 
+export function decodeGetLoyaltyBalanceResponse(v: any): GetLoyaltyBalanceResponse {
+if (v === null || v === undefined) return v;
+return {
+customerId: v.customer_id,
+balance: v.balance,
+};
+}
+
+export function encodeGetLoyaltyBalanceResponse(v: GetLoyaltyBalanceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
+if (v.balance !== undefined) { out.balance = v.balance; }
+return out;
+}
+
 export interface GetLoyaltyConfigRequest {
+}
+
+export function decodeGetLoyaltyConfigRequest(v: any): GetLoyaltyConfigRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetLoyaltyConfigRequest(v: GetLoyaltyConfigRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface GetLoyaltyConfigResponse {
 config?: LoyaltyConfig;
 }
 
+export function decodeGetLoyaltyConfigResponse(v: any): GetLoyaltyConfigResponse {
+if (v === null || v === undefined) return v;
+return {
+config: (v.config !== undefined ? decodeLoyaltyConfig(v.config) : v.config),
+};
+}
+
+export function encodeGetLoyaltyConfigResponse(v: GetLoyaltyConfigResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.config !== undefined) { out.config = encodeLoyaltyConfig(v.config); }
+return out;
+}
+
 export interface ListLoyaltyTransactionsRequest {
-customer_id?: string;
+customerId?: string;
+}
+
+export function decodeListLoyaltyTransactionsRequest(v: any): ListLoyaltyTransactionsRequest {
+if (v === null || v === undefined) return v;
+return {
+customerId: v.customer_id,
+};
+}
+
+export function encodeListLoyaltyTransactionsRequest(v: ListLoyaltyTransactionsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
+return out;
 }
 
 export interface ListLoyaltyTransactionsResponse {
 transactions?: (LoyaltyTransaction)[];
 }
 
+export function decodeListLoyaltyTransactionsResponse(v: any): ListLoyaltyTransactionsResponse {
+if (v === null || v === undefined) return v;
+return {
+transactions: (v.transactions !== undefined ? (v.transactions as any[]).map(decodeLoyaltyTransaction) : v.transactions),
+};
+}
+
+export function encodeListLoyaltyTransactionsResponse(v: ListLoyaltyTransactionsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.transactions !== undefined) { out.transactions = (v.transactions as any[]).map(encodeLoyaltyTransaction); }
+return out;
+}
+
 export interface RedeemPointsRequest {
-customer_id?: string;
+customerId?: string;
 points?: number;
 }
 
+export function decodeRedeemPointsRequest(v: any): RedeemPointsRequest {
+if (v === null || v === undefined) return v;
+return {
+customerId: v.customer_id,
+points: v.points,
+};
+}
+
+export function encodeRedeemPointsRequest(v: RedeemPointsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
+if (v.points !== undefined) { out.points = v.points; }
+return out;
+}
+
 export interface RedeemPointsResponse {
-transaction_id?: string;
+transactionId?: string;
 message?: string;
 }
 
+export function decodeRedeemPointsResponse(v: any): RedeemPointsResponse {
+if (v === null || v === undefined) return v;
+return {
+transactionId: v.transaction_id,
+message: v.message,
+};
+}
+
+export function encodeRedeemPointsResponse(v: RedeemPointsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.transactionId !== undefined) { out.transaction_id = v.transactionId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface UpdateLoyaltyConfigRequest {
-is_enabled?: boolean;
-points_per_dollar?: number;
-redemption_rate?: number;
-min_redeem_points?: number;
+isEnabled?: boolean;
+pointsPerDollar?: number;
+redemptionRate?: number;
+minRedeemPoints?: number;
+}
+
+export function decodeUpdateLoyaltyConfigRequest(v: any): UpdateLoyaltyConfigRequest {
+if (v === null || v === undefined) return v;
+return {
+isEnabled: v.is_enabled,
+pointsPerDollar: v.points_per_dollar,
+redemptionRate: v.redemption_rate,
+minRedeemPoints: v.min_redeem_points,
+};
+}
+
+export function encodeUpdateLoyaltyConfigRequest(v: UpdateLoyaltyConfigRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.isEnabled !== undefined) { out.is_enabled = v.isEnabled; }
+if (v.pointsPerDollar !== undefined) { out.points_per_dollar = v.pointsPerDollar; }
+if (v.redemptionRate !== undefined) { out.redemption_rate = v.redemptionRate; }
+if (v.minRedeemPoints !== undefined) { out.min_redeem_points = v.minRedeemPoints; }
+return out;
 }
 
 export interface UpdateLoyaltyConfigResponse {
 message?: string;
+}
+
+export function decodeUpdateLoyaltyConfigResponse(v: any): UpdateLoyaltyConfigResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateLoyaltyConfigResponse(v: UpdateLoyaltyConfigResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

@@ -2,30 +2,113 @@
 
 export interface Settings {
 id?: string;
-business_id?: string;
-auto_assign?: boolean;
-sla_hours?: number;
-business_hours?: string;
-notification_email?: string;
-created_at?: string;
-updated_at?: string;
+businessId?: string;
+autoAssign?: boolean;
+slaHours?: number;
+businessHours?: string;
+notificationEmail?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeSettings(v: any): Settings {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+businessId: v.business_id,
+autoAssign: v.auto_assign,
+slaHours: v.sla_hours,
+businessHours: v.business_hours,
+notificationEmail: v.notification_email,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeSettings(v: Settings): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.autoAssign !== undefined) { out.auto_assign = v.autoAssign; }
+if (v.slaHours !== undefined) { out.sla_hours = v.slaHours; }
+if (v.businessHours !== undefined) { out.business_hours = v.businessHours; }
+if (v.notificationEmail !== undefined) { out.notification_email = v.notificationEmail; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface GetSettingsRequest {
+}
+
+export function decodeGetSettingsRequest(v: any): GetSettingsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetSettingsRequest(v: GetSettingsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface GetSettingsResponse {
 settings?: Settings;
 }
 
+export function decodeGetSettingsResponse(v: any): GetSettingsResponse {
+if (v === null || v === undefined) return v;
+return {
+settings: (v.settings !== undefined ? decodeSettings(v.settings) : v.settings),
+};
+}
+
+export function encodeGetSettingsResponse(v: GetSettingsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.settings !== undefined) { out.settings = encodeSettings(v.settings); }
+return out;
+}
+
 export interface UpdateSettingsRequest {
-auto_assign?: boolean;
-sla_hours?: number;
-business_hours?: string;
-notification_email?: string;
+autoAssign?: boolean;
+slaHours?: number;
+businessHours?: string;
+notificationEmail?: string;
+}
+
+export function decodeUpdateSettingsRequest(v: any): UpdateSettingsRequest {
+if (v === null || v === undefined) return v;
+return {
+autoAssign: v.auto_assign,
+slaHours: v.sla_hours,
+businessHours: v.business_hours,
+notificationEmail: v.notification_email,
+};
+}
+
+export function encodeUpdateSettingsRequest(v: UpdateSettingsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.autoAssign !== undefined) { out.auto_assign = v.autoAssign; }
+if (v.slaHours !== undefined) { out.sla_hours = v.slaHours; }
+if (v.businessHours !== undefined) { out.business_hours = v.businessHours; }
+if (v.notificationEmail !== undefined) { out.notification_email = v.notificationEmail; }
+return out;
 }
 
 export interface UpdateSettingsResponse {
 message?: string;
+}
+
+export function decodeUpdateSettingsResponse(v: any): UpdateSettingsResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateSettingsResponse(v: UpdateSettingsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

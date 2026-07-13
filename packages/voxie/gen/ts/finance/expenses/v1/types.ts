@@ -2,80 +2,301 @@
 
 export interface Expense {
 id?: string;
-owner_id?: string;
-category_id?: string;
+ownerId?: string;
+categoryId?: string;
 amount?: number;
 currency?: string;
 description?: string;
 vendor?: string;
-receipt_url?: string;
-expense_date?: string;
+receiptUrl?: string;
+expenseDate?: string;
 status?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeExpense(v: any): Expense {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+categoryId: v.category_id,
+amount: v.amount,
+currency: v.currency,
+description: v.description,
+vendor: v.vendor,
+receiptUrl: v.receipt_url,
+expenseDate: v.expense_date,
+status: v.status,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeExpense(v: Expense): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.categoryId !== undefined) { out.category_id = v.categoryId; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.vendor !== undefined) { out.vendor = v.vendor; }
+if (v.receiptUrl !== undefined) { out.receipt_url = v.receiptUrl; }
+if (v.expenseDate !== undefined) { out.expense_date = v.expenseDate; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ExpenseCategory {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 color?: string;
-created_at?: string;
+createdAt?: string;
+}
+
+export function decodeExpenseCategory(v: any): ExpenseCategory {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+color: v.color,
+createdAt: v.created_at,
+};
+}
+
+export function encodeExpenseCategory(v: ExpenseCategory): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.color !== undefined) { out.color = v.color; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface CreateExpenseRequest {
-category_id?: string;
+categoryId?: string;
 amount?: number;
 currency?: string;
 description?: string;
 vendor?: string;
-receipt_url?: string;
-expense_date?: string;
+receiptUrl?: string;
+expenseDate?: string;
+}
+
+export function decodeCreateExpenseRequest(v: any): CreateExpenseRequest {
+if (v === null || v === undefined) return v;
+return {
+categoryId: v.category_id,
+amount: v.amount,
+currency: v.currency,
+description: v.description,
+vendor: v.vendor,
+receiptUrl: v.receipt_url,
+expenseDate: v.expense_date,
+};
+}
+
+export function encodeCreateExpenseRequest(v: CreateExpenseRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.categoryId !== undefined) { out.category_id = v.categoryId; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.vendor !== undefined) { out.vendor = v.vendor; }
+if (v.receiptUrl !== undefined) { out.receipt_url = v.receiptUrl; }
+if (v.expenseDate !== undefined) { out.expense_date = v.expenseDate; }
+return out;
 }
 
 export interface CreateExpenseResponse {
-expense_id?: string;
+expenseId?: string;
 message?: string;
+}
+
+export function decodeCreateExpenseResponse(v: any): CreateExpenseResponse {
+if (v === null || v === undefined) return v;
+return {
+expenseId: v.expense_id,
+message: v.message,
+};
+}
+
+export function encodeCreateExpenseResponse(v: CreateExpenseResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.expenseId !== undefined) { out.expense_id = v.expenseId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface DeleteExpenseRequest {
 id?: string;
 }
 
+export function decodeDeleteExpenseRequest(v: any): DeleteExpenseRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteExpenseRequest(v: DeleteExpenseRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteExpenseResponse {
 message?: string;
+}
+
+export function decodeDeleteExpenseResponse(v: any): DeleteExpenseResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteExpenseResponse(v: DeleteExpenseResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface GetExpenseRequest {
 id?: string;
 }
 
+export function decodeGetExpenseRequest(v: any): GetExpenseRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetExpenseRequest(v: GetExpenseRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface GetExpenseResponse {
 expense?: Expense;
 }
 
+export function decodeGetExpenseResponse(v: any): GetExpenseResponse {
+if (v === null || v === undefined) return v;
+return {
+expense: (v.expense !== undefined ? decodeExpense(v.expense) : v.expense),
+};
+}
+
+export function encodeGetExpenseResponse(v: GetExpenseResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.expense !== undefined) { out.expense = encodeExpense(v.expense); }
+return out;
+}
+
 export interface ListExpenseCategoriesRequest {
+}
+
+export function decodeListExpenseCategoriesRequest(v: any): ListExpenseCategoriesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListExpenseCategoriesRequest(v: ListExpenseCategoriesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListExpenseCategoriesResponse {
 categories?: (ExpenseCategory)[];
 }
 
+export function decodeListExpenseCategoriesResponse(v: any): ListExpenseCategoriesResponse {
+if (v === null || v === undefined) return v;
+return {
+categories: (v.categories !== undefined ? (v.categories as any[]).map(decodeExpenseCategory) : v.categories),
+};
+}
+
+export function encodeListExpenseCategoriesResponse(v: ListExpenseCategoriesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.categories !== undefined) { out.categories = (v.categories as any[]).map(encodeExpenseCategory); }
+return out;
+}
+
 export interface ListExpensesRequest {
+}
+
+export function decodeListExpensesRequest(v: any): ListExpensesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListExpensesRequest(v: ListExpensesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListExpensesResponse {
 expenses?: (Expense)[];
 }
 
+export function decodeListExpensesResponse(v: any): ListExpensesResponse {
+if (v === null || v === undefined) return v;
+return {
+expenses: (v.expenses !== undefined ? (v.expenses as any[]).map(decodeExpense) : v.expenses),
+};
+}
+
+export function encodeListExpensesResponse(v: ListExpensesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.expenses !== undefined) { out.expenses = (v.expenses as any[]).map(encodeExpense); }
+return out;
+}
+
 export interface UpdateExpenseBody {
-category_id?: string;
+categoryId?: string;
 amount?: number;
 currency?: string;
 description?: string;
 vendor?: string;
-receipt_url?: string;
-expense_date?: string;
+receiptUrl?: string;
+expenseDate?: string;
+}
+
+export function decodeUpdateExpenseBody(v: any): UpdateExpenseBody {
+if (v === null || v === undefined) return v;
+return {
+categoryId: v.category_id,
+amount: v.amount,
+currency: v.currency,
+description: v.description,
+vendor: v.vendor,
+receiptUrl: v.receipt_url,
+expenseDate: v.expense_date,
+};
+}
+
+export function encodeUpdateExpenseBody(v: UpdateExpenseBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.categoryId !== undefined) { out.category_id = v.categoryId; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.vendor !== undefined) { out.vendor = v.vendor; }
+if (v.receiptUrl !== undefined) { out.receipt_url = v.receiptUrl; }
+if (v.expenseDate !== undefined) { out.expense_date = v.expenseDate; }
+return out;
 }
 
 export interface UpdateExpenseRequest {
@@ -83,12 +304,53 @@ id?: string;
 body?: UpdateExpenseBody;
 }
 
+export function decodeUpdateExpenseRequest(v: any): UpdateExpenseRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateExpenseBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateExpenseRequest(v: UpdateExpenseRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateExpenseBody(v.body); }
+return out;
+}
+
 export interface UpdateExpenseResponse {
 message?: string;
 }
 
+export function decodeUpdateExpenseResponse(v: any): UpdateExpenseResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateExpenseResponse(v: UpdateExpenseResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface UpdateExpenseStatusBody {
 status?: string;
+}
+
+export function decodeUpdateExpenseStatusBody(v: any): UpdateExpenseStatusBody {
+if (v === null || v === undefined) return v;
+return {
+status: v.status,
+};
+}
+
+export function encodeUpdateExpenseStatusBody(v: UpdateExpenseStatusBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface UpdateExpenseStatusRequest {
@@ -96,7 +358,35 @@ id?: string;
 body?: UpdateExpenseStatusBody;
 }
 
+export function decodeUpdateExpenseStatusRequest(v: any): UpdateExpenseStatusRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateExpenseStatusBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateExpenseStatusRequest(v: UpdateExpenseStatusRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateExpenseStatusBody(v.body); }
+return out;
+}
+
 export interface UpdateExpenseStatusResponse {
 message?: string;
+}
+
+export function decodeUpdateExpenseStatusResponse(v: any): UpdateExpenseStatusResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateExpenseStatusResponse(v: UpdateExpenseStatusResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

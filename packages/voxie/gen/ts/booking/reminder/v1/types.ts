@@ -2,19 +2,63 @@
 
 export interface Reminder {
 id?: string;
-owner_id?: string;
-business_id?: string;
-appointment_id?: string;
+ownerId?: string;
+businessId?: string;
+appointmentId?: string;
 type?: string;
-scheduled_at?: string;
-sent_at?: string;
-created_at?: string;
+scheduledAt?: string;
+sentAt?: string;
+createdAt?: string;
+}
+
+export function decodeReminder(v: any): Reminder {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+businessId: v.business_id,
+appointmentId: v.appointment_id,
+type: v.type,
+scheduledAt: v.scheduled_at,
+sentAt: v.sent_at,
+createdAt: v.created_at,
+};
+}
+
+export function encodeReminder(v: Reminder): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.appointmentId !== undefined) { out.appointment_id = v.appointmentId; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.scheduledAt !== undefined) { out.scheduled_at = v.scheduledAt; }
+if (v.sentAt !== undefined) { out.sent_at = v.sentAt; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface CreateReminderRequest {
-appointment_id?: string;
+appointmentId?: string;
 type?: string;
-scheduled_at?: string;
+scheduledAt?: string;
+}
+
+export function decodeCreateReminderRequest(v: any): CreateReminderRequest {
+if (v === null || v === undefined) return v;
+return {
+appointmentId: v.appointment_id,
+type: v.type,
+scheduledAt: v.scheduled_at,
+};
+}
+
+export function encodeCreateReminderRequest(v: CreateReminderRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.appointmentId !== undefined) { out.appointment_id = v.appointmentId; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.scheduledAt !== undefined) { out.scheduled_at = v.scheduledAt; }
+return out;
 }
 
 export interface CreateReminderResponse {
@@ -22,10 +66,49 @@ id?: string;
 message?: string;
 }
 
+export function decodeCreateReminderResponse(v: any): CreateReminderResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+message: v.message,
+};
+}
+
+export function encodeCreateReminderResponse(v: CreateReminderResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListRemindersRequest {
+}
+
+export function decodeListRemindersRequest(v: any): ListRemindersRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListRemindersRequest(v: ListRemindersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListRemindersResponse {
 reminders?: (Reminder)[];
+}
+
+export function decodeListRemindersResponse(v: any): ListRemindersResponse {
+if (v === null || v === undefined) return v;
+return {
+reminders: (v.reminders !== undefined ? (v.reminders as any[]).map(decodeReminder) : v.reminders),
+};
+}
+
+export function encodeListRemindersResponse(v: ListRemindersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.reminders !== undefined) { out.reminders = (v.reminders as any[]).map(encodeReminder); }
+return out;
 }
 

@@ -3,26 +3,91 @@
 export interface ApiKey {
 id?: string;
 name?: string;
-key_prefix?: string;
+keyPrefix?: string;
 scopes?: (string)[];
-created_at?: string;
-last_used_at?: string;
-expires_at?: string;
-is_active?: boolean;
+createdAt?: string;
+lastUsedAt?: string;
+expiresAt?: string;
+isActive?: boolean;
+}
+
+export function decodeApiKey(v: any): ApiKey {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+keyPrefix: v.key_prefix,
+scopes: v.scopes,
+createdAt: v.created_at,
+lastUsedAt: v.last_used_at,
+expiresAt: v.expires_at,
+isActive: v.is_active,
+};
+}
+
+export function encodeApiKey(v: ApiKey): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.keyPrefix !== undefined) { out.key_prefix = v.keyPrefix; }
+if (v.scopes !== undefined) { out.scopes = v.scopes; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.lastUsedAt !== undefined) { out.last_used_at = v.lastUsedAt; }
+if (v.expiresAt !== undefined) { out.expires_at = v.expiresAt; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface Webhook {
 id?: string;
 url?: string;
 events?: (string)[];
-is_active?: boolean;
-created_at?: string;
-last_triggered_at?: string;
+isActive?: boolean;
+createdAt?: string;
+lastTriggeredAt?: string;
+}
+
+export function decodeWebhook(v: any): Webhook {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+url: v.url,
+events: v.events,
+isActive: v.is_active,
+createdAt: v.created_at,
+lastTriggeredAt: v.last_triggered_at,
+};
+}
+
+export function encodeWebhook(v: Webhook): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.url !== undefined) { out.url = v.url; }
+if (v.events !== undefined) { out.events = v.events; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.lastTriggeredAt !== undefined) { out.last_triggered_at = v.lastTriggeredAt; }
+return out;
 }
 
 export interface CreateApiKeyRequest {
 name?: string;
 scopes?: (string)[];
+}
+
+export function decodeCreateApiKeyRequest(v: any): CreateApiKeyRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+scopes: v.scopes,
+};
+}
+
+export function encodeCreateApiKeyRequest(v: CreateApiKeyRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.scopes !== undefined) { out.scopes = v.scopes; }
+return out;
 }
 
 export interface CreateApiKeyResponse {
@@ -31,9 +96,41 @@ key?: string;
 message?: string;
 }
 
+export function decodeCreateApiKeyResponse(v: any): CreateApiKeyResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+key: v.key,
+message: v.message,
+};
+}
+
+export function encodeCreateApiKeyResponse(v: CreateApiKeyResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.key !== undefined) { out.key = v.key; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface CreateWebhookRequest {
 url?: string;
 events?: (string)[];
+}
+
+export function decodeCreateWebhookRequest(v: any): CreateWebhookRequest {
+if (v === null || v === undefined) return v;
+return {
+url: v.url,
+events: v.events,
+};
+}
+
+export function encodeCreateWebhookRequest(v: CreateWebhookRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.url !== undefined) { out.url = v.url; }
+if (v.events !== undefined) { out.events = v.events; }
+return out;
 }
 
 export interface CreateWebhookResponse {
@@ -41,44 +138,191 @@ id?: string;
 message?: string;
 }
 
+export function decodeCreateWebhookResponse(v: any): CreateWebhookResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+message: v.message,
+};
+}
+
+export function encodeCreateWebhookResponse(v: CreateWebhookResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DeleteWebhookRequest {
 id?: string;
+}
+
+export function decodeDeleteWebhookRequest(v: any): DeleteWebhookRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteWebhookRequest(v: DeleteWebhookRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteWebhookResponse {
 message?: string;
 }
 
+export function decodeDeleteWebhookResponse(v: any): DeleteWebhookResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteWebhookResponse(v: DeleteWebhookResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListApiKeysRequest {
+}
+
+export function decodeListApiKeysRequest(v: any): ListApiKeysRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListApiKeysRequest(v: ListApiKeysRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListApiKeysResponse {
 keys?: (ApiKey)[];
 }
 
+export function decodeListApiKeysResponse(v: any): ListApiKeysResponse {
+if (v === null || v === undefined) return v;
+return {
+keys: (v.keys !== undefined ? (v.keys as any[]).map(decodeApiKey) : v.keys),
+};
+}
+
+export function encodeListApiKeysResponse(v: ListApiKeysResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.keys !== undefined) { out.keys = (v.keys as any[]).map(encodeApiKey); }
+return out;
+}
+
 export interface ListWebhooksRequest {
+}
+
+export function decodeListWebhooksRequest(v: any): ListWebhooksRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListWebhooksRequest(v: ListWebhooksRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListWebhooksResponse {
 webhooks?: (Webhook)[];
 }
 
+export function decodeListWebhooksResponse(v: any): ListWebhooksResponse {
+if (v === null || v === undefined) return v;
+return {
+webhooks: (v.webhooks !== undefined ? (v.webhooks as any[]).map(decodeWebhook) : v.webhooks),
+};
+}
+
+export function encodeListWebhooksResponse(v: ListWebhooksResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.webhooks !== undefined) { out.webhooks = (v.webhooks as any[]).map(encodeWebhook); }
+return out;
+}
+
 export interface RevokeApiKeyRequest {
 id?: string;
+}
+
+export function decodeRevokeApiKeyRequest(v: any): RevokeApiKeyRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeRevokeApiKeyRequest(v: RevokeApiKeyRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface RevokeApiKeyResponse {
 message?: string;
 }
 
+export function decodeRevokeApiKeyResponse(v: any): RevokeApiKeyResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeRevokeApiKeyResponse(v: RevokeApiKeyResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface UpdateWebhookRequest {
 id?: string;
 url?: string;
 events?: (string)[];
-is_active?: boolean;
+isActive?: boolean;
+}
+
+export function decodeUpdateWebhookRequest(v: any): UpdateWebhookRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+url: v.url,
+events: v.events,
+isActive: v.is_active,
+};
+}
+
+export function encodeUpdateWebhookRequest(v: UpdateWebhookRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.url !== undefined) { out.url = v.url; }
+if (v.events !== undefined) { out.events = v.events; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface UpdateWebhookResponse {
 webhook?: Webhook;
+}
+
+export function decodeUpdateWebhookResponse(v: any): UpdateWebhookResponse {
+if (v === null || v === undefined) return v;
+return {
+webhook: (v.webhook !== undefined ? decodeWebhook(v.webhook) : v.webhook),
+};
+}
+
+export function encodeUpdateWebhookResponse(v: UpdateWebhookResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.webhook !== undefined) { out.webhook = encodeWebhook(v.webhook); }
+return out;
 }
 

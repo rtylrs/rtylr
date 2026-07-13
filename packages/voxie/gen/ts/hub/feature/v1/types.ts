@@ -6,20 +6,79 @@ enabled?: boolean;
 variant?: string;
 }
 
+export function decodeFeatureResolution(v: any): FeatureResolution {
+if (v === null || v === undefined) return v;
+return {
+key: v.key,
+enabled: v.enabled,
+variant: v.variant,
+};
+}
+
+export function encodeFeatureResolution(v: FeatureResolution): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.key !== undefined) { out.key = v.key; }
+if (v.enabled !== undefined) { out.enabled = v.enabled; }
+if (v.variant !== undefined) { out.variant = v.variant; }
+return out;
+}
+
 export interface FeatureFlag {
 key?: string;
 description?: string;
 enabled?: boolean;
-rollout_percentage?: number;
-variant_on?: string;
-variant_off?: string;
+rolloutPercentage?: number;
+variantOn?: string;
+variantOff?: string;
+}
+
+export function decodeFeatureFlag(v: any): FeatureFlag {
+if (v === null || v === undefined) return v;
+return {
+key: v.key,
+description: v.description,
+enabled: v.enabled,
+rolloutPercentage: v.rollout_percentage,
+variantOn: v.variant_on,
+variantOff: v.variant_off,
+};
+}
+
+export function encodeFeatureFlag(v: FeatureFlag): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.key !== undefined) { out.key = v.key; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.enabled !== undefined) { out.enabled = v.enabled; }
+if (v.rolloutPercentage !== undefined) { out.rollout_percentage = v.rolloutPercentage; }
+if (v.variantOn !== undefined) { out.variant_on = v.variantOn; }
+if (v.variantOff !== undefined) { out.variant_off = v.variantOff; }
+return out;
 }
 
 export interface FeatureTarget {
-feature_key?: string;
-owner_id?: string;
+featureKey?: string;
+ownerId?: string;
 enabled?: boolean;
 variant?: string;
+}
+
+export function decodeFeatureTarget(v: any): FeatureTarget {
+if (v === null || v === undefined) return v;
+return {
+featureKey: v.feature_key,
+ownerId: v.owner_id,
+enabled: v.enabled,
+variant: v.variant,
+};
+}
+
+export function encodeFeatureTarget(v: FeatureTarget): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.featureKey !== undefined) { out.feature_key = v.featureKey; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.enabled !== undefined) { out.enabled = v.enabled; }
+if (v.variant !== undefined) { out.variant = v.variant; }
+return out;
 }
 
 export interface FeatureCondition {
@@ -28,43 +87,173 @@ operator?: string;
 value?: string;
 }
 
+export function decodeFeatureCondition(v: any): FeatureCondition {
+if (v === null || v === undefined) return v;
+return {
+attribute: v.attribute,
+operator: v.operator,
+value: v.value,
+};
+}
+
+export function encodeFeatureCondition(v: FeatureCondition): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.attribute !== undefined) { out.attribute = v.attribute; }
+if (v.operator !== undefined) { out.operator = v.operator; }
+if (v.value !== undefined) { out.value = v.value; }
+return out;
+}
+
 export interface FeatureRule {
 id?: string;
-feature_key?: string;
+featureKey?: string;
 priority?: number;
 description?: string;
 variant?: string;
-rollout_percentage?: number;
+rolloutPercentage?: number;
 enabled?: boolean;
 conditions?: (FeatureCondition)[];
 }
 
+export function decodeFeatureRule(v: any): FeatureRule {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+featureKey: v.feature_key,
+priority: v.priority,
+description: v.description,
+variant: v.variant,
+rolloutPercentage: v.rollout_percentage,
+enabled: v.enabled,
+conditions: (v.conditions !== undefined ? (v.conditions as any[]).map(decodeFeatureCondition) : v.conditions),
+};
+}
+
+export function encodeFeatureRule(v: FeatureRule): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.featureKey !== undefined) { out.feature_key = v.featureKey; }
+if (v.priority !== undefined) { out.priority = v.priority; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.variant !== undefined) { out.variant = v.variant; }
+if (v.rolloutPercentage !== undefined) { out.rollout_percentage = v.rolloutPercentage; }
+if (v.enabled !== undefined) { out.enabled = v.enabled; }
+if (v.conditions !== undefined) { out.conditions = (v.conditions as any[]).map(encodeFeatureCondition); }
+return out;
+}
+
 export interface ListFlagsRequest {
+}
+
+export function decodeListFlagsRequest(v: any): ListFlagsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListFlagsRequest(v: ListFlagsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListFlagsResponse {
 flags?: (FeatureFlag)[];
 }
 
+export function decodeListFlagsResponse(v: any): ListFlagsResponse {
+if (v === null || v === undefined) return v;
+return {
+flags: (v.flags !== undefined ? (v.flags as any[]).map(decodeFeatureFlag) : v.flags),
+};
+}
+
+export function encodeListFlagsResponse(v: ListFlagsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.flags !== undefined) { out.flags = (v.flags as any[]).map(encodeFeatureFlag); }
+return out;
+}
+
 export interface UpsertFlagRequest {
 key?: string;
 description?: string;
 enabled?: boolean;
-rollout_percentage?: number;
-variant_on?: string;
-variant_off?: string;
+rolloutPercentage?: number;
+variantOn?: string;
+variantOff?: string;
+}
+
+export function decodeUpsertFlagRequest(v: any): UpsertFlagRequest {
+if (v === null || v === undefined) return v;
+return {
+key: v.key,
+description: v.description,
+enabled: v.enabled,
+rolloutPercentage: v.rollout_percentage,
+variantOn: v.variant_on,
+variantOff: v.variant_off,
+};
+}
+
+export function encodeUpsertFlagRequest(v: UpsertFlagRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.key !== undefined) { out.key = v.key; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.enabled !== undefined) { out.enabled = v.enabled; }
+if (v.rolloutPercentage !== undefined) { out.rollout_percentage = v.rolloutPercentage; }
+if (v.variantOn !== undefined) { out.variant_on = v.variantOn; }
+if (v.variantOff !== undefined) { out.variant_off = v.variantOff; }
+return out;
 }
 
 export interface UpsertFlagResponse {
 message?: string;
 }
 
+export function decodeUpsertFlagResponse(v: any): UpsertFlagResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpsertFlagResponse(v: UpsertFlagResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DeleteFlagRequest {
 key?: string;
 }
 
+export function decodeDeleteFlagRequest(v: any): DeleteFlagRequest {
+if (v === null || v === undefined) return v;
+return {
+key: v.key,
+};
+}
+
+export function encodeDeleteFlagRequest(v: DeleteFlagRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.key !== undefined) { out.key = v.key; }
+return out;
+}
+
 export interface DeleteFlagResponse {
 message?: string;
+}
+
+export function decodeDeleteFlagResponse(v: any): DeleteFlagResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteFlagResponse(v: DeleteFlagResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface ResolveFeaturesRequest {
@@ -72,13 +261,56 @@ subject?: string;
 attributes?: Record<string, string>;
 }
 
+export function decodeResolveFeaturesRequest(v: any): ResolveFeaturesRequest {
+if (v === null || v === undefined) return v;
+return {
+subject: v.subject,
+attributes: v.attributes,
+};
+}
+
+export function encodeResolveFeaturesRequest(v: ResolveFeaturesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.subject !== undefined) { out.subject = v.subject; }
+if (v.attributes !== undefined) { out.attributes = v.attributes; }
+return out;
+}
+
 export interface ResolveFeaturesResponse {
 features?: Record<string, FeatureResolution>;
 variant?: string;
 }
 
+export function decodeResolveFeaturesResponse(v: any): ResolveFeaturesResponse {
+if (v === null || v === undefined) return v;
+return {
+features: (v.features !== undefined ? Object.fromEntries(Object.entries(v.features as Record<string, any>).map(([k, val]) => [k, decodeFeatureResolution(val)])) : v.features),
+variant: v.variant,
+};
+}
+
+export function encodeResolveFeaturesResponse(v: ResolveFeaturesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.features !== undefined) { out.features = Object.fromEntries(Object.entries(v.features as Record<string, any>).map(([k, val]) => [k, encodeFeatureResolution(val)])); }
+if (v.variant !== undefined) { out.variant = v.variant; }
+return out;
+}
+
 export interface ResolveMyFeaturesRequest {
 attributes?: Record<string, string>;
+}
+
+export function decodeResolveMyFeaturesRequest(v: any): ResolveMyFeaturesRequest {
+if (v === null || v === undefined) return v;
+return {
+attributes: v.attributes,
+};
+}
+
+export function encodeResolveMyFeaturesRequest(v: ResolveMyFeaturesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.attributes !== undefined) { out.attributes = v.attributes; }
+return out;
 }
 
 export interface ResolveMyFeaturesResponse {
@@ -86,27 +318,108 @@ features?: Record<string, FeatureResolution>;
 variant?: string;
 }
 
+export function decodeResolveMyFeaturesResponse(v: any): ResolveMyFeaturesResponse {
+if (v === null || v === undefined) return v;
+return {
+features: (v.features !== undefined ? Object.fromEntries(Object.entries(v.features as Record<string, any>).map(([k, val]) => [k, decodeFeatureResolution(val)])) : v.features),
+variant: v.variant,
+};
+}
+
+export function encodeResolveMyFeaturesResponse(v: ResolveMyFeaturesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.features !== undefined) { out.features = Object.fromEntries(Object.entries(v.features as Record<string, any>).map(([k, val]) => [k, encodeFeatureResolution(val)])); }
+if (v.variant !== undefined) { out.variant = v.variant; }
+return out;
+}
+
 export interface ListRulesRequest {
-feature_key?: string;
+featureKey?: string;
+}
+
+export function decodeListRulesRequest(v: any): ListRulesRequest {
+if (v === null || v === undefined) return v;
+return {
+featureKey: v.feature_key,
+};
+}
+
+export function encodeListRulesRequest(v: ListRulesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.featureKey !== undefined) { out.feature_key = v.featureKey; }
+return out;
 }
 
 export interface ListRulesResponse {
 rules?: (FeatureRule)[];
 }
 
+export function decodeListRulesResponse(v: any): ListRulesResponse {
+if (v === null || v === undefined) return v;
+return {
+rules: (v.rules !== undefined ? (v.rules as any[]).map(decodeFeatureRule) : v.rules),
+};
+}
+
+export function encodeListRulesResponse(v: ListRulesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.rules !== undefined) { out.rules = (v.rules as any[]).map(encodeFeatureRule); }
+return out;
+}
+
 export interface CreateRuleRequest {
-feature_key?: string;
+featureKey?: string;
 priority?: number;
 description?: string;
 variant?: string;
-rollout_percentage?: number;
+rolloutPercentage?: number;
 enabled?: boolean;
 conditions?: (FeatureCondition)[];
 }
 
+export function decodeCreateRuleRequest(v: any): CreateRuleRequest {
+if (v === null || v === undefined) return v;
+return {
+featureKey: v.feature_key,
+priority: v.priority,
+description: v.description,
+variant: v.variant,
+rolloutPercentage: v.rollout_percentage,
+enabled: v.enabled,
+conditions: (v.conditions !== undefined ? (v.conditions as any[]).map(decodeFeatureCondition) : v.conditions),
+};
+}
+
+export function encodeCreateRuleRequest(v: CreateRuleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.featureKey !== undefined) { out.feature_key = v.featureKey; }
+if (v.priority !== undefined) { out.priority = v.priority; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.variant !== undefined) { out.variant = v.variant; }
+if (v.rolloutPercentage !== undefined) { out.rollout_percentage = v.rolloutPercentage; }
+if (v.enabled !== undefined) { out.enabled = v.enabled; }
+if (v.conditions !== undefined) { out.conditions = (v.conditions as any[]).map(encodeFeatureCondition); }
+return out;
+}
+
 export interface CreateRuleResponse {
-rule_id?: string;
+ruleId?: string;
 message?: string;
+}
+
+export function decodeCreateRuleResponse(v: any): CreateRuleResponse {
+if (v === null || v === undefined) return v;
+return {
+ruleId: v.rule_id,
+message: v.message,
+};
+}
+
+export function encodeCreateRuleResponse(v: CreateRuleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.ruleId !== undefined) { out.rule_id = v.ruleId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface UpdateRuleRequest {
@@ -114,48 +427,198 @@ id?: string;
 priority?: number;
 description?: string;
 variant?: string;
-rollout_percentage?: number;
+rolloutPercentage?: number;
 enabled?: boolean;
 conditions?: (FeatureCondition)[];
+}
+
+export function decodeUpdateRuleRequest(v: any): UpdateRuleRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+priority: v.priority,
+description: v.description,
+variant: v.variant,
+rolloutPercentage: v.rollout_percentage,
+enabled: v.enabled,
+conditions: (v.conditions !== undefined ? (v.conditions as any[]).map(decodeFeatureCondition) : v.conditions),
+};
+}
+
+export function encodeUpdateRuleRequest(v: UpdateRuleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.priority !== undefined) { out.priority = v.priority; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.variant !== undefined) { out.variant = v.variant; }
+if (v.rolloutPercentage !== undefined) { out.rollout_percentage = v.rolloutPercentage; }
+if (v.enabled !== undefined) { out.enabled = v.enabled; }
+if (v.conditions !== undefined) { out.conditions = (v.conditions as any[]).map(encodeFeatureCondition); }
+return out;
 }
 
 export interface UpdateRuleResponse {
 message?: string;
 }
 
+export function decodeUpdateRuleResponse(v: any): UpdateRuleResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateRuleResponse(v: UpdateRuleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DeleteRuleRequest {
 id?: string;
+}
+
+export function decodeDeleteRuleRequest(v: any): DeleteRuleRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteRuleRequest(v: DeleteRuleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteRuleResponse {
 message?: string;
 }
 
+export function decodeDeleteRuleResponse(v: any): DeleteRuleResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteRuleResponse(v: DeleteRuleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListTargetsRequest {
-feature_key?: string;
+featureKey?: string;
+}
+
+export function decodeListTargetsRequest(v: any): ListTargetsRequest {
+if (v === null || v === undefined) return v;
+return {
+featureKey: v.feature_key,
+};
+}
+
+export function encodeListTargetsRequest(v: ListTargetsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.featureKey !== undefined) { out.feature_key = v.featureKey; }
+return out;
 }
 
 export interface ListTargetsResponse {
 targets?: (FeatureTarget)[];
 }
 
+export function decodeListTargetsResponse(v: any): ListTargetsResponse {
+if (v === null || v === undefined) return v;
+return {
+targets: (v.targets !== undefined ? (v.targets as any[]).map(decodeFeatureTarget) : v.targets),
+};
+}
+
+export function encodeListTargetsResponse(v: ListTargetsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.targets !== undefined) { out.targets = (v.targets as any[]).map(encodeFeatureTarget); }
+return out;
+}
+
 export interface UpsertTargetRequest {
-feature_key?: string;
-owner_id?: string;
+featureKey?: string;
+ownerId?: string;
 enabled?: boolean;
 variant?: string;
+}
+
+export function decodeUpsertTargetRequest(v: any): UpsertTargetRequest {
+if (v === null || v === undefined) return v;
+return {
+featureKey: v.feature_key,
+ownerId: v.owner_id,
+enabled: v.enabled,
+variant: v.variant,
+};
+}
+
+export function encodeUpsertTargetRequest(v: UpsertTargetRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.featureKey !== undefined) { out.feature_key = v.featureKey; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.enabled !== undefined) { out.enabled = v.enabled; }
+if (v.variant !== undefined) { out.variant = v.variant; }
+return out;
 }
 
 export interface UpsertTargetResponse {
 message?: string;
 }
 
+export function decodeUpsertTargetResponse(v: any): UpsertTargetResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpsertTargetResponse(v: UpsertTargetResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DeleteTargetRequest {
-feature_key?: string;
-owner_id?: string;
+featureKey?: string;
+ownerId?: string;
+}
+
+export function decodeDeleteTargetRequest(v: any): DeleteTargetRequest {
+if (v === null || v === undefined) return v;
+return {
+featureKey: v.feature_key,
+ownerId: v.owner_id,
+};
+}
+
+export function encodeDeleteTargetRequest(v: DeleteTargetRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.featureKey !== undefined) { out.feature_key = v.featureKey; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+return out;
 }
 
 export interface DeleteTargetResponse {
 message?: string;
+}
+
+export function decodeDeleteTargetResponse(v: any): DeleteTargetResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteTargetResponse(v: DeleteTargetResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

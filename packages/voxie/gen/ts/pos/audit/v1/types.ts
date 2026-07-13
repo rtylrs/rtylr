@@ -2,43 +2,152 @@
 
 export interface AuditLog {
 id?: string;
-business_id?: string;
-branch_id?: string;
-terminal_id?: string;
-employee_id?: string;
+businessId?: string;
+branchId?: string;
+terminalId?: string;
+employeeId?: string;
 action?: string;
-entity_type?: string;
-entity_id?: string;
+entityType?: string;
+entityId?: string;
 details?: string;
-ip_address?: string;
-created_at?: string;
+ipAddress?: string;
+createdAt?: string;
+}
+
+export function decodeAuditLog(v: any): AuditLog {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+businessId: v.business_id,
+branchId: v.branch_id,
+terminalId: v.terminal_id,
+employeeId: v.employee_id,
+action: v.action,
+entityType: v.entity_type,
+entityId: v.entity_id,
+details: v.details,
+ipAddress: v.ip_address,
+createdAt: v.created_at,
+};
+}
+
+export function encodeAuditLog(v: AuditLog): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+if (v.terminalId !== undefined) { out.terminal_id = v.terminalId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.action !== undefined) { out.action = v.action; }
+if (v.entityType !== undefined) { out.entity_type = v.entityType; }
+if (v.entityId !== undefined) { out.entity_id = v.entityId; }
+if (v.details !== undefined) { out.details = v.details; }
+if (v.ipAddress !== undefined) { out.ip_address = v.ipAddress; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface CreateAuditRequest {
-branch_id?: string;
-terminal_id?: string;
-employee_id?: string;
+branchId?: string;
+terminalId?: string;
+employeeId?: string;
 action?: string;
-entity_type?: string;
-entity_id?: string;
+entityType?: string;
+entityId?: string;
 details?: string;
-ip_address?: string;
+ipAddress?: string;
+}
+
+export function decodeCreateAuditRequest(v: any): CreateAuditRequest {
+if (v === null || v === undefined) return v;
+return {
+branchId: v.branch_id,
+terminalId: v.terminal_id,
+employeeId: v.employee_id,
+action: v.action,
+entityType: v.entity_type,
+entityId: v.entity_id,
+details: v.details,
+ipAddress: v.ip_address,
+};
+}
+
+export function encodeCreateAuditRequest(v: CreateAuditRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+if (v.terminalId !== undefined) { out.terminal_id = v.terminalId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.action !== undefined) { out.action = v.action; }
+if (v.entityType !== undefined) { out.entity_type = v.entityType; }
+if (v.entityId !== undefined) { out.entity_id = v.entityId; }
+if (v.details !== undefined) { out.details = v.details; }
+if (v.ipAddress !== undefined) { out.ip_address = v.ipAddress; }
+return out;
 }
 
 export interface CreateAuditResponse {
-audit_log_id?: string;
+auditLogId?: string;
 message?: string;
+}
+
+export function decodeCreateAuditResponse(v: any): CreateAuditResponse {
+if (v === null || v === undefined) return v;
+return {
+auditLogId: v.audit_log_id,
+message: v.message,
+};
+}
+
+export function encodeCreateAuditResponse(v: CreateAuditResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.auditLogId !== undefined) { out.audit_log_id = v.auditLogId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface ListAuditRequest {
 action?: string;
-entity_type?: string;
-employee_id?: string;
-start_date?: string;
-end_date?: string;
+entityType?: string;
+employeeId?: string;
+startDate?: string;
+endDate?: string;
+}
+
+export function decodeListAuditRequest(v: any): ListAuditRequest {
+if (v === null || v === undefined) return v;
+return {
+action: v.action,
+entityType: v.entity_type,
+employeeId: v.employee_id,
+startDate: v.start_date,
+endDate: v.end_date,
+};
+}
+
+export function encodeListAuditRequest(v: ListAuditRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.action !== undefined) { out.action = v.action; }
+if (v.entityType !== undefined) { out.entity_type = v.entityType; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.endDate !== undefined) { out.end_date = v.endDate; }
+return out;
 }
 
 export interface ListAuditResponse {
 logs?: (AuditLog)[];
+}
+
+export function decodeListAuditResponse(v: any): ListAuditResponse {
+if (v === null || v === undefined) return v;
+return {
+logs: (v.logs !== undefined ? (v.logs as any[]).map(decodeAuditLog) : v.logs),
+};
+}
+
+export function encodeListAuditResponse(v: ListAuditResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.logs !== undefined) { out.logs = (v.logs as any[]).map(encodeAuditLog); }
+return out;
 }
 

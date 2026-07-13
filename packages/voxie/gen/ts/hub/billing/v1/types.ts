@@ -3,9 +3,30 @@
 export interface BillingSummary {
 plan?: string;
 status?: string;
-current_usage?: number;
-usage_limit?: number;
-next_billing_date?: string;
+currentUsage?: number;
+usageLimit?: number;
+nextBillingDate?: string;
+}
+
+export function decodeBillingSummary(v: any): BillingSummary {
+if (v === null || v === undefined) return v;
+return {
+plan: v.plan,
+status: v.status,
+currentUsage: v.current_usage,
+usageLimit: v.usage_limit,
+nextBillingDate: v.next_billing_date,
+};
+}
+
+export function encodeBillingSummary(v: BillingSummary): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.plan !== undefined) { out.plan = v.plan; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.currentUsage !== undefined) { out.current_usage = v.currentUsage; }
+if (v.usageLimit !== undefined) { out.usage_limit = v.usageLimit; }
+if (v.nextBillingDate !== undefined) { out.next_billing_date = v.nextBillingDate; }
+return out;
 }
 
 export interface Invoice {
@@ -13,21 +34,92 @@ id?: string;
 amount?: number;
 currency?: string;
 status?: string;
-issued_at?: string;
-paid_at?: string;
+issuedAt?: string;
+paidAt?: string;
+}
+
+export function decodeInvoice(v: any): Invoice {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+amount: v.amount,
+currency: v.currency,
+status: v.status,
+issuedAt: v.issued_at,
+paidAt: v.paid_at,
+};
+}
+
+export function encodeInvoice(v: Invoice): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.issuedAt !== undefined) { out.issued_at = v.issuedAt; }
+if (v.paidAt !== undefined) { out.paid_at = v.paidAt; }
+return out;
 }
 
 export interface GetBillingSummaryRequest {
+}
+
+export function decodeGetBillingSummaryRequest(v: any): GetBillingSummaryRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetBillingSummaryRequest(v: GetBillingSummaryRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface GetBillingSummaryResponse {
 summary?: BillingSummary;
 }
 
+export function decodeGetBillingSummaryResponse(v: any): GetBillingSummaryResponse {
+if (v === null || v === undefined) return v;
+return {
+summary: (v.summary !== undefined ? decodeBillingSummary(v.summary) : v.summary),
+};
+}
+
+export function encodeGetBillingSummaryResponse(v: GetBillingSummaryResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.summary !== undefined) { out.summary = encodeBillingSummary(v.summary); }
+return out;
+}
+
 export interface ListInvoicesRequest {
+}
+
+export function decodeListInvoicesRequest(v: any): ListInvoicesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListInvoicesRequest(v: ListInvoicesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListInvoicesResponse {
 invoices?: (Invoice)[];
+}
+
+export function decodeListInvoicesResponse(v: any): ListInvoicesResponse {
+if (v === null || v === undefined) return v;
+return {
+invoices: (v.invoices !== undefined ? (v.invoices as any[]).map(decodeInvoice) : v.invoices),
+};
+}
+
+export function encodeListInvoicesResponse(v: ListInvoicesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.invoices !== undefined) { out.invoices = (v.invoices as any[]).map(encodeInvoice); }
+return out;
 }
 

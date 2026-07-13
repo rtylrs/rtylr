@@ -2,50 +2,183 @@
 
 export interface UnmatchedBankTransaction {
 id?: string;
-bank_account_id?: string;
-amount_minor_units?: string;
+bankAccountId?: string;
+amountMinorUnits?: string;
 currency?: string;
-occurred_at?: string;
+occurredAt?: string;
 description?: string;
-external_id?: string;
+externalId?: string;
+}
+
+export function decodeUnmatchedBankTransaction(v: any): UnmatchedBankTransaction {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+bankAccountId: v.bank_account_id,
+amountMinorUnits: v.amount_minor_units,
+currency: v.currency,
+occurredAt: v.occurred_at,
+description: v.description,
+externalId: v.external_id,
+};
+}
+
+export function encodeUnmatchedBankTransaction(v: UnmatchedBankTransaction): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.bankAccountId !== undefined) { out.bank_account_id = v.bankAccountId; }
+if (v.amountMinorUnits !== undefined) { out.amount_minor_units = v.amountMinorUnits; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.occurredAt !== undefined) { out.occurred_at = v.occurredAt; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.externalId !== undefined) { out.external_id = v.externalId; }
+return out;
 }
 
 export interface UnmatchedInvoice {
 id?: string;
-invoice_number?: string;
-client_name?: string;
-amount_minor_units?: string;
+invoiceNumber?: string;
+clientName?: string;
+amountMinorUnits?: string;
 currency?: string;
-issue_date?: string;
-due_date?: string;
+issueDate?: string;
+dueDate?: string;
+}
+
+export function decodeUnmatchedInvoice(v: any): UnmatchedInvoice {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+invoiceNumber: v.invoice_number,
+clientName: v.client_name,
+amountMinorUnits: v.amount_minor_units,
+currency: v.currency,
+issueDate: v.issue_date,
+dueDate: v.due_date,
+};
+}
+
+export function encodeUnmatchedInvoice(v: UnmatchedInvoice): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.invoiceNumber !== undefined) { out.invoice_number = v.invoiceNumber; }
+if (v.clientName !== undefined) { out.client_name = v.clientName; }
+if (v.amountMinorUnits !== undefined) { out.amount_minor_units = v.amountMinorUnits; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.issueDate !== undefined) { out.issue_date = v.issueDate; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+return out;
 }
 
 export interface MatchSuggestion {
-bank_feed_id?: string;
-target_type?: string;
-target_id?: string;
-amount_minor_units?: string;
-days_apart?: number;
+bankFeedId?: string;
+targetType?: string;
+targetId?: string;
+amountMinorUnits?: string;
+daysApart?: number;
 score?: number;
+}
+
+export function decodeMatchSuggestion(v: any): MatchSuggestion {
+if (v === null || v === undefined) return v;
+return {
+bankFeedId: v.bank_feed_id,
+targetType: v.target_type,
+targetId: v.target_id,
+amountMinorUnits: v.amount_minor_units,
+daysApart: v.days_apart,
+score: v.score,
+};
+}
+
+export function encodeMatchSuggestion(v: MatchSuggestion): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.bankFeedId !== undefined) { out.bank_feed_id = v.bankFeedId; }
+if (v.targetType !== undefined) { out.target_type = v.targetType; }
+if (v.targetId !== undefined) { out.target_id = v.targetId; }
+if (v.amountMinorUnits !== undefined) { out.amount_minor_units = v.amountMinorUnits; }
+if (v.daysApart !== undefined) { out.days_apart = v.daysApart; }
+if (v.score !== undefined) { out.score = v.score; }
+return out;
 }
 
 export interface GetOverviewRequest {
 }
 
+export function decodeGetOverviewRequest(v: any): GetOverviewRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetOverviewRequest(v: GetOverviewRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface GetOverviewResponse {
-unmatched_bank_txns?: (UnmatchedBankTransaction)[];
-unmatched_invoices?: (UnmatchedInvoice)[];
+unmatchedBankTxns?: (UnmatchedBankTransaction)[];
+unmatchedInvoices?: (UnmatchedInvoice)[];
 suggestions?: (MatchSuggestion)[];
 }
 
+export function decodeGetOverviewResponse(v: any): GetOverviewResponse {
+if (v === null || v === undefined) return v;
+return {
+unmatchedBankTxns: (v.unmatched_bank_txns !== undefined ? (v.unmatched_bank_txns as any[]).map(decodeUnmatchedBankTransaction) : v.unmatched_bank_txns),
+unmatchedInvoices: (v.unmatched_invoices !== undefined ? (v.unmatched_invoices as any[]).map(decodeUnmatchedInvoice) : v.unmatched_invoices),
+suggestions: (v.suggestions !== undefined ? (v.suggestions as any[]).map(decodeMatchSuggestion) : v.suggestions),
+};
+}
+
+export function encodeGetOverviewResponse(v: GetOverviewResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.unmatchedBankTxns !== undefined) { out.unmatched_bank_txns = (v.unmatchedBankTxns as any[]).map(encodeUnmatchedBankTransaction); }
+if (v.unmatchedInvoices !== undefined) { out.unmatched_invoices = (v.unmatchedInvoices as any[]).map(encodeUnmatchedInvoice); }
+if (v.suggestions !== undefined) { out.suggestions = (v.suggestions as any[]).map(encodeMatchSuggestion); }
+return out;
+}
+
 export interface MatchRequest {
-bank_feed_id?: string;
-target_type?: string;
-target_id?: string;
+bankFeedId?: string;
+targetType?: string;
+targetId?: string;
+}
+
+export function decodeMatchRequest(v: any): MatchRequest {
+if (v === null || v === undefined) return v;
+return {
+bankFeedId: v.bank_feed_id,
+targetType: v.target_type,
+targetId: v.target_id,
+};
+}
+
+export function encodeMatchRequest(v: MatchRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.bankFeedId !== undefined) { out.bank_feed_id = v.bankFeedId; }
+if (v.targetType !== undefined) { out.target_type = v.targetType; }
+if (v.targetId !== undefined) { out.target_id = v.targetId; }
+return out;
 }
 
 export interface MatchResponse {
 id?: string;
 message?: string;
+}
+
+export function decodeMatchResponse(v: any): MatchResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+message: v.message,
+};
+}
+
+export function encodeMatchResponse(v: MatchResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

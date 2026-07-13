@@ -4,7 +4,26 @@ export interface VelocityPoint {
 cycle?: string;
 completed?: number;
 total?: number;
-completion_rate?: number;
+completionRate?: number;
+}
+
+export function decodeVelocityPoint(v: any): VelocityPoint {
+if (v === null || v === undefined) return v;
+return {
+cycle: v.cycle,
+completed: v.completed,
+total: v.total,
+completionRate: v.completion_rate,
+};
+}
+
+export function encodeVelocityPoint(v: VelocityPoint): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.cycle !== undefined) { out.cycle = v.cycle; }
+if (v.completed !== undefined) { out.completed = v.completed; }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.completionRate !== undefined) { out.completion_rate = v.completionRate; }
+return out;
 }
 
 export interface BurndownPoint {
@@ -13,10 +32,44 @@ ideal?: number;
 actual?: number;
 }
 
+export function decodeBurndownPoint(v: any): BurndownPoint {
+if (v === null || v === undefined) return v;
+return {
+day: v.day,
+ideal: v.ideal,
+actual: v.actual,
+};
+}
+
+export function encodeBurndownPoint(v: BurndownPoint): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.day !== undefined) { out.day = v.day; }
+if (v.ideal !== undefined) { out.ideal = v.ideal; }
+if (v.actual !== undefined) { out.actual = v.actual; }
+return out;
+}
+
 export interface MemberTime {
 id?: string;
 name?: string;
 hours?: number;
+}
+
+export function decodeMemberTime(v: any): MemberTime {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+hours: v.hours,
+};
+}
+
+export function encodeMemberTime(v: MemberTime): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.hours !== undefined) { out.hours = v.hours; }
+return out;
 }
 
 export interface ThroughputPoint {
@@ -24,12 +77,48 @@ week?: string;
 completed?: number;
 }
 
+export function decodeThroughputPoint(v: any): ThroughputPoint {
+if (v === null || v === undefined) return v;
+return {
+week: v.week,
+completed: v.completed,
+};
+}
+
+export function encodeThroughputPoint(v: ThroughputPoint): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.week !== undefined) { out.week = v.week; }
+if (v.completed !== undefined) { out.completed = v.completed; }
+return out;
+}
+
 export interface TeamTaskSummary {
 id?: string;
 title?: string;
 status?: string;
 priority?: string;
-due_date?: string;
+dueDate?: string;
+}
+
+export function decodeTeamTaskSummary(v: any): TeamTaskSummary {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+title: v.title,
+status: v.status,
+priority: v.priority,
+dueDate: v.due_date,
+};
+}
+
+export function encodeTeamTaskSummary(v: TeamTaskSummary): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.title !== undefined) { out.title = v.title; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.priority !== undefined) { out.priority = v.priority; }
+if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
+return out;
 }
 
 export interface TeamMemberWorkload {
@@ -37,51 +126,197 @@ id?: string;
 name?: string;
 initials?: string;
 capacity?: number;
-assigned_hours?: number;
+assignedHours?: number;
 load?: number;
 tasks?: (TeamTaskSummary)[];
+}
+
+export function decodeTeamMemberWorkload(v: any): TeamMemberWorkload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+initials: v.initials,
+capacity: v.capacity,
+assignedHours: v.assigned_hours,
+load: v.load,
+tasks: (v.tasks !== undefined ? (v.tasks as any[]).map(decodeTeamTaskSummary) : v.tasks),
+};
+}
+
+export function encodeTeamMemberWorkload(v: TeamMemberWorkload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.initials !== undefined) { out.initials = v.initials; }
+if (v.capacity !== undefined) { out.capacity = v.capacity; }
+if (v.assignedHours !== undefined) { out.assigned_hours = v.assignedHours; }
+if (v.load !== undefined) { out.load = v.load; }
+if (v.tasks !== undefined) { out.tasks = (v.tasks as any[]).map(encodeTeamTaskSummary); }
+return out;
 }
 
 export interface RoadmapProject {
 id?: string;
 name?: string;
 color?: string;
-start_date?: string;
-target_date?: string;
+startDate?: string;
+targetDate?: string;
 progress?: number;
-done_count?: number;
-task_count?: number;
+doneCount?: number;
+taskCount?: number;
 description?: string;
-workspace_id?: string;
+workspaceId?: string;
+}
+
+export function decodeRoadmapProject(v: any): RoadmapProject {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+color: v.color,
+startDate: v.start_date,
+targetDate: v.target_date,
+progress: v.progress,
+doneCount: v.done_count,
+taskCount: v.task_count,
+description: v.description,
+workspaceId: v.workspace_id,
+};
+}
+
+export function encodeRoadmapProject(v: RoadmapProject): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.color !== undefined) { out.color = v.color; }
+if (v.startDate !== undefined) { out.start_date = v.startDate; }
+if (v.targetDate !== undefined) { out.target_date = v.targetDate; }
+if (v.progress !== undefined) { out.progress = v.progress; }
+if (v.doneCount !== undefined) { out.done_count = v.doneCount; }
+if (v.taskCount !== undefined) { out.task_count = v.taskCount; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+return out;
 }
 
 export interface GetInsightsRequest {
-workspace_id?: string;
+workspaceId?: string;
+}
+
+export function decodeGetInsightsRequest(v: any): GetInsightsRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+};
+}
+
+export function encodeGetInsightsRequest(v: GetInsightsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+return out;
 }
 
 export interface GetInsightsResponse {
 velocity?: (VelocityPoint)[];
 burndown?: (BurndownPoint)[];
-cycle_time?: number;
-time_by_member?: (MemberTime)[];
+cycleTime?: number;
+timeByMember?: (MemberTime)[];
 throughput?: (ThroughputPoint)[];
-total_tasks?: number;
-done_tasks?: number;
+totalTasks?: number;
+doneTasks?: number;
+}
+
+export function decodeGetInsightsResponse(v: any): GetInsightsResponse {
+if (v === null || v === undefined) return v;
+return {
+velocity: (v.velocity !== undefined ? (v.velocity as any[]).map(decodeVelocityPoint) : v.velocity),
+burndown: (v.burndown !== undefined ? (v.burndown as any[]).map(decodeBurndownPoint) : v.burndown),
+cycleTime: v.cycle_time,
+timeByMember: (v.time_by_member !== undefined ? (v.time_by_member as any[]).map(decodeMemberTime) : v.time_by_member),
+throughput: (v.throughput !== undefined ? (v.throughput as any[]).map(decodeThroughputPoint) : v.throughput),
+totalTasks: v.total_tasks,
+doneTasks: v.done_tasks,
+};
+}
+
+export function encodeGetInsightsResponse(v: GetInsightsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.velocity !== undefined) { out.velocity = (v.velocity as any[]).map(encodeVelocityPoint); }
+if (v.burndown !== undefined) { out.burndown = (v.burndown as any[]).map(encodeBurndownPoint); }
+if (v.cycleTime !== undefined) { out.cycle_time = v.cycleTime; }
+if (v.timeByMember !== undefined) { out.time_by_member = (v.timeByMember as any[]).map(encodeMemberTime); }
+if (v.throughput !== undefined) { out.throughput = (v.throughput as any[]).map(encodeThroughputPoint); }
+if (v.totalTasks !== undefined) { out.total_tasks = v.totalTasks; }
+if (v.doneTasks !== undefined) { out.done_tasks = v.doneTasks; }
+return out;
 }
 
 export interface GetTeamWorkloadRequest {
-workspace_id?: string;
+workspaceId?: string;
+}
+
+export function decodeGetTeamWorkloadRequest(v: any): GetTeamWorkloadRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+};
+}
+
+export function encodeGetTeamWorkloadRequest(v: GetTeamWorkloadRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+return out;
 }
 
 export interface GetTeamWorkloadResponse {
 members?: (TeamMemberWorkload)[];
 }
 
+export function decodeGetTeamWorkloadResponse(v: any): GetTeamWorkloadResponse {
+if (v === null || v === undefined) return v;
+return {
+members: (v.members !== undefined ? (v.members as any[]).map(decodeTeamMemberWorkload) : v.members),
+};
+}
+
+export function encodeGetTeamWorkloadResponse(v: GetTeamWorkloadResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.members !== undefined) { out.members = (v.members as any[]).map(encodeTeamMemberWorkload); }
+return out;
+}
+
 export interface GetRoadmapRequest {
-workspace_id?: string;
+workspaceId?: string;
+}
+
+export function decodeGetRoadmapRequest(v: any): GetRoadmapRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+};
+}
+
+export function encodeGetRoadmapRequest(v: GetRoadmapRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+return out;
 }
 
 export interface GetRoadmapResponse {
 projects?: (RoadmapProject)[];
+}
+
+export function decodeGetRoadmapResponse(v: any): GetRoadmapResponse {
+if (v === null || v === undefined) return v;
+return {
+projects: (v.projects !== undefined ? (v.projects as any[]).map(decodeRoadmapProject) : v.projects),
+};
+}
+
+export function encodeGetRoadmapResponse(v: GetRoadmapResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.projects !== undefined) { out.projects = (v.projects as any[]).map(encodeRoadmapProject); }
+return out;
 }
 

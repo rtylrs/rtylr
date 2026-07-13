@@ -2,30 +2,113 @@
 
 export interface TrainingCourse {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 description?: string;
-duration_hours?: number;
-is_required?: boolean;
-created_at?: string;
+durationHours?: number;
+isRequired?: boolean;
+createdAt?: string;
+}
+
+export function decodeTrainingCourse(v: any): TrainingCourse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+description: v.description,
+durationHours: v.duration_hours,
+isRequired: v.is_required,
+createdAt: v.created_at,
+};
+}
+
+export function encodeTrainingCourse(v: TrainingCourse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.durationHours !== undefined) { out.duration_hours = v.durationHours; }
+if (v.isRequired !== undefined) { out.is_required = v.isRequired; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface ListTrainingCoursesRequest {
+}
+
+export function decodeListTrainingCoursesRequest(v: any): ListTrainingCoursesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListTrainingCoursesRequest(v: ListTrainingCoursesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListTrainingCoursesResponse {
 courses?: (TrainingCourse)[];
 }
 
+export function decodeListTrainingCoursesResponse(v: any): ListTrainingCoursesResponse {
+if (v === null || v === undefined) return v;
+return {
+courses: (v.courses !== undefined ? (v.courses as any[]).map(decodeTrainingCourse) : v.courses),
+};
+}
+
+export function encodeListTrainingCoursesResponse(v: ListTrainingCoursesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.courses !== undefined) { out.courses = (v.courses as any[]).map(encodeTrainingCourse); }
+return out;
+}
+
 export interface CreateTrainingCourseRequest {
 name?: string;
 description?: string;
-duration_hours?: number;
-is_required?: boolean;
+durationHours?: number;
+isRequired?: boolean;
+}
+
+export function decodeCreateTrainingCourseRequest(v: any): CreateTrainingCourseRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+description: v.description,
+durationHours: v.duration_hours,
+isRequired: v.is_required,
+};
+}
+
+export function encodeCreateTrainingCourseRequest(v: CreateTrainingCourseRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.durationHours !== undefined) { out.duration_hours = v.durationHours; }
+if (v.isRequired !== undefined) { out.is_required = v.isRequired; }
+return out;
 }
 
 export interface CreateTrainingCourseResponse {
 id?: string;
 message?: string;
+}
+
+export function decodeCreateTrainingCourseResponse(v: any): CreateTrainingCourseResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+message: v.message,
+};
+}
+
+export function encodeCreateTrainingCourseResponse(v: CreateTrainingCourseResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

@@ -3,8 +3,27 @@
 export interface ExpenseAnalytics {
 total?: number;
 change?: number;
-by_category?: (ExpenseByCategory)[];
+byCategory?: (ExpenseByCategory)[];
 trend?: (ExpensePoint)[];
+}
+
+export function decodeExpenseAnalytics(v: any): ExpenseAnalytics {
+if (v === null || v === undefined) return v;
+return {
+total: v.total,
+change: v.change,
+byCategory: (v.by_category !== undefined ? (v.by_category as any[]).map(decodeExpenseByCategory) : v.by_category),
+trend: (v.trend !== undefined ? (v.trend as any[]).map(decodeExpensePoint) : v.trend),
+};
+}
+
+export function encodeExpenseAnalytics(v: ExpenseAnalytics): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.total !== undefined) { out.total = v.total; }
+if (v.change !== undefined) { out.change = v.change; }
+if (v.byCategory !== undefined) { out.by_category = (v.byCategory as any[]).map(encodeExpenseByCategory); }
+if (v.trend !== undefined) { out.trend = (v.trend as any[]).map(encodeExpensePoint); }
+return out;
 }
 
 export interface ExpenseByCategory {
@@ -15,9 +34,45 @@ budget?: number;
 utilization?: number;
 }
 
+export function decodeExpenseByCategory(v: any): ExpenseByCategory {
+if (v === null || v === undefined) return v;
+return {
+category: v.category,
+amount: v.amount,
+percentage: v.percentage,
+budget: v.budget,
+utilization: v.utilization,
+};
+}
+
+export function encodeExpenseByCategory(v: ExpenseByCategory): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.category !== undefined) { out.category = v.category; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+if (v.percentage !== undefined) { out.percentage = v.percentage; }
+if (v.budget !== undefined) { out.budget = v.budget; }
+if (v.utilization !== undefined) { out.utilization = v.utilization; }
+return out;
+}
+
 export interface ExpensePoint {
 date?: string;
 amount?: number;
+}
+
+export function decodeExpensePoint(v: any): ExpensePoint {
+if (v === null || v === undefined) return v;
+return {
+date: v.date,
+amount: v.amount,
+};
+}
+
+export function encodeExpensePoint(v: ExpensePoint): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.date !== undefined) { out.date = v.date; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+return out;
 }
 
 export interface InvoiceAgingBucket {
@@ -26,9 +81,41 @@ count?: number;
 amount?: number;
 }
 
+export function decodeInvoiceAgingBucket(v: any): InvoiceAgingBucket {
+if (v === null || v === undefined) return v;
+return {
+bucket: v.bucket,
+count: v.count,
+amount: v.amount,
+};
+}
+
+export function encodeInvoiceAgingBucket(v: InvoiceAgingBucket): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.bucket !== undefined) { out.bucket = v.bucket; }
+if (v.count !== undefined) { out.count = v.count; }
+if (v.amount !== undefined) { out.amount = v.amount; }
+return out;
+}
+
 export interface InvoiceAging {
-total_outstanding?: number;
+totalOutstanding?: number;
 buckets?: (InvoiceAgingBucket)[];
+}
+
+export function decodeInvoiceAging(v: any): InvoiceAging {
+if (v === null || v === undefined) return v;
+return {
+totalOutstanding: v.total_outstanding,
+buckets: (v.buckets !== undefined ? (v.buckets as any[]).map(decodeInvoiceAgingBucket) : v.buckets),
+};
+}
+
+export function encodeInvoiceAging(v: InvoiceAging): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.totalOutstanding !== undefined) { out.total_outstanding = v.totalOutstanding; }
+if (v.buckets !== undefined) { out.buckets = (v.buckets as any[]).map(encodeInvoiceAgingBucket); }
+return out;
 }
 
 export interface CashFlowAnalytics {
@@ -38,6 +125,25 @@ net?: number;
 trend?: (CashFlowPoint)[];
 }
 
+export function decodeCashFlowAnalytics(v: any): CashFlowAnalytics {
+if (v === null || v === undefined) return v;
+return {
+inflows: v.inflows,
+outflows: v.outflows,
+net: v.net,
+trend: (v.trend !== undefined ? (v.trend as any[]).map(decodeCashFlowPoint) : v.trend),
+};
+}
+
+export function encodeCashFlowAnalytics(v: CashFlowAnalytics): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.inflows !== undefined) { out.inflows = v.inflows; }
+if (v.outflows !== undefined) { out.outflows = v.outflows; }
+if (v.net !== undefined) { out.net = v.net; }
+if (v.trend !== undefined) { out.trend = (v.trend as any[]).map(encodeCashFlowPoint); }
+return out;
+}
+
 export interface CashFlowPoint {
 date?: string;
 inflow?: number;
@@ -45,26 +151,121 @@ outflow?: number;
 net?: number;
 }
 
+export function decodeCashFlowPoint(v: any): CashFlowPoint {
+if (v === null || v === undefined) return v;
+return {
+date: v.date,
+inflow: v.inflow,
+outflow: v.outflow,
+net: v.net,
+};
+}
+
+export function encodeCashFlowPoint(v: CashFlowPoint): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.date !== undefined) { out.date = v.date; }
+if (v.inflow !== undefined) { out.inflow = v.inflow; }
+if (v.outflow !== undefined) { out.outflow = v.outflow; }
+if (v.net !== undefined) { out.net = v.net; }
+return out;
+}
+
 export interface GetCashFlowAnalyticsRequest {
 period?: string;
+}
+
+export function decodeGetCashFlowAnalyticsRequest(v: any): GetCashFlowAnalyticsRequest {
+if (v === null || v === undefined) return v;
+return {
+period: v.period,
+};
+}
+
+export function encodeGetCashFlowAnalyticsRequest(v: GetCashFlowAnalyticsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.period !== undefined) { out.period = v.period; }
+return out;
 }
 
 export interface GetCashFlowAnalyticsResponse {
 analytics?: CashFlowAnalytics;
 }
 
+export function decodeGetCashFlowAnalyticsResponse(v: any): GetCashFlowAnalyticsResponse {
+if (v === null || v === undefined) return v;
+return {
+analytics: (v.analytics !== undefined ? decodeCashFlowAnalytics(v.analytics) : v.analytics),
+};
+}
+
+export function encodeGetCashFlowAnalyticsResponse(v: GetCashFlowAnalyticsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.analytics !== undefined) { out.analytics = encodeCashFlowAnalytics(v.analytics); }
+return out;
+}
+
 export interface GetExpenseAnalyticsRequest {
 period?: string;
+}
+
+export function decodeGetExpenseAnalyticsRequest(v: any): GetExpenseAnalyticsRequest {
+if (v === null || v === undefined) return v;
+return {
+period: v.period,
+};
+}
+
+export function encodeGetExpenseAnalyticsRequest(v: GetExpenseAnalyticsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.period !== undefined) { out.period = v.period; }
+return out;
 }
 
 export interface GetExpenseAnalyticsResponse {
 analytics?: ExpenseAnalytics;
 }
 
+export function decodeGetExpenseAnalyticsResponse(v: any): GetExpenseAnalyticsResponse {
+if (v === null || v === undefined) return v;
+return {
+analytics: (v.analytics !== undefined ? decodeExpenseAnalytics(v.analytics) : v.analytics),
+};
+}
+
+export function encodeGetExpenseAnalyticsResponse(v: GetExpenseAnalyticsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.analytics !== undefined) { out.analytics = encodeExpenseAnalytics(v.analytics); }
+return out;
+}
+
 export interface GetInvoiceAgingRequest {
+}
+
+export function decodeGetInvoiceAgingRequest(v: any): GetInvoiceAgingRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetInvoiceAgingRequest(v: GetInvoiceAgingRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface GetInvoiceAgingResponse {
 aging?: InvoiceAging;
+}
+
+export function decodeGetInvoiceAgingResponse(v: any): GetInvoiceAgingResponse {
+if (v === null || v === undefined) return v;
+return {
+aging: (v.aging !== undefined ? decodeInvoiceAging(v.aging) : v.aging),
+};
+}
+
+export function encodeGetInvoiceAgingResponse(v: GetInvoiceAgingResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.aging !== undefined) { out.aging = encodeInvoiceAging(v.aging); }
+return out;
 }
 

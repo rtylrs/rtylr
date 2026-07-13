@@ -2,34 +2,87 @@
 
 export interface Customer {
 id?: string;
-owner_id?: string;
-first_name?: string;
-last_name?: string;
+ownerId?: string;
+firstName?: string;
+lastName?: string;
 email?: string;
 phone?: string;
-date_of_birth?: string;
+dateOfBirth?: string;
 gender?: string;
 address?: string;
 city?: string;
 country?: string;
-loyalty_points?: string;
-total_spent?: number;
-visit_count?: string;
-last_visit_at?: string;
-loyalty_tier?: string;
+loyaltyPoints?: string;
+totalSpent?: number;
+visitCount?: string;
+lastVisitAt?: string;
+loyaltyTier?: string;
 tags?: (string)[];
 notes?: string;
-is_active?: boolean;
-created_at?: string;
-updated_at?: string;
+isActive?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeCustomer(v: any): Customer {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+firstName: v.first_name,
+lastName: v.last_name,
+email: v.email,
+phone: v.phone,
+dateOfBirth: v.date_of_birth,
+gender: v.gender,
+address: v.address,
+city: v.city,
+country: v.country,
+loyaltyPoints: v.loyalty_points,
+totalSpent: v.total_spent,
+visitCount: v.visit_count,
+lastVisitAt: v.last_visit_at,
+loyaltyTier: v.loyalty_tier,
+tags: v.tags,
+notes: v.notes,
+isActive: v.is_active,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeCustomer(v: Customer): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.firstName !== undefined) { out.first_name = v.firstName; }
+if (v.lastName !== undefined) { out.last_name = v.lastName; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.dateOfBirth !== undefined) { out.date_of_birth = v.dateOfBirth; }
+if (v.gender !== undefined) { out.gender = v.gender; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.city !== undefined) { out.city = v.city; }
+if (v.country !== undefined) { out.country = v.country; }
+if (v.loyaltyPoints !== undefined) { out.loyalty_points = v.loyaltyPoints; }
+if (v.totalSpent !== undefined) { out.total_spent = v.totalSpent; }
+if (v.visitCount !== undefined) { out.visit_count = v.visitCount; }
+if (v.lastVisitAt !== undefined) { out.last_visit_at = v.lastVisitAt; }
+if (v.loyaltyTier !== undefined) { out.loyalty_tier = v.loyaltyTier; }
+if (v.tags !== undefined) { out.tags = v.tags; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface CreateCustomerRequest {
-first_name?: string;
-last_name?: string;
+firstName?: string;
+lastName?: string;
 email?: string;
 phone?: string;
-date_of_birth?: string;
+dateOfBirth?: string;
 gender?: string;
 address?: string;
 city?: string;
@@ -38,25 +91,125 @@ tags?: (string)[];
 notes?: string;
 }
 
+export function decodeCreateCustomerRequest(v: any): CreateCustomerRequest {
+if (v === null || v === undefined) return v;
+return {
+firstName: v.first_name,
+lastName: v.last_name,
+email: v.email,
+phone: v.phone,
+dateOfBirth: v.date_of_birth,
+gender: v.gender,
+address: v.address,
+city: v.city,
+country: v.country,
+tags: v.tags,
+notes: v.notes,
+};
+}
+
+export function encodeCreateCustomerRequest(v: CreateCustomerRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.firstName !== undefined) { out.first_name = v.firstName; }
+if (v.lastName !== undefined) { out.last_name = v.lastName; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.dateOfBirth !== undefined) { out.date_of_birth = v.dateOfBirth; }
+if (v.gender !== undefined) { out.gender = v.gender; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.city !== undefined) { out.city = v.city; }
+if (v.country !== undefined) { out.country = v.country; }
+if (v.tags !== undefined) { out.tags = v.tags; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+return out;
+}
+
 export interface CreateCustomerResponse {
-customer_id?: string;
+customerId?: string;
 message?: string;
+}
+
+export function decodeCreateCustomerResponse(v: any): CreateCustomerResponse {
+if (v === null || v === undefined) return v;
+return {
+customerId: v.customer_id,
+message: v.message,
+};
+}
+
+export function encodeCreateCustomerResponse(v: CreateCustomerResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface DeleteCustomerRequest {
 id?: string;
 }
 
+export function decodeDeleteCustomerRequest(v: any): DeleteCustomerRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteCustomerRequest(v: DeleteCustomerRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteCustomerResponse {
 message?: string;
+}
+
+export function decodeDeleteCustomerResponse(v: any): DeleteCustomerResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteCustomerResponse(v: DeleteCustomerResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface GetCustomerRequest {
 id?: string;
 }
 
+export function decodeGetCustomerRequest(v: any): GetCustomerRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetCustomerRequest(v: GetCustomerRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface GetCustomerResponse {
 customer?: Customer;
+}
+
+export function decodeGetCustomerResponse(v: any): GetCustomerResponse {
+if (v === null || v === undefined) return v;
+return {
+customer: (v.customer !== undefined ? decodeCustomer(v.customer) : v.customer),
+};
+}
+
+export function encodeGetCustomerResponse(v: GetCustomerResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.customer !== undefined) { out.customer = encodeCustomer(v.customer); }
+return out;
 }
 
 export interface ListCustomersRequest {
@@ -64,29 +217,104 @@ search?: string;
 tier?: string;
 tag?: string;
 page?: string;
-page_size?: string;
+pageSize?: string;
+}
+
+export function decodeListCustomersRequest(v: any): ListCustomersRequest {
+if (v === null || v === undefined) return v;
+return {
+search: v.search,
+tier: v.tier,
+tag: v.tag,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListCustomersRequest(v: ListCustomersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.search !== undefined) { out.search = v.search; }
+if (v.tier !== undefined) { out.tier = v.tier; }
+if (v.tag !== undefined) { out.tag = v.tag; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
 }
 
 export interface ListCustomersResponse {
 customers?: (Customer)[];
 total?: string;
 page?: string;
-page_size?: string;
+pageSize?: string;
+}
+
+export function decodeListCustomersResponse(v: any): ListCustomersResponse {
+if (v === null || v === undefined) return v;
+return {
+customers: (v.customers !== undefined ? (v.customers as any[]).map(decodeCustomer) : v.customers),
+total: v.total,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListCustomersResponse(v: ListCustomersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.customers !== undefined) { out.customers = (v.customers as any[]).map(encodeCustomer); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
 }
 
 export interface UpdateCustomerBody {
-first_name?: string;
-last_name?: string;
+firstName?: string;
+lastName?: string;
 email?: string;
 phone?: string;
-date_of_birth?: string;
+dateOfBirth?: string;
 gender?: string;
 address?: string;
 city?: string;
 country?: string;
 tags?: (string)[];
 notes?: string;
-is_active?: boolean;
+isActive?: boolean;
+}
+
+export function decodeUpdateCustomerBody(v: any): UpdateCustomerBody {
+if (v === null || v === undefined) return v;
+return {
+firstName: v.first_name,
+lastName: v.last_name,
+email: v.email,
+phone: v.phone,
+dateOfBirth: v.date_of_birth,
+gender: v.gender,
+address: v.address,
+city: v.city,
+country: v.country,
+tags: v.tags,
+notes: v.notes,
+isActive: v.is_active,
+};
+}
+
+export function encodeUpdateCustomerBody(v: UpdateCustomerBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.firstName !== undefined) { out.first_name = v.firstName; }
+if (v.lastName !== undefined) { out.last_name = v.lastName; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.dateOfBirth !== undefined) { out.date_of_birth = v.dateOfBirth; }
+if (v.gender !== undefined) { out.gender = v.gender; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.city !== undefined) { out.city = v.city; }
+if (v.country !== undefined) { out.country = v.country; }
+if (v.tags !== undefined) { out.tags = v.tags; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface UpdateCustomerRequest {
@@ -94,7 +322,35 @@ id?: string;
 body?: UpdateCustomerBody;
 }
 
+export function decodeUpdateCustomerRequest(v: any): UpdateCustomerRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateCustomerBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateCustomerRequest(v: UpdateCustomerRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateCustomerBody(v.body); }
+return out;
+}
+
 export interface UpdateCustomerResponse {
 message?: string;
+}
+
+export function decodeUpdateCustomerResponse(v: any): UpdateCustomerResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateCustomerResponse(v: UpdateCustomerResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

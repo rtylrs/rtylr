@@ -2,28 +2,100 @@
 
 export interface Floor {
 id?: string;
-business_id?: string;
-branch_id?: string;
+businessId?: string;
+branchId?: string;
 name?: string;
-sort_order?: number;
-is_active?: boolean;
-created_at?: string;
+sortOrder?: number;
+isActive?: boolean;
+createdAt?: string;
+}
+
+export function decodeFloor(v: any): Floor {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+businessId: v.business_id,
+branchId: v.branch_id,
+name: v.name,
+sortOrder: v.sort_order,
+isActive: v.is_active,
+createdAt: v.created_at,
+};
+}
+
+export function encodeFloor(v: Floor): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface CreateFloorRequest {
-branch_id?: string;
+branchId?: string;
 name?: string;
-sort_order?: number;
+sortOrder?: number;
+}
+
+export function decodeCreateFloorRequest(v: any): CreateFloorRequest {
+if (v === null || v === undefined) return v;
+return {
+branchId: v.branch_id,
+name: v.name,
+sortOrder: v.sort_order,
+};
+}
+
+export function encodeCreateFloorRequest(v: CreateFloorRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
+return out;
 }
 
 export interface CreateFloorResponse {
-floor_id?: string;
+floorId?: string;
 message?: string;
+}
+
+export function decodeCreateFloorResponse(v: any): CreateFloorResponse {
+if (v === null || v === undefined) return v;
+return {
+floorId: v.floor_id,
+message: v.message,
+};
+}
+
+export function encodeCreateFloorResponse(v: CreateFloorResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.floorId !== undefined) { out.floor_id = v.floorId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface UpdateFloorBody {
 name?: string;
-sort_order?: number;
+sortOrder?: number;
+}
+
+export function decodeUpdateFloorBody(v: any): UpdateFloorBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+sortOrder: v.sort_order,
+};
+}
+
+export function encodeUpdateFloorBody(v: UpdateFloorBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
+return out;
 }
 
 export interface UpdateFloorRequest {
@@ -31,23 +103,103 @@ id?: string;
 body?: UpdateFloorBody;
 }
 
+export function decodeUpdateFloorRequest(v: any): UpdateFloorRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateFloorBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateFloorRequest(v: UpdateFloorRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateFloorBody(v.body); }
+return out;
+}
+
 export interface UpdateFloorResponse {
 message?: string;
+}
+
+export function decodeUpdateFloorResponse(v: any): UpdateFloorResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateFloorResponse(v: UpdateFloorResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface DeleteFloorRequest {
 id?: string;
 }
 
+export function decodeDeleteFloorRequest(v: any): DeleteFloorRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteFloorRequest(v: DeleteFloorRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteFloorResponse {
 message?: string;
 }
 
+export function decodeDeleteFloorResponse(v: any): DeleteFloorResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteFloorResponse(v: DeleteFloorResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListFloorsRequest {
-branch_id?: string;
+branchId?: string;
+}
+
+export function decodeListFloorsRequest(v: any): ListFloorsRequest {
+if (v === null || v === undefined) return v;
+return {
+branchId: v.branch_id,
+};
+}
+
+export function encodeListFloorsRequest(v: ListFloorsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.branchId !== undefined) { out.branch_id = v.branchId; }
+return out;
 }
 
 export interface ListFloorsResponse {
 floors?: (Floor)[];
+}
+
+export function decodeListFloorsResponse(v: any): ListFloorsResponse {
+if (v === null || v === undefined) return v;
+return {
+floors: (v.floors !== undefined ? (v.floors as any[]).map(decodeFloor) : v.floors),
+};
+}
+
+export function encodeListFloorsResponse(v: ListFloorsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.floors !== undefined) { out.floors = (v.floors as any[]).map(encodeFloor); }
+return out;
 }
 

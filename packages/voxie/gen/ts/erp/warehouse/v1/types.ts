@@ -2,17 +2,52 @@
 
 export interface Warehouse {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 address?: string;
 city?: string;
 country?: string;
-manager_name?: string;
+managerName?: string;
 capacity?: string;
-is_default?: boolean;
-is_active?: boolean;
-created_at?: string;
-updated_at?: string;
+isDefault?: boolean;
+isActive?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeWarehouse(v: any): Warehouse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+address: v.address,
+city: v.city,
+country: v.country,
+managerName: v.manager_name,
+capacity: v.capacity,
+isDefault: v.is_default,
+isActive: v.is_active,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeWarehouse(v: Warehouse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.city !== undefined) { out.city = v.city; }
+if (v.country !== undefined) { out.country = v.country; }
+if (v.managerName !== undefined) { out.manager_name = v.managerName; }
+if (v.capacity !== undefined) { out.capacity = v.capacity; }
+if (v.isDefault !== undefined) { out.is_default = v.isDefault; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface CreateWarehouseRequest {
@@ -20,30 +55,122 @@ name?: string;
 address?: string;
 city?: string;
 country?: string;
-manager_name?: string;
+managerName?: string;
 capacity?: string;
-is_default?: boolean;
-is_active?: boolean;
+isDefault?: boolean;
+isActive?: boolean;
+}
+
+export function decodeCreateWarehouseRequest(v: any): CreateWarehouseRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+address: v.address,
+city: v.city,
+country: v.country,
+managerName: v.manager_name,
+capacity: v.capacity,
+isDefault: v.is_default,
+isActive: v.is_active,
+};
+}
+
+export function encodeCreateWarehouseRequest(v: CreateWarehouseRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.city !== undefined) { out.city = v.city; }
+if (v.country !== undefined) { out.country = v.country; }
+if (v.managerName !== undefined) { out.manager_name = v.managerName; }
+if (v.capacity !== undefined) { out.capacity = v.capacity; }
+if (v.isDefault !== undefined) { out.is_default = v.isDefault; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface CreateWarehouseResponse {
-warehouse_id?: string;
+warehouseId?: string;
 message?: string;
+}
+
+export function decodeCreateWarehouseResponse(v: any): CreateWarehouseResponse {
+if (v === null || v === undefined) return v;
+return {
+warehouseId: v.warehouse_id,
+message: v.message,
+};
+}
+
+export function encodeCreateWarehouseResponse(v: CreateWarehouseResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.warehouseId !== undefined) { out.warehouse_id = v.warehouseId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface DeleteWarehouseRequest {
 id?: string;
 }
 
+export function decodeDeleteWarehouseRequest(v: any): DeleteWarehouseRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteWarehouseRequest(v: DeleteWarehouseRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteWarehouseResponse {
 message?: string;
+}
+
+export function decodeDeleteWarehouseResponse(v: any): DeleteWarehouseResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteWarehouseResponse(v: DeleteWarehouseResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface ListWarehousesRequest {
 }
 
+export function decodeListWarehousesRequest(v: any): ListWarehousesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListWarehousesRequest(v: ListWarehousesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface ListWarehousesResponse {
 warehouses?: (Warehouse)[];
+}
+
+export function decodeListWarehousesResponse(v: any): ListWarehousesResponse {
+if (v === null || v === undefined) return v;
+return {
+warehouses: (v.warehouses !== undefined ? (v.warehouses as any[]).map(decodeWarehouse) : v.warehouses),
+};
+}
+
+export function encodeListWarehousesResponse(v: ListWarehousesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.warehouses !== undefined) { out.warehouses = (v.warehouses as any[]).map(encodeWarehouse); }
+return out;
 }
 
 export interface UpdateWarehouseBody {
@@ -51,10 +178,37 @@ name?: string;
 address?: string;
 city?: string;
 country?: string;
-manager_name?: string;
+managerName?: string;
 capacity?: string;
-is_default?: boolean;
-is_active?: boolean;
+isDefault?: boolean;
+isActive?: boolean;
+}
+
+export function decodeUpdateWarehouseBody(v: any): UpdateWarehouseBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+address: v.address,
+city: v.city,
+country: v.country,
+managerName: v.manager_name,
+capacity: v.capacity,
+isDefault: v.is_default,
+isActive: v.is_active,
+};
+}
+
+export function encodeUpdateWarehouseBody(v: UpdateWarehouseBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.address !== undefined) { out.address = v.address; }
+if (v.city !== undefined) { out.city = v.city; }
+if (v.country !== undefined) { out.country = v.country; }
+if (v.managerName !== undefined) { out.manager_name = v.managerName; }
+if (v.capacity !== undefined) { out.capacity = v.capacity; }
+if (v.isDefault !== undefined) { out.is_default = v.isDefault; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface UpdateWarehouseRequest {
@@ -62,7 +216,35 @@ id?: string;
 body?: UpdateWarehouseBody;
 }
 
+export function decodeUpdateWarehouseRequest(v: any): UpdateWarehouseRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateWarehouseBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateWarehouseRequest(v: UpdateWarehouseRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateWarehouseBody(v.body); }
+return out;
+}
+
 export interface UpdateWarehouseResponse {
 message?: string;
+}
+
+export function decodeUpdateWarehouseResponse(v: any): UpdateWarehouseResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateWarehouseResponse(v: UpdateWarehouseResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
