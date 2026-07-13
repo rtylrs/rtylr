@@ -13,7 +13,7 @@ import { usePanelResize } from '../hooks/usePanelResize';
 import { useShortcuts } from '../hooks/useShortcuts';
 import { authHeaders } from '../lib/auth';
 import { createMemoryClient } from '../lib/memoryClient';
-import { ApiError } from '@voxire/voxie/hub/memory/v1/service_client';
+import { ApiError } from '@voxire/voxie/hub/memory/v1/client';
 import { buildCaretFollowUps } from '../lib/followUps';
 import { inferCaretModeForPrompt } from '../lib/modeIntent';
 import { buildCaretEmptyState, type CaretStarter } from '../lib/suggestions';

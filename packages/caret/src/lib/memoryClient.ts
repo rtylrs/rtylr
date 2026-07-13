@@ -1,4 +1,4 @@
-import { MemoryServiceClient } from '@voxire/voxie/hub/memory/v1/service_client';
+import { MemoryServiceClient } from '@voxire/voxie/hub/memory/v1/client';
 import { authHeaders } from './auth';
 
 /**

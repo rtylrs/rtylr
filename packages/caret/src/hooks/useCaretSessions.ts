@@ -21,8 +21,8 @@ export function useCaretSessions({
     queryKey: ['caret', 'sessions', userId],
     queryFn: async (): Promise<CaretChatSummary[]> => {
       const res = await createMemoryClient(apiBaseUrl).listChats({ limit: 20, offset: 0 });
-      return res.chats
-        .filter((chat) => chat.id)
+      return (res.chats ?? [])
+        .filter((chat): chat is typeof chat & { id: string } => Boolean(chat.id))
         .map((chat) => ({
           id: chat.id,
           title: normalizeChatTitle(chat.title),
