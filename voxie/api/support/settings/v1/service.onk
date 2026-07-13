@@ -1,0 +1,7 @@
+package support.settings.v1
+
+service SettingsService {
+  getSettings(GetSupportSettingsRequest) -> GetSupportSettingsResponse @get("/settings")
+
+  updateSettings(UpdateSupportSettingsRequest) -> UpdateSupportSettingsResponse @put("/settings")
+}

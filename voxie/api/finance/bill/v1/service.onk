@@ -1,0 +1,14 @@
+package finance.bill.v1
+
+/// BillService defines accounts-payable bill endpoints.
+service BillService {
+  listBills(ListBillsRequest) -> ListBillsResponse @get("/bills")
+
+  createBill(CreateBillRequest) -> CreateBillResponse @post("/bills")
+
+  updateBill(UpdateBillRequest) -> UpdateBillResponse @put("/bills/{id}") @body("body")
+
+  getBill(GetBillRequest) -> GetBillResponse @get("/bills/{id}")
+
+  deleteBill(DeleteBillRequest) -> DeleteBillResponse @delete("/bills/{id}")
+}

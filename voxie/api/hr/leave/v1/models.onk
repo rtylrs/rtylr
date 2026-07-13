@@ -1,0 +1,226 @@
+package hr.leave.v1
+
+/// LeaveTypePayload defines a category of leave employees can request.
+message LeaveTypePayload {
+  /// Unique identifier for the leave type.
+  id: int64
+  /// Tenant owner this leave type belongs to.
+  owner_id: int64
+  /// Human-readable name (e.g. "Annual Leave", "Sick Leave").
+  name: string
+  /// Whether days taken under this type are paid.
+  is_paid: bool
+  /// Whether leave requests of this type require manager approval.
+  requires_approval: bool
+  /// Rule describing how entitlement accrues (e.g. "monthly", "yearly"); absent if entitlement is fixed.
+  accrual_rule: string? @nullable
+  /// Maximum unused days that may carry over to the next year.
+  max_carryover_days: int32
+  /// Minimum calendar days of notice required before the leave starts.
+  min_notice_days: int32
+  /// Number of consecutive days after which supporting documentation is required; absent if never required.
+  requires_documentation_after_days: int32? @nullable
+  /// Whether this leave type is currently available for new requests.
+  is_active: bool
+  /// Unix timestamp when this record was created.
+  created_at: int64
+  /// Unix timestamp when this record was last updated.
+  updated_at: int64
+}
+
+/// LeaveRequestPayload is a single employee's request for time off.
+message LeaveRequestPayload {
+  /// Unique identifier for the leave request.
+  id: int64
+  /// Tenant owner this request belongs to.
+  owner_id: int64
+  /// Employee who is requesting leave.
+  employee_id: int64
+  /// Leave type being requested.
+  leave_type_id: int64
+  /// First day of leave (ISO-8601 date).
+  start_date: string
+  /// Last day of leave (ISO-8601 date).
+  end_date: string
+  /// Total number of working days requested (may be fractional for half-days).
+  total_days: float64
+  /// Additional context from the employee; absent if none provided.
+  notes: string? @nullable
+  /// Workflow status (pending | approved | rejected | cancelled).
+  status: string
+  /// Current step in a multi-level approval chain.
+  current_approval_level: int32
+  /// Reason the request was rejected; absent unless status is rejected.
+  rejection_reason: string? @nullable
+  /// Unix timestamp when this record was created.
+  created_at: int64
+  /// Unix timestamp when this record was last updated.
+  updated_at: int64
+}
+
+/// LeaveBalancePayload tracks an employee's remaining entitlement for a leave type and year.
+message LeaveBalancePayload {
+  /// Unique identifier for the balance record.
+  id: int64
+  /// Tenant owner this balance belongs to.
+  owner_id: int64
+  /// Employee this balance is for.
+  employee_id: int64
+  /// Leave type this balance tracks.
+  leave_type_id: int64
+  /// Calendar year this balance applies to.
+  year: int32
+  /// Total entitled days for the year (including carryover).
+  entitled_days: float64
+  /// Days already consumed by approved requests.
+  used_days: float64
+  /// Days reserved by pending (not yet approved) requests.
+  pending_days: float64
+  /// Days still available (entitled - used - pending).
+  remaining_days: float64
+  /// Unix timestamp when this record was created.
+  created_at: int64
+  /// Unix timestamp when this record was last updated.
+  updated_at: int64
+}
+
+message ListLeaveRequestsRequest {
+  /// Filter by employee; absent to include all employees.
+  employee_id: int64? @query("employee_id") @nullable
+  /// Filter by status; absent to include all statuses.
+  status: string? @query("status") @nullable
+}
+
+message ListLeaveRequestsResponse {
+  /// Page of leave requests matching the filters.
+  requests: LeaveRequestPayload[]
+  /// Total number of matching leave requests across all pages.
+  total: int64 @encode(number)
+  /// Page size used for this request.
+  limit: int32
+  /// Offset used for this request.
+  offset: int32
+}
+
+message CreateLeaveRequestRequest {
+  /// Employee requesting leave.
+  employee_id: int64 @required @gt(0)
+  /// Leave type being requested.
+  leave_type_id: int64 @required @gt(0)
+  /// First day of leave (ISO-8601 date).
+  start_date: string @required
+  /// Last day of leave (ISO-8601 date).
+  end_date: string @required
+  /// Total number of working days requested.
+  total_days: float64 @required @gt(0)
+  /// Additional context from the employee; absent if none provided.
+  notes: string? @nullable
+}
+
+message CreateLeaveRequestResponse {
+  /// The newly created leave request.
+  request: LeaveRequestPayload
+}
+
+/// ApproveLeaveBody carries approval decision fields bound from the HTTP payload.
+message ApproveLeaveBody {
+  /// True to approve, false to reject.
+  approved: bool
+  /// Reason for rejection; absent if approving.
+  rejection_reason: string? @nullable
+}
+
+message ApproveLeaveRequest {
+  /// request_id is the leave request being reviewed.
+  request_id: int64 @required @gt(0)
+  body: ApproveLeaveBody
+}
+
+message ApproveLeaveResponse {
+  /// Whether the approval action was processed.
+  success: bool
+}
+
+message ListLeaveTypesRequest {}
+
+message ListLeaveTypesResponse {
+  /// All leave types configured for the tenant.
+  leave_types: LeaveTypePayload[]
+  /// Total number of leave types.
+  total: int64 @encode(number)
+  /// Page size used for this request.
+  limit: int32
+  /// Offset used for this request.
+  offset: int32
+}
+
+message CreateLeaveTypeRequest {
+  /// Human-readable name (e.g. "Annual Leave", "Sick Leave").
+  name: string @required
+  /// Whether days taken under this type are paid.
+  is_paid: bool
+  /// Whether leave requests of this type require manager approval.
+  requires_approval: bool
+  /// Accrual rule; absent if entitlement is fixed.
+  accrual_rule: string? @nullable
+  /// Maximum unused days that may carry over to the next year.
+  max_carryover_days: int32 @required @gt(0)
+  /// Minimum calendar days of notice required.
+  min_notice_days: int32 @required @gt(0)
+  /// Consecutive days after which documentation is required; absent if never.
+  requires_documentation_after_days: int32? @nullable
+}
+
+message CreateLeaveTypeResponse {
+  /// The newly created leave type.
+  leave_type: LeaveTypePayload
+}
+
+/// UpdateLeaveTypeBody carries updatable leave type fields bound from the HTTP payload.
+message UpdateLeaveTypeBody {
+  /// Updated name; absent to keep current value.
+  name: string? @nullable
+  /// Updated paid status; absent to keep current value.
+  is_paid: bool? @nullable
+  /// Updated approval requirement; absent to keep current value.
+  requires_approval: bool? @nullable
+  /// Updated accrual rule; absent to keep current value.
+  accrual_rule: string? @nullable
+  /// Updated max carryover days; absent to keep current value.
+  max_carryover_days: int32? @nullable
+  /// Updated min notice days; absent to keep current value.
+  min_notice_days: int32? @nullable
+  /// Updated documentation threshold; absent to keep current value.
+  requires_documentation_after_days: int32? @nullable
+  /// Updated active status; absent to keep current value.
+  is_active: bool? @nullable
+}
+
+message UpdateLeaveTypeRequest {
+  /// ID of the leave type to update.
+  id: int64 @required @gt(0)
+  body: UpdateLeaveTypeBody
+}
+
+message UpdateLeaveTypeResponse {
+  /// The updated leave type.
+  leave_type: LeaveTypePayload
+}
+
+message ListLeaveBalancesRequest {
+  /// Filter by employee; absent to include all employees.
+  employee_id: int64? @query("employee_id") @nullable
+  /// Filter by year; absent to return current year.
+  year: int32? @query("year") @nullable
+}
+
+message ListLeaveBalancesResponse {
+  /// Leave balances matching the filters.
+  balances: LeaveBalancePayload[]
+  /// Total number of matching balances across all pages.
+  total: int64 @encode(number)
+  /// Page size used for this request.
+  limit: int32
+  /// Offset used for this request.
+  offset: int32
+}

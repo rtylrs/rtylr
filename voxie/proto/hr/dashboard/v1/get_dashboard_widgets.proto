@@ -1,7 +1,0 @@
-syntax = "proto3";
-
-package hr.dashboard.v1;
-
-option go_package = "github.com/voxire/voxie/gen/go/hr/dashboard/v1";
-
-message GetDashboardWidgetsRequest {}

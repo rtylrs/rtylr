@@ -1,0 +1,12 @@
+package erp.inventory.v1
+
+/// InventoryService defines ERP inventory endpoints.
+service InventoryService {
+  getInventoryReport(GetInventoryReportRequest) -> GetInventoryReportResponse @get("/report")
+
+  getLowStock(GetLowStockRequest) -> GetLowStockResponse @get("/low-stock")
+
+  getValuation(GetValuationRequest) -> GetValuationResponse @get("/valuation")
+
+  adjustInventory(AdjustInventoryRequest) -> AdjustInventoryResponse @post("/adjust")
+}

@@ -1,0 +1,16 @@
+package pos.table.v1
+
+/// TableService defines POS floor table endpoints.
+service TableService {
+  /// Returns tables for the active business.
+  listTables(ListTablesRequest) -> ListTablesResponse @get("/tables")
+
+  /// Creates a new table.
+  createTable(CreateTableRequest) -> CreateTableResponse @post("/tables")
+
+  /// Updates an existing table.
+  updateTable(UpdateTableRequest) -> UpdateTableResponse @put("/tables/{id}") @body("body")
+
+  /// Removes a table by ID.
+  deleteTable(DeleteTableRequest) -> DeleteTableResponse @delete("/tables/{id}")
+}

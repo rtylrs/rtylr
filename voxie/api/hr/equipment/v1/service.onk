@@ -1,0 +1,16 @@
+package hr.equipment.v1
+
+/// EquipmentService defines HR equipment endpoints.
+service EquipmentService {
+  /// ListAssets returns equipment assets with optional filters.
+  listAssets(ListAssetsRequest) -> ListAssetsResponse @get("/assets")
+
+  /// ListEquipmentRequests returns equipment requests with optional filters.
+  listEquipmentRequests(ListEquipmentRequestsRequest) -> ListEquipmentRequestsResponse @get("/requests")
+
+  /// CreateEquipmentRequest submits an equipment request.
+  createEquipmentRequest(CreateEquipmentRequestRequest) -> CreateEquipmentRequestResponse @post("/requests")
+
+  /// ApproveEquipment approves an equipment request.
+  approveEquipment(ApproveEquipmentRequest) -> ApproveEquipmentResponse @patch("/requests/{equipment_request_id}/approve") @body("body")
+}

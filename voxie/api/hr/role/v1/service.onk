@@ -1,0 +1,13 @@
+package hr.role.v1
+
+/// RoleService defines HR role endpoints.
+service RoleService {
+  /// Creates a new role.
+  createRole(CreateRoleRequest) -> CreateRoleResponse @post("/roles")
+
+  /// Updates an existing role.
+  updateRole(UpdateRoleRequest) -> UpdateRoleResponse @put("/roles/{id}") @body("body")
+
+  /// Assigns a role to an employee.
+  assignRole(AssignRoleRequest) -> AssignRoleResponse @post("/roles/assign")
+}

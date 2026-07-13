@@ -1,0 +1,16 @@
+package pos.modifier.v1
+
+/// ModifierService defines POS menu item modifier endpoints.
+service ModifierService {
+  /// Returns modifiers for the active business.
+  listModifiers(ListModifiersRequest) -> ListModifiersResponse @get("/modifiers")
+
+  /// Creates a new modifier.
+  createModifier(CreateModifierRequest) -> CreateModifierResponse @post("/modifiers")
+
+  /// Updates an existing modifier.
+  updateModifier(UpdateModifierRequest) -> UpdateModifierResponse @put("/modifiers/{id}") @body("body")
+
+  /// Removes a modifier by ID.
+  deleteModifier(DeleteModifierRequest) -> DeleteModifierResponse @delete("/modifiers/{id}")
+}

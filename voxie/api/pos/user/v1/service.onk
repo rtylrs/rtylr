@@ -1,0 +1,22 @@
+package pos.user.v1
+
+/// UserService defines POS roster operator endpoints.
+service UserService {
+  /// Returns POS roster operators for a location.
+  listPOSUsers(ListPOSUsersRequest) -> ListPOSUsersResponse @get("/users")
+
+  /// Creates a new POS roster operator.
+  createPOSUser(CreatePOSUserRequest) -> CreatePOSUserResponse @post("/users")
+
+  /// Updates an existing POS roster operator.
+  updatePOSUser(UpdatePOSUserRequest) -> UpdatePOSUserResponse @patch("/users/update")
+
+  /// Deactivates a POS roster operator.
+  deactivatePOSUser(DeactivatePOSUserRequest) -> DeactivatePOSUserResponse @patch("/users/deactivate")
+
+  /// Verifies an operator PIN for terminal sign-in.
+  verifyPOSUserPIN(VerifyPOSUserPINRequest) -> VerifyPOSUserPINResponse @post("/users/verify-pin")
+
+  /// Sets or resets an operator PIN.
+  setPIN(SetPINRequest) -> SetPINResponse @post("/users/set-pin")
+}

@@ -1,0 +1,25 @@
+package pos.stock.v1
+
+/// StockService defines POS inventory and stock movement endpoints.
+service StockService {
+  /// Returns stock movements, optionally filtered by branch and product.
+  listStockMovements(ListStockMovementsRequest) -> ListStockMovementsResponse @get("/movements")
+
+  /// Records a stock receipt.
+  receiveStock(ReceiveStockRequest) -> ReceiveStockResponse @post("/receive")
+
+  /// Records a manual stock adjustment.
+  adjustStock(AdjustStockRequest) -> AdjustStockResponse @post("/adjust")
+
+  /// Records wasted stock.
+  wasteStock(WasteStockRequest) -> WasteStockResponse @post("/waste")
+
+  /// Transfers stock between branches.
+  transferStock(TransferStockRequest) -> TransferStockResponse @post("/transfer")
+
+  /// Returns branch inventory levels.
+  listInventory(ListInventoryRequest) -> ListInventoryResponse @get("/inventory")
+
+  /// Returns branch inventory items at or below their reorder point.
+  lowStock(LowStockRequest) -> LowStockResponse @get("/low-stock")
+}

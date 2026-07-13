@@ -1,0 +1,61 @@
+package hub.memory.v1
+
+message ChatSummary {
+  id: string
+  title: string
+  summary: string
+  updated_at: string
+  pinned: bool
+  archived: bool
+}
+
+message ChatMessage {
+  id: string
+  role: string
+  content: string
+  created_at: string
+  tokens_used: int32
+}
+
+message ListChatsRequest {
+  limit: int32 @query("limit")
+  offset: int32 @query("offset")
+}
+
+message ListChatsResponse {
+  chats: ChatSummary[]
+}
+
+message GetChatMessagesRequest {
+  session_id: string
+}
+
+message GetChatMessagesResponse {
+  messages: ChatMessage[]
+}
+
+message DeleteChatRequest {
+  session_id: string
+}
+
+message DeleteChatResponse {
+  deleted: bool
+}
+
+message RenameChatRequest {
+  session_id: string
+  title: string
+}
+
+message RenameChatResponse {
+  updated: bool
+}
+
+message PinChatRequest {
+  session_id: string
+  pinned: bool
+}
+
+message PinChatResponse {
+  updated: bool
+}

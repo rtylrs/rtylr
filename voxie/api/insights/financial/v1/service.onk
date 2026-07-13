@@ -1,0 +1,13 @@
+package insights.financial.v1
+
+/// FinancialService defines insights financial analytics endpoints.
+service FinancialService {
+  /// Returns cash flow analytics for a period.
+  getCashFlowAnalytics(GetCashFlowAnalyticsRequest) -> GetCashFlowAnalyticsResponse @get("/cash-flow")
+
+  /// Returns expense analytics for a period.
+  getExpenseAnalytics(GetExpenseAnalyticsRequest) -> GetExpenseAnalyticsResponse @get("/expenses")
+
+  /// Returns invoice aging analysis.
+  getInvoiceAging(GetInvoiceAgingRequest) -> GetInvoiceAgingResponse @get("/invoice-aging")
+}

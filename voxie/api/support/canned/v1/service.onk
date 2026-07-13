@@ -1,0 +1,11 @@
+package support.canned.v1
+
+service CannedResponseService {
+  listCannedResponses(ListCannedResponsesRequest) -> ListCannedResponsesResponse @get("/canned-responses")
+
+  createCannedResponse(CreateCannedResponseRequest) -> CreateCannedResponseResponse @post("/canned-responses")
+
+  updateCannedResponse(UpdateCannedResponseRequest) -> UpdateCannedResponseResponse @put("/canned-responses/{id}")
+
+  deleteCannedResponse(DeleteCannedResponseRequest) -> DeleteCannedResponseResponse @delete("/canned-responses/{id}")
+}

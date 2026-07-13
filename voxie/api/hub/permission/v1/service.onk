@@ -1,0 +1,22 @@
+package hub.permission.v1
+
+/// PermissionService defines hub permission and role endpoints.
+service PermissionService {
+  /// Returns the permission matrix.
+  getPermissions(GetPermissionsRequest) -> GetPermissionsResponse @get("/permissions")
+
+  /// Returns defined roles.
+  listRoles(ListRolesRequest) -> ListRolesResponse @get("/roles")
+
+  /// Creates a new role.
+  createRole(CreateRoleRequest) -> CreateRoleResponse @post("/roles")
+
+  /// Updates a custom role.
+  updateRole(UpdateRoleRequest) -> UpdateRoleResponse @put("/roles/{id}") @body("body")
+
+  /// Deletes a custom role.
+  deleteRole(DeleteRoleRequest) -> DeleteRoleResponse @delete("/roles/{id}")
+
+  /// Toggles a single permission cell.
+  updatePermissionMatrix(UpdatePermissionMatrixRequest) -> UpdatePermissionMatrixResponse @patch("/matrix")
+}

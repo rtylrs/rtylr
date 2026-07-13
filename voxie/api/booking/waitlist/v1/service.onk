@@ -1,0 +1,9 @@
+package booking.waitlist.v1
+
+service WaitlistService {
+  listEntries(ListEntriesRequest) -> ListEntriesResponse @get("/entries")
+
+  createEntry(CreateEntryRequest) -> CreateEntryResponse @post("/entries")
+
+  updateEntry(UpdateEntryRequest) -> UpdateEntryResponse @put("/entries/{id}")
+}

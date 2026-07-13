@@ -10,7 +10,7 @@ on:
 
 jobs:
   verify:
-    name: Lint, Breaking & Generate
+    name: Generate & Verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -42,16 +42,6 @@ jobs:
       - name: Add GOPATH/bin to PATH
         run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
-      - name: Install buf
-        run: go install github.com/bufbuild/buf/cmd/buf@v1.65.0
-
-      - name: buf lint
-        run: make lint
-
-      - name: buf breaking
-        if: github.event_name == 'pull_request'
-        run: make breaking
-
       - name: Regenerate contracts
         run: |
           make generate
@@ -69,7 +59,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           git diff --exit-code -- gen/ go.mod go.sum pnpm-lock.yaml || {
-            echo "::error::gen/ is out of date with the proto sources. Run 'make generate' locally and commit gen/, go.mod, go.sum, and pnpm-lock.yaml."
+            echo "::error::gen/ is out of date with the api/*.onk sources. Run 'make generate' locally and commit gen/, go.mod, go.sum, and pnpm-lock.yaml."
             exit 1
           }
 

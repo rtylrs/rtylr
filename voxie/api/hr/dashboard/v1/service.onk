@@ -1,0 +1,13 @@
+package hr.dashboard.v1
+
+/// DashboardService defines HR dashboard endpoints.
+service DashboardService {
+  /// GetHRDashboard returns the HR dashboard summary.
+  getHRDashboard(GetHRDashboardRequest) -> GetHRDashboardResponse @get("/dashboard")
+
+  /// GetDashboardWidgets returns widget layout and preloaded data.
+  getDashboardWidgets(GetDashboardWidgetsRequest) -> GetDashboardWidgetsResponse @get("/dashboard/widgets")
+
+  /// UpdateDashboardWidgets saves widget layout for the current business.
+  updateDashboardWidgets(UpdateDashboardWidgetsRequest) -> UpdateDashboardWidgetsResponse @put("/dashboard/widgets")
+}

@@ -1,0 +1,9 @@
+package flow.notification.v1
+
+service NotificationService {
+  listNotifications(ListNotificationsRequest) -> ListNotificationsResponse @get("/notifications")
+
+  markNotificationRead(MarkNotificationReadRequest) -> MarkNotificationReadResponse @put("/notifications/{id}/read")
+
+  markAllNotificationsRead(MarkAllNotificationsReadRequest) -> MarkAllNotificationsReadResponse @put("/notifications/read-all")
+}

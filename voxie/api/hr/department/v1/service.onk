@@ -1,0 +1,16 @@
+package hr.department.v1
+
+/// DepartmentService defines HR department endpoints.
+service DepartmentService {
+  /// ListDepartments returns departments for the active business.
+  listDepartments(ListDepartmentsRequest) -> ListDepartmentsResponse @get("/departments")
+
+  /// CreateDepartment creates a new department.
+  createDepartment(CreateDepartmentRequest) -> CreateDepartmentResponse @post("/departments")
+
+  /// UpdateDepartment updates an existing department.
+  updateDepartment(UpdateDepartmentRequest) -> UpdateDepartmentResponse @put("/departments/{id}") @body("body")
+
+  /// DeleteDepartment deletes a department.
+  deleteDepartment(DeleteDepartmentRequest) -> DeleteDepartmentResponse @delete("/departments/{id}")
+}

@@ -1,0 +1,10 @@
+package pos.receipt.v1
+
+/// ReceiptService defines POS receipt endpoints.
+service ReceiptService {
+  /// Returns receipts, optionally filtered by date range.
+  listReceipts(ListReceiptsRequest) -> ListReceiptsResponse @get("/receipts")
+
+  /// Emails a receipt to the given address.
+  emailReceipt(EmailReceiptRequest) -> EmailReceiptResponse @post("/receipts/{id}/email")
+}

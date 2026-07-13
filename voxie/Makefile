@@ -1,39 +1,24 @@
-.PHONY: clean lint format breaking generate install-plugins install-js typecheck
+.PHONY: clean generate install-onek install-js typecheck
 
-ONEKIT_VERSION := v0.3.5
+ONK_VERSION := v0.4.4
 
 # Clean generated code
 clean:
 	rm -rf gen
 
-# Lint proto files
-lint:
-	buf lint
+# Install the onek CLI used to generate Go/TypeScript from api/*.onk contracts.
+install-onek:
+	go install github.com/1homsi/onekit/cmd/onek@$(ONK_VERSION)
 
-# Format proto files
-format:
-	buf format -w
-
-# Check for breaking changes
-breaking:
-	buf breaking --against '.git#branch=main'
-
-# Install the onekit protoc plugins used for generation
-install-plugins:
-	go install github.com/corezio/onekit/cmd/protoc-gen-onekit-go-http@$(ONEKIT_VERSION)
-	go install github.com/corezio/onekit/cmd/protoc-gen-onekit-ts-client@$(ONEKIT_VERSION)
-	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-
-# Install JS codegen tooling (ts-proto)
+# Install JS codegen tooling
 install-js:
 	pnpm install --frozen-lockfile
 
-# Regenerate gen/go and gen/ts from proto sources. Output is committed to the repo.
-generate: install-plugins install-js
-	buf dep update
+# Regenerate gen/go and gen/ts from api/*.onk. Output is committed to the repo.
+generate: install-onek install-js
 	rm -rf gen/go gen/ts
-	buf generate
-	python3 scripts/generate_validation_metadata.py --proto-root proto --out-dir gen/ts/validation
+	python3 scripts/generate_validation_metadata.py --proto-root api --out-dir gen/ts/validation
+	onek build .
 
 # Typecheck the generated TypeScript output
 typecheck: install-js

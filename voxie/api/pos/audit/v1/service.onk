@@ -1,0 +1,10 @@
+package pos.audit.v1
+
+/// AuditService defines POS audit log endpoints.
+service AuditService {
+  /// Returns audit log entries filtered by action, entity, or date range.
+  listAudit(ListAuditRequest) -> ListAuditResponse @get("/audit")
+
+  /// Records a new audit log entry.
+  createAudit(CreateAuditRequest) -> CreateAuditResponse @post("/audit")
+}

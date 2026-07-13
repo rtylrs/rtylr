@@ -1,0 +1,10 @@
+package pos.settings.v1
+
+/// SettingsService defines POS business settings endpoints.
+service SettingsService {
+  /// Returns the active business POS settings.
+  getPOSSettings(GetPOSSettingsRequest) -> GetPOSSettingsResponse @get("/settings")
+
+  /// Updates the active business POS settings.
+  updatePOSSettings(UpdatePOSSettingsRequest) -> UpdatePOSSettingsResponse @put("/settings")
+}

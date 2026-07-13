@@ -1,0 +1,13 @@
+package hr.overtime.v1
+
+/// OvertimeService defines HR overtime request endpoints.
+service OvertimeService {
+  /// ListOvertimeRequests returns overtime requests with optional filters.
+  listOvertimeRequests(ListOvertimeRequestsRequest) -> ListOvertimeRequestsResponse @get("/requests")
+
+  /// CreateOvertimeRequest submits an overtime request.
+  createOvertimeRequest(CreateOvertimeRequestRequest) -> CreateOvertimeRequestResponse @post("/requests")
+
+  /// ApproveOvertime approves an overtime request.
+  approveOvertime(ApproveOvertimeRequest) -> ApproveOvertimeResponse @patch("/requests/{overtime_request_id}/approve") @body("body")
+}

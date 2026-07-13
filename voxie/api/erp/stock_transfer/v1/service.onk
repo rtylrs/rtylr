@@ -1,0 +1,10 @@
+package erp.stock_transfer.v1
+
+/// StockTransferService defines ERP stock transfer endpoints.
+service StockTransferService {
+  listStockTransfers(ListStockTransfersRequest) -> ListStockTransfersResponse @get("/stock-transfers")
+
+  createStockTransfer(CreateStockTransferRequest) -> CreateStockTransferResponse @post("/stock-transfers")
+
+  updateStockTransferStatus(UpdateStockTransferStatusRequest) -> UpdateStockTransferStatusResponse @patch("/stock-transfers/{id}/status")
+}

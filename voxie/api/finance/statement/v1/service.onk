@@ -1,0 +1,7 @@
+package finance.statement.v1
+
+service StatementService {
+  getBalanceSheet(GetBalanceSheetRequest) -> GetBalanceSheetResponse @get("/balance-sheet")
+
+  getCashFlow(GetCashFlowRequest) -> GetCashFlowResponse @get("/cash-flow")
+}
