@@ -15,6 +15,11 @@ const mockClient = vi.hoisted(() => ({
 vi.mock('@voxire/api', () => ({
   createOneKitClient: () => mockClient,
   getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
+  toFiniteNumber: (value: unknown, fallback = 0) => {
+    if (value === null || value === undefined || value === '') return fallback;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  },
 }));
 
 import {
