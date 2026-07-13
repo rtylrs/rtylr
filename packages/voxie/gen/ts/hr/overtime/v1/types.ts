@@ -2,22 +2,72 @@
 
 export interface OvertimeRequestPayload {
 id?: string;
-owner_id?: string;
-employee_id?: string;
+ownerId?: string;
+employeeId?: string;
 date?: string;
-planned_extra_minutes?: number;
+plannedExtraMinutes?: number;
 reason?: string;
 status?: string;
-current_approval_level?: number;
-approved_by?: string;
-multiplier_applied?: number;
-created_at?: string;
-updated_at?: string;
+currentApprovalLevel?: number;
+approvedBy?: string;
+multiplierApplied?: number;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeOvertimeRequestPayload(v: any): OvertimeRequestPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+employeeId: v.employee_id,
+date: v.date,
+plannedExtraMinutes: v.planned_extra_minutes,
+reason: v.reason,
+status: v.status,
+currentApprovalLevel: v.current_approval_level,
+approvedBy: v.approved_by,
+multiplierApplied: v.multiplier_applied,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeOvertimeRequestPayload(v: OvertimeRequestPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.date !== undefined) { out.date = v.date; }
+if (v.plannedExtraMinutes !== undefined) { out.planned_extra_minutes = v.plannedExtraMinutes; }
+if (v.reason !== undefined) { out.reason = v.reason; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.currentApprovalLevel !== undefined) { out.current_approval_level = v.currentApprovalLevel; }
+if (v.approvedBy !== undefined) { out.approved_by = v.approvedBy; }
+if (v.multiplierApplied !== undefined) { out.multiplier_applied = v.multiplierApplied; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ListOvertimeRequestsRequest {
-employee_id?: string;
+employeeId?: string;
 status?: string;
+}
+
+export function decodeListOvertimeRequestsRequest(v: any): ListOvertimeRequestsRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+status: v.status,
+};
+}
+
+export function encodeListOvertimeRequestsRequest(v: ListOvertimeRequestsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface ListOvertimeRequestsResponse {
@@ -27,29 +77,125 @@ limit?: number;
 offset?: number;
 }
 
+export function decodeListOvertimeRequestsResponse(v: any): ListOvertimeRequestsResponse {
+if (v === null || v === undefined) return v;
+return {
+requests: (v.requests !== undefined ? (v.requests as any[]).map(decodeOvertimeRequestPayload) : v.requests),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListOvertimeRequestsResponse(v: ListOvertimeRequestsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.requests !== undefined) { out.requests = (v.requests as any[]).map(encodeOvertimeRequestPayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
 export interface CreateOvertimeRequestRequest {
-employee_id?: string;
+employeeId?: string;
 date?: string;
-planned_extra_minutes?: number;
+plannedExtraMinutes?: number;
 reason?: string;
+}
+
+export function decodeCreateOvertimeRequestRequest(v: any): CreateOvertimeRequestRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+date: v.date,
+plannedExtraMinutes: v.planned_extra_minutes,
+reason: v.reason,
+};
+}
+
+export function encodeCreateOvertimeRequestRequest(v: CreateOvertimeRequestRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.date !== undefined) { out.date = v.date; }
+if (v.plannedExtraMinutes !== undefined) { out.planned_extra_minutes = v.plannedExtraMinutes; }
+if (v.reason !== undefined) { out.reason = v.reason; }
+return out;
 }
 
 export interface CreateOvertimeRequestResponse {
 request?: OvertimeRequestPayload;
 }
 
+export function decodeCreateOvertimeRequestResponse(v: any): CreateOvertimeRequestResponse {
+if (v === null || v === undefined) return v;
+return {
+request: (v.request !== undefined ? decodeOvertimeRequestPayload(v.request) : v.request),
+};
+}
+
+export function encodeCreateOvertimeRequestResponse(v: CreateOvertimeRequestResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.request !== undefined) { out.request = encodeOvertimeRequestPayload(v.request); }
+return out;
+}
+
 export interface ApproveOvertimeBody {
 approved?: boolean;
-multiplier_applied?: number;
-rejection_reason?: string;
+multiplierApplied?: number;
+rejectionReason?: string;
+}
+
+export function decodeApproveOvertimeBody(v: any): ApproveOvertimeBody {
+if (v === null || v === undefined) return v;
+return {
+approved: v.approved,
+multiplierApplied: v.multiplier_applied,
+rejectionReason: v.rejection_reason,
+};
+}
+
+export function encodeApproveOvertimeBody(v: ApproveOvertimeBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.approved !== undefined) { out.approved = v.approved; }
+if (v.multiplierApplied !== undefined) { out.multiplier_applied = v.multiplierApplied; }
+if (v.rejectionReason !== undefined) { out.rejection_reason = v.rejectionReason; }
+return out;
 }
 
 export interface ApproveOvertimeRequest {
-overtime_request_id?: string;
+overtimeRequestId?: string;
 body?: ApproveOvertimeBody;
+}
+
+export function decodeApproveOvertimeRequest(v: any): ApproveOvertimeRequest {
+if (v === null || v === undefined) return v;
+return {
+overtimeRequestId: v.overtime_request_id,
+body: (v.body !== undefined ? decodeApproveOvertimeBody(v.body) : v.body),
+};
+}
+
+export function encodeApproveOvertimeRequest(v: ApproveOvertimeRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.overtimeRequestId !== undefined) { out.overtime_request_id = v.overtimeRequestId; }
+if (v.body !== undefined) { out.body = encodeApproveOvertimeBody(v.body); }
+return out;
 }
 
 export interface ApproveOvertimeResponse {
 success?: boolean;
+}
+
+export function decodeApproveOvertimeResponse(v: any): ApproveOvertimeResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeApproveOvertimeResponse(v: ApproveOvertimeResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
 }
 

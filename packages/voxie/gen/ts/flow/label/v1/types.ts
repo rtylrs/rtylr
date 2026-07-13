@@ -2,28 +2,105 @@
 
 export interface Label {
 id?: string;
-workspace_id?: string;
+workspaceId?: string;
 name?: string;
 color?: string;
-created_at?: string;
+createdAt?: string;
+}
+
+export function decodeLabel(v: any): Label {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+workspaceId: v.workspace_id,
+name: v.name,
+color: v.color,
+createdAt: v.created_at,
+};
+}
+
+export function encodeLabel(v: Label): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.color !== undefined) { out.color = v.color; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface ListLabelsRequest {
-workspace_id?: string;
+workspaceId?: string;
+}
+
+export function decodeListLabelsRequest(v: any): ListLabelsRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+};
+}
+
+export function encodeListLabelsRequest(v: ListLabelsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+return out;
 }
 
 export interface ListLabelsResponse {
 labels?: (Label)[];
 }
 
+export function decodeListLabelsResponse(v: any): ListLabelsResponse {
+if (v === null || v === undefined) return v;
+return {
+labels: (v.labels !== undefined ? (v.labels as any[]).map(decodeLabel) : v.labels),
+};
+}
+
+export function encodeListLabelsResponse(v: ListLabelsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.labels !== undefined) { out.labels = (v.labels as any[]).map(encodeLabel); }
+return out;
+}
+
 export interface CreateLabelRequest {
-workspace_id?: string;
+workspaceId?: string;
 name?: string;
 color?: string;
 }
 
+export function decodeCreateLabelRequest(v: any): CreateLabelRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+name: v.name,
+color: v.color,
+};
+}
+
+export function encodeCreateLabelRequest(v: CreateLabelRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.color !== undefined) { out.color = v.color; }
+return out;
+}
+
 export interface CreateLabelResponse {
 label?: Label;
+}
+
+export function decodeCreateLabelResponse(v: any): CreateLabelResponse {
+if (v === null || v === undefined) return v;
+return {
+label: (v.label !== undefined ? decodeLabel(v.label) : v.label),
+};
+}
+
+export function encodeCreateLabelResponse(v: CreateLabelResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.label !== undefined) { out.label = encodeLabel(v.label); }
+return out;
 }
 
 export interface UpdateLabelRequest {
@@ -32,24 +109,108 @@ name?: string;
 color?: string;
 }
 
+export function decodeUpdateLabelRequest(v: any): UpdateLabelRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+color: v.color,
+};
+}
+
+export function encodeUpdateLabelRequest(v: UpdateLabelRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.color !== undefined) { out.color = v.color; }
+return out;
+}
+
 export interface UpdateLabelResponse {
 message?: string;
+}
+
+export function decodeUpdateLabelResponse(v: any): UpdateLabelResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateLabelResponse(v: UpdateLabelResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface DeleteLabelRequest {
 id?: string;
 }
 
+export function decodeDeleteLabelRequest(v: any): DeleteLabelRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteLabelRequest(v: DeleteLabelRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteLabelResponse {
 message?: string;
 }
 
+export function decodeDeleteLabelResponse(v: any): DeleteLabelResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteLabelResponse(v: DeleteLabelResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface SetTaskLabelsRequest {
-task_id?: string;
-label_ids?: (string)[];
+taskId?: string;
+labelIds?: (string)[];
+}
+
+export function decodeSetTaskLabelsRequest(v: any): SetTaskLabelsRequest {
+if (v === null || v === undefined) return v;
+return {
+taskId: v.task_id,
+labelIds: v.label_ids,
+};
+}
+
+export function encodeSetTaskLabelsRequest(v: SetTaskLabelsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.labelIds !== undefined) { out.label_ids = v.labelIds; }
+return out;
 }
 
 export interface SetTaskLabelsResponse {
 message?: string;
+}
+
+export function decodeSetTaskLabelsResponse(v: any): SetTaskLabelsResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeSetTaskLabelsResponse(v: SetTaskLabelsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

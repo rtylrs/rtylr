@@ -2,15 +2,46 @@
 
 export interface Template {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 type?: string;
 subject?: string;
 body?: string;
 variables?: string;
-is_active?: boolean;
-created_at?: string;
-updated_at?: string;
+isActive?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeTemplate(v: any): Template {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+type: v.type,
+subject: v.subject,
+body: v.body,
+variables: v.variables,
+isActive: v.is_active,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeTemplate(v: Template): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.subject !== undefined) { out.subject = v.subject; }
+if (v.body !== undefined) { out.body = v.body; }
+if (v.variables !== undefined) { out.variables = v.variables; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface CreateTemplateRequest {
@@ -19,27 +50,115 @@ type?: string;
 subject?: string;
 body?: string;
 variables?: string;
-is_active?: boolean;
+isActive?: boolean;
+}
+
+export function decodeCreateTemplateRequest(v: any): CreateTemplateRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+type: v.type,
+subject: v.subject,
+body: v.body,
+variables: v.variables,
+isActive: v.is_active,
+};
+}
+
+export function encodeCreateTemplateRequest(v: CreateTemplateRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.subject !== undefined) { out.subject = v.subject; }
+if (v.body !== undefined) { out.body = v.body; }
+if (v.variables !== undefined) { out.variables = v.variables; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface CreateTemplateResponse {
-template_id?: string;
+templateId?: string;
 message?: string;
+}
+
+export function decodeCreateTemplateResponse(v: any): CreateTemplateResponse {
+if (v === null || v === undefined) return v;
+return {
+templateId: v.template_id,
+message: v.message,
+};
+}
+
+export function encodeCreateTemplateResponse(v: CreateTemplateResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.templateId !== undefined) { out.template_id = v.templateId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface DeleteTemplateRequest {
 id?: string;
 }
 
+export function decodeDeleteTemplateRequest(v: any): DeleteTemplateRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteTemplateRequest(v: DeleteTemplateRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteTemplateResponse {
 message?: string;
+}
+
+export function decodeDeleteTemplateResponse(v: any): DeleteTemplateResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteTemplateResponse(v: DeleteTemplateResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface ListTemplatesRequest {
 }
 
+export function decodeListTemplatesRequest(v: any): ListTemplatesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListTemplatesRequest(v: ListTemplatesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface ListTemplatesResponse {
 templates?: (Template)[];
+}
+
+export function decodeListTemplatesResponse(v: any): ListTemplatesResponse {
+if (v === null || v === undefined) return v;
+return {
+templates: (v.templates !== undefined ? (v.templates as any[]).map(decodeTemplate) : v.templates),
+};
+}
+
+export function encodeListTemplatesResponse(v: ListTemplatesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.templates !== undefined) { out.templates = (v.templates as any[]).map(encodeTemplate); }
+return out;
 }
 
 export interface UpdateTemplateBody {
@@ -48,7 +167,30 @@ type?: string;
 subject?: string;
 body?: string;
 variables?: string;
-is_active?: boolean;
+isActive?: boolean;
+}
+
+export function decodeUpdateTemplateBody(v: any): UpdateTemplateBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+type: v.type,
+subject: v.subject,
+body: v.body,
+variables: v.variables,
+isActive: v.is_active,
+};
+}
+
+export function encodeUpdateTemplateBody(v: UpdateTemplateBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.subject !== undefined) { out.subject = v.subject; }
+if (v.body !== undefined) { out.body = v.body; }
+if (v.variables !== undefined) { out.variables = v.variables; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface UpdateTemplateRequest {
@@ -56,7 +198,35 @@ id?: string;
 body?: UpdateTemplateBody;
 }
 
+export function decodeUpdateTemplateRequest(v: any): UpdateTemplateRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateTemplateBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateTemplateRequest(v: UpdateTemplateRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateTemplateBody(v.body); }
+return out;
+}
+
 export interface UpdateTemplateResponse {
 message?: string;
+}
+
+export function decodeUpdateTemplateResponse(v: any): UpdateTemplateResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateTemplateResponse(v: UpdateTemplateResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

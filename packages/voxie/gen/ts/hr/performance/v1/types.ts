@@ -2,46 +2,154 @@
 
 export interface ReviewGoalPayload {
 id?: string;
-owner_id?: string;
-employee_id?: string;
-review_cycle_id?: string;
+ownerId?: string;
+employeeId?: string;
+reviewCycleId?: string;
 title?: string;
 description?: string;
 weight?: number;
-success_criteria?: string;
+successCriteria?: string;
 status?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeReviewGoalPayload(v: any): ReviewGoalPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+employeeId: v.employee_id,
+reviewCycleId: v.review_cycle_id,
+title: v.title,
+description: v.description,
+weight: v.weight,
+successCriteria: v.success_criteria,
+status: v.status,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeReviewGoalPayload(v: ReviewGoalPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.reviewCycleId !== undefined) { out.review_cycle_id = v.reviewCycleId; }
+if (v.title !== undefined) { out.title = v.title; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.weight !== undefined) { out.weight = v.weight; }
+if (v.successCriteria !== undefined) { out.success_criteria = v.successCriteria; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface PerformanceReviewPayload {
 id?: string;
-owner_id?: string;
-employee_id?: string;
-review_cycle_id?: string;
-reviewer_employee_id?: string;
-review_type?: string;
-overall_rating?: string;
+ownerId?: string;
+employeeId?: string;
+reviewCycleId?: string;
+reviewerEmployeeId?: string;
+reviewType?: string;
+overallRating?: string;
 narrative?: string;
 status?: string;
-shared_with_employee_at?: string;
-created_at?: string;
-updated_at?: string;
+sharedWithEmployeeAt?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodePerformanceReviewPayload(v: any): PerformanceReviewPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+employeeId: v.employee_id,
+reviewCycleId: v.review_cycle_id,
+reviewerEmployeeId: v.reviewer_employee_id,
+reviewType: v.review_type,
+overallRating: v.overall_rating,
+narrative: v.narrative,
+status: v.status,
+sharedWithEmployeeAt: v.shared_with_employee_at,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodePerformanceReviewPayload(v: PerformanceReviewPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.reviewCycleId !== undefined) { out.review_cycle_id = v.reviewCycleId; }
+if (v.reviewerEmployeeId !== undefined) { out.reviewer_employee_id = v.reviewerEmployeeId; }
+if (v.reviewType !== undefined) { out.review_type = v.reviewType; }
+if (v.overallRating !== undefined) { out.overall_rating = v.overallRating; }
+if (v.narrative !== undefined) { out.narrative = v.narrative; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.sharedWithEmployeeAt !== undefined) { out.shared_with_employee_at = v.sharedWithEmployeeAt; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ReviewCyclePayload {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 type?: string;
-period_start?: string;
-period_end?: string;
+periodStart?: string;
+periodEnd?: string;
 status?: string;
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeReviewCyclePayload(v: any): ReviewCyclePayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+type: v.type,
+periodStart: v.period_start,
+periodEnd: v.period_end,
+status: v.status,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeReviewCyclePayload(v: ReviewCyclePayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.periodStart !== undefined) { out.period_start = v.periodStart; }
+if (v.periodEnd !== undefined) { out.period_end = v.periodEnd; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ListReviewCyclesRequest {
+}
+
+export function decodeListReviewCyclesRequest(v: any): ListReviewCyclesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListReviewCyclesRequest(v: ListReviewCyclesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListReviewCyclesResponse {
@@ -51,28 +159,120 @@ limit?: number;
 offset?: number;
 }
 
+export function decodeListReviewCyclesResponse(v: any): ListReviewCyclesResponse {
+if (v === null || v === undefined) return v;
+return {
+cycles: (v.cycles !== undefined ? (v.cycles as any[]).map(decodeReviewCyclePayload) : v.cycles),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListReviewCyclesResponse(v: ListReviewCyclesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.cycles !== undefined) { out.cycles = (v.cycles as any[]).map(encodeReviewCyclePayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
 export interface CreateReviewCycleRequest {
 name?: string;
 type?: string;
-period_start?: string;
-period_end?: string;
+periodStart?: string;
+periodEnd?: string;
+}
+
+export function decodeCreateReviewCycleRequest(v: any): CreateReviewCycleRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+type: v.type,
+periodStart: v.period_start,
+periodEnd: v.period_end,
+};
+}
+
+export function encodeCreateReviewCycleRequest(v: CreateReviewCycleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.periodStart !== undefined) { out.period_start = v.periodStart; }
+if (v.periodEnd !== undefined) { out.period_end = v.periodEnd; }
+return out;
 }
 
 export interface CreateReviewCycleResponse {
 cycle?: ReviewCyclePayload;
 }
 
+export function decodeCreateReviewCycleResponse(v: any): CreateReviewCycleResponse {
+if (v === null || v === undefined) return v;
+return {
+cycle: (v.cycle !== undefined ? decodeReviewCyclePayload(v.cycle) : v.cycle),
+};
+}
+
+export function encodeCreateReviewCycleResponse(v: CreateReviewCycleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.cycle !== undefined) { out.cycle = encodeReviewCyclePayload(v.cycle); }
+return out;
+}
+
 export interface OpenReviewCycleRequest {
-cycle_id?: string;
+cycleId?: string;
+}
+
+export function decodeOpenReviewCycleRequest(v: any): OpenReviewCycleRequest {
+if (v === null || v === undefined) return v;
+return {
+cycleId: v.cycle_id,
+};
+}
+
+export function encodeOpenReviewCycleRequest(v: OpenReviewCycleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.cycleId !== undefined) { out.cycle_id = v.cycleId; }
+return out;
 }
 
 export interface OpenReviewCycleResponse {
 cycle?: ReviewCyclePayload;
 }
 
+export function decodeOpenReviewCycleResponse(v: any): OpenReviewCycleResponse {
+if (v === null || v === undefined) return v;
+return {
+cycle: (v.cycle !== undefined ? decodeReviewCyclePayload(v.cycle) : v.cycle),
+};
+}
+
+export function encodeOpenReviewCycleResponse(v: OpenReviewCycleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.cycle !== undefined) { out.cycle = encodeReviewCyclePayload(v.cycle); }
+return out;
+}
+
 export interface ListGoalsRequest {
-employee_id?: string;
-review_cycle_id?: string;
+employeeId?: string;
+reviewCycleId?: string;
+}
+
+export function decodeListGoalsRequest(v: any): ListGoalsRequest {
+if (v === null || v === undefined) return v;
+return {
+employeeId: v.employee_id,
+reviewCycleId: v.review_cycle_id,
+};
+}
+
+export function encodeListGoalsRequest(v: ListGoalsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.reviewCycleId !== undefined) { out.review_cycle_id = v.reviewCycleId; }
+return out;
 }
 
 export interface ListGoalsResponse {
@@ -82,13 +282,62 @@ limit?: number;
 offset?: number;
 }
 
+export function decodeListGoalsResponse(v: any): ListGoalsResponse {
+if (v === null || v === undefined) return v;
+return {
+goals: (v.goals !== undefined ? (v.goals as any[]).map(decodeReviewGoalPayload) : v.goals),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListGoalsResponse(v: ListGoalsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.goals !== undefined) { out.goals = (v.goals as any[]).map(encodeReviewGoalPayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
 export interface SubmitReviewRequest {
-review_id?: string;
-overall_rating?: string;
+reviewId?: string;
+overallRating?: string;
 narrative?: string;
+}
+
+export function decodeSubmitReviewRequest(v: any): SubmitReviewRequest {
+if (v === null || v === undefined) return v;
+return {
+reviewId: v.review_id,
+overallRating: v.overall_rating,
+narrative: v.narrative,
+};
+}
+
+export function encodeSubmitReviewRequest(v: SubmitReviewRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.reviewId !== undefined) { out.review_id = v.reviewId; }
+if (v.overallRating !== undefined) { out.overall_rating = v.overallRating; }
+if (v.narrative !== undefined) { out.narrative = v.narrative; }
+return out;
 }
 
 export interface SubmitReviewResponse {
 review?: PerformanceReviewPayload;
+}
+
+export function decodeSubmitReviewResponse(v: any): SubmitReviewResponse {
+if (v === null || v === undefined) return v;
+return {
+review: (v.review !== undefined ? decodePerformanceReviewPayload(v.review) : v.review),
+};
+}
+
+export function encodeSubmitReviewResponse(v: SubmitReviewResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.review !== undefined) { out.review = encodePerformanceReviewPayload(v.review); }
+return out;
 }
 

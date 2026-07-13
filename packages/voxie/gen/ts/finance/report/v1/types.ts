@@ -2,22 +2,72 @@
 
 export interface TaxConfig {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 rate?: number;
 type?: string;
-is_default?: boolean;
-is_active?: boolean;
-created_at?: string;
+isDefault?: boolean;
+isActive?: boolean;
+createdAt?: string;
+}
+
+export function decodeTaxConfig(v: any): TaxConfig {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+rate: v.rate,
+type: v.type,
+isDefault: v.is_default,
+isActive: v.is_active,
+createdAt: v.created_at,
+};
+}
+
+export function encodeTaxConfig(v: TaxConfig): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.rate !== undefined) { out.rate = v.rate; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.isDefault !== undefined) { out.is_default = v.isDefault; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface ExpenseCategoryDetail {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 color?: string;
 icon?: string;
-created_at?: string;
+createdAt?: string;
+}
+
+export function decodeExpenseCategoryDetail(v: any): ExpenseCategoryDetail {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+color: v.color,
+icon: v.icon,
+createdAt: v.created_at,
+};
+}
+
+export function encodeExpenseCategoryDetail(v: ExpenseCategoryDetail): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.color !== undefined) { out.color = v.color; }
+if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface GetPLReportRequest {
@@ -25,14 +75,54 @@ period?: string;
 date?: string;
 }
 
+export function decodeGetPLReportRequest(v: any): GetPLReportRequest {
+if (v === null || v === undefined) return v;
+return {
+period: v.period,
+date: v.date,
+};
+}
+
+export function encodeGetPLReportRequest(v: GetPLReportRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.period !== undefined) { out.period = v.period; }
+if (v.date !== undefined) { out.date = v.date; }
+return out;
+}
+
 export interface GetPLReportResponse {
 period?: string;
 revenue?: number;
 cogs?: number;
-gross_profit?: number;
-operating_expenses?: number;
-net_profit?: number;
-margin_pct?: number;
+grossProfit?: number;
+operatingExpenses?: number;
+netProfit?: number;
+marginPct?: number;
+}
+
+export function decodeGetPLReportResponse(v: any): GetPLReportResponse {
+if (v === null || v === undefined) return v;
+return {
+period: v.period,
+revenue: v.revenue,
+cogs: v.cogs,
+grossProfit: v.gross_profit,
+operatingExpenses: v.operating_expenses,
+netProfit: v.net_profit,
+marginPct: v.margin_pct,
+};
+}
+
+export function encodeGetPLReportResponse(v: GetPLReportResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.period !== undefined) { out.period = v.period; }
+if (v.revenue !== undefined) { out.revenue = v.revenue; }
+if (v.cogs !== undefined) { out.cogs = v.cogs; }
+if (v.grossProfit !== undefined) { out.gross_profit = v.grossProfit; }
+if (v.operatingExpenses !== undefined) { out.operating_expenses = v.operatingExpenses; }
+if (v.netProfit !== undefined) { out.net_profit = v.netProfit; }
+if (v.marginPct !== undefined) { out.margin_pct = v.marginPct; }
+return out;
 }
 
 export interface GetTaxReportRequest {
@@ -40,17 +130,73 @@ period?: string;
 date?: string;
 }
 
+export function decodeGetTaxReportRequest(v: any): GetTaxReportRequest {
+if (v === null || v === undefined) return v;
+return {
+period: v.period,
+date: v.date,
+};
+}
+
+export function encodeGetTaxReportRequest(v: GetTaxReportRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.period !== undefined) { out.period = v.period; }
+if (v.date !== undefined) { out.date = v.date; }
+return out;
+}
+
 export interface GetTaxReportResponse {
 period?: string;
-tax_collected?: number;
-tax_owed?: number;
+taxCollected?: number;
+taxOwed?: number;
+}
+
+export function decodeGetTaxReportResponse(v: any): GetTaxReportResponse {
+if (v === null || v === undefined) return v;
+return {
+period: v.period,
+taxCollected: v.tax_collected,
+taxOwed: v.tax_owed,
+};
+}
+
+export function encodeGetTaxReportResponse(v: GetTaxReportResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.period !== undefined) { out.period = v.period; }
+if (v.taxCollected !== undefined) { out.tax_collected = v.taxCollected; }
+if (v.taxOwed !== undefined) { out.tax_owed = v.taxOwed; }
+return out;
 }
 
 export interface ListExpenseCategoryDetailsRequest {
 }
 
+export function decodeListExpenseCategoryDetailsRequest(v: any): ListExpenseCategoryDetailsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListExpenseCategoryDetailsRequest(v: ListExpenseCategoryDetailsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface ListExpenseCategoryDetailsResponse {
 categories?: (ExpenseCategoryDetail)[];
+}
+
+export function decodeListExpenseCategoryDetailsResponse(v: any): ListExpenseCategoryDetailsResponse {
+if (v === null || v === undefined) return v;
+return {
+categories: (v.categories !== undefined ? (v.categories as any[]).map(decodeExpenseCategoryDetail) : v.categories),
+};
+}
+
+export function encodeListExpenseCategoryDetailsResponse(v: ListExpenseCategoryDetailsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.categories !== undefined) { out.categories = (v.categories as any[]).map(encodeExpenseCategoryDetail); }
+return out;
 }
 
 export interface CreateExpenseCategoryDetailRequest {
@@ -59,25 +205,111 @@ color?: string;
 icon?: string;
 }
 
+export function decodeCreateExpenseCategoryDetailRequest(v: any): CreateExpenseCategoryDetailRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+color: v.color,
+icon: v.icon,
+};
+}
+
+export function encodeCreateExpenseCategoryDetailRequest(v: CreateExpenseCategoryDetailRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.color !== undefined) { out.color = v.color; }
+if (v.icon !== undefined) { out.icon = v.icon; }
+return out;
+}
+
 export interface CreateExpenseCategoryDetailResponse {
 category?: ExpenseCategoryDetail;
 }
 
+export function decodeCreateExpenseCategoryDetailResponse(v: any): CreateExpenseCategoryDetailResponse {
+if (v === null || v === undefined) return v;
+return {
+category: (v.category !== undefined ? decodeExpenseCategoryDetail(v.category) : v.category),
+};
+}
+
+export function encodeCreateExpenseCategoryDetailResponse(v: CreateExpenseCategoryDetailResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.category !== undefined) { out.category = encodeExpenseCategoryDetail(v.category); }
+return out;
+}
+
 export interface ListTaxConfigRequest {
+}
+
+export function decodeListTaxConfigRequest(v: any): ListTaxConfigRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListTaxConfigRequest(v: ListTaxConfigRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListTaxConfigResponse {
 configs?: (TaxConfig)[];
 }
 
+export function decodeListTaxConfigResponse(v: any): ListTaxConfigResponse {
+if (v === null || v === undefined) return v;
+return {
+configs: (v.configs !== undefined ? (v.configs as any[]).map(decodeTaxConfig) : v.configs),
+};
+}
+
+export function encodeListTaxConfigResponse(v: ListTaxConfigResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.configs !== undefined) { out.configs = (v.configs as any[]).map(encodeTaxConfig); }
+return out;
+}
+
 export interface CreateTaxConfigRequest {
 name?: string;
 rate?: number;
 type?: string;
-is_default?: boolean;
+isDefault?: boolean;
+}
+
+export function decodeCreateTaxConfigRequest(v: any): CreateTaxConfigRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+rate: v.rate,
+type: v.type,
+isDefault: v.is_default,
+};
+}
+
+export function encodeCreateTaxConfigRequest(v: CreateTaxConfigRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.rate !== undefined) { out.rate = v.rate; }
+if (v.type !== undefined) { out.type = v.type; }
+if (v.isDefault !== undefined) { out.is_default = v.isDefault; }
+return out;
 }
 
 export interface CreateTaxConfigResponse {
 config?: TaxConfig;
+}
+
+export function decodeCreateTaxConfigResponse(v: any): CreateTaxConfigResponse {
+if (v === null || v === undefined) return v;
+return {
+config: (v.config !== undefined ? decodeTaxConfig(v.config) : v.config),
+};
+}
+
+export function encodeCreateTaxConfigResponse(v: CreateTaxConfigResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.config !== undefined) { out.config = encodeTaxConfig(v.config); }
+return out;
 }
 

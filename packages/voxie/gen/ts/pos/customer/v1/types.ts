@@ -2,17 +2,64 @@
 
 export interface Customer {
 id?: string;
-first_name?: string;
-last_name?: string;
+firstName?: string;
+lastName?: string;
 email?: string;
 phone?: string;
+}
+
+export function decodeCustomer(v: any): Customer {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+firstName: v.first_name,
+lastName: v.last_name,
+email: v.email,
+phone: v.phone,
+};
+}
+
+export function encodeCustomer(v: Customer): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.firstName !== undefined) { out.first_name = v.firstName; }
+if (v.lastName !== undefined) { out.last_name = v.lastName; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+return out;
 }
 
 export interface SearchCustomersRequest {
 query?: string;
 }
 
+export function decodeSearchCustomersRequest(v: any): SearchCustomersRequest {
+if (v === null || v === undefined) return v;
+return {
+query: v.query,
+};
+}
+
+export function encodeSearchCustomersRequest(v: SearchCustomersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.query !== undefined) { out.query = v.query; }
+return out;
+}
+
 export interface SearchCustomersResponse {
 customers?: (Customer)[];
+}
+
+export function decodeSearchCustomersResponse(v: any): SearchCustomersResponse {
+if (v === null || v === undefined) return v;
+return {
+customers: (v.customers !== undefined ? (v.customers as any[]).map(decodeCustomer) : v.customers),
+};
+}
+
+export function encodeSearchCustomersResponse(v: SearchCustomersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.customers !== undefined) { out.customers = (v.customers as any[]).map(encodeCustomer); }
+return out;
 }
 

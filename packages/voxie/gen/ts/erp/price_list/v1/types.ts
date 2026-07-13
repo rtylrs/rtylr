@@ -2,29 +2,110 @@
 
 export interface PriceList {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 currency?: string;
-is_default?: boolean;
-created_at?: string;
-updated_at?: string;
+isDefault?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodePriceList(v: any): PriceList {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+currency: v.currency,
+isDefault: v.is_default,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodePriceList(v: PriceList): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.isDefault !== undefined) { out.is_default = v.isDefault; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface CreatePriceListRequest {
 name?: string;
 currency?: string;
-is_default?: boolean;
+isDefault?: boolean;
+}
+
+export function decodeCreatePriceListRequest(v: any): CreatePriceListRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+currency: v.currency,
+isDefault: v.is_default,
+};
+}
+
+export function encodeCreatePriceListRequest(v: CreatePriceListRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.isDefault !== undefined) { out.is_default = v.isDefault; }
+return out;
 }
 
 export interface CreatePriceListResponse {
-price_list_id?: string;
+priceListId?: string;
 message?: string;
+}
+
+export function decodeCreatePriceListResponse(v: any): CreatePriceListResponse {
+if (v === null || v === undefined) return v;
+return {
+priceListId: v.price_list_id,
+message: v.message,
+};
+}
+
+export function encodeCreatePriceListResponse(v: CreatePriceListResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.priceListId !== undefined) { out.price_list_id = v.priceListId; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface ListPriceListsRequest {
 }
 
+export function decodeListPriceListsRequest(v: any): ListPriceListsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListPriceListsRequest(v: ListPriceListsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface ListPriceListsResponse {
-price_lists?: (PriceList)[];
+priceLists?: (PriceList)[];
+}
+
+export function decodeListPriceListsResponse(v: any): ListPriceListsResponse {
+if (v === null || v === undefined) return v;
+return {
+priceLists: (v.price_lists !== undefined ? (v.price_lists as any[]).map(decodePriceList) : v.price_lists),
+};
+}
+
+export function encodeListPriceListsResponse(v: ListPriceListsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.priceLists !== undefined) { out.price_lists = (v.priceLists as any[]).map(encodePriceList); }
+return out;
 }
 

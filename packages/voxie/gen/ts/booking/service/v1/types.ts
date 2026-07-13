@@ -2,25 +2,81 @@
 
 export interface BookingService {
 id?: string;
-owner_id?: string;
-business_id?: string;
+ownerId?: string;
+businessId?: string;
 name?: string;
 description?: string;
-duration_minutes?: number;
+durationMinutes?: number;
 price?: number;
 color?: string;
-is_active?: boolean;
-created_at?: string;
-updated_at?: string;
+isActive?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeBookingService(v: any): BookingService {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+businessId: v.business_id,
+name: v.name,
+description: v.description,
+durationMinutes: v.duration_minutes,
+price: v.price,
+color: v.color,
+isActive: v.is_active,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeBookingService(v: BookingService): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.durationMinutes !== undefined) { out.duration_minutes = v.durationMinutes; }
+if (v.price !== undefined) { out.price = v.price; }
+if (v.color !== undefined) { out.color = v.color; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface CreateServiceRequest {
 name?: string;
 description?: string;
-duration_minutes?: number;
+durationMinutes?: number;
 price?: number;
 color?: string;
-is_active?: boolean;
+isActive?: boolean;
+}
+
+export function decodeCreateServiceRequest(v: any): CreateServiceRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+description: v.description,
+durationMinutes: v.duration_minutes,
+price: v.price,
+color: v.color,
+isActive: v.is_active,
+};
+}
+
+export function encodeCreateServiceRequest(v: CreateServiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.durationMinutes !== undefined) { out.duration_minutes = v.durationMinutes; }
+if (v.price !== undefined) { out.price = v.price; }
+if (v.color !== undefined) { out.color = v.color; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface CreateServiceResponse {
@@ -28,32 +84,135 @@ id?: string;
 message?: string;
 }
 
+export function decodeCreateServiceResponse(v: any): CreateServiceResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+message: v.message,
+};
+}
+
+export function encodeCreateServiceResponse(v: CreateServiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DeleteServiceRequest {
 id?: string;
+}
+
+export function decodeDeleteServiceRequest(v: any): DeleteServiceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteServiceRequest(v: DeleteServiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteServiceResponse {
 message?: string;
 }
 
+export function decodeDeleteServiceResponse(v: any): DeleteServiceResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteServiceResponse(v: DeleteServiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListServicesRequest {
+}
+
+export function decodeListServicesRequest(v: any): ListServicesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListServicesRequest(v: ListServicesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListServicesResponse {
 services?: (BookingService)[];
 }
 
+export function decodeListServicesResponse(v: any): ListServicesResponse {
+if (v === null || v === undefined) return v;
+return {
+services: (v.services !== undefined ? (v.services as any[]).map(decodeBookingService) : v.services),
+};
+}
+
+export function encodeListServicesResponse(v: ListServicesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.services !== undefined) { out.services = (v.services as any[]).map(encodeBookingService); }
+return out;
+}
+
 export interface UpdateServiceRequest {
 id?: string;
 name?: string;
 description?: string;
-duration_minutes?: number;
+durationMinutes?: number;
 price?: number;
 color?: string;
-is_active?: boolean;
+isActive?: boolean;
+}
+
+export function decodeUpdateServiceRequest(v: any): UpdateServiceRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+description: v.description,
+durationMinutes: v.duration_minutes,
+price: v.price,
+color: v.color,
+isActive: v.is_active,
+};
+}
+
+export function encodeUpdateServiceRequest(v: UpdateServiceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
+if (v.durationMinutes !== undefined) { out.duration_minutes = v.durationMinutes; }
+if (v.price !== undefined) { out.price = v.price; }
+if (v.color !== undefined) { out.color = v.color; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface UpdateServiceResponse {
 message?: string;
+}
+
+export function decodeUpdateServiceResponse(v: any): UpdateServiceResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateServiceResponse(v: UpdateServiceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

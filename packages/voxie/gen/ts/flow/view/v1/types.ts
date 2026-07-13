@@ -5,31 +5,120 @@ id?: string;
 name?: string;
 icon?: string;
 filters?: string;
-group_by?: string;
-sort_by?: string;
-sort_dir?: string;
+groupBy?: string;
+sortBy?: string;
+sortDir?: string;
+}
+
+export function decodeView(v: any): View {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+icon: v.icon,
+filters: v.filters,
+groupBy: v.group_by,
+sortBy: v.sort_by,
+sortDir: v.sort_dir,
+};
+}
+
+export function encodeView(v: View): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.filters !== undefined) { out.filters = v.filters; }
+if (v.groupBy !== undefined) { out.group_by = v.groupBy; }
+if (v.sortBy !== undefined) { out.sort_by = v.sortBy; }
+if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
+return out;
 }
 
 export interface ListViewsRequest {
-workspace_id?: string;
+workspaceId?: string;
+}
+
+export function decodeListViewsRequest(v: any): ListViewsRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+};
+}
+
+export function encodeListViewsRequest(v: ListViewsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+return out;
 }
 
 export interface ListViewsResponse {
 views?: (View)[];
 }
 
+export function decodeListViewsResponse(v: any): ListViewsResponse {
+if (v === null || v === undefined) return v;
+return {
+views: (v.views !== undefined ? (v.views as any[]).map(decodeView) : v.views),
+};
+}
+
+export function encodeListViewsResponse(v: ListViewsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.views !== undefined) { out.views = (v.views as any[]).map(encodeView); }
+return out;
+}
+
 export interface CreateViewRequest {
-workspace_id?: string;
+workspaceId?: string;
 name?: string;
 icon?: string;
 filters?: string;
-group_by?: string;
-sort_by?: string;
-sort_dir?: string;
+groupBy?: string;
+sortBy?: string;
+sortDir?: string;
+}
+
+export function decodeCreateViewRequest(v: any): CreateViewRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+name: v.name,
+icon: v.icon,
+filters: v.filters,
+groupBy: v.group_by,
+sortBy: v.sort_by,
+sortDir: v.sort_dir,
+};
+}
+
+export function encodeCreateViewRequest(v: CreateViewRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.filters !== undefined) { out.filters = v.filters; }
+if (v.groupBy !== undefined) { out.group_by = v.groupBy; }
+if (v.sortBy !== undefined) { out.sort_by = v.sortBy; }
+if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
+return out;
 }
 
 export interface CreateViewResponse {
 view?: View;
+}
+
+export function decodeCreateViewResponse(v: any): CreateViewResponse {
+if (v === null || v === undefined) return v;
+return {
+view: (v.view !== undefined ? decodeView(v.view) : v.view),
+};
+}
+
+export function encodeCreateViewResponse(v: CreateViewResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.view !== undefined) { out.view = encodeView(v.view); }
+return out;
 }
 
 export interface UpdateViewRequest {
@@ -37,18 +126,78 @@ id?: string;
 name?: string;
 icon?: string;
 filters?: string;
-group_by?: string;
-sort_by?: string;
-sort_dir?: string;
+groupBy?: string;
+sortBy?: string;
+sortDir?: string;
+}
+
+export function decodeUpdateViewRequest(v: any): UpdateViewRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+icon: v.icon,
+filters: v.filters,
+groupBy: v.group_by,
+sortBy: v.sort_by,
+sortDir: v.sort_dir,
+};
+}
+
+export function encodeUpdateViewRequest(v: UpdateViewRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.filters !== undefined) { out.filters = v.filters; }
+if (v.groupBy !== undefined) { out.group_by = v.groupBy; }
+if (v.sortBy !== undefined) { out.sort_by = v.sortBy; }
+if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
+return out;
 }
 
 export interface UpdateViewResponse {
+}
+
+export function decodeUpdateViewResponse(v: any): UpdateViewResponse {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeUpdateViewResponse(v: UpdateViewResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface DeleteViewRequest {
 id?: string;
 }
 
+export function decodeDeleteViewRequest(v: any): DeleteViewRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteViewRequest(v: DeleteViewRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteViewResponse {
+}
+
+export function decodeDeleteViewResponse(v: any): DeleteViewResponse {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeDeleteViewResponse(v: DeleteViewResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 

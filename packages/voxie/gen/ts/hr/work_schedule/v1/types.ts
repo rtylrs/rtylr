@@ -2,47 +2,162 @@
 
 export interface WorkSchedulePayload {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
-working_days?: (string)[];
-start_time?: string;
-end_time?: string;
-break_minutes?: number;
-contracted_hours_per_week?: number;
-daily_ot_threshold_minutes?: number;
-weekly_ot_threshold_minutes?: number;
-created_at?: string;
-updated_at?: string;
+workingDays?: (string)[];
+startTime?: string;
+endTime?: string;
+breakMinutes?: number;
+contractedHoursPerWeek?: number;
+dailyOtThresholdMinutes?: number;
+weeklyOtThresholdMinutes?: number;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeWorkSchedulePayload(v: any): WorkSchedulePayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+workingDays: v.working_days,
+startTime: v.start_time,
+endTime: v.end_time,
+breakMinutes: v.break_minutes,
+contractedHoursPerWeek: v.contracted_hours_per_week,
+dailyOtThresholdMinutes: v.daily_ot_threshold_minutes,
+weeklyOtThresholdMinutes: v.weekly_ot_threshold_minutes,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeWorkSchedulePayload(v: WorkSchedulePayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.workingDays !== undefined) { out.working_days = v.workingDays; }
+if (v.startTime !== undefined) { out.start_time = v.startTime; }
+if (v.endTime !== undefined) { out.end_time = v.endTime; }
+if (v.breakMinutes !== undefined) { out.break_minutes = v.breakMinutes; }
+if (v.contractedHoursPerWeek !== undefined) { out.contracted_hours_per_week = v.contractedHoursPerWeek; }
+if (v.dailyOtThresholdMinutes !== undefined) { out.daily_ot_threshold_minutes = v.dailyOtThresholdMinutes; }
+if (v.weeklyOtThresholdMinutes !== undefined) { out.weekly_ot_threshold_minutes = v.weeklyOtThresholdMinutes; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ListWorkSchedulesResponse {
 schedules?: (WorkSchedulePayload)[];
 }
 
+export function decodeListWorkSchedulesResponse(v: any): ListWorkSchedulesResponse {
+if (v === null || v === undefined) return v;
+return {
+schedules: (v.schedules !== undefined ? (v.schedules as any[]).map(decodeWorkSchedulePayload) : v.schedules),
+};
+}
+
+export function encodeListWorkSchedulesResponse(v: ListWorkSchedulesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.schedules !== undefined) { out.schedules = (v.schedules as any[]).map(encodeWorkSchedulePayload); }
+return out;
+}
+
 export interface CreateWorkScheduleRequest {
 name?: string;
-working_days?: (string)[];
-start_time?: string;
-end_time?: string;
-break_minutes?: number;
-contracted_hours_per_week?: number;
-daily_ot_threshold_minutes?: number;
-weekly_ot_threshold_minutes?: number;
+workingDays?: (string)[];
+startTime?: string;
+endTime?: string;
+breakMinutes?: number;
+contractedHoursPerWeek?: number;
+dailyOtThresholdMinutes?: number;
+weeklyOtThresholdMinutes?: number;
+}
+
+export function decodeCreateWorkScheduleRequest(v: any): CreateWorkScheduleRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+workingDays: v.working_days,
+startTime: v.start_time,
+endTime: v.end_time,
+breakMinutes: v.break_minutes,
+contractedHoursPerWeek: v.contracted_hours_per_week,
+dailyOtThresholdMinutes: v.daily_ot_threshold_minutes,
+weeklyOtThresholdMinutes: v.weekly_ot_threshold_minutes,
+};
+}
+
+export function encodeCreateWorkScheduleRequest(v: CreateWorkScheduleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.workingDays !== undefined) { out.working_days = v.workingDays; }
+if (v.startTime !== undefined) { out.start_time = v.startTime; }
+if (v.endTime !== undefined) { out.end_time = v.endTime; }
+if (v.breakMinutes !== undefined) { out.break_minutes = v.breakMinutes; }
+if (v.contractedHoursPerWeek !== undefined) { out.contracted_hours_per_week = v.contractedHoursPerWeek; }
+if (v.dailyOtThresholdMinutes !== undefined) { out.daily_ot_threshold_minutes = v.dailyOtThresholdMinutes; }
+if (v.weeklyOtThresholdMinutes !== undefined) { out.weekly_ot_threshold_minutes = v.weeklyOtThresholdMinutes; }
+return out;
 }
 
 export interface CreateWorkScheduleResponse {
 schedule?: WorkSchedulePayload;
 }
 
+export function decodeCreateWorkScheduleResponse(v: any): CreateWorkScheduleResponse {
+if (v === null || v === undefined) return v;
+return {
+schedule: (v.schedule !== undefined ? decodeWorkSchedulePayload(v.schedule) : v.schedule),
+};
+}
+
+export function encodeCreateWorkScheduleResponse(v: CreateWorkScheduleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.schedule !== undefined) { out.schedule = encodeWorkSchedulePayload(v.schedule); }
+return out;
+}
+
 export interface UpdateWorkScheduleBody {
 name?: string;
-working_days?: (string)[];
-start_time?: string;
-end_time?: string;
-break_minutes?: number;
-contracted_hours_per_week?: number;
-daily_ot_threshold_minutes?: number;
-weekly_ot_threshold_minutes?: number;
+workingDays?: (string)[];
+startTime?: string;
+endTime?: string;
+breakMinutes?: number;
+contractedHoursPerWeek?: number;
+dailyOtThresholdMinutes?: number;
+weeklyOtThresholdMinutes?: number;
+}
+
+export function decodeUpdateWorkScheduleBody(v: any): UpdateWorkScheduleBody {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+workingDays: v.working_days,
+startTime: v.start_time,
+endTime: v.end_time,
+breakMinutes: v.break_minutes,
+contractedHoursPerWeek: v.contracted_hours_per_week,
+dailyOtThresholdMinutes: v.daily_ot_threshold_minutes,
+weeklyOtThresholdMinutes: v.weekly_ot_threshold_minutes,
+};
+}
+
+export function encodeUpdateWorkScheduleBody(v: UpdateWorkScheduleBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.workingDays !== undefined) { out.working_days = v.workingDays; }
+if (v.startTime !== undefined) { out.start_time = v.startTime; }
+if (v.endTime !== undefined) { out.end_time = v.endTime; }
+if (v.breakMinutes !== undefined) { out.break_minutes = v.breakMinutes; }
+if (v.contractedHoursPerWeek !== undefined) { out.contracted_hours_per_week = v.contractedHoursPerWeek; }
+if (v.dailyOtThresholdMinutes !== undefined) { out.daily_ot_threshold_minutes = v.dailyOtThresholdMinutes; }
+if (v.weeklyOtThresholdMinutes !== undefined) { out.weekly_ot_threshold_minutes = v.weeklyOtThresholdMinutes; }
+return out;
 }
 
 export interface UpdateWorkScheduleRequest {
@@ -50,7 +165,35 @@ id?: string;
 body?: UpdateWorkScheduleBody;
 }
 
+export function decodeUpdateWorkScheduleRequest(v: any): UpdateWorkScheduleRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeUpdateWorkScheduleBody(v.body) : v.body),
+};
+}
+
+export function encodeUpdateWorkScheduleRequest(v: UpdateWorkScheduleRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeUpdateWorkScheduleBody(v.body); }
+return out;
+}
+
 export interface UpdateWorkScheduleResponse {
 schedule?: WorkSchedulePayload;
+}
+
+export function decodeUpdateWorkScheduleResponse(v: any): UpdateWorkScheduleResponse {
+if (v === null || v === undefined) return v;
+return {
+schedule: (v.schedule !== undefined ? decodeWorkSchedulePayload(v.schedule) : v.schedule),
+};
+}
+
+export function encodeUpdateWorkScheduleResponse(v: UpdateWorkScheduleResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.schedule !== undefined) { out.schedule = encodeWorkSchedulePayload(v.schedule); }
+return out;
 }
 

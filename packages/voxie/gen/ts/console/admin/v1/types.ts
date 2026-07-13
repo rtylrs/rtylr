@@ -3,72 +3,249 @@
 export interface User {
 id?: string;
 email?: string;
-full_name?: string;
-business_id?: string;
-is_console_admin?: boolean;
-is_banned?: boolean;
-ban_reason?: string;
-banned_at?: string;
-created_at?: string;
+fullName?: string;
+businessId?: string;
+isConsoleAdmin?: boolean;
+isBanned?: boolean;
+banReason?: string;
+bannedAt?: string;
+createdAt?: string;
+}
+
+export function decodeUser(v: any): User {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+email: v.email,
+fullName: v.full_name,
+businessId: v.business_id,
+isConsoleAdmin: v.is_console_admin,
+isBanned: v.is_banned,
+banReason: v.ban_reason,
+bannedAt: v.banned_at,
+createdAt: v.created_at,
+};
+}
+
+export function encodeUser(v: User): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.fullName !== undefined) { out.full_name = v.fullName; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.isConsoleAdmin !== undefined) { out.is_console_admin = v.isConsoleAdmin; }
+if (v.isBanned !== undefined) { out.is_banned = v.isBanned; }
+if (v.banReason !== undefined) { out.ban_reason = v.banReason; }
+if (v.bannedAt !== undefined) { out.banned_at = v.bannedAt; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface Business {
 id?: string;
-owner_id?: string;
+ownerId?: string;
 name?: string;
 slug?: string;
-created_at?: string;
+createdAt?: string;
+}
+
+export function decodeBusiness(v: any): Business {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+name: v.name,
+slug: v.slug,
+createdAt: v.created_at,
+};
+}
+
+export function encodeBusiness(v: Business): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.slug !== undefined) { out.slug = v.slug; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface Subscription {
 id?: string;
-owner_id?: string;
-owner_name?: string;
-owner_email?: string;
-business_id?: string;
-business_name?: string;
-plan_id?: string;
-plan_name?: string;
+ownerId?: string;
+ownerName?: string;
+ownerEmail?: string;
+businessId?: string;
+businessName?: string;
+planId?: string;
+planName?: string;
 status?: string;
-seat_count?: number;
-active_seat_count?: number;
-included_seat_limit?: number;
-included_seat_count?: number;
-billable_seat_count?: number;
-trial_ends_at?: string;
-next_billing_date?: string;
-current_period_ends_at?: string;
-paddle_subscription_id?: string;
-paddle_customer_id?: string;
-days_remaining?: number;
-created_at?: string;
-updated_at?: string;
+seatCount?: number;
+activeSeatCount?: number;
+includedSeatLimit?: number;
+includedSeatCount?: number;
+billableSeatCount?: number;
+trialEndsAt?: string;
+nextBillingDate?: string;
+currentPeriodEndsAt?: string;
+paddleSubscriptionId?: string;
+paddleCustomerId?: string;
+daysRemaining?: number;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeSubscription(v: any): Subscription {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+ownerName: v.owner_name,
+ownerEmail: v.owner_email,
+businessId: v.business_id,
+businessName: v.business_name,
+planId: v.plan_id,
+planName: v.plan_name,
+status: v.status,
+seatCount: v.seat_count,
+activeSeatCount: v.active_seat_count,
+includedSeatLimit: v.included_seat_limit,
+includedSeatCount: v.included_seat_count,
+billableSeatCount: v.billable_seat_count,
+trialEndsAt: v.trial_ends_at,
+nextBillingDate: v.next_billing_date,
+currentPeriodEndsAt: v.current_period_ends_at,
+paddleSubscriptionId: v.paddle_subscription_id,
+paddleCustomerId: v.paddle_customer_id,
+daysRemaining: v.days_remaining,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeSubscription(v: Subscription): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.ownerName !== undefined) { out.owner_name = v.ownerName; }
+if (v.ownerEmail !== undefined) { out.owner_email = v.ownerEmail; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.businessName !== undefined) { out.business_name = v.businessName; }
+if (v.planId !== undefined) { out.plan_id = v.planId; }
+if (v.planName !== undefined) { out.plan_name = v.planName; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.seatCount !== undefined) { out.seat_count = v.seatCount; }
+if (v.activeSeatCount !== undefined) { out.active_seat_count = v.activeSeatCount; }
+if (v.includedSeatLimit !== undefined) { out.included_seat_limit = v.includedSeatLimit; }
+if (v.includedSeatCount !== undefined) { out.included_seat_count = v.includedSeatCount; }
+if (v.billableSeatCount !== undefined) { out.billable_seat_count = v.billableSeatCount; }
+if (v.trialEndsAt !== undefined) { out.trial_ends_at = v.trialEndsAt; }
+if (v.nextBillingDate !== undefined) { out.next_billing_date = v.nextBillingDate; }
+if (v.currentPeriodEndsAt !== undefined) { out.current_period_ends_at = v.currentPeriodEndsAt; }
+if (v.paddleSubscriptionId !== undefined) { out.paddle_subscription_id = v.paddleSubscriptionId; }
+if (v.paddleCustomerId !== undefined) { out.paddle_customer_id = v.paddleCustomerId; }
+if (v.daysRemaining !== undefined) { out.days_remaining = v.daysRemaining; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface Plan {
 id?: string;
 name?: string;
-price_per_seat_cents?: number;
-annual_price_per_seat_cents?: number;
-is_active?: boolean;
-created_at?: string;
+pricePerSeatCents?: number;
+annualPricePerSeatCents?: number;
+isActive?: boolean;
+createdAt?: string;
+}
+
+export function decodePlan(v: any): Plan {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+pricePerSeatCents: v.price_per_seat_cents,
+annualPricePerSeatCents: v.annual_price_per_seat_cents,
+isActive: v.is_active,
+createdAt: v.created_at,
+};
+}
+
+export function encodePlan(v: Plan): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.pricePerSeatCents !== undefined) { out.price_per_seat_cents = v.pricePerSeatCents; }
+if (v.annualPricePerSeatCents !== undefined) { out.annual_price_per_seat_cents = v.annualPricePerSeatCents; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface Stats {
-total_users?: string;
-banned_users?: string;
-active_subscriptions?: string;
-total_businesses?: string;
-total_grants?: string;
-manual_addon_grants?: string;
-console_admins?: string;
+totalUsers?: string;
+bannedUsers?: string;
+activeSubscriptions?: string;
+totalBusinesses?: string;
+totalGrants?: string;
+manualAddonGrants?: string;
+consoleAdmins?: string;
+}
+
+export function decodeStats(v: any): Stats {
+if (v === null || v === undefined) return v;
+return {
+totalUsers: v.total_users,
+bannedUsers: v.banned_users,
+activeSubscriptions: v.active_subscriptions,
+totalBusinesses: v.total_businesses,
+totalGrants: v.total_grants,
+manualAddonGrants: v.manual_addon_grants,
+consoleAdmins: v.console_admins,
+};
+}
+
+export function encodeStats(v: Stats): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.totalUsers !== undefined) { out.total_users = v.totalUsers; }
+if (v.bannedUsers !== undefined) { out.banned_users = v.bannedUsers; }
+if (v.activeSubscriptions !== undefined) { out.active_subscriptions = v.activeSubscriptions; }
+if (v.totalBusinesses !== undefined) { out.total_businesses = v.totalBusinesses; }
+if (v.totalGrants !== undefined) { out.total_grants = v.totalGrants; }
+if (v.manualAddonGrants !== undefined) { out.manual_addon_grants = v.manualAddonGrants; }
+if (v.consoleAdmins !== undefined) { out.console_admins = v.consoleAdmins; }
+return out;
 }
 
 export interface GetStatsRequest {
 }
 
+export function decodeGetStatsRequest(v: any): GetStatsRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetStatsRequest(v: GetStatsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface GetStatsResponse {
 stats?: Stats;
+}
+
+export function decodeGetStatsResponse(v: any): GetStatsResponse {
+if (v === null || v === undefined) return v;
+return {
+stats: (v.stats !== undefined ? decodeStats(v.stats) : v.stats),
+};
+}
+
+export function encodeGetStatsResponse(v: GetStatsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.stats !== undefined) { out.stats = encodeStats(v.stats); }
+return out;
 }
 
 export interface ListUsersRequest {
@@ -79,24 +256,105 @@ email?: string;
 name?: string;
 }
 
+export function decodeListUsersRequest(v: any): ListUsersRequest {
+if (v === null || v === undefined) return v;
+return {
+limit: v.limit,
+offset: v.offset,
+id: v.id,
+email: v.email,
+name: v.name,
+};
+}
+
+export function encodeListUsersRequest(v: ListUsersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+if (v.id !== undefined) { out.id = v.id; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.name !== undefined) { out.name = v.name; }
+return out;
+}
+
 export interface ListUsersResponse {
 users?: (User)[];
 total?: string;
+}
+
+export function decodeListUsersResponse(v: any): ListUsersResponse {
+if (v === null || v === undefined) return v;
+return {
+users: (v.users !== undefined ? (v.users as any[]).map(decodeUser) : v.users),
+total: v.total,
+};
+}
+
+export function encodeListUsersResponse(v: ListUsersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.users !== undefined) { out.users = (v.users as any[]).map(encodeUser); }
+if (v.total !== undefined) { out.total = v.total; }
+return out;
 }
 
 export interface GetUserRequest {
 id?: string;
 }
 
+export function decodeGetUserRequest(v: any): GetUserRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetUserRequest(v: GetUserRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface GetUserResponse {
 user?: User;
+}
+
+export function decodeGetUserResponse(v: any): GetUserResponse {
+if (v === null || v === undefined) return v;
+return {
+user: (v.user !== undefined ? decodeUser(v.user) : v.user),
+};
+}
+
+export function encodeGetUserResponse(v: GetUserResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.user !== undefined) { out.user = encodeUser(v.user); }
+return out;
 }
 
 export interface CreateUserRequest {
 email?: string;
 password?: string;
-full_name?: string;
-is_console_admin?: boolean;
+fullName?: string;
+isConsoleAdmin?: boolean;
+}
+
+export function decodeCreateUserRequest(v: any): CreateUserRequest {
+if (v === null || v === undefined) return v;
+return {
+email: v.email,
+password: v.password,
+fullName: v.full_name,
+isConsoleAdmin: v.is_console_admin,
+};
+}
+
+export function encodeCreateUserRequest(v: CreateUserRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.email !== undefined) { out.email = v.email; }
+if (v.password !== undefined) { out.password = v.password; }
+if (v.fullName !== undefined) { out.full_name = v.fullName; }
+if (v.isConsoleAdmin !== undefined) { out.is_console_admin = v.isConsoleAdmin; }
+return out;
 }
 
 export interface CreateUserResponse {
@@ -104,22 +362,93 @@ user?: User;
 message?: string;
 }
 
+export function decodeCreateUserResponse(v: any): CreateUserResponse {
+if (v === null || v === undefined) return v;
+return {
+user: (v.user !== undefined ? decodeUser(v.user) : v.user),
+message: v.message,
+};
+}
+
+export function encodeCreateUserResponse(v: CreateUserResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.user !== undefined) { out.user = encodeUser(v.user); }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface UpdateUserRequest {
 id?: string;
-full_name?: string;
+fullName?: string;
 email?: string;
+}
+
+export function decodeUpdateUserRequest(v: any): UpdateUserRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+fullName: v.full_name,
+email: v.email,
+};
+}
+
+export function encodeUpdateUserRequest(v: UpdateUserRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.fullName !== undefined) { out.full_name = v.fullName; }
+if (v.email !== undefined) { out.email = v.email; }
+return out;
 }
 
 export interface UpdateUserResponse {
 message?: string;
 }
 
+export function decodeUpdateUserResponse(v: any): UpdateUserResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateUserResponse(v: UpdateUserResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DeleteUserRequest {
 id?: string;
 }
 
+export function decodeDeleteUserRequest(v: any): DeleteUserRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteUserRequest(v: DeleteUserRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface DeleteUserResponse {
 message?: string;
+}
+
+export function decodeDeleteUserResponse(v: any): DeleteUserResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteUserResponse(v: DeleteUserResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface BanUserRequest {
@@ -127,33 +456,141 @@ id?: string;
 reason?: string;
 }
 
+export function decodeBanUserRequest(v: any): BanUserRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+reason: v.reason,
+};
+}
+
+export function encodeBanUserRequest(v: BanUserRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.reason !== undefined) { out.reason = v.reason; }
+return out;
+}
+
 export interface BanUserResponse {
 message?: string;
+}
+
+export function decodeBanUserResponse(v: any): BanUserResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeBanUserResponse(v: BanUserResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
 export interface UnbanUserRequest {
 id?: string;
 }
 
+export function decodeUnbanUserRequest(v: any): UnbanUserRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeUnbanUserRequest(v: UnbanUserRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
 export interface UnbanUserResponse {
 message?: string;
 }
 
+export function decodeUnbanUserResponse(v: any): UnbanUserResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUnbanUserResponse(v: UnbanUserResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface SetConsoleAdminRequest {
 id?: string;
-is_console_admin?: boolean;
+isConsoleAdmin?: boolean;
+}
+
+export function decodeSetConsoleAdminRequest(v: any): SetConsoleAdminRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+isConsoleAdmin: v.is_console_admin,
+};
+}
+
+export function encodeSetConsoleAdminRequest(v: SetConsoleAdminRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.isConsoleAdmin !== undefined) { out.is_console_admin = v.isConsoleAdmin; }
+return out;
 }
 
 export interface SetConsoleAdminResponse {
 message?: string;
 }
 
+export function decodeSetConsoleAdminResponse(v: any): SetConsoleAdminResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeSetConsoleAdminResponse(v: SetConsoleAdminResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface GetUserSubscriptionRequest {
-user_id?: string;
+userId?: string;
+}
+
+export function decodeGetUserSubscriptionRequest(v: any): GetUserSubscriptionRequest {
+if (v === null || v === undefined) return v;
+return {
+userId: v.user_id,
+};
+}
+
+export function encodeGetUserSubscriptionRequest(v: GetUserSubscriptionRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.userId !== undefined) { out.user_id = v.userId; }
+return out;
 }
 
 export interface GetUserSubscriptionResponse {
 subscription?: Subscription;
+}
+
+export function decodeGetUserSubscriptionResponse(v: any): GetUserSubscriptionResponse {
+if (v === null || v === undefined) return v;
+return {
+subscription: (v.subscription !== undefined ? decodeSubscription(v.subscription) : v.subscription),
+};
+}
+
+export function encodeGetUserSubscriptionResponse(v: GetUserSubscriptionResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.subscription !== undefined) { out.subscription = encodeSubscription(v.subscription); }
+return out;
 }
 
 export interface ListBusinessesRequest {
@@ -161,7 +598,28 @@ limit?: number;
 offset?: number;
 id?: string;
 name?: string;
-owner_id?: string;
+ownerId?: string;
+}
+
+export function decodeListBusinessesRequest(v: any): ListBusinessesRequest {
+if (v === null || v === undefined) return v;
+return {
+limit: v.limit,
+offset: v.offset,
+id: v.id,
+name: v.name,
+ownerId: v.owner_id,
+};
+}
+
+export function encodeListBusinessesRequest(v: ListBusinessesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+return out;
 }
 
 export interface ListBusinessesResponse {
@@ -169,36 +627,140 @@ businesses?: (Business)[];
 total?: string;
 }
 
+export function decodeListBusinessesResponse(v: any): ListBusinessesResponse {
+if (v === null || v === undefined) return v;
+return {
+businesses: (v.businesses !== undefined ? (v.businesses as any[]).map(decodeBusiness) : v.businesses),
+total: v.total,
+};
+}
+
+export function encodeListBusinessesResponse(v: ListBusinessesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.businesses !== undefined) { out.businesses = (v.businesses as any[]).map(encodeBusiness); }
+if (v.total !== undefined) { out.total = v.total; }
+return out;
+}
+
 export interface UpdateBusinessRequest {
 id?: string;
 name?: string;
+}
+
+export function decodeUpdateBusinessRequest(v: any): UpdateBusinessRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+};
+}
+
+export function encodeUpdateBusinessRequest(v: UpdateBusinessRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+return out;
 }
 
 export interface UpdateBusinessResponse {
 message?: string;
 }
 
+export function decodeUpdateBusinessResponse(v: any): UpdateBusinessResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdateBusinessResponse(v: UpdateBusinessResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DeleteBusinessRequest {
 id?: string;
+}
+
+export function decodeDeleteBusinessRequest(v: any): DeleteBusinessRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteBusinessRequest(v: DeleteBusinessRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteBusinessResponse {
 message?: string;
 }
 
+export function decodeDeleteBusinessResponse(v: any): DeleteBusinessResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteBusinessResponse(v: DeleteBusinessResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface CreateBusinessOwnerRequest {
 email?: string;
 password?: string;
-full_name?: string;
-business_name?: string;
+fullName?: string;
+businessName?: string;
 industry?: string;
 country?: string;
 timezone?: string;
 currency?: string;
-grant_plan?: boolean;
-plan_id?: string;
-subscription_status?: string;
-grant_days?: number;
+grantPlan?: boolean;
+planId?: string;
+subscriptionStatus?: string;
+grantDays?: number;
+}
+
+export function decodeCreateBusinessOwnerRequest(v: any): CreateBusinessOwnerRequest {
+if (v === null || v === undefined) return v;
+return {
+email: v.email,
+password: v.password,
+fullName: v.full_name,
+businessName: v.business_name,
+industry: v.industry,
+country: v.country,
+timezone: v.timezone,
+currency: v.currency,
+grantPlan: v.grant_plan,
+planId: v.plan_id,
+subscriptionStatus: v.subscription_status,
+grantDays: v.grant_days,
+};
+}
+
+export function encodeCreateBusinessOwnerRequest(v: CreateBusinessOwnerRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.email !== undefined) { out.email = v.email; }
+if (v.password !== undefined) { out.password = v.password; }
+if (v.fullName !== undefined) { out.full_name = v.fullName; }
+if (v.businessName !== undefined) { out.business_name = v.businessName; }
+if (v.industry !== undefined) { out.industry = v.industry; }
+if (v.country !== undefined) { out.country = v.country; }
+if (v.timezone !== undefined) { out.timezone = v.timezone; }
+if (v.currency !== undefined) { out.currency = v.currency; }
+if (v.grantPlan !== undefined) { out.grant_plan = v.grantPlan; }
+if (v.planId !== undefined) { out.plan_id = v.planId; }
+if (v.subscriptionStatus !== undefined) { out.subscription_status = v.subscriptionStatus; }
+if (v.grantDays !== undefined) { out.grant_days = v.grantDays; }
+return out;
 }
 
 export interface CreateBusinessOwnerResponse {
@@ -208,10 +770,46 @@ subscription?: Subscription;
 message?: string;
 }
 
+export function decodeCreateBusinessOwnerResponse(v: any): CreateBusinessOwnerResponse {
+if (v === null || v === undefined) return v;
+return {
+owner: (v.owner !== undefined ? decodeUser(v.owner) : v.owner),
+business: (v.business !== undefined ? decodeBusiness(v.business) : v.business),
+subscription: (v.subscription !== undefined ? decodeSubscription(v.subscription) : v.subscription),
+message: v.message,
+};
+}
+
+export function encodeCreateBusinessOwnerResponse(v: CreateBusinessOwnerResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.owner !== undefined) { out.owner = encodeUser(v.owner); }
+if (v.business !== undefined) { out.business = encodeBusiness(v.business); }
+if (v.subscription !== undefined) { out.subscription = encodeSubscription(v.subscription); }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListSubscriptionsRequest {
 limit?: number;
 offset?: number;
 status?: string;
+}
+
+export function decodeListSubscriptionsRequest(v: any): ListSubscriptionsRequest {
+if (v === null || v === undefined) return v;
+return {
+limit: v.limit,
+offset: v.offset,
+status: v.status,
+};
+}
+
+export function encodeListSubscriptionsRequest(v: ListSubscriptionsRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface ListSubscriptionsResponse {
@@ -219,47 +817,190 @@ subscriptions?: (Subscription)[];
 total?: string;
 }
 
+export function decodeListSubscriptionsResponse(v: any): ListSubscriptionsResponse {
+if (v === null || v === undefined) return v;
+return {
+subscriptions: (v.subscriptions !== undefined ? (v.subscriptions as any[]).map(decodeSubscription) : v.subscriptions),
+total: v.total,
+};
+}
+
+export function encodeListSubscriptionsResponse(v: ListSubscriptionsResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.subscriptions !== undefined) { out.subscriptions = (v.subscriptions as any[]).map(encodeSubscription); }
+if (v.total !== undefined) { out.total = v.total; }
+return out;
+}
+
 export interface UpsertSubscriptionRequest {
-owner_id?: string;
-plan_id?: string;
+ownerId?: string;
+planId?: string;
 status?: string;
-seat_count?: number;
-trial_ends_at?: string;
-next_billing_date?: string;
-current_period_ends_at?: string;
-total_days?: number;
-paddle_subscription_id?: string;
-paddle_customer_id?: string;
+seatCount?: number;
+trialEndsAt?: string;
+nextBillingDate?: string;
+currentPeriodEndsAt?: string;
+totalDays?: number;
+paddleSubscriptionId?: string;
+paddleCustomerId?: string;
+}
+
+export function decodeUpsertSubscriptionRequest(v: any): UpsertSubscriptionRequest {
+if (v === null || v === undefined) return v;
+return {
+ownerId: v.owner_id,
+planId: v.plan_id,
+status: v.status,
+seatCount: v.seat_count,
+trialEndsAt: v.trial_ends_at,
+nextBillingDate: v.next_billing_date,
+currentPeriodEndsAt: v.current_period_ends_at,
+totalDays: v.total_days,
+paddleSubscriptionId: v.paddle_subscription_id,
+paddleCustomerId: v.paddle_customer_id,
+};
+}
+
+export function encodeUpsertSubscriptionRequest(v: UpsertSubscriptionRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.planId !== undefined) { out.plan_id = v.planId; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.seatCount !== undefined) { out.seat_count = v.seatCount; }
+if (v.trialEndsAt !== undefined) { out.trial_ends_at = v.trialEndsAt; }
+if (v.nextBillingDate !== undefined) { out.next_billing_date = v.nextBillingDate; }
+if (v.currentPeriodEndsAt !== undefined) { out.current_period_ends_at = v.currentPeriodEndsAt; }
+if (v.totalDays !== undefined) { out.total_days = v.totalDays; }
+if (v.paddleSubscriptionId !== undefined) { out.paddle_subscription_id = v.paddleSubscriptionId; }
+if (v.paddleCustomerId !== undefined) { out.paddle_customer_id = v.paddleCustomerId; }
+return out;
 }
 
 export interface UpsertSubscriptionResponse {
 message?: string;
 }
 
+export function decodeUpsertSubscriptionResponse(v: any): UpsertSubscriptionResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpsertSubscriptionResponse(v: UpsertSubscriptionResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface DeleteSubscriptionRequest {
 id?: string;
+}
+
+export function decodeDeleteSubscriptionRequest(v: any): DeleteSubscriptionRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteSubscriptionRequest(v: DeleteSubscriptionRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
 }
 
 export interface DeleteSubscriptionResponse {
 message?: string;
 }
 
+export function decodeDeleteSubscriptionResponse(v: any): DeleteSubscriptionResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteSubscriptionResponse(v: DeleteSubscriptionResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
 export interface ListPlansRequest {
+}
+
+export function decodeListPlansRequest(v: any): ListPlansRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListPlansRequest(v: ListPlansRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
 }
 
 export interface ListPlansResponse {
 plans?: (Plan)[];
 }
 
+export function decodeListPlansResponse(v: any): ListPlansResponse {
+if (v === null || v === undefined) return v;
+return {
+plans: (v.plans !== undefined ? (v.plans as any[]).map(decodePlan) : v.plans),
+};
+}
+
+export function encodeListPlansResponse(v: ListPlansResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.plans !== undefined) { out.plans = (v.plans as any[]).map(encodePlan); }
+return out;
+}
+
 export interface UpdatePlanRequest {
 id?: string;
 name?: string;
-price_per_seat_cents?: number;
-annual_price_per_seat_cents?: number;
-is_active?: boolean;
+pricePerSeatCents?: number;
+annualPricePerSeatCents?: number;
+isActive?: boolean;
+}
+
+export function decodeUpdatePlanRequest(v: any): UpdatePlanRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+name: v.name,
+pricePerSeatCents: v.price_per_seat_cents,
+annualPricePerSeatCents: v.annual_price_per_seat_cents,
+isActive: v.is_active,
+};
+}
+
+export function encodeUpdatePlanRequest(v: UpdatePlanRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.pricePerSeatCents !== undefined) { out.price_per_seat_cents = v.pricePerSeatCents; }
+if (v.annualPricePerSeatCents !== undefined) { out.annual_price_per_seat_cents = v.annualPricePerSeatCents; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+return out;
 }
 
 export interface UpdatePlanResponse {
 message?: string;
+}
+
+export function decodeUpdatePlanResponse(v: any): UpdatePlanResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeUpdatePlanResponse(v: UpdatePlanResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 

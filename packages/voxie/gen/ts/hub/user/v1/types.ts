@@ -3,16 +3,56 @@
 export interface GetMeRequest {
 }
 
+export function decodeGetMeRequest(v: any): GetMeRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetMeRequest(v: GetMeRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface GetMeResponse {
 id?: string;
 email?: string;
-full_name?: string;
+fullName?: string;
 apps?: (string)[];
 role?: string;
-business_id?: string;
-business_name?: string;
-is_owner?: boolean;
+businessId?: string;
+businessName?: string;
+isOwner?: boolean;
 onboarded?: boolean;
+}
+
+export function decodeGetMeResponse(v: any): GetMeResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+email: v.email,
+fullName: v.full_name,
+apps: v.apps,
+role: v.role,
+businessId: v.business_id,
+businessName: v.business_name,
+isOwner: v.is_owner,
+onboarded: v.onboarded,
+};
+}
+
+export function encodeGetMeResponse(v: GetMeResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.fullName !== undefined) { out.full_name = v.fullName; }
+if (v.apps !== undefined) { out.apps = v.apps; }
+if (v.role !== undefined) { out.role = v.role; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.businessName !== undefined) { out.business_name = v.businessName; }
+if (v.isOwner !== undefined) { out.is_owner = v.isOwner; }
+if (v.onboarded !== undefined) { out.onboarded = v.onboarded; }
+return out;
 }
 
 export interface UpdateProfileRequest {
@@ -20,23 +60,103 @@ name?: string;
 email?: string;
 }
 
+export function decodeUpdateProfileRequest(v: any): UpdateProfileRequest {
+if (v === null || v === undefined) return v;
+return {
+name: v.name,
+email: v.email,
+};
+}
+
+export function encodeUpdateProfileRequest(v: UpdateProfileRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.name !== undefined) { out.name = v.name; }
+if (v.email !== undefined) { out.email = v.email; }
+return out;
+}
+
 export interface UpdateProfileResponse {
 user?: GetMeResponse;
 }
 
+export function decodeUpdateProfileResponse(v: any): UpdateProfileResponse {
+if (v === null || v === undefined) return v;
+return {
+user: (v.user !== undefined ? decodeGetMeResponse(v.user) : v.user),
+};
+}
+
+export function encodeUpdateProfileResponse(v: UpdateProfileResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.user !== undefined) { out.user = encodeGetMeResponse(v.user); }
+return out;
+}
+
 export interface ChangePasswordRequest {
-current_password?: string;
-new_password?: string;
+currentPassword?: string;
+newPassword?: string;
+}
+
+export function decodeChangePasswordRequest(v: any): ChangePasswordRequest {
+if (v === null || v === undefined) return v;
+return {
+currentPassword: v.current_password,
+newPassword: v.new_password,
+};
+}
+
+export function encodeChangePasswordRequest(v: ChangePasswordRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.currentPassword !== undefined) { out.current_password = v.currentPassword; }
+if (v.newPassword !== undefined) { out.new_password = v.newPassword; }
+return out;
 }
 
 export interface ChangePasswordResponse {
 }
 
+export function decodeChangePasswordResponse(v: any): ChangePasswordResponse {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeChangePasswordResponse(v: ChangePasswordResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface SwitchBusinessRequest {
-business_id?: string;
+businessId?: string;
+}
+
+export function decodeSwitchBusinessRequest(v: any): SwitchBusinessRequest {
+if (v === null || v === undefined) return v;
+return {
+businessId: v.business_id,
+};
+}
+
+export function encodeSwitchBusinessRequest(v: SwitchBusinessRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+return out;
 }
 
 export interface SwitchBusinessResponse {
 token?: string;
+}
+
+export function decodeSwitchBusinessResponse(v: any): SwitchBusinessResponse {
+if (v === null || v === undefined) return v;
+return {
+token: v.token,
+};
+}
+
+export function encodeSwitchBusinessResponse(v: SwitchBusinessResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.token !== undefined) { out.token = v.token; }
+return out;
 }
 

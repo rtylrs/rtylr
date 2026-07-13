@@ -2,40 +2,138 @@
 
 export interface ApprovalChainLevelPayload {
 id?: string;
-owner_id?: string;
-chain_id?: string;
-level_order?: number;
-approver_type?: string;
-approver_role_id?: string;
-approver_employee_id?: string;
-threshold_min_value?: number;
-threshold_max_value?: number;
-timeout_days?: number;
-timeout_action?: string;
-created_at?: string;
-updated_at?: string;
+ownerId?: string;
+chainId?: string;
+levelOrder?: number;
+approverType?: string;
+approverRoleId?: string;
+approverEmployeeId?: string;
+thresholdMinValue?: number;
+thresholdMaxValue?: number;
+timeoutDays?: number;
+timeoutAction?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeApprovalChainLevelPayload(v: any): ApprovalChainLevelPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+chainId: v.chain_id,
+levelOrder: v.level_order,
+approverType: v.approver_type,
+approverRoleId: v.approver_role_id,
+approverEmployeeId: v.approver_employee_id,
+thresholdMinValue: v.threshold_min_value,
+thresholdMaxValue: v.threshold_max_value,
+timeoutDays: v.timeout_days,
+timeoutAction: v.timeout_action,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeApprovalChainLevelPayload(v: ApprovalChainLevelPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.chainId !== undefined) { out.chain_id = v.chainId; }
+if (v.levelOrder !== undefined) { out.level_order = v.levelOrder; }
+if (v.approverType !== undefined) { out.approver_type = v.approverType; }
+if (v.approverRoleId !== undefined) { out.approver_role_id = v.approverRoleId; }
+if (v.approverEmployeeId !== undefined) { out.approver_employee_id = v.approverEmployeeId; }
+if (v.thresholdMinValue !== undefined) { out.threshold_min_value = v.thresholdMinValue; }
+if (v.thresholdMaxValue !== undefined) { out.threshold_max_value = v.thresholdMaxValue; }
+if (v.timeoutDays !== undefined) { out.timeout_days = v.timeoutDays; }
+if (v.timeoutAction !== undefined) { out.timeout_action = v.timeoutAction; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface ApprovalChainPayload {
 id?: string;
-owner_id?: string;
-request_type?: string;
+ownerId?: string;
+requestType?: string;
 name?: string;
-delegation_enabled?: boolean;
+delegationEnabled?: boolean;
 levels?: (ApprovalChainLevelPayload)[];
-created_at?: string;
-updated_at?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeApprovalChainPayload(v: any): ApprovalChainPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+requestType: v.request_type,
+name: v.name,
+delegationEnabled: v.delegation_enabled,
+levels: (v.levels !== undefined ? (v.levels as any[]).map(decodeApprovalChainLevelPayload) : v.levels),
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeApprovalChainPayload(v: ApprovalChainPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.requestType !== undefined) { out.request_type = v.requestType; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.delegationEnabled !== undefined) { out.delegation_enabled = v.delegationEnabled; }
+if (v.levels !== undefined) { out.levels = (v.levels as any[]).map(encodeApprovalChainLevelPayload); }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
 }
 
 export interface UpsertApprovalChainRequest {
 id?: string;
-request_type?: string;
+requestType?: string;
 name?: string;
-delegation_enabled?: boolean;
+delegationEnabled?: boolean;
 levels?: (ApprovalChainLevelPayload)[];
+}
+
+export function decodeUpsertApprovalChainRequest(v: any): UpsertApprovalChainRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+requestType: v.request_type,
+name: v.name,
+delegationEnabled: v.delegation_enabled,
+levels: (v.levels !== undefined ? (v.levels as any[]).map(decodeApprovalChainLevelPayload) : v.levels),
+};
+}
+
+export function encodeUpsertApprovalChainRequest(v: UpsertApprovalChainRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.requestType !== undefined) { out.request_type = v.requestType; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.delegationEnabled !== undefined) { out.delegation_enabled = v.delegationEnabled; }
+if (v.levels !== undefined) { out.levels = (v.levels as any[]).map(encodeApprovalChainLevelPayload); }
+return out;
 }
 
 export interface UpsertApprovalChainResponse {
 chain?: ApprovalChainPayload;
+}
+
+export function decodeUpsertApprovalChainResponse(v: any): UpsertApprovalChainResponse {
+if (v === null || v === undefined) return v;
+return {
+chain: (v.chain !== undefined ? decodeApprovalChainPayload(v.chain) : v.chain),
+};
+}
+
+export function encodeUpsertApprovalChainResponse(v: UpsertApprovalChainResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.chain !== undefined) { out.chain = encodeApprovalChainPayload(v.chain); }
+return out;
 }
 

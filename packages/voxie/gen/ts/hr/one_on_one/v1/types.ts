@@ -2,34 +2,125 @@
 
 export interface OneOnOne {
 id?: string;
-owner_id?: string;
-manager_id?: string;
-staff_id?: string;
-scheduled_at?: string;
+ownerId?: string;
+managerId?: string;
+staffId?: string;
+scheduledAt?: string;
 notes?: string;
-action_items?: string;
+actionItems?: string;
 status?: string;
-created_at?: string;
+createdAt?: string;
+}
+
+export function decodeOneOnOne(v: any): OneOnOne {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+ownerId: v.owner_id,
+managerId: v.manager_id,
+staffId: v.staff_id,
+scheduledAt: v.scheduled_at,
+notes: v.notes,
+actionItems: v.action_items,
+status: v.status,
+createdAt: v.created_at,
+};
+}
+
+export function encodeOneOnOne(v: OneOnOne): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.managerId !== undefined) { out.manager_id = v.managerId; }
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+if (v.scheduledAt !== undefined) { out.scheduled_at = v.scheduledAt; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.actionItems !== undefined) { out.action_items = v.actionItems; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+return out;
 }
 
 export interface ListOneOnOnesRequest {
 }
 
+export function decodeListOneOnOnesRequest(v: any): ListOneOnOnesRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListOneOnOnesRequest(v: ListOneOnOnesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
 export interface ListOneOnOnesResponse {
-one_on_ones?: (OneOnOne)[];
+oneOnOnes?: (OneOnOne)[];
+}
+
+export function decodeListOneOnOnesResponse(v: any): ListOneOnOnesResponse {
+if (v === null || v === undefined) return v;
+return {
+oneOnOnes: (v.one_on_ones !== undefined ? (v.one_on_ones as any[]).map(decodeOneOnOne) : v.one_on_ones),
+};
+}
+
+export function encodeListOneOnOnesResponse(v: ListOneOnOnesResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.oneOnOnes !== undefined) { out.one_on_ones = (v.oneOnOnes as any[]).map(encodeOneOnOne); }
+return out;
 }
 
 export interface CreateOneOnOneRequest {
-manager_id?: string;
-staff_id?: string;
-scheduled_at?: string;
+managerId?: string;
+staffId?: string;
+scheduledAt?: string;
 notes?: string;
-action_items?: string;
+actionItems?: string;
 status?: string;
+}
+
+export function decodeCreateOneOnOneRequest(v: any): CreateOneOnOneRequest {
+if (v === null || v === undefined) return v;
+return {
+managerId: v.manager_id,
+staffId: v.staff_id,
+scheduledAt: v.scheduled_at,
+notes: v.notes,
+actionItems: v.action_items,
+status: v.status,
+};
+}
+
+export function encodeCreateOneOnOneRequest(v: CreateOneOnOneRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.managerId !== undefined) { out.manager_id = v.managerId; }
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+if (v.scheduledAt !== undefined) { out.scheduled_at = v.scheduledAt; }
+if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.actionItems !== undefined) { out.action_items = v.actionItems; }
+if (v.status !== undefined) { out.status = v.status; }
+return out;
 }
 
 export interface CreateOneOnOneResponse {
 id?: string;
 message?: string;
+}
+
+export function decodeCreateOneOnOneResponse(v: any): CreateOneOnOneResponse {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+message: v.message,
+};
+}
+
+export function encodeCreateOneOnOneResponse(v: CreateOneOnOneResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.message !== undefined) { out.message = v.message; }
+return out;
 }
 
