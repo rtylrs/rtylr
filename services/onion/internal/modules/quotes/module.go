@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/api"
 	"github.com/voxire/onion/internal/modules/quotes/internal/application"
@@ -54,7 +53,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := financequotev1.RegisterQuoteServiceServer(
 		api.NewQuoteAPI(m.service),
 		financequotev1.WithMux(mux),
-		financequotev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register finance quote service: %w", err))
 	}

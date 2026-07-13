@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	bookingresourcev1 "github.com/voxire/voxie/gen/go/booking/resource/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/booking_resources/internal/api"
 	"github.com/voxire/onion/internal/modules/booking_resources/internal/application"
@@ -23,7 +22,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := bookingresourcev1.RegisterResourceServiceServer(
 		api.NewResourceAPI(m.service),
 		bookingresourcev1.WithMux(mux),
-		bookingresourcev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register booking resource service: %w", err))
 	}

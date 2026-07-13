@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_tables/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_tables/internal/application"
 	postablev1 "github.com/voxire/voxie/gen/go/pos/table/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -24,7 +23,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := postablev1.RegisterTableServiceServer(
 		api.NewTableAPI(m.service),
 		postablev1.WithMux(mux),
-		postablev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS table service: %w", err))
 	}

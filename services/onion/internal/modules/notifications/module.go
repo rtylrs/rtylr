@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hubnotificationv1 "github.com/voxire/voxie/gen/go/hub/notification/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/go-chi/chi/v5"
 
@@ -30,7 +29,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubnotificationv1.RegisterNotificationServiceServer(
 		handlers.NewNotificationAPI(m.service),
 		hubnotificationv1.WithMux(mux),
-		hubnotificationv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register hub notification service: %w", err))
 	}

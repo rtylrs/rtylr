@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hrattendancev1.RegisterAttendanceServiceServer(
 		api.NewAttendanceAPI(m.service),
 		hrattendancev1.WithMux(mux),
-		hrattendancev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register HR attendance service: %w", err))
 	}

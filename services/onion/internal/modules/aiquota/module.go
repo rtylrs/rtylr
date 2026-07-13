@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/aiquota/internal/api"
 	"github.com/voxire/onion/internal/modules/aiquota/internal/application"
 	hubaiv1 "github.com/voxire/voxie/gen/go/hub/ai/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -24,7 +23,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubaiv1.RegisterAiServiceServer(
 		api.NewAiAPI(m.service),
 		hubaiv1.WithMux(mux),
-		hubaiv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register hub ai service: %w", err))
 	}

@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	possettingsv1 "github.com/voxire/voxie/gen/go/pos/settings/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/application"
@@ -56,7 +55,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := possettingsv1.RegisterSettingsServiceServer(
 		api.NewSettingsAPI(m.service),
 		possettingsv1.WithMux(mux),
-		possettingsv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS settings service: %w", err))
 	}

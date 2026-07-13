@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	crmfeedbackv1 "github.com/voxire/voxie/gen/go/crm/feedback/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/feedback/internal/api"
 	"github.com/voxire/onion/internal/modules/feedback/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := crmfeedbackv1.RegisterFeedbackServiceServer(
 		api.NewFeedbackAPI(m.service),
 		crmfeedbackv1.WithMux(mux),
-		crmfeedbackv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register crm feedback service: %w", err))
 	}

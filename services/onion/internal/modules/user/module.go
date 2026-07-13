@@ -9,7 +9,6 @@ import (
 
 	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
 	hubuserv1 "github.com/voxire/voxie/gen/go/hub/user/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/user/internal/api"
 	"github.com/voxire/onion/internal/modules/user/internal/application"
@@ -105,11 +104,9 @@ func (m *Module) WithInviteAccepter(accepter api.InviteAccepter) *Module {
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
-	marshalOpts := protojson.MarshalOptions{UseProtoNames: true}
 	if err := hubuserv1.RegisterUserServiceServer(
 		api.NewUserAPI(m.UserService, m.ProfileResolver),
 		hubuserv1.WithMux(mux),
-		hubuserv1.WithMarshalOptions(marshalOpts),
 	); err != nil {
 		panic(fmt.Errorf("register hub user service: %w", err))
 	}
@@ -117,7 +114,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := commonauthv1.RegisterAuthServiceServer(
 		api.NewAuthAPI(m.UserService, m.ProvisionerResolver, m.inviteAccepter, OnUserCreated, OnUserLogin),
 		commonauthv1.WithMux(mux),
-		commonauthv1.WithMarshalOptions(marshalOpts),
 	); err != nil {
 		panic(fmt.Errorf("register common auth service: %w", err))
 	}

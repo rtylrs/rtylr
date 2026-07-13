@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/segments/internal/api"
 	"github.com/voxire/onion/internal/modules/segments/internal/application"
@@ -25,7 +24,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := crmsegmentv1.RegisterSegmentServiceServer(
 		api.NewSegmentAPI(m.service),
 		crmsegmentv1.WithMux(mux),
-		crmsegmentv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register segment service: %w", err))
 	}

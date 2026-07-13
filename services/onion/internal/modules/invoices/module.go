@@ -11,7 +11,6 @@ import (
 	financeinvoicespaymentsv1 "github.com/voxire/voxie/gen/go/finance/invoices/payments/v1"
 	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 	financereportv1 "github.com/voxire/voxie/gen/go/finance/report/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/api"
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
@@ -143,7 +142,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := financereportv1.RegisterReportServiceServer(
 		api.NewReportAPI(m.service),
 		financereportv1.WithMux(mux),
-		financereportv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register finance report service: %w", err))
 	}
@@ -151,7 +149,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := financeinvoicesv1.RegisterInvoicesServiceServer(
 		api.NewInvoicesAPI(m.service),
 		financeinvoicesv1.WithMux(mux),
-		financeinvoicesv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register finance invoices service: %w", err))
 	}
@@ -159,7 +156,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := financeinvoicespaymentsv1.RegisterInvoicePaymentServiceServer(
 		api.NewInvoicePaymentAPI(m.service),
 		financeinvoicespaymentsv1.WithMux(mux),
-		financeinvoicespaymentsv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register finance invoice payment service: %w", err))
 	}
@@ -167,7 +163,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := financedashboardv1.RegisterDashboardServiceServer(
 		api.NewDashboardAPI(m.service),
 		financedashboardv1.WithMux(mux),
-		financedashboardv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register finance dashboard service: %w", err))
 	}

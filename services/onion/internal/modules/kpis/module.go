@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hubdashboardv1 "github.com/voxire/voxie/gen/go/hub/dashboard/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/kpis/internal/api"
 	"github.com/voxire/onion/internal/modules/kpis/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubdashboardv1.RegisterDashboardServiceServer(
 		api.NewDashboardAPI(m.service),
 		hubdashboardv1.WithMux(mux),
-		hubdashboardv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register hub dashboard service: %w", err))
 	}

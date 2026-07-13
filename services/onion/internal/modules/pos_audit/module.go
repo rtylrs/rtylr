@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	posauditv1 "github.com/voxire/voxie/gen/go/pos/audit/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/application"
@@ -25,7 +24,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := posauditv1.RegisterAuditServiceServer(
 		api.NewAuditAPI(m.service),
 		posauditv1.WithMux(mux),
-		posauditv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS audit service: %w", err))
 	}

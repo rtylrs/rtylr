@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	hrtimeoffv1 "github.com/voxire/voxie/gen/go/hr/time_off/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/time_off/internal/api"
 	"github.com/voxire/onion/internal/modules/time_off/internal/application"
@@ -29,7 +28,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hrtimeoffv1.RegisterTimeOffServiceServer(
 		api.NewTimeOffAPI(m.service),
 		hrtimeoffv1.WithMux(mux),
-		hrtimeoffv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register HR time off service: %w", err))
 	}

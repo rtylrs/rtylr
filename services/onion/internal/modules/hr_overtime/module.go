@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/api"
@@ -69,7 +68,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	err := hrovertimev1.RegisterOvertimeServiceServer(
 		api.NewOvertimeService(m.service),
 		hrovertimev1.WithMux(mux),
-		hrovertimev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	)
 	if err != nil {
 		panic(err)

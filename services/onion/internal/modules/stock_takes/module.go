@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	erpstocktakev1 "github.com/voxire/voxie/gen/go/erp/stock_take/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/api"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := erpstocktakev1.RegisterStockTakeServiceServer(
 		api.NewStockTakeAPI(m.service),
 		erpstocktakev1.WithMux(mux),
-		erpstocktakev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register ERP stock take service: %w", err))
 	}

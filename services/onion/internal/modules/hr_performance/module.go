@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/application"
@@ -56,7 +55,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	err := hrperformancev1.RegisterPerformanceServiceServer(
 		api.NewPerformanceService(m.service),
 		hrperformancev1.WithMux(mux),
-		hrperformancev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	)
 	if err != nil {
 		panic(err)

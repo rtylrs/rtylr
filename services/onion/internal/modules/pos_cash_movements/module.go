@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	poscashv1 "github.com/voxire/voxie/gen/go/pos/cash/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/application"
@@ -25,7 +24,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := poscashv1.RegisterCashServiceServer(
 		api.NewCashAPI(m.service),
 		poscashv1.WithMux(mux),
-		poscashv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS cash service: %w", err))
 	}

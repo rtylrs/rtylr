@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	erpinventoryv1 "github.com/voxire/voxie/gen/go/erp/inventory/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/inventory/internal/api"
 	"github.com/voxire/onion/internal/modules/inventory/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := erpinventoryv1.RegisterInventoryServiceServer(
 		api.NewInventoryAPI(m.service),
 		erpinventoryv1.WithMux(mux),
-		erpinventoryv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register ERP inventory service: %w", err))
 	}

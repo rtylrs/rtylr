@@ -2,11 +2,11 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 
 	flowviewv1 "github.com/voxire/voxie/gen/go/flow/view/v1"
-	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -22,22 +22,26 @@ func NewViewAPI(service *application.Service) *ViewAPI {
 	return &ViewAPI{Service: service}
 }
 
-func filtersToStruct(filters map[string]interface{}) *structpb.Struct {
+func filtersToStruct(filters map[string]interface{}) string {
 	if filters == nil {
 		filters = map[string]interface{}{}
 	}
-	s, err := structpb.NewStruct(filters)
+	data, err := json.Marshal(filters)
 	if err != nil {
-		return &structpb.Struct{Fields: map[string]*structpb.Value{}}
+		return "{}"
 	}
-	return s
+	return string(data)
 }
 
-func filtersFromStruct(s *structpb.Struct) map[string]interface{} {
-	if s == nil {
+func filtersFromStruct(s string) map[string]interface{} {
+	if s == "" {
 		return map[string]interface{}{}
 	}
-	return s.AsMap()
+	var m map[string]interface{}
+	if err := json.Unmarshal([]byte(s), &m); err != nil {
+		return map[string]interface{}{}
+	}
+	return m
 }
 
 func toView(v domain.View) *flowviewv1.View {

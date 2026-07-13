@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	erpwarehousev1 "github.com/voxire/voxie/gen/go/erp/warehouse/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/warehouses/internal/api"
 	"github.com/voxire/onion/internal/modules/warehouses/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := erpwarehousev1.RegisterWarehouseServiceServer(
 		api.NewWarehouseAPI(m.service),
 		erpwarehousev1.WithMux(mux),
-		erpwarehousev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register ERP warehouse service: %w", err))
 	}

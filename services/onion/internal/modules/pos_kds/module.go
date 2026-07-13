@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/application"
 	poskdsv1 "github.com/voxire/voxie/gen/go/pos/kds/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -24,7 +23,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := poskdsv1.RegisterKDSServiceServer(
 		api.NewKDSAPI(m.service),
 		poskdsv1.WithMux(mux),
-		poskdsv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS KDS service: %w", err))
 	}

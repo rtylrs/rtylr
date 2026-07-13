@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	financejournalv1 "github.com/voxire/voxie/gen/go/finance/journal/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/journal/internal/api"
 	"github.com/voxire/onion/internal/modules/journal/internal/application"
@@ -25,7 +24,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := financejournalv1.RegisterJournalServiceServer(
 		api.NewJournalAPI(m.service),
 		financejournalv1.WithMux(mux),
-		financejournalv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register finance journal service: %w", err))
 	}

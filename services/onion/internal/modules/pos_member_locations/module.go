@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/application"
 	posaccessv1 "github.com/voxire/voxie/gen/go/pos/access/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct{ service *application.Service }
@@ -22,7 +21,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := posaccessv1.RegisterAccessServiceServer(
 		api.NewAccessAPI(m.service),
 		posaccessv1.WithMux(mux),
-		posaccessv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS access service: %w", err))
 	}

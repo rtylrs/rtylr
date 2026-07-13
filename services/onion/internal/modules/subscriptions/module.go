@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hubsubscriptionv1 "github.com/voxire/voxie/gen/go/hub/subscription/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/go-chi/chi/v5"
 
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubsubscriptionv1.RegisterSubscriptionServiceServer(
 		api.NewSubscriptionAPI(m.service),
 		hubsubscriptionv1.WithMux(mux),
-		hubsubscriptionv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register hub subscription service: %w", err))
 	}

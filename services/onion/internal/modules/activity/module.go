@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/activity/internal/api"
 	"github.com/voxire/onion/internal/modules/activity/internal/application"
 	hubactivityv1 "github.com/voxire/voxie/gen/go/hub/activity/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -26,7 +25,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubactivityv1.RegisterActivityServiceServer(
 		api.NewActivityAPI(m.service),
 		hubactivityv1.WithMux(mux),
-		hubactivityv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register hub activity service: %w", err))
 	}

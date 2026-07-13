@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	erpstocktransferv1 "github.com/voxire/voxie/gen/go/erp/stock_transfer/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/api"
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := erpstocktransferv1.RegisterStockTransferServiceServer(
 		api.NewStockTransferAPI(m.service),
 		erpstocktransferv1.WithMux(mux),
-		erpstocktransferv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register ERP stock transfer service: %w", err))
 	}

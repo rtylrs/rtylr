@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	erppurchaseorderv1 "github.com/voxire/voxie/gen/go/erp/purchase_order/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/api"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := erppurchaseorderv1.RegisterPurchaseOrderServiceServer(
 		api.NewPurchaseOrderAPI(m.service),
 		erppurchaseorderv1.WithMux(mux),
-		erppurchaseorderv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register ERP purchase order service: %w", err))
 	}
