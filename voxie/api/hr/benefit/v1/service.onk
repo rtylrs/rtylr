@@ -1,0 +1,7 @@
+package hr.benefit.v1
+
+service BenefitService {
+  listBenefits(ListBenefitsRequest) -> ListBenefitsResponse @get("/benefits")
+
+  createBenefit(CreateBenefitRequest) -> CreateBenefitResponse @post("/benefits")
+}

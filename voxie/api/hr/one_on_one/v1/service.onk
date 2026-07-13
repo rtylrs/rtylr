@@ -1,0 +1,7 @@
+package hr.one_on_one.v1
+
+service OneOnOneService {
+  listOneOnOnes(ListOneOnOnesRequest) -> ListOneOnOnesResponse @get("/one-on-ones")
+
+  createOneOnOne(CreateOneOnOneRequest) -> CreateOneOnOneResponse @post("/one-on-ones")
+}

@@ -225,7 +225,14 @@ def iter_message_fields(proto: Path) -> tuple[str, dict[str, dict[str, object]]]
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate frontend validation metadata from voxie proto files.")
-    parser.add_argument("--proto-root", type=Path, default=DEFAULT_ROOT / "proto")
+    # Every service has been migrated off .proto onto api/*.onk (see
+    # README.md), so proto/ no longer exists and this always scans zero
+    # files - the generated metadata is now permanently empty (but still
+    # type-checks; see the comment on contractValidationMetadata's type
+    # annotation below). This script has no .onk-aware equivalent yet: it
+    # only understands proto's buf.validate syntax. Frontend field validation
+    # metadata is a known gap until an onk-decorator-aware generator exists.
+    parser.add_argument("--proto-root", type=Path, default=DEFAULT_ROOT / "api")
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_ROOT / "src" / "validation")
     return parser.parse_args()
 

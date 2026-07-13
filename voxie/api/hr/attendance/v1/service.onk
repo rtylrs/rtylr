@@ -1,0 +1,13 @@
+package hr.attendance.v1
+
+/// AttendanceService defines HR attendance endpoints.
+service AttendanceService {
+  /// ListAttendance returns attendance records with optional filters.
+  listAttendance(ListAttendanceRequest) -> ListAttendanceResponse @get("/attendance")
+
+  /// AttendanceClockIn records an attendance clock-in.
+  attendanceClockIn(AttendanceClockInRequest) -> AttendanceClockInResponse @post("/attendance/clock-in")
+
+  /// AttendanceClockOut records an attendance clock-out.
+  attendanceClockOut(AttendanceClockOutRequest) -> AttendanceClockOutResponse @post("/attendance/clock-out")
+}

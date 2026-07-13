@@ -1,0 +1,10 @@
+package pos.kds.v1
+
+/// KDSService defines POS kitchen display endpoints.
+service KDSService {
+  /// Returns active kitchen display orders.
+  listKDSOrders(ListKDSOrdersRequest) -> ListKDSOrdersResponse @get("/orders")
+
+  /// Updates the status of an order item on the kitchen display.
+  updateKDSItemStatus(UpdateKDSItemStatusRequest) -> UpdateKDSItemStatusResponse @put("/{order_id}/items/{item_id}") @body("body")
+}

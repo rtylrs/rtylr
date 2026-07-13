@@ -1,0 +1,31 @@
+package insights.report.v1
+
+/// ReportService defines insights report template endpoints.
+service ReportService {
+  /// Returns saved report templates.
+  listReportTemplates(ListReportTemplatesRequest) -> ListReportTemplatesResponse @get("/templates")
+
+  /// Creates a report template.
+  createReportTemplate(CreateReportTemplateRequest) -> CreateReportTemplateResponse @post("/templates")
+
+  /// Returns a report template by ID.
+  getReportTemplate(GetReportTemplateRequest) -> GetReportTemplateResponse @get("/templates/{id}")
+
+  /// Returns scheduled reports.
+  listScheduledReports(ListScheduledReportsRequest) -> ListScheduledReportsResponse @get("/scheduled")
+
+  /// Creates a scheduled report.
+  createScheduledReport(CreateScheduledReportRequest) -> CreateScheduledReportResponse @post("/scheduled")
+
+  /// Updates a scheduled report.
+  updateScheduledReport(UpdateScheduledReportRequest) -> UpdateScheduledReportResponse @put("/scheduled/{id}")
+
+  /// Removes a scheduled report.
+  deleteScheduledReport(DeleteScheduledReportRequest) -> DeleteScheduledReportResponse @delete("/scheduled/{id}")
+
+  /// Queues a revenue report export.
+  generateRevenueReport(GenerateRevenueReportRequest) -> GenerateRevenueReportResponse @post("/reports/revenue/generate")
+
+  /// Returns a CSV export for a revenue date range.
+  exportRevenueReport(ExportRevenueReportRequest) -> ExportRevenueReportResponse @get("/reports/revenue/export")
+}

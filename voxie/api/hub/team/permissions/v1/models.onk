@@ -1,0 +1,9 @@
+package hub.team.permissions.v1
+
+message UpdatePermissionsRequest {
+  user_id: int64 @required @gt(0)
+  apps: string[] @min_items(1)
+  role: string @required
+}
+
+message UpdatePermissionsResponse {}

@@ -1,0 +1,131 @@
+package hr.staff.v1
+
+/// Staff is an HR staff member record.
+message Staff {
+  id: int64
+  owner_id: int64
+  user_id: int64
+  department_id: int64
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  role: string
+  employment_type: string
+  /// The current lifecycle state.
+  status: string
+  salary: float64
+  hourly_rate: float64
+  overtime_rate: float64
+  start_date: string
+  end_date: string
+  address: string
+  emergency_contact_name: string
+  emergency_contact_phone: string
+  apps: string
+  notes: string
+  /// When the record was created.
+  created_at: string
+  /// When the record was last updated.
+  updated_at: string
+}
+
+message ListStaffRequest {
+  search: string @query("search")
+  department_id: string @query("department_id")
+  /// The current lifecycle state.
+  status: string @query("status")
+}
+
+message ListStaffResponse {
+  staff: Staff[]
+}
+
+message CreateStaffRequest {
+  user_id: int64 @required @gt(0)
+  department_id: int64 @required @gt(0)
+  first_name: string @required
+  last_name: string @required
+  email: string @required @email
+  phone: string
+  role: string @required
+  employment_type: string @required
+  /// The current lifecycle state.
+  status: string @required
+  salary: float64 @gte(0)
+  hourly_rate: float64 @gte(0)
+  overtime_rate: float64 @gte(0)
+  start_date: string @required
+  end_date: string @required
+  address: string
+  emergency_contact_name: string @required
+  emergency_contact_phone: string @required
+  apps: string @required
+  notes: string
+}
+
+message CreateStaffResponse {
+  id: int64
+}
+
+message GetStaffRequest {
+  id: int64 @required @gt(0)
+}
+
+message GetStaffResponse {
+  staff: Staff
+}
+
+message UpdateStaffBody {
+  department_id: int64 @required @gt(0)
+  first_name: string @required
+  last_name: string @required
+  email: string @required @email
+  phone: string
+  role: string @required
+  employment_type: string @required
+  /// The current lifecycle state.
+  status: string @required
+  salary: float64 @gte(0)
+  hourly_rate: float64 @gte(0)
+  overtime_rate: float64 @gte(0)
+  end_date: string @required
+  address: string
+  emergency_contact_name: string @required
+  emergency_contact_phone: string @required
+  apps: string @required
+  notes: string
+}
+
+message UpdateStaffRequest {
+  id: int64 @required @gt(0)
+  body: UpdateStaffBody
+}
+
+message UpdateStaffResponse {
+  success: bool
+}
+
+message DeleteStaffRequest {
+  id: int64 @required @gt(0)
+}
+
+message DeleteStaffResponse {
+  success: bool
+}
+
+message ClockInRequest {
+  staff_id: int64 @required @gt(0)
+}
+
+message ClockInResponse {
+  success: bool
+}
+
+message ClockOutRequest {
+  staff_id: int64 @required @gt(0)
+}
+
+message ClockOutResponse {
+  success: bool
+}

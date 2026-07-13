@@ -1,0 +1,16 @@
+package insights.customer.v1
+
+/// CustomerService defines insights customer analytics endpoints.
+service CustomerService {
+  /// Returns customer analytics for a period.
+  getCustomerAnalytics(GetCustomerAnalyticsRequest) -> GetCustomerAnalyticsResponse @get("/analytics")
+
+  /// Returns churn analysis for a period.
+  getChurnAnalysis(GetChurnAnalysisRequest) -> GetChurnAnalysisResponse @get("/churn")
+
+  /// Returns lifetime value analysis.
+  getLTVAnalysis(GetLTVAnalysisRequest) -> GetLTVAnalysisResponse @get("/ltv")
+
+  /// Returns top customers by spend or order count.
+  getTopCustomers(GetTopCustomersRequest) -> GetTopCustomersResponse @get("/top")
+}

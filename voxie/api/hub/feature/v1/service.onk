@@ -1,0 +1,27 @@
+package hub.feature.v1
+
+service FeatureService {
+  resolveFeatures(ResolveFeaturesRequest) -> ResolveFeaturesResponse @post("/features")
+
+  resolveMyFeatures(ResolveMyFeaturesRequest) -> ResolveMyFeaturesResponse @post("/features/me")
+
+  listFlags(ListFlagsRequest) -> ListFlagsResponse @get("/features/admin/flags")
+
+  upsertFlag(UpsertFlagRequest) -> UpsertFlagResponse @put("/features/admin/flags")
+
+  deleteFlag(DeleteFlagRequest) -> DeleteFlagResponse @delete("/features/admin/flags/{key}")
+
+  listTargets(ListTargetsRequest) -> ListTargetsResponse @get("/features/admin/targets")
+
+  upsertTarget(UpsertTargetRequest) -> UpsertTargetResponse @put("/features/admin/targets")
+
+  deleteTarget(DeleteTargetRequest) -> DeleteTargetResponse @delete("/features/admin/targets/{feature_key}/{owner_id}")
+
+  listRules(ListRulesRequest) -> ListRulesResponse @get("/features/admin/rules")
+
+  createRule(CreateRuleRequest) -> CreateRuleResponse @post("/features/admin/rules")
+
+  updateRule(UpdateRuleRequest) -> UpdateRuleResponse @put("/features/admin/rules")
+
+  deleteRule(DeleteRuleRequest) -> DeleteRuleResponse @delete("/features/admin/rules/{id}")
+}

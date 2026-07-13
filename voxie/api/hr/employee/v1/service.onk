@@ -1,0 +1,19 @@
+package hr.employee.v1
+
+/// EmployeeService defines HR employee endpoints.
+service EmployeeService {
+  /// ListEmployees returns employees with optional filters.
+  listEmployees(ListEmployeesRequest) -> ListEmployeesResponse @get("/employees")
+
+  /// CreateEmployee creates a new employee.
+  createEmployee(CreateEmployeeRequest) -> CreateEmployeeResponse @post("/employees")
+
+  /// UpdateEmployee updates an existing employee.
+  updateEmployee(UpdateEmployeeRequest) -> UpdateEmployeeResponse @put("/employees/{id}") @body("body")
+
+  /// InviteEmployee sends an employee invitation.
+  inviteEmployee(InviteEmployeeRequest) -> InviteEmployeeResponse @post("/employees/invite")
+
+  /// AcceptInvite accepts an employee invitation.
+  acceptInvite(AcceptInviteRequest) -> AcceptInviteResponse @post("/employees/invite/accept")
+}

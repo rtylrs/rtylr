@@ -1,0 +1,16 @@
+package pos.combo.v1
+
+/// ComboService defines POS combo endpoints.
+service ComboService {
+  /// Returns all combos for the active business.
+  listCombos(ListCombosRequest) -> ListCombosResponse @get("/combos")
+
+  /// Creates a new combo.
+  createCombo(CreateComboRequest) -> CreateComboResponse @post("/combos")
+
+  /// Updates an existing combo.
+  updateCombo(UpdateComboRequest) -> UpdateComboResponse @put("/combos/{id}") @body("body")
+
+  /// Removes a combo by ID.
+  deleteCombo(DeleteComboRequest) -> DeleteComboResponse @delete("/combos/{id}")
+}

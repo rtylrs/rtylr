@@ -1,0 +1,13 @@
+package pos.location.v1
+
+/// LocationService defines POS location endpoints.
+service LocationService {
+  /// Returns locations for the active business.
+  listLocations(ListLocationsRequest) -> ListLocationsResponse @get("/locations")
+
+  /// Creates a new location.
+  createLocation(CreateLocationRequest) -> CreateLocationResponse @post("/locations")
+
+  /// Updates an existing location.
+  updateLocation(UpdateLocationRequest) -> UpdateLocationResponse @put("/locations/{id}") @body("body")
+}

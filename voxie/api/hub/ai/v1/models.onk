@@ -1,0 +1,37 @@
+package hub.ai.v1
+
+message AiQuotaStatus {
+  plan_slug: string
+  mode: string
+  allowance_tokens: int64
+  used_tokens: int64
+  remaining_tokens: int64
+  overage_tokens: int64
+  allow_overage: bool
+  blocked: bool
+  period_end: string
+}
+
+message AiQuotaSettings {
+  mode: string
+}
+
+message GetAiUsageRequest {}
+
+message GetAiUsageResponse {
+  usage: AiQuotaStatus
+}
+
+message GetAiQuotaSettingsRequest {}
+
+message GetAiQuotaSettingsResponse {
+  settings: AiQuotaSettings
+}
+
+message UpdateAiQuotaSettingsRequest {
+  mode: string @required
+}
+
+message UpdateAiQuotaSettingsResponse {
+  settings: AiQuotaSettings
+}

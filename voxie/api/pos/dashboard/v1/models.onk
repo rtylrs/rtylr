@@ -1,0 +1,10 @@
+package pos.dashboard.v1
+
+message DashboardRequest {}
+
+message DashboardResponse {
+  total_sales: float64
+  order_count: int32
+  avg_order: float64
+  table_turnover: float64
+}

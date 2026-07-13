@@ -1,0 +1,7 @@
+package pos.manager.v1
+
+/// ManagerService defines POS manager override endpoints.
+service ManagerService {
+  /// Verifies a manager PIN and returns the associated staff member.
+  verifyPIN(VerifyPINRequest) -> VerifyPINResponse @post("/verify")
+}

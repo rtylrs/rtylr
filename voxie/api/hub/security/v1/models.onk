@@ -1,0 +1,52 @@
+package hub.security.v1
+
+message SecurityState {
+  two_factor_enabled: bool
+  active_sessions: ActiveSession[]
+}
+
+message ActiveSession {
+  id: string
+  ip: string
+  user_agent: string
+  /// When the record was created.
+  created_at: string
+  is_current: bool
+}
+
+message LoginEntry {
+  /// Email address used for lookup or contact.
+  email: string
+  method: string
+  ip: string
+  user_agent: string
+  success: bool
+  /// When the record was created.
+  created_at: string
+}
+
+message GetSecurityStateRequest {}
+
+message GetSecurityStateResponse {
+  state: SecurityState
+}
+
+message LoginHistoryRequest {}
+
+message LoginHistoryResponse {
+  history: LoginEntry[]
+}
+
+message InvalidateSessionsRequest {}
+
+message InvalidateSessionsResponse {
+  message: string
+}
+
+message Update2FARequest {
+  enabled: bool
+}
+
+message Update2FAResponse {
+  message: string
+}
