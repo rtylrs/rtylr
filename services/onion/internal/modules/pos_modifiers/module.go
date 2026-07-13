@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/application"
 	posmodifierv1 "github.com/voxire/voxie/gen/go/pos/modifier/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -24,7 +23,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := posmodifierv1.RegisterModifierServiceServer(
 		api.NewModifierAPI(m.service),
 		posmodifierv1.WithMux(mux),
-		posmodifierv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS modifier service: %w", err))
 	}

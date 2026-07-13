@@ -7,7 +7,6 @@ import (
 	"time"
 
 	hubcaretv1 "github.com/voxire/voxie/gen/go/hub/caret/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/go-chi/chi/v5"
 
@@ -53,7 +52,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubcaretv1.RegisterCaretServiceServer(
 		api.NewCaretAPI(),
 		hubcaretv1.WithMux(mux),
-		hubcaretv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register hub caret service: %w", err))
 	}

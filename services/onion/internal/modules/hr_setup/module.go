@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	hrsetupv1 "github.com/voxire/voxie/gen/go/hr/setup/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/hr_setup/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_setup/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hrsetupv1.RegisterSetupServiceServer(
 		api.NewSetupAPI(m.service),
 		hrsetupv1.WithMux(mux),
-		hrsetupv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register HR setup service: %w", err))
 	}

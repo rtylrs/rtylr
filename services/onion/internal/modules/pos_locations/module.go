@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/application"
 	poslocationv1 "github.com/voxire/voxie/gen/go/pos/location/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -24,7 +23,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := poslocationv1.RegisterLocationServiceServer(
 		api.NewLocationAPI(m.service),
 		poslocationv1.WithMux(mux),
-		poslocationv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS location service: %w", err))
 	}

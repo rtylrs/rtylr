@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hrtrainingv1 "github.com/voxire/voxie/gen/go/hr/training/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/training/internal/api"
 	"github.com/voxire/onion/internal/modules/training/internal/application"
@@ -25,7 +24,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hrtrainingv1.RegisterTrainingServiceServer(
 		api.NewTrainingAPI(m.service),
 		hrtrainingv1.WithMux(mux),
-		hrtrainingv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register training service: %w", err))
 	}

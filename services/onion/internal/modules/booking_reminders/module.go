@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	bookingreminderv1 "github.com/voxire/voxie/gen/go/booking/reminder/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/booking_reminders/internal/api"
 	"github.com/voxire/onion/internal/modules/booking_reminders/internal/application"
@@ -23,7 +22,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := bookingreminderv1.RegisterReminderServiceServer(
 		api.NewReminderAPI(m.service),
 		bookingreminderv1.WithMux(mux),
-		bookingreminderv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register booking reminder service: %w", err))
 	}

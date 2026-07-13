@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/application"
 	posterminalv1 "github.com/voxire/voxie/gen/go/pos/terminal/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -24,7 +23,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := posterminalv1.RegisterTerminalServiceServer(
 		api.NewTerminalAPI(m.service),
 		posterminalv1.WithMux(mux),
-		posterminalv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS terminal service: %w", err))
 	}

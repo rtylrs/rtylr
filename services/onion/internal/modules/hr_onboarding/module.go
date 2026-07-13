@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/application"
@@ -35,7 +34,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	err := hronboardingv1.RegisterOnboardingServiceServer(
 		api.NewOnboardingService(m.service),
 		hronboardingv1.WithMux(mux),
-		hronboardingv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	)
 	if err != nil {
 		panic(err)

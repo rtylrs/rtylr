@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	supportcannedv1 "github.com/voxire/voxie/gen/go/support/canned/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/support_canned/internal/api"
 	"github.com/voxire/onion/internal/modules/support_canned/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := supportcannedv1.RegisterCannedResponseServiceServer(
 		api.NewCannedResponseAPI(m.service),
 		supportcannedv1.WithMux(mux),
-		supportcannedv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register support canned service: %w", err))
 	}

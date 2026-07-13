@@ -8,8 +8,6 @@ import (
 	"strings"
 
 	crmtemplatev1 "github.com/voxire/voxie/gen/go/crm/template/v1"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/voxire/onion/internal/modules/templates/internal/application"
 	"github.com/voxire/onion/internal/modules/templates/internal/domain"
@@ -191,26 +189,20 @@ func newTemplate(template domain.Template) *crmtemplatev1.Template {
 	}
 }
 
-func variablesToBytes(value *structpb.Value) ([]byte, error) {
-	if value == nil {
+func variablesToBytes(value string) ([]byte, error) {
+	if value == "" {
 		return []byte("[]"), nil
 	}
-	return protojson.Marshal(value)
+	var probe any
+	if err := json.Unmarshal([]byte(value), &probe); err != nil {
+		return nil, err
+	}
+	return []byte(value), nil
 }
 
-func bytesToVariables(raw []byte) *structpb.Value {
+func bytesToVariables(raw []byte) string {
 	if len(raw) == 0 {
-		raw = []byte("[]")
+		return "[]"
 	}
-
-	var data any
-	if err := json.Unmarshal(raw, &data); err != nil {
-		data = []any{}
-	}
-
-	value, err := structpb.NewValue(data)
-	if err != nil {
-		return structpb.NewListValue(&structpb.ListValue{})
-	}
-	return value
+	return string(raw)
 }

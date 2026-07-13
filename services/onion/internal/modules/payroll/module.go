@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hrpayrollv1 "github.com/voxire/voxie/gen/go/hr/payroll/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/payroll/internal/api"
 	"github.com/voxire/onion/internal/modules/payroll/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hrpayrollv1.RegisterPayrollServiceServer(
 		api.NewPayrollAPI(m.service),
 		hrpayrollv1.WithMux(mux),
-		hrpayrollv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register payroll service: %w", err))
 	}

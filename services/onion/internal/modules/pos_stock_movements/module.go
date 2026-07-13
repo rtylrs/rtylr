@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/application"
 	posstockv1 "github.com/voxire/voxie/gen/go/pos/stock/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -24,7 +23,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := posstockv1.RegisterStockServiceServer(
 		api.NewStockAPI(m.service),
 		posstockv1.WithMux(mux),
-		posstockv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS stock service: %w", err))
 	}

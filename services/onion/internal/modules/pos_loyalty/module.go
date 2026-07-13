@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	posloyaltyv1 "github.com/voxire/voxie/gen/go/pos/loyalty/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/application"
@@ -25,7 +24,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := posloyaltyv1.RegisterLoyaltyServiceServer(
 		api.NewLoyaltyAPI(m.service),
 		posloyaltyv1.WithMux(mux),
-		posloyaltyv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS loyalty service: %w", err))
 	}

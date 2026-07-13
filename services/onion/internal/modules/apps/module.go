@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hubappv1 "github.com/voxire/voxie/gen/go/hub/app/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/apps/internal/api"
 	"github.com/voxire/onion/internal/modules/apps/internal/application"
@@ -29,7 +28,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubappv1.RegisterAppServiceServer(
 		api.NewAppAPI(m.service, m.addonsService),
 		hubappv1.WithMux(mux),
-		hubappv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register hub app service: %w", err))
 	}

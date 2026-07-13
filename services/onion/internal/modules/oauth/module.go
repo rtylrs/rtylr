@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	commonoauthv1 "github.com/voxire/voxie/gen/go/common/oauth/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/go-chi/chi/v5"
 
@@ -31,7 +30,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := commonoauthv1.RegisterOauthServiceServer(
 		api.NewOauthAPI(m.service),
 		commonoauthv1.WithMux(mux),
-		commonoauthv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register common oauth service: %w", err))
 	}

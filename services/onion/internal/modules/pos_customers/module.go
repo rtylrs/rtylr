@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	poscustomerv1 "github.com/voxire/voxie/gen/go/pos/customer/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/application"
@@ -25,7 +24,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := poscustomerv1.RegisterCustomerServiceServer(
 		api.NewCustomerAPI(m.service),
 		poscustomerv1.WithMux(mux),
-		poscustomerv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS customer service: %w", err))
 	}

@@ -14,7 +14,6 @@ import (
 	posordersrefundsv1 "github.com/voxire/voxie/gen/go/pos/orders/refunds/v1"
 	posorderssplitv1 "github.com/voxire/voxie/gen/go/pos/orders/splits/v1"
 	posordersv1 "github.com/voxire/voxie/gen/go/pos/orders/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/go-chi/chi/v5"
 
@@ -34,7 +33,6 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
-	marshalOpts := protojson.MarshalOptions{UseProtoNames: true}
 	register := func(err error, label string) {
 		if err != nil {
 			panic(fmt.Errorf("register %s: %w", label, err))
@@ -44,49 +42,41 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	register(posdashboardv1.RegisterDashboardServiceServer(
 		handlers.NewDashboardAPI(m.service),
 		posdashboardv1.WithMux(mux),
-		posdashboardv1.WithMarshalOptions(marshalOpts),
 	), "POS dashboard service")
 
 	register(posordersv1.RegisterOrderServiceServer(
 		handlers.NewOrderAPI(m.service),
 		posordersv1.WithMux(mux),
-		posordersv1.WithMarshalOptions(marshalOpts),
 	), "POS order service")
 
 	register(posorderspaymentsv1.RegisterOrderPaymentServiceServer(
 		handlers.NewPaymentAPI(m.service),
 		posorderspaymentsv1.WithMux(mux),
-		posorderspaymentsv1.WithMarshalOptions(marshalOpts),
 	), "POS order payment service")
 
 	register(posordersrefundsv1.RegisterOrderRefundServiceServer(
 		handlers.NewRefundAPI(m.service),
 		posordersrefundsv1.WithMux(mux),
-		posordersrefundsv1.WithMarshalOptions(marshalOpts),
 	), "POS order refund service")
 
 	register(posorderssplitv1.RegisterOrderSplitServiceServer(
 		handlers.NewSplitAPI(m.service),
 		posorderssplitv1.WithMux(mux),
-		posorderssplitv1.WithMarshalOptions(marshalOpts),
 	), "POS order split service")
 
 	register(posordersdiscountsv1.RegisterOrderDiscountServiceServer(
 		handlers.NewDiscountAPI(m.service),
 		posordersdiscountsv1.WithMux(mux),
-		posordersdiscountsv1.WithMarshalOptions(marshalOpts),
 	), "POS order discount service")
 
 	register(posordersholdsv1.RegisterOrderHoldServiceServer(
 		handlers.NewHoldAPI(m.service),
 		posordersholdsv1.WithMux(mux),
-		posordersholdsv1.WithMarshalOptions(marshalOpts),
 	), "POS order hold service")
 
 	register(posordersitemsv1.RegisterOrderItemServiceServer(
 		handlers.NewItemAPI(m.service),
 		posordersitemsv1.WithMux(mux),
-		posordersitemsv1.WithMarshalOptions(marshalOpts),
 	), "POS order item service")
 }
 

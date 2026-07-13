@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hubdeveloperv1 "github.com/voxire/voxie/gen/go/hub/developer/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/api_keys/internal/api"
 	"github.com/voxire/onion/internal/modules/api_keys/internal/application"
@@ -29,7 +28,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubdeveloperv1.RegisterDeveloperServiceServer(
 		api.NewDeveloperAPI(NewHubAPIKeysProvider(m.service), m.webhooksService),
 		hubdeveloperv1.WithMux(mux),
-		hubdeveloperv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register hub developer service: %w", err))
 	}

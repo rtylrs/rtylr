@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	financebankaccountv1 "github.com/voxire/voxie/gen/go/finance/bank_account/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/api"
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/application"
@@ -25,7 +24,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := financebankaccountv1.RegisterBankAccountServiceServer(
 		api.NewBankAccountAPI(m.service),
 		financebankaccountv1.WithMux(mux),
-		financebankaccountv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register finance bank account service: %w", err))
 	}

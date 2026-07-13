@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	erpcategoryv1 "github.com/voxire/voxie/gen/go/erp/category/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/categories/internal/api"
 	"github.com/voxire/onion/internal/modules/categories/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := erpcategoryv1.RegisterCategoryServiceServer(
 		api.NewCategoryAPI(m.service),
 		erpcategoryv1.WithMux(mux),
-		erpcategoryv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register ERP category service: %w", err))
 	}

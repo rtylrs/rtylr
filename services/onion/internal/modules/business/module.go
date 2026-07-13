@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hubbusinessv1 "github.com/voxire/voxie/gen/go/hub/business/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/business/internal/api"
 	"github.com/voxire/onion/internal/modules/business/internal/application"
@@ -38,7 +37,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubbusinessv1.RegisterBusinessServiceServer(
 		businessAPI,
 		hubbusinessv1.WithMux(mux),
-		hubbusinessv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register hub business service: %w", err))
 	}

@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	bookingcalendarv1 "github.com/voxire/voxie/gen/go/booking/calendar/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/booking_calendar/internal/api"
 	"github.com/voxire/onion/internal/modules/booking_calendar/internal/application"
@@ -23,7 +22,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := bookingcalendarv1.RegisterCalendarServiceServer(
 		api.NewCalendarAPI(m.service),
 		bookingcalendarv1.WithMux(mux),
-		bookingcalendarv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register booking calendar service: %w", err))
 	}

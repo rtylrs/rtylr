@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/api"
@@ -57,7 +56,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hrequipmentv1.RegisterEquipmentServiceServer(
 		api.NewEquipmentAPI(m.service),
 		hrequipmentv1.WithMux(mux),
-		hrequipmentv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register HR equipment service: %w", err))
 	}

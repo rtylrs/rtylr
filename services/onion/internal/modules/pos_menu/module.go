@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/application"
@@ -25,7 +24,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := posmenuitemv1.RegisterMenuItemServiceServer(
 		api.NewMenuItemAPI(m.service),
 		posmenuitemv1.WithMux(mux),
-		posmenuitemv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS menu item service: %w", err))
 	}

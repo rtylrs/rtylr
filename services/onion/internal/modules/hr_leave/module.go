@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/api"
@@ -66,7 +65,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	err := hrleavev1.RegisterLeaveServiceServer(
 		api.NewLeaveService(m.service),
 		hrleavev1.WithMux(mux),
-		hrleavev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	)
 	if err != nil {
 		panic(err)

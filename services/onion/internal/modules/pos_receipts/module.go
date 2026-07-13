@@ -9,7 +9,6 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/application"
 	posreceiptv1 "github.com/voxire/voxie/gen/go/pos/receipt/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type Module struct {
@@ -24,7 +23,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := posreceiptv1.RegisterReceiptServiceServer(
 		api.NewReceiptAPI(m.service),
 		posreceiptv1.WithMux(mux),
-		posreceiptv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register POS receipt service: %w", err))
 	}

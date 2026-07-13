@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	crmtemplatev1 "github.com/voxire/voxie/gen/go/crm/template/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/templates/internal/api"
 	"github.com/voxire/onion/internal/modules/templates/internal/application"
@@ -27,7 +26,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := crmtemplatev1.RegisterTemplateServiceServer(
 		api.NewTemplateAPI(m.service),
 		crmtemplatev1.WithMux(mux),
-		crmtemplatev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register crm template service: %w", err))
 	}

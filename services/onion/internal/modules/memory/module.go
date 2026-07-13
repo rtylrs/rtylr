@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hubmemoryv1 "github.com/voxire/voxie/gen/go/hub/memory/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/go-chi/chi/v5"
 
@@ -36,7 +35,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubmemoryv1.RegisterMemoryServiceServer(
 		api.NewMemoryAPI(m.memoryService),
 		hubmemoryv1.WithMux(mux),
-		hubmemoryv1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register hub memory service: %w", err))
 	}

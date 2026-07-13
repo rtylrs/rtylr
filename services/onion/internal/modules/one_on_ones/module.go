@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	hroneononev1 "github.com/voxire/voxie/gen/go/hr/one_on_one/v1"
-	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/voxire/onion/internal/modules/one_on_ones/internal/api"
 	"github.com/voxire/onion/internal/modules/one_on_ones/internal/application"
@@ -25,7 +24,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hroneononev1.RegisterOneOnOneServiceServer(
 		api.NewOneOnOneAPI(m.service),
 		hroneononev1.WithMux(mux),
-		hroneononev1.WithMarshalOptions(protojson.MarshalOptions{UseProtoNames: true}),
 	); err != nil {
 		panic(fmt.Errorf("register one-on-one service: %w", err))
 	}
