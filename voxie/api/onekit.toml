@@ -1,0 +1,10 @@
+module = "github.com/voxire/voxie/gen/go"
+
+[generate.go-server]
+out = "../gen/go"
+
+[generate.go-client]
+out = "../gen/go"
+
+[generate.ts-client]
+out = "../gen/ts"
