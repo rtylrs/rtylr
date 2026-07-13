@@ -293,8 +293,16 @@ def main() -> None:
         "  protoName: string;\n"
         "  message: string;\n"
         "};\n\n"
-        f"export const contractValidationMetadata = {json.dumps(request_messages, indent=2, sort_keys=True)} as const satisfies ContractValidationMetadata;\n\n"
-        f"export const contractValidationOneofMetadata = {json.dumps(request_oneofs, indent=2, sort_keys=True)} as const satisfies ContractOneofValidationMetadata;\n\n"
+        # An explicit type annotation (rather than relying solely on `as const
+        # satisfies` inference) is required here: when the underlying dict is
+        # empty (e.g. every oneof-validated proto message has since been
+        # migrated to .onk, which has no equivalent decorator), TypeScript
+        # infers the bare object literal `{}` as its own zero-key type, so
+        # `keyof typeof metadata` collapses to `never` and callers indexing
+        # into it break. Annotating the declared type keeps `keyof` as
+        # `string` regardless of how many keys are actually present.
+        f"export const contractValidationMetadata: ContractValidationMetadata = {json.dumps(request_messages, indent=2, sort_keys=True)} as const;\n\n"
+        f"export const contractValidationOneofMetadata: ContractOneofValidationMetadata = {json.dumps(request_oneofs, indent=2, sort_keys=True)} as const;\n\n"
         "export function getContractValidation(messageName: string) {\n"
         "  return contractValidationMetadata[messageName as keyof typeof contractValidationMetadata];\n"
         "}\n"

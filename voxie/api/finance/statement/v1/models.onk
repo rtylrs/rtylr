@@ -1,0 +1,24 @@
+package finance.statement.v1
+
+message GetBalanceSheetRequest {}
+
+message GetBalanceSheetResponse {
+  total_assets: float64
+  total_liabilities: float64
+  total_equity: float64
+  cash_balance: float64
+  accounts_receivable: float64
+  accounts_payable: float64
+}
+
+message GetCashFlowRequest {
+  period: string @query("period")
+}
+
+message GetCashFlowResponse {
+  period: string
+  operating_inflow: float64
+  operating_outflow: float64
+  net_operating: float64
+  net_cash_flow: float64
+}

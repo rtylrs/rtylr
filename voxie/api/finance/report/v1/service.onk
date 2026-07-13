@@ -1,0 +1,16 @@
+package finance.report.v1
+
+/// ReportService defines finance reporting endpoints.
+service ReportService {
+  getPLReport(GetPLReportRequest) -> GetPLReportResponse @get("/pl")
+
+  getTaxReport(GetTaxReportRequest) -> GetTaxReportResponse @get("/tax")
+
+  listExpenseCategoryDetails(ListExpenseCategoryDetailsRequest) -> ListExpenseCategoryDetailsResponse @get("/expense-categories")
+
+  createExpenseCategoryDetail(CreateExpenseCategoryDetailRequest) -> CreateExpenseCategoryDetailResponse @post("/expense-categories")
+
+  listTaxConfig(ListTaxConfigRequest) -> ListTaxConfigResponse @get("/tax-config")
+
+  createTaxConfig(CreateTaxConfigRequest) -> CreateTaxConfigResponse @post("/tax-config")
+}

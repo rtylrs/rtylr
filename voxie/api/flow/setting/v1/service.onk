@@ -1,0 +1,7 @@
+package flow.setting.v1
+
+service SettingService {
+  getUserSettings(GetUserSettingsRequest) -> GetUserSettingsResponse @get("/settings")
+
+  updateUserSettings(UpdateUserSettingsRequest) -> UpdateUserSettingsResponse @put("/settings")
+}

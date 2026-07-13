@@ -1,0 +1,13 @@
+package common.oauth.v1
+
+/// OauthService defines OAuth authorization endpoints.
+service OauthService {
+  /// Issue starts the OAuth authorization redirect flow.
+  issue(IssueRequest) -> IssueResponse @post("/issue")
+
+  token(TokenRequest) -> TokenResponse @post("/token")
+
+  revoke(RevokeRequest) -> RevokeResponse @post("/revoke")
+
+  me(MeRequest) -> MeResponse @get("/me")
+}
