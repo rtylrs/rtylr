@@ -130,7 +130,7 @@ export interface SafeApi {
  * Usage:
  * ```ts
  * import { createApiClient } from '@voxire/api';
- * import { safeFetch } from '@voxire/api/result';
+ * import { safeFetch } from '@voxire/result';
  *
  * const api = createApiClient('crm');
  * const safe = safeFetch(api);
@@ -190,7 +190,7 @@ export function safeFetch(client: AxiosInstance): SafeApi {
  * ```ts
  * useQuery({
  *   queryKey: ['products'],
- *   queryFn: () => unwrap(safe.get<Product[]>('/api/erp/product/v1/products')),
+ *   queryFn: () => unwrap(safe.get<Product[]>('/erp/product/v1/products')),
  * });
  * ```
  */
