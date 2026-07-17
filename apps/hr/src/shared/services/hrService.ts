@@ -65,7 +65,7 @@ export const hrService = {
   createStaff: (data: StaffPayload) => safe.post('/hr/staff', data),
   updateStaff: (id: number, data: Partial<StaffPayload>) => safe.put('/hr/staff', { id, ...data }),
   deleteStaff: (id: number) => safe.delete('/hr/staff', { data: { id } }),
-  getDashboard: () => safe.get('/api/hr/dashboard/v1/dashboard'),
+  getDashboard: () => safe.get('/hr/dashboard/v1/dashboard'),
 
   // Departments
   getDepartments: () => safe.get('/hr/departments'),

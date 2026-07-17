@@ -40,9 +40,9 @@ describe('hrService', () => {
     expect(safe.delete).toHaveBeenCalledWith('/hr/staff', { data: { id: 1 } });
   });
 
-  it('getDashboard calls GET /api/hr/dashboard/v1/dashboard', () => {
+  it('getDashboard calls GET /hr/dashboard/v1/dashboard', () => {
     hrService.getDashboard();
-    expect(safe.get).toHaveBeenCalledWith('/api/hr/dashboard/v1/dashboard');
+    expect(safe.get).toHaveBeenCalledWith('/hr/dashboard/v1/dashboard');
   });
 
   // Departments

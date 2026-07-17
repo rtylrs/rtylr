@@ -12,7 +12,7 @@ export const useApiKeys = () => {
   return useQuery<ApiKey[]>({
     queryKey: ['api-keys'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/api/hub/developer/v1/api-keys'));
+      const res = await unwrap(safe.get('/hub/developer/v1/api-keys'));
       const raw = res?.keys ?? res;
       return z.array(apiKeySchema).parse(Array.isArray(raw) ? raw : []);
     },
@@ -23,7 +23,7 @@ export const useCreateApiKey = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { name: string; scopes: string[] }) => {
-      const res = await unwrap(safe.post('/api/hub/developer/v1/api-keys', payload));
+      const res = await unwrap(safe.post('/hub/developer/v1/api-keys', payload));
       return res as { id: number; key: string; message: string };
     },
     onSuccess: () => {
@@ -38,7 +38,7 @@ export const useRevokeApiKey = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.post('/api/hub/developer/v1/api-keys/revoke', { id: Number(id) }));
+      await unwrap(safe.post('/hub/developer/v1/api-keys/revoke', { id: Number(id) }));
       return id;
     },
     onSuccess: () => {

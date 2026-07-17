@@ -83,7 +83,7 @@ const Checkout = (): React.JSX.Element => {
     };
 
     try {
-      const res = await api.post<PlaceOrderResponse>('/api/pos/orders/v1/orders/public', body);
+      const res = await api.post<PlaceOrderResponse>('/pos/orders/v1/orders/public', body);
       const { order_id, order_number } = res.data;
       clearCart();
       void navigate({ to: `/order-status/${order_id}?number=${encodeURIComponent(order_number)}` });

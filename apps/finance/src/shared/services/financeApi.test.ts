@@ -92,9 +92,9 @@ describe('financeApi', () => {
   });
 
   // P&L
-  it('getPL calls GET /api/finance/report/v1/pl with period param', () => {
+  it('getPL calls GET /finance/report/v1/pl with period param', () => {
     financeApi.getPL('2026-Q1');
-    expect(safe.get).toHaveBeenCalledWith('/api/finance/report/v1/pl', {
+    expect(safe.get).toHaveBeenCalledWith('/finance/report/v1/pl', {
       params: expect.objectContaining({ period: '2026-Q1' }),
     });
   });

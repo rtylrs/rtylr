@@ -148,11 +148,11 @@ export function useOnboardingTour() {
       TOUR_STEPS.forEach((step) => tour.addStep(step));
 
       tour.on('complete', () => {
-        void safe.patch('/api/hub/team/onboarding/v1/onboarded');
+        void safe.patch('/hub/team/onboarding/v1/onboarded');
       });
 
       tour.on('cancel', () => {
-        void safe.patch('/api/hub/team/onboarding/v1/onboarded');
+        void safe.patch('/hub/team/onboarding/v1/onboarded');
       });
 
       tour.start();

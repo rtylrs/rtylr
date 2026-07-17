@@ -30,8 +30,7 @@ interface SwitchBusinessResponse {
 export const useListMyBusinesses = () =>
   useQuery({
     queryKey: ['businesses', 'mine'],
-    queryFn: () =>
-      unwrap(safe.get<ListMyBusinessesResponse>('/api/hub/business/v1/businesses/mine')),
+    queryFn: () => unwrap(safe.get<ListMyBusinessesResponse>('/hub/business/v1/businesses/mine')),
     staleTime: 30_000,
   });
 
@@ -39,7 +38,7 @@ export const useCreateSubBusiness = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateSubBusinessRequest) =>
-      unwrap(safe.post<CreateSubBusinessResponse>('/api/hub/business/v1/businesses', data)),
+      unwrap(safe.post<CreateSubBusinessResponse>('/hub/business/v1/businesses', data)),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['businesses', 'mine'] });
     },
@@ -50,7 +49,7 @@ export const useSwitchBusiness = () =>
   useMutation({
     mutationFn: (businessId: number) =>
       unwrap(
-        safe.post<SwitchBusinessResponse>('/api/hub/user/v1/users/switch-business', {
+        safe.post<SwitchBusinessResponse>('/hub/user/v1/users/switch-business', {
           business_id: businessId,
         })
       ),
@@ -66,7 +65,7 @@ export const useBusinessExists = (name: string) =>
     queryKey: ['business-exists', name.trim()],
     queryFn: () =>
       unwrap(
-        safe.get<{ exists: boolean }>('/api/hub/business/v1/businesses/name-exists', {
+        safe.get<{ exists: boolean }>('/hub/business/v1/businesses/name-exists', {
           params: { name: name.trim() },
         })
       ),
@@ -79,7 +78,5 @@ export const useBusinessExists = (name: string) =>
 export const useOnboardBusiness = () =>
   useMutation({
     mutationFn: (name: string) =>
-      unwrap(
-        safe.post<OnboardBusinessResponse>('/api/hub/business/v1/businesses/onboard', { name })
-      ),
+      unwrap(safe.post<OnboardBusinessResponse>('/hub/business/v1/businesses/onboard', { name })),
   });

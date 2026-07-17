@@ -11,7 +11,7 @@ export const useIntegrations = () => {
   return useQuery({
     queryKey: ['integrations'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/api/hub/integration/v1/integrations'));
+      const res = await unwrap(safe.get('/hub/integration/v1/integrations'));
       const raw = res?.integrations ?? res;
       return z.array(integrationSchema).parse(Array.isArray(raw) ? raw : []);
     },
@@ -22,7 +22,7 @@ export const useConnectIntegration = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.post('/api/hub/integration/v1/integrations/connect', { provider: id }));
+      await unwrap(safe.post('/hub/integration/v1/integrations/connect', { provider: id }));
       return id;
     },
     onSuccess: () => {
@@ -37,9 +37,7 @@ export const useDisconnectIntegration = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(
-        safe.post('/api/hub/integration/v1/integrations/disconnect', { id: Number(id) })
-      );
+      await unwrap(safe.post('/hub/integration/v1/integrations/disconnect', { id: Number(id) }));
       return id;
     },
     onSuccess: () => {

@@ -55,7 +55,7 @@ export const useGroups = (): ReturnType<typeof useQuery<Group[]>> =>
   useQuery<Group[]>({
     queryKey: ['groups'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/api/hub/team/groups/v1/groups'));
+      const res = await unwrap(safe.get('/hub/team/groups/v1/groups'));
       return (res as { groups?: Group[] })?.groups ?? [];
     },
     staleTime: 30_000,
@@ -68,7 +68,7 @@ export const useGroup = (
     queryKey: ['groups', id],
     queryFn: async () => {
       if (!id) return undefined;
-      const res = await unwrap(safe.get(`/api/hub/team/groups/v1/groups/${id}`));
+      const res = await unwrap(safe.get(`/hub/team/groups/v1/groups/${id}`));
       return (res as { group?: GroupDetail })?.group;
     },
     enabled: !!id,
@@ -94,7 +94,7 @@ export const useCreateGroup = (): ReturnType<
       color?: string;
       resourcePermissions: ResourcePermission[];
     }) => {
-      const res = await unwrap(safe.post('/api/hub/team/groups/v1/groups', payload));
+      const res = await unwrap(safe.post('/hub/team/groups/v1/groups', payload));
       return (res as { group: Group })?.group;
     },
     onSuccess: () => {
@@ -127,7 +127,7 @@ export const useUpdateGroup = (
       color?: string;
       resourcePermissions: ResourcePermission[];
     }) => {
-      const res = await unwrap(safe.put(`/api/hub/team/groups/v1/groups/${id}`, payload));
+      const res = await unwrap(safe.put(`/hub/team/groups/v1/groups/${id}`, payload));
       return (res as { group: Group })?.group;
     },
     onSuccess: () => {
@@ -143,7 +143,7 @@ export const useDeleteGroup = (): ReturnType<typeof useMutation<void, Error, num
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (groupId: number) => {
-      await unwrap(safe.delete(`/api/hub/team/groups/v1/groups/${groupId}`));
+      await unwrap(safe.delete(`/hub/team/groups/v1/groups/${groupId}`));
     },
     onSuccess: () => {
       toast.success('Group deleted');
@@ -160,7 +160,7 @@ export const useAddGroupMembers = (
   return useMutation({
     mutationFn: async (userIds: number[]) => {
       await unwrap(
-        safe.post(`/api/hub/team/groups/v1/groups/${groupId}/members`, { user_ids: userIds })
+        safe.post(`/hub/team/groups/v1/groups/${groupId}/members`, { user_ids: userIds })
       );
     },
     onSuccess: () => {
@@ -178,7 +178,7 @@ export const useRemoveGroupMember = (
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (userId: number) => {
-      await unwrap(safe.delete(`/api/hub/team/groups/v1/groups/${groupId}/members/${userId}`));
+      await unwrap(safe.delete(`/hub/team/groups/v1/groups/${groupId}/members/${userId}`));
     },
     onSuccess: () => {
       toast.success('Member removed');

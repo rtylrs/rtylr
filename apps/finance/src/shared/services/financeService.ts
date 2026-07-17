@@ -80,5 +80,5 @@ export const financeService = {
   getTaxConfig: () => safe.get('/finance/tax'),
   updateTaxConfig: (data: TaxConfigPayload) => safe.put('/finance/tax', data),
   getPLReport: (params?: PLFilterParams) =>
-    safe.get('/api/finance/report/v1/pl', { params: plReportQueryParams(params) }),
+    safe.get('/finance/report/v1/pl', { params: plReportQueryParams(params) }),
 };

@@ -270,7 +270,7 @@ export const financeApi = {
 
   // P&L
   getPL: (period: string) =>
-    safe.get<PLReport>('/api/finance/report/v1/pl', {
+    safe.get<PLReport>('/finance/report/v1/pl', {
       params: plReportQueryParams({ period, date: new Date().toISOString().slice(0, 10) }),
     }),
 

@@ -23,7 +23,7 @@ const LowStockWidget: React.FC = () => {
     queryKey: ['low-stock-widget'],
     queryFn: async () => {
       const res = await unwrap(
-        safe.get<LowStockResponse | StockItem[]>('/api/erp/inventory/v1/low-stock')
+        safe.get<LowStockResponse | StockItem[]>('/erp/inventory/v1/low-stock')
       );
       return (Array.isArray(res) ? res : (res.items ?? res.products)) ?? [];
     },

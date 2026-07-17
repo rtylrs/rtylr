@@ -9,7 +9,7 @@ export const useKpis = () => {
   return useQuery({
     queryKey: ['dash-kpis'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/api/hub/dashboard/v1/kpis'));
+      const res = await unwrap(safe.get('/hub/dashboard/v1/kpis'));
       return dashKpisSchema.parse(res);
     },
     staleTime: 30_000,

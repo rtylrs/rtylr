@@ -11,7 +11,7 @@ import {
   ChatMessage,
 } from '@voxire/menu';
 import useAsync from '../../../shared/hooks/useAsync';
-import { menuApi } from '../../../shared/api/api';
+import { menuApi } from '../../../shared/api';
 
 type LayoutType = 'grid' | 'list' | 'minimal';
 

@@ -86,7 +86,7 @@ const rootRoute = createRootRoute({
       <AppGuard
         appId="flow"
         fetchUser={(): Promise<Record<string, unknown>> =>
-          unwrap(safe.get<Record<string, unknown>>('/api/hub/user/v1/users/me'))
+          unwrap(safe.get<Record<string, unknown>>('/hub/user/v1/users/me'))
         }
       >
         <Outlet />

@@ -100,7 +100,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
   const handleRequestAccess = async (appId: string): Promise<void> => {
     setRequestLoading(appId);
     try {
-      await safe.post('/api/hub/team/access/v1/requests', { app: appId });
+      await safe.post('/hub/team/access/v1/requests', { app: appId });
       setRequested((prev) => new Set(prev).add(appId));
     } catch {
       // silently fail, server returns success anyway if already requested
@@ -380,12 +380,12 @@ function BusinessRoute(): React.JSX.Element | null {
 
     setToken(token);
 
-    unwrap(safe.get<Record<string, unknown>>('/api/hub/user/v1/users/me'))
+    unwrap(safe.get<Record<string, unknown>>('/hub/user/v1/users/me'))
       .then((res) => {
         setUser(res as StoredUser);
         unwrap(
           safe.get<{ business?: Record<string, unknown>; maintenance?: boolean }>(
-            '/api/hub/config/v1/config'
+            '/hub/config/v1/config'
           )
         )
           .then((configRes) => {

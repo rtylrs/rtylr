@@ -60,7 +60,7 @@ const Account: React.FC = () => {
     queryKey: ['security', 'login-history'],
     queryFn: async () => {
       const response = await unwrap(
-        safe.get<LoginHistoryResponse>('/api/hub/security/v1/login-history')
+        safe.get<LoginHistoryResponse>('/hub/security/v1/login-history')
       );
       return (response.history ?? []).map((entry) => ({
         email: entry.email,
@@ -89,7 +89,7 @@ const Account: React.FC = () => {
   const updateProfile = useMutation({
     mutationFn: () =>
       unwrap(
-        safe.patch('/api/hub/user/v1/users/me', {
+        safe.patch('/hub/user/v1/users/me', {
           name: formData.name,
         })
       ),
@@ -101,7 +101,7 @@ const Account: React.FC = () => {
   });
 
   const invalidateSessions = useMutation({
-    mutationFn: () => unwrap(safe.post('/api/hub/security/v1/invalidate-sessions')),
+    mutationFn: () => unwrap(safe.post('/hub/security/v1/invalidate-sessions')),
     onSuccess: () => signOut('dash'),
     onError: () => toast.error('Failed to invalidate sessions'),
   });

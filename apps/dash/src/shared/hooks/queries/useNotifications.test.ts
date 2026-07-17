@@ -96,9 +96,7 @@ describe('useNotifications', () => {
     mockGet.mockResolvedValue({ notifications: [] });
 
     renderHook(() => useNotifications(), { wrapper: createWrapper() });
-    await waitFor(() =>
-      expect(mockGet).toHaveBeenCalledWith('/api/hub/notification/v1/notifications')
-    );
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/hub/notification/v1/notifications'));
   });
 
   it('handles API error', async () => {
@@ -124,7 +122,7 @@ describe('useMarkNotificationRead', () => {
 
     // Should call the right endpoint
     await waitFor(() =>
-      expect(mockPatch).toHaveBeenCalledWith('/api/hub/notification/v1/notifications/1/read')
+      expect(mockPatch).toHaveBeenCalledWith('/hub/notification/v1/notifications/1/read')
     );
   });
 
@@ -156,7 +154,7 @@ describe('useMarkAllNotificationsRead', () => {
     });
 
     await waitFor(() =>
-      expect(mockPatch).toHaveBeenCalledWith('/api/hub/notification/v1/notifications/read-all')
+      expect(mockPatch).toHaveBeenCalledWith('/hub/notification/v1/notifications/read-all')
     );
   });
 

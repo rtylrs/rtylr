@@ -75,7 +75,7 @@ describe('useUpdateBusiness', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockPut).toHaveBeenCalledWith('/api/hub/config/v1/config', {
+    expect(mockPut).toHaveBeenCalledWith('/hub/config/v1/config', {
       site_name: 'Suplab Store',
       contact_email: 'suplabstore@gmail.com',
       contact_number: '+961000000',

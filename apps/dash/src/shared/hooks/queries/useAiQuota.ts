@@ -50,7 +50,7 @@ export const useAiUsage = () =>
   useQuery({
     queryKey: ['ai-usage'],
     queryFn: async (): Promise<AiUsage> => {
-      const res = await unwrap(safe.get<{ usage?: RawAiUsage }>('/api/hub/ai/v1/usage'));
+      const res = await unwrap(safe.get<{ usage?: RawAiUsage }>('/hub/ai/v1/usage'));
       return normalizeAiUsage(res?.usage);
     },
     staleTime: 30_000,
@@ -61,7 +61,7 @@ export const useAiQuotaMode = () =>
     queryKey: ['ai-quota-settings'],
     queryFn: async (): Promise<AiQuotaMode> => {
       const res = await unwrap(
-        safe.get<{ settings: { mode: AiQuotaMode } }>('/api/hub/ai/v1/quota-settings')
+        safe.get<{ settings: { mode: AiQuotaMode } }>('/hub/ai/v1/quota-settings')
       );
       return res?.settings?.mode ?? 'pool';
     },
@@ -71,7 +71,7 @@ export const useAiQuotaMode = () =>
 export const useUpdateAiQuotaMode = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (mode: AiQuotaMode) => unwrap(safe.put('/api/hub/ai/v1/quota-settings', { mode })),
+    mutationFn: (mode: AiQuotaMode) => unwrap(safe.put('/hub/ai/v1/quota-settings', { mode })),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ai-quota-settings'] });
       qc.invalidateQueries({ queryKey: ['ai-usage'] });
