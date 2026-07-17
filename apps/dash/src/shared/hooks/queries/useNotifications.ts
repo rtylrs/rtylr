@@ -15,7 +15,7 @@ export const useNotifications = () => {
       const raw = res?.notifications ?? res;
       return z.array(notificationSchema).parse(Array.isArray(raw) ? raw : []);
     },
-    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 };
 
