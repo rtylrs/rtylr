@@ -99,7 +99,6 @@ export const useTeam = (params: UseTeamParams = {}) => {
         pageSize,
       };
     },
-    staleTime: 30_000,
   });
 };
 

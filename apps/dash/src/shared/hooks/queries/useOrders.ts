@@ -14,6 +14,6 @@ export const useOrders = () => {
       const raw = res?.orders ?? res;
       return z.array(dashOrderSchema).parse(Array.isArray(raw) ? raw : []);
     },
-    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
   });
 };

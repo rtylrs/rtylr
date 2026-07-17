@@ -1,35 +1,12 @@
 import React from 'react';
 import { Users, ArrowUpRight } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
-import { safe } from '../../../../shared/lib/api';
-
-interface WidgetMember {
-  id?: string;
-  fullName?: string;
-  email?: string;
-  role?: string;
-  isActive?: boolean;
-}
+import { useTeam } from '../../../../shared/hooks/queries/useTeam';
 
 const TeamWidget: React.FC = () => {
   const navigate = useNavigate();
-  const { data: raw } = useQuery({
-    queryKey: ['team-widget'],
-    queryFn: async (): Promise<WidgetMember[]> => {
-      try {
-        const res = await unwrap(
-          safe.get<{ users?: WidgetMember[] } | WidgetMember[]>('/hub/team/members/v1/members')
-        );
-        return (Array.isArray(res) ? res : res.users) ?? [];
-      } catch {
-        return [];
-      }
-    },
-    staleTime: 60_000,
-  });
-  const members: WidgetMember[] = Array.isArray(raw) ? (raw as WidgetMember[]) : [];
+  const { data } = useTeam({ pageSize: 50 });
+  const members = data?.members ?? [];
 
   return (
     <div className="flex flex-col h-full">

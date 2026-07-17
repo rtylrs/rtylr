@@ -82,11 +82,13 @@ export interface AuditPage {
 // AUDIT_FETCH_LIMIT above) - `total` is capped at that fetch size.
 export const useAuditLog = (params: { page: number; pageSize: number }) => {
   const { page, pageSize } = params;
-  return useQuery({
-    queryKey: ['audit', page, pageSize],
-    queryFn: async (): Promise<AuditPage> => {
+  return useQuery<ActivityEntry[], Error, AuditPage>({
+    queryKey: ['audit'],
+    queryFn: async (): Promise<ActivityEntry[]> => {
       const res = await activityClient.listActivity({ limit: AUDIT_FETCH_LIMIT });
-      const entries = (res.activities ?? []).map(mapEntry);
+      return (res.activities ?? []).map(mapEntry);
+    },
+    select: (entries): AuditPage => {
       const start = Math.max(0, (page - 1) * pageSize);
       return {
         entries: entries.slice(start, start + pageSize),
@@ -96,6 +98,6 @@ export const useAuditLog = (params: { page: number; pageSize: number }) => {
       };
     },
     staleTime: 20_000,
-    placeholderData: (prev) => prev,
+    refetchOnWindowFocus: true,
   });
 };
