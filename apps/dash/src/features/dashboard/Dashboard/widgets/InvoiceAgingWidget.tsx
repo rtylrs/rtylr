@@ -47,7 +47,7 @@ const InvoiceAgingWidget: React.FC = (): React.JSX.Element => {
     queryKey: ['insights-invoice-aging'],
     queryFn: async (): Promise<Bucket[]> => {
       try {
-        const res = await unwrap(safe.get<ApiResponse>('/insights/financial/invoice-aging'));
+        const res = await unwrap(safe.get<ApiResponse>('/insights/financial/v1/invoice-aging'));
         return (res.buckets ?? []).map((b) => ({
           label: b.label,
           amountMinorUnits: toFiniteNumber(b.amountMinorUnits ?? b.amount_minor_units),

@@ -42,7 +42,7 @@ const RevenueByAppWidget: React.FC = (): React.JSX.Element => {
     queryKey: ['insights-revenue-by-app'],
     queryFn: async (): Promise<AppSlice[]> => {
       try {
-        const res = await unwrap(safe.get<ApiResponse>('/insights/revenue/by-app'));
+        const res = await unwrap(safe.get<ApiResponse>('/insights/revenue/v1/by-app'));
         return (res.byApp ?? res.by_app ?? []).map((slice) => ({
           app: slice.app ?? 'other',
           amountMinorUnits: toFiniteNumber(slice.amountMinorUnits ?? slice.amount_minor_units),

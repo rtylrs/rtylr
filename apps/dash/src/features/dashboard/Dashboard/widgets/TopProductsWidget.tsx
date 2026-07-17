@@ -42,7 +42,7 @@ const TopProductsWidget: React.FC = () => {
     queryFn: async (): Promise<WidgetProduct[]> => {
       try {
         const res = await unwrap(
-          safe.get<BestSellersResponse | RawWidgetProduct[]>('/insights/products/best-sellers', {
+          safe.get<BestSellersResponse | RawWidgetProduct[]>('/insights/product/v1/best-sellers', {
             params: { limit: 5 },
           })
         );

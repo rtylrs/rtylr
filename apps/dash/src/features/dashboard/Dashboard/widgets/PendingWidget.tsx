@@ -8,6 +8,7 @@ interface PendingRequest {
   staffName?: string;
   staff_name?: string;
   type?: string;
+  status?: string;
 }
 
 const PendingWidget: React.FC = () => {
@@ -16,11 +17,11 @@ const PendingWidget: React.FC = () => {
     queryFn: async (): Promise<PendingRequest[]> => {
       try {
         const res = await unwrap(
-          safe.get<{ requests?: PendingRequest[] } | PendingRequest[]>('/hr/time-off', {
-            params: { status: 'pending' },
-          })
+          safe.get<{ requests?: PendingRequest[] } | PendingRequest[]>('/hr/time-off/v1/requests')
         );
-        return (Array.isArray(res) ? res : res.requests) ?? [];
+        return ((Array.isArray(res) ? res : res.requests) ?? []).filter(
+          (request) => request.status?.toLowerCase() === 'pending'
+        );
       } catch {
         return [];
       }

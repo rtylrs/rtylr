@@ -37,7 +37,7 @@ const TopCustomersWidget: React.FC = (): React.JSX.Element => {
     queryFn: async (): Promise<TopCustomer[]> => {
       try {
         const res = await unwrap(
-          safe.get<ApiResponse>('/insights/customers/top', { params: { limit: 5 } })
+          safe.get<ApiResponse>('/insights/customer/v1/top', { params: { limit: 5 } })
         );
         return (res.customers ?? []).map((customer) => ({
           id: toFiniteNumber(customer.id),
