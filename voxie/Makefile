@@ -1,6 +1,6 @@
 .PHONY: clean generate install-onek install-js typecheck
 
-ONK_VERSION := v0.4.6
+ONK_VERSION := v0.4.7
 
 # Clean generated code
 clean:
