@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
-import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { join, resolve } from 'path';
 import type { Plugin } from 'vite';
 
 function getCommit(): string {
@@ -29,7 +29,7 @@ export function versionPlugin(): Plugin {
   return {
     name: 'vite-plugin-version',
     configResolved(config) {
-      outDir = config.build.outDir;
+      outDir = resolve(config.root, config.build.outDir);
     },
     configureServer(server) {
       server.middlewares.use('/version.json', (_req, res) => {
@@ -38,6 +38,7 @@ export function versionPlugin(): Plugin {
       });
     },
     closeBundle() {
+      mkdirSync(outDir, { recursive: true });
       writeFileSync(
         join(outDir, 'version.json'),
         JSON.stringify(buildVersionData(), null, 2) + '\n'
