@@ -10,7 +10,7 @@ export const useOrders = () => {
   return useQuery({
     queryKey: ['dash-orders'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/store/orders'));
+      const res = await unwrap(safe.get('/pos/orders/v1/orders'));
       const raw = res?.orders ?? res;
       return z.array(dashOrderSchema).parse(Array.isArray(raw) ? raw : []);
     },

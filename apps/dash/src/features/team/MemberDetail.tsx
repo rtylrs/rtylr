@@ -104,7 +104,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   const { data: memberGroups = [] } = useQuery<GroupSummary[]>({
     queryKey: ['user-groups', id],
     queryFn: async () => {
-      const res = await unwrap(safe.get(`/team/users/${id}/groups`));
+      const res = await unwrap(safe.get(`/hub/team/groups/v1/users/${id}/groups`));
       return (res as { groups?: GroupSummary[] })?.groups ?? [];
     },
     enabled: !!id,
@@ -113,7 +113,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   const qc = useQueryClient();
   const removeFromGroup = useMutation({
     mutationFn: async ({ groupId, userId }: { groupId: number; userId: string }) => {
-      await unwrap(safe.delete(`/team/groups/${groupId}/members/${userId}`));
+      await unwrap(safe.delete(`/hub/team/groups/v1/groups/${groupId}/members/${userId}`));
     },
     onSuccess: () => {
       toast.success('Removed from group');

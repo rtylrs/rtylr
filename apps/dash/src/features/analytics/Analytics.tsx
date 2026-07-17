@@ -66,7 +66,7 @@ const useBestSellers = () =>
     queryFn: async (): Promise<BestSeller[]> => {
       const res = await unwrap(
         safe.get<{ products?: RawBestSeller[] } | RawBestSeller[]>(
-          '/insights/products/best-sellers',
+          '/insights/product/v1/best-sellers',
           {
             params: { limit: 5 },
           }
