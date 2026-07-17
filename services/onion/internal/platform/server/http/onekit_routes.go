@@ -10,11 +10,12 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-// MountOneKit attaches the shared oneKit ServeMux below the public /api prefix.
-// Generated oneKit servers own paths such as /hub/user/v1/users/me, while /api
-// is an Onion deployment prefix and must be removed before dispatching.
+// MountOneKit attaches the shared oneKit ServeMux at the generated contract
+// paths, such as /hub/user/v1/users/me. Chi's specific routes continue to take
+// precedence over this wildcard, allowing generated and platform routes to
+// coexist without a separate deployment prefix.
 func MountOneKit(router chi.Router, mux *http.ServeMux) {
-	router.Mount("/api", http.StripPrefix("/api", mux))
+	router.Handle("/*", mux)
 }
 
 // AutoRegisterAPIs walks the modules struct and calls RegisterAPI(mux) on every
