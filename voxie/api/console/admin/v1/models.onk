@@ -1,10 +1,10 @@
 package console.admin.v1
 
 message User {
-  id: int64
+  id: int64 @encode(number)
   email: string
   full_name: string
-  business_id: int64?
+  business_id: int64? @encode(number)
   is_console_admin: bool
   is_banned: bool
   ban_reason: string?
@@ -13,21 +13,21 @@ message User {
 }
 
 message Business {
-  id: int64
-  owner_id: int64
+  id: int64 @encode(number)
+  owner_id: int64 @encode(number)
   name: string
   slug: string
   created_at: string
 }
 
 message Subscription {
-  id: int64
-  owner_id: int64
+  id: int64 @encode(number)
+  owner_id: int64 @encode(number)
   owner_name: string
   owner_email: string
-  business_id: int64?
+  business_id: int64? @encode(number)
   business_name: string
-  plan_id: int64
+  plan_id: int64 @encode(number)
   plan_name: string
   status: string
   seat_count: int32
@@ -46,7 +46,7 @@ message Subscription {
 }
 
 message Plan {
-  id: int64
+  id: int64 @encode(number)
   name: string
   price_per_seat_cents: int32
   annual_price_per_seat_cents: int32
@@ -55,13 +55,13 @@ message Plan {
 }
 
 message Stats {
-  total_users: int64
-  banned_users: int64
-  active_subscriptions: int64
-  total_businesses: int64
-  total_grants: int64
-  manual_addon_grants: int64
-  console_admins: int64
+  total_users: int64 @encode(number)
+  banned_users: int64 @encode(number)
+  active_subscriptions: int64 @encode(number)
+  total_businesses: int64 @encode(number)
+  total_grants: int64 @encode(number)
+  manual_addon_grants: int64 @encode(number)
+  console_admins: int64 @encode(number)
 }
 
 message GetStatsRequest {}
@@ -73,18 +73,18 @@ message GetStatsResponse {
 message ListUsersRequest {
   limit: int32 @query("limit")
   offset: int32 @query("offset")
-  id: int64? @query("id")
+  id: int64? @query("id") @encode(number)
   email: string @query("email")
   name: string @query("name")
 }
 
 message ListUsersResponse {
   users: User[]
-  total: int64
+  total: int64 @encode(number)
 }
 
 message GetUserRequest {
-  id: int64 @gt(0)
+  id: int64 @gt(0) @encode(number)
 }
 
 message GetUserResponse {
@@ -104,7 +104,7 @@ message CreateUserResponse {
 }
 
 message UpdateUserRequest {
-  id: int64 @gt(0)
+  id: int64 @gt(0) @encode(number)
   full_name: string?
   email: string?
 }
@@ -114,7 +114,7 @@ message UpdateUserResponse {
 }
 
 message DeleteUserRequest {
-  id: int64 @gt(0)
+  id: int64 @gt(0) @encode(number)
 }
 
 message DeleteUserResponse {
@@ -122,7 +122,7 @@ message DeleteUserResponse {
 }
 
 message BanUserRequest {
-  id: int64 @gt(0)
+  id: int64 @gt(0) @encode(number)
   reason: string
 }
 
@@ -131,7 +131,7 @@ message BanUserResponse {
 }
 
 message UnbanUserRequest {
-  id: int64 @gt(0)
+  id: int64 @gt(0) @encode(number)
 }
 
 message UnbanUserResponse {
@@ -139,7 +139,7 @@ message UnbanUserResponse {
 }
 
 message SetConsoleAdminRequest {
-  id: int64 @gt(0)
+  id: int64 @gt(0) @encode(number)
   is_console_admin: bool
 }
 
@@ -148,7 +148,7 @@ message SetConsoleAdminResponse {
 }
 
 message GetUserSubscriptionRequest {
-  user_id: int64 @gt(0)
+  user_id: int64 @gt(0) @encode(number)
 }
 
 message GetUserSubscriptionResponse {
@@ -158,18 +158,18 @@ message GetUserSubscriptionResponse {
 message ListBusinessesRequest {
   limit: int32 @query("limit")
   offset: int32 @query("offset")
-  id: int64? @query("id")
+  id: int64? @query("id") @encode(number)
   name: string @query("name")
-  owner_id: int64? @query("owner_id")
+  owner_id: int64? @query("owner_id") @encode(number)
 }
 
 message ListBusinessesResponse {
   businesses: Business[]
-  total: int64
+  total: int64 @encode(number)
 }
 
 message UpdateBusinessRequest {
-  id: int64 @gt(0)
+  id: int64 @gt(0) @encode(number)
   name: string
 }
 
@@ -178,7 +178,7 @@ message UpdateBusinessResponse {
 }
 
 message DeleteBusinessRequest {
-  id: int64 @gt(0)
+  id: int64 @gt(0) @encode(number)
 }
 
 message DeleteBusinessResponse {
@@ -195,7 +195,7 @@ message CreateBusinessOwnerRequest {
   timezone: string
   currency: string
   grant_plan: bool
-  plan_id: int64?
+  plan_id: int64? @encode(number)
   subscription_status: string
   grant_days: int32?
 }
@@ -215,12 +215,12 @@ message ListSubscriptionsRequest {
 
 message ListSubscriptionsResponse {
   subscriptions: Subscription[]
-  total: int64
+  total: int64 @encode(number)
 }
 
 message UpsertSubscriptionRequest {
-  owner_id: int64 @gt(0)
-  plan_id: int64 @gt(0)
+  owner_id: int64 @gt(0) @encode(number)
+  plan_id: int64 @gt(0) @encode(number)
   status: string
   seat_count: int32?
   trial_ends_at: string?
@@ -236,7 +236,7 @@ message UpsertSubscriptionResponse {
 }
 
 message DeleteSubscriptionRequest {
-  id: int64 @gt(0)
+  id: int64 @gt(0) @encode(number)
 }
 
 message DeleteSubscriptionResponse {
@@ -250,7 +250,7 @@ message ListPlansResponse {
 }
 
 message UpdatePlanRequest {
-  id: int64 @gt(0)
+  id: int64 @gt(0) @encode(number)
   name: string?
   price_per_seat_cents: int32?
   annual_price_per_seat_cents: int32?
