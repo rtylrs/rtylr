@@ -37,7 +37,10 @@ export function useFeatureGate(key: string, defaultEnabled = true): boolean {
       try {
         const subject = getOrCreateFeatureSubject();
         const res = await unwrap(
-          safe.post<FeaturesResponse>('/features', { subject, attributes: { app: 'auth' } })
+          safe.post<FeaturesResponse>('/hub/feature/v1/features', {
+            subject,
+            attributes: { app: 'auth' },
+          })
         );
         const features = res.features ?? {};
         const next = features[key]?.enabled ?? features[responseKeyFor(key)]?.enabled;
