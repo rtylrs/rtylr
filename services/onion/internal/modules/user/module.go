@@ -130,16 +130,16 @@ var OnUserLogin func(ctx context.Context, userID int64)
 func (m *Module) GetAnonymousRoutes() []string {
 	return sliceutils.Concat(
 		[]string{
-			"/api/common/auth/v1/register",
-			"/api/common/auth/v1/login",
-			"/api/common/auth/v1/register/google",
-			"/api/common/auth/v1/password-reset/request",
-			"/api/common/auth/v1/password-reset/confirm",
-			"/api/common/auth/v1/verify-email",
-			"/api/common/auth/v1/resend-verification",
-			"/api/common/auth/v1/invite/accept",
-			"/api/common/auth/v1/email-exists",
-			"/api/common/auth/v1/social/authorize",
+			"/common/auth/v1/register",
+			"/common/auth/v1/login",
+			"/common/auth/v1/register/google",
+			"/common/auth/v1/password-reset/request",
+			"/common/auth/v1/password-reset/confirm",
+			"/common/auth/v1/verify-email",
+			"/common/auth/v1/resend-verification",
+			"/common/auth/v1/invite/accept",
+			"/common/auth/v1/email-exists",
+			"/common/auth/v1/social/authorize",
 		},
 	)
 }

@@ -29,9 +29,8 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	}
 }
 
-// GetAnonymousRoutes exposes /features to the landing page without auth. Note
-// the per-user reads use /features/me (authenticated, not listed here), and the
-// /features/admin/* surface stays behind auth + an owner/admin role gate.
+// GetAnonymousRoutes exposes anonymous feature resolution without auth. The
+// per-user and admin surfaces remain protected.
 func (m *Module) GetAnonymousRoutes() []string {
-	return []string{"/features"}
+	return []string{"/hub/feature/v1/features"}
 }
