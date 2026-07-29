@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	hubfeaturev1 "github.com/voxire/voxie/gen/go/hub/feature/v1"
-
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/api"
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/application"
+	hubfeaturev1 "github.com/voxire/voxie/gen/go/hub/feature/v1"
 )
 
 type Module struct {

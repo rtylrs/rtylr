@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	hubdeveloperv1 "github.com/voxire/voxie/gen/go/hub/developer/v1"
-
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/hubdeveloper"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hubdeveloperv1 "github.com/voxire/voxie/gen/go/hub/developer/v1"
 )
 
 type DeveloperAPI struct {

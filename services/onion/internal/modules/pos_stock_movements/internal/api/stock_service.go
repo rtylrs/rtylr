@@ -5,13 +5,12 @@ import (
 	"errors"
 	"net/http"
 
-	posstockv1 "github.com/voxire/voxie/gen/go/pos/stock/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	posstockv1 "github.com/voxire/voxie/gen/go/pos/stock/v1"
 )
 
 type StockAPI struct {

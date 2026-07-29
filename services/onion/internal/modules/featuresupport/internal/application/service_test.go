@@ -27,6 +27,7 @@ func (m *mockRepo) DeleteFlag(_ context.Context, _ string) error       { return 
 func (m *mockRepo) GetUserEmail(_ context.Context, _ int64) (string, error) {
 	return "", nil
 }
+
 func (m *mockRepo) ListTargetsByOwner(_ context.Context, ownerID int64) ([]domain.Target, error) {
 	return m.targets[ownerID], nil
 }

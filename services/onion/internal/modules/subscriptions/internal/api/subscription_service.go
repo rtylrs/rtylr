@@ -7,13 +7,12 @@ import (
 	"strings"
 	"time"
 
-	hubsubscriptionv1 "github.com/voxire/voxie/gen/go/hub/subscription/v1"
-
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/application"
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	hubsubscriptionv1 "github.com/voxire/voxie/gen/go/hub/subscription/v1"
 )
 
 type SubscriptionAPI struct {

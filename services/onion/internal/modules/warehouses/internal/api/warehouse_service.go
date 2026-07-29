@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	erpwarehousev1 "github.com/voxire/voxie/gen/go/erp/warehouse/v1"
-
 	"github.com/voxire/onion/internal/modules/warehouses/internal/application"
 	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	erpwarehousev1 "github.com/voxire/voxie/gen/go/erp/warehouse/v1"
 )
 
 type WarehouseAPI struct {

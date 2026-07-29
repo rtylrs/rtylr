@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
-
 	"github.com/voxire/onion/internal/modules/products/internal/api"
 	"github.com/voxire/onion/internal/modules/products/internal/application"
+	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
 )
 
 type Module struct {

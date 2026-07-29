@@ -6,12 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
-	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/wsbus"
+	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 )
 
 func publishColumnEvent(eventType string, projectID, columnID, actorID int64) {

@@ -6,12 +6,11 @@ import (
 	"strings"
 	"time"
 
-	supportknowledgev1 "github.com/voxire/voxie/gen/go/support/knowledge/v1"
-
 	"github.com/voxire/onion/internal/modules/support_knowledge/internal/application"
 	"github.com/voxire/onion/internal/modules/support_knowledge/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	supportknowledgev1 "github.com/voxire/voxie/gen/go/support/knowledge/v1"
 )
 
 type KnowledgeAPI struct {

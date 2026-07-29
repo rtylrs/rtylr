@@ -3,9 +3,8 @@ package api
 import (
 	"time"
 
-	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
-
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
+	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
 )
 
 func newProductPayload(product domain.Product) *erpproductv1.Product {

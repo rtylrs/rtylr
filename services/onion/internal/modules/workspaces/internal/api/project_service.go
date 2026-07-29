@@ -7,14 +7,13 @@ import (
 	"strconv"
 	"time"
 
-	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/wsbus"
+	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 )
 
 type ProjectAPI struct {
@@ -87,7 +86,7 @@ func (a *ProjectAPI) resolveBusinessID(ctx context.Context) (int64, *authPkg.Aut
 	return businessID, authUser, nil
 }
 
-func (a *ProjectAPI) resolveWorkspaceID(ctx context.Context, userID int64, workspaceID int64) (int64, error) {
+func (a *ProjectAPI) resolveWorkspaceID(ctx context.Context, userID, workspaceID int64) (int64, error) {
 	raw := strconv.FormatInt(workspaceID, 10)
 	if workspaceID == 0 {
 		raw = "personal"

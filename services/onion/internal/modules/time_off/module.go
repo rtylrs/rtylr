@@ -7,11 +7,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	hrtimeoffv1 "github.com/voxire/voxie/gen/go/hr/time_off/v1"
 
 	"github.com/voxire/onion/internal/modules/time_off/internal/api"
 	"github.com/voxire/onion/internal/modules/time_off/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	hrtimeoffv1 "github.com/voxire/voxie/gen/go/hr/time_off/v1"
 )
 
 type Module struct {

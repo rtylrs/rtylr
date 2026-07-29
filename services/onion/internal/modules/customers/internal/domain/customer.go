@@ -79,10 +79,10 @@ type CustomerListFilter struct {
 	OwnerID    int64
 	BusinessID int64
 	Search     string
-	Tier     string
-	Tag      string
-	Page     int
-	PageSize int
+	Tier       string
+	Tag        string
+	Page       int
+	PageSize   int
 }
 
 type CustomerListResult struct {

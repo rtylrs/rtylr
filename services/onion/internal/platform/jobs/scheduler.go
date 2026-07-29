@@ -88,7 +88,7 @@ func (s *Scheduler) Start(ctx context.Context) error {
 		if strings.TrimSpace(job.Schedule) == "" {
 			continue
 		}
-		job := job
+
 		if _, err := s.cron.AddFunc(job.Schedule, func() {
 			if _, err := s.Run(ctx, job.Name); err != nil {
 				if errors.Is(err, ErrJobAlreadyRunning) || errors.Is(err, ErrJobLockNotAcquired) {

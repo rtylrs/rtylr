@@ -94,7 +94,6 @@ func (b *securityBatcher) flush() {
 	}
 }
 
-
 func sanitizeHeaders(headers map[string][]string) map[string][]string {
 	sanitized := make(map[string][]string)
 	sensitiveHeaders := []string{"authorization", "cookie", "x-api-key", "token", "password"}

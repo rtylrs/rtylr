@@ -176,18 +176,18 @@ func (r *Repository) UpdateStatus(ctx context.Context, businessID, id int64, sta
 
 func campaignFromRow(row sqlc.CrmCampaign) domain.Campaign {
 	c := domain.Campaign{
-		ID:        row.ID,
-		OwnerID:   row.OwnerID,
+		ID:         row.ID,
+		OwnerID:    row.OwnerID,
 		BusinessID: row.BusinessID,
-		Name:      row.Name,
-		Type:      string(row.Channel),
-		Status:    string(row.Status.CrmCampaignsStatus),
-		Subject:   row.Subject.String,
-		Body:      row.Content,
-		SentCount: int(row.SentCount.Int32),
-		OpenCount: int(row.OpenedCount.Int32),
-		CreatedAt: row.CreatedAt.Time,
-		UpdatedAt: row.UpdatedAt.Time,
+		Name:       row.Name,
+		Type:       string(row.Channel),
+		Status:     string(row.Status.CrmCampaignsStatus),
+		Subject:    row.Subject.String,
+		Body:       row.Content,
+		SentCount:  int(row.SentCount.Int32),
+		OpenCount:  int(row.OpenedCount.Int32),
+		CreatedAt:  row.CreatedAt.Time,
+		UpdatedAt:  row.UpdatedAt.Time,
 	}
 
 	if row.SegmentID.Valid {

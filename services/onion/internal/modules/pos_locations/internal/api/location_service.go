@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"strings"
 
-	poslocationv1 "github.com/voxire/voxie/gen/go/pos/location/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	poslocationv1 "github.com/voxire/voxie/gen/go/pos/location/v1"
 )
 
 type LocationAPI struct {

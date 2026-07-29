@@ -7,11 +7,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	consoleadminv1 "github.com/voxire/voxie/gen/go/console/admin/v1"
 
 	"github.com/voxire/onion/internal/modules/console/internal/api"
 	"github.com/voxire/onion/internal/modules/console/internal/application"
 	"github.com/voxire/onion/internal/modules/console/internal/routes"
+	consoleadminv1 "github.com/voxire/voxie/gen/go/console/admin/v1"
 )
 
 type Module struct {

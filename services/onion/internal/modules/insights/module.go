@@ -7,6 +7,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+
+	"github.com/voxire/onion/internal/modules/insights/internal/api"
+	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	insightscustomerv1 "github.com/voxire/voxie/gen/go/insights/customer/v1"
 	insightsdashboardv1 "github.com/voxire/voxie/gen/go/insights/dashboard/v1"
 	insightsfinancialv1 "github.com/voxire/voxie/gen/go/insights/financial/v1"
@@ -15,9 +18,6 @@ import (
 	insightsreportv1 "github.com/voxire/voxie/gen/go/insights/report/v1"
 	insightsrevenuev1 "github.com/voxire/voxie/gen/go/insights/revenue/v1"
 	insightssettingv1 "github.com/voxire/voxie/gen/go/insights/setting/v1"
-
-	"github.com/voxire/onion/internal/modules/insights/internal/api"
-	"github.com/voxire/onion/internal/modules/insights/internal/application"
 )
 
 // Module is the cross-domain aggregation layer that powers the /insights/*

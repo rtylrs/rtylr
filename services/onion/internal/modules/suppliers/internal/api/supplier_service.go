@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"strings"
 
-	erpsupplierv1 "github.com/voxire/voxie/gen/go/erp/supplier/v1"
-
 	"github.com/voxire/onion/internal/modules/suppliers/internal/application"
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	erpsupplierv1 "github.com/voxire/voxie/gen/go/erp/supplier/v1"
 )
 
 type SupplierAPI struct {

@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	hubintegrationv1 "github.com/voxire/voxie/gen/go/hub/integration/v1"
-
 	"github.com/voxire/onion/internal/modules/integrations/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hubintegrationv1 "github.com/voxire/voxie/gen/go/hub/integration/v1"
 )
 
 type IntegrationAPI struct {

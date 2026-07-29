@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	hrdepartmentv1 "github.com/voxire/voxie/gen/go/hr/department/v1"
-
 	"github.com/voxire/onion/internal/modules/departments/internal/application"
 	"github.com/voxire/onion/internal/modules/departments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hrdepartmentv1 "github.com/voxire/voxie/gen/go/hr/department/v1"
 )
 
 type DepartmentAPI struct {

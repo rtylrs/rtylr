@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	"github.com/voxire/onion/internal/modules/invoices/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
-	"golang.org/x/sync/errgroup"
 )
 
 const (

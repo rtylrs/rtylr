@@ -10,12 +10,12 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	"github.com/voxire/onion/internal/modules/customers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
-	"golang.org/x/sync/errgroup"
 )
 
 type Repository struct {

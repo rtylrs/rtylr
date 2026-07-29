@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	supportsettingsv1 "github.com/voxire/voxie/gen/go/support/settings/v1"
-
 	"github.com/voxire/onion/internal/modules/support_settings/internal/application"
 	"github.com/voxire/onion/internal/modules/support_settings/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	supportsettingsv1 "github.com/voxire/voxie/gen/go/support/settings/v1"
 )
 
 type SettingsAPI struct {

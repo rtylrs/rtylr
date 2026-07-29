@@ -681,11 +681,11 @@ func (r *Repository) MarkAllNotificationsRead(ctx context.Context, userID int64)
 
 func (r *Repository) GetUserSettings(ctx context.Context, userID int64) (domain.UserSettings, error) {
 	s := domain.UserSettings{
-		UserID:         userID,
-		TaskAssigned:   true,
-		TaskComments:   true,
-		Mentions:       true,
-		WeeklyDigest:   true,
+		UserID:       userID,
+		TaskAssigned: true,
+		TaskComments: true,
+		Mentions:     true,
+		WeeklyDigest: true,
 	}
 
 	row, err := r.queries.GetUserSettings(ctx, userID)

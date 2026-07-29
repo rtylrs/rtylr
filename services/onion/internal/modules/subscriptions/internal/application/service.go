@@ -14,8 +14,10 @@ import (
 	paddlePkg "github.com/voxire/onion/internal/platform/paddle"
 )
 
-const subscriptionCacheTTL = 10 * time.Minute
-const defaultPlanSlug = "free"
+const (
+	subscriptionCacheTTL = 10 * time.Minute
+	defaultPlanSlug      = "free"
+)
 
 // invalidateSubscriptionScope clears every subscription + user-scoped cache
 // entry for the owner. Called by every mutation that changes plan/seat/state.

@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	hubdashboardv1 "github.com/voxire/voxie/gen/go/hub/dashboard/v1"
-
 	"github.com/voxire/onion/internal/modules/kpis/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hubdashboardv1 "github.com/voxire/voxie/gen/go/hub/dashboard/v1"
 )
 
 type DashboardAPI struct {

@@ -11,8 +11,8 @@ import (
 )
 
 type repository interface {
-	Create(ctx context.Context, businessID int64, ownerID int64, input domain.CheckoutCreateInput) (int64, error)
-	Complete(ctx context.Context, businessID, id int64, ownerID int64) error
+	Create(ctx context.Context, businessID, ownerID int64, input domain.CheckoutCreateInput) (int64, error)
+	Complete(ctx context.Context, businessID, id, ownerID int64) error
 }
 
 type Service struct{ repo repository }
@@ -30,7 +30,7 @@ func invalidateCheckoutScope(ctx context.Context, businessID int64) {
 	}
 }
 
-func (s *Service) Create(ctx context.Context, businessID int64, ownerID int64, input domain.CheckoutCreateInput) (int64, error) {
+func (s *Service) Create(ctx context.Context, businessID, ownerID int64, input domain.CheckoutCreateInput) (int64, error) {
 	id, err := s.repo.Create(ctx, businessID, ownerID, input)
 	if err != nil {
 		return 0, err
@@ -39,7 +39,7 @@ func (s *Service) Create(ctx context.Context, businessID int64, ownerID int64, i
 	return id, nil
 }
 
-func (s *Service) Complete(ctx context.Context, businessID, id int64, ownerID int64) error {
+func (s *Service) Complete(ctx context.Context, businessID, id, ownerID int64) error {
 	if err := s.repo.Complete(ctx, businessID, id, ownerID); err != nil {
 		return err
 	}

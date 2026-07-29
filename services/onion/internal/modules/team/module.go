@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/voxire/onion/internal/modules/team/internal/api"
+	"github.com/voxire/onion/internal/modules/team/internal/application"
 	hubteamaccessv1 "github.com/voxire/voxie/gen/go/hub/team/access/v1"
 	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
 	hubteaminvitationsv1 "github.com/voxire/voxie/gen/go/hub/team/invitations/v1"
 	hubteammembersv1 "github.com/voxire/voxie/gen/go/hub/team/members/v1"
 	hubteamonboardingv1 "github.com/voxire/voxie/gen/go/hub/team/onboarding/v1"
 	hubteampermissionsv1 "github.com/voxire/voxie/gen/go/hub/team/permissions/v1"
-
-	"github.com/voxire/onion/internal/modules/team/internal/api"
-	"github.com/voxire/onion/internal/modules/team/internal/application"
 )
 
 type Module struct {

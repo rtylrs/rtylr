@@ -4,13 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	poscustomerv1 "github.com/voxire/voxie/gen/go/pos/customer/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	poscustomerv1 "github.com/voxire/voxie/gen/go/pos/customer/v1"
 )
 
 type CustomerAPI struct {

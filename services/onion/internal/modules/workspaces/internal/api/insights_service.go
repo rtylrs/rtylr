@@ -5,11 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	flowinsightsv1 "github.com/voxire/voxie/gen/go/flow/insights/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	flowinsightsv1 "github.com/voxire/voxie/gen/go/flow/insights/v1"
 )
 
 type InsightsAPI struct {

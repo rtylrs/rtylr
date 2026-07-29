@@ -50,7 +50,7 @@ func (m *mockRepo) Create(_ context.Context, ownerID, businessID int64, url, sec
 	return m.createID, m.createErr
 }
 
-func (m *mockRepo) Get(_ context.Context, _ int64, _ int64) (domain.Webhook, error) {
+func (m *mockRepo) Get(_ context.Context, _, _ int64) (domain.Webhook, error) {
 	return m.getResult, m.getErr
 }
 

@@ -7,10 +7,10 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	financerecurringinvoicev1 "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1"
 
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/api"
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/application"
+	financerecurringinvoicev1 "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1"
 )
 
 type Module struct {

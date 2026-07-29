@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	hubnotificationv1 "github.com/voxire/voxie/gen/go/hub/notification/v1"
-
 	"github.com/voxire/onion/internal/modules/notifications/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hubnotificationv1 "github.com/voxire/voxie/gen/go/hub/notification/v1"
 )
 
 type NotificationAPI struct {

@@ -5,14 +5,13 @@ import (
 	"net/http"
 	"strconv"
 
-	hubbusinessv1 "github.com/voxire/voxie/gen/go/hub/business/v1"
-	hubconfigv1 "github.com/voxire/voxie/gen/go/hub/config/v1"
-
 	"github.com/voxire/onion/internal/modules/config/internal/application"
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hubbusinessv1 "github.com/voxire/voxie/gen/go/hub/business/v1"
+	hubconfigv1 "github.com/voxire/voxie/gen/go/hub/config/v1"
 )
 
 type ConfigAPI struct {

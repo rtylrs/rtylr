@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	crmfeedbackv1 "github.com/voxire/voxie/gen/go/crm/feedback/v1"
-
 	"github.com/voxire/onion/internal/modules/feedback/internal/api"
 	"github.com/voxire/onion/internal/modules/feedback/internal/application"
+	crmfeedbackv1 "github.com/voxire/voxie/gen/go/crm/feedback/v1"
 )
 
 type Module struct {

@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	hrpayrollv1 "github.com/voxire/voxie/gen/go/hr/payroll/v1"
-
 	"github.com/voxire/onion/internal/modules/payroll/internal/application"
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hrpayrollv1 "github.com/voxire/voxie/gen/go/hr/payroll/v1"
 )
 
 type PayrollAPI struct {
@@ -83,7 +82,7 @@ func (a *PayrollAPI) MarkPayrollPaid(ctx context.Context, req *hrpayrollv1.MarkP
 	return &hrpayrollv1.MarkPayrollPaidResponse{Success: true}, nil
 }
 
-func resolveIdentity(ctx context.Context) (businessID int64, ownerID int64, errModel error) {
+func resolveIdentity(ctx context.Context) (businessID, ownerID int64, errModel error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return 0, 0, onekiterrors.PermissionDenied()

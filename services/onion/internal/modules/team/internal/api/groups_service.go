@@ -4,11 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
-
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
 )
 
 type GroupsAPI struct {

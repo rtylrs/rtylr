@@ -4,13 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	hubpermissionv1 "github.com/voxire/voxie/gen/go/hub/permission/v1"
-
 	"github.com/voxire/onion/internal/modules/roles/internal/application"
 	"github.com/voxire/onion/internal/modules/roles/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hubpermissionv1 "github.com/voxire/voxie/gen/go/hub/permission/v1"
 )
 
 type PermissionAPI struct {

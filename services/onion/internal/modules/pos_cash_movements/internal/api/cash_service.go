@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	poscashv1 "github.com/voxire/voxie/gen/go/pos/cash/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	poscashv1 "github.com/voxire/voxie/gen/go/pos/cash/v1"
 )
 
 type CashAPI struct {
@@ -93,7 +92,7 @@ func authenticatedCashUser(ctx context.Context) (*authPkg.AuthUser, error) {
 	return device.User, nil
 }
 
-func cashMovementInput(businessID int64, branchID int64, terminalID int64, sessionID int64, employeeID int64, amount float64, reason string) domain.CreateCashMovementInput {
+func cashMovementInput(businessID, branchID, terminalID, sessionID, employeeID int64, amount float64, reason string) domain.CreateCashMovementInput {
 	return domain.CreateCashMovementInput{
 		BusinessID: businessID,
 		BranchID:   branchID,

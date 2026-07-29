@@ -33,12 +33,12 @@ func (t *TrinoStatusProvider) GetStatus(ctx context.Context) status.ComponentSta
 	}
 
 	details := map[string]interface{}{
-		"enabled":  true,
-		"host":     config.GetTrinoHost(),
-		"port":     config.GetTrinoPort(),
-		"catalog":  config.GetTrinoCatalog(),
-		"schema":   config.GetTrinoSchema(),
-		"tls":      config.IsTrinoTLS(),
+		"enabled":   true,
+		"host":      config.GetTrinoHost(),
+		"port":      config.GetTrinoPort(),
+		"catalog":   config.GetTrinoCatalog(),
+		"schema":    config.GetTrinoSchema(),
+		"tls":       config.IsTrinoTLS(),
 		"connected": trino.Available(),
 	}
 

@@ -7,14 +7,13 @@ import (
 	"net/http"
 	"strings"
 
-	hubbusinessv1 "github.com/voxire/voxie/gen/go/hub/business/v1"
-
 	"github.com/voxire/onion/internal/modules/business/internal/application"
 	"github.com/voxire/onion/internal/modules/business/internal/domain"
 	usermodule "github.com/voxire/onion/internal/modules/user"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	hubbusinessv1 "github.com/voxire/voxie/gen/go/hub/business/v1"
 )
 
 type BusinessAPI struct {

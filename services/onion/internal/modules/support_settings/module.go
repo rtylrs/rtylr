@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	supportsettingsv1 "github.com/voxire/voxie/gen/go/support/settings/v1"
-
 	"github.com/voxire/onion/internal/modules/support_settings/internal/api"
 	"github.com/voxire/onion/internal/modules/support_settings/internal/application"
+	supportsettingsv1 "github.com/voxire/voxie/gen/go/support/settings/v1"
 )
 
 type Module struct {

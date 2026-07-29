@@ -41,12 +41,12 @@ func (r *Repository) Create(ctx context.Context, input domain.TemplateInput) (in
 	result, err := r.queries.CreateTemplate(ctx, sqlc.CreateTemplateParams{
 		OwnerID:    input.OwnerID,
 		BusinessID: input.BusinessID,
-		Name:      input.Name,
-		Type:      sqlc.CrmTemplatesType(input.Type),
-		Subject:   sql.NullString{String: input.Subject, Valid: input.Subject != ""},
-		Body:      input.Body,
-		Variables: json.RawMessage(input.Variables),
-		IsActive:  sql.NullBool{Bool: input.IsActive, Valid: true},
+		Name:       input.Name,
+		Type:       sqlc.CrmTemplatesType(input.Type),
+		Subject:    sql.NullString{String: input.Subject, Valid: input.Subject != ""},
+		Body:       input.Body,
+		Variables:  json.RawMessage(input.Variables),
+		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create template", logger.Error(err))
@@ -59,11 +59,11 @@ func (r *Repository) Create(ctx context.Context, input domain.TemplateInput) (in
 
 func (r *Repository) Update(ctx context.Context, input domain.TemplateUpdateInput) error {
 	result, err := r.queries.UpdateTemplate(ctx, sqlc.UpdateTemplateParams{
-		Name:      input.Name,
-		Type:      sqlc.CrmTemplatesType(input.Type),
-		Subject:   sql.NullString{String: input.Subject, Valid: input.Subject != ""},
-		Body:      input.Body,
-		Variables: json.RawMessage(input.Variables),
+		Name:       input.Name,
+		Type:       sqlc.CrmTemplatesType(input.Type),
+		Subject:    sql.NullString{String: input.Subject, Valid: input.Subject != ""},
+		Body:       input.Body,
+		Variables:  json.RawMessage(input.Variables),
 		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
 		ID:         input.ID,
 		BusinessID: input.BusinessID,
@@ -111,16 +111,16 @@ func (r *Repository) Delete(ctx context.Context, businessID, templateID int64) e
 
 func templateFromRow(row sqlc.CrmTemplate) domain.Template {
 	t := domain.Template{
-		ID:        row.ID,
-		OwnerID:   row.OwnerID,
+		ID:         row.ID,
+		OwnerID:    row.OwnerID,
 		BusinessID: row.BusinessID,
-		Name:      row.Name,
-		Type:      string(row.Type),
-		Subject:   row.Subject.String,
-		Body:      row.Body,
-		IsActive:  row.IsActive.Bool,
-		CreatedAt: row.CreatedAt.Time,
-		UpdatedAt: row.UpdatedAt.Time,
+		Name:       row.Name,
+		Type:       string(row.Type),
+		Subject:    row.Subject.String,
+		Body:       row.Body,
+		IsActive:   row.IsActive.Bool,
+		CreatedAt:  row.CreatedAt.Time,
+		UpdatedAt:  row.UpdatedAt.Time,
 	}
 
 	if row.Variables != nil {

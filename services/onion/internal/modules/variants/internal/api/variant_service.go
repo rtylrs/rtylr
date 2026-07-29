@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	erpvariantv1 "github.com/voxire/voxie/gen/go/erp/variant/v1"
-
 	"github.com/voxire/onion/internal/modules/variants/internal/application"
 	"github.com/voxire/onion/internal/modules/variants/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	erpvariantv1 "github.com/voxire/voxie/gen/go/erp/variant/v1"
 )
 
 type VariantAPI struct {

@@ -4,11 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	hubsecurityv1 "github.com/voxire/voxie/gen/go/hub/security/v1"
-
 	"github.com/voxire/onion/internal/modules/security/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	hubsecurityv1 "github.com/voxire/voxie/gen/go/hub/security/v1"
 )
 
 type SecurityAPI struct {

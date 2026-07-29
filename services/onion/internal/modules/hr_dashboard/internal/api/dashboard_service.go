@@ -4,8 +4,6 @@ import (
 	"context"
 	"net/http"
 
-	hrdashboardv1 "github.com/voxire/voxie/gen/go/hr/dashboard/v1"
-
 	hrdashboardapp "github.com/voxire/onion/internal/modules/hr_dashboard/internal/application"
 	hrdashboarddomain "github.com/voxire/onion/internal/modules/hr_dashboard/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_dashboard/stats"
@@ -13,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hrdashboardv1 "github.com/voxire/voxie/gen/go/hr/dashboard/v1"
 )
 
 type DashboardAPI struct {

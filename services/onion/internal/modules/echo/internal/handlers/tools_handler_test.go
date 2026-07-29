@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"net/http"
-
-	onekithttp "github.com/corezio/onekit/http"
 	"strings"
 	"testing"
+
+	onekithttp "github.com/corezio/onekit/http"
 )
 
 func oneKitStatus(err error) int {
@@ -86,7 +86,6 @@ func TestToolDecisionDenyReturnsDeniedWithoutExecution(t *testing.T) {
 		Input:      map[string]any{"name": "Ada"},
 		Decision:   "deny",
 	})
-
 	if err != nil {
 		t.Fatalf("Serve returned error: %#v", err)
 	}
@@ -114,7 +113,6 @@ func TestToolDecisionApproveUnimplementedWriteToolReturnsExplicitError(t *testin
 		Decision:   "approve",
 		Mode:       string(ModeAgent),
 	})
-
 	if err != nil {
 		t.Fatalf("Serve returned error: %#v", err)
 	}
@@ -143,7 +141,6 @@ func TestToolDecisionApproveWriteToolRequiresAgentMode(t *testing.T) {
 		Decision:   "approve",
 		Mode:       string(ModeAsk),
 	})
-
 	if err != nil {
 		t.Fatalf("Serve returned error: %#v", err)
 	}
@@ -169,7 +166,6 @@ func TestToolDecisionApproveExecutableWriteToolReturnsSuccess(t *testing.T) {
 		Decision:   "approve",
 		Mode:       string(ModeAgent),
 	})
-
 	if err != nil {
 		t.Fatalf("Serve returned error: %#v", err)
 	}
@@ -201,7 +197,6 @@ func TestToolDecisionApproveTriesMultipleExecutors(t *testing.T) {
 		Decision:   "approve",
 		Mode:       string(ModeAgent),
 	})
-
 	if err != nil {
 		t.Fatalf("Serve returned error: %#v", err)
 	}
@@ -224,7 +219,6 @@ func TestToolDecisionApproveExecutableWriteToolFailureReturnsError(t *testing.T)
 		Decision:   "approve",
 		Mode:       string(ModeAgent),
 	})
-
 	if err != nil {
 		t.Fatalf("Serve returned error: %#v", err)
 	}
@@ -244,7 +238,6 @@ func TestToolDecisionUnknownToolReturnsExplicitError(t *testing.T) {
 		Name:       "crm.destroy_everything",
 		Decision:   "approve",
 	})
-
 	if err != nil {
 		t.Fatalf("Serve returned error: %#v", err)
 	}

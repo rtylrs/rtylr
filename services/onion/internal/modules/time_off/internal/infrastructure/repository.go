@@ -77,11 +77,11 @@ func (r *Repository) CreateTimeOffRequest(ctx context.Context, input domain.Time
 		BusinessID: input.BusinessID,
 		StaffID:    input.StaffID,
 		Type:       sqlc.HrTimeOffRequestsType(input.Type),
-		StartDate: parseDate(input.StartDate),
-		EndDate:   parseDate(input.EndDate),
-		DaysCount: fmt.Sprintf("%g", input.DaysCount),
-		Reason:    sql.NullString{String: input.Reason, Valid: input.Reason != ""},
-		Notes:     sql.NullString{String: input.Notes, Valid: input.Notes != ""},
+		StartDate:  parseDate(input.StartDate),
+		EndDate:    parseDate(input.EndDate),
+		DaysCount:  fmt.Sprintf("%g", input.DaysCount),
+		Reason:     sql.NullString{String: input.Reason, Valid: input.Reason != ""},
+		Notes:      sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create time off request", logger.Error(err))

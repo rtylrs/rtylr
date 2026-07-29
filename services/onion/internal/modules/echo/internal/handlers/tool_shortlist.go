@@ -14,31 +14,37 @@ var promptToolGlobalNames = map[string]struct{}{
 }
 
 var promptToolModuleKeywords = map[string][]string{
-	"booking": []string{"appointment", "booking", "calendar", "service", "resource", "waitlist", "reminder"},
-	"crm":     []string{"customer", "crm", "campaign", "segment", "lead", "marketing"},
-	"erp":     []string{"inventory", "stock", "supplier", "warehouse", "purchase", "transfer", "brand", "category", "product", "reorder"},
-	"finance": []string{"invoice", "expense", "bank", "payment", "bill", "quote", "tax", "cash", "balance", "profit", "loss", "revenue", "payable", "receivable"},
-	"flow":    []string{"task", "project", "roadmap", "workload", "flow", "milestone"},
-	"hr":      []string{"employee", "staff", "hr", "payroll", "leave", "overtime", "attendance", "timesheet", "shift", "department", "role"},
-	"insights": []string{"insight", "dashboard", "kpi", "metric", "trend", "sales", "revenue", "churn", "margin", "bestseller",
-		"slow mover", "headcount", "utilization", "schedule", "scheduled", "recurring", "daily", "weekly", "report", "watch", "alert"},
-	"loyalty": []string{"loyalty", "points", "reward", "member", "tier"},
-	"memory":  []string{"remember", "memory", "preference", "prefer", "default", "always", "never", "rule", "note", "save", "keep in mind"},
-	"pos":     []string{"pos", "order", "terminal", "register", "floor", "table", "menu", "modifier", "session", "cash", "branch", "refund", "sale"},
-	"store":   []string{"store", "storefront", "ecommerce", "online", "website", "catalog", "slug"},
-	"support": []string{"support", "ticket", "inbox", "canned", "article", "knowledge", "kb", "help", "unread"},
+	"booking": {"appointment", "booking", "calendar", "service", "resource", "waitlist", "reminder"},
+	"crm":     {"customer", "crm", "campaign", "segment", "lead", "marketing"},
+	"erp":     {"inventory", "stock", "supplier", "warehouse", "purchase", "transfer", "brand", "category", "product", "reorder"},
+	"finance": {"invoice", "expense", "bank", "payment", "bill", "quote", "tax", "cash", "balance", "profit", "loss", "revenue", "payable", "receivable"},
+	"flow":    {"task", "project", "roadmap", "workload", "flow", "milestone"},
+	"hr":      {"employee", "staff", "hr", "payroll", "leave", "overtime", "attendance", "timesheet", "shift", "department", "role"},
+	"insights": {
+		"insight", "dashboard", "kpi", "metric", "trend", "sales", "revenue", "churn", "margin", "bestseller",
+		"slow mover", "headcount", "utilization", "schedule", "scheduled", "recurring", "daily", "weekly", "report", "watch", "alert",
+	},
+	"loyalty": {"loyalty", "points", "reward", "member", "tier"},
+	"memory":  {"remember", "memory", "preference", "prefer", "default", "always", "never", "rule", "note", "save", "keep in mind"},
+	"pos":     {"pos", "order", "terminal", "register", "floor", "table", "menu", "modifier", "session", "cash", "branch", "refund", "sale"},
+	"store":   {"store", "storefront", "ecommerce", "online", "website", "catalog", "slug"},
+	"support": {"support", "ticket", "inbox", "canned", "article", "knowledge", "kb", "help", "unread"},
 }
 
 var promptToolActionKeywords = map[string][]string{
-	"create": []string{"create", "add", "new", "record", "make", "draft"},
-	"get":    []string{"get", "show", "open", "view", "detail", "details", "find", "lookup", "load"},
-	"list":   []string{"list", "all", "recent", "top", "show me", "which"},
-	"remember": []string{"remember", "save", "keep in mind", "note that", "always", "never", "prefer", "default",
-		"from now on", "next time"},
-	"mutate": []string{"approve", "receive", "send", "refund", "set", "update", "change", "move", "transfer"},
-	"schedule": []string{"schedule", "scheduled", "recurring", "repeat", "daily", "weekly", "monthly", "every day", "every monday",
-		"alert", "notify", "remind", "watch", "send me"},
-	"summary": []string{"summary", "summarize", "overview", "status", "how are", "how is"},
+	"create": {"create", "add", "new", "record", "make", "draft"},
+	"get":    {"get", "show", "open", "view", "detail", "details", "find", "lookup", "load"},
+	"list":   {"list", "all", "recent", "top", "show me", "which"},
+	"remember": {
+		"remember", "save", "keep in mind", "note that", "always", "never", "prefer", "default",
+		"from now on", "next time",
+	},
+	"mutate": {"approve", "receive", "send", "refund", "set", "update", "change", "move", "transfer"},
+	"schedule": {
+		"schedule", "scheduled", "recurring", "repeat", "daily", "weekly", "monthly", "every day", "every monday",
+		"alert", "notify", "remind", "watch", "send me",
+	},
+	"summary": {"summary", "summarize", "overview", "status", "how are", "how is"},
 }
 
 type promptToolScore struct {

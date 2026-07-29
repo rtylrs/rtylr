@@ -136,8 +136,8 @@ func POSBranchLocationID(ctx context.Context, tx DBTX, ownerID, posLocationID in
 	}
 
 	id, err := q.GetPOSBranchLocationID(ctx, stocksqlc.GetPOSBranchLocationIDParams{
-		OwnerID:   ownerID,
-		SourceID:  posLocationID,
+		OwnerID:  ownerID,
+		SourceID: posLocationID,
 	})
 	if err == nil {
 		return id, nil
@@ -271,20 +271,20 @@ func applyKnown(ctx context.Context, q *stocksqlc.Queries, m Movement, before, a
 		channel = "erp"
 	}
 	if err := q.InsertStockLedgerEntry(ctx, stocksqlc.InsertStockLedgerEntryParams{
-		OwnerID:         m.OwnerID,
-		LocationID:      m.LocationID,
-		ProductID:       m.ProductID,
-		EntryType:       stocksqlc.StockLedgerEntryType(m.EntryType),
-		QuantityChange:  fmtQty(m.Change),
-		QuantityBefore:  fmtQty(before),
-		QuantityAfter:   fmtQty(after),
-		ReferenceID:     nullInt(m.ReferenceID),
-		ReferenceType:   nullStr(m.ReferenceType),
-		TransferGroup:   nullInt(m.TransferGroup),
-		Channel:         stocksqlc.StockLedgerChannel(channel),
-		Note:            nullStr(m.Note),
-		EmployeeID:      nullInt(m.EmployeeID),
-		CreatedBy:       nullInt(m.CreatedBy),
+		OwnerID:        m.OwnerID,
+		LocationID:     m.LocationID,
+		ProductID:      m.ProductID,
+		EntryType:      stocksqlc.StockLedgerEntryType(m.EntryType),
+		QuantityChange: fmtQty(m.Change),
+		QuantityBefore: fmtQty(before),
+		QuantityAfter:  fmtQty(after),
+		ReferenceID:    nullInt(m.ReferenceID),
+		ReferenceType:  nullStr(m.ReferenceType),
+		TransferGroup:  nullInt(m.TransferGroup),
+		Channel:        stocksqlc.StockLedgerChannel(channel),
+		Note:           nullStr(m.Note),
+		EmployeeID:     nullInt(m.EmployeeID),
+		CreatedBy:      nullInt(m.CreatedBy),
 	}); err != nil {
 		return 0, 0, fmt.Errorf("stock_core: insert ledger: %w", err)
 	}

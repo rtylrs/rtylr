@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
-	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
-
 	"github.com/voxire/onion/internal/modules/segments/internal/application"
 	"github.com/voxire/onion/internal/modules/segments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	crmcustomerv1 "github.com/voxire/voxie/gen/go/crm/customer/v1"
+	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
 )
 
 type SegmentAPI struct {
@@ -190,7 +189,7 @@ func newSegmentCustomers(items []domain.SegmentCustomer) []*crmcustomerv1.Custom
 	return out
 }
 
-func resolveRequestIdentity(ctx context.Context) (businessID int64, ownerID int64, errModel error) {
+func resolveRequestIdentity(ctx context.Context) (businessID, ownerID int64, errModel error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return 0, 0, onekiterrors.PermissionDenied()

@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"net/http"
 
-	hrdashboardv1 "github.com/voxire/voxie/gen/go/hr/dashboard/v1"
-
 	"github.com/voxire/onion/internal/modules/hr_dashboard/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_dashboard/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_dashboard/stats"
+	hrdashboardv1 "github.com/voxire/voxie/gen/go/hr/dashboard/v1"
 )
 
 type Module struct {

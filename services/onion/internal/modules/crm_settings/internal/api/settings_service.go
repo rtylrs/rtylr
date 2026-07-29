@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	crmsettingsv1 "github.com/voxire/voxie/gen/go/crm/settings/v1"
-
 	"github.com/voxire/onion/internal/modules/crm_settings/internal/application"
 	"github.com/voxire/onion/internal/modules/crm_settings/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	crmsettingsv1 "github.com/voxire/voxie/gen/go/crm/settings/v1"
 )
 
 type SettingsAPI struct {

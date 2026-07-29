@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	financestatementv1 "github.com/voxire/voxie/gen/go/finance/statement/v1"
-
 	"github.com/voxire/onion/internal/modules/finance_reports/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	financestatementv1 "github.com/voxire/voxie/gen/go/finance/statement/v1"
 )
 
 type StatementAPI struct {

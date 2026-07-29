@@ -5,13 +5,12 @@ import (
 	"errors"
 	"net/http"
 
-	possessionv1 "github.com/voxire/voxie/gen/go/pos/session/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	possessionv1 "github.com/voxire/voxie/gen/go/pos/session/v1"
 )
 
 type SessionAPI struct {

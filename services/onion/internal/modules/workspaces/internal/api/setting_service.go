@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
 )
 
 type SettingAPI struct {

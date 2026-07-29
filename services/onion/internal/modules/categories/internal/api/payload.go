@@ -1,9 +1,8 @@
 package api
 
 import (
-	erpcategoryv1 "github.com/voxire/voxie/gen/go/erp/category/v1"
-
 	"github.com/voxire/onion/internal/modules/categories/internal/domain"
+	erpcategoryv1 "github.com/voxire/voxie/gen/go/erp/category/v1"
 )
 
 func newCategoryPayload(c domain.Category) *erpcategoryv1.Category {

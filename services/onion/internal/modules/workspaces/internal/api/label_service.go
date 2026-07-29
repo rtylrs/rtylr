@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"strconv"
 
-	flowlabelv1 "github.com/voxire/voxie/gen/go/flow/label/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	flowlabelv1 "github.com/voxire/voxie/gen/go/flow/label/v1"
 )
 
 type LabelAPI struct {
@@ -32,7 +31,7 @@ func toLabel(l domain.Label) *flowlabelv1.Label {
 	}
 }
 
-func (a *LabelAPI) resolveWorkspaceID(ctx context.Context, userID int64, workspaceID int64) (int64, error) {
+func (a *LabelAPI) resolveWorkspaceID(ctx context.Context, userID, workspaceID int64) (int64, error) {
 	raw := strconv.FormatInt(workspaceID, 10)
 	if workspaceID == 0 {
 		raw = "personal"

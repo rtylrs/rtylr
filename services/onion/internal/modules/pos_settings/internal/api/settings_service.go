@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	possettingsv1 "github.com/voxire/voxie/gen/go/pos/settings/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	possettingsv1 "github.com/voxire/voxie/gen/go/pos/settings/v1"
 )
 
 func businessIDFromContext(ctx context.Context) (int64, error) {

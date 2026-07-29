@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"time"
 
-	financereconciliationv1 "github.com/voxire/voxie/gen/go/finance/reconciliation/v1"
-
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/application"
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	financereconciliationv1 "github.com/voxire/voxie/gen/go/finance/reconciliation/v1"
 )
 
 type ReconciliationAPI struct {

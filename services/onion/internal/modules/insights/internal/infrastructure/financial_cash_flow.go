@@ -55,9 +55,9 @@ func (r *Repository) dailyPaidInvoices(ctx context.Context, businessID int64, fr
 func (r *Repository) dailyExpenses(ctx context.Context, businessID int64, from, to time.Time) (map[string]int64, error) {
 	// cross-schema read from finance_expenses — daily outflow for cash-flow chart
 	rows, err := r.queries.GetDailyExpenses(ctx, sqlc.GetDailyExpensesParams{
-		BusinessID: businessID,
-		FromExpenseDate:   from,
-		ToExpenseDate:     to,
+		BusinessID:      businessID,
+		FromExpenseDate: from,
+		ToExpenseDate:   to,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: daily expenses failed", logger.Error(err))

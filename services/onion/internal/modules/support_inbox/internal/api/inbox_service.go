@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	supportinboxv1 "github.com/voxire/voxie/gen/go/support/inbox/v1"
-
 	"github.com/voxire/onion/internal/modules/support_inbox/internal/application"
 	"github.com/voxire/onion/internal/modules/support_inbox/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	supportinboxv1 "github.com/voxire/voxie/gen/go/support/inbox/v1"
 )
 
 type InboxAPI struct {

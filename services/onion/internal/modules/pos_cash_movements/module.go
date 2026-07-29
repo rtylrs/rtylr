@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	poscashv1 "github.com/voxire/voxie/gen/go/pos/cash/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/application"
+	poscashv1 "github.com/voxire/voxie/gen/go/pos/cash/v1"
 )
 
 type Module struct {

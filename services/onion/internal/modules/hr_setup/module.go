@@ -7,11 +7,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	hrsetupv1 "github.com/voxire/voxie/gen/go/hr/setup/v1"
 
 	"github.com/voxire/onion/internal/modules/hr_setup/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_setup/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	hrsetupv1 "github.com/voxire/voxie/gen/go/hr/setup/v1"
 )
 
 type Module struct {

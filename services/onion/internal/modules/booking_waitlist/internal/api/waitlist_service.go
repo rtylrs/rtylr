@@ -7,13 +7,12 @@ import (
 	"strings"
 	"time"
 
-	bookingwaitlistv1 "github.com/voxire/voxie/gen/go/booking/waitlist/v1"
-
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	bookingwaitlistv1 "github.com/voxire/voxie/gen/go/booking/waitlist/v1"
 )
 
 type WaitlistAPI struct {

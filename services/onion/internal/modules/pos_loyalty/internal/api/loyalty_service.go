@@ -5,13 +5,12 @@ import (
 	"errors"
 	"net/http"
 
-	posloyaltyv1 "github.com/voxire/voxie/gen/go/pos/loyalty/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	posloyaltyv1 "github.com/voxire/voxie/gen/go/pos/loyalty/v1"
 )
 
 type LoyaltyAPI struct {

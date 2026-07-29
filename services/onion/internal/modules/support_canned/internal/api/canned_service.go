@@ -6,12 +6,11 @@ import (
 	"strings"
 	"time"
 
-	supportcannedv1 "github.com/voxire/voxie/gen/go/support/canned/v1"
-
 	"github.com/voxire/onion/internal/modules/support_canned/internal/application"
 	"github.com/voxire/onion/internal/modules/support_canned/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	supportcannedv1 "github.com/voxire/voxie/gen/go/support/canned/v1"
 )
 
 type CannedResponseAPI struct {

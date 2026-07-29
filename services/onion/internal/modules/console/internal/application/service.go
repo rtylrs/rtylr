@@ -16,8 +16,10 @@ import (
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
-const consoleTTL = 1 * time.Minute
-const freeIncludedSeatLimit = 10
+const (
+	consoleTTL            = 1 * time.Minute
+	freeIncludedSeatLimit = 10
+)
 
 var (
 	ErrNotOrganizationOwner   = errors.New("access can only be granted to organization owners")

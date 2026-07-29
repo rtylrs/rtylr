@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	hubmenuv1 "github.com/voxire/voxie/gen/go/hub/menu/v1"
-
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/api"
+	hubmenuv1 "github.com/voxire/voxie/gen/go/hub/menu/v1"
 )
 
 type Module struct{}

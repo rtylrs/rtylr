@@ -4,13 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	erpstocktakev1 "github.com/voxire/voxie/gen/go/erp/stock_take/v1"
-
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/application"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	erpstocktakev1 "github.com/voxire/voxie/gen/go/erp/stock_take/v1"
 )
 
 type StockTakeAPI struct {

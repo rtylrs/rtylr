@@ -442,16 +442,16 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 	}
 
 	result, err := r.queries.CreateContract(ctx, sqlc.CreateContractParams{
-		OwnerID:       ownerID,
-		BusinessID:    ownerID,
-		LeadID:        req.LeadID,
-		Plan:          plan,
-		Mrr:           strconv.FormatFloat(req.MRR, 'g', -1, 64),
-		Seats:         int32(seats),
-		SignedAt:      nullableDatePtr(req.SignedAt),
-		SignedByName:  nullableString(req.SignedByName),
-		ClosedBy:      nullableInt64(req.ClosedBy),
-		Notes:         nullableString(req.Notes),
+		OwnerID:      ownerID,
+		BusinessID:   ownerID,
+		LeadID:       req.LeadID,
+		Plan:         plan,
+		Mrr:          strconv.FormatFloat(req.MRR, 'g', -1, 64),
+		Seats:        int32(seats),
+		SignedAt:     nullableDatePtr(req.SignedAt),
+		SignedByName: nullableString(req.SignedByName),
+		ClosedBy:     nullableInt64(req.ClosedBy),
+		Notes:        nullableString(req.Notes),
 	})
 	if err != nil {
 		return domain.Contract{}, err

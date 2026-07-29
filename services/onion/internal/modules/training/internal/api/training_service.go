@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	hrtrainingv1 "github.com/voxire/voxie/gen/go/hr/training/v1"
-
 	"github.com/voxire/onion/internal/modules/training/internal/application"
 	"github.com/voxire/onion/internal/modules/training/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hrtrainingv1 "github.com/voxire/voxie/gen/go/hr/training/v1"
 )
 
 type TrainingAPI struct {

@@ -14,11 +14,11 @@ type mockRepo struct {
 	compErr   error
 }
 
-func (m *mockRepo) Create(_ context.Context, _ int64, _ int64, _ domain.CheckoutCreateInput) (int64, error) {
+func (m *mockRepo) Create(_ context.Context, _, _ int64, _ domain.CheckoutCreateInput) (int64, error) {
 	return m.createID, m.createErr
 }
 
-func (m *mockRepo) Complete(_ context.Context, _, _ int64, _ int64) error {
+func (m *mockRepo) Complete(_ context.Context, _, _, _ int64) error {
 	return m.compErr
 }
 

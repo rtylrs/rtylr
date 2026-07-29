@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	supportcannedv1 "github.com/voxire/voxie/gen/go/support/canned/v1"
-
 	"github.com/voxire/onion/internal/modules/support_canned/internal/api"
 	"github.com/voxire/onion/internal/modules/support_canned/internal/application"
+	supportcannedv1 "github.com/voxire/voxie/gen/go/support/canned/v1"
 )
 
 type Module struct {

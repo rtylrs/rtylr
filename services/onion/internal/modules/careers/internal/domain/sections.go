@@ -15,14 +15,14 @@ type Section struct {
 	OwnerID    int64
 	BusinessID int64
 	Kind       string
-	Title     string
-	Body      string
-	MediaURL  string
-	ItemsJSON string
-	Position  int32
-	Enabled   bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Title      string
+	Body       string
+	MediaURL   string
+	ItemsJSON  string
+	Position   int32
+	Enabled    bool
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
 }
 
 // SectionInput is the write shape. ID is zero for create, non-zero
@@ -34,10 +34,10 @@ type SectionInput struct {
 	OwnerID    int64
 	BusinessID int64
 	Kind       string
-	Title     string
-	Body      string
-	MediaURL  string
-	ItemsJSON string
-	Position  int32
-	Enabled   bool
+	Title      string
+	Body       string
+	MediaURL   string
+	ItemsJSON  string
+	Position   int32
+	Enabled    bool
 }

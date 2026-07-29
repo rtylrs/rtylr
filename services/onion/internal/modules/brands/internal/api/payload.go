@@ -1,9 +1,8 @@
 package api
 
 import (
-	erpbrandv1 "github.com/voxire/voxie/gen/go/erp/brand/v1"
-
 	"github.com/voxire/onion/internal/modules/brands/internal/domain"
+	erpbrandv1 "github.com/voxire/voxie/gen/go/erp/brand/v1"
 )
 
 func newBrandPayload(b domain.Brand) *erpbrandv1.Brand {

@@ -6,12 +6,11 @@ import (
 	"errors"
 	"net/http"
 
-	flowviewv1 "github.com/voxire/voxie/gen/go/flow/view/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	flowviewv1 "github.com/voxire/voxie/gen/go/flow/view/v1"
 )
 
 type ViewAPI struct {

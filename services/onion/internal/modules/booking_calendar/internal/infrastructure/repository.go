@@ -41,8 +41,8 @@ func (r *Repository) FetchAppointments(ctx context.Context, businessID int64, fr
 	}
 
 	rows, err := r.queries.FetchCalendarAppointments(ctx, sqlc.FetchCalendarAppointmentsParams{
-		BusinessID: businessID,
-		StartTime:  fromTime,
+		BusinessID:  businessID,
+		StartTime:   fromTime,
 		StartTime_2: toTime,
 	})
 	if err != nil {

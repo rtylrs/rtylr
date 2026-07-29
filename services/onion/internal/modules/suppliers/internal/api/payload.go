@@ -1,9 +1,8 @@
 package api
 
 import (
-	erpsupplierv1 "github.com/voxire/voxie/gen/go/erp/supplier/v1"
-
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
+	erpsupplierv1 "github.com/voxire/voxie/gen/go/erp/supplier/v1"
 )
 
 func newSupplierPayload(s domain.Supplier) *erpsupplierv1.Supplier {

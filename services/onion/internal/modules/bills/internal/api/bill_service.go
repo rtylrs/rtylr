@@ -5,14 +5,13 @@ import (
 	"errors"
 	"net/http"
 
-	financebillv1 "github.com/voxire/voxie/gen/go/finance/bill/v1"
-
 	"github.com/voxire/onion/internal/modules/bills/internal/application"
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	financebillv1 "github.com/voxire/voxie/gen/go/finance/bill/v1"
 )
 
 // listBillsPageSize bounds ListBills server-side. The voxie

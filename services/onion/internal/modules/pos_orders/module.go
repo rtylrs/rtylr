@@ -6,6 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+
+	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
+	"github.com/voxire/onion/internal/modules/pos_orders/internal/routes"
+	"github.com/voxire/onion/internal/modules/pos_orders/internal/routes/handlers"
 	posdashboardv1 "github.com/voxire/voxie/gen/go/pos/dashboard/v1"
 	posordersdiscountsv1 "github.com/voxire/voxie/gen/go/pos/orders/discounts/v1"
 	posordersholdsv1 "github.com/voxire/voxie/gen/go/pos/orders/holds/v1"
@@ -14,12 +19,6 @@ import (
 	posordersrefundsv1 "github.com/voxire/voxie/gen/go/pos/orders/refunds/v1"
 	posorderssplitv1 "github.com/voxire/voxie/gen/go/pos/orders/splits/v1"
 	posordersv1 "github.com/voxire/voxie/gen/go/pos/orders/v1"
-
-	"github.com/go-chi/chi/v5"
-
-	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
-	"github.com/voxire/onion/internal/modules/pos_orders/internal/routes"
-	"github.com/voxire/onion/internal/modules/pos_orders/internal/routes/handlers"
 )
 
 type Module struct {

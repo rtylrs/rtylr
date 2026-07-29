@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"time"
 
-	hubcaretv1 "github.com/voxire/voxie/gen/go/hub/caret/v1"
-
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/echo/internal/api"
 	"github.com/voxire/onion/internal/modules/echo/internal/application"
 	"github.com/voxire/onion/internal/modules/echo/internal/handlers"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	hubcaretv1 "github.com/voxire/voxie/gen/go/hub/caret/v1"
 )
 
 var aiStreamRateLimit = serverHttp.AIUserRateLimit(5, time.Minute)

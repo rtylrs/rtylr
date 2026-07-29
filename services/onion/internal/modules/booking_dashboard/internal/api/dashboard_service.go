@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	bookingdashboardv1 "github.com/voxire/voxie/gen/go/booking/dashboard/v1"
-
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	bookingdashboardv1 "github.com/voxire/voxie/gen/go/booking/dashboard/v1"
 )
 
 type DashboardAPI struct {
