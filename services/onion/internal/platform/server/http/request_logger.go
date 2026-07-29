@@ -23,9 +23,9 @@ import (
 const (
 	// maxLoggedRequestBodyBytes is how much of a JSON body we read for logging
 	// previews. The handler still receives the full body via replay.
-	maxLoggedRequestBodyBytes = 8 << 10
-	maxLoggedBodyPreviewBytes = 1024
-	maxLoggedHeaderValueBytes = 200
+	maxLoggedRequestBodyBytes        = 8 << 10
+	maxLoggedBodyPreviewBytes        = 1024
+	maxLoggedHeaderValueBytes        = 200
 	duplicateDetectorCleanupInterval = time.Minute
 )
 
@@ -393,17 +393,7 @@ func isSensitiveField(key string) bool {
 }
 
 func logRequest(ctx context.Context, r *http.Request, statusCode int, duration time.Duration, bodyContent string, headers, query map[string][]string, serviceName string, count int) {
-	routeCtx := chi.RouteContext(ctx)
-
-	var routeParams []string
-
-	if routeCtx != nil {
-		for i, key := range routeCtx.URLParams.Keys {
-			if i < len(routeCtx.URLParams.Values) {
-				routeParams = append(routeParams, fmt.Sprintf("%s: %s", key, routeCtx.URLParams.Values[i]))
-			}
-		}
-	}
+	routeParams := routeParamsFromRequest(r)
 
 	queryParams := make([]string, 0, len(query))
 	for key, values := range query {
@@ -459,6 +449,26 @@ func logRequest(ctx context.Context, r *http.Request, statusCode int, duration t
 	}
 
 	logger.Ctx(ctx).Warn(message, fields...)
+}
+
+func routeParamsFromRequest(r *http.Request) []string {
+	if r == nil {
+		return nil
+	}
+
+	routeCtx := chi.RouteContext(r.Context())
+	if routeCtx == nil {
+		return nil
+	}
+
+	routeParams := make([]string, 0, len(routeCtx.URLParams.Keys))
+	for i, key := range routeCtx.URLParams.Keys {
+		if i < len(routeCtx.URLParams.Values) {
+			routeParams = append(routeParams, fmt.Sprintf("%s: %s", key, routeCtx.URLParams.Values[i]))
+		}
+	}
+
+	return routeParams
 }
 
 func truncateString(s string, maxLen int) string {
