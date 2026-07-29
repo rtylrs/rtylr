@@ -8,11 +8,11 @@ import (
 	"strings"
 
 	onekithttp "github.com/corezio/onekit/http"
-	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
 
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
+	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
 )
 
 type InviteAccepter interface {
@@ -190,7 +190,7 @@ func (a *AuthAPI) ResetPasswordConfirm(ctx context.Context, req *commonauthv1.Re
 	return &commonauthv1.ResetPasswordConfirmResponse{Message: "Password reset successfully."}, nil
 }
 
-func (a *AuthAPI) VerifyEmail(ctx context.Context, req *commonauthv1.VerifyEmailRequest) (*commonauthv1.VerifyEmailResponse, error) {
+func (a *AuthAPI) VerifyEmail(_ context.Context, req *commonauthv1.VerifyEmailRequest) (*commonauthv1.VerifyEmailResponse, error) {
 	if strings.TrimSpace(req.GetToken()) == "" {
 		return nil, onekithttp.NewError(http.StatusBadRequest, "token is required")
 	}

@@ -6,13 +6,12 @@ import (
 	"strings"
 	"time"
 
-	bookingresourcev1 "github.com/voxire/voxie/gen/go/booking/resource/v1"
-
 	"github.com/voxire/onion/internal/modules/booking_resources/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_resources/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	bookingresourcev1 "github.com/voxire/voxie/gen/go/booking/resource/v1"
 )
 
 type ResourceAPI struct {
@@ -102,7 +101,7 @@ func (a *ResourceAPI) DeleteResource(ctx context.Context, req *bookingresourcev1
 	return &bookingresourcev1.DeleteResourceResponse{Message: "Resource deleted"}, nil
 }
 
-func newResourceInput(name, resourceType string, capacity int32, isActive bool, requireName bool) (domain.ResourceInput, error) {
+func newResourceInput(name, resourceType string, capacity int32, isActive, requireName bool) (domain.ResourceInput, error) {
 	name = strings.TrimSpace(name)
 	if requireName && name == "" {
 		return domain.ResourceInput{}, onekiterrors.New(http.StatusBadRequest, "Name is required")

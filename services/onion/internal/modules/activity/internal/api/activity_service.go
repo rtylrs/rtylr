@@ -4,12 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	hubactivityv1 "github.com/voxire/voxie/gen/go/hub/activity/v1"
-
 	"github.com/voxire/onion/internal/modules/activity/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hubactivityv1 "github.com/voxire/voxie/gen/go/hub/activity/v1"
 )
 
 type ActivityAPI struct {

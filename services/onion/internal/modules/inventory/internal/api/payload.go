@@ -1,9 +1,8 @@
 package api
 
 import (
-	erpinventoryv1 "github.com/voxire/voxie/gen/go/erp/inventory/v1"
-
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
+	erpinventoryv1 "github.com/voxire/voxie/gen/go/erp/inventory/v1"
 )
 
 func newInventoryReportItemPayload(item domain.InventoryReportItem) *erpinventoryv1.InventoryReportItem {

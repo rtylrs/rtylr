@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	bookingappointmentv1 "github.com/voxire/voxie/gen/go/booking/appointment/v1"
-
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -15,6 +13,7 @@ import (
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	bookingappointmentv1 "github.com/voxire/voxie/gen/go/booking/appointment/v1"
 )
 
 const appointmentsCacheScope = "booking_appointments"

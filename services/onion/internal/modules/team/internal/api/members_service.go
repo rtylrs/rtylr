@@ -5,13 +5,12 @@ import (
 	"errors"
 	"net/http"
 
-	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
-	hubteammembersv1 "github.com/voxire/voxie/gen/go/hub/team/members/v1"
-
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
+	hubteammembersv1 "github.com/voxire/voxie/gen/go/hub/team/members/v1"
 )
 
 type MembersAPI struct {

@@ -454,9 +454,7 @@ func (r *Repository) ListTimesheetBusinessIDs(ctx context.Context) ([]int64, err
 	}
 
 	businessIDs := make([]int64, 0, len(rows))
-	for _, businessID := range rows {
-		businessIDs = append(businessIDs, businessID)
-	}
+	businessIDs = append(businessIDs, rows...)
 	return businessIDs, nil
 }
 

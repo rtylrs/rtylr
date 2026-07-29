@@ -211,5 +211,7 @@ func fileUUIDFromCanonicalURL(raw string) (string, bool) {
 func writePurgeResponse(w http.ResponseWriter, resp purgeResponse) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Cache-Control", "no-store")
-	_ = json.NewEncoder(w).Encode(resp)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logger.Global().Warn("cdn: failed to encode purge response", logger.Error(err))
+	}
 }

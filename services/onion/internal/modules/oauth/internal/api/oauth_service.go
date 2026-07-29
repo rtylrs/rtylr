@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"net/url"
 
-	commonoauthv1 "github.com/voxire/voxie/gen/go/common/oauth/v1"
-
 	"github.com/voxire/onion/internal/modules/oauth/internal/application"
 	"github.com/voxire/onion/internal/modules/oauth/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	commonoauthv1 "github.com/voxire/voxie/gen/go/common/oauth/v1"
 )
 
 type OauthAPI struct {

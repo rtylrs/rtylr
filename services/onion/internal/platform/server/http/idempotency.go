@@ -16,11 +16,11 @@ import (
 )
 
 const (
-	idempotencyHeader            = "Idempotency-Key"
-	idempotencyTTL               = 30 * time.Minute
-	idempotencyMaxLen            = 128
+	idempotencyHeader             = "Idempotency-Key"
+	idempotencyTTL                = 30 * time.Minute
+	idempotencyMaxLen             = 128
 	idempotencyMaxStoredBodyBytes = 256 << 10
-	idempotencyCacheWriteTimeout = 2 * time.Second
+	idempotencyCacheWriteTimeout  = 2 * time.Second
 )
 
 // idempotencyRecord is what we store in the cache for a completed request.

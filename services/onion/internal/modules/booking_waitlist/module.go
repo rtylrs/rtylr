@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	bookingwaitlistv1 "github.com/voxire/voxie/gen/go/booking/waitlist/v1"
-
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/api"
 	"github.com/voxire/onion/internal/modules/booking_waitlist/internal/application"
+	bookingwaitlistv1 "github.com/voxire/voxie/gen/go/booking/waitlist/v1"
 )
 
 type Module struct{ service *application.Service }

@@ -7,13 +7,12 @@ import (
 	"strings"
 	"time"
 
-	posreceiptv1 "github.com/voxire/voxie/gen/go/pos/receipt/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	posreceiptv1 "github.com/voxire/voxie/gen/go/pos/receipt/v1"
 )
 
 type ReceiptAPI struct {

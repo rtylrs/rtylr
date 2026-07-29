@@ -37,7 +37,6 @@ func TestGenerateTextStreamParseAcceptsCamelCaseAliases(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 	got, err := handler.parseAndValidateRequest(rec, req)
-
 	if err != nil {
 		t.Fatalf("parseAndValidateRequest: %v", err)
 	}

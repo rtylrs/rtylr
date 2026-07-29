@@ -120,12 +120,13 @@ func scoreApplication(opening *domain.Opening, app domain.Application) domain.Ma
 			risks = append(risks, "Salary expectation is above range")
 		}
 	}
-	if app.CVProcessingStatus == "processed" {
+	switch app.CVProcessingStatus {
+	case "processed":
 		score += 6
-	} else if app.CVProcessingStatus == "error" {
+	case "error":
 		score -= 12
 		risks = append(risks, "CV extraction failed")
-	} else {
+	default:
 		score -= 5
 		risks = append(risks, "CV extraction still pending")
 	}
@@ -180,12 +181,13 @@ func scoreCandidate(candidate domain.Candidate) domain.MatchSignal {
 		score += 8
 		strengths = append(strengths, candidate.CVProfile.Seniority)
 	}
-	if candidate.CVProcessingStatus == "processed" {
+	switch candidate.CVProcessingStatus {
+	case "processed":
 		score += 10
-	} else if candidate.CVProcessingStatus == "error" {
+	case "error":
 		score -= 15
 		risks = append(risks, "CV extraction failed")
-	} else {
+	default:
 		score -= 6
 		risks = append(risks, "CV extraction pending")
 	}

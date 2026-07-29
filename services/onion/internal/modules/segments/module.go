@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
-
 	"github.com/voxire/onion/internal/modules/segments/internal/api"
 	"github.com/voxire/onion/internal/modules/segments/internal/application"
+	crmsegmentv1 "github.com/voxire/voxie/gen/go/crm/segment/v1"
 )
 
 type Module struct {

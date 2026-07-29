@@ -6,12 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
-	commonoauthv1 "github.com/voxire/voxie/gen/go/common/oauth/v1"
-
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/oauth/internal/api"
 	"github.com/voxire/onion/internal/modules/oauth/internal/application"
+	commonoauthv1 "github.com/voxire/voxie/gen/go/common/oauth/v1"
 )
 
 type Module struct {

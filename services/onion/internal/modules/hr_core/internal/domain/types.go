@@ -42,25 +42,25 @@ type DepartmentRecord struct {
 }
 
 type LocationRecord struct {
-	ID        int64     `json:"id"`
-	OwnerID   int64     `json:"owner_id"`
-	BusinessID            int64     `json:"business_id"`
-	Name      string    `json:"name"`
-	Address   string    `json:"address"`
-	City      string    `json:"city"`
-	Country   string    `json:"country"`
-	Timezone  string    `json:"timezone"`
-	Latitude  float64   `json:"latitude"`
-	Longitude float64   `json:"longitude"`
-	IsDefault bool      `json:"is_default"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID         int64     `json:"id"`
+	OwnerID    int64     `json:"owner_id"`
+	BusinessID int64     `json:"business_id"`
+	Name       string    `json:"name"`
+	Address    string    `json:"address"`
+	City       string    `json:"city"`
+	Country    string    `json:"country"`
+	Timezone   string    `json:"timezone"`
+	Latitude   float64   `json:"latitude"`
+	Longitude  float64   `json:"longitude"`
+	IsDefault  bool      `json:"is_default"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 type WorkScheduleRecord struct {
 	ID           int64     `json:"id"`
 	OwnerID      int64     `json:"owner_id"`
-	BusinessID            int64     `json:"business_id"`
+	BusinessID   int64     `json:"business_id"`
 	Name         string    `json:"name"`
 	ScheduleData string    `json:"schedule_data"`
 	IsDefault    bool      `json:"is_default"`
@@ -71,7 +71,7 @@ type WorkScheduleRecord struct {
 type RoleRecord struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
-	BusinessID            int64     `json:"business_id"`
+	BusinessID  int64     `json:"business_id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Permissions string    `json:"permissions"`
@@ -88,7 +88,7 @@ type PermissionRecord struct {
 type EmployeeRoleRecord struct {
 	ID         int64     `json:"id"`
 	OwnerID    int64     `json:"owner_id"`
-	BusinessID            int64     `json:"business_id"`
+	BusinessID int64     `json:"business_id"`
 	EmployeeID int64     `json:"employee_id"`
 	RoleID     int64     `json:"role_id"`
 	CreatedAt  time.Time `json:"created_at"`
@@ -97,7 +97,7 @@ type EmployeeRoleRecord struct {
 type SetupStepRecord struct {
 	ID          int64     `json:"id"`
 	OwnerID     int64     `json:"owner_id"`
-	BusinessID            int64     `json:"business_id"`
+	BusinessID  int64     `json:"business_id"`
 	StepKey     string    `json:"step_key"`
 	StepLabel   string    `json:"step_label"`
 	IsCompleted bool      `json:"is_completed"`
@@ -124,7 +124,7 @@ type HRCompanyConfigRecord struct {
 type ApprovalChainRecord struct {
 	ID          int64                      `json:"id"`
 	OwnerID     int64                      `json:"owner_id"`
-	BusinessID            int64     `json:"business_id"`
+	BusinessID  int64                      `json:"business_id"`
 	RequestType string                     `json:"request_type"`
 	Name        string                     `json:"name"`
 	Levels      []ApprovalChainLevelRecord `json:"levels"`
@@ -135,7 +135,7 @@ type ApprovalChainRecord struct {
 type ApprovalChainLevelRecord struct {
 	ID                 int64     `json:"id"`
 	OwnerID            int64     `json:"owner_id"`
-	BusinessID            int64     `json:"business_id"`
+	BusinessID         int64     `json:"business_id"`
 	ApprovalChainID    int64     `json:"approval_chain_id"`
 	LevelOrder         int32     `json:"level_order"`
 	ApproverType       string    `json:"approver_type"`
@@ -147,7 +147,7 @@ type ApprovalChainLevelRecord struct {
 type InviteRecord struct {
 	ID         int64     `json:"id"`
 	OwnerID    int64     `json:"owner_id"`
-	BusinessID            int64     `json:"business_id"`
+	BusinessID int64     `json:"business_id"`
 	EmployeeID int64     `json:"employee_id"`
 	Token      string    `json:"token"`
 	ExpiresAt  time.Time `json:"expires_at"`

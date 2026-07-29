@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	poscombov1 "github.com/voxire/voxie/gen/go/pos/combo/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_combos/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_combos/internal/application"
+	poscombov1 "github.com/voxire/voxie/gen/go/pos/combo/v1"
 )
 
 type Module struct {

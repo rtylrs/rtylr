@@ -17,7 +17,7 @@ type ExpenseByCategoryRow struct {
 func (r *Repository) GetExpensesByCategory(ctx context.Context, businessID int64, from, to time.Time) ([]ExpenseByCategoryRow, error) {
 	// cross-schema read from finance_expenses + finance_expense_categories — category-grouped expense totals
 	rows, err := r.queries.GetExpensesByCategory(ctx, sqlc.GetExpensesByCategoryParams{
-		BusinessID: businessID,
+		BusinessID:      businessID,
 		FromExpenseDate: from,
 		ToExpenseDate:   to,
 	})

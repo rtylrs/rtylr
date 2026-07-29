@@ -11,6 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
 // Rate limiters created before Start is called (e.g. package-level vars)
 // use context.Background() and are effectively immortal — that's fine for
 // singletons that last the whole process.

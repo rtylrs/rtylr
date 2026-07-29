@@ -119,7 +119,8 @@ func (r *Repository) ListSelfHostLicenses(ctx context.Context, limit, offset int
 
 func scanSelfHostLicenseRow(scanner interface {
 	Scan(dest ...any) error
-}) (*SelfHostLicenseRow, error) {
+},
+) (*SelfHostLicenseRow, error) {
 	var row SelfHostLicenseRow
 	if err := scanner.Scan(
 		&row.ID,
@@ -206,7 +207,7 @@ func (r *Repository) RegenerateSelfHostLicenseKey(ctx context.Context, id int64,
 	return nil
 }
 
-func (r *Repository) RevokeSelfHostLicense(ctx context.Context, id int64, updatedBy int64) error {
+func (r *Repository) RevokeSelfHostLicense(ctx context.Context, id, updatedBy int64) error {
 	affected, err := r.queries.RevokeSelfHostLicense(ctx, sqlc.RevokeSelfHostLicenseParams{
 		UpdatedBy: sql.NullInt64{Int64: updatedBy, Valid: true},
 		ID:        id,

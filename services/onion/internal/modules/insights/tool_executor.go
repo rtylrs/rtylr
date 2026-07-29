@@ -603,9 +603,9 @@ func insightsToolString(value any) string {
 		return ""
 	case string:
 		return v
-	case fmt.Stringer:
-		return v.String()
 	case json.Number:
+		return v.String()
+	case fmt.Stringer:
 		return v.String()
 	default:
 		return fmt.Sprint(v)

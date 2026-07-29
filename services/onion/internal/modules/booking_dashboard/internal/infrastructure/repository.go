@@ -24,8 +24,8 @@ func NewRepository(db *sql.DB) *Repository {
 
 func (r *Repository) GetTodayCount(ctx context.Context, businessID int64, start, end time.Time) (int, error) {
 	cnt, err := r.queries.CountAppointmentsToday(ctx, sqlc.CountAppointmentsTodayParams{
-		BusinessID: businessID,
-		StartTime:  start,
+		BusinessID:  businessID,
+		StartTime:   start,
 		StartTime_2: end,
 	})
 	if err != nil {

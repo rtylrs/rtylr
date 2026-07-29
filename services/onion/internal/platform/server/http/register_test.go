@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
 
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
 )
 
 func TestValidateProtoMessagesRejectsInvalidGeneratedMessage(t *testing.T) {

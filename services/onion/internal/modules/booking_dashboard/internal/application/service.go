@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"time"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/domain"
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
-	"golang.org/x/sync/errgroup"
 )
 
 const bookingDashboardTTL = 1 * time.Minute

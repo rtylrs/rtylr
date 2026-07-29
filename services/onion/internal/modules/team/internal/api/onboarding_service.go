@@ -4,11 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	hubteamonboardingv1 "github.com/voxire/voxie/gen/go/hub/team/onboarding/v1"
-
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	hubteamonboardingv1 "github.com/voxire/voxie/gen/go/hub/team/onboarding/v1"
 )
 
 type OnboardingAPI struct {

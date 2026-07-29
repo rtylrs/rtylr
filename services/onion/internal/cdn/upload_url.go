@@ -585,10 +585,6 @@ func uploadURLWebPCacheKey(seed, sourceHash string) string {
 	return uploadURLTransformCacheKey(seed, sourceHash, p)
 }
 
-func uploadURLWebPStorageKey(key string) string {
-	return "upload-url-transformed/" + key + ".webp"
-}
-
 func uploadURLTransformCacheKey(seed, sourceHash string, p Params) string {
 	return cacheKey("upload-url-transform", seed, sourceHash, p.CacheKey("params"))
 }

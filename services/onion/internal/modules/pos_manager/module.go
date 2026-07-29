@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	posmanagerv1 "github.com/voxire/voxie/gen/go/pos/manager/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_manager/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_manager/internal/application"
+	posmanagerv1 "github.com/voxire/voxie/gen/go/pos/manager/v1"
 )
 
 type Module struct {

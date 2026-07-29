@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	onekithttp "github.com/corezio/onekit/http"
+
 	bookingappointmentv1 "github.com/voxire/voxie/gen/go/booking/appointment/v1"
 )
 

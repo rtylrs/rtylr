@@ -99,10 +99,7 @@ func (s *Service) UpdatePurchaseOrderStatus(ctx context.Context, businessID, id 
 	// line item, and ledger the movement — all atomically and idempotently.
 	// ReceivePurchaseOrder owns that whole transaction.
 	if status == string(domain.POStatusReceived) {
-		if err := s.ReceivePurchaseOrder(ctx, businessID, id, businessID); err != nil {
-			return err
-		}
-		return nil
+		return s.ReceivePurchaseOrder(ctx, businessID, id, businessID)
 	}
 
 	if err := s.repo.UpdatePurchaseOrderStatus(ctx, businessID, id, status); err != nil {

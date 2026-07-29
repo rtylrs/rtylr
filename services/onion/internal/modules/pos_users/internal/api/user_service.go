@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"errors"
-	posuserv1 "github.com/voxire/voxie/gen/go/pos/user/v1"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/pos_users/internal/application"
@@ -12,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	posuserv1 "github.com/voxire/voxie/gen/go/pos/user/v1"
 )
 
 type UserAPI struct {

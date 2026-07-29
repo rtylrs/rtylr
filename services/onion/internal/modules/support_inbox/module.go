@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	supportinboxv1 "github.com/voxire/voxie/gen/go/support/inbox/v1"
-
 	"github.com/voxire/onion/internal/modules/support_inbox/internal/api"
 	"github.com/voxire/onion/internal/modules/support_inbox/internal/application"
+	supportinboxv1 "github.com/voxire/voxie/gen/go/support/inbox/v1"
 )
 
 type Module struct {

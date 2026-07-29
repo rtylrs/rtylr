@@ -7,14 +7,14 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	financedashboardv1 "github.com/voxire/voxie/gen/go/finance/dashboard/v1"
-	financeinvoicespaymentsv1 "github.com/voxire/voxie/gen/go/finance/invoices/payments/v1"
-	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
-	financereportv1 "github.com/voxire/voxie/gen/go/finance/report/v1"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/api"
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	financedashboardv1 "github.com/voxire/voxie/gen/go/finance/dashboard/v1"
+	financeinvoicespaymentsv1 "github.com/voxire/voxie/gen/go/finance/invoices/payments/v1"
+	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
+	financereportv1 "github.com/voxire/voxie/gen/go/finance/report/v1"
 )
 
 type Module struct {

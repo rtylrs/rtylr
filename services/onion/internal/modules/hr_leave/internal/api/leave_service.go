@@ -15,7 +15,7 @@ func NewLeaveService(service *application.Service) *LeaveService {
 	return &LeaveService{service: service}
 }
 
-func (s *LeaveService) ListLeaveRequests(ctx context.Context, req *hrleavev1.ListLeaveRequestsRequest) (*hrleavev1.ListLeaveRequestsResponse, error) {
+func (s *LeaveService) ListLeaveRequests(ctx context.Context, _ *hrleavev1.ListLeaveRequestsRequest) (*hrleavev1.ListLeaveRequestsResponse, error) {
 	res, err := (&ListLeaveRequestsHandler{Service: s.service}).Serve(ctx, &ListLeaveRequestsRequest{})
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (s *LeaveService) ApproveLeave(ctx context.Context, req *hrleavev1.ApproveL
 	return &hrleavev1.ApproveLeaveResponse{Success: res.Success}, nil
 }
 
-func (s *LeaveService) ListLeaveTypes(ctx context.Context, req *hrleavev1.ListLeaveTypesRequest) (*hrleavev1.ListLeaveTypesResponse, error) {
+func (s *LeaveService) ListLeaveTypes(ctx context.Context, _ *hrleavev1.ListLeaveTypesRequest) (*hrleavev1.ListLeaveTypesResponse, error) {
 	res, err := (&ListLeaveTypesHandler{Service: s.service}).Serve(ctx, &ListLeaveTypesRequest{})
 	if err != nil {
 		return nil, err

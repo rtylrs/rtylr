@@ -1,9 +1,8 @@
 package api
 
 import (
-	hubteammembersv1 "github.com/voxire/voxie/gen/go/hub/team/members/v1"
-
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
+	hubteammembersv1 "github.com/voxire/voxie/gen/go/hub/team/members/v1"
 )
 
 func newProtoStaffUser(u domain.StaffUser) *hubteammembersv1.StaffUserPayload {

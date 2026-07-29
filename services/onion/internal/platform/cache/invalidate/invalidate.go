@@ -65,6 +65,7 @@ func Invalidate(ctx context.Context, t keys.InvalidationType, id string) Result 
 	return res
 }
 
+//nolint:revive // Keep the exported name aligned with the sibling Invalidate API.
 func InvalidateAsync(_ context.Context, t keys.InvalidationType, id string) Result {
 	patterns := patternsFor(t, id)
 	res := Result{Type: t, ID: id, Patterns: patterns}

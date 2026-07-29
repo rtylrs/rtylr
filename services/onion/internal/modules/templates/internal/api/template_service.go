@@ -7,13 +7,12 @@ import (
 	"net/http"
 	"strings"
 
-	crmtemplatev1 "github.com/voxire/voxie/gen/go/crm/template/v1"
-
 	"github.com/voxire/onion/internal/modules/templates/internal/application"
 	"github.com/voxire/onion/internal/modules/templates/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	crmtemplatev1 "github.com/voxire/voxie/gen/go/crm/template/v1"
 )
 
 type TemplateAPI struct {

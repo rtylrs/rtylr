@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"net/http"
 
-	hubnotificationv1 "github.com/voxire/voxie/gen/go/hub/notification/v1"
-
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/notifications/internal/application"
 	"github.com/voxire/onion/internal/modules/notifications/internal/routes"
 	"github.com/voxire/onion/internal/modules/notifications/internal/routes/handlers"
+	hubnotificationv1 "github.com/voxire/voxie/gen/go/hub/notification/v1"
 )
 
 type Module struct {

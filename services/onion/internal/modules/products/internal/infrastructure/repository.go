@@ -329,11 +329,7 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		}
 	}
 
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit()
 }
 
 func (r *Repository) replacePrimaryProductImage(ctx context.Context, qtx *sqlc.Queries, ownerID, productID int64, alt, imageURL string) error {

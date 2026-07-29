@@ -19,8 +19,8 @@ func (r *Repository) GetSalesByCategory(ctx context.Context, businessID int64) (
 	thisFrom, thisTo, _, _ := mtdRanges(nowFn())
 	// cross-schema read from erp_categories + erp_products + pos_order_items + pos_orders — MTD category sales
 	rows, err := r.queries.GetSalesByCategory(ctx, sqlc.GetSalesByCategoryParams{
-		BusinessID: businessID,
-		CreatedAt:  sql.NullTime{Time: thisFrom, Valid: true},
+		BusinessID:  businessID,
+		CreatedAt:   sql.NullTime{Time: thisFrom, Valid: true},
 		CreatedAt_2: sql.NullTime{Time: thisTo, Valid: true},
 	})
 	if err != nil {

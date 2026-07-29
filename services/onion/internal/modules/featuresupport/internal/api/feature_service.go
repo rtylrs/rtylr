@@ -6,12 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	hubfeaturev1 "github.com/voxire/voxie/gen/go/hub/feature/v1"
-
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/application"
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	hubfeaturev1 "github.com/voxire/voxie/gen/go/hub/feature/v1"
 )
 
 type FeatureAPI struct {

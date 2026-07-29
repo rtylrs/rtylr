@@ -25,7 +25,7 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(pool), pool: pool}
 }
 
-func (r *Repository) Create(ctx context.Context, businessID int64, ownerID int64, input domain.CheckoutCreateInput) (int64, error) {
+func (r *Repository) Create(ctx context.Context, businessID, ownerID int64, input domain.CheckoutCreateInput) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin checkout transaction", logger.Error(err))
@@ -70,7 +70,7 @@ func (r *Repository) Create(ctx context.Context, businessID int64, ownerID int64
 	return id, nil
 }
 
-func (r *Repository) Complete(ctx context.Context, businessID, id int64, ownerID int64) error {
+func (r *Repository) Complete(ctx context.Context, businessID, id, _ int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin checkout completion transaction", logger.Error(err))

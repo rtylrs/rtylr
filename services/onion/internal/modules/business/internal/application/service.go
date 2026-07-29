@@ -76,8 +76,10 @@ func (s *Service) ListUserBusinesses(ctx context.Context, userID int64) ([]domai
 	)
 }
 
-var ErrSubBusinessNotOwned = errors.New("parent business not found or not owned by user")
-var ErrSubBusinessNameEmpty = errors.New("business name is required")
+var (
+	ErrSubBusinessNotOwned  = errors.New("parent business not found or not owned by user")
+	ErrSubBusinessNameEmpty = errors.New("business name is required")
+)
 
 func (s *Service) CreateSubBusiness(ctx context.Context, name string, ownerUserID, parentBusinessID int64) (int64, error) {
 	name = strings.TrimSpace(name)

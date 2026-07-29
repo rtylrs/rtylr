@@ -137,6 +137,7 @@ func (p *plainCompletionProvider) CompleteText(_ context.Context, _ string) (str
 	}
 	return p.result, nil
 }
+
 func (p *plainCompletionProvider) CompleteTextStream(_ context.Context, _ string) (<-chan StreamToken, error) {
 	return nil, errors.New("not implemented")
 }

@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	hrbenefitv1 "github.com/voxire/voxie/gen/go/hr/benefit/v1"
-
 	"github.com/voxire/onion/internal/modules/benefits/internal/application"
 	"github.com/voxire/onion/internal/modules/benefits/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hrbenefitv1 "github.com/voxire/voxie/gen/go/hr/benefit/v1"
 )
 
 type BenefitAPI struct {

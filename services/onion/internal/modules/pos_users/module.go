@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	posuserv1 "github.com/voxire/voxie/gen/go/pos/user/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_users/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_users/internal/application"
+	posuserv1 "github.com/voxire/voxie/gen/go/pos/user/v1"
 )
 
 type Module struct{ service *application.Service }

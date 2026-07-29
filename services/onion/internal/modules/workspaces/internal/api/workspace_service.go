@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"strconv"
 
-	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/wsbus"
+	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
 )
 
 type WorkspaceAPI struct {
@@ -211,7 +210,7 @@ func (a *WorkspaceAPI) RemoveWorkspaceMember(ctx context.Context, req *flowworks
 	return &flowworkspacev1.RemoveWorkspaceMemberResponse{Message: "Member removed successfully"}, nil
 }
 
-func (a *WorkspaceAPI) resolveWorkspaceID(ctx context.Context, userID int64, workspaceID int64) (int64, error) {
+func (a *WorkspaceAPI) resolveWorkspaceID(ctx context.Context, userID, workspaceID int64) (int64, error) {
 	raw := strconv.FormatInt(workspaceID, 10)
 	if workspaceID == 0 {
 		raw = "personal"

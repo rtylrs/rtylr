@@ -180,7 +180,7 @@ func (s *Service) RevealSelfHostLicenseKey(ctx context.Context, id int64) (*Self
 	}, nil
 }
 
-func (s *Service) RegenerateSelfHostLicenseKey(ctx context.Context, id int64, adminID int64) (*SelfHostLicenseKeyResult, error) {
+func (s *Service) RegenerateSelfHostLicenseKey(ctx context.Context, id, adminID int64) (*SelfHostLicenseKeyResult, error) {
 	row, err := s.repo.GetSelfHostLicenseByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, infrastructure.ErrSelfHostLicenseNotFound) {
@@ -221,7 +221,7 @@ func (s *Service) RegenerateSelfHostLicenseKey(ctx context.Context, id int64, ad
 	}, nil
 }
 
-func (s *Service) RevokeSelfHostLicense(ctx context.Context, id int64, adminID int64) (*SelfHostLicenseDTO, error) {
+func (s *Service) RevokeSelfHostLicense(ctx context.Context, id, adminID int64) (*SelfHostLicenseDTO, error) {
 	if err := s.repo.RevokeSelfHostLicense(ctx, id, adminID); err != nil {
 		if errors.Is(err, infrastructure.ErrSelfHostLicenseNotFound) {
 			return nil, ErrSelfHostLicenseNotFound
@@ -362,7 +362,7 @@ func parseOptionalLicenseTime(raw string) (*time.Time, error) {
 		}
 		lastErr = err
 	}
-	return nil, fmt.Errorf("%w: invalid time %q: %v", ErrInvalidSelfHostLicenseInput, raw, lastErr)
+	return nil, fmt.Errorf("%w: invalid time %q: %w", ErrInvalidSelfHostLicenseInput, raw, lastErr)
 }
 
 func randomLicenseID() string {

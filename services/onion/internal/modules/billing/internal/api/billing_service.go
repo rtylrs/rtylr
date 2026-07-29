@@ -4,11 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	hubbillingv1 "github.com/voxire/voxie/gen/go/hub/billing/v1"
-
 	"github.com/voxire/onion/internal/modules/billing/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	hubbillingv1 "github.com/voxire/voxie/gen/go/hub/billing/v1"
 )
 
 type BillingAPI struct {

@@ -5,12 +5,11 @@ import (
 	"errors"
 	"net/http"
 
-	hubuserv1 "github.com/voxire/voxie/gen/go/hub/user/v1"
-
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/hubprofile"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	hubuserv1 "github.com/voxire/voxie/gen/go/hub/user/v1"
 )
 
 type UserAPI struct {

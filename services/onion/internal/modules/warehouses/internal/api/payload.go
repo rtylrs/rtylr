@@ -1,9 +1,8 @@
 package api
 
 import (
-	erpwarehousev1 "github.com/voxire/voxie/gen/go/erp/warehouse/v1"
-
 	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
+	erpwarehousev1 "github.com/voxire/voxie/gen/go/erp/warehouse/v1"
 )
 
 func newWarehousePayload(w domain.Warehouse) *erpwarehousev1.Warehouse {

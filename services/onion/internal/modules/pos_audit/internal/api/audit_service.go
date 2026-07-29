@@ -7,12 +7,11 @@ import (
 	"strings"
 	"time"
 
-	posauditv1 "github.com/voxire/voxie/gen/go/pos/audit/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	posauditv1 "github.com/voxire/voxie/gen/go/pos/audit/v1"
 )
 
 type AuditAPI struct {

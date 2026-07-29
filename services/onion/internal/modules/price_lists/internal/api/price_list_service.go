@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	erppricelistv1 "github.com/voxire/voxie/gen/go/erp/price_list/v1"
-
 	"github.com/voxire/onion/internal/modules/price_lists/internal/application"
 	"github.com/voxire/onion/internal/modules/price_lists/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	erppricelistv1 "github.com/voxire/voxie/gen/go/erp/price_list/v1"
 )
 
 type PriceListAPI struct {

@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
-
 	"github.com/voxire/onion/internal/modules/documents/internal/application"
 	"github.com/voxire/onion/internal/modules/documents/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hrdocumentv1 "github.com/voxire/voxie/gen/go/hr/document/v1"
 )
 
 var expiryDateLayouts = []string{

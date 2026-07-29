@@ -8,11 +8,10 @@ import (
 	"strings"
 	"time"
 
-	consoleadminv1 "github.com/voxire/voxie/gen/go/console/admin/v1"
-
 	"github.com/voxire/onion/internal/modules/console/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	consoleadminv1 "github.com/voxire/voxie/gen/go/console/admin/v1"
 )
 
 type ConsoleAdminAPI struct {

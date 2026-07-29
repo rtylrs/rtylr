@@ -83,12 +83,12 @@ type TimeOffInput struct {
 	OwnerID    int64   `json:"owner_id"`
 	BusinessID int64   `json:"business_id"`
 	StaffID    int64   `json:"staff_id"`
-	Type      string  `json:"type"`
-	StartDate string  `json:"start_date"`
-	EndDate   string  `json:"end_date"`
-	DaysCount float64 `json:"days_count"`
-	Reason    string  `json:"reason"`
-	Notes     string  `json:"notes"`
+	Type       string  `json:"type"`
+	StartDate  string  `json:"start_date"`
+	EndDate    string  `json:"end_date"`
+	DaysCount  float64 `json:"days_count"`
+	Reason     string  `json:"reason"`
+	Notes      string  `json:"notes"`
 }
 
 type TimeOffApprovalInput struct {

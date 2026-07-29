@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"net/http"
 
-	possettingsv1 "github.com/voxire/voxie/gen/go/pos/settings/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_settings/internal/domain"
+	possettingsv1 "github.com/voxire/voxie/gen/go/pos/settings/v1"
 )
 
 const (

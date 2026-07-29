@@ -5,13 +5,12 @@ import (
 	"errors"
 	"net/http"
 
-	posaccessv1 "github.com/voxire/voxie/gen/go/pos/access/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	posaccessv1 "github.com/voxire/voxie/gen/go/pos/access/v1"
 )
 
 type AccessAPI struct {

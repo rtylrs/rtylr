@@ -15,9 +15,9 @@ import (
 	"strings"
 
 	"buf.build/go/protovalidate"
+	onekithttp "github.com/corezio/onekit/http"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
-	onekithttp "github.com/corezio/onekit/http"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
@@ -302,6 +302,7 @@ func validateRequest[Req any](ctx context.Context, handler interface{}, req *Req
 
 	return nil
 }
+
 func validateProtoMessages(value any) error {
 	seen := make(map[uintptr]struct{})
 	return walkProtoMessages(reflect.ValueOf(value), seen)
@@ -581,7 +582,7 @@ func parseQueryPrimitive(value string) any {
 func WriteOneKitError(ctx context.Context, w http.ResponseWriter, err error) {
 	w.Header().Set("Content-Type", "application/json")
 
-	statusCode := http.StatusInternalServerError
+	var statusCode int
 	var response proto.Message
 
 	var validationErr *onekithttp.ValidationError

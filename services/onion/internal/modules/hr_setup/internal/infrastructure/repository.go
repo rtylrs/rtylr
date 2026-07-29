@@ -43,10 +43,10 @@ func (r *Repository) GetSetupSteps(ctx context.Context, businessID int64) ([]*do
 
 func (r *Repository) UpsertSetupStep(ctx context.Context, businessID int64, stepKey string, completedAt time.Time) error {
 	return r.queries.UpsertSetupStep(ctx, sqlc.UpsertSetupStepParams{
-		OwnerID:      businessID,
-		BusinessID:   businessID,
-		StepKey:      stepKey,
-		CompletedAt:  sql.NullTime{Time: completedAt, Valid: true},
+		OwnerID:     businessID,
+		BusinessID:  businessID,
+		StepKey:     stepKey,
+		CompletedAt: sql.NullTime{Time: completedAt, Valid: true},
 	})
 }
 
@@ -77,8 +77,8 @@ func (r *Repository) UpsertHRConfig(ctx context.Context, ownerID int64, complete
 		completed = sql.NullTime{Time: *completedAt, Valid: true}
 	}
 	if err := r.queries.UpsertHRConfig(ctx, sqlc.UpsertHRConfigParams{
-		OwnerID:           ownerID,
-		SetupCompletedAt:  completed,
+		OwnerID:          ownerID,
+		SetupCompletedAt: completed,
 	}); err != nil {
 		return nil, err
 	}

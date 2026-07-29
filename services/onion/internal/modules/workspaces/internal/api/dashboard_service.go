@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"strconv"
 
-	flowdashboardv1 "github.com/voxire/voxie/gen/go/flow/dashboard/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	flowdashboardv1 "github.com/voxire/voxie/gen/go/flow/dashboard/v1"
 )
 
 type DashboardAPI struct {

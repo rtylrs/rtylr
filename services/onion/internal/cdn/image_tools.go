@@ -132,11 +132,13 @@ func (c *CDN) imageAnalyze(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"id":     id,
 		"metric": metric,
 		"value":  strings.TrimSpace(string(out)),
-	})
+	}); err != nil {
+		logger.Ctx(r.Context()).Warn("cdn: failed to encode image analysis response", logger.Error(err))
+	}
 }
 
 func (c *CDN) runImageAnalysis(r *http.Request, storageKey, metric string) ([]byte, error) {
@@ -222,12 +224,12 @@ func responsiveWidths(minW, maxW, count int) []int {
 	return widths
 }
 
-func clampInt(value, min, max int) int {
-	if value < min {
-		return min
+func clampInt(value, minValue, maxValue int) int {
+	if value < minValue {
+		return minValue
 	}
-	if value > max {
-		return max
+	if value > maxValue {
+		return maxValue
 	}
 	return value
 }

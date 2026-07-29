@@ -6,12 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
-	hubsubscriptionv1 "github.com/voxire/voxie/gen/go/hub/subscription/v1"
-
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/api"
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/application"
+	hubsubscriptionv1 "github.com/voxire/voxie/gen/go/hub/subscription/v1"
 )
 
 type Module struct {

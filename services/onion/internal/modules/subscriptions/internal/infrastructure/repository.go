@@ -29,31 +29,6 @@ func NewRepository(db *sql.DB) *Repository {
 
 // ── Plans ─────────────────────────────────────────────────────────────────────
 
-// scanPlan hydrates a Plan from a row matching planSelectCols.
-// Reused by all three GetPlan* entrypoints.
-func scanPlan(scanner interface {
-	Scan(dest ...any) error
-},
-) (domain.Plan, error) {
-	var p domain.Plan
-	var appsJSON, featuresJSON string
-	var maxSeats, maxLocations sql.NullInt64
-	err := scanner.Scan(
-		&p.ID, &p.Name, &p.Slug, &appsJSON, &p.PricePerSeatCents,
-		&p.AnnualPricePerSeatCents, &p.TrialDays,
-		&p.PaddlePriceID, &p.Tagline,
-		&maxSeats, &maxLocations,
-		&p.AICreditsPerMonth, &featuresJSON,
-		&p.TierOrder, &p.IsSolo, &p.IsFeatured,
-		&p.IsActive, &p.CreatedAt,
-	)
-	if err != nil {
-		return domain.Plan{}, err
-	}
-	hydratePlanJSON(&p, appsJSON, featuresJSON, maxSeats, maxLocations)
-	return p, nil
-}
-
 func hydratePlanJSON(p *domain.Plan, appsJSON, featuresJSON string, maxSeats, maxLocations sql.NullInt64) {
 	if jsonErr := json.Unmarshal([]byte(appsJSON), &p.Apps); jsonErr != nil {
 		p.Apps = []string{}
@@ -263,11 +238,11 @@ func (r *Repository) UpsertSubscription(ctx context.Context, ownerID, planID int
 	nextBilling := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, time.UTC)
 
 	return r.queries.UpsertSubscription(ctx, sqlc.UpsertSubscriptionParams{
-		OwnerID:   ownerID,
-		PlanID:    planID,
-		Status:    sqlc.NullSubscriptionsStatus{SubscriptionsStatus: status, Valid: true},
-		SeatCount: int32(seatCount),
-		TrialEndsAt: trialEnd,
+		OwnerID:         ownerID,
+		PlanID:          planID,
+		Status:          sqlc.NullSubscriptionsStatus{SubscriptionsStatus: status, Valid: true},
+		SeatCount:       int32(seatCount),
+		TrialEndsAt:     trialEnd,
 		NextBillingDate: sql.NullTime{Time: nextBilling, Valid: true},
 	})
 }

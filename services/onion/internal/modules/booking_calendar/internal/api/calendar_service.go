@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	bookingcalendarv1 "github.com/voxire/voxie/gen/go/booking/calendar/v1"
-
 	"github.com/voxire/onion/internal/modules/booking_calendar/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_calendar/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	bookingcalendarv1 "github.com/voxire/voxie/gen/go/booking/calendar/v1"
 )
 
 type CalendarAPI struct {

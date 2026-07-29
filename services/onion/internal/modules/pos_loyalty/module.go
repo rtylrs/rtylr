@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	posloyaltyv1 "github.com/voxire/voxie/gen/go/pos/loyalty/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/api"
 	"github.com/voxire/onion/internal/modules/pos_loyalty/internal/application"
+	posloyaltyv1 "github.com/voxire/voxie/gen/go/pos/loyalty/v1"
 )
 
 type Module struct {

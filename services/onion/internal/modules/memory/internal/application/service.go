@@ -386,7 +386,7 @@ func (s *Service) Close() error {
 	return nil
 }
 
-func setSessionMetadataFlag(raw string, key string, value bool) (string, error) {
+func setSessionMetadataFlag(raw, key string, value bool) (string, error) {
 	metadata := map[string]interface{}{}
 	if strings.TrimSpace(raw) != "" && strings.TrimSpace(raw) != "null" {
 		if err := json.Unmarshal([]byte(raw), &metadata); err != nil {

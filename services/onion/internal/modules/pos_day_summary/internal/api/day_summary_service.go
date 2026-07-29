@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"regexp"
 
-	possummaryv1 "github.com/voxire/voxie/gen/go/pos/day_summary/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_day_summary/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	possummaryv1 "github.com/voxire/voxie/gen/go/pos/day_summary/v1"
 )
 
 var reDate = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)

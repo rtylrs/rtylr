@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	supportcustomerv1 "github.com/voxire/voxie/gen/go/support/customer/v1"
-
 	"github.com/voxire/onion/internal/modules/support_customers/internal/application"
 	"github.com/voxire/onion/internal/modules/support_customers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	supportcustomerv1 "github.com/voxire/voxie/gen/go/support/customer/v1"
 )
 
 type CustomerAPI struct {

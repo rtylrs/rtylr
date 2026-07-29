@@ -37,7 +37,7 @@ func sessionToChatSummary(session domain.ChatSession) *hubmemoryv1.ChatSummary {
 	}
 }
 
-func sessionMetadataBool(raw string, key string) bool {
+func sessionMetadataBool(raw, key string) bool {
 	if raw == "" || raw == "null" {
 		return false
 	}

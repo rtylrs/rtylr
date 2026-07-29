@@ -6,6 +6,12 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+
+	"github.com/voxire/onion/internal/modules/workspaces/internal/api"
+	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
+	"github.com/voxire/onion/internal/modules/workspaces/internal/realtime"
+	"github.com/voxire/onion/internal/platform/logger"
 	flowcyclev1 "github.com/voxire/voxie/gen/go/flow/cycle/v1"
 	flowdashboardv1 "github.com/voxire/voxie/gen/go/flow/dashboard/v1"
 	flowinsightsv1 "github.com/voxire/voxie/gen/go/flow/insights/v1"
@@ -17,13 +23,6 @@ import (
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 	flowviewv1 "github.com/voxire/voxie/gen/go/flow/view/v1"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
-
-	"github.com/go-chi/chi/v5"
-
-	"github.com/voxire/onion/internal/modules/workspaces/internal/api"
-	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
-	"github.com/voxire/onion/internal/modules/workspaces/internal/realtime"
-	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Module struct {
@@ -113,7 +112,7 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	}
 }
 
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
+func (m *Module) RegisterRoutes(_ context.Context, router *chi.Mux, _ ...interface{}) {
 	// Realtime WebSocket endpoint. Registered as a raw chi handler — the
 	// standard RegisterGET wrapper would try to decode the request body
 	// and serialize a JSON response, both of which break the WS upgrade.

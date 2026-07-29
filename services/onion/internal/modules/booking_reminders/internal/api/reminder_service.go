@@ -7,13 +7,12 @@ import (
 	"strings"
 	"time"
 
-	bookingreminderv1 "github.com/voxire/voxie/gen/go/booking/reminder/v1"
-
 	"github.com/voxire/onion/internal/modules/booking_reminders/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_reminders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	bookingreminderv1 "github.com/voxire/voxie/gen/go/booking/reminder/v1"
 )
 
 type ReminderAPI struct {

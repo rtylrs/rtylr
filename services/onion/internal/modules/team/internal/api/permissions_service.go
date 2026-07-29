@@ -5,12 +5,11 @@ import (
 	"errors"
 	"net/http"
 
-	hubteampermissionsv1 "github.com/voxire/voxie/gen/go/hub/team/permissions/v1"
-
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	hubteampermissionsv1 "github.com/voxire/voxie/gen/go/hub/team/permissions/v1"
 )
 
 type PermissionsAPI struct {

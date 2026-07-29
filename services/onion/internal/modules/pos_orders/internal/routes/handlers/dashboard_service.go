@@ -4,10 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	posdashboardv1 "github.com/voxire/voxie/gen/go/pos/dashboard/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	posdashboardv1 "github.com/voxire/voxie/gen/go/pos/dashboard/v1"
 )
 
 type DashboardAPI struct {

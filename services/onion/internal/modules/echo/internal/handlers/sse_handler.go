@@ -36,8 +36,10 @@ type QuotaService interface {
 	RecordUsage(ctx context.Context, businessID, userID int64, tokens int)
 }
 
-const caretSystemPreamble = "You are Caret, an AI business assistant for rtylr."
-const maxSessionTitleRunes = 80
+const (
+	caretSystemPreamble  = "You are Caret, an AI business assistant for rtylr."
+	maxSessionTitleRunes = 80
+)
 
 const (
 	cachedReplayTinyResponseRunes = 12
@@ -729,10 +731,9 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		}
 	}
 
-	currentPrompt := basePrompt
 	currentPromptChars := cachePlan.PromptChars
 	totalTokens := 0
-	finalToken := snips.StreamToken{}
+	var finalToken snips.StreamToken
 	for round := 0; ; round++ {
 		beforeToolResults := renderer.ToolResultCount()
 		beforeResponseChars := fullResponse.Len()
@@ -756,7 +757,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 			return
 		}
 
-		currentPrompt = buildToolResultContinuationPrompt(basePrompt, fullResponse.String(), newToolResults)
+		currentPrompt := buildToolResultContinuationPrompt(basePrompt, fullResponse.String(), newToolResults)
 		currentPromptChars = len(currentPrompt)
 		nextTokenChan, err := h.AiService.GenerateTextStream(ctx, currentPrompt)
 		if err != nil {

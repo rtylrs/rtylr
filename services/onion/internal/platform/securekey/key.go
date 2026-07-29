@@ -54,7 +54,7 @@ func Hash(secret string) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func ConstantTimeEqual(secret string, expectedHash string) bool {
+func ConstantTimeEqual(secret, expectedHash string) bool {
 	incoming := Hash(secret)
 	if len(incoming) != len(expectedHash) {
 		return false

@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"strings"
 
-	posmodifierv1 "github.com/voxire/voxie/gen/go/pos/modifier/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	posmodifierv1 "github.com/voxire/voxie/gen/go/pos/modifier/v1"
 )
 
 type ModifierAPI struct {

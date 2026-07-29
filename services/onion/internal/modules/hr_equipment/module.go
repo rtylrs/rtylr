@@ -6,12 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
-	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
-
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
+	hrequipmentv1 "github.com/voxire/voxie/gen/go/hr/equipment/v1"
 )
 
 type hrCoreApprovalAdapter struct {

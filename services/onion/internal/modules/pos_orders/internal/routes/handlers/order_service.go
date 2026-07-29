@@ -8,11 +8,10 @@ import (
 	"net/http"
 	"time"
 
-	posordersv1 "github.com/voxire/voxie/gen/go/pos/orders/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	posordersv1 "github.com/voxire/voxie/gen/go/pos/orders/v1"
 )
 
 type OrderAPI struct {

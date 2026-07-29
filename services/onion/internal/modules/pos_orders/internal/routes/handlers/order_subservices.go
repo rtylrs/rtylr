@@ -5,6 +5,9 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
+	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	posordersdiscountsv1 "github.com/voxire/voxie/gen/go/pos/orders/discounts/v1"
 	posordersholdsv1 "github.com/voxire/voxie/gen/go/pos/orders/holds/v1"
 	posordersitemsv1 "github.com/voxire/voxie/gen/go/pos/orders/items/v1"
@@ -12,10 +15,6 @@ import (
 	posordersrefundsv1 "github.com/voxire/voxie/gen/go/pos/orders/refunds/v1"
 	posorderssplitv1 "github.com/voxire/voxie/gen/go/pos/orders/splits/v1"
 	posordersv1 "github.com/voxire/voxie/gen/go/pos/orders/v1"
-
-	"github.com/voxire/onion/internal/modules/pos_orders/internal/application"
-	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
-	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
 type PaymentAPI struct {

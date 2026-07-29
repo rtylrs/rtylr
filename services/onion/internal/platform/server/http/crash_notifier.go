@@ -10,9 +10,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
-var (
-	ErrCrashRecovered = errors.New("crash recovered")
-)
+var ErrCrashRecovered = errors.New("crash recovered")
 
 func CrashNotifierMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {

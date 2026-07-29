@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	hrtimesheetv1 "github.com/voxire/voxie/gen/go/hr/timesheet/v1"
-
 	"github.com/voxire/onion/internal/modules/timesheets/internal/api"
 	"github.com/voxire/onion/internal/modules/timesheets/internal/application"
+	hrtimesheetv1 "github.com/voxire/voxie/gen/go/hr/timesheet/v1"
 )
 
 type Module struct {

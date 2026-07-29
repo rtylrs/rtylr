@@ -13,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/trinodb/trino-go-client/trino" // register Trino database/sql driver
 	trinodriver "github.com/trinodb/trino-go-client/trino"
 
 	"github.com/voxire/onion/internal/platform/config"
@@ -224,10 +223,7 @@ func Ping(ctx context.Context) error {
 		return err
 	}
 	var one int
-	if err := db.QueryRowContext(ctx, "SELECT 1").Scan(&one); err != nil {
-		return err
-	}
-	return nil
+	return db.QueryRowContext(ctx, "SELECT 1").Scan(&one)
 }
 
 // Close shuts down the Trino pool.

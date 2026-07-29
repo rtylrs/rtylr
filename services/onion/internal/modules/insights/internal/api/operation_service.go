@@ -31,8 +31,8 @@ func (a *OperationAPI) GetHeadcountMetrics(ctx context.Context, _ *insightsopera
 	return &insightsoperationv1.GetHeadcountMetricsResponse{
 		Metrics: &insightsoperationv1.HeadcountMetrics{
 			Current:            int32(row.ActiveStaff),
-			HiredThisPeriod:    int32(max(row.MomDelta, 0)),
-			DepartedThisPeriod: int32(max(-row.MomDelta, 0)),
+			HiredThisPeriod:    int32(maxInt64(row.MomDelta, 0)),
+			DepartedThisPeriod: int32(maxInt64(-row.MomDelta, 0)),
 			TurnoverRate:       row.MomDeltaPct,
 		},
 	}, nil
@@ -123,7 +123,7 @@ func (a *OperationAPI) GetOperationsSummary(ctx context.Context, _ *insightsoper
 	}, nil
 }
 
-func max(a, b int64) int64 {
+func maxInt64(a, b int64) int64 {
 	if a > b {
 		return a
 	}

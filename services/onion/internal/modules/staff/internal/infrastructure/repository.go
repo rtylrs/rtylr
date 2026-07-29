@@ -31,68 +31,6 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-// staffFromRow maps an sqlc HrStaff model to the domain Staff type.
-func staffFromRow(row sqlc.HrStaff) domain.Staff {
-	var s domain.Staff
-	s.ID = row.ID
-	s.OwnerID = row.OwnerID
-	s.BusinessID = row.BusinessID
-	if row.UserID.Valid {
-		s.UserID = row.UserID.Int64
-	}
-	if row.DepartmentID.Valid {
-		s.DepartmentID = row.DepartmentID.Int64
-	}
-	s.FirstName = row.FirstName
-	s.LastName = row.LastName
-	s.Email = row.Email
-	if row.Phone.Valid {
-		s.Phone = row.Phone.String
-	}
-	s.Role = row.Role
-	if row.EmploymentType.Valid {
-		s.EmploymentType = string(row.EmploymentType.HrStaffEmploymentType)
-	}
-	if row.Status.Valid {
-		s.Status = string(row.Status.HrStaffStatus)
-	}
-	if row.Salary.Valid {
-		s.Salary = parseDecimal(row.Salary.String)
-	}
-	if row.HourlyRate.Valid {
-		s.HourlyRate = parseDecimal(row.HourlyRate.String)
-	}
-	if row.OvertimeRate.Valid {
-		s.OvertimeRate = parseDecimal(row.OvertimeRate.String)
-	}
-	s.StartDate = row.StartDate
-	if row.EndDate.Valid {
-		s.EndDate = row.EndDate.Time
-	}
-	if row.Address.Valid {
-		s.Address = row.Address.String
-	}
-	if row.EmergencyContactName.Valid {
-		s.EmergencyContactName = row.EmergencyContactName.String
-	}
-	if row.EmergencyContactPhone.Valid {
-		s.EmergencyContactPhone = row.EmergencyContactPhone.String
-	}
-	if row.Apps != nil {
-		s.Apps = string(row.Apps)
-	}
-	if row.Notes.Valid {
-		s.Notes = row.Notes.String
-	}
-	if row.CreatedAt.Valid {
-		s.CreatedAt = row.CreatedAt.Time
-	}
-	if row.UpdatedAt.Valid {
-		s.UpdatedAt = row.UpdatedAt.Time
-	}
-	return s
-}
-
 // dynamic-query: squirrel
 func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, departmentID, status string) ([]domain.Staff, error) {
 	businessID := ownerID

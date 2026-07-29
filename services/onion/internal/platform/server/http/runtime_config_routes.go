@@ -26,12 +26,12 @@ var runtimeAppDeps = map[string][]string{
 }
 
 type runtimeConfigResponse struct {
-	DeploymentMode     string               `json:"deployment_mode"`
-	SelfHosted         bool                 `json:"self_hosted"`
-	Version            string               `json:"version"`
-	URLs               map[string]string    `json:"urls"`
-	Apps               runtimeAppsBlock     `json:"apps"`
-	AllFeaturesEnabled bool                 `json:"all_features_enabled"`
+	DeploymentMode     string                `json:"deployment_mode"`
+	SelfHosted         bool                  `json:"self_hosted"`
+	Version            string                `json:"version"`
+	URLs               map[string]string     `json:"urls"`
+	Apps               runtimeAppsBlock      `json:"apps"`
+	AllFeaturesEnabled bool                  `json:"all_features_enabled"`
 	License            runtimeLicenseSummary `json:"license"`
 }
 

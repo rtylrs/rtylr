@@ -6,10 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	financeaccountv1 "github.com/voxire/voxie/gen/go/finance/account/v1"
-
 	"github.com/voxire/onion/internal/modules/accounts/internal/api"
 	"github.com/voxire/onion/internal/modules/accounts/internal/application"
+	financeaccountv1 "github.com/voxire/voxie/gen/go/finance/account/v1"
 )
 
 type Module struct {

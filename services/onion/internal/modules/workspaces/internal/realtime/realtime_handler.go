@@ -16,6 +16,8 @@ import (
 // handshake (the `WebSocket` constructor accepts no headers). The client
 // therefore passes the JWT in the `?token=` query param and we validate
 // it here inside the handler before upgrading.
+//
+//nolint:revive // The name matches the module route registration convention.
 func RealtimeRoutes() []string { return []string{"/flow/ws"} }
 
 // ServeRealtime upgrades the HTTP request to a WebSocket and hands it

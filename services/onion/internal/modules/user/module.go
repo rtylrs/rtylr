@@ -7,15 +7,14 @@ import (
 	"net/http"
 	"time"
 
-	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
-	hubuserv1 "github.com/voxire/voxie/gen/go/hub/user/v1"
-
 	"github.com/voxire/onion/internal/modules/user/internal/api"
 	"github.com/voxire/onion/internal/modules/user/internal/application"
 	"github.com/voxire/onion/internal/modules/user/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/hubprofile"
 	"github.com/voxire/onion/internal/platform/utils/sliceutils"
+	commonauthv1 "github.com/voxire/voxie/gen/go/common/auth/v1"
+	hubuserv1 "github.com/voxire/voxie/gen/go/hub/user/v1"
 )
 
 const tokenValidationCacheTTL = 30 * time.Second

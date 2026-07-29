@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"net/http"
 
-	hubmemoryv1 "github.com/voxire/voxie/gen/go/hub/memory/v1"
-
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/memory/internal/api"
 	"github.com/voxire/onion/internal/modules/memory/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	hubmemoryv1 "github.com/voxire/voxie/gen/go/hub/memory/v1"
 )
 
 type Module struct {

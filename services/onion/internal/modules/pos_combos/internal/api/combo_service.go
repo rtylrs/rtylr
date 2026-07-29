@@ -6,13 +6,12 @@ import (
 	"net/http"
 	"strings"
 
-	poscombov1 "github.com/voxire/voxie/gen/go/pos/combo/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_combos/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_combos/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	poscombov1 "github.com/voxire/voxie/gen/go/pos/combo/v1"
 )
 
 type ComboAPI struct {

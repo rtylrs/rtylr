@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	posterminalv1 "github.com/voxire/voxie/gen/go/pos/terminal/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	posterminalv1 "github.com/voxire/voxie/gen/go/pos/terminal/v1"
 )
 
 type TerminalAPI struct {

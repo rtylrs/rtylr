@@ -50,4 +50,3 @@ func (r *Repository) GetOperationsKPIs(ctx context.Context, businessID int64) (O
 
 	return out, nil
 }
-

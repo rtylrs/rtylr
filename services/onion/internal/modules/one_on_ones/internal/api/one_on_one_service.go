@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"time"
 
-	hroneononev1 "github.com/voxire/voxie/gen/go/hr/one_on_one/v1"
-
 	"github.com/voxire/onion/internal/modules/one_on_ones/internal/application"
 	"github.com/voxire/onion/internal/modules/one_on_ones/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	hroneononev1 "github.com/voxire/voxie/gen/go/hr/one_on_one/v1"
 )
 
 var scheduledAtLayouts = []string{

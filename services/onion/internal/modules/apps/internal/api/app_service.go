@@ -5,14 +5,13 @@ import (
 	"net/http"
 	"time"
 
-	hubappv1 "github.com/voxire/voxie/gen/go/hub/app/v1"
-
 	"github.com/voxire/onion/internal/modules/apps/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/hubapp"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	hubappv1 "github.com/voxire/voxie/gen/go/hub/app/v1"
 )
 
 const addonsCacheScope = "addons"

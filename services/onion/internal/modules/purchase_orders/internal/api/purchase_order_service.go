@@ -7,13 +7,12 @@ import (
 	"strings"
 	"time"
 
-	erppurchaseorderv1 "github.com/voxire/voxie/gen/go/erp/purchase_order/v1"
-
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	erppurchaseorderv1 "github.com/voxire/voxie/gen/go/erp/purchase_order/v1"
 )
 
 type PurchaseOrderAPI struct {

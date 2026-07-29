@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	erpcategoryv1 "github.com/voxire/voxie/gen/go/erp/category/v1"
-
 	"github.com/voxire/onion/internal/modules/categories/internal/application"
 	"github.com/voxire/onion/internal/modules/categories/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	erpcategoryv1 "github.com/voxire/voxie/gen/go/erp/category/v1"
 )
 
 // listCategoriesPageSize bounds ListCategories server-side. The voxie

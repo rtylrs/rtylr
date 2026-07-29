@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"strings"
 
-	posfloorv1 "github.com/voxire/voxie/gen/go/pos/floor/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_floors/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	posfloorv1 "github.com/voxire/voxie/gen/go/pos/floor/v1"
 )
 
 type FloorAPI struct {

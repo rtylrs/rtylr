@@ -87,8 +87,8 @@ func (r *Repository) sumPaidInvoicesMinorUnits(ctx context.Context, businessID i
 func (r *Repository) countPosOrders(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from pos_orders — order volume powers the dashboard orders card
 	n, err := r.queries.CountPosOrders(ctx, sqlc.CountPosOrdersParams{
-		BusinessID: businessID,
-		CreatedAt:  sql.NullTime{Time: from, Valid: true},
+		BusinessID:  businessID,
+		CreatedAt:   sql.NullTime{Time: from, Valid: true},
 		CreatedAt_2: sql.NullTime{Time: to, Valid: true},
 	})
 	if err != nil {
@@ -101,8 +101,8 @@ func (r *Repository) countPosOrders(ctx context.Context, businessID int64, from,
 func (r *Repository) countCrmCustomersCreated(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from crm_customers — new customer signups for the dashboard customers card
 	n, err := r.queries.CountCrmCustomersCreated(ctx, sqlc.CountCrmCustomersCreatedParams{
-		BusinessID: businessID,
-		CreatedAt:  sql.NullTime{Time: from, Valid: true},
+		BusinessID:  businessID,
+		CreatedAt:   sql.NullTime{Time: from, Valid: true},
 		CreatedAt_2: sql.NullTime{Time: to, Valid: true},
 	})
 	if err != nil {
@@ -115,8 +115,8 @@ func (r *Repository) countCrmCustomersCreated(ctx context.Context, businessID in
 func (r *Repository) sumExpensesMinorUnits(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from finance_expenses — expense totals feed the margin card
 	total, err := r.queries.SumExpenses(ctx, sqlc.SumExpensesParams{
-		BusinessID:  businessID,
-		ExpenseDate: from,
+		BusinessID:    businessID,
+		ExpenseDate:   from,
 		ExpenseDate_2: to,
 	})
 	if err != nil {

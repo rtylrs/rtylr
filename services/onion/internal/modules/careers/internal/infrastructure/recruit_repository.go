@@ -64,21 +64,21 @@ func (r *Repository) GetCareerBySlug(ctx context.Context, businessID int64, slug
 
 func (r *Repository) CreateCareer(ctx context.Context, in domain.RecruitCareerInput) (int64, error) {
 	result, err := r.queries.CreateRecruitCareer(ctx, sqlc.CreateRecruitCareerParams{
-		OwnerID:         in.OwnerID,
-		BusinessID:      in.BusinessID,
-		Slug:            in.Slug,
-		Title:           in.Title,
-		Department:      nullStr(in.Department),
-		Location:        nullStr(in.Location),
-		EmploymentType:  nullStr(in.EmploymentType),
-		WorkMode:        nullStr(in.WorkMode),
-		Seniority:       nullStr(in.Seniority),
-		Details:         in.Details,
-		Requirements:    nullStr(in.Requirements),
-		SalaryMin:       nullDecimal(in.SalaryMin),
-		SalaryMax:       nullDecimal(in.SalaryMax),
-		SalaryCurrency:  nullStr(in.SalaryCurrency),
-		IsPublished:     in.IsPublished,
+		OwnerID:        in.OwnerID,
+		BusinessID:     in.BusinessID,
+		Slug:           in.Slug,
+		Title:          in.Title,
+		Department:     nullStr(in.Department),
+		Location:       nullStr(in.Location),
+		EmploymentType: nullStr(in.EmploymentType),
+		WorkMode:       nullStr(in.WorkMode),
+		Seniority:      nullStr(in.Seniority),
+		Details:        in.Details,
+		Requirements:   nullStr(in.Requirements),
+		SalaryMin:      nullDecimal(in.SalaryMin),
+		SalaryMax:      nullDecimal(in.SalaryMax),
+		SalaryCurrency: nullStr(in.SalaryCurrency),
+		IsPublished:    in.IsPublished,
 	})
 	if err != nil {
 		return 0, err
@@ -393,13 +393,6 @@ func nullDecimal(f float64) sql.NullString {
 		return sql.NullString{}
 	}
 	return sql.NullString{String: strconv.FormatFloat(f, 'f', 2, 64), Valid: true}
-}
-
-func nullJSONBytes(s string) sql.NullString {
-	if s == "" {
-		return sql.NullString{}
-	}
-	return sql.NullString{String: s, Valid: true}
 }
 
 func parseSalary(v string) float64 {
