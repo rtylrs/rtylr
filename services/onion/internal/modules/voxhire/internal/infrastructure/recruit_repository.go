@@ -21,8 +21,6 @@ import (
 
 const mysqlErrDuplicateEntry = 1062
 
-
-
 func parseDecimalString(s string) float64 {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
@@ -106,7 +104,8 @@ func openingFromCareerRow(row sqlc.GetCareerOpeningByIDRow) *domain.Opening {
 }
 
 func taskFromRow(id, applicationID, jobID int64, openingTitle, candidateName, candidateEmail, title, status string,
-	dueAt, completedAt sql.NullTime, createdAt sql.NullTime) domain.Task {
+	dueAt, completedAt, createdAt sql.NullTime,
+) domain.Task {
 	task := domain.Task{
 		ID: id, ApplicationID: applicationID, JobID: jobID, OpeningTitle: openingTitle,
 		CandidateName: candidateName, CandidateEmail: candidateEmail, Title: title, Status: status,
@@ -554,7 +553,7 @@ func (r *Repository) UpdateCareer(ctx context.Context, in domain.CareerInput) (*
 		Seniority: sqlNullString(in.Seniority), Details: in.Details,
 		SalaryMin: sqlNullDecimal(in.SalaryMin), SalaryMax: sqlNullDecimal(in.SalaryMax),
 		SalaryCurrency: sqlNullString(in.SalaryCurrency),
-		ID: in.ID, OwnerID: voxhireCareerOwnerID,
+		ID:             in.ID, OwnerID: voxhireCareerOwnerID,
 	}); err != nil {
 		logger.Ctx(ctx).Error("Failed to update voxhire career", logger.Error(err))
 		return nil, err
@@ -929,7 +928,7 @@ func (r *Repository) CreateCareerApplication(ctx context.Context, in domain.Care
 		JobID: in.JobID, Name: in.Name, Email: in.Email,
 		Phone: sqlNullString(in.Phone), Location: sqlNullString(in.Location),
 		SalaryExpectation: sqlNullDecimal(in.SalaryExpectation),
-		WorkHistory: sqlNullString(in.WorkHistory), Education: sqlNullString(in.Education),
+		WorkHistory:       sqlNullString(in.WorkHistory), Education: sqlNullString(in.Education),
 		ExperienceSummary: sqlNullString(in.ExperienceSummary), CoverLetter: sqlNullString(in.CoverLetter),
 		CvKey: sqlNullString(in.CVKey),
 	})
@@ -1166,7 +1165,7 @@ func (r *Repository) ListCVJobs(ctx context.Context, f domain.CandidateFilter) (
 }
 
 func (r *Repository) RetryCVProcessing(ctx context.Context, source string, id int64) error {
-	table := ""
+	var table string
 	switch source {
 	case "talent":
 		table = "voxhire_talent_applications"
@@ -1586,7 +1585,7 @@ func (r *Repository) ListPendingCVProcessingTargets(ctx context.Context, limit i
 
 // UpdateCVProcessingResult stores extracted CV text and summary for search.
 func (r *Repository) UpdateCVProcessingResult(ctx context.Context, result domain.CVProcessingResult) error {
-	table := ""
+	var table string
 	switch result.Source {
 	case "talent":
 		table = "voxhire_talent_applications"
@@ -1638,11 +1637,4 @@ func nullStr(s string) any {
 		return nil
 	}
 	return s
-}
-
-func nullFloat(f float64) any {
-	if f == 0 {
-		return nil
-	}
-	return f
 }

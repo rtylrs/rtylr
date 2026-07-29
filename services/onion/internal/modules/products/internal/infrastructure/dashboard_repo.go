@@ -2,14 +2,14 @@ package infrastructure
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"strconv"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	"github.com/voxire/onion/internal/modules/products/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
-	"golang.org/x/sync/errgroup"
 )
 
 // GetDashboard aggregates the counts + recent records used by the ERP
@@ -118,12 +118,12 @@ func (r *Repository) topLowStockItems(ctx context.Context, ownerID int64, limit 
 	items := make([]domain.LowStockItem, 0, len(rows))
 	for _, row := range rows {
 		items = append(items, domain.LowStockItem{
-			ProductID:      row.ID,
-			Name:           row.Name,
-			SKU:            row.Sku,
-			CurrentStock:   parseDecimal(row.StockQuantity),
-			ReorderPoint:   parseDecimal(row.LowStockThreshold),
-			WarehouseName:  "",
+			ProductID:     row.ID,
+			Name:          row.Name,
+			SKU:           row.Sku,
+			CurrentStock:  parseDecimal(row.StockQuantity),
+			ReorderPoint:  parseDecimal(row.LowStockThreshold),
+			WarehouseName: "",
 		})
 	}
 	return items, nil
@@ -243,10 +243,4 @@ func interfaceToFloat(v interface{}) float64 {
 		return 0
 	}
 	return f
-}
-
-func closeRows(ctx context.Context, rows *sql.Rows) {
-	if err := rows.Close(); err != nil {
-		logger.Ctx(ctx).Warn("Failed to close rows", logger.Error(err))
-	}
 }

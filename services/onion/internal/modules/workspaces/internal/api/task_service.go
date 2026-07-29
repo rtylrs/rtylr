@@ -4,13 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 )
 
 type TaskAPI struct {
@@ -31,10 +30,6 @@ func (a *TaskAPI) resolveAuth(ctx context.Context) (*authPkg.AuthUser, int64, er
 		return nil, 0, onekiterrors.PermissionDenied()
 	}
 	return authUser, businessID, nil
-}
-
-func notImplemented(feature string) error {
-	return onekiterrors.New(http.StatusNotImplemented, feature+" is not available on the OneKit path yet")
 }
 
 func (a *TaskAPI) ListTasks(ctx context.Context, req *flowtaskv1.ListTasksRequest) (*flowtaskv1.ListTasksResponse, error) {

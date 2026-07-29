@@ -4,13 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	financereportv1 "github.com/voxire/voxie/gen/go/finance/report/v1"
-
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
 	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
+	financereportv1 "github.com/voxire/voxie/gen/go/finance/report/v1"
 )
 
 type ReportAPI struct {
@@ -182,8 +181,4 @@ func newTaxConfigDetailPayload(t domain.TaxConfig) *financereportv1.TaxConfig {
 		Type:      t.Type,
 		IsDefault: t.IsDefault,
 	}
-}
-
-func notImplemented(method string) error {
-	return onekiterrors.New(http.StatusNotImplemented, method+" is not implemented on OneKit yet")
 }

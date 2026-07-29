@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -23,7 +22,7 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(db), pool: db}
 }
 
-func (r *Repository) ListMovements(ctx context.Context, businessID, ownerID, branchID, productID int64) ([]domain.StockMovement, error) {
+func (r *Repository) ListMovements(ctx context.Context, businessID, _, branchID, productID int64) ([]domain.StockMovement, error) {
 	rows, err := r.queries.ListPOSStockMovements(ctx, sqlc.ListPOSStockMovementsParams{
 		BusinessID: businessID,
 		SourceID:   branchID,
@@ -37,12 +36,12 @@ func (r *Repository) ListMovements(ctx context.Context, businessID, ownerID, bra
 	movements := make([]domain.StockMovement, 0, len(rows))
 	for _, row := range rows {
 		m := domain.StockMovement{
-			ID:        row.ID,
+			ID:         row.ID,
 			BusinessID: businessID,
-			BranchID:  branchID,
-			ProductID: row.ProductID,
-			Type:      posMovementType(string(row.EntryType)),
-			Quantity:  decimalToFloat(row.QuantityChange),
+			BranchID:   branchID,
+			ProductID:  row.ProductID,
+			Type:       posMovementType(string(row.EntryType)),
+			Quantity:   decimalToFloat(row.QuantityChange),
 		}
 		if row.ReferenceID.Valid {
 			m.ReferenceID = &row.ReferenceID.Int64
@@ -238,7 +237,7 @@ func (r *Repository) SetInventoryQuantity(ctx context.Context, businessID, branc
 	return nil
 }
 
-func (r *Repository) ListBranchInventory(ctx context.Context, businessID, ownerID, branchID int64) ([]domain.BranchInventory, error) {
+func (r *Repository) ListBranchInventory(ctx context.Context, businessID, _, branchID int64) ([]domain.BranchInventory, error) {
 	rows, err := r.queries.ListBranchInventory(ctx, sqlc.ListBranchInventoryParams{
 		SourceID:   branchID,
 		BusinessID: businessID,
@@ -250,7 +249,7 @@ func (r *Repository) ListBranchInventory(ctx context.Context, businessID, ownerI
 	return mapBranchInventoryRows(ctx, rows, businessID, branchID)
 }
 
-func (r *Repository) ListLowStockItems(ctx context.Context, businessID, ownerID, branchID int64) ([]domain.BranchInventory, error) {
+func (r *Repository) ListLowStockItems(ctx context.Context, businessID, _, branchID int64) ([]domain.BranchInventory, error) {
 	rows, err := r.queries.ListLowStockBranchInventory(ctx, sqlc.ListLowStockBranchInventoryParams{
 		SourceID:   branchID,
 		BusinessID: businessID,
@@ -266,7 +265,7 @@ func (r *Repository) ListLowStockItems(ctx context.Context, businessID, ownerID,
 	return mapBranchInventoryRows(ctx, converted, businessID, branchID)
 }
 
-func (r *Repository) GetInventoryItem(ctx context.Context, businessID, ownerID, branchID, productID int64) (domain.BranchInventory, error) {
+func (r *Repository) GetInventoryItem(ctx context.Context, businessID, _, branchID, productID int64) (domain.BranchInventory, error) {
 	rows, err := r.queries.GetBranchInventoryItem(ctx, sqlc.GetBranchInventoryItemParams{
 		SourceID:   branchID,
 		BusinessID: businessID,
@@ -399,7 +398,7 @@ func (r *Repository) ownerIDForBusiness(ctx context.Context, businessID int64) i
 	return ownerID
 }
 
-func mapBranchInventoryRows(ctx context.Context, rows []sqlc.ListBranchInventoryRow, businessID, branchID int64) ([]domain.BranchInventory, error) {
+func mapBranchInventoryRows(_ context.Context, rows []sqlc.ListBranchInventoryRow, businessID, branchID int64) ([]domain.BranchInventory, error) {
 	items := make([]domain.BranchInventory, 0, len(rows))
 	for _, row := range rows {
 		item := domain.BranchInventory{
@@ -504,10 +503,6 @@ func decimalToFloat(s any) float64 {
 		return 0
 	}
 	return f
-}
-
-func floatToDecimal(f float64) string {
-	return fmt.Sprintf("%.3f", f)
 }
 
 func stringPtrValue(s *string) string {

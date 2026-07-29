@@ -1383,32 +1383,6 @@ func interfaceToFloat(v any) float64 {
 	return f
 }
 
-func sessionFromRow(row sqlc.PosSession) *domain.Session {
-	s := &domain.Session{
-		ID:               row.ID,
-		OwnerID:          row.OwnerID,
-		LocationID:       row.LocationID.Int64,
-		StaffID:          row.StaffID,
-		Status:           domain.SessionStatus(row.Status.PosSessionsStatus),
-		OpeningCash:      decimalToFloat(row.OpeningCash.String),
-		ClosingCash:      decimalToFloat(row.ClosingCash.String),
-		ExpectedCash:     decimalToFloat(row.ExpectedCash.String),
-		CashDifference:   decimalToFloat(row.CashDifference.String),
-		TotalSales:       decimalToFloat(row.TotalSales.String),
-		TotalOrders:      int(row.TotalOrders.Int32),
-		TotalCashSales:   decimalToFloat(row.TotalCashSales.String),
-		TotalCardSales:   decimalToFloat(row.TotalCardSales.String),
-		TotalOnlineSales: decimalToFloat(row.TotalOnlineSales.String),
-		TotalRefunds:     decimalToFloat(row.TotalRefunds.String),
-		OpenedAt:         row.OpenedAt.Time,
-		Notes:            row.Notes.String,
-	}
-	if row.ClosedAt.Valid {
-		s.ClosedAt = &row.ClosedAt.Time
-	}
-	return s
-}
-
 func scanOrderRow(rows *sql.Rows) (domain.Order, error) {
 	var o domain.Order
 	var paidAt sql.NullTime
