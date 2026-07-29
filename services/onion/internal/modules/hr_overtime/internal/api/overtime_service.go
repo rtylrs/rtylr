@@ -15,7 +15,7 @@ func NewOvertimeService(service *application.Service) *OvertimeService {
 	return &OvertimeService{service: service}
 }
 
-func (s *OvertimeService) ListOvertimeRequests(ctx context.Context, req *hrovertimev1.ListOvertimeRequestsRequest) (*hrovertimev1.ListOvertimeRequestsResponse, error) {
+func (s *OvertimeService) ListOvertimeRequests(ctx context.Context, _ *hrovertimev1.ListOvertimeRequestsRequest) (*hrovertimev1.ListOvertimeRequestsResponse, error) {
 	res, err := (&ListOvertimeRequestsHandler{Service: s.service}).Serve(ctx, &ListOvertimeRequestsRequest{})
 	if err != nil {
 		return nil, err

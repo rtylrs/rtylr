@@ -385,14 +385,19 @@ linters:
             - github.com/beevik/etree
             - golang.org/x/crypto
             - golang.org/x/oauth2
+            - golang.org/x/sync
             - github.com/openai/openai-go/v2
             - github.com/openai/openai-go/v2/option
+            - github.com/openai/openai-go/v2/shared
             - github.com/google/generative-ai-go/genai
+            - buf.build/go/protovalidate
             - google.golang.org/api/option
             - google.golang.org/api/sheets/v4
             - google.golang.org/api/idtoken
             - google.golang.org/grpc
             - google.golang.org/grpc/reflection
+            - google.golang.org/protobuf/encoding/protojson
+            - google.golang.org/protobuf/proto
             - github.com/aws/aws-sdk-go-v2/aws
             - github.com/aws/aws-sdk-go-v2/config
             - github.com/aws/aws-sdk-go-v2/credentials
@@ -410,6 +415,14 @@ linters:
             - github.com/coder/websocket
             - github.com/axiomhq/axiom-go
             - github.com/workos/workos-go
+            - github.com/robfig/cron/v3
+            - github.com/corezio/onekit/http
+            - github.com/trinodb/trino-go-client/trino
+            - github.com/testcontainers/testcontainers-go
+            - github.com/testcontainers/testcontainers-go/wait
+            - github.com/koyachi/go-nude
+            - github.com/ledongthuc/pdf
+            - golang.org/x/image/webp
           # Packages that are not allowed
           deny:
             - pkg: "github.com/sirupsen/logrus"
@@ -433,10 +446,13 @@ linters:
           - codnect.io/chrono
           - github.com/beevik/etree
           - golang.org/x/crypto
+          - golang.org/x/sync
           - github.com/openai/openai-go/v2
           - github.com/google/generative-ai-go
+          - buf.build/go/protovalidate
           - google.golang.org/api
           - google.golang.org/grpc
+          - google.golang.org/protobuf
           - github.com/aws/aws-sdk-go-v2
           - github.com/aws/aws-sdk-go-v2/aws
           - github.com/aws/aws-sdk-go-v2/config
@@ -452,6 +468,12 @@ linters:
           - github.com/coder/websocket
           - github.com/axiomhq/axiom-go
           - github.com/workos/workos-go
+          - github.com/robfig/cron/v3
+          - github.com/corezio/onekit/http
+          - github.com/trinodb/trino-go-client
+          - github.com/testcontainers/testcontainers-go
+          - github.com/koyachi/go-nude
+          - github.com/ledongthuc/pdf
 
         # List of allowed module domains
         domains:
@@ -467,6 +489,7 @@ linters:
           - github.com/openai
           - github.com/google
           - google.golang.org
+          - buf.build
           - github.com/redis
           - github.com/allegro
           - github.com/puzpuzpuz
@@ -476,6 +499,12 @@ linters:
           - github.com/coder
           - github.com/axiomhq
           - github.com/workos
+          - github.com/corezio
+          - github.com/robfig
+          - github.com/trinodb
+          - github.com/testcontainers
+          - github.com/koyachi
+          - github.com/ledongthuc
 
       blocked:
         # List of blocked modules

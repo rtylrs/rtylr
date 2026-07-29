@@ -40,7 +40,7 @@ var toolCollectionLabels = map[string]string{
 	"work_schedules": "work schedules",
 }
 
-func summarizeToolResult(name string, input, output map[string]any, status, errorMessage string) string {
+func summarizeToolResult(name string, _, output map[string]any, status, errorMessage string) string {
 	target := toolResultTarget(name)
 	if status == "error" {
 		if strings.TrimSpace(errorMessage) == "" {

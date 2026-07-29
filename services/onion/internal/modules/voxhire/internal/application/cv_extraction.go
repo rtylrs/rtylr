@@ -27,9 +27,11 @@ const (
 	maxCVSummaryRunes     = 700
 )
 
-var whitespaceRE = regexp.MustCompile(`\s+`)
-var yearsExperienceRE = regexp.MustCompile(`(?i)(\d{1,2})\+?\s*(?:years?|yrs?|yoe)`)
-var salarySignalRE = regexp.MustCompile(`(?i)(?:usd|\$)\s?[\d,]+|[\d,]+\s?(?:usd|dollars?)`)
+var (
+	whitespaceRE      = regexp.MustCompile(`\s+`)
+	yearsExperienceRE = regexp.MustCompile(`(?i)(\d{1,2})\+?\s*(?:years?|yrs?|yoe)`)
+	salarySignalRE    = regexp.MustCompile(`(?i)(?:usd|\$)\s?[\d,]+|[\d,]+\s?(?:usd|dollars?)`)
+)
 
 type cvKeyword struct {
 	Label string
@@ -315,7 +317,7 @@ func extractWordXMLText(r io.Reader) (string, error) {
 	var out strings.Builder
 	for {
 		tok, err := decoder.Token()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -452,13 +454,13 @@ func uniqueSorted(values []string) []string {
 	return out
 }
 
-func truncateBytes(text string, max int) string {
-	if len(text) <= max {
+func truncateBytes(text string, maxBytes int) string {
+	if len(text) <= maxBytes {
 		return text
 	}
 	cut := 0
 	for i := range text {
-		if i > max {
+		if i > maxBytes {
 			break
 		}
 		cut = i

@@ -103,9 +103,12 @@ func (c *CDN) CheckMediaEngine() error {
 // invalidation). chi panics if you route a method it doesn't know about, so it
 // must be registered once at package load — before any RegisterRoutes call —
 // otherwise the upload runmode crash-loops on boot.
-func init() {
+func registerPurgeMethod() struct{} {
 	chi.RegisterMethod("PURGE")
+	return struct{}{}
 }
+
+var _ = registerPurgeMethod()
 
 // RegisterRoutes mounts the CDN endpoints. Read endpoints are public; the
 // upload endpoint is wrapped in the API-key middleware. /health, /metrics and

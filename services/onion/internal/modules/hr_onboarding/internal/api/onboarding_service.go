@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/application"
@@ -21,7 +22,7 @@ func NewOnboardingService(service *application.Service) *OnboardingService {
 	return &OnboardingService{service: service}
 }
 
-func (s *OnboardingService) ListChecklistTemplates(ctx context.Context, req *hronboardingv1.ListChecklistTemplatesRequest) (*hronboardingv1.ListChecklistTemplatesResponse, error) {
+func (s *OnboardingService) ListChecklistTemplates(ctx context.Context, _ *hronboardingv1.ListChecklistTemplatesRequest) (*hronboardingv1.ListChecklistTemplatesResponse, error) {
 	res, err := (&ListTemplatesHandler{Service: s.service}).Serve(ctx, &ListTemplatesRequest{})
 	if err != nil {
 		return nil, err
@@ -59,7 +60,7 @@ func (s *OnboardingService) UpdateChecklistTemplate(ctx context.Context, req *hr
 		RoleID:      req.GetRoleId(),
 	})
 	if err != nil {
-		if err == domain.ErrTemplateNotFound {
+		if errors.Is(err, domain.ErrTemplateNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Template not found")
 		}
 		logger.Ctx(ctx).Error("failed to update onboarding template", logger.Any("owner_id", device.User.UserID), logger.Any("template_id", req.GetRoleId()), logger.Error(err))
@@ -85,7 +86,7 @@ func (s *OnboardingService) AddItemToChecklistTemplate(ctx context.Context, req 
 		RequiresAttachment: req.GetRequiresAttachment(),
 	})
 	if err != nil {
-		if err == domain.ErrTemplateNotFound {
+		if errors.Is(err, domain.ErrTemplateNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Template not found")
 		}
 		logger.Ctx(ctx).Error("failed to add item to onboarding template", logger.Any("owner_id", device.User.UserID), logger.Any("template_id", req.GetRoleId()), logger.Error(err))
@@ -122,7 +123,7 @@ func (s *OnboardingService) GetEmployeeChecklist(ctx context.Context, req *hronb
 	}
 	checklist, err := s.service.GetEmployeeChecklist(ctx, businessID, req.GetEmployeeId(), req.GetEmployeeId())
 	if err != nil {
-		if err == domain.ErrChecklistNotFound {
+		if errors.Is(err, domain.ErrChecklistNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Checklist not found")
 		}
 		logger.Ctx(ctx).Error("failed to get employee checklist", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", req.GetEmployeeId()), logger.Error(err))
@@ -144,6 +145,6 @@ func (s *OnboardingService) TriggerChecklist(ctx context.Context, req *hronboard
 	return &hronboardingv1.TriggerChecklistResponse{Checklist: res.Checklist}, nil
 }
 
-func (s *OnboardingService) CompleteChecklistItem(ctx context.Context, req *hronboardingv1.CompleteChecklistItemRequest) (*hronboardingv1.CompleteChecklistItemResponse, error) {
+func (s *OnboardingService) CompleteChecklistItem(_ context.Context, _ *hronboardingv1.CompleteChecklistItemRequest) (*hronboardingv1.CompleteChecklistItemResponse, error) {
 	return nil, onekiterrors.New(http.StatusBadRequest, "checklist item id is required")
 }

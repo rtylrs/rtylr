@@ -594,7 +594,7 @@ func invoiceToolFallbackItemWithDescription(input map[string]any, description st
 	return validateInvoiceToolItems([]domain.InvoiceItemInput{item})
 }
 
-func invoiceToolItem(value any, input map[string]any, index int) (domain.InvoiceItemInput, error) {
+func invoiceToolItem(value any, _ map[string]any, index int) (domain.InvoiceItemInput, error) {
 	itemMap, ok := value.(map[string]any)
 	if !ok {
 		return domain.InvoiceItemInput{}, fmt.Errorf("item %d must be an object", index+1)

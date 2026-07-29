@@ -49,7 +49,13 @@ func TestQuery_ReturnsDisabledWhenOff(t *testing.T) {
 	t.Setenv(config.TrinoEnabledEnvVar, "false")
 	config.GlobalConfig = nil
 
-	_, err := Query(context.Background(), "SELECT 1")
+	rows, err := Query(context.Background(), "SELECT 1")
+	if rows != nil {
+		defer rows.Close()
+		if rowsErr := rows.Err(); rowsErr != nil {
+			t.Fatalf("rows.Err: %v", rowsErr)
+		}
+	}
 	if !errors.Is(err, ErrDisabled) {
 		t.Fatalf("expected ErrDisabled, got %v", err)
 	}
@@ -70,7 +76,13 @@ func TestQuery_ReturnsNotConnectedWhenEnabledButUnreachable(t *testing.T) {
 		t.Fatal("expected trino unavailable when connection fails")
 	}
 
-	_, err := Query(context.Background(), "SELECT 1")
+	rows, err := Query(context.Background(), "SELECT 1")
+	if rows != nil {
+		defer rows.Close()
+		if rowsErr := rows.Err(); rowsErr != nil {
+			t.Fatalf("rows.Err: %v", rowsErr)
+		}
+	}
 	if !errors.Is(err, ErrNotConnected) {
 		t.Fatalf("expected ErrNotConnected, got %v", err)
 	}

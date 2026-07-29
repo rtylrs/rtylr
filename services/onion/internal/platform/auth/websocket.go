@@ -56,6 +56,7 @@ func WebSocketToken(r *http.Request) string {
 	return ""
 }
 
+//nolint:revive // The exported name is explicit at call sites that authenticate WS upgrades.
 func AuthUserFromWebSocketRequest(r *http.Request) (*AuthUser, error) {
 	token := WebSocketToken(r)
 	if token == "" {

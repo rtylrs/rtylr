@@ -19,6 +19,8 @@ var ErrLicenseNotFound = errors.New("license not found")
 
 // LicenseRecord is the subset of self_host_licenses the authority needs to apply
 // revocation and DB-side expiry on top of the signature/expiry verification.
+//
+//nolint:revive // Keep the exported name explicit for package consumers and tests.
 type LicenseRecord struct {
 	Status     string
 	ExpiresAt  *time.Time

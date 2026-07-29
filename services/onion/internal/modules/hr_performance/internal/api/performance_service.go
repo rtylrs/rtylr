@@ -15,7 +15,7 @@ func NewPerformanceService(service *application.Service) *PerformanceService {
 	return &PerformanceService{service: service}
 }
 
-func (s *PerformanceService) ListReviewCycles(ctx context.Context, req *hrperformancev1.ListReviewCyclesRequest) (*hrperformancev1.ListReviewCyclesResponse, error) {
+func (s *PerformanceService) ListReviewCycles(ctx context.Context, _ *hrperformancev1.ListReviewCyclesRequest) (*hrperformancev1.ListReviewCyclesResponse, error) {
 	res, err := (&ListCyclesHandler{Service: s.service}).Serve(ctx, &ListCyclesRequest{})
 	if err != nil {
 		return nil, err

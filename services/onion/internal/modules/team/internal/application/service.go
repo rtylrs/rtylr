@@ -444,7 +444,7 @@ func (s *Service) ApproveAccessRequest(ctx context.Context, actorID, businessID,
 	}
 	apps = append(apps, app)
 
-	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, targetUserID, apps, domain.Role(existing.Role)); err != nil {
+	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, targetUserID, apps, existing.Role); err != nil {
 		return err
 	}
 	invalidateUserScope(ctx, targetUserID)

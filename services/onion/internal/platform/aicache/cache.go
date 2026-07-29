@@ -15,9 +15,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	aicachesqlc "github.com/voxire/onion/internal/platform/aicache/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
-	aicachesqlc "github.com/voxire/onion/internal/platform/aicache/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -163,11 +163,13 @@ type collectorState struct {
 
 var (
 	collector                  = newCollector()
-	persistentAnalyticsEnabled atomic.Bool
+	persistentAnalyticsEnabled = newPersistentAnalyticsFlag()
 )
 
-func init() {
-	persistentAnalyticsEnabled.Store(true)
+func newPersistentAnalyticsFlag() *atomic.Bool {
+	enabled := &atomic.Bool{}
+	enabled.Store(true)
+	return enabled
 }
 
 func newCollector() *collectorState {
@@ -525,19 +527,19 @@ func persistentDatabaseSnapshot() (AnalyticsSnapshot, bool) {
 
 func eventFromAICacheRow(row aicachesqlc.ListRecentAICacheEventsRow) (Event, error) {
 	event := Event{
-		At:              row.OccurredAt,
-		Outcome:         row.Outcome,
-		Mode:            row.Mode,
-		Provider:        row.Provider.String,
-		Reason:          row.Reason.String,
-		CacheKeyPreview: row.CacheKeyPreview.String,
-		BusinessID:      row.BusinessID.Int64,
-		UserID:          row.UserID.Int64,
-		PromptChars:     int(row.PromptChars.Int32),
-		ResponseChars:   int(row.ResponseChars.Int32),
-		ProviderTokens:  int(row.ProviderTokens.Int32),
+		At:               row.OccurredAt,
+		Outcome:          row.Outcome,
+		Mode:             row.Mode,
+		Provider:         row.Provider.String,
+		Reason:           row.Reason.String,
+		CacheKeyPreview:  row.CacheKeyPreview.String,
+		BusinessID:       row.BusinessID.Int64,
+		UserID:           row.UserID.Int64,
+		PromptChars:      int(row.PromptChars.Int32),
+		ResponseChars:    int(row.ResponseChars.Int32),
+		ProviderTokens:   int(row.ProviderTokens.Int32),
 		EstimatedSavings: int(row.EstimatedSavingsTokens.Int32),
-		LatencyMs:       row.LatencyMs.Int64,
+		LatencyMs:        row.LatencyMs.Int64,
 	}
 	return event, nil
 }
@@ -561,52 +563,6 @@ func nullSQLInt64(value int64) sql.NullInt64 {
 		return sql.NullInt64{}
 	}
 	return sql.NullInt64{Int64: value, Valid: true}
-}
-
-func scanAnalyticsEvent(rows *sql.Rows) (Event, error) {
-	var (
-		event            Event
-		provider         sql.NullString
-		reason           sql.NullString
-		cacheKeyPreview  sql.NullString
-		businessID       sql.NullInt64
-		userID           sql.NullInt64
-		promptChars      sql.NullInt64
-		responseChars    sql.NullInt64
-		providerTokens   sql.NullInt64
-		estimatedSavings sql.NullInt64
-		latencyMs        sql.NullInt64
-	)
-	err := rows.Scan(
-		&event.At,
-		&event.Outcome,
-		&event.Mode,
-		&provider,
-		&reason,
-		&cacheKeyPreview,
-		&businessID,
-		&userID,
-		&promptChars,
-		&responseChars,
-		&providerTokens,
-		&estimatedSavings,
-		&latencyMs,
-	)
-	if err != nil {
-		return Event{}, err
-	}
-
-	event.Provider = provider.String
-	event.Reason = reason.String
-	event.CacheKeyPreview = cacheKeyPreview.String
-	event.BusinessID = businessID.Int64
-	event.UserID = userID.Int64
-	event.PromptChars = int(promptChars.Int64)
-	event.ResponseChars = int(responseChars.Int64)
-	event.ProviderTokens = int(providerTokens.Int64)
-	event.EstimatedSavings = int(estimatedSavings.Int64)
-	event.LatencyMs = latencyMs.Int64
-	return event, nil
 }
 
 func snapshotFromEvents(events []Event) AnalyticsSnapshot {
@@ -655,27 +611,6 @@ func withAnalyticsSource(snapshot AnalyticsSnapshot, source string, durable bool
 	snapshot.AnalyticsSource = source
 	snapshot.AnalyticsDurable = durable
 	return snapshot
-}
-
-func nullableString(value string) any {
-	if strings.TrimSpace(value) == "" {
-		return nil
-	}
-	return value
-}
-
-func nullableInt(value int) any {
-	if value == 0 {
-		return nil
-	}
-	return value
-}
-
-func nullableInt64(value int64) any {
-	if value == 0 {
-		return nil
-	}
-	return value
 }
 
 func analyticsEventID(event Event) string {

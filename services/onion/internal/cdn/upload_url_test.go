@@ -183,16 +183,16 @@ while [ "$#" -gt 0 ]; do
     shift
     out="$1"
   fi
-  shift
+ shift
 done
 printf fake-webp > "$out"
 `
-	if err := os.WriteFile(path, []byte(script), 0o755); err != nil {
+	if err := os.WriteFile(path, []byte(script), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	return path
 }
 
 func mapValues(key, value string) map[string][]string {
-	return map[string][]string{key: []string{value}}
+	return map[string][]string{key: {value}}
 }

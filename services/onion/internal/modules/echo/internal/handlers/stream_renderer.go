@@ -266,7 +266,7 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		return r.emitReadToolMarker(blockID, call, preview)
 	}
 
-	if err := WriteEvent(r.w, r.flush, StreamEvent{
+	return WriteEvent(r.w, r.flush, StreamEvent{
 		Type:             EventToolCall,
 		MessageID:        r.messageID,
 		BlockID:          blockID,
@@ -275,11 +275,7 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		Input:            call.Input,
 		Preview:          preview,
 		RequiresApproval: requiresApproval,
-	}); err != nil {
-		return err
-	}
-
-	return nil
+	})
 }
 
 func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMarker, preview string) error {

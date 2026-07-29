@@ -196,16 +196,31 @@ func TestTaskDetailToolPayloadIncludesSubtasksCommentsAndActivity(t *testing.T) 
 	if _, ok := payload["task"].(map[string]any); !ok {
 		t.Fatalf("task payload missing: %#v", payload["task"])
 	}
-	if got := payload["subtasks"].([]map[string]any); len(got) != 1 || got[0]["title"] != "Pull overdue list" {
-		t.Fatalf("subtasks = %#v, want one subtask", got)
+	gotSubtasks, ok := payload["subtasks"].([]map[string]any)
+	if !ok {
+		t.Fatalf("subtasks has unexpected type: %#v", payload["subtasks"])
 	}
-	if got := payload["comments"].([]map[string]any); len(got) != 1 || got[0]["content"] != "Waiting on accounting." {
-		t.Fatalf("comments = %#v, want one comment", got)
+	if len(gotSubtasks) != 1 || gotSubtasks[0]["title"] != "Pull overdue list" {
+		t.Fatalf("subtasks = %#v, want one subtask", gotSubtasks)
 	}
-	if got := payload["activity"].([]map[string]any); len(got) != 1 || got[0]["action"] != "status_changed" {
-		t.Fatalf("activity = %#v, want one activity item", got)
+	gotComments, ok := payload["comments"].([]map[string]any)
+	if !ok {
+		t.Fatalf("comments has unexpected type: %#v", payload["comments"])
 	}
-	counts := payload["counts"].(map[string]any)
+	if len(gotComments) != 1 || gotComments[0]["content"] != "Waiting on accounting." {
+		t.Fatalf("comments = %#v, want one comment", gotComments)
+	}
+	gotActivity, ok := payload["activity"].([]map[string]any)
+	if !ok {
+		t.Fatalf("activity has unexpected type: %#v", payload["activity"])
+	}
+	if len(gotActivity) != 1 || gotActivity[0]["action"] != "status_changed" {
+		t.Fatalf("activity = %#v, want one activity item", gotActivity)
+	}
+	counts, ok := payload["counts"].(map[string]any)
+	if !ok {
+		t.Fatalf("counts has unexpected type: %#v", payload["counts"])
+	}
 	if counts["subtasks"] != 1 || counts["comments"] != 1 || counts["activity"] != 1 {
 		t.Fatalf("counts = %#v, want all counts to be 1", counts)
 	}

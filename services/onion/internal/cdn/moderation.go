@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"image"
-	_ "image/gif"
+	_ "image/gif" // register GIF decoder
 	"image/jpeg"
-	_ "image/png"
+	_ "image/png" // register PNG decoder
 	"io"
 	"os"
 	"strings"
@@ -17,7 +17,7 @@ import (
 	nude "github.com/koyachi/go-nude"
 	"github.com/openai/openai-go/v2"
 	"github.com/openai/openai-go/v2/option"
-	_ "golang.org/x/image/webp"
+	_ "golang.org/x/image/webp" // register WebP decoder
 
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"

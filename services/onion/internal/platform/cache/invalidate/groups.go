@@ -27,7 +27,7 @@ func RegisterDefaultGroups() {
 }
 
 func patternGroup(t keys.InvalidationType) invalidation.InvalidateFunc {
-	return func(ctx context.Context, ids []string, options ...cacher.ClientOption) {
+	return func(ctx context.Context, ids []string, _ ...cacher.ClientOption) {
 		if len(ids) == 0 && t == keys.InvalidateAll {
 			Invalidate(ctx, t, "")
 			return

@@ -164,6 +164,7 @@ func TestApplicationsHandlerRejectsUnsupportedCV(t *testing.T) {
 }
 
 func newVoxhireMultipartBody(t *testing.T, cvSize int) (*bytes.Buffer, string) {
+	t.Helper()
 	return newVoxhireMultipartBodyWithFile(t, cvSize, "resume.pdf")
 }
 
