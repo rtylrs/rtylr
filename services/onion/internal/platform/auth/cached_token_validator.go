@@ -57,13 +57,16 @@ func (v *cachingTokenValidator) ValidateTokenFull(ctx context.Context, token str
 		return claims, nil
 	}
 
-	value, err, _ := v.group.Do(key, func() (any, error) {
+	resultCh := v.group.DoChan(key, func() (any, error) {
 		now := time.Now()
 		if claims, ok := v.get(key, now); ok {
 			return claims, nil
 		}
 
-		claims, err := v.inner.ValidateTokenFull(ctx, token)
+		validationCtx, cancel := tokenValidationContext(ctx)
+		defer cancel()
+
+		claims, err := v.inner.ValidateTokenFull(validationCtx, token)
 		if err != nil {
 			return nil, err
 		}
@@ -74,15 +77,30 @@ func (v *cachingTokenValidator) ValidateTokenFull(ctx context.Context, token str
 		v.put(key, claims, now)
 		return cloneTokenClaims(claims), nil
 	})
-	if err != nil {
-		return nil, err
+
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case result := <-resultCh:
+		if result.Err != nil {
+			return nil, result.Err
+		}
+
+		claims, ok := result.Val.(*TokenClaims)
+		if !ok || claims == nil {
+			return nil, errNilTokenClaims
+		}
+		return cloneTokenClaims(claims), nil
+	}
+}
+
+func tokenValidationContext(ctx context.Context) (context.Context, context.CancelFunc) {
+	base := context.WithoutCancel(ctx)
+	if deadline, ok := ctx.Deadline(); ok {
+		return context.WithDeadline(base, deadline)
 	}
 
-	claims, ok := value.(*TokenClaims)
-	if !ok || claims == nil {
-		return nil, errNilTokenClaims
-	}
-	return cloneTokenClaims(claims), nil
+	return base, func() {}
 }
 
 func (v *cachingTokenValidator) get(key string, now time.Time) (*TokenClaims, bool) {

@@ -166,7 +166,7 @@ func createAppointmentInput(req *bookingappointmentv1.CreateAppointmentRequest) 
 func updateAppointmentInput(req *bookingappointmentv1.UpdateAppointmentRequest) (domain.AppointmentInput, error) {
 	startTime := strings.TrimSpace(req.GetStartTime())
 	endTime := strings.TrimSpace(req.GetEndTime())
-	if errModel := validateAppointmentTimes(startTime, endTime, false); errModel != nil {
+	if errModel := validateAppointmentTimes(startTime, endTime, true); errModel != nil {
 		return domain.AppointmentInput{}, errModel
 	}
 	return domain.AppointmentInput{
