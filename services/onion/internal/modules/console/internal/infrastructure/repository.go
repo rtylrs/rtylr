@@ -1237,6 +1237,41 @@ func (r *Repository) CreateGrant(ctx context.Context, userID, planID, grantedBy 
 	return res.LastInsertId()
 }
 
+// GetGrant returns the display fields for one grant without loading the full
+// grant history. CreateGrant uses it to build its response efficiently.
+func (r *Repository) GetGrant(ctx context.Context, id int64) (*GrantRow, error) {
+	query, args, err := sq.
+		Select("g.id", "g.user_id", "COALESCE(u.full_name, '')", "g.plan_id", "p.name", "g.granted_by", "adm.full_name",
+			"g.note", "g.expires_at", "g.revoked_at", "g.created_at", "u.email", "b.id", "b.name").
+		From("manual_access_grants g").
+		Join("plans p ON p.id = g.plan_id").
+		LeftJoin("users u ON u.id = g.user_id").
+		LeftJoin("businesses b ON b.owner_id = g.user_id AND COALESCE(b.is_active, TRUE) = TRUE").
+		LeftJoin("users adm ON adm.id = g.granted_by").
+		Where(sq.Eq{"g.id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	var grant GrantRow
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(
+		&grant.ID, &grant.UserID, &grant.UserName, &grant.PlanID, &grant.PlanName, &grant.GrantedBy, &grant.GranterName,
+		&grant.Note, &grant.ExpiresAt, &grant.RevokedAt, &grant.CreatedAt, &grant.UserEmail, &grant.BusinessID, &grant.BusinessName,
+	); err != nil {
+		return nil, err
+	}
+	if grant.BusinessID.Valid {
+		seatCount, err := r.CountActiveSeatsForOwner(ctx, grant.UserID)
+		if err != nil {
+			return nil, err
+		}
+		grant.ActiveSeatCount = seatCount
+	}
+	return &grant, nil
+}
+
 func (r *Repository) GetGrantUserID(ctx context.Context, id int64) (int64, error) {
 	query, args, err := sq.
 		Select("user_id").
@@ -1411,6 +1446,40 @@ func (r *Repository) CreateAddonGrant(ctx context.Context, userID, businessID in
 		return 0, err
 	}
 	return res.LastInsertId()
+}
+
+// GetAddonGrant returns the display fields for one grant without loading the
+// full grant history. CreateAddonGrant uses it to build its response.
+func (r *Repository) GetAddonGrant(ctx context.Context, id int64) (*AddonGrantRow, error) {
+	query, args, err := sq.
+		Select(
+			"g.id", "g.user_id", "COALESCE(u.full_name, '')", "u.email",
+			"g.business_id", "COALESCE(b.name, '')",
+			"g.addon_id", "a.name", "a.price",
+			"g.granted_by", "adm.full_name", "g.note", "g.expires_at", "g.revoked_at",
+			"g.enabled_by_grant", "g.created_at",
+		).
+		From("manual_addon_grants g").
+		Join("addons a ON a.id = g.addon_id").
+		LeftJoin("users u ON u.id = g.user_id").
+		LeftJoin("businesses b ON b.id = g.business_id").
+		LeftJoin("users adm ON adm.id = g.granted_by").
+		Where(sq.Eq{"g.id": id}).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	var grant AddonGrantRow
+	if err := r.pool.QueryRowContext(ctx, query, args...).Scan(
+		&grant.ID, &grant.UserID, &grant.UserName, &grant.UserEmail, &grant.BusinessID, &grant.BusinessName,
+		&grant.AddonID, &grant.AddonName, &grant.AddonPrice, &grant.GrantedBy, &grant.GranterName, &grant.Note,
+		&grant.ExpiresAt, &grant.RevokedAt, &grant.EnabledByGrant, &grant.CreatedAt,
+	); err != nil {
+		return nil, err
+	}
+	return &grant, nil
 }
 
 func (r *Repository) GetAddonGrantScope(ctx context.Context, id int64) (*AddonGrantScopeRow, error) {
