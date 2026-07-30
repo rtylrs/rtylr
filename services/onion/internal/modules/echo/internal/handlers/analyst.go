@@ -141,11 +141,16 @@ func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, questi
 
 	started := time.Now()
 	today := time.Now().UTC().Format("2006-01-02")
-	raw, err := h.AiService.CompleteTextWithOptions(ctx, buildSpecGenPrompt(h.AnalystService.SchemaPrompt(), question, today), snips.DeterministicJSONCompletionOptions())
+	specPrompt := buildSpecGenPrompt(h.AnalystService.SchemaPrompt(), question, today)
+	raw, err := h.AiService.CompleteTextWithOptions(ctx, specPrompt, snips.DeterministicJSONCompletionOptions())
 	if err != nil {
 		logger.Ctx(ctx).Warn("analyst spec generation failed", logger.Error(err))
 		return nil, false
 	}
+	// Spec generation is a separate provider call from the user-facing answer.
+	// The provider interface does not expose usage for non-streaming calls, so
+	// meter it with the same fallback estimate used for streamed providers.
+	h.recordUsage(ctx, businessID, userID, estimateTokens(len(specPrompt)+len(raw)))
 
 	specJSON := repairLLMJSON(extractJSONObject(raw))
 	if specJSON == "" || specJSON == "{}" {

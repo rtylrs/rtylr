@@ -746,6 +746,11 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		totalTokens += streamUsageTokens(token, currentPromptChars, fullResponse.Len()-beforeResponseChars)
 
 		newToolResults := renderer.ToolResultsSince(beforeToolResults)
+		if len(newToolResults) > 0 {
+			// A live read can change independently of the request/page context, so
+			// never replay an answer that was informed by a tool result.
+			cachePlan = disableExactCachePlan(cachePlan, "live tool result informed the response")
+		}
 		if len(newToolResults) == 0 || round >= maxToolResultContinuations {
 			if err := renderer.Finish(); err != nil {
 				return
