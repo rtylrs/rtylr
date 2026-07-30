@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/storage"
 )
 
 // publicCareersCacheScope namespaces the per-owner public careers page
@@ -286,6 +287,20 @@ func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplica
 	if !isOwnedResumeURL(req.ResumeURL, custom.OwnerID, career.ID) {
 		return SubmitApplicationResponse{}, onekiterrors.New(http.StatusBadRequest, "Resume does not belong to this role")
 	}
+	if isInternalResumeKey(req.ResumeURL) {
+		client, storageErr := storage.Default()
+		if storageErr != nil {
+			code, message := storage.BuildHTTPError(storageErr)
+			return SubmitApplicationResponse{}, onekiterrors.New(code, message)
+		}
+		metadata, metadataErr := client.Metadata(ctx, req.ResumeURL)
+		if metadataErr != nil {
+			return SubmitApplicationResponse{}, onekiterrors.New(http.StatusBadRequest, "Resume upload was not found")
+		}
+		if err := validateResumeMetadata(metadata); err != nil {
+			return SubmitApplicationResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
+	}
 
 	input := domain.SubmissionInput{
 		CareerID:      career.ID,
@@ -331,9 +346,23 @@ func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplica
 }
 
 func isOwnedResumeURL(resumeURL string, ownerID, careerID int64) bool {
-	if resumeURL == "" || strings.HasPrefix(resumeURL, "http://") || strings.HasPrefix(resumeURL, "https://") {
+	if !isInternalResumeKey(resumeURL) {
 		return true
 	}
 
 	return strings.HasPrefix(resumeURL, fmt.Sprintf("resumes/%d/%d/", ownerID, careerID))
+}
+
+func isInternalResumeKey(resumeURL string) bool {
+	return resumeURL != "" && !strings.HasPrefix(resumeURL, "http://") && !strings.HasPrefix(resumeURL, "https://")
+}
+
+func validateResumeMetadata(metadata storage.ObjectMetadata) error {
+	if !storage.AllowedResumeContentTypes[metadata.ContentType] {
+		return fmt.Errorf("Only PDF or Word resumes are accepted")
+	}
+	if metadata.Size > storage.MaxResumeBytes {
+		return fmt.Errorf("Resume must be 10 MB or smaller")
+	}
+	return nil
 }

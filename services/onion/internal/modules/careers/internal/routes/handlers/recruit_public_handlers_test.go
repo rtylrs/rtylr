@@ -1,6 +1,10 @@
 package handlers
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/voxire/onion/internal/platform/storage"
+)
 
 func TestIsOwnedResumeURL(t *testing.T) {
 	tests := []struct {
@@ -20,6 +24,26 @@ func TestIsOwnedResumeURL(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if got := isOwnedResumeURL(test.resumeURL, 21, 34); got != test.want {
 				t.Fatalf("isOwnedResumeURL(%q) = %t, want %t", test.resumeURL, got, test.want)
+			}
+		})
+	}
+}
+
+func TestValidateResumeMetadata(t *testing.T) {
+	tests := []struct {
+		name     string
+		metadata storage.ObjectMetadata
+		wantErr  bool
+	}{
+		{name: "allowed PDF", metadata: storage.ObjectMetadata{ContentType: "application/pdf", Size: storage.MaxResumeBytes}},
+		{name: "unsupported content type", metadata: storage.ObjectMetadata{ContentType: "image/png", Size: 1}, wantErr: true},
+		{name: "oversized resume", metadata: storage.ObjectMetadata{ContentType: "application/pdf", Size: storage.MaxResumeBytes + 1}, wantErr: true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if err := validateResumeMetadata(test.metadata); (err != nil) != test.wantErr {
+				t.Fatalf("validateResumeMetadata() error = %v, wantErr %t", err, test.wantErr)
 			}
 		})
 	}
