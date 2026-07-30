@@ -152,6 +152,27 @@ func TestCompleteTextWithOptionsFallsBackToPlainProvider(t *testing.T) {
 	}
 }
 
+func TestCompleteTextStreamFallsBackWithoutRetryingPrimary(t *testing.T) {
+	primary := &streamingTestProvider{streamErr: errors.New("primary unavailable")}
+	fallback := &streamingTestProvider{tokens: []StreamToken{{Text: "fallback"}, {Done: true}}}
+	client := &Client{
+		providers:       []Provider{primary, fallback},
+		primaryProvider: primary,
+	}
+
+	stream, err := client.CompleteTextStream(context.Background(), "prompt")
+	if err != nil {
+		t.Fatalf("CompleteTextStream: %v", err)
+	}
+	first := <-stream
+	if first.Text != "fallback" || first.Provider != "stream-test" {
+		t.Fatalf("first token = %#v, want fallback token", first)
+	}
+	if primary.streamCalls != 1 || fallback.streamCalls != 1 {
+		t.Fatalf("stream calls: primary=%d fallback=%d, want one each", primary.streamCalls, fallback.streamCalls)
+	}
+}
+
 type plainCompletionProvider struct {
 	result     string
 	err        error
@@ -180,6 +201,29 @@ type recordingCompletionProvider struct {
 	plainCompletionProvider
 	optionCalls int
 	lastOptions CompletionOptions
+}
+
+type streamingTestProvider struct {
+	plainCompletionProvider
+	tokens      []StreamToken
+	streamErr   error
+	streamCalls int
+}
+
+func (p *streamingTestProvider) Name() string { return "stream-test" }
+
+func (p *streamingTestProvider) CompleteTextStream(_ context.Context, _ string) (<-chan StreamToken, error) {
+	p.streamCalls++
+	if p.streamErr != nil {
+		return nil, p.streamErr
+	}
+
+	out := make(chan StreamToken, len(p.tokens))
+	for _, token := range p.tokens {
+		out <- token
+	}
+	close(out)
+	return out, nil
 }
 
 func (p *recordingCompletionProvider) CompleteTextWithOptions(_ context.Context, _ string, opts CompletionOptions) (string, error) {
