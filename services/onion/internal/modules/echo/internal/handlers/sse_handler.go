@@ -740,6 +740,14 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		beforeResponseChars := fullResponse.Len()
 		token, ok := h.drainProviderStream(ctx, w, tokenChan, clientGone, renderer, cachePlan, businessID, userID, currentPromptChars)
 		if !ok {
+			partialResponseChars := fullResponse.Len() - beforeResponseChars + len(renderer.pending)
+			if token.Error != "" || partialResponseChars > 0 {
+				// Providers may consume the full prompt before a transport failure or
+				// client interruption. They do not reliably report usage on failed
+				// streams, so meter the observed partial attempt conservatively.
+				totalTokens += estimateTokens(currentPromptChars) + estimateTokens(partialResponseChars)
+				h.recordUsage(ctx, businessID, userID, totalTokens)
+			}
 			return
 		}
 		finalToken = token
