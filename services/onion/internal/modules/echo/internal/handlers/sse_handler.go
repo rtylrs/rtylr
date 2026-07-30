@@ -52,6 +52,7 @@ const (
 	cachedReplayTargetDuration    = 8500 * time.Millisecond
 	maxToolResultContinuations    = 2
 	maxToolResultPromptBytes      = 12000
+	unexpectedStreamClosureError  = "Response stream ended before completion"
 )
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
@@ -780,7 +781,20 @@ func (h *GenerateTextStreamHandler) drainProviderStream(ctx context.Context, w h
 		select {
 		case token, ok := <-tokenChan:
 			if !ok {
-				return snips.StreamToken{}, false
+				token := snips.StreamToken{Error: unexpectedStreamClosureError, Done: true}
+				h.writeErrorResponse(w, token.Error)
+				aicache.Record(aicache.Event{
+					Outcome:         aicache.OutcomeError,
+					Mode:            cachePlan.Mode,
+					Provider:        cachePlan.Provider,
+					Reason:          "provider stream closed before completion",
+					CacheKeyPreview: aicache.KeyPreview(cachePlan.Key),
+					BusinessID:      businessID,
+					UserID:          userID,
+					PromptChars:     promptChars,
+					LatencyMs:       time.Since(cachePlan.StartedAt).Milliseconds(),
+				})
+				return token, false
 			}
 
 			if token.Error != "" {
