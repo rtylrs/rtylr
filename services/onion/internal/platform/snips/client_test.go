@@ -58,6 +58,39 @@ func TestEnhanceStreamWithProviderStopsWhenContextCancelsUnderBackpressure(t *te
 	}
 }
 
+func TestSendTextTokenWaitsForConsumer(t *testing.T) {
+	provider := &OpenAIProvider{}
+	tokens := make(chan StreamToken)
+	done := make(chan bool, 1)
+
+	go func() {
+		done <- provider.sendTextToken(context.Background(), tokens, "hello")
+	}()
+
+	select {
+	case token := <-tokens:
+		if token.Text != "hello" {
+			t.Fatalf("Text = %q, want hello", token.Text)
+		}
+	case <-time.After(250 * time.Millisecond):
+		t.Fatal("sendTextToken did not wait for a consumer")
+	}
+
+	if ok := <-done; !ok {
+		t.Fatal("sendTextToken = false, want true after delivery")
+	}
+}
+
+func TestSendTextTokenStopsOnContextCancellation(t *testing.T) {
+	provider := &OpenAIProvider{}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	if ok := provider.sendTextToken(ctx, make(chan StreamToken), "hello"); ok {
+		t.Fatal("sendTextToken = true, want false after context cancellation")
+	}
+}
+
 func waitUntilBuffered(t *testing.T, ch <-chan StreamToken, want int) {
 	t.Helper()
 
