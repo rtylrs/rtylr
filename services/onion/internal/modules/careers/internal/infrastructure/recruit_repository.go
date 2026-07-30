@@ -203,6 +203,13 @@ func (r *Repository) ListSubmissions(ctx context.Context, businessID int64, stat
 	return submissionsFromRows(rows), nil
 }
 
+func (r *Repository) GetSubmissionResumeURL(ctx context.Context, businessID, submissionID int64) (string, error) {
+	return r.queries.GetCareerSubmissionResumeURL(ctx, sqlc.GetCareerSubmissionResumeURLParams{
+		ID:         submissionID,
+		BusinessID: businessID,
+	})
+}
+
 func (r *Repository) UpdateSubmissionStatus(ctx context.Context, businessID, submissionID int64, status string) error {
 	return r.queries.UpdateCareerSubmissionStatus(ctx, sqlc.UpdateCareerSubmissionStatusParams{
 		Status:     status,

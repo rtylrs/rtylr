@@ -2,6 +2,8 @@ package infrastructure_test
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -269,6 +271,46 @@ func TestCareers_SaveApplication_ReturnsPositiveID(t *testing.T) {
 	}
 	if appID <= 0 {
 		t.Errorf("expected positive ID, got %d", appID)
+	}
+}
+
+func TestCareers_GetSubmissionResumeURL_IsBusinessScoped(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	careerID, err := repo.CreateCareer(ctx, domain.RecruitCareerInput{
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
+		Slug: "submission-resume-url", Title: "Resume URL Test",
+	})
+	if err != nil {
+		t.Fatalf("CreateCareer: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM careers_submissions WHERE career_id = ?", careerID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM careers WHERE id = ?", careerID)
+	})
+
+	const resumeURL = "resumes/1001/1/test-resume.pdf"
+	submissionID, err := repo.CreateSubmission(ctx, domain.SubmissionInput{
+		CareerID: careerID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
+		CandidateName: "Ada Lovelace", Email: "ada@example.com", ResumeURL: resumeURL,
+	})
+	if err != nil {
+		t.Fatalf("CreateSubmission: %v", err)
+	}
+
+	got, err := repo.GetSubmissionResumeURL(ctx, testutil.BusinessID, submissionID)
+	if err != nil {
+		t.Fatalf("GetSubmissionResumeURL: %v", err)
+	}
+	if got != resumeURL {
+		t.Fatalf("resume URL = %q, want %q", got, resumeURL)
+	}
+
+	_, err = repo.GetSubmissionResumeURL(ctx, testutil.BusinessID+1, submissionID)
+	if !errors.Is(err, sql.ErrNoRows) {
+		t.Fatalf("GetSubmissionResumeURL with another business error = %v, want sql.ErrNoRows", err)
 	}
 }
 

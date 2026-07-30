@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"regexp"
 	"strings"
@@ -90,6 +91,14 @@ func (s *Service) CreateSubmission(ctx context.Context, in domain.SubmissionInpu
 
 func (s *Service) ListSubmissions(ctx context.Context, businessID int64, status string) ([]domain.Submission, error) {
 	return s.repo.ListSubmissions(ctx, businessID, status)
+}
+
+func (s *Service) GetSubmissionResumeURL(ctx context.Context, businessID, submissionID int64) (string, error) {
+	resumeURL, err := s.repo.GetSubmissionResumeURL(ctx, businessID, submissionID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", ErrNotFound
+	}
+	return resumeURL, err
 }
 
 func (s *Service) UpdateSubmissionStatus(ctx context.Context, businessID, submissionID int64, status string) error {
