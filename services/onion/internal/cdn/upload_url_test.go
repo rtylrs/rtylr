@@ -187,7 +187,7 @@ while [ "$#" -gt 0 ]; do
 done
 printf fake-webp > "$out"
 `
-	if err := os.WriteFile(path, []byte(script), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte(script), 0o700); err != nil {
 		t.Fatal(err)
 	}
 	return path
