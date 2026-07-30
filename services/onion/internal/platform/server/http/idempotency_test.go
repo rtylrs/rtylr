@@ -80,6 +80,20 @@ func TestResponseRecorderWriteLocksStatusOK(t *testing.T) {
 	}
 }
 
+func TestResponseRecorderPreservesFlusher(t *testing.T) {
+	underlying := httptest.NewRecorder()
+	rec := &responseRecorder{ResponseWriter: underlying, status: http.StatusOK}
+
+	flusher, ok := any(rec).(http.Flusher)
+	if !ok {
+		t.Fatal("responseRecorder should preserve http.Flusher")
+	}
+	flusher.Flush()
+	if !underlying.Flushed {
+		t.Fatal("Flush did not reach the underlying ResponseWriter")
+	}
+}
+
 func TestReserveIdempotencyKeyRetriesAfterTransientReservationRace(t *testing.T) {
 	store := &idempotencyTestStore{setResults: []bool{false, true}}
 	reserved, cached := reserveIdempotencyKey(context.Background(), store, "key", []byte(`{"status":0}`))

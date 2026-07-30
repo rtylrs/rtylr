@@ -258,6 +258,14 @@ type responseRecorder struct {
 	buf         bytes.Buffer
 }
 
+func (rr *responseRecorder) Unwrap() http.ResponseWriter { return rr.ResponseWriter }
+
+func (rr *responseRecorder) Flush() {
+	if flusher, ok := rr.ResponseWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
+}
+
 func (rr *responseRecorder) WriteHeader(code int) {
 	if rr.wroteHeader {
 		return
