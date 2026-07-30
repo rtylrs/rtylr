@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -61,7 +62,7 @@ func TestRateLimitMiddleware_Returns429(t *testing.T) {
 
 	for i := 0; i < 3; i++ {
 		req := httptest.NewRequest(http.MethodGet, "/x", http.NoBody)
-		req.RemoteAddr = "1.1.1.1:1234"
+		req.RemoteAddr = "1.1.1.1:" + strconv.Itoa(1234+i)
 		rec := httptest.NewRecorder()
 		wrapped.ServeHTTP(rec, req)
 
@@ -87,7 +88,7 @@ func TestRateLimitMiddleware_Returns429(t *testing.T) {
 func TestGetClientKey_TrustsOnlyCloudflare(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 	r.RemoteAddr = "10.0.0.1:1234"
-	if got := getClientKey(r); got != "10.0.0.1:1234" {
+	if got := getClientKey(r); got != "10.0.0.1" {
 		t.Errorf("default to RemoteAddr, got %q", got)
 	}
 
@@ -95,7 +96,7 @@ func TestGetClientKey_TrustsOnlyCloudflare(t *testing.T) {
 	// them to mint unlimited buckets and bypass the limiters).
 	r.Header.Set("X-Forwarded-For", "spoofed.example, proxy.example")
 	r.Header.Set("X-Real-IP", "9.9.9.9")
-	if got := getClientKey(r); got != "10.0.0.1:1234" {
+	if got := getClientKey(r); got != "10.0.0.1" {
 		t.Errorf("X-Forwarded-For/X-Real-IP must be ignored, got %q", got)
 	}
 
@@ -103,6 +104,12 @@ func TestGetClientKey_TrustsOnlyCloudflare(t *testing.T) {
 	r.Header.Set("CF-Connecting-IP", "8.8.8.8")
 	if got := getClientKey(r); got != "8.8.8.8" {
 		t.Errorf("CF-Connecting-IP should win, got %q", got)
+	}
+
+	r.Header.Del("CF-Connecting-IP")
+	r.RemoteAddr = "[2001:db8::1]:443"
+	if got := getClientKey(r); got != "2001:db8::1" {
+		t.Errorf("IPv6 host = %q, want address without port", got)
 	}
 }
 
