@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
@@ -281,6 +283,9 @@ func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplica
 	if err != nil || !career.IsPublished {
 		return SubmitApplicationResponse{}, onekiterrors.New(http.StatusNotFound, "Role not found or no longer open")
 	}
+	if !isOwnedResumeURL(req.ResumeURL, custom.OwnerID, career.ID) {
+		return SubmitApplicationResponse{}, onekiterrors.New(http.StatusBadRequest, "Resume does not belong to this role")
+	}
 
 	input := domain.SubmissionInput{
 		CareerID:      career.ID,
@@ -323,4 +328,12 @@ func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplica
 	)
 
 	return SubmitApplicationResponse{ID: id, Message: "Application received"}, nil
+}
+
+func isOwnedResumeURL(resumeURL string, ownerID, careerID int64) bool {
+	if resumeURL == "" || strings.HasPrefix(resumeURL, "http://") || strings.HasPrefix(resumeURL, "https://") {
+		return true
+	}
+
+	return strings.HasPrefix(resumeURL, fmt.Sprintf("resumes/%d/%d/", ownerID, careerID))
 }
