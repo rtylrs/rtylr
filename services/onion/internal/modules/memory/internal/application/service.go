@@ -297,15 +297,6 @@ func (s *Service) extractAndStoreMemories(ctx context.Context, userID int, sessi
 func (s *Service) identifyMemories(_ []domain.ConversationMessage, summaryData *SummaryData) []MemoryItem {
 	memories := make([]MemoryItem, 0, len(summaryData.KeyTopics))
 
-	if summaryData.Sentiment != "" {
-		memories = append(memories, MemoryItem{
-			Type:       "preference",
-			Key:        "conversation_style",
-			Value:      fmt.Sprintf("User prefers %s conversations", summaryData.Sentiment),
-			Confidence: 0.8,
-		})
-	}
-
 	for _, topic := range summaryData.KeyTopics {
 		memories = append(memories, MemoryItem{
 			Type:       "interest",

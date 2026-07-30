@@ -66,3 +66,14 @@ func TestBuildSummaryPromptBoundsAndSanitizesConversation(t *testing.T) {
 		t.Fatalf("prompt included message beyond the recent limit\n%s", got)
 	}
 }
+
+func TestIdentifyMemoriesDoesNotTreatSentimentAsUserPreference(t *testing.T) {
+	memories := (&Service{}).identifyMemories(nil, &SummaryData{
+		KeyTopics: []string{"inventory"},
+		Sentiment: "negative",
+	})
+
+	if len(memories) != 1 || memories[0].Key != "topic_inventory" {
+		t.Fatalf("unexpected memories: %#v", memories)
+	}
+}
