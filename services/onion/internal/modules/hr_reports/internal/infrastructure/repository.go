@@ -75,7 +75,7 @@ func reflectValueToInterface(v reflect.Value) interface{} {
 			return nil
 		}
 		return reflectValueToInterface(v.Elem())
-	case reflect.Ptr:
+	case reflect.Pointer:
 		if v.IsNil() {
 			return nil
 		}

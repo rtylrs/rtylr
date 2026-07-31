@@ -29,7 +29,7 @@ func registerRecursive(ctx context.Context, val reflect.Value, registry *Registr
 	if val.Kind() == reflect.Interface {
 		val = val.Elem()
 	}
-	if val.Kind() != reflect.Ptr || val.IsNil() {
+	if val.Kind() != reflect.Pointer || val.IsNil() {
 		return
 	}
 
@@ -64,7 +64,7 @@ func registerRecursive(ctx context.Context, val reflect.Value, registry *Registr
 
 func isNilableAndNonNil(v reflect.Value) bool {
 	switch v.Kind() {
-	case reflect.Ptr, reflect.Interface, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func:
+	case reflect.Pointer, reflect.Interface, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func:
 		return !v.IsNil()
 	default:
 		return false

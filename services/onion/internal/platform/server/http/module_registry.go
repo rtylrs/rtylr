@@ -186,7 +186,7 @@ func (mr *ModuleRegistry) GetModuleNames() []string {
 
 func isNilableAndNonNil(v reflect.Value) bool {
 	switch v.Kind() {
-	case reflect.Ptr, reflect.Interface, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func:
+	case reflect.Pointer, reflect.Interface, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func:
 		return !v.IsNil()
 	default:
 		return false
@@ -194,7 +194,7 @@ func isNilableAndNonNil(v reflect.Value) bool {
 }
 
 func isPlatformStruct(v reflect.Value) bool {
-	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
+	if v.Kind() != reflect.Pointer || v.Elem().Kind() != reflect.Struct {
 		return false
 	}
 
