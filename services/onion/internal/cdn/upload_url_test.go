@@ -190,6 +190,11 @@ printf fake-webp > "$out"
 	if err := os.WriteFile(path, []byte(script), 0o600); err != nil {
 		t.Fatal(err)
 	}
+	// The stub is exec'd by serveUploadURLWebP, so it needs the executable bit.
+	// Set it via Chmod rather than WriteFile to keep gosec's G306 satisfied.
+	if err := os.Chmod(path, 0o700); err != nil {
+		t.Fatal(err)
+	}
 	return path
 }
 
