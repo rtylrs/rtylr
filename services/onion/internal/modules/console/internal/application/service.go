@@ -937,22 +937,12 @@ func (s *Service) CreateGrant(ctx context.Context, userID, planID, grantedBy int
 		logger.Ctx(ctx).Warn("failed to upsert subscription for grant", logger.Error(subErr))
 	}
 
-	rows, _, err := s.repo.ListGrants(ctx, 1, 0)
-	if err != nil || len(rows) == 0 {
+	grant, err := s.repo.GetGrant(ctx, id)
+	if err != nil {
 		return &GrantDTO{ID: id}, nil
 	}
-	// Return the created grant by fetching from the list
-	result, _, err2 := s.repo.ListGrants(ctx, 1000, 0)
-	if err2 != nil {
-		return &GrantDTO{ID: id}, nil
-	}
-	for _, g := range result {
-		if g.ID == id {
-			dto := toGrantDTO(g)
-			return &dto, nil
-		}
-	}
-	return &GrantDTO{ID: id}, nil
+	dto := toGrantDTO(*grant)
+	return &dto, nil
 }
 
 func (s *Service) RevokeGrant(ctx context.Context, id int64) error {
@@ -1159,17 +1149,12 @@ func (s *Service) CreateAddonGrant(ctx context.Context, userID, businessID int64
 		return nil, err
 	}
 
-	result, _, err := s.repo.ListAddonGrants(ctx, 1000, 0)
+	grant, err := s.repo.GetAddonGrant(ctx, id)
 	if err != nil {
 		return &AddonGrantDTO{ID: id}, nil
 	}
-	for _, g := range result {
-		if g.ID == id {
-			dto := toAddonGrantDTO(g)
-			return &dto, nil
-		}
-	}
-	return &AddonGrantDTO{ID: id}, nil
+	dto := toAddonGrantDTO(*grant)
+	return &dto, nil
 }
 
 func (s *Service) cleanupAddonGrantEnablement(ctx context.Context, scope *infrastructure.AddonGrantScopeRow) error {

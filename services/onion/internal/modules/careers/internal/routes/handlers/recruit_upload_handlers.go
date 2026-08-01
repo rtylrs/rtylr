@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -151,19 +152,15 @@ func (h *ResumeDownloadURLHandler) Serve(ctx context.Context, req *ResumeDownloa
 		return ResumeDownloadURLResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	// Look up the submission, scoped to the caller's tenant. The list
-	// method filters by business_id already; finding it here means the
-	// caller owns it.
-	submissions, err := h.CareersService.ListSubmissions(ctx, businessID, "")
+	// Query the requested submission directly, with tenant scoping in SQL.
+	// Loading the full submission list here used memory and DB time in
+	// proportion to every applicant for a single resume download.
+	resumeKey, err := h.CareersService.GetSubmissionResumeURL(ctx, businessID, req.SubmissionID)
 	if err != nil {
-		return ResumeDownloadURLResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to locate submission")
-	}
-	var resumeKey string
-	for _, s := range submissions {
-		if s.ID == req.SubmissionID {
-			resumeKey = s.ResumeURL
-			break
+		if errors.Is(err, application.ErrNotFound) {
+			return ResumeDownloadURLResponse{}, onekiterrors.New(http.StatusNotFound, "Submission not found or has no resume")
 		}
+		return ResumeDownloadURLResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to locate submission")
 	}
 	if resumeKey == "" {
 		return ResumeDownloadURLResponse{}, onekiterrors.New(http.StatusNotFound, "Submission not found or has no resume")

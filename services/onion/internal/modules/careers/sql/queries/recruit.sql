@@ -296,6 +296,12 @@ LEFT JOIN careers c ON c.id = s.career_id
 WHERE s.business_id = ? AND s.status = ?
 ORDER BY s.created_at DESC;
 
+-- name: GetCareerSubmissionResumeURL :one
+SELECT COALESCE(resume_url, '') AS resume_url
+FROM careers_submissions
+WHERE id = ? AND business_id = ?
+LIMIT 1;
+
 -- name: UpdateCareerSubmissionStatus :exec
 UPDATE careers_submissions
 SET status = ?

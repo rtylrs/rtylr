@@ -245,6 +245,39 @@ func TestListPlans_ReturnsPlans(t *testing.T) {
 	_ = plans
 }
 
+func TestGetGrant_ReturnsCreatedGrant(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	plans, err := repo.ListPlans(ctx)
+	if err != nil {
+		t.Fatalf("ListPlans: %v", err)
+	}
+	if len(plans) == 0 {
+		t.Skip("no plan fixtures available")
+	}
+
+	grantID, err := repo.CreateGrant(ctx, testutil.OwnerID, plans[0].ID, testutil.OwnerID, "lookup test", nil)
+	if err != nil {
+		t.Fatalf("CreateGrant: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM manual_access_grants WHERE id = ?", grantID)
+	})
+
+	grant, err := repo.GetGrant(ctx, grantID)
+	if err != nil {
+		t.Fatalf("GetGrant: %v", err)
+	}
+	if grant.ID != grantID {
+		t.Fatalf("grant ID = %d, want %d", grant.ID, grantID)
+	}
+	if grant.PlanID != plans[0].ID {
+		t.Fatalf("plan ID = %d, want %d", grant.PlanID, plans[0].ID)
+	}
+}
+
 func TestResourceCRUD_HidesSensitiveUserColumns(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
