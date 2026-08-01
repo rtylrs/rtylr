@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/snips"
 )
 
 func TestGenerateTextStreamParseRejectsTrailingJSON(t *testing.T) {
@@ -94,6 +96,70 @@ func TestStreamPreludeAndTokensUseStructuredSSEEvents(t *testing.T) {
 	}
 }
 
+func TestDrainProviderStreamReportsPrematureClosure(t *testing.T) {
+	handler := &GenerateTextStreamHandler{}
+	rec := httptest.NewRecorder()
+	full := &strings.Builder{}
+	renderer := newStreamEventRenderer(rec, nil, "assistant-1", full)
+	tokens := make(chan snips.StreamToken)
+	close(tokens)
+
+	token, ok := handler.drainProviderStream(
+		context.Background(),
+		rec,
+		tokens,
+		make(chan bool),
+		renderer,
+		cacheWritePlan{Mode: string(ModeAsk), StartedAt: time.Now()},
+		1,
+		2,
+		0,
+	)
+	if ok {
+		t.Fatal("drainProviderStream succeeded after the provider stream closed")
+	}
+	if token.Error != unexpectedStreamClosureError {
+		t.Fatalf("Error = %q, want %q", token.Error, unexpectedStreamClosureError)
+	}
+
+	events := decodeSSEEvents(t, rec.Body.String())
+	if len(events) != 1 || events[0].Type != EventError || events[0].Error != unexpectedStreamClosureError {
+		t.Fatalf("unexpected SSE events: %#v", events)
+	}
+}
+
+func TestStreamTokensToClientRecordsPartialFailedUsage(t *testing.T) {
+	quota := &recordingQuotaService{recorded: make(chan int, 1)}
+	handler := &GenerateTextStreamHandler{QuotaService: quota}
+	rec := httptest.NewRecorder()
+	tokens := make(chan snips.StreamToken, 2)
+	tokens <- snips.StreamToken{Text: "partial"}
+	tokens <- snips.StreamToken{Error: "provider failed", Done: true}
+	close(tokens)
+
+	handler.streamTokensToClient(
+		context.Background(),
+		rec,
+		tokens,
+		make(chan bool),
+		&GenerateTextStreamRequest{SessionID: "session-1", UserID: 2},
+		1,
+		2,
+		cacheWritePlan{Mode: string(ModeAsk), PromptChars: 40, StartedAt: time.Now()},
+		nil,
+		"prompt",
+	)
+
+	select {
+	case got := <-quota.recorded:
+		if got != estimateTokens(40)+estimateTokens(len("partial")) {
+			t.Fatalf("recorded tokens = %d, want conservative partial usage", got)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("partial failed stream usage was not recorded")
+	}
+}
+
 func TestStreamRendererExtractsSplitThinkingMarker(t *testing.T) {
 	rec := httptest.NewRecorder()
 	full := &strings.Builder{}
@@ -122,6 +188,18 @@ func TestStreamRendererExtractsSplitThinkingMarker(t *testing.T) {
 	if !strings.Contains(full.String(), "Here is the answer.") || !strings.Contains(full.String(), "Final.") {
 		t.Fatalf("public response missing visible text, got %q", full.String())
 	}
+}
+
+type recordingQuotaService struct {
+	recorded chan int
+}
+
+func (s *recordingQuotaService) Authorize(_ context.Context, _, _ int64) (bool, string, int64, int64, int64) {
+	return true, "", 0, 0, 0
+}
+
+func (s *recordingQuotaService) RecordUsage(_ context.Context, _, _ int64, tokens int) {
+	s.recorded <- tokens
 }
 
 func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {

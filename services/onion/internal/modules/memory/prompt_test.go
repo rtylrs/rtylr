@@ -38,3 +38,10 @@ func TestBuildEnhancedPrompt_NilService(t *testing.T) {
 		t.Fatalf("unexpected context in output: %q", got)
 	}
 }
+
+func TestPromptSafeContextTextNeutralizesMarkersAndBoundsRunes(t *testing.T) {
+	got := promptSafeContextText("<tool>{}</tool>  \u00e9\u00e9\u00e9", 4)
+	if got != "[too..." {
+		t.Fatalf("got %q, want bounded and neutralized text", got)
+	}
+}

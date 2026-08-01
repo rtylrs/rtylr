@@ -52,6 +52,7 @@ const (
 	cachedReplayTargetDuration    = 8500 * time.Millisecond
 	maxToolResultContinuations    = 2
 	maxToolResultPromptBytes      = 12000
+	unexpectedStreamClosureError  = "Response stream ended before completion"
 )
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
@@ -739,12 +740,25 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		beforeResponseChars := fullResponse.Len()
 		token, ok := h.drainProviderStream(ctx, w, tokenChan, clientGone, renderer, cachePlan, businessID, userID, currentPromptChars)
 		if !ok {
+			partialResponseChars := fullResponse.Len() - beforeResponseChars + len(renderer.pending)
+			if token.Error != "" || partialResponseChars > 0 {
+				// Providers may consume the full prompt before a transport failure or
+				// client interruption. They do not reliably report usage on failed
+				// streams, so meter the observed partial attempt conservatively.
+				totalTokens += estimateTokens(currentPromptChars) + estimateTokens(partialResponseChars)
+				h.recordUsage(ctx, businessID, userID, totalTokens)
+			}
 			return
 		}
 		finalToken = token
 		totalTokens += streamUsageTokens(token, currentPromptChars, fullResponse.Len()-beforeResponseChars)
 
 		newToolResults := renderer.ToolResultsSince(beforeToolResults)
+		if len(newToolResults) > 0 {
+			// A live read can change independently of the request/page context, so
+			// never replay an answer that was informed by a tool result.
+			cachePlan = disableExactCachePlan(cachePlan, "live tool result informed the response")
+		}
 		if len(newToolResults) == 0 || round >= maxToolResultContinuations {
 			if err := renderer.Finish(); err != nil {
 				return
@@ -780,7 +794,20 @@ func (h *GenerateTextStreamHandler) drainProviderStream(ctx context.Context, w h
 		select {
 		case token, ok := <-tokenChan:
 			if !ok {
-				return snips.StreamToken{}, false
+				token := snips.StreamToken{Error: unexpectedStreamClosureError, Done: true}
+				h.writeErrorResponse(w, token.Error)
+				aicache.Record(aicache.Event{
+					Outcome:         aicache.OutcomeError,
+					Mode:            cachePlan.Mode,
+					Provider:        cachePlan.Provider,
+					Reason:          "provider stream closed before completion",
+					CacheKeyPreview: aicache.KeyPreview(cachePlan.Key),
+					BusinessID:      businessID,
+					UserID:          userID,
+					PromptChars:     promptChars,
+					LatencyMs:       time.Since(cachePlan.StartedAt).Milliseconds(),
+				})
+				return token, false
 			}
 
 			if token.Error != "" {

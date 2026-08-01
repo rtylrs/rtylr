@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/generative-ai-go/genai"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 
 	"github.com/voxire/onion/internal/platform/config"
@@ -125,6 +126,15 @@ func (c *GeminiProvider) CompleteTextStream(ctx context.Context, prompt string) 
 
 	go func() {
 		defer close(tokenChan)
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Global().Error("panic in Gemini stream goroutine", logger.Any("panic", r))
+				select {
+				case tokenChan <- StreamToken{Error: "internal streaming error", Done: true}:
+				case <-ctx.Done():
+				}
+			}
+		}()
 
 		c.processGeminiStream(ctx, prompt, tokenChan)
 	}()
@@ -156,7 +166,7 @@ func (c *GeminiProvider) processGeminiStream(ctx context.Context, prompt string,
 func (c *GeminiProvider) tryModelStream(ctx context.Context, prompt, modelName string, tokenChan chan<- StreamToken) bool {
 	model := c.client.GenerativeModel(modelName)
 
-	maxTokens := int32(2048)
+	maxTokens := int32(config.AIMaxOutputTokens)
 	temperature := float32(0.7)
 	topP := float32(0.8)
 	topK := int32(40)
@@ -179,28 +189,40 @@ func (c *GeminiProvider) tryModelStream(ctx context.Context, prompt, modelName s
 }
 
 func (c *GeminiProvider) processModelIteration(ctx context.Context, iter *genai.GenerateContentResponseIterator, tokenChan chan<- StreamToken) bool {
+	emittedText := false
 	for {
 		resp, err := iter.Next()
 		if err != nil {
-			break
+			if errors.Is(err, iterator.Done) {
+				select {
+				case tokenChan <- StreamToken{Done: true}:
+					return true
+				case <-ctx.Done():
+					return false
+				}
+			}
+
+			logger.Ctx(ctx).Error("Gemini stream iterator failed", logger.Error(err))
+			if emittedText {
+				select {
+				case tokenChan <- StreamToken{Error: "Gemini stopped while generating a response", Done: true}:
+				case <-ctx.Done():
+				}
+				return true
+			}
+			return false
 		}
 
 		if resp == nil {
-			break
+			logger.Ctx(ctx).Error("Gemini stream model returned an empty response")
+			return false
 		}
 
 		if !c.processResponse(ctx, resp, tokenChan) {
-			break
+			return false
 		}
+		emittedText = true
 	}
-
-	select {
-	case tokenChan <- StreamToken{Done: true}:
-	case <-ctx.Done():
-		return false
-	}
-
-	return true
 }
 
 func (c *GeminiProvider) processResponse(ctx context.Context, resp *genai.GenerateContentResponse, tokenChan chan<- StreamToken) bool {

@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	CacheVersion = "exact-v2"
+	CacheVersion = "exact-v3"
 
 	OutcomeHit   = "hit"
 	OutcomeMiss  = "miss"

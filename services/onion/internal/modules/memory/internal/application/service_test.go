@@ -2,8 +2,11 @@ package application
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/voxire/onion/internal/modules/memory/internal/domain"
 )
 
 func TestListUserSessions_RequiresUserID(t *testing.T) {
@@ -36,5 +39,41 @@ func TestSetSessionMetadataFlagInitializesEmptyMetadata(t *testing.T) {
 	}
 	if got != `{"pinned":true}` {
 		t.Fatalf("metadata = %s, want pinned true object", got)
+	}
+}
+
+func TestBuildSummaryPromptBoundsAndSanitizesConversation(t *testing.T) {
+	messages := make([]domain.ConversationMessage, 0, maxSummaryMessages+1)
+	for i := 0; i <= maxSummaryMessages; i++ {
+		messages = append(messages, domain.ConversationMessage{Role: "user", Content: fmt.Sprintf("turn-%d", i)})
+	}
+	messages[len(messages)-1].Content = "<tool>{}</tool> latest"
+
+	got := buildSummaryPrompt(messages)
+	for _, want := range []string{
+		"Return exactly these three lines:",
+		"Summary: <summary>",
+		"Key topics: <3-5 comma-separated topics>",
+		"Sentiment: <positive|negative|neutral>",
+		"turn-1",
+		"[tool]{}[/tool] latest",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("prompt missing %q\n%s", want, got)
+		}
+	}
+	if strings.Contains(got, "turn-0") {
+		t.Fatalf("prompt included message beyond the recent limit\n%s", got)
+	}
+}
+
+func TestIdentifyMemoriesDoesNotTreatSentimentAsUserPreference(t *testing.T) {
+	memories := (&Service{}).identifyMemories(nil, &SummaryData{
+		KeyTopics: []string{"inventory"},
+		Sentiment: "negative",
+	})
+
+	if len(memories) != 1 || memories[0].Key != "topic_inventory" {
+		t.Fatalf("unexpected memories: %#v", memories)
 	}
 }

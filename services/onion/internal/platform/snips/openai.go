@@ -172,10 +172,7 @@ func (c *OpenAIProvider) CompleteTextStream(ctx context.Context, prompt string) 
 		defer func() {
 			if r := recover(); r != nil {
 				logger.Global().Error("panic in AI stream goroutine", logger.Any("panic", r))
-				select {
-				case tokenChan <- StreamToken{Error: "internal streaming error", Done: true}:
-				default:
-				}
+				c.sendErrorToken(ctx, tokenChan, "internal streaming error")
 			}
 		}()
 		c.processOpenAIStream(ctx, prompt, tokenChan)
@@ -191,7 +188,7 @@ func (c *OpenAIProvider) processOpenAIStream(ctx context.Context, prompt string,
 
 	stream := c.client.Chat.Completions.NewStreaming(ctx, c.chatParams(prompt, true, CompletionOptions{}))
 	if stream == nil {
-		c.sendErrorToken(tokenChan, "failed to create streaming response")
+		c.sendErrorToken(ctx, tokenChan, "failed to create streaming response")
 		return
 	}
 
@@ -214,7 +211,7 @@ func (c *OpenAIProvider) processOpenAIStream(ctx context.Context, prompt string,
 
 		for i := range chunk.Choices {
 			if content := chunk.Choices[i].Delta.Content; content != "" {
-				if !c.sendTextToken(tokenChan, content) {
+				if !c.sendTextToken(ctx, tokenChan, content) {
 					return
 				}
 			}
@@ -222,33 +219,37 @@ func (c *OpenAIProvider) processOpenAIStream(ctx context.Context, prompt string,
 	}
 
 	if err := stream.Err(); err != nil {
-		c.sendErrorToken(tokenChan, err.Error())
+		c.sendErrorToken(ctx, tokenChan, err.Error())
 		return
 	}
 
-	c.sendCompletionToken(tokenChan, int(promptTokens), int(completionTokens))
+	c.sendCompletionToken(ctx, tokenChan, int(promptTokens), int(completionTokens))
 }
 
-func (c *OpenAIProvider) sendTextToken(tokenChan chan<- StreamToken, content string) bool {
+func (c *OpenAIProvider) sendTextToken(ctx context.Context, tokenChan chan<- StreamToken, content string) bool {
 	select {
 	case tokenChan <- StreamToken{Text: content, Done: false}:
 		return true
-	default:
+	case <-ctx.Done():
 		return false
 	}
 }
 
-func (c *OpenAIProvider) sendErrorToken(tokenChan chan<- StreamToken, errorMsg string) {
+func (c *OpenAIProvider) sendErrorToken(ctx context.Context, tokenChan chan<- StreamToken, errorMsg string) bool {
 	select {
 	case tokenChan <- StreamToken{Error: errorMsg, Done: true}:
-	default:
+		return true
+	case <-ctx.Done():
+		return false
 	}
 }
 
-func (c *OpenAIProvider) sendCompletionToken(tokenChan chan<- StreamToken, promptTokens, completionTokens int) {
+func (c *OpenAIProvider) sendCompletionToken(ctx context.Context, tokenChan chan<- StreamToken, promptTokens, completionTokens int) bool {
 	select {
 	case tokenChan <- StreamToken{Done: true, PromptTokens: promptTokens, CompletionTokens: completionTokens}:
-	default:
+		return true
+	case <-ctx.Done():
+		return false
 	}
 }
 

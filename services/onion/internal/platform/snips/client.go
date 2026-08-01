@@ -143,8 +143,13 @@ func (c *Client) CompleteTextStream(ctx context.Context, prompt string) (<-chan 
 		}
 	}
 
-	// Fallback to first available provider
-	for _, provider := range c.providers {
+	// The primary provider is always registered first. It has already been
+	// attempted above, so continue with the remaining providers.
+	start := 0
+	if c.primaryProvider != nil {
+		start = 1
+	}
+	for _, provider := range c.providers[start:] {
 		if provider.IsAvailable() {
 			tokenChan, err := provider.CompleteTextStream(ctx, prompt)
 			if err == nil {
