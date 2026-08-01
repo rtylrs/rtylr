@@ -11,6 +11,7 @@ func allowedHeaders() []string {
 	return []string{
 		"Authorization",
 		"Content-Type",
+		"Idempotency-Key",
 		"Accept",
 		"Origin",
 		"User-Agent",

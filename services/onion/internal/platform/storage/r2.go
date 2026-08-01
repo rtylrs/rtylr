@@ -194,9 +194,16 @@ var AllowedResumeContentTypes = map[string]bool{
 	"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
 }
 
-// MaxResumeBytes is the hard ceiling enforced by the presigned URL
-// via Content-Length-Range. 10 MB is generous — most PDFs are under 1.
+// MaxResumeBytes is the largest resume accepted when an application is
+// submitted. 10 MB is generous — most PDFs are under 1.
 const MaxResumeBytes int64 = 10 * 1024 * 1024
+
+// ObjectMetadata is the subset of object properties callers need to verify
+// a direct upload before persisting its key.
+type ObjectMetadata struct {
+	ContentType string
+	Size        int64
+}
 
 // PresignUpload returns a short-lived PUT URL the browser can upload
 // to directly. The key is caller-controlled; the content-type lock
@@ -265,6 +272,28 @@ func (c *Client) Download(ctx context.Context, key string) (io.ReadCloser, int64
 		size = *out.ContentLength
 	}
 	return out.Body, size, nil
+}
+
+// Metadata reads the content type and size of an object without downloading
+// it. Unlike Exists, it returns errors so callers can enforce upload
+// validation before storing an object key.
+func (c *Client) Metadata(ctx context.Context, key string) (ObjectMetadata, error) {
+	out, err := c.s3.HeadObject(ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(c.bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return ObjectMetadata{}, fmt.Errorf("reading object metadata key=%s: %w", key, err)
+	}
+
+	metadata := ObjectMetadata{}
+	if out.ContentType != nil {
+		metadata.ContentType = *out.ContentType
+	}
+	if out.ContentLength != nil {
+		metadata.Size = *out.ContentLength
+	}
+	return metadata, nil
 }
 
 // Exists reports whether an object is present. A HeadObject error is

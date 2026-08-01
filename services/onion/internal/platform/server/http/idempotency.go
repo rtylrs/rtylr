@@ -30,6 +30,13 @@ type idempotencyRecord struct {
 	Body    []byte      `json:"body"`
 }
 
+type idempotencyRedisStore interface {
+	SetNx(ctx context.Context, key string, val []byte, ttl time.Duration) bool
+	Get(ctx context.Context, key string) []byte
+	Put(ctx context.Context, key string, val []byte, ttl time.Duration)
+	Delete(ctx context.Context, keys []string)
+}
+
 // IdempotencyMiddleware deduplicates mutating requests that carry an
 // Idempotency-Key header. On the first call the handler runs normally and
 // the response is stored for 30 minutes; any subsequent request with the same
@@ -84,9 +91,9 @@ func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Hand
 	rc := cacher.GetRedisCache()
 	pending := []byte(`{"status":0}`)
 
-	reserved := rc.SetNx(r.Context(), cacheKey, pending, idempotencyTTL)
+	reserved, cached := reserveIdempotencyKey(r.Context(), rc, cacheKey, pending)
 	if !reserved {
-		if cached := rc.Get(r.Context(), cacheKey); cached != nil {
+		if cached != nil {
 			var rec idempotencyRecord
 			if err := json.Unmarshal(cached, &rec); err == nil {
 				if rec.Status >= 200 {
@@ -103,8 +110,15 @@ func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Hand
 				return
 			}
 		}
-		// Reservation vanished between SetNx and Get (TTL expiry / release):
-		// process without holding it rather than blocking the caller.
+		// Do not execute a mutating handler without a reservation. A failed
+		// reservation is either another in-flight request or a brief cache race;
+		// both are safe to retry, while running now could duplicate the mutation.
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusConflict)
+		if _, writeErr := w.Write([]byte(`{"error":"a request with this Idempotency-Key is still being processed"}`)); writeErr != nil {
+			logger.Ctx(r.Context()).Warn("failed to write idempotency conflict response", logger.Error(writeErr))
+		}
+		return
 	}
 
 	stored := false
@@ -129,6 +143,18 @@ func serveIdempotentRedis(w http.ResponseWriter, r *http.Request, next http.Hand
 			stored = true
 		})
 	}
+}
+
+func reserveIdempotencyKey(ctx context.Context, store idempotencyRedisStore, key string, pending []byte) (bool, []byte) {
+	for attempt := 0; attempt < 2; attempt++ {
+		if store.SetNx(ctx, key, pending, idempotencyTTL) {
+			return true, nil
+		}
+		if cached := store.Get(ctx, key); cached != nil {
+			return false, cached
+		}
+	}
+	return false, nil
 }
 
 // serveIdempotentLocal is the single-replica fallback used when Redis is off:
@@ -230,6 +256,14 @@ type responseRecorder struct {
 	status      int
 	wroteHeader bool
 	buf         bytes.Buffer
+}
+
+func (rr *responseRecorder) Unwrap() http.ResponseWriter { return rr.ResponseWriter }
+
+func (rr *responseRecorder) Flush() {
+	if flusher, ok := rr.ResponseWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
 }
 
 func (rr *responseRecorder) WriteHeader(code int) {

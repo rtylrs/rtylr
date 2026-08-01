@@ -79,3 +79,52 @@ func TestResponseRecorderWriteLocksStatusOK(t *testing.T) {
 		t.Fatalf("expected underlying response to keep OK, got %d", underlying.Code)
 	}
 }
+
+func TestResponseRecorderPreservesFlusher(t *testing.T) {
+	underlying := httptest.NewRecorder()
+	rec := &responseRecorder{ResponseWriter: underlying, status: http.StatusOK}
+
+	flusher, ok := any(rec).(http.Flusher)
+	if !ok {
+		t.Fatal("responseRecorder should preserve http.Flusher")
+	}
+	flusher.Flush()
+	if !underlying.Flushed {
+		t.Fatal("Flush did not reach the underlying ResponseWriter")
+	}
+}
+
+func TestReserveIdempotencyKeyRetriesAfterTransientReservationRace(t *testing.T) {
+	store := &idempotencyTestStore{setResults: []bool{false, true}}
+	reserved, cached := reserveIdempotencyKey(context.Background(), store, "key", []byte(`{"status":0}`))
+	if !reserved || cached != nil {
+		t.Fatalf("reserved=%t cached=%q, want successful retry", reserved, cached)
+	}
+	if store.setCalls != 2 {
+		t.Fatalf("SetNx calls = %d, want 2", store.setCalls)
+	}
+}
+
+func TestReserveIdempotencyKeyDoesNotProceedWithoutReservation(t *testing.T) {
+	store := &idempotencyTestStore{setResults: []bool{false, false}}
+	reserved, cached := reserveIdempotencyKey(context.Background(), store, "key", []byte(`{"status":0}`))
+	if reserved || cached != nil {
+		t.Fatalf("reserved=%t cached=%q, want no reservation", reserved, cached)
+	}
+}
+
+type idempotencyTestStore struct {
+	setResults []bool
+	setCalls   int
+	cached     []byte
+}
+
+func (s *idempotencyTestStore) SetNx(_ context.Context, _ string, _ []byte, _ time.Duration) bool {
+	result := s.setResults[s.setCalls]
+	s.setCalls++
+	return result
+}
+
+func (s *idempotencyTestStore) Get(_ context.Context, _ string) []byte                     { return s.cached }
+func (s *idempotencyTestStore) Put(_ context.Context, _ string, _ []byte, _ time.Duration) {}
+func (s *idempotencyTestStore) Delete(_ context.Context, _ []string)                       {}
