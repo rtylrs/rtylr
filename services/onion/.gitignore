@@ -70,3 +70,6 @@ internal/**/sql/*.sql.go
 /worker
 /pay
 /main
+
+# Per-machine agent config, not shared across machines
+/CLAUDE.md
