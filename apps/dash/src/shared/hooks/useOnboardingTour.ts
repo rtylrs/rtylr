@@ -129,10 +129,14 @@ const TOUR_STEPS: StepOptions[] = [
 export function useOnboardingTour() {
   const { user } = useUserStore();
   const tourRef = useRef<Tour | null>(null);
+  const userId = user?.id;
+  const hasOnboarded = user?.onboarded;
 
   useEffect(() => {
-    if (!user || user.onboarded) return;
-    if (localStorage.getItem('rtylr-tour-done') === '1') return;
+    if (!userId || hasOnboarded) return;
+    const storageKey = `rtylr-tour-done:${userId}`;
+    if (localStorage.getItem(storageKey) === '1') return;
+    if (tourRef.current) return;
 
     // Small delay to let the DOM render
     const timer = setTimeout(() => {
@@ -147,13 +151,14 @@ export function useOnboardingTour() {
 
       TOUR_STEPS.forEach((step) => tour.addStep(step));
 
-      tour.on('complete', () => {
+      const persistCompletion = () => {
+        localStorage.setItem(storageKey, '1');
         void safe.patch('/hub/team/onboarding/v1/onboarded');
-      });
+        tourRef.current = null;
+      };
 
-      tour.on('cancel', () => {
-        void safe.patch('/hub/team/onboarding/v1/onboarded');
-      });
+      tour.on('complete', persistCompletion);
+      tour.on('cancel', persistCompletion);
 
       tour.start();
       tourRef.current = tour;
@@ -161,7 +166,9 @@ export function useOnboardingTour() {
 
     return () => {
       clearTimeout(timer);
-      tourRef.current?.cancel();
+      const activeTour = tourRef.current;
+      tourRef.current = null;
+      activeTour?.cancel();
     };
-  }, [user?.onboarded]);
+  }, [hasOnboarded, userId]);
 }
