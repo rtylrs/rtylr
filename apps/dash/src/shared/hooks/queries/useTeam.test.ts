@@ -165,7 +165,30 @@ describe('useInviteMember', () => {
       fullName: 'New User',
       role: 'staff',
       apps: ['pos'],
-      password: '',
+    });
+  });
+
+  it('includes a password when an administrator creates the account directly', async () => {
+    mockInvitationsClient.inviteUser.mockResolvedValue({ userId: '9', message: 'ok' });
+
+    const { result } = renderHook(() => useInviteMember(), { wrapper: createWrapper() });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        email: 'manual@test.com',
+        fullName: 'Manual User',
+        role: 'admin',
+        apps: ['dash'],
+        password: 'strong-password',
+      });
+    });
+
+    expect(mockInvitationsClient.inviteUser).toHaveBeenCalledWith({
+      email: 'manual@test.com',
+      fullName: 'Manual User',
+      role: 'admin',
+      apps: ['dash'],
+      password: 'strong-password',
     });
   });
 });

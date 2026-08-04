@@ -169,6 +169,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
       toast.error('Email and name are required');
       return;
     }
+    if (authMethod === 'manual' && password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
     try {
       const res = await invite.mutateAsync({
         email,
@@ -524,6 +528,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="At least 8 characters"
                       required={authMethod === 'manual'}
+                      minLength={8}
                     />
                     <button
                       type="button"

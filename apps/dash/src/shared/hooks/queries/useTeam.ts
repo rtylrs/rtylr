@@ -134,7 +134,7 @@ export const useInviteMember = () => {
         fullName: payload.fullName,
         role: payload.role,
         apps: payload.apps,
-        password: payload.password ?? '',
+        ...(payload.password ? { password: payload.password } : {}),
       });
     },
     onSuccess: () => {
