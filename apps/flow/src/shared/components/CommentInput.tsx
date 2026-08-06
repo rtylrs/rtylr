@@ -5,11 +5,13 @@ import { useFlowStore } from '../stores/flowStore';
 interface CommentInputProps {
   onSubmit: (body: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export const CommentInput: React.FC<CommentInputProps> = ({
   onSubmit,
   placeholder = 'Leave a comment… @mention to notify',
+  disabled,
 }) => {
   const [value, setValue] = useState('');
   const [mentionOpen, setMentionOpen] = useState(false);
@@ -27,7 +29,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
   };
 
   const handleSubmit = () => {
-    if (!value.trim()) return;
+    if (disabled || !value.trim()) return;
     onSubmit(value.trim());
     setValue('');
     setMentionOpen(false);
@@ -53,7 +55,8 @@ export const CommentInput: React.FC<CommentInputProps> = ({
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKey}
         placeholder={placeholder}
-        className="w-full bg-transparent outline-none resize-none p-3 text-[12px]"
+        disabled={disabled}
+        className="w-full bg-transparent outline-none resize-none p-3 text-[12px] disabled:opacity-60"
         rows={3}
         style={{ color: 'var(--flow-text)' }}
       />
@@ -65,7 +68,8 @@ export const CommentInput: React.FC<CommentInputProps> = ({
           <button
             type="button"
             onClick={() => setMentionOpen((o) => !o)}
-            className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+            disabled={disabled}
+            className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
             style={{ color: 'var(--flow-text-dim)' }}
             title="Mention someone"
           >
@@ -85,7 +89,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={!value.trim()}
+          disabled={disabled || !value.trim()}
           className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold transition-opacity disabled:opacity-40"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
