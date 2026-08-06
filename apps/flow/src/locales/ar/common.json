@@ -17,6 +17,8 @@
   "dueDate": "تاريخ الاستحقاق",
   "assignee": "المسؤول",
   "priority": "الأولوية",
+  "readOnlyAccess": "لديك صلاحية العرض فقط ولا يمكنك إجراء أي تغييرات",
+  "deleteRestricted": "يمكن للمالكين والمشرفين فقط حذف هذا العنصر",
   "focusToday": {
     "emptyTitle": "Nothing pinned for today",
     "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway."
