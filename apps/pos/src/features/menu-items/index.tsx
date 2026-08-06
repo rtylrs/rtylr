@@ -10,7 +10,7 @@ import { SkeletonGrid } from '../../shared/components/Skeleton';
 import { useMenuItems } from './useMenuItems';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
-import type { MenuItem } from '../../shared/types/pos';
+import type { MenuItem } from '@voxire/voxie/pos/menu_item/v1/types';
 import { buildMenuItemCartProduct } from '../../shared/utils/cart/cartProduct';
 
 const MenuItemsScreen: React.FC = () => {
@@ -24,7 +24,7 @@ const MenuItemsScreen: React.FC = () => {
 
   const filtered = items.filter((it) => {
     const matchesCat = category === 'All' || it.category === category;
-    const matchesSearch = !search || it.name.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = !search || (it.name ?? '').toLowerCase().includes(search.toLowerCase());
     return matchesCat && matchesSearch;
   });
 

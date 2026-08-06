@@ -32,10 +32,12 @@ const item: CartItem = {
 describe('discount → checkout chain', () => {
   it('flat discount reduces the charge amount sent to the payment endpoint', async () => {
     const discount = buildDiscountRequest({ orderId: '99', mode: 'flat', valueInput: '5' });
-    expect(discount).toEqual({ orderId: 99, payload: { discount_type: 'flat', discount_value: 5 } });
+    expect(discount).toEqual({
+      payload: { orderId: '99', discountType: 'flat', discountValue: 5, reason: '' },
+    });
 
     const originalTotal = 40;
-    const discountedTotal = originalTotal - discount.payload.discount_value;
+    const discountedTotal = originalTotal - discount.payload.discountValue!;
     expect(discountedTotal).toBe(35);
 
     const order = buildCheckoutOrder({
@@ -55,7 +57,7 @@ describe('discount → checkout chain', () => {
       order,
       payload,
       method: 'cash',
-      createOrder: vi.fn(() => Promise.resolve({ id: 200 })),
+      createOrder: vi.fn(() => Promise.resolve({ orderId: 200 })),
       chargeOrder,
       enqueueOffline: vi.fn(),
       recordCashSale: vi.fn(),
@@ -63,14 +65,13 @@ describe('discount → checkout chain', () => {
 
     expect(result).toEqual({ status: 'online', orderId: 200 });
     expect(chargeOrder).toHaveBeenCalledWith(
-      200,
-      expect.objectContaining({ amount_paid: 35 }),
+      expect.objectContaining({ orderId: '200', amountPaid: 35 }),
     );
   });
 
   it('percent discount is capped at 100% maximum', () => {
     const discount = buildDiscountRequest({ orderId: '99', mode: 'percent', valueInput: '150' });
-    expect(discount.payload.discount_value).toBe(100);
+    expect(discount.payload.discountValue).toBe(100);
   });
 
   it('zero discount value is rejected before checkout', () => {
@@ -88,7 +89,7 @@ describe('discount → checkout chain', () => {
   it('10% percent discount on $80 order charges $72', async () => {
     const discount = buildDiscountRequest({ orderId: '50', mode: 'percent', valueInput: '10' });
     const originalTotal = 80;
-    const discountedTotal = originalTotal * (1 - discount.payload.discount_value / 100);
+    const discountedTotal = originalTotal * (1 - discount.payload.discountValue! / 100);
     expect(discountedTotal).toBeCloseTo(72, 2);
 
     const chargeOrder = vi.fn(async () => undefined);
@@ -107,7 +108,7 @@ describe('discount → checkout chain', () => {
       order,
       payload,
       method: 'card',
-      createOrder: vi.fn(() => Promise.resolve({ id: 201 })),
+      createOrder: vi.fn(() => Promise.resolve({ orderId: 201 })),
       chargeOrder,
       enqueueOffline: vi.fn(),
       recordCashSale: vi.fn(),
@@ -115,8 +116,7 @@ describe('discount → checkout chain', () => {
 
     expect(result).toEqual({ status: 'online', orderId: 201 });
     expect(chargeOrder).toHaveBeenCalledWith(
-      201,
-      expect.objectContaining({ amount_paid: discountedTotal }),
+      expect.objectContaining({ orderId: '201', amountPaid: discountedTotal }),
     );
   });
 });

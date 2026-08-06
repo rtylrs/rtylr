@@ -1,4 +1,5 @@
-import type { Combo, MenuItem } from '../../types/pos';
+import type { Combo } from '../../types/pos';
+import type { MenuItem } from '@voxire/voxie/pos/menu_item/v1/types';
 import type { CartItemModifier } from '../../stores/cartStore';
 
 export const MENU_ITEM_CART_ERROR = 'Select a valid menu item before adding it.';
@@ -34,11 +35,11 @@ export function buildMenuItemCartProduct(item: MenuItem): CartProductInput {
   return {
     id: item.id,
     productId,
-    name: item.name,
+    name: item.name ?? '',
     sku: item.sku,
     barcode: item.barcode,
-    unitPrice: item.price,
-    price: item.price,
+    unitPrice: item.salePrice ?? 0,
+    price: item.salePrice,
     taxRate: item.taxRate,
   };
 }

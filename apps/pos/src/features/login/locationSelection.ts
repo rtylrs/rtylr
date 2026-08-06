@@ -1,3 +1,7 @@
+import type { MyLocation } from '@voxire/voxie/pos/access/v1/types';
+import type { Location } from '@voxire/voxie/pos/location/v1/types';
+import type { Terminal } from '@voxire/voxie/pos/terminal/v1/types';
+
 export interface LocationOption {
   locationId: number;
   name: string;
@@ -24,17 +28,6 @@ function positiveInt(value: unknown): number | null {
   return Math.floor(number);
 }
 
-function record(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
-}
-
-export function extractLocationsList(data: unknown): unknown[] {
-  if (Array.isArray(data)) return data;
-  const raw = record(data);
-  if (Array.isArray(raw?.locations)) return raw.locations as unknown[];
-  return [];
-}
-
 export function mergeLocationOptions(...lists: LocationOption[][]): LocationOption[] {
   const seen = new Map<number, LocationOption>();
   for (const list of lists) {
@@ -45,50 +38,50 @@ export function mergeLocationOptions(...lists: LocationOption[][]): LocationOpti
   return [...seen.values()];
 }
 
-export function mapBranchLocations(rawBranches: unknown[]): LocationOption[] {
-  return rawBranches.flatMap((branch) => {
-    const raw = branch as Record<string, unknown>;
-    const id = positiveInt(raw.id ?? raw.locationId ?? raw.location_id);
+function branchLocationRawId(location: Location | MyLocation): unknown {
+  if ('id' in location && location.id !== undefined) return location.id;
+  if ('locationId' in location && location.locationId !== undefined) return location.locationId;
+  return undefined;
+}
+
+export function mapBranchLocations(locations: Array<Location | MyLocation>): LocationOption[] {
+  return locations.flatMap((location) => {
+    const id = positiveInt(branchLocationRawId(location));
     if (!id) return [];
 
     return [
       {
         locationId: id,
-        name: String(raw.name ?? ''),
-        address: String(raw.address ?? ''),
-        phone: String(raw.phone ?? ''),
+        name: location.name ?? '',
+        address: location.address ?? '',
+        phone: location.phone ?? '',
       },
     ];
   });
 }
 
 export function filterTerminalsForLocation(
-  rawTerminals: unknown[],
+  rawTerminals: Terminal[],
   locationId: number
 ): TerminalOption[] {
   return rawTerminals.flatMap((terminal) => {
-    const raw = terminal as Record<string, unknown>;
-    const id = positiveInt(raw.id);
-    const branchId = positiveInt(raw.branchId ?? raw.branch_id);
+    const id = positiveInt(terminal.id);
+    const branchId = positiveInt(terminal.branchId);
     if (!id || branchId !== locationId) return [];
 
     return [
       {
         id,
-        name: String(raw.name ?? ''),
-        type: String(raw.type ?? 'pos'),
-        isActive: raw.isActive !== false,
+        name: terminal.name ?? '',
+        type: 'pos',
+        isActive: terminal.isActive ?? false,
       },
     ];
   });
 }
 
-export function extractCreatedLocationId(response: unknown): number {
-  const raw = record(response);
-  const nestedData = record(raw?.data);
-  const id =
-    positiveInt(raw?.location_id ?? raw?.locationId ?? raw?.id) ??
-    positiveInt(nestedData?.location_id ?? nestedData?.locationId ?? nestedData?.id);
+export function createdLocationId(locationId: string): number {
+  const id = positiveInt(locationId);
 
   if (!id) {
     throw new Error(CREATED_LOCATION_ID_ERROR);
@@ -97,15 +90,8 @@ export function extractCreatedLocationId(response: unknown): number {
   return id;
 }
 
-export function extractCreatedTerminalId(response: unknown): number {
-  const raw = record(response);
-  const nestedTerminal = record(raw?.terminal);
-  const nestedData = record(raw?.data);
-  const id =
-    positiveInt(raw?.id) ??
-    positiveInt(raw?.terminalId ?? raw?.terminal_id) ??
-    positiveInt(nestedTerminal?.id) ??
-    positiveInt(nestedData?.id ?? nestedData?.terminalId ?? nestedData?.terminal_id);
+export function createdTerminalId(terminalId: string): number {
+  const id = positiveInt(terminalId);
 
   if (!id) {
     throw new Error(CREATED_TERMINAL_ID_ERROR);

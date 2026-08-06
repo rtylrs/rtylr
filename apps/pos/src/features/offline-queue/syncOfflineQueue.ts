@@ -1,9 +1,9 @@
 import type { OfflineQueuedOrder } from '../../shared/types/pos';
-import type { CreateOrderPayload } from '../../shared/services/api/posService';
+import type { CreateOrderRequest } from '@voxire/voxie/pos/orders/v1/types';
 
 interface SyncQueuedOrdersParams {
   entries: OfflineQueuedOrder[];
-  syncOrder: (order: CreateOrderPayload) => Promise<void>;
+  syncOrder: (order: CreateOrderRequest) => Promise<void>;
   retry: (id: string) => void;
   markSynced: (id: string) => void;
   markFailed: (id: string, err: string) => void;

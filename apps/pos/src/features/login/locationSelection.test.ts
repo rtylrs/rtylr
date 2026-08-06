@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  extractCreatedTerminalId,
+  createdTerminalId,
   filterTerminalsForLocation,
   mapBranchLocations,
 } from './locationSelection';
@@ -9,9 +9,9 @@ describe('locationSelection', () => {
   it('maps only branches with valid positive ids', () => {
     expect(
       mapBranchLocations([
-        { id: 3, name: 'Main', address: 'A', phone: '1' },
-        { id: 0, name: 'Broken' },
-        { id: Number.NaN, name: 'Missing' },
+        { id: '3', ownerId: '1', name: 'Main', address: 'A', phone: '1', isActive: true, createdAt: '', updatedAt: '' },
+        { id: '0', ownerId: '1', name: 'Broken', address: '', phone: '', isActive: true, createdAt: '', updatedAt: '' },
+        { id: 'NaN', ownerId: '1', name: 'Missing', address: '', phone: '', isActive: true, createdAt: '', updatedAt: '' },
       ])
     ).toEqual([{ locationId: 3, name: 'Main', address: 'A', phone: '1' }]);
   });
@@ -20,27 +20,24 @@ describe('locationSelection', () => {
     expect(
       filterTerminalsForLocation(
         [
-          { id: 4, name: 'Register 1', type: 'pos', branchId: 3 },
-          { id: 0, name: 'Broken', type: 'pos', branchId: 3 },
-          { id: 5, name: 'Other', type: 'pos', branchId: 9 },
+          { id: '4', businessId: '1', branchId: '3', name: 'Register 1', deviceId: null, isActive: true, lastSeenAt: null, createdAt: '' },
+          { id: '0', businessId: '1', branchId: '3', name: 'Broken', deviceId: null, isActive: true, lastSeenAt: null, createdAt: '' },
+          { id: '5', businessId: '1', branchId: '9', name: 'Other', deviceId: null, isActive: true, lastSeenAt: null, createdAt: '' },
         ],
         3
       )
     ).toEqual([{ id: 4, name: 'Register 1', type: 'pos', isActive: true }]);
   });
 
-  it('extracts created terminal ids from known API response shapes', () => {
-    expect(extractCreatedTerminalId({ id: '8' })).toBe(8);
-    expect(extractCreatedTerminalId({ terminalId: 9 })).toBe(9);
-    expect(extractCreatedTerminalId({ terminal: { id: '10' } })).toBe(10);
-    expect(extractCreatedTerminalId({ data: { id: 11 } })).toBe(11);
+  it('reads created terminal ids from generated responses', () => {
+    expect(createdTerminalId('8')).toBe(8);
   });
 
   it('rejects created terminal responses without valid ids', () => {
-    expect(() => extractCreatedTerminalId({ id: 'draft' })).toThrow(
+    expect(() => createdTerminalId('draft')).toThrow(
       'Terminal registration did not return a valid terminal ID.',
     );
-    expect(() => extractCreatedTerminalId(null)).toThrow(
+    expect(() => createdTerminalId('')).toThrow(
       'Terminal registration did not return a valid terminal ID.',
     );
   });

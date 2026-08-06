@@ -3,7 +3,8 @@ import { CheckCircle2, ReceiptText, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
 import { useCartStore } from '../../../../shared/stores/cartStore';
 import { useHeldOrdersStore } from '../../../../shared/stores/heldOrdersStore';
 import { useSettingsStore } from '../../../../shared/stores/settingsStore';
@@ -11,9 +12,10 @@ import { useTerminalContextStore } from '../../../../shared/stores/terminalConte
 import ConfirmModal from '../../../../shared/components/ConfirmModal';
 import QuickNoteModal from '../../../../shared/components/QuickNoteModal';
 import OfflineBadge from '../../../../shared/components/OfflineBadge';
-import { posService } from '../../../../shared/services/api/posService';
 import { formatCurrency } from '../../../../shared/utils/format';
 import { buildOrderSubmitPayload, extractCreatedOrderId } from './orderSubmitWorkflow';
+
+const orderClient = createOneKitClient(OrderServiceClient, 'pos');
 
 interface OrderPanelProps {
   tableNumber?: string;
@@ -76,18 +78,16 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
     setSubmittingOrder(true);
     try {
       if (!serverOrderId) {
-        const created = await unwrap(
-          posService.createOrder(
-            buildOrderSubmitPayload({
-              items,
-              locationId,
-              tableId: activeTableId,
-              customerId,
-              customerName,
-              orderType,
-              notes,
-            })
-          )
+        const created = await orderClient.createOrder(
+          buildOrderSubmitPayload({
+            items,
+            locationId,
+            tableId: activeTableId,
+            customerId,
+            customerName,
+            orderType,
+            notes,
+          })
         );
         extractCreatedOrderId(created);
       }

@@ -1,10 +1,10 @@
 // Pure helpers for menu item display and filtering.
 
-import type { MenuItem } from '../types/pos';
+import type { MenuItem } from '@voxire/voxie/pos/menu_item/v1/types';
 
 /** Return true if a menu item is currently available. */
 export function isAvailable(item: MenuItem): boolean {
-  return item.available !== false;
+  return item.isActive !== false;
 }
 
 /** Return true if a menu item is out of stock (stock is 0 or explicitly set to 0). */
@@ -46,10 +46,11 @@ export function uniqueCategories(items: MenuItem[]): string[] {
 
 /** Return the price formatted as a display string (no currency symbol). */
 export function priceLabel(item: MenuItem): string {
-  return item.price.toFixed(2);
+  return (item.salePrice ?? 0).toFixed(2);
 }
 
 /** Return the effective tax rate for an item (defaults to 0 if not set). */
 export function itemTaxRate(item: MenuItem): number {
-  return typeof item.taxRate === 'number' && Number.isFinite(item.taxRate) ? item.taxRate : 0;
+  const taxRate = item.taxRate ?? 0;
+  return Number.isFinite(taxRate) ? taxRate : 0;
 }

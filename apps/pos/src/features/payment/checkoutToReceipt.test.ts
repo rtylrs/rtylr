@@ -73,7 +73,7 @@ async function runFullSale() {
     order,
     payload,
     method: 'cash',
-    createOrder: vi.fn(() => Promise.resolve({ id: 500 })),
+    createOrder: vi.fn(() => Promise.resolve({ orderId: 500 })),
     chargeOrder: vi.fn(() => Promise.resolve()),
     enqueueOffline: vi.fn(),
     recordCashSale: vi.fn(),

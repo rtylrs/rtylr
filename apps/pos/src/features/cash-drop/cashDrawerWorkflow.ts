@@ -1,9 +1,9 @@
 import { formatCurrency } from '../../shared/utils/format';
 import type {
+  CashMovementPayload,
   QueuedCashMovement,
   QueuedCashMovementAction,
 } from '../../shared/stores/cashMovementQueueStore';
-import type { CashMovementPayload } from '../../shared/services/api/posService';
 
 export type CashDrawerAction = 'drop' | 'paid_out' | 'paid_in' | 'float';
 

@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import api from '../services/api/api';
+import { createOneKitClient } from '@voxire/api';
+import { OauthServiceClient } from '@voxire/voxie/common/oauth/v1/client';
+import { ConfigServiceClient } from '@voxire/voxie/hub/config/v1/client';
+import { SettingsServiceClient } from '@voxire/voxie/pos/settings/v1/client';
 
 interface Addons {
   feedback: boolean;
@@ -12,6 +15,10 @@ interface Addons {
 interface ApiError extends Error {
   response?: { data?: { message?: string } };
 }
+
+const oauthClient = createOneKitClient(OauthServiceClient, 'pos');
+const configClient = createOneKitClient(ConfigServiceClient, 'pos');
+const settingsClient = createOneKitClient(SettingsServiceClient, 'pos');
 
 export interface StoredUser {
   role?: string;
@@ -158,27 +165,33 @@ export const useUserStore = create<UserState & UserActions>()(
       getUserInfo: async () => {
         set({ loading: true, error: null });
         try {
-          const response = await api.get('/business/me');
-          const data = record(response.data) ?? {};
+          const [me, config] = await Promise.all([
+            oauthClient.me({}),
+            configClient.getConfig({}).catch(() => ({ business: undefined })),
+          ]);
           const state = get();
-          const user = (record(data.user) ?? data) as StoredUser;
-          const profile = normalizeBusinessProfile(data.business ?? data.profile ?? data);
+          const profile = normalizeBusinessProfile(config.business);
+          const user: StoredUser = {
+            ...(state.user ?? {}),
+            id: me.userId,
+            role: me.role,
+          };
           set({
-            role: user.role ?? state.role,
-            userId: idText(data.userId ?? data.user_id ?? user.id) ?? state.userId,
-            token: text(data.token) ?? state.token,
+            role: me.role || state.role,
+            userId: idText(me.userId) ?? state.userId,
+            token: state.token,
             user,
             businessProfile: profile ?? state.businessProfile,
             isAuthenticated: true,
             loading: false,
             addons: user.addons ?? state.addons,
-            visits: Array.isArray(data.visits) ? data.visits : state.visits,
+            visits: state.visits,
           });
         } catch (err) {
           const error = err as ApiError;
           set({
             loading: false,
-            error: error.response?.data?.message || 'Failed to restore session',
+            error: error.response?.data?.message || error.message || 'Failed to restore session',
           });
           throw err;
         }
@@ -187,11 +200,20 @@ export const useUserStore = create<UserState & UserActions>()(
       setThemeAsync: async (payload) => {
         set({ loading: true, error: null });
         try {
-          const response = await api.put(`/business/${payload.id}/theme`, payload.themeData);
+          const current = await settingsClient.getPOSSettings({});
+          const response = await settingsClient.updatePOSSettings({
+            businessProfile: current.settings?.businessProfile ?? '',
+            theme: JSON.stringify(payload.themeData),
+            features: current.settings?.features,
+            receiptFooter: current.settings?.receiptFooter ?? '',
+          });
           const state = get();
           if (state.user) {
             set({
-              user: { ...state.user, theme: response.data.theme },
+              user: {
+                ...state.user,
+                theme: response.settings?.theme ? JSON.parse(response.settings.theme) : payload.themeData,
+              },
               loading: false,
               error: null,
             });
@@ -200,7 +222,7 @@ export const useUserStore = create<UserState & UserActions>()(
           const error = err as ApiError;
           set({
             loading: false,
-            error: error.response?.data?.message || 'Failed to update theme',
+            error: error.response?.data?.message || error.message || 'Failed to update theme',
           });
           throw err;
         }

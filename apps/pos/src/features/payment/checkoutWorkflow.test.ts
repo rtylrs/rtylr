@@ -74,11 +74,15 @@ describe('processCheckout', () => {
     });
 
     expect(result).toEqual({ status: 'online', orderId: 555 });
-    expect(chargeOrder).toHaveBeenCalledWith(555, { payment_method: 'card', amount_paid: 21.6 });
+    expect(chargeOrder).toHaveBeenCalledWith({
+      orderId: '555',
+      paymentMethod: 'card',
+      amountPaid: 21.6,
+    });
   });
 
   it('creates and charges the order online', async () => {
-    const createOrder = vi.fn(() => Promise.resolve({ id: 123 }));
+    const createOrder = vi.fn(() => Promise.resolve({ orderId: 123 }));
     const chargeOrder = vi.fn(() => Promise.resolve());
     const enqueueOffline = vi.fn();
     const recordCashSale = vi.fn();
@@ -102,7 +106,11 @@ describe('processCheckout', () => {
     });
 
     expect(result).toEqual({ status: 'online', orderId: 123 });
-    expect(chargeOrder).toHaveBeenCalledWith(123, { payment_method: 'cash', amount_paid: 21.6 });
+    expect(chargeOrder).toHaveBeenCalledWith({
+      orderId: '123',
+      paymentMethod: 'cash',
+      amountPaid: 21.6,
+    });
     expect(enqueueOffline).not.toHaveBeenCalled();
     expect(recordCashSale).toHaveBeenCalledWith(21.6, 'local-1');
   });

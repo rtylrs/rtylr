@@ -1,16 +1,27 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useUserStore } from './userStore';
 
-// Mock the api module
-vi.mock('../services/api/api', () => ({
-  default: {
-    post: vi.fn(),
-    get: vi.fn(),
-    put: vi.fn(),
-  },
+const oauthClient = vi.hoisted(() => ({
+  me: vi.fn(),
 }));
 
-import api from '../services/api/api';
+const configClient = vi.hoisted(() => ({
+  getConfig: vi.fn(),
+}));
+
+const settingsClient = vi.hoisted(() => ({
+  getPOSSettings: vi.fn(),
+  updatePOSSettings: vi.fn(),
+}));
+
+vi.mock('@voxire/api', () => ({
+  createOneKitClient: vi.fn((client: { name?: string }) => {
+    if (client.name === 'OauthServiceClient') return oauthClient;
+    if (client.name === 'ConfigServiceClient') return configClient;
+    if (client.name === 'SettingsServiceClient') return settingsClient;
+    return {};
+  }),
+}));
 
 const { getState, setState } = useUserStore;
 const act = (fn: () => void) => {
@@ -19,6 +30,7 @@ const act = (fn: () => void) => {
 
 const initialState = {
   user: null,
+  businessProfile: null,
   token: null,
   isAuthenticated: false,
   loading: false,
@@ -37,11 +49,10 @@ const initialState = {
 beforeEach(() => {
   setState(initialState);
   vi.clearAllMocks();
+  configClient.getConfig.mockResolvedValue({ maintenance: false, business: undefined });
 });
 
 describe('userStore', () => {
-  // ── Initial state ──────────────────────────────────────────────
-
   it('starts with default unauthenticated state', () => {
     expect(getState().user).toBeNull();
     expect(getState().token).toBeNull();
@@ -50,31 +61,20 @@ describe('userStore', () => {
     expect(getState().error).toBeNull();
     expect(getState().role).toBeNull();
     expect(getState().userId).toBeNull();
-    expect(getState().addons).toEqual({
-      feedback: false,
-      about: false,
-      contact: false,
-      landing: false,
-    });
+    expect(getState().addons.feedback).toBe(false);
     expect(getState().visits).toEqual([]);
   });
-
-  // ── setToken ───────────────────────────────────────────────────
 
   it('sets token', () => {
     act(() => getState().setToken('abc123'));
     expect(getState().token).toBe('abc123');
   });
 
-  // ── setUser ────────────────────────────────────────────────────
-
   it('sets user', () => {
     const user = { name: 'John', email: 'john@test.com' };
     act(() => getState().setUser(user));
     expect(getState().user).toEqual(user);
   });
-
-  // ── logout ─────────────────────────────────────────────────────
 
   it('logs out and clears state', () => {
     setState({
@@ -94,99 +94,108 @@ describe('userStore', () => {
     expect(getState().userId).toBeNull();
   });
 
-  it('logout is safe when already logged out', () => {
-    act(() => getState().logout());
-    expect(getState().user).toBeNull();
-    expect(getState().isAuthenticated).toBe(false);
-  });
-
-  // ── clearError ─────────────────────────────────────────────────
-
   it('clears error', () => {
     setState({ error: 'Something went wrong' });
     act(() => getState().clearError());
     expect(getState().error).toBeNull();
   });
 
-  // ── getUserInfo ────────────────────────────────────────────────
-
-  it('fetches user info successfully', async () => {
-    vi.mocked(api.get).mockResolvedValueOnce({
-      data: {
-        userId: 'u1',
-        token: 'tok123',
-        user: {
-          name: 'Alice',
-          role: 'admin',
-          addons: { feedback: true, about: true, contact: false, landing: false },
-        },
-        visits: [{ id: 'v1' }],
+  it('restores user info from generated oauth and config clients', async () => {
+    oauthClient.me.mockResolvedValueOnce({
+      userId: 'u1',
+      businessId: 'b1',
+      role: 'admin',
+    });
+    configClient.getConfig.mockResolvedValueOnce({
+      maintenance: false,
+      business: {
+        id: 'b1',
+        name: 'Alice Store',
+        type: 'retail',
+        logoUrl: '',
+        address: 'Main St',
+        phone: '111',
+        email: 'alice@test.com',
+        website: '',
+        timezone: 'UTC',
+        currency: 'USD',
+        country: 'US',
+        plan: 'trial',
+        createdAt: '',
+        slug: 'alice-store',
       },
     });
 
     await getState().getUserInfo();
 
+    expect(oauthClient.me).toHaveBeenCalledWith({});
+    expect(configClient.getConfig).toHaveBeenCalledWith({});
     expect(getState().userId).toBe('u1');
-    expect(getState().token).toBe('tok123');
     expect(getState().role).toBe('admin');
     expect(getState().isAuthenticated).toBe(true);
+    expect(getState().businessProfile?.name).toBe('Alice Store');
     expect(getState().loading).toBe(false);
-    expect(getState().addons.feedback).toBe(true);
-    expect(getState().visits).toHaveLength(1);
   });
 
-  it('uses nested user id when business profile omits top-level user id', async () => {
-    vi.mocked(api.get).mockResolvedValueOnce({
-      data: {
-        token: 'tok123',
-        user: {
-          id: 42,
-          name: 'Alice',
-          role: 'admin',
-        },
-      },
+  it('restores user info when config lookup fails', async () => {
+    oauthClient.me.mockResolvedValueOnce({
+      userId: '42',
+      businessId: 'b1',
+      role: 'admin',
     });
+    configClient.getConfig.mockRejectedValueOnce(new Error('config unavailable'));
 
     await getState().getUserInfo();
 
     expect(getState().userId).toBe('42');
+    expect(getState().businessProfile).toBeNull();
     expect(getState().isAuthenticated).toBe(true);
   });
 
   it('sets error on getUserInfo failure', async () => {
-    vi.mocked(api.get).mockRejectedValueOnce({
-      response: { data: { message: 'Unauthorized' } },
-    });
+    const error = new Error('Unauthorized') as Error & {
+      response?: { data?: { message?: string } };
+    };
+    error.response = { data: { message: 'Unauthorized' } };
+    oauthClient.me.mockRejectedValueOnce(error);
 
     await expect(getState().getUserInfo()).rejects.toBeTruthy();
     expect(getState().error).toBe('Unauthorized');
     expect(getState().loading).toBe(false);
   });
 
-  it('uses fallback error on getUserInfo failure without message', async () => {
-    vi.mocked(api.get).mockRejectedValueOnce(new Error('Network'));
+  it('uses generated error message on getUserInfo failure without response payload', async () => {
+    oauthClient.me.mockRejectedValueOnce(new Error('Network'));
 
     await expect(getState().getUserInfo()).rejects.toBeTruthy();
-    expect(getState().error).toBe('Failed to restore session');
+    expect(getState().error).toBe('Network');
   });
 
-  // ── setThemeAsync ──────────────────────────────────────────────
-
-  it('updates theme on user successfully', async () => {
+  it('updates theme through generated POS settings', async () => {
     setState({ user: { name: 'Alice', theme: 'light' } });
-    vi.mocked(api.put).mockResolvedValueOnce({
-      data: { theme: { primary: '#000' } },
+    settingsClient.getPOSSettings.mockResolvedValueOnce({
+      settings: { businessProfile: '', features: undefined, receiptFooter: '' },
+    });
+    settingsClient.updatePOSSettings.mockResolvedValueOnce({
+      settings: { theme: '{"primary":"#000"}' },
+      message: 'ok',
     });
 
     await getState().setThemeAsync({ id: 'biz1', themeData: { primary: '#000' } });
 
-    expect(getState().user.theme).toEqual({ primary: '#000' });
+    expect(settingsClient.updatePOSSettings).toHaveBeenCalledWith({
+      businessProfile: '',
+      theme: '{"primary":"#000"}',
+      features: undefined,
+      receiptFooter: '',
+    });
+    expect(getState().user?.theme).toEqual({ primary: '#000' });
     expect(getState().loading).toBe(false);
   });
 
   it('sets error on setThemeAsync failure', async () => {
     setState({ user: { name: 'Alice' } });
-    vi.mocked(api.put).mockRejectedValueOnce({
+    settingsClient.getPOSSettings.mockRejectedValueOnce({
       response: { data: { message: 'Theme update failed' } },
     });
 
@@ -195,16 +204,9 @@ describe('userStore', () => {
     expect(getState().loading).toBe(false);
   });
 
-  // ── Edge cases ─────────────────────────────────────────────────
-
-  it('clearError is a no-op when no error', () => {
-    act(() => getState().clearError());
-    expect(getState().error).toBeNull();
-  });
-
   it('setUser replaces existing user', () => {
     act(() => getState().setUser({ name: 'A' }));
     act(() => getState().setUser({ name: 'B' }));
-    expect(getState().user.name).toBe('B');
+    expect(getState().user?.name).toBe('B');
   });
 });

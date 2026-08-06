@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { unwrap } from '@voxire/api';
-import { posService } from '../services/api/posService';
+import { createOneKitClient } from '@voxire/api';
+import { UserServiceClient } from '@voxire/voxie/pos/user/v1/client';
+
+const userClient = createOneKitClient(UserServiceClient, 'pos');
 
 export interface EmployeeCapabilities {
   canVoid: boolean;
@@ -105,7 +107,11 @@ export const useEmployeeSessionStore = create<EmployeeSessionState & EmployeeSes
 
         set({ loading: true, error: null });
         try {
-          const data = await unwrap(posService.verifyPIN(locationId, userId, normalizedPin));
+          const data = await userClient.verifyPOSUserPIN({
+            locationId: String(locationId),
+            userId: String(userId),
+            pin: normalizedPin,
+          });
           const employee = normalizeVerifyResponse(data);
           set({ employee, isActive: true, loading: false, error: null });
         } catch (err) {

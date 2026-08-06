@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { OfflineQueuedOrder } from '../types/pos';
-import type { CreateOrderPayload } from '../services/api/posService';
+import type { CreateOrderRequest } from '@voxire/voxie/pos/orders/v1/types';
 
 interface OfflineQueueState {
   queue: OfflineQueuedOrder[];
@@ -9,7 +9,7 @@ interface OfflineQueueState {
 }
 
 interface OfflineQueueActions {
-  enqueue: (order: CreateOrderPayload) => OfflineQueuedOrder;
+  enqueue: (order: CreateOrderRequest) => OfflineQueuedOrder;
   setOnline: (online: boolean) => void;
   retry: (id: string) => void;
   markSynced: (id: string) => void;

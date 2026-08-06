@@ -8,10 +8,21 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { syncPendingOfflineOrders } from './offlineQueueSync';
 import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
-import type { CreateOrderPayload } from '../../shared/services/api/posService';
+import type { CreateOrderRequest } from '@voxire/voxie/pos/orders/v1/types';
 
-function makePayload(notes: string): CreateOrderPayload {
-  return { payment_method: 'cash', notes, items: [] };
+function makePayload(notes: string): CreateOrderRequest {
+  return {
+    sessionId: '0',
+    tableId: '0',
+    locationId: '0',
+    type: '',
+    customerId: '0',
+    customerName: '',
+    paymentMethod: 'cash',
+    notes,
+    kitchenNotes: '',
+    items: [],
+  };
 }
 
 beforeEach(() => {
@@ -42,7 +53,7 @@ describe('offline queue sync under network failures', () => {
     store.enqueue(makePayload('order-3'));
 
     let callCount = 0;
-    const syncFn = vi.fn(async (order: CreateOrderPayload) => {
+    const syncFn = vi.fn(async (order: CreateOrderRequest) => {
       callCount++;
       if (order.notes === 'order-2') {
         throw new Error('Service temporarily unavailable');
@@ -56,11 +67,11 @@ describe('offline queue sync under network failures', () => {
     expect(result.failed).toBe(1);
 
     const queue = useOfflineQueueStore.getState().queue;
-    const failedEntry = queue.find((e) => (e.order as CreateOrderPayload).notes === 'order-2');
+    const failedEntry = queue.find((e) => (e.order as CreateOrderRequest).notes === 'order-2');
     expect(failedEntry?.status).toBe('failed');
 
-    expect(queue.find((e) => (e.order as CreateOrderPayload).notes === 'order-1')).toBeUndefined();
-    expect(queue.find((e) => (e.order as CreateOrderPayload).notes === 'order-3')).toBeUndefined();
+    expect(queue.find((e) => (e.order as CreateOrderRequest).notes === 'order-1')).toBeUndefined();
+    expect(queue.find((e) => (e.order as CreateOrderRequest).notes === 'order-3')).toBeUndefined();
   });
 
   it('does not retry previously failed orders in the same sync pass', async () => {
@@ -75,7 +86,7 @@ describe('offline queue sync under network failures', () => {
     expect(syncFn).not.toHaveBeenCalled();
 
     const queue = useOfflineQueueStore.getState().queue;
-    expect(queue.find((e) => (e.order as CreateOrderPayload).notes === 'order-fail')?.status).toBe('failed');
+    expect(queue.find((e) => (e.order as CreateOrderRequest).notes === 'order-fail')?.status).toBe('failed');
   });
 
   it('checkout falls back to offline queue when server is unreachable', async () => {
@@ -93,8 +104,8 @@ describe('offline queue sync under network failures', () => {
       createdAt: '2026-05-13T10:00:00.000Z',
     });
 
-    const enqueuedPayloads: CreateOrderPayload[] = [];
-    const enqueueOffline = vi.fn((p: CreateOrderPayload) => {
+    const enqueuedPayloads: CreateOrderRequest[] = [];
+    const enqueueOffline = vi.fn((p: CreateOrderRequest) => {
       enqueuedPayloads.push(p);
       useOfflineQueueStore.getState().enqueue(p);
     });
@@ -134,7 +145,7 @@ describe('offline queue sync under network failures', () => {
     });
 
     const store = useOfflineQueueStore.getState();
-    const enqueueOffline = (p: CreateOrderPayload) => store.enqueue(p);
+    const enqueueOffline = (p: CreateOrderRequest) => store.enqueue(p);
 
     await processCheckout({
       order,

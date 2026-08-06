@@ -58,22 +58,15 @@ describe('buildLocalDaySummary', () => {
     });
   });
 
-  it('normalizes remote day-summary envelopes with string amounts and API aliases', () => {
+  it('normalizes a decoded day-summary response into local summary fields', () => {
     expect(
       normalizeDaySummaryResponse(
         {
-          data: {
-            date: '2026-05-06',
-            gross_sales: '100.50',
-            net_sales: '90.25',
-            tax_collected: '10.25',
-            tips: '8',
-            refunds: '2',
-            voids: '1',
-            order_count: '4',
-            average_ticket: '25.125',
-            cash_drops: '30',
-          },
+          totalSales: 100.5,
+          totalTax: 10.25,
+          totalTips: 8,
+          totalRefunds: 2,
+          totalOrders: 4,
         },
         {
           date: '2026-05-06',
@@ -84,14 +77,14 @@ describe('buildLocalDaySummary', () => {
     ).toEqual({
       date: '2026-05-06',
       grossSales: 100.5,
-      netSales: 90.25,
+      netSales: 98.5,
       taxCollected: 10.25,
       tips: 8,
       refunds: 2,
-      voids: 1,
+      voids: 0,
       orderCount: 4,
       averageTicket: 25.125,
-      cashDrops: 30,
+      cashDrops: 0,
       openingFloat: 100,
       closingCash: 160,
     });
@@ -100,7 +93,7 @@ describe('buildLocalDaySummary', () => {
   it('uses cash drawer fallbacks for missing remote opening and closing cash', () => {
     expect(
       normalizeDaySummaryResponse(
-        { grossSales: 25, netSales: 20 },
+        { totalSales: 25, totalRefunds: 5 },
         { date: '2026-05-06', openingFloat: 50, closingCash: 75 },
       ),
     ).toMatchObject({

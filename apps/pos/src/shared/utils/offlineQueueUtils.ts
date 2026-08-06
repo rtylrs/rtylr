@@ -54,5 +54,5 @@ export function retryableEntries(
 
 /** Return total number of items across all queued orders. */
 export function totalQueuedItemCount(entries: OfflineQueuedOrder[]): number {
-  return entries.reduce((sum, e) => sum + e.order.items.length, 0);
+  return entries.reduce((sum, e) => sum + (e.order.items ?? []).length, 0);
 }

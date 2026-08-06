@@ -13,9 +13,10 @@ const payments: PaymentEntry[] = [
 
 describe('collapsePayments', () => {
   it('collapses single-method payments into one payload', () => {
-    expect(collapsePayments(payments, 0)).toEqual({
-      payment_method: 'card',
-      amount_paid: 20,
+    expect(collapsePayments('1', payments, 0)).toEqual({
+      orderId: '1',
+      paymentMethod: 'card',
+      amountPaid: 20,
     });
   });
 
@@ -24,21 +25,22 @@ describe('collapsePayments', () => {
       { id: 'p1', method: 'cash', amount: 30, createdAt: '2026-05-06T00:00:00.000Z' },
       { id: 'p2', method: 'card', amount: 20, createdAt: '2026-05-06T00:00:00.000Z' },
     ];
-    expect(collapsePayments(split, 5)).toEqual({
-      payment_method: 'cash',
-      amount_paid: 55,
+    expect(collapsePayments('1', split, 5)).toEqual({
+      orderId: '1',
+      paymentMethod: 'cash',
+      amountPaid: 55,
     });
   });
 
   it('throws when payments array is empty', () => {
-    expect(() => collapsePayments([], 0)).toThrow('Add at least one payment before charging.');
+    expect(() => collapsePayments('1', [], 0)).toThrow('Add at least one payment before charging.');
   });
 
   it('throws when all payment amounts are zero', () => {
     const zeroed: PaymentEntry[] = [
       { id: 'z1', method: 'cash', amount: 0, createdAt: '2026-05-06T00:00:00.000Z' },
     ];
-    expect(() => collapsePayments(zeroed, 0)).toThrow('Payment amounts must be greater than zero.');
+    expect(() => collapsePayments('1', zeroed, 0)).toThrow('Payment amounts must be greater than zero.');
   });
 });
 
@@ -70,6 +72,6 @@ describe('finalizeMultiPayment', () => {
       chargeOrder,
     });
 
-    expect(chargeOrder).toHaveBeenCalledWith(42, { payment_method: 'card', amount_paid: 22 });
+    expect(chargeOrder).toHaveBeenCalledWith({ orderId: '42', paymentMethod: 'card', amountPaid: 22 });
   });
 });

@@ -1,31 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { SettingsServiceClient } from '@voxire/voxie/pos/settings/v1/client';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
 import type { POSBusinessProfile, POSFeatureKey } from '../../shared/stores/settingsStore';
 import {
   normalizePOSTheme,
   POS_THEME_OPTIONS,
+  type POSTheme,
   useThemeStore,
 } from '../../shared/stores/themeStore';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
-import {
-  posService,
-  type POSBusinessSettingsResponse,
-  type POSTheme,
-} from '../../shared/services/api/posService';
 import { listPrinters, listSerialPorts } from '../../shared/services/hardware/hardwareDiscovery';
 import type { PrinterInfo, SerialPortInfo } from '../../shared/services/hardware/hardwareDiscovery';
 import { isTauri } from '../../shared/utils/platform';
 import appConfig from '../../app.json';
 import { HardwareHealthCheck } from './HardwareHealthCheck';
+import { useTranslation } from 'react-i18next';
+import ServerSetup from '../server-setup';
 
 const INPUT_CLS =
   'w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25';
 const SELECT_CLS =
   'w-full h-11 px-3 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25';
+
+const settingsClient = createOneKitClient(SettingsServiceClient, 'pos');
 
 const PROFILE_OPTIONS: { value: POSBusinessProfile; label: string }[] = [
   { value: 'retail', label: 'Retail' },
@@ -46,6 +47,7 @@ const FEATURE_OPTIONS: { key: POSFeatureKey; label: string }[] = [
 ];
 
 const SettingsScreen: React.FC = () => {
+  const { t } = useTranslation('server');
   const s = useSettingsStore();
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
@@ -94,20 +96,20 @@ const SettingsScreen: React.FC = () => {
     setSavingPOSSettings(true);
     try {
       const selectedTheme: POSTheme = normalizePOSTheme(theme);
-      const response = await unwrap(
-        posService.updatePOSSettings({
-          business_profile: s.businessProfile,
-          theme: selectedTheme,
-          features: s.features,
-          receipt_footer: s.receiptFooter,
-        })
-      );
-      const settings = (response as POSBusinessSettingsResponse).settings;
+      const response = await settingsClient.updatePOSSettings({
+        businessProfile: s.businessProfile,
+        theme: selectedTheme,
+        features: s.features,
+        receiptFooter: s.receiptFooter,
+      });
+      const settings = response.settings;
       if (settings) {
-        s.setBusinessProfile(settings.business_profile);
-        s.setFeatures(settings.features);
-        s.setReceiptFooter(settings.receipt_footer);
-        setTheme(settings.theme);
+        s.setBusinessProfile(settings.businessProfile as POSBusinessProfile);
+        if (settings.features) {
+          s.setFeatures(settings.features);
+        }
+        s.setReceiptFooter(settings.receiptFooter ?? '');
+        setTheme(settings.theme ?? '');
       }
       toast.success('POS settings saved');
     } catch {
@@ -120,6 +122,10 @@ const SettingsScreen: React.FC = () => {
   return (
     <ScreenLayout title="Settings">
       <div className="p-5 max-w-3xl space-y-5">
+        <Section title={t('sectionTitle')}>
+          <ServerSetup variant="settings" />
+        </Section>
+
         <Section title="Business">
           <div className="grid grid-cols-1 gap-3">
             <div>

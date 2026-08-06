@@ -1,4 +1,4 @@
-import type { DiscountPayload } from '../../shared/services/api/posService';
+import type { DiscountOrderRequest } from '@voxire/voxie/pos/orders/discounts/v1/types';
 
 export type DiscountMode = 'percent' | 'flat';
 
@@ -9,8 +9,7 @@ interface BuildDiscountRequestParams {
 }
 
 interface DiscountRequest {
-  orderId: number;
-  payload: DiscountPayload;
+  payload: DiscountOrderRequest;
 }
 
 function positiveInteger(value: unknown): number | null {
@@ -38,10 +37,11 @@ export function buildDiscountRequest({
   }
 
   return {
-    orderId: normalizedOrderId,
     payload: {
-      discount_type: mode,
-      discount_value: discountValue(mode, valueInput),
+      orderId: String(normalizedOrderId),
+      discountType: mode,
+      discountValue: discountValue(mode, valueInput),
+      reason: '',
     },
   };
 }

@@ -1,31 +1,12 @@
 /**
- * End-to-end: load inventory items → perform a stock action →
- * confirm the correct posService endpoint is called with the right payload.
- *
- * Chains buildStockAction (validation + payload construction) →
- * posService.{receiveStock|adjustStock|wasteStock|transferStock}.
+ * End-to-end: load inventory items → build generated stock action payloads.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-
-vi.mock('../../shared/services/api/posService', () => ({
-  posService: {
-    receiveStock: vi.fn(),
-    adjustStock: vi.fn(),
-    wasteStock: vi.fn(),
-    transferStock: vi.fn(),
-  },
-}));
-
-vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((p) => p),
-}));
+import { describe, it, expect } from 'vitest';
 
 import { buildStockAction, mapInventoryItems } from './inventoryWorkflow';
 import type { StockAction } from './inventoryWorkflow';
-import { posService } from '../../shared/services/api/posService';
-import { unwrap } from '@voxire/api';
 
-async function applyStockAction(params: {
+function applyStockAction(params: {
   itemId: number;
   action: StockAction;
   quantityInput: string;
@@ -33,95 +14,73 @@ async function applyStockAction(params: {
   toBranchId?: number;
   reason?: string;
 }) {
-  const built = buildStockAction(params);
-  switch (built.action) {
-    case 'receive':
-      return unwrap(posService.receiveStock(built.payload));
-    case 'adjust':
-      return unwrap(posService.adjustStock(built.payload));
-    case 'waste':
-      return unwrap(posService.wasteStock(built.payload));
-    case 'transfer':
-      return unwrap(posService.transferStock(built.payload));
-  }
+  return buildStockAction(params);
 }
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
 describe('inventory end-to-end flow', () => {
-  it('receive stock calls receiveStock with correct payload', async () => {
-    vi.mocked(posService.receiveStock).mockResolvedValue(undefined as never);
-
-    await applyStockAction({ itemId: 10, action: 'receive', quantityInput: '50', branchId: 1, reason: 'delivery' });
-
-    expect(posService.receiveStock).toHaveBeenCalledTimes(1);
-    expect(posService.receiveStock).toHaveBeenCalledWith({
-      branch_id: 1,
-      product_id: 10,
+  it('receive stock builds the generated payload', () => {
+    expect(
+      applyStockAction({ itemId: 10, action: 'receive', quantityInput: '50', branchId: 1, reason: 'delivery' }),
+    ).toEqual({
+      action: 'receive',
+      payload: {
+      branchId: '1',
+      productId: '10',
       quantity: 50,
       note: 'delivery',
-      employee_id: null,
+      employeeId: '0',
+      },
     });
-
-    expect(posService.adjustStock).not.toHaveBeenCalled();
-    expect(posService.wasteStock).not.toHaveBeenCalled();
-    expect(posService.transferStock).not.toHaveBeenCalled();
   });
 
-  it('waste stock calls wasteStock with item id and quantity', async () => {
-    vi.mocked(posService.wasteStock).mockResolvedValue(undefined as never);
-
-    await applyStockAction({ itemId: 5, action: 'waste', quantityInput: '3', branchId: 1, reason: 'spoiled' });
-
-    expect(posService.wasteStock).toHaveBeenCalledTimes(1);
-    expect(posService.wasteStock).toHaveBeenCalledWith({
-      branch_id: 1,
-      product_id: 5,
+  it('waste stock builds the generated payload', () => {
+    expect(
+      applyStockAction({ itemId: 5, action: 'waste', quantityInput: '3', branchId: 1, reason: 'spoiled' }),
+    ).toEqual({
+      action: 'waste',
+      payload: {
+      branchId: '1',
+      productId: '5',
       quantity: 3,
       note: 'spoiled',
-      employee_id: null,
+      employeeId: '0',
+      },
     });
-
-    expect(posService.receiveStock).not.toHaveBeenCalled();
   });
 
-  it('adjust stock calls adjustStock', async () => {
-    vi.mocked(posService.adjustStock).mockResolvedValue(undefined as never);
-
-    await applyStockAction({ itemId: 7, action: 'adjust', quantityInput: '10', branchId: 1, reason: 'count correction' });
-
-    expect(posService.adjustStock).toHaveBeenCalledTimes(1);
-    expect(posService.adjustStock).toHaveBeenCalledWith({
-      branch_id: 1,
-      product_id: 7,
+  it('adjust stock builds the generated payload', () => {
+    expect(
+      applyStockAction({ itemId: 7, action: 'adjust', quantityInput: '10', branchId: 1, reason: 'count correction' }),
+    ).toEqual({
+      action: 'adjust',
+      payload: {
+      branchId: '1',
+      productId: '7',
       quantity: 10,
       note: 'count correction',
-      employee_id: null,
+      employeeId: '0',
+      },
     });
   });
 
-  it('transfer stock calls transferStock with source and destination branches', async () => {
-    vi.mocked(posService.transferStock).mockResolvedValue(undefined as never);
-
-    await applyStockAction({
+  it('transfer stock builds the generated payload with source and destination branches', () => {
+    expect(applyStockAction({
       itemId: 7,
       action: 'transfer',
       quantityInput: '5',
       branchId: 1,
       toBranchId: 2,
       reason: 'restock front counter',
-    });
-
-    expect(posService.transferStock).toHaveBeenCalledTimes(1);
-    expect(posService.transferStock).toHaveBeenCalledWith({
-      from_branch_id: 1,
-      to_branch_id: 2,
-      product_id: 7,
+    })).toEqual({
+      action: 'transfer',
+      payload: {
+      fromBranchId: '1',
+      toBranchId: '2',
+      productId: '7',
       quantity: 5,
       note: 'restock front counter',
-      employee_id: null,
+      employeeId: '0',
+      },
     });
   });
 
@@ -129,26 +88,19 @@ describe('inventory end-to-end flow', () => {
     expect(() =>
       buildStockAction({ itemId: 1, action: 'transfer', quantityInput: '1', branchId: 1 }),
     ).toThrow('Select a destination location before transferring stock');
-
-    expect(posService.transferStock).not.toHaveBeenCalled();
   });
 
   it('zero quantity is rejected before any service call', () => {
     expect(() =>
       buildStockAction({ itemId: 1, action: 'receive', quantityInput: '0', branchId: 1 }),
     ).toThrow('Quantity must be greater than zero');
-
-    expect(posService.receiveStock).not.toHaveBeenCalled();
-    expect(posService.adjustStock).not.toHaveBeenCalled();
-    expect(posService.wasteStock).not.toHaveBeenCalled();
-    expect(posService.transferStock).not.toHaveBeenCalled();
   });
 
   it('mapInventoryItems identifies low-stock items (currentQty < lowStockThreshold)', () => {
     const raw = [
-      { item_id: 1, name: 'Milk', current_qty: 2, unit: 'L', low_stock_threshold: 10 },
-      { item_id: 2, name: 'Sugar', current_qty: 50, unit: 'kg', low_stock_threshold: 5 },
-      { item_id: 3, name: 'Coffee', current_qty: 0, unit: 'kg', low_stock_threshold: 2 },
+      { id: '1', businessId: '1', branchId: '1', productId: '1', itemId: '1', name: 'Milk', sku: '', quantity: 2, currentQty: 2, unit: 'L', reorderPoint: 10, reorderQuantity: 0, lowStockThreshold: 10, updatedAt: '' },
+      { id: '2', businessId: '1', branchId: '1', productId: '2', itemId: '2', name: 'Sugar', sku: '', quantity: 50, currentQty: 50, unit: 'kg', reorderPoint: 5, reorderQuantity: 0, lowStockThreshold: 5, updatedAt: '' },
+      { id: '3', businessId: '1', branchId: '1', productId: '3', itemId: '3', name: 'Coffee', sku: '', quantity: 0, currentQty: 0, unit: 'kg', reorderPoint: 2, reorderQuantity: 0, lowStockThreshold: 2, updatedAt: '' },
     ];
 
     const items = mapInventoryItems(raw);
@@ -161,10 +113,10 @@ describe('inventory end-to-end flow', () => {
     expect(lowStock.map((i) => i.name)).not.toContain('Sugar');
   });
 
-  it('low-stock detection uses both snake_case and camelCase fields from server', () => {
+  it('low-stock detection uses generated inventory fields', () => {
     const rawMixed = [
-      { item_id: 10, name: 'Oat Milk', current_qty: 1, unit: 'L', low_stock_threshold: 5 },
-      { itemId: 11, name: 'Syrup', currentQty: 3, unit: 'bottles', low_stock_threshold: 10 },
+      { id: '10', businessId: '1', branchId: '1', productId: '10', itemId: '10', name: 'Oat Milk', sku: '', quantity: 1, currentQty: 1, unit: 'L', reorderPoint: 5, reorderQuantity: 0, lowStockThreshold: 5, updatedAt: '' },
+      { id: '11', businessId: '1', branchId: '1', productId: '11', itemId: '11', name: 'Syrup', sku: '', quantity: 3, currentQty: 3, unit: 'bottles', reorderPoint: 10, reorderQuantity: 0, lowStockThreshold: 10, updatedAt: '' },
     ];
 
     const items = mapInventoryItems(rawMixed);

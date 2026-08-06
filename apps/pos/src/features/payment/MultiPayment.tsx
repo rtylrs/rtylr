@@ -1,4 +1,4 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -7,14 +7,18 @@ import ScreenLayout from '../../layouts/ScreenLayout';
 import PaymentMethodTile from '../../shared/components/PaymentMethodTile';
 import TipSelector from '../../shared/components/TipSelector';
 import { formatCurrency } from '../../shared/utils/format';
-import type { Order, OrderLineItem, PaymentEntry, PaymentMethod } from '../../shared/types/pos';
-import { posService } from '../../shared/services/api/posService';
+import type { PaymentEntry, PaymentMethod } from '../../shared/types/pos';
+import type { Order, OrderItem } from '@voxire/voxie/pos/orders/v1/types';
+import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
+import { OrderPaymentServiceClient } from '@voxire/voxie/pos/orders/payments/v1/client';
 import { finalizeMultiPayment } from './multiPaymentWorkflow';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
-import { normalizeOrderResponse } from '../orders/ordersWorkflow';
 
-function lineTotal(item: OrderLineItem): number {
-  return item.total ?? item.price * item.quantity;
+const orderClient = createOneKitClient(OrderServiceClient, 'pos');
+const orderPaymentClient = createOneKitClient(OrderPaymentServiceClient, 'pos');
+
+function lineTotal(item: OrderItem): number {
+  return item.total || (item.unitPrice ?? 0) * (item.quantity ?? 0);
 }
 
 const MultiPaymentScreen: React.FC = () => {
@@ -47,11 +51,11 @@ const MultiPaymentScreen: React.FC = () => {
     }
 
     try {
-      const res = await unwrap(posService.getOrder(id));
-      const normalized = normalizeOrderResponse(res);
+      const res = await orderClient.getOrderDetail({ orderId: String(id) });
+      const order = res.order ?? null;
       if (canApply()) {
-        setOrder(normalized);
-        setOrderError(normalized ? null : 'The order response was empty.');
+        setOrder(order);
+        setOrderError(order ? null : 'The order response was empty.');
       }
     } catch (error) {
       const message =
@@ -75,7 +79,7 @@ const MultiPaymentScreen: React.FC = () => {
   }, [loadOrder]);
 
   const subtotal = order?.subtotal ?? 0;
-  const tax = order?.tax ?? 0;
+  const tax = order?.taxAmount ?? 0;
   const appliedTip = tipsEnabled ? tip : 0;
   const total = (order?.total ?? 0) + appliedTip;
   const paid = payments.reduce((sum, p) => sum + p.amount, 0);
@@ -110,8 +114,8 @@ const MultiPaymentScreen: React.FC = () => {
         payments,
         tip: appliedTip,
         total,
-        chargeOrder: async (id, payload) => {
-          await unwrap(posService.chargeOrder(id, payload));
+        chargeOrder: async (payload) => {
+          await orderPaymentClient.processPayment(payload);
         },
       });
       toast.success('Payment complete');
@@ -173,16 +177,16 @@ const MultiPaymentScreen: React.FC = () => {
               <div>
                 <p className="text-sm font-bold text-pos-text">Items purchased</p>
                 <p className="text-[11px] text-pos-muted">
-                  {order.items.length} line{order.items.length === 1 ? '' : 's'}
+                  {(order.items ?? []).length} line{(order.items ?? []).length === 1 ? '' : 's'}
                 </p>
               </div>
-              <span className="text-xs text-pos-muted">#{order.number ?? order.id}</span>
+              <span className="text-xs text-pos-muted">#{order.orderNumber || order.id}</span>
             </div>
-            {order.items.length > 0 ? (
+            {(order.items ?? []).length > 0 ? (
               <ul className="space-y-2">
-                {order.items.map((item) => (
+                {(order.items ?? []).map((item) => (
                   <li
-                    key={item.id || `${item.name}-${item.quantity}-${item.price}`}
+                    key={item.id || `${item.name}-${item.quantity}-${item.unitPrice}`}
                     className="rounded-lg bg-white/6 border border-pos-border p-3"
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -191,7 +195,7 @@ const MultiPaymentScreen: React.FC = () => {
                           {item.quantity}x {item.name}
                         </p>
                         <p className="text-[11px] text-pos-muted">
-                          {formatCurrency(item.price)} each
+                          {formatCurrency(item.unitPrice ?? 0)} each
                           {item.sku ? ` · ${item.sku}` : ''}
                         </p>
                         {item.notes && (

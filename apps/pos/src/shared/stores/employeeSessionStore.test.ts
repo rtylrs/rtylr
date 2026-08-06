@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-vi.mock('@voxire/api', () => ({ unwrap: (p: unknown) => p }));
-vi.mock('../services/api/posService', () => ({
-  posService: { verifyPIN: vi.fn() },
+const userClient = vi.hoisted(() => ({
+  verifyPOSUserPIN: vi.fn(),
+}));
+
+vi.mock('@voxire/api', () => ({
+  createOneKitClient: () => userClient,
 }));
 
 import { useEmployeeSessionStore } from './employeeSessionStore';
-import { posService } from '../services/api/posService';
 
 const { getState, setState } = useEmployeeSessionStore;
 
@@ -36,11 +38,15 @@ describe('employeeSessionStore', () => {
   });
 
   it('authenticates a roster operator and stores capabilities', async () => {
-    vi.mocked(posService.verifyPIN).mockResolvedValueOnce(verifyResponse() as never);
+    vi.mocked(userClient.verifyPOSUserPIN).mockResolvedValueOnce(verifyResponse() as never);
 
     await getState().authenticatePin(3, 42, '1234');
 
-    expect(posService.verifyPIN).toHaveBeenCalledWith(3, 42, '1234');
+    expect(userClient.verifyPOSUserPIN).toHaveBeenCalledWith({
+      locationId: '3',
+      userId: '42',
+      pin: '1234',
+    });
     expect(getState().isActive).toBe(true);
     expect(getState().employee).toEqual({
       id: '42',
@@ -59,7 +65,7 @@ describe('employeeSessionStore', () => {
   });
 
   it('defaults missing capability flags to false/0', async () => {
-    vi.mocked(posService.verifyPIN).mockResolvedValueOnce(
+    vi.mocked(userClient.verifyPOSUserPIN).mockResolvedValueOnce(
       verifyResponse({
         role: 'cashier',
         can_void: undefined,
@@ -83,7 +89,7 @@ describe('employeeSessionStore', () => {
 
   it('sets loading true during authentication', async () => {
     let loadingDuringCall = false;
-    vi.mocked(posService.verifyPIN).mockImplementation((() => {
+    vi.mocked(userClient.verifyPOSUserPIN).mockImplementation((() => {
       loadingDuringCall = getState().loading;
       return Promise.resolve(verifyResponse());
     }) as never);
@@ -93,7 +99,7 @@ describe('employeeSessionStore', () => {
   });
 
   it('sets a generic error on failed authentication (no cause leak)', async () => {
-    vi.mocked(posService.verifyPIN).mockRejectedValueOnce(
+    vi.mocked(userClient.verifyPOSUserPIN).mockRejectedValueOnce(
       new Error('401 Invalid credentials') as never
     );
 
@@ -107,12 +113,12 @@ describe('employeeSessionStore', () => {
     await expect(getState().authenticatePin(3, 42, '   ')).rejects.toThrow(
       'Enter your employee PIN'
     );
-    expect(posService.verifyPIN).not.toHaveBeenCalled();
+    expect(userClient.verifyPOSUserPIN).not.toHaveBeenCalled();
     expect(getState().isActive).toBe(false);
   });
 
   it('rejects a malformed verify response without activating a session', async () => {
-    vi.mocked(posService.verifyPIN).mockResolvedValueOnce(
+    vi.mocked(userClient.verifyPOSUserPIN).mockResolvedValueOnce(
       verifyResponse({ user_id: 0 }) as never
     );
 

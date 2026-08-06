@@ -74,9 +74,10 @@ describe('split-tender checkout: $30 cash + $20 card', () => {
     });
 
     // cash ($30) dominates card ($20); total = 30+20+5 tip = 55
-    expect(chargeOrder).toHaveBeenCalledWith(99, {
-      payment_method: 'cash',
-      amount_paid: 55,
+    expect(chargeOrder).toHaveBeenCalledWith({
+      orderId: '99',
+      paymentMethod: 'cash',
+      amountPaid: 55,
     });
   });
 

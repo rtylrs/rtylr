@@ -41,8 +41,8 @@ describe('buildRefundRequest', () => {
     });
 
     expect(result).toEqual({
-      orderId: 7,
       payload: {
+        orderId: '7',
         amount: 15.5,
         reason: 'Wrong item',
       },
@@ -66,7 +66,8 @@ describe('processRefund', () => {
       recordCashRefund,
     });
 
-    expect(refundOrder).toHaveBeenCalledWith(7, {
+    expect(refundOrder).toHaveBeenCalledWith({
+      orderId: '7',
       amount: 42,
       reason: 'Customer complaint',
     });

@@ -1,18 +1,29 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useCallback, useEffect, useState } from 'react';
-import { posService } from '../../shared/services/api/posService';
+import { KDSServiceClient } from '@voxire/voxie/pos/kds/v1/client';
 import { useUserStore } from '../../shared/stores/userStore';
-import { buildKdsStatusUpdate, mapKdsOrders, parsePositiveInteger } from './kdsWorkflow';
 import { useKdsStream } from './useKdsStream';
 
 export interface KDSOrder {
   id: string;
   number: string;
   station: string;
-  items: { name: string; qty: number; course?: string; notes?: string }[];
+  items: { id: string; orderId: string; name: string; qty: number; course?: string; notes?: string }[];
   status: 'new' | 'cooking' | 'ready' | 'served';
   createdAt: string;
   elapsedSeconds?: number;
+}
+
+const kdsClient = createOneKitClient(KDSServiceClient, 'pos');
+const kdsStatuses = new Set<KDSOrder['status']>(['new', 'cooking', 'ready', 'served']);
+
+function parsePositiveInteger(value: unknown): number | undefined {
+  const numeric = Number(value);
+  return Number.isInteger(numeric) && numeric > 0 ? numeric : undefined;
+}
+
+function kdsStatus(value: string): KDSOrder['status'] {
+  return kdsStatuses.has(value as KDSOrder['status']) ? (value as KDSOrder['status']) : 'new';
 }
 
 export function useKDSOrders(station?: string) {
@@ -27,9 +38,24 @@ export function useKDSOrders(station?: string) {
     setLoading(true);
     setError(null);
     try {
-      const res = await unwrap(posService.getKDSOrders(station));
-      const raw = res?.orders ?? res?.data ?? [];
-      setOrders(mapKdsOrders(raw));
+      const res = await kdsClient.listKDSOrders({});
+      const nextOrders = (res.orders ?? [])
+        .map((order) => ({
+          id: order.id ?? '',
+          number: order.orderNumber || order.id || '',
+          station: order.type || 'Kitchen',
+          items: (order.items ?? []).map((item) => ({
+            id: item.id ?? '',
+            orderId: item.orderId || order.id || '',
+            name: item.name || 'Item',
+            qty: item.quantity || 1,
+            notes: item.notes || undefined,
+          })),
+          status: kdsStatus(order.status ?? ''),
+          createdAt: order.createdAt || new Date().toISOString(),
+        }))
+        .filter((order) => !station || order.station.toLowerCase() === station.toLowerCase());
+      setOrders(nextOrders);
     } catch (e) {
       const err = e as { response?: { data?: { message?: string } }; message?: string };
       setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load KDS orders');
@@ -46,10 +72,22 @@ export function useKDSOrders(station?: string) {
   useKdsStream(ownerID, load);
 
   const setStatus = async (id: string, status: KDSOrder['status']): Promise<void> => {
-    const request = buildKdsStatusUpdate(id, status);
+    const order = orders.find((item) => item.id === id);
+    const itemUpdates = order?.items.filter((item) => parsePositiveInteger(item.id));
+    if (!order || !itemUpdates || itemUpdates.length === 0) {
+      return;
+    }
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
     try {
-      await unwrap(posService.updateKDSItemStatus(request.itemId, request.status));
+      await Promise.all(
+        itemUpdates.map((item) =>
+          kdsClient.updateKDSItemStatus({
+            orderId: item.orderId || order.id,
+            itemId: item.id,
+            body: { status },
+          }),
+        ),
+      );
     } catch {
       // leave local state updated; real sync handled by reload
     }

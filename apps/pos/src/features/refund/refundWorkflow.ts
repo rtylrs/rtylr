@@ -1,5 +1,5 @@
+import type { ProcessRefundRequest } from '@voxire/voxie/pos/orders/refunds/v1/types';
 import type { Receipt } from '../../shared/types/pos';
-import type { VoidRefundPayload } from '../../shared/services/api/posService';
 
 interface BuildRefundRequestParams {
   orderId: string | undefined;
@@ -10,13 +10,12 @@ interface BuildRefundRequestParams {
 }
 
 interface BuiltRefundRequest {
-  orderId: number;
-  payload: VoidRefundPayload;
+  payload: ProcessRefundRequest;
   cashRefundAmount: number;
 }
 
 interface ProcessRefundParams extends BuildRefundRequestParams {
-  refundOrder: (orderId: number, payload: VoidRefundPayload) => Promise<void>;
+  refundOrder: (payload: ProcessRefundRequest) => Promise<void>;
   recordCashRefund: (amount: number, orderId: string) => void;
 }
 
@@ -65,8 +64,8 @@ export function buildRefundRequest({
   const cashTendered = cashPaid(receipt);
 
   return {
-    orderId: numericOrderId,
     payload: {
+      orderId: String(numericOrderId),
       amount,
       reason,
     },
@@ -80,9 +79,9 @@ export async function processRefund({
   ...params
 }: ProcessRefundParams): Promise<void> {
   const refund = buildRefundRequest(params);
-  await refundOrder(refund.orderId, refund.payload);
+  await refundOrder(refund.payload);
 
   if (refund.cashRefundAmount > 0) {
-    recordCashRefund(refund.cashRefundAmount, String(refund.orderId));
+    recordCashRefund(refund.cashRefundAmount, refund.payload.orderId ?? '');
   }
 }

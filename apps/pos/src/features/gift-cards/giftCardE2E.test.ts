@@ -2,18 +2,13 @@
  * End-to-end: gift card issue → redeem → apply discount in checkout.
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { ResultAsync } from 'neverthrow';
 
-vi.mock('../../shared/services/api/posService', () => ({
-  posService: {
-    createGiftCard: vi.fn(() =>
-      ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as never)
-    ),
-  },
+const giftCardClient = vi.hoisted(() => ({
+  createGiftCard: vi.fn(() => Promise.resolve({ giftCardId: 'remote-gc', message: 'ok' })),
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((p) => p),
+  createOneKitClient: () => giftCardClient,
 }));
 
 import { issueGiftCard } from './giftCardWorkflow';

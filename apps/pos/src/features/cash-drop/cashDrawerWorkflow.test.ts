@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { processCashDrawerAction, recordCashDrawerAction } from './cashDrawerWorkflow';
-import type { CashMovementPayload } from '../../shared/services/api/posService';
+import type { CashMovementPayload } from '../../shared/stores/cashMovementQueueStore';
 
 const actions = () => ({
   openDrawer: vi.fn(),

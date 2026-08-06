@@ -7,7 +7,7 @@ describe('cartProduct', () => {
       buildMenuItemCartProduct({
         id: '17',
         name: 'Burger',
-        price: 12.5,
+        salePrice: 12.5,
         category: 'Mains',
         sku: 'BRG',
         taxRate: 0.11,
@@ -27,7 +27,7 @@ describe('cartProduct', () => {
 
   it('rejects menu items without a valid product ID', () => {
     expect(() =>
-      buildMenuItemCartProduct({ id: 'local-1', name: 'Burger', price: 12, category: 'Mains' }),
+      buildMenuItemCartProduct({ id: 'local-1', name: 'Burger', salePrice: 12, category: 'Mains' }),
     ).toThrow('Select a valid menu item before adding it.');
   });
 

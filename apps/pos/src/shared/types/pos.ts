@@ -142,8 +142,8 @@ export interface DaySummary {
 
 export interface OfflineQueuedOrder {
   id: string;
-  /** Backend-shaped CreateOrderPayload, replayed verbatim on reconnect. */
-  order: import('../services/api/posService').CreateOrderPayload;
+  /** Generated Voxie CreateOrderRequest, replayed verbatim on reconnect. */
+  order: import('@voxire/voxie/pos/orders/v1/types').CreateOrderRequest;
   queuedAt: string;
   retries: number;
   lastError?: string;

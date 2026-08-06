@@ -1,16 +1,17 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, Package } from 'lucide-react';
 import { toast } from 'sonner';
+import { MenuItemServiceClient } from '@voxire/voxie/pos/menu_item/v1/client';
+import type { MenuItem } from '@voxire/voxie/pos/menu_item/v1/types';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import SearchBar from '../../shared/components/SearchBar';
 import Skeleton from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
 import { useMenuItems } from '../menu-items/useMenuItems';
-import { posService } from '../../shared/services/api/posService';
-import type { MenuItem } from '../../shared/types/pos';
 import { formatCurrency } from '../../shared/utils/format';
-import { buildMenuItemUpdate } from './productQuickEditWorkflow';
+
+const menuItemClient = createOneKitClient(MenuItemServiceClient, 'pos');
 
 const ProductQuickEditScreen: React.FC = () => {
   const { items, loading, error, reload } = useMenuItems();
@@ -23,11 +24,12 @@ const ProductQuickEditScreen: React.FC = () => {
     setDrafts((prev) => {
       const next = { ...prev };
       items.forEach((it) => {
-        if (!next[it.id]) {
-          next[it.id] = {
-            price: it.price,
+        const id = it.id ?? '';
+        if (!next[id]) {
+          next[id] = {
+            price: it.salePrice ?? 0,
             stock: it.stock,
-            available: it.available !== false,
+            available: it.isActive !== false,
           };
         }
       });
@@ -36,17 +38,30 @@ const ProductQuickEditScreen: React.FC = () => {
   }, [items]);
 
   const filtered = items.filter(
-    (it) => !search || it.name.toLowerCase().includes(search.toLowerCase())
+    (it) => !search || (it.name ?? '').toLowerCase().includes(search.toLowerCase())
   );
 
   const update = (id: string, field: keyof (typeof drafts)[string], value: unknown) =>
     setDrafts((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
 
   const save = async (item: MenuItem) => {
-    const draft = drafts[item.id];
+    const draft = drafts[item.id ?? ''];
     try {
-      const update = buildMenuItemUpdate(item.id, draft);
-      await unwrap(posService.updateMenuItem(update.itemId, update.payload));
+      if (!draft) {
+        throw new Error('Select a valid product before saving.');
+      }
+      await menuItemClient.updateMenuItem({
+        id: item.id ?? '',
+        body: {
+          name: item.name,
+          salePrice: Number.isFinite(draft.price) && draft.price >= 0 ? draft.price : 0,
+          stock:
+            Number.isFinite(draft.stock) && draft.stock != null && draft.stock >= 0
+              ? draft.stock
+              : 0,
+          isActive: draft.available,
+        },
+      });
       toast.success(`Updated ${item.name}`);
       reload();
     } catch (error) {
@@ -78,16 +93,17 @@ const ProductQuickEditScreen: React.FC = () => {
             </thead>
             <tbody>
               {filtered.map((it) => {
-                const draft = drafts[it.id] ?? { price: it.price, available: true };
+                const itemId = it.id ?? '';
+                const draft = drafts[itemId] ?? { price: it.salePrice ?? 0, available: true };
                 return (
-                  <tr key={it.id} className="border-b border-pos-border">
+                  <tr key={itemId} className="border-b border-pos-border">
                     <td className="py-2 text-pos-text">{it.name}</td>
-                    <td className="py-2 text-pos-muted">{formatCurrency(it.price)}</td>
+                    <td className="py-2 text-pos-muted">{formatCurrency(it.salePrice ?? 0)}</td>
                     <td className="py-2">
                       <input
                         type="number"
                         value={draft.price}
-                        onChange={(e) => update(it.id, 'price', Number(e.target.value))}
+                        onChange={(e) => update(itemId, 'price', Number(e.target.value))}
                         className="h-10 w-24 rounded-lg bg-white/8 border border-pos-border px-2 text-pos-text"
                       />
                     </td>
@@ -97,7 +113,7 @@ const ProductQuickEditScreen: React.FC = () => {
                         value={draft.stock ?? ''}
                         onChange={(e) =>
                           update(
-                            it.id,
+                            itemId,
                             'stock',
                             e.target.value ? Number(e.target.value) : undefined
                           )
@@ -109,7 +125,7 @@ const ProductQuickEditScreen: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={draft.available}
-                        onChange={(e) => update(it.id, 'available', e.target.checked)}
+                        onChange={(e) => update(itemId, 'available', e.target.checked)}
                         className="w-5 h-5"
                       />
                     </td>

@@ -3,12 +3,18 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import LocationSelect from './LocationSelect';
 
-const mockPosService = vi.hoisted(() => ({
+const accessClient = vi.hoisted(() => ({
   getMyLocations: vi.fn(),
-  getBranches: vi.fn(),
-  getTerminals: vi.fn(),
+}));
+
+const locationClient = vi.hoisted(() => ({
+  listLocations: vi.fn(),
+  createLocation: vi.fn(),
+}));
+
+const terminalClient = vi.hoisted(() => ({
+  listTerminals: vi.fn(),
   createTerminal: vi.fn(),
-  createBranch: vi.fn(),
 }));
 
 const mockToast = vi.hoisted(() => ({
@@ -23,21 +29,16 @@ vi.mock('../../shared/stores/userStore', () => ({
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((value) => value),
+  createOneKitClient: vi.fn((client: { name?: string }) => {
+    if (client.name === 'AccessServiceClient') return accessClient;
+    if (client.name === 'LocationServiceClient') return locationClient;
+    if (client.name === 'TerminalServiceClient') return terminalClient;
+    return {};
+  }),
 }));
 
 vi.mock('sonner', () => ({
   toast: mockToast,
-}));
-
-vi.mock('../../shared/services/api/posService', () => ({
-  posService: {
-    getMyLocations: (...args: unknown[]) => mockPosService.getMyLocations(...args),
-    getBranches: (...args: unknown[]) => mockPosService.getBranches(...args),
-    getTerminals: (...args: unknown[]) => mockPosService.getTerminals(...args),
-    createTerminal: (...args: unknown[]) => mockPosService.createTerminal(...args),
-    createBranch: (...args: unknown[]) => mockPosService.createBranch(...args),
-  },
 }));
 
 describe('LocationSelect', () => {
@@ -51,8 +52,8 @@ describe('LocationSelect', () => {
   });
 
   it('shows a load error when assigned and owned locations both fail', async () => {
-    mockPosService.getMyLocations.mockRejectedValue(new Error('assigned failed'));
-    mockPosService.getBranches.mockRejectedValue(new Error('branches failed'));
+    accessClient.getMyLocations.mockRejectedValue(new Error('assigned failed'));
+    locationClient.listLocations.mockRejectedValue(new Error('branches failed'));
 
     render(<LocationSelect onComplete={vi.fn()} />);
 
@@ -62,8 +63,8 @@ describe('LocationSelect', () => {
   });
 
   it('shows owned locations when the assigned list is empty', async () => {
-    mockPosService.getMyLocations.mockResolvedValue({ locations: [] });
-    mockPosService.getBranches.mockResolvedValue({
+    accessClient.getMyLocations.mockResolvedValue({ locations: [] });
+    locationClient.listLocations.mockResolvedValue({
       locations: [
         { id: 3, name: 'HQ' },
         { id: 4, name: 'Annex' },
@@ -77,10 +78,10 @@ describe('LocationSelect', () => {
   });
 
   it('merges assigned and owned locations without duplicates', async () => {
-    mockPosService.getMyLocations.mockResolvedValue({
+    accessClient.getMyLocations.mockResolvedValue({
       locations: [{ id: 1, name: 'Main' }],
     });
-    mockPosService.getBranches.mockResolvedValue({
+    locationClient.listLocations.mockResolvedValue({
       locations: [
         { id: 1, name: 'Main' },
         { id: 2, name: 'Uptown' },
@@ -94,8 +95,8 @@ describe('LocationSelect', () => {
   });
 
   it('shows the first-location setup form when no locations exist anywhere', async () => {
-    mockPosService.getMyLocations.mockResolvedValue({ locations: [] });
-    mockPosService.getBranches.mockResolvedValue({ locations: [] });
+    accessClient.getMyLocations.mockResolvedValue({ locations: [] });
+    locationClient.listLocations.mockResolvedValue({ locations: [] });
 
     render(<LocationSelect onComplete={vi.fn()} />);
 
@@ -106,10 +107,10 @@ describe('LocationSelect', () => {
   });
 
   it('creates the first location and advances to terminal registration', async () => {
-    mockPosService.getMyLocations.mockResolvedValue({ locations: [] });
-    mockPosService.getBranches.mockResolvedValue({ locations: [] });
-    mockPosService.createBranch.mockResolvedValue({ location_id: 7, message: 'ok' });
-    mockPosService.getTerminals.mockResolvedValue({ terminals: [] });
+    accessClient.getMyLocations.mockResolvedValue({ locations: [] });
+    locationClient.listLocations.mockResolvedValue({ locations: [] });
+    locationClient.createLocation.mockResolvedValue({ locationId: 7, message: 'ok' });
+    terminalClient.listTerminals.mockResolvedValue({ terminals: [] });
 
     render(<LocationSelect onComplete={vi.fn()} />);
 
@@ -119,11 +120,11 @@ describe('LocationSelect', () => {
     fireEvent.click(screen.getByText('Create location'));
 
     expect(await screen.findByText('Register this terminal')).toBeTruthy();
-    expect(mockPosService.createBranch).toHaveBeenCalledWith({
+    expect(locationClient.createLocation).toHaveBeenCalledWith({
       name: 'Downtown Cafe',
       address: '',
       phone: '',
-      is_active: true,
+      isActive: true,
     });
     // Terminal name pre-filled for first-run flow
     const terminalInput = screen.getByPlaceholderText(
@@ -133,9 +134,9 @@ describe('LocationSelect', () => {
   });
 
   it('reports a failed location create without leaving the form', async () => {
-    mockPosService.getMyLocations.mockResolvedValue({ locations: [] });
-    mockPosService.getBranches.mockResolvedValue({ locations: [] });
-    mockPosService.createBranch.mockRejectedValue(new Error('Failed to create location'));
+    accessClient.getMyLocations.mockResolvedValue({ locations: [] });
+    locationClient.listLocations.mockResolvedValue({ locations: [] });
+    locationClient.createLocation.mockRejectedValue(new Error('Failed to create location'));
 
     render(<LocationSelect onComplete={vi.fn()} />);
 
@@ -151,13 +152,13 @@ describe('LocationSelect', () => {
   });
 
   it('offers an Add location button alongside existing locations', async () => {
-    mockPosService.getMyLocations.mockResolvedValue({
+    accessClient.getMyLocations.mockResolvedValue({
       locations: [
         { id: 1, name: 'Main' },
         { id: 2, name: 'Uptown' },
       ],
     });
-    mockPosService.getBranches.mockResolvedValue({ locations: [] });
+    locationClient.listLocations.mockResolvedValue({ locations: [] });
 
     render(<LocationSelect onComplete={vi.fn()} />);
 
@@ -170,13 +171,13 @@ describe('LocationSelect', () => {
 
   it('does not offer location creation to a store manager', async () => {
     mockUser.role = 'store_manager';
-    mockPosService.getMyLocations.mockResolvedValue({
+    accessClient.getMyLocations.mockResolvedValue({
       locations: [
         { id: 1, name: 'Main' },
         { id: 2, name: 'Uptown' },
       ],
     });
-    mockPosService.getBranches.mockResolvedValue({ locations: [] });
+    locationClient.listLocations.mockResolvedValue({ locations: [] });
 
     render(<LocationSelect onComplete={vi.fn()} />);
 
@@ -186,8 +187,8 @@ describe('LocationSelect', () => {
 
   it('tells an unassigned store manager to ask their owner instead of showing a create form', async () => {
     mockUser.role = 'store_manager';
-    mockPosService.getMyLocations.mockResolvedValue({ locations: [] });
-    mockPosService.getBranches.mockResolvedValue({ locations: [] });
+    accessClient.getMyLocations.mockResolvedValue({ locations: [] });
+    locationClient.listLocations.mockResolvedValue({ locations: [] });
 
     render(<LocationSelect onComplete={vi.fn()} />);
 
@@ -196,14 +197,14 @@ describe('LocationSelect', () => {
   });
 
   it('shows a terminal load error when terminals cannot be loaded for a location', async () => {
-    mockPosService.getMyLocations.mockResolvedValue({
+    accessClient.getMyLocations.mockResolvedValue({
       locations: [
         { id: 1, name: 'Main' },
         { id: 2, name: 'Uptown' },
       ],
     });
-    mockPosService.getBranches.mockResolvedValue({ locations: [] });
-    mockPosService.getTerminals.mockRejectedValue(new Error('terminals failed'));
+    locationClient.listLocations.mockResolvedValue({ locations: [] });
+    terminalClient.listTerminals.mockRejectedValue(new Error('terminals failed'));
 
     render(<LocationSelect onComplete={vi.fn()} />);
 
@@ -216,15 +217,15 @@ describe('LocationSelect', () => {
 
   it('reports invalid terminal create responses and does not complete setup', async () => {
     const onComplete = vi.fn();
-    mockPosService.getMyLocations.mockResolvedValue({
+    accessClient.getMyLocations.mockResolvedValue({
       locations: [
         { id: 1, name: 'Main' },
         { id: 2, name: 'Uptown' },
       ],
     });
-    mockPosService.getBranches.mockResolvedValue({ locations: [] });
-    mockPosService.getTerminals.mockResolvedValue({ terminals: [] });
-    mockPosService.createTerminal.mockResolvedValue({ id: 'draft' });
+    locationClient.listLocations.mockResolvedValue({ locations: [] });
+    terminalClient.listTerminals.mockResolvedValue({ terminals: [] });
+    terminalClient.createTerminal.mockResolvedValue({ terminalId: 'draft' });
 
     render(<LocationSelect onComplete={onComplete} />);
 

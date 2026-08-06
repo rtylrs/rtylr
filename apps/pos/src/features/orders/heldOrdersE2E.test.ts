@@ -8,7 +8,6 @@ import { describe, expect, it } from 'vitest';
 import {
   buildHeldOrderCartProducts,
   buildServerHeldOrderResume,
-  normalizeServerHeldOrders,
   HELD_ORDER_ITEM_ERROR,
   SERVER_HELD_ORDER_ITEM_ERROR,
 } from './heldOrdersWorkflow';
@@ -54,52 +53,7 @@ describe('local held order → cart restore', () => {
   });
 });
 
-describe('server held orders → normalize → resume', () => {
-  it('normalizes a server response with snake_case fields', () => {
-    const raw = [
-      {
-        id: '22',
-        order_number: '1001',
-        total: 20,
-        created_at: '2026-05-13T12:00:00.000Z',
-        customer_name: 'Alice',
-      },
-    ];
-
-    const orders = normalizeServerHeldOrders(raw);
-
-    expect(orders).toHaveLength(1);
-    expect(orders[0].orderNumber).toBe('1001');
-    expect(orders[0].customerName).toBe('Alice');
-    expect(orders[0].total).toBe(20);
-  });
-
-  it('normalizes a server response wrapped in { orders: [...] }', () => {
-    const raw = {
-      orders: [
-        { id: '5', orderNumber: 'O-42', total: 35, createdAt: '2026-05-13T12:00:00.000Z' },
-      ],
-    };
-
-    const orders = normalizeServerHeldOrders(raw);
-
-    expect(orders).toHaveLength(1);
-    expect(orders[0].id).toBe('5');
-  });
-
-  it('filters out malformed server order entries silently', () => {
-    const raw = [
-      null,
-      { id: '1', order_number: 'O-1', total: 10, created_at: '2026-05-13T12:00:00.000Z' },
-      { id: '2' }, // missing total and createdAt
-    ];
-
-    const orders = normalizeServerHeldOrders(raw);
-
-    expect(orders).toHaveLength(1);
-    expect(orders[0].orderNumber).toBe('O-1');
-  });
-
+describe('server held orders → generated row → resume', () => {
   it('buildServerHeldOrderResume creates cart products from synced items', () => {
     const serverOrder = {
       id: 22,

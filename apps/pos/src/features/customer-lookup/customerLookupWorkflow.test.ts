@@ -4,15 +4,13 @@ import { buildCustomerAttachment, mapCustomers } from './customerLookupWorkflow'
 describe('customerLookupWorkflow', () => {
   it('maps customers with defaults and nullable fields normalized', () => {
     expect(
-      mapCustomers([{ id: 12, phone: null, email: null, loyaltyPoints: null, lastVisit: null }]),
+      mapCustomers([{ id: 12 as unknown as string }]),
     ).toEqual([
       {
         id: '12',
         name: 'Customer',
         phone: undefined,
         email: undefined,
-        loyaltyPoints: undefined,
-        lastVisit: undefined,
       },
     ]);
   });

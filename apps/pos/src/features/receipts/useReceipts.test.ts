@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useReceipts } from './useReceipts';
 
-const mockPosService = {
-  getReceipts: vi.fn(),
+const receiptClient = vi.hoisted(() => ({
+  listReceipts: vi.fn(),
   emailReceipt: vi.fn(),
-};
+}));
 
 const mockReceiptsStore = {
   receipts: [] as any[],
@@ -14,14 +14,7 @@ const mockReceiptsStore = {
 };
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((v) => v),
-}));
-
-vi.mock('../../shared/services/api/posService', () => ({
-  posService: {
-    getReceipts: (...args: unknown[]) => mockPosService.getReceipts(...args),
-    emailReceipt: (...args: unknown[]) => mockPosService.emailReceipt(...args),
-  },
+  createOneKitClient: () => receiptClient,
 }));
 
 vi.mock('../../shared/stores/receiptsStore', () => ({
@@ -62,7 +55,7 @@ describe('useReceipts', () => {
   });
 
   it('loads remote receipts on mount', async () => {
-    mockPosService.getReceipts.mockResolvedValue({ receipts: sampleReceipts });
+    receiptClient.listReceipts.mockResolvedValue({ receipts: sampleReceipts });
 
     const { result } = renderHook(() => useReceipts());
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -70,54 +63,8 @@ describe('useReceipts', () => {
     expect(result.current.receipts).toHaveLength(2);
   });
 
-  it('handles .data key in response', async () => {
-    mockPosService.getReceipts.mockResolvedValue({ data: [sampleReceipts[0]] });
-
-    const { result } = renderHook(() => useReceipts());
-    await waitFor(() => expect(result.current.loading).toBe(false));
-
-    expect(result.current.receipts).toHaveLength(1);
-  });
-
-  it('normalizes backend snake_case receipts', async () => {
-    mockPosService.getReceipts.mockResolvedValue({
-      receipts: [
-        {
-          id: 42,
-          order_number: 'ORD-42',
-          customer_name: 'Sam',
-          total: '30.50',
-          payment_method: 'card',
-          paid_at: '2026-01-02T12:00:00Z',
-        },
-      ],
-    });
-
-    const { result } = renderHook(() => useReceipts());
-    await waitFor(() => expect(result.current.loading).toBe(false));
-
-    expect(result.current.receipts).toEqual([
-      {
-        id: '42',
-        orderId: 'ORD-42',
-        customerName: 'Sam',
-        total: 30.5,
-        printedAt: '2026-01-02T12:00:00Z',
-        items: [],
-        payments: [
-          {
-            id: 'payment-42',
-            method: 'card',
-            amount: 30.5,
-            createdAt: '2026-01-02T12:00:00Z',
-          },
-        ],
-      },
-    ]);
-  });
-
   it('handles error state', async () => {
-    mockPosService.getReceipts.mockRejectedValue(new Error('Failed'));
+    receiptClient.listReceipts.mockRejectedValue(new Error('Failed'));
 
     const { result } = renderHook(() => useReceipts());
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -130,7 +77,7 @@ describe('useReceipts', () => {
       { id: 'local1', orderId: 'o3', total: 10, printedAt: '2026-01-01', items: [], payments: [] },
       { id: 'r1', orderId: 'o1', total: 25.99, printedAt: '2026-01-01', items: [], payments: [] },
     ];
-    mockPosService.getReceipts.mockResolvedValue({ receipts: sampleReceipts });
+    receiptClient.listReceipts.mockResolvedValue({ receipts: sampleReceipts });
 
     const { result } = renderHook(() => useReceipts());
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -139,9 +86,9 @@ describe('useReceipts', () => {
     expect(result.current.receipts).toHaveLength(3);
   });
 
-  it('email function calls posService and marks emailed for remote receipt ids', async () => {
-    mockPosService.getReceipts.mockResolvedValue({ receipts: [] });
-    mockPosService.emailReceipt.mockResolvedValue({ success: true });
+  it('email function calls generated receipt endpoint and marks emailed for remote receipt ids', async () => {
+    receiptClient.listReceipts.mockResolvedValue({ receipts: [] });
+    receiptClient.emailReceipt.mockResolvedValue({ success: true });
 
     const { result } = renderHook(() => useReceipts());
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -152,12 +99,12 @@ describe('useReceipts', () => {
     });
 
     expect(emailResult).toBe(true);
-    expect(mockPosService.emailReceipt).toHaveBeenCalledWith(42, 'alice@test.com');
+    expect(receiptClient.emailReceipt).toHaveBeenCalledWith({ id: '42', email: 'alice@test.com' });
     expect(mockReceiptsStore.markEmailed).toHaveBeenCalledWith('42');
   });
 
   it('does not call backend email API for local-only receipt ids', async () => {
-    mockPosService.getReceipts.mockResolvedValue({ receipts: [] });
+    receiptClient.listReceipts.mockResolvedValue({ receipts: [] });
 
     const { result } = renderHook(() => useReceipts());
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -168,13 +115,13 @@ describe('useReceipts', () => {
     });
 
     expect(emailResult).toBe(false);
-    expect(mockPosService.emailReceipt).not.toHaveBeenCalled();
+    expect(receiptClient.emailReceipt).not.toHaveBeenCalled();
     expect(mockReceiptsStore.markEmailed).not.toHaveBeenCalled();
   });
 
   it('email function returns false on error', async () => {
-    mockPosService.getReceipts.mockResolvedValue({ receipts: [] });
-    mockPosService.emailReceipt.mockRejectedValue(new Error('fail'));
+    receiptClient.listReceipts.mockResolvedValue({ receipts: [] });
+    receiptClient.emailReceipt.mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useReceipts());
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -188,12 +135,12 @@ describe('useReceipts', () => {
   });
 
   it('reload function refetches remote data', async () => {
-    mockPosService.getReceipts.mockResolvedValue({ receipts: [] });
+    receiptClient.listReceipts.mockResolvedValue({ receipts: [] });
 
     const { result } = renderHook(() => useReceipts());
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    mockPosService.getReceipts.mockResolvedValue({ receipts: sampleReceipts });
+    receiptClient.listReceipts.mockResolvedValue({ receipts: sampleReceipts });
 
     await act(async () => {
       await result.current.reload();
@@ -203,7 +150,7 @@ describe('useReceipts', () => {
   });
 
   it('exposes add function from store', async () => {
-    mockPosService.getReceipts.mockResolvedValue({ receipts: [] });
+    receiptClient.listReceipts.mockResolvedValue({ receipts: [] });
 
     const { result } = renderHook(() => useReceipts());
     await waitFor(() => expect(result.current.loading).toBe(false));

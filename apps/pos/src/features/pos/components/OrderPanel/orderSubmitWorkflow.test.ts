@@ -24,7 +24,7 @@ const item = (overrides: Partial<CartItem> = {}): CartItem => ({
 });
 
 describe('orderSubmitWorkflow', () => {
-  it('builds a CreateOrderPayload for submitting a local cart to Orders', () => {
+  it('builds a generated CreateOrderRequest for submitting a local cart to Orders', () => {
     expect(
       buildOrderSubmitPayload({
         items: [item()],
@@ -35,19 +35,23 @@ describe('orderSubmitWorkflow', () => {
         notes: 'Pickup shelf',
       }),
     ).toEqual({
-      location_id: 2,
-      table_id: 9,
-      customer_id: 5,
-      customer_name: undefined,
+      sessionId: '0',
+      locationId: '2',
+      tableId: '9',
+      customerId: '5',
+      customerName: '',
       type: 'takeaway',
+      paymentMethod: '',
       notes: 'Pickup shelf',
+      kitchenNotes: '',
       items: [{
-        menu_item_id: 7,
+        menuItemId: '7',
         name: 'Burger',
+        sku: '',
         quantity: 2,
-        unit_price: 10,
-        discount_pct: 0,
-        tax_rate: 0,
+        unitPrice: 10,
+        discountPct: 0,
+        taxRate: 0,
         notes: 'No onions',
       }],
     });
@@ -55,17 +59,17 @@ describe('orderSubmitWorkflow', () => {
 
   it('omits undefined optional fields gracefully', () => {
     const result = buildOrderSubmitPayload({ items: [item()] });
-    expect(result.location_id).toBeUndefined();
-    expect(result.customer_id).toBeUndefined();
+    expect(result.locationId).toBe('0');
+    expect(result.customerId).toBe('0');
     expect(result.items).toHaveLength(1);
   });
 
   it('extracts positive integer order IDs from create responses', () => {
-    expect(extractCreatedOrderId({ id: 10 })).toBe(10);
-    expect(extractCreatedOrderId({ order_id: '11' })).toBe(11);
+    expect(extractCreatedOrderId({ orderId: 10 })).toBe(10);
+    expect(extractCreatedOrderId({ orderId: '11' })).toBe(11);
   });
 
   it('rejects create responses without a valid server order ID', () => {
-    expect(() => extractCreatedOrderId({ id: 'local-1' })).toThrow(ORDER_SUBMIT_ID_ERROR);
+    expect(() => extractCreatedOrderId({ orderId: 'local-1' })).toThrow(ORDER_SUBMIT_ID_ERROR);
   });
 });

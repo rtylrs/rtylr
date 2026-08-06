@@ -1,9 +1,11 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { DaySummaryServiceClient } from '@voxire/voxie/pos/day_summary/v1/client';
 import { useEffect, useState } from 'react';
-import { posService } from '../../shared/services/api/posService';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import type { DaySummary } from '../../shared/types/pos';
 import { buildLocalDaySummary, normalizeDaySummaryResponse } from './cashDrawerSummary';
+
+const daySummaryClient = createOneKitClient(DaySummaryServiceClient, 'pos');
 
 export function useDaySummary(date?: string) {
   const [summary, setSummary] = useState<DaySummary | null>(null);
@@ -17,7 +19,7 @@ export function useDaySummary(date?: string) {
     setLoading(true);
     setError(null);
     try {
-      const res = await unwrap(posService.getDaySummary(date));
+      const res = await daySummaryClient.daySummary({ date: date ?? '' });
       const mapped = normalizeDaySummaryResponse(res, {
         date: date ?? new Date().toISOString().slice(0, 10),
         openingFloat,

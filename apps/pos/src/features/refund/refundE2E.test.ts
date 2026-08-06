@@ -51,7 +51,8 @@ describe('processRefund - full cash refund', () => {
       recordCashRefund,
     });
 
-    expect(refundOrder).toHaveBeenCalledWith(1, {
+    expect(refundOrder).toHaveBeenCalledWith({
+      orderId: '1',
       amount: 50,
       reason: 'Customer changed mind',
     });
@@ -74,7 +75,7 @@ describe('processRefund - full card refund', () => {
       recordCashRefund,
     });
 
-    expect(refundOrder).toHaveBeenCalledWith(2, { amount: 50, reason: 'Wrong item' });
+    expect(refundOrder).toHaveBeenCalledWith({ orderId: '2', amount: 50, reason: 'Wrong item' });
     // Card payment → no cash in drawer to return
     expect(recordCashRefund).not.toHaveBeenCalled();
   });
@@ -95,7 +96,7 @@ describe('processRefund - partial refund', () => {
       recordCashRefund,
     });
 
-    expect(refundOrder).toHaveBeenCalledWith(1, { amount: 20, reason: 'Partial complaint' });
+    expect(refundOrder).toHaveBeenCalledWith({ orderId: '1', amount: 20, reason: 'Partial complaint' });
     expect(recordCashRefund).toHaveBeenCalledWith(20, '1');
   });
 
@@ -135,7 +136,7 @@ describe('processRefund - split payment receipt', () => {
       recordCashRefund,
     });
 
-    expect(refundOrder).toHaveBeenCalledWith(3, { amount: 40, reason: 'Partial' });
+    expect(refundOrder).toHaveBeenCalledWith({ orderId: '3', amount: 40, reason: 'Partial' });
     // Cash drawer only gets back the $30 that was cash - not the card portion
     expect(recordCashRefund).toHaveBeenCalledWith(30, '3');
   });

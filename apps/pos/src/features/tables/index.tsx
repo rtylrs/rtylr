@@ -1,4 +1,5 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { TableServiceClient } from '@voxire/voxie/pos/table/v1/client';
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, Armchair } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -6,8 +7,9 @@ import ScreenLayout from '../../layouts/ScreenLayout';
 import TableCard from '../../shared/components/TableCard';
 import Skeleton from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
-import { posService } from '../../shared/services/api/posService';
-import { normalizeTablesResponse, type TableRow } from './tablesWorkflow';
+import { mapRemoteTables, type TableRow } from './tablesWorkflow';
+
+const tableClient = createOneKitClient(TableServiceClient, 'pos');
 
 const TablesScreen: React.FC = () => {
   const [tables, setTables] = useState<TableRow[]>([]);
@@ -19,8 +21,8 @@ const TablesScreen: React.FC = () => {
     (async () => {
       setLoading(true);
       try {
-        const res = await unwrap(posService.getTables());
-        setTables(normalizeTablesResponse(res));
+        const res = await tableClient.listTables({});
+        setTables(mapRemoteTables(res.tables ?? []));
       } catch (e) {
         const err = e as { response?: { data?: { message?: string } }; message?: string };
         setError(err?.response?.data?.message ?? 'Failed to load tables');

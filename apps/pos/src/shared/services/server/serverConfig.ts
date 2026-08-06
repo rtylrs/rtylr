@@ -102,6 +102,42 @@ export function resolveWsBaseUrl(): string {
   return `${wsScheme}${base.replace(/^https?:\/\//, '')}`;
 }
 
+/** Derive a fallback auth URL from a self-hosted API URL when runtime-config is unavailable. */
+export function deriveSelfHostAuthUrl(apiUrl: string): string {
+  try {
+    const url = new URL(apiUrl);
+    const hostname = url.hostname;
+
+    // 1. Subdomain replacements: e.g. api.domain.com -> auth.domain.com
+    if (hostname.startsWith('api.')) {
+      url.hostname = 'auth.' + hostname.slice(4);
+      return url.origin;
+    }
+    if (hostname.includes('api')) {
+      const newHostname = hostname
+        .replace(/\bapi\b/g, 'auth')
+        .replace(/-api/g, '-auth')
+        .replace(/api-/g, 'auth-');
+      if (newHostname !== hostname) {
+        url.hostname = newHostname;
+        return url.origin;
+      }
+    }
+
+    // 2. Path replacement: e.g. domain.com/api/v1 -> domain.com/auth
+    const pathname = url.pathname.replace(/\/+$/, '');
+    const apiIndex = pathname.indexOf('/api');
+    if (apiIndex !== -1) {
+      return `${url.origin}${pathname.substring(0, apiIndex)}/auth`;
+    }
+
+    // 3. General fallback: append /auth
+    return `${url.origin}/auth`;
+  } catch {
+    return HOSTED_AUTH_URL;
+  }
+}
+
 /**
  * Resolve the auth (sign-in) base URL. For self-host this comes from the
  * customer backend's runtime-config when known; otherwise we fall back to the
@@ -111,8 +147,7 @@ export function resolveAuthUrl(): string {
   const state = readPersistedState();
   if (state?.mode === 'self_host') {
     if (state.authUrl) return state.authUrl.replace(/\/$/, '');
-    // TODO: derive a sensible self-host auth URL when runtime-config is
-    // unavailable. For now self-host falls back to the hosted auth host.
+    if (state.customApiUrl) return deriveSelfHostAuthUrl(state.customApiUrl);
     return HOSTED_AUTH_URL;
   }
   return HOSTED_AUTH_URL;

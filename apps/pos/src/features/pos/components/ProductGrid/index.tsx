@@ -6,7 +6,7 @@ import { useCartStore } from "../../../../shared/stores/cartStore";
 import { useSettingsStore } from "../../../../shared/stores/settingsStore";
 import { buildMenuItemCartProduct } from "../../../../shared/utils/cart/cartProduct";
 import { formatCurrency } from "../../../../shared/utils/format";
-import type { MenuItem } from "../../../../shared/types/pos";
+import type { MenuItem } from "@voxire/voxie/pos/menu_item/v1/types";
 
 type Product = MenuItem;
 interface ProductGridProps {
@@ -44,7 +44,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
   });
 
   const addProduct = (product: Product) => {
-    if (product.available === false) return;
+    if (product.isActive === false) return;
 
     try {
       addItem(buildMenuItemCartProduct(product));
@@ -94,10 +94,10 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
         ) : (
           <div className="grid grid-cols-3 gap-2.5">
             {filtered.map((product) => {
-              const unavailable = product.available === false;
+              const unavailable = product.isActive === false;
               const stock = product.stock;
               const showStock = inventoryEnabled && hasFiniteStock(stock);
-              const imageUrl = cdnImageUrl(product.image);
+              const imageUrl = cdnImageUrl(product.imageUrl);
               return (
                 <motion.button
                   key={product.id}
@@ -117,7 +117,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
                     />
                   ) : (
                     <div className="flex w-full aspect-[4/3] items-center justify-center bg-white/6 text-lg font-semibold text-pos-muted">
-                      {product.name.slice(0, 1).toUpperCase()}
+                      {(product.name ?? '').slice(0, 1).toUpperCase()}
                     </div>
                   )}
                   <div className="flex flex-1 flex-col gap-1.5 p-3">
@@ -131,7 +131,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, categories }) => {
                     )}
                     <div className="mt-auto flex items-end justify-between gap-2">
                       <span className="text-sm font-semibold text-pos-text">
-                        {formatCurrency(product.price, currency)}
+                        {formatCurrency(product.salePrice ?? 0, currency)}
                       </span>
                       {showStock && (
                         <span className="rounded-full bg-white/6 px-2 py-1 text-[10px] font-semibold text-pos-muted">

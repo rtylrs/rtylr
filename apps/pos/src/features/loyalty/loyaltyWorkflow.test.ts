@@ -7,18 +7,14 @@ import {
   redeemPointsForDiscount,
 } from './loyaltyWorkflow';
 
-vi.mock('../../shared/services/api/posService', () => ({
-  posService: {
-    earnLoyaltyPoints: vi.fn(),
-    redeemLoyaltyPoints: vi.fn(),
-  },
+const loyaltyClient = vi.hoisted(() => ({
+  earnPoints: vi.fn(),
+  redeemPoints: vi.fn(),
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((p) => p),
+  createOneKitClient: () => loyaltyClient,
 }));
-
-import { posService } from '../../shared/services/api/posService';
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -77,7 +73,7 @@ describe('maxRedeemablePoints', () => {
 
 describe('earnPointsAfterPayment', () => {
   it('calls earnLoyaltyPoints with correct points count', async () => {
-    vi.mocked(posService.earnLoyaltyPoints).mockResolvedValue(undefined as never);
+    vi.mocked(loyaltyClient.earnPoints).mockResolvedValue(undefined as never);
 
     const result = await earnPointsAfterPayment({
       customerId: 42,
@@ -86,10 +82,10 @@ describe('earnPointsAfterPayment', () => {
     });
 
     expect(result).toEqual({ earned: 25, newTotal: null });
-    expect(posService.earnLoyaltyPoints).toHaveBeenCalledWith({
-      customer_id: 42,
+    expect(loyaltyClient.earnPoints).toHaveBeenCalledWith({
+      customerId: '42',
       points: 25,
-      order_id: 500,
+      orderId: '500',
     });
   });
 
@@ -101,7 +97,7 @@ describe('earnPointsAfterPayment', () => {
     });
 
     expect(result).toBeNull();
-    expect(posService.earnLoyaltyPoints).not.toHaveBeenCalled();
+    expect(loyaltyClient.earnPoints).not.toHaveBeenCalled();
   });
 
   it('skips API call when total earns 0 points', async () => {
@@ -112,13 +108,13 @@ describe('earnPointsAfterPayment', () => {
     });
 
     expect(result).toEqual({ earned: 0, newTotal: null });
-    expect(posService.earnLoyaltyPoints).not.toHaveBeenCalled();
+    expect(loyaltyClient.earnPoints).not.toHaveBeenCalled();
   });
 });
 
 describe('redeemPointsForDiscount', () => {
   it('calls redeemLoyaltyPoints and returns discount amount', async () => {
-    vi.mocked(posService.redeemLoyaltyPoints).mockResolvedValue(undefined as never);
+    vi.mocked(loyaltyClient.redeemPoints).mockResolvedValue(undefined as never);
 
     const result = await redeemPointsForDiscount({
       customerId: 42,
@@ -127,10 +123,9 @@ describe('redeemPointsForDiscount', () => {
     });
 
     expect(result).toEqual({ pointsUsed: 200, discountAmount: 2.0 });
-    expect(posService.redeemLoyaltyPoints).toHaveBeenCalledWith({
-      customer_id: 42,
+    expect(loyaltyClient.redeemPoints).toHaveBeenCalledWith({
+      customerId: '42',
       points: 200,
-      order_id: 500,
     });
   });
 
@@ -142,7 +137,7 @@ describe('redeemPointsForDiscount', () => {
     });
 
     expect(result).toBeNull();
-    expect(posService.redeemLoyaltyPoints).not.toHaveBeenCalled();
+    expect(loyaltyClient.redeemPoints).not.toHaveBeenCalled();
   });
 
   it('returns null and skips API when points to redeem is 0', async () => {
@@ -153,6 +148,6 @@ describe('redeemPointsForDiscount', () => {
     });
 
     expect(result).toBeNull();
-    expect(posService.redeemLoyaltyPoints).not.toHaveBeenCalled();
+    expect(loyaltyClient.redeemPoints).not.toHaveBeenCalled();
   });
 });

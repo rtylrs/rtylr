@@ -17,7 +17,7 @@ describe('closeSessionWithFallback', () => {
     });
 
     expect(result).toEqual({ status: 'online' });
-    expect(closeSession).toHaveBeenCalledWith(42, { closing_float: 95 });
+    expect(closeSession).toHaveBeenCalledWith({ id: '42', closingFloat: 95 });
     expect(enqueue).not.toHaveBeenCalled();
   });
 
@@ -43,7 +43,7 @@ describe('closeSessionWithFallback', () => {
 describe('buildCloseSessionPayload', () => {
   it('builds a finite close payload and variance from cash input', () => {
     expect(buildCloseSessionPayload({ expected: 100, actualInput: '95.50' })).toEqual({
-      closing_float: 95.5,
+      closingFloat: 95.5,
       expected: 100,
       variance: -4.5,
     });
@@ -57,7 +57,7 @@ describe('buildCloseSessionPayload', () => {
 
   it('normalizes invalid expected cash to zero', () => {
     expect(buildCloseSessionPayload({ expected: Number.NaN, actualInput: '10' })).toEqual({
-      closing_float: 10,
+      closingFloat: 10,
       expected: 0,
       variance: 10,
     });

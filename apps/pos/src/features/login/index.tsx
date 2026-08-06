@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { toast } from 'sonner';
 import { Loader2, ChevronLeft, ShieldCheck } from 'lucide-react';
+import { AccessServiceClient } from '@voxire/voxie/pos/access/v1/client';
+import { UserServiceClient } from '@voxire/voxie/pos/user/v1/client';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
-import { posService } from '../../shared/services/api/posService';
 import { RtylrWordmark } from '../../shared/components/RtylrWordmark';
-import { mapRoster, isCompletePin, PIN_LENGTH, type RosterMember } from './rosterWorkflow';
+import { isCompletePin, PIN_LENGTH, type RosterMember } from './rosterWorkflow';
+
+const accessClient = createOneKitClient(AccessServiceClient, 'pos');
+const userClient = createOneKitClient(UserServiceClient, 'pos');
 
 const KEYS = [
   ['1', '2', '3'],
@@ -41,8 +45,23 @@ const PinLogin: React.FC = () => {
     setRosterLoading(true);
     setRosterError(null);
     try {
-      const data = await unwrap(posService.getLocationRoster(locationId));
-      setRoster(mapRoster(data));
+      const data = await accessClient.getLocationRoster({ locationId: String(locationId) });
+      setRoster(
+        (data.roster ?? []).flatMap((entry) => {
+          const userId = Number(entry.userId);
+          const name = entry.name ?? '';
+          if (!Number.isFinite(userId) || userId <= 0 || !name.trim()) return [];
+          return [
+            {
+              userId,
+              name,
+              hasPin: entry.hasPin ?? false,
+              isManager: entry.isManager ?? false,
+              posRole: entry.posRole ?? '',
+            },
+          ];
+        })
+      );
     } catch {
       setRosterError('Unable to load the staff list. Check your connection and try again.');
     } finally {
@@ -115,9 +134,12 @@ const PinLogin: React.FC = () => {
     submittingRef.current = true;
     setSettingPin(true);
     try {
-      await unwrap(
-        posService.setPIN({ userId: member.userId, locationId, name: member.name, pin })
-      );
+      await userClient.setPIN({
+        userId: String(member.userId),
+        locationId: String(locationId),
+        name: member.name,
+        pin,
+      });
       // Immediately sign in with the PIN just set.
       await authenticatePin(locationId, member.userId, pin);
     } catch (err) {

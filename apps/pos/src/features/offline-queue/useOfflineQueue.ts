@@ -1,9 +1,10 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
+import type { CreateOrderRequest } from '@voxire/voxie/pos/orders/v1/types';
 import { useCallback } from 'react';
 import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
 import { useSessionCloseQueueStore } from '../../shared/stores/sessionCloseQueueStore';
 import { useCashMovementQueueStore } from '../../shared/stores/cashMovementQueueStore';
-import { posService } from '../../shared/services/api/posService';
 import { syncQueuedOrders } from './syncOfflineQueue';
 import {
   retrySessionClose,
@@ -12,8 +13,10 @@ import {
 } from '../close-session/sessionCloseQueueSync';
 import { retryCashMovement, syncAllCashMovements } from '../cash-drop/cashMovementQueueSync';
 
-const syncOrder = async (order: Parameters<typeof posService.createOrder>[0]): Promise<void> => {
-  await unwrap(posService.createOrder(order));
+const orderClient = createOneKitClient(OrderServiceClient, 'pos');
+
+const syncOrder = async (order: CreateOrderRequest): Promise<void> => {
+  await orderClient.createOrder(order);
 };
 
 export function useOfflineQueue() {

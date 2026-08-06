@@ -4,11 +4,12 @@ import { Banknote, CreditCard, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
+import { OrderPaymentServiceClient } from '@voxire/voxie/pos/orders/payments/v1/client';
 import POSLayout from '../../layouts/POSLayout';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
-import { posService } from '../../shared/services/api/posService';
 import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
 import {
@@ -26,6 +27,9 @@ import { resetAfterCheckout } from './checkoutState';
 import QrPayPanel from './QrPayPanel';
 import TipSelector from '../../shared/components/TipSelector';
 import { earnPointsAfterPayment } from '../loyalty/loyaltyWorkflow';
+
+const orderClient = createOneKitClient(OrderServiceClient, 'pos');
+const orderPaymentClient = createOneKitClient(OrderPaymentServiceClient, 'pos');
 
 const fmt = (n: number): string =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
@@ -99,9 +103,9 @@ const Payment: React.FC = () => {
         payload,
         method,
         existingOrderId: serverOrderId,
-        createOrder: async (payload) => unwrap(posService.createOrder(payload)),
-        chargeOrder: async (orderId, payload) => {
-          await unwrap(posService.chargeOrder(orderId, payload));
+        createOrder: (payload) => orderClient.createOrder(payload),
+        chargeOrder: async (payload) => {
+          await orderPaymentClient.processPayment(payload);
         },
         enqueueOffline,
         recordCashSale,

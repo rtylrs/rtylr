@@ -4,22 +4,18 @@
  * Proves that the loyalty flow chains correctly with the payment workflow.
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { buildCheckoutOrder, processCheckout } from '../payment/checkoutWorkflow';
+import { buildCheckoutOrder, buildCreateOrderPayload, processCheckout } from '../payment/checkoutWorkflow';
 import { earnPointsAfterPayment, redeemPointsForDiscount } from './loyaltyWorkflow';
 import type { CartItem } from '../../shared/stores/cartStore';
 
-vi.mock('../../shared/services/api/posService', () => ({
-  posService: {
-    earnLoyaltyPoints: vi.fn(),
-    redeemLoyaltyPoints: vi.fn(),
-  },
+const loyaltyClient = vi.hoisted(() => ({
+  earnPoints: vi.fn(),
+  redeemPoints: vi.fn(),
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((p) => p),
+  createOneKitClient: () => loyaltyClient,
 }));
-
-import { posService } from '../../shared/services/api/posService';
 
 const item: CartItem = {
   lineId: '1::',
@@ -43,7 +39,7 @@ beforeEach(() => {
 
 describe('checkout → earn loyalty points', () => {
   it('earns points proportional to order total after successful online payment', async () => {
-    vi.mocked(posService.earnLoyaltyPoints).mockResolvedValue(undefined as never);
+    vi.mocked(loyaltyClient.earnPoints).mockResolvedValue(undefined as never);
 
     const order = buildCheckoutOrder({
       id: 'local-1',
@@ -51,14 +47,15 @@ describe('checkout → earn loyalty points', () => {
       subtotal: 18,
       tax: 1.44,
       total: 19.44,
-      employeeId: 1,
       createdAt: '2026-05-13T10:00:00.000Z',
     });
+    const payload = buildCreateOrderPayload({ items: [item], method: 'cash' });
 
     const checkoutResult = await processCheckout({
       order,
+      payload,
       method: 'cash',
-      createOrder: vi.fn(() => Promise.resolve({ id: 1001 })),
+      createOrder: vi.fn(() => Promise.resolve({ orderId: '1001', orderNumber: 'ORD-1001', message: 'ok' })),
       chargeOrder: vi.fn(() => Promise.resolve()),
       enqueueOffline: vi.fn(),
       recordCashSale: vi.fn(),
@@ -74,10 +71,10 @@ describe('checkout → earn loyalty points', () => {
     });
 
     expect(earnResult).toEqual({ earned: 19, newTotal: null }); // floor(19.44 * 1)
-    expect(posService.earnLoyaltyPoints).toHaveBeenCalledWith({
-      customer_id: 7,
+    expect(loyaltyClient.earnPoints).toHaveBeenCalledWith({
+      customerId: '7',
       points: 19,
-      order_id: 1001,
+      orderId: '1001',
     });
   });
 
@@ -88,14 +85,15 @@ describe('checkout → earn loyalty points', () => {
       subtotal: 18,
       tax: 1.44,
       total: 19.44,
-      employeeId: 1,
       createdAt: '2026-05-13T10:00:00.000Z',
     });
+    const payload = buildCreateOrderPayload({ items: [item], method: 'card' });
 
     await processCheckout({
       order,
+      payload,
       method: 'card',
-      createOrder: vi.fn(() => Promise.resolve({ id: 1002 })),
+      createOrder: vi.fn(() => Promise.resolve({ orderId: '1002', orderNumber: 'ORD-1002', message: 'ok' })),
       chargeOrder: vi.fn(() => Promise.resolve()),
       enqueueOffline: vi.fn(),
       recordCashSale: vi.fn(),
@@ -108,13 +106,13 @@ describe('checkout → earn loyalty points', () => {
     });
 
     expect(earnResult).toBeNull();
-    expect(posService.earnLoyaltyPoints).not.toHaveBeenCalled();
+    expect(loyaltyClient.earnPoints).not.toHaveBeenCalled();
   });
 });
 
 describe('redeem points → discount applied before checkout', () => {
   it('redeems points and returns correct dollar discount', async () => {
-    vi.mocked(posService.redeemLoyaltyPoints).mockResolvedValue(undefined as never);
+    vi.mocked(loyaltyClient.redeemPoints).mockResolvedValue(undefined as never);
 
     // Customer has 500 points ($5.00 discount at $0.01/point)
     const redeemResult = await redeemPointsForDiscount({
@@ -124,10 +122,9 @@ describe('redeem points → discount applied before checkout', () => {
     });
 
     expect(redeemResult).toEqual({ pointsUsed: 500, discountAmount: 5.0 });
-    expect(posService.redeemLoyaltyPoints).toHaveBeenCalledWith({
-      customer_id: 7,
+    expect(loyaltyClient.redeemPoints).toHaveBeenCalledWith({
+      customerId: '7',
       points: 500,
-      order_id: 2001,
     });
   });
 
@@ -139,7 +136,7 @@ describe('redeem points → discount applied before checkout', () => {
   });
 
   it('chains redeem → checkout with reduced total', async () => {
-    vi.mocked(posService.redeemLoyaltyPoints).mockResolvedValue(undefined as never);
+    vi.mocked(loyaltyClient.redeemPoints).mockResolvedValue(undefined as never);
 
     const redeemResult = await redeemPointsForDiscount({
       customerId: 7,
@@ -156,14 +153,15 @@ describe('redeem points → discount applied before checkout', () => {
       subtotal: 18,
       tax: 1.44,
       total: discountedTotal,
-      employeeId: 1,
       createdAt: '2026-05-13T10:00:00.000Z',
     });
+    const payload = buildCreateOrderPayload({ items: [item], method: 'cash' });
 
     const checkoutResult = await processCheckout({
       order,
+      payload,
       method: 'cash',
-      createOrder: vi.fn(() => Promise.resolve({ id: 3001 })),
+      createOrder: vi.fn(() => Promise.resolve({ orderId: '3001', orderNumber: 'ORD-3001', message: 'ok' })),
       chargeOrder: vi.fn(() => Promise.resolve()),
       enqueueOffline: vi.fn(),
       recordCashSale: vi.fn(),

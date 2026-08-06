@@ -1,5 +1,4 @@
-import { z } from 'zod';
-import { customerSchema } from '../../shared/utils/schemas/customers';
+import type { Customer as RemoteCustomer } from '@voxire/voxie/pos/customer/v1/types';
 import type { Customer } from '../../shared/types/pos';
 
 export const CUSTOMER_ATTACHMENT_ERROR = 'Select a valid customer before attaching it to the order.';
@@ -10,16 +9,13 @@ function positiveInteger(value: unknown): number | undefined {
   return numeric;
 }
 
-export function mapCustomers(raw: unknown): Customer[] {
-  const parsed = z.array(customerSchema).parse(Array.isArray(raw) ? raw : []);
-
-  return parsed.map((c) => ({
-    id: c.id,
-    name: c.name,
-    phone: c.phone ?? undefined,
-    email: c.email ?? undefined,
-    loyaltyPoints: c.loyaltyPoints ?? undefined,
-    lastVisit: c.lastVisit ?? undefined,
+export function mapCustomers(customers: RemoteCustomer[]): Customer[] {
+  return customers.map((c) => ({
+    id: c.id == null ? '' : String(c.id),
+    name:
+      `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim() || c.email || c.phone || 'Customer',
+    phone: c.phone || undefined,
+    email: c.email || undefined,
   }));
 }
 

@@ -4,7 +4,6 @@ import {
   SERVER_HELD_ORDER_ITEM_ERROR,
   buildHeldOrderCartProducts,
   buildServerHeldOrderResume,
-  normalizeServerHeldOrders,
 } from './heldOrdersWorkflow';
 import type { HeldOrder } from '../../shared/stores/heldOrdersStore';
 
@@ -65,49 +64,18 @@ describe('heldOrdersWorkflow', () => {
     ).toThrow(SERVER_HELD_ORDER_ITEM_ERROR);
   });
 
-  it('normalizes nested server held-order response shapes before rendering', () => {
-    expect(
-      normalizeServerHeldOrders({
-        data: {
-          orders: [
-            {
-              id: ' 22 ',
-              order_number: 1001,
-              customer_name: ' Ada ',
-              total: '20.50',
-              created_at: '2026-01-01T10:00:00.000Z',
-              items: [
-                { menu_item_id: ' 5 ', name: ' Fries ', qty: '2', price: '4.25' },
-                { productId: 8, name: '', quantity: 'bad', unitPrice: -1 },
-              ],
-            },
-          ],
-        },
-      }),
-    ).toEqual([
-      {
-        id: '22',
-        orderNumber: '1001',
-        customerName: 'Ada',
-        total: 20.5,
-        createdAt: '2026-01-01T10:00:00.000Z',
-        items: [
-          { menuItemId: '5', name: 'Fries', qty: 2, price: 4.25 },
-          { productId: '8', name: 'Item', quantity: 1, unitPrice: 0 },
-        ],
-      },
-    ]);
-  });
+  it('uses generated held-order rows directly', () => {
+    const resume = buildServerHeldOrderResume({
+      id: '22',
+      orderNumber: '1001',
+      total: 20.5,
+      createdAt: '2026-01-01T10:00:00.000Z',
+      items: [{ menuItemId: '5', name: 'Fries', quantity: 2, unitPrice: 4.25 }],
+    });
 
-  it('drops unusable server held-order rows', () => {
-    expect(
-      normalizeServerHeldOrders({
-        orders: [
-          null,
-          { id: ' ', orderNumber: '1001', total: 10, createdAt: '2026-01-01T10:00:00.000Z' },
-          { id: 3, total: 'bad', createdAt: '2026-01-01T10:00:00.000Z' },
-        ],
-      }),
-    ).toEqual([]);
+    expect(resume.products).toEqual([
+      { id: '5', productId: 5, name: 'Fries', unitPrice: 4.25, price: 4.25 },
+      { id: '5', productId: 5, name: 'Fries', unitPrice: 4.25, price: 4.25 },
+    ]);
   });
 });

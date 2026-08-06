@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { MapPin, Monitor, Plus, Loader2 } from 'lucide-react';
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { AccessServiceClient } from '@voxire/voxie/pos/access/v1/client';
+import { LocationServiceClient } from '@voxire/voxie/pos/location/v1/client';
+import { TerminalServiceClient } from '@voxire/voxie/pos/terminal/v1/client';
 import { toast } from 'sonner';
-import { posService } from '../../shared/services/api/posService';
 import { useUserStore } from '../../shared/stores/userStore';
 import { RtylrWordmark } from '../../shared/components/RtylrWordmark';
 import {
-  extractCreatedLocationId,
-  extractCreatedTerminalId,
-  extractLocationsList,
+  createdLocationId,
+  createdTerminalId,
   filterTerminalsForLocation,
   mapBranchLocations,
   mergeLocationOptions,
   type LocationOption,
   type TerminalOption,
 } from './locationSelection';
+
+const accessClient = createOneKitClient(AccessServiceClient, 'pos');
+const locationClient = createOneKitClient(LocationServiceClient, 'pos');
+const terminalClient = createOneKitClient(TerminalServiceClient, 'pos');
 
 interface Props {
   onComplete: (locationId: number, terminalId: number) => void;
@@ -47,14 +52,14 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
   useEffect(() => {
     (async () => {
       const [assigned, owned] = await Promise.allSettled([
-        unwrap(posService.getMyLocations()),
-        unwrap(posService.getBranches()),
+        accessClient.getMyLocations({}),
+        locationClient.listLocations({}),
       ]);
 
       const lists: LocationOption[][] = [];
       for (const result of [assigned, owned]) {
         if (result.status === 'fulfilled') {
-          lists.push(mapBranchLocations(extractLocationsList(result.value)));
+          lists.push(mapBranchLocations(result.value.locations ?? []));
         }
       }
 
@@ -86,10 +91,8 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
     setLoading(true);
     setTerminalError(null);
     try {
-      const data = await unwrap(posService.getTerminals());
-      const rawTerminals =
-        (data as Record<string, unknown>)?.terminals ?? (Array.isArray(data) ? data : []);
-      const filtered = filterTerminalsForLocation(rawTerminals as unknown[], loc.locationId);
+      const data = await terminalClient.listTerminals({});
+      const filtered = filterTerminalsForLocation(data.terminals ?? [], loc.locationId);
       setTerminals(filtered);
       if (filtered.length === 0) {
         setNewTerminalName((prev) => prev || 'Register 1');
@@ -106,16 +109,14 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
     if (!newLocationName.trim()) return;
     setCreatingLocation(true);
     try {
-      const data = await unwrap(
-        posService.createBranch({
-          name: newLocationName.trim(),
-          address: newLocationAddress.trim(),
-          phone: newLocationPhone.trim(),
-          is_active: true,
-        })
-      );
+      const data = await locationClient.createLocation({
+        name: newLocationName.trim(),
+        address: newLocationAddress.trim(),
+        phone: newLocationPhone.trim(),
+        isActive: true,
+      });
       const loc: LocationOption = {
-        locationId: extractCreatedLocationId(data),
+        locationId: createdLocationId(data.locationId ?? ''),
         name: newLocationName.trim(),
         address: newLocationAddress.trim(),
         phone: newLocationPhone.trim(),
@@ -138,14 +139,12 @@ const LocationSelect: React.FC<Props> = ({ onComplete }) => {
     if (!selectedLocation || !newTerminalName.trim()) return;
     setCreatingTerminal(true);
     try {
-      const data = await unwrap(
-        posService.createTerminal({
-          branchId: selectedLocation.locationId,
-          name: newTerminalName.trim(),
-          type: 'pos',
-        })
-      );
-      onComplete(selectedLocation.locationId, extractCreatedTerminalId(data));
+      const data = await terminalClient.createTerminal({
+        branchId: String(selectedLocation.locationId),
+        name: newTerminalName.trim(),
+        deviceId: '',
+      });
+      onComplete(selectedLocation.locationId, createdTerminalId(data.terminalId ?? ''));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to register terminal');
     } finally {

@@ -10,27 +10,27 @@ import {
   priceLabel,
   itemTaxRate,
 } from './menuItemUtils';
-import type { MenuItem } from '../types/pos';
+import type { MenuItem } from '@voxire/voxie/pos/menu_item/v1/types';
 
 const makeItem = (overrides: Partial<MenuItem> = {}): MenuItem => ({
   id: 'item1',
   name: 'Burger',
-  price: 10,
+  salePrice: 10,
   category: 'Mains',
   ...overrides,
 });
 
 describe('isAvailable', () => {
-  it('returns true when available is not set', () => {
+  it('returns true when isActive is not set', () => {
     expect(isAvailable(makeItem())).toBe(true);
   });
 
-  it('returns true when available is explicitly true', () => {
-    expect(isAvailable(makeItem({ available: true }))).toBe(true);
+  it('returns true when isActive is explicitly true', () => {
+    expect(isAvailable(makeItem({ isActive: true }))).toBe(true);
   });
 
-  it('returns false when available is false', () => {
-    expect(isAvailable(makeItem({ available: false }))).toBe(false);
+  it('returns false when isActive is false', () => {
+    expect(isAvailable(makeItem({ isActive: false }))).toBe(false);
   });
 });
 
@@ -68,11 +68,11 @@ describe('isLowStock', () => {
 
 describe('isOrderable', () => {
   it('returns true when item is available and in stock', () => {
-    expect(isOrderable(makeItem({ available: true, stock: 5 }))).toBe(true);
+    expect(isOrderable(makeItem({ isActive: true, stock: 5 }))).toBe(true);
   });
 
   it('returns false when item is unavailable', () => {
-    expect(isOrderable(makeItem({ available: false }))).toBe(false);
+    expect(isOrderable(makeItem({ isActive: false }))).toBe(false);
   });
 
   it('returns false when item is out of stock', () => {
@@ -83,8 +83,8 @@ describe('isOrderable', () => {
 describe('orderableItems', () => {
   it('filters to only orderable items', () => {
     const items = [
-      makeItem({ id: 'a', available: true }),
-      makeItem({ id: 'b', available: false }),
+      makeItem({ id: 'a', isActive: true }),
+      makeItem({ id: 'b', isActive: false }),
       makeItem({ id: 'c', stock: 0 }),
     ];
     const result = orderableItems(items);
@@ -119,8 +119,8 @@ describe('uniqueCategories', () => {
 
 describe('priceLabel', () => {
   it('formats the price to 2 decimal places', () => {
-    expect(priceLabel(makeItem({ price: 12.5 }))).toBe('12.50');
-    expect(priceLabel(makeItem({ price: 10 }))).toBe('10.00');
+    expect(priceLabel(makeItem({ salePrice: 12.5 }))).toBe('12.50');
+    expect(priceLabel(makeItem({ salePrice: 10 }))).toBe('10.00');
   });
 });
 

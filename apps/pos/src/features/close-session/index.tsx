@@ -1,4 +1,5 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { SessionServiceClient } from '@voxire/voxie/pos/session/v1/client';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -6,9 +7,10 @@ import ScreenLayout from '../../layouts/ScreenLayout';
 import { formatCurrency } from '../../shared/utils/format';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import { useDaySummary } from '../day-summary/useDaySummary';
-import { posService } from '../../shared/services/api/posService';
 import { useSessionCloseQueueStore } from '../../shared/stores/sessionCloseQueueStore';
 import { buildCloseSessionPayload, closeSessionWithFallback } from './closeSessionWorkflow';
+
+const sessionClient = createOneKitClient(SessionServiceClient, 'pos');
 
 const CloseSessionScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -37,8 +39,8 @@ const CloseSessionScreen: React.FC = () => {
           expected,
           actualInput: actualCash,
         }),
-        closeSession: async (sessionId, payload) => {
-          await unwrap(posService.closeSession(sessionId, payload));
+        closeSession: async (payload) => {
+          await sessionClient.closeSession(payload);
         },
         enqueue: enqueueSessionClose,
       });

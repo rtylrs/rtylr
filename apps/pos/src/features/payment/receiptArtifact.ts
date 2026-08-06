@@ -4,6 +4,7 @@ import type { Order, PaymentMethod, Receipt } from '../../shared/types/pos';
 const RECEIPT_PAYMENT_METHOD: Record<CheckoutPaymentMethod, PaymentMethod> = {
   cash: 'cash',
   card: 'card',
+  gift_card: 'gift_card',
   qr: 'other',
 };
 

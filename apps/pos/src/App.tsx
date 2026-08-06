@@ -1,7 +1,8 @@
 import React, { useEffect, Suspense, useRef } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { SettingsServiceClient } from '@voxire/voxie/pos/settings/v1/client';
 import { ErrorBoundary } from '@voxire/ui';
 import AppRoutes from './routes/AppRoutes';
 import NoMatch from './features/extras/NoMatch';
@@ -26,13 +27,13 @@ import { useOfflineQueueAutoSync } from './features/offline-queue/useOfflineQueu
 import { reportReactError } from './shared/services/observability/appErrors';
 import { useTerminalHeartbeat } from './shared/services/terminal/useTerminalHeartbeat';
 import { buildCartContext } from './shared/services/terminal/cartContext';
-import { posService, type POSBusinessSettingsResponse } from './shared/services/api/posService';
 import { runDesktopAutoUpdater } from './shared/services/desktop/autoUpdater';
 import {
   businessAddress,
   businessContactPhone,
   businessDisplayName,
 } from './shared/stores/userStore';
+import type { POSBusinessProfile } from './shared/stores/settingsStore';
 
 const getTokenFromCookie = (): string | null =>
   document.cookie
@@ -40,6 +41,12 @@ const getTokenFromCookie = (): string | null =>
     .map((c) => c.trim())
     .find((c) => c.startsWith('token='))
     ?.split('=')[1] ?? null;
+
+const settingsClient = createOneKitClient(SettingsServiceClient, 'pos');
+
+function isPOSBusinessProfile(value: string): value is POSBusinessProfile {
+  return value === 'retail' || value === 'restaurant' || value === 'quick_service';
+}
 
 const AppInner = (): React.JSX.Element => {
   useKeyboardShortcuts();
@@ -130,14 +137,20 @@ const AppShell = (): React.JSX.Element => {
     if (!token && !getTokenFromCookie()) return;
 
     hasLoadedPOSSettings.current = true;
-    void unwrap(posService.getPOSSettings())
+    void settingsClient
+      .getPOSSettings({})
       .then((data) => {
-        const settings = (data as POSBusinessSettingsResponse).settings;
+        const settings = data.settings;
         if (!settings) return;
-        setPOSBusinessProfile(settings.business_profile);
-        setPOSFeatures(settings.features);
-        setReceiptFooter(settings.receipt_footer);
-        setTheme(settings.theme);
+        const businessProfile = settings.businessProfile ?? '';
+        if (isPOSBusinessProfile(businessProfile)) {
+          setPOSBusinessProfile(businessProfile);
+        }
+        if (settings.features) {
+          setPOSFeatures(settings.features);
+        }
+        setReceiptFooter(settings.receiptFooter ?? '');
+        setTheme(settings.theme ?? '');
       })
       .catch(() => {
         hasLoadedPOSSettings.current = false;

@@ -1,4 +1,4 @@
-import type { SplitPayload } from '../../shared/services/api/posService';
+import type { SplitOrderRequest } from '@voxire/voxie/pos/orders/splits/v1/types';
 import type { CartItem } from '../../shared/stores/cartStore';
 
 export const SPLIT_UNSYNCED_ITEM_ERROR = 'Sync this order before splitting by item.';
@@ -14,7 +14,7 @@ interface BuildSplitBillRequestInput {
 
 type SplitBillRequest =
   | { localOnly: true }
-  | { localOnly: false; orderId: number; payload: SplitPayload };
+  | { localOnly: false; payload: SplitOrderRequest };
 
 function positiveInteger(value: unknown): number | undefined {
   const numeric = typeof value === 'string' ? Number(value.trim()) : Number(value);
@@ -49,5 +49,11 @@ export function buildSplitBillRequest(input: BuildSplitBillRequestInput): SplitB
     throw new Error(SPLIT_GROUP_ERROR);
   }
 
-  return { localOnly: false, orderId, payload: { parts: seats, splits: splitGroups } };
+  return {
+    localOnly: false,
+    payload: {
+      orderId: String(orderId),
+      splits: splitGroups.map((itemIds) => ({ itemIds: itemIds.map(String) })),
+    },
+  };
 }

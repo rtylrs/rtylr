@@ -30,8 +30,10 @@ describe('splitBillWorkflow', () => {
       }),
     ).toEqual({
       localOnly: false,
-      orderId: 7,
-      payload: { parts: 2, splits: [[11], [12]] },
+      payload: {
+        orderId: '7',
+        splits: [{ itemIds: ['11'] }, { itemIds: ['12'] }],
+      },
     });
   });
 
@@ -44,7 +46,7 @@ describe('splitBillWorkflow', () => {
         items: [item('11'), item('12')],
         assignments: { '11': 0, '12': 1 },
       }),
-    ).toMatchObject({ orderId: 99 });
+    ).toMatchObject({ payload: { orderId: '99' } });
   });
 
   it('returns local-only when no valid server order ID exists', () => {

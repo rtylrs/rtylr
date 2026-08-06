@@ -5,18 +5,13 @@
  * correct remaining balance is tracked after the sale.
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { ResultAsync } from 'neverthrow';
 
-vi.mock('../../shared/services/api/posService', () => ({
-  posService: {
-    createGiftCard: vi.fn(() =>
-      ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as never)
-    ),
-  },
+const giftCardClient = vi.hoisted(() => ({
+  createGiftCard: vi.fn(() => Promise.resolve({ giftCardId: 'remote-gc', message: 'ok' })),
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((p) => p),
+  createOneKitClient: () => giftCardClient,
 }));
 
 import { issueGiftCard } from './giftCardWorkflow';
@@ -100,7 +95,7 @@ describe('gift card → checkout', () => {
       order,
       payload,
       method: 'cash',
-      createOrder: vi.fn(() => Promise.resolve({ id: 300 })),
+      createOrder: vi.fn(() => Promise.resolve({ orderId: 300 })),
       chargeOrder,
       enqueueOffline: vi.fn(),
       recordCashSale: vi.fn(),
@@ -108,8 +103,7 @@ describe('gift card → checkout', () => {
 
     expect(result).toEqual({ status: 'online', orderId: 300 });
     expect(chargeOrder).toHaveBeenCalledWith(
-      300,
-      expect.objectContaining({ amount_paid: 30 }),
+      expect.objectContaining({ orderId: '300', amountPaid: 30 }),
     );
   });
 
@@ -138,7 +132,7 @@ describe('gift card → checkout', () => {
       order,
       payload,
       method: 'gift_card',
-      createOrder: vi.fn(() => Promise.resolve({ id: 301 })),
+      createOrder: vi.fn(() => Promise.resolve({ orderId: 301 })),
       chargeOrder,
       enqueueOffline: vi.fn(),
       recordCashSale: vi.fn(),
@@ -146,8 +140,7 @@ describe('gift card → checkout', () => {
 
     expect(result).toEqual({ status: 'online', orderId: 301 });
     expect(chargeOrder).toHaveBeenCalledWith(
-      301,
-      expect.objectContaining({ amount_paid: 0 }),
+      expect.objectContaining({ orderId: '301', amountPaid: 0 }),
     );
   });
 
@@ -197,15 +190,14 @@ describe('gift card → checkout', () => {
       order,
       payload,
       method: 'cash',
-      createOrder: vi.fn(() => Promise.resolve({ id: 302 })),
+      createOrder: vi.fn(() => Promise.resolve({ orderId: 302 })),
       chargeOrder,
       enqueueOffline: vi.fn(),
       recordCashSale: vi.fn(),
     });
 
     expect(chargeOrder).toHaveBeenCalledWith(
-      302,
-      expect.objectContaining({ amount_paid: 20 }),
+      expect.objectContaining({ orderId: '302', amountPaid: 20 }),
     );
   });
 });

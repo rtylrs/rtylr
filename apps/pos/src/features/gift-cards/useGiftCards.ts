@@ -1,9 +1,22 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useCallback, useState } from 'react';
-import { posService } from '../../shared/services/api/posService';
+import { GiftCardServiceClient } from '@voxire/voxie/pos/gift_card/v1/client';
+import type { GiftCard as ServerGiftCard } from '@voxire/voxie/pos/gift_card/v1/types';
 import { useGiftCardStore } from '../../shared/stores/giftCardStore';
 import type { GiftCard } from '../../shared/types/pos';
-import { normalizeRemoteGiftCard, normalizeRemoteGiftCardList } from './giftCardRemote';
+
+const giftCardClient = createOneKitClient(GiftCardServiceClient, 'pos');
+
+function giftCardFromServer(card: ServerGiftCard): GiftCard {
+  return {
+    id: card.id ?? '',
+    code: card.code ?? '',
+    balance: card.currentBalance ?? 0,
+    issuedAt: card.createdAt || new Date().toISOString(),
+    active: card.isActive ?? false,
+    ...(card.customerName ? { customerName: card.customerName } : {}),
+  };
+}
 
 export function useGiftCards() {
   const store = useGiftCardStore();
@@ -14,11 +27,8 @@ export function useGiftCards() {
     setLoading(true);
     setError(null);
     try {
-      const res = await unwrap(posService.getGiftCards());
-      const remoteCards = normalizeRemoteGiftCardList(res);
-      if (remoteCards.length > 0 || (res as { gift_cards?: unknown[] })?.gift_cards) {
-        useGiftCardStore.getState().setCards(remoteCards);
-      }
+      const res = await giftCardClient.listGiftCards({});
+      useGiftCardStore.getState().setCards((res.giftCards ?? []).map(giftCardFromServer));
     } catch (e) {
       const err = e as { response?: { data?: { message?: string } }; message?: string };
       setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load gift cards');
@@ -32,9 +42,8 @@ export function useGiftCards() {
     if (!normalizedCode) return null;
 
     try {
-      const res = await unwrap(posService.getGiftCardBalance(normalizedCode));
-      const remoteCard = normalizeRemoteGiftCard(res);
-      if (remoteCard) return remoteCard;
+      const res = await giftCardClient.getGiftCardByCode({ code: normalizedCode });
+      if (res.giftCard) return giftCardFromServer(res.giftCard);
 
       return useGiftCardStore.getState().findByCode(normalizedCode) ?? null;
     } catch {

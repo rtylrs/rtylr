@@ -1,13 +1,15 @@
-import { unwrap } from '@voxire/api';
-import { posService } from '../../shared/services/api/posService';
+import { createOneKitClient } from '@voxire/api';
+import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
+import type { CreateOrderRequest } from '@voxire/voxie/pos/orders/v1/types';
 import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
-import type { CreateOrderPayload } from '../../shared/services/api/posService';
 import { syncQueuedOrders } from './syncOfflineQueue';
 
-type SyncOrder = (order: CreateOrderPayload) => Promise<void>;
+type SyncOrder = (order: CreateOrderRequest) => Promise<void>;
+
+const orderClient = createOneKitClient(OrderServiceClient, 'pos');
 
 const syncOrderWithApi: SyncOrder = async (order) => {
-  await unwrap(posService.createOrder(order));
+  await orderClient.createOrder(order);
 };
 
 export async function syncPendingOfflineOrders(

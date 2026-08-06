@@ -1,8 +1,10 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { TerminalServiceClient } from '@voxire/voxie/pos/terminal/v1/client';
 import { useEffect } from 'react';
-import { posService } from '../api/posService';
 import { useTerminalContextStore } from '../../stores/terminalContextStore';
 import { startTerminalHeartbeat } from './terminalHeartbeat';
+
+const terminalClient = createOneKitClient(TerminalServiceClient, 'pos');
 
 export function useTerminalHeartbeat(active: boolean): void {
   const terminalId = useTerminalContextStore((s) => s.terminalId);
@@ -11,7 +13,7 @@ export function useTerminalHeartbeat(active: boolean): void {
     if (!active || !terminalId) return;
     return startTerminalHeartbeat({
       heartbeat: async () => {
-        await unwrap(posService.heartbeat(terminalId));
+        await terminalClient.heartbeatTerminal({ terminalId: String(terminalId) });
       },
     });
   }, [active, terminalId]);

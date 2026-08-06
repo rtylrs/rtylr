@@ -1,4 +1,4 @@
-import type { CreateOrderPayload } from '../../../../shared/services/api/posService';
+import type { CreateOrderRequest, CreateOrderResponse } from '@voxire/voxie/pos/orders/v1/types';
 import type { CartItem } from '../../../../shared/stores/cartStore';
 
 export const ORDER_SUBMIT_ID_ERROR = 'Order was saved, but no server order ID was returned.';
@@ -19,34 +19,38 @@ function positiveInteger(value: unknown): number | undefined {
   return numeric;
 }
 
-// Builds a backend CreateOrderRequest-shaped payload. The backend computes
-// totals from the per-line unit_price/tax_rate, so no totals are sent.
-export function buildOrderSubmitPayload(input: BuildOrderSubmitPayloadInput): CreateOrderPayload {
+function idString(value: unknown): string {
+  return String(positiveInteger(value) ?? 0);
+}
+
+// Builds the generated Voxie CreateOrderRequest. The backend computes totals
+// from the per-line unitPrice/taxRate, so no totals are sent.
+export function buildOrderSubmitPayload(input: BuildOrderSubmitPayloadInput): CreateOrderRequest {
   return {
-    location_id: positiveInteger(input.locationId),
-    table_id: positiveInteger(input.tableId),
-    customer_id: positiveInteger(input.customerId),
-    customer_name: input.customerName ?? undefined,
-    type: input.orderType,
-    notes: input.notes,
+    sessionId: '0',
+    locationId: idString(input.locationId),
+    tableId: idString(input.tableId),
+    customerId: idString(input.customerId),
+    customerName: input.customerName ?? '',
+    type: input.orderType ?? '',
+    paymentMethod: '',
+    notes: input.notes ?? '',
+    kitchenNotes: '',
     items: input.items.map((item) => ({
-      menu_item_id: item.productId,
+      menuItemId: String(item.productId),
       name: item.name,
+      sku: item.sku ?? '',
       quantity: positiveInteger(item.quantity) ?? 1,
-      unit_price: Number.isFinite(item.unitPrice) && item.unitPrice >= 0 ? item.unitPrice : 0,
-      discount_pct: item.discountPct ?? 0,
-      tax_rate: item.taxRate ?? 0,
+      unitPrice: Number.isFinite(item.unitPrice) && item.unitPrice >= 0 ? item.unitPrice : 0,
+      discountPct: item.discountPct ?? 0,
+      taxRate: item.taxRate ?? 0,
       notes: item.notes ?? '',
     })),
   };
 }
 
-export function extractCreatedOrderId(created: unknown): number {
-  const response = created as { id?: unknown; order_id?: unknown; orderId?: unknown };
-  const orderId =
-    positiveInteger(response.id) ??
-    positiveInteger(response.order_id) ??
-    positiveInteger(response.orderId);
+export function extractCreatedOrderId(created: CreateOrderResponse): number {
+  const orderId = positiveInteger(created.orderId);
   if (orderId == null) {
     throw new Error(ORDER_SUBMIT_ID_ERROR);
   }

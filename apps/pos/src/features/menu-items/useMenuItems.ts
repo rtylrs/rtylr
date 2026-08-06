@@ -1,9 +1,9 @@
-import { unwrap } from '@voxire/api';
-import { z } from 'zod';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import { posService } from '../../shared/services/api/posService';
-import type { MenuItem } from '../../shared/types/pos';
-import { menuItemSchema } from '../../shared/utils/schemas/menuItems';
+import { MenuItemServiceClient } from '@voxire/voxie/pos/menu_item/v1/client';
+import type { MenuItem } from '@voxire/voxie/pos/menu_item/v1/types';
+
+const menuItemClient = createOneKitClient(MenuItemServiceClient, 'pos');
 
 interface UseMenuItemsResult {
   items: MenuItem[];
@@ -17,28 +17,14 @@ export function useMenuItems(): UseMenuItemsResult {
   const query = useQuery({
     queryKey: ['pos-menu-items'],
     queryFn: async (): Promise<MenuItem[]> => {
-      const res = await unwrap(posService.getMenuItems());
-      const raw = res?.items ?? res?.data ?? [];
-      const parsed = z.array(menuItemSchema).parse(Array.isArray(raw) ? raw : []);
-      return parsed.map((it) => ({
-        id: it.id,
-        name: it.name,
-        price: it.price,
-        category: it.category,
-        image: it.image ?? undefined,
-        available: it.available,
-        sku: it.sku ?? undefined,
-        stock: it.stock ?? undefined,
-        description: it.description ?? undefined,
-        taxRate: it.taxRate ?? undefined,
-        barcode: it.barcode ?? undefined,
-      }));
+      const res = await menuItemClient.listMenuItems({});
+      return res.items ?? [];
     },
     staleTime: 2 * 60 * 1000,
   });
 
   const items = query.data ?? [];
-  const categories = Array.from(new Set(items.map((i) => i.category))).sort();
+  const categories = Array.from(new Set(items.map((i) => i.category ?? ''))).sort();
 
   return {
     items,

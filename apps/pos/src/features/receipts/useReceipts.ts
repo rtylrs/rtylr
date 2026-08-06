@@ -1,10 +1,12 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { z } from 'zod';
 import { useCallback, useEffect, useState } from 'react';
-import { posService } from '../../shared/services/api/posService';
+import { ReceiptServiceClient } from '@voxire/voxie/pos/receipt/v1/client';
 import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import type { Receipt } from '../../shared/types/pos';
 import { receiptSchema } from '../../shared/utils/schemas/receipts';
+
+const receiptClient = createOneKitClient(ReceiptServiceClient, 'pos');
 
 function parseRemoteReceiptId(id: string): number | null {
   const parsed = Number(id);
@@ -23,9 +25,8 @@ export function useReceipts() {
     setLoading(true);
     setError(null);
     try {
-      const res = await unwrap(posService.getReceipts());
-      const raw = res?.receipts ?? res?.data ?? [];
-      setRemote(z.array(receiptSchema).parse(Array.isArray(raw) ? raw : []) as Receipt[]);
+      const res = await receiptClient.listReceipts({ from: '', to: '' });
+      setRemote(z.array(receiptSchema).parse(res.receipts) as Receipt[]);
     } catch (e) {
       const err = e as { response?: { data?: { message?: string } }; message?: string };
       setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load receipts');
@@ -44,7 +45,7 @@ export function useReceipts() {
       if (!remoteId) return false;
 
       try {
-        await unwrap(posService.emailReceipt(remoteId, address));
+        await receiptClient.emailReceipt({ id: String(remoteId), email: address });
         markEmailed(id);
         return true;
       } catch {

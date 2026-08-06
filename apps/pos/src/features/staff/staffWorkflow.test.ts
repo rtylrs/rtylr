@@ -2,22 +2,20 @@ import { describe, it, expect } from 'vitest';
 import { mapPOSUsers, buildStaffUpdate, type StaffUser } from './staffWorkflow';
 
 describe('mapPOSUsers', () => {
-  it('maps the users envelope (camelCase from the API layer)', () => {
-    const out = mapPOSUsers({
-      users: [
-        {
-          id: 5,
-          name: 'Alice',
-          role: 'manager',
-          isActive: true,
-          maxDiscountPct: 100,
-          canVoid: true,
-          canRefund: true,
-          canOpenDrawer: true,
-          canApplyDiscount: true,
-        },
-      ],
-    });
+  it('maps a decoded POSUser array (camelCase from the API layer)', () => {
+    const out = mapPOSUsers([
+      {
+        id: '5',
+        name: 'Alice',
+        role: 'manager',
+        isActive: true,
+        maxDiscountPct: 100,
+        canVoid: true,
+        canRefund: true,
+        canOpenDrawer: true,
+        canApplyDiscount: true,
+      },
+    ]);
     expect(out).toEqual([
       {
         id: 5,
@@ -33,27 +31,24 @@ describe('mapPOSUsers', () => {
     ]);
   });
 
-  it('tolerates snake_case and a bare array', () => {
+  it('applies capability defaults when fields are absent', () => {
     const out = mapPOSUsers([
-      { id: 9, name: 'Bob', role: 'cashier', is_active: false, can_void: false, max_discount_pct: 15 },
+      { id: '9', name: 'Bob', role: 'cashier', isActive: false, canVoid: false, maxDiscountPct: 15 },
     ]);
     expect(out[0]).toMatchObject({ id: 9, name: 'Bob', role: 'cashier', isActive: false, maxDiscountPct: 15 });
   });
 
   it('falls back to cashier for an unknown role and drops invalid rows', () => {
-    const out = mapPOSUsers({
-      users: [
-        { id: 0, name: 'Bad' },
-        { id: 3, name: 'X', role: 'wizard' },
-      ],
-    });
+    const out = mapPOSUsers([
+      { id: '0', name: 'Bad' },
+      { id: '3', name: 'X', role: 'wizard' },
+    ]);
     expect(out).toHaveLength(1);
     expect(out[0].role).toBe('cashier');
   });
 
-  it('returns [] for unusable input', () => {
-    expect(mapPOSUsers(null)).toEqual([]);
-    expect(mapPOSUsers({})).toEqual([]);
+  it('returns [] for an empty array', () => {
+    expect(mapPOSUsers([])).toEqual([]);
   });
 });
 
@@ -70,7 +65,7 @@ describe('buildStaffUpdate', () => {
     canApplyDiscount: false,
   };
 
-  it('builds a snake_case update payload', () => {
+  it('builds the generated camelCase update payload', () => {
     const payload = buildStaffUpdate(user, {
       role: 'manager',
       isActive: true,
@@ -81,15 +76,16 @@ describe('buildStaffUpdate', () => {
       canApplyDiscount: true,
     });
     expect(payload).toEqual({
-      id: 5,
+      id: '5',
       name: 'Alice',
       role: 'manager',
-      is_active: true,
-      max_discount_pct: 50,
-      can_void: true,
-      can_refund: true,
-      can_open_drawer: true,
-      can_apply_discount: true,
+      isActive: true,
+      hourlyRate: 0,
+      maxDiscountPct: 50,
+      canVoid: true,
+      canRefund: true,
+      canOpenDrawer: true,
+      canApplyDiscount: true,
     });
   });
 

@@ -1,10 +1,10 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { UserServiceClient } from '@voxire/voxie/pos/user/v1/client';
 import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Loader2, ShieldCheck, UserX, KeyRound } from 'lucide-react';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import ManagerRequired from '../../shared/components/ManagerRequired';
-import { posService } from '../../shared/services/api/posService';
 import { useCapabilities } from '../../shared/hooks/useCapabilities';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
 import {
@@ -14,6 +14,8 @@ import {
   type StaffEdits,
   type StaffRole,
 } from './staffWorkflow';
+
+const userClient = createOneKitClient(UserServiceClient, 'pos');
 
 const ROLE_OPTIONS: StaffRole[] = ['manager', 'cashier', 'server', 'bartender', 'kitchen'];
 
@@ -50,8 +52,8 @@ const StaffScreen: React.FC = () => {
     if (!locationId) return;
     setLoading(true);
     try {
-      const data = await unwrap(posService.getPOSUsers(locationId));
-      setUsers(mapPOSUsers(data));
+      const data = await userClient.listPOSUsers({ locationId: String(locationId) });
+      setUsers(mapPOSUsers(data.users ?? []));
     } catch {
       toast.error('Failed to load staff');
     } finally {
@@ -78,7 +80,7 @@ const StaffScreen: React.FC = () => {
     if (!selected || !edits) return;
     setSaving(true);
     try {
-      await unwrap(posService.updatePOSUser(buildStaffUpdate(selected, edits)));
+      await userClient.updatePOSUser(buildStaffUpdate(selected, edits));
       toast.success(edits.newPin ? 'Saved — PIN reset' : 'Staff member updated');
       closeEditor();
       await load();
@@ -91,7 +93,7 @@ const StaffScreen: React.FC = () => {
 
   const deactivate = async (u: StaffUser): Promise<void> => {
     try {
-      await unwrap(posService.deactivatePOSUser(u.id));
+      await userClient.deactivatePOSUser({ id: String(u.id) });
       toast.success(`${u.name} deactivated`);
       closeEditor();
       await load();

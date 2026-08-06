@@ -1,16 +1,18 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { OrderRefundServiceClient } from '@voxire/voxie/pos/orders/refunds/v1/client';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import ManagerRequired from '../../shared/components/ManagerRequired';
-import { posService } from '../../shared/services/api/posService';
 import { useCapabilities } from '../../shared/hooks/useCapabilities';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import { formatCurrency } from '../../shared/utils/format';
 import { processRefund } from './refundWorkflow';
+
+const orderRefundClient = createOneKitClient(OrderRefundServiceClient, 'pos');
 
 const REASONS = [
   'Customer complaint',
@@ -42,8 +44,8 @@ const RefundScreen: React.FC = () => {
         amountInput: amount,
         reason,
         receipt,
-        refundOrder: async (id, payload) => {
-          await unwrap(posService.refundOrder(id, payload));
+        refundOrder: async (payload) => {
+          await orderRefundClient.processRefund(payload);
         },
         recordCashRefund,
       });

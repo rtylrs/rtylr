@@ -1,8 +1,9 @@
-import { unwrap } from '@voxire/api';
-import { posService } from '../../shared/services/api/posService';
-import type { CashMovementPayload } from '../../shared/services/api/posService';
+import { createOneKitClient } from '@voxire/api';
+import { CashServiceClient } from '@voxire/voxie/pos/cash/v1/client';
+import type { CashAdjustRequest, CashDropRequest, CashPickupRequest } from '@voxire/voxie/pos/cash/v1/types';
 import {
   useCashMovementQueueStore,
+  type CashMovementPayload,
   type QueuedCashMovementAction,
 } from '../../shared/stores/cashMovementQueueStore';
 import { resolveOpenSessionId } from '../close-session/closeSessionWorkflow';
@@ -13,21 +14,41 @@ type SyncMovement = (
   payload: CashMovementPayload
 ) => Promise<void>;
 
+const cashClient = createOneKitClient(CashServiceClient, 'pos');
+
+function id(value: unknown): string {
+  return value == null || value === '' ? '0' : String(value);
+}
+
+function buildCashRequest(
+  payload: CashMovementPayload
+): CashDropRequest | CashPickupRequest | CashAdjustRequest {
+  return {
+    branchId: id(payload.branch_id),
+    terminalId: id(payload.terminal_id),
+    sessionId: id(payload.session_id),
+    employeeId: id(payload.employee_id),
+    amount: payload.amount,
+    reason: payload.reason ?? '',
+  };
+}
+
 export const syncCashMovementWithApi: SyncMovement = async (action, payload) => {
   const body: CashMovementPayload =
     payload.session_id > 0 ? payload : { ...payload, session_id: await resolveOpenSessionId() };
+  const request = buildCashRequest(body);
 
   if (action === 'drop') {
-    await unwrap(posService.cashDrop(body));
+    await cashClient.cashDrop(request);
     return;
   }
 
   if (action === 'paid_out') {
-    await unwrap(posService.cashPickup(body));
+    await cashClient.cashPickup(request);
     return;
   }
 
-  await unwrap(posService.cashAdjust(body));
+  await cashClient.cashAdjust(request);
 };
 
 export async function syncPendingCashMovements(

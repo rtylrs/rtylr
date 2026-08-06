@@ -82,7 +82,7 @@ async function runCompleteSale() {
   });
 
   const payload = buildCreateOrderPayload({ items: [item], method: 'cash' });
-  const createOrder = vi.fn(() => Promise.resolve({ id: 999 }));
+  const createOrder = vi.fn(() => Promise.resolve({ orderId: 999 }));
   const chargeOrder = vi.fn(() => Promise.resolve());
 
   const checkoutResult = await processCheckout({
@@ -157,7 +157,7 @@ describe('complete sale chain: checkout → receipt → drawer → KDS → inven
     expect(kdsResult.status).toBe('sent');
 
     expect(stockAction.action).toBe('adjust');
-    expect(stockAction.payload.product_id).toBe(5);
+    expect(stockAction.payload.productId).toBe('5');
     expect(stockAction.payload.quantity).toBe(2);
     expect(stockAction.payload.note).toContain('ORD-999');
   });
@@ -206,7 +206,7 @@ describe('complete sale chain: checkout → receipt → drawer → KDS → inven
       order,
       payload,
       method: 'card',
-      createOrder: vi.fn(() => Promise.resolve({ id: 1000 })),
+      createOrder: vi.fn(() => Promise.resolve({ orderId: 1000 })),
       chargeOrder: vi.fn(() => Promise.resolve()),
       enqueueOffline: vi.fn(),
       recordCashSale: vi.fn(),

@@ -1,4 +1,4 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, ChevronLeft, ChevronRight, ReceiptText } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -9,42 +9,28 @@ import SearchBar from '../../shared/components/SearchBar';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
 import OrderStatusBadge from '../../shared/components/OrderStatusBadge';
-import { posService } from '../../shared/services/api/posService';
-import type { Order, OrderStatus } from '../../shared/types/pos';
+import type { OrderStatus } from '../../shared/types/pos';
 import { formatCurrency, formatDate } from '../../shared/utils/format';
 import { isVoidable, orderStatusLabel } from '../../shared/utils/orderStatus';
-import { normalizeOrdersResponse } from './ordersWorkflow';
+import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
+import type { Order } from '@voxire/voxie/pos/orders/v1/types';
 
 const FILTERS = ['all', 'pending', 'preparing', 'ready', 'paid', 'voided', 'refunded'] as const;
 type OrderFilter = (typeof FILTERS)[number];
 const PAGE_SIZE = 25;
+const orderClient = createOneKitClient(OrderServiceClient, 'pos');
 
 function orderItemsPreview(order: Order): string | null {
-  if (order.items.length === 0) return null;
+  const items = order.items ?? [];
+  if (items.length === 0) return null;
 
-  const preview = order.items
+  const preview = items
     .slice(0, 3)
     .map((item) => `${item.quantity}x ${item.name}`)
     .join(', ');
-  const remaining = order.items.length - 3;
+  const remaining = items.length - 3;
 
   return remaining > 0 ? `${preview}, +${remaining} more` : preview;
-}
-
-function responseNumber(res: unknown, ...keys: string[]): number | undefined {
-  if (!res || typeof res !== 'object') return undefined;
-  const record = res as Record<string, unknown>;
-  for (const key of keys) {
-    const numeric = Number(record[key]);
-    if (Number.isFinite(numeric) && numeric >= 0) return numeric;
-  }
-  return undefined;
-}
-
-function responseBool(res: unknown, ...keys: string[]): boolean {
-  if (!res || typeof res !== 'object') return false;
-  const record = res as Record<string, unknown>;
-  return keys.some((key) => record[key] === true);
 }
 
 const OrdersScreen: React.FC = () => {
@@ -68,20 +54,19 @@ const OrdersScreen: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await unwrap(
-          posService.getOrders({
-            page,
-            page_size: PAGE_SIZE,
-            ...(filter !== 'all' ? { status: filter } : {}),
-            ...(debouncedSearch.trim() ? { search: debouncedSearch.trim() } : {}),
-          })
-        );
-        const nextOrders = normalizeOrdersResponse(res);
+        const res = await orderClient.listOrders({
+          sessionId: '0',
+          status: filter !== 'all' ? filter : '',
+          dateFrom: '',
+          dateTo: '',
+          search: debouncedSearch.trim(),
+          page,
+          pageSize: PAGE_SIZE,
+        });
+        const nextOrders = res.orders ?? [];
         setOrders(nextOrders);
-        const nextTotal =
-          responseNumber(res, 'total', 'totalCount', 'total_count') ?? nextOrders.length;
-        setTotal(nextTotal);
-        setHasMore(responseBool(res, 'hasMore', 'has_more') || page * PAGE_SIZE < nextTotal);
+        setTotal(res.total ?? 0);
+        setHasMore(res.hasMore ?? false);
       } catch (e) {
         const err = e as {
           response?: { data?: { message?: string } };
@@ -98,9 +83,12 @@ const OrdersScreen: React.FC = () => {
     e.stopPropagation();
     setReopening(String(order.id));
     try {
-      await unwrap(posService.reopenOrder(Number(order.id)));
+      await orderClient.updateOrderStatus({
+        orderId: String(order.id),
+        body: { status: 'pending' },
+      });
       setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: 'pending' } : o)));
-      toast.success(`Order #${order.number ?? order.id} reopened`);
+      toast.success(`Order #${order.orderNumber || order.id} reopened`);
     } catch (err) {
       const e = err as {
         response?: { data?: { message?: string } };
@@ -114,12 +102,12 @@ const OrdersScreen: React.FC = () => {
 
   const handleVoid = async (e: React.MouseEvent, order: Order) => {
     e.stopPropagation();
-    if (!window.confirm(`Void order #${order.number ?? order.id}? This cannot be undone.`)) return;
+    if (!window.confirm(`Void order #${order.orderNumber || order.id}? This cannot be undone.`)) return;
     setVoiding(String(order.id));
     try {
-      await unwrap(posService.voidOrder(Number(order.id), { reason: 'Manager void' }));
+      await orderClient.voidOrder({ orderId: String(order.id), reason: 'Manager void' });
       setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: 'voided' } : o)));
-      toast.success(`Order #${order.number ?? order.id} voided`);
+      toast.success(`Order #${order.orderNumber || order.id} voided`);
     } catch (err) {
       const e = err as {
         response?: { data?: { message?: string } };
@@ -187,16 +175,16 @@ const OrdersScreen: React.FC = () => {
                     <div className="flex justify-between items-center gap-4">
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="font-bold text-pos-text truncate">
-                          #{o.number ?? o.id}
+                          #{o.orderNumber || o.id}
                         </span>
-                        <OrderStatusBadge status={o.status} />
-                        {o.tableNumber && (
-                          <span className="text-xs text-pos-muted">Table {o.tableNumber}</span>
+                        <OrderStatusBadge status={o.status as OrderStatus} />
+                        {o.tableId && (
+                          <span className="text-xs text-pos-muted">Table {o.tableId}</span>
                         )}
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         <span className="text-sm font-bold text-pos-text">
-                          {formatCurrency(o.total)}
+                          {formatCurrency(o.total ?? 0)}
                         </span>
                         {reopenMode && o.status === 'paid' && (
                           <button
@@ -208,7 +196,7 @@ const OrdersScreen: React.FC = () => {
                             {reopening === String(o.id) ? '...' : 'Reopen'}
                           </button>
                         )}
-                        {!reopenMode && isVoidable(o.status) && (
+                        {!reopenMode && isVoidable(o.status as OrderStatus) && (
                           <button
                             type="button"
                             disabled={voiding === String(o.id)}
@@ -221,7 +209,7 @@ const OrdersScreen: React.FC = () => {
                       </div>
                     </div>
                     <div className="mt-1 space-y-1">
-                      <div className="text-[11px] text-pos-muted">{formatDate(o.createdAt)}</div>
+                      <div className="text-[11px] text-pos-muted">{formatDate(o.createdAt ?? '')}</div>
                       {preview && <div className="text-xs text-pos-muted truncate">{preview}</div>}
                     </div>
                   </li>

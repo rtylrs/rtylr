@@ -1,6 +1,8 @@
-import { unwrap } from '@voxire/api';
-import { posService } from '../../shared/services/api/posService';
+import { createOneKitClient } from '@voxire/api';
+import { GiftCardServiceClient } from '@voxire/voxie/pos/gift_card/v1/client';
 import type { GiftCard } from '../../shared/types/pos';
+
+const giftCardClient = createOneKitClient(GiftCardServiceClient, 'pos');
 
 interface IssueGiftCardParams {
   codeInput: string;
@@ -25,7 +27,13 @@ export async function issueGiftCard({
       return { ok: false, error: 'Gift card amount must be greater than zero' };
     }
 
-    await unwrap(posService.createGiftCard({ code, initial_amount: amount, amount }));
+    await giftCardClient.createGiftCard({
+      code,
+      initialAmount: amount,
+      customerName: '',
+      customerEmail: '',
+      expiresAt: '',
+    });
 
     const card = issue({ code, balance: amount });
     return { ok: true, card };

@@ -1,13 +1,15 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { OrderDiscountServiceClient } from '@voxire/voxie/pos/orders/discounts/v1/client';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import ManagerRequired from '../../shared/components/ManagerRequired';
-import { posService } from '../../shared/services/api/posService';
 import { useCapabilities } from '../../shared/hooks/useCapabilities';
 import { formatCurrency } from '../../shared/utils/format';
 import { buildDiscountRequest, type DiscountMode } from './discountWorkflow';
+
+const orderDiscountClient = createOneKitClient(OrderDiscountServiceClient, 'pos');
 
 const DiscountScreen: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
@@ -20,11 +22,15 @@ const DiscountScreen: React.FC = () => {
     try {
       const request = buildDiscountRequest({ orderId, mode, valueInput: value });
       // Enforce the operator's discount ceiling for percent discounts.
-      if (mode === 'percent' && maxDiscountPct > 0 && request.payload.discount_value > maxDiscountPct) {
+      if (
+        mode === 'percent' &&
+        maxDiscountPct > 0 &&
+        (request.payload.discountValue ?? 0) > maxDiscountPct
+      ) {
         toast.error(`Your discount limit is ${maxDiscountPct}%`);
         return;
       }
-      await unwrap(posService.applyDiscount(request.orderId, request.payload));
+      await orderDiscountClient.discountOrder(request.payload);
       toast.success('Discount applied');
       navigate(-1);
     } catch (error) {

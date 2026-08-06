@@ -4,19 +4,12 @@ import { useGiftCardStore } from '../../shared/stores/giftCardStore';
 import { useGiftCards } from './useGiftCards';
 
 const mockPosService = vi.hoisted(() => ({
-  getGiftCards: vi.fn(),
-  getGiftCardBalance: vi.fn(),
+  listGiftCards: vi.fn(),
+  getGiftCardByCode: vi.fn(),
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((value) => value),
-}));
-
-vi.mock('../../shared/services/api/posService', () => ({
-  posService: {
-    getGiftCards: (...args: unknown[]) => mockPosService.getGiftCards(...args),
-    getGiftCardBalance: (...args: unknown[]) => mockPosService.getGiftCardBalance(...args),
-  },
+  createOneKitClient: () => mockPosService,
 }));
 
 describe('useGiftCards', () => {
@@ -26,13 +19,14 @@ describe('useGiftCards', () => {
   });
 
   it('returns a normalized remote balance and trims the card code', async () => {
-    mockPosService.getGiftCardBalance.mockResolvedValue({
-      card: {
-        id: 7,
-        code: ' GC-7 ',
-        balance: '25.50',
-        issued_at: '2026-01-01T00:00:00.000Z',
-        active: true,
+    mockPosService.getGiftCardByCode.mockResolvedValue({
+      giftCard: {
+        id: '7',
+        code: 'GC-7',
+        currentBalance: 25.5,
+        createdAt: '2026-01-01T00:00:00.000Z',
+        isActive: true,
+        customerName: '',
       },
     });
 
@@ -43,7 +37,7 @@ describe('useGiftCards', () => {
       card = await result.current.checkBalance(' GC-7 ');
     });
 
-    expect(mockPosService.getGiftCardBalance).toHaveBeenCalledWith('GC-7');
+    expect(mockPosService.getGiftCardByCode).toHaveBeenCalledWith({ code: 'GC-7' });
     expect(card).toEqual({
       id: '7',
       code: 'GC-7',
@@ -62,7 +56,7 @@ describe('useGiftCards', () => {
     });
 
     expect(card).toBeNull();
-    expect(mockPosService.getGiftCardBalance).not.toHaveBeenCalled();
+    expect(mockPosService.getGiftCardByCode).not.toHaveBeenCalled();
   });
 
   it('falls back to the local store when the remote lookup fails or returns unusable data', async () => {
@@ -75,7 +69,7 @@ describe('useGiftCards', () => {
     };
     useGiftCardStore.setState({ cards: [localCard] });
 
-    mockPosService.getGiftCardBalance.mockRejectedValueOnce(new Error('Offline'));
+    mockPosService.getGiftCardByCode.mockRejectedValueOnce(new Error('Offline'));
     const { result } = renderHook(() => useGiftCards());
 
     let failedRemoteCard;
@@ -84,9 +78,9 @@ describe('useGiftCards', () => {
     });
 
     expect(failedRemoteCard).toBe(localCard);
-    expect(mockPosService.getGiftCardBalance).toHaveBeenLastCalledWith('GC-LOCAL');
+    expect(mockPosService.getGiftCardByCode).toHaveBeenLastCalledWith({ code: 'GC-LOCAL' });
 
-    mockPosService.getGiftCardBalance.mockResolvedValueOnce({ data: { code: 'GC-LOCAL', balance: 'bad' } });
+    mockPosService.getGiftCardByCode.mockResolvedValueOnce({});
 
     let invalidRemoteCard;
     await act(async () => {
@@ -97,7 +91,7 @@ describe('useGiftCards', () => {
   });
 
   it('surfaces clean refresh errors', async () => {
-    mockPosService.getGiftCards.mockRejectedValue(new Error('Gift card service unavailable'));
+    mockPosService.listGiftCards.mockRejectedValue(new Error('Gift card service unavailable'));
 
     const { result } = renderHook(() => useGiftCards());
 

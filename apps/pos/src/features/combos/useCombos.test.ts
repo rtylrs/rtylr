@@ -4,18 +4,12 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useCombos } from './useCombos';
 
-const mockPosService = vi.hoisted(() => ({
-  getCombos: vi.fn(),
+const comboClient = vi.hoisted(() => ({
+  listCombos: vi.fn(),
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((value) => value),
-}));
-
-vi.mock('../../shared/services/api/posService', () => ({
-  posService: {
-    getCombos: (...args: unknown[]) => mockPosService.getCombos(...args),
-  },
+  createOneKitClient: () => comboClient,
 }));
 
 const createWrapper = () => {
@@ -32,18 +26,19 @@ describe('useCombos', () => {
     vi.clearAllMocks();
   });
 
-  it('loads combos with schema defaults and numeric coercion', async () => {
-    mockPosService.getCombos.mockResolvedValue({
-      combos: [{ id: 1, price: '20', items: [{ itemId: 2, qty: '2' }] }],
+  it('loads combos from generated combo rows', async () => {
+    comboClient.listCombos.mockResolvedValue({
+      combos: [{ id: '1', name: 'Lunch', price: 20, items: JSON.stringify([{ itemId: 2, qty: 2 }]) }],
     });
 
     const { result } = renderHook(() => useCombos(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
+    expect(comboClient.listCombos).toHaveBeenCalledWith({});
     expect(result.current.combos).toEqual([
       {
         id: '1',
-        name: 'Combo',
+        name: 'Lunch',
         price: 20,
         description: undefined,
         items: [{ itemId: '2', qty: 2 }],
@@ -51,24 +46,8 @@ describe('useCombos', () => {
     ]);
   });
 
-  it('handles .data and non-array responses safely', async () => {
-    mockPosService.getCombos.mockResolvedValueOnce({ data: [{ id: '2', name: 'Lunch' }] });
-
-    const first = renderHook(() => useCombos(), { wrapper: createWrapper() });
-    await waitFor(() => expect(first.result.current.loading).toBe(false));
-
-    expect(first.result.current.combos[0].name).toBe('Lunch');
-
-    mockPosService.getCombos.mockResolvedValueOnce({ combos: 'invalid' });
-
-    const second = renderHook(() => useCombos(), { wrapper: createWrapper() });
-    await waitFor(() => expect(second.result.current.loading).toBe(false));
-
-    expect(second.result.current.combos).toEqual([]);
-  });
-
   it('exposes clean error messages', async () => {
-    mockPosService.getCombos.mockRejectedValue(new Error('Failed to load combos'));
+    comboClient.listCombos.mockRejectedValue(new Error('Failed to load combos'));
 
     const { result } = renderHook(() => useCombos(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -78,12 +57,14 @@ describe('useCombos', () => {
   });
 
   it('reload refetches combos', async () => {
-    mockPosService.getCombos.mockResolvedValue({ combos: [] });
+    comboClient.listCombos.mockResolvedValue({ combos: [] });
 
     const { result } = renderHook(() => useCombos(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    mockPosService.getCombos.mockResolvedValue({ combos: [{ id: '3', name: 'Dinner' }] });
+    comboClient.listCombos.mockResolvedValue({
+      combos: [{ id: '3', name: 'Dinner', price: 15, items: '' }],
+    });
 
     await act(async () => {
       await result.current.reload();

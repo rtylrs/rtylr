@@ -1,12 +1,10 @@
 import type { CartItem } from '../../shared/stores/cartStore';
 import type { Order } from '../../shared/types/pos';
-import type {
-  CreateOrderPayload,
-  PaymentPayload,
-} from '../../shared/services/api/posService';
+import type { CreateOrderRequest, CreateOrderResponse } from '@voxire/voxie/pos/orders/v1/types';
+import type { ProcessPaymentRequest } from '@voxire/voxie/pos/orders/payments/v1/types';
 import { roundCents } from '../../shared/utils/orderCalc';
 
-export type CheckoutPaymentMethod = 'card' | 'cash' | 'qr';
+export type CheckoutPaymentMethod = 'card' | 'cash' | 'qr' | 'gift_card';
 
 interface CashTender {
   received: number;
@@ -39,14 +37,12 @@ interface BuildCreateOrderPayloadParams {
 
 interface ProcessCheckoutParams {
   order: Order;
-  payload: CreateOrderPayload;
+  payload: CreateOrderRequest;
   method: CheckoutPaymentMethod;
   existingOrderId?: number | null;
-  // The API client camelCases responses, so the backend's order_id arrives as
-  // orderId; accept all shapes so neither the runtime contract nor older mocks break.
-  createOrder: (payload: CreateOrderPayload) => Promise<{ orderId?: number; id?: number; order_id?: number }>;
-  chargeOrder: (orderId: number, payload: PaymentPayload) => Promise<void>;
-  enqueueOffline: (payload: CreateOrderPayload) => void;
+  createOrder: (payload: CreateOrderRequest) => Promise<CreateOrderResponse>;
+  chargeOrder: (payload: ProcessPaymentRequest) => Promise<void>;
+  enqueueOffline: (payload: CreateOrderRequest) => void;
   recordCashSale: (amount: number, orderId: string) => void;
 }
 
@@ -56,6 +52,10 @@ function positiveInteger(value: unknown): number | undefined {
   const numeric = typeof value === 'string' ? Number(value.trim()) : Number(value);
   if (!Number.isInteger(numeric) || numeric <= 0) return undefined;
   return numeric;
+}
+
+function idString(value: unknown): string {
+  return String(positiveInteger(value) ?? 0);
 }
 
 export function buildCashTender(amountInput: string, totalDue: number): CashTender {
@@ -115,23 +115,25 @@ export function buildCreateOrderPayload({
   customerId,
   customerName,
   notes,
-}: BuildCreateOrderPayloadParams): CreateOrderPayload {
+}: BuildCreateOrderPayloadParams): CreateOrderRequest {
   return {
-    location_id: positiveInteger(locationId),
-    table_id: positiveInteger(tableId),
-    session_id: positiveInteger(sessionId),
-    ...(orderType ? { type: orderType } : {}),
-    customer_id: positiveInteger(customerId),
-    customer_name: customerName ?? undefined,
-    payment_method: method,
-    notes,
+    locationId: idString(locationId),
+    tableId: idString(tableId),
+    sessionId: idString(sessionId),
+    type: orderType ?? '',
+    customerId: idString(customerId),
+    customerName: customerName ?? '',
+    paymentMethod: method,
+    notes: notes ?? '',
+    kitchenNotes: '',
     items: items.map((item) => ({
-      menu_item_id: item.productId,
+      menuItemId: String(item.productId),
       name: item.name,
+      sku: item.sku ?? '',
       quantity: item.quantity,
-      unit_price: item.unitPrice,
-      discount_pct: item.discountPct ?? 0,
-      tax_rate: item.taxRate ?? 0,
+      unitPrice: item.unitPrice,
+      discountPct: item.discountPct ?? 0,
+      taxRate: item.taxRate ?? 0,
       notes: item.notes ?? '',
     })),
   };
@@ -152,15 +154,16 @@ export async function processCheckout({
     let orderId = persistedOrderId;
     if (!orderId) {
       const createRes = await createOrder(payload);
-      orderId = createRes.orderId ?? createRes.id ?? createRes.order_id;
+      orderId = positiveInteger(createRes.orderId);
       if (!orderId || orderId <= 0) {
         throw new Error('Order was not accepted by the server.');
       }
     }
 
-    await chargeOrder(orderId, {
-      payment_method: method,
-      amount_paid: order.total,
+    await chargeOrder({
+      orderId: String(orderId),
+      paymentMethod: method,
+      amountPaid: order.total,
     });
 
     if (method === 'cash') {

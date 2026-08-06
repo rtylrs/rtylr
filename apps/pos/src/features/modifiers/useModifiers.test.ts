@@ -4,18 +4,12 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useModifiers } from './useModifiers';
 
-const mockPosService = vi.hoisted(() => ({
-  getModifiers: vi.fn(),
+const modifierClient = vi.hoisted(() => ({
+  listModifiers: vi.fn(),
 }));
 
 vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((value) => value),
-}));
-
-vi.mock('../../shared/services/api/posService', () => ({
-  posService: {
-    getModifiers: (...args: unknown[]) => mockPosService.getModifiers(...args),
-  },
+  createOneKitClient: () => modifierClient,
 }));
 
 const createWrapper = () => {
@@ -32,14 +26,15 @@ describe('useModifiers', () => {
     vi.clearAllMocks();
   });
 
-  it('loads modifier groups with defaults and numeric coercion', async () => {
-    mockPosService.getModifiers.mockResolvedValue({
-      groups: [
+  it('groups generated modifier rows for the UI', async () => {
+    modifierClient.listModifiers.mockResolvedValue({
+      modifiers: [
         {
-          id: 1,
-          min: '1',
-          max: '3',
-          modifiers: [{ id: 2, name: 'Cheese', priceDelta: '1.5' }],
+          id: '2',
+          name: 'Cheese',
+          groupName: 'Toppings',
+          priceDelta: 1.5,
+          isRequired: true,
         },
       ],
     });
@@ -47,19 +42,20 @@ describe('useModifiers', () => {
     const { result } = renderHook(() => useModifiers(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
+    expect(modifierClient.listModifiers).toHaveBeenCalledWith({});
     expect(result.current.groups).toEqual([
       {
-        id: '1',
-        name: 'Modifiers',
+        id: 'toppings',
+        name: 'Toppings',
         min: 1,
-        max: 3,
+        max: 1,
         modifiers: [
           {
             id: '2',
             name: 'Cheese',
             priceDelta: 1.5,
-            group: 'Modifiers',
-            required: false,
+            group: 'Toppings',
+            required: true,
             defaultSelected: false,
           },
         ],
@@ -67,24 +63,8 @@ describe('useModifiers', () => {
     ]);
   });
 
-  it('handles .data and non-array responses safely', async () => {
-    mockPosService.getModifiers.mockResolvedValueOnce({ data: [{ id: '2', name: 'Sauces' }] });
-
-    const first = renderHook(() => useModifiers(), { wrapper: createWrapper() });
-    await waitFor(() => expect(first.result.current.loading).toBe(false));
-
-    expect(first.result.current.groups[0].name).toBe('Sauces');
-
-    mockPosService.getModifiers.mockResolvedValueOnce({ groups: 'invalid' });
-
-    const second = renderHook(() => useModifiers(), { wrapper: createWrapper() });
-    await waitFor(() => expect(second.result.current.loading).toBe(false));
-
-    expect(second.result.current.groups).toEqual([]);
-  });
-
   it('exposes clean error messages', async () => {
-    mockPosService.getModifiers.mockRejectedValue(new Error('Failed to load modifiers'));
+    modifierClient.listModifiers.mockRejectedValue(new Error('Failed to load modifiers'));
 
     const { result } = renderHook(() => useModifiers(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -94,12 +74,20 @@ describe('useModifiers', () => {
   });
 
   it('reload refetches modifier groups', async () => {
-    mockPosService.getModifiers.mockResolvedValue({ groups: [] });
+    modifierClient.listModifiers.mockResolvedValue({ modifiers: [] });
 
     const { result } = renderHook(() => useModifiers(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.loading).toBe(false));
 
-    mockPosService.getModifiers.mockResolvedValue({ groups: [{ id: '3', name: 'Toppings' }] });
+    modifierClient.listModifiers.mockResolvedValue({
+      modifiers: [{
+        id: '3',
+        name: 'Sauce',
+        groupName: 'Toppings',
+        priceDelta: 0,
+        isRequired: false,
+      }],
+    });
 
     await act(async () => {
       await result.current.reload();

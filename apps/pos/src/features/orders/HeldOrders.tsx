@@ -2,20 +2,21 @@ import React from 'react';
 import { CirclePause } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
+import { OrderHoldServiceClient } from '@voxire/voxie/pos/orders/holds/v1/client';
+import type { Order as ServerHeldOrder } from '@voxire/voxie/pos/orders/v1/types';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
 import { useHeldOrdersStore } from '../../shared/stores/heldOrdersStore';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { formatDate, formatCurrency } from '../../shared/utils/format';
-import { posService } from '../../shared/services/api/posService';
 import {
   buildHeldOrderCartProducts,
   buildServerHeldOrderResume,
-  normalizeServerHeldOrders,
-  type ServerHeldOrder,
 } from './heldOrdersWorkflow';
+
+const orderHoldClient = createOneKitClient(OrderHoldServiceClient, 'pos');
 
 const HeldOrdersScreen: React.FC = () => {
   const orders = useHeldOrdersStore((s) => s.orders);
@@ -28,7 +29,10 @@ const HeldOrdersScreen: React.FC = () => {
 
   const { data: serverOrders = [] } = useQuery<ServerHeldOrder[]>({
     queryKey: ['pos', 'held-orders'],
-    queryFn: async () => normalizeServerHeldOrders(await unwrap(posService.getHeldOrders())),
+    queryFn: async () => {
+      const response = await orderHoldClient.listHeldOrders({});
+      return response.orders ?? [];
+    },
     refetchInterval: 15_000,
   });
 
@@ -90,8 +94,8 @@ const HeldOrdersScreen: React.FC = () => {
                       <div>
                         <div className="text-sm font-semibold text-pos-text">#{o.orderNumber}</div>
                         <div className="text-[11px] text-pos-muted">
-                          {o.customerName ?? 'Guest'} · {formatCurrency(o.total)} ·{' '}
-                          {formatDate(o.createdAt)}
+                          {o.customerName ?? 'Guest'} · {formatCurrency(o.total ?? 0)} ·{' '}
+                          {formatDate(o.createdAt ?? '')}
                         </div>
                       </div>
                       <button

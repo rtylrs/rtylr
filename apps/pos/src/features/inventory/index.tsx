@@ -1,11 +1,13 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Package, Store } from 'lucide-react';
 import { toast } from 'sonner';
+import { AccessServiceClient } from '@voxire/voxie/pos/access/v1/client';
+import { LocationServiceClient } from '@voxire/voxie/pos/location/v1/client';
+import { StockServiceClient } from '@voxire/voxie/pos/stock/v1/client';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
-import { posService } from '../../shared/services/api/posService';
 import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStore';
 import { useTerminalContextStore } from '../../shared/stores/terminalContextStore';
 import {
@@ -15,6 +17,10 @@ import {
   summarizeLowStockItems,
 } from './inventoryWorkflow';
 import type { InventoryItem, InventoryLocation, StockAction } from './inventoryWorkflow';
+
+const accessClient = createOneKitClient(AccessServiceClient, 'pos');
+const locationClient = createOneKitClient(LocationServiceClient, 'pos');
+const stockClient = createOneKitClient(StockServiceClient, 'pos');
 
 const ACTION_LABELS: Record<StockAction, string> = {
   receive: 'Receive',
@@ -154,11 +160,11 @@ const InventoryScreen: React.FC = () => {
     setLoading(true);
     try {
       const [inv, low] = await Promise.all([
-        unwrap(posService.getBranchInventory(branchId)) as Promise<unknown>,
-        unwrap(posService.getLowStock(branchId)) as Promise<unknown>,
+        stockClient.listInventory({ branchId: String(branchId) }),
+        stockClient.lowStock({ branchId: String(branchId) }),
       ]);
-      setItems(mapInventoryItems(inv));
-      setLowStock(mapInventoryItems(low));
+      setItems(mapInventoryItems(inv.inventory ?? []));
+      setLowStock(mapInventoryItems(low.items ?? []));
     } catch {
       toast.error('Failed to load inventory');
     } finally {
@@ -171,12 +177,12 @@ const InventoryScreen: React.FC = () => {
   }, [load]);
 
   useEffect(() => {
-    void Promise.allSettled([unwrap(posService.getMyLocations()), unwrap(posService.getBranches())]).then(
+    void Promise.allSettled([accessClient.getMyLocations({}), locationClient.listLocations({})]).then(
       (results) => {
         const merged = new Map<number, InventoryLocation>();
         for (const result of results) {
           if (result.status !== 'fulfilled') continue;
-          for (const location of mapInventoryLocations(result.value)) {
+          for (const location of mapInventoryLocations(result.value.locations ?? [])) {
             if (!merged.has(location.id)) merged.set(location.id, location);
           }
         }
@@ -205,16 +211,16 @@ const InventoryScreen: React.FC = () => {
       const call = (() => {
         switch (built.action) {
           case 'receive':
-            return posService.receiveStock(built.payload);
+            return stockClient.receiveStock(built.payload);
           case 'adjust':
-            return posService.adjustStock(built.payload);
+            return stockClient.adjustStock(built.payload);
           case 'waste':
-            return posService.wasteStock(built.payload);
+            return stockClient.wasteStock(built.payload);
           case 'transfer':
-            return posService.transferStock(built.payload);
+            return stockClient.transferStock(built.payload);
         }
       })();
-      await unwrap(call);
+      await call;
       toast.success(`${ACTION_LABELS[action]} recorded`);
       void load();
     } catch (err) {

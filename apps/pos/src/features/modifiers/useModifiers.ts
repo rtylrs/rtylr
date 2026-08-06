@@ -1,31 +1,50 @@
-import { unwrap } from '@voxire/api';
-import { z } from 'zod';
+import { createOneKitClient } from '@voxire/api';
+import { ModifierServiceClient } from '@voxire/voxie/pos/modifier/v1/client';
 import { useQuery } from '@tanstack/react-query';
-import { posService } from '../../shared/services/api/posService';
 import type { ModifierGroup } from '../../shared/types/pos';
-import { modifierGroupSchema } from '../../shared/utils/schemas/modifiers';
+
+const modifierClient = createOneKitClient(ModifierServiceClient, 'pos');
+
+function toModifierGroups(
+  modifiers: Awaited<ReturnType<typeof modifierClient.listModifiers>>['modifiers']
+): ModifierGroup[] {
+  const groups = new Map<string, ModifierGroup>();
+
+  for (const modifier of modifiers ?? []) {
+    const groupName = modifier.groupName || 'Modifiers';
+    const groupId = groupName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const group =
+      groups.get(groupName) ??
+      ({
+        id: groupId || groupName,
+        name: groupName,
+        min: modifier.isRequired ? 1 : 0,
+        max: 0,
+        modifiers: [],
+      } satisfies ModifierGroup);
+
+    group.min = Math.max(group.min, modifier.isRequired ? 1 : 0);
+    group.modifiers.push({
+      id: modifier.id ?? '',
+      name: modifier.name ?? '',
+      priceDelta: modifier.priceDelta ?? 0,
+      group: groupName,
+      required: modifier.isRequired,
+      defaultSelected: false,
+    });
+    group.max = group.modifiers.length;
+    groups.set(groupName, group);
+  }
+
+  return Array.from(groups.values());
+}
 
 export function useModifiers() {
   const query = useQuery({
     queryKey: ['pos-modifiers'],
     queryFn: async (): Promise<ModifierGroup[]> => {
-      const res = await unwrap(posService.getModifiers());
-      const raw = res?.groups ?? res?.data ?? [];
-      const parsed = z.array(modifierGroupSchema).parse(Array.isArray(raw) ? raw : []);
-      return parsed.map((g) => ({
-        id: g.id,
-        name: g.name,
-        min: g.min,
-        max: g.max,
-        modifiers: g.modifiers.map((m) => ({
-          id: m.id,
-          name: m.name,
-          priceDelta: m.priceDelta,
-          group: m.group ?? g.name,
-          required: m.required,
-          defaultSelected: m.defaultSelected,
-        })),
-      }));
+      const res = await modifierClient.listModifiers({});
+      return toModifierGroups(res.modifiers);
     },
     staleTime: 5 * 60 * 1000,
   });

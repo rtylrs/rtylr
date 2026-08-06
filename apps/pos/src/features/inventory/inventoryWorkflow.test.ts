@@ -18,7 +18,7 @@ describe('buildStockAction', () => {
 
     expect(result).toEqual({
       action: 'receive',
-      payload: { branch_id: 1, product_id: 1, quantity: 50, note: 'Weekly delivery', employee_id: null },
+      payload: { branchId: '1', productId: '1', quantity: 50, note: 'Weekly delivery', employeeId: '0' },
     });
   });
 
@@ -31,7 +31,7 @@ describe('buildStockAction', () => {
     });
 
     expect(result.payload.quantity).toBe(2.5);
-    expect(result.payload.note).toBeNull();
+    expect(result.payload.note).toBe('');
   });
 
   it('throws when quantity is zero or negative', () => {
@@ -87,12 +87,12 @@ describe('buildStockAction', () => {
     expect(result).toEqual({
       action: 'transfer',
       payload: {
-        from_branch_id: 1,
-        to_branch_id: 2,
-        product_id: 12,
+        fromBranchId: '1',
+        toBranchId: '2',
+        productId: '12',
         quantity: 4,
         note: 'Move to warehouse',
-        employee_id: 9,
+        employeeId: '9',
       },
     });
   });
@@ -115,15 +115,15 @@ describe('buildStockAction', () => {
 });
 
 describe('mapInventoryItems', () => {
-  it('maps snake_case server response', () => {
+  it('maps decoded branch inventory fields', () => {
     const raw = [
       {
-        item_id: 1,
+        itemId: 1,
         name: 'Tomatoes',
         sku: 'TOM-001',
-        current_qty: 15,
+        currentQty: 15,
         unit: 'kg',
-        low_stock_threshold: 5,
+        lowStockThreshold: 5,
       },
     ];
     const result = mapInventoryItems(raw);
@@ -139,24 +139,24 @@ describe('mapInventoryItems', () => {
     ]);
   });
 
-  it('maps camelCase server response', () => {
-    const raw = [{ itemId: 2, name: 'Oil', currentQty: 3, unit: 'L', threshold: 2 }];
+  it('falls back to reorderPoint for the low stock threshold', () => {
+    const raw = [{ itemId: 2, name: 'Oil', currentQty: 3, unit: 'L', reorderPoint: 2 }];
     const result = mapInventoryItems(raw);
     expect(result[0].itemId).toBe(2);
     expect(result[0].currentQty).toBe(3);
     expect(result[0].lowStockThreshold).toBe(2);
   });
 
-  it('maps shared stock inventory response', () => {
+  it('maps shared stock inventory fields (productId/quantity/reorderPoint)', () => {
     const raw = [
       {
         id: 99,
-        product_id: 12,
+        productId: 12,
         name: 'Platinum MultiVitamins Muscletech',
         sku: 'SUPLAB-PLATINUM-MULTIVITAMINS',
         quantity: 28,
         unit: 'units',
-        reorder_point: 5,
+        reorderPoint: 5,
       },
     ];
     const result = mapInventoryItems(raw);
@@ -170,40 +170,34 @@ describe('mapInventoryItems', () => {
     });
   });
 
-  it('maps inventory envelope response', () => {
-    const result = mapInventoryItems({
-      inventory: [{ product_id: 7, name: 'Iso 100 Dymatize', quantity: 8 }],
-    });
+  it('falls back to id when itemId and productId are absent', () => {
+    const result = mapInventoryItems([{ id: 7, name: 'Iso 100 Dymatize', quantity: 8 }]);
     expect(result[0].itemId).toBe(7);
     expect(result[0].currentQty).toBe(8);
   });
 
   it('filters out entries with invalid item ids', () => {
     const raw = [
-      { item_id: 0, name: 'Bad', current_qty: 5, unit: 'kg', low_stock_threshold: 1 },
-      { item_id: 3, name: 'Good', current_qty: 10, unit: 'kg', low_stock_threshold: 2 },
+      { itemId: 0, name: 'Bad', currentQty: 5, unit: 'kg', lowStockThreshold: 1 },
+      { itemId: 3, name: 'Good', currentQty: 10, unit: 'kg', lowStockThreshold: 2 },
     ];
     const result = mapInventoryItems(raw);
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe('Good');
   });
 
-  it('returns empty array for non-array input', () => {
-    expect(mapInventoryItems(null)).toEqual([]);
-    expect(mapInventoryItems('string')).toEqual([]);
-    expect(mapInventoryItems({})).toEqual([]);
+  it('returns an empty array for an empty list', () => {
+    expect(mapInventoryItems([])).toEqual([]);
   });
 });
 
 describe('mapInventoryLocations', () => {
-  it('maps location envelope responses', () => {
+  it('maps location responses from both access and location services', () => {
     expect(
-      mapInventoryLocations({
-        locations: [
-          { id: 1, name: 'Main' },
-          { location_id: 2, label: 'Warehouse' },
-        ],
-      }),
+      mapInventoryLocations([
+        { id: 1, name: 'Main' },
+        { locationId: 2, name: 'Warehouse' },
+      ]),
     ).toEqual([
       { id: 1, name: 'Main' },
       { id: 2, name: 'Warehouse' },

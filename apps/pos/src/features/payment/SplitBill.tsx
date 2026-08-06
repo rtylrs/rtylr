@@ -1,12 +1,14 @@
+import { createOneKitClient } from '@voxire/api';
+import { OrderSplitServiceClient } from '@voxire/voxie/pos/orders/splits/v1/client';
 import React, { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { unwrap } from '@voxire/api';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { formatCurrency } from '../../shared/utils/format';
 import { useCartStore } from '../../shared/stores/cartStore';
-import { posService } from '../../shared/services/api/posService';
 import { buildSplitBillRequest } from './splitBillWorkflow';
+
+const orderSplitClient = createOneKitClient(OrderSplitServiceClient, 'pos');
 
 type SplitMode = 'seat' | 'amount' | 'items';
 
@@ -64,7 +66,7 @@ const SplitBillScreen: React.FC = () => {
     }
     setConfirming(true);
     try {
-      await unwrap(posService.splitOrder(request.orderId, request.payload));
+      await orderSplitClient.splitOrder(request.payload);
       toast.success(`Split into ${seats} ticket${seats === 1 ? '' : 's'}`);
       navigate(-1);
     } catch {

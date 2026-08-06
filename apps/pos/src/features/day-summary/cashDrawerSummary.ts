@@ -1,6 +1,6 @@
+import type { DaySummaryResponse } from '@voxire/voxie/pos/day_summary/v1/types';
 import type { DaySummary } from '../../shared/types/pos';
 import type { CashMovement } from '../../shared/stores/cashDrawerStore';
-import { daySummarySchema } from '../../shared/utils/schemas/daySummary';
 
 interface BuildLocalDaySummaryParams {
   date: string;
@@ -15,49 +15,28 @@ interface DaySummaryFallbacks {
   closingCash: number;
 }
 
-function record(value: unknown): Record<string, unknown> | null {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-function numberOrUndefined(value: unknown): number | undefined {
-  if (value === undefined || value === null || value === '') return undefined;
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? numeric : undefined;
-}
-
-function textOrUndefined(value: unknown): string | undefined {
-  const normalized = String(value ?? '').trim();
-  return normalized || undefined;
-}
-
-function daySummaryPayload(response: unknown): Record<string, unknown> {
-  const root = record(response);
-  if (!root) return {};
-  return record(root.data) ?? root;
-}
-
 export function normalizeDaySummaryResponse(
-  response: unknown,
+  response: DaySummaryResponse,
   fallbacks: DaySummaryFallbacks,
 ): DaySummary {
-  const raw = daySummaryPayload(response);
+  const totalSales = response.totalSales ?? 0;
+  const totalRefunds = response.totalRefunds ?? 0;
+  const totalOrders = response.totalOrders ?? 0;
 
-  return daySummarySchema.parse({
-    date: textOrUndefined(raw.date) ?? fallbacks.date,
-    grossSales: numberOrUndefined(raw.grossSales ?? raw.gross_sales),
-    netSales: numberOrUndefined(raw.netSales ?? raw.net_sales),
-    taxCollected: numberOrUndefined(raw.taxCollected ?? raw.tax_collected),
-    tips: numberOrUndefined(raw.tips),
-    refunds: numberOrUndefined(raw.refunds),
-    voids: numberOrUndefined(raw.voids),
-    orderCount: numberOrUndefined(raw.orderCount ?? raw.order_count),
-    averageTicket: numberOrUndefined(raw.averageTicket ?? raw.average_ticket),
-    cashDrops: numberOrUndefined(raw.cashDrops ?? raw.cash_drops),
-    openingFloat: numberOrUndefined(raw.openingFloat ?? raw.opening_float) ?? fallbacks.openingFloat,
-    closingCash: numberOrUndefined(raw.closingCash ?? raw.closing_cash) ?? fallbacks.closingCash,
-  });
+  return {
+    date: fallbacks.date,
+    grossSales: totalSales,
+    netSales: totalSales - totalRefunds,
+    taxCollected: response.totalTax ?? 0,
+    tips: response.totalTips ?? 0,
+    refunds: totalRefunds,
+    voids: 0,
+    orderCount: totalOrders,
+    averageTicket: totalOrders > 0 ? totalSales / totalOrders : 0,
+    cashDrops: 0,
+    openingFloat: fallbacks.openingFloat,
+    closingCash: fallbacks.closingCash,
+  };
 }
 
 export function buildLocalDaySummary({

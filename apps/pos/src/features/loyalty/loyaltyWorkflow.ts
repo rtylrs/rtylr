@@ -1,5 +1,7 @@
-import { unwrap } from '@voxire/api';
-import { posService } from '../../shared/services/api/posService';
+import { createOneKitClient } from '@voxire/api';
+import { LoyaltyServiceClient } from '@voxire/voxie/pos/loyalty/v1/client';
+
+const loyaltyClient = createOneKitClient(LoyaltyServiceClient, 'pos');
 
 // Points-per-dollar earned (configurable via /pos/loyalty/config, default 1 point per $1)
 export const DEFAULT_POINTS_PER_DOLLAR = 1;
@@ -60,9 +62,11 @@ export async function earnPointsAfterPayment(params: {
   const earned = calculateEarnedPoints(totalAmount, pointsPerDollar);
   if (earned === 0) return { earned: 0, newTotal: null };
 
-  await unwrap(
-    posService.earnLoyaltyPoints({ customer_id: customerId, points: earned, order_id: orderId }),
-  );
+  await loyaltyClient.earnPoints({
+    customerId: String(customerId),
+    points: earned,
+    orderId: String(orderId),
+  });
   return { earned, newTotal: null };
 }
 
@@ -78,12 +82,9 @@ export async function redeemPointsForDiscount(params: {
   if (pointsToRedeem <= 0) return null;
 
   const discountAmount = calculateRedemptionDiscount(pointsToRedeem, pointValue);
-  await unwrap(
-    posService.redeemLoyaltyPoints({
-      customer_id: customerId,
-      points: pointsToRedeem,
-      order_id: orderId,
-    }),
-  );
+  await loyaltyClient.redeemPoints({
+    customerId: String(customerId),
+    points: pointsToRedeem,
+  });
   return { pointsUsed: pointsToRedeem, discountAmount };
 }

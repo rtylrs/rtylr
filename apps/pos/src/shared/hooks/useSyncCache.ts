@@ -1,13 +1,19 @@
 import { useEffect, useCallback } from 'react';
-import { unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
+import { ComboServiceClient } from '@voxire/voxie/pos/combo/v1/client';
+import { MenuItemServiceClient } from '@voxire/voxie/pos/menu_item/v1/client';
+import { ModifierServiceClient } from '@voxire/voxie/pos/modifier/v1/client';
 import { db } from '../services/db';
-import { posService } from '../services/api/posService';
 import {
   normalizeCachedCombos,
   normalizeCachedModifiers,
   normalizeCachedProducts,
   responseArray,
 } from './syncCacheWorkflow';
+
+const menuItemClient = createOneKitClient(MenuItemServiceClient, 'pos');
+const modifierClient = createOneKitClient(ModifierServiceClient, 'pos');
+const comboClient = createOneKitClient(ComboServiceClient, 'pos');
 
 /**
  * Syncs products, modifiers, combos, and customers from the API
@@ -21,7 +27,7 @@ export function useSyncCache() {
       const syncedAt = Date.now();
 
       // Sync products
-      const productsData = await unwrap(posService.getMenuItems());
+      const productsData = await menuItemClient.listMenuItems({});
       const items = normalizeCachedProducts(
         responseArray(productsData, ['items', 'products', 'data']),
         syncedAt,
@@ -32,7 +38,7 @@ export function useSyncCache() {
       }
 
       // Sync modifiers
-      const modsData = await unwrap(posService.getModifiers());
+      const modsData = await modifierClient.listModifiers({});
       const mods = normalizeCachedModifiers(
         responseArray(modsData, ['modifiers', 'groups', 'data']),
         syncedAt,
@@ -43,7 +49,7 @@ export function useSyncCache() {
       }
 
       // Sync combos
-      const combosData = await unwrap(posService.getCombos());
+      const combosData = await comboClient.listCombos({});
       const combos = normalizeCachedCombos(responseArray(combosData, ['combos', 'data']), syncedAt);
       if (combos.length > 0) {
         await db.combos.clear();

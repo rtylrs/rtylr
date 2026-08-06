@@ -1,6 +1,6 @@
 import React from "react";
 import { cdnImageUrl } from "@voxire/config";
-import type { MenuItem } from "../types/pos";
+import type { MenuItem } from "@voxire/voxie/pos/menu_item/v1/types";
 import { formatCurrency } from "../utils/format";
 
 interface ItemTileProps {
@@ -16,7 +16,7 @@ const ItemTile: React.FC<ItemTileProps> = ({
   size = "md",
   disabled,
 }) => {
-  const unavailable = disabled || item.available === false;
+  const unavailable = disabled || item.isActive === false;
   const stock = item.stock;
   const showStock = typeof stock === "number" && Number.isFinite(stock);
   const stockLabel =
@@ -30,7 +30,7 @@ const ItemTile: React.FC<ItemTileProps> = ({
       : size === "sm"
         ? "p-2 min-h-[4rem]"
         : "p-3 min-h-[5.5rem]";
-  const imageUrl = cdnImageUrl(item.image);
+  const imageUrl = cdnImageUrl(item.imageUrl);
   return (
     <button
       onClick={() => !unavailable && onClick(item)}
@@ -48,7 +48,7 @@ const ItemTile: React.FC<ItemTileProps> = ({
         />
       ) : (
         <div className="mb-1.5 flex w-full aspect-square items-center justify-center rounded-lg bg-white/6 text-sm font-semibold text-pos-muted">
-          {item.name.slice(0, 1).toUpperCase()}
+          {(item.name ?? '').slice(0, 1).toUpperCase()}
         </div>
       )}
       <div className="flex-1">
@@ -61,7 +61,7 @@ const ItemTile: React.FC<ItemTileProps> = ({
           </p>
         )}
         <p className="text-xs text-pos-muted mt-1">
-          {formatCurrency(item.price)}
+          {formatCurrency(item.salePrice ?? 0)}
         </p>
         {showStock && (
           <p className="mt-1 text-[10px] font-semibold text-pos-muted">

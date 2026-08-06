@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import api from '../services/api/api';
+import { createOneKitClient } from '@voxire/api';
+import { ConfigServiceClient } from '@voxire/voxie/hub/config/v1/client';
+import type { UpdateConfigRequest } from '@voxire/voxie/hub/config/v1/types';
 
 interface ContactInfo {
   contactEmail: string | null;
@@ -52,6 +54,35 @@ const initialState: ConfigState = {
   loading: true,
 };
 
+const configClient = createOneKitClient(ConfigServiceClient, 'pos');
+
+function emptyUpdateConfig(overrides: Partial<UpdateConfigRequest>): UpdateConfigRequest {
+  return {
+    siteName: undefined,
+    logoUrl: undefined,
+    faviconUrl: undefined,
+    contactEmail: undefined,
+    contactNumber: undefined,
+    senderEmail: undefined,
+    website: undefined,
+    mapsUrl: undefined,
+    address: undefined,
+    city: undefined,
+    zipcode: undefined,
+    country: undefined,
+    instagram: undefined,
+    maintenanceMode: undefined,
+    maintenanceNotice: undefined,
+    addonsEnabled: undefined,
+    enableReviews: undefined,
+    enableWishlist: undefined,
+    enableNewsletterSignup: undefined,
+    aboutContent: undefined,
+    footerSubText: undefined,
+    ...overrides,
+  };
+}
+
 export const useConfigStore = create<ConfigState & ConfigActions>()(
   persist(
     (set, get) => ({
@@ -79,20 +110,19 @@ export const useConfigStore = create<ConfigState & ConfigActions>()(
 
       fetchConfigData: async () => {
         try {
-          const response = await api.get('/config');
-          const { maintanance, aboutContent, count, contactEmail, contactNumber, faqs, news } =
-            response.data.config;
+          const response = await configClient.getConfig({});
+          const business = response.business;
 
           set({
-            aboutContent,
-            maintanance,
-            businessCount: count,
+            aboutContent: null,
+            maintanance: response.maintenance,
+            businessCount: business ? 1 : 0,
             contactInfo: {
-              contactEmail,
-              contactNumber,
+              contactEmail: business?.email ?? null,
+              contactNumber: business?.phone ?? null,
             },
-            faqs,
-            news,
+            faqs: [],
+            news: [],
             loading: false,
           });
         } catch (error) {
@@ -102,16 +132,15 @@ export const useConfigStore = create<ConfigState & ConfigActions>()(
 
       updateAboutContent: async (data) => {
         try {
-          const response = await api.put('/config/update', data);
-          set({ aboutContent: response.data.aboutContent });
+          const response = await configClient.updateConfig(
+            emptyUpdateConfig({ aboutContent: data.aboutContent })
+          );
+          set({ aboutContent: response.config?.aboutContent ?? data.aboutContent });
         } catch (error) {}
       },
 
       fetchFaqs: async () => {
-        try {
-          const response = await api.get('/config/faqs');
-          set({ faqs: response.data });
-        } catch (error) {}
+        set({ faqs: [] });
       },
     }),
     {
