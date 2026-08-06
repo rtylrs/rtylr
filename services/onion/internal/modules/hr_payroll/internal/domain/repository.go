@@ -18,6 +18,10 @@ type Repository interface {
 
 	// Payroll Entries
 	ListPayrollEntries(ctx context.Context, ownerID, runID int64) ([]PayrollEntryRecord, error)
+	GetPayrollEntryForEmployee(ctx context.Context, ownerID, runID, employeeID int64) (*PayrollEntryRecord, error)
+
+	// Self-service (my-runs)
+	ListPayrollRunsForEmployee(ctx context.Context, ownerID, employeeID int64, params ListPayrollRunsParams) ([]PayrollRunRecord, int64, error)
 
 	// Cross-module data gathering
 	ListApprovedTimesheetSummaries(ctx context.Context, ownerID int64, periodStart, periodEnd string) ([]TimesheetSummary, error)

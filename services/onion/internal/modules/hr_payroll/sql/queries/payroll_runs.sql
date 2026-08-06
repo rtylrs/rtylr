@@ -34,3 +34,16 @@ LIMIT 1;
 
 -- name: ListDistinctPayrollOwnerIDs :many
 SELECT DISTINCT business_id FROM hr_payroll_config;
+
+-- name: ListPayrollRunsForEmployee :many
+SELECT r.id, r.owner_id, r.business_id, r.period_start, r.period_end, r.status, r.created_by, r.approved_by, r.exported_at, r.total_gross, r.total_net, r.created_at, r.updated_at
+FROM hr_payroll_runs r
+JOIN hr_payroll_entries e ON e.payroll_run_id = r.id AND e.business_id = r.business_id
+WHERE r.business_id = ? AND e.employee_id = ? AND r.status IN (?, ?)
+ORDER BY r.created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountPayrollRunsForEmployee :one
+SELECT COUNT(*) FROM hr_payroll_runs r
+JOIN hr_payroll_entries e ON e.payroll_run_id = r.id AND e.business_id = r.business_id
+WHERE r.business_id = ? AND e.employee_id = ? AND r.status IN (?, ?);
