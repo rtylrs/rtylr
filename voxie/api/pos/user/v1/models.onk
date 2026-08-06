@@ -46,8 +46,8 @@ message CreatePOSUserResponse {
 message UpdatePOSUserRequest {
   id: int64 @required @gt(0)
   name: string @required
-  /// pin is the pin value for this contract.
-  pin: string @required
+  /// Optional replacement PIN. Omit it to preserve the current PIN.
+  pin: string
   /// role is the role value for this contract.
   role: string @required
   is_active: bool
