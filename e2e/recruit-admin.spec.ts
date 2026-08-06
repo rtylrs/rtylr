@@ -54,7 +54,7 @@ const FAKE_SUBMISSION = {
 };
 
 async function stubRecruitAdminAPIs(page: import('@playwright/test').Page): Promise<void> {
-  await page.route('**/api/hub/user/v1/users/me', (route) =>
+  await page.route('**/hub/user/v1/users/me', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',

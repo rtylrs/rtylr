@@ -5,7 +5,7 @@ import { test, expect, type Page, type Route } from './fixtures';
  *
  * Every backend endpoint is stubbed via `page.route()` so CI never touches the
  * real backend. Auth seeding follows the same pattern as crm-customers.spec.ts:
- * seed a `token` cookie and stub `/api/hub/user/v1/users/me` before first navigation.
+ * seed a `token` cookie and stub `/hub/user/v1/users/me` before first navigation.
  *
  * Wire shapes use snake_case to mirror the Go backend response format. The
  * shared axios interceptor converts them to camelCase before hooks see them.
@@ -87,7 +87,7 @@ async function stubBaseRoutes(page: Page): Promise<void> {
     route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
   );
 
-  // AppGuard calls /api/hub/user/v1/users/me to validate CRM access.
+  // AppGuard calls /hub/user/v1/users/me to validate CRM access.
   await page.route(/\/user\/me$/, (route: Route) =>
     route.fulfill({
       status: 200,

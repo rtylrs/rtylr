@@ -179,7 +179,7 @@ async function installFlowStubs(
   });
 
   // (2) Shell/auth endpoints.
-  await page.route(`${API_HOST}/api/hub/user/v1/users/me`, (route: Route) =>
+  await page.route(`${API_HOST}/hub/user/v1/users/me`, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',

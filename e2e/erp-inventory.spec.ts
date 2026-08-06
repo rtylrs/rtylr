@@ -99,8 +99,8 @@ async function installProductStubs(
     })
   );
 
-  // (3) AppGuard expects /api/hub/user/v1/users/me to resolve with a user who has ERP access.
-  await page.route(`${apiHost}/api/hub/user/v1/users/me`, (route: Route) =>
+  // (3) AppGuard expects /hub/user/v1/users/me to resolve with a user who has ERP access.
+  await page.route(`${apiHost}/hub/user/v1/users/me`, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -109,14 +109,14 @@ async function installProductStubs(
   );
 
   // (4) Categories + brands feed the filter drawer + quick-add dropdown.
-  await page.route(`${apiHost}/api/erp/category/v1/categories`, (route: Route) =>
+  await page.route(`${apiHost}/erp/category/v1/categories`, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ categories: FAKE_CATEGORIES }),
     })
   );
-  await page.route(`${apiHost}/api/erp/brand/v1/brands`, (route: Route) =>
+  await page.route(`${apiHost}/erp/brand/v1/brands`, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -129,7 +129,7 @@ async function installProductStubs(
   // The ERP API multiplexes create/update/delete through POST /erp/products
   // with an `_action` discriminator - see shared/services/erpApi.ts. We
   // mirror that here so the handlers stay faithful to production.
-  await page.route(`${apiHost}/api/erp/product/v1/products`, async (route: Route) => {
+  await page.route(`${apiHost}/erp/product/v1/products`, async (route: Route) => {
     const req = route.request();
     const url = new URL(req.url());
     if (req.method() === 'GET') {
@@ -202,7 +202,7 @@ async function installProductStubs(
 
   // (6) Barcode lookup - registered BEFORE the by-id handler so the
   // /products/barcode/* path doesn't get mis-parsed as /products/<id>.
-  await page.route(`${apiHost}/api/erp/product/v1/products/barcode/**`, (route: Route) =>
+  await page.route(`${apiHost}/erp/product/v1/products/barcode/**`, (route: Route) =>
     route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
   );
 
@@ -301,7 +301,7 @@ async function installSupplierStubs(
   );
 
   // (3) AppGuard user identity.
-  await page.route(`${apiHost}/api/hub/user/v1/users/me`, (route: Route) =>
+  await page.route(`${apiHost}/hub/user/v1/users/me`, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -310,7 +310,7 @@ async function installSupplierStubs(
   );
 
   // (4) Suppliers list + create (POST).
-  await page.route(`${apiHost}/api/erp/supplier/v1/suppliers`, async (route: Route) => {
+  await page.route(`${apiHost}/erp/supplier/v1/suppliers`, async (route: Route) => {
     const req = route.request();
     if (req.method() === 'GET') {
       await route.fulfill({
@@ -388,7 +388,7 @@ async function installPurchaseOrderStubs(
     })
   );
 
-  await page.route(`${apiHost}/api/hub/user/v1/users/me`, (route: Route) =>
+  await page.route(`${apiHost}/hub/user/v1/users/me`, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -396,7 +396,7 @@ async function installPurchaseOrderStubs(
     })
   );
 
-  await page.route(`${apiHost}/api/erp/purchase-order/v1/purchase-orders`, async (route: Route) => {
+  await page.route(`${apiHost}/erp/purchase-order/v1/purchase-orders`, async (route: Route) => {
     const req = route.request();
     if (req.method() === 'GET') {
       await route.fulfill({
@@ -482,7 +482,7 @@ async function installCategoryStubs(
     })
   );
 
-  await page.route(`${apiHost}/api/hub/user/v1/users/me`, (route: Route) =>
+  await page.route(`${apiHost}/hub/user/v1/users/me`, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -490,7 +490,7 @@ async function installCategoryStubs(
     })
   );
 
-  await page.route(`${apiHost}/api/erp/category/v1/categories`, async (route: Route) => {
+  await page.route(`${apiHost}/erp/category/v1/categories`, async (route: Route) => {
     const req = route.request();
     if (req.method() === 'GET') {
       await route.fulfill({
@@ -553,7 +553,7 @@ async function installCategoryStubs(
 
 test.describe.skip('ERP inventory flow', () => {
   // AppGuard redirects to auth when there's no token cookie. A dummy
-  // value is enough because we stub /api/hub/user/v1/users/me - the guard only checks
+  // value is enough because we stub /hub/user/v1/users/me - the guard only checks
   // presence, not validity.
   test.beforeEach(async ({ context }) => {
     await context.addCookies([
@@ -687,7 +687,7 @@ test.describe.skip('ERP suppliers flow', () => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: ERP_URL }]);
   });
 
-  test('supplier names render from GET /api/erp/supplier/v1/suppliers', async ({ page }) => {
+  test('supplier names render from GET /erp/supplier/v1/suppliers', async ({ page }) => {
     const fakeSuppliers: StubSupplier[] = [
       {
         id: 1,
@@ -748,7 +748,7 @@ test.describe.skip('ERP purchase orders flow', () => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: ERP_URL }]);
   });
 
-  test('PO number and supplier name render from GET /api/erp/purchase-order/v1/purchase-orders', async ({
+  test('PO number and supplier name render from GET /erp/purchase-order/v1/purchase-orders', async ({
     page,
   }) => {
     const fakePOs: StubPurchaseOrder[] = [
@@ -823,7 +823,7 @@ test.describe.skip('ERP categories flow', () => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: ERP_URL }]);
   });
 
-  test('category names render from GET /api/erp/category/v1/categories', async ({ page }) => {
+  test('category names render from GET /erp/category/v1/categories', async ({ page }) => {
     const fakeCategories: StubCategory[] = [
       { id: 1, name: 'Beverages', description: 'Drinks', product_count: 5, sort_order: 1 },
       { id: 2, name: 'Snacks', description: 'Bites', product_count: 3, sort_order: 2 },

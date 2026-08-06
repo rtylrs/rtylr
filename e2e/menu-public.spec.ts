@@ -7,7 +7,7 @@ import { test, expect } from './fixtures';
 const MENU_URL = process.env.MENU_URL ?? 'http://localhost:5174';
 
 async function stubPublicMenuAPIs(page: import('@playwright/test').Page): Promise<void> {
-  await page.route('**/api/hub/business/v1/businesses/public*', (route) =>
+  await page.route('**/hub/business/v1/businesses/public*', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -23,7 +23,7 @@ async function stubPublicMenuAPIs(page: import('@playwright/test').Page): Promis
     })
   );
 
-  await page.route('**/api/pos/menu-item/v1/menu-items/public*', (route) =>
+  await page.route('**/pos/menu-item/v1/menu-items/public*', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',

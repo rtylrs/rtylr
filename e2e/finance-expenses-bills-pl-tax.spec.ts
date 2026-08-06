@@ -5,7 +5,7 @@ import { test, expect } from './fixtures';
  *
  * Every `/finance/*` call is stubbed via `page.route()` so the spec runs
  * without a backend. The AppGuard is satisfied the same way as the invoice
- * spec: a `token` cookie plus a stubbed `/api/hub/user/v1/users/me` response.
+ * spec: a `token` cookie plus a stubbed `/hub/user/v1/users/me` response.
  */
 
 const FINANCE_URL = process.env.FINANCE_URL ?? 'http://localhost:5182';
@@ -13,8 +13,8 @@ const FINANCE_URL = process.env.FINANCE_URL ?? 'http://localhost:5182';
 // ── Shared auth + fallback stub ───────────────────────────────────────────
 
 async function seedAuth(page: import('@playwright/test').Page): Promise<void> {
-  // AppGuard reads /api/hub/user/v1/users/me on mount.
-  await page.route('**/api/hub/user/v1/users/me', (route) =>
+  // AppGuard reads /hub/user/v1/users/me on mount.
+  await page.route('**/hub/user/v1/users/me', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -213,8 +213,8 @@ test.describe.skip('Finance - Profit & Loss report', () => {
   });
 
   test('renders revenue and net profit from stub data', async ({ page }) => {
-    // The PL screen calls GET /api/finance/report/v1/pl?period=month by default.
-    await page.route('**/api/finance/report/v1/pl*', async (route) => {
+    // The PL screen calls GET /finance/report/v1/pl?period=month by default.
+    await page.route('**/finance/report/v1/pl*', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -244,7 +244,7 @@ test.describe.skip('Finance - Profit & Loss report', () => {
   });
 
   test('period selector buttons render', async ({ page }) => {
-    await page.route('**/api/finance/report/v1/pl*', async (route) => {
+    await page.route('**/finance/report/v1/pl*', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',

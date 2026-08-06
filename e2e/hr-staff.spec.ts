@@ -103,8 +103,8 @@ async function installHrStubs(
     })
   );
 
-  // (3) AppGuard expects /api/hub/user/v1/users/me to resolve with a user who has HR access.
-  await page.route(`${apiHost}/api/hub/user/v1/users/me`, (route: Route) =>
+  // (3) AppGuard expects /hub/user/v1/users/me to resolve with a user who has HR access.
+  await page.route(`${apiHost}/hub/user/v1/users/me`, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -113,7 +113,7 @@ async function installHrStubs(
   );
 
   // (4) HR config/settings - HRConfigRoute loads this before rendering features.
-  await page.route(`${apiHost}/api/hr/dashboard/v1/dashboard`, async (route: Route) => {
+  await page.route(`${apiHost}/hr/dashboard/v1/dashboard`, async (route: Route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -191,7 +191,7 @@ async function installHrStubs(
 
 test.describe.skip('HR staff list', () => {
   // AppGuard redirects to auth when there is no token cookie. A dummy value is
-  // enough because we stub /api/hub/user/v1/users/me - the guard only checks presence.
+  // enough because we stub /hub/user/v1/users/me - the guard only checks presence.
   test.beforeEach(async ({ context }) => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: HR_URL }]);
   });
