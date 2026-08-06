@@ -121,7 +121,7 @@ const DefaultLayout: React.FC = () => {
   const location = useLocation();
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const [theme, setThemeState] = useState<Theme>(() => {
-    return (localStorage.getItem('rtylr-insights-theme') as Theme) || 'dark';
+    return (localStorage.getItem('rtylr-insights-theme') as Theme) || 'light';
   });
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
