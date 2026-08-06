@@ -34,6 +34,20 @@ func (h *ListPayrollRunsHandler) Serve(ctx context.Context, req *ListPayrollRuns
 		return ListPayrollRunsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, device.User.UserID, device.User.UserID)
+	if empErr != nil {
+		logger.Ctx(ctx).Warn("failed to resolve employee for payroll permission check", logger.Any("owner_id", device.User.UserID), logger.Error(empErr))
+		return ListPayrollRunsResponse{}, onekiterrors.PermissionDenied()
+	}
+	allowed, permErr := h.Service.HasPermission(ctx, device.User.UserID, employeeID, "manage_payroll")
+	if permErr != nil {
+		logger.Ctx(ctx).Error("failed to check manage_payroll permission", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", employeeID), logger.Error(permErr))
+		return ListPayrollRunsResponse{}, onekiterrors.PermissionDenied()
+	}
+	if !allowed {
+		return ListPayrollRunsResponse{}, onekiterrors.PermissionDenied()
+	}
+
 	runs, total, err := h.Service.ListPayrollRuns(ctx, device.User.UserID, domain.ListPayrollRunsParams{
 		Limit: req.Limit, Offset: req.Offset,
 	})

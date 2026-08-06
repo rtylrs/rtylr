@@ -67,6 +67,18 @@ func (r *Repository) GetEmployee(ctx context.Context, businessID, employeeID int
 	return &emp, nil
 }
 
+func (r *Repository) GetEmployeeIDByUserID(ctx context.Context, businessID, userID int64) (int64, error) {
+	id, err := r.queries.GetEmployeeIDByUserID(ctx, sqlc.GetEmployeeIDByUserIDParams{BusinessID: businessID, UserID: sql.NullInt64{Int64: userID, Valid: true}})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, domain.ErrEmployeeNotFound
+		}
+		logger.Ctx(ctx).Error("failed to get employee by user id", logger.Any("business_id", businessID), logger.Any("user_id", userID), logger.Error(err))
+		return 0, err
+	}
+	return id, nil
+}
+
 func (r *Repository) CreateEmployee(ctx context.Context, businessID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
 	result, err := r.queries.CreateEmployee(ctx, employeeToParams(businessID, emp))
 	if err != nil {

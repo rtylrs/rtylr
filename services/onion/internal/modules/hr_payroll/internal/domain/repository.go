@@ -18,6 +18,10 @@ type Repository interface {
 
 	// Payroll Entries
 	ListPayrollEntries(ctx context.Context, ownerID, runID int64) ([]PayrollEntryRecord, error)
+	GetPayrollEntryForEmployee(ctx context.Context, ownerID, runID, employeeID int64) (*PayrollEntryRecord, error)
+
+	// Self-service (my-runs)
+	ListPayrollRunsForEmployee(ctx context.Context, ownerID, employeeID int64, params ListPayrollRunsParams) ([]PayrollRunRecord, int64, error)
 
 	// Cross-module data gathering
 	ListApprovedTimesheetSummaries(ctx context.Context, ownerID int64, periodStart, periodEnd string) ([]TimesheetSummary, error)
@@ -31,6 +35,14 @@ type Repository interface {
 
 type ApprovalChainProvider interface {
 	GetApprovalChain(ctx context.Context, ownerID int64, requestType string) (*ApprovalChainInfo, error)
+}
+
+// PermissionProvider lets the payroll service resolve which hr_employees row
+// belongs to the calling platform user and check role-based permissions,
+// without depending on hr_core directly.
+type PermissionProvider interface {
+	GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error)
+	HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error)
 }
 
 // FinanceJournalPoster lets the payroll service hand a completed run off to the

@@ -50,3 +50,6 @@ WHERE id = ? AND business_id = ?;
 -- name: CreateLeaveBalance :exec
 INSERT INTO hr_leave_balances (owner_id, business_id, employee_id, leave_type_id, year)
 VALUES (?, ?, ?, ?, ?);
+
+-- name: GetEmployeeIDByUserID :one
+SELECT id FROM hr_employees WHERE business_id = ? AND user_id = ? LIMIT 1;

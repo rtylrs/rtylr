@@ -47,6 +47,20 @@ func (h *TriggerPayrollRunHandler) Serve(ctx context.Context, req *TriggerPayrol
 		return TriggerPayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, device.User.UserID, device.User.UserID)
+	if empErr != nil {
+		logger.Ctx(ctx).Warn("failed to resolve employee for payroll permission check", logger.Any("owner_id", device.User.UserID), logger.Error(empErr))
+		return TriggerPayrollRunResponse{}, onekiterrors.PermissionDenied()
+	}
+	allowed, permErr := h.Service.HasPermission(ctx, device.User.UserID, employeeID, "manage_payroll")
+	if permErr != nil {
+		logger.Ctx(ctx).Error("failed to check manage_payroll permission", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", employeeID), logger.Error(permErr))
+		return TriggerPayrollRunResponse{}, onekiterrors.PermissionDenied()
+	}
+	if !allowed {
+		return TriggerPayrollRunResponse{}, onekiterrors.PermissionDenied()
+	}
+
 	run, entries, err := h.Service.TriggerPayrollRun(ctx, device.User.UserID, device.User.UserID, req.PeriodStart, req.PeriodEnd)
 	if err != nil {
 		if errors.Is(err, domain.ErrPayrollNotConfigured) {

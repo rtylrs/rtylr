@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
@@ -162,6 +163,47 @@ func TestCreateEmployee_OwnerIDSet(t *testing.T) {
 	})
 	if emp.OwnerID != testutil.OwnerID {
 		t.Errorf("OwnerID = %d, want %d", emp.OwnerID, testutil.OwnerID)
+	}
+}
+
+func TestGetEmployeeIDByUserID_ReturnsMatchingEmployee(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const linkedUserID int64 = 900001
+	created, err := repo.CreateEmployee(ctx, testutil.OwnerID, domain.EmployeeRecord{
+		UserID:         linkedUserID,
+		FirstName:      "Linked",
+		LastName:       "User",
+		Email:          "linked.user.infra@example.com",
+		Status:         "active",
+		EmploymentType: "full_time",
+	})
+	if err != nil {
+		t.Fatalf("CreateEmployee: %v", err)
+	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_employees WHERE id = ?", created.ID)
+	})
+
+	employeeID, err := repo.GetEmployeeIDByUserID(ctx, testutil.OwnerID, linkedUserID)
+	if err != nil {
+		t.Fatalf("GetEmployeeIDByUserID: %v", err)
+	}
+	if employeeID != created.ID {
+		t.Errorf("employeeID = %d, want %d", employeeID, created.ID)
+	}
+}
+
+func TestGetEmployeeIDByUserID_UnknownUser_ReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	_, err := repo.GetEmployeeIDByUserID(ctx, testutil.OwnerID, 999999999)
+	if !errors.Is(err, domain.ErrEmployeeNotFound) {
+		t.Errorf("expected ErrEmployeeNotFound, got %v", err)
 	}
 }
 

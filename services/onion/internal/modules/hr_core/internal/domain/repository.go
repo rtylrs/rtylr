@@ -9,6 +9,7 @@ type Repository interface {
 	// Employees
 	ListEmployees(ctx context.Context, ownerID int64, params ListEmployeesParams) ([]EmployeeRecord, int64, error)
 	GetEmployee(ctx context.Context, ownerID, employeeID int64) (*EmployeeRecord, error)
+	GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error)
 	CreateEmployee(ctx context.Context, ownerID int64, emp EmployeeRecord) (*EmployeeRecord, error)
 	UpdateEmployee(ctx context.Context, ownerID int64, emp EmployeeRecord) (*EmployeeRecord, error)
 	CreateEmployeeWithBalances(ctx context.Context, ownerID int64, emp EmployeeRecord, leaveTypeIDs []int64) (*EmployeeRecord, error)

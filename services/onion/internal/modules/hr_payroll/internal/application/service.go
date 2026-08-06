@@ -28,17 +28,27 @@ func invalidateHRPayrollScope(ctx context.Context, ownerID int64) {
 type Service struct {
 	repo             *infrastructure.Repository
 	approvalProvider domain.ApprovalChainProvider
+	permissions      domain.PermissionProvider
 	financePoster    domain.FinanceJournalPoster
 	notifier         domain.NotificationDispatcher
 }
 
-func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider) *Service {
+func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider, permissions domain.PermissionProvider) *Service {
 	return &Service{
 		repo:             infrastructure.NewRepository(db),
 		approvalProvider: approvalProvider,
+		permissions:      permissions,
 		financePoster:    noopFinancePoster{},
 		notifier:         noopNotifier{},
 	}
+}
+
+func (s *Service) GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error) {
+	return s.permissions.GetEmployeeIDByUserID(ctx, ownerID, userID)
+}
+
+func (s *Service) HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error) {
+	return s.permissions.HasPermission(ctx, ownerID, employeeID, permissionKey)
 }
 
 // SetFinancePoster wires a finance module implementation into the payroll
@@ -377,6 +387,41 @@ func (s *Service) GetPayrollRun(ctx context.Context, ownerID, runID int64) (*dom
 	}
 
 	return run, entries, nil
+}
+
+// ListMyPayrollRuns lists payroll runs for the caller's own employeeID only,
+// restricted to statuses that represent finalized pay. The employeeID must
+// already be resolved from the authenticated user — never trust a
+// client-supplied employee id for self-service scoping.
+func (s *Service) ListMyPayrollRuns(ctx context.Context, ownerID, employeeID int64, params domain.ListPayrollRunsParams) ([]domain.PayrollRunRecord, int64, error) {
+	if params.Limit <= 0 {
+		params.Limit = 20
+	}
+	if params.Limit > 100 {
+		params.Limit = 100
+	}
+	return s.repo.ListPayrollRunsForEmployee(ctx, ownerID, employeeID, params)
+}
+
+// GetMyPayrollRun returns a payroll run along with only the caller's own
+// entry in it. If the employee has no entry in the run, or the run isn't in
+// a self-service-visible status, it reports ErrPayrollRunNotFound rather than
+// revealing that the run exists for other employees.
+func (s *Service) GetMyPayrollRun(ctx context.Context, ownerID, runID, employeeID int64) (*domain.PayrollRunRecord, *domain.PayrollEntryRecord, error) {
+	run, err := s.repo.GetPayrollRun(ctx, ownerID, runID)
+	if err != nil {
+		return nil, nil, err
+	}
+	if run.Status != domain.PayrollStatusApproved && run.Status != domain.PayrollStatusExported {
+		return nil, nil, domain.ErrPayrollRunNotFound
+	}
+
+	entry, err := s.repo.GetPayrollEntryForEmployee(ctx, ownerID, runID, employeeID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return run, entry, nil
 }
 
 func (s *Service) NotifyPayrollPeriodOpen(ctx context.Context) error {

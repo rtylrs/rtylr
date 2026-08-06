@@ -26,6 +26,12 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterGET[handlers.GetPayrollRunRequest, handlers.GetPayrollRunResponse](
 		ctx, router, handlers.GetPayrollRunRoutes(), &handlers.GetPayrollRunHandler{Service: service},
 	)
+	serverHttp.RegisterGET[handlers.ListMyPayrollRunsRequest, handlers.ListMyPayrollRunsResponse](
+		ctx, router, handlers.ListMyPayrollRunsRoutes(), &handlers.ListMyPayrollRunsHandler{Service: service},
+	)
+	serverHttp.RegisterGET[handlers.GetMyPayrollRunRequest, handlers.GetMyPayrollRunResponse](
+		ctx, router, handlers.GetMyPayrollRunRoutes(), &handlers.GetMyPayrollRunHandler{Service: service},
+	)
 	serverHttp.RegisterPOSTWithValidation[handlers.TriggerPayrollRunRequest, handlers.TriggerPayrollRunResponse](
 		ctx, router, handlers.TriggerPayrollRunRoutes(), &handlers.TriggerPayrollRunHandler{Service: service},
 	)
