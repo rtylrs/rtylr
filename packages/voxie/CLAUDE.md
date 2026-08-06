@@ -102,7 +102,7 @@ voxie/
 
 ### `.onk` Conventions
 
-- **Directory layout mirrors HTTP path:** a service under `api/hub/team/members/v1/` gets base path `/api/hub/team/members/v1` inferred automatically (kebab-casing multi-word segments, e.g. `time_entry` → `time-entry`) — no explicit `base_path:` unless the route is genuinely irregular.
+- **Directory layout mirrors HTTP path:** a service under `hub/team/members/v1/` gets base path `/hub/team/members/v1` inferred automatically (kebab-casing multi-word segments, e.g. `time_entry` → `time-entry`) — no explicit `base_path:` unless the route is genuinely irregular.
 - **Two files per service directory:** `models.onk` (messages + enums) and `service.onk` (the service + its RPCs).
 - **Field naming:** `snake_case` in `.onk`. Generated Go uses PascalCase struct fields with `json:"snake_case"` tags; generated TypeScript keeps `snake_case` to match the wire JSON exactly.
 - **Message naming:** PascalCase. e.g., `StaffUserPayload`, `ListTeamRequest`, `InviteUserResponse`.
@@ -134,7 +134,7 @@ Import paths include the capability path:
 **Go backend (`onion`):**
 
 ```go
-import membersv1 "github.com/voxire/voxie/gen/go/api/hub/team/members/v1"
+import membersv1 "github.com/voxire/voxie/gen/go/hub/team/members/v1"
 
 return handlers.ListUsersResponse{
     Users: []*membersv1.StaffUserPayload{ ... },
@@ -144,9 +144,9 @@ return handlers.ListUsersResponse{
 **TypeScript frontends (`rtylr`, `pos`) via `@voxire/voxie`:**
 
 ```ts
-import type { StaffUserPayload } from '@voxire/voxie/api/hub/team/members/v1/types';
-import type { LoginRequest } from '@voxire/voxie/api/common/auth/v1/types';
-import { FloorServiceClient } from '@voxire/voxie/api/pos/floor/v1/client';
+import type { StaffUserPayload } from '@voxire/voxie/hub/team/members/v1/types';
+import type { LoginRequest } from '@voxire/voxie/common/auth/v1/types';
+import { FloorServiceClient } from '@voxire/voxie/pos/floor/v1/client';
 ```
 
 ### Deprecating and Removing Fields
@@ -281,8 +281,8 @@ There is nothing to run in `onion`, `packages`, `rtylr`, or `pos` — they all c
 1. Create `api/common/{domain}/v1/` for shared contracts or `api/{app}/{capability}/{subdomain}/v1/` for app-owned contracts, with `models.onk` + `service.onk`.
 2. Run `onek check api`.
 3. Run `make generate` and commit the `.onk` files together with the regenerated `gen/go` and `gen/ts`.
-4. In `onion`: `cd voxie && git pull && cd ..` → `git add voxie` → import from the generated capability path under `gen/go/api/`. No local generation step needed.
-5. In `packages`: `cd voxie && git pull && cd ..` → `git add voxie` → import from `@voxire/voxie/api/{capability path}`. No local generation step or export-path edit needed.
+4. In `onion`: `cd voxie && git pull && cd ..` → `git add voxie` → import from the generated capability path under `gen/go/`. No local generation step needed.
+5. In `packages`: `cd voxie && git pull && cd ..` → `git add voxie` → import from `@voxire/voxie/{capability path}`. No local generation step or export-path edit needed.
 
 ### Submodule update workflow
 

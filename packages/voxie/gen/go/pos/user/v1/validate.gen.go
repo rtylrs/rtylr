@@ -54,9 +54,6 @@ func (m *UpdatePOSUserRequest) Validate() error {
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.Pin == "" {
-		violations = append(violations, "pin is required")
-	}
 	if m.Role == "" {
 		violations = append(violations, "role is required")
 	}
