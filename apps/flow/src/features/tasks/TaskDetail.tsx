@@ -53,6 +53,7 @@ import {
 } from '../../shared/stores/flowStore';
 import type { ApiTask, ApiTaskDetail, ApiTaskActivity } from '../../shared/services/flowApi';
 import { useUserStore } from '../../shared/stores/userStore';
+import { useCanEditTask, useCanDeleteResource } from '../../shared/lib/currentUser';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import CommentList from '../../shared/components/CommentList';
 import CommentInput from '../../shared/components/CommentInput';
@@ -193,6 +194,8 @@ const TaskDetail: React.FC = () => {
   useTaskRealtime(id);
   const { data: taskData, isLoading } = useTask(id);
   const user = useUserStore((s) => s.user);
+  const canEdit = useCanEditTask();
+  const canRemove = useCanDeleteResource();
   const updateTaskMut = useUpdateTask();
   const deleteTaskMut = useDeleteTask();
   const addCommentMut = useAddComment();
@@ -431,10 +434,10 @@ const TaskDetail: React.FC = () => {
                   }
                 );
               }}
-              className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+              className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
               style={{ color: 'var(--flow-text-muted)' }}
-              title="Archive"
-              disabled={updateTaskMut.isPending}
+              title={!canEdit ? t('common.readOnlyAccess') : 'Archive'}
+              disabled={updateTaskMut.isPending || !canEdit}
             >
               <Archive size={12} />
             </button>
@@ -452,15 +455,24 @@ const TaskDetail: React.FC = () => {
                   // useDeleteTask already toasts on error.
                 });
               }}
-              className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+              className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
               style={{ color: '#ef4444' }}
-              title="Delete"
-              disabled={deleteTaskMut.isPending}
+              title={!canRemove ? t('common.deleteRestricted') : 'Delete'}
+              disabled={deleteTaskMut.isPending || !canRemove}
             >
               <Trash2 size={12} />
             </button>
           </div>
         </div>
+
+        {!canEdit && (
+          <div
+            className="px-4 py-2 text-[11px] sm:px-6"
+            style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-dim)' }}
+          >
+            {t('common.readOnlyAccess')}
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 6 }}
@@ -473,7 +485,8 @@ const TaskDetail: React.FC = () => {
             <input
               value={task.title}
               onChange={(e) => updateTask(task.id, { title: e.target.value })}
-              className="w-full bg-transparent outline-none font-bold mb-4 text-xl sm:text-2xl"
+              disabled={!canEdit}
+              className="w-full bg-transparent outline-none font-bold mb-4 text-xl sm:text-2xl disabled:opacity-70"
               style={{
                 color: 'var(--flow-text)',
               }}
@@ -484,7 +497,8 @@ const TaskDetail: React.FC = () => {
               onChange={(e) => updateTask(task.id, { description: e.target.value })}
               placeholder="Add a description…"
               rows={5}
-              className="w-full bg-transparent outline-none text-[13px] leading-relaxed mb-6 resize-none"
+              disabled={!canEdit}
+              className="w-full bg-transparent outline-none text-[13px] leading-relaxed mb-6 resize-none disabled:opacity-70"
               style={{ color: 'var(--flow-text-muted)' }}
             />
 
@@ -503,6 +517,7 @@ const TaskDetail: React.FC = () => {
                 subtasks={taskSubtasks}
                 onToggle={toggleSubtask}
                 onAdd={(title) => addSubtask(task.id, title)}
+                disabled={!canEdit}
               />
             </section>
 
@@ -521,6 +536,7 @@ const TaskDetail: React.FC = () => {
                 onRemove={(attachmentId) =>
                   removeAttachmentMut.mutate({ taskId: task.id, attachmentId })
                 }
+                disabled={!canEdit}
               />
             </section>
 
@@ -570,6 +586,7 @@ const TaskDetail: React.FC = () => {
                         : { id: 'local', name: 'You', initials: 'YO' }
                     )
                   }
+                  disabled={!canEdit}
                 />
               </div>
             )}
@@ -599,7 +616,8 @@ const TaskDetail: React.FC = () => {
               }
               updateTask(task.id, { status: next });
             }}
-            className="bg-transparent text-[12px] outline-none w-full"
+            disabled={!canEdit}
+            className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           >
             {statuses.map((s) => (
@@ -614,7 +632,8 @@ const TaskDetail: React.FC = () => {
           <select
             value={task.priority}
             onChange={(e) => updateTask(task.id, { priority: e.target.value as Task['priority'] })}
-            className="bg-transparent text-[12px] outline-none w-full"
+            disabled={!canEdit}
+            className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           >
             {priorities.map((p) => (
@@ -639,7 +658,8 @@ const TaskDetail: React.FC = () => {
                     assigneeInitials: m.initials,
                   });
               }}
-              className="bg-transparent text-[12px] outline-none flex-1"
+              disabled={!canEdit}
+              className="bg-transparent text-[12px] outline-none flex-1 disabled:opacity-70"
               style={{ color: 'var(--flow-text)' }}
             >
               {members.map((m) => (
@@ -655,6 +675,7 @@ const TaskDetail: React.FC = () => {
           <DueDatePicker
             value={task.dueDate}
             onChange={(d) => updateTask(task.id, { dueDate: d })}
+            disabled={!canEdit}
           />
         </DetailField>
 
@@ -664,7 +685,8 @@ const TaskDetail: React.FC = () => {
             value={task.estimate || ''}
             onChange={(e) => updateTask(task.id, { estimate: Number(e.target.value) })}
             placeholder="hours"
-            className="bg-transparent text-[12px] outline-none w-full"
+            disabled={!canEdit}
+            className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           />
         </DetailField>
@@ -713,7 +735,7 @@ const TaskDetail: React.FC = () => {
                         {formatRelative(log.loggedAt || log.createdAt)}
                       </p>
                     </div>
-                    {(user == null || String(log.userId) === user.id) && (
+                    {canEdit && (user == null || String(log.userId) === user.id) && (
                       <button
                         type="button"
                         onClick={() => deleteTimeLogMut.mutate({ id: log.id, taskId: task.id })}
@@ -787,7 +809,9 @@ const TaskDetail: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setLogFormOpen(true)}
-                className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
+                disabled={!canEdit}
+                title={!canEdit ? t('common.readOnlyAccess') : undefined}
+                className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)] disabled:opacity-40"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <Plus size={9} /> Log time
@@ -801,7 +825,8 @@ const TaskDetail: React.FC = () => {
             <button
               type="button"
               onClick={() => updateTask(task.id, { effortMinutes: undefined })}
-              className="text-[10px] px-2 py-1 rounded-md"
+              disabled={!canEdit}
+              className="text-[10px] px-2 py-1 rounded-md disabled:opacity-40"
               style={{
                 background: !task.effortMinutes ? 'var(--flow-hover)' : 'transparent',
                 color: 'var(--flow-text-muted)',
@@ -815,7 +840,8 @@ const TaskDetail: React.FC = () => {
                 key={m}
                 type="button"
                 onClick={() => updateTask(task.id, { effortMinutes: m })}
-                className="text-[10px] px-2 py-1 rounded-md transition-colors"
+                disabled={!canEdit}
+                className="text-[10px] px-2 py-1 rounded-md transition-colors disabled:opacity-40"
                 style={{
                   background: task.effortMinutes === m ? 'var(--accent-muted)' : 'transparent',
                   color: 'var(--flow-text)',
@@ -824,7 +850,7 @@ const TaskDetail: React.FC = () => {
                       ? `1px solid ${'var(--accent)'}66`
                       : '1px solid var(--flow-border)',
                 }}
-                title={`${m} minutes`}
+                title={!canEdit ? t('common.readOnlyAccess') : `${m} minutes`}
               >
                 {formatEffortMinutes(m)}
               </button>
@@ -837,7 +863,8 @@ const TaskDetail: React.FC = () => {
             value={task.waitingOn || ''}
             onChange={(e) => updateTask(task.id, { waitingOn: e.target.value || undefined })}
             placeholder="Person, team, approval…"
-            className="bg-transparent text-[12px] outline-none w-full placeholder:opacity-50"
+            disabled={!canEdit}
+            className="bg-transparent text-[12px] outline-none w-full placeholder:opacity-50 disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           />
         </DetailField>
@@ -848,7 +875,8 @@ const TaskDetail: React.FC = () => {
             onChange={(e) => updateTask(task.id, { decisionNote: e.target.value || undefined })}
             placeholder="Why this approach (one line)"
             rows={2}
-            className="w-full bg-transparent text-[12px] outline-none resize-none placeholder:opacity-50 rounded-md px-2 py-1.5"
+            disabled={!canEdit}
+            className="w-full bg-transparent text-[12px] outline-none resize-none placeholder:opacity-50 rounded-md px-2 py-1.5 disabled:opacity-70"
             style={{ border: '1px solid var(--flow-border)', color: 'var(--flow-text)' }}
           />
         </DetailField>
@@ -857,7 +885,9 @@ const TaskDetail: React.FC = () => {
           <button
             type="button"
             onClick={() => updateTask(task.id, { focusPin: !task.focusPin })}
-            className="text-[11px] px-2.5 py-1.5 rounded-md w-full text-left transition-colors"
+            disabled={!canEdit}
+            title={!canEdit ? t('common.readOnlyAccess') : undefined}
+            className="text-[11px] px-2.5 py-1.5 rounded-md w-full text-left transition-colors disabled:opacity-60"
             style={{
               background: task.focusPin ? 'var(--accent-muted)' : 'var(--flow-hover)',
               color: 'var(--flow-text)',
@@ -889,7 +919,8 @@ const TaskDetail: React.FC = () => {
             <select
               value={task.sectionId ?? ''}
               onChange={(e) => updateTask(task.id, { sectionId: e.target.value || undefined })}
-              className="bg-transparent text-[12px] outline-none w-full"
+              disabled={!canEdit}
+              className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
               style={{ color: 'var(--flow-text)' }}
             >
               <option value="">No section</option>
@@ -915,7 +946,8 @@ const TaskDetail: React.FC = () => {
                     },
                   })
                 }
-                className="bg-transparent text-[12px] outline-none w-full"
+                disabled={!canEdit}
+                className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
                 style={{ color: 'var(--flow-text)' }}
               >
                 <option value="">-</option>
@@ -937,7 +969,8 @@ const TaskDetail: React.FC = () => {
                     },
                   })
                 }
-                className="bg-transparent text-[12px] outline-none w-full"
+                disabled={!canEdit}
+                className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
                 style={{ color: 'var(--flow-text)' }}
               />
             ) : (
@@ -951,7 +984,8 @@ const TaskDetail: React.FC = () => {
                     },
                   })
                 }
-                className="bg-transparent text-[12px] outline-none w-full"
+                disabled={!canEdit}
+                className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
                 style={{ color: 'var(--flow-text)' }}
               />
             )}
@@ -970,21 +1004,23 @@ const TaskDetail: React.FC = () => {
                 >
                   {dt.identifier} · {dt.title}
                 </button>
-                <button
-                  type="button"
-                  className="text-[10px] shrink-0"
-                  style={{ color: 'var(--flow-text-dim)' }}
-                  onClick={() =>
-                    updateTask(task.id, {
-                      dependencies: (task.dependencies ?? []).filter((x) => x !== dt.id),
-                    })
-                  }
-                >
-                  Remove
-                </button>
+                {canEdit && (
+                  <button
+                    type="button"
+                    className="text-[10px] shrink-0"
+                    style={{ color: 'var(--flow-text-dim)' }}
+                    onClick={() =>
+                      updateTask(task.id, {
+                        dependencies: (task.dependencies ?? []).filter((x) => x !== dt.id),
+                      })
+                    }
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             ))}
-            {dependencyCandidates.length > 0 && (
+            {dependencyCandidates.length > 0 && canEdit && (
               <div className="flex gap-1 pt-1">
                 <select
                   value={depId}
@@ -1021,7 +1057,7 @@ const TaskDetail: React.FC = () => {
 
         <DetailField icon={Tag} label="Labels">
           <div className="flex flex-wrap gap-1 relative">
-            {taskLabels.length === 0 && (
+            {taskLabels.length === 0 && canEdit && (
               <button
                 onClick={() => setLabelPickerOpen((v) => !v)}
                 className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
@@ -1035,10 +1071,10 @@ const TaskDetail: React.FC = () => {
                 key={l.id}
                 label={{ id: String(l.id), name: l.name, color: l.color }}
                 small
-                onRemove={() => handleToggleLabel(l.id)}
+                onRemove={canEdit ? () => handleToggleLabel(l.id) : undefined}
               />
             ))}
-            {taskLabels.length > 0 && (
+            {taskLabels.length > 0 && canEdit && (
               <button
                 onClick={() => setLabelPickerOpen((v) => !v)}
                 className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"

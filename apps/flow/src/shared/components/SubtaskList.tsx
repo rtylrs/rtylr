@@ -6,15 +6,21 @@ interface SubtaskListProps {
   subtasks: Subtask[];
   onToggle: (id: string) => void;
   onAdd: (title: string) => void;
+  disabled?: boolean;
 }
 
-export const SubtaskList: React.FC<SubtaskListProps> = ({ subtasks, onToggle, onAdd }) => {
+export const SubtaskList: React.FC<SubtaskListProps> = ({
+  subtasks,
+  onToggle,
+  onAdd,
+  disabled,
+}) => {
   const [newTitle, setNewTitle] = useState('');
   const completed = subtasks.filter((s) => s.completed).length;
   const pct = subtasks.length > 0 ? Math.round((completed / subtasks.length) * 100) : 0;
 
   const submit = () => {
-    if (!newTitle.trim()) return;
+    if (disabled || !newTitle.trim()) return;
     onAdd(newTitle.trim());
     setNewTitle('');
   };
@@ -45,7 +51,8 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({ subtasks, onToggle, on
               <button
                 key={s.id}
                 onClick={() => onToggle(s.id)}
-                className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-[var(--flow-hover)] transition-colors text-left"
+                disabled={disabled}
+                className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-[var(--flow-hover)] transition-colors text-left disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span
                   className="h-4 w-4 rounded flex items-center justify-center shrink-0"
@@ -78,7 +85,8 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({ subtasks, onToggle, on
           onChange={(e) => setNewTitle(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submit()}
           placeholder="Add subtask…"
-          className="flex-1 bg-transparent outline-none text-[12px]"
+          disabled={disabled}
+          className="flex-1 bg-transparent outline-none text-[12px] disabled:opacity-60"
           style={{ color: 'var(--flow-text)' }}
         />
       </div>

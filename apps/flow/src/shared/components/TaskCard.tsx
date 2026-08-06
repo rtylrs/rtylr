@@ -18,6 +18,8 @@ import PriorityIcon from './PriorityIcon';
 import AssigneeAvatar from './AssigneeAvatar';
 import LabelChip from './LabelChip';
 import { useDeleteTask } from '../../features/tasks/useTasks';
+import { useCanDeleteResource } from '../lib/currentUser';
+import { useTranslation } from 'react-i18next';
 
 interface TaskCardProps {
   task: Task;
@@ -39,8 +41,10 @@ const TaskContextMenu: React.FC<{
   menu: ContextMenuState;
   onClose: () => void;
 }> = ({ menu, onClose }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const deleteTask = useDeleteTask();
+  const canRemove = useCanDeleteResource();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -114,10 +118,19 @@ const TaskContextMenu: React.FC<{
       </button>
       <div style={{ height: 1, background: 'var(--flow-border)', margin: '4px 0' }} />
       <button
-        style={{ ...itemStyle, color: '#ef4444' }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239,68,68,0.08)')}
+        style={{
+          ...itemStyle,
+          color: canRemove ? '#ef4444' : 'var(--flow-text-dim)',
+          cursor: canRemove ? 'pointer' : 'not-allowed',
+        }}
+        disabled={!canRemove}
+        title={!canRemove ? t('common.deleteRestricted') : undefined}
+        onMouseEnter={(e) => {
+          if (canRemove) e.currentTarget.style.background = 'rgba(239,68,68,0.08)';
+        }}
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         onClick={() => {
+          if (!canRemove) return;
           deleteTask.mutate(menu.taskId, {
             onSuccess: () => toast.success('Task deleted'),
             onError: () => toast.error('Failed to delete task'),
@@ -125,7 +138,10 @@ const TaskContextMenu: React.FC<{
           onClose();
         }}
       >
-        <Trash2 size={12} style={{ color: '#ef4444', flexShrink: 0 }} />
+        <Trash2
+          size={12}
+          style={{ color: canRemove ? '#ef4444' : 'var(--flow-text-dim)', flexShrink: 0 }}
+        />
         Delete
       </button>
     </div>,
