@@ -67,6 +67,10 @@ func (s *Service) GetEmployee(ctx context.Context, ownerID, employeeID int64) (*
 	)
 }
 
+func (s *Service) GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error) {
+	return s.repo.GetEmployeeIDByUserID(ctx, ownerID, userID)
+}
+
 func (s *Service) CreateEmployee(ctx context.Context, ownerID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
 	defer invalidateHRCoreScope(ctx, ownerID)
 	if err := s.SeedDefaultRoles(ctx, ownerID); err != nil {

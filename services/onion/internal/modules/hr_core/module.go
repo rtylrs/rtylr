@@ -46,6 +46,14 @@ func (m *Module) GetAnonymousRoutes() []string {
 	}
 }
 
+func (m *Module) GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error) {
+	return m.service.GetEmployeeIDByUserID(ctx, ownerID, userID)
+}
+
+func (m *Module) HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error) {
+	return m.service.HasPermission(ctx, ownerID, employeeID, permissionKey)
+}
+
 func (m *Module) GetApprovalChain(ctx context.Context, ownerID int64, requestType string) (*ApprovalChainInfo, error) {
 	chain, err := m.service.GetApprovalChain(ctx, ownerID, requestType)
 	if err != nil {
