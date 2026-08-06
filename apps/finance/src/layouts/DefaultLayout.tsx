@@ -201,7 +201,7 @@ const DefaultLayout: React.FC = () => {
     [pathname, search, pageTitle]
   );
   const [theme, setThemeState] = useState<Theme>(
-    () => (localStorage.getItem('finance-theme') as Theme) || 'dark'
+    () => (localStorage.getItem('finance-theme') as Theme) || 'light'
   );
   const [searchOpen, setSearchOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);

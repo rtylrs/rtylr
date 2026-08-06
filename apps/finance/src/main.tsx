@@ -18,7 +18,7 @@ const BootLoader = (): React.JSX.Element => (
       height: '100vh',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#0a0a0a',
+      background: 'var(--hub-bg)',
     }}
   >
     <div
@@ -36,7 +36,7 @@ const BootLoader = (): React.JSX.Element => (
 );
 
 // Apply persisted theme before first render to prevent flash
-const saved = localStorage.getItem('finance-theme') || 'dark';
+const saved = localStorage.getItem('finance-theme') || 'light';
 document.documentElement.setAttribute(
   'data-theme',
   saved === 'system'
