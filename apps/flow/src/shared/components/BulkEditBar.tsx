@@ -9,6 +9,7 @@ import {
   useBulkUpdatePriority,
   useBulkDelete,
 } from '../../features/tasks/useTasks';
+import { useCanEditTask, useCanDeleteResource } from '../lib/currentUser';
 
 const t = (key: string): string => i18next.t(key) as string;
 
@@ -17,6 +18,8 @@ export const BulkEditBar: React.FC = () => {
   const bulkStatus = useBulkUpdateStatus();
   const bulkPriority = useBulkUpdatePriority();
   const bulkDelete = useBulkDelete();
+  const canEdit = useCanEditTask();
+  const canRemove = useCanDeleteResource();
 
   if (selectedTaskIds.length === 0) return null;
 
@@ -42,7 +45,8 @@ export const BulkEditBar: React.FC = () => {
         </span>
         <div className="h-4 w-px mx-1" style={{ background: 'var(--flow-border)' }} />
         <button
-          disabled={isPending}
+          disabled={isPending || !canEdit}
+          title={!canEdit ? t('common.readOnlyAccess') : undefined}
           onClick={() =>
             bulkStatus
               .mutateAsync({ ids: selectedTaskIds, status: 'done' })
@@ -55,7 +59,8 @@ export const BulkEditBar: React.FC = () => {
           <Check size={11} /> Mark done
         </button>
         <button
-          disabled={isPending}
+          disabled={isPending || !canEdit}
+          title={!canEdit ? t('common.readOnlyAccess') : undefined}
           onClick={() =>
             bulkPriority
               .mutateAsync({ ids: selectedTaskIds, priority: 'urgent' })
@@ -68,7 +73,8 @@ export const BulkEditBar: React.FC = () => {
           <Flag size={11} /> Set urgent
         </button>
         <button
-          disabled={isPending}
+          disabled={isPending || !canEdit}
+          title={!canEdit ? t('common.readOnlyAccess') : undefined}
           onClick={() =>
             bulkStatus
               .mutateAsync({ ids: selectedTaskIds, status: 'cancelled' })
@@ -81,7 +87,8 @@ export const BulkEditBar: React.FC = () => {
           <Archive size={11} /> Archive
         </button>
         <button
-          disabled={isPending}
+          disabled={isPending || !canRemove}
+          title={!canRemove ? t('common.deleteRestricted') : undefined}
           onClick={() =>
             bulkDelete
               .mutateAsync(selectedTaskIds)
