@@ -47,7 +47,7 @@ func (m *Module) GetAnonymousRoutes() []string {
 		"/oauth/authorize",
 		"/oauth/token",
 		"/oauth/revoke",
-		"/api/common/oauth/v1/token",
-		"/api/common/oauth/v1/revoke",
+		"/common/oauth/v1/token",
+		"/common/oauth/v1/revoke",
 	}
 }

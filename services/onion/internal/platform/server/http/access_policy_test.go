@@ -38,16 +38,16 @@ func TestRouteAccessPolicy(t *testing.T) {
 
 func TestRouteAccessPolicyMatchesParameterizedRoutes(t *testing.T) {
 	policy := NewRouteAccessPolicy()
-	policy.RegisterAnonymousRoutes("/api/pos/orders/v1/orders/{order_id}/public-status")
+	policy.RegisterAnonymousRoutes("/pos/orders/v1/orders/{order_id}/public-status")
 	policy.RegisterAgentRoutes("test-agent", "/agent/{id}/status")
 
-	if !policy.IsAllowedAnonymously("/api/pos/orders/v1/orders/123/public-status") {
+	if !policy.IsAllowedAnonymously("/pos/orders/v1/orders/123/public-status") {
 		t.Fatal("expected anonymous route pattern to match concrete path")
 	}
-	if policy.IsAllowedAnonymously("/api/pos/orders/v1/orders/123/items/public-status") {
+	if policy.IsAllowedAnonymously("/pos/orders/v1/orders/123/items/public-status") {
 		t.Fatal("expected route pattern not to match extra path segment")
 	}
-	if policy.IsAllowedAnonymously("/api/pos/orders/v1/orders//public-status") {
+	if policy.IsAllowedAnonymously("/pos/orders/v1/orders//public-status") {
 		t.Fatal("expected route pattern not to match empty path segment")
 	}
 	if !policy.IsAllowedForAgent("test-agent", "/agent/abc/status") {

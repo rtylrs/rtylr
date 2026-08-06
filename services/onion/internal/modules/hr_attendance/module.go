@@ -32,6 +32,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{
-		"/api/hr/attendance/v1/attendance/clock-in",
+		"/hr/attendance/v1/attendance/clock-in",
 	}
 }

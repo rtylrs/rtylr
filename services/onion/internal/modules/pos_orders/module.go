@@ -86,8 +86,8 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{
 		"/pos/payments/webhook",
-		"/api/pos/orders/v1/orders/public",
-		"/api/pos/orders/v1/orders/{order_id}/public-status",
+		"/pos/orders/v1/orders/public",
+		"/pos/orders/v1/orders/{order_id}/public-status",
 		"/pos/ws",
 	}
 }

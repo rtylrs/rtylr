@@ -76,7 +76,7 @@ func (m *Module) Service() *application.Service {
 
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{
-		"/api/hub/team/invitations/v1/invitations/verify",
-		"/api/hub/team/invitations/v1/invitations/accept",
+		"/hub/team/invitations/v1/invitations/verify",
+		"/hub/team/invitations/v1/invitations/accept",
 	}
 }

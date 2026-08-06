@@ -776,7 +776,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	}
 
 	// oneKit contract services: every module's generated service servers
-	// register on one shared mux; the generated code owns every /api/... path.
+	// register on one shared mux; the generated code owns every contract path.
 	// Runs before RegisterRoutes so module escape hatches (rate-limited or
 	// special routes) can reference the mux captured in RegisterAPI.
 	oneKitMux := stdhttp.NewServeMux()

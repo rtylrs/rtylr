@@ -13,7 +13,7 @@ func TestIsMaliciousPath(t *testing.T) {
 	}{
 		// Sub-segments of legitimate API paths must NOT match.
 		{"/hr/setup/status", false},
-		{"/api/admin-panel", false},
+		{"/erp/admin-panel", false},
 		{"/console", false},
 		{"/console/stats", false},
 		{"/console/resources", false},
@@ -61,13 +61,13 @@ func TestIsLegitimateTraffic_AcceptsBrowsersOnPublicPaths(t *testing.T) {
 }
 
 func TestIsLegitimateTraffic_RejectsBrowserOnPrivateAPI(t *testing.T) {
-	// Regression: previously /api/erp/product/v1/products matched because every path contains
+	// Regression: previously /erp/product/v1/products matched because every path contains
 	// "/", which short-circuited the legitimate-paths check to true. Only the
 	// explicit allowlist should match now.
-	r := httptest.NewRequest(http.MethodGet, "/api/erp/product/v1/products", http.NoBody)
+	r := httptest.NewRequest(http.MethodGet, "/erp/product/v1/products", http.NoBody)
 	r.Header.Set("User-Agent", "Mozilla/5.0")
 	if isLegitimateTraffic(r) {
-		t.Error("/api/erp/product/v1/products is a private API, browser UA should not make it legitimate")
+		t.Error("/erp/product/v1/products is a private API, browser UA should not make it legitimate")
 	}
 }
 

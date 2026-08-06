@@ -715,20 +715,20 @@ All relative to `https://api.voxire.dev`. Auth required unless noted.
 | GET | `/team/onboard` | ✓ | Mark user as onboarded |
 | POST | `/team/request-access` | ✓ | Request app access |
 
-### ERP (OneKit — `/api/erp/*`)
+### ERP (OneKit — `/erp/*`)
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
-| GET | `/api/erp/product/v1/products` | ✓ | List products |
-| POST | `/api/erp/product/v1/products` | ✓ | Create product |
-| PUT | `/api/erp/product/v1/products/{id}` | ✓ | Update product |
-| DELETE | `/api/erp/product/v1/products/{id}` | ✓ | Delete product |
-| GET | `/api/erp/supplier/v1/suppliers` | ✓ | List suppliers |
-| POST | `/api/erp/supplier/v1/suppliers` | ✓ | Create supplier |
-| GET | `/api/erp/purchase-order/v1/purchase-orders` | ✓ | List purchase orders |
-| PATCH | `/api/erp/purchase-order/v1/purchase-orders/{id}/status` | ✓ | Update PO status |
-| POST | `/api/erp/inventory/v1/adjust` | ✓ | Adjust inventory |
-| GET | `/api/erp/inventory/v1/report` | ✓ | Inventory report |
+| GET | `/erp/product/v1/products` | ✓ | List products |
+| POST | `/erp/product/v1/products` | ✓ | Create product |
+| PUT | `/erp/product/v1/products/{id}` | ✓ | Update product |
+| DELETE | `/erp/product/v1/products/{id}` | ✓ | Delete product |
+| GET | `/erp/supplier/v1/suppliers` | ✓ | List suppliers |
+| POST | `/erp/supplier/v1/suppliers` | ✓ | Create supplier |
+| GET | `/erp/purchase-order/v1/purchase-orders` | ✓ | List purchase orders |
+| PATCH | `/erp/purchase-order/v1/purchase-orders/{id}/status` | ✓ | Update PO status |
+| POST | `/erp/inventory/v1/adjust` | ✓ | Adjust inventory |
+| GET | `/erp/inventory/v1/report` | ✓ | Inventory report |
 
 Legacy `/erp/*` chi routes are removed. See `onion/docs/backend.md` for the full OneKit path list.
 

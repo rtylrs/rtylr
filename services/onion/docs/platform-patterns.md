@@ -104,52 +104,39 @@ HTTP endpoints are contract-first:
 frontend <-> oneKit generated client/server <-> Onion application service
 ```
 
-Each backend module should expose one or more Voxie `service.proto` definitions.
-Those services import `onekit/http/annotations.proto` and declare an HTTP
-`base_path` that mirrors the proto file's own directory path, prefixed with
-`/api`: `pos/floor/v1/service.proto` → `base_path: "/api/pos/floor/v1"`. Each
-RPC's `path` option is appended to that base path (e.g. `/floors`), giving a
-full route of `/api/{app}/{module}/{version}/{route}`.
+Each backend module should expose one or more Voxie `.onk` service definitions.
+The schema root is `voxie/api`, but that filesystem directory is not an HTTP
+prefix: `api/pos/floor/v1/service.onk` generates routes below
+`/pos/floor/v1`. Each RPC decorator supplies the remaining operation path,
+giving a full route of `/{app}/{module}/{version}/{route}`.
 
 Onion modules implement the generated `FooServiceServer` interfaces directly.
-Registration follows the Koussa/Anghamna pattern:
+Registration uses the shared oneKit mux:
 
-1. Build a private `http.ServeMux`.
+1. Expose `RegisterAPI(*http.ServeMux)` on the module.
 2. Call generated `RegisterFooServiceServer(...)` with `WithMux(...)`.
-3. Mount that mux on the chi router at the exact same full path the proto
-   declares (`router.Method(http.MethodGet, "/api/pos/floor/v1/floors", mux)`)
-   — chi and the generated mux both match on this literal path, so they must
-   stay in sync by hand.
+3. Let `AutoRegisterAPIs` register every module on the shared mux and
+   `MountOneKit` attach it once at the router root. Do not add an `/api` mount
+   or duplicate generated paths in chi.
 4. Keep authorization, tenancy resolution, and domain orchestration in the
    module implementation.
 
 The generated oneKit server owns request binding, path/query/body decoding,
-header checks, and protovalidate validation. Module implementations should not
+header checks, and contract validation. Module implementations should not
 redefine HTTP request structs for endpoints that have generated service
 contracts.
 
 ### Errors from oneKit handlers
 
-Return `*errorModels.ServerError` directly from a generated `FooServiceServer`
-method — the same type every other Onion handler already returns, from the
-same `internal/platform/errors` package:
+Return errors through `internal/platform/onekiterrors` so module
+implementations consistently use the shared backend error constructors:
 
 ```go
-return nil, &errorModels.ServerError{
-    HTTPCode: http.StatusBadRequest,
-    Code:     http.StatusBadRequest,
-    Message:  "Name is required",
-}
+return nil, onekiterrors.New(http.StatusBadRequest, "Name is required")
 ```
 
-Wire `WithErrorHandler(serverHttp.OneKitErrorHandler)` (from
-`internal/platform/server/http`) when calling `RegisterFooServiceServer`.
-`OneKitErrorHandler` unwraps `*errorModels.ServerError` first, falls back to
-onekit's own `ValidationError`/`Error` types (protovalidate failures, etc.),
-and writes the response through the exact same `writeServerError` helper the
-non-oneKit `RegisterGET`/`RegisterPOST` handlers use — so oneKit-backed and
-hand-written routes return identical error envelopes. There is no separate
-error-wrapper package; don't reintroduce one.
+Do not reintroduce the removed protobuf-era `WithErrorHandler` or per-route
+adapter setup. The generated server owns its JSON error envelope.
 
 Contract generation is owned by the `voxie` repo, not `onion`. `gen/go` ships
 pre-committed in the `voxie` submodule — bump the submodule pointer to pick up

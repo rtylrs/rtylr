@@ -37,7 +37,7 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{
-		"/api/hub/subscription/v1/plans",
+		"/hub/subscription/v1/plans",
 		"/subscriptions/paddle-webhook",
 	}
 }

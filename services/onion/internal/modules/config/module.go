@@ -38,6 +38,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{
-		"/api/hub/config/v1/industries",
+		"/hub/config/v1/industries",
 	}
 }

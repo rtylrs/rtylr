@@ -30,6 +30,6 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{
-		"/api/pos/menu-item/v1/menu-items/public",
+		"/pos/menu-item/v1/menu-items/public",
 	}
 }
