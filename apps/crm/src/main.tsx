@@ -22,7 +22,7 @@ const queryClient = new QueryClient({
 });
 
 // Apply persisted theme before first render to prevent flash
-const saved = localStorage.getItem('crm-theme') || 'dark';
+const saved = localStorage.getItem('crm-theme') || 'light';
 document.documentElement.setAttribute(
   'data-theme',
   saved === 'system'

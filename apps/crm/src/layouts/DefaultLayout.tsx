@@ -109,7 +109,7 @@ function getPageTitle(pathname: string): string {
 type Theme = 'light' | 'dark' | 'system';
 
 function getStoredTheme(): Theme {
-  return (localStorage.getItem('crm-theme') as Theme) || 'dark';
+  return (localStorage.getItem('crm-theme') as Theme) || 'light';
 }
 
 function applyTheme(theme: Theme) {
