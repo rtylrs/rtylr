@@ -19,6 +19,7 @@ import TaskCard from '../../shared/components/TaskCard';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
+import { useCanEditTask } from '../../shared/lib/currentUser';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 
@@ -155,6 +156,7 @@ const ProjectBoard: React.FC = () => {
   const { selectedTaskIds, toggleSelectTask, activeWorkspaceId } = useFlowStore();
   const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
   const moveTask = useMoveTaskToColumn();
+  const canEdit = useCanEditTask();
 
   useProjectRealtime(projectId);
 
@@ -228,6 +230,7 @@ const ProjectBoard: React.FC = () => {
 
   const handleDrop = (e: React.DragEvent, colId: string) => {
     e.preventDefault();
+    if (!canEdit) return;
     const taskId = e.dataTransfer.getData('text/plain');
     if (!taskId) return;
     moveTask.mutate({ taskId, columnId: colId });
@@ -294,6 +297,7 @@ const ProjectBoard: React.FC = () => {
               groupBy={groupBy}
               isOver={dragOver === String(col.id)}
               selectedTaskIds={selectedTaskIds}
+              canEdit={canEdit}
               onDragOver={() => setDragOver(String(col.id))}
               onDragLeave={() => setDragOver(null)}
               onDrop={(e) => handleDrop(e, String(col.id))}
@@ -398,6 +402,7 @@ const KanbanColumn: React.FC<{
   groupBy: GroupKey;
   isOver: boolean;
   selectedTaskIds: string[];
+  canEdit: boolean;
   onDragOver: () => void;
   onDragLeave: () => void;
   onDrop: (e: React.DragEvent) => void;
@@ -412,6 +417,7 @@ const KanbanColumn: React.FC<{
   groupBy,
   isOver,
   selectedTaskIds,
+  canEdit,
   onDragOver,
   onDragLeave,
   onDrop,
@@ -520,7 +526,7 @@ const KanbanColumn: React.FC<{
               <TaskCard
                 key={task.id}
                 task={task}
-                draggable
+                draggable={canEdit}
                 onDragStart={(e) => onDragStart(e, task.id)}
                 selected={selectedTaskIds.includes(task.id)}
                 onSelect={() => onSelect(task.id)}
@@ -558,7 +564,7 @@ const KanbanColumn: React.FC<{
                   <TaskCard
                     key={task.id}
                     task={task}
-                    draggable
+                    draggable={canEdit}
                     onDragStart={(e) => onDragStart(e, task.id)}
                     selected={selectedTaskIds.includes(task.id)}
                     onSelect={() => onSelect(task.id)}
