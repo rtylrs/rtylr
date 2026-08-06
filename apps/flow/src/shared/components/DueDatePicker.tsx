@@ -6,9 +6,10 @@ import { formatDate } from '../lib/utils';
 interface DueDatePickerProps {
   value?: string;
   onChange: (date: string) => void;
+  disabled?: boolean;
 }
 
-export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange }) => {
+export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, disabled }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const overdue = value && new Date(value) < new Date();
@@ -24,13 +25,14 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange })
   return (
     <div className="relative">
       <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 px-2 py-1 rounded text-[11px] transition-colors hover:bg-[var(--flow-hover)]"
+        onClick={() => !disabled && setOpen((o) => !o)}
+        disabled={disabled}
+        className="flex items-center gap-1.5 px-2 py-1 rounded text-[11px] transition-colors hover:bg-[var(--flow-hover)] disabled:opacity-60 disabled:hover:bg-transparent"
         style={{ color: overdue ? '#ef4444' : 'var(--flow-text-muted)' }}
       >
         <Calendar size={12} />
         {value ? formatDate(value) : t('common.datePicker.setDate')}
-        {value && (
+        {value && !disabled && (
           <X
             size={10}
             onClick={(e) => {
@@ -41,7 +43,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange })
           />
         )}
       </button>
-      {open && (
+      {open && !disabled && (
         <div
           className="absolute top-full left-0 mt-1 rounded-lg z-50 py-1 min-w-[160px]"
           style={{
