@@ -33,6 +33,14 @@ type ApprovalChainProvider interface {
 	GetApprovalChain(ctx context.Context, ownerID int64, requestType string) (*ApprovalChainInfo, error)
 }
 
+// PermissionProvider lets the payroll service resolve which hr_employees row
+// belongs to the calling platform user and check role-based permissions,
+// without depending on hr_core directly.
+type PermissionProvider interface {
+	GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error)
+	HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error)
+}
+
 // FinanceJournalPoster lets the payroll service hand a completed run off to the
 // finance module without depending on it directly. The finance module is
 // expected to translate the call into the appropriate journal entries

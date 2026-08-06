@@ -28,17 +28,27 @@ func invalidateHRPayrollScope(ctx context.Context, ownerID int64) {
 type Service struct {
 	repo             *infrastructure.Repository
 	approvalProvider domain.ApprovalChainProvider
+	permissions      domain.PermissionProvider
 	financePoster    domain.FinanceJournalPoster
 	notifier         domain.NotificationDispatcher
 }
 
-func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider) *Service {
+func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider, permissions domain.PermissionProvider) *Service {
 	return &Service{
 		repo:             infrastructure.NewRepository(db),
 		approvalProvider: approvalProvider,
+		permissions:      permissions,
 		financePoster:    noopFinancePoster{},
 		notifier:         noopNotifier{},
 	}
+}
+
+func (s *Service) GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error) {
+	return s.permissions.GetEmployeeIDByUserID(ctx, ownerID, userID)
+}
+
+func (s *Service) HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error) {
+	return s.permissions.HasPermission(ctx, ownerID, employeeID, permissionKey)
 }
 
 // SetFinancePoster wires a finance module implementation into the payroll

@@ -132,6 +132,54 @@ func TestTriggerPayrollRun_BothDatesBlank(t *testing.T) {
 	}
 }
 
+type fakePermissionProvider struct {
+	employeeID  int64
+	employeeErr error
+	allowed     bool
+	permErr     error
+}
+
+func (f fakePermissionProvider) GetEmployeeIDByUserID(_ context.Context, _, _ int64) (int64, error) {
+	return f.employeeID, f.employeeErr
+}
+
+func (f fakePermissionProvider) HasPermission(_ context.Context, _, _ int64, _ string) (bool, error) {
+	return f.allowed, f.permErr
+}
+
+func TestService_GetEmployeeIDByUserID_DelegatesToPermissionProvider(t *testing.T) {
+	s := &Service{permissions: fakePermissionProvider{employeeID: 4101}}
+	id, err := s.GetEmployeeIDByUserID(context.Background(), 1001, 5555)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if id != 4101 {
+		t.Errorf("employeeID = %d, want 4101", id)
+	}
+}
+
+func TestService_HasPermission_DelegatesToPermissionProvider(t *testing.T) {
+	s := &Service{permissions: fakePermissionProvider{allowed: true}}
+	allowed, err := s.HasPermission(context.Background(), 1001, 4101, "manage_payroll")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !allowed {
+		t.Error("expected allowed=true")
+	}
+}
+
+func TestService_HasPermission_FalseWhenNotGranted(t *testing.T) {
+	s := &Service{permissions: fakePermissionProvider{allowed: false}}
+	allowed, err := s.HasPermission(context.Background(), 1001, 4102, "manage_payroll")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if allowed {
+		t.Error("expected allowed=false")
+	}
+}
+
 func TestNoopFinancePoster_IsFinanceJournalPoster(_ *testing.T) {
 	var _ domain.FinanceJournalPoster = noopFinancePoster{}
 }

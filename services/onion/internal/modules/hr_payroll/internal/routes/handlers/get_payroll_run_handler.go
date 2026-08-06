@@ -35,6 +35,20 @@ func (h *GetPayrollRunHandler) Serve(ctx context.Context, _ *GetPayrollRunReques
 		return GetPayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, device.User.UserID, device.User.UserID)
+	if empErr != nil {
+		logger.Ctx(ctx).Warn("failed to resolve employee for payroll permission check", logger.Any("owner_id", device.User.UserID), logger.Error(empErr))
+		return GetPayrollRunResponse{}, onekiterrors.PermissionDenied()
+	}
+	allowed, permErr := h.Service.HasPermission(ctx, device.User.UserID, employeeID, "manage_payroll")
+	if permErr != nil {
+		logger.Ctx(ctx).Error("failed to check manage_payroll permission", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", employeeID), logger.Error(permErr))
+		return GetPayrollRunResponse{}, onekiterrors.PermissionDenied()
+	}
+	if !allowed {
+		return GetPayrollRunResponse{}, onekiterrors.PermissionDenied()
+	}
+
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
 	if parseErr != nil {
