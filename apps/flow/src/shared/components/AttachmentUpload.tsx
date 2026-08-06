@@ -7,6 +7,7 @@ interface AttachmentUploadProps {
   attachments: Attachment[];
   onAdd?: (name: string, size: number, mime: string, url: string) => void;
   onRemove?: (id: string) => void;
+  disabled?: boolean;
 }
 
 function formatSize(bytes: number): string {
@@ -19,6 +20,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
   attachments,
   onAdd,
   onRemove,
+  disabled,
 }) => {
   const ref = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -66,7 +68,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
                   {formatSize(a.size)} · {a.uploadedBy}
                 </p>
               </div>
-              {onRemove && (
+              {onRemove && !disabled && (
                 <button
                   onClick={() => onRemove(a.id)}
                   className="h-5 w-5 rounded opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-[var(--flow-active)]"
@@ -81,15 +83,15 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
       </div>
       <button
         onClick={() => {
-          if (!uploading) ref.current?.click();
+          if (!uploading && !disabled) ref.current?.click();
         }}
-        disabled={uploading}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] w-full transition-colors"
+        disabled={uploading || disabled}
+        className="flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] w-full transition-colors disabled:opacity-50"
         style={{
           background: 'var(--flow-input-bg)',
           border: '1px dashed var(--flow-border)',
           color: 'var(--flow-text-muted)',
-          cursor: uploading ? 'wait' : 'pointer',
+          cursor: uploading ? 'wait' : disabled ? 'not-allowed' : 'pointer',
         }}
       >
         <Upload size={12} />
