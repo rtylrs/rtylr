@@ -42,18 +42,6 @@
     color-scheme: light;
   }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --auth-bg: #0a0a0a;
-      --auth-card: #141414;
-      --auth-text: #f0f0ee;
-      --auth-text-muted: #9ca3af;
-      --auth-border: #262626;
-      --auth-input-bg: #1a1a1a;
-      color-scheme: dark;
-    }
-  }
-
   html {
     font-family: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
     background-color: var(--auth-bg);
@@ -96,24 +84,4 @@ button.voxire-button.auth-provider-button:hover:not(.voxire-button-disabled) {
 button.voxire-button.auth-provider-button:active:not(.voxire-button-disabled) {
   background: #f3f4f6;
   box-shadow: 0 1px 2px rgb(17 17 17 / 0.04);
-}
-
-@media (prefers-color-scheme: dark) {
-  button.voxire-button.auth-provider-button {
-    background: #ffffff;
-    border-color: #111111;
-    color: #111111;
-  }
-
-  button.voxire-button.auth-provider-button:hover:not(.voxire-button-disabled) {
-    background: #f4f4f4;
-    border-color: #111111;
-    color: #111111;
-    box-shadow: 0 6px 16px rgb(0 0 0 / 0.12);
-  }
-
-  button.voxire-button.auth-provider-button:active:not(.voxire-button-disabled) {
-    background: #eeeeee;
-    box-shadow: none;
-  }
 }
