@@ -50,8 +50,7 @@
   --app-insights: #6366f1;
 }
 
-/* ── Dark mode (default) ─────────────────────────────────────── */
-:root,
+/* ── Dark mode ───────────────────────────────────────────────── */
 :root[data-theme='dark'] {
   --dash-bg: #0a0a0a;
   --dash-surface: #111111;
@@ -68,7 +67,8 @@
   --dash-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-/* ── Light mode ──────────────────────────────────────────────── */
+/* ── Light mode (default) ────────────────────────────────────── */
+:root,
 :root[data-theme='light'] {
   --dash-bg: #f4f4f5;
   --dash-surface: #ffffff;
