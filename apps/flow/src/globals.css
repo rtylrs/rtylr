@@ -16,8 +16,7 @@
   --accent-focus: rgba(100, 197, 185, 0.5);
 }
 
-/* ── Dark mode (default) ─────────────────────────────────────── */
-:root,
+/* ── Dark mode ───────────────────────────────────────────────── */
 :root[data-theme='dark'] {
   --flow-bg: #0a0a0a;
   --flow-surface: #111111;
@@ -49,7 +48,8 @@
   --hub-shadow: var(--flow-shadow);
 }
 
-/* ── Light mode ──────────────────────────────────────────────── */
+/* ── Light mode (default) ────────────────────────────────────── */
+:root,
 :root[data-theme='light'] {
   --flow-bg: #f4f4f5;
   --flow-surface: #ffffff;
