@@ -178,7 +178,7 @@ const DefaultLayout: React.FC = () => {
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
   const [theme, setThemeState] = useState<Theme>(() => {
-    return (localStorage.getItem('rtylr-erp-theme') as Theme) || 'dark';
+    return (localStorage.getItem('rtylr-erp-theme') as Theme) || 'light';
   });
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);

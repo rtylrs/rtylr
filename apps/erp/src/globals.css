@@ -16,8 +16,7 @@
   --accent-focus: rgba(69, 131, 196, 0.5);
 }
 
-/* ── Dark mode (default) ─────────────────────────────────────── */
-:root,
+/* ── Dark mode ───────────────────────────────────────────────── */
 :root[data-theme='dark'] {
   --hub-bg: #0a0a0a;
   --hub-surface: #111111;
@@ -34,7 +33,8 @@
   --hub-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-/* ── Light mode ──────────────────────────────────────────────── */
+/* ── Light mode (default) ────────────────────────────────────── */
+:root,
 :root[data-theme='light'] {
   --hub-bg: #f4f4f5;
   --hub-surface: #ffffff;

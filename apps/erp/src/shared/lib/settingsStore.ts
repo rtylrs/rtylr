@@ -25,7 +25,7 @@ export const useSettings = create<ErpSettings>()(
       taxRate: 8.25,
       lowStockThreshold: 10,
       defaultWarehouseId: 1,
-      theme: 'dark',
+      theme: 'light',
       notifyOnLowStock: true,
       notifyOnExpiry: true,
       setCurrency: (currency) => set({ currency }),
