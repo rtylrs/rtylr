@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ShoppingCart, Package, Users, Heart, DollarSign, Workflow, BarChart2 } from 'lucide-react';
+import Link from 'next/link';
 import { blurFadeIn, blurFadeInSlow, staggerBlur, viewportOnce } from '../../../lib/animations';
 import { SplitWords } from '../../motion/SplitWords';
 import styles from './ProductsSection.module.scss';
@@ -9,6 +10,7 @@ interface Product {
   label: string;
   title: string;
   description: string;
+  href: string;
   Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
 }
 
@@ -18,6 +20,7 @@ const PRODUCTS_TOP: Product[] = [
     title: 'Point of sale',
     description:
       'Tickets, tables, splits, tips, and every payment type. The register that keeps up with real service.',
+    href: '/pos',
     Icon: ShoppingCart,
   },
   {
@@ -25,6 +28,7 @@ const PRODUCTS_TOP: Product[] = [
     title: 'Inventory',
     description:
       'Recipe-linked depletion, supplier management, auto-reorder. Your shelves tell the database.',
+    href: '/erp',
     Icon: Package,
   },
   {
@@ -32,6 +36,7 @@ const PRODUCTS_TOP: Product[] = [
     title: 'People & payroll',
     description:
       'Scheduling, clock-in, payroll, time off, compliance. The people side, without the paperwork.',
+    href: '/hr',
     Icon: Users,
   },
   {
@@ -39,6 +44,7 @@ const PRODUCTS_TOP: Product[] = [
     title: 'Customers & loyalty',
     description:
       'Profiles, segments, campaigns, and loyalty, fed live by every receipt your POS writes.',
+    href: '/crm',
     Icon: Heart,
   },
 ];
@@ -49,6 +55,7 @@ const PRODUCTS_BOTTOM: Product[] = [
     title: 'Books that close themselves',
     description:
       'Invoices, expenses, sales tax, and a live P&L. Every sale reconciles in real time.',
+    href: '/finance',
     Icon: DollarSign,
   },
   {
@@ -56,6 +63,7 @@ const PRODUCTS_BOTTOM: Product[] = [
     title: 'Projects & tasks',
     description:
       'Kanban, automations, and tasks linked to the actual invoice, customer, or shift they belong to.',
+    href: '/flow',
     Icon: Workflow,
   },
   {
@@ -63,6 +71,7 @@ const PRODUCTS_BOTTOM: Product[] = [
     title: 'Analytics across everything',
     description:
       'Revenue trends, customer cohorts, labor margin. Every number pulled live from every other app.',
+    href: 'https://insights.rtylr.com',
     Icon: BarChart2,
   },
 ];
@@ -85,7 +94,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <p className={styles.cardLabel}>{product.label}</p>
       <h3 className={styles.cardTitle}>{product.title}</h3>
       <p className={styles.cardDescription}>{product.description}</p>
-      <span className={styles.cardArrow}>Explore →</span>
+      <Link
+        href={product.href}
+        className={styles.cardArrow}
+        aria-label={`Explore ${product.label}`}
+      >
+        Explore →
+      </Link>
     </motion.div>
   );
 };
