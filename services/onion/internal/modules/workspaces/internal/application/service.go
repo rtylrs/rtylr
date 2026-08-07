@@ -19,11 +19,12 @@ const (
 	workspacesScope = "workspaces"
 	workspacesTTL   = 2 * time.Minute
 
-	// internalTaskListCap bounds task list reads made on behalf of another
-	// feature (the dashboard's "my tasks" widget, a task's subtasks embedded
-	// in its detail view) rather than a paginated list RPC. Matches the cap
-	// these reads already used before pagination existed.
-	internalTaskListCap = int64(500)
+	// internalListCap bounds list reads made on behalf of another feature
+	// (the dashboard's "my tasks" widget, a task's subtasks embedded in its
+	// detail view, a project's columns re-fetched right after creating one)
+	// rather than a paginated list RPC. Matches the cap these reads already
+	// used before pagination existed.
+	internalListCap = int64(500)
 )
 
 func invalidateWorkspacesScope(ctx context.Context, businessID int64) {
@@ -48,14 +49,27 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 // Workspaces
 // ─────────────────────────────────────────────
 
-func (s *Service) ListWorkspaces(ctx context.Context, businessID int64) ([]domain.Workspace, error) {
-	return cacher.Of[[]domain.Workspace]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(workspacesScope, businessID, "list"),
-		func(ctx context.Context) ([]domain.Workspace, error) {
-			return s.repo.GetWorkspacesByOwner(ctx, businessID)
+type workspacesPage struct {
+	Workspaces []domain.Workspace
+	Total      int64
+}
+
+func (s *Service) ListWorkspaces(ctx context.Context, businessID, page, limit int64) ([]domain.Workspace, int64, error) {
+	offset := (page - 1) * limit
+	result, err := cacher.Of[workspacesPage]().GetOrComputeSingle(ctx,
+		// page/limit are part of the cache key, not just the fetch - otherwise
+		// page 2 would return page 1's cached rows until the TTL expires.
+		cacheKeys.Scoped(workspacesScope, businessID, fmt.Sprintf("list:page=%d:limit=%d", page, limit)),
+		func(ctx context.Context) (workspacesPage, error) {
+			workspaces, total, fetchErr := s.repo.GetWorkspacesByOwner(ctx, businessID, limit, offset)
+			return workspacesPage{Workspaces: workspaces, Total: total}, fetchErr
 		},
 		cacher.WithExpiry(ctx, workspacesTTL),
 	)
+	if err != nil {
+		return nil, 0, err
+	}
+	return result.Workspaces, result.Total, nil
 }
 
 func (s *Service) CreateWorkspace(ctx context.Context, input domain.WorkspaceInput) (domain.Workspace, error) {
@@ -103,8 +117,8 @@ func (s *Service) RemoveWorkspaceMember(ctx context.Context, input domain.Remove
 	return s.repo.RemoveWorkspaceMember(ctx, input)
 }
 
-func (s *Service) ListWorkspaceMembers(ctx context.Context, workspaceID int64) ([]domain.WorkspaceMember, error) {
-	return s.repo.ListWorkspaceMembers(ctx, workspaceID)
+func (s *Service) ListWorkspaceMembers(ctx context.Context, workspaceID, limit, offset int64) ([]domain.WorkspaceMember, int64, error) {
+	return s.repo.ListWorkspaceMembers(ctx, workspaceID, limit, offset)
 }
 
 func (s *Service) UpdateWorkspaceMemberRole(ctx context.Context, input domain.UpdateWorkspaceMemberRoleInput) error {
@@ -162,8 +176,8 @@ func (s *Service) IsTaskMember(ctx context.Context, userID, taskID int64) bool {
 // Projects
 // ─────────────────────────────────────────────
 
-func (s *Service) ListProjects(ctx context.Context, workspaceID, businessID int64) ([]domain.Project, error) {
-	return s.repo.GetProjectsByWorkspace(ctx, workspaceID, businessID)
+func (s *Service) ListProjects(ctx context.Context, workspaceID, businessID, limit, offset int64) ([]domain.Project, int64, error) {
+	return s.repo.GetProjectsByWorkspace(ctx, workspaceID, businessID, limit, offset)
 }
 
 func (s *Service) CreateProject(ctx context.Context, input domain.ProjectInput) (domain.Project, error) {
@@ -202,8 +216,8 @@ func (s *Service) DeleteProject(ctx context.Context, id, businessID int64) error
 	return s.repo.ArchiveProject(ctx, id, businessID)
 }
 
-func (s *Service) ListProjectMembers(ctx context.Context, projectID int64) ([]domain.ProjectMember, error) {
-	return s.repo.ListProjectMembers(ctx, projectID)
+func (s *Service) ListProjectMembers(ctx context.Context, projectID, limit, offset int64) ([]domain.ProjectMember, int64, error) {
+	return s.repo.ListProjectMembers(ctx, projectID, limit, offset)
 }
 
 func (s *Service) AddProjectMember(ctx context.Context, input domain.AddProjectMemberInput) error {
@@ -288,7 +302,7 @@ func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskD
 		return domain.TaskDetail{}, err
 	}
 
-	subtasks, _, err := s.repo.GetSubtasks(ctx, taskID, internalTaskListCap, 0)
+	subtasks, _, err := s.repo.GetSubtasks(ctx, taskID, internalListCap, 0)
 	if err != nil {
 		return domain.TaskDetail{}, err
 	}
@@ -448,7 +462,7 @@ func (s *Service) GetDashboard(ctx context.Context, workspaceID, businessID, use
 		return domain.DashboardStats{}, err
 	}
 
-	myTasks, _, err := s.repo.GetMyTasks(ctx, userID, internalTaskListCap, 0)
+	myTasks, _, err := s.repo.GetMyTasks(ctx, userID, internalListCap, 0)
 	if err != nil {
 		return domain.DashboardStats{}, err
 	}
@@ -536,8 +550,8 @@ func (s *Service) DeleteTimeLogFlat(ctx context.Context, id, userID int64) error
 // Labels
 // ─────────────────────────────────────────────
 
-func (s *Service) ListLabels(ctx context.Context, workspaceID int64) ([]domain.Label, error) {
-	return s.repo.GetLabelsByWorkspace(ctx, workspaceID)
+func (s *Service) ListLabels(ctx context.Context, workspaceID, limit, offset int64) ([]domain.Label, int64, error) {
+	return s.repo.GetLabelsByWorkspace(ctx, workspaceID, limit, offset)
 }
 
 func (s *Service) CreateLabel(ctx context.Context, input domain.LabelInput) (domain.Label, error) {
@@ -746,8 +760,8 @@ func (s *Service) GetProjectTaskCounts(ctx context.Context, projectID int64) (to
 // Project Columns
 // ─────────────────────────────────────────────
 
-func (s *Service) GetColumnsByProject(ctx context.Context, projectID int64) ([]domain.ProjectColumn, error) {
-	return s.repo.GetColumnsByProject(ctx, projectID)
+func (s *Service) GetColumnsByProject(ctx context.Context, projectID, limit, offset int64) ([]domain.ProjectColumn, int64, error) {
+	return s.repo.GetColumnsByProject(ctx, projectID, limit, offset)
 }
 
 func (s *Service) CreateColumn(ctx context.Context, input domain.ProjectColumnInput) (domain.ProjectColumn, error) {
@@ -755,7 +769,7 @@ func (s *Service) CreateColumn(ctx context.Context, input domain.ProjectColumnIn
 	if err != nil {
 		return domain.ProjectColumn{}, err
 	}
-	cols, err := s.repo.GetColumnsByProject(ctx, input.ProjectID)
+	cols, _, err := s.repo.GetColumnsByProject(ctx, input.ProjectID, internalListCap, 0)
 	if err != nil {
 		return domain.ProjectColumn{}, err
 	}

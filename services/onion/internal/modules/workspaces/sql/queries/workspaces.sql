@@ -7,7 +7,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetWorkspacesByOwner :many
 SELECT id, owner_id, business_id, name, description, icon, color, is_default, created_by, created_at, updated_at
-FROM flow_workspaces WHERE business_id = ? ORDER BY is_default DESC, created_at ASC;
+FROM flow_workspaces WHERE business_id = ? ORDER BY is_default DESC, created_at ASC
+LIMIT ? OFFSET ?;
 
 -- name: UpdateWorkspace :exec
 UPDATE flow_workspaces SET name = ?, description = ?, icon = ?, color = ?
@@ -27,6 +28,9 @@ DELETE FROM flow_workspace_members WHERE workspace_id = ? AND user_id = ?;
 INSERT INTO flow_projects (workspace_id, owner_id, business_id, name, description, icon, color, start_date, due_date, created_by)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
+-- name: CountProjectsByWorkspace :one
+SELECT COUNT(*) FROM flow_projects WHERE workspace_id = ? AND business_id = ?;
+
 -- name: GetProjectsByWorkspace :many
 SELECT
     p.id, p.workspace_id, p.owner_id, p.business_id, p.name,
@@ -41,7 +45,8 @@ SELECT
     COALESCE((SELECT COUNT(*) FROM flow_project_members pm WHERE pm.project_id = p.id), 0) AS member_count
 FROM flow_projects p
 WHERE p.workspace_id = ? AND p.business_id = ?
-ORDER BY p.created_at DESC;
+ORDER BY p.created_at DESC
+LIMIT ? OFFSET ?;
 
 -- name: UpdateProject :exec
 UPDATE flow_projects SET name = ?, description = ?, icon = ?, color = ?, status = ?, start_date = ?, due_date = ?
@@ -138,9 +143,13 @@ FROM flow_time_logs WHERE task_id = ? ORDER BY logged_at DESC;
 -- name: CreateLabel :execresult
 INSERT INTO flow_labels (workspace_id, name, color) VALUES (?, ?, ?);
 
+-- name: CountLabelsByWorkspace :one
+SELECT COUNT(*) FROM flow_labels WHERE workspace_id = ?;
+
 -- name: GetLabelsByWorkspace :many
 SELECT id, workspace_id, name, color, created_at
-FROM flow_labels WHERE workspace_id = ? ORDER BY name ASC;
+FROM flow_labels WHERE workspace_id = ? ORDER BY name ASC
+LIMIT ? OFFSET ?;
 
 -- name: GetDashboardStats :one
 SELECT

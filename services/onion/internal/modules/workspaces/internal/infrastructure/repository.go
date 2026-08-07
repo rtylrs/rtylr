@@ -70,11 +70,21 @@ func (r *Repository) CreateWorkspace(ctx context.Context, input domain.Workspace
 	return res.LastInsertId()
 }
 
-func (r *Repository) GetWorkspacesByOwner(ctx context.Context, businessID int64) ([]domain.Workspace, error) {
-	rows, err := r.queries.GetWorkspacesByOwner(ctx, businessID)
+func (r *Repository) GetWorkspacesByOwner(ctx context.Context, businessID, limit, offset int64) ([]domain.Workspace, int64, error) {
+	total, err := r.queries.CountWorkspacesByOwner(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("CountWorkspacesByOwner failed", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.GetWorkspacesByOwner(ctx, sqlc.GetWorkspacesByOwnerParams{
+		BusinessID: businessID,
+		Limit:      int32(limit),
+		Offset:     int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetWorkspacesByOwner failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	workspaces := make([]domain.Workspace, 0, len(rows))
@@ -93,7 +103,7 @@ func (r *Repository) GetWorkspacesByOwner(ctx context.Context, businessID int64)
 			UpdatedAt:   row.UpdatedAt.Time,
 		})
 	}
-	return workspaces, nil
+	return workspaces, total, nil
 }
 
 func (r *Repository) UpdateWorkspace(ctx context.Context, input domain.UpdateWorkspaceInput) error {
@@ -187,14 +197,25 @@ func (r *Repository) CreateProject(ctx context.Context, input domain.ProjectInpu
 	return res.LastInsertId()
 }
 
-func (r *Repository) GetProjectsByWorkspace(ctx context.Context, workspaceID, businessID int64) ([]domain.Project, error) {
-	rows, err := r.queries.GetProjectsByWorkspace(ctx, sqlc.GetProjectsByWorkspaceParams{
+func (r *Repository) GetProjectsByWorkspace(ctx context.Context, workspaceID, businessID, limit, offset int64) ([]domain.Project, int64, error) {
+	total, err := r.queries.CountProjectsByWorkspace(ctx, sqlc.CountProjectsByWorkspaceParams{
 		WorkspaceID: workspaceID,
 		BusinessID:  businessID,
 	})
 	if err != nil {
+		logger.Ctx(ctx).Error("CountProjectsByWorkspace failed", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.GetProjectsByWorkspace(ctx, sqlc.GetProjectsByWorkspaceParams{
+		WorkspaceID: workspaceID,
+		BusinessID:  businessID,
+		Limit:       int32(limit),
+		Offset:      int32(offset),
+	})
+	if err != nil {
 		logger.Ctx(ctx).Error("GetProjectsByWorkspace failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	projects := make([]domain.Project, 0, len(rows))
@@ -228,7 +249,7 @@ func (r *Repository) GetProjectsByWorkspace(ctx context.Context, workspaceID, bu
 		}
 		projects = append(projects, p)
 	}
-	return projects, nil
+	return projects, total, nil
 }
 
 func (r *Repository) UpdateProject(ctx context.Context, input domain.UpdateProjectInput) error {
@@ -804,11 +825,21 @@ func (r *Repository) CreateLabel(ctx context.Context, input domain.LabelInput) (
 	return res.LastInsertId()
 }
 
-func (r *Repository) GetLabelsByWorkspace(ctx context.Context, workspaceID int64) ([]domain.Label, error) {
-	rows, err := r.queries.GetLabelsByWorkspace(ctx, workspaceID)
+func (r *Repository) GetLabelsByWorkspace(ctx context.Context, workspaceID, limit, offset int64) ([]domain.Label, int64, error) {
+	total, err := r.queries.CountLabelsByWorkspace(ctx, workspaceID)
+	if err != nil {
+		logger.Ctx(ctx).Error("CountLabelsByWorkspace failed", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.GetLabelsByWorkspace(ctx, sqlc.GetLabelsByWorkspaceParams{
+		WorkspaceID: workspaceID,
+		Limit:       int32(limit),
+		Offset:      int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetLabelsByWorkspace failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	labels := make([]domain.Label, 0, len(rows))
@@ -821,7 +852,7 @@ func (r *Repository) GetLabelsByWorkspace(ctx context.Context, workspaceID int64
 			CreatedAt:   row.CreatedAt.Time,
 		})
 	}
-	return labels, nil
+	return labels, total, nil
 }
 
 func (r *Repository) UpdateLabel(ctx context.Context, id, actorID int64, input domain.LabelInput) error {
@@ -1181,12 +1212,22 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 // Workspace Members (extended)
 // ─────────────────────────────────────────────
 
-func (r *Repository) ListWorkspaceMembers(ctx context.Context, workspaceID int64) ([]domain.WorkspaceMember, error) {
+func (r *Repository) ListWorkspaceMembers(ctx context.Context, workspaceID, limit, offset int64) ([]domain.WorkspaceMember, int64, error) {
+	total, err := r.queries.CountWorkspaceMembers(ctx, workspaceID)
+	if err != nil {
+		logger.Ctx(ctx).Error("CountWorkspaceMembers failed", logger.Error(err))
+		return nil, 0, err
+	}
+
 	// cross-schema read from users — workspace member display names
-	rows, err := r.queries.ListWorkspaceMembers(ctx, workspaceID)
+	rows, err := r.queries.ListWorkspaceMembers(ctx, sqlc.ListWorkspaceMembersParams{
+		WorkspaceID: workspaceID,
+		Limit:       int32(limit),
+		Offset:      int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListWorkspaceMembers failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	members := make([]domain.WorkspaceMember, 0, len(rows))
@@ -1201,7 +1242,7 @@ func (r *Repository) ListWorkspaceMembers(ctx context.Context, workspaceID int64
 			Email:       row.Email,
 		})
 	}
-	return members, nil
+	return members, total, nil
 }
 
 func (r *Repository) UpdateWorkspaceMemberRole(ctx context.Context, input domain.UpdateWorkspaceMemberRoleInput) error {
@@ -1253,11 +1294,21 @@ func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID int64) 
 // Project Members
 // ─────────────────────────────────────────────
 
-func (r *Repository) ListProjectMembers(ctx context.Context, projectID int64) ([]domain.ProjectMember, error) {
-	rows, err := r.queries.ListProjectMembers(ctx, projectID)
+func (r *Repository) ListProjectMembers(ctx context.Context, projectID, limit, offset int64) ([]domain.ProjectMember, int64, error) {
+	total, err := r.queries.CountProjectMembers(ctx, projectID)
+	if err != nil {
+		logger.Ctx(ctx).Error("CountProjectMembers failed", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListProjectMembers(ctx, sqlc.ListProjectMembersParams{
+		ProjectID: projectID,
+		Limit:     int32(limit),
+		Offset:    int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListProjectMembers failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	members := make([]domain.ProjectMember, 0, len(rows))
@@ -1272,7 +1323,7 @@ func (r *Repository) ListProjectMembers(ctx context.Context, projectID int64) ([
 			Email:     row.Email,
 		})
 	}
-	return members, nil
+	return members, total, nil
 }
 
 func (r *Repository) AddProjectMember(ctx context.Context, input domain.AddProjectMemberInput) error {
@@ -1354,11 +1405,21 @@ func (r *Repository) GetUserWorkspaceRole(ctx context.Context, workspaceID, user
 
 // ─── Project Columns ─────────────────────────────────────────────────────────
 
-func (r *Repository) GetColumnsByProject(ctx context.Context, projectID int64) ([]domain.ProjectColumn, error) {
-	rows, err := r.queries.GetColumnsByProject(ctx, projectID)
+func (r *Repository) GetColumnsByProject(ctx context.Context, projectID, limit, offset int64) ([]domain.ProjectColumn, int64, error) {
+	total, err := r.queries.CountProjectColumns(ctx, projectID)
+	if err != nil {
+		logger.Ctx(ctx).Error("CountProjectColumns failed", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.GetColumnsByProject(ctx, sqlc.GetColumnsByProjectParams{
+		ProjectID: projectID,
+		Limit:     int32(limit),
+		Offset:    int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetColumnsByProject failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	cols := make([]domain.ProjectColumn, 0, len(rows))
@@ -1375,7 +1436,7 @@ func (r *Repository) GetColumnsByProject(ctx context.Context, projectID int64) (
 			UpdatedAt:   row.UpdatedAt.Time,
 		})
 	}
-	return cols, nil
+	return cols, total, nil
 }
 
 func (r *Repository) CreateColumn(ctx context.Context, input domain.ProjectColumnInput) (int64, error) {
