@@ -107,6 +107,16 @@ func invalidateFeatureSupportCache(ctx context.Context) {
 	}
 }
 
+func invalidateFeatureSupportCacheForOwner(ctx context.Context, ownerID int64) {
+	invalidateFeatureSupportCache(ctx)
+	if ownerID == 0 {
+		return
+	}
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(featureSupportCacheScope, ownerID))
+	}
+}
+
 // bucketOf maps (salt, subject) to a stable bucket in [0,100). The salt mixes
 // in the flag/rule so a subject doesn't land in the same bucket everywhere.
 func bucketOf(salt, subject string) uint32 {
@@ -388,7 +398,7 @@ func (s *Service) UpsertTarget(ctx context.Context, t domain.Target) error {
 	if err := s.repo.UpsertTarget(ctx, t); err != nil {
 		return err
 	}
-	invalidateFeatureSupportCache(ctx)
+	invalidateFeatureSupportCacheForOwner(ctx, t.OwnerID)
 	return nil
 }
 
@@ -396,7 +406,7 @@ func (s *Service) DeleteTarget(ctx context.Context, key string, ownerID int64) e
 	if err := s.repo.DeleteTarget(ctx, key, ownerID); err != nil {
 		return err
 	}
-	invalidateFeatureSupportCache(ctx)
+	invalidateFeatureSupportCacheForOwner(ctx, ownerID)
 	return nil
 }
 
@@ -416,7 +426,7 @@ func (s *Service) listTargetsByOwner(ctx context.Context, ownerID int64) ([]doma
 		return nil, nil
 	}
 	return cacher.Of[[]domain.Target]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(featureSupportCacheScope, 0, fmt.Sprintf("targets:owner:%d", ownerID)),
+		cacheKeys.Scoped(featureSupportCacheScope, ownerID, "targets"),
 		func(ctx context.Context) ([]domain.Target, error) {
 			return s.repo.ListTargetsByOwner(ctx, ownerID)
 		},
