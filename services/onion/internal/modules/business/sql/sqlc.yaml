@@ -4,6 +4,7 @@ sql:
     queries: "queries"
     schema:
       - "../../../../internal/platform/database/schemas/shared/config.sql"
+      - "../../../../internal/platform/database/schemas/shared/user_apps.sql"
       - "schema/businesses.sql"
       - "schema/user_business_access.sql"
       - "../../../../internal/platform/database/schemas/hr_core/schema.sql"

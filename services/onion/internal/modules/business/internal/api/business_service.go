@@ -158,6 +158,60 @@ func (a *BusinessAPI) UpdateBusiness(_ context.Context, _ *hubbusinessv1.UpdateB
 	return nil, onekiterrors.New(http.StatusNotImplemented, "Update business is not implemented")
 }
 
+func (a *BusinessAPI) RenameBusiness(ctx context.Context, req *hubbusinessv1.RenameBusinessRequest) (*hubbusinessv1.RenameBusinessResponse, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	name := strings.TrimSpace(req.GetName())
+	if name == "" {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Name is required")
+	}
+	if len(name) > 255 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Name must be 255 characters or fewer")
+	}
+
+	if err := a.Service.RenameBusiness(ctx, req.GetBusinessId(), device.User.UserID, name); err != nil {
+		switch {
+		case errors.Is(err, application.ErrBusinessNameEmpty):
+			return nil, onekiterrors.New(http.StatusBadRequest, "Name is required")
+		case errors.Is(err, application.ErrBusinessNotOwned):
+			return nil, onekiterrors.PermissionDenied()
+		case strings.Contains(strings.ToLower(err.Error()), "duplicate"):
+			return nil, onekiterrors.New(http.StatusConflict, "That business name is already taken")
+		default:
+			logger.Ctx(ctx).Error("rename business failed", logger.Error(err))
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to rename business")
+		}
+	}
+
+	return &hubbusinessv1.RenameBusinessResponse{
+		Business: &hubbusinessv1.Business{Id: req.GetBusinessId(), Name: name},
+	}, nil
+}
+
+func (a *BusinessAPI) DeleteBusiness(ctx context.Context, req *hubbusinessv1.DeleteBusinessRequest) (*hubbusinessv1.DeleteBusinessResponse, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	if err := a.Service.DeleteBusiness(ctx, req.GetBusinessId(), device.User.UserID); err != nil {
+		switch {
+		case errors.Is(err, application.ErrCannotDeleteOnlyBusiness):
+			return nil, onekiterrors.New(http.StatusConflict, "You cannot delete your only remaining business")
+		case errors.Is(err, application.ErrBusinessNotOwned):
+			return nil, onekiterrors.PermissionDenied()
+		default:
+			logger.Ctx(ctx).Error("delete business failed", logger.Error(err))
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete business")
+		}
+	}
+
+	return &hubbusinessv1.DeleteBusinessResponse{Message: "Business deleted"}, nil
+}
+
 func (a *BusinessAPI) ListMyBusinesses(ctx context.Context, _ *hubbusinessv1.ListMyBusinessesRequest) (*hubbusinessv1.ListMyBusinessesResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
@@ -177,6 +231,7 @@ func (a *BusinessAPI) ListMyBusinesses(ctx context.Context, _ *hubbusinessv1.Lis
 			LogoUrl:  b.LogoURL,
 			ParentId: b.ParentID,
 			IsActive: b.IsActive,
+			IsOwned:  b.IsOwned,
 		})
 	}
 

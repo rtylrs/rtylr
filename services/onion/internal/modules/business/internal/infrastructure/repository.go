@@ -127,13 +127,45 @@ func (r *Repository) UpdateSlug(ctx context.Context, businessID int64, slug stri
 	})
 }
 
-// ListUserBusinesses returns all businesses the user owns (businesses.owner_id = userID)
-// or has explicit access to via user_business_access.
+func (r *Repository) RenameBusiness(ctx context.Context, businessID, ownerUserID int64, name string) (bool, error) {
+	result, err := r.queries.RenameBusiness(ctx, sqlc.RenameBusinessParams{
+		Name:    name,
+		ID:      businessID,
+		OwnerID: ownerUserID,
+	})
+	if err != nil {
+		return false, err
+	}
+	affected, err := result.RowsAffected()
+	return affected > 0, err
+}
+
+func (r *Repository) DeactivateBusiness(ctx context.Context, businessID, ownerUserID int64) (bool, error) {
+	result, err := r.queries.DeactivateBusiness(ctx, sqlc.DeactivateBusinessParams{
+		ID:      businessID,
+		OwnerID: ownerUserID,
+	})
+	if err != nil {
+		return false, err
+	}
+	affected, err := result.RowsAffected()
+	return affected > 0, err
+}
+
+func (r *Repository) CountActiveOwnedBusinesses(ctx context.Context, ownerUserID int64) (int64, error) {
+	return r.queries.CountActiveOwnedBusinesses(ctx, ownerUserID)
+}
+
+// ListUserBusinesses returns all businesses the user owns or has an active
+// owner/member grant for.
 func (r *Repository) ListUserBusinesses(ctx context.Context, userID int64) ([]domain.OwnedBusiness, error) {
-	// cross-schema read from user_business_access — multi-business ownership
+	// Cross-schema reads from user_business_access and user_app_permissions
+	// provide one switcher for owners and invited team members.
 	rows, err := r.queries.ListUserBusinesses(ctx, sqlc.ListUserBusinessesParams{
-		OwnerID: userID,
-		UserID:  userID,
+		OwnerID:   userID,
+		OwnerID_2: userID,
+		UserID:    userID,
+		UserID_2:  userID,
 	})
 	if err != nil {
 		return nil, err
@@ -147,6 +179,7 @@ func (r *Repository) ListUserBusinesses(ctx context.Context, userID int64) ([]do
 			LogoURL:  row.LogoUrl,
 			ParentID: row.ParentID,
 			IsActive: row.IsActive.Valid && row.IsActive.Bool,
+			IsOwned:  row.IsOwned,
 		})
 	}
 	return result, nil

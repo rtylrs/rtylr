@@ -42,4 +42,5 @@ type OwnedBusiness struct {
 	LogoURL  string
 	ParentID int64
 	IsActive bool
+	IsOwned  bool
 }

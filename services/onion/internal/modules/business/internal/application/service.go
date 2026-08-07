@@ -26,6 +26,9 @@ type repository interface {
 	ListUserBusinesses(ctx context.Context, userID int64) ([]domain.OwnedBusiness, error)
 	CreateSubBusiness(ctx context.Context, name string, ownerUserID, parentBusinessID int64) (int64, error)
 	CheckSubBusinessOwnership(ctx context.Context, ownerUserID, parentBusinessID int64) (bool, error)
+	RenameBusiness(ctx context.Context, businessID, ownerUserID int64, name string) (bool, error)
+	DeactivateBusiness(ctx context.Context, businessID, ownerUserID int64) (bool, error)
+	CountActiveOwnedBusinesses(ctx context.Context, ownerUserID int64) (int64, error)
 }
 
 type Service struct {
@@ -77,8 +80,11 @@ func (s *Service) ListUserBusinesses(ctx context.Context, userID int64) ([]domai
 }
 
 var (
-	ErrSubBusinessNotOwned  = errors.New("parent business not found or not owned by user")
-	ErrSubBusinessNameEmpty = errors.New("business name is required")
+	ErrSubBusinessNotOwned      = errors.New("parent business not found or not owned by user")
+	ErrSubBusinessNameEmpty     = errors.New("business name is required")
+	ErrBusinessNotOwned         = errors.New("business not found or not owned by user")
+	ErrBusinessNameEmpty        = errors.New("business name is required")
+	ErrCannotDeleteOnlyBusiness = errors.New("cannot delete the only remaining business")
 )
 
 func (s *Service) CreateSubBusiness(ctx context.Context, name string, ownerUserID, parentBusinessID int64) (int64, error) {
@@ -99,4 +105,45 @@ func (s *Service) CreateSubBusiness(ctx context.Context, name string, ownerUserI
 	}
 	cacher.Of[[]domain.OwnedBusiness]().Delete(ctx, []string{cacheKeys.UserBusinesses(ownerUserID)})
 	return id, nil
+}
+
+func (s *Service) RenameBusiness(ctx context.Context, businessID, ownerUserID int64, name string) error {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return ErrBusinessNameEmpty
+	}
+
+	updated, err := s.repo.RenameBusiness(ctx, businessID, ownerUserID, name)
+	if err != nil {
+		return err
+	}
+	if !updated {
+		return ErrBusinessNotOwned
+	}
+
+	cacher.Of[domain.BusinessProfile]().Delete(ctx, []string{cacheKeys.BusinessProfile(businessID)})
+	cacher.Of[[]domain.OwnedBusiness]().Delete(ctx, []string{cacheKeys.UserBusinesses(ownerUserID)})
+	return nil
+}
+
+func (s *Service) DeleteBusiness(ctx context.Context, businessID, ownerUserID int64) error {
+	count, err := s.repo.CountActiveOwnedBusinesses(ctx, ownerUserID)
+	if err != nil {
+		return err
+	}
+	if count <= 1 {
+		return ErrCannotDeleteOnlyBusiness
+	}
+
+	deleted, err := s.repo.DeactivateBusiness(ctx, businessID, ownerUserID)
+	if err != nil {
+		return err
+	}
+	if !deleted {
+		return ErrBusinessNotOwned
+	}
+
+	cacher.Of[domain.BusinessProfile]().Delete(ctx, []string{cacheKeys.BusinessProfile(businessID)})
+	cacher.Of[[]domain.OwnedBusiness]().Delete(ctx, []string{cacheKeys.UserBusinesses(ownerUserID)})
+	return nil
 }

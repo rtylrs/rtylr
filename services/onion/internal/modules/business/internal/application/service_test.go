@@ -17,6 +17,16 @@ type mockRepo struct {
 		ownerID int64
 		slug    string
 	}
+	rename struct {
+		businessID int64
+		ownerID    int64
+		name       string
+	}
+	deactivate struct {
+		businessID int64
+		ownerID    int64
+	}
+	activeOwned int64
 }
 
 func (m *mockRepo) GetProfile(_ context.Context, ownerID int64) (domain.BusinessProfile, error) {
@@ -49,6 +59,26 @@ func (m *mockRepo) CreateSubBusiness(_ context.Context, _ string, _, _ int64) (i
 
 func (m *mockRepo) CheckSubBusinessOwnership(_ context.Context, _, _ int64) (bool, error) {
 	return false, m.err
+}
+
+func (m *mockRepo) RenameBusiness(_ context.Context, businessID, ownerID int64, name string) (bool, error) {
+	m.rename.businessID = businessID
+	m.rename.ownerID = ownerID
+	m.rename.name = name
+	return m.err == nil, m.err
+}
+
+func (m *mockRepo) DeactivateBusiness(_ context.Context, businessID, ownerID int64) (bool, error) {
+	m.deactivate.businessID = businessID
+	m.deactivate.ownerID = ownerID
+	return m.err == nil, m.err
+}
+
+func (m *mockRepo) CountActiveOwnedBusinesses(_ context.Context, _ int64) (int64, error) {
+	if m.activeOwned == 0 {
+		return 2, m.err
+	}
+	return m.activeOwned, m.err
 }
 
 func TestGetProfile_Delegates(t *testing.T) {
@@ -108,5 +138,50 @@ func TestUpdateSlug_InvalidatesLocalCachedProfile(t *testing.T) {
 	}
 	if repo.updated.ownerID != ownerID || repo.updated.slug != "voxire" {
 		t.Fatalf("unexpected update args: %+v", repo.updated)
+	}
+}
+
+func TestRenameBusiness_TrimsNameAndScopesToOwner(t *testing.T) {
+	repo := &mockRepo{}
+	s := &Service{repo: repo}
+
+	if err := s.RenameBusiness(context.Background(), 12, 34, "  New name  "); err != nil {
+		t.Fatalf("rename business: %v", err)
+	}
+
+	if repo.rename.businessID != 12 || repo.rename.ownerID != 34 || repo.rename.name != "New name" {
+		t.Fatalf("unexpected rename args: %+v", repo.rename)
+	}
+}
+
+func TestRenameBusiness_RejectsBlankName(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+
+	if err := s.RenameBusiness(context.Background(), 12, 34, "   "); !errors.Is(err, ErrBusinessNameEmpty) {
+		t.Fatalf("expected blank name error, got %v", err)
+	}
+}
+
+func TestDeleteBusiness_RejectsOnlyOwnedBusiness(t *testing.T) {
+	repo := &mockRepo{activeOwned: 1}
+	s := &Service{repo: repo}
+
+	if err := s.DeleteBusiness(context.Background(), 12, 34); !errors.Is(err, ErrCannotDeleteOnlyBusiness) {
+		t.Fatalf("expected only-business error, got %v", err)
+	}
+	if repo.deactivate.businessID != 0 {
+		t.Fatal("should not deactivate the only owned business")
+	}
+}
+
+func TestDeleteBusiness_ScopesToOwner(t *testing.T) {
+	repo := &mockRepo{activeOwned: 2}
+	s := &Service{repo: repo}
+
+	if err := s.DeleteBusiness(context.Background(), 12, 34); err != nil {
+		t.Fatalf("delete business: %v", err)
+	}
+	if repo.deactivate.businessID != 12 || repo.deactivate.ownerID != 34 {
+		t.Fatalf("unexpected deactivate args: %+v", repo.deactivate)
 	}
 }

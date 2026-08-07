@@ -45,12 +45,34 @@ ORDER BY is_default DESC, name ASC;
 -- name: UpdateBusinessSlug :exec
 UPDATE businesses SET slug = ? WHERE id = ?;
 
+-- name: RenameBusiness :execresult
+UPDATE businesses
+SET name = ?
+WHERE id = ? AND owner_id = ? AND is_active = TRUE;
+
+-- name: DeactivateBusiness :execresult
+UPDATE businesses
+SET is_active = FALSE
+WHERE id = ? AND owner_id = ? AND is_active = TRUE;
+
+-- name: CountActiveOwnedBusinesses :one
+SELECT COUNT(*) AS cnt
+FROM businesses
+WHERE owner_id = ? AND is_active = TRUE;
+
 -- name: ListUserBusinesses :many
-SELECT b.id, b.name, COALESCE(b.logo_url, '') AS logo_url, COALESCE(b.parent_id, 0) AS parent_id, b.is_active
+SELECT b.id, b.name, COALESCE(b.logo_url, '') AS logo_url, COALESCE(b.parent_id, 0) AS parent_id,
+       b.is_active, (b.owner_id = ?) AS is_owned
 FROM businesses b
 WHERE b.is_active = TRUE
   AND (b.owner_id = ? OR EXISTS (
     SELECT 1 FROM user_business_access uba WHERE uba.user_id = ? AND uba.business_id = b.id
+  ) OR EXISTS (
+    SELECT 1
+    FROM user_app_permissions uap
+    WHERE uap.user_id = ?
+      AND uap.business_id = b.id
+      AND uap.is_active = TRUE
   ))
 ORDER BY b.id ASC;
 
