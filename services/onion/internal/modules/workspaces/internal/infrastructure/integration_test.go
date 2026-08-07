@@ -369,7 +369,7 @@ func TestWorkspaces_CreateTask_AppearsInProject(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = repo.DeleteTask(ctx, taskID, testutil.OwnerID) })
 
-	tasks, err := repo.GetTasksByProject(ctx, domain.ListTasksFilter{ProjectID: projID, WorkspaceID: wsID})
+	tasks, _, err := repo.GetTasksByProject(ctx, domain.ListTasksFilter{ProjectID: projID, WorkspaceID: wsID, Limit: 100})
 	if err != nil {
 		t.Fatalf("GetTasksByProject: %v", err)
 	}
@@ -416,7 +416,7 @@ func TestWorkspaces_DeleteTask_RemovesFromProject(t *testing.T) {
 		t.Fatalf("DeleteTask: %v", err)
 	}
 
-	tasks, _ := repo.GetTasksByProject(ctx, domain.ListTasksFilter{ProjectID: projID, WorkspaceID: wsID})
+	tasks, _, _ := repo.GetTasksByProject(ctx, domain.ListTasksFilter{ProjectID: projID, WorkspaceID: wsID, Limit: 100})
 	for _, tk := range tasks {
 		if tk.ID == taskID {
 			t.Errorf("deleted task id=%d still in list", taskID)

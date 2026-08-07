@@ -18,6 +18,12 @@ import (
 const (
 	workspacesScope = "workspaces"
 	workspacesTTL   = 2 * time.Minute
+
+	// internalTaskListCap bounds task list reads made on behalf of another
+	// feature (the dashboard's "my tasks" widget, a task's subtasks embedded
+	// in its detail view) rather than a paginated list RPC. Matches the cap
+	// these reads already used before pagination existed.
+	internalTaskListCap = int64(500)
 )
 
 func invalidateWorkspacesScope(ctx context.Context, businessID int64) {
@@ -240,7 +246,7 @@ func (s *Service) InviteProjectMemberByEmail(ctx context.Context, projectID int6
 // Tasks
 // ─────────────────────────────────────────────
 
-func (s *Service) ListTasks(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
+func (s *Service) ListTasks(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, int64, error) {
 	if filter.ProjectID == 0 && filter.WorkspaceID != 0 {
 		return s.repo.GetTasksByWorkspace(ctx, filter)
 	}
@@ -282,7 +288,7 @@ func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskD
 		return domain.TaskDetail{}, err
 	}
 
-	subtasks, err := s.repo.GetSubtasks(ctx, taskID)
+	subtasks, _, err := s.repo.GetSubtasks(ctx, taskID, internalTaskListCap, 0)
 	if err != nil {
 		return domain.TaskDetail{}, err
 	}
@@ -368,18 +374,31 @@ func (s *Service) DeleteTask(ctx context.Context, taskID, businessID int64) erro
 	return s.repo.DeleteTask(ctx, taskID, businessID)
 }
 
-func (s *Service) GetMyTasks(ctx context.Context, userID int64) ([]domain.Task, error) {
-	return cacher.Of[[]domain.Task]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped("user", userID, "workspace_tasks"),
-		func(ctx context.Context) ([]domain.Task, error) {
-			return s.repo.GetMyTasks(ctx, userID)
+type myTasksPage struct {
+	Tasks []domain.Task
+	Total int64
+}
+
+func (s *Service) GetMyTasks(ctx context.Context, userID, page, limit int64) ([]domain.Task, int64, error) {
+	offset := (page - 1) * limit
+	result, err := cacher.Of[myTasksPage]().GetOrComputeSingle(ctx,
+		// page/limit are part of the cache key, not just the fetch - otherwise
+		// page 2 would return page 1's cached rows until the 2-minute TTL expires.
+		cacheKeys.Scoped("user", userID, fmt.Sprintf("workspace_tasks:page=%d:limit=%d", page, limit)),
+		func(ctx context.Context) (myTasksPage, error) {
+			tasks, total, fetchErr := s.repo.GetMyTasks(ctx, userID, limit, offset)
+			return myTasksPage{Tasks: tasks, Total: total}, fetchErr
 		},
 		cacher.WithExpiry(ctx, workspacesTTL),
 	)
+	if err != nil {
+		return nil, 0, err
+	}
+	return result.Tasks, result.Total, nil
 }
 
-func (s *Service) SearchTasks(ctx context.Context, workspaceID int64, q string) ([]domain.Task, error) {
-	return s.repo.SearchTasks(ctx, workspaceID, q)
+func (s *Service) SearchTasks(ctx context.Context, workspaceID int64, q string, limit, offset int64) ([]domain.Task, int64, error) {
+	return s.repo.SearchTasks(ctx, workspaceID, q, limit, offset)
 }
 
 // ─────────────────────────────────────────────
@@ -429,7 +448,7 @@ func (s *Service) GetDashboard(ctx context.Context, workspaceID, businessID, use
 		return domain.DashboardStats{}, err
 	}
 
-	myTasks, err := s.repo.GetMyTasks(ctx, userID)
+	myTasks, _, err := s.repo.GetMyTasks(ctx, userID, internalTaskListCap, 0)
 	if err != nil {
 		return domain.DashboardStats{}, err
 	}
@@ -451,8 +470,8 @@ func (s *Service) GetTaskActivity(ctx context.Context, taskID int64) ([]domain.T
 // Task Subtasks (standalone)
 // ─────────────────────────────────────────────
 
-func (s *Service) GetSubtasks(ctx context.Context, taskID int64) ([]domain.Task, error) {
-	return s.repo.GetSubtasks(ctx, taskID)
+func (s *Service) GetSubtasks(ctx context.Context, taskID, limit, offset int64) ([]domain.Task, int64, error) {
+	return s.repo.GetSubtasks(ctx, taskID, limit, offset)
 }
 
 func (s *Service) CreateSubtask(ctx context.Context, input domain.TaskInput) (domain.Task, error) {

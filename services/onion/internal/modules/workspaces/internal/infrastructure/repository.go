@@ -305,50 +305,92 @@ func (r *Repository) CreateTask(ctx context.Context, input domain.TaskInput) (in
 	return res.LastInsertId()
 }
 
-// dynamic-query: squirrel
-func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
-	builder := enrichedTaskSelectForList(filter.Compact).
-		Where(sq.Eq{"t.project_id": filter.ProjectID}).
-		Where("t.parent_task_id IS NULL")
-
+// taskListConditions builds the shared WHERE conditions for a scoped task
+// list (by project or by workspace) so the same filter logic backs both the
+// COUNT and the paginated SELECT.
+func taskListConditions(scopeCol string, scopeVal int64, filter domain.ListTasksFilter) sq.And {
+	conds := sq.And{
+		sq.Eq{scopeCol: scopeVal},
+		sq.Expr("t.parent_task_id IS NULL"),
+	}
 	if filter.Status != "" {
-		builder = builder.Where(sq.Eq{"t.status": filter.Status})
+		conds = append(conds, sq.Eq{"t.status": filter.Status})
 	} else if filter.ActiveOnly {
-		builder = builder.Where("t.status NOT IN ('done', 'cancelled')")
+		conds = append(conds, sq.Expr("t.status NOT IN ('done', 'cancelled')"))
 	}
 	if filter.AssigneeID != nil {
-		builder = builder.Where(sq.Eq{"t.assignee_id": *filter.AssigneeID})
+		conds = append(conds, sq.Eq{"t.assignee_id": *filter.AssigneeID})
 	}
 	if filter.Priority != "" {
-		builder = builder.Where(sq.Eq{"t.priority": filter.Priority})
+		conds = append(conds, sq.Eq{"t.priority": filter.Priority})
 	}
+	return conds
+}
 
-	builder = builder.OrderBy("t.sort_order ASC", "t.created_at ASC")
-
-	return r.listEnrichedTasks(ctx, builder)
+// countTasks runs a COUNT(*) over flow_tasks using the given conditions. The
+// conditions built by taskListConditions only ever reference "t."-prefixed
+// columns, so the count never needs the list query's project/user JOINs.
+// dynamic-query: squirrel
+func (r *Repository) countTasks(ctx context.Context, conds sq.And) (int64, error) {
+	q, args, err := sq.Select("COUNT(*)").
+		From("flow_tasks t").
+		Where(conds).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("countTasks build failed", logger.Error(err))
+		return 0, err
+	}
+	var total int64
+	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&total); err != nil {
+		logger.Ctx(ctx).Error("countTasks failed", logger.Error(err))
+		return 0, err
+	}
+	return total, nil
 }
 
 // dynamic-query: squirrel
-func (r *Repository) GetTasksByWorkspace(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, error) {
+func (r *Repository) GetTasksByProject(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, int64, error) {
+	conds := taskListConditions("t.project_id", filter.ProjectID, filter)
+
+	total, err := r.countTasks(ctx, conds)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	builder := enrichedTaskSelectForList(filter.Compact).
-		Where(sq.Eq{"t.workspace_id": filter.WorkspaceID}).
-		Where("t.parent_task_id IS NULL")
+		Where(conds).
+		OrderBy("t.sort_order ASC", "t.created_at ASC").
+		Limit(uint64(filter.Limit)).
+		Offset(uint64(filter.Offset))
 
-	if filter.Status != "" {
-		builder = builder.Where(sq.Eq{"t.status": filter.Status})
-	} else if filter.ActiveOnly {
-		builder = builder.Where("t.status NOT IN ('done', 'cancelled')")
+	tasks, err := r.listEnrichedTasks(ctx, builder)
+	if err != nil {
+		return nil, 0, err
 	}
-	if filter.AssigneeID != nil {
-		builder = builder.Where(sq.Eq{"t.assignee_id": *filter.AssigneeID})
-	}
-	if filter.Priority != "" {
-		builder = builder.Where(sq.Eq{"t.priority": filter.Priority})
+	return tasks, total, nil
+}
+
+// dynamic-query: squirrel
+func (r *Repository) GetTasksByWorkspace(ctx context.Context, filter domain.ListTasksFilter) ([]domain.Task, int64, error) {
+	conds := taskListConditions("t.workspace_id", filter.WorkspaceID, filter)
+
+	total, err := r.countTasks(ctx, conds)
+	if err != nil {
+		return nil, 0, err
 	}
 
-	builder = builder.OrderBy("t.created_at DESC").Limit(500)
+	builder := enrichedTaskSelectForList(filter.Compact).
+		Where(conds).
+		OrderBy("t.created_at DESC").
+		Limit(uint64(filter.Limit)).
+		Offset(uint64(filter.Offset))
 
-	return r.listEnrichedTasks(ctx, builder)
+	tasks, err := r.listEnrichedTasks(ctx, builder)
+	if err != nil {
+		return nil, 0, err
+	}
+	return tasks, total, nil
 }
 
 func (r *Repository) GetTaskByID(ctx context.Context, taskID int64) (domain.Task, error) {
@@ -362,12 +404,26 @@ func (r *Repository) GetTaskByID(ctx context.Context, taskID int64) (domain.Task
 	return tasks[0], nil
 }
 
-func (r *Repository) GetSubtasks(ctx context.Context, parentTaskID int64) ([]domain.Task, error) {
-	return r.listEnrichedTasks(ctx,
+// dynamic-query: squirrel
+func (r *Repository) GetSubtasks(ctx context.Context, parentTaskID, limit, offset int64) ([]domain.Task, int64, error) {
+	conds := sq.And{sq.Eq{"t.parent_task_id": parentTaskID}}
+
+	total, err := r.countTasks(ctx, conds)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	tasks, err := r.listEnrichedTasks(ctx,
 		enrichedTaskSelect().
-			Where(sq.Eq{"t.parent_task_id": parentTaskID}).
-			OrderBy("t.sort_order ASC", "t.created_at ASC"),
+			Where(conds).
+			OrderBy("t.sort_order ASC", "t.created_at ASC").
+			Limit(uint64(limit)).
+			Offset(uint64(offset)),
 	)
+	if err != nil {
+		return nil, 0, err
+	}
+	return tasks, total, nil
 }
 
 // myTasksDoneWindowDays bounds how far back completed tasks surface in the global
@@ -375,30 +431,44 @@ func (r *Repository) GetSubtasks(ctx context.Context, parentTaskID int64) ([]dom
 const myTasksDoneWindowDays = 14
 
 // dynamic-query: squirrel
-func (r *Repository) GetMyTasks(ctx context.Context, userID int64) ([]domain.Task, error) {
+func (r *Repository) GetMyTasks(ctx context.Context, userID, limit, offset int64) ([]domain.Task, int64, error) {
 	// All active work assigned to the user, plus tasks they completed within the
 	// recent window so the board's Done column isn't always empty. Cancelled tasks
 	// stay hidden. completed_at is stamped by both the status and partial-update
 	// paths when a task moves to 'done'.
 	doneCutoff := time.Now().AddDate(0, 0, -myTasksDoneWindowDays)
-	return r.listEnrichedTasks(ctx,
+	conds := sq.And{
+		sq.Eq{"t.assignee_id": userID},
+		sq.Expr("t.parent_task_id IS NULL"),
+		sq.Or{
+			sq.Expr("t.status NOT IN ('done','cancelled')"),
+			sq.And{
+				sq.Eq{"t.status": "done"},
+				sq.GtOrEq{"t.completed_at": doneCutoff},
+			},
+		},
+	}
+
+	total, err := r.countTasks(ctx, conds)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	tasks, err := r.listEnrichedTasks(ctx,
 		enrichedTaskSelect().
-			Where(sq.Eq{"t.assignee_id": userID}).
-			Where("t.parent_task_id IS NULL").
-			Where(sq.Or{
-				sq.Expr("t.status NOT IN ('done','cancelled')"),
-				sq.And{
-					sq.Eq{"t.status": "done"},
-					sq.GtOrEq{"t.completed_at": doneCutoff},
-				},
-			}).
+			Where(conds).
 			OrderBy(
 				"CASE WHEN t.due_date IS NULL THEN 1 ELSE 0 END",
 				"t.due_date ASC",
 				"t.created_at DESC",
 			).
-			Limit(500),
+			Limit(uint64(limit)).
+			Offset(uint64(offset)),
 	)
+	if err != nil {
+		return nil, 0, err
+	}
+	return tasks, total, nil
 }
 
 // dynamic-query: squirrel
@@ -1422,15 +1492,27 @@ func (r *Repository) SeedDefaultColumns(ctx context.Context, projectID, workspac
 // ─────────────────────────────────────────────
 
 // dynamic-query: squirrel
-func (r *Repository) SearchTasks(ctx context.Context, workspaceID int64, q string) ([]domain.Task, error) {
+func (r *Repository) SearchTasks(ctx context.Context, workspaceID int64, q string, limit, offset int64) ([]domain.Task, int64, error) {
 	q = strings.TrimSpace(q)
 	if q == "" {
-		return []domain.Task{}, nil
+		return []domain.Task{}, 0, nil
 	}
 	searchQuery := searchutil.BooleanPrefixQuery(q)
 	if searchQuery == "" {
-		return []domain.Task{}, nil
+		return []domain.Task{}, 0, nil
 	}
+
+	countQuery := `SELECT COUNT(*)
+	          FROM flow_tasks
+	          WHERE workspace_id = ?
+	            AND archived = FALSE
+	            AND MATCH(title, description) AGAINST (? IN BOOLEAN MODE)`
+	var total int64
+	if err := r.pool.QueryRowContext(ctx, countQuery, workspaceID, searchQuery).Scan(&total); err != nil {
+		logger.Ctx(ctx).Error("SearchTasks count failed", logger.Error(err))
+		return nil, 0, err
+	}
+
 	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, section_id, title, description,
 	           status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
 	           estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
@@ -1439,16 +1521,20 @@ func (r *Repository) SearchTasks(ctx context.Context, workspaceID int64, q strin
 	            AND archived = FALSE
 	            AND MATCH(title, description) AGAINST (? IN BOOLEAN MODE)
 	          ORDER BY updated_at DESC
-	          LIMIT 50`
+	          LIMIT ? OFFSET ?`
 
-	rows, err := r.pool.QueryContext(ctx, query, workspaceID, searchQuery)
+	rows, err := r.pool.QueryContext(ctx, query, workspaceID, searchQuery, limit, offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("SearchTasks failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
-	return scanTasksRaw(ctx, rows)
+	tasks, err := scanTasksRaw(ctx, rows)
+	if err != nil {
+		return nil, 0, err
+	}
+	return tasks, total, nil
 }
 
 // ─────────────────────────────────────────────
