@@ -47,3 +47,8 @@ CREATE TABLE IF NOT EXISTS stock_ledger (
     created_by      BIGINT NULL,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE OR REPLACE VIEW product_stock_total AS
+    SELECT owner_id, business_id, product_id, SUM(on_hand) AS total_quantity
+    FROM stock_levels
+    GROUP BY owner_id, business_id, product_id;
