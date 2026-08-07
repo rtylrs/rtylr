@@ -501,14 +501,22 @@ func (r *Repository) GetInsights(ctx context.Context, workspaceID int64) (domain
 // Team Workload
 // ─────────────────────────────────────────────
 
-func (r *Repository) GetTeamWorkload(ctx context.Context, workspaceID int64) ([]domain.TeamMemberWorkload, error) {
+func (r *Repository) GetTeamWorkload(ctx context.Context, workspaceID, limit, offset int64) ([]domain.TeamMemberWorkload, int64, error) {
+	total, err := r.queries.CountWorkspaceMembersForWorkload(ctx, workspaceID)
+	if err != nil {
+		logger.Ctx(ctx).Error("CountWorkspaceMembersForWorkload failed", logger.Error(err))
+		return nil, 0, err
+	}
+
 	rows, err := r.queries.GetTeamWorkload(ctx, sqlc.GetTeamWorkloadParams{
 		WorkspaceID:   workspaceID,
 		WorkspaceID_2: workspaceID,
+		Limit:         int32(limit),
+		Offset:        int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetTeamWorkload failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	workloads := make([]domain.TeamMemberWorkload, 0, len(rows))
@@ -548,7 +556,7 @@ func (r *Repository) GetTeamWorkload(ctx context.Context, workspaceID int64) ([]
 		workloads[i].Tasks = mapWorkloadMemberTasks(taskRows)
 	}
 
-	return workloads, nil
+	return workloads, total, nil
 }
 
 func mapWorkloadMemberTasks(rows []sqlc.GetTeamWorkloadMemberTasksRow) []domain.Task {
@@ -612,11 +620,21 @@ func mapWorkloadMemberTasks(rows []sqlc.GetTeamWorkloadMemberTasksRow) []domain.
 // Roadmap (derived from projects + milestones)
 // ─────────────────────────────────────────────
 
-func (r *Repository) GetRoadmap(ctx context.Context, workspaceID int64) ([]domain.Project, error) {
-	rows, err := r.queries.GetRoadmap(ctx, workspaceID)
+func (r *Repository) GetRoadmap(ctx context.Context, workspaceID, limit, offset int64) ([]domain.Project, int64, error) {
+	total, err := r.queries.CountRoadmapProjects(ctx, workspaceID)
+	if err != nil {
+		logger.Ctx(ctx).Error("CountRoadmapProjects failed", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.GetRoadmap(ctx, sqlc.GetRoadmapParams{
+		WorkspaceID: workspaceID,
+		Limit:       int32(limit),
+		Offset:      int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetRoadmap failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	projects := make([]domain.Project, 0, len(rows))
@@ -642,7 +660,7 @@ func (r *Repository) GetRoadmap(ctx context.Context, workspaceID int64) ([]domai
 		}
 		projects = append(projects, p)
 	}
-	return projects, nil
+	return projects, total, nil
 }
 
 // ─────────────────────────────────────────────

@@ -134,6 +134,9 @@ GROUP BY u.id, u.full_name, u.email
 ORDER BY SUM(tl.duration_minutes) DESC
 LIMIT 10;
 
+-- name: CountWorkspaceMembersForWorkload :one
+SELECT COUNT(*) FROM flow_workspace_members WHERE workspace_id = ?;
+
 -- cross-schema read from users — team workload member summary
 -- name: GetTeamWorkload :many
 SELECT
@@ -148,8 +151,13 @@ LEFT JOIN flow_tasks t ON t.assignee_id = u.id
     AND t.parent_task_id IS NULL
 WHERE wm.workspace_id = ?
 GROUP BY u.id, u.full_name, u.email
-ORDER BY task_count DESC;
+ORDER BY task_count DESC
+LIMIT ? OFFSET ?;
 
+-- Per-member fan-out from GetTeamWorkload, one call per member on the current
+-- page. Intentionally capped at 10 - a workload card shows a preview of a
+-- member's open work, not their full backlog. The outer member list is what's
+-- paginated; this inner cap is fixed regardless of page size.
 -- name: GetTeamWorkloadMemberTasks :many
 SELECT
     id, project_id, workspace_id, owner_id, parent_task_id, section_id,
@@ -162,13 +170,17 @@ WHERE workspace_id = ? AND assignee_id = ? AND status NOT IN ('done', 'cancelled
 ORDER BY priority DESC, due_date ASC
 LIMIT 10;
 
+-- name: CountRoadmapProjects :one
+SELECT COUNT(*) FROM flow_projects WHERE workspace_id = ? AND status != 'archived';
+
 -- name: GetRoadmap :many
 SELECT
     p.id, p.workspace_id, p.owner_id, p.name, p.description, p.icon, p.color,
     p.status, p.start_date, p.due_date, p.created_by, p.created_at, p.updated_at
 FROM flow_projects p
 WHERE p.workspace_id = ? AND p.status != 'archived'
-ORDER BY p.start_date ASC, p.created_at ASC;
+ORDER BY p.start_date ASC, p.created_at ASC
+LIMIT ? OFFSET ?;
 
 -- name: ListNotifications :many
 SELECT

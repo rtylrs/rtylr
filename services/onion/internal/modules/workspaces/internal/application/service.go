@@ -690,16 +690,16 @@ func (s *Service) GetInsights(ctx context.Context, workspaceID int64) (domain.In
 // Team Workload
 // ─────────────────────────────────────────────
 
-func (s *Service) GetTeamWorkload(ctx context.Context, workspaceID int64) ([]domain.TeamMemberWorkload, error) {
-	return s.repo.GetTeamWorkload(ctx, workspaceID)
+func (s *Service) GetTeamWorkload(ctx context.Context, workspaceID, limit, offset int64) ([]domain.TeamMemberWorkload, int64, error) {
+	return s.repo.GetTeamWorkload(ctx, workspaceID, limit, offset)
 }
 
 // ─────────────────────────────────────────────
 // Roadmap
 // ─────────────────────────────────────────────
 
-func (s *Service) GetRoadmap(ctx context.Context, workspaceID int64) ([]domain.Project, error) {
-	return s.repo.GetRoadmap(ctx, workspaceID)
+func (s *Service) GetRoadmap(ctx context.Context, workspaceID, limit, offset int64) ([]domain.Project, int64, error) {
+	return s.repo.GetRoadmap(ctx, workspaceID, limit, offset)
 }
 
 // ─────────────────────────────────────────────
