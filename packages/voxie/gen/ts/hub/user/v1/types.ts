@@ -23,6 +23,7 @@ role?: string;
 businessId?: string;
 businessName?: string;
 isOwner?: boolean;
+isConsoleAdmin?: boolean;
 onboarded?: boolean;
 }
 
@@ -37,6 +38,7 @@ role: v.role,
 businessId: v.business_id,
 businessName: v.business_name,
 isOwner: v.is_owner,
+isConsoleAdmin: v.is_console_admin,
 onboarded: v.onboarded,
 };
 }
@@ -51,6 +53,7 @@ if (v.role !== undefined) { out.role = v.role; }
 if (v.businessId !== undefined) { out.business_id = v.businessId; }
 if (v.businessName !== undefined) { out.business_name = v.businessName; }
 if (v.isOwner !== undefined) { out.is_owner = v.isOwner; }
+if (v.isConsoleAdmin !== undefined) { out.is_console_admin = v.isConsoleAdmin; }
 if (v.onboarded !== undefined) { out.onboarded = v.onboarded; }
 return out;
 }

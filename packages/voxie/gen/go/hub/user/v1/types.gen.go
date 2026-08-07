@@ -10,15 +10,16 @@ type GetMeRequest struct {
 }
 
 type GetMeResponse struct {
-	Id           int64    `json:"id,omitempty"`
-	Email        string   `json:"email,omitempty"`
-	FullName     string   `json:"full_name,omitempty"`
-	Apps         []string `json:"apps,omitempty"`
-	Role         string   `json:"role,omitempty"`
-	BusinessId   int64    `json:"business_id,omitempty"`
-	BusinessName string   `json:"business_name,omitempty"`
-	IsOwner      bool     `json:"is_owner,omitempty"`
-	Onboarded    bool     `json:"onboarded,omitempty"`
+	Id             int64    `json:"id,omitempty"`
+	Email          string   `json:"email,omitempty"`
+	FullName       string   `json:"full_name,omitempty"`
+	Apps           []string `json:"apps,omitempty"`
+	Role           string   `json:"role,omitempty"`
+	BusinessId     int64    `json:"business_id,omitempty"`
+	BusinessName   string   `json:"business_name,omitempty"`
+	IsOwner        bool     `json:"is_owner,omitempty"`
+	IsConsoleAdmin bool     `json:"is_console_admin,omitempty"`
+	Onboarded      bool     `json:"onboarded,omitempty"`
 }
 
 func (m *GetMeResponse) MarshalJSON() ([]byte, error) {
@@ -122,6 +123,14 @@ func (x *GetMeResponse) GetIsOwner() bool {
 		return zero
 	}
 	return x.IsOwner
+}
+
+func (x *GetMeResponse) GetIsConsoleAdmin() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsConsoleAdmin
 }
 
 func (x *GetMeResponse) GetOnboarded() bool {
