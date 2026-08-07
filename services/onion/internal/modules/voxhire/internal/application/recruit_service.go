@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/voxire/onion/internal/modules/careers"
 	"github.com/voxire/onion/internal/modules/voxhire/internal/domain"
-	"github.com/voxire/onion/internal/platform/cache/cacher"
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/storage"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
@@ -20,7 +20,6 @@ const (
 	cvURLTTL       = 10 * time.Minute
 
 	minAdminPasswordLen = 6
-	careersCatalogKey   = "cache:careers:active"
 )
 
 var errJWTSecretMissing = errors.New("jwt secret not configured")
@@ -174,8 +173,7 @@ func (s *Service) SetCareerActive(ctx context.Context, id int64, active bool) (*
 }
 
 func invalidateCareersCatalog(ctx context.Context) {
-	cacher.GetInMemoryCache(ctx).DeleteByPattern(ctx, careersCatalogKey)
-	cacher.GetRedisCache().DeleteByPattern(ctx, careersCatalogKey)
+	careers.InvalidateActiveCareers(ctx)
 }
 
 func normalizeCareerInput(in domain.CareerInput) domain.CareerInput {
