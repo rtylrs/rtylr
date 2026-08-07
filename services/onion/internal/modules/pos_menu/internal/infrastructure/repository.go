@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
@@ -42,7 +43,7 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuI
 			Name:       row.Name,
 			SalePrice:  decimalToFloat(row.SalePrice),
 			TaxRate:    decimalToFloat(row.TaxRate),
-			Stock:      decimalToFloat(row.StockQuantity),
+			Stock:      stockToFloat(row.StockQuantity),
 			IsActive:   row.IsActive.Valid && row.IsActive.Bool,
 			Category:   row.CategoryName,
 		}
@@ -127,4 +128,27 @@ func decimalToFloat(s string) float64 {
 
 func floatToDecimal(f float64) string {
 	return strconv.FormatFloat(f, 'f', 2, 64)
+}
+
+// stockToFloat converts the value returned by the COALESCE(pst.total_quantity, p.stock_quantity)
+// aggregate (sqlc emits interface{} for a DECIMAL sourced from the product_stock_total view) into
+// a float64, handling the driver representations MySQL may return for a DECIMAL column.
+func stockToFloat(v interface{}) float64 {
+	if v == nil {
+		return 0
+	}
+	switch val := v.(type) {
+	case float64:
+		return val
+	case float32:
+		return float64(val)
+	case int64:
+		return float64(val)
+	case []byte:
+		return decimalToFloat(string(val))
+	case string:
+		return decimalToFloat(val)
+	default:
+		return decimalToFloat(fmt.Sprintf("%v", val))
+	}
 }
