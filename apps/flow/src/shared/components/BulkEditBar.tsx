@@ -7,6 +7,7 @@ import { useFlowStore } from '../stores/flowStore';
 import {
   useBulkUpdateStatus,
   useBulkUpdatePriority,
+  useBulkUpdateArchive,
   useBulkDelete,
 } from '../../features/tasks/useTasks';
 import { useCanEditTask, useCanDeleteResource } from '../lib/currentUser';
@@ -17,13 +18,15 @@ export const BulkEditBar: React.FC = () => {
   const { selectedTaskIds, clearSelection } = useFlowStore();
   const bulkStatus = useBulkUpdateStatus();
   const bulkPriority = useBulkUpdatePriority();
+  const bulkArchive = useBulkUpdateArchive();
   const bulkDelete = useBulkDelete();
   const canEdit = useCanEditTask();
   const canRemove = useCanDeleteResource();
 
   if (selectedTaskIds.length === 0) return null;
 
-  const isPending = bulkStatus.isPending || bulkPriority.isPending || bulkDelete.isPending;
+  const isPending =
+    bulkStatus.isPending || bulkPriority.isPending || bulkArchive.isPending || bulkDelete.isPending;
 
   return (
     <AnimatePresence>
@@ -76,8 +79,8 @@ export const BulkEditBar: React.FC = () => {
           disabled={isPending || !canEdit}
           title={!canEdit ? t('common.readOnlyAccess') : undefined}
           onClick={() =>
-            bulkStatus
-              .mutateAsync({ ids: selectedTaskIds, status: 'cancelled' })
+            bulkArchive
+              .mutateAsync({ ids: selectedTaskIds })
               .then(() => clearSelection())
               .catch(() => toast.error(t('errors.generic')))
           }
