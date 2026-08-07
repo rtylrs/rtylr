@@ -185,7 +185,13 @@ const ProjectBoard: React.FC = () => {
   // Tasks mapped to Task shape for TaskCard. Computed BEFORE any early
   // return so the useMemo below always runs in the same hook slot on
   // every render (React #310 otherwise - conditional hook order).
-  const tasks: Task[] = useMemo(() => apiTasks.map(apiTaskToTask), [apiTasks]);
+  // `activeOnly` is a query param the backend doesn't currently act on,
+  // so archived tasks still come back over the wire - filter client-side
+  // to match Triage/FocusToday/FlowLayout.
+  const tasks: Task[] = useMemo(
+    () => apiTasks.map(apiTaskToTask).filter((t) => !t.archived),
+    [apiTasks]
+  );
 
   // Precompute the ordered lane index across all tasks so every column
   // renders the same rows in the same order - otherwise empty columns
