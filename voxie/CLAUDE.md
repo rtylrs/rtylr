@@ -4,7 +4,7 @@
 
 - **Product:** RTYLR — commerce operating system
 - **Repo role:** API contracts. Single source of truth for all API request/response types shared between the Go backend (`onion`) and the TypeScript frontend (`rtylr`). Neither repo writes its own type definitions for cross-boundary types — they import from here.
-- **Schema language:** [onekit](https://github.com/1homsi/onekit)'s `.onk` — every service has been fully migrated off Protocol Buffers; `proto/`, `buf`, and the old `corezio/onekit` protoc plugins no longer exist in this repo.
+- **Schema language:** [onekit](https://github.com/1homsi/onekit)'s `.onk` — every service has been fully migrated off Protocol Buffers; `proto/`, `buf`, and the old OneKit protoc plugins no longer exist in this repo.
 - **Built by:** Voxire — Abed El-Fattah Amouneh & Mohammad Homsi
 - **Business email:** info@voxire.com
 - **WhatsApp:** +961 3 940 708
