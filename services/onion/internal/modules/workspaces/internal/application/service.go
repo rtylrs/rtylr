@@ -584,8 +584,8 @@ func (s *Service) SetTaskLabels(ctx context.Context, taskID, actorID int64, labe
 // Cycles
 // ─────────────────────────────────────────────
 
-func (s *Service) ListCycles(ctx context.Context, workspaceID int64) ([]domain.Cycle, error) {
-	return s.repo.ListCycles(ctx, workspaceID)
+func (s *Service) ListCycles(ctx context.Context, workspaceID, limit, offset int64) ([]domain.Cycle, int64, error) {
+	return s.repo.ListCycles(ctx, workspaceID, limit, offset)
 }
 
 func (s *Service) CreateCycle(ctx context.Context, input domain.CycleInput) (domain.Cycle, error) {
@@ -619,8 +619,8 @@ func (s *Service) UpdateCycle(ctx context.Context, input domain.UpdateCycleInput
 // Milestones
 // ─────────────────────────────────────────────
 
-func (s *Service) ListMilestones(ctx context.Context, workspaceID int64, projectID *int64) ([]domain.Milestone, error) {
-	return s.repo.ListMilestones(ctx, workspaceID, projectID)
+func (s *Service) ListMilestones(ctx context.Context, workspaceID int64, projectID *int64, limit, offset int64) ([]domain.Milestone, int64, error) {
+	return s.repo.ListMilestones(ctx, workspaceID, projectID, limit, offset)
 }
 
 func (s *Service) CreateMilestone(ctx context.Context, input domain.MilestoneInput) (domain.Milestone, error) {
@@ -648,8 +648,8 @@ func (s *Service) UpdateMilestone(ctx context.Context, input domain.UpdateMilest
 // Views
 // ─────────────────────────────────────────────
 
-func (s *Service) ListViews(ctx context.Context, workspaceID int64) ([]domain.View, error) {
-	return s.repo.ListViews(ctx, workspaceID)
+func (s *Service) ListViews(ctx context.Context, workspaceID, limit, offset int64) ([]domain.View, int64, error) {
+	return s.repo.ListViews(ctx, workspaceID, limit, offset)
 }
 
 func (s *Service) CreateView(ctx context.Context, input domain.ViewInput) (domain.View, error) {

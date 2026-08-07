@@ -57,7 +57,8 @@ func (a *CycleAPI) ListCycles(ctx context.Context, req *flowcyclev1.ListCyclesRe
 		}
 	}
 
-	cycles, err := a.Service.ListCycles(ctx, wsID)
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	cycles, total, err := a.Service.ListCycles(ctx, wsID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
 	}
@@ -66,7 +67,10 @@ func (a *CycleAPI) ListCycles(ctx context.Context, req *flowcyclev1.ListCyclesRe
 	for _, c := range cycles {
 		out = append(out, toCycle(c))
 	}
-	return &flowcyclev1.ListCyclesResponse{Cycles: out}, nil
+	return &flowcyclev1.ListCyclesResponse{
+		Cycles:     out,
+		Pagination: buildPagination(page, limit, total, len(cycles)),
+	}, nil
 }
 
 func (a *CycleAPI) CreateCycle(ctx context.Context, req *flowcyclev1.CreateCycleRequest) (*flowcyclev1.CreateCycleResponse, error) {

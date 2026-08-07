@@ -20,11 +20,21 @@ import (
 // Cycles
 // ─────────────────────────────────────────────
 
-func (r *Repository) ListCycles(ctx context.Context, workspaceID int64) ([]domain.Cycle, error) {
-	rows, err := r.queries.ListCycles(ctx, workspaceID)
+func (r *Repository) ListCycles(ctx context.Context, workspaceID, limit, offset int64) ([]domain.Cycle, int64, error) {
+	total, err := r.queries.CountCycles(ctx, workspaceID)
+	if err != nil {
+		logger.Ctx(ctx).Error("CountCycles failed", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListCycles(ctx, sqlc.ListCyclesParams{
+		WorkspaceID: workspaceID,
+		Limit:       int32(limit),
+		Offset:      int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListCycles failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	cycles := make([]domain.Cycle, 0, len(rows))
@@ -57,7 +67,7 @@ func (r *Repository) ListCycles(ctx context.Context, workspaceID int64) ([]domai
 		}
 		cycles = append(cycles, c)
 	}
-	return cycles, nil
+	return cycles, total, nil
 }
 
 func (r *Repository) CreateCycle(ctx context.Context, input domain.CycleInput) (int64, error) {
@@ -115,27 +125,45 @@ func nullInt64PtrFromPtr(v *int64) sql.NullInt64 {
 // Milestones
 // ─────────────────────────────────────────────
 
-func (r *Repository) ListMilestones(ctx context.Context, workspaceID int64, projectID *int64) ([]domain.Milestone, error) {
-	var rows []sqlc.ListMilestonesByWorkspaceRow
-	var err error
+func (r *Repository) ListMilestones(ctx context.Context, workspaceID int64, projectID *int64, limit, offset int64) ([]domain.Milestone, int64, error) {
 	if projectID != nil {
-		projectRows, listErr := r.queries.ListMilestonesByProject(ctx, sqlc.ListMilestonesByProjectParams{
+		total, countErr := r.queries.CountMilestonesByProject(ctx, sqlc.CountMilestonesByProjectParams{
 			WorkspaceID: sql.NullInt64{Int64: workspaceID, Valid: true},
 			ProjectID:   *projectID,
 		})
+		if countErr != nil {
+			logger.Ctx(ctx).Error("CountMilestonesByProject failed", logger.Error(countErr))
+			return nil, 0, countErr
+		}
+		projectRows, listErr := r.queries.ListMilestonesByProject(ctx, sqlc.ListMilestonesByProjectParams{
+			WorkspaceID: sql.NullInt64{Int64: workspaceID, Valid: true},
+			ProjectID:   *projectID,
+			Limit:       int32(limit),
+			Offset:      int32(offset),
+		})
 		if listErr != nil {
 			logger.Ctx(ctx).Error("ListMilestones failed", logger.Error(listErr))
-			return nil, listErr
+			return nil, 0, listErr
 		}
-		return mapMilestoneProjectRows(projectRows), nil
+		return mapMilestoneProjectRows(projectRows), total, nil
 	}
 
-	rows, err = r.queries.ListMilestonesByWorkspace(ctx, sql.NullInt64{Int64: workspaceID, Valid: true})
+	total, err := r.queries.CountMilestonesByWorkspace(ctx, sql.NullInt64{Int64: workspaceID, Valid: true})
+	if err != nil {
+		logger.Ctx(ctx).Error("CountMilestonesByWorkspace failed", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListMilestonesByWorkspace(ctx, sqlc.ListMilestonesByWorkspaceParams{
+		WorkspaceID: sql.NullInt64{Int64: workspaceID, Valid: true},
+		Limit:       int32(limit),
+		Offset:      int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListMilestones failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
-	return mapMilestoneWorkspaceRows(rows), nil
+	return mapMilestoneWorkspaceRows(rows), total, nil
 }
 
 func mapMilestoneWorkspaceRows(rows []sqlc.ListMilestonesByWorkspaceRow) []domain.Milestone {
@@ -260,11 +288,21 @@ func (r *Repository) UpdateMilestone(ctx context.Context, input domain.UpdateMil
 // Views
 // ─────────────────────────────────────────────
 
-func (r *Repository) ListViews(ctx context.Context, workspaceID int64) ([]domain.View, error) {
-	rows, err := r.queries.ListViews(ctx, workspaceID)
+func (r *Repository) ListViews(ctx context.Context, workspaceID, limit, offset int64) ([]domain.View, int64, error) {
+	total, err := r.queries.CountViewsByWorkspace(ctx, workspaceID)
+	if err != nil {
+		logger.Ctx(ctx).Error("CountViewsByWorkspace failed", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListViews(ctx, sqlc.ListViewsParams{
+		WorkspaceID: workspaceID,
+		Limit:       int32(limit),
+		Offset:      int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListViews failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	views := make([]domain.View, 0, len(rows))
@@ -294,7 +332,7 @@ func (r *Repository) ListViews(ctx context.Context, workspaceID int64) ([]domain
 		}
 		views = append(views, v)
 	}
-	return views, nil
+	return views, total, nil
 }
 
 func (r *Repository) CreateView(ctx context.Context, input domain.ViewInput) (int64, error) {

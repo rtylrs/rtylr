@@ -70,7 +70,8 @@ func (a *MilestoneAPI) ListMilestones(ctx context.Context, req *flowmilestonev1.
 		}
 	}
 
-	milestones, err := a.Service.ListMilestones(ctx, wsID, projID)
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	milestones, total, err := a.Service.ListMilestones(ctx, wsID, projID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
 	}
@@ -79,7 +80,10 @@ func (a *MilestoneAPI) ListMilestones(ctx context.Context, req *flowmilestonev1.
 	for _, m := range milestones {
 		out = append(out, toMilestone(m))
 	}
-	return &flowmilestonev1.ListMilestonesResponse{Milestones: out}, nil
+	return &flowmilestonev1.ListMilestonesResponse{
+		Milestones: out,
+		Pagination: buildPagination(page, limit, total, len(milestones)),
+	}, nil
 }
 
 func (a *MilestoneAPI) CreateMilestone(ctx context.Context, req *flowmilestonev1.CreateMilestoneRequest) (*flowmilestonev1.CreateMilestoneResponse, error) {
