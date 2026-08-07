@@ -1,6 +1,6 @@
 -- name: ListPurchaseOrders :many
 SELECT id, owner_id, business_id, supplier_id, po_number, status, subtotal, tax_amount, total,
-       expected_delivery, received_at, notes, created_by, created_at, updated_at
+       expected_delivery, received_at, notes, created_by, created_at, updated_at, destination_location_id
 FROM erp_purchase_orders
 WHERE business_id = ?
 ORDER BY created_at DESC
@@ -8,7 +8,7 @@ LIMIT ? OFFSET ?;
 
 -- name: ListPurchaseOrdersByStatus :many
 SELECT id, owner_id, business_id, supplier_id, po_number, status, subtotal, tax_amount, total,
-       expected_delivery, received_at, notes, created_by, created_at, updated_at
+       expected_delivery, received_at, notes, created_by, created_at, updated_at, destination_location_id
 FROM erp_purchase_orders
 WHERE business_id = ? AND status = ?
 ORDER BY created_at DESC
@@ -16,7 +16,7 @@ LIMIT ? OFFSET ?;
 
 -- name: GetPurchaseOrderByID :one
 SELECT id, owner_id, business_id, supplier_id, po_number, status, subtotal, tax_amount, total,
-       expected_delivery, received_at, notes, created_by, created_at, updated_at
+       expected_delivery, received_at, notes, created_by, created_at, updated_at, destination_location_id
 FROM erp_purchase_orders
 WHERE id = ? AND business_id = ?;
 
