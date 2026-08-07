@@ -64,5 +64,6 @@ export function apiTaskToTask(t: ApiTask): Task {
     decisionNote: t.decisionNote,
     focusPin: t.focusPin,
     sectionId,
+    archived: t.archived,
   };
 }
