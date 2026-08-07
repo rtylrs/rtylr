@@ -202,18 +202,6 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .voxire-button-ghost {
-    &:hover:not(.voxire-button-disabled) {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    &:active:not(.voxire-button-disabled) {
-      background-color: rgba(255, 255, 255, 0.15);
-    }
-  }
-}
-
 @media (max-width: 768px) {
   .voxire-button {
     &.voxire-button-lg {
