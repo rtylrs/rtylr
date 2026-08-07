@@ -545,6 +545,10 @@ export const flowApi = {
     estimatedHours?: number;
   }) => safe.post<{ task: ApiTask }>('/flow/task/v1/tasks', toTaskCreatePayload(data)),
 
+  // `archived` isn't part of the UpdateTaskBody wire contract yet (voxie
+  // flow/task/v1 has no field for it) - the backend silently drops the
+  // key today. Still forwarded here so the frontend is ready the moment
+  // the contract gains it, without another round-trip through this file.
   updateTask: (id: string, data: Partial<ApiTask>) =>
     safe.put<{ message: string }>(`/flow/task/v1/tasks/${id}`, {
       body: {
@@ -556,6 +560,7 @@ export const flowApi = {
         due_date: data.dueDate ?? '-',
         start_date: '-',
         labels: data.labels?.map((l) => Number(l)) ?? [0],
+        archived: data.archived,
       },
     }),
 

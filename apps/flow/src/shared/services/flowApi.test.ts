@@ -150,8 +150,22 @@ describe('flowApi', () => {
         due_date: '-',
         start_date: '-',
         labels: [0],
+        archived: undefined,
       },
     });
+  });
+
+  it('updateTask forwards archived when set', () => {
+    // Regression guard: TaskDetail's Archive button and Archive.tsx's
+    // Restore button both call updateTask({ archived: ... }) - if this
+    // function's body allowlist doesn't forward the field, the request
+    // silently carries no archive intent at all, independent of whether
+    // the backend contract can accept it yet.
+    flowApi.updateTask('9', { archived: true });
+    expect(safe.put).toHaveBeenCalledWith(
+      '/flow/task/v1/tasks/9',
+      expect.objectContaining({ body: expect.objectContaining({ archived: true }) })
+    );
   });
 
   it('deleteTask calls DELETE /flow/task/v1/tasks/{id}', () => {
