@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Building2, Check, ChevronRight, Plus, Loader2, Search } from 'lucide-react';
+import { Building2, Check, ChevronRight, Plus, Loader2, Search, Settings2 } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { setCookie, removeCookie, getDefaultCookieDomain } from '@voxire/auth';
 import {
   Dialog,
@@ -27,6 +28,7 @@ import { useBillingDetail, useMySubscription } from '../../shared/hooks/queries/
 
 const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useUserStore();
   const currentBusinessId = user?.businessId ?? 0;
 
@@ -204,6 +206,11 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
                 {t('businesses.addBusiness')}
               </DropdownMenuItem>
             </Tooltip>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate({ to: '/settings/businesses' })}>
+              <Settings2 size={13} />
+              {t('businesses.manage')}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

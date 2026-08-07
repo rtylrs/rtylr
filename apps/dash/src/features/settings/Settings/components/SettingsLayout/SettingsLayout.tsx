@@ -46,6 +46,7 @@ function getNavGroups(isOwner: boolean, addons: AddonData[], selfHosted: boolean
         { label: 'AI Usage', path: '/settings/ai', icon: Sparkles },
         ...(isOwner
           ? [
+              { label: 'Businesses', path: '/settings/businesses', icon: Building2 },
               { label: 'General', path: '/settings/general', icon: Building2 },
               { label: 'Industry', path: '/settings/industry', icon: Briefcase },
             ]

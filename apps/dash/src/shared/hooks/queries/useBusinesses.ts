@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../lib/api';
+import { useConfigStore } from '../../stores/configStore';
+import { useUserStore } from '../../stores/userStore';
 
 export interface OwnedBusiness {
   id: number;
@@ -8,10 +10,12 @@ export interface OwnedBusiness {
   logoUrl: string;
   parentId: number;
   isActive: boolean;
+  /** False when the current user only has team access to the business. */
+  isOwned?: boolean;
 }
 
 interface ListMyBusinessesResponse {
-  businesses: OwnedBusiness[];
+  businesses?: Array<OwnedBusiness & { id?: number | string; parentId?: number | string }>;
 }
 
 interface CreateSubBusinessRequest {
@@ -30,7 +34,20 @@ interface SwitchBusinessResponse {
 export const useListMyBusinesses = () =>
   useQuery({
     queryKey: ['businesses', 'mine'],
-    queryFn: () => unwrap(safe.get<ListMyBusinessesResponse>('/hub/business/v1/businesses/mine')),
+    queryFn: async () => {
+      const response = await unwrap(
+        safe.get<ListMyBusinessesResponse>('/hub/business/v1/businesses/mine')
+      );
+
+      return {
+        businesses: (response.businesses ?? []).map((business) => ({
+          ...business,
+          id: Number(business.id),
+          parentId: Number(business.parentId ?? 0),
+          isOwned: business.isOwned ?? true,
+        })),
+      } satisfies ListMyBusinessesResponse;
+    },
     staleTime: 30_000,
   });
 
@@ -41,6 +58,54 @@ export const useCreateSubBusiness = () => {
       unwrap(safe.post<CreateSubBusinessResponse>('/hub/business/v1/businesses', data)),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['businesses', 'mine'] });
+      void queryClient.invalidateQueries({ queryKey: ['business'] });
+    },
+  });
+};
+
+interface RenameBusinessRequest {
+  businessId: number;
+  name: string;
+}
+
+export const useRenameBusiness = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ businessId, name }: RenameBusinessRequest) =>
+      unwrap(
+        safe.patch<{ business?: unknown }>(
+          `/hub/business/v1/businesses/${encodeURIComponent(String(businessId))}/name`,
+          { name }
+        )
+      ),
+    onSuccess: (_response, variables) => {
+      void queryClient.invalidateQueries({ queryKey: ['businesses', 'mine'] });
+      void queryClient.invalidateQueries({ queryKey: ['business'] });
+      void queryClient.invalidateQueries({ queryKey: ['user'] });
+      const currentUser = useUserStore.getState().user;
+      if (currentUser && Number(currentUser.businessId) === variables.businessId) {
+        useUserStore.getState().setUser({ ...currentUser, businessName: variables.name });
+      }
+      const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
+      useConfigStore.getState().setWebsiteData({
+        ...currentWebsiteData,
+        siteName: variables.name,
+      });
+    },
+  });
+};
+
+export const useDeleteBusiness = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (businessId: number) =>
+      unwrap(safe.delete(`/hub/business/v1/businesses/${encodeURIComponent(String(businessId))}`)),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['businesses', 'mine'] });
+      void queryClient.invalidateQueries({ queryKey: ['business'] });
+      void queryClient.invalidateQueries({ queryKey: ['user'] });
     },
   });
 };

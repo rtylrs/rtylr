@@ -26,6 +26,7 @@ const Analytics = React.lazy(() => import('./features/analytics/Analytics.tsx'))
 const Chat = React.lazy(() => import('./features/chat/Chat'));
 
 const Account = React.lazy(() => import('./features/settings/Settings/components/Account'));
+const Businesses = React.lazy(() => import('./features/settings/Settings/components/Businesses'));
 const General = React.lazy(() => import('./features/settings/Settings/components/General'));
 const Industry = React.lazy(() => import('./features/settings/Settings/components/BusinessType'));
 const Domain = React.lazy(() => import('./features/settings/Settings/components/Domain/Domain'));
@@ -285,6 +286,16 @@ const settingsAccountRoute = createRoute({
   ),
 });
 
+const settingsBusinessesRoute = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/businesses',
+  component: () => (
+    <Suspense fallback={fallback}>
+      <Businesses />
+    </Suspense>
+  ),
+});
+
 const settingsGeneralRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/general',
@@ -412,6 +423,7 @@ const routeTree = rootRoute.addChildren([
     settingsRoute.addChildren([
       settingsIndexRoute,
       settingsAccountRoute,
+      settingsBusinessesRoute,
       settingsGeneralRoute,
       settingsIndustryRoute,
       settingsDomainRoute,
