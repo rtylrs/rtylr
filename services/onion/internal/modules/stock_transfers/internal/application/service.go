@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
 
 const stockTransfersCacheTTL = 5 * time.Minute
@@ -52,7 +53,7 @@ func paginateStockTransfers(page, pageSize int64) (int, int) {
 
 func (s *Service) ListStockTransfers(ctx context.Context, businessID, page, pageSize int64) ([]domain.StockTransfer, bool, error) {
 	limit, offset := paginateStockTransfers(page, pageSize)
-	cacheKey := fmt.Sprintf("stock_transfers:%d|p=%d|ps=%d", businessID, page, pageSize)
+	cacheKey := cacheKeys.Scoped("stock_transfers", businessID, fmt.Sprintf("p=%d:ps=%d", page, pageSize))
 
 	res, err := cacher.Of[stockTransfersPageResult]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (stockTransfersPageResult, error) {
 		items, hasMore, err := s.repo.ListStockTransfers(ctx, businessID, limit, offset)
@@ -91,5 +92,5 @@ func (s *Service) UpdateStockTransferStatus(ctx context.Context, businessID, id 
 }
 
 func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
-	cacher.Of[stockTransfersPageResult]().DeleteByPattern(ctx, []string{fmt.Sprintf("stock_transfers:%d*", businessID)})
+	cacher.Of[stockTransfersPageResult]().DeleteByPattern(ctx, []string{cacheKeys.ScopedPrefix("stock_transfers", businessID)})
 }
