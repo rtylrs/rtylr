@@ -66,9 +66,10 @@ func (a *UserAPI) UpdateProfile(ctx context.Context, req *hubuserv1.UpdateProfil
 
 	return &hubuserv1.UpdateProfileResponse{
 		User: &hubuserv1.GetMeResponse{
-			Id:       user.ID,
-			Email:    user.Email,
-			FullName: user.FullName,
+			Id:             user.ID,
+			Email:          user.Email,
+			FullName:       user.FullName,
+			IsConsoleAdmin: user.IsConsoleAdmin,
 		},
 	}, nil
 }
@@ -119,14 +120,15 @@ func profileToGetMeResponse(profile hubprofile.Profile) *hubuserv1.GetMeResponse
 	}
 
 	return &hubuserv1.GetMeResponse{
-		Id:           profile.ID,
-		Email:        profile.Email,
-		FullName:     profile.FullName,
-		Apps:         apps,
-		Role:         profile.Role,
-		BusinessId:   profile.BusinessID,
-		BusinessName: profile.BusinessName,
-		IsOwner:      profile.IsOwner,
-		Onboarded:    profile.Onboarded,
+		Id:             profile.ID,
+		Email:          profile.Email,
+		FullName:       profile.FullName,
+		Apps:           apps,
+		Role:           profile.Role,
+		BusinessId:     profile.BusinessID,
+		BusinessName:   profile.BusinessName,
+		IsOwner:        profile.IsOwner,
+		IsConsoleAdmin: profile.IsConsoleAdmin,
+		Onboarded:      profile.Onboarded,
 	}
 }
