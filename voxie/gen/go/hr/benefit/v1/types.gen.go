@@ -3,6 +3,7 @@ package v1
 
 import (
 	"encoding/json"
+	common_pagination_v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	"strconv"
 )
 
@@ -249,4 +250,246 @@ func (x *ListBenefitsResponse) GetPlans() []*BenefitPlan {
 		return zero
 	}
 	return x.Plans
+}
+
+type BenefitEnrollment struct {
+	Id          int64   `json:"id,omitempty"`
+	OwnerId     int64   `json:"owner_id,omitempty"`
+	EmployeeId  int64   `json:"employee_id,omitempty"`
+	PlanId      int64   `json:"plan_id,omitempty"`
+	Status      string  `json:"status,omitempty"`
+	EnrolledAt  string  `json:"enrolled_at,omitempty"`
+	CancelledAt *string `json:"cancelled_at,omitempty"`
+}
+
+func (m *BenefitEnrollment) MarshalJSON() ([]byte, error) {
+	type alias BenefitEnrollment
+	aux := struct {
+		*alias
+		Id         string `json:"id,omitempty"`
+		OwnerId    string `json:"owner_id,omitempty"`
+		EmployeeId string `json:"employee_id,omitempty"`
+		PlanId     string `json:"plan_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
+	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	aux.PlanId = strconv.FormatInt(m.PlanId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *BenefitEnrollment) UnmarshalJSON(data []byte) error {
+	type alias BenefitEnrollment
+	aux := struct {
+		*alias
+		Id         string `json:"id,omitempty"`
+		OwnerId    string `json:"owner_id,omitempty"`
+		EmployeeId string `json:"employee_id,omitempty"`
+		PlanId     string `json:"plan_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	if aux.OwnerId != "" {
+		v, err := strconv.ParseInt(aux.OwnerId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.OwnerId = v
+	}
+	if aux.EmployeeId != "" {
+		v, err := strconv.ParseInt(aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = v
+	}
+	if aux.PlanId != "" {
+		v, err := strconv.ParseInt(aux.PlanId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.PlanId = v
+	}
+	return nil
+}
+
+func (x *BenefitEnrollment) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *BenefitEnrollment) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *BenefitEnrollment) GetEmployeeId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.EmployeeId
+}
+
+func (x *BenefitEnrollment) GetPlanId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PlanId
+}
+
+func (x *BenefitEnrollment) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *BenefitEnrollment) GetEnrolledAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EnrolledAt
+}
+
+func (x *BenefitEnrollment) GetCancelledAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.CancelledAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.CancelledAt
+}
+
+type EnrollInBenefitRequest struct {
+	PlanId int64 `json:"plan_id,omitempty"`
+}
+
+func (m *EnrollInBenefitRequest) MarshalJSON() ([]byte, error) {
+	type alias EnrollInBenefitRequest
+	aux := struct {
+		*alias
+		PlanId string `json:"plan_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.PlanId = strconv.FormatInt(m.PlanId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *EnrollInBenefitRequest) UnmarshalJSON(data []byte) error {
+	type alias EnrollInBenefitRequest
+	aux := struct {
+		*alias
+		PlanId string `json:"plan_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.PlanId != "" {
+		v, err := strconv.ParseInt(aux.PlanId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.PlanId = v
+	}
+	return nil
+}
+
+func (x *EnrollInBenefitRequest) GetPlanId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PlanId
+}
+
+type EnrollInBenefitResponse struct {
+	Enrollment *BenefitEnrollment `json:"enrollment,omitempty"`
+}
+
+func (x *EnrollInBenefitResponse) GetEnrollment() *BenefitEnrollment {
+	if x == nil {
+		var zero *BenefitEnrollment
+		return zero
+	}
+	return x.Enrollment
+}
+
+type ListMyBenefitEnrollmentsRequest struct {
+	Page    int32  `json:"page,omitempty"`
+	Limit   int32  `json:"limit,omitempty"`
+	SortBy  string `json:"sort_by,omitempty"`
+	SortDir string `json:"sort_dir,omitempty"`
+}
+
+func (x *ListMyBenefitEnrollmentsRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListMyBenefitEnrollmentsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListMyBenefitEnrollmentsRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListMyBenefitEnrollmentsRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
+type ListMyBenefitEnrollmentsResponse struct {
+	Enrollments []*BenefitEnrollment                     `json:"enrollments,omitempty"`
+	Pagination  *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
+}
+
+func (x *ListMyBenefitEnrollmentsResponse) GetEnrollments() []*BenefitEnrollment {
+	if x == nil {
+		var zero []*BenefitEnrollment
+		return zero
+	}
+	return x.Enrollments
+}
+
+func (x *ListMyBenefitEnrollmentsResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
