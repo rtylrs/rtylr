@@ -3,6 +3,7 @@ package v1
 
 import (
 	"encoding/json"
+	common_pagination_v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	"strconv"
 )
 
@@ -138,10 +139,47 @@ func (x *Notification) GetTimestamp() string {
 }
 
 type ListNotificationsRequest struct {
+	Page    int32  `json:"page,omitempty"`
+	Limit   int32  `json:"limit,omitempty"`
+	SortBy  string `json:"sort_by,omitempty"`
+	SortDir string `json:"sort_dir,omitempty"`
+}
+
+func (x *ListNotificationsRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListNotificationsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListNotificationsRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListNotificationsRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
 }
 
 type ListNotificationsResponse struct {
-	Notifications []*Notification `json:"notifications,omitempty"`
+	Notifications []*Notification                          `json:"notifications,omitempty"`
+	Pagination    *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *ListNotificationsResponse) GetNotifications() []*Notification {
@@ -150,6 +188,14 @@ func (x *ListNotificationsResponse) GetNotifications() []*Notification {
 		return zero
 	}
 	return x.Notifications
+}
+
+func (x *ListNotificationsResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type MarkNotificationReadRequest struct {

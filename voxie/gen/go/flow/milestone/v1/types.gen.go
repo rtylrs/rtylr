@@ -3,6 +3,7 @@ package v1
 
 import (
 	"encoding/json"
+	common_pagination_v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	"strconv"
 )
 
@@ -171,6 +172,10 @@ func (x *Milestone) GetProject() *MilestoneProject {
 type ListMilestonesRequest struct {
 	ProjectId   string `json:"project_id,omitempty"`
 	WorkspaceId string `json:"workspace_id,omitempty"`
+	Page        int32  `json:"page,omitempty"`
+	Limit       int32  `json:"limit,omitempty"`
+	SortBy      string `json:"sort_by,omitempty"`
+	SortDir     string `json:"sort_dir,omitempty"`
 }
 
 func (x *ListMilestonesRequest) GetProjectId() string {
@@ -189,8 +194,41 @@ func (x *ListMilestonesRequest) GetWorkspaceId() string {
 	return x.WorkspaceId
 }
 
+func (x *ListMilestonesRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListMilestonesRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListMilestonesRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListMilestonesRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListMilestonesResponse struct {
-	Milestones []*Milestone `json:"milestones,omitempty"`
+	Milestones []*Milestone                             `json:"milestones,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *ListMilestonesResponse) GetMilestones() []*Milestone {
@@ -199,6 +237,14 @@ func (x *ListMilestonesResponse) GetMilestones() []*Milestone {
 		return zero
 	}
 	return x.Milestones
+}
+
+func (x *ListMilestonesResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type CreateMilestoneRequest struct {

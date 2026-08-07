@@ -3,6 +3,7 @@ package v1
 
 import (
 	"encoding/json"
+	common_pagination_v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	"strconv"
 )
 
@@ -94,7 +95,11 @@ func (x *Label) GetCreatedAt() string {
 }
 
 type ListLabelsRequest struct {
-	WorkspaceId int64 `json:"workspace_id,omitempty"`
+	WorkspaceId int64  `json:"workspace_id,omitempty"`
+	Page        int32  `json:"page,omitempty"`
+	Limit       int32  `json:"limit,omitempty"`
+	SortBy      string `json:"sort_by,omitempty"`
+	SortDir     string `json:"sort_dir,omitempty"`
 }
 
 func (m *ListLabelsRequest) MarshalJSON() ([]byte, error) {
@@ -134,8 +139,41 @@ func (x *ListLabelsRequest) GetWorkspaceId() int64 {
 	return x.WorkspaceId
 }
 
+func (x *ListLabelsRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListLabelsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListLabelsRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListLabelsRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListLabelsResponse struct {
-	Labels []*Label `json:"labels,omitempty"`
+	Labels     []*Label                                 `json:"labels,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *ListLabelsResponse) GetLabels() []*Label {
@@ -144,6 +182,14 @@ func (x *ListLabelsResponse) GetLabels() []*Label {
 		return zero
 	}
 	return x.Labels
+}
+
+func (x *ListLabelsResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type CreateLabelRequest struct {

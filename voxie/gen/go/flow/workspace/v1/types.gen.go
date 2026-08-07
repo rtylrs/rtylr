@@ -3,6 +3,7 @@ package v1
 
 import (
 	"encoding/json"
+	common_pagination_v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	"strconv"
 )
 
@@ -301,10 +302,47 @@ func (x *WorkspaceMember) GetJoinedAt() string {
 }
 
 type ListWorkspacesRequest struct {
+	Page    int32  `json:"page,omitempty"`
+	Limit   int32  `json:"limit,omitempty"`
+	SortBy  string `json:"sort_by,omitempty"`
+	SortDir string `json:"sort_dir,omitempty"`
+}
+
+func (x *ListWorkspacesRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListWorkspacesRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListWorkspacesRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListWorkspacesRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
 }
 
 type ListWorkspacesResponse struct {
-	Workspaces []*Workspace `json:"workspaces,omitempty"`
+	Workspaces []*Workspace                             `json:"workspaces,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *ListWorkspacesResponse) GetWorkspaces() []*Workspace {
@@ -313,6 +351,14 @@ func (x *ListWorkspacesResponse) GetWorkspaces() []*Workspace {
 		return zero
 	}
 	return x.Workspaces
+}
+
+func (x *ListWorkspacesResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type CreateWorkspaceRequest struct {
@@ -521,7 +567,11 @@ func (x *DeleteWorkspaceResponse) GetMessage() string {
 }
 
 type ListWorkspaceMembersRequest struct {
-	WorkspaceId int64 `json:"workspace_id,omitempty"`
+	WorkspaceId int64  `json:"workspace_id,omitempty"`
+	Page        int32  `json:"page,omitempty"`
+	Limit       int32  `json:"limit,omitempty"`
+	SortBy      string `json:"sort_by,omitempty"`
+	SortDir     string `json:"sort_dir,omitempty"`
 }
 
 func (m *ListWorkspaceMembersRequest) MarshalJSON() ([]byte, error) {
@@ -561,8 +611,41 @@ func (x *ListWorkspaceMembersRequest) GetWorkspaceId() int64 {
 	return x.WorkspaceId
 }
 
+func (x *ListWorkspaceMembersRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListWorkspaceMembersRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListWorkspaceMembersRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListWorkspaceMembersRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListWorkspaceMembersResponse struct {
-	Members []*WorkspaceMember `json:"members,omitempty"`
+	Members    []*WorkspaceMember                       `json:"members,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *ListWorkspaceMembersResponse) GetMembers() []*WorkspaceMember {
@@ -571,6 +654,14 @@ func (x *ListWorkspaceMembersResponse) GetMembers() []*WorkspaceMember {
 		return zero
 	}
 	return x.Members
+}
+
+func (x *ListWorkspaceMembersResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type AddWorkspaceMemberRequest struct {
