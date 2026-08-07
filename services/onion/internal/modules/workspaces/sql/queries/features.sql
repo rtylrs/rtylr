@@ -182,6 +182,9 @@ WHERE p.workspace_id = ? AND p.status != 'archived'
 ORDER BY p.start_date ASC, p.created_at ASC
 LIMIT ? OFFSET ?;
 
+-- name: CountNotifications :one
+SELECT COUNT(*) FROM flow_notifications WHERE user_id = ?;
+
 -- name: ListNotifications :many
 SELECT
     id, user_id, workspace_id, type, title, COALESCE(description, '') AS description,
@@ -191,7 +194,7 @@ SELECT
 FROM flow_notifications
 WHERE user_id = ?
 ORDER BY created_at DESC
-LIMIT 100;
+LIMIT ? OFFSET ?;
 
 -- name: CreateNotification :exec
 INSERT INTO flow_notifications

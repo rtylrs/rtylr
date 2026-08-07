@@ -706,8 +706,8 @@ func (s *Service) GetRoadmap(ctx context.Context, workspaceID, limit, offset int
 // Notifications
 // ─────────────────────────────────────────────
 
-func (s *Service) ListNotifications(ctx context.Context, userID int64) ([]domain.Notification, error) {
-	return s.repo.ListNotifications(ctx, userID)
+func (s *Service) ListNotifications(ctx context.Context, userID, limit, offset int64) ([]domain.Notification, int64, error) {
+	return s.repo.ListNotifications(ctx, userID, limit, offset)
 }
 
 func (s *Service) MarkNotificationRead(ctx context.Context, id, userID int64) error {

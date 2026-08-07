@@ -667,11 +667,21 @@ func (r *Repository) GetRoadmap(ctx context.Context, workspaceID, limit, offset 
 // Notifications
 // ─────────────────────────────────────────────
 
-func (r *Repository) ListNotifications(ctx context.Context, userID int64) ([]domain.Notification, error) {
-	rows, err := r.queries.ListNotifications(ctx, userID)
+func (r *Repository) ListNotifications(ctx context.Context, userID, limit, offset int64) ([]domain.Notification, int64, error) {
+	total, err := r.queries.CountNotifications(ctx, userID)
+	if err != nil {
+		logger.Ctx(ctx).Error("CountNotifications failed", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListNotifications(ctx, sqlc.ListNotificationsParams{
+		UserID: userID,
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListNotifications failed", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	notifs := make([]domain.Notification, 0, len(rows))
@@ -700,7 +710,7 @@ func (r *Repository) ListNotifications(ctx context.Context, userID int64) ([]dom
 		}
 		notifs = append(notifs, n)
 	}
-	return notifs, nil
+	return notifs, total, nil
 }
 
 func (r *Repository) CreateNotification(ctx context.Context, input domain.CreateNotificationInput) error {
