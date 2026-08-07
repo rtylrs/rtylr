@@ -301,3 +301,66 @@ func (c *BusinessServiceClient) UpdateBusiness(ctx context.Context, req *UpdateB
 	}
 	return result, nil
 }
+
+func (c *BusinessServiceClient) RenameBusiness(ctx context.Context, req *RenameBusinessRequest) (*RenameBusinessResponse, error) {
+	path := "/hub/business/v1/businesses/{business_id}/name"
+	path = strings.ReplaceAll(path, "{business_id}", fmt.Sprintf("%v", req.BusinessId))
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal request: %w", err)
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "PATCH", c.BaseURL+path, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(RenameBusinessResponse)
+	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *BusinessServiceClient) DeleteBusiness(ctx context.Context, req *DeleteBusinessRequest) (*DeleteBusinessResponse, error) {
+	path := "/hub/business/v1/businesses/{business_id}"
+	path = strings.ReplaceAll(path, "{business_id}", fmt.Sprintf("%v", req.BusinessId))
+	query := url.Values{}
+	if len(query) > 0 {
+		path += "?" + query.Encode()
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "DELETE", c.BaseURL+path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(DeleteBusinessResponse)
+	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}

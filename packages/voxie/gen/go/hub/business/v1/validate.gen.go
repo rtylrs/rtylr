@@ -136,3 +136,28 @@ func (m *UpdateBusinessRequest) Validate() error {
 	}
 	return nil
 }
+
+func (m *RenameBusinessRequest) Validate() error {
+	var violations []string
+	if m.BusinessId <= 0 {
+		violations = append(violations, "business_id must be greater than 0")
+	}
+	if m.Name == "" {
+		violations = append(violations, "name is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteBusinessRequest) Validate() error {
+	var violations []string
+	if m.BusinessId <= 0 {
+		violations = append(violations, "business_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}

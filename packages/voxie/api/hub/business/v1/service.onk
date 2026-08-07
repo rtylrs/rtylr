@@ -28,4 +28,10 @@ service BusinessService {
 
   /// Updates an existing business.
   updateBusiness(UpdateBusinessRequest) -> UpdateBusinessResponse @put("/businesses/{business_id}")
+
+  /// Renames an active business owned by the current user.
+  renameBusiness(RenameBusinessRequest) -> RenameBusinessResponse @patch("/businesses/{business_id}/name")
+
+  /// Removes an active business owned by the current user.
+  deleteBusiness(DeleteBusinessRequest) -> DeleteBusinessResponse @delete("/businesses/{business_id}")
 }

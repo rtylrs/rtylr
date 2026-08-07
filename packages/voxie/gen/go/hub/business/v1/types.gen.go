@@ -170,6 +170,7 @@ type BusinessEntry struct {
 	LogoUrl  string `json:"logo_url,omitempty"`
 	ParentId int64  `json:"parent_id,omitempty"`
 	IsActive bool   `json:"is_active,omitempty"`
+	IsOwned  bool   `json:"is_owned,omitempty"`
 }
 
 func (m *BusinessEntry) MarshalJSON() ([]byte, error) {
@@ -249,6 +250,14 @@ func (x *BusinessEntry) GetIsActive() bool {
 		return zero
 	}
 	return x.IsActive
+}
+
+func (x *BusinessEntry) GetIsOwned() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsOwned
 }
 
 type PublicLocation struct {
@@ -962,4 +971,119 @@ func (x *UpdateBusinessResponse) GetBusiness() *Business {
 		return zero
 	}
 	return x.Business
+}
+
+type RenameBusinessRequest struct {
+	BusinessId int64  `json:"business_id,omitempty"`
+	Name       string `json:"name,omitempty"`
+}
+
+func (m *RenameBusinessRequest) MarshalJSON() ([]byte, error) {
+	type alias RenameBusinessRequest
+	aux := struct {
+		*alias
+		BusinessId string `json:"business_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *RenameBusinessRequest) UnmarshalJSON(data []byte) error {
+	type alias RenameBusinessRequest
+	aux := struct {
+		*alias
+		BusinessId string `json:"business_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.BusinessId != "" {
+		v, err := strconv.ParseInt(aux.BusinessId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.BusinessId = v
+	}
+	return nil
+}
+
+func (x *RenameBusinessRequest) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *RenameBusinessRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+type RenameBusinessResponse struct {
+	Business *Business `json:"business,omitempty"`
+}
+
+func (x *RenameBusinessResponse) GetBusiness() *Business {
+	if x == nil {
+		var zero *Business
+		return zero
+	}
+	return x.Business
+}
+
+type DeleteBusinessRequest struct {
+	BusinessId int64 `json:"business_id,omitempty"`
+}
+
+func (m *DeleteBusinessRequest) MarshalJSON() ([]byte, error) {
+	type alias DeleteBusinessRequest
+	aux := struct {
+		*alias
+		BusinessId string `json:"business_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *DeleteBusinessRequest) UnmarshalJSON(data []byte) error {
+	type alias DeleteBusinessRequest
+	aux := struct {
+		*alias
+		BusinessId string `json:"business_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.BusinessId != "" {
+		v, err := strconv.ParseInt(aux.BusinessId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.BusinessId = v
+	}
+	return nil
+}
+
+func (x *DeleteBusinessRequest) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+type DeleteBusinessResponse struct {
+	Message string `json:"message,omitempty"`
+}
+
+func (x *DeleteBusinessResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
 }

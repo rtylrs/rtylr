@@ -62,6 +62,7 @@ name?: string;
 logoUrl?: string;
 parentId?: string;
 isActive?: boolean;
+isOwned?: boolean;
 }
 
 export function decodeBusinessEntry(v: any): BusinessEntry {
@@ -72,6 +73,7 @@ name: v.name,
 logoUrl: v.logo_url,
 parentId: v.parent_id,
 isActive: v.is_active,
+isOwned: v.is_owned,
 };
 }
 
@@ -82,6 +84,7 @@ if (v.name !== undefined) { out.name = v.name; }
 if (v.logoUrl !== undefined) { out.logo_url = v.logoUrl; }
 if (v.parentId !== undefined) { out.parent_id = v.parentId; }
 if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.isOwned !== undefined) { out.is_owned = v.isOwned; }
 return out;
 }
 
@@ -514,6 +517,77 @@ business: (v.business !== undefined ? decodeBusiness(v.business) : v.business),
 export function encodeUpdateBusinessResponse(v: UpdateBusinessResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.business !== undefined) { out.business = encodeBusiness(v.business); }
+return out;
+}
+
+export interface RenameBusinessRequest {
+businessId?: string;
+name?: string;
+}
+
+export function decodeRenameBusinessRequest(v: any): RenameBusinessRequest {
+if (v === null || v === undefined) return v;
+return {
+businessId: v.business_id,
+name: v.name,
+};
+}
+
+export function encodeRenameBusinessRequest(v: RenameBusinessRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.name !== undefined) { out.name = v.name; }
+return out;
+}
+
+export interface RenameBusinessResponse {
+business?: Business;
+}
+
+export function decodeRenameBusinessResponse(v: any): RenameBusinessResponse {
+if (v === null || v === undefined) return v;
+return {
+business: (v.business !== undefined ? decodeBusiness(v.business) : v.business),
+};
+}
+
+export function encodeRenameBusinessResponse(v: RenameBusinessResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.business !== undefined) { out.business = encodeBusiness(v.business); }
+return out;
+}
+
+export interface DeleteBusinessRequest {
+businessId?: string;
+}
+
+export function decodeDeleteBusinessRequest(v: any): DeleteBusinessRequest {
+if (v === null || v === undefined) return v;
+return {
+businessId: v.business_id,
+};
+}
+
+export function encodeDeleteBusinessRequest(v: DeleteBusinessRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+return out;
+}
+
+export interface DeleteBusinessResponse {
+message?: string;
+}
+
+export function decodeDeleteBusinessResponse(v: any): DeleteBusinessResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeDeleteBusinessResponse(v: DeleteBusinessResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 

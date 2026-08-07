@@ -44,6 +44,8 @@ type BusinessServiceServer interface {
 	GetPublicBusiness(ctx context.Context, req *GetPublicBusinessRequest) (*GetPublicBusinessResponse, error)
 	SetSlug(ctx context.Context, req *SetSlugRequest) (*SetSlugResponse, error)
 	UpdateBusiness(ctx context.Context, req *UpdateBusinessRequest) (*UpdateBusinessResponse, error)
+	RenameBusiness(ctx context.Context, req *RenameBusinessRequest) (*RenameBusinessResponse, error)
+	DeleteBusiness(ctx context.Context, req *DeleteBusinessRequest) (*DeleteBusinessResponse, error)
 }
 
 func RegisterBusinessServiceServer(srv BusinessServiceServer, opts ...ServerOption) error {
@@ -227,6 +229,46 @@ func RegisterBusinessServiceServer(srv BusinessServiceServer, opts ...ServerOpti
 			}
 		}
 		resp, err := srv.UpdateBusiness(r.Context(), req)
+		if err != nil {
+			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	})
+	mux.HandleFunc("PATCH /hub/business/v1/businesses/{business_id}/name", func(w http.ResponseWriter, r *http.Request) {
+		req := new(RenameBusinessRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		req.BusinessId = parseInt64(r.PathValue("business_id"))
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.RenameBusiness(r.Context(), req)
+		if err != nil {
+			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	})
+	mux.HandleFunc("DELETE /hub/business/v1/businesses/{business_id}", func(w http.ResponseWriter, r *http.Request) {
+		req := new(DeleteBusinessRequest)
+		req.BusinessId = parseInt64(r.PathValue("business_id"))
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.DeleteBusiness(r.Context(), req)
 		if err != nil {
 			writeJSONError(w, http.StatusInternalServerError, err.Error())
 			return

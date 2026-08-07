@@ -30,6 +30,8 @@ message BusinessEntry {
   /// Identifies the parent business, zero for top-level businesses.
   parent_id: int64
   is_active: bool
+  /// True when the current user owns the business; false for team access.
+  is_owned: bool
 }
 
 /// PublicLocation is a location entry for public menu surfaces.
@@ -143,4 +145,21 @@ message UpdateBusinessRequest {
 
 message UpdateBusinessResponse {
   business: Business
+}
+
+message RenameBusinessRequest {
+  business_id: int64 @required @gt(0)
+  name: string @required
+}
+
+message RenameBusinessResponse {
+  business: Business
+}
+
+message DeleteBusinessRequest {
+  business_id: int64 @required @gt(0)
+}
+
+message DeleteBusinessResponse {
+  message: string
 }
