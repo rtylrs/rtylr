@@ -109,7 +109,7 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
         <DropdownMenu>
           <DropdownMenuTrigger>
             <button
-              className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+              className="flex items-center gap-2 w-full px-3 py-2 rounded-lg cursor-pointer text-sm transition-colors duration-150 hover:bg-[var(--dash-hover)]"
               style={{ color: 'var(--dash-text-muted)' }}
             >
               <span
