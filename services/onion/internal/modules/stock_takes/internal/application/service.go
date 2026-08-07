@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
 
 const stockTakesCacheTTL = 5 * time.Minute
@@ -51,7 +52,7 @@ func paginateStockTakes(page, pageSize int64) (int, int) {
 
 func (s *Service) ListStockTakes(ctx context.Context, businessID, page, pageSize int64) ([]domain.StockTake, bool, error) {
 	limit, offset := paginateStockTakes(page, pageSize)
-	cacheKey := fmt.Sprintf("stock_takes:%d|p=%d|ps=%d", businessID, page, pageSize)
+	cacheKey := cacheKeys.Scoped("stock_takes", businessID, fmt.Sprintf("p=%d:ps=%d", page, pageSize))
 
 	res, err := cacher.Of[stockTakesPageResult]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) (stockTakesPageResult, error) {
 		items, hasMore, err := s.repo.ListStockTakes(ctx, businessID, limit, offset)
@@ -86,5 +87,5 @@ func (s *Service) UpdateStockTake(ctx context.Context, businessID int64, input d
 }
 
 func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
-	cacher.Of[stockTakesPageResult]().DeleteByPattern(ctx, []string{fmt.Sprintf("stock_takes:%d*", businessID)})
+	cacher.Of[stockTakesPageResult]().DeleteByPattern(ctx, []string{cacheKeys.ScopedPrefix("stock_takes", businessID)})
 }
