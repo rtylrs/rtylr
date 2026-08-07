@@ -12,6 +12,8 @@ message GetMeResponse {
   business_id: int64
   business_name: string
   is_owner: bool
+  /// is_console_admin indicates the user can access the internal console.
+  is_console_admin: bool
   onboarded: bool
 }
 
