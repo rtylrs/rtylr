@@ -37,6 +37,8 @@ func WithMux(mux *http.ServeMux) ServerOption {
 type BenefitServiceServer interface {
 	ListBenefits(ctx context.Context, req *ListBenefitsRequest) (*ListBenefitsResponse, error)
 	CreateBenefit(ctx context.Context, req *CreateBenefitRequest) (*CreateBenefitResponse, error)
+	EnrollInBenefit(ctx context.Context, req *EnrollInBenefitRequest) (*EnrollInBenefitResponse, error)
+	ListMyBenefitEnrollments(ctx context.Context, req *ListMyBenefitEnrollmentsRequest) (*ListMyBenefitEnrollmentsResponse, error)
 }
 
 func RegisterBenefitServiceServer(srv BenefitServiceServer, opts ...ServerOption) error {
@@ -79,6 +81,56 @@ func RegisterBenefitServiceServer(srv BenefitServiceServer, opts ...ServerOption
 			}
 		}
 		resp, err := srv.CreateBenefit(r.Context(), req)
+		if err != nil {
+			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	})
+	mux.HandleFunc("POST /hr/benefit/v1/benefits/enrollments", func(w http.ResponseWriter, r *http.Request) {
+		req := new(EnrollInBenefitRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.EnrollInBenefit(r.Context(), req)
+		if err != nil {
+			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	})
+	mux.HandleFunc("GET /hr/benefit/v1/benefits/enrollments/mine", func(w http.ResponseWriter, r *http.Request) {
+		req := new(ListMyBenefitEnrollmentsRequest)
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt32(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("limit") != "" {
+			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+		}
+		if r.URL.Query().Get("sort_by") != "" {
+			req.SortBy = r.URL.Query().Get("sort_by")
+		}
+		if r.URL.Query().Get("sort_dir") != "" {
+			req.SortDir = r.URL.Query().Get("sort_dir")
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.ListMyBenefitEnrollments(r.Context(), req)
 		if err != nil {
 			writeJSONError(w, http.StatusInternalServerError, err.Error())
 			return
