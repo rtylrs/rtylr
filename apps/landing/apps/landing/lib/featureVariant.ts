@@ -7,7 +7,6 @@ const VARIANT_COOKIE = 'rtylr_variant';
 const ANON_COOKIE = 'rtylr_aid';
 
 export const DEFAULT_VARIANT = 'a';
-export const IS_DESKTOP_MODE_DEFAULT_FEATURE = 'is_desktop_mode_default';
 
 const ANON_ID_DAYS = 365;
 const VARIANT_DAYS = 30;
@@ -61,20 +60,6 @@ export async function resolveLandingFeatures(): Promise<FeaturesResponse> {
   }
 
   return landingFeaturesPromise;
-}
-
-export function featureFlagEnabled(
-  features: FeaturesResponse['features'] | undefined,
-  key: string,
-  fallback = false
-): boolean {
-  const feature = features?.[key];
-  if (!feature) return fallback;
-
-  const variant = feature.variant.toLowerCase();
-  if (['true', 'on', '1', 'yes'].includes(variant)) return true;
-  if (['false', 'off', '0', 'no'].includes(variant)) return false;
-  return feature.enabled;
 }
 
 /**

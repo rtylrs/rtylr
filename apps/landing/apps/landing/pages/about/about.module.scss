@@ -1,17 +1,11 @@
 // ── About Page ────────────────────────────────────────────────────────────────
 
-$blue: #e8e6e1;
-$cyan: #e8e6e1;
-$dark-primary: #040428;
-$bg: #151515;
-$border: #232220;
-$border-subtle: rgba(255, 255, 255, 0.1);
-$text-muted: rgba(255, 255, 255, 0.5);
-$text-mid: rgba(255, 255, 255, 0.65);
+$text-muted: rgba(19, 19, 19, 0.6);
+$text-mid: rgba(19, 19, 19, 0.7);
 
 .aboutPage {
   background-color: var(--app-background);
-  color: #fff;
+  color: var(--ink);
   min-height: 100vh;
   padding-bottom: 120px;
 }
@@ -33,14 +27,14 @@ $text-mid: rgba(255, 255, 255, 0.65);
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: $blue;
+  color: var(--ink);
   margin-bottom: 16px;
 }
 
 .sectionTitle {
   font-size: 2.4rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ink);
   letter-spacing: -0.025em;
   margin: 0 0 48px;
   max-width: 680px;
@@ -52,12 +46,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   display: flex;
   justify-content: center;
   padding: 120px 24px 100px;
-  background: radial-gradient(
-    ellipse 80% 60% at 50% 0%,
-    rgba(232, 230, 225, 0.08) 0%,
-    transparent 70%
-  );
-  border-bottom: 1px solid $border;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .heroInner {
@@ -72,9 +61,9 @@ $text-mid: rgba(255, 255, 255, 0.65);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(232, 230, 225, 0.1);
-  border: 1px solid rgba(232, 230, 225, 0.25);
-  color: rgba(255, 255, 255, 0.75);
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline-strong);
+  color: $text-mid;
   padding: 6px 18px 6px 14px;
   border-radius: 100px;
   font-size: 0.78rem;
@@ -87,9 +76,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: $cyan;
+  background: var(--ink);
   flex-shrink: 0;
-  box-shadow: 0 0 8px rgba(232, 230, 225, 0.8);
   animation: pulse 2.4s ease-in-out infinite;
 }
 
@@ -110,7 +98,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   font-weight: 700;
   line-height: 1.08;
   letter-spacing: -0.035em;
-  color: #fff;
+  color: var(--ink);
   margin: 0 0 24px;
 }
 
@@ -126,7 +114,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 
 .missionSection {
   padding: 96px 0;
-  border-bottom: 1px solid $border;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .missionGrid {
@@ -144,7 +132,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 .missionTitle {
   font-size: 2rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ink);
   letter-spacing: -0.025em;
   margin: 0 0 20px;
   line-height: 1.2;
@@ -169,7 +157,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   gap: 2px;
   width: 100%;
   max-width: 400px;
-  border: 1px solid $border;
+  border: 1px solid var(--hairline);
 }
 
 .statCard {
@@ -178,20 +166,20 @@ $text-mid: rgba(255, 255, 255, 0.65);
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid $border;
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
   gap: 8px;
   transition: background 0.2s ease;
 
   &:hover {
-    background: rgba(232, 230, 225, 0.06);
+    background: var(--bg-surface-b);
   }
 }
 
 .statNumber {
   font-size: 2.4rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ink);
   letter-spacing: -0.03em;
   line-height: 1;
 }
@@ -208,13 +196,13 @@ $text-mid: rgba(255, 255, 255, 0.65);
 
 .storySection {
   padding: 96px 0;
-  border-bottom: 1px solid $border;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .storyTitle {
   font-size: 2.4rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ink);
   letter-spacing: -0.025em;
   margin: 0 0 40px;
 }
@@ -237,14 +225,14 @@ $text-mid: rgba(255, 255, 255, 0.65);
 
 .productsSection {
   padding: 96px 0;
-  border-bottom: 1px solid $border;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .productsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1px;
-  border: 1px solid $border;
+  border: 1px solid var(--hairline);
 }
 
 .productCard {
@@ -252,8 +240,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border-right: 1px solid $border;
+  background: var(--bg-surface-a);
+  border-right: 1px solid var(--hairline);
   transition: background 0.2s ease;
 
   &:last-child {
@@ -261,7 +249,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   }
 
   &:hover {
-    background: rgba(232, 230, 225, 0.04);
+    background: var(--bg-surface-b);
   }
 }
 
@@ -274,7 +262,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 .productCardLabel {
   font-size: 0.82rem;
   font-weight: 600;
-  color: $blue;
+  color: var(--ink);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   margin: 0;
@@ -293,9 +281,9 @@ $text-mid: rgba(255, 255, 255, 0.65);
   border-radius: 100px;
   font-size: 0.78rem;
   font-weight: 500;
-  background: rgba(232, 230, 225, 0.1);
-  color: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(232, 230, 225, 0.22);
+  background: var(--bg-surface-b);
+  color: $text-mid;
+  border: 1px solid var(--hairline-strong);
   letter-spacing: 0.2px;
 }
 
@@ -310,7 +298,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 
 .teamSection {
   padding: 96px 0;
-  border-bottom: 1px solid $border;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .teamGrid {
@@ -321,8 +309,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
 }
 
 .founderCard {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid $border;
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
   border-radius: 16px;
   padding: 40px 36px;
   display: flex;
@@ -335,8 +323,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
     background 0.25s ease;
 
   &:hover {
-    border-color: rgba(232, 230, 225, 0.4);
-    background: rgba(232, 230, 225, 0.04);
+    border-color: var(--hairline-strong);
+    background: var(--bg-surface-b);
   }
 }
 
@@ -344,36 +332,31 @@ $text-mid: rgba(255, 255, 255, 0.65);
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(
-    135deg,
-    $dark-primary 0%,
-    rgba(232, 230, 225, 0.4) 50%,
-    rgba(232, 230, 225, 0.35) 100%
-  );
+  background: linear-gradient(135deg, var(--ink) 0%, rgba(19, 19, 19, 0.75) 50%, rgba(19, 19, 19, 0.6) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid rgba(232, 230, 225, 0.3);
+  border: 2px solid var(--hairline-strong);
   margin-bottom: 8px;
 }
 
 .avatarInitials {
   font-size: 1.4rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
+  color: #fff;
   letter-spacing: 0.05em;
 }
 
 .founderName {
   font-size: 1rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--ink);
   margin: 0;
 }
 
 .founderRole {
   font-size: 0.82rem;
-  color: $blue;
+  color: var(--ink);
   font-weight: 500;
   letter-spacing: 0.1px;
 }
@@ -385,7 +368,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   transition: color 0.2s ease;
 
   &:hover {
-    color: $cyan;
+    color: var(--ink);
   }
 }
 
@@ -393,28 +376,28 @@ $text-mid: rgba(255, 255, 255, 0.65);
 
 .valuesSection {
   padding: 96px 0;
-  border-bottom: 1px solid $border;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .valuesGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1px;
-  border: 1px solid $border;
+  border: 1px solid var(--hairline);
 }
 
 .valueCard {
   padding: 44px 36px;
-  background: rgba(255, 255, 255, 0.02);
-  border-right: 1px solid $border;
-  border-bottom: 1px solid $border;
+  background: var(--bg-surface-a);
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
   display: flex;
   flex-direction: column;
   gap: 14px;
   transition: background 0.2s ease;
 
   &:hover {
-    background: rgba(232, 230, 225, 0.04);
+    background: var(--bg-surface-b);
   }
 
   &:nth-child(2n) {
@@ -431,14 +414,13 @@ $text-mid: rgba(255, 255, 255, 0.65);
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: $cyan;
-  box-shadow: 0 0 10px rgba(232, 230, 225, 0.6);
+  background: var(--ink);
 }
 
 .valueTitle {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--ink);
   margin: 0;
 }
 
@@ -461,15 +443,15 @@ $text-mid: rgba(255, 255, 255, 0.65);
   flex-direction: column;
   align-items: center;
   padding: 80px 24px;
-  border: 1px solid $border;
+  border: 1px solid var(--hairline);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-surface-a);
 }
 
 .ctaTitle {
   font-size: 2.8rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ink);
   letter-spacing: -0.03em;
   margin: 0 0 16px;
   max-width: 600px;
@@ -490,31 +472,33 @@ $text-mid: rgba(255, 255, 255, 0.65);
 }
 
 .ctaPrimary {
-  background: #e8e6e1;
-  color: #0a0a0a;
+  background: var(--btn-cream-bg);
+  color: #fff;
   border: none;
   padding: 14px 38px;
   border-radius: 50px;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: var(--btn-cream-shadow);
   transition: all 0.25s ease;
 
   &:hover {
-    background: #ffffff;
+    background: var(--btn-cream-bg-hover);
+    box-shadow: var(--btn-cream-shadow-hover);
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(232, 230, 225, 0.4);
   }
 
   &:active {
+    background: #000;
     transform: translateY(0);
   }
 }
 
 .ctaSecondary {
-  background: transparent;
-  color: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
   padding: 14px 38px;
   border-radius: 50px;
   font-size: 0.95rem;
@@ -523,9 +507,9 @@ $text-mid: rgba(255, 255, 255, 0.65);
   transition: all 0.25s ease;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.95);
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
+    color: var(--ink);
   }
 }
 
@@ -547,7 +531,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 
   .productCard {
     border-right: none;
-    border-bottom: 1px solid $border;
+    border-bottom: 1px solid var(--hairline);
 
     &:last-child {
       border-bottom: none;
@@ -607,7 +591,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 
     &:nth-child(3),
     &:nth-child(4) {
-      border-bottom: 1px solid $border;
+      border-bottom: 1px solid var(--hairline);
     }
 
     &:last-child {

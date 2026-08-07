@@ -55,7 +55,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
       style={{
         position: 'absolute',
         inset: 0,
-        background: 'var(--app-background)',
+        background: 'var(--bg-surface-a)',
         fontFamily: 'inherit',
         fontSize: 13,
         display: 'flex',
@@ -74,8 +74,8 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
         }}
       >
         <div>
-          <span style={{ color: '#e8e6e1', fontWeight: 600, fontSize: 14 }}>Revenue</span>
-          <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, marginLeft: 10 }}>
+          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>Revenue</span>
+          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginLeft: 10 }}>
             Last 7 days
           </span>
         </div>
@@ -87,9 +87,9 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
                 padding: '4px 10px',
                 borderRadius: 6,
                 fontSize: 11,
-                background: i === 0 ? 'rgba(255,255,255,0.08)' : 'transparent',
-                color: i === 0 ? '#e8e6e1' : 'rgba(255,255,255,0.35)',
-                border: i === 0 ? '1px solid rgba(255,255,255,0.12)' : '1px solid transparent',
+                background: i === 0 ? 'var(--bg-surface-b)' : 'transparent',
+                color: i === 0 ? 'var(--ink)' : 'rgba(19,19,19,0.45)',
+                border: i === 0 ? '1px solid var(--hairline-strong)' : '1px solid transparent',
                 cursor: 'pointer',
               }}
             >
@@ -107,19 +107,19 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
           <div
             key={k.label}
             style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.07)',
+              background: 'var(--bg-surface-b)',
+              border: '1px solid var(--hairline)',
               borderRadius: 8,
               padding: '10px 12px',
             }}
           >
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.38)', marginBottom: 5 }}>
+            <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.55)', marginBottom: 5 }}>
               {k.label}
             </div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#e8e6e1', marginBottom: 3 }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 3 }}>
               {k.value}
             </div>
-            <div style={{ fontSize: 10, color: k.good ? '#22c55e' : '#f87171' }}>{k.delta}</div>
+            <div style={{ fontSize: 10, color: k.good ? '#16a34a' : '#dc2626' }}>{k.delta}</div>
           </div>
         ))}
       </div>
@@ -143,7 +143,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
                 y={y + 4}
                 textAnchor="end"
                 fontSize={8}
-                fill="rgba(255,255,255,0.25)"
+                fill="rgba(19,19,19,0.4)"
               >
                 ${((max * t) / 1000).toFixed(0)}k
               </text>
@@ -160,7 +160,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
                 y1={y}
                 x2={W - PAD.r}
                 y2={y}
-                stroke="rgba(255,255,255,0.06)"
+                stroke="rgba(19,19,19,0.08)"
                 strokeWidth={0.5}
               />
             );
@@ -176,8 +176,8 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
           />
           <defs>
             <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#e8e6e1" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#e8e6e1" stopOpacity="0" />
+              <stop offset="0%" stopColor="#131313" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#131313" stopOpacity="0" />
             </linearGradient>
           </defs>
 
@@ -185,7 +185,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
           <motion.path
             d={linePath}
             fill="none"
-            stroke="#e8e6e1"
+            stroke="#131313"
             strokeWidth={1.5}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -205,7 +205,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
                 cx={x}
                 cy={y}
                 r={hoveredDay === i ? 5 : 3}
-                fill={hoveredDay === i ? '#fff' : '#e8e6e1'}
+                fill="#131313"
                 style={{ transition: 'r 0.15s ease' }}
                 opacity={drawn ? 1 : 0}
               />
@@ -214,7 +214,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
                 y={H - PAD.b + 14}
                 textAnchor="middle"
                 fontSize={9}
-                fill={hoveredDay === i ? '#e8e6e1' : 'rgba(255,255,255,0.3)'}
+                fill={hoveredDay === i ? '#131313' : 'rgba(19,19,19,0.45)'}
                 style={{ transition: 'fill 0.15s ease' }}
               >
                 {DAYS[i]}
@@ -227,7 +227,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
                     width={56}
                     height={22}
                     rx={4}
-                    fill="#1e1e1e"
+                    fill="#131313"
                     stroke="rgba(255,255,255,0.12)"
                     strokeWidth={0.5}
                   />
@@ -237,7 +237,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
                     textAnchor="middle"
                     fontSize={9}
                     fontWeight="700"
-                    fill="#e8e6e1"
+                    fill="#ffffff"
                   >
                     ${(REVENUE[i] / 1000).toFixed(1)}k
                   </text>

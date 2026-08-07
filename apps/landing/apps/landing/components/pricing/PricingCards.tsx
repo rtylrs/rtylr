@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '../../lib/cn';
 import { AnimatePresence, motion } from 'motion/react';
 import { HiCheck } from 'react-icons/hi';
-import { blurFadeIn, staggerBlur, viewportOnce, SPRING_SMOOTH } from '../../lib/animations';
+import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { PLANS, type BillingCycle, type Plan } from './pricingData';
 import styles from './PricingCards.module.scss';
 
@@ -27,7 +27,6 @@ const PricingCards = ({ billing = 'monthly', onCta }: PricingCardsProps): React.
           key={plan.name}
           className={cn(styles.pricingCard, plan.featured && styles.featured)}
           variants={blurFadeIn}
-          whileHover={{ y: -8, transition: SPRING_SMOOTH }}
         >
           {plan.featured && <div className={styles.popularBadge}>Most Popular</div>}
           <div className={styles.planHeader}>

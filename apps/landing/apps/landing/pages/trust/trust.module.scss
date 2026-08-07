@@ -2,7 +2,7 @@
 
 .page {
   background: var(--app-background);
-  color: #e8e6e1;
+  color: var(--ink);
 }
 
 // ── HERO ───────────────────────────────────────────────────────────────────
@@ -42,14 +42,14 @@
   font-weight: 600;
   line-height: 1.02;
   letter-spacing: -0.04em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0 0 22px;
 }
 
 .heroSubtitle {
   font-size: 1.05rem;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(19, 19, 19, 0.65);
   margin: 0 0 36px;
   max-width: 620px;
 }
@@ -61,8 +61,8 @@
 }
 
 .primaryBtn {
-  background: #e8e6e1;
-  color: #0a0a0a;
+  background: var(--btn-cream-bg);
+  color: #fff;
   border: none;
   border-radius: 999px;
   padding: 10px 22px;
@@ -75,20 +75,27 @@
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  box-shadow: var(--btn-cream-shadow);
   transition:
     background 0.18s ease,
+    box-shadow 0.18s ease,
     transform 0.18s ease;
 
   &:hover {
-    background: #ffffff;
+    background: var(--btn-cream-bg-hover);
+    box-shadow: var(--btn-cream-shadow-hover);
     transform: translateY(-1px);
+  }
+
+  &:active {
+    background: #000;
   }
 }
 
 .outlineBtn {
-  background: transparent;
-  color: #e8e6e1;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
   border-radius: 999px;
   padding: 10px 22px;
   font-size: 0.88rem;
@@ -105,8 +112,8 @@
     background 0.18s ease;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.42);
-    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
   }
 }
 
@@ -121,7 +128,7 @@
 .statusGrid {
   display: grid;
   grid-template-columns: 1.4fr 1fr 1fr 1fr;
-  border: 1px solid #232220;
+  border: 1px solid var(--hairline);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -131,7 +138,7 @@
   align-items: center;
   gap: 12px;
   padding: 22px 28px;
-  border-right: 1px solid #232220;
+  border-right: 1px solid var(--hairline);
 
   &:last-child {
     border-right: none;
@@ -161,28 +168,28 @@
 .statusLabel {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #e8e6e1;
+  color: var(--ink);
   letter-spacing: -0.005em;
   margin-bottom: 3px;
 }
 
 .statusSub {
   font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(19, 19, 19, 0.6);
   letter-spacing: -0.005em;
 
   a {
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(19, 19, 19, 0.8);
     text-decoration: underline;
     text-underline-offset: 3px;
-    text-decoration-color: rgba(255, 255, 255, 0.35);
+    text-decoration-color: rgba(19, 19, 19, 0.35);
   }
 }
 
 .statusBig {
   font-size: 1.6rem;
   font-weight: 600;
-  color: #e8e6e1;
+  color: var(--ink);
   letter-spacing: -0.025em;
   font-variant-numeric: tabular-nums;
   margin-bottom: 2px;
@@ -208,7 +215,7 @@
   font-weight: 600;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(19, 19, 19, 0.55);
   margin-bottom: 20px;
 }
 
@@ -217,20 +224,20 @@
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.035em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0;
 }
 
 .pillarsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  border: 1px solid #232220;
+  border: 1px solid var(--hairline);
 }
 
 .pillarCard {
   padding: 32px 28px;
-  border-right: 1px solid #232220;
-  border-bottom: 1px solid #232220;
+  border-right: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -244,7 +251,7 @@
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--bg-surface-b);
   }
 }
 
@@ -254,16 +261,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
   border-radius: 8px;
-  color: #e8e6e1;
+  color: var(--ink);
 }
 
 .pillarTitle {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #e8e6e1;
+  color: var(--ink);
   letter-spacing: -0.015em;
   margin: 0;
   line-height: 1.2;
@@ -272,7 +279,7 @@
 .pillarCopy {
   font-size: 0.92rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(19, 19, 19, 0.65);
   margin: 0;
   flex-grow: 1;
 }
@@ -280,12 +287,12 @@
 .pillarLink {
   display: inline-block;
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(19, 19, 19, 0.6);
   text-decoration: none;
   padding-top: 4px;
 
   &:hover {
-    color: #e8e6e1;
+    color: var(--ink);
   }
 }
 
@@ -310,44 +317,44 @@
 .complianceCopy {
   font-size: 0.95rem;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(19, 19, 19, 0.65);
   margin: 18px 0 0;
 
   a {
-    color: #e8e6e1;
+    color: var(--ink);
     text-decoration: underline;
     text-underline-offset: 3px;
-    text-decoration-color: rgba(232, 230, 225, 0.35);
+    text-decoration-color: rgba(19, 19, 19, 0.35);
   }
 }
 
 .contactStrip {
   margin-top: 22px;
   padding: 24px 26px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
   border-radius: 10px;
 
   h3 {
     font-size: 1rem;
     font-weight: 600;
-    color: #e8e6e1;
+    color: var(--ink);
     margin: 0 0 8px;
     letter-spacing: -0.015em;
   }
 
   p {
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(19, 19, 19, 0.65);
     line-height: 1.6;
     margin: 0;
   }
 
   a {
-    color: #e8e6e1;
+    color: var(--ink);
     text-decoration: underline;
     text-underline-offset: 3px;
-    text-decoration-color: rgba(232, 230, 225, 0.35);
+    text-decoration-color: rgba(19, 19, 19, 0.35);
   }
 }
 
@@ -355,7 +362,7 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  border: 1px solid #232220;
+  border: 1px solid var(--hairline);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -365,7 +372,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 22px;
-  border-bottom: 1px solid #232220;
+  border-bottom: 1px solid var(--hairline);
   gap: 16px;
 
   &:last-child {
@@ -373,14 +380,14 @@
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.015);
+    background: var(--bg-surface-b);
   }
 }
 
 .complianceLabel {
   font-size: 0.95rem;
   font-weight: 500;
-  color: #e8e6e1;
+  color: var(--ink);
   letter-spacing: -0.005em;
 }
 
@@ -389,22 +396,22 @@
   align-items: center;
   gap: 6px;
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(19, 19, 19, 0.6);
   padding: 4px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
   letter-spacing: 0.1px;
   white-space: nowrap;
 }
 
 .complianceStatusReady {
-  color: #a2d9af;
-  background: rgba(107, 207, 127, 0.1);
-  border-color: rgba(107, 207, 127, 0.25);
+  color: #1f7a3d;
+  background: rgba(107, 207, 127, 0.12);
+  border-color: rgba(107, 207, 127, 0.35);
 
   svg {
-    color: #6bcf7f;
+    color: #1f7a3d;
   }
 }
 
@@ -420,14 +427,14 @@
   max-width: 820px;
   margin: 0 auto;
   padding: 56px 48px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
   border-radius: 12px;
   text-align: center;
 }
 
 .dataIcon {
-  color: rgba(107, 207, 127, 0.85);
+  color: rgba(31, 122, 61, 0.85);
   margin-bottom: 18px;
 }
 
@@ -435,7 +442,7 @@
   font-size: clamp(1.6rem, 2.6vw, 2rem);
   font-weight: 600;
   letter-spacing: -0.025em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0 0 18px;
   line-height: 1.15;
 }
@@ -443,7 +450,7 @@
 .dataCopy {
   font-size: 0.98rem;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(19, 19, 19, 0.65);
   margin: 0 auto;
   max-width: 640px;
 }
@@ -460,7 +467,7 @@
       }
 
       &:nth-child(n + 3) {
-        border-top: 1px solid #232220;
+        border-top: 1px solid var(--hairline);
       }
     }
   }
@@ -470,11 +477,11 @@
 
     .pillarCard {
       &:nth-child(3n) {
-        border-right: 1px solid #232220;
+        border-right: 1px solid var(--hairline);
       }
 
       &:nth-last-child(-n + 3) {
-        border-bottom: 1px solid #232220;
+        border-bottom: 1px solid var(--hairline);
       }
 
       &:nth-child(2n) {
@@ -511,7 +518,7 @@
 
     .statusCell {
       border-right: none !important;
-      border-bottom: 1px solid #232220;
+      border-bottom: 1px solid var(--hairline);
 
       &:last-child {
         border-bottom: none;
@@ -535,7 +542,7 @@
 
       &:nth-last-child(-n + 3),
       &:nth-last-child(-n + 2) {
-        border-bottom: 1px solid #232220;
+        border-bottom: 1px solid var(--hairline);
       }
 
       &:last-child {

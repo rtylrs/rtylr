@@ -1,17 +1,14 @@
 // ── Contact Page ──────────────────────────────────────────────────────────────
 
-$blue: #e8e6e1;
-$cyan: #e8e6e1;
-$dark-primary: #040428;
-$bg: #151515;
-$border: #232220;
-$border-subtle: rgba(255, 255, 255, 0.1);
-$text-muted: rgba(255, 255, 255, 0.5);
-$text-mid: rgba(255, 255, 255, 0.65);
+$blue: var(--ink);
+$cyan: var(--ink);
+$border: var(--hairline);
+$text-muted: rgba(19, 19, 19, 0.6);
+$text-mid: rgba(19, 19, 19, 0.72);
 
 .contactPage {
   background-color: var(--app-background);
-  color: #fff;
+  color: var(--ink);
   min-height: 100vh;
   padding-bottom: 0;
 }
@@ -25,18 +22,13 @@ $text-mid: rgba(255, 255, 255, 0.65);
   text-align: center;
   padding: 100px 24px 80px;
   border-bottom: 1px solid $border;
-  background: radial-gradient(
-    ellipse 70% 50% at 50% 0%,
-    rgba(232, 230, 225, 0.07) 0%,
-    transparent 70%
-  );
 }
 
 .headerTitle {
   font-size: 4.5rem;
   font-weight: 700;
   letter-spacing: -0.04em;
-  color: #fff;
+  color: var(--ink);
   margin: 0 0 16px;
   line-height: 1.05;
 }
@@ -92,7 +84,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   align-items: flex-start;
   gap: 16px;
   padding: 20px 20px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-surface-a);
   border: 1px solid $border;
   border-radius: 12px;
   text-decoration: none;
@@ -101,8 +93,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
     background 0.2s ease;
 
   &:hover {
-    border-color: rgba(232, 230, 225, 0.4);
-    background: rgba(232, 230, 225, 0.04);
+    border-color: var(--hairline-strong);
+    background: var(--bg-surface-b);
   }
 }
 
@@ -110,8 +102,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: rgba(232, 230, 225, 0.1);
-  border: 1px solid rgba(232, 230, 225, 0.2);
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -136,7 +128,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 .channelValue {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--ink);
 }
 
 .channelDescription {
@@ -149,7 +141,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   flex-direction: column;
   gap: 4px;
   padding: 24px 20px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-surface-a);
   border: 1px solid $border;
   border-radius: 12px;
 }
@@ -171,7 +163,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 // ── Form ──────────────────────────────────────────────────────────────────────
 
 .formSection {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-surface-a);
   border: 1px solid $border;
   border-radius: 16px;
   padding: 44px 40px;
@@ -180,7 +172,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 .formTitle {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ink);
   margin: 0 0 32px;
   letter-spacing: -0.02em;
 }
@@ -236,12 +228,12 @@ $text-mid: rgba(255, 255, 255, 0.65);
 }
 
 .fieldInput {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-surface-b);
   border: 1px solid $border;
   border-radius: 8px;
   padding: 12px 16px;
   font-size: 0.9rem;
-  color: #fff;
+  color: var(--ink);
   width: 100%;
   transition:
     border-color 0.2s ease,
@@ -249,23 +241,23 @@ $text-mid: rgba(255, 255, 255, 0.65);
   font-family: inherit;
 
   &::placeholder {
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(19, 19, 19, 0.35);
   }
 
   &:focus {
     outline: none;
-    border-color: rgba(232, 230, 225, 0.6);
-    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--hairline-strong);
+    background: var(--bg-surface-a);
   }
 }
 
 .fieldTextarea {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--bg-surface-b);
   border: 1px solid $border;
   border-radius: 8px;
   padding: 12px 16px;
   font-size: 0.9rem;
-  color: #fff;
+  color: var(--ink);
   width: 100%;
   transition:
     border-color 0.2s ease,
@@ -276,13 +268,13 @@ $text-mid: rgba(255, 255, 255, 0.65);
   line-height: 1.6;
 
   &::placeholder {
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(19, 19, 19, 0.35);
   }
 
   &:focus {
     outline: none;
-    border-color: rgba(232, 230, 225, 0.6);
-    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--hairline-strong);
+    background: var(--bg-surface-a);
   }
 }
 
@@ -293,8 +285,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
 }
 
 .submitBtn {
-  background: #e8e6e1;
-  color: #0a0a0a;
+  background: var(--btn-cream-bg);
+  color: #fff;
   border: none;
   padding: 14px 32px;
   border-radius: 8px;
@@ -305,14 +297,16 @@ $text-mid: rgba(255, 255, 255, 0.65);
   width: 100%;
   margin-top: 4px;
   font-family: inherit;
+  box-shadow: var(--btn-cream-shadow);
 
   &:hover {
-    background: #ffffff;
+    background: var(--btn-cream-bg-hover);
     transform: translateY(-2px);
-    box-shadow: 0 10px 32px rgba(232, 230, 225, 0.35);
+    box-shadow: var(--btn-cream-shadow-hover);
   }
 
   &:active {
+    background: #000;
     transform: translateY(0);
   }
 }
@@ -336,7 +330,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 .successTitle {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ink);
   margin: 0;
 }
 
@@ -349,9 +343,9 @@ $text-mid: rgba(255, 255, 255, 0.65);
 }
 
 .successReset {
-  background: transparent;
-  color: $blue;
-  border: 1px solid rgba(232, 230, 225, 0.3);
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
   padding: 10px 24px;
   border-radius: 8px;
   font-size: 0.88rem;
@@ -362,8 +356,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   font-family: inherit;
 
   &:hover {
-    background: rgba(232, 230, 225, 0.1);
-    border-color: rgba(232, 230, 225, 0.5);
+    background: var(--btn-glass-bg-hover);
+    border-color: var(--ink);
   }
 }
 
@@ -375,15 +369,15 @@ $text-mid: rgba(255, 255, 255, 0.65);
   justify-content: center;
   gap: 24px;
   padding: 32px 24px;
-  background: rgba(255, 255, 255, 0.03);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--bg-surface-b);
+  border-top: 1px solid var(--hairline);
   flex-wrap: wrap;
 }
 
 .stripText {
   font-size: 1rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(19, 19, 19, 0.65);
   margin: 0;
 }
 
@@ -391,8 +385,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #e8e6e1;
-  color: #0a0a0a;
+  background: var(--btn-cream-bg);
+  color: #fff;
   border: none;
   padding: 10px 24px;
   border-radius: 8px;
@@ -404,8 +398,11 @@ $text-mid: rgba(255, 255, 255, 0.65);
   font-family: inherit;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: var(--btn-cream-bg-hover);
+  }
+
+  &:active {
+    background: #000;
   }
 }
 

@@ -8,57 +8,31 @@
 
 .pricingCard {
   position: relative;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.045) 0%,
-    rgba(255, 255, 255, 0.015) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
   border-radius: 12px;
   padding: 40px 32px;
   display: flex;
   flex-direction: column;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    var(--elev-2);
+  box-shadow: var(--elev-1);
   transition:
     background 0.3s ease,
     border-color 0.3s ease,
-    transform 0.35s var(--ease-out-soft),
     box-shadow 0.35s var(--ease-out-soft);
 
   &:hover {
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.07) 0%,
-      rgba(255, 255, 255, 0.025) 100%
-    );
-    border-color: rgba(255, 255, 255, 0.18);
-    transform: translateY(-6px);
-    box-shadow:
-      0 1px 0 rgba(255, 255, 255, 0.08) inset,
-      var(--elev-3);
+    border-color: var(--hairline-strong);
+    box-shadow: var(--elev-2);
   }
 
   &.featured {
-    background: linear-gradient(
-      180deg,
-      rgba(232, 230, 225, 0.1) 0%,
-      rgba(232, 230, 225, 0.03) 100%
-    );
-    border-color: rgba(232, 230, 225, 0.4);
-    box-shadow:
-      0 1px 0 rgba(255, 255, 255, 0.08) inset,
-      var(--elev-2),
-      var(--glow-cream);
+    background: #f7f6f4;
+    border-color: rgba(19, 19, 19, 0.35);
+    box-shadow: var(--elev-2);
 
     &:hover {
-      border-color: rgba(232, 230, 225, 0.7);
-      transform: translateY(-6px) scale(1.015);
-      box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.12) inset,
-        var(--elev-3),
-        var(--glow-cream-strong);
+      border-color: var(--ink);
+      box-shadow: var(--elev-3);
     }
   }
 }
@@ -68,8 +42,8 @@
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background: #e8e6e1;
-  color: #0a0a0a;
+  background: var(--ink);
+  color: #ffffff;
   padding: 4px 14px;
   border-radius: 100px;
   font-size: 0.66rem;
@@ -88,14 +62,14 @@
 .planName {
   font-size: 1.5rem;
   font-weight: 600;
-  color: white;
+  color: var(--ink);
   margin: 0 0 8px 0;
   line-height: 1.1;
 }
 
 .planDescription {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(19, 19, 19, 0.6);
   margin: 0;
   line-height: 1.5;
 }
@@ -111,19 +85,19 @@
 .amount {
   font-size: 3rem;
   font-weight: 700;
-  color: white;
+  color: var(--ink);
   line-height: 1;
   letter-spacing: -0.02em;
 }
 
 .priceSuffix {
   font-size: 1rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(19, 19, 19, 0.55);
 }
 
 .priceNote {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(19, 19, 19, 0.5);
   margin: 0 0 28px 0;
   min-height: 40px;
   line-height: 1.4;
@@ -144,13 +118,13 @@
   align-items: flex-start;
   gap: 12px;
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(19, 19, 19, 0.75);
   line-height: 1.5;
 }
 
 .checkIcon {
   flex-shrink: 0;
-  color: #e8e6e1;
+  color: var(--ink);
   width: 18px;
   height: 18px;
   margin-top: 2px;
@@ -158,9 +132,9 @@
 
 .ctaButton {
   appearance: none;
-  background: #ffffff;
-  background-image: none;
-  color: #0a0a0a;
+  background: var(--btn-cream-bg);
+  background-image: var(--btn-cream-bg);
+  color: #ffffff;
   border: 0;
   padding: 14px 24px;
   border-radius: 12px;
@@ -169,24 +143,23 @@
   cursor: pointer;
   width: 100%;
   letter-spacing: 0;
-  box-shadow: none;
+  box-shadow: var(--btn-cream-shadow);
   transition:
     background 0.2s ease,
     transform 0.22s var(--ease-out-soft);
 
   &:hover {
-    background: #f4f4f4;
+    background: var(--btn-cream-bg-hover);
     transform: translateY(-1px);
+    box-shadow: var(--btn-cream-shadow-hover);
   }
 
   &:active {
-    background: #eeeeee;
+    background: #000000;
     transform: translateY(0);
   }
 }
 
-// Keep three columns down to 820px so the 860px OS-mode pricing window
-// still shows the grid; stack only below that.
 @media (max-width: 1024px) {
   .pricingGrid {
     gap: 14px;

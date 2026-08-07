@@ -1,17 +1,13 @@
 // ── Hardware Page ─────────────────────────────────────────────────────────────
 
-$blue: #e8e6e1;
-$cyan: #e8e6e1;
-$dark-primary: #040428;
-$bg: #151515;
-$border: #232220;
-$border-subtle: rgba(255, 255, 255, 0.1);
-$text-muted: rgba(255, 255, 255, 0.5);
-$text-mid: rgba(255, 255, 255, 0.65);
+$blue: var(--ink);
+$cyan: var(--ink);
+$border: var(--hairline);
+$text-muted: rgba(19, 19, 19, 0.65);
 
 .hardwarePage {
   background-color: var(--app-background);
-  color: #fff;
+  color: var(--ink);
   min-height: 100vh;
   padding-bottom: 0;
 }
@@ -32,11 +28,6 @@ $text-mid: rgba(255, 255, 255, 0.65);
   justify-content: center;
   padding: 112px 24px 96px;
   border-bottom: 1px solid $border;
-  background: radial-gradient(
-    ellipse 80% 55% at 50% 0%,
-    rgba(232, 230, 225, 0.08) 0%,
-    transparent 70%
-  );
 }
 
 .heroInner {
@@ -51,9 +42,9 @@ $text-mid: rgba(255, 255, 255, 0.65);
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(232, 230, 225, 0.1);
-  border: 1px solid rgba(232, 230, 225, 0.25);
-  color: rgba(255, 255, 255, 0.75);
+  background: rgba(19, 19, 19, 0.05);
+  border: 1px solid var(--hairline-strong);
+  color: rgba(19, 19, 19, 0.7);
   padding: 6px 18px 6px 14px;
   border-radius: 100px;
   font-size: 0.78rem;
@@ -68,7 +59,6 @@ $text-mid: rgba(255, 255, 255, 0.65);
   border-radius: 50%;
   background: $cyan;
   flex-shrink: 0;
-  box-shadow: 0 0 8px rgba(232, 230, 225, 0.8);
   animation: pulse 2.4s ease-in-out infinite;
 }
 
@@ -89,7 +79,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
   font-weight: 700;
   line-height: 1.08;
   letter-spacing: -0.035em;
-  color: #fff;
+  color: var(--ink);
   margin: 0 0 24px;
 }
 
@@ -116,7 +106,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 
 .hardwareCard {
   position: relative;
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--bg-surface-a);
   border: 1px solid $border;
   border-radius: 12px;
   overflow: hidden;
@@ -128,10 +118,10 @@ $text-mid: rgba(255, 255, 255, 0.65);
     transform 0.25s ease;
 
   &:hover {
-    border-color: rgba(232, 230, 225, 0.4);
-    background: rgba(232, 230, 225, 0.04);
+    border-color: var(--hairline-strong);
+    background: var(--btn-glass-bg-hover);
     transform: translateY(-3px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--elev-2);
 
     .cardAccentBar {
       background: linear-gradient(90deg, $blue 0%, $cyan 100%);
@@ -142,7 +132,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 .cardAccentBar {
   height: 3px;
   width: 100%;
-  background: rgba(232, 230, 225, 0.25);
+  background: var(--hairline-strong);
   transition: background 0.25s ease;
   flex-shrink: 0;
 }
@@ -159,8 +149,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   width: 48px;
   height: 48px;
   border-radius: 10px;
-  background: rgba(232, 230, 225, 0.1);
-  border: 1px solid rgba(232, 230, 225, 0.2);
+  background: rgba(19, 19, 19, 0.05);
+  border: 1px solid var(--hairline-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -185,7 +175,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 .cardName {
   font-size: 1.05rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--ink);
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -200,7 +190,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 // ── Integration strip ─────────────────────────────────────────────────────────
 
 .integrationStrip {
-  background: $blue;
+  background: var(--ink);
   padding: 28px 24px;
   display: flex;
   justify-content: center;
@@ -217,9 +207,9 @@ $text-mid: rgba(255, 255, 255, 0.65);
 .stripBadge {
   display: inline-flex;
   align-items: center;
-  background: rgba(0, 0, 0, 0.1);
-  color: #0a0a0a;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 100px;
   padding: 4px 16px;
   font-size: 0.72rem;
@@ -233,7 +223,7 @@ $text-mid: rgba(255, 255, 255, 0.65);
 .stripText {
   font-size: 1rem;
   font-weight: 500;
-  color: rgba(0, 0, 0, 0.75);
+  color: rgba(255, 255, 255, 0.78);
   margin: 0;
   line-height: 1.5;
 }
@@ -252,13 +242,13 @@ $text-mid: rgba(255, 255, 255, 0.65);
   padding: 80px 24px;
   border: 1px solid $border;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-surface-b);
 }
 
 .ctaTitle {
   font-size: 2.8rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--ink);
   letter-spacing: -0.03em;
   margin: 0 0 16px;
   max-width: 600px;
@@ -281,8 +271,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
 }
 
 .ctaPrimary {
-  background: $blue;
-  color: #0a0a0a;
+  background: var(--btn-cream-bg);
+  color: #fff;
   border: none;
   padding: 14px 38px;
   border-radius: 50px;
@@ -291,22 +281,24 @@ $text-mid: rgba(255, 255, 255, 0.65);
   cursor: pointer;
   transition: all 0.25s ease;
   font-family: inherit;
+  box-shadow: var(--btn-cream-shadow);
 
   &:hover {
-    background: #ffffff;
+    background: var(--btn-cream-bg-hover);
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(232, 230, 225, 0.4);
+    box-shadow: var(--btn-cream-shadow-hover);
   }
 
   &:active {
+    background: #000;
     transform: translateY(0);
   }
 }
 
 .ctaSecondary {
-  background: transparent;
-  color: rgba(255, 255, 255, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
   padding: 14px 38px;
   border-radius: 50px;
   font-size: 0.95rem;
@@ -316,9 +308,8 @@ $text-mid: rgba(255, 255, 255, 0.65);
   font-family: inherit;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.05);
-    color: rgba(255, 255, 255, 0.95);
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
   }
 }
 

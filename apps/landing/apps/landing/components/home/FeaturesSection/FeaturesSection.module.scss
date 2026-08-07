@@ -5,7 +5,7 @@
 
 .featuresSection {
   padding: 120px 0;
-  background: var(--app-background);
+  background: var(--bg-surface-a);
   min-height: 100vh;
   display: flex;
   align-items: flex-start;
@@ -30,9 +30,9 @@
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.14em;
-  color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(19, 19, 19, 0.65);
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline-strong);
   padding: 6px 12px;
   border-radius: 999px;
   margin-bottom: 18px;
@@ -43,13 +43,13 @@
   font-weight: 600;
   line-height: 1.08;
   letter-spacing: -0.028em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0;
   max-width: 860px;
 }
 
 .sectionTitleAccent {
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(19, 19, 19, 0.55);
 }
 
 // Tab bar - horizontal pill row. Scrolls horizontally on narrow
@@ -73,8 +73,8 @@
   position: relative;
   flex-shrink: 0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.62);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(19, 19, 19, 0.62);
+  border: 1px solid var(--hairline-strong);
   border-radius: 999px;
   padding: 9px 18px;
   font-size: 0.88rem;
@@ -89,9 +89,9 @@
   min-height: 38px;
 
   &:hover {
-    color: #e8e6e1;
-    border-color: rgba(255, 255, 255, 0.22);
-    background: rgba(255, 255, 255, 0.04);
+    color: var(--ink);
+    border-color: rgba(19, 19, 19, 0.3);
+    background: rgba(19, 19, 19, 0.04);
   }
 }
 
@@ -111,11 +111,11 @@
 }
 
 .tabActive {
-  color: #0a0a0a;
+  color: #ffffff;
   border-color: transparent;
 
   &:hover {
-    color: #0a0a0a;
+    color: #ffffff;
     border-color: transparent;
     background: transparent;
   }
@@ -142,7 +142,7 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(19, 19, 19, 0.55);
   margin-bottom: 14px;
   display: block;
 }
@@ -150,7 +150,7 @@
 .featureTitle {
   font-size: clamp(1.75rem, 2.6vw, 2.4rem);
   font-weight: 600;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0 0 18px;
   line-height: 1.1;
   letter-spacing: -0.025em;
@@ -159,7 +159,7 @@
 
 .featureDescription {
   font-size: 1.05rem;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(19, 19, 19, 0.7);
   line-height: 1.55;
   margin: 0 0 26px;
   max-width: 520px;
@@ -208,12 +208,9 @@
   max-height: 540px;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #2c2a27;
-  background: var(--app-background);
-  // Float the demo panel above the flat section background.
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    var(--elev-3);
+  border: 1px solid var(--hairline);
+  background: var(--bg-surface-b);
+  box-shadow: var(--elev-1);
 }
 
 .showcaseImage {
@@ -250,7 +247,7 @@
   width: 5px;
   height: 5px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(19, 19, 19, 0.15);
   transition:
     background 0.2s ease,
     width 0.2s ease;
@@ -259,7 +256,7 @@
 .progressDotActive {
   position: relative;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(19, 19, 19, 0.2);
   width: 20px;
   border-radius: 999px;
 }
@@ -267,7 +264,7 @@
 .progressFill {
   position: absolute;
   inset: 0;
-  background: #e8e6e1;
+  background: var(--ink);
   border-radius: 999px;
   transform-origin: left;
 }

@@ -1,13 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ShoppingCart, Package, Users, Heart, DollarSign, Workflow, BarChart2 } from 'lucide-react';
-import {
-  blurFadeIn,
-  blurFadeInSlow,
-  staggerBlur,
-  viewportOnce,
-  SPRING_SMOOTH,
-} from '../../../lib/animations';
+import { blurFadeIn, blurFadeInSlow, staggerBlur, viewportOnce } from '../../../lib/animations';
 import { SplitWords } from '../../motion/SplitWords';
 import styles from './ProductsSection.module.scss';
 
@@ -84,12 +78,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }: ProductCardProps): React.JSX.Element => {
   const { Icon } = product;
   return (
-    <motion.div
-      className={styles.card}
-      variants={blurFadeIn}
-      custom={index}
-      whileHover={{ y: -6, transition: SPRING_SMOOTH }}
-    >
+    <motion.div className={styles.card} variants={blurFadeIn} custom={index}>
       <motion.div className={styles.iconWrap} whileHover={{ scale: 1.08, rotate: -3 }}>
         <Icon size={20} strokeWidth={1.6} />
       </motion.div>

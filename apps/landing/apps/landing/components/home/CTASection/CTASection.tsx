@@ -11,16 +11,8 @@ import {
 } from '../../../lib/animations';
 import { SplitWords } from '../../motion/SplitWords';
 import { navigateExternal } from '../../../lib/navigation';
+import CTAGraphic from './CTAGraphic';
 import styles from './CTASection.module.scss';
-
-const BRANDS = [
-  { id: 'stripe', label: 'Stripe' },
-  { id: 'square', label: 'Square' },
-  { id: 'quickbooks', label: 'QuickBooks' },
-  { id: 'xero', label: 'Xero' },
-  { id: 'slack', label: 'Slack' },
-  { id: 'google', label: 'Google' },
-];
 
 const CTASection: React.FC = (): React.JSX.Element => {
   const router = useRouter();
@@ -36,7 +28,7 @@ const CTASection: React.FC = (): React.JSX.Element => {
   return (
     <section className={styles.ctaSection}>
       <div className={styles.split}>
-        {/* Left, title, CTAs, logo grid */}
+        {/* Left, title, CTAs */}
         <motion.div
           className={styles.left}
           initial="hidden"
@@ -79,17 +71,9 @@ const CTASection: React.FC = (): React.JSX.Element => {
               Book a demo
             </motion.button>
           </motion.div>
-
-          <motion.div className={styles.brandGrid} variants={blurFadeIn}>
-            {BRANDS.map((b) => (
-              <div key={b.id} className={styles.brandCell}>
-                <span className={styles.brandLabel}>{b.label}</span>
-              </div>
-            ))}
-          </motion.div>
         </motion.div>
 
-        {/* Right, generative image - unmasks from the center with a slow settle */}
+        {/* Right, interactive graphic - unmasks from the center with a slow settle */}
         <motion.div
           className={styles.right}
           initial={{ opacity: 0, scale: 1.08, clipPath: 'inset(12% 12% 12% 12% round 24px)' }}
@@ -97,13 +81,7 @@ const CTASection: React.FC = (): React.JSX.Element => {
           viewport={viewportOnce}
           transition={{ duration: 1.3, ease: EASE_OUT_EXPO }}
         >
-          <img
-            src="/images/home/hero-banner-top-bar-bg.webp"
-            alt=""
-            className={styles.rightImg}
-            loading="lazy"
-            decoding="async"
-          />
+          <CTAGraphic />
         </motion.div>
       </div>
     </section>

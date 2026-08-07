@@ -2,7 +2,7 @@
 
 .page {
   background: var(--app-background);
-  color: #e8e6e1;
+  color: var(--ink);
 }
 
 .hero {
@@ -26,15 +26,15 @@
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: rgba(214, 184, 142, 0.95);
+  color: var(--ink);
   margin-bottom: 24px;
   padding: 5px 12px 5px 10px;
-  border: 1px solid rgba(214, 184, 142, 0.28);
+  border: 1px solid var(--hairline-strong);
   border-radius: 999px;
-  background: rgba(214, 184, 142, 0.08);
+  background: var(--bg-surface-b);
 
   svg {
-    color: #d6b88e;
+    color: var(--ink);
   }
 }
 
@@ -43,12 +43,12 @@
   font-weight: 600;
   line-height: 1.02;
   letter-spacing: -0.04em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0 0 22px;
 }
 
 .heroTitleSoft {
-  color: rgba(214, 184, 142, 0.9);
+  color: rgba(19, 19, 19, 0.65);
   font-style: italic;
   font-weight: 500;
 }
@@ -56,7 +56,7 @@
 .heroSubtitle {
   font-size: 1.05rem;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(19, 19, 19, 0.65);
   margin: 0 0 32px;
   max-width: 620px;
 }
@@ -68,8 +68,8 @@
 }
 
 .primaryBtn {
-  background: #e8e6e1;
-  color: #0a0a0a;
+  background: var(--btn-cream-bg);
+  color: #fff;
   border: none;
   border-radius: 999px;
   padding: 10px 22px;
@@ -80,20 +80,27 @@
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  box-shadow: var(--btn-cream-shadow);
   transition:
     background 0.18s ease,
+    box-shadow 0.18s ease,
     transform 0.18s ease;
 
   &:hover {
-    background: #ffffff;
+    background: var(--btn-cream-bg-hover);
+    box-shadow: var(--btn-cream-shadow-hover);
     transform: translateY(-1px);
+  }
+
+  &:active {
+    background: #000;
   }
 }
 
 .outlineBtn {
-  background: transparent;
-  color: #e8e6e1;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: var(--btn-glass-bg);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
   border-radius: 999px;
   padding: 10px 22px;
   font-size: 0.88rem;
@@ -108,8 +115,8 @@
     background 0.18s ease;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.42);
-    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--ink);
+    background: var(--btn-glass-bg-hover);
   }
 }
 
@@ -136,7 +143,7 @@
   font-weight: 600;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(19, 19, 19, 0.55);
   margin-bottom: 18px;
 }
 
@@ -145,7 +152,7 @@
   font-weight: 600;
   line-height: 1.04;
   letter-spacing: -0.035em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0;
 }
 
@@ -157,16 +164,16 @@
 
 .track {
   padding: 28px 32px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
   border-radius: 12px;
   transition:
     border-color 0.22s ease,
     background 0.22s ease;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.035);
+    border-color: var(--hairline-strong);
+    background: var(--bg-surface-b);
   }
 }
 
@@ -181,7 +188,7 @@
 .trackNumber {
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-size: 0.92rem;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(19, 19, 19, 0.4);
   padding-top: 10px;
   letter-spacing: 0.3px;
 }
@@ -192,10 +199,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(214, 184, 142, 0.1);
-  border: 1px solid rgba(214, 184, 142, 0.22);
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline-strong);
   border-radius: 8px;
-  color: #d6b88e;
+  color: var(--ink);
 }
 
 .trackTitles {
@@ -208,13 +215,13 @@
   font-size: 1.18rem;
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0;
 }
 
 .trackWho {
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(19, 19, 19, 0.55);
   margin: 0;
   font-style: italic;
 }
@@ -222,7 +229,7 @@
 .trackSummary {
   font-size: 0.98rem;
   line-height: 1.65;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(19, 19, 19, 0.65);
   margin: 0 0 16px;
 }
 
@@ -239,7 +246,7 @@
     align-items: flex-start;
     gap: 8px;
     font-size: 0.88rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(19, 19, 19, 0.75);
     line-height: 1.45;
 
     svg {
@@ -270,8 +277,8 @@
 
 .tierCard {
   padding: 32px 28px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-surface-a);
+  border: 1px solid var(--hairline);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -293,21 +300,21 @@
 .tierCommitment {
   font-family: 'SF Mono', 'Fira Code', monospace;
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(19, 19, 19, 0.6);
   letter-spacing: 0.2px;
 }
 
 .tierDesc {
   font-size: 0.92rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(19, 19, 19, 0.68);
   margin: 0;
   flex-grow: 1;
 }
 
 .tierProgress {
   height: 4px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--hairline);
   border-radius: 2px;
   overflow: hidden;
   margin-top: 8px;
@@ -331,7 +338,7 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  border: 1px solid #232220;
+  border: 1px solid var(--hairline);
   border-radius: 10px;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -342,14 +349,14 @@
     align-items: flex-start;
     gap: 14px;
     padding: 22px 20px;
-    border-right: 1px solid #232220;
+    border-right: 1px solid var(--hairline);
 
     &:last-child {
       border-right: none;
     }
 
     svg {
-      color: #e8e6e1;
+      color: var(--ink);
       opacity: 0.7;
       flex-shrink: 0;
       margin-top: 2px;
@@ -363,13 +370,13 @@
       strong {
         font-size: 0.88rem;
         font-weight: 600;
-        color: #e8e6e1;
+        color: var(--ink);
         letter-spacing: -0.005em;
       }
 
       span {
         font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.5);
+        color: rgba(19, 19, 19, 0.6);
         line-height: 1.45;
       }
     }
@@ -383,7 +390,7 @@
   max-width: 1100px;
   margin: 0 auto;
   text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--hairline);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -393,13 +400,13 @@
   font-size: clamp(2rem, 3.6vw, 2.8rem);
   font-weight: 600;
   letter-spacing: -0.03em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 40px 0 14px;
 }
 
 .ctaCopy {
   font-size: 0.98rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(19, 19, 19, 0.65);
   margin: 0 0 28px;
   max-width: 520px;
 }
@@ -432,7 +439,7 @@
       }
 
       &:nth-child(n + 3) {
-        border-top: 1px solid #232220;
+        border-top: 1px solid var(--hairline);
       }
     }
   }
@@ -469,7 +476,7 @@
 
     li {
       border-right: none !important;
-      border-bottom: 1px solid #232220;
+      border-bottom: 1px solid var(--hairline);
 
       &:last-child {
         border-bottom: none;

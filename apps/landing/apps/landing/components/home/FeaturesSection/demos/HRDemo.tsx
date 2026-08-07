@@ -100,7 +100,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
       style={{
         position: 'absolute',
         inset: 0,
-        background: 'var(--app-background)',
+        background: 'var(--bg-surface-a)',
         fontFamily: 'inherit',
         fontSize: 13,
         display: 'flex',
@@ -112,7 +112,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
       <div
         style={{
           padding: '16px 20px 14px',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          borderBottom: '1px solid var(--hairline)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -120,14 +120,14 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
         }}
       >
         <div>
-          <span style={{ color: '#e8e6e1', fontWeight: 600, fontSize: 14 }}>Schedule</span>
-          <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, marginLeft: 10 }}>
+          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>Schedule</span>
+          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginLeft: 10 }}>
             Today · Mon 5 May
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e' }} />
-          <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12 }}>{clocked} on shift</span>
+          <span style={{ color: 'rgba(19,19,19,0.65)', fontSize: 12 }}>{clocked} on shift</span>
         </div>
       </div>
 
@@ -143,7 +143,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
         {[8, 10, 12, 14, 16, 18, 20, 22].map((h) => (
           <span
             key={h}
-            style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', width: 24, textAlign: 'center' }}
+            style={{ fontSize: 9, color: 'rgba(19,19,19,0.4)', width: 24, textAlign: 'center' }}
           >
             {fmtHour(h)}
           </span>
@@ -160,7 +160,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
             bottom: 0,
             left: `calc(148px + ${nowPct}% * ((100% - 148px) / 100))`,
             width: 1,
-            background: 'rgba(232,230,225,0.4)',
+            background: 'var(--ink)',
             zIndex: 10,
             pointerEvents: 'none',
           }}
@@ -170,8 +170,8 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
               position: 'absolute',
               top: 0,
               left: -18,
-              background: 'rgba(232,230,225,0.9)',
-              color: '#0a0a0a',
+              background: 'var(--ink)',
+              color: '#ffffff',
               borderRadius: 4,
               padding: '1px 5px',
               fontSize: 9,
@@ -194,7 +194,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
                 display: 'flex',
                 alignItems: 'center',
                 padding: '7px 20px 7px 0',
-                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                borderBottom: '1px solid var(--hairline)',
               }}
             >
               {/* Staff info */}
@@ -213,13 +213,13 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
                     width: 28,
                     height: 28,
                     borderRadius: '50%',
-                    background: isOn ? s.color : 'rgba(255,255,255,0.08)',
+                    background: isOn ? s.color : 'var(--hairline)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: 10,
                     fontWeight: 700,
-                    color: isOn ? '#0a0a0a' : 'rgba(255,255,255,0.4)',
+                    color: isOn ? '#0a0a0a' : 'rgba(19,19,19,0.4)',
                     transition: 'all 0.3s ease',
                     flexShrink: 0,
                   }}
@@ -231,12 +231,12 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
                     style={{
                       fontSize: 11,
                       fontWeight: 500,
-                      color: isOn ? '#e8e6e1' : 'rgba(255,255,255,0.45)',
+                      color: isOn ? 'var(--ink)' : 'rgba(19,19,19,0.5)',
                     }}
                   >
                     {s.name}
                   </div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{s.role}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.45)' }}>{s.role}</div>
                 </div>
               </div>
 
@@ -251,9 +251,9 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
                     left: `${leftPct}%`,
                     width: `${widthPct}%`,
                     height: '100%',
-                    background: isOn ? `${s.color}33` : 'rgba(255,255,255,0.05)',
+                    background: isOn ? `${s.color}33` : 'var(--hairline)',
                     borderRadius: 4,
-                    border: `1px solid ${isOn ? `${s.color}66` : 'rgba(255,255,255,0.08)'}`,
+                    border: `1px solid ${isOn ? `${s.color}66` : 'var(--hairline-strong)'}`,
                     transformOrigin: 'left',
                     display: 'flex',
                     alignItems: 'center',
@@ -264,7 +264,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
                   <span
                     style={{
                       fontSize: 9,
-                      color: isOn ? s.color : 'rgba(255,255,255,0.25)',
+                      color: isOn ? s.color : 'rgba(19,19,19,0.4)',
                       whiteSpace: 'nowrap',
                     }}
                   >

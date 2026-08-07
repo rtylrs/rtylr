@@ -44,7 +44,7 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
       style={{
         position: 'absolute',
         inset: 0,
-        background: 'var(--app-background)',
+        background: 'var(--bg-surface-a)',
         fontFamily: 'inherit',
         fontSize: 13,
         display: 'flex',
@@ -63,15 +63,15 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
         }}
       >
         <div>
-          <span style={{ color: '#e8e6e1', fontWeight: 600, fontSize: 14 }}>P&amp;L</span>
-          <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, marginLeft: 10 }}>
+          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>P&amp;L</span>
+          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginLeft: 10 }}>
             May 2026
           </span>
         </div>
         <span
           style={{
-            background: 'rgba(34,197,94,0.1)',
-            color: '#22c55e',
+            background: 'rgba(34,197,94,0.12)',
+            color: '#16a34a',
             borderRadius: 999,
             padding: '3px 10px',
             fontSize: 11,
@@ -95,19 +95,19 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
           <div
             key={m.label}
             style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.07)',
+              background: 'var(--bg-surface-b)',
+              border: '1px solid var(--hairline)',
               borderRadius: 10,
               padding: '12px 14px',
             }}
           >
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>
+            <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.55)', marginBottom: 6 }}>
               {m.label}
             </div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#e8e6e1', marginBottom: 4 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginBottom: 4 }}>
               {shown ? `$${(m.value / 1000).toFixed(1)}k` : '-'}
             </div>
-            <div style={{ fontSize: 11, color: '#22c55e' }}>{pctChange(m.value, m.prev)} MoM</div>
+            <div style={{ fontSize: 11, color: '#16a34a' }}>{pctChange(m.value, m.prev)} MoM</div>
           </div>
         ))}
       </div>
@@ -117,7 +117,7 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
         <div
           style={{
             fontSize: 11,
-            color: 'rgba(255,255,255,0.35)',
+            color: 'rgba(19,19,19,0.5)',
             marginBottom: 12,
             display: 'flex',
             gap: 16,
@@ -129,7 +129,7 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
                 width: 8,
                 height: 8,
                 borderRadius: 2,
-                background: '#e8e6e1',
+                background: 'var(--ink)',
                 display: 'inline-block',
               }}
             />
@@ -141,7 +141,7 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
                 width: 8,
                 height: 8,
                 borderRadius: 2,
-                background: 'rgba(255,255,255,0.2)',
+                background: 'rgba(19,19,19,0.25)',
                 display: 'inline-block',
               }}
             />
@@ -177,7 +177,7 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
                   transition={{ duration: 0.7, delay: i * 0.05, ease: 'easeOut' }}
                   style={{
                     flex: 1,
-                    background: i === MONTHS.length - 1 ? '#e8e6e1' : 'rgba(232,230,225,0.35)',
+                    background: i === MONTHS.length - 1 ? 'var(--ink)' : 'rgba(19,19,19,0.3)',
                     borderRadius: '3px 3px 0 0',
                     minHeight: 2,
                   }}
@@ -188,13 +188,13 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
                   style={{
                     flex: 1,
                     background:
-                      i === MONTHS.length - 1 ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)',
+                      i === MONTHS.length - 1 ? 'rgba(19,19,19,0.35)' : 'rgba(19,19,19,0.12)',
                     borderRadius: '3px 3px 0 0',
                     minHeight: 2,
                   }}
                 />
               </div>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 9, color: 'rgba(19,19,19,0.45)', whiteSpace: 'nowrap' }}>
                 {month}
               </div>
             </div>

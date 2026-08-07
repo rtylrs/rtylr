@@ -1,12 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import {
-  fadeInUp,
-  staggerBlur,
-  blurFadeIn,
-  viewportOnce,
-  SPRING_SMOOTH,
-} from '../../../lib/animations';
+import { fadeInUp, staggerBlur, blurFadeIn, viewportOnce } from '../../../lib/animations';
 import { SplitWords } from '../../motion/SplitWords';
 import styles from './IntegrationsSection.module.scss';
 
@@ -123,12 +117,7 @@ const IntegrationsSection: React.FC = () => {
           variants={staggerBlur}
         >
           {integrations.map((integration, index) => (
-            <motion.div
-              key={index}
-              className={styles.integrationCard}
-              variants={blurFadeIn}
-              whileHover={{ y: -6, transition: SPRING_SMOOTH }}
-            >
+            <motion.div key={index} className={styles.integrationCard} variants={blurFadeIn}>
               <div
                 className={styles.iconWrapper}
                 style={

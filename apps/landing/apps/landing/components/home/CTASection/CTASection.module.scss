@@ -1,7 +1,7 @@
 .ctaSection {
-  background: var(--app-background);
+  background: var(--bg-surface-b);
   position: relative;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--hairline);
   overflow: hidden;
 }
 
@@ -20,7 +20,7 @@
   justify-content: center;
   gap: 32px;
   padding: 96px 80px;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid var(--hairline);
 }
 
 .ctaTitle {
@@ -28,7 +28,7 @@
   font-weight: 600;
   line-height: 1.02;
   letter-spacing: -0.04em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -37,7 +37,7 @@
 .ctaSubtitle {
   font-size: 1rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(19, 19, 19, 0.6);
   margin: -12px 0 0;
   max-width: 440px;
   letter-spacing: -0.005em;
@@ -49,9 +49,12 @@
   flex-wrap: wrap;
 }
 
+// transform not set on hover/active here - CTASection.tsx already drives
+// these buttons' scale via whileHover/whileTap; a competing CSS transform
+// would fight Motion's inline style.
 .primaryBtn {
-  background: #ffffff;
-  color: #0a0a0a;
+  background: var(--btn-cream-bg);
+  color: #ffffff;
   border: none;
   border-radius: 12px;
   padding: 11px 24px;
@@ -61,26 +64,23 @@
   font-family: var(--primary-font);
   letter-spacing: 0;
   min-height: 42px;
-  box-shadow: none;
-  transition:
-    transform 0.22s var(--ease-out-soft),
-    background 0.22s ease;
+  box-shadow: var(--btn-cream-shadow);
+  transition: background 0.22s ease, box-shadow 0.22s ease;
 
   &:hover {
-    background: #f4f4f4;
-    transform: translateY(-1px);
+    background: var(--btn-cream-bg-hover);
+    box-shadow: var(--btn-cream-shadow-hover);
   }
 
   &:active {
-    background: #eeeeee;
-    transform: translateY(0);
+    background: #000000;
   }
 }
 
 .outlineBtn {
   background: var(--btn-glass-bg);
-  color: #e8e6e1;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: var(--ink);
+  border: 1px solid var(--hairline-strong);
   border-radius: 999px;
   padding: 11px 24px;
   font-size: 0.88rem;
@@ -89,86 +89,27 @@
   font-family: var(--primary-font);
   letter-spacing: -0.01em;
   min-height: 42px;
-  box-shadow: var(--btn-glass-shadow);
-  backdrop-filter: blur(6px);
+  box-shadow: none;
   transition:
-    transform 0.22s var(--ease-out-soft),
     border-color 0.22s ease,
-    background 0.22s ease,
-    box-shadow 0.22s var(--ease-out-soft);
+    background 0.22s ease;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.5);
+    border-color: var(--ink);
     background: var(--btn-glass-bg-hover);
-    transform: translateY(-2px);
-    box-shadow: var(--btn-glass-shadow-hover);
-  }
-
-  &:active {
-    transform: translateY(0);
-    box-shadow: var(--btn-glass-shadow);
   }
 }
 
-// ── Brand grid, shared-border pattern, like stats ──────────────────────────
-
-.brandGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  margin-top: 24px;
-  border: 1px solid #232220;
-  max-width: 520px;
-}
-
-.brandCell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 28px 16px;
-  min-height: 80px;
-  border-right: 1px solid #232220;
-  border-bottom: 1px solid #232220;
-  transition: background 0.25s ease;
-
-  &:nth-child(3n) {
-    border-right: none;
-  }
-
-  &:nth-last-child(-n + 3) {
-    border-bottom: none;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.02);
-  }
-}
-
-.brandLabel {
-  font-size: 1rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.72);
-  letter-spacing: -0.005em;
-}
-
-// ── Right column ────────────────────────────────────────────────────────────
+// ── Right column - interactive "seven apps, one platform" orbit graphic ────
 
 .right {
   position: relative;
   overflow: hidden;
   min-height: 100%;
-  background: var(--app-background);
-}
-
-.rightImg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  -webkit-mask-image: none;
-  mask-image: none;
+  background: var(--bg-surface-a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 // ── Responsive ───────────────────────────────────────────────────────────────
@@ -188,11 +129,11 @@
   .left {
     padding: 72px 32px;
     border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--hairline);
   }
 
   .right {
-    min-height: 340px;
+    min-height: 400px;
   }
 }
 
@@ -213,30 +154,5 @@
   .outlineBtn {
     width: 100%;
     text-align: center;
-  }
-
-  .brandGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .brandCell {
-    padding: 22px 12px;
-    min-height: 68px;
-
-    &:nth-child(3n) {
-      border-right: 1px solid #232220;
-    }
-
-    &:nth-last-child(-n + 3) {
-      border-bottom: 1px solid #232220;
-    }
-
-    &:nth-child(2n) {
-      border-right: none;
-    }
-
-    &:nth-last-child(-n + 2) {
-      border-bottom: none;
-    }
   }
 }

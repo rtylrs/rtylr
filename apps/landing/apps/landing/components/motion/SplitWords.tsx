@@ -54,7 +54,15 @@ export const SplitWords: React.FC<SplitWordsProps> = ({
               <React.Fragment key={key}>
                 {wi > 0 && ' '}
                 <span
-                  style={{ display: 'inline-block', overflow: 'hidden', verticalAlign: 'bottom' }}
+                  style={{
+                    display: 'inline-block',
+                    overflow: 'hidden',
+                    verticalAlign: 'bottom',
+                    // Own line-height, not the (often tighter) parent's - so
+                    // this clip mask has room for descenders (g, y, p, q, j)
+                    // regardless of what font/line-height the heading uses.
+                    lineHeight: 'normal',
+                  }}
                   aria-hidden="true"
                 >
                   <motion.span

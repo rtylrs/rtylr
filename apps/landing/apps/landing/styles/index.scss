@@ -5,7 +5,7 @@
 @use 'variables';
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--primary-font);
   font-weight: 400;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -56,7 +56,7 @@ body {
   padding: 0;
   background-color: var(--app-background);
   height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--primary-font);
   color: var(--secondary-color);
   scroll-behavior: smooth;
   color: var(--primary-color);
@@ -67,8 +67,9 @@ body {
   background-color: white;
 }
 
-// Landing-wide button neutralizer. Exclude OS-mode chrome and embedded app
-// controls so the desktop shell keeps its own local styling.
+// Landing-wide button neutralizer. Two intentional flat variants: a solid-ink
+// primary and a flat-outline secondary (see --btn-cream-*/--btn-glass-* in
+// _variables.scss). Excludes a handful of hand-styled local controls.
 :where(
     button,
     a[class*='Btn'],
@@ -77,12 +78,12 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *) {
-  background: #ffffff !important;
-  background-image: none !important;
-  color: #0a0a0a !important;
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']) {
+  background: var(--btn-cream-bg) !important;
+  background-image: var(--btn-cream-bg) !important;
+  color: #ffffff !important;
   border: 0 !important;
-  box-shadow: none !important;
+  box-shadow: var(--btn-cream-shadow) !important;
   text-shadow: none !important;
   letter-spacing: 0 !important;
 }
@@ -95,12 +96,12 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *):hover {
-  background: #f4f4f4 !important;
-  background-image: none !important;
-  color: #0a0a0a !important;
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):hover {
+  background: var(--btn-cream-bg-hover) !important;
+  background-image: var(--btn-cream-bg-hover) !important;
+  color: #ffffff !important;
   border: 0 !important;
-  box-shadow: none !important;
+  box-shadow: var(--btn-cream-shadow-hover) !important;
 }
 
 :where(
@@ -111,10 +112,10 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *):active {
-  background: #eeeeee !important;
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):active {
+  background: #000000 !important;
   background-image: none !important;
-  color: #0a0a0a !important;
+  color: #ffffff !important;
   border: 0 !important;
   box-shadow: none !important;
 }
@@ -130,11 +131,11 @@ body {
     a[class*='dark-outline'],
     a[class*='darkOutline'],
     a[class*='secondary']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *) {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']) {
   background: var(--btn-glass-bg) !important;
   background-image: none !important;
-  color: #e8e6e1 !important;
-  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--hairline-strong) !important;
   box-shadow: var(--btn-glass-shadow) !important;
   text-shadow: none !important;
 }
@@ -150,11 +151,11 @@ body {
     a[class*='dark-outline'],
     a[class*='darkOutline'],
     a[class*='secondary']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *):hover {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node']):hover {
   background: var(--btn-glass-bg-hover) !important;
   background-image: none !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.44) !important;
+  color: var(--ink) !important;
+  border-color: var(--hairline-strong) !important;
   box-shadow: var(--btn-glass-shadow-hover) !important;
 }
 
@@ -166,7 +167,7 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *)::before,
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node'])::before,
 :where(
     button,
     a[class*='Btn'],
@@ -175,81 +176,9 @@ body {
     a[class*='button'],
     a[class*='CTA'],
     a[class*='cta']
-  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not(.rtylr-desktop-shell *):not([class*='nav-link']):not([class*='mobile-nav-item'] *)::after {
+  ):not([class*='FeaturesSection_tab']):not([class*='toggleOption']):not([class*='faqQuestion']):not([class*='nav-link']):not([class*='mobile-nav-item'] *):not([class*='FeaturesSection_showcaseImageContainer'] *):not([class*='CTAGraphic_node'])::after {
   background-image: none !important;
   box-shadow: none !important;
-}
-
-.rtylr-desktop-shell .rtylr-os-menu-trigger,
-.rtylr-desktop-shell .rtylr-os-menu-logo-trigger {
-  background: transparent !important;
-  background-image: none !important;
-  color: rgba(255, 255, 255, 0.8) !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-
-.rtylr-desktop-shell .rtylr-os-menu-trigger:hover,
-.rtylr-desktop-shell .rtylr-os-menu-logo-trigger:hover {
-  background: rgba(255, 255, 255, 0.07) !important;
-  background-image: none !important;
-}
-
-.rtylr-desktop-shell .rtylr-os-menu-trigger[aria-expanded='true'],
-.rtylr-desktop-shell .rtylr-os-menu-logo-trigger[aria-expanded='true'] {
-  background: rgba(255, 255, 255, 0.1) !important;
-  background-image: none !important;
-}
-
-.rtylr-desktop-shell .rtylr-os-menu-dropdown {
-  background: #151515 !important;
-  background-image: none !important;
-  color: rgba(255, 255, 255, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6) !important;
-}
-
-.rtylr-desktop-shell .rtylr-os-menu-item {
-  background: transparent !important;
-  background-image: none !important;
-  color: rgba(255, 255, 255, 0.85) !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-
-.rtylr-desktop-shell .rtylr-os-menu-item:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  background-image: none !important;
-}
-
-.rtylr-desktop-shell .rtylr-os-menu-separator {
-  background: rgba(255, 255, 255, 0.08) !important;
-}
-
-.rtylr-desktop-shell .rtylr-os-window-control {
-  width: 12px !important;
-  height: 12px !important;
-  min-width: 12px !important;
-  min-height: 12px !important;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: 50% !important;
-  box-shadow: none !important;
-  background-image: none !important;
-}
-
-.rtylr-desktop-shell .rtylr-os-window-control-close {
-  background: #ff5f57 !important;
-}
-
-.rtylr-desktop-shell .rtylr-os-window-control-minimize {
-  background: #febc2e !important;
-}
-
-.rtylr-desktop-shell .rtylr-os-window-control-maximize {
-  background: #28c840 !important;
 }
 
 /* Hide default scrollbar */

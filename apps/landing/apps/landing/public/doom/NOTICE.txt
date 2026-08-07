@@ -1,4 +1,0 @@
-DOOM shareware (Knee-Deep in the Dead, Episode 1) by id Software.
-DOOM.EXE + DOOM1.WAD are the official shareware release, which id Software
-made freely redistributable. Bundled here to run in-browser via js-dos
-(DOSBox compiled to WebAssembly). Not the full retail game.

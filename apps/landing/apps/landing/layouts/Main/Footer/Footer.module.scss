@@ -1,5 +1,5 @@
 .footer {
-  color: #ffffff;
+  color: var(--ink);
   font-family: inherit;
   padding: 80px 0 40px;
 
@@ -14,13 +14,14 @@
     grid-template-columns: 200px 1fr auto;
     gap: 60px;
     padding-bottom: 60px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--hairline);
   }
 
   .footer-logo-section {
     .footer-logo {
       width: 140px;
       height: auto;
+      filter: brightness(0);
     }
   }
 
@@ -35,7 +36,7 @@
       font-size: 0.75rem;
       font-weight: 600;
       margin-bottom: 20px;
-      color: rgba(255, 255, 255, 0.5);
+      color: rgba(19, 19, 19, 0.5);
       letter-spacing: 1px;
       text-transform: uppercase;
     }
@@ -49,7 +50,7 @@
         margin-bottom: 12px;
 
         .footer-link {
-          color: #ffffff;
+          color: var(--ink);
           text-decoration: none;
           font-size: 0.95rem;
           font-weight: 400;
@@ -57,7 +58,7 @@
           display: inline-block;
 
           &:hover {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(19, 19, 19, 0.7);
           }
         }
       }
@@ -87,7 +88,7 @@
     gap: 24px;
 
     .legal-link {
-      color: rgba(255, 255, 255, 0.5);
+      color: rgba(19, 19, 19, 0.5);
       text-decoration: none;
       font-size: 0.7rem;
       font-weight: 500;
@@ -96,7 +97,7 @@
       transition: color 0.2s;
 
       &:hover {
-        color: rgba(255, 255, 255, 0.8);
+        color: rgba(19, 19, 19, 0.8);
       }
     }
   }
@@ -104,7 +105,7 @@
   .copyright {
     margin: 0;
     font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(19, 19, 19, 0.5);
     font-weight: 500;
     letter-spacing: 0.5px;
     text-transform: uppercase;

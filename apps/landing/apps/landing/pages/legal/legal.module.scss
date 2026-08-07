@@ -3,7 +3,7 @@
 
 .page {
   background: var(--app-background);
-  color: #e8e6e1;
+  color: var(--ink);
   padding: 96px 32px 128px;
 }
 
@@ -35,7 +35,7 @@
   font-weight: 600;
   letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(19, 19, 19, 0.5);
   margin-bottom: 20px;
 }
 
@@ -44,13 +44,13 @@
   font-weight: 600;
   line-height: 1.04;
   letter-spacing: -0.035em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0 0 18px;
 }
 
 .meta {
   font-size: 0.92rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(19, 19, 19, 0.5);
   letter-spacing: 0.1px;
 }
 
@@ -76,7 +76,7 @@
     font-weight: 600;
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(19, 19, 19, 0.4);
     margin: 0 0 12px;
   }
 
@@ -91,7 +91,7 @@
   }
 
   a {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(19, 19, 19, 0.65);
     text-decoration: none;
     font-size: 0.85rem;
     line-height: 1.4;
@@ -109,14 +109,14 @@
       top: 0;
       font-family: 'SF Mono', 'Fira Code', monospace;
       font-size: 0.72rem;
-      color: rgba(255, 255, 255, 0.3);
+      color: rgba(19, 19, 19, 0.35);
     }
 
     &:hover {
-      color: #e8e6e1;
+      color: var(--ink);
 
       &::before {
-        color: rgba(232, 230, 225, 0.8);
+        color: var(--ink);
       }
     }
   }
@@ -128,13 +128,13 @@
   max-width: 740px;
   font-size: 1rem;
   line-height: 1.75;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(19, 19, 19, 0.8);
 
   h2 {
     font-size: 1.5rem;
     font-weight: 600;
     letter-spacing: -0.025em;
-    color: #e8e6e1;
+    color: var(--ink);
     margin: 56px 0 16px;
     scroll-margin-top: 120px;
 
@@ -147,7 +147,7 @@
     font-size: 1.05rem;
     font-weight: 600;
     letter-spacing: -0.015em;
-    color: #e8e6e1;
+    color: var(--ink);
     margin: 28px 0 10px;
   }
 
@@ -166,33 +166,33 @@
   }
 
   a {
-    color: #e8e6e1;
+    color: var(--ink);
     text-decoration: underline;
     text-underline-offset: 3px;
-    text-decoration-color: rgba(232, 230, 225, 0.35);
+    text-decoration-color: rgba(19, 19, 19, 0.35);
 
     &:hover {
-      text-decoration-color: rgba(232, 230, 225, 0.95);
+      text-decoration-color: rgba(19, 19, 19, 0.9);
     }
   }
 
   strong {
-    color: #e8e6e1;
+    color: var(--ink);
     font-weight: 600;
   }
 
   code {
     font-family: 'SF Mono', 'Fira Code', monospace;
     font-size: 0.88em;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(19, 19, 19, 0.05);
     padding: 1px 6px;
     border-radius: 3px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--hairline);
   }
 
   hr {
     border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--hairline);
     margin: 48px 0;
   }
 }
@@ -202,30 +202,30 @@
 .contactStrip {
   margin-top: 72px;
   padding: 32px 36px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
   border-radius: 10px;
 
   h3 {
     font-size: 1.05rem;
     font-weight: 600;
-    color: #e8e6e1;
+    color: var(--ink);
     margin: 0 0 10px;
     letter-spacing: -0.015em;
   }
 
   p {
     font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(19, 19, 19, 0.75);
     line-height: 1.6;
     margin: 0;
   }
 
   a {
-    color: #e8e6e1;
+    color: var(--ink);
     text-decoration: underline;
     text-underline-offset: 3px;
-    text-decoration-color: rgba(232, 230, 225, 0.35);
+    text-decoration-color: rgba(19, 19, 19, 0.35);
   }
 }
 
@@ -241,8 +241,8 @@
     position: static;
     max-height: none;
     padding: 18px 20px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--bg-surface-b);
+    border: 1px solid var(--hairline);
     border-radius: 8px;
   }
 }

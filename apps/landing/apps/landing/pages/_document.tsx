@@ -8,7 +8,7 @@ export default function Document() {
 
         {/* PWA manifest - installable on iOS / Android */}
         <link rel="manifest" href="/site.webmanifest" />
-        <meta name="theme-color" content="#0a0a0a" />
+        <meta name="theme-color" content="#fafafa" />
 
         {/* Structured Data - Organization */}
         <script
@@ -55,14 +55,7 @@ export default function Document() {
           href="/favicon/android-chrome-512x512.png"
         />
 
-        {/* Fonts */}
-        <link
-          rel="preload"
-          href="/fonts/PlusJakartaSans.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin=""
-        />
+        {/* Inter fallback font - DM Sans itself is self-hosted by next/font */}
         <link
           rel="preload"
           href="/fonts/Inter-Regular.ttf"

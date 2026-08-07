@@ -9,40 +9,11 @@ import { test, expect } from './fixtures';
 const LANDING_URL = process.env.LANDING_URL ?? 'http://127.0.0.1:4200';
 
 test.describe('Landing page', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.route('https://api.voxire.com/features', (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          variant: 'a',
-          features: {
-            is_desktop_mode_default: {
-              key: 'is_desktop_mode_default',
-              enabled: false,
-              variant: 'false',
-            },
-          },
-        }),
-      })
-    );
-  });
-
   test('homepage loads with h1 hero', async ({ page }) => {
     await page.goto(LANDING_URL);
     // MainHero renders an <h1>; if this breaks we've either dropped
     // the heading (SEO regression) or moved it out of the viewport.
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  });
-
-  test('homepage defaults to website mode with desktop opt-in', async ({ page }) => {
-    await page.goto(LANDING_URL);
-    await expect(page.locator('.rtylr-desktop-shell')).toHaveCount(0);
-    await expect(page.getByRole('link', { name: /^Pricing$/i }).first()).toBeVisible();
-
-    await page.getByRole('button', { name: /switch to os mode/i }).click();
-    await expect(page.locator('.rtylr-desktop-shell')).toBeVisible();
-    await expect(page.getByRole('button', { name: /^Pricing$/i }).first()).toBeVisible();
   });
 
   test('pricing page renders the plan heading', async ({ page }) => {

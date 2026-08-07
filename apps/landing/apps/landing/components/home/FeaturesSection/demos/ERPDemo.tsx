@@ -55,7 +55,7 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
       style={{
         position: 'absolute',
         inset: 0,
-        background: 'var(--app-background)',
+        background: 'var(--bg-surface-a)',
         fontFamily: 'inherit',
         fontSize: 13,
         display: 'flex',
@@ -67,7 +67,7 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
       <div
         style={{
           padding: '16px 20px 14px',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          borderBottom: '1px solid var(--hairline)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -75,8 +75,8 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
         }}
       >
         <div>
-          <span style={{ color: '#e8e6e1', fontWeight: 600, fontSize: 14 }}>Inventory</span>
-          <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, marginLeft: 10 }}>
+          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>Inventory</span>
+          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginLeft: 10 }}>
             {items.length} items
           </span>
         </div>
@@ -106,9 +106,9 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           fontSize: 10,
           fontWeight: 600,
           letterSpacing: '0.1em',
-          color: 'rgba(255,255,255,0.3)',
+          color: 'rgba(19,19,19,0.45)',
           textTransform: 'uppercase',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          borderBottom: '1px solid var(--hairline)',
           flexShrink: 0,
         }}
       >
@@ -130,21 +130,23 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                 display: 'grid',
                 gridTemplateColumns: '1fr 100px 80px 80px',
                 padding: '10px 20px',
-                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                borderBottom: '1px solid var(--hairline)',
                 alignItems: 'center',
-                background: pulse && s.label !== 'OK' ? 'rgba(255,255,255,0.015)' : 'transparent',
+                background: pulse && s.label !== 'OK' ? 'rgba(19,19,19,0.02)' : 'transparent',
                 transition: 'background 0.4s ease',
               }}
             >
               <div>
-                <div style={{ color: '#e8e6e1', fontSize: 12, fontWeight: 500 }}>{item.name}</div>
-                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11 }}>{item.supplier}</div>
+                <div style={{ color: 'var(--ink)', fontSize: 12, fontWeight: 500 }}>
+                  {item.name}
+                </div>
+                <div style={{ color: 'rgba(19,19,19,0.45)', fontSize: 11 }}>{item.supplier}</div>
               </div>
               <div style={{ paddingRight: 8 }}>
                 <div
                   style={{
                     height: 4,
-                    background: 'rgba(255,255,255,0.08)',
+                    background: 'var(--hairline)',
                     borderRadius: 999,
                     overflow: 'hidden',
                   }}
@@ -160,7 +162,7 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                   />
                 </div>
               </div>
-              <div style={{ textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+              <div style={{ textAlign: 'center', fontSize: 12, color: 'rgba(19,19,19,0.65)' }}>
                 {item.qty} {item.unit}
               </div>
               <div style={{ textAlign: 'center' }}>

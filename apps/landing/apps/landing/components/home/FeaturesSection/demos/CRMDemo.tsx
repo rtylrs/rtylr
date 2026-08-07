@@ -59,18 +59,18 @@ const CUSTOMERS: Customer[] = [
 ];
 
 const SEGMENTS: { id: Segment; label: string; color: string }[] = [
-  { id: 'all', label: 'All', color: '#e8e6e1' },
-  { id: 'vip', label: '★ VIP', color: '#fbbf24' },
-  { id: 'regular', label: 'Regular', color: '#60a5fa' },
-  { id: 'atrisk', label: 'At risk', color: '#f87171' },
-  { id: 'new', label: 'New', color: '#34d399' },
+  { id: 'all', label: 'All', color: 'var(--ink)' },
+  { id: 'vip', label: '★ VIP', color: '#b45309' },
+  { id: 'regular', label: 'Regular', color: '#2563eb' },
+  { id: 'atrisk', label: 'At risk', color: '#dc2626' },
+  { id: 'new', label: 'New', color: '#16a34a' },
 ];
 
 const TIER: Record<Exclude<Segment, 'all'>, { label: string; color: string; bg: string }> = {
-  vip: { label: '★ VIP', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
-  regular: { label: 'Regular', color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
-  atrisk: { label: 'At risk', color: '#f87171', bg: 'rgba(248,113,113,0.1)' },
-  new: { label: 'New', color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
+  vip: { label: '★ VIP', color: '#b45309', bg: 'rgba(251,191,36,0.15)' },
+  regular: { label: 'Regular', color: '#2563eb', bg: 'rgba(96,165,250,0.15)' },
+  atrisk: { label: 'At risk', color: '#dc2626', bg: 'rgba(248,113,113,0.15)' },
+  new: { label: 'New', color: '#16a34a', bg: 'rgba(52,211,153,0.15)' },
 };
 
 export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
@@ -83,7 +83,7 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
       style={{
         position: 'absolute',
         inset: 0,
-        background: 'var(--app-background)',
+        background: 'var(--bg-surface-a)',
         fontFamily: 'inherit',
         fontSize: 13,
         display: 'flex',
@@ -95,7 +95,7 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
       <div
         style={{
           padding: '16px 20px 14px',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
+          borderBottom: '1px solid var(--hairline)',
           flexShrink: 0,
         }}
       >
@@ -107,8 +107,8 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
             marginBottom: 12,
           }}
         >
-          <span style={{ color: '#e8e6e1', fontWeight: 600, fontSize: 14 }}>Customers</span>
-          <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>1,204 total</span>
+          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>Customers</span>
+          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12 }}>1,204 total</span>
         </div>
         {/* Segment tabs */}
         <div style={{ display: 'flex', gap: 6, overflowX: 'auto' }}>
@@ -118,13 +118,13 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
               onClick={() => setActive(seg.id)}
               style={{
                 flexShrink: 0,
-                background: active === seg.id ? 'rgba(255,255,255,0.06)' : 'transparent',
-                border: `1px solid ${active === seg.id ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.07)'}`,
+                background: active === seg.id ? 'var(--bg-surface-b)' : 'transparent',
+                border: `1px solid ${active === seg.id ? 'var(--hairline-strong)' : 'var(--hairline)'}`,
                 borderRadius: 999,
                 padding: '5px 12px',
                 fontSize: 11,
                 fontWeight: 500,
-                color: active === seg.id ? seg.color : 'rgba(255,255,255,0.45)',
+                color: active === seg.id ? seg.color : 'rgba(19,19,19,0.5)',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease',
               }}
@@ -144,9 +144,9 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           fontSize: 10,
           fontWeight: 600,
           letterSpacing: '0.1em',
-          color: 'rgba(255,255,255,0.28)',
+          color: 'rgba(19,19,19,0.45)',
           textTransform: 'uppercase',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          borderBottom: '1px solid var(--hairline)',
           flexShrink: 0,
         }}
       >
@@ -173,7 +173,7 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                   display: 'grid',
                   gridTemplateColumns: '1fr 70px 90px 70px',
                   padding: '10px 20px',
-                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  borderBottom: '1px solid var(--hairline)',
                   alignItems: 'center',
                   cursor: 'pointer',
                 }}
@@ -198,10 +198,10 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                     {c.initials}
                   </div>
                   <div>
-                    <div style={{ fontSize: 12, fontWeight: 500, color: '#e8e6e1' }}>{c.name}</div>
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>
-                      {c.visits} visits
+                    <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink)' }}>
+                      {c.name}
                     </div>
+                    <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.5)' }}>{c.visits} visits</div>
                   </div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
@@ -223,7 +223,7 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                     textAlign: 'right',
                     fontSize: 12,
                     fontWeight: 600,
-                    color: '#e8e6e1',
+                    color: 'var(--ink)',
                   }}
                 >
                   ${c.spend.toLocaleString()}
@@ -232,7 +232,7 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                   style={{
                     textAlign: 'right',
                     fontSize: 11,
-                    color: 'rgba(255,255,255,0.35)',
+                    color: 'rgba(19,19,19,0.5)',
                   }}
                 >
                   {c.last}

@@ -1,6 +1,6 @@
 .page {
   background: var(--app-background);
-  color: #e8e6e1;
+  color: var(--ink);
   padding: 96px 24px 120px;
 }
 
@@ -15,13 +15,13 @@
   gap: 6px;
   font-size: 0.85rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(19, 19, 19, 0.6);
   text-decoration: none;
   margin-bottom: 28px;
   transition: color 0.18s ease;
 
   &:hover {
-    color: #e8e6e1;
+    color: var(--ink);
   }
 }
 
@@ -44,7 +44,7 @@
   font-weight: 600;
   line-height: 1.08;
   letter-spacing: -0.035em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0 0 18px;
 }
 
@@ -53,20 +53,20 @@
   align-items: center;
   gap: 8px;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(19, 19, 19, 0.55);
   margin-bottom: 44px;
   padding-bottom: 28px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--hairline);
 }
 
 .dot {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(19, 19, 19, 0.35);
 }
 
 .body {
   font-size: 1.075rem;
   line-height: 1.75;
-  color: rgba(232, 230, 225, 0.82);
+  color: rgba(19, 19, 19, 0.82);
 }
 
 .p {
@@ -77,7 +77,7 @@
   font-size: 1.6rem;
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 48px 0 18px;
   line-height: 1.2;
 }
@@ -86,7 +86,7 @@
   font-size: 1.22rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 34px 0 14px;
 }
 
@@ -110,15 +110,15 @@
   border-left: 3px solid rgba(214, 184, 142, 0.7);
   font-size: 1.18rem;
   line-height: 1.6;
-  color: #e8e6e1;
+  color: var(--ink);
   font-style: italic;
 }
 
 .cta {
   margin-top: 64px;
   padding: 36px 36px 40px;
-  background: linear-gradient(135deg, rgba(214, 184, 142, 0.08), rgba(35, 34, 32, 0.25));
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-surface-b);
+  border: 1px solid var(--hairline);
   border-radius: 14px;
   text-align: center;
 
@@ -126,13 +126,13 @@
     font-size: 1.4rem;
     font-weight: 600;
     letter-spacing: -0.02em;
-    color: #e8e6e1;
+    color: var(--ink);
     margin: 0 0 8px;
   }
 
   p {
     font-size: 0.98rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(19, 19, 19, 0.65);
     margin: 0 0 22px;
   }
 }
@@ -140,8 +140,8 @@
 .ctaBtn {
   display: inline-block;
   padding: 11px 26px;
-  background: #e8e6e1;
-  color: #0a0a0a;
+  background: var(--btn-cream-bg);
+  color: #fff;
   font-size: 0.92rem;
   font-weight: 600;
   border-radius: 8px;
@@ -149,7 +149,11 @@
   transition: background 0.18s ease;
 
   &:hover {
-    background: #ffffff;
+    background: var(--btn-cream-bg-hover);
+  }
+
+  &:active {
+    background: #000;
   }
 }
 

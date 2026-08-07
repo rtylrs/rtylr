@@ -1,12 +1,10 @@
 import React from 'react';
-import dynamic from 'next/dynamic';
 import AppLayout from '../components/Layout/AppLayout';
 import MainLayout from '../layouts/Main/MainLayout';
 import HelmetContainer from '../components/HelmetContainer';
 import { webSiteSchema, organizationSchema } from '../lib/structured-data';
 import HeroSection from '../components/home/HeroSection/HeroSection';
 import ProductsSection from '../components/home/ProductsSection/ProductsSection';
-import ParallaxShowcase from '../components/home/ParallaxShowcase/ParallaxShowcase';
 import FeaturesSection from '../components/home/FeaturesSection/FeaturesSection';
 import HowItWorksSection from '../components/home/HowItWorksSection/HowItWorksSection';
 import PricingSection from '../components/home/PricingSection/PricingSection';
@@ -14,14 +12,6 @@ import TestimonialsSection from '../components/home/TestimonialsSection/Testimon
 import IntegrationsSection from '../components/home/IntegrationsSection/IntegrationsSection';
 import CTASection from '../components/home/CTASection/CTASection';
 import styles from './index.module.scss';
-
-// DesktopOrWebsite handles mode detection client-side - never SSR
-// Bots crawl the static HTML content rendered below via SSG
-const DesktopOrWebsite = dynamic(
-  () =>
-    import('../components/Desktop/DesktopOrWebsite').then((m) => ({ default: m.DesktopOrWebsite })),
-  { ssr: false }
-);
 
 const SEO_PROPS = {
   title: 'rtylr · Your entire business, one platform.',
@@ -48,7 +38,6 @@ const WebsiteContent = (): JSX.Element => (
       <div className={styles.Homepage}>
         <HeroSection />
         <ProductsSection />
-        <ParallaxShowcase />
         <FeaturesSection />
         <HowItWorksSection />
         <PricingSection />
@@ -66,12 +55,7 @@ const HomePage = (): JSX.Element => {
   return (
     <>
       <HelmetContainer {...SEO_PROPS} />
-      {/* Static HTML for SEO - always in the DOM, hidden in OS mode by the overlay */}
-      <noscript>
-        <WebsiteContent />
-      </noscript>
-      {/* Client-side mode switcher - renders Desktop or Website */}
-      <DesktopOrWebsite websiteContent={<WebsiteContent />} />
+      <WebsiteContent />
     </>
   );
 };

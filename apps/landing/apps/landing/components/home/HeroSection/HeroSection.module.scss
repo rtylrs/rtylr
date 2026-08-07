@@ -2,8 +2,8 @@
 // Flat neutral background. No hue, no vignette, no glow. Just type and the card.
 
 .heroSection {
-  background-color: var(--app-background);
-  color: white;
+  background-color: var(--bg-surface-a);
+  color: var(--ink);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -37,8 +37,8 @@
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(255, 255, 255, 0.07) 10%,
-    rgba(255, 255, 255, 0.07) 90%,
+    rgba(19, 19, 19, 0.08) 10%,
+    rgba(19, 19, 19, 0.08) 90%,
     transparent 100%
   );
 }
@@ -91,14 +91,14 @@
   margin-bottom: 40px;
 
   &:hover .announceText {
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(19, 19, 19, 0.95);
   }
 }
 
 // Small standalone BETA chip, filled, rectangular-ish, not wrapped around the text
 .announcePill {
-  background: #d7d6cf;
-  color: #0a0a0a;
+  background: var(--bg-surface-b);
+  color: var(--ink);
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.8px;
@@ -111,7 +111,7 @@
 
 .announceText {
   font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(19, 19, 19, 0.7);
   font-weight: 500;
   letter-spacing: -0.005em;
   display: inline-flex;
@@ -122,7 +122,7 @@
 
 .announceArrow {
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(19, 19, 19, 0.5);
   transform: translateY(-1px);
 }
 
@@ -130,10 +130,10 @@
 
 .heroTitle {
   font-size: clamp(2.2rem, 4.4vw, 4rem);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.08;
   letter-spacing: -0.035em;
-  color: #e8e6e1;
+  color: var(--ink);
   margin: 0 0 44px;
   max-width: 780px;
   -webkit-font-smoothing: antialiased;
@@ -141,7 +141,7 @@
 }
 
 .heroTitleAccent {
-  color: #e8e6e1;
+  color: var(--ink);
   display: inline;
 }
 
@@ -163,7 +163,7 @@
   border: 0;
 }
 
-// ── AI prompt card, Retool AppGen clone ─────────────────────────────────────
+// ── AI prompt card ───────────────────────────────────────────────────────────
 
 // Registered custom property so we can animate the conic-gradient angle
 @property --ai-angle {
@@ -178,38 +178,29 @@
   }
 }
 
-// Fallback for browsers that don't support @property (older Firefox),
-// rotates a larger pseudo-element instead.
-@keyframes aiBorderRotate {
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-
 .aiCard {
   position: relative;
   isolation: isolate;
   width: 100%;
   max-width: 620px;
-  background: linear-gradient(180deg, #1c1c1c 0%, #161616 100%);
+  background: var(--bg-surface-a);
   border-radius: 12px;
   padding: 16px 16px 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   text-align: left;
-  box-shadow: none;
+  box-shadow: var(--elev-1);
   transition:
-    background 0.2s ease,
+    box-shadow 0.2s ease,
     transform 0.3s var(--ease-out-soft);
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: none;
+    box-shadow: var(--elev-2);
   }
 
   // Rainbow ring on the card border, spins continuously.
-  // Uses 1px ring (not 0.5px, sub-pixel padding clips the corners with mask).
   &::before {
     content: '';
     position: absolute;
@@ -244,16 +235,16 @@
   border: none;
   outline: none;
   resize: none;
-  color: #e8e6e1;
+  color: var(--ink);
   font-size: 0.95rem;
   line-height: 1.5;
   font-family: var(--primary-font);
   letter-spacing: -0.005em;
   padding: 2px 4px 0;
-  caret-color: #e8e6e1;
+  caret-color: var(--ink);
 
   &::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(19, 19, 19, 0.4);
   }
 }
 
@@ -276,20 +267,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(19, 19, 19, 0.05);
   border: 1px solid transparent;
   border-radius: 999px;
   cursor: pointer;
   padding: 0;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(19, 19, 19, 0.55);
   transition:
     background 0.18s ease,
     color 0.18s ease,
     transform 0.18s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.85);
+    background: rgba(19, 19, 19, 0.08);
+    color: rgba(19, 19, 19, 0.85);
     transform: translateY(-1px);
   }
 
@@ -298,34 +289,28 @@
   }
 }
 
-// First icon is "active", solid cream like Retool's PostgreSQL elephant
+// First icon is "active" - solid ink fill, same button system as the rest of the site
 .aiCardIconActive {
   background: var(--btn-cream-bg);
-  color: #0a0a0a;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.7) inset,
-    0 0 16px -2px rgba(232, 230, 225, 0.45),
-    0 2px 6px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  box-shadow: var(--btn-cream-shadow);
 
   &:hover {
     background: var(--btn-cream-bg-hover);
-    color: #0a0a0a;
-    box-shadow:
-      0 1px 0 rgba(255, 255, 255, 0.85) inset,
-      0 0 22px 0 rgba(232, 230, 225, 0.6),
-      0 3px 8px rgba(0, 0, 0, 0.45);
+    color: #ffffff;
+    box-shadow: var(--btn-cream-shadow-hover);
   }
 }
 
-// Plain white action, matching the rest of the landing CTA system.
+// Solid-ink action, matching the rest of the landing CTA system.
 .aiCardSubmit {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #ffffff;
-  color: #11110f;
+  background: var(--btn-cream-bg);
+  color: #ffffff;
   border: none;
   border-radius: 12px;
   padding: 9px 14px 9px 18px;
@@ -334,7 +319,7 @@
   cursor: pointer;
   font-family: var(--primary-font);
   letter-spacing: 0;
-  box-shadow: none;
+  box-shadow: var(--btn-cream-shadow);
   transition:
     background 0.2s ease,
     color 0.2s ease,
@@ -346,10 +331,12 @@
     transition: transform 0.22s var(--ease-out-soft);
   }
 
+  // transform is owned by MainHero's whileHover/whileTap on this button -
+  // a competing CSS transform here would fight Motion's inline style.
   &:hover {
-    background: #f4f4f4;
-    color: #080806;
-    transform: translateY(-1px);
+    background: var(--btn-cream-bg-hover);
+    color: #ffffff;
+    box-shadow: var(--btn-cream-shadow-hover);
 
     svg {
       transform: translateX(2px);
@@ -357,8 +344,7 @@
   }
 
   &:active {
-    background: #eeeeee;
-    transform: translateY(0);
+    background: #000000;
   }
 }
 
@@ -367,20 +353,20 @@
 .demoLine {
   margin: 22px 0 0;
   font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(19, 19, 19, 0.55);
   letter-spacing: -0.005em;
 }
 
 .demoLineAnchor {
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
-  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-decoration-color: rgba(19, 19, 19, 0.35);
   transition: text-decoration-color 0.2s ease;
 
   &:hover {
-    text-decoration-color: rgba(255, 255, 255, 0.95);
+    text-decoration-color: rgba(19, 19, 19, 0.7);
   }
 }
 
@@ -399,14 +385,14 @@
   .logoScroll {
     display: grid;
     grid-template-columns: repeat(8, minmax(0, 1fr));
-    border: 1px solid #232220;
+    border: 1px solid var(--hairline);
 
     .logoItem {
-      color: #ffffff;
+      color: var(--ink);
       transition: all 0.3s;
       padding: 30px 20px;
       text-align: center;
-      border-right: 1px solid #232220;
+      border-right: 1px solid var(--hairline);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -420,13 +406,13 @@
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.02);
+        background: rgba(19, 19, 19, 0.02);
       }
 
       .statNumber {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #ffffff;
+        color: var(--ink);
       }
 
       .statLabel {
@@ -459,7 +445,7 @@
     }
 
     .logoItem:nth-child(n + 5) {
-      border-top: 1px solid #232220;
+      border-top: 1px solid var(--hairline);
     }
   }
 }
@@ -529,7 +515,7 @@
     }
 
     .logoItem:nth-child(n + 3) {
-      border-top: 1px solid #232220;
+      border-top: 1px solid var(--hairline);
     }
   }
 }

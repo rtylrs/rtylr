@@ -59,7 +59,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
         position: 'absolute',
         inset: 0,
         display: 'flex',
-        background: 'var(--app-background)',
+        background: 'var(--bg-surface-a)',
         fontFamily: 'inherit',
         fontSize: 13,
         overflow: 'hidden',
@@ -69,7 +69,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
       <div
         style={{
           flex: 1,
-          borderRight: '1px solid rgba(255,255,255,0.07)',
+          borderRight: '1px solid var(--hairline)',
           padding: '20px 16px',
           overflow: 'hidden',
         }}
@@ -79,7 +79,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
             fontSize: 10,
             fontWeight: 600,
             letterSpacing: '0.12em',
-            color: 'rgba(255,255,255,0.35)',
+            color: 'rgba(19,19,19,0.5)',
             textTransform: 'uppercase',
             marginBottom: 14,
           }}
@@ -92,19 +92,19 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
               key={item.id}
               onClick={() => addItem(item.id)}
               style={{
-                background: flash === item.id ? 'rgba(232,230,225,0.12)' : 'rgba(255,255,255,0.03)',
-                border: `1px solid ${flash === item.id ? 'rgba(232,230,225,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                background: flash === item.id ? 'var(--bg-surface-a)' : 'var(--bg-surface-b)',
+                border: `1px solid ${flash === item.id ? 'var(--ink)' : 'var(--hairline)'}`,
                 borderRadius: 8,
                 padding: '10px 12px',
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'background 0.15s ease, border-color 0.15s ease',
-                color: '#e8e6e1',
+                color: 'var(--ink)',
               }}
             >
               <div style={{ marginBottom: 3, fontSize: 16 }}>{item.emoji}</div>
               <div style={{ fontWeight: 500, fontSize: 12, marginBottom: 2 }}>{item.name}</div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>
+              <div style={{ fontSize: 11, color: 'rgba(19,19,19,0.55)' }}>
                 ${item.price.toFixed(2)}
               </div>
             </button>
@@ -119,7 +119,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           padding: '20px 14px',
           display: 'flex',
           flexDirection: 'column',
-          background: 'var(--app-background)',
+          background: 'var(--bg-surface-b)',
         }}
       >
         <div
@@ -127,7 +127,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
             fontSize: 10,
             fontWeight: 600,
             letterSpacing: '0.12em',
-            color: 'rgba(255,255,255,0.35)',
+            color: 'rgba(19,19,19,0.5)',
             textTransform: 'uppercase',
             marginBottom: 14,
           }}
@@ -145,7 +145,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           }}
         >
           {cart.length === 0 ? (
-            <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>Add items…</div>
+            <div style={{ color: 'rgba(19,19,19,0.35)', fontSize: 12 }}>Add items…</div>
           ) : (
             <AnimatePresence>
               {cart.map((item) => (
@@ -160,10 +160,10 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                     fontSize: 12,
                   }}
                 >
-                  <span style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  <span style={{ color: 'rgba(19,19,19,0.7)' }}>
                     {item.qty}× {item.name}
                   </span>
-                  <span style={{ color: '#e8e6e1', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--ink)', fontWeight: 600 }}>
                     ${(item.price * item.qty).toFixed(2)}
                   </span>
                 </motion.div>
@@ -172,9 +172,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           )}
         </div>
 
-        <div
-          style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 14, marginTop: 12 }}
-        >
+        <div style={{ borderTop: '1px solid var(--hairline)', paddingTop: 14, marginTop: 12 }}>
           <div
             style={{
               display: 'flex',
@@ -183,15 +181,15 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
               marginBottom: 14,
             }}
           >
-            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>Total</span>
-            <span style={{ color: '#e8e6e1', fontWeight: 700, fontSize: 16 }}>
+            <span style={{ color: 'rgba(19,19,19,0.55)', fontSize: 12 }}>Total</span>
+            <span style={{ color: 'var(--ink)', fontWeight: 700, fontSize: 16 }}>
               ${total.toFixed(2)}
             </span>
           </div>
           <div
             style={{
-              background: cart.length ? '#e8e6e1' : 'rgba(255,255,255,0.06)',
-              color: cart.length ? '#0a0a0a' : 'rgba(255,255,255,0.25)',
+              background: cart.length ? 'var(--ink)' : 'var(--hairline)',
+              color: cart.length ? '#ffffff' : 'rgba(19,19,19,0.35)',
               borderRadius: 8,
               padding: '11px',
               textAlign: 'center',
