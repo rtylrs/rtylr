@@ -27,6 +27,13 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 	routes.RegisterRoutes(ctx, router, m.CareersService)
 }
 
+// InvalidateActiveCareers busts the cached public careers catalogue.
+// Call this after writing to the shared careers table from outside this
+// module (e.g. voxhire's admin panel writes into the same table).
+func InvalidateActiveCareers(ctx context.Context) {
+	application.InvalidateActiveCareersCache(ctx)
+}
+
 func (m *Module) GetAnonymousRoutes() []string {
 	// /careers is the legacy voxire-corporate list. The /recruit/public/*
 	// routes back the candidate-facing careers sites — they resolve the

@@ -30,3 +30,11 @@ func (s *Service) GetActiveCareers(ctx context.Context) ([]domain.Career, error)
 		cacher.WithExpiry(ctx, 15*time.Minute),
 	)
 }
+
+// InvalidateActiveCareersCache busts the cached public careers catalogue.
+// Exposed so other code that writes into the shared careers table (e.g.
+// the voxhire module) can invalidate it without needing careers' internal
+// domain/cache types.
+func InvalidateActiveCareersCache(ctx context.Context) {
+	cacher.Of[[]domain.Career]().DeleteByPattern(ctx, []string{careersCatalogKey})
+}
