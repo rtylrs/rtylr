@@ -39,6 +39,18 @@ const query = new URLSearchParams();
 if (req.workspaceId !== undefined) {
 query.set("workspace_id", String(req.workspaceId));
 }
+if (req.page !== undefined) {
+query.set("page", String(req.page));
+}
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.sortBy !== undefined) {
+query.set("sort_by", String(req.sortBy));
+}
+if (req.sortDir !== undefined) {
+query.set("sort_dir", String(req.sortDir));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {

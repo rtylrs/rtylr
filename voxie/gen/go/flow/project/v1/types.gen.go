@@ -3,6 +3,7 @@ package v1
 
 import (
 	"encoding/json"
+	common_pagination_v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	"strconv"
 )
 
@@ -480,7 +481,11 @@ func (x *ProjectMember) GetAddedAt() string {
 }
 
 type ListProjectsRequest struct {
-	WorkspaceId int64 `json:"workspace_id,omitempty"`
+	WorkspaceId int64  `json:"workspace_id,omitempty"`
+	Page        int32  `json:"page,omitempty"`
+	Limit       int32  `json:"limit,omitempty"`
+	SortBy      string `json:"sort_by,omitempty"`
+	SortDir     string `json:"sort_dir,omitempty"`
 }
 
 func (m *ListProjectsRequest) MarshalJSON() ([]byte, error) {
@@ -520,8 +525,41 @@ func (x *ListProjectsRequest) GetWorkspaceId() int64 {
 	return x.WorkspaceId
 }
 
+func (x *ListProjectsRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListProjectsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListProjectsRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListProjectsRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListProjectsResponse struct {
-	Projects []*Project `json:"projects,omitempty"`
+	Projects   []*Project                               `json:"projects,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *ListProjectsResponse) GetProjects() []*Project {
@@ -530,6 +568,14 @@ func (x *ListProjectsResponse) GetProjects() []*Project {
 		return zero
 	}
 	return x.Projects
+}
+
+func (x *ListProjectsResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type CreateProjectRequest struct {
@@ -821,7 +867,11 @@ func (x *DeleteProjectResponse) GetMessage() string {
 }
 
 type ListProjectColumnsRequest struct {
-	ProjectId int64 `json:"project_id,omitempty"`
+	ProjectId int64  `json:"project_id,omitempty"`
+	Page      int32  `json:"page,omitempty"`
+	Limit     int32  `json:"limit,omitempty"`
+	SortBy    string `json:"sort_by,omitempty"`
+	SortDir   string `json:"sort_dir,omitempty"`
 }
 
 func (m *ListProjectColumnsRequest) MarshalJSON() ([]byte, error) {
@@ -861,8 +911,41 @@ func (x *ListProjectColumnsRequest) GetProjectId() int64 {
 	return x.ProjectId
 }
 
+func (x *ListProjectColumnsRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListProjectColumnsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListProjectColumnsRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListProjectColumnsRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListProjectColumnsResponse struct {
-	Columns []*ProjectColumn `json:"columns,omitempty"`
+	Columns    []*ProjectColumn                         `json:"columns,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *ListProjectColumnsResponse) GetColumns() []*ProjectColumn {
@@ -871,6 +954,14 @@ func (x *ListProjectColumnsResponse) GetColumns() []*ProjectColumn {
 		return zero
 	}
 	return x.Columns
+}
+
+func (x *ListProjectColumnsResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type CreateProjectColumnRequest struct {
@@ -1178,7 +1269,11 @@ func (x *MoveTaskToColumnResponse) GetMessage() string {
 }
 
 type ListProjectMembersRequest struct {
-	ProjectId int64 `json:"project_id,omitempty"`
+	ProjectId int64  `json:"project_id,omitempty"`
+	Page      int32  `json:"page,omitempty"`
+	Limit     int32  `json:"limit,omitempty"`
+	SortBy    string `json:"sort_by,omitempty"`
+	SortDir   string `json:"sort_dir,omitempty"`
 }
 
 func (m *ListProjectMembersRequest) MarshalJSON() ([]byte, error) {
@@ -1218,8 +1313,41 @@ func (x *ListProjectMembersRequest) GetProjectId() int64 {
 	return x.ProjectId
 }
 
+func (x *ListProjectMembersRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListProjectMembersRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListProjectMembersRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListProjectMembersRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListProjectMembersResponse struct {
-	Members []*ProjectMember `json:"members,omitempty"`
+	Members    []*ProjectMember                         `json:"members,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *ListProjectMembersResponse) GetMembers() []*ProjectMember {
@@ -1228,6 +1356,14 @@ func (x *ListProjectMembersResponse) GetMembers() []*ProjectMember {
 		return zero
 	}
 	return x.Members
+}
+
+func (x *ListProjectMembersResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type AddProjectMemberRequest struct {

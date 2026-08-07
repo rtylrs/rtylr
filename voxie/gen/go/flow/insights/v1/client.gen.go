@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 type InsightsServiceClient struct {
@@ -55,6 +56,10 @@ func (c *InsightsServiceClient) GetTeamWorkload(ctx context.Context, req *GetTea
 	path := "/flow/insights/v1/team/workload"
 	query := url.Values{}
 	query.Set("workspace_id", req.WorkspaceId)
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("sort_by", req.SortBy)
+	query.Set("sort_dir", req.SortDir)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -86,6 +91,10 @@ func (c *InsightsServiceClient) GetRoadmap(ctx context.Context, req *GetRoadmapR
 	path := "/flow/insights/v1/roadmap"
 	query := url.Values{}
 	query.Set("workspace_id", req.WorkspaceId)
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("sort_by", req.SortBy)
+	query.Set("sort_dir", req.SortDir)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

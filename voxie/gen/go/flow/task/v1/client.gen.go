@@ -37,6 +37,10 @@ func (c *TaskServiceClient) ListTasks(ctx context.Context, req *ListTasksRequest
 	if req.WorkspaceId != nil {
 		query.Set("workspace_id", *req.WorkspaceId)
 	}
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("sort_by", req.SortBy)
+	query.Set("sort_dir", req.SortDir)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -67,6 +71,10 @@ func (c *TaskServiceClient) ListTasks(ctx context.Context, req *ListTasksRequest
 func (c *TaskServiceClient) GetMyTasks(ctx context.Context, req *GetMyTasksRequest) (*GetMyTasksResponse, error) {
 	path := "/flow/task/v1/tasks/my"
 	query := url.Values{}
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("sort_by", req.SortBy)
+	query.Set("sort_dir", req.SortDir)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -129,6 +137,10 @@ func (c *TaskServiceClient) SearchTasks(ctx context.Context, req *SearchTasksReq
 	query := url.Values{}
 	query.Set("q", req.Q)
 	query.Set("workspace_id", req.WorkspaceId)
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("sort_by", req.SortBy)
+	query.Set("sort_dir", req.SortDir)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -348,6 +360,10 @@ func (c *TaskServiceClient) GetSubtasks(ctx context.Context, req *GetSubtasksReq
 	path := "/flow/task/v1/tasks/{task_id}/subtasks"
 	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
 	query := url.Values{}
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("sort_by", req.SortBy)
+	query.Set("sort_dir", req.SortDir)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

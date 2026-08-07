@@ -26,6 +26,10 @@ func NewWorkspaceServiceClient(baseURL string) *WorkspaceServiceClient {
 func (c *WorkspaceServiceClient) ListWorkspaces(ctx context.Context, req *ListWorkspacesRequest) (*ListWorkspacesResponse, error) {
 	path := "/flow/workspace/v1/workspaces"
 	query := url.Values{}
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("sort_by", req.SortBy)
+	query.Set("sort_dir", req.SortDir)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -151,6 +155,10 @@ func (c *WorkspaceServiceClient) ListWorkspaceMembers(ctx context.Context, req *
 	path := "/flow/workspace/v1/workspaces/members"
 	query := url.Values{}
 	query.Set("workspace_id", strconv.FormatInt(int64(req.WorkspaceId), 10))
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("sort_by", req.SortBy)
+	query.Set("sort_dir", req.SortDir)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
