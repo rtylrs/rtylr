@@ -211,10 +211,14 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
               ))}
             </div>
 
-            <div className={styles.progressRow} aria-hidden="true">
+            <div className={styles.progressRow} role="group" aria-label="Choose a platform app">
               {FEATURES.map((f, i) => (
-                <span
+                <button
                   key={f.id}
+                  type="button"
+                  aria-label={`Show ${f.category}`}
+                  aria-pressed={i === activeIndex}
+                  onClick={() => selectFeature(i)}
                   className={cn(styles.progressDot, i === activeIndex && styles.progressDotActive)}
                 >
                   {i === activeIndex && (
@@ -226,7 +230,7 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
                       transition={{ duration: AUTO_ADVANCE_MS / 1000, ease: 'linear' }}
                     />
                   )}
-                </span>
+                </button>
               ))}
             </div>
           </div>

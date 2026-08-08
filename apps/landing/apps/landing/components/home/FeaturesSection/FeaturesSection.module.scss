@@ -244,13 +244,26 @@
 }
 
 .progressDot {
+  appearance: none;
+  border: 0;
+  padding: 0;
   width: 5px;
   height: 5px;
   border-radius: 999px;
   background: rgba(19, 19, 19, 0.15);
+  cursor: pointer;
   transition:
     background 0.2s ease,
     width 0.2s ease;
+
+  &:hover {
+    background: rgba(19, 19, 19, 0.4);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 5px;
+  }
 }
 
 .progressDotActive {
@@ -259,6 +272,10 @@
   background: rgba(19, 19, 19, 0.2);
   width: 20px;
   border-radius: 999px;
+
+  &:hover {
+    background: rgba(19, 19, 19, 0.3);
+  }
 }
 
 .progressFill {
