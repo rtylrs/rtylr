@@ -24,25 +24,33 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
 
   return (
     <div className="relative">
-      <button
-        onClick={() => !disabled && setOpen((o) => !o)}
-        disabled={disabled}
-        className="flex items-center gap-1.5 px-2 py-1 rounded text-[11px] transition-colors hover:bg-[var(--flow-hover)] disabled:opacity-60 disabled:hover:bg-transparent"
+      <div
+        className="flex items-center gap-1.5 text-[11px]"
         style={{ color: overdue ? '#ef4444' : 'var(--flow-text-muted)' }}
       >
-        <Calendar size={12} />
-        {value ? formatDate(value) : t('common.datePicker.setDate')}
+        <button
+          type="button"
+          onClick={() => !disabled && setOpen((o) => !o)}
+          disabled={disabled}
+          className="flex items-center gap-1.5 px-2 py-1 rounded transition-colors hover:bg-[var(--flow-hover)] disabled:opacity-60 disabled:hover:bg-transparent"
+        >
+          <Calendar size={12} />
+          {value ? formatDate(value) : t('common.datePicker.setDate')}
+        </button>
         {value && !disabled && (
-          <X
-            size={10}
+          <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onChange('');
             }}
+            aria-label={t('common.datePicker.clearDate')}
             className="hover:text-[var(--flow-text)]"
-          />
+          >
+            <X size={10} />
+          </button>
         )}
-      </button>
+      </div>
       {open && !disabled && (
         <div
           className="absolute top-full left-0 mt-1 rounded-lg z-50 py-1 min-w-[160px]"
