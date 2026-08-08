@@ -227,9 +227,12 @@ const ProjectList: React.FC = () => {
   const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
   const { data: apiTasks } = useTasks({ projectId, activeOnly: true, compact: true });
 
-  const projectTasks: Task[] = apiTasks
-    ? apiTasks.map(apiTaskToTask)
-    : tasks.filter((t) => t.projectId === projectId);
+  // `activeOnly` is a query param the backend doesn't currently act on, so
+  // archived tasks still come back over the wire - filter client-side to
+  // match Triage/FocusToday/FlowLayout.
+  const projectTasks: Task[] = (
+    apiTasks ? apiTasks.map(apiTaskToTask) : tasks.filter((t) => t.projectId === projectId)
+  ).filter((t) => !t.archived);
 
   const projectSections = useMemo(
     () => sections.filter((s) => s.projectId === projectId).sort((a, b) => a.order - b.order),
