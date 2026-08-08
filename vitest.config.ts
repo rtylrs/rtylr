@@ -9,7 +9,14 @@ export default defineConfig({
     // undici dep, so it sidesteps the conflict.
     environment: 'happy-dom',
     setupFiles: ['./test/setup.ts'],
-    include: ['packages/*/src/**/*.test.{ts,tsx}', 'apps/*/src/**/*.test.{ts,tsx}'],
+    include: [
+      'packages/*/src/**/*.test.{ts,tsx}',
+      'apps/*/src/**/*.test.{ts,tsx}',
+      // Root-level build tooling (the shared Vite plugins). Not covered by
+      // `pnpm lint` or `pnpm typecheck`, which scope to apps/ and packages/,
+      // so its tests are the only automated gate it has.
+      './*.test.ts',
+    ],
     exclude: ['**/node_modules/**', 'dist', '.next', 'e2e'],
     coverage: {
       provider: 'v8',
