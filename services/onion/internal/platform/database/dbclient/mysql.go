@@ -79,6 +79,10 @@ func Connect(ctx context.Context) error {
 	}
 
 	mainDSN := resolveMainDSN()
+	if err := checkProductionSafety(mainDSN); err != nil {
+		return err
+	}
+
 	mainDB, err := openDB(ctx, mainDSN)
 	if err != nil {
 		return fmt.Errorf("failed to connect to main MySQL database: %w", err)
