@@ -1,3 +1,5 @@
+import type { Task as ContractTask } from '@voxire/voxie/flow/task/v1/types';
+
 import { safe } from '../lib/api';
 
 // -- Types ----------------------------------------------------------------
@@ -68,7 +70,13 @@ export interface ApiTask {
   estimate?: number;
   estimatedHours?: number | null;
   actualHours?: number | null;
-  archived?: boolean;
+  // Pinned to the generated contract rather than re-declared. ApiTask is
+  // hand-rolled and drifts from the wire (see apiTaskToTask on the numeric
+  // ids); swapping the whole interface for the generated Task is the Phase 3
+  // migration, but `archived` is the field this archive work turns on, so it
+  // tracks voxie directly - if the contract drops it or makes it required,
+  // this file stops compiling instead of silently disagreeing.
+  archived?: ContractTask['archived'];
   identifier?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -545,10 +553,16 @@ export const flowApi = {
     estimatedHours?: number;
   }) => safe.post<{ task: ApiTask }>('/flow/task/v1/tasks', toTaskCreatePayload(data)),
 
-  // `archived` isn't part of the UpdateTaskBody wire contract yet (voxie
-  // flow/task/v1 has no field for it) - the backend silently drops the
-  // key today. Still forwarded here so the frontend is ready the moment
-  // the contract gains it, without another round-trip through this file.
+  // `archived` is now part of the wire contract (UpdateTaskBody.archived in
+  // voxie flow/task/v1). It is omitempty, so the distinction below is load
+  // bearing: `false` must be sent as `false` because that is what un-archives
+  // a task, while `undefined` must stay omitted so a partial update doesn't
+  // touch the column. Never collapse this to a truthiness check - flowApi.test
+  // pins both directions.
+  //
+  // Still a no-op end to end until onion reads it: TaskAPI.UpdateTask builds
+  // domain.UpdateTaskInput without Archived, even though the SQL write path
+  // already handles it via COALESCE(?, archived).
   updateTask: (id: string, data: Partial<ApiTask>) =>
     safe.put<{ message: string }>(`/flow/task/v1/tasks/${id}`, {
       body: {

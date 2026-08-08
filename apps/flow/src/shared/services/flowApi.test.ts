@@ -168,6 +168,18 @@ describe('flowApi', () => {
     );
   });
 
+  it('updateTask forwards archived: false rather than omitting it', () => {
+    // The restore path (Archive.tsx) un-archives by sending `false`. Omitting
+    // the key is a no-op server-side (COALESCE(?, archived) keeps the current
+    // value), so a truthiness guard here would turn Restore into a button that
+    // reports success and changes nothing.
+    flowApi.updateTask('9', { archived: false });
+    expect(safe.put).toHaveBeenCalledWith(
+      '/flow/task/v1/tasks/9',
+      expect.objectContaining({ body: expect.objectContaining({ archived: false }) })
+    );
+  });
+
   it('deleteTask calls DELETE /flow/task/v1/tasks/{id}', () => {
     flowApi.deleteTask('9');
     expect(safe.delete).toHaveBeenCalledWith('/flow/task/v1/tasks/9');
