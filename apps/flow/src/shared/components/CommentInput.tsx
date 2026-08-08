@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { AtSign, Send, Smile } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFlowStore } from '../stores/flowStore';
 
 interface CommentInputProps {
@@ -13,6 +14,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
   placeholder = 'Leave a comment… @mention to notify',
   disabled,
 }) => {
+  const { t } = useTranslation();
   const [value, setValue] = useState('');
   const [mentionOpen, setMentionOpen] = useState(false);
   const ref = useRef<HTMLTextAreaElement>(null);
@@ -77,11 +79,11 @@ export const CommentInput: React.FC<CommentInputProps> = ({
           </button>
           <button
             type="button"
-            onClick={undefined}
             disabled
-            className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+            className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
             style={{ color: 'var(--flow-text-dim)' }}
-            title="Emoji picker"
+            title={t('common.emojiPickerComingSoon')}
+            aria-label={t('common.emojiPickerComingSoon')}
           >
             <Smile size={12} />
           </button>

@@ -19,6 +19,8 @@
   "priority": "Priorité",
   "readOnlyAccess": "Vous disposez d'un accès en lecture seule et ne pouvez pas apporter de modifications",
   "deleteRestricted": "Seuls les propriétaires et administrateurs de l'espace peuvent supprimer cet élément",
+  "comingSoon": "Bientôt disponible",
+  "emojiPickerComingSoon": "Sélecteur d'émojis (bientôt disponible)",
   "focusToday": {
     "emptyTitle": "Nothing pinned for today",
     "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway."

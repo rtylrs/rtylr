@@ -19,6 +19,8 @@
   "priority": "Priority",
   "readOnlyAccess": "You have view-only access and can't make changes",
   "deleteRestricted": "Only workspace admins and owners can delete this",
+  "comingSoon": "Coming soon",
+  "emojiPickerComingSoon": "Emoji picker (coming soon)",
   "focusToday": {
     "emptyTitle": "Nothing pinned for today",
     "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway."
