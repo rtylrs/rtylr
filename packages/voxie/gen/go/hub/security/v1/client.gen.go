@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 type SecurityServiceClient struct {
@@ -54,6 +55,8 @@ func (c *SecurityServiceClient) GetSecurityState(ctx context.Context, req *GetSe
 func (c *SecurityServiceClient) LoginHistory(ctx context.Context, req *LoginHistoryRequest) (*LoginHistoryResponse, error) {
 	path := "/hub/security/v1/login-history"
 	query := url.Values{}
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("page_size", strconv.FormatInt(int64(req.PageSize), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
