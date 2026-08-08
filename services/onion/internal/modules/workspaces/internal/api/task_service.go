@@ -214,6 +214,10 @@ func (a *TaskAPI) UpdateTask(ctx context.Context, req *flowtaskv1.UpdateTaskRequ
 		DueDate:     dueDate,
 		StartDate:   startDate,
 		Labels:      body.GetLabels(),
+		// Read the pointer, not GetArchived(): the accessor flattens an absent
+		// field to false, which would archive-or-restore a task the request
+		// never mentioned. nil here is what makes COALESCE(?, archived) hold.
+		Archived: body.Archived,
 	}
 
 	if err := a.Service.UpdateTask(ctx, input, authUser.UserID); err != nil {
