@@ -194,8 +194,11 @@ const TaskDetail: React.FC = () => {
   useTaskRealtime(id);
   const { data: taskData, isLoading } = useTask(id);
   const user = useUserStore((s) => s.user);
-  const canEdit = useCanEditTask();
-  const canRemove = useCanDeleteResource();
+  // Read up here rather than below the isLoading early return: these gates are
+  // hooks, so they have to run on every render, and they need the task's project.
+  const detail = taskData as ApiTaskDetail | undefined;
+  const canEdit = useCanEditTask(detail?.task?.projectId);
+  const canRemove = useCanDeleteResource(detail?.task?.projectId);
   const updateTaskMut = useUpdateTask();
   const deleteTaskMut = useDeleteTask();
   const addCommentMut = useAddComment();
@@ -259,7 +262,6 @@ const TaskDetail: React.FC = () => {
     );
   }
 
-  const detail = taskData as ApiTaskDetail | undefined;
   const task = detail?.task;
   const taskComments = (detail?.comments ?? []).map((c) => ({
     id: c.id,

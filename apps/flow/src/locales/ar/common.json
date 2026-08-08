@@ -18,7 +18,7 @@
   "assignee": "المسؤول",
   "priority": "الأولوية",
   "readOnlyAccess": "لديك صلاحية العرض فقط ولا يمكنك إجراء أي تغييرات",
-  "deleteRestricted": "يمكن للمالكين والمشرفين فقط حذف هذا العنصر",
+  "deleteRestricted": "يمكن لمشرفي المشروع فقط حذف هذا العنصر",
   "comingSoon": "قريباً",
   "emojiPickerComingSoon": "منتقي الرموز التعبيرية (قريباً)",
   "focusToday": {
