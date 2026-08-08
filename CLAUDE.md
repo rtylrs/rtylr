@@ -116,7 +116,7 @@ rtylr/
 
 > **Removed apps:** `landing` (marketing site) now lives in its own repo. `hub` was renamed to `dash`. `vbitez` (POS desktop) is not part of this monorepo. Empty `apps/hub`, `apps/vbitez`, or `apps/landing` folders on disk are untracked leftovers - safe to delete.
 >
-> **Submodules:** `packages/` (tryrtylr/packages) is the only top-level submodule here. It contains `packages/voxie` directly (proto contracts + generated `gen/ts`, which `@voxire/voxie` re-exports). Run `git submodule update --init --recursive` after every pull, then `pnpm install`. `pos/` (the separate POS terminal repo) shares this same `packages` submodule and gets contracts the same way.
+> **Submodules:** `packages/` (tryrtylr/packages) is the only top-level submodule here. It carries `packages/voxie` as vendored files, **not** as a nested submodule (proto contracts + generated `gen/ts`, which `@voxire/voxie` re-exports), so there is no inner pointer to bump. Run `git submodule update --init --recursive` after every pull, then `pnpm install`. `pos/` (the separate POS terminal repo) shares this same `packages` submodule and gets contracts the same way.
 
 ### Tech Stack
 
@@ -776,7 +776,7 @@ pnpm test:e2e      # Playwright e2e tests
 
 ### Submodules (packages)
 
-`packages/` (tryrtylr/packages — all shared workspace packages) is a git submodule, and it contains `packages/voxie` directly (proto contracts + committed `gen/ts`). After cloning or pulling:
+`packages/` (tryrtylr/packages — all shared workspace packages) is a git submodule, and it carries `packages/voxie` as vendored files rather than as a nested submodule (proto contracts + committed `gen/ts`). There is no `.gitmodules` entry in `packages`, and `git ls-files -s voxie` returns plain `100644` blobs instead of a `160000` gitlink. That means there is no inner pointer to bump and nothing to `git pull` inside `packages/voxie`: new contracts land in `packages` as a direct file sync, and `packages` is the only submodule pointer this repo moves. After cloning or pulling:
 
 ```bash
 git submodule update --init --recursive
