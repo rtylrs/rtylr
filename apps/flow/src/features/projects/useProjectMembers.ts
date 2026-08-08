@@ -5,15 +5,24 @@ import { flowApi } from '../../shared/services/flowApi';
 import type { ApiProjectMember } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
-export function useProjectMembers(projectId?: string) {
-  return useQuery<ApiProjectMember[]>({
+/**
+ * Query options for one project's member list, shared by `useProjectMembers` and
+ * by the multi-project lookup in `useCurrentProjectRoles`, so both read and fill
+ * the same `['project-members', projectId]` cache entry rather than refetching.
+ */
+export function projectMembersQueryOptions(projectId?: string) {
+  return {
     queryKey: ['project-members', projectId],
-    queryFn: async () => {
+    queryFn: async (): Promise<ApiProjectMember[]> => {
       const res = await unwrap(flowApi.getProjectMembers(projectId!));
       return unwrapListResponse<ApiProjectMember>(res, 'members');
     },
     enabled: !!projectId,
-  });
+  };
+}
+
+export function useProjectMembers(projectId?: string) {
+  return useQuery<ApiProjectMember[]>(projectMembersQueryOptions(projectId));
 }
 
 export function useAddProjectMember(projectId: string) {
