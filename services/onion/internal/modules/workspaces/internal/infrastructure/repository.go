@@ -658,6 +658,12 @@ func (r *Repository) GetCommentTaskID(ctx context.Context, commentID int64) (int
 	return r.queries.GetCommentTaskID(ctx, commentID)
 }
 
+// GetAttachmentTaskID returns the task an attachment hangs off, so a delete can
+// be authorized against that task's project.
+func (r *Repository) GetAttachmentTaskID(ctx context.Context, attachmentID int64) (int64, error) {
+	return r.queries.GetAttachmentTaskID(ctx, attachmentID)
+}
+
 // ─────────────────────────────────────────────
 // Activity
 // ─────────────────────────────────────────────
@@ -1006,6 +1012,7 @@ func enrichedTaskColumns(includeDescription bool) []string {
 		"t.title", descriptionColumn, "COALESCE(t.status, 'todo') AS status", "COALESCE(t.priority, 'none') AS priority",
 		"t.assignee_id", "t.reporter_id", "t.due_date", "t.start_date", "t.completed_at",
 		"t.estimated_hours", "t.actual_hours", "t.sort_order", "t.labels",
+		"COALESCE(t.archived, FALSE) AS archived",
 		"t.created_at", "t.updated_at",
 		"COALESCE(p.name, '')  AS project_name",
 		"COALESCE(p.color, '') AS project_color",
@@ -1078,7 +1085,7 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 		&t.Title, &desc, &t.Status, &t.Priority,
 		&assigneeID, &t.ReporterID,
 		&dueDate, &startDate, &completedAt,
-		&estHours, &actHours, &t.SortOrder, &labelsRaw,
+		&estHours, &actHours, &t.SortOrder, &labelsRaw, &t.Archived,
 		&t.CreatedAt, &t.UpdatedAt,
 		&t.ProjectName, &t.ProjectColor, &t.AssigneeName, &t.SubtaskCount,
 	)
@@ -1164,7 +1171,7 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 			&t.Title, &desc, &t.Status, &t.Priority,
 			&assigneeID, &t.ReporterID,
 			&dueDate, &startDate, &completedAt,
-			&estHours, &actHours, &t.SortOrder, &labelsRaw,
+			&estHours, &actHours, &t.SortOrder, &labelsRaw, &t.Archived,
 			&t.CreatedAt, &t.UpdatedAt,
 		)
 		if err != nil {
@@ -1403,6 +1410,41 @@ func (r *Repository) GetUserWorkspaceRole(ctx context.Context, workspaceID, user
 	return string(role.FlowWorkspaceMembersRole), nil
 }
 
+// GetProjectMemberRole returns the caller's role on a project, or
+// sql.ErrNoRows when they hold no explicit membership row. A project owner and
+// a workspace member both reach a project without one, so a not-found here is
+// not the same as "no access" — see Service.RequireProjectRole.
+func (r *Repository) GetProjectMemberRole(ctx context.Context, projectID, userID int64) (string, error) {
+	role, err := r.queries.GetProjectMemberRole(ctx, sqlc.GetProjectMemberRoleParams{
+		ProjectID: projectID,
+		UserID:    userID,
+	})
+	if err != nil {
+		return "", err
+	}
+	if !role.Valid {
+		return "", sql.ErrNoRows
+	}
+	return string(role.FlowProjectMembersRole), nil
+}
+
+// GetProjectOwnerWorkspace returns a project's owner and workspace, the two
+// facts needed to fall back from an absent project membership row.
+func (r *Repository) GetProjectOwnerWorkspace(ctx context.Context, projectID int64) (int64, int64, error) {
+	row, err := r.queries.GetProjectOwnerWorkspace(ctx, projectID)
+	if err != nil {
+		return 0, 0, err
+	}
+	return row.OwnerID, row.WorkspaceID, nil
+}
+
+// GetWorkspaceOwner returns a workspace's owner. A workspace owner has no
+// flow_workspace_members row of their own, so the roster read alone would miss
+// them.
+func (r *Repository) GetWorkspaceOwner(ctx context.Context, workspaceID int64) (int64, error) {
+	return r.queries.GetWorkspaceOwner(ctx, workspaceID)
+}
+
 // ─── Project Columns ─────────────────────────────────────────────────────────
 
 func (r *Repository) GetColumnsByProject(ctx context.Context, projectID, limit, offset int64) ([]domain.ProjectColumn, int64, error) {
@@ -1576,7 +1618,8 @@ func (r *Repository) SearchTasks(ctx context.Context, workspaceID int64, q strin
 
 	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, section_id, title, description,
 	           status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
-	           estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
+	           estimated_hours, actual_hours, sort_order, labels, COALESCE(archived, FALSE) AS archived,
+	           created_at, updated_at
 	          FROM flow_tasks
 	          WHERE workspace_id = ?
 	            AND archived = FALSE

@@ -573,6 +573,7 @@ func mapWorkloadMemberTasks(rows []sqlc.GetTeamWorkloadMemberTasksRow) []domain.
 			Priority:    string(row.Priority.FlowTasksPriority),
 			ReporterID:  row.ReporterID,
 			SortOrder:   int(row.SortOrder.Int32),
+			Archived:    row.Archived.Bool,
 			CreatedAt:   row.CreatedAt.Time,
 			UpdatedAt:   row.UpdatedAt.Time,
 			Identifier:  "T-" + strconv.FormatInt(row.ID, 10),

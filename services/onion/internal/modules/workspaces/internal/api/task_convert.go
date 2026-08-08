@@ -50,6 +50,7 @@ func toTask(t domain.Task) *flowtaskv1.Task {
 		SectionId:        t.SectionID,
 		CycleId:          t.CycleID,
 		MilestoneId:      t.MilestoneID,
+		Archived:         t.Archived,
 	}
 	if t.DueDate != nil {
 		s := t.DueDate.Format("2006-01-02T15:04:05Z")

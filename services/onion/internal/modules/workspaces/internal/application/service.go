@@ -173,6 +173,117 @@ func (s *Service) IsTaskMember(ctx context.Context, userID, taskID int64) bool {
 }
 
 // ─────────────────────────────────────────────
+// Authorization
+// ─────────────────────────────────────────────
+
+// projectRoleFor resolves a caller's effective role on a project, or "" when
+// they hold none.
+//
+// A flow_project_members row is only one of three ways to reach a project:
+// IsProjectMember also admits the project's owner and any member of the
+// project's workspace, and neither necessarily has a row — CreateProject
+// writes none for the owner. Resolving on the members table alone would deny
+// both groups access they have today, so the lookup falls back through
+// ownership and then the workspace roster.
+func (s *Service) projectRoleFor(ctx context.Context, projectID, userID int64) string {
+	if projectID == 0 || userID == 0 {
+		return ""
+	}
+	if role, err := s.repo.GetProjectMemberRole(ctx, projectID, userID); err == nil && role != "" {
+		return role
+	}
+
+	ownerID, workspaceID, err := s.repo.GetProjectOwnerWorkspace(ctx, projectID)
+	if err != nil {
+		return ""
+	}
+	if ownerID == userID {
+		return domain.FlowRoleAdmin
+	}
+	return s.workspaceRoleFor(ctx, workspaceID, userID)
+}
+
+// workspaceRoleFor resolves a caller's role on a workspace. The owner holds no
+// flow_workspace_members row either, so they are resolved separately.
+func (s *Service) workspaceRoleFor(ctx context.Context, workspaceID, userID int64) string {
+	if workspaceID == 0 || userID == 0 {
+		return ""
+	}
+	if ownerID, err := s.repo.GetWorkspaceOwner(ctx, workspaceID); err == nil && ownerID == userID {
+		return domain.FlowRoleAdmin
+	}
+	role, err := s.repo.GetUserWorkspaceRole(ctx, workspaceID, userID)
+	if err != nil {
+		return ""
+	}
+	return role
+}
+
+// RequireProjectRole reports whether userID holds at least minRole on a
+// project, returning domain.ErrUnauthorized when they do not. The API layer
+// maps that to a permission-denied response.
+func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID int64, minRole string) error {
+	if domain.RoleAllows(s.projectRoleFor(ctx, projectID, userID), minRole) {
+		return nil
+	}
+	return domain.ErrUnauthorized
+}
+
+// RequireTaskRole is RequireProjectRole addressed by task rather than project.
+// A task need not belong to a project, so the fallback order mirrors
+// IsTaskMember: project, then workspace, then sole ownership.
+func (s *Service) RequireTaskRole(ctx context.Context, taskID, userID int64, minRole string) error {
+	if taskID == 0 || userID == 0 {
+		return domain.ErrUnauthorized
+	}
+	task, err := s.repo.GetTaskByID(ctx, taskID)
+	if err != nil {
+		return domain.ErrUnauthorized
+	}
+
+	if task.ProjectID != 0 {
+		return s.RequireProjectRole(ctx, task.ProjectID, userID, minRole)
+	}
+	if task.WorkspaceID != 0 {
+		if domain.RoleAllows(s.workspaceRoleFor(ctx, task.WorkspaceID, userID), minRole) {
+			return nil
+		}
+		return domain.ErrUnauthorized
+	}
+	if task.OwnerID == userID {
+		return nil
+	}
+	return domain.ErrUnauthorized
+}
+
+// RequireCommentRole authorizes against the project owning a comment's task.
+func (s *Service) RequireCommentRole(ctx context.Context, commentID, userID int64, minRole string) error {
+	taskID, err := s.repo.GetCommentTaskID(ctx, commentID)
+	if err != nil {
+		return domain.ErrUnauthorized
+	}
+	return s.RequireTaskRole(ctx, taskID, userID, minRole)
+}
+
+// RequireAttachmentRole authorizes against the project owning an attachment's task.
+func (s *Service) RequireAttachmentRole(ctx context.Context, attachmentID, userID int64, minRole string) error {
+	taskID, err := s.repo.GetAttachmentTaskID(ctx, attachmentID)
+	if err != nil {
+		return domain.ErrUnauthorized
+	}
+	return s.RequireTaskRole(ctx, taskID, userID, minRole)
+}
+
+// RequireTimeLogRole authorizes against the project owning a time log's task.
+func (s *Service) RequireTimeLogRole(ctx context.Context, timeLogID, userID int64, minRole string) error {
+	taskID, err := s.repo.GetTimeLogTaskID(ctx, timeLogID)
+	if err != nil {
+		return domain.ErrUnauthorized
+	}
+	return s.RequireTaskRole(ctx, taskID, userID, minRole)
+}
+
+// ─────────────────────────────────────────────
 // Projects
 // ─────────────────────────────────────────────
 

@@ -128,6 +128,13 @@ func (a *LabelAPI) SetTaskLabels(ctx context.Context, req *flowlabelv1.SetTaskLa
 		return nil, onekiterrors.PermissionDenied()
 	}
 
+	// Setting a task's labels is a task mutation, so it takes the same tier as
+	// the handlers in task_service.go. The repository guard below only checks
+	// workspace membership, which admits a viewer.
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
 	labelIDs := req.GetLabelIds()
 	if labelIDs == nil {
 		labelIDs = []int64{}

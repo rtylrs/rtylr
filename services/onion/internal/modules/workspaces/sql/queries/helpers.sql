@@ -10,6 +10,12 @@ FROM flow_time_logs
 WHERE id = ?
 LIMIT 1;
 
+-- name: GetAttachmentTaskID :one
+SELECT task_id
+FROM flow_task_attachments
+WHERE id = ?
+LIMIT 1;
+
 -- name: DeleteTimeLog :exec
 DELETE FROM flow_time_logs
 WHERE id = ? AND user_id = ?;

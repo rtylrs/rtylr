@@ -111,6 +111,10 @@ func (a *TaskAPI) CreateTask(ctx context.Context, req *flowtaskv1.CreateTaskRequ
 		projectID = myTasksID
 	}
 
+	if roleErr := a.Service.RequireProjectRole(ctx, projectID, authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
 	dueDate, err := parseTaskDate(req.GetDueDate())
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid due_date")
@@ -184,6 +188,10 @@ func (a *TaskAPI) UpdateTask(ctx context.Context, req *flowtaskv1.UpdateTaskRequ
 		return nil, err
 	}
 
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
 	body := req.GetBody()
 	dueDate, err := parseTaskDate(body.GetDueDate())
 	if err != nil {
@@ -206,6 +214,10 @@ func (a *TaskAPI) UpdateTask(ctx context.Context, req *flowtaskv1.UpdateTaskRequ
 		DueDate:     dueDate,
 		StartDate:   startDate,
 		Labels:      body.GetLabels(),
+		// Read the pointer, not GetArchived(): the accessor flattens an absent
+		// field to false, which would archive-or-restore a task the request
+		// never mentioned. nil here is what makes COALESCE(?, archived) hold.
+		Archived: body.Archived,
 	}
 
 	if err := a.Service.UpdateTask(ctx, input, authUser.UserID); err != nil {
@@ -223,6 +235,10 @@ func (a *TaskAPI) UpdateTaskStatus(ctx context.Context, req *flowtaskv1.UpdateTa
 	authUser, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	input := domain.UpdateTaskStatusInput{
@@ -249,6 +265,10 @@ func (a *TaskAPI) DeleteTask(ctx context.Context, req *flowtaskv1.DeleteTaskRequ
 		return nil, err
 	}
 
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
 	var projectID int64
 	if existing, fetchErr := a.Service.GetTaskDetail(ctx, req.GetId()); fetchErr == nil {
 		projectID = existing.Task.ProjectID
@@ -269,6 +289,19 @@ func (a *TaskAPI) CreateSubtask(ctx context.Context, req *flowtaskv1.CreateSubta
 	}
 
 	parentID := req.GetParentTaskId()
+
+	// Gate on the parent task's project, and additionally on project_id when
+	// the request names one — the two can disagree, and writing into a project
+	// the caller cannot write to must not ride in on the parent's permission.
+	if roleErr := a.Service.RequireTaskRole(ctx, parentID, authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if req.GetProjectId() != 0 {
+		if roleErr := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+			return nil, onekiterrors.PermissionDenied()
+		}
+	}
+
 	dueDate, err := parseTaskDate(req.GetDueDate())
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid due_date")
@@ -304,6 +337,10 @@ func (a *TaskAPI) CreateAttachment(ctx context.Context, req *flowtaskv1.CreateAt
 	authUser, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	id, createErr := a.Service.CreateAttachment(ctx, domain.TaskAttachmentInput{
@@ -352,6 +389,10 @@ func (a *TaskAPI) AddComment(ctx context.Context, req *flowtaskv1.AddCommentRequ
 		return nil, onekiterrors.PermissionDenied()
 	}
 
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
 	comment, err := a.Service.AddComment(ctx, req.GetTaskId(), authUser.UserID, req.GetContent())
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to add comment")
@@ -364,6 +405,10 @@ func (a *TaskAPI) AddComment(ctx context.Context, req *flowtaskv1.AddCommentRequ
 func (a *TaskAPI) DeleteComment(ctx context.Context, req *flowtaskv1.DeleteCommentRequest) (*flowtaskv1.DeleteCommentResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	if roleErr := a.Service.RequireCommentRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -417,9 +462,13 @@ func (a *TaskAPI) GetAttachments(ctx context.Context, req *flowtaskv1.GetAttachm
 }
 
 func (a *TaskAPI) DeleteAttachment(ctx context.Context, req *flowtaskv1.DeleteAttachmentRequest) (*flowtaskv1.DeleteAttachmentResponse, error) {
-	_, businessID, err := a.resolveAuth(ctx)
+	authUser, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	if roleErr := a.Service.RequireAttachmentRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	if err := a.Service.DeleteAttachment(ctx, req.GetId(), businessID); err != nil {
@@ -438,6 +487,10 @@ func (a *TaskAPI) CreateTimeLog(ctx context.Context, req *flowtaskv1.CreateTimeL
 	taskID := req.GetTaskId()
 	if taskID == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "task_id is required")
+	}
+
+	if roleErr := a.Service.RequireTaskRole(ctx, taskID, authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	id, err := a.Service.CreateTimeLog(ctx, domain.TimeLogInput{
@@ -479,6 +532,10 @@ func (a *TaskAPI) GetTimeLogs(ctx context.Context, req *flowtaskv1.GetTimeLogsRe
 func (a *TaskAPI) DeleteTimeLog(ctx context.Context, req *flowtaskv1.DeleteTimeLogRequest) (*flowtaskv1.DeleteTimeLogResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	if roleErr := a.Service.RequireTimeLogRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

@@ -72,3 +72,21 @@ SELECT role
 FROM flow_workspace_members
 WHERE workspace_id = ? AND user_id = ?
 LIMIT 1;
+
+-- name: GetProjectMemberRole :one
+SELECT role
+FROM flow_project_members
+WHERE project_id = ? AND user_id = ?
+LIMIT 1;
+
+-- name: GetProjectOwnerWorkspace :one
+SELECT owner_id, workspace_id
+FROM flow_projects
+WHERE id = ?
+LIMIT 1;
+
+-- name: GetWorkspaceOwner :one
+SELECT owner_id
+FROM flow_workspaces
+WHERE id = ?
+LIMIT 1;
