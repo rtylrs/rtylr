@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { versionPlugin } from '../../vite-plugin-version.ts';
+import { apiTargetGuardPlugin } from '../../vite-plugin-api-target-guard.ts';
 
 export default defineConfig(() => ({
   root: __dirname,
@@ -19,6 +20,7 @@ export default defineConfig(() => ({
     }),
     tsconfigPaths(),
     versionPlugin(),
+    apiTargetGuardPlugin(),
   ],
   resolve: {
     alias: {
