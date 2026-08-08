@@ -40,7 +40,8 @@
     "in3Days": "In 3 days",
     "nextWeek": "Next week",
     "in2Weeks": "In 2 weeks",
-    "setDate": "Set date"
+    "setDate": "Set date",
+    "clearDate": "Clear date"
   },
   "insights": {
     "burndown": "Burndown (active cycle)",
