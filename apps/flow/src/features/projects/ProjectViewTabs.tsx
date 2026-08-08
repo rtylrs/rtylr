@@ -10,6 +10,7 @@ import {
   Settings as SettingsIcon,
   Plus,
 } from 'lucide-react';
+import { useFeatureFlag, FLAG_KEYS } from '@voxire/config';
 
 interface ProjectViewTabsProps {
   project: { name: string; color: string };
@@ -26,6 +27,9 @@ interface ViewDef {
   icon: React.ComponentType<{ size?: number }>;
   path: (wid: string, pid: string) => string;
   match: (path: string) => boolean;
+  // Route is wrapped in AppFlagGuard(APP_FLOW_PREVIEW_ROUTES) in router.tsx -
+  // keep this in sync with which routes are gated there.
+  previewOnly?: boolean;
 }
 
 const VIEWS: ViewDef[] = [
@@ -35,6 +39,7 @@ const VIEWS: ViewDef[] = [
     icon: Activity,
     path: (w, p) => `/w/${w}/p/${p}/overview`,
     match: (p) => p.endsWith('/overview'),
+    previewOnly: true,
   },
   {
     key: 'board',
@@ -58,6 +63,7 @@ const VIEWS: ViewDef[] = [
     icon: GanttChart,
     path: (w, p) => `/w/${w}/p/${p}/timeline`,
     match: (p) => p.endsWith('/timeline'),
+    previewOnly: true,
   },
   {
     key: 'calendar',
@@ -72,6 +78,7 @@ const VIEWS: ViewDef[] = [
     icon: BarChart3,
     path: (w, p) => `/w/${w}/p/${p}/dashboard`,
     match: (p) => p.endsWith('/dashboard'),
+    previewOnly: true,
   },
 ];
 
@@ -90,6 +97,8 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
   rightSlot,
 }) => {
   const { pathname } = useLocation();
+  const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
+  const visibleViews = VIEWS.filter((v) => !v.previewOnly || showPreviewRoutes);
 
   return (
     <div
@@ -120,7 +129,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
             border: '1px solid var(--flow-border)',
           }}
         >
-          {VIEWS.map((v) => {
+          {visibleViews.map((v) => {
             const active = v.match(pathname);
             const Icon = v.icon;
             return (
