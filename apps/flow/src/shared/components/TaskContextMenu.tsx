@@ -11,6 +11,8 @@ export interface ContextMenuState {
   x: number;
   y: number;
   taskId: string;
+  /** The task's project, so Delete can be gated on the user's role in it. */
+  projectId: string;
 }
 
 export const TaskContextMenu: React.FC<{
@@ -20,7 +22,7 @@ export const TaskContextMenu: React.FC<{
   const { t } = useTranslation();
   const navigate = useNavigate();
   const deleteTask = useDeleteTask();
-  const canRemove = useCanDeleteResource();
+  const canRemove = useCanDeleteResource(menu.projectId);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
