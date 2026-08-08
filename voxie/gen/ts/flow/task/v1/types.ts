@@ -31,6 +31,7 @@ subtaskCount?: number;
 sectionId?: string;
 cycleId?: string;
 milestoneId?: string;
+archived?: boolean;
 }
 
 export function decodeTask(v: any): Task {
@@ -65,6 +66,7 @@ subtaskCount: v.subtask_count,
 sectionId: v.section_id,
 cycleId: v.cycle_id,
 milestoneId: v.milestone_id,
+archived: v.archived,
 };
 }
 
@@ -99,6 +101,7 @@ if (v.subtaskCount !== undefined) { out.subtask_count = v.subtaskCount; }
 if (v.sectionId !== undefined) { out.section_id = v.sectionId; }
 if (v.cycleId !== undefined) { out.cycle_id = v.cycleId; }
 if (v.milestoneId !== undefined) { out.milestone_id = v.milestoneId; }
+if (v.archived !== undefined) { out.archived = v.archived; }
 return out;
 }
 
@@ -583,6 +586,7 @@ assigneeId?: string;
 dueDate?: string;
 startDate?: string;
 labels?: (string)[];
+archived?: boolean;
 }
 
 export function decodeUpdateTaskBody(v: any): UpdateTaskBody {
@@ -596,6 +600,7 @@ assigneeId: v.assignee_id,
 dueDate: v.due_date,
 startDate: v.start_date,
 labels: v.labels,
+archived: v.archived,
 };
 }
 
@@ -609,6 +614,7 @@ if (v.assigneeId !== undefined) { out.assignee_id = v.assigneeId; }
 if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
 if (v.startDate !== undefined) { out.start_date = v.startDate; }
 if (v.labels !== undefined) { out.labels = v.labels; }
+if (v.archived !== undefined) { out.archived = v.archived; }
 return out;
 }
 

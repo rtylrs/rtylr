@@ -61,6 +61,10 @@ message Task {
   cycle_id: int64? @nullable
   /// Milestone this task rolls up to, if any.
   milestone_id: int64? @nullable
+  /// Whether the task is archived. Archived tasks are excluded from default
+  /// list and board views but stay readable by id. Absent means false, as
+  /// with every other non-nullable scalar in this message.
+  archived: bool
 }
 
 message TaskComment {
@@ -284,6 +288,9 @@ message UpdateTaskBody {
   start_date: string @required
   /// labels is the labels value for this contract.
   labels: int64[] @min_items(1)
+  /// Updated archived status; absent to keep current value. True archives the
+  /// task, false restores it.
+  archived: bool? @nullable
 }
 
 message UpdateTaskRequest {

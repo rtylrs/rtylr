@@ -37,6 +37,7 @@ type Task struct {
 	SectionId        *int64   `json:"section_id,omitempty"`
 	CycleId          *int64   `json:"cycle_id,omitempty"`
 	MilestoneId      *int64   `json:"milestone_id,omitempty"`
+	Archived         bool     `json:"archived,omitempty"`
 }
 
 func (m *Task) MarshalJSON() ([]byte, error) {
@@ -404,6 +405,14 @@ func (x *Task) GetMilestoneId() int64 {
 		return zero
 	}
 	return *x.MilestoneId
+}
+
+func (x *Task) GetArchived() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Archived
 }
 
 type TaskComment struct {
@@ -1560,6 +1569,7 @@ type UpdateTaskBody struct {
 	DueDate     string  `json:"due_date,omitempty"`
 	StartDate   string  `json:"start_date,omitempty"`
 	Labels      []int64 `json:"labels,omitempty"`
+	Archived    *bool   `json:"archived,omitempty"`
 }
 
 func (m *UpdateTaskBody) MarshalJSON() ([]byte, error) {
@@ -1663,6 +1673,18 @@ func (x *UpdateTaskBody) GetLabels() []int64 {
 		return zero
 	}
 	return x.Labels
+}
+
+func (x *UpdateTaskBody) GetArchived() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.Archived == nil {
+		var zero bool
+		return zero
+	}
+	return *x.Archived
 }
 
 type UpdateTaskRequest struct {
