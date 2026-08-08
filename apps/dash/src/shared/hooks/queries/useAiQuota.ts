@@ -27,6 +27,10 @@ type RawAiUsage = Partial<AiUsage> & {
   period_end?: string;
 };
 
+type AiQuotaSettingsResponse = {
+  settings?: { mode?: AiQuotaMode };
+};
+
 function finiteNumber(value: unknown): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -71,9 +75,13 @@ export const useAiQuotaMode = () =>
 export const useUpdateAiQuotaMode = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (mode: AiQuotaMode) => unwrap(safe.put('/hub/ai/v1/quota-settings', { mode })),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['ai-quota-settings'] });
+    mutationFn: (mode: AiQuotaMode) =>
+      unwrap<AiQuotaSettingsResponse>(safe.put('/hub/ai/v1/quota-settings', { mode })),
+    onSuccess: (res, requestedMode) => {
+      const returnedMode = res?.settings?.mode;
+      const nextMode =
+        returnedMode === 'pool' || returnedMode === 'per_person' ? returnedMode : requestedMode;
+      qc.setQueryData<AiQuotaMode>(['ai-quota-settings'], nextMode);
       qc.invalidateQueries({ queryKey: ['ai-usage'] });
       toast.success('AI allocation updated');
     },
