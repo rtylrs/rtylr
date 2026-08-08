@@ -61,32 +61,11 @@ INSERT INTO flow_tasks
  assignee_id, reporter_id, due_date, start_date, estimated_hours, labels)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: GetTasksByProject :many
-SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
-       status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
-       estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
-FROM flow_tasks WHERE project_id = ? AND parent_task_id IS NULL
-ORDER BY sort_order ASC, created_at ASC;
-
 -- name: GetTaskByID :one
 SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
        status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
        estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
 FROM flow_tasks WHERE id = ?;
-
--- name: GetSubtasks :many
-SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
-       status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
-       estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
-FROM flow_tasks WHERE parent_task_id = ? ORDER BY sort_order ASC, created_at ASC;
-
--- name: GetMyTasks :many
-SELECT id, project_id, workspace_id, owner_id, parent_task_id, title, description,
-       status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
-       estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
-FROM flow_tasks
-WHERE assignee_id = ? AND status NOT IN ('done','cancelled')
-ORDER BY FIELD(priority,'urgent','high','medium','low','none'), due_date ASC;
 
 -- name: UpdateTask :exec
 UPDATE flow_tasks
