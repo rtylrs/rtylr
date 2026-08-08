@@ -31,6 +31,7 @@ export const Composer: React.FC<ComposerProps> = ({
   const [value, setValue] = useState('');
   const taRef = useRef<HTMLTextAreaElement>(null);
   const mode = useCaretSettingsStore((s) => s.mode);
+  const voiceEnabled = useCaretSettingsStore((s) => s.voiceEnabled);
   useAutosize(taRef, value);
   const inferredMode = useMemo(() => inferCaretModeForPrompt(value, mode), [mode, value]);
   const showModeHint = value.trim().length > 0 && inferredMode !== mode && !isStreaming;
@@ -58,6 +59,12 @@ export const Composer: React.FC<ComposerProps> = ({
     onSubmit(trimmed);
     setValue('');
   }, [value, isStreaming, onSubmit]);
+
+  const appendTranscript = useCallback((text: string): void => {
+    const normalized = text.trim();
+    if (!normalized) return;
+    setValue((prev) => (prev.length && !prev.endsWith(' ') ? `${prev} ` : prev) + normalized);
+  }, []);
 
   const handleKey = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -146,11 +153,7 @@ export const Composer: React.FC<ComposerProps> = ({
         <ModePicker />
         <span style={{ flex: 1 }} />
         {onAttach && <AttachButton onFiles={onAttach} />}
-        <MicButton
-          onTranscript={(text) =>
-            setValue((prev) => (prev.length && !prev.endsWith(' ') ? prev + ' ' : prev) + text)
-          }
-        />
+        {voiceEnabled && <MicButton onTranscript={appendTranscript} />}
         {isStreaming ? (
           <StopButton onStop={onStop} />
         ) : (

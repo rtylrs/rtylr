@@ -2,13 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Minimal Web Speech API shape. We don't import lib.dom types here because
 // `webkitSpeechRecognition` isn't in standard TS lib definitions.
-interface SpeechRecognitionResult {
+interface SpeechRecognitionAlternative {
   transcript: string;
+}
+interface SpeechRecognitionResult {
   isFinal: boolean;
+  0: SpeechRecognitionAlternative;
 }
 interface SpeechRecognitionEventLike {
-  resultIndex: number;
-  results: ArrayLike<ArrayLike<SpeechRecognitionResult>>;
+  results: ArrayLike<SpeechRecognitionResult>;
 }
 interface SpeechRecognitionLike {
   continuous: boolean;
@@ -62,10 +64,14 @@ export function useSpeechToText(lang = 'en-US'): UseSpeechToTextResult {
     rec.lang = lang;
     rec.onresult = (e) => {
       let out = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        out += e.results[i][0].transcript;
+      for (let i = 0; i < e.results.length; i++) {
+        const result = e.results[i];
+        if (result?.isFinal) out += result[0]?.transcript ?? '';
       }
-      setTranscript((prev) => prev + out);
+      // The browser keeps prior results in the list and revisits interim
+      // results as they change. Rebuilding from final results prevents the
+      // same words from being appended once per interim event.
+      setTranscript(out);
     };
     rec.onend = () => setListening(false);
     rec.onerror = (ev) => {
@@ -85,6 +91,7 @@ export function useSpeechToText(lang = 'en-US'): UseSpeechToTextResult {
 
   const start = useCallback((): void => {
     setError(null);
+    setTranscript('');
     const rec = recRef.current;
     if (!rec) return;
     try {

@@ -7,6 +7,8 @@ export { default as CaretMessage } from './components/CaretMessage';
 
 // Composition pieces (advanced consumers can build their own layouts)
 export { default as HeaderBar } from './components/header/HeaderBar';
+export { default as ChatTabs } from './components/ChatTabs';
+export type { ChatTabsProps } from './components/ChatTabs';
 export { default as MessageList } from './components/MessageList';
 export { default as MessageBubble } from './components/MessageBubble';
 export { default as MessageBlocks } from './components/MessageBlocks';
