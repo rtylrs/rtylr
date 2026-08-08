@@ -7,10 +7,18 @@ on:
       - "**.md"
       - "docs/**"
 
-# This workflow never touches a database. Schema changes are applied to the
-# production DB manually by an operator — CI does not create, migrate, or
-# connect to any database. Integration tests that need a DB skip themselves
-# unless DB_HOST is set (see internal/testutil.OpenDB).
+# The `test` job never touches a database. Schema changes are applied to the
+# production DB manually by an operator: CI does not create, migrate, or
+# connect to any production database. Integration tests that need a DB skip
+# themselves unless DB_HOST is set (see internal/testutil.OpenDB).
+#
+# The `role-gating-tests` job is the one exception. It provisions a throwaway
+# MySQL service container so the Flow project-role authorization tests actually
+# execute, because with DB_HOST unset they report `ok` without running a single
+# assertion. It deliberately runs only the workspaces api and domain packages:
+# the wider `internal/infrastructure` integration suites have pre-existing
+# failures against a freshly migrated database and would report red for reasons
+# unrelated to the change under review.
 jobs:
   test:
     name: Build, Vet & Test
@@ -59,3 +67,84 @@ jobs:
 
       - name: Run tests
         run: go test ./... -count=1 -timeout=10m
+
+  role-gating-tests:
+    name: Role Gating Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci_root_password
+          MYSQL_DATABASE: onion_ci
+          MYSQL_USER: onion_ci
+          MYSQL_PASSWORD: onion_ci_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci_root_password"
+          --health-interval=5s
+          --health-timeout=10s
+          --health-retries=30
+
+    env:
+      JWT_SECRET: test-jwt-secret-at-least-32-characters-long
+      APP_ENV: test
+      REDIS_ENABLED: "false"
+      INMEMORY_CACHE_MAX_SIZE_MB: "32"
+      CI: "true"
+      DB_HOST: 127.0.0.1
+      DB_PORT: "3306"
+      DB_USER: onion_ci
+      DB_PASSWORD: onion_ci_password
+      DB_NAME: onion_ci
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.26"
+          cache: true
+
+      - name: Install sqlc
+        run: |
+          curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
+            | tar -xz -C /usr/local/bin sqlc
+          sqlc version
+
+      - name: Generate sqlc code
+        run: |
+          chmod +x scripts/generate_sqlc.sh
+          ./scripts/generate_sqlc.sh
+
+      - name: Install MySQL client
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+
+      - name: Apply schema to the throwaway database
+        run: |
+          chmod +x scripts/migrate.sh
+          ./scripts/migrate.sh
+
+      # Guard against the failure mode this job exists to prevent: if OpenDB
+      # cannot reach the service container it skips instead of failing, and the
+      # job would pass while asserting nothing.
+      - name: Fail if the role gating tests skip
+        run: |
+          # pipefail matters: without it `tee` would swallow a non-zero go test
+          # exit code and the job would report green on failing tests.
+          set -o pipefail
+          go test ./internal/modules/workspaces/internal/api/... \
+                  ./internal/modules/workspaces/internal/domain/... \
+                  -count=1 -timeout=10m -v 2>&1 | tee test-output.txt
+          if grep -q '^--- SKIP' test-output.txt; then
+            echo "::error::Role gating tests skipped; they must run against the service container."
+            exit 1
+          fi
