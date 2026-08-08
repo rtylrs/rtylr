@@ -18,7 +18,7 @@
   "assignee": "Assigné à",
   "priority": "Priorité",
   "readOnlyAccess": "Vous disposez d'un accès en lecture seule et ne pouvez pas apporter de modifications",
-  "deleteRestricted": "Seuls les propriétaires et administrateurs de l'espace peuvent supprimer cet élément",
+  "deleteRestricted": "Seuls les administrateurs du projet peuvent supprimer cet élément",
   "comingSoon": "Bientôt disponible",
   "emojiPickerComingSoon": "Sélecteur d'émojis (bientôt disponible)",
   "focusToday": {
