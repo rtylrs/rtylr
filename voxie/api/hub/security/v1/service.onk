@@ -5,7 +5,7 @@ service SecurityService {
   /// Returns the current security settings.
   getSecurityState(GetSecurityStateRequest) -> GetSecurityStateResponse @get("/state")
 
-  /// Returns recent login events.
+  /// Returns paginated login events for the authenticated user.
   loginHistory(LoginHistoryRequest) -> LoginHistoryResponse @get("/login-history")
 
   /// Revokes all active sessions.
