@@ -41,7 +41,7 @@ func TestWorkspaces_CreateWorkspace_ReturnsPositiveID(t *testing.T) {
 func TestWorkspaces_GetWorkspacesByOwner_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, err := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID)
+	_, _, err := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("GetWorkspacesByOwner: %v", err)
 	}
@@ -60,7 +60,7 @@ func TestWorkspaces_CreateWorkspace_AppearsInList(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = repo.DeleteWorkspace(context.Background(), id, testutil.OwnerID) })
 
-	workspaces, err := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID)
+	workspaces, _, err := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID, 500, 0)
 	if err != nil {
 		t.Fatalf("GetWorkspacesByOwner: %v", err)
 	}
@@ -107,7 +107,7 @@ func TestWorkspaces_DeleteWorkspace_RemovesFromList(t *testing.T) {
 		t.Fatalf("DeleteWorkspace: %v", err)
 	}
 
-	workspaces, _ := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID)
+	workspaces, _, _ := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID, 500, 0)
 	for _, w := range workspaces {
 		if w.ID == id {
 			t.Errorf("deleted workspace id=%d still in list", id)
@@ -151,7 +151,7 @@ func TestWorkspaces_GetProjectsByWorkspace_NoError(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = repo.DeleteWorkspace(context.Background(), wsID, testutil.OwnerID) })
 
-	projects, err := repo.GetProjectsByWorkspace(context.Background(), wsID, testutil.OwnerID)
+	projects, _, err := repo.GetProjectsByWorkspace(context.Background(), wsID, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("GetProjectsByWorkspace: %v", err)
 	}
@@ -325,7 +325,7 @@ func TestWorkspaces_CreateProject_AppearsInList(t *testing.T) {
 		t.Fatalf("CreateProject: %v", err)
 	}
 
-	projects, err := repo.GetProjectsByWorkspace(ctx, wsID, testutil.OwnerID)
+	projects, _, err := repo.GetProjectsByWorkspace(ctx, wsID, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("GetProjectsByWorkspace: %v", err)
 	}
@@ -369,7 +369,7 @@ func TestWorkspaces_CreateTask_AppearsInProject(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = repo.DeleteTask(ctx, taskID, testutil.OwnerID) })
 
-	tasks, err := repo.GetTasksByProject(ctx, domain.ListTasksFilter{ProjectID: projID, WorkspaceID: wsID})
+	tasks, _, err := repo.GetTasksByProject(ctx, domain.ListTasksFilter{ProjectID: projID, WorkspaceID: wsID, Limit: 100})
 	if err != nil {
 		t.Fatalf("GetTasksByProject: %v", err)
 	}
@@ -416,7 +416,7 @@ func TestWorkspaces_DeleteTask_RemovesFromProject(t *testing.T) {
 		t.Fatalf("DeleteTask: %v", err)
 	}
 
-	tasks, _ := repo.GetTasksByProject(ctx, domain.ListTasksFilter{ProjectID: projID, WorkspaceID: wsID})
+	tasks, _, _ := repo.GetTasksByProject(ctx, domain.ListTasksFilter{ProjectID: projID, WorkspaceID: wsID, Limit: 100})
 	for _, tk := range tasks {
 		if tk.ID == taskID {
 			t.Errorf("deleted task id=%d still in list", taskID)
@@ -557,7 +557,7 @@ func TestWorkspaces_GetLabelsByWorkspace_ReturnsLabel(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = repo.DeleteLabel(ctx, labelID, testutil.OwnerID) })
 
-	labels, err := repo.GetLabelsByWorkspace(ctx, wsID)
+	labels, _, err := repo.GetLabelsByWorkspace(ctx, wsID, 100, 0)
 	if err != nil {
 		t.Fatalf("GetLabelsByWorkspace: %v", err)
 	}

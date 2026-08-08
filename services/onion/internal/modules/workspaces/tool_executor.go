@@ -77,7 +77,8 @@ func (m *Module) executeListTasksTool(ctx context.Context, input map[string]any)
 		return nil, errors.New("permission denied")
 	}
 
-	tasks, err := m.service.ListTasks(ctx, domain.ListTasksFilter{
+	offset := (parsed.Page - 1) * parsed.Limit
+	tasks, total, err := m.service.ListTasks(ctx, domain.ListTasksFilter{
 		ProjectID:   parsed.ProjectID,
 		WorkspaceID: workspaceID,
 		Status:      parsed.Status,
@@ -85,32 +86,25 @@ func (m *Module) executeListTasksTool(ctx context.Context, input map[string]any)
 		Priority:    parsed.Priority,
 		ActiveOnly:  parsed.ActiveOnly,
 		Compact:     parsed.Compact,
+		Limit:       parsed.Limit,
+		Offset:      offset,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	start := int((parsed.Page - 1) * parsed.Limit)
-	if start > len(tasks) {
-		start = len(tasks)
-	}
-	end := start + int(parsed.Limit)
-	if end > len(tasks) {
-		end = len(tasks)
-	}
-
-	payloads := make([]map[string]any, 0, end-start)
-	for _, task := range tasks[start:end] {
+	payloads := make([]map[string]any, 0, len(tasks))
+	for _, task := range tasks {
 		payloads = append(payloads, taskToolPayload(task))
 	}
 
 	return map[string]any{
 		"tasks":     payloads,
-		"total":     len(tasks),
+		"total":     total,
 		"returned":  len(payloads),
 		"page":      parsed.Page,
 		"page_size": parsed.Limit,
-		"has_more":  end < len(tasks),
+		"has_more":  offset+int64(len(payloads)) < total,
 		"filters": map[string]any{
 			"project_id":  parsed.ProjectID,
 			"workspace":   parsed.WorkspaceRaw,

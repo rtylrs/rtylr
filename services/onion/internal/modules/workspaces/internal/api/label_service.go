@@ -54,7 +54,8 @@ func (a *LabelAPI) ListLabels(ctx context.Context, req *flowlabelv1.ListLabelsRe
 		return nil, err
 	}
 
-	labels, err := a.Service.ListLabels(ctx, workspaceID)
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	labels, total, err := a.Service.ListLabels(ctx, workspaceID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list labels")
 	}
@@ -63,7 +64,10 @@ func (a *LabelAPI) ListLabels(ctx context.Context, req *flowlabelv1.ListLabelsRe
 	for _, l := range labels {
 		out = append(out, toLabel(l))
 	}
-	return &flowlabelv1.ListLabelsResponse{Labels: out}, nil
+	return &flowlabelv1.ListLabelsResponse{
+		Labels:     out,
+		Pagination: buildPagination(page, limit, total, len(labels)),
+	}, nil
 }
 
 func (a *LabelAPI) CreateLabel(ctx context.Context, req *flowlabelv1.CreateLabelRequest) (*flowlabelv1.CreateLabelResponse, error) {

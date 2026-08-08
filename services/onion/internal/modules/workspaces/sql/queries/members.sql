@@ -1,3 +1,6 @@
+-- name: CountWorkspaceMembers :one
+SELECT COUNT(*) FROM flow_workspace_members WHERE workspace_id = ?;
+
 -- cross-schema read from users — workspace member display names
 -- name: ListWorkspaceMembers :many
 SELECT
@@ -7,7 +10,8 @@ SELECT
 FROM flow_workspace_members wm
 LEFT JOIN users u ON u.id = wm.user_id
 WHERE wm.workspace_id = ?
-ORDER BY wm.joined_at ASC;
+ORDER BY wm.joined_at ASC
+LIMIT ? OFFSET ?;
 
 -- name: UpdateWorkspaceMemberRole :exec
 UPDATE flow_workspace_members
@@ -24,6 +28,9 @@ LIMIT 1;
 INSERT INTO flow_workspaces (owner_id, name, icon, color, is_default, is_personal, created_by)
 VALUES (?, 'Personal', '🏠', '#64C5B9', TRUE, TRUE, ?);
 
+-- name: CountProjectMembers :one
+SELECT COUNT(*) FROM flow_project_members WHERE project_id = ?;
+
 -- cross-schema read from users — project member display names
 -- name: ListProjectMembers :many
 SELECT
@@ -33,7 +40,8 @@ SELECT
 FROM flow_project_members pm
 LEFT JOIN users u ON u.id = pm.user_id
 WHERE pm.project_id = ?
-ORDER BY pm.joined_at ASC;
+ORDER BY pm.joined_at ASC
+LIMIT ? OFFSET ?;
 
 -- name: AddProjectMember :exec
 INSERT INTO flow_project_members (project_id, user_id, role)

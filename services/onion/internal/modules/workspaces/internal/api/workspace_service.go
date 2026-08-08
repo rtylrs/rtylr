@@ -62,13 +62,14 @@ func (a *WorkspaceAPI) resolveBusinessID(ctx context.Context) (int64, error) {
 	return businessID, nil
 }
 
-func (a *WorkspaceAPI) ListWorkspaces(ctx context.Context, _ *flowworkspacev1.ListWorkspacesRequest) (*flowworkspacev1.ListWorkspacesResponse, error) {
+func (a *WorkspaceAPI) ListWorkspaces(ctx context.Context, req *flowworkspacev1.ListWorkspacesRequest) (*flowworkspacev1.ListWorkspacesResponse, error) {
 	businessID, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	workspaces, err := a.Service.ListWorkspaces(ctx, businessID)
+	page, limit, _ := resolvePagination(req.GetPage(), req.GetLimit())
+	workspaces, total, err := a.Service.ListWorkspaces(ctx, businessID, int64(page), int64(limit))
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list workspaces")
 	}
@@ -77,7 +78,10 @@ func (a *WorkspaceAPI) ListWorkspaces(ctx context.Context, _ *flowworkspacev1.Li
 	for _, w := range workspaces {
 		out = append(out, toWorkspace(w))
 	}
-	return &flowworkspacev1.ListWorkspacesResponse{Workspaces: out}, nil
+	return &flowworkspacev1.ListWorkspacesResponse{
+		Workspaces: out,
+		Pagination: buildPagination(page, limit, total, len(workspaces)),
+	}, nil
 }
 
 func (a *WorkspaceAPI) CreateWorkspace(ctx context.Context, req *flowworkspacev1.CreateWorkspaceRequest) (*flowworkspacev1.CreateWorkspaceResponse, error) {
@@ -256,7 +260,8 @@ func (a *WorkspaceAPI) ListWorkspaceMembers(ctx context.Context, req *flowworksp
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	members, err := a.Service.ListWorkspaceMembers(ctx, workspaceID)
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	members, total, err := a.Service.ListWorkspaceMembers(ctx, workspaceID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list members")
 	}
@@ -265,7 +270,10 @@ func (a *WorkspaceAPI) ListWorkspaceMembers(ctx context.Context, req *flowworksp
 	for _, m := range members {
 		out = append(out, toWorkspaceMember(m))
 	}
-	return &flowworkspacev1.ListWorkspaceMembersResponse{Members: out}, nil
+	return &flowworkspacev1.ListWorkspaceMembersResponse{
+		Members:    out,
+		Pagination: buildPagination(page, limit, total, len(members)),
+	}, nil
 }
 
 func (a *WorkspaceAPI) UpdateWorkspaceMemberRole(ctx context.Context, req *flowworkspacev1.UpdateWorkspaceMemberRoleRequest) (*flowworkspacev1.UpdateWorkspaceMemberRoleResponse, error) {

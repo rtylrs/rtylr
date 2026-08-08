@@ -66,7 +66,8 @@ func (a *ViewAPI) ListViews(ctx context.Context, req *flowviewv1.ListViewsReques
 		return nil, err
 	}
 
-	views, err := a.Service.ListViews(ctx, wsID)
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	views, total, err := a.Service.ListViews(ctx, wsID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
 	}
@@ -75,7 +76,10 @@ func (a *ViewAPI) ListViews(ctx context.Context, req *flowviewv1.ListViewsReques
 	for _, v := range views {
 		out = append(out, toView(v))
 	}
-	return &flowviewv1.ListViewsResponse{Views: out}, nil
+	return &flowviewv1.ListViewsResponse{
+		Views:      out,
+		Pagination: buildPagination(page, limit, total, len(views)),
+	}, nil
 }
 
 func (a *ViewAPI) CreateView(ctx context.Context, req *flowviewv1.CreateViewRequest) (*flowviewv1.CreateViewResponse, error) {
