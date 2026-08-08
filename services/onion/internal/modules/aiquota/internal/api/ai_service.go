@@ -70,8 +70,7 @@ func (a *AiAPI) UpdateAiQuotaSettings(ctx context.Context, req *hubaiv1.UpdateAi
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	role := strings.ToLower(device.User.Role)
-	if role != "owner" && role != "admin" {
+	if !canUpdateAiQuotaSettings(device.User.Role) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -88,4 +87,13 @@ func (a *AiAPI) UpdateAiQuotaSettings(ctx context.Context, req *hubaiv1.UpdateAi
 	return &hubaiv1.UpdateAiQuotaSettingsResponse{
 		Settings: &hubaiv1.AiQuotaSettings{Mode: normalized},
 	}, nil
+}
+
+func canUpdateAiQuotaSettings(role string) bool {
+	switch strings.ToLower(strings.TrimSpace(role)) {
+	case "owner", "admin", "console_admin":
+		return true
+	default:
+		return false
+	}
 }
