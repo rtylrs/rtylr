@@ -56,6 +56,7 @@ const Businesses: React.FC = () => {
 
   const businesses = data?.businesses ?? [];
   const currentBusinessId = Number(user?.businessId ?? 0);
+  const currentBusiness = businesses.find((business) => business.id === currentBusinessId);
   const ownedBusinesses = businesses.filter((business) => business.isOwned !== false);
   const activeOwnedBusinesses = ownedBusinesses.filter((business) => business.isActive !== false);
   const isTrialMode = subscription?.status === 'trial' || billing?.status === 'trial';
@@ -175,17 +176,26 @@ const Businesses: React.FC = () => {
   return (
     <>
       <HelmetContainer title={`${t('businesses.manageTitle')} · rtylr`} />
-      <div className="max-w-3xl space-y-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
-              {t('businesses.manageTitle')}
-            </h1>
-            <p className="mt-0.5 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-              {t('businesses.manageDescription')}
-            </p>
+      <div className="max-w-5xl space-y-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+              style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+            >
+              <Building2 size={21} />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
+                {t('businesses.manageTitle')}
+              </h1>
+              <p className="mt-1 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+                {t('businesses.manageDescription')}
+              </p>
+            </div>
           </div>
           <Button
+            className="shrink-0 cursor-pointer self-start sm:self-auto"
             onClick={() => setCreateOpen(true)}
             disabled={isTrialMode || !parentBusinessId}
             title={isTrialMode ? t('businesses.trialSingleBusinessTooltip') : undefined}
@@ -195,37 +205,40 @@ const Businesses: React.FC = () => {
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('businesses.manageCardTitle')}</CardTitle>
-            <CardDescription>{t('businesses.manageCardDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2
-                  size={20}
-                  className="animate-spin"
-                  style={{ color: 'var(--dash-text-dim)' }}
-                />
-              </div>
-            ) : businesses.length === 0 ? (
-              <div
-                className="rounded-lg border border-dashed px-4 py-10 text-center"
-                style={{ borderColor: 'var(--dash-border)' }}
-              >
-                <Building2
-                  size={24}
-                  className="mx-auto mb-2"
-                  style={{ color: 'var(--dash-text-dim)' }}
-                />
-                <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-                  {t('businesses.noBusinesses')}
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y" style={{ borderColor: 'var(--dash-border)' }}>
-                {businesses.map((business) => {
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
+          <Card className="overflow-hidden">
+            <CardHeader
+              className="border-b px-5 py-5"
+              style={{ borderColor: 'var(--dash-border)' }}
+            >
+              <CardTitle>{t('businesses.manageCardTitle')}</CardTitle>
+              <CardDescription>{t('businesses.manageCardDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 p-3 sm:p-4">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2
+                    size={20}
+                    className="animate-spin"
+                    style={{ color: 'var(--dash-text-dim)' }}
+                  />
+                </div>
+              ) : businesses.length === 0 ? (
+                <div
+                  className="rounded-xl border border-dashed px-4 py-10 text-center"
+                  style={{ borderColor: 'var(--dash-border)' }}
+                >
+                  <Building2
+                    size={24}
+                    className="mx-auto mb-2"
+                    style={{ color: 'var(--dash-text-dim)' }}
+                  />
+                  <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('businesses.noBusinesses')}
+                  </p>
+                </div>
+              ) : (
+                businesses.map((business) => {
                   const isCurrent = business.id === currentBusinessId;
                   const isOwned = business.isOwned !== false;
                   const isDeleteDisabled =
@@ -234,11 +247,18 @@ const Businesses: React.FC = () => {
                   return (
                     <div
                       key={business.id}
-                      className="flex items-center gap-3 py-4 first:pt-0 last:pb-0"
+                      className="group flex items-center gap-3 rounded-xl border px-3 py-3.5 transition-colors hover:bg-[var(--dash-hover)] sm:px-4"
+                      style={{
+                        background: isCurrent ? 'rgba(69,131,196,0.05)' : undefined,
+                        borderColor: isCurrent ? 'rgba(69,131,196,0.35)' : 'var(--dash-border)',
+                      }}
                     >
                       <div
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-                        style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                        style={{
+                          background: isCurrent ? 'rgba(69,131,196,0.14)' : 'var(--dash-hover)',
+                          color: isCurrent ? '#4583C4' : 'var(--dash-text-muted)',
+                        }}
                       >
                         <Building2 size={18} />
                       </div>
@@ -271,27 +291,29 @@ const Businesses: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        <p className="mt-0.5 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                        <p className="mt-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
                           {isOwned
                             ? t('businesses.ownerAccess')
                             : t('businesses.teamAccessDescription')}
                         </p>
                       </div>
                       {isOwned && (
-                        <div className="flex shrink-0 items-center gap-1">
+                        <div className="ml-auto flex shrink-0 items-center gap-1">
                           <Button
                             variant="ghost"
-                            size="icon"
+                            size="sm"
+                            className="h-8 cursor-pointer px-2 text-xs"
                             onClick={() => openRename(business)}
                             aria-label={`${t('businesses.rename')} ${business.name}`}
-                            title={t('businesses.rename')}
                             style={{ color: 'var(--dash-text-muted)' }}
                           >
-                            <Pencil size={15} />
+                            <Pencil size={13} />
+                            <span className="hidden md:inline">{t('businesses.rename')}</span>
                           </Button>
                           <Button
                             variant="ghost"
-                            size="icon"
+                            size="sm"
+                            className="h-8 cursor-pointer px-2 text-xs"
                             onClick={() => setDeleteTarget(business)}
                             disabled={isDeleteDisabled}
                             aria-label={`${t('businesses.delete')} ${business.name}`}
@@ -302,21 +324,58 @@ const Businesses: React.FC = () => {
                             }
                             style={{ color: '#ef4444' }}
                           >
-                            <Trash2 size={15} />
+                            <Trash2 size={13} />
+                            <span className="hidden md:inline">{t('businesses.delete')}</span>
                           </Button>
                         </div>
                       )}
                     </div>
                   );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                })
+              )}
+            </CardContent>
+          </Card>
 
-        <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-          {t('businesses.manageNote')}
-        </p>
+          <div className="space-y-5">
+            <Card className="overflow-hidden">
+              <div
+                className="p-5"
+                style={{
+                  background:
+                    'linear-gradient(145deg, rgba(69,131,196,0.16), rgba(69,131,196,0.04))',
+                  borderBottom: '1px solid var(--dash-border)',
+                }}
+              >
+                <p
+                  className="text-[10px] font-semibold uppercase tracking-widest"
+                  style={{ color: '#4583C4' }}
+                >
+                  {t('businesses.current')}
+                </p>
+                <p
+                  className="mt-2 truncate text-base font-semibold"
+                  style={{ color: 'var(--dash-text)' }}
+                >
+                  {currentBusiness?.name ?? user?.businessName ?? t('businesses.myBusinesses')}
+                </p>
+                <div
+                  className="mt-3 inline-flex items-center gap-1.5 text-xs"
+                  style={{ color: 'var(--dash-text-muted)' }}
+                >
+                  <Check size={13} style={{ color: '#4583C4' }} />
+                  {currentBusiness?.isOwned === false
+                    ? t('businesses.teamAccess')
+                    : t('businesses.ownerAccess')}
+                </div>
+              </div>
+              <CardContent className="p-5">
+                <p className="text-xs leading-5" style={{ color: 'var(--dash-text-dim)' }}>
+                  {t('businesses.manageNote')}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
 
       <Dialog open={createOpen} onOpenChange={closeCreate}>
