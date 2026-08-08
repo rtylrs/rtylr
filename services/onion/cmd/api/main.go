@@ -514,7 +514,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		Apps:                  apps.NewModule(ctx, dbclient.Pool()),
 		Automations:           automations.NewModule(ctx, dbclient.Pool()),
 		BankAccounts:          bankAccountsModule,
-		Benefits:              benefits.NewModule(ctx, dbclient.Pool()),
+		Benefits:              benefits.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		Billing:               billing.NewModule(ctx, dbclient.Pool()),
 		Subscriptions:         subscriptions.NewModule(ctx, dbclient.Pool()),
 		Bills:                 billsModule,
