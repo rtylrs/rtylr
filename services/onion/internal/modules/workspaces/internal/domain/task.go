@@ -25,6 +25,7 @@ type Task struct {
 	ActualHours    *float64
 	SortOrder      int
 	Labels         []int64
+	Archived       bool
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 

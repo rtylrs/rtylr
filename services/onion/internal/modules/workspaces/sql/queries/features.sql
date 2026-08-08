@@ -163,7 +163,7 @@ SELECT
     id, project_id, workspace_id, owner_id, parent_task_id, section_id,
     title, description, status, priority,
     assignee_id, reporter_id, due_date, start_date, completed_at,
-    estimated_hours, actual_hours, sort_order, labels,
+    estimated_hours, actual_hours, sort_order, labels, archived,
     created_at, updated_at
 FROM flow_tasks
 WHERE workspace_id = ? AND assignee_id = ? AND status NOT IN ('done', 'cancelled') AND parent_task_id IS NULL
