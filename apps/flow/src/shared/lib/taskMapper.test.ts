@@ -121,8 +121,11 @@ describe('apiTaskToTask', () => {
     expect(out.archived).toBe(true);
   });
 
-  it('defaults archived to falsy when the field is missing', () => {
+  it('normalises a missing archived field to false', () => {
+    // `archived` is omitempty on the contract, so an unarchived task comes
+    // back with the key absent. The mapper resolves that to a real `false`
+    // rather than leaking `undefined` into the store.
     const out = apiTaskToTask(baseApiTask());
-    expect(out.archived).toBeFalsy();
+    expect(out.archived).toBe(false);
   });
 });
