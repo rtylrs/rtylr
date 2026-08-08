@@ -10,7 +10,7 @@ import (
 const asyncUserHookTimeout = 10 * time.Second
 
 type loginRecorder interface {
-	RecordLogin(ctx context.Context, userID int64, email, method, ip string, success bool) error
+	RecordLogin(ctx context.Context, userID int64, email, method, ip, userAgent string, success bool) error
 }
 
 func runAsyncUserHook(ctx context.Context, userID int64, hook func(context.Context, int64)) {
@@ -31,7 +31,7 @@ func runAsyncUserHook(ctx context.Context, userID int64, hook func(context.Conte
 	}()
 }
 
-func runAsyncLoginTasks(ctx context.Context, recorder loginRecorder, userID int64, email, ip string, hook func(context.Context, int64)) {
+func runAsyncLoginTasks(ctx context.Context, recorder loginRecorder, userID int64, email, ip, userAgent string, hook func(context.Context, int64)) {
 	if recorder == nil && hook == nil {
 		return
 	}
@@ -47,7 +47,7 @@ func runAsyncLoginTasks(ctx context.Context, recorder loginRecorder, userID int6
 		defer cancel()
 
 		if recorder != nil {
-			if err := recorder.RecordLogin(taskCtx, userID, email, "email", ip, true); err != nil {
+			if err := recorder.RecordLogin(taskCtx, userID, email, "email", ip, userAgent, true); err != nil {
 				logger.Ctx(taskCtx).Warn("failed to record login", logger.Int("user_id", int(userID)), logger.Error(err))
 			}
 		}

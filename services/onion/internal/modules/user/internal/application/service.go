@@ -438,8 +438,8 @@ func (c *AccessTokenClaims) SetExpiration(exp time.Time) {
 }
 
 // RecordLogin delegates to the repository to write a login history entry.
-func (s *Service) RecordLogin(ctx context.Context, userID int64, email, method, ip string, success bool) error {
-	return s.repo.RecordLogin(ctx, userID, email, method, ip, success)
+func (s *Service) RecordLogin(ctx context.Context, userID int64, email, method, ip, userAgent string, success bool) error {
+	return s.repo.RecordLogin(ctx, userID, email, method, ip, userAgent, success)
 }
 
 func (s *Service) AssignSubscription(ctx context.Context, ownerID int64, planSlug string) error {

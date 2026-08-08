@@ -52,16 +52,27 @@ func (r *Repository) SetTwoFactor(ctx context.Context, userID int64, enabled boo
 	return nil
 }
 
-func (r *Repository) GetLoginHistory(ctx context.Context, userID int64) ([]domain.LoginEntry, error) {
-	rows, err := r.queries.ListLoginHistory(ctx, userID)
+func (r *Repository) GetLoginHistory(ctx context.Context, userID int64, limit, offset int) ([]domain.LoginEntry, int64, error) {
+	total, err := r.queries.CountLoginHistory(ctx, userID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count login history", logger.Error(err))
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListLoginHistory(ctx, sqlc.ListLoginHistoryParams{
+		UserID: userID,
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get login history", logger.Error(err))
-		return nil, err
+		return nil, 0, err
 	}
 
 	entries := make([]domain.LoginEntry, 0, len(rows))
 	for _, row := range rows {
 		entry := domain.LoginEntry{
+			ID:        row.ID,
 			Email:     row.Email,
 			Method:    row.Method,
 			IP:        row.IpAddress,
@@ -75,7 +86,7 @@ func (r *Repository) GetLoginHistory(ctx context.Context, userID int64) ([]domai
 		}
 		entries = append(entries, entry)
 	}
-	return entries, nil
+	return entries, total, nil
 }
 
 func (r *Repository) InvalidateAllSessions(ctx context.Context, userID int64) error {

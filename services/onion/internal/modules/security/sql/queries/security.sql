@@ -5,11 +5,14 @@ SELECT COALESCE(two_factor_enabled, FALSE) FROM users WHERE id = ?;
 UPDATE users SET two_factor_enabled = ? WHERE id = ?;
 
 -- name: ListLoginHistory :many
-SELECT email, method, COALESCE(ip_address,''), COALESCE(user_agent,''), success, created_at
+SELECT id, email, method, COALESCE(ip_address,''), COALESCE(user_agent,''), success, created_at
 FROM login_history
 WHERE user_id = ?
-ORDER BY created_at DESC
-LIMIT 20;
+ORDER BY created_at DESC, id DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountLoginHistory :one
+SELECT COUNT(*) FROM login_history WHERE user_id = ?;
 
 -- name: InvalidateAllSessions :exec
 UPDATE user_sessions SET revoked_at = NOW() WHERE user_id = ? AND revoked_at IS NULL;

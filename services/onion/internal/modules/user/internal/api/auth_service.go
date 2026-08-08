@@ -112,8 +112,8 @@ func (a *AuthAPI) Login(ctx context.Context, req *commonauthv1.LoginRequest) (*c
 		return nil, onekithttp.NewError(http.StatusInternalServerError, "Failed to retrieve user information")
 	}
 
-	ip := authPkg.DeviceCtx(ctx).IP
-	runAsyncLoginTasks(ctx, a.UserService, userID, req.GetEmail(), ip, a.OnUserLogin)
+	device := authPkg.DeviceCtx(ctx)
+	runAsyncLoginTasks(ctx, a.UserService, userID, req.GetEmail(), device.IP, device.UserAgent, a.OnUserLogin)
 
 	return &commonauthv1.LoginResponse{
 		Token:          token,

@@ -20,6 +20,7 @@ type TwoFactorInput struct {
 }
 
 type LoginEntry struct {
+	ID        int64     `json:"id"`
 	Email     string    `json:"email"`
 	Method    string    `json:"method"`
 	IP        string    `json:"ip"`

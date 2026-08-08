@@ -10,8 +10,8 @@ type fakeLoginRecorder struct {
 	recorded chan error
 }
 
-func (f *fakeLoginRecorder) RecordLogin(ctx context.Context, userID int64, email, method, ip string, success bool) error {
-	if userID != 42 || email != "alice@example.com" || method != "email" || ip != "127.0.0.1" || !success {
+func (f *fakeLoginRecorder) RecordLogin(ctx context.Context, userID int64, email, method, ip, userAgent string, success bool) error {
+	if userID != 42 || email != "alice@example.com" || method != "email" || ip != "127.0.0.1" || userAgent != "TestAgent/1.0" || !success {
 		f.recorded <- context.Canceled
 		return nil
 	}
@@ -53,7 +53,7 @@ func TestRunAsyncLoginTasksIgnoresParentCancellation(t *testing.T) {
 
 	recorder := &fakeLoginRecorder{recorded: make(chan error, 1)}
 	hookDone := make(chan error, 1)
-	runAsyncLoginTasks(parent, recorder, 42, "alice@example.com", "127.0.0.1", func(ctx context.Context, userID int64) {
+	runAsyncLoginTasks(parent, recorder, 42, "alice@example.com", "127.0.0.1", "TestAgent/1.0", func(ctx context.Context, userID int64) {
 		if userID != 42 {
 			hookDone <- context.Canceled
 			return

@@ -230,12 +230,13 @@ func (r *Repository) EnsureEmployeeForUser(ctx context.Context, ownerID, userID 
 }
 
 // RecordLogin writes a login history entry via sqlc.
-func (r *Repository) RecordLogin(ctx context.Context, userID int64, email, method, ip string, success bool) error {
+func (r *Repository) RecordLogin(ctx context.Context, userID int64, email, method, ip, userAgent string, success bool) error {
 	return r.queries.RecordLoginHistory(ctx, sqlc.RecordLoginHistoryParams{
 		UserID:    userID,
 		Email:     email,
 		Method:    method,
 		IpAddress: sql.NullString{String: ip, Valid: ip != ""},
+		UserAgent: sql.NullString{String: userAgent, Valid: userAgent != ""},
 		Success:   sql.NullBool{Bool: success, Valid: true},
 	})
 }

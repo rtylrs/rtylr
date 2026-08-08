@@ -163,7 +163,7 @@ func TestUser_GetUserRole_Owner(t *testing.T) {
 func TestUser_RecordLogin_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	err := repo.RecordLogin(context.Background(), testutil.OwnerID, "owner@example.com", "password", "127.0.0.1", true)
+	err := repo.RecordLogin(context.Background(), testutil.OwnerID, "owner@example.com", "password", "127.0.0.1", "IntegrationTest/1.0", true)
 	if err != nil {
 		t.Fatalf("RecordLogin: %v", err)
 	}
