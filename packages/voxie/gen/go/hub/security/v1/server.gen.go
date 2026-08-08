@@ -68,6 +68,12 @@ func RegisterSecurityServiceServer(srv SecurityServiceServer, opts ...ServerOpti
 	})
 	mux.HandleFunc("GET /hub/security/v1/login-history", func(w http.ResponseWriter, r *http.Request) {
 		req := new(LoginHistoryRequest)
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt32(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("page_size") != "" {
+			req.PageSize = parseInt32(r.URL.Query().Get("page_size"))
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
