@@ -1,4 +1,20 @@
 import type { Member } from '../stores/flowStore';
+import type { FlowProjectRole } from '../services/flowApi';
+
+/**
+ * Two different role vocabularies live in this file and they are not
+ * interchangeable:
+ *
+ * - `Member['role']` (owner|admin|member|viewer) is the business-wide team role.
+ *   Workspace-level questions - managing the workspace, creating projects,
+ *   inviting people - are answered with it.
+ * - `FlowProjectRole` (admin|member|viewer) comes from `flow_project_members` and
+ *   answers per-project questions. Editing and deleting inside a project are
+ *   scoped to a single project, so they use this one.
+ *
+ * A company admin who is only a viewer on a project must not be able to edit its
+ * tasks, which is why the two must stay separate.
+ */
 
 /** Returns a human-readable label for a member role. */
 export function roleLabel(role: Member['role']): string {
@@ -21,14 +37,34 @@ export function canCreateProject(role: Member['role']): boolean {
   return role === 'owner' || role === 'admin' || role === 'member';
 }
 
-/** Returns true if the role can edit tasks. */
-export function canEditTask(role: Member['role']): boolean {
+/** Returns true if the project role can edit tasks in that project. */
+export function canEditTask(role: FlowProjectRole): boolean {
   return role !== 'viewer';
 }
 
-/** Returns true if the role can delete resources. */
-export function canDelete(role: Member['role']): boolean {
-  return role === 'owner' || role === 'admin';
+/** Returns true if the project role can delete resources in that project. */
+export function canDelete(role: FlowProjectRole): boolean {
+  return role === 'admin';
+}
+
+/** Project roles ordered most to least privileged. */
+const PROJECT_ROLE_RANK: Record<FlowProjectRole, number> = {
+  admin: 0,
+  member: 1,
+  viewer: 2,
+};
+
+/**
+ * Returns the least privileged of the given project roles, or undefined for an
+ * empty list. Used to gate an action that spans several projects at once: the
+ * user may only do it if they may do it everywhere it would apply.
+ */
+export function mostRestrictiveProjectRole(roles: FlowProjectRole[]): FlowProjectRole | undefined {
+  return roles.reduce<FlowProjectRole | undefined>(
+    (lowest, role) =>
+      lowest === undefined || PROJECT_ROLE_RANK[role] > PROJECT_ROLE_RANK[lowest] ? role : lowest,
+    undefined
+  );
 }
 
 /** Returns true if the role can invite members. */
