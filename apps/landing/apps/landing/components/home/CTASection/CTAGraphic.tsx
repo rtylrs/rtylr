@@ -65,7 +65,7 @@ const CTAGraphic: React.FC = (): React.JSX.Element => {
           <button
             type="button"
             key={node.id}
-            className={styles.node}
+            className={node.id === 'pos' ? `${styles.node} ${styles.nodePos}` : styles.node}
             style={{ left: `${x}%`, top: `${y}%` }}
             onMouseEnter={() => setHovered(i)}
             onMouseLeave={() => setHovered(null)}
