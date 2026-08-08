@@ -25,6 +25,16 @@ func (m *mockRepo) Create(_ context.Context, _ int64, input domain.BenefitPlanIn
 	return m.createID, m.createErr
 }
 
+// Enrollment methods are unused by the plan tests below; mockEnrollmentRepo
+// overrides them where behavior matters.
+func (m *mockRepo) CreateEnrollment(_ context.Context, _, _, _ int64) (domain.BenefitEnrollment, error) {
+	return domain.BenefitEnrollment{}, nil
+}
+
+func (m *mockRepo) ListEnrollmentsByEmployee(_ context.Context, _, _ int64, _, _ int32) ([]domain.BenefitEnrollment, int32, error) {
+	return nil, 0, nil
+}
+
 func TestList_Delegates(t *testing.T) {
 	want := []domain.BenefitPlan{{ID: 1, Name: "Health"}}
 	s := &Service{repo: &mockRepo{listResult: want}}

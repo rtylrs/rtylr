@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/benefits/internal/api"
 	"github.com/voxire/onion/internal/modules/benefits/internal/application"
+	"github.com/voxire/onion/internal/modules/benefits/internal/domain"
 	hrbenefitv1 "github.com/voxire/voxie/gen/go/hr/benefit/v1"
 )
 
@@ -15,8 +16,10 @@ type Module struct {
 	service *application.Service
 }
 
-func NewModule(ctx context.Context, db *sql.DB) *Module {
-	return &Module{service: application.NewService(ctx, db)}
+// NewModule takes an EmployeeDirectory (hr_core satisfies it) so self-service
+// enrollment can resolve the caller's employee record.
+func NewModule(ctx context.Context, db *sql.DB, employees domain.EmployeeDirectory) *Module {
+	return &Module{service: application.NewService(ctx, db, employees)}
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

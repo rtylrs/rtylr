@@ -19,14 +19,20 @@ const (
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.BenefitPlan, error)
 	Create(ctx context.Context, businessID int64, input domain.BenefitPlanInput) (int64, error)
+	CreateEnrollment(ctx context.Context, businessID, employeeID, planID int64) (domain.BenefitEnrollment, error)
+	ListEnrollmentsByEmployee(ctx context.Context, businessID, employeeID int64, limit, offset int32) ([]domain.BenefitEnrollment, int32, error)
 }
 
 type Service struct {
-	repo repository
+	repo      repository
+	employees domain.EmployeeDirectory
 }
 
-func NewService(_ context.Context, db *sql.DB) *Service {
-	return &Service{repo: infrastructure.NewRepository(db)}
+func NewService(_ context.Context, db *sql.DB, employees domain.EmployeeDirectory) *Service {
+	return &Service{
+		repo:      infrastructure.NewRepository(db),
+		employees: employees,
+	}
 }
 
 func invalidateBenefitsScope(ctx context.Context, businessID int64) {
