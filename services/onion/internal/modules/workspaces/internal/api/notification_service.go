@@ -39,13 +39,14 @@ func toNotification(n domain.Notification) *flownotificationv1.Notification {
 	return out
 }
 
-func (a *NotificationAPI) ListNotifications(ctx context.Context, _ *flownotificationv1.ListNotificationsRequest) (*flownotificationv1.ListNotificationsResponse, error) {
+func (a *NotificationAPI) ListNotifications(ctx context.Context, req *flownotificationv1.ListNotificationsRequest) (*flownotificationv1.ListNotificationsResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	notifs, err := a.Service.ListNotifications(ctx, authUser.UserID)
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	notifs, total, err := a.Service.ListNotifications(ctx, authUser.UserID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
 	}
@@ -54,7 +55,10 @@ func (a *NotificationAPI) ListNotifications(ctx context.Context, _ *flownotifica
 	for _, n := range notifs {
 		out = append(out, toNotification(n))
 	}
-	return &flownotificationv1.ListNotificationsResponse{Notifications: out}, nil
+	return &flownotificationv1.ListNotificationsResponse{
+		Notifications: out,
+		Pagination:    buildPagination(page, limit, total, len(notifs)),
+	}, nil
 }
 
 func (a *NotificationAPI) MarkNotificationRead(ctx context.Context, req *flownotificationv1.MarkNotificationReadRequest) (*flownotificationv1.MarkNotificationReadResponse, error) {

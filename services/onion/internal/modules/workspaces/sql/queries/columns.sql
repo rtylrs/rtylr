@@ -2,7 +2,8 @@
 SELECT id, project_id, workspace_id, name, color, sort_order, created_by, created_at, updated_at
 FROM flow_project_columns
 WHERE project_id = ?
-ORDER BY sort_order ASC;
+ORDER BY sort_order ASC
+LIMIT ? OFFSET ?;
 
 -- name: CreateColumn :execresult
 INSERT INTO flow_project_columns (project_id, workspace_id, name, color, sort_order, created_by)

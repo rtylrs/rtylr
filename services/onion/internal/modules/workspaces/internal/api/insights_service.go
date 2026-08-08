@@ -97,7 +97,8 @@ func (a *InsightsAPI) GetTeamWorkload(ctx context.Context, req *flowinsightsv1.G
 		return nil, err
 	}
 
-	workload, err := a.Service.GetTeamWorkload(ctx, wsID)
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	workload, total, err := a.Service.GetTeamWorkload(ctx, wsID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
 	}
@@ -127,7 +128,10 @@ func (a *InsightsAPI) GetTeamWorkload(ctx context.Context, req *flowinsightsv1.G
 			Tasks:         tasks,
 		})
 	}
-	return &flowinsightsv1.GetTeamWorkloadResponse{Members: members}, nil
+	return &flowinsightsv1.GetTeamWorkloadResponse{
+		Members:    members,
+		Pagination: buildPagination(page, limit, total, len(workload)),
+	}, nil
 }
 
 func (a *InsightsAPI) GetRoadmap(ctx context.Context, req *flowinsightsv1.GetRoadmapRequest) (*flowinsightsv1.GetRoadmapResponse, error) {
@@ -141,17 +145,20 @@ func (a *InsightsAPI) GetRoadmap(ctx context.Context, req *flowinsightsv1.GetRoa
 		return nil, err
 	}
 
-	projects, err := a.Service.GetRoadmap(ctx, wsID)
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	projects, total, err := a.Service.GetRoadmap(ctx, wsID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
 	}
 
 	payloads := make([]*flowinsightsv1.RoadmapProject, 0, len(projects))
+	// One GetProjectTaskCounts call per project on this page - bounded by the
+	// outer pagination (at most `limit` projects), not by its own cap.
 	for _, p := range projects {
-		total, done := a.Service.GetProjectTaskCounts(ctx, p.ID)
+		taskCount, done := a.Service.GetProjectTaskCounts(ctx, p.ID)
 		progress := int32(0)
-		if total > 0 {
-			progress = int32(float64(done) / float64(total) * 100)
+		if taskCount > 0 {
+			progress = int32(float64(done) / float64(taskCount) * 100)
 		}
 
 		rp := &flowinsightsv1.RoadmapProject{
@@ -160,7 +167,7 @@ func (a *InsightsAPI) GetRoadmap(ctx context.Context, req *flowinsightsv1.GetRoa
 			Color:       p.Color,
 			Progress:    progress,
 			DoneCount:   int32(done),
-			TaskCount:   int32(total),
+			TaskCount:   int32(taskCount),
 			Description: p.Description,
 			WorkspaceId: strconv.FormatInt(p.WorkspaceID, 10),
 		}
@@ -172,5 +179,8 @@ func (a *InsightsAPI) GetRoadmap(ctx context.Context, req *flowinsightsv1.GetRoa
 		}
 		payloads = append(payloads, rp)
 	}
-	return &flowinsightsv1.GetRoadmapResponse{Projects: payloads}, nil
+	return &flowinsightsv1.GetRoadmapResponse{
+		Projects:   payloads,
+		Pagination: buildPagination(page, limit, total, len(projects)),
+	}, nil
 }

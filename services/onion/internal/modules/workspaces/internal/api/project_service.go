@@ -109,7 +109,8 @@ func (a *ProjectAPI) ListProjects(ctx context.Context, req *flowprojectv1.ListPr
 		return nil, err
 	}
 
-	projects, err := a.Service.ListProjects(ctx, workspaceID, businessID)
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	projects, total, err := a.Service.ListProjects(ctx, workspaceID, businessID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list projects")
 	}
@@ -118,7 +119,10 @@ func (a *ProjectAPI) ListProjects(ctx context.Context, req *flowprojectv1.ListPr
 	for _, p := range projects {
 		out = append(out, toProject(p))
 	}
-	return &flowprojectv1.ListProjectsResponse{Projects: out}, nil
+	return &flowprojectv1.ListProjectsResponse{
+		Projects:   out,
+		Pagination: buildPagination(page, limit, total, len(projects)),
+	}, nil
 }
 
 func (a *ProjectAPI) CreateProject(ctx context.Context, req *flowprojectv1.CreateProjectRequest) (*flowprojectv1.CreateProjectResponse, error) {

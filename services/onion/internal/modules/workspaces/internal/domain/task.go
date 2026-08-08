@@ -144,6 +144,8 @@ type ListTasksFilter struct {
 	Priority    string
 	ActiveOnly  bool
 	Compact     bool
+	Limit       int64
+	Offset      int64
 }
 
 type Label struct {

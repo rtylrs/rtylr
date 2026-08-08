@@ -55,7 +55,8 @@ func toProjectMember(m domain.ProjectMember) *flowprojectv1.ProjectMember {
 }
 
 func (a *ProjectAPI) ListProjectColumns(ctx context.Context, req *flowprojectv1.ListProjectColumnsRequest) (*flowprojectv1.ListProjectColumnsResponse, error) {
-	cols, err := a.Service.GetColumnsByProject(ctx, req.GetProjectId())
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	cols, total, err := a.Service.GetColumnsByProject(ctx, req.GetProjectId(), int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list columns")
 	}
@@ -63,7 +64,10 @@ func (a *ProjectAPI) ListProjectColumns(ctx context.Context, req *flowprojectv1.
 	for _, c := range cols {
 		out = append(out, toProjectColumn(c))
 	}
-	return &flowprojectv1.ListProjectColumnsResponse{Columns: out}, nil
+	return &flowprojectv1.ListProjectColumnsResponse{
+		Columns:    out,
+		Pagination: buildPagination(page, limit, total, len(cols)),
+	}, nil
 }
 
 func (a *ProjectAPI) CreateProjectColumn(ctx context.Context, req *flowprojectv1.CreateProjectColumnRequest) (*flowprojectv1.CreateProjectColumnResponse, error) {
@@ -163,7 +167,8 @@ func (a *ProjectAPI) ListProjectMembers(ctx context.Context, req *flowprojectv1.
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	members, err := a.Service.ListProjectMembers(ctx, req.GetProjectId())
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	members, total, err := a.Service.ListProjectMembers(ctx, req.GetProjectId(), int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list project members")
 	}
@@ -171,7 +176,10 @@ func (a *ProjectAPI) ListProjectMembers(ctx context.Context, req *flowprojectv1.
 	for _, m := range members {
 		out = append(out, toProjectMember(m))
 	}
-	return &flowprojectv1.ListProjectMembersResponse{Members: out}, nil
+	return &flowprojectv1.ListProjectMembersResponse{
+		Members:    out,
+		Pagination: buildPagination(page, limit, total, len(members)),
+	}, nil
 }
 
 func (a *ProjectAPI) AddProjectMember(ctx context.Context, req *flowprojectv1.AddProjectMemberRequest) (*flowprojectv1.AddProjectMemberResponse, error) {

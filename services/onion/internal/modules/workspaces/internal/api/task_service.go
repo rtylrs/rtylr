@@ -51,34 +51,44 @@ func (a *TaskAPI) ListTasks(ctx context.Context, req *flowtaskv1.ListTasksReques
 		return nil, onekiterrors.PermissionDenied()
 	}
 
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	filter := domain.ListTasksFilter{
 		ProjectID:   req.GetProjectId(),
 		WorkspaceID: workspaceID,
 		Status:      req.GetStatus(),
 		AssigneeID:  req.AssigneeId,
 		Priority:    req.GetPriority(),
+		Limit:       int64(limit),
+		Offset:      offset,
 	}
 
-	tasks, err := a.Service.ListTasks(ctx, filter)
+	tasks, total, err := a.Service.ListTasks(ctx, filter)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list tasks")
 	}
 
-	return &flowtaskv1.ListTasksResponse{Tasks: tasksToProto(tasks)}, nil
+	return &flowtaskv1.ListTasksResponse{
+		Tasks:      tasksToProto(tasks),
+		Pagination: buildPagination(page, limit, total, len(tasks)),
+	}, nil
 }
 
-func (a *TaskAPI) GetMyTasks(ctx context.Context, _ *flowtaskv1.GetMyTasksRequest) (*flowtaskv1.GetMyTasksResponse, error) {
+func (a *TaskAPI) GetMyTasks(ctx context.Context, req *flowtaskv1.GetMyTasksRequest) (*flowtaskv1.GetMyTasksResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	tasks, err := a.Service.GetMyTasks(ctx, authUser.UserID)
+	page, limit, _ := resolvePagination(req.GetPage(), req.GetLimit())
+	tasks, total, err := a.Service.GetMyTasks(ctx, authUser.UserID, int64(page), int64(limit))
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get my tasks")
 	}
 
-	return &flowtaskv1.GetMyTasksResponse{Tasks: tasksToProto(tasks)}, nil
+	return &flowtaskv1.GetMyTasksResponse{
+		Tasks:      tasksToProto(tasks),
+		Pagination: buildPagination(page, limit, total, len(tasks)),
+	}, nil
 }
 
 func (a *TaskAPI) CreateTask(ctx context.Context, req *flowtaskv1.CreateTaskRequest) (*flowtaskv1.CreateTaskResponse, error) {
@@ -321,12 +331,16 @@ func (a *TaskAPI) GetSubtasks(ctx context.Context, req *flowtaskv1.GetSubtasksRe
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	subtasks, err := a.Service.GetSubtasks(ctx, req.GetTaskId())
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	subtasks, total, err := a.Service.GetSubtasks(ctx, req.GetTaskId(), int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get subtasks")
 	}
 
-	return &flowtaskv1.GetSubtasksResponse{Subtasks: subtasksToCompact(subtasks)}, nil
+	return &flowtaskv1.GetSubtasksResponse{
+		Subtasks:   subtasksToCompact(subtasks),
+		Pagination: buildPagination(page, limit, total, len(subtasks)),
+	}, nil
 }
 
 func (a *TaskAPI) AddComment(ctx context.Context, req *flowtaskv1.AddCommentRequest) (*flowtaskv1.AddCommentResponse, error) {
@@ -486,12 +500,16 @@ func (a *TaskAPI) SearchTasks(ctx context.Context, req *flowtaskv1.SearchTasksRe
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
 	}
 
-	tasks, err := a.Service.SearchTasks(ctx, workspaceID, req.GetQ())
+	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
+	tasks, total, err := a.Service.SearchTasks(ctx, workspaceID, req.GetQ(), int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to search tasks")
 	}
 
-	return &flowtaskv1.SearchTasksResponse{Tasks: tasksToProto(tasks)}, nil
+	return &flowtaskv1.SearchTasksResponse{
+		Tasks:      tasksToProto(tasks),
+		Pagination: buildPagination(page, limit, total, len(tasks)),
+	}, nil
 }
 
 func (a *TaskAPI) GetMyTasksProject(ctx context.Context, _ *flowtaskv1.GetMyTasksProjectRequest) (*flowtaskv1.GetMyTasksProjectResponse, error) {

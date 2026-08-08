@@ -1,3 +1,6 @@
+-- name: CountCycles :one
+SELECT COUNT(*) FROM flow_cycles WHERE workspace_id = ?;
+
 -- name: ListCycles :many
 SELECT
     c.id, c.workspace_id, c.project_id, c.name, c.description, c.status,
@@ -9,11 +12,15 @@ LEFT JOIN flow_cycle_tasks ct ON ct.cycle_id = c.id
 LEFT JOIN flow_tasks t ON t.id = ct.task_id
 WHERE c.workspace_id = ?
 GROUP BY c.id
-ORDER BY c.start_date DESC;
+ORDER BY c.start_date DESC
+LIMIT ? OFFSET ?;
 
 -- name: CreateCycle :execresult
 INSERT INTO flow_cycles (owner_id, business_id, workspace_id, project_id, name, description, start_date, end_date, created_by)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: CountMilestonesByWorkspace :one
+SELECT COUNT(*) FROM flow_milestones WHERE workspace_id = ?;
 
 -- name: ListMilestonesByWorkspace :many
 SELECT
@@ -28,7 +35,11 @@ LEFT JOIN flow_milestone_tasks mt ON mt.milestone_id = m.id
 LEFT JOIN flow_tasks t ON t.id = mt.task_id
 WHERE m.workspace_id = ?
 GROUP BY m.id
-ORDER BY m.due_date ASC;
+ORDER BY m.due_date ASC
+LIMIT ? OFFSET ?;
+
+-- name: CountMilestonesByProject :one
+SELECT COUNT(*) FROM flow_milestones WHERE workspace_id = ? AND project_id = ?;
 
 -- name: ListMilestonesByProject :many
 SELECT
@@ -43,17 +54,22 @@ LEFT JOIN flow_milestone_tasks mt ON mt.milestone_id = m.id
 LEFT JOIN flow_tasks t ON t.id = mt.task_id
 WHERE m.workspace_id = ? AND m.project_id = ?
 GROUP BY m.id
-ORDER BY m.due_date ASC;
+ORDER BY m.due_date ASC
+LIMIT ? OFFSET ?;
 
 -- name: CreateMilestone :execresult
 INSERT INTO flow_milestones (owner_id, business_id, project_id, workspace_id, name, description, due_date, created_by)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
+-- name: CountViewsByWorkspace :one
+SELECT COUNT(*) FROM flow_views WHERE workspace_id = ?;
+
 -- name: ListViews :many
 SELECT id, workspace_id, name, icon, filters, group_by, sort_by, sort_dir, created_by, created_at
 FROM flow_views
 WHERE workspace_id = ?
-ORDER BY created_at ASC;
+ORDER BY created_at ASC
+LIMIT ? OFFSET ?;
 
 -- name: CreateView :execresult
 INSERT INTO flow_views (workspace_id, name, icon, filters, group_by, sort_by, sort_dir, created_by)
@@ -118,6 +134,9 @@ GROUP BY u.id, u.full_name, u.email
 ORDER BY SUM(tl.duration_minutes) DESC
 LIMIT 10;
 
+-- name: CountWorkspaceMembersForWorkload :one
+SELECT COUNT(*) FROM flow_workspace_members WHERE workspace_id = ?;
+
 -- cross-schema read from users — team workload member summary
 -- name: GetTeamWorkload :many
 SELECT
@@ -132,8 +151,13 @@ LEFT JOIN flow_tasks t ON t.assignee_id = u.id
     AND t.parent_task_id IS NULL
 WHERE wm.workspace_id = ?
 GROUP BY u.id, u.full_name, u.email
-ORDER BY task_count DESC;
+ORDER BY task_count DESC
+LIMIT ? OFFSET ?;
 
+-- Per-member fan-out from GetTeamWorkload, one call per member on the current
+-- page. Intentionally capped at 10 - a workload card shows a preview of a
+-- member's open work, not their full backlog. The outer member list is what's
+-- paginated; this inner cap is fixed regardless of page size.
 -- name: GetTeamWorkloadMemberTasks :many
 SELECT
     id, project_id, workspace_id, owner_id, parent_task_id, section_id,
@@ -146,13 +170,20 @@ WHERE workspace_id = ? AND assignee_id = ? AND status NOT IN ('done', 'cancelled
 ORDER BY priority DESC, due_date ASC
 LIMIT 10;
 
+-- name: CountRoadmapProjects :one
+SELECT COUNT(*) FROM flow_projects WHERE workspace_id = ? AND status != 'archived';
+
 -- name: GetRoadmap :many
 SELECT
     p.id, p.workspace_id, p.owner_id, p.name, p.description, p.icon, p.color,
     p.status, p.start_date, p.due_date, p.created_by, p.created_at, p.updated_at
 FROM flow_projects p
 WHERE p.workspace_id = ? AND p.status != 'archived'
-ORDER BY p.start_date ASC, p.created_at ASC;
+ORDER BY p.start_date ASC, p.created_at ASC
+LIMIT ? OFFSET ?;
+
+-- name: CountNotifications :one
+SELECT COUNT(*) FROM flow_notifications WHERE user_id = ?;
 
 -- name: ListNotifications :many
 SELECT
@@ -163,7 +194,7 @@ SELECT
 FROM flow_notifications
 WHERE user_id = ?
 ORDER BY created_at DESC
-LIMIT 100;
+LIMIT ? OFFSET ?;
 
 -- name: CreateNotification :exec
 INSERT INTO flow_notifications
