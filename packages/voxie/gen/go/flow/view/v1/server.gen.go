@@ -55,6 +55,18 @@ func RegisterViewServiceServer(srv ViewServiceServer, opts ...ServerOption) erro
 		if r.URL.Query().Get("workspace_id") != "" {
 			req.WorkspaceId = r.URL.Query().Get("workspace_id")
 		}
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt32(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("limit") != "" {
+			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+		}
+		if r.URL.Query().Get("sort_by") != "" {
+			req.SortBy = r.URL.Query().Get("sort_by")
+		}
+		if r.URL.Query().Get("sort_dir") != "" {
+			req.SortDir = r.URL.Query().Get("sort_dir")
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

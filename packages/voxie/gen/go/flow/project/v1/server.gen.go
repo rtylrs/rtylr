@@ -67,6 +67,18 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		if r.URL.Query().Get("workspace_id") != "" {
 			req.WorkspaceId = parseInt64(r.URL.Query().Get("workspace_id"))
 		}
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt32(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("limit") != "" {
+			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+		}
+		if r.URL.Query().Get("sort_by") != "" {
+			req.SortBy = r.URL.Query().Get("sort_by")
+		}
+		if r.URL.Query().Get("sort_dir") != "" {
+			req.SortDir = r.URL.Query().Get("sort_dir")
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -147,6 +159,18 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		req := new(ListProjectColumnsRequest)
 		if r.URL.Query().Get("project_id") != "" {
 			req.ProjectId = parseInt64(r.URL.Query().Get("project_id"))
+		}
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt32(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("limit") != "" {
+			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+		}
+		if r.URL.Query().Get("sort_by") != "" {
+			req.SortBy = r.URL.Query().Get("sort_by")
+		}
+		if r.URL.Query().Get("sort_dir") != "" {
+			req.SortDir = r.URL.Query().Get("sort_dir")
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
@@ -250,6 +274,18 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		req := new(ListProjectMembersRequest)
 		if r.URL.Query().Get("project_id") != "" {
 			req.ProjectId = parseInt64(r.URL.Query().Get("project_id"))
+		}
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt32(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("limit") != "" {
+			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+		}
+		if r.URL.Query().Get("sort_by") != "" {
+			req.SortBy = r.URL.Query().Get("sort_by")
+		}
+		if r.URL.Query().Get("sort_dir") != "" {
+			req.SortDir = r.URL.Query().Get("sort_dir")
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

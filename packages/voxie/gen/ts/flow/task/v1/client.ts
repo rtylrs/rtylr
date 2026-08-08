@@ -51,6 +51,18 @@ query.set("priority", String(req.priority));
 if (req.workspaceId !== undefined) {
 query.set("workspace_id", String(req.workspaceId));
 }
+if (req.page !== undefined) {
+query.set("page", String(req.page));
+}
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.sortBy !== undefined) {
+query.set("sort_by", String(req.sortBy));
+}
+if (req.sortDir !== undefined) {
+query.set("sort_dir", String(req.sortDir));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
@@ -69,6 +81,18 @@ return decodeListTasksResponse(await res.json());
 async getMyTasks(req: GetMyTasksRequest): Promise<GetMyTasksResponse> {
 let path = "/flow/task/v1/tasks/my";
 const query = new URLSearchParams();
+if (req.page !== undefined) {
+query.set("page", String(req.page));
+}
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.sortBy !== undefined) {
+query.set("sort_by", String(req.sortBy));
+}
+if (req.sortDir !== undefined) {
+query.set("sort_dir", String(req.sortDir));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
@@ -110,6 +134,18 @@ query.set("q", String(req.q));
 }
 if (req.workspaceId !== undefined) {
 query.set("workspace_id", String(req.workspaceId));
+}
+if (req.page !== undefined) {
+query.set("page", String(req.page));
+}
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.sortBy !== undefined) {
+query.set("sort_by", String(req.sortBy));
+}
+if (req.sortDir !== undefined) {
+query.set("sort_dir", String(req.sortDir));
 }
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
@@ -234,6 +270,18 @@ async getSubtasks(req: GetSubtasksRequest): Promise<GetSubtasksResponse> {
 let path = "/flow/task/v1/tasks/{task_id}/subtasks";
 path = path.replace("{task_id}", encodeURIComponent(String(req.taskId)));
 const query = new URLSearchParams();
+if (req.page !== undefined) {
+query.set("page", String(req.page));
+}
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.sortBy !== undefined) {
+query.set("sort_by", String(req.sortBy));
+}
+if (req.sortDir !== undefined) {
+query.set("sort_dir", String(req.sortDir));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {

@@ -86,6 +86,18 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 			workspaceIdVal := r.URL.Query().Get("workspace_id")
 			req.WorkspaceId = &workspaceIdVal
 		}
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt32(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("limit") != "" {
+			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+		}
+		if r.URL.Query().Get("sort_by") != "" {
+			req.SortBy = r.URL.Query().Get("sort_by")
+		}
+		if r.URL.Query().Get("sort_dir") != "" {
+			req.SortDir = r.URL.Query().Get("sort_dir")
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -102,6 +114,18 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 	})
 	mux.HandleFunc("GET /flow/task/v1/tasks/my", func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetMyTasksRequest)
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt32(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("limit") != "" {
+			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+		}
+		if r.URL.Query().Get("sort_by") != "" {
+			req.SortBy = r.URL.Query().Get("sort_by")
+		}
+		if r.URL.Query().Get("sort_dir") != "" {
+			req.SortDir = r.URL.Query().Get("sort_dir")
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -139,6 +163,18 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		if r.URL.Query().Get("workspace_id") != "" {
 			req.WorkspaceId = r.URL.Query().Get("workspace_id")
+		}
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt32(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("limit") != "" {
+			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+		}
+		if r.URL.Query().Get("sort_by") != "" {
+			req.SortBy = r.URL.Query().Get("sort_by")
+		}
+		if r.URL.Query().Get("sort_dir") != "" {
+			req.SortDir = r.URL.Query().Get("sort_dir")
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
@@ -281,6 +317,18 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 	mux.HandleFunc("GET /flow/task/v1/tasks/{task_id}/subtasks", func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetSubtasksRequest)
 		req.TaskId = parseInt64(r.PathValue("task_id"))
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt32(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("limit") != "" {
+			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+		}
+		if r.URL.Query().Get("sort_by") != "" {
+			req.SortBy = r.URL.Query().Get("sort_by")
+		}
+		if r.URL.Query().Get("sort_dir") != "" {
+			req.SortDir = r.URL.Query().Get("sort_dir")
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

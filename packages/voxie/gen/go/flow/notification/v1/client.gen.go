@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -25,6 +26,10 @@ func NewNotificationServiceClient(baseURL string) *NotificationServiceClient {
 func (c *NotificationServiceClient) ListNotifications(ctx context.Context, req *ListNotificationsRequest) (*ListNotificationsResponse, error) {
 	path := "/flow/notification/v1/notifications"
 	query := url.Values{}
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("sort_by", req.SortBy)
+	query.Set("sort_dir", req.SortDir)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

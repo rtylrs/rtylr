@@ -14,10 +14,20 @@ message Notification {
   timestamp: string
 }
 
-message ListNotificationsRequest {}
+message ListNotificationsRequest {
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
 
 message ListNotificationsResponse {
   notifications: Notification[]
+  pagination: PaginationResponse
 }
 
 message MarkNotificationReadRequest {

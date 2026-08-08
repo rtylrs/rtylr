@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -27,6 +28,10 @@ func (c *MilestoneServiceClient) ListMilestones(ctx context.Context, req *ListMi
 	query := url.Values{}
 	query.Set("project_id", req.ProjectId)
 	query.Set("workspace_id", req.WorkspaceId)
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("sort_by", req.SortBy)
+	query.Set("sort_dir", req.SortDir)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
