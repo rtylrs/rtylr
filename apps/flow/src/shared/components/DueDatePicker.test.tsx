@@ -60,4 +60,26 @@ describe('DueDatePicker clear control', () => {
       screen.queryByRole('button', { name: 'common.datePicker.clearDate' })
     ).not.toBeInTheDocument();
   });
+
+  it('gives the toggle button its own padding so the pill click area is not a dead zone on the wrapper', () => {
+    render(<DueDatePicker value="2026-08-10" onChange={vi.fn()} />);
+
+    const [toggleButton] = screen.getAllByRole('button');
+    expect(toggleButton.className).toMatch(/\bpx-2\b/);
+    expect(toggleButton.className).toMatch(/\bpy-1\b/);
+
+    const wrapper = toggleButton.parentElement;
+    expect(wrapper?.className).not.toMatch(/\bpx-2\b/);
+    expect(wrapper?.className).not.toMatch(/\bpy-1\b/);
+  });
+
+  it('opens the date picker when clicking anywhere on the toggle button, not just the text node', async () => {
+    const user = userEvent.setup();
+    render(<DueDatePicker value="2026-08-10" onChange={vi.fn()} />);
+
+    const [toggleButton] = screen.getAllByRole('button');
+    await user.click(toggleButton);
+
+    expect(screen.getByText('common.datePicker.today')).toBeInTheDocument();
+  });
 });

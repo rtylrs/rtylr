@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { cn, formatDate } from '../lib/utils';
+import { formatDate } from '../lib/utils';
 
 interface DueDatePickerProps {
   value?: string;
@@ -25,17 +25,14 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
   return (
     <div className="relative">
       <div
-        className={cn(
-          'flex items-center gap-1.5 px-2 py-1 rounded text-[11px] transition-colors',
-          disabled ? 'opacity-60' : 'hover:bg-[var(--flow-hover)]'
-        )}
+        className="flex items-center gap-1.5 text-[11px]"
         style={{ color: overdue ? '#ef4444' : 'var(--flow-text-muted)' }}
       >
         <button
           type="button"
           onClick={() => !disabled && setOpen((o) => !o)}
           disabled={disabled}
-          className="flex items-center gap-1.5"
+          className="flex items-center gap-1.5 px-2 py-1 rounded transition-colors hover:bg-[var(--flow-hover)] disabled:opacity-60 disabled:hover:bg-transparent"
         >
           <Calendar size={12} />
           {value ? formatDate(value) : t('common.datePicker.setDate')}
