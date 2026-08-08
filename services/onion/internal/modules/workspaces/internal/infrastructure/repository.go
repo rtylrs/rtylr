@@ -1012,6 +1012,7 @@ func enrichedTaskColumns(includeDescription bool) []string {
 		"t.title", descriptionColumn, "COALESCE(t.status, 'todo') AS status", "COALESCE(t.priority, 'none') AS priority",
 		"t.assignee_id", "t.reporter_id", "t.due_date", "t.start_date", "t.completed_at",
 		"t.estimated_hours", "t.actual_hours", "t.sort_order", "t.labels",
+		"COALESCE(t.archived, FALSE) AS archived",
 		"t.created_at", "t.updated_at",
 		"COALESCE(p.name, '')  AS project_name",
 		"COALESCE(p.color, '') AS project_color",
@@ -1084,7 +1085,7 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 		&t.Title, &desc, &t.Status, &t.Priority,
 		&assigneeID, &t.ReporterID,
 		&dueDate, &startDate, &completedAt,
-		&estHours, &actHours, &t.SortOrder, &labelsRaw,
+		&estHours, &actHours, &t.SortOrder, &labelsRaw, &t.Archived,
 		&t.CreatedAt, &t.UpdatedAt,
 		&t.ProjectName, &t.ProjectColor, &t.AssigneeName, &t.SubtaskCount,
 	)
@@ -1170,7 +1171,7 @@ func scanTasksRaw(ctx context.Context, rows *sql.Rows) ([]domain.Task, error) {
 			&t.Title, &desc, &t.Status, &t.Priority,
 			&assigneeID, &t.ReporterID,
 			&dueDate, &startDate, &completedAt,
-			&estHours, &actHours, &t.SortOrder, &labelsRaw,
+			&estHours, &actHours, &t.SortOrder, &labelsRaw, &t.Archived,
 			&t.CreatedAt, &t.UpdatedAt,
 		)
 		if err != nil {
@@ -1617,7 +1618,8 @@ func (r *Repository) SearchTasks(ctx context.Context, workspaceID int64, q strin
 
 	query := `SELECT id, project_id, workspace_id, owner_id, parent_task_id, section_id, title, description,
 	           status, priority, assignee_id, reporter_id, due_date, start_date, completed_at,
-	           estimated_hours, actual_hours, sort_order, labels, created_at, updated_at
+	           estimated_hours, actual_hours, sort_order, labels, COALESCE(archived, FALSE) AS archived,
+	           created_at, updated_at
 	          FROM flow_tasks
 	          WHERE workspace_id = ?
 	            AND archived = FALSE
