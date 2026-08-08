@@ -79,7 +79,7 @@ func Connect(ctx context.Context) error {
 	}
 
 	mainDSN := resolveMainDSN()
-	if err := checkProductionSafety(mainDSN); err != nil {
+	if err := checkProductionSafety("database", mainDSN); err != nil {
 		return err
 	}
 
@@ -90,13 +90,15 @@ func Connect(ctx context.Context) error {
 
 	client.mainDB = mainDB
 
-	var loggingDSN string
-	if config.GlobalConfig != nil {
-		loggingDSN = config.GlobalConfig.LoggingDatabaseURL
-	} else {
-		loggingDSN = os.Getenv("LOGGING_DATABASE_URL")
-	}
-	if loggingDSN != "" {
+	// The logging pool is writable, so a local run pointed at the production
+	// logging database could read and mutate live data. Guarded like the main
+	// DSN, and hard-blocking like it too, since a logging connection failure is
+	// already fatal here.
+	if loggingDSN := resolveLoggingDSN(); loggingDSN != "" {
+		if err := checkProductionSafety("logging database", loggingDSN); err != nil {
+			return err
+		}
+
 		loggingDB, loggingErr := openDB(ctx, loggingDSN)
 		if loggingErr != nil {
 			return fmt.Errorf("failed to connect to logging MySQL database: %w", loggingErr)
@@ -109,8 +111,19 @@ func Connect(ctx context.Context) error {
 	// tenant-scoped user. Optional and fail-soft: if it's not configured or not
 	// reachable, AI reads fall back to the primary via ReplicaPool().
 	if replicaConfigured() {
-		replicaDB, repErr := openDB(ctx, buildReplicaDSN())
-		if repErr != nil {
+		replicaDSN := buildReplicaDSN()
+
+		// Fail-soft, matching the rest of this path: refusing to open the
+		// connection already achieves what the guard exists for, and AI reads
+		// fall back to the primary. Hard-blocking would turn an optional,
+		// deliberately degradable subsystem into a startup-fatal dependency,
+		// which is a bigger behavior change than the guard should make.
+		// Logged at Error rather than Warn because a production-shaped replica
+		// host is a misconfiguration, not a transiently unreachable replica.
+		if safetyErr := checkProductionSafety("read replica", replicaDSN); safetyErr != nil {
+			logger.Ctx(ctx).Error("skipping read replica; AI reads will use the primary",
+				logger.Error(safetyErr))
+		} else if replicaDB, repErr := openDB(ctx, replicaDSN); repErr != nil {
 			logger.Ctx(ctx).Warn("failed to connect to read replica; AI reads will use the primary",
 				logger.Error(repErr))
 		} else {
@@ -195,6 +208,17 @@ func resolveMainDSN() string {
 	}
 
 	return buildLocalDSN()
+}
+
+// resolveLoggingDSN returns the optional logging-database DSN, or "" when none
+// is configured. Split out of Connect so the safety guard can be exercised
+// against it directly.
+func resolveLoggingDSN() string {
+	if config.GlobalConfig != nil {
+		return config.GlobalConfig.LoggingDatabaseURL
+	}
+
+	return os.Getenv("LOGGING_DATABASE_URL")
 }
 
 // Read-replica / AI read-only connection env vars.
