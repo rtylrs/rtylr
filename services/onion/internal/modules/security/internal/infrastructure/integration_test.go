@@ -68,7 +68,7 @@ func TestGetLoginHistory_ReturnsNoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	history, err := repo.GetLoginHistory(ctx, testutil.OwnerID)
+	history, _, err := repo.GetLoginHistory(ctx, testutil.OwnerID, 20, 0)
 	if err != nil {
 		t.Fatalf("security.GetLoginHistory: unexpected error: %v", err)
 	}
@@ -81,7 +81,7 @@ func TestGetLoginHistory_NoUser_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	history, err := repo.GetLoginHistory(ctx, 0)
+	history, _, err := repo.GetLoginHistory(ctx, 0, 20, 0)
 	if err != nil {
 		t.Fatalf("GetLoginHistory(userID=0): unexpected error: %v", err)
 	}
@@ -95,15 +95,13 @@ func TestRecordLogin_IncreasesHistoryCount(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// Remove all login history entries for this owner to start fresh,
-	// since GetLoginHistory is capped at 20. With 20 entries already
-	// present, adding one more would not increase the returned count.
+	// Remove all login history entries for this owner to start fresh.
 	db.ExecContext(ctx, "DELETE FROM login_history WHERE user_id = ?", testutil.OwnerID)
 	t.Cleanup(func() {
 		db.ExecContext(ctx, "DELETE FROM login_history WHERE user_id = ?", testutil.OwnerID)
 	})
 
-	before, err := repo.GetLoginHistory(ctx, testutil.OwnerID)
+	before, _, err := repo.GetLoginHistory(ctx, testutil.OwnerID, 20, 0)
 	if err != nil {
 		t.Fatalf("GetLoginHistory before: %v", err)
 	}
@@ -113,7 +111,7 @@ func TestRecordLogin_IncreasesHistoryCount(t *testing.T) {
 		t.Fatalf("RecordLogin: %v", err)
 	}
 
-	after, err := repo.GetLoginHistory(ctx, testutil.OwnerID)
+	after, _, err := repo.GetLoginHistory(ctx, testutil.OwnerID, 20, 0)
 	if err != nil {
 		t.Fatalf("GetLoginHistory after: %v", err)
 	}
@@ -138,7 +136,7 @@ func TestRecordLogin_FieldsPersisted(t *testing.T) {
 		t.Fatalf("RecordLogin: %v", err)
 	}
 
-	history, err := repo.GetLoginHistory(ctx, testutil.OwnerID)
+	history, _, err := repo.GetLoginHistory(ctx, testutil.OwnerID, 20, 0)
 	if err != nil {
 		t.Fatalf("GetLoginHistory: %v", err)
 	}
@@ -149,6 +147,9 @@ func TestRecordLogin_FieldsPersisted(t *testing.T) {
 			found = true
 			if !e.Success {
 				t.Errorf("expected Success=true, got false")
+			}
+			if e.UserAgent != agent {
+				t.Errorf("user agent = %q, want %q", e.UserAgent, agent)
 			}
 			break
 		}
@@ -168,7 +169,7 @@ func TestRecordLogin_FailedLogin(t *testing.T) {
 		t.Fatalf("RecordLogin(success=false): %v", err)
 	}
 
-	history, err := repo.GetLoginHistory(ctx, testutil.OwnerID)
+	history, _, err := repo.GetLoginHistory(ctx, testutil.OwnerID, 20, 0)
 	if err != nil {
 		t.Fatalf("GetLoginHistory: %v", err)
 	}
@@ -185,7 +186,7 @@ func TestRecordLogin_FailedLogin(t *testing.T) {
 	}
 }
 
-func TestGetLoginHistory_MaxReturned20(t *testing.T) {
+func TestGetLoginHistory_RespectsPageSizeAndTotal(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
@@ -195,13 +196,16 @@ func TestGetLoginHistory_MaxReturned20(t *testing.T) {
 		_ = repo.RecordLogin(ctx, testutil.OwnerID, "bulk@example.com", "password", "1.1.1.1", "BulkAgent", true)
 	}
 
-	history, err := repo.GetLoginHistory(ctx, testutil.OwnerID)
+	history, total, err := repo.GetLoginHistory(ctx, testutil.OwnerID, 20, 0)
 	if err != nil {
 		t.Fatalf("GetLoginHistory: %v", err)
 	}
 
-	if len(history) > 20 {
-		t.Errorf("expected at most 20 entries (LIMIT 20), got %d", len(history))
+	if len(history) != 20 {
+		t.Errorf("expected exactly 20 entries, got %d", len(history))
+	}
+	if total < 25 {
+		t.Errorf("expected total to include all seeded entries, got %d", total)
 	}
 }
 
@@ -215,7 +219,7 @@ func TestGetLoginHistory_EachEntryHasEmail(t *testing.T) {
 		t.Fatalf("RecordLogin: %v", err)
 	}
 
-	history, err := repo.GetLoginHistory(ctx, testutil.OwnerID)
+	history, _, err := repo.GetLoginHistory(ctx, testutil.OwnerID, 20, 0)
 	if err != nil {
 		t.Fatalf("GetLoginHistory: %v", err)
 	}

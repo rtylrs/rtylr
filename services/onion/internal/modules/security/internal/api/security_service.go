@@ -48,13 +48,17 @@ func (a *SecurityAPI) GetSecurityState(ctx context.Context, _ *hubsecurityv1.Get
 	}, nil
 }
 
-func (a *SecurityAPI) LoginHistory(ctx context.Context, _ *hubsecurityv1.LoginHistoryRequest) (*hubsecurityv1.LoginHistoryResponse, error) {
+func (a *SecurityAPI) LoginHistory(ctx context.Context, req *hubsecurityv1.LoginHistoryRequest) (*hubsecurityv1.LoginHistoryResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	entries, err := a.Service.GetLoginHistory(ctx, device.User.UserID)
+	page, pageSize := application.NormalizeLoginHistoryPagination(
+		int64(req.GetPage()),
+		int64(req.GetPageSize()),
+	)
+	entries, total, hasMore, err := a.Service.GetLoginHistory(ctx, device.User.UserID, page, pageSize)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get login history")
 	}
@@ -62,6 +66,7 @@ func (a *SecurityAPI) LoginHistory(ctx context.Context, _ *hubsecurityv1.LoginHi
 	payloads := make([]*hubsecurityv1.LoginEntry, 0, len(entries))
 	for _, e := range entries {
 		payloads = append(payloads, &hubsecurityv1.LoginEntry{
+			Id:        e.ID,
 			Email:     e.Email,
 			Method:    e.Method,
 			Ip:        e.IP,
@@ -71,7 +76,13 @@ func (a *SecurityAPI) LoginHistory(ctx context.Context, _ *hubsecurityv1.LoginHi
 		})
 	}
 
-	return &hubsecurityv1.LoginHistoryResponse{History: payloads}, nil
+	return &hubsecurityv1.LoginHistoryResponse{
+		History:  payloads,
+		Total:    int32(total),
+		Page:     int32(page),
+		PageSize: int32(pageSize),
+		HasMore:  hasMore,
+	}, nil
 }
 
 func (a *SecurityAPI) InvalidateSessions(ctx context.Context, _ *hubsecurityv1.InvalidateSessionsRequest) (*hubsecurityv1.InvalidateSessionsResponse, error) {

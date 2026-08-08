@@ -90,20 +90,28 @@ func (h *Toggle2FAHandler) Serve(ctx context.Context, req *Toggle2FARequest) (To
 
 type (
 	LoginHistoryHandler struct{ Service *application.Service }
-	LoginHistoryRequest struct{}
+	LoginHistoryRequest struct {
+		Page     int64 `json:"page"`
+		PageSize int64 `json:"page_size"`
+	}
 )
 
 type LoginHistoryResponse struct {
-	History []*hubsecurityv1.LoginEntry `json:"history"`
+	History  []*hubsecurityv1.LoginEntry `json:"history"`
+	Total    int32                       `json:"total"`
+	Page     int32                       `json:"page"`
+	PageSize int32                       `json:"page_size"`
+	HasMore  bool                        `json:"has_more"`
 }
 
-func (h *LoginHistoryHandler) Serve(ctx context.Context, _ *LoginHistoryRequest) (LoginHistoryResponse, error) {
+func (h *LoginHistoryHandler) Serve(ctx context.Context, req *LoginHistoryRequest) (LoginHistoryResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return LoginHistoryResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	entries, err := h.Service.GetLoginHistory(ctx, device.User.UserID)
+	page, pageSize := application.NormalizeLoginHistoryPagination(req.Page, req.PageSize)
+	entries, total, hasMore, err := h.Service.GetLoginHistory(ctx, device.User.UserID, page, pageSize)
 	if err != nil {
 		return LoginHistoryResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get login history")
 	}
@@ -111,6 +119,7 @@ func (h *LoginHistoryHandler) Serve(ctx context.Context, _ *LoginHistoryRequest)
 	payloads := make([]*hubsecurityv1.LoginEntry, 0, len(entries))
 	for _, e := range entries {
 		payloads = append(payloads, &hubsecurityv1.LoginEntry{
+			Id:        e.ID,
 			Email:     e.Email,
 			Method:    e.Method,
 			Ip:        e.IP,
@@ -120,7 +129,13 @@ func (h *LoginHistoryHandler) Serve(ctx context.Context, _ *LoginHistoryRequest)
 		})
 	}
 
-	return LoginHistoryResponse{History: payloads}, nil
+	return LoginHistoryResponse{
+		History:  payloads,
+		Total:    int32(total),
+		Page:     int32(page),
+		PageSize: int32(pageSize),
+		HasMore:  hasMore,
+	}, nil
 }
 
 // -- Invalidate All Sessions --
