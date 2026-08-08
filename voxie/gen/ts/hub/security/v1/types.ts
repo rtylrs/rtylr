@@ -50,6 +50,7 @@ return out;
 }
 
 export interface LoginEntry {
+id?: string;
 email?: string;
 method?: string;
 ip?: string;
@@ -61,6 +62,7 @@ createdAt?: string;
 export function decodeLoginEntry(v: any): LoginEntry {
 if (v === null || v === undefined) return v;
 return {
+id: v.id,
 email: v.email,
 method: v.method,
 ip: v.ip,
@@ -72,6 +74,7 @@ createdAt: v.created_at,
 
 export function encodeLoginEntry(v: LoginEntry): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
 if (v.email !== undefined) { out.email = v.email; }
 if (v.method !== undefined) { out.method = v.method; }
 if (v.ip !== undefined) { out.ip = v.ip; }
@@ -113,33 +116,51 @@ return out;
 }
 
 export interface LoginHistoryRequest {
+page?: number;
+pageSize?: number;
 }
 
 export function decodeLoginHistoryRequest(v: any): LoginHistoryRequest {
 if (v === null || v === undefined) return v;
 return {
+page: v.page,
+pageSize: v.page_size,
 };
 }
 
 export function encodeLoginHistoryRequest(v: LoginHistoryRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
 export interface LoginHistoryResponse {
 history?: (LoginEntry)[];
+total?: number;
+page?: number;
+pageSize?: number;
+hasMore?: boolean;
 }
 
 export function decodeLoginHistoryResponse(v: any): LoginHistoryResponse {
 if (v === null || v === undefined) return v;
 return {
 history: (v.history !== undefined ? (v.history as any[]).map(decodeLoginEntry) : v.history),
+total: v.total,
+page: v.page,
+pageSize: v.page_size,
+hasMore: v.has_more,
 };
 }
 
 export function encodeLoginHistoryResponse(v: LoginHistoryResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.history !== undefined) { out.history = (v.history as any[]).map(encodeLoginEntry); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
 return out;
 }
 

@@ -15,6 +15,8 @@ message ActiveSession {
 }
 
 message LoginEntry {
+  /// Database identifier for this login event.
+  id: int64
   /// Email address used for lookup or contact.
   email: string
   method: string
@@ -31,10 +33,23 @@ message GetSecurityStateResponse {
   state: SecurityState
 }
 
-message LoginHistoryRequest {}
+message LoginHistoryRequest {
+  /// 1-based page number to return.
+  page: int32 @query("page")
+  /// Maximum number of login events to return in one page.
+  page_size: int32 @query("page_size")
+}
 
 message LoginHistoryResponse {
   history: LoginEntry[]
+  /// Total number of login events for the authenticated user.
+  total: int32
+  /// The 1-based page number returned.
+  page: int32
+  /// The number of login events requested per page after server limits.
+  page_size: int32
+  /// Whether another page of login events is available.
+  has_more: bool
 }
 
 message InvalidateSessionsRequest {}

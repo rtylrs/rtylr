@@ -54,6 +54,12 @@ return decodeGetSecurityStateResponse(await res.json());
 async loginHistory(req: LoginHistoryRequest): Promise<LoginHistoryResponse> {
 let path = "/hub/security/v1/login-history";
 const query = new URLSearchParams();
+if (req.page !== undefined) {
+query.set("page", String(req.page));
+}
+if (req.pageSize !== undefined) {
+query.set("page_size", String(req.pageSize));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
