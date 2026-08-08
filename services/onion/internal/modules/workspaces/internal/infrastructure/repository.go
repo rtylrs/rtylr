@@ -658,6 +658,12 @@ func (r *Repository) GetCommentTaskID(ctx context.Context, commentID int64) (int
 	return r.queries.GetCommentTaskID(ctx, commentID)
 }
 
+// GetAttachmentTaskID returns the task an attachment hangs off, so a delete can
+// be authorized against that task's project.
+func (r *Repository) GetAttachmentTaskID(ctx context.Context, attachmentID int64) (int64, error) {
+	return r.queries.GetAttachmentTaskID(ctx, attachmentID)
+}
+
 // ─────────────────────────────────────────────
 // Activity
 // ─────────────────────────────────────────────
@@ -1401,6 +1407,41 @@ func (r *Repository) GetUserWorkspaceRole(ctx context.Context, workspaceID, user
 		return "", sql.ErrNoRows
 	}
 	return string(role.FlowWorkspaceMembersRole), nil
+}
+
+// GetProjectMemberRole returns the caller's role on a project, or
+// sql.ErrNoRows when they hold no explicit membership row. A project owner and
+// a workspace member both reach a project without one, so a not-found here is
+// not the same as "no access" — see Service.RequireProjectRole.
+func (r *Repository) GetProjectMemberRole(ctx context.Context, projectID, userID int64) (string, error) {
+	role, err := r.queries.GetProjectMemberRole(ctx, sqlc.GetProjectMemberRoleParams{
+		ProjectID: projectID,
+		UserID:    userID,
+	})
+	if err != nil {
+		return "", err
+	}
+	if !role.Valid {
+		return "", sql.ErrNoRows
+	}
+	return string(role.FlowProjectMembersRole), nil
+}
+
+// GetProjectOwnerWorkspace returns a project's owner and workspace, the two
+// facts needed to fall back from an absent project membership row.
+func (r *Repository) GetProjectOwnerWorkspace(ctx context.Context, projectID int64) (int64, int64, error) {
+	row, err := r.queries.GetProjectOwnerWorkspace(ctx, projectID)
+	if err != nil {
+		return 0, 0, err
+	}
+	return row.OwnerID, row.WorkspaceID, nil
+}
+
+// GetWorkspaceOwner returns a workspace's owner. A workspace owner has no
+// flow_workspace_members row of their own, so the roster read alone would miss
+// them.
+func (r *Repository) GetWorkspaceOwner(ctx context.Context, workspaceID int64) (int64, error) {
+	return r.queries.GetWorkspaceOwner(ctx, workspaceID)
 }
 
 // ─── Project Columns ─────────────────────────────────────────────────────────
