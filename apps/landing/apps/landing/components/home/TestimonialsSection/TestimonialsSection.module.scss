@@ -35,7 +35,9 @@
 
 .tickerTrack {
   display: flex;
+  width: max-content;
   gap: 32px;
+  --ticker-loop-offset: 16px;
   will-change: transform;
 }
 
@@ -122,13 +124,13 @@
     transform: translateX(0);
   }
   to {
-    transform: translateX(calc(-50% - 16px));
+    transform: translateX(calc(-50% - var(--ticker-loop-offset)));
   }
 }
 
 @keyframes testimonialsScrollRight {
   from {
-    transform: translateX(calc(-50% - 16px));
+    transform: translateX(calc(-50% - var(--ticker-loop-offset)));
   }
   to {
     transform: translateX(0);
@@ -168,5 +170,6 @@
 
   .tickerTrack {
     gap: 24px;
+    --ticker-loop-offset: 12px;
   }
 }
