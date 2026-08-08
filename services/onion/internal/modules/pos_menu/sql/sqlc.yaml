@@ -7,6 +7,7 @@ sql:
       - "../../../../internal/platform/database/schemas/pos"
       - "../../../../internal/platform/database/schemas/erp"
       - "../../../../internal/platform/database/schemas/erp/product_extras.sql"
+      - "../../../../internal/platform/stock_core/sql/schema/stock_core.sql"
     gen:
       go:
         package: "sqlc"
