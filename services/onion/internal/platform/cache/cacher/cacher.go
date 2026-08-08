@@ -103,7 +103,7 @@ func (c Cache[M]) GetOrComputeKeys(ctx context.Context, keys []string, fetch fun
 			// real failure. Callers already receive the error and
 			// decide whether to alert, swallow, or translate to a
 			// 4xx. Logging at ERROR here promoted normal "not found"
-			// hits into Axiom error metrics.
+			// hits into remote error metrics.
 			return results, err
 		}
 
@@ -140,7 +140,7 @@ func (c Cache[M]) GetOrComputeWithError(ctx context.Context, ids []string, fetch
 			// real failure. Callers already receive the error and
 			// decide whether to alert, swallow, or translate to a
 			// 4xx. Logging at ERROR here promoted normal "not found"
-			// hits into Axiom error metrics.
+			// hits into remote error metrics.
 			return results, err
 		}
 
