@@ -16,7 +16,7 @@ export interface UseCaretStreamParams {
 
 export interface UseCaretStreamResult {
   sendMessage: (prompt: string, modeOverride?: CaretMode) => Promise<void>;
-  stopStreaming: () => void;
+  stopStreaming: (tabId?: string) => void;
 }
 
 interface OpenThinking {
@@ -30,35 +30,46 @@ export function useCaretStream({
   systemContext,
   pageContext,
 }: UseCaretStreamParams): UseCaretStreamResult {
-  const store = useCaretStore();
-  const abortRef = useRef<AbortController | null>(null);
+  const abortRef = useRef<Map<string, AbortController>>(new Map());
 
-  const stopStreaming = useCallback((): void => {
-    abortRef.current?.abort();
-    abortRef.current = null;
-    store.setStreaming(false);
-  }, [store]);
+  const stopStreaming = useCallback((tabId?: string): void => {
+    const store = useCaretStore.getState();
+    const targetTabId = tabId ?? store.activeTabId;
+    const controller = abortRef.current.get(targetTabId);
+    controller?.abort();
+    if (abortRef.current.get(targetTabId) === controller) {
+      abortRef.current.delete(targetTabId);
+    }
+    store.setStreaming(false, targetTabId);
+  }, []);
 
   const sendMessage = useCallback(
     async (prompt: string, modeOverride?: CaretMode): Promise<void> => {
-      if (!prompt.trim() || store.isStreaming) return;
+      const store = useCaretStore.getState();
+      const tab = store.tabs.find((candidate) => candidate.id === store.activeTabId);
+      if (!prompt.trim() || !tab || tab.isStreaming) return;
+
+      const tabId = tab.id;
 
       const userMessageId = `user-${Date.now()}`;
-      store.addMessage({
-        id: userMessageId,
-        role: 'user',
-        blocks: [],
-        content: prompt.trim(),
-        createdAt: new Date().toISOString(),
-      });
+      store.addMessage(
+        {
+          id: userMessageId,
+          role: 'user',
+          blocks: [],
+          content: prompt.trim(),
+          createdAt: new Date().toISOString(),
+        },
+        tabId
+      );
 
-      store.startAssistantMessage();
+      store.startAssistantMessage(tabId);
       const assistantMessageId = `assistant-${Date.now()}`;
 
       const baseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
       const url = `${baseUrl}ai/generate-text-stream`;
       const controller = new AbortController();
-      abortRef.current = controller;
+      abortRef.current.set(tabId, controller);
 
       const openThinking: Record<string, OpenThinking> = {};
 
@@ -75,7 +86,9 @@ export function useCaretStream({
           },
           body: JSON.stringify({
             prompt: prompt.trim(),
-            session_id: store.sessionId ?? '',
+            session_id:
+              useCaretStore.getState().tabs.find((candidate) => candidate.id === tabId)
+                ?.sessionId ?? '',
             user_id: userId,
             system_context: systemContext ?? '',
             page_context: pageContext,
@@ -88,98 +101,129 @@ export function useCaretStream({
         }
 
         for await (const event of consumeSse(response, assistantMessageId)) {
-          dispatch(event, openThinking);
+          dispatch(event, openThinking, tabId);
         }
 
-        store.setStreaming(false);
+        useCaretStore.getState().setStreaming(false, tabId);
       } catch (error) {
         if ((error as Error).name === 'AbortError') return;
-        store.setStreaming(false);
+        useCaretStore.getState().setStreaming(false, tabId);
         const message =
           error instanceof Error
             ? error.message
             : 'An unexpected error occurred. Please try again.';
-        store.appendBlockToLastAssistant({
-          id: `error-${Date.now()}`,
-          type: 'text',
-          content: `\n\n_Error: ${message}_`,
-        });
+        useCaretStore.getState().appendBlockToLastAssistant(
+          {
+            id: `error-${Date.now()}`,
+            type: 'text',
+            content: `\n\n_Error: ${message}_`,
+          },
+          tabId
+        );
       } finally {
-        abortRef.current = null;
+        if (abortRef.current.get(tabId) === controller) {
+          abortRef.current.delete(tabId);
+          useCaretStore.getState().setStreaming(false, tabId);
+        }
       }
     },
-    [apiBaseUrl, userId, systemContext, pageContext, store]
+    [apiBaseUrl, userId, systemContext, pageContext]
   );
 
   /** Translate one server event into store mutations. */
-  function dispatch(event: CaretStreamEvent, openThinking: Record<string, OpenThinking>): void {
+  function dispatch(
+    event: CaretStreamEvent,
+    openThinking: Record<string, OpenThinking>,
+    tabId: string
+  ): void {
+    const store = useCaretStore.getState();
     switch (event.type) {
       case 'session':
-        if (!store.sessionId) store.setSessionId(event.sessionId);
+        if (!store.tabs.find((candidate) => candidate.id === tabId)?.sessionId) {
+          store.setSessionId(event.sessionId, tabId);
+        }
         break;
 
       case 'text_delta':
-        store.appendToLastAssistantMessage(event.delta);
+        store.appendToLastAssistantMessage(event.delta, tabId);
         break;
 
       case 'thinking_start':
         openThinking[event.blockId] = { blockId: event.blockId, startedAt: Date.now() };
-        store.appendBlockToLastAssistant({
-          id: event.blockId,
-          type: 'thinking',
-          content: '',
-        });
+        store.appendBlockToLastAssistant(
+          {
+            id: event.blockId,
+            type: 'thinking',
+            content: '',
+          },
+          tabId
+        );
         break;
 
       case 'thinking_delta':
-        store.updateBlockOnLastAssistant(event.blockId, (b) =>
-          b.type === 'thinking' ? { ...b, content: b.content + event.delta } : b
+        store.updateBlockOnLastAssistant(
+          event.blockId,
+          (b) => (b.type === 'thinking' ? { ...b, content: b.content + event.delta } : b),
+          tabId
         );
         break;
 
       case 'thinking_end': {
         const opened = openThinking[event.blockId];
         const duration = event.durationMs ?? (opened ? Date.now() - opened.startedAt : undefined);
-        store.updateBlockOnLastAssistant(event.blockId, (b) =>
-          b.type === 'thinking' ? { ...b, durationMs: duration } : b
+        store.updateBlockOnLastAssistant(
+          event.blockId,
+          (b) => (b.type === 'thinking' ? { ...b, durationMs: duration } : b),
+          tabId
         );
         delete openThinking[event.blockId];
         break;
       }
 
       case 'tool_call':
-        store.appendBlockToLastAssistant({
-          id: event.blockId,
-          type: 'tool_call',
-          name: event.name,
-          mode: event.mode,
-          input: event.input,
-          status: event.requiresApproval ? 'pending' : 'running',
-          preview: event.preview,
-          requiresApproval: event.requiresApproval,
-        });
+        store.appendBlockToLastAssistant(
+          {
+            id: event.blockId,
+            type: 'tool_call',
+            name: event.name,
+            mode: event.mode,
+            input: event.input,
+            status: event.requiresApproval ? 'pending' : 'running',
+            preview: event.preview,
+            requiresApproval: event.requiresApproval,
+          },
+          tabId
+        );
         break;
 
       case 'tool_result':
-        store.setToolStatus(event.blockId, event.status, {
-          output: event.output,
-          summary: event.summary,
-          error: event.error,
-        });
+        store.setToolStatus(
+          event.blockId,
+          event.status,
+          {
+            output: event.output,
+            summary: event.summary,
+            error: event.error,
+          },
+          tabId
+        );
         break;
 
       case 'message_end':
       case 'done':
-        store.setStreaming(false);
+        store.setStreaming(false, tabId);
         break;
 
       case 'error':
-        store.appendBlockToLastAssistant({
-          id: `error-${Date.now()}`,
-          type: 'text',
-          content: `\n\n_${event.error}_`,
-        });
-        if (!event.recoverable) store.setStreaming(false);
+        store.appendBlockToLastAssistant(
+          {
+            id: `error-${Date.now()}`,
+            type: 'text',
+            content: `\n\n_${event.error}_`,
+          },
+          tabId
+        );
+        if (!event.recoverable) store.setStreaming(false, tabId);
         break;
     }
   }

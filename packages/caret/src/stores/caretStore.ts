@@ -1,52 +1,166 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CaretMessage, ContentBlock, ToolCallBlock } from '../types/message';
+import { normalizeChatTitle, titleFromUserMessage } from '../lib/chatTitles';
 
 export type { CaretMessage } from '../types/message';
 
-interface CaretState {
-  isOpen: boolean;
+const NEW_CHAT_TITLE = 'New chat';
+
+export interface CaretTab {
+  id: string;
   sessionId: string | null;
+  title: string;
   messages: CaretMessage[];
   isStreaming: boolean;
+  isLoading: boolean;
+  isLoaded: boolean;
+}
+
+interface CaretState {
+  isOpen: boolean;
+  tabs: CaretTab[];
+  activeTabId: string;
+  /** Compatibility projections for older embedded Caret consumers. */
+  messages: CaretMessage[];
+  isStreaming: boolean;
+}
+
+export interface NewCaretTabInput {
+  sessionId?: string | null;
+  title?: string | null;
 }
 
 interface CaretActions {
   open: () => void;
   close: () => void;
   toggle: () => void;
-  setSessionId: (id: string) => void;
-  setMessages: (messages: CaretMessage[]) => void;
-  addMessage: (msg: CaretMessage) => void;
-  appendToLastAssistantMessage: (token: string) => void;
-  startAssistantMessage: () => void;
+  newTab: (input?: NewCaretTabInput) => string;
+  setActiveTab: (id: string) => void;
+  closeTab: (id: string) => void;
+  setTabTitle: (title: string, tabId?: string) => void;
+  setTabLoading: (loading: boolean, tabId?: string) => void;
+  setSessionId: (id: string | null, tabId?: string) => void;
+  setMessages: (messages: CaretMessage[], tabId?: string) => void;
+  addMessage: (msg: CaretMessage, tabId?: string) => void;
+  appendToLastAssistantMessage: (token: string, tabId?: string) => void;
+  startAssistantMessage: (tabId?: string) => void;
   /** Append a block to the last assistant message. Creates one if missing. */
-  appendBlockToLastAssistant: (block: ContentBlock) => void;
+  appendBlockToLastAssistant: (block: ContentBlock, tabId?: string) => void;
   /** Update an existing block on the last assistant message. */
   updateBlockOnLastAssistant: (
     blockId: string,
-    patch: (block: ContentBlock) => ContentBlock
+    patch: (block: ContentBlock) => ContentBlock,
+    tabId?: string
   ) => void;
-  setStreaming: (streaming: boolean) => void;
+  setStreaming: (streaming: boolean, tabId?: string) => void;
   setToolStatus: (
     blockId: string,
     status: ToolCallBlock['status'],
-    extras?: Partial<ToolCallBlock>
+    extras?: Partial<ToolCallBlock>,
+    tabId?: string
   ) => void;
-  reset: () => void;
+  reset: (tabId?: string) => void;
 }
 
 export type CaretStore = CaretState & CaretActions;
 
+interface PersistedCaretTab {
+  id: string;
+  sessionId: string | null;
+  title: string;
+}
+
+interface PersistedCaretState {
+  isOpen?: boolean;
+  activeTabId?: string;
+  tabs?: PersistedCaretTab[];
+}
+
+function createId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function createTab(input: NewCaretTabInput & { id?: string } = {}): CaretTab {
+  const sessionId = input.sessionId ?? null;
+  return {
+    id: input.id ?? createId('tab'),
+    sessionId,
+    title: normalizeChatTitle(input.title) || NEW_CHAT_TITLE,
+    messages: [],
+    isStreaming: false,
+    isLoading: false,
+    isLoaded: !sessionId,
+  };
+}
+
+const firstTab = createTab();
+const EMPTY_MESSAGES: CaretMessage[] = [];
+
 const initialState: CaretState = {
   isOpen: false,
-  sessionId: null,
-  messages: [],
-  isStreaming: false,
+  tabs: [firstTab],
+  activeTabId: firstTab.id,
+  messages: firstTab.messages,
+  isStreaming: firstTab.isStreaming,
 };
 
+function activeTabId(state: CaretState, tabId?: string): string {
+  return tabId ?? state.activeTabId;
+}
+
+function updateTab(
+  state: CaretState,
+  tabId: string | undefined,
+  updater: (tab: CaretTab) => CaretTab
+): Partial<CaretState> {
+  const id = activeTabId(state, tabId);
+  const index = state.tabs.findIndex((tab) => tab.id === id);
+  if (index < 0) return {};
+
+  const nextTab = updater(state.tabs[index]);
+  if (nextTab === state.tabs[index]) return {};
+
+  const tabs = [...state.tabs];
+  tabs[index] = nextTab;
+  const activeTab = tabs.find((tab) => tab.id === state.activeTabId);
+  return {
+    tabs,
+    messages: activeTab?.messages ?? EMPTY_MESSAGES,
+    isStreaming: activeTab?.isStreaming ?? false,
+  };
+}
+
+function titleFromMessages(messages: CaretMessage[]): string | null {
+  const firstUserMessage = messages.find((message) => message.role === 'user' && message.content);
+  return firstUserMessage?.content ? titleFromUserMessage(firstUserMessage.content) : null;
+}
+
+function mergePersistedState(persistedState: unknown, currentState: CaretStore): CaretStore {
+  const persisted = (persistedState ?? {}) as PersistedCaretState;
+  const persistedTabs = Array.isArray(persisted.tabs)
+    ? persisted.tabs
+        .filter((tab): tab is PersistedCaretTab => Boolean(tab?.id))
+        .map((tab) => createTab({ id: tab.id, sessionId: tab.sessionId, title: tab.title }))
+    : [];
+  const tabs = persistedTabs.length > 0 ? persistedTabs : currentState.tabs;
+  const activeTabId = tabs.some((tab) => tab.id === persisted.activeTabId)
+    ? persisted.activeTabId!
+    : tabs[0].id;
+  const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0];
+
+  return {
+    ...currentState,
+    isOpen: typeof persisted.isOpen === 'boolean' ? persisted.isOpen : currentState.isOpen,
+    tabs,
+    activeTabId,
+    messages: activeTab.messages,
+    isStreaming: activeTab.isStreaming,
+  };
+}
+
 const emptyAssistant = (): CaretMessage => ({
-  id: `assistant-${Date.now()}`,
+  id: createId('assistant'),
   role: 'assistant',
   blocks: [],
   content: '',
@@ -60,104 +174,206 @@ export const useCaretStore = create<CaretStore>()(
 
       open: () => set({ isOpen: true }),
       close: () => set({ isOpen: false }),
-      toggle: () => set((s) => ({ isOpen: !s.isOpen })),
-      setSessionId: (id) => set({ sessionId: id }),
+      toggle: () => set((state) => ({ isOpen: !state.isOpen })),
 
-      setMessages: (messages) => set({ messages }),
+      newTab: (input = {}) => {
+        const tab = createTab(input);
+        set((state) => ({
+          tabs: [...state.tabs, tab],
+          activeTabId: tab.id,
+          messages: tab.messages,
+          isStreaming: tab.isStreaming,
+        }));
+        return tab.id;
+      },
 
-      addMessage: (msg) => set((s) => ({ messages: [...s.messages, msg] })),
+      setActiveTab: (id) =>
+        set((state) => {
+          const tab = state.tabs.find((candidate) => candidate.id === id);
+          return tab
+            ? { activeTabId: id, messages: tab.messages, isStreaming: tab.isStreaming }
+            : {};
+        }),
 
-      appendToLastAssistantMessage: (token) =>
-        set((s) => {
-          const messages = [...s.messages];
-          const lastIndex = messages.length - 1;
-          if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') return { messages };
+      closeTab: (id) =>
+        set((state) => {
+          const index = state.tabs.findIndex((tab) => tab.id === id);
+          if (index < 0) return {};
 
-          const last = messages[lastIndex];
-          // Maintain legacy `content` for clipboard/SSR fallbacks while we
-          // transition the renderer to blocks.
-          const blocks = last.blocks.length > 0 ? [...last.blocks] : [];
-          let firstText = blocks.findIndex((b) => b.type === 'text');
-          if (firstText === -1) {
-            blocks.push({ id: `${last.id}-text-0`, type: 'text', content: token });
-            firstText = blocks.length - 1;
-          } else {
-            const existing = blocks[firstText];
-            if (existing.type === 'text') {
-              blocks[firstText] = { ...existing, content: existing.content + token };
+          if (state.tabs.length === 1) {
+            const replacement = createTab({ id });
+            return {
+              tabs: [replacement],
+              activeTabId: replacement.id,
+              messages: replacement.messages,
+              isStreaming: replacement.isStreaming,
+            };
+          }
+
+          const tabs = state.tabs.filter((tab) => tab.id !== id);
+          if (state.activeTabId !== id) return { tabs };
+
+          const nextIndex = Math.min(index, tabs.length - 1);
+          const nextTab = tabs[nextIndex];
+          return {
+            tabs,
+            activeTabId: nextTab.id,
+            messages: nextTab.messages,
+            isStreaming: nextTab.isStreaming,
+          };
+        }),
+
+      setTabTitle: (title, tabId) =>
+        set((state) =>
+          updateTab(state, tabId, (tab) => ({
+            ...tab,
+            title: normalizeChatTitle(title),
+          }))
+        ),
+
+      setTabLoading: (isLoading, tabId) =>
+        set((state) => updateTab(state, tabId, (tab) => ({ ...tab, isLoading }))),
+
+      setSessionId: (id, tabId) =>
+        set((state) => updateTab(state, tabId, (tab) => ({ ...tab, sessionId: id }))),
+
+      setMessages: (messages, tabId) =>
+        set((state) =>
+          updateTab(state, tabId, (tab) => ({
+            ...tab,
+            messages,
+            isLoaded: true,
+            title:
+              tab.title === NEW_CHAT_TITLE ? (titleFromMessages(messages) ?? tab.title) : tab.title,
+          }))
+        ),
+
+      addMessage: (msg, tabId) =>
+        set((state) =>
+          updateTab(state, tabId, (tab) => ({
+            ...tab,
+            messages: [...tab.messages, msg],
+            title:
+              tab.title === NEW_CHAT_TITLE && msg.role === 'user' && msg.content
+                ? titleFromUserMessage(msg.content)
+                : tab.title,
+          }))
+        ),
+
+      appendToLastAssistantMessage: (token, tabId) =>
+        set((state) =>
+          updateTab(state, tabId, (tab) => {
+            const messages = [...tab.messages];
+            const lastIndex = messages.length - 1;
+            if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') return tab;
+
+            const last = messages[lastIndex];
+            const blocks = last.blocks.length > 0 ? [...last.blocks] : [];
+            let firstText = blocks.findIndex((block) => block.type === 'text');
+            if (firstText === -1) {
+              blocks.push({ id: `${last.id}-text-0`, type: 'text', content: token });
+              firstText = blocks.length - 1;
+            } else {
+              const existing = blocks[firstText];
+              if (existing.type === 'text') {
+                blocks[firstText] = { ...existing, content: existing.content + token };
+              }
             }
-          }
-          messages[lastIndex] = {
-            ...last,
-            blocks,
-            content: (last.content ?? '') + token,
-          };
-          return { messages };
-        }),
+            messages[lastIndex] = {
+              ...last,
+              blocks,
+              content: (last.content ?? '') + token,
+            };
+            return { ...tab, messages };
+          })
+        ),
 
-      startAssistantMessage: () =>
-        set((s) => ({
-          isStreaming: true,
-          messages: [...s.messages, emptyAssistant()],
-        })),
+      startAssistantMessage: (tabId) =>
+        set((state) =>
+          updateTab(state, tabId, (tab) => ({
+            ...tab,
+            isStreaming: true,
+            messages: [...tab.messages, emptyAssistant()],
+          }))
+        ),
 
-      appendBlockToLastAssistant: (block) =>
-        set((s) => {
-          const messages = [...s.messages];
-          let lastIndex = messages.length - 1;
-          if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') {
-            messages.push(emptyAssistant());
-            lastIndex = messages.length - 1;
-          }
-          const last = messages[lastIndex];
-          messages[lastIndex] = {
-            ...last,
-            blocks: [...last.blocks, block],
-            content:
-              block.type === 'text'
-                ? [last.content ?? '', block.content].filter(Boolean).join('\n')
-                : last.content,
-          };
-          return { messages };
-        }),
+      appendBlockToLastAssistant: (block, tabId) =>
+        set((state) =>
+          updateTab(state, tabId, (tab) => {
+            const messages = [...tab.messages];
+            let lastIndex = messages.length - 1;
+            if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') {
+              messages.push(emptyAssistant());
+              lastIndex = messages.length - 1;
+            }
+            const last = messages[lastIndex];
+            messages[lastIndex] = {
+              ...last,
+              blocks: [...last.blocks, block],
+              content:
+                block.type === 'text'
+                  ? [last.content ?? '', block.content].filter(Boolean).join('\n')
+                  : last.content,
+            };
+            return { ...tab, messages };
+          })
+        ),
 
-      updateBlockOnLastAssistant: (blockId, patch) =>
-        set((s) => {
-          const messages = [...s.messages];
-          const lastIndex = messages.length - 1;
-          if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') return { messages };
-          const last = messages[lastIndex];
-          messages[lastIndex] = {
-            ...last,
-            blocks: last.blocks.map((b) => (b.id === blockId ? patch(b) : b)),
-          };
-          return { messages };
-        }),
+      updateBlockOnLastAssistant: (blockId, patch, tabId) =>
+        set((state) =>
+          updateTab(state, tabId, (tab) => {
+            const messages = [...tab.messages];
+            const lastIndex = messages.length - 1;
+            if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') return tab;
+            const last = messages[lastIndex];
+            messages[lastIndex] = {
+              ...last,
+              blocks: last.blocks.map((block) => (block.id === blockId ? patch(block) : block)),
+            };
+            return { ...tab, messages };
+          })
+        ),
 
-      setStreaming: (streaming) => set({ isStreaming: streaming }),
+      setStreaming: (isStreaming, tabId) =>
+        set((state) => updateTab(state, tabId, (tab) => ({ ...tab, isStreaming }))),
 
-      setToolStatus: (blockId, status, extras) =>
-        set((s) => {
-          const messages = s.messages.map((m) =>
-            m.role !== 'assistant'
-              ? m
-              : {
-                  ...m,
-                  blocks: m.blocks.map((b) =>
-                    b.id === blockId && b.type === 'tool_call'
-                      ? { ...b, status, ...(extras ?? {}) }
-                      : b
-                  ),
-                }
-          );
-          return { messages };
-        }),
+      setToolStatus: (blockId, status, extras, tabId) =>
+        set((state) =>
+          updateTab(state, tabId, (tab) => ({
+            ...tab,
+            messages: tab.messages.map((message) =>
+              message.role !== 'assistant'
+                ? message
+                : {
+                    ...message,
+                    blocks: message.blocks.map((block) =>
+                      block.id === blockId && block.type === 'tool_call'
+                        ? { ...block, status, ...(extras ?? {}) }
+                        : block
+                    ),
+                  }
+            ),
+          }))
+        ),
 
-      reset: () => set({ messages: [], sessionId: null, isStreaming: false }),
+      reset: (tabId) =>
+        set((state) =>
+          updateTab(state, tabId, (tab) => ({
+            ...createTab({ id: tab.id }),
+            title: NEW_CHAT_TITLE,
+          }))
+        ),
     }),
     {
       name: 'caret-session',
-      partialize: (state) => ({ isOpen: state.isOpen }),
+      version: 2,
+      partialize: (state): PersistedCaretState => ({
+        isOpen: state.isOpen,
+        activeTabId: state.activeTabId,
+        tabs: state.tabs.map(({ id, sessionId, title }) => ({ id, sessionId, title })),
+      }),
+      migrate: (persistedState) => persistedState as PersistedCaretState,
+      merge: mergePersistedState,
     }
   )
 );

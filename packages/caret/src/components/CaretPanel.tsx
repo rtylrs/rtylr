@@ -19,11 +19,12 @@ import { inferCaretModeForPrompt } from '../lib/modeIntent';
 import { buildCaretEmptyState, type CaretStarter } from '../lib/suggestions';
 import type { CaretChatSummary } from '../types/chat';
 import type { CaretPageContext } from '../types/context';
-import type { ToolCallBlock } from '../types/message';
+import type { CaretMessage, ToolCallBlock } from '../types/message';
 import HeaderBar from './header/HeaderBar';
 import MessageList from './MessageList';
+import MessageSkeleton from './MessageSkeleton';
 import { Composer } from './composer';
-import ContextDock from './ContextDock';
+import ChatTabs from './ChatTabs';
 import EmptyState from './EmptyState';
 import SettingsPanel from './SettingsPanel';
 import { ChatList } from './sidebar';
@@ -39,6 +40,8 @@ export interface CaretPanelProps {
 }
 
 type ToolDecision = 'approve' | 'deny';
+
+const EMPTY_MESSAGES: CaretMessage[] = [];
 
 interface ToolDecisionResponse {
   tool_call_id: string;
@@ -101,17 +104,14 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   variant,
 }) => {
   useShortcuts();
-  const {
-    isOpen,
-    sessionId,
-    messages,
-    isStreaming,
-    setToolStatus,
-    appendBlockToLastAssistant,
-    setSessionId,
-    setMessages,
-    reset,
-  } = useCaretStore();
+  const caret = useCaretStore();
+  const activeTab = caret.tabs.find((tab) => tab.id === caret.activeTabId) ?? caret.tabs[0];
+  const activeTabId = activeTab?.id ?? caret.activeTabId;
+  const sessionId = activeTab?.sessionId ?? null;
+  const messages = activeTab?.messages ?? EMPTY_MESSAGES;
+  const isStreaming = activeTab?.isStreaming ?? false;
+  const isLoading = activeTab?.isLoading ?? false;
+  const { isOpen } = caret;
   const showThinking = useCaretSettingsStore((s) => s.showThinking);
   const panelWidth = useCaretSettingsStore((s) => s.panelWidth);
   const view = useCaretUIStore((s) => s.view);
@@ -145,22 +145,43 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   }, [sessions, setRecent]);
 
   const newChat = useCallback((): void => {
-    reset();
+    caret.newTab();
     setView('chat');
-  }, [reset, setView]);
+  }, [caret, setView]);
 
   const selectChat = useCallback(
-    async (id: string): Promise<void> => {
-      setSessionId(id);
-      setView('chat');
-      try {
-        const loaded = await loadChat(id);
-        setMessages(loaded);
-      } catch {
-        setMessages([]);
+    (id: string): void => {
+      const existing = useCaretStore.getState().tabs.find((tab) => tab.sessionId === id);
+      if (existing) {
+        caret.setActiveTab(existing.id);
+      } else {
+        const summary = sessions.find((chat) => chat.id === id);
+        caret.newTab({ sessionId: id, title: summary?.title });
       }
+      setView('chat');
     },
-    [loadChat, setSessionId, setMessages, setView]
+    [caret, sessions, setView]
+  );
+
+  useEffect(() => {
+    if (!activeTab || activeTab.isLoaded || activeTab.isLoading || !activeTab.sessionId) return;
+
+    const tabId = activeTab.id;
+    const tabSessionId = activeTab.sessionId;
+    caret.setTabLoading(true, tabId);
+    void loadChat(tabSessionId)
+      .then((loaded) => caret.setMessages(loaded, tabId))
+      .catch(() => caret.setMessages([], tabId))
+      .finally(() => caret.setTabLoading(false, tabId));
+  }, [activeTab, caret, loadChat]);
+
+  const closeChatTab = useCallback(
+    (tabId: string): void => {
+      const tab = useCaretStore.getState().tabs.find((candidate) => candidate.id === tabId);
+      if (tab?.isStreaming) stopStreaming(tabId);
+      caret.closeTab(tabId);
+    },
+    [caret, stopStreaming]
   );
 
   const deleteChat = useCallback(
@@ -190,14 +211,18 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
         return;
       }
 
-      if (sessionId === id) {
-        reset();
+      const openTab = useCaretStore.getState().tabs.find((tab) => tab.sessionId === id);
+      const wasActive = openTab?.id === activeTabId;
+      if (openTab) {
+        closeChatTab(openTab.id);
+      }
+      if (wasActive) {
         setView('chat');
       }
 
       void queryClient.invalidateQueries({ queryKey });
     },
-    [apiBaseUrl, queryClient, removeRecent, reset, sessionId, setRecent, setView, userId]
+    [activeTabId, apiBaseUrl, closeChatTab, queryClient, removeRecent, setRecent, setView, userId]
   );
 
   const [introPlaying, setIntroPlaying] = useState(false);
@@ -214,28 +239,27 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     return () => window.clearTimeout(timer);
   }, [isOpen]);
 
-  const findToolCall = useCallback(
-    (id: string): ToolCallBlock | null => {
-      for (const message of messages) {
-        for (const block of message.blocks) {
-          if (block.type === 'tool_call' && block.id === id) return block;
-        }
+  const findToolCall = useCallback((id: string, tabId: string): ToolCallBlock | null => {
+    const tab = useCaretStore.getState().tabs.find((candidate) => candidate.id === tabId);
+    for (const message of tab?.messages ?? []) {
+      for (const block of message.blocks) {
+        if (block.type === 'tool_call' && block.id === id) return block;
       }
-      return null;
-    },
-    [messages]
-  );
+    }
+    return null;
+  }, []);
 
   const sendToolDecision = useCallback(
     async (id: string, decision: ToolDecision): Promise<void> => {
-      const call = findToolCall(id);
+      const tabId = activeTabId;
+      const call = findToolCall(id, tabId);
       if (!call) {
-        setToolStatus(id, 'error', { error: 'Tool call no longer exists.' });
+        caret.setToolStatus(id, 'error', { error: 'Tool call no longer exists.' }, tabId);
         return;
       }
 
       const baseUrl = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
-      setToolStatus(id, 'running');
+      caret.setToolStatus(id, 'running', undefined, tabId);
 
       try {
         const response = await fetch(`${baseUrl}caret/tools/decision`, {
@@ -273,26 +297,32 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
                 },
                 preview: result.preview,
               };
-        setToolStatus(id, status, extras);
+        caret.setToolStatus(id, status, extras, tabId);
         const followUp = decisionFollowUp(decision, status, result);
         if (followUp) {
-          appendBlockToLastAssistant({
-            id: `tool-followup-${id}-${Date.now()}`,
-            type: 'text',
-            content: followUp,
-          });
+          caret.appendBlockToLastAssistant(
+            {
+              id: `tool-followup-${id}-${Date.now()}`,
+              type: 'text',
+              content: followUp,
+            },
+            tabId
+          );
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Tool decision failed.';
-        setToolStatus(id, 'error', { error: message });
-        appendBlockToLastAssistant({
-          id: `tool-followup-${id}-${Date.now()}`,
-          type: 'text',
-          content: "I couldn't finish that. No confirmed changes were made.",
-        });
+        caret.setToolStatus(id, 'error', { error: message }, tabId);
+        caret.appendBlockToLastAssistant(
+          {
+            id: `tool-followup-${id}-${Date.now()}`,
+            type: 'text',
+            content: "I couldn't finish that. No confirmed changes were made.",
+          },
+          tabId
+        );
       }
     },
-    [apiBaseUrl, appendBlockToLastAssistant, findToolCall, mode, setToolStatus]
+    [activeTabId, apiBaseUrl, caret, findToolCall, mode]
   );
 
   const onApprove = useCallback(
@@ -375,11 +405,28 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
         }}
       />
 
-      <HeaderBar onNewChat={newChat} onSelectChat={selectChat} onDeleteChat={deleteChat} />
+      <HeaderBar onSelectChat={selectChat} onDeleteChat={deleteChat} />
+      <ChatTabs
+        tabs={caret.tabs}
+        activeTabId={activeTabId}
+        onSelect={caret.setActiveTab}
+        onNew={newChat}
+        onClose={closeChatTab}
+      />
 
       {view === 'chat' && (
         <>
-          {messages.length === 0 ? (
+          {isLoading ? (
+            <div
+              style={{
+                flex: 1,
+                overflowY: 'auto',
+                padding: 18,
+              }}
+            >
+              <MessageSkeleton />
+            </div>
+          ) : messages.length === 0 ? (
             <EmptyState
               title={emptyState.title}
               subtitle={emptyState.subtitle}
@@ -390,27 +437,21 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               onSuggestion={sendStarter}
             />
           ) : (
-            <>
-              <MessageList
-                messages={messages}
-                isStreaming={isStreaming}
-                showThinking={showThinking}
-                onApproveTool={onApprove}
-                onDenyTool={onDeny}
-                followUps={followUps}
-                onFollowUp={sendStarter}
-              />
-              <ContextDock
-                signals={emptyState.contextSignals}
-                action={isStreaming ? undefined : emptyState.primaryAction}
-                onAction={sendStarter}
-              />
-            </>
+            <MessageList
+              messages={messages}
+              isStreaming={isStreaming}
+              showThinking={showThinking}
+              onApproveTool={onApprove}
+              onDenyTool={onDeny}
+              followUps={followUps}
+              onFollowUp={sendStarter}
+            />
           )}
           <Composer
+            key={activeTabId}
             isStreaming={isStreaming}
             onSubmit={(t) => sendPromptWithIntent(t)}
-            onStop={stopStreaming}
+            onStop={() => stopStreaming(activeTabId)}
             placeholder={emptyState.composerPlaceholder}
           />
         </>

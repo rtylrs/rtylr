@@ -530,15 +530,6 @@ function buildPrimaryAction({
     );
   }
 
-  if (includesAny(contextKey, ['report', 'insight', 'analytics', 'dashboard', 'operation'])) {
-    return starter(
-      `Review ${pageContext?.page ?? 'these numbers'} and tell me what changed or looks risky`,
-      'analyst',
-      'Explain the signals',
-      'Changes, outliers, and next questions.'
-    );
-  }
-
   if (includesAny(contextKey, ['setting', 'setup', 'config', 'apps'])) {
     return starter(
       `Review ${pageContext?.page ?? 'this setup'} and tell me what is missing or risky`,

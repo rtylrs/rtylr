@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 import IconButton from '../../ui/IconButton';
 import Tooltip from '../../ui/Tooltip';
@@ -10,16 +10,24 @@ export interface MicButtonProps {
 
 export const MicButton: React.FC<MicButtonProps> = ({ onTranscript }) => {
   const { supported, listening, transcript, start, stop, reset } = useSpeechToText();
+  const deliveredTranscript = useRef('');
 
-  // Stream interim transcripts into the composer as they arrive.
+  // The speech hook returns the full set of final results. Only append the
+  // newly recognized suffix so browser result updates never duplicate text.
   useEffect(() => {
-    if (!listening || !transcript) return;
-    onTranscript(transcript);
-  }, [transcript, listening, onTranscript]);
+    if (!transcript) return;
+    const previous = deliveredTranscript.current;
+    const next = transcript.startsWith(previous) ? transcript.slice(previous.length) : transcript;
+    if (next) onTranscript(next);
+    deliveredTranscript.current = transcript;
+  }, [transcript, onTranscript]);
 
   // When the user stops, clear the buffer so the next session starts fresh.
   useEffect(() => {
-    if (!listening) reset();
+    if (!listening) {
+      deliveredTranscript.current = '';
+      reset();
+    }
   }, [listening, reset]);
 
   if (!supported) {
