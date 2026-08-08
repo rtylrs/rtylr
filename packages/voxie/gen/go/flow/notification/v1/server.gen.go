@@ -51,6 +51,18 @@ func RegisterNotificationServiceServer(srv NotificationServiceServer, opts ...Se
 	mux := o.mux
 	mux.HandleFunc("GET /flow/notification/v1/notifications", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListNotificationsRequest)
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt32(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("limit") != "" {
+			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+		}
+		if r.URL.Query().Get("sort_by") != "" {
+			req.SortBy = r.URL.Query().Get("sort_by")
+		}
+		if r.URL.Query().Get("sort_dir") != "" {
+			req.SortDir = r.URL.Query().Get("sort_dir")
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

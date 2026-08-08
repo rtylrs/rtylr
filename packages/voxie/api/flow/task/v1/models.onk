@@ -61,6 +61,10 @@ message Task {
   cycle_id: int64? @nullable
   /// Milestone this task rolls up to, if any.
   milestone_id: int64? @nullable
+  /// Whether the task is archived. Archived tasks are excluded from default
+  /// list and board views but stay readable by id. Absent means false, as
+  /// with every other non-nullable scalar in this message.
+  archived: bool
 }
 
 message TaskComment {
@@ -163,18 +167,37 @@ message ListTasksRequest {
   priority: string @query("priority")
   /// workspace_id filters tasks by workspace when project_id is absent.
   workspace_id: string? @query("workspace_id")
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
 }
 
 message ListTasksResponse {
   /// tasks is the tasks value for this contract.
   tasks: Task[]
+  pagination: PaginationResponse
 }
 
-message GetMyTasksRequest {}
+message GetMyTasksRequest {
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
+}
 
 message GetMyTasksResponse {
   /// tasks is the tasks value for this contract.
   tasks: Task[]
+  pagination: PaginationResponse
 }
 
 message GetMyTasksProjectRequest {}
@@ -187,10 +210,19 @@ message GetMyTasksProjectResponse {
 message SearchTasksRequest {
   q: string @query("q")
   workspace_id: string @required @query("workspace_id")
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
 }
 
 message SearchTasksResponse {
   tasks: Task[]
+  pagination: PaginationResponse
 }
 
 message CreateTaskRequest {
@@ -256,6 +288,9 @@ message UpdateTaskBody {
   start_date: string @required
   /// labels is the labels value for this contract.
   labels: int64[] @min_items(1)
+  /// Updated archived status; absent to keep current value. True archives the
+  /// task, false restores it.
+  archived: bool? @nullable
 }
 
 message UpdateTaskRequest {
@@ -330,11 +365,20 @@ message CreateSubtaskResponse {
 message GetSubtasksRequest {
   /// task_id is the task id value for this contract.
   task_id: int64 @required @gt(0)
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// The field to sort results by.
+  sort_by: string @query("sort_by")
+  /// The sort direction ("asc" or "desc").
+  sort_dir: string @query("sort_dir")
 }
 
 message GetSubtasksResponse {
   /// subtasks is the subtasks value for this contract.
   subtasks: TaskPayloadCompact[]
+  pagination: PaginationResponse
 }
 
 message AddCommentRequest {

@@ -3,6 +3,7 @@ package v1
 
 import (
 	"encoding/json"
+	common_pagination_v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	"strconv"
 )
 
@@ -103,6 +104,10 @@ func (x *View) GetSortDir() string {
 
 type ListViewsRequest struct {
 	WorkspaceId string `json:"workspace_id,omitempty"`
+	Page        int32  `json:"page,omitempty"`
+	Limit       int32  `json:"limit,omitempty"`
+	SortBy      string `json:"sort_by,omitempty"`
+	SortDir     string `json:"sort_dir,omitempty"`
 }
 
 func (x *ListViewsRequest) GetWorkspaceId() string {
@@ -113,8 +118,41 @@ func (x *ListViewsRequest) GetWorkspaceId() string {
 	return x.WorkspaceId
 }
 
+func (x *ListViewsRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListViewsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListViewsRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListViewsRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListViewsResponse struct {
-	Views []*View `json:"views,omitempty"`
+	Views      []*View                                  `json:"views,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *ListViewsResponse) GetViews() []*View {
@@ -123,6 +161,14 @@ func (x *ListViewsResponse) GetViews() []*View {
 		return zero
 	}
 	return x.Views
+}
+
+func (x *ListViewsResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type CreateViewRequest struct {

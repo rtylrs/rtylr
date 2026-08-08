@@ -3,6 +3,7 @@ package v1
 
 import (
 	"encoding/json"
+	common_pagination_v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	"strconv"
 )
 
@@ -36,6 +37,7 @@ type Task struct {
 	SectionId        *int64   `json:"section_id,omitempty"`
 	CycleId          *int64   `json:"cycle_id,omitempty"`
 	MilestoneId      *int64   `json:"milestone_id,omitempty"`
+	Archived         bool     `json:"archived,omitempty"`
 }
 
 func (m *Task) MarshalJSON() ([]byte, error) {
@@ -403,6 +405,14 @@ func (x *Task) GetMilestoneId() int64 {
 		return zero
 	}
 	return *x.MilestoneId
+}
+
+func (x *Task) GetArchived() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Archived
 }
 
 type TaskComment struct {
@@ -977,6 +987,10 @@ type ListTasksRequest struct {
 	AssigneeId  *int64  `json:"assignee_id,omitempty"`
 	Priority    string  `json:"priority,omitempty"`
 	WorkspaceId *string `json:"workspace_id,omitempty"`
+	Page        int32   `json:"page,omitempty"`
+	Limit       int32   `json:"limit,omitempty"`
+	SortBy      string  `json:"sort_by,omitempty"`
+	SortDir     string  `json:"sort_dir,omitempty"`
 }
 
 func (x *ListTasksRequest) GetProjectId() int64 {
@@ -1031,8 +1045,41 @@ func (x *ListTasksRequest) GetWorkspaceId() string {
 	return *x.WorkspaceId
 }
 
+func (x *ListTasksRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListTasksRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListTasksRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListTasksRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListTasksResponse struct {
-	Tasks []*Task `json:"tasks,omitempty"`
+	Tasks      []*Task                                  `json:"tasks,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *ListTasksResponse) GetTasks() []*Task {
@@ -1043,11 +1090,56 @@ func (x *ListTasksResponse) GetTasks() []*Task {
 	return x.Tasks
 }
 
+func (x *ListTasksResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
+}
+
 type GetMyTasksRequest struct {
+	Page    int32  `json:"page,omitempty"`
+	Limit   int32  `json:"limit,omitempty"`
+	SortBy  string `json:"sort_by,omitempty"`
+	SortDir string `json:"sort_dir,omitempty"`
+}
+
+func (x *GetMyTasksRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *GetMyTasksRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *GetMyTasksRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *GetMyTasksRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
 }
 
 type GetMyTasksResponse struct {
-	Tasks []*Task `json:"tasks,omitempty"`
+	Tasks      []*Task                                  `json:"tasks,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *GetMyTasksResponse) GetTasks() []*Task {
@@ -1056,6 +1148,14 @@ func (x *GetMyTasksResponse) GetTasks() []*Task {
 		return zero
 	}
 	return x.Tasks
+}
+
+func (x *GetMyTasksResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type GetMyTasksProjectRequest struct {
@@ -1124,6 +1224,10 @@ func (x *GetMyTasksProjectResponse) GetWorkspaceId() int64 {
 type SearchTasksRequest struct {
 	Q           string `json:"q,omitempty"`
 	WorkspaceId string `json:"workspace_id,omitempty"`
+	Page        int32  `json:"page,omitempty"`
+	Limit       int32  `json:"limit,omitempty"`
+	SortBy      string `json:"sort_by,omitempty"`
+	SortDir     string `json:"sort_dir,omitempty"`
 }
 
 func (x *SearchTasksRequest) GetQ() string {
@@ -1142,8 +1246,41 @@ func (x *SearchTasksRequest) GetWorkspaceId() string {
 	return x.WorkspaceId
 }
 
+func (x *SearchTasksRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *SearchTasksRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *SearchTasksRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *SearchTasksRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type SearchTasksResponse struct {
-	Tasks []*Task `json:"tasks,omitempty"`
+	Tasks      []*Task                                  `json:"tasks,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *SearchTasksResponse) GetTasks() []*Task {
@@ -1152,6 +1289,14 @@ func (x *SearchTasksResponse) GetTasks() []*Task {
 		return zero
 	}
 	return x.Tasks
+}
+
+func (x *SearchTasksResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type CreateTaskRequest struct {
@@ -1424,6 +1569,7 @@ type UpdateTaskBody struct {
 	DueDate     string  `json:"due_date,omitempty"`
 	StartDate   string  `json:"start_date,omitempty"`
 	Labels      []int64 `json:"labels,omitempty"`
+	Archived    *bool   `json:"archived,omitempty"`
 }
 
 func (m *UpdateTaskBody) MarshalJSON() ([]byte, error) {
@@ -1527,6 +1673,18 @@ func (x *UpdateTaskBody) GetLabels() []int64 {
 		return zero
 	}
 	return x.Labels
+}
+
+func (x *UpdateTaskBody) GetArchived() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.Archived == nil {
+		var zero bool
+		return zero
+	}
+	return *x.Archived
 }
 
 type UpdateTaskRequest struct {
@@ -1919,7 +2077,11 @@ func (x *CreateSubtaskResponse) GetMessage() string {
 }
 
 type GetSubtasksRequest struct {
-	TaskId int64 `json:"task_id,omitempty"`
+	TaskId  int64  `json:"task_id,omitempty"`
+	Page    int32  `json:"page,omitempty"`
+	Limit   int32  `json:"limit,omitempty"`
+	SortBy  string `json:"sort_by,omitempty"`
+	SortDir string `json:"sort_dir,omitempty"`
 }
 
 func (m *GetSubtasksRequest) MarshalJSON() ([]byte, error) {
@@ -1959,8 +2121,41 @@ func (x *GetSubtasksRequest) GetTaskId() int64 {
 	return x.TaskId
 }
 
+func (x *GetSubtasksRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *GetSubtasksRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *GetSubtasksRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *GetSubtasksRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type GetSubtasksResponse struct {
-	Subtasks []*TaskPayloadCompact `json:"subtasks,omitempty"`
+	Subtasks   []*TaskPayloadCompact                    `json:"subtasks,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *GetSubtasksResponse) GetSubtasks() []*TaskPayloadCompact {
@@ -1969,6 +2164,14 @@ func (x *GetSubtasksResponse) GetSubtasks() []*TaskPayloadCompact {
 		return zero
 	}
 	return x.Subtasks
+}
+
+func (x *GetSubtasksResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type AddCommentRequest struct {

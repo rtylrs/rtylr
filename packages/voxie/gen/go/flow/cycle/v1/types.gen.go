@@ -3,6 +3,7 @@ package v1
 
 import (
 	"encoding/json"
+	common_pagination_v1 "github.com/voxire/voxie/gen/go/common/pagination/v1"
 	"strconv"
 )
 
@@ -122,6 +123,10 @@ func (x *Cycle) GetCompleted() int32 {
 
 type ListCyclesRequest struct {
 	WorkspaceId string `json:"workspace_id,omitempty"`
+	Page        int32  `json:"page,omitempty"`
+	Limit       int32  `json:"limit,omitempty"`
+	SortBy      string `json:"sort_by,omitempty"`
+	SortDir     string `json:"sort_dir,omitempty"`
 }
 
 func (x *ListCyclesRequest) GetWorkspaceId() string {
@@ -132,8 +137,41 @@ func (x *ListCyclesRequest) GetWorkspaceId() string {
 	return x.WorkspaceId
 }
 
+func (x *ListCyclesRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListCyclesRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListCyclesRequest) GetSortBy() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortBy
+}
+
+func (x *ListCyclesRequest) GetSortDir() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SortDir
+}
+
 type ListCyclesResponse struct {
-	Cycles []*Cycle `json:"cycles,omitempty"`
+	Cycles     []*Cycle                                 `json:"cycles,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
 }
 
 func (x *ListCyclesResponse) GetCycles() []*Cycle {
@@ -142,6 +180,14 @@ func (x *ListCyclesResponse) GetCycles() []*Cycle {
 		return zero
 	}
 	return x.Cycles
+}
+
+func (x *ListCyclesResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
 }
 
 type CreateCycleRequest struct {
