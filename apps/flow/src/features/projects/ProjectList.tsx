@@ -19,6 +19,7 @@ import { cn, formatDate } from '../../shared/lib/utils';
 import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useCurrentProject } from './useCurrentProject';
+import { TaskContextMenu, ContextMenuState } from '../../shared/components/TaskContextMenu';
 
 const PRIORITY_ICONS: Record<string, { color: string; label: string }> = {
   urgent: { color: '#ef4444', label: 'Urgent' },
@@ -40,8 +41,9 @@ interface TaskRowProps {
   depth?: number;
 }
 
-const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
+export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
   const [checked, setChecked] = useState(task.status === 'done');
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const updateTaskStatus = useUpdateTaskStatus();
 
   useEffect(() => {
@@ -58,6 +60,17 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
         onError: () => setChecked(!newChecked),
       }
     );
+  };
+
+  const handleMoreClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const menuW = 160;
+    const menuH = 120;
+    const x = e.clientX + menuW > vw ? e.clientX - menuW : e.clientX;
+    const y = e.clientY + menuH > vh ? e.clientY - menuH : e.clientY;
+    setContextMenu({ x, y, taskId: task.id });
   };
 
   return (
@@ -129,11 +142,15 @@ const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 
       {/* More */}
       <button
+        onClick={handleMoreClick}
+        aria-label="More options"
         className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
         style={{ color: 'var(--flow-text-dim)' }}
       >
         <MoreHorizontal size={13} />
       </button>
+
+      {contextMenu && <TaskContextMenu menu={contextMenu} onClose={() => setContextMenu(null)} />}
     </motion.div>
   );
 };
