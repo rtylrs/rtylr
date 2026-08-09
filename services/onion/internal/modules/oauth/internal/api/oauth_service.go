@@ -61,6 +61,7 @@ func (a *OauthAPI) Issue(ctx context.Context, req *commonoauthv1.IssueRequest) (
 	if req.GetState() != "" {
 		cq.Set("state", req.GetState())
 	}
+	cq.Set("iss", "rtylr")
 	callbackURL.RawQuery = cq.Encode()
 
 	return &commonoauthv1.IssueResponse{RedirectUrl: callbackURL.String()}, nil
