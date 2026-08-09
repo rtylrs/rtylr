@@ -24,10 +24,10 @@ const BusinessTypeSettings: React.FC = () => {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    if (businessType) setSelected(businessType);
+    setSelected(businessType || '');
   }, [businessType]);
 
-  const groups = data?.groups ?? [];
+  const groups = useMemo(() => data?.groups ?? [], [data?.groups]);
 
   const filteredGroups = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -52,16 +52,19 @@ const BusinessTypeSettings: React.FC = () => {
 
   const handleSave = () => {
     if (!selected) return;
-    setBusinessType(selected as BusinessType);
-    updateBusiness.mutate({ data: { businessType: selected } });
+
+    updateBusiness.mutate(
+      { data: { businessType: selected } },
+      { onSuccess: () => setBusinessType(selected as BusinessType) }
+    );
   };
 
-  const hasSelection = !!selected;
+  const hasChanges = selected !== (businessType || '');
 
   return (
     <>
       <HelmetContainer title="Industry · rtylr" />
-      <div className={cn('space-y-6', hasSelection && 'pb-24')}>
+      <div className={cn('space-y-6', hasChanges && 'pb-24')}>
         <div>
           <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
             Industry
@@ -133,7 +136,7 @@ const BusinessTypeSettings: React.FC = () => {
         )}
 
         <AnimatePresence>
-          {hasSelection && (
+          {hasChanges && (
             <motion.div
               key="save-footer"
               initial={{ y: 96, opacity: 0 }}
