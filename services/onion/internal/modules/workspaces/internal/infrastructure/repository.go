@@ -494,11 +494,6 @@ func (r *Repository) GetMyTasks(ctx context.Context, userID, limit, offset int64
 
 // dynamic-query: squirrel
 func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInput) error {
-	labelsJSON, err := marshalLabels(input.Labels)
-	if err != nil {
-		return err
-	}
-
 	var statusParam interface{}
 	if input.Status != "" {
 		statusParam = input.Status
@@ -507,8 +502,19 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 	if input.Priority != "" {
 		priorityParam = input.Priority
 	}
+	// Guard on the input slice, not on the marshalled bytes. marshalLabels turns
+	// a nil slice into "[]", which is never nil, so testing its output made
+	// labelsParam non-NULL on every call and overwrote labels on updates that
+	// never mentioned them. Only a nil slice means "leave the column alone"; an
+	// explicit empty slice means "clear every label" and must still be written.
+	// marshalLabels is left as-is because CreateTask depends on it defaulting a
+	// nil slice to "[]" for the INSERT.
 	var labelsParam interface{}
-	if labelsJSON != nil {
+	if input.Labels != nil {
+		labelsJSON, err := marshalLabels(input.Labels)
+		if err != nil {
+			return err
+		}
 		labelsParam = labelsJSON
 	}
 	var titleParam interface{}
