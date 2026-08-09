@@ -1,6 +1,8 @@
 import type { Tool } from '../types.js';
 import { ok, apiErr, qs } from '../types.js';
 
+const SUPPLIER_BASE = '/api/erp/supplier/v1/suppliers';
+
 export const listSuppliers: Tool = {
   name: 'erp_list_suppliers',
   description: 'List ERP suppliers.',
@@ -14,7 +16,7 @@ export const listSuppliers: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/erp/suppliers${qs(input, ['search', 'limit', 'offset'])}`);
+      const res = await api.get(`${SUPPLIER_BASE}${qs(input, ['search', 'limit', 'offset'])}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -38,7 +40,7 @@ export const createSupplier: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.post('/erp/suppliers', input);
+      const res = await api.post(SUPPLIER_BASE, input);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -64,7 +66,7 @@ export const updateSupplier: Tool = {
   handler: async (input, api) => {
     try {
       const { supplier_id, ...body } = input;
-      const res = await api.put(`/erp/suppliers/${supplier_id}`, body);
+      const res = await api.put(`${SUPPLIER_BASE}/${supplier_id}`, { body });
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -84,7 +86,7 @@ export const deleteSupplier: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.delete(`/erp/suppliers/${input.supplier_id}`);
+      const res = await api.delete(`${SUPPLIER_BASE}/${input.supplier_id}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

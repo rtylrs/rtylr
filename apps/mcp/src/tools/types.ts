@@ -1,8 +1,10 @@
 import type { AxiosInstance } from 'axios';
+import { z } from 'zod';
 
 export interface ToolResult {
   content: Array<{ type: 'text'; text: string }>;
   isError?: boolean;
+  [key: string]: unknown;
 }
 
 export interface Tool {
@@ -39,4 +41,44 @@ export function qs(input: Record<string, unknown>, keys: string[]): string {
   }
   const s = p.toString();
   return s ? `?${s}` : '';
+}
+
+export function jsonSchemaToZodShape(inputSchema: {
+  type?: string;
+  properties?: Record<string, { type?: string; description?: string; enum?: string[] }>;
+  required?: string[];
+}): Record<string, z.ZodTypeAny> {
+  const shape: Record<string, z.ZodTypeAny> = {};
+  const props = inputSchema?.properties ?? {};
+  const required = new Set(inputSchema?.required ?? []);
+
+  for (const [key, prop] of Object.entries(props)) {
+    let schema: z.ZodTypeAny;
+
+    if (prop.enum && prop.enum.length > 0) {
+      schema = z.enum(prop.enum as [string, ...string[]]);
+    } else if (prop.type === 'number' || prop.type === 'integer') {
+      schema = z.number();
+    } else if (prop.type === 'boolean') {
+      schema = z.boolean();
+    } else if (prop.type === 'array') {
+      schema = z.array(z.any());
+    } else if (prop.type === 'object') {
+      schema = z.record(z.any());
+    } else {
+      schema = z.string();
+    }
+
+    if (prop.description) {
+      schema = schema.describe(prop.description);
+    }
+
+    if (!required.has(key)) {
+      schema = schema.optional();
+    }
+
+    shape[key] = schema;
+  }
+
+  return shape;
 }
