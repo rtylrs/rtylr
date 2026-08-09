@@ -46,7 +46,6 @@ const Footer: React.FC = () => {
         },
         { to: '/integrations', label: 'Integrations' },
         { to: '/support', label: 'Help Center' },
-        { to: 'https://docs.rtylr.com/changelog', label: 'Changelog', external: true },
       ],
     },
     {
@@ -55,11 +54,6 @@ const Footer: React.FC = () => {
         {
           to: 'https://docs.rtylr.com',
           label: 'Documentation',
-          external: true,
-        },
-        {
-          to: 'https://docs.rtylr.com/api',
-          label: 'API Reference',
           external: true,
         },
         { to: 'https://status.rtylr.com', label: 'Status', external: true },

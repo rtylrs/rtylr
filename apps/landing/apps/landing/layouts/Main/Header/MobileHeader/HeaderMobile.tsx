@@ -315,14 +315,6 @@ const HeaderMobile: React.FC = () => {
                     Blog
                   </Link>
                   <a
-                    href="https://docs.rtylr.com/changelog"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={closeMenu}
-                  >
-                    Changelog
-                  </a>
-                  <a
                     href="https://docs.rtylr.com"
                     target="_blank"
                     rel="noopener noreferrer"

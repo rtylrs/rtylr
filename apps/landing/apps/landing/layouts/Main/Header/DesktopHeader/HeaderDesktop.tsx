@@ -37,7 +37,6 @@ const RESOURCE_LINKS = [
   { href: '/hardware', label: 'Hardware' },
   { href: '/integrations', label: 'Integrations' },
   { href: '/blog', label: 'Blog' },
-  { href: 'https://docs.rtylr.com/changelog', label: 'Changelog', external: true },
   { href: 'https://docs.rtylr.com', label: 'Documentation', external: true },
   { href: '/support', label: 'Help Center' },
   { href: '/trust', label: 'Trust Center' },
