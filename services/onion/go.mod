@@ -24,7 +24,6 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.42.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.16
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.99.1
-	github.com/axiomhq/axiom-go v0.32.0
 	github.com/coder/websocket v1.8.14
 	github.com/corezio/onekit v0.3.5
 	github.com/fogleman/gg v1.3.0
@@ -33,6 +32,7 @@ require (
 	github.com/koyachi/go-nude v0.0.1
 	github.com/ledongthuc/pdf v0.0.0-20250511090121-5959a4027728
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/samber/slog-betterstack v1.4.4
 	github.com/testcontainers/testcontainers-go v0.43.0
 	github.com/trinodb/trino-go-client v0.333.0
 	github.com/voxire/voxie v0.0.0-00010101000000-000000000000
@@ -105,6 +105,8 @@ require (
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
+	github.com/samber/lo v1.53.0 // indirect
+	github.com/samber/slog-common v0.21.0 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.5 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect

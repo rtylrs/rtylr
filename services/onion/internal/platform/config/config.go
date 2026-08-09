@@ -128,9 +128,9 @@ type AppConfig struct {
 	// Database Logging
 	LoggingDatabaseURL string
 
-	// Axiom logging
-	AxiomToken   string
-	AxiomDataset string
+	// Better Stack logging
+	BetterStackSourceToken   string
+	BetterStackIngestingHost string
 
 	// Slack logging — routes error/request/suspicious logs to Slack channels.
 	SlackLoggingEnabled     bool
@@ -319,9 +319,9 @@ func LoadAndValidate() (*AppConfig, error) {
 		// Database Logging
 		LoggingDatabaseURL: os.Getenv("LOGGING_DATABASE_URL"),
 
-		// Axiom logging
-		AxiomToken:   os.Getenv("AXIOM_TOKEN"),
-		AxiomDataset: os.Getenv("AXIOM_DATASET"),
+		// Better Stack logging
+		BetterStackSourceToken:   os.Getenv("BETTERSTACK_SOURCE_TOKEN"),
+		BetterStackIngestingHost: strings.TrimSpace(os.Getenv("BETTERSTACK_INGESTING_HOST")),
 
 		SlackLoggingEnabled:     strings.ToLower(strings.TrimSpace(os.Getenv("SLACK_LOGGING_ENABLED"))) == "true",
 		SlackBotToken:           os.Getenv("SLACK_BOT_TOKEN"),

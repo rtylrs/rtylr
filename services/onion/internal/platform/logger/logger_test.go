@@ -97,3 +97,23 @@ func TestFlushIsNoOp(t *testing.T) {
 	}()
 	Flush()
 }
+
+func TestBetterStackEndpoint(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{name: "empty uses library default", input: "", want: ""},
+		{name: "host gets https scheme", input: "s123.eu-nbg-2.betterstackdata.com", want: "https://s123.eu-nbg-2.betterstackdata.com"},
+		{name: "full endpoint is preserved", input: " https://logs.example.test/ ", want: "https://logs.example.test/"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := betterStackEndpoint(tt.input); got != tt.want {
+				t.Fatalf("betterStackEndpoint(%q) = %q, want %q", tt.input, got, tt.want)
+			}
+		})
+	}
+}

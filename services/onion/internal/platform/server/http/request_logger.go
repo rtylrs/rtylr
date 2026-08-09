@@ -71,7 +71,7 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 			duration := time.Since(start)
 
 			// Failed requests (4xx/5xx) → the Slack request-logs channel (batched).
-			// 2xx/3xx are left to Axiom to keep the channel signal-dense. Malicious
+			// 2xx/3xx are left to Better Stack to keep the channel signal-dense. Malicious
 			// requests are blocked upstream by SecurityMiddleware and never reach here.
 			// Anonymous 401s (no token) are expected bot/scanner noise — skip them.
 			if slack.Enabled() && responseWriter.statusCode >= 400 &&

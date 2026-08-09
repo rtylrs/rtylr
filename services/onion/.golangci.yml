@@ -414,7 +414,7 @@ linters:
             - github.com/resend/resend-go/v2
             - github.com/getsentry/sentry-go
             - github.com/coder/websocket
-            - github.com/axiomhq/axiom-go
+            - github.com/samber/slog-betterstack
             - github.com/workos/workos-go
             - github.com/robfig/cron/v3
             - github.com/corezio/onekit/http
@@ -467,7 +467,7 @@ linters:
           - github.com/resend/resend-go/v2
           - github.com/getsentry/sentry-go
           - github.com/coder/websocket
-          - github.com/axiomhq/axiom-go
+          - github.com/samber/slog-betterstack
           - github.com/workos/workos-go
           - github.com/robfig/cron/v3
           - github.com/corezio/onekit/http
@@ -498,7 +498,7 @@ linters:
           - github.com/resend
           - github.com/getsentry
           - github.com/coder
-          - github.com/axiomhq
+          - github.com/samber
           - github.com/workos
           - github.com/corezio
           - github.com/robfig

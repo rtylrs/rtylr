@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	axiomSlog "github.com/axiomhq/axiom-go/adapters/slog"
+	slogbetterstack "github.com/samber/slog-betterstack"
 
 	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/slack"
@@ -27,11 +27,9 @@ type Field struct {
 	Value interface{}
 }
 
-var globalAxiomHandler *axiomSlog.Handler
-
-// SetupLogger initialises the global slog default. If AXIOM_TOKEN and
-// AXIOM_DATASET are set, warn+error records are shipped to Axiom in addition
-// to JSON stdout. Call after loading environment variables.
+// SetupLogger initialises the global slog default. If BETTERSTACK_SOURCE_TOKEN
+// is set, warn+error records are shipped to Better Stack in addition to JSON
+// stdout. Call after loading environment variables.
 func SetupLogger() {
 	// Start the Slack notifier first so the slack handler below has somewhere to
 	// send (no-op unless SLACK_LOGGING_ENABLED + a bot token are set).
@@ -42,20 +40,22 @@ func SetupLogger() {
 	// Error-level records are mirrored to the Slack alerts channel (batched).
 	handlers := []slog.Handler{stdoutHandler, slackErrorHandler{}}
 
-	var token, dataset string
+	var token, ingestingHost string
 	if config.GlobalConfig != nil {
-		token = config.GlobalConfig.AxiomToken
-		dataset = config.GlobalConfig.AxiomDataset
+		token = config.GlobalConfig.BetterStackSourceToken
+		ingestingHost = config.GlobalConfig.BetterStackIngestingHost
 	} else {
-		token = os.Getenv("AXIOM_TOKEN")
-		dataset = os.Getenv("AXIOM_DATASET")
+		token = os.Getenv("BETTERSTACK_SOURCE_TOKEN")
+		ingestingHost = os.Getenv("BETTERSTACK_INGESTING_HOST")
 	}
 
-	if token != "" && dataset != "" {
-		if h, err := axiomSlog.New(axiomSlog.SetLevel(slog.LevelWarn)); err == nil {
-			globalAxiomHandler = h
-			handlers = append(handlers, &dedupHandler{inner: h, window: 30 * time.Second})
-		}
+	if strings.TrimSpace(token) != "" {
+		h := slogbetterstack.Option{
+			Level:    slog.LevelWarn,
+			Token:    strings.TrimSpace(token),
+			Endpoint: betterStackEndpoint(ingestingHost),
+		}.NewBetterstackHandler()
+		handlers = append(handlers, &dedupHandler{inner: h, window: 30 * time.Second})
 	}
 
 	// Tag every record with which runmode emitted it (api / worker / upload),
@@ -108,11 +108,16 @@ func (slackErrorHandler) Handle(_ context.Context, r slog.Record) error {
 func (h slackErrorHandler) WithAttrs(_ []slog.Attr) slog.Handler { return h }
 func (h slackErrorHandler) WithGroup(_ string) slog.Handler      { return h }
 
-// Flush drains any buffered Axiom events. Call on shutdown.
-func Flush() {
-	if globalAxiomHandler != nil {
-		globalAxiomHandler.Close()
+// Flush is retained as a shutdown hook for callers. The Better Stack slog
+// handler dispatches asynchronously and does not expose a flush operation.
+func Flush() {}
+
+func betterStackEndpoint(ingestingHost string) string {
+	ingestingHost = strings.TrimSpace(ingestingHost)
+	if ingestingHost == "" || strings.Contains(ingestingHost, "://") {
+		return ingestingHost
 	}
+	return "https://" + ingestingHost
 }
 
 // multiHandler fans out to multiple slog.Handlers. Each handler's own Enabled
@@ -156,7 +161,8 @@ func (m *multiHandler) WithGroup(name string) slog.Handler {
 }
 
 // dedupHandler wraps a slog.Handler and suppresses repeated (level, message)
-// pairs within the configured window so Axiom doesn't receive duplicate bursts.
+// pairs within the configured window so Better Stack doesn't receive duplicate
+// bursts.
 type dedupHandler struct {
 	inner  slog.Handler
 	window time.Duration
