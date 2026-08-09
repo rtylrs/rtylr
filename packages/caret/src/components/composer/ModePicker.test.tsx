@@ -16,9 +16,9 @@ describe('ModePicker', () => {
 
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
     expect(screen.getAllByRole('menuitemradio')).toHaveLength(4);
-    expect(screen.getByRole('menuitemradio', { name: 'Analyst' }).getAttribute('aria-checked')).toBe(
-      'true'
-    );
+    expect(
+      screen.getByRole('menuitemradio', { name: 'Analyst' }).getAttribute('aria-checked')
+    ).toBe('true');
     expect(screen.queryByText('Reports, tables, and KPI breakdowns. Read-only.')).toBeNull();
 
     fireEvent.click(screen.getByRole('menuitemradio', { name: 'Ask' }));
