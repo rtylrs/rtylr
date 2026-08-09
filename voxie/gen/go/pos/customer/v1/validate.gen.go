@@ -20,10 +20,40 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Customer) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *SearchCustomersRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Query == "" {
 		violations = append(violations, "query is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *SearchCustomersResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Customers {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "customers: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

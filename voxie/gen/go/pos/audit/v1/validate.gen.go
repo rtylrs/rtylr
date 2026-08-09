@@ -20,7 +20,21 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *AuditLog) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateAuditRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BranchId <= 0 {
 		violations = append(violations, "branch_id must be greater than 0")
@@ -52,13 +66,43 @@ func (m *CreateAuditRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateAuditResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ListAuditRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.StartDate == "" {
 		violations = append(violations, "start_date is required")
 	}
 	if m.EndDate == "" {
 		violations = append(violations, "end_date is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAuditResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Logs {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "logs: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

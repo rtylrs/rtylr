@@ -47,6 +47,11 @@ if (v.isLowStock !== undefined) { out.is_low_stock = v.isLowStock; }
 return out;
 }
 
+export function validateInventoryReportItem(v: InventoryReportItem): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ValuationItem {
 categoryName?: string;
 warehouseName?: string;
@@ -76,10 +81,15 @@ if (v.totalCost !== undefined) { out.total_cost = v.totalCost; }
 return out;
 }
 
+export function validateValuationItem(v: ValuationItem): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface AdjustInventoryRequest {
-productId?: string;
-change?: number;
-type?: string;
+productId: string;
+change: number;
+type: string;
 notes?: string;
 }
 
@@ -102,6 +112,16 @@ if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
 }
 
+export function validateAdjustInventoryRequest(v: AdjustInventoryRequest): string[] {
+const violations: string[] = [];
+if (!(v.productId !== undefined && v.productId !== null)) violations.push("product_id is required");
+if (v.productId !== undefined && v.productId !== null && !(Number(v.productId) > 0)) violations.push("product_id violates @gt");
+if (!(v.change !== undefined && v.change !== null)) violations.push("change is required");
+if (v.change !== undefined && v.change !== null && !(Number(v.change) > 0)) violations.push("change violates @gt");
+if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+return violations;
+}
+
 export interface AdjustInventoryResponse {
 message?: string;
 }
@@ -119,6 +139,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateAdjustInventoryResponse(v: AdjustInventoryResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetInventoryReportRequest {
 }
 
@@ -131,6 +156,11 @@ return {
 export function encodeGetInventoryReportRequest(v: GetInventoryReportRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetInventoryReportRequest(v: GetInventoryReportRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetInventoryReportResponse {
@@ -153,6 +183,12 @@ if (v.totalValue !== undefined) { out.total_value = v.totalValue; }
 return out;
 }
 
+export function validateGetInventoryReportResponse(v: GetInventoryReportResponse): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateInventoryReportItem(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface GetLowStockRequest {
 }
 
@@ -165,6 +201,11 @@ return {
 export function encodeGetLowStockRequest(v: GetLowStockRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetLowStockRequest(v: GetLowStockRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetLowStockResponse {
@@ -187,6 +228,12 @@ if (v.count !== undefined) { out.count = v.count; }
 return out;
 }
 
+export function validateGetLowStockResponse(v: GetLowStockResponse): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateInventoryReportItem(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface GetValuationRequest {
 }
 
@@ -199,6 +246,11 @@ return {
 export function encodeGetValuationRequest(v: GetValuationRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetValuationRequest(v: GetValuationRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetValuationResponse {
@@ -219,5 +271,11 @@ const out: Record<string, unknown> = {};
 if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeValuationItem); }
 if (v.totalValue !== undefined) { out.total_value = v.totalValue; }
 return out;
+}
+
+export function validateGetValuationResponse(v: GetValuationResponse): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateValuationItem(item).map((message) => "items: " + message));
+return violations;
 }
 

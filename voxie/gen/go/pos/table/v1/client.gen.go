@@ -23,6 +23,11 @@ func NewTableServiceClient(baseURL string) *TableServiceClient {
 }
 
 func (c *TableServiceClient) ListTables(ctx context.Context, req *ListTablesRequest) (*ListTablesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/table/v1/tables"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *TableServiceClient) ListTables(ctx context.Context, req *ListTablesRequ
 }
 
 func (c *TableServiceClient) CreateTable(ctx context.Context, req *CreateTableRequest) (*CreateTableResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/table/v1/tables"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,9 +94,14 @@ func (c *TableServiceClient) CreateTable(ctx context.Context, req *CreateTableRe
 }
 
 func (c *TableServiceClient) UpdateTable(ctx context.Context, req *UpdateTableRequest) (*UpdateTableResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/table/v1/tables/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -116,6 +131,11 @@ func (c *TableServiceClient) UpdateTable(ctx context.Context, req *UpdateTableRe
 }
 
 func (c *TableServiceClient) DeleteTable(ctx context.Context, req *DeleteTableRequest) (*DeleteTableResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/table/v1/tables/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

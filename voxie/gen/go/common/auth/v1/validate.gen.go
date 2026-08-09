@@ -21,6 +21,9 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *RegisterRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Email == "" {
 		violations = append(violations, "email is required")
@@ -40,7 +43,21 @@ func (m *RegisterRequest) Validate() error {
 	return nil
 }
 
+func (m *RegisterResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *LoginRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Email == "" {
 		violations = append(violations, "email is required")
@@ -57,7 +74,21 @@ func (m *LoginRequest) Validate() error {
 	return nil
 }
 
+func (m *LoginResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GoogleAuthRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Code == "" {
 		violations = append(violations, "code is required")
@@ -68,7 +99,21 @@ func (m *GoogleAuthRequest) Validate() error {
 	return nil
 }
 
+func (m *GoogleAuthResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ResetPasswordRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Email == "" {
 		violations = append(violations, "email is required")
@@ -76,6 +121,17 @@ func (m *ResetPasswordRequest) Validate() error {
 	if m.Email != "" && !emailPattern.MatchString(m.Email) {
 		violations = append(violations, "email must be a valid email")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ResetPasswordResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -83,6 +139,9 @@ func (m *ResetPasswordRequest) Validate() error {
 }
 
 func (m *ResetPasswordConfirmRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Token == "" {
 		violations = append(violations, "token is required")
@@ -90,6 +149,17 @@ func (m *ResetPasswordConfirmRequest) Validate() error {
 	if m.Password == "" {
 		violations = append(violations, "password is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ResetPasswordConfirmResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -97,6 +167,9 @@ func (m *ResetPasswordConfirmRequest) Validate() error {
 }
 
 func (m *VerifyEmailRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Token == "" {
 		violations = append(violations, "token is required")
@@ -107,7 +180,21 @@ func (m *VerifyEmailRequest) Validate() error {
 	return nil
 }
 
+func (m *VerifyEmailResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ResendVerificationRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Email == "" {
 		violations = append(violations, "email is required")
@@ -121,7 +208,21 @@ func (m *ResendVerificationRequest) Validate() error {
 	return nil
 }
 
+func (m *ResendVerificationResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *InviteAcceptRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Token == "" {
 		violations = append(violations, "token is required")
@@ -135,7 +236,21 @@ func (m *InviteAcceptRequest) Validate() error {
 	return nil
 }
 
+func (m *InviteAcceptResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CheckEmailExistsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Email == "" {
 		violations = append(violations, "email is required")
@@ -149,11 +264,36 @@ func (m *CheckEmailExistsRequest) Validate() error {
 	return nil
 }
 
+func (m *CheckEmailExistsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *SocialAuthorizeRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if !inSet(m.Provider, "google", "github", "microsoft", "apple", "") {
 		violations = append(violations, "provider must be one of the allowed values")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *SocialAuthorizeResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

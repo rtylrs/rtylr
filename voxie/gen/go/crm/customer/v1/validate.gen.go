@@ -20,7 +20,21 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Customer) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateCustomerRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.FirstName == "" {
 		violations = append(violations, "first_name is required")
@@ -55,7 +69,21 @@ func (m *CreateCustomerRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateCustomerResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteCustomerRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -66,10 +94,67 @@ func (m *DeleteCustomerRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteCustomerResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetCustomerRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetCustomerResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Customer != nil {
+		if err := m.Customer.Validate(); err != nil {
+			violations = append(violations, "customer: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListCustomersRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListCustomersResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Customers {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "customers: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -78,6 +163,9 @@ func (m *GetCustomerRequest) Validate() error {
 }
 
 func (m *UpdateCustomerBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.FirstName == "" {
 		violations = append(violations, "first_name is required")
@@ -113,10 +201,29 @@ func (m *UpdateCustomerBody) Validate() error {
 }
 
 func (m *UpdateCustomerRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateCustomerResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

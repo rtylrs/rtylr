@@ -24,6 +24,11 @@ func NewLeaveServiceClient(baseURL string) *LeaveServiceClient {
 }
 
 func (c *LeaveServiceClient) ListLeaveRequests(ctx context.Context, req *ListLeaveRequestsRequest) (*ListLeaveRequestsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/leave/v1/requests"
 	query := url.Values{}
 	if req.EmployeeId != nil {
@@ -60,6 +65,11 @@ func (c *LeaveServiceClient) ListLeaveRequests(ctx context.Context, req *ListLea
 }
 
 func (c *LeaveServiceClient) CreateLeaveRequest(ctx context.Context, req *CreateLeaveRequestRequest) (*CreateLeaveRequestResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/leave/v1/requests"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -91,9 +101,14 @@ func (c *LeaveServiceClient) CreateLeaveRequest(ctx context.Context, req *Create
 }
 
 func (c *LeaveServiceClient) ApproveLeave(ctx context.Context, req *ApproveLeaveRequest) (*ApproveLeaveResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/leave/v1/requests/{request_id}/approve"
 	path = strings.ReplaceAll(path, "{request_id}", fmt.Sprintf("%v", req.RequestId))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -123,6 +138,11 @@ func (c *LeaveServiceClient) ApproveLeave(ctx context.Context, req *ApproveLeave
 }
 
 func (c *LeaveServiceClient) ListLeaveTypes(ctx context.Context, req *ListLeaveTypesRequest) (*ListLeaveTypesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/leave/v1/types"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -153,6 +173,11 @@ func (c *LeaveServiceClient) ListLeaveTypes(ctx context.Context, req *ListLeaveT
 }
 
 func (c *LeaveServiceClient) CreateLeaveType(ctx context.Context, req *CreateLeaveTypeRequest) (*CreateLeaveTypeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/leave/v1/types"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -184,9 +209,14 @@ func (c *LeaveServiceClient) CreateLeaveType(ctx context.Context, req *CreateLea
 }
 
 func (c *LeaveServiceClient) UpdateLeaveType(ctx context.Context, req *UpdateLeaveTypeRequest) (*UpdateLeaveTypeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/leave/v1/types/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -216,6 +246,11 @@ func (c *LeaveServiceClient) UpdateLeaveType(ctx context.Context, req *UpdateLea
 }
 
 func (c *LeaveServiceClient) ListLeaveBalances(ctx context.Context, req *ListLeaveBalancesRequest) (*ListLeaveBalancesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/leave/v1/balances"
 	query := url.Values{}
 	if req.EmployeeId != nil {

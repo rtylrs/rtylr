@@ -29,8 +29,13 @@ if (v.phone !== undefined) { out.phone = v.phone; }
 return out;
 }
 
+export function validateCustomer(v: Customer): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface SearchCustomersRequest {
-query?: string;
+query: string;
 }
 
 export function decodeSearchCustomersRequest(v: any): SearchCustomersRequest {
@@ -44,6 +49,12 @@ export function encodeSearchCustomersRequest(v: SearchCustomersRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.query !== undefined) { out.query = v.query; }
 return out;
+}
+
+export function validateSearchCustomersRequest(v: SearchCustomersRequest): string[] {
+const violations: string[] = [];
+if (!(v.query !== undefined && v.query !== null) || v.query === "") violations.push("query is required");
+return violations;
 }
 
 export interface SearchCustomersResponse {
@@ -61,5 +72,11 @@ export function encodeSearchCustomersResponse(v: SearchCustomersResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.customers !== undefined) { out.customers = (v.customers as any[]).map(encodeCustomer); }
 return out;
+}
+
+export function validateSearchCustomersResponse(v: SearchCustomersResponse): string[] {
+const violations: string[] = [];
+if (v.customers !== undefined && v.customers !== null) for (const item of v.customers) violations.push(...validateCustomer(item).map((message) => "customers: " + message));
+return violations;
 }
 

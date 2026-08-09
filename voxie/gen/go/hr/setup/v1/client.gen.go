@@ -21,6 +21,11 @@ func NewSetupServiceClient(baseURL string) *SetupServiceClient {
 }
 
 func (c *SetupServiceClient) CompleteSetupStep(ctx context.Context, req *CompleteSetupStepRequest) (*CompleteSetupStepResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/setup/v1/steps"
 	body, err := json.Marshal(req)
 	if err != nil {

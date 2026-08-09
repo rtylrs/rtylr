@@ -2,7 +2,7 @@
 import * as flow_task_v1 from "../../task/v1/types";
 
 export interface GetFlowDashboardRequest {
-workspaceId?: string;
+workspaceId: string;
 }
 
 export function decodeGetFlowDashboardRequest(v: any): GetFlowDashboardRequest {
@@ -16,6 +16,13 @@ export function encodeGetFlowDashboardRequest(v: GetFlowDashboardRequest): Recor
 const out: Record<string, unknown> = {};
 if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
 return out;
+}
+
+export function validateGetFlowDashboardRequest(v: GetFlowDashboardRequest): string[] {
+const violations: string[] = [];
+if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+return violations;
 }
 
 export interface GetFlowDashboardResponse {
@@ -45,5 +52,11 @@ if (v.completedThisWeek !== undefined) { out.completed_this_week = v.completedTh
 if (v.overdueTasks !== undefined) { out.overdue_tasks = v.overdueTasks; }
 if (v.myTasks !== undefined) { out.my_tasks = (v.myTasks as any[]).map(flow_task_v1.encodeTask); }
 return out;
+}
+
+export function validateGetFlowDashboardResponse(v: GetFlowDashboardResponse): string[] {
+const violations: string[] = [];
+if (v.myTasks !== undefined && v.myTasks !== null) for (const item of v.myTasks) violations.push(...flow_task_v1.validateTask(item).map((message) => "my_tasks: " + message));
+return violations;
 }
 

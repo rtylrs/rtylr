@@ -24,6 +24,11 @@ func NewWorkspaceServiceClient(baseURL string) *WorkspaceServiceClient {
 }
 
 func (c *WorkspaceServiceClient) ListWorkspaces(ctx context.Context, req *ListWorkspacesRequest) (*ListWorkspacesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/workspace/v1/workspaces"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -58,6 +63,11 @@ func (c *WorkspaceServiceClient) ListWorkspaces(ctx context.Context, req *ListWo
 }
 
 func (c *WorkspaceServiceClient) CreateWorkspace(ctx context.Context, req *CreateWorkspaceRequest) (*CreateWorkspaceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/workspace/v1/workspaces"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -89,9 +99,14 @@ func (c *WorkspaceServiceClient) CreateWorkspace(ctx context.Context, req *Creat
 }
 
 func (c *WorkspaceServiceClient) UpdateWorkspace(ctx context.Context, req *UpdateWorkspaceRequest) (*UpdateWorkspaceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/workspace/v1/workspaces/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -121,6 +136,11 @@ func (c *WorkspaceServiceClient) UpdateWorkspace(ctx context.Context, req *Updat
 }
 
 func (c *WorkspaceServiceClient) DeleteWorkspace(ctx context.Context, req *DeleteWorkspaceRequest) (*DeleteWorkspaceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/workspace/v1/workspaces/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -152,6 +172,11 @@ func (c *WorkspaceServiceClient) DeleteWorkspace(ctx context.Context, req *Delet
 }
 
 func (c *WorkspaceServiceClient) ListWorkspaceMembers(ctx context.Context, req *ListWorkspaceMembersRequest) (*ListWorkspaceMembersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/workspace/v1/workspaces/members"
 	query := url.Values{}
 	query.Set("workspace_id", strconv.FormatInt(int64(req.WorkspaceId), 10))
@@ -187,6 +212,11 @@ func (c *WorkspaceServiceClient) ListWorkspaceMembers(ctx context.Context, req *
 }
 
 func (c *WorkspaceServiceClient) AddWorkspaceMember(ctx context.Context, req *AddWorkspaceMemberRequest) (*AddWorkspaceMemberResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/workspace/v1/workspaces/members"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -218,6 +248,11 @@ func (c *WorkspaceServiceClient) AddWorkspaceMember(ctx context.Context, req *Ad
 }
 
 func (c *WorkspaceServiceClient) RemoveWorkspaceMember(ctx context.Context, req *RemoveWorkspaceMemberRequest) (*RemoveWorkspaceMemberResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/workspace/v1/workspaces/members"
 	query := url.Values{}
 	query.Set("workspace_id", strconv.FormatInt(int64(req.WorkspaceId), 10))
@@ -250,6 +285,11 @@ func (c *WorkspaceServiceClient) RemoveWorkspaceMember(ctx context.Context, req 
 }
 
 func (c *WorkspaceServiceClient) UpdateWorkspaceMemberRole(ctx context.Context, req *UpdateWorkspaceMemberRoleRequest) (*UpdateWorkspaceMemberRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/workspace/v1/workspaces/members/role"
 	body, err := json.Marshal(req)
 	if err != nil {

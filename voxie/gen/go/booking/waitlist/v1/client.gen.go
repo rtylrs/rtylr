@@ -23,6 +23,11 @@ func NewWaitlistServiceClient(baseURL string) *WaitlistServiceClient {
 }
 
 func (c *WaitlistServiceClient) ListEntries(ctx context.Context, req *ListEntriesRequest) (*ListEntriesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/booking/waitlist/v1/entries"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *WaitlistServiceClient) ListEntries(ctx context.Context, req *ListEntrie
 }
 
 func (c *WaitlistServiceClient) CreateEntry(ctx context.Context, req *CreateEntryRequest) (*CreateEntryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/booking/waitlist/v1/entries"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *WaitlistServiceClient) CreateEntry(ctx context.Context, req *CreateEntr
 }
 
 func (c *WaitlistServiceClient) UpdateEntry(ctx context.Context, req *UpdateEntryRequest) (*UpdateEntryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/booking/waitlist/v1/entries/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

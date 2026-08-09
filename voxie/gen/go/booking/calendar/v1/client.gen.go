@@ -21,6 +21,11 @@ func NewCalendarServiceClient(baseURL string) *CalendarServiceClient {
 }
 
 func (c *CalendarServiceClient) GetCalendar(ctx context.Context, req *GetCalendarRequest) (*GetCalendarResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/booking/calendar/v1/calendar"
 	query := url.Values{}
 	query.Set("from", req.From)

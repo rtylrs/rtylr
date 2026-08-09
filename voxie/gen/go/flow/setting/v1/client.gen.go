@@ -22,6 +22,11 @@ func NewSettingServiceClient(baseURL string) *SettingServiceClient {
 }
 
 func (c *SettingServiceClient) GetUserSettings(ctx context.Context, req *GetUserSettingsRequest) (*GetUserSettingsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/setting/v1/settings"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *SettingServiceClient) GetUserSettings(ctx context.Context, req *GetUser
 }
 
 func (c *SettingServiceClient) UpdateUserSettings(ctx context.Context, req *UpdateUserSettingsRequest) (*UpdateUserSettingsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/setting/v1/settings"
 	body, err := json.Marshal(req)
 	if err != nil {

@@ -44,6 +44,11 @@ if (v.messageCount !== undefined) { out.message_count = v.messageCount; }
 return out;
 }
 
+export function validateInboxItem(v: InboxItem): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListInboxRequest {
 page?: number;
 pageSize?: number;
@@ -62,6 +67,11 @@ const out: Record<string, unknown> = {};
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
+}
+
+export function validateListInboxRequest(v: ListInboxRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListInboxResponse {
@@ -90,6 +100,12 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListInboxResponse(v: ListInboxResponse): string[] {
+const violations: string[] = [];
+if (v.inbox !== undefined && v.inbox !== null) for (const item of v.inbox) violations.push(...validateInboxItem(item).map((message) => "inbox: " + message));
+return violations;
+}
+
 export interface GetUnreadCountRequest {
 }
 
@@ -102,6 +118,11 @@ return {
 export function encodeGetUnreadCountRequest(v: GetUnreadCountRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetUnreadCountRequest(v: GetUnreadCountRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetUnreadCountResponse {
@@ -119,5 +140,10 @@ export function encodeGetUnreadCountResponse(v: GetUnreadCountResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.count !== undefined) { out.count = v.count; }
 return out;
+}
+
+export function validateGetUnreadCountResponse(v: GetUnreadCountResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

@@ -20,7 +20,21 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Segment) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateSegmentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -37,7 +51,21 @@ func (m *CreateSegmentRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateSegmentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteSegmentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -48,7 +76,21 @@ func (m *DeleteSegmentRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteSegmentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetSegmentCustomersRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.SegmentId <= 0 {
 		violations = append(violations, "segment_id must be greater than 0")
@@ -65,7 +107,26 @@ func (m *GetSegmentCustomersRequest) Validate() error {
 	return nil
 }
 
+func (m *GetSegmentCustomersResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Customers {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "customers: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetSegmentDetailRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -76,7 +137,58 @@ func (m *GetSegmentDetailRequest) Validate() error {
 	return nil
 }
 
+func (m *GetSegmentDetailResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Segment != nil {
+		if err := m.Segment.Validate(); err != nil {
+			violations = append(violations, "segment: "+err.Error())
+		}
+	}
+	for _, value := range m.Customers {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "customers: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListSegmentsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListSegmentsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Segments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "segments: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateSegmentBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -94,10 +206,29 @@ func (m *UpdateSegmentBody) Validate() error {
 }
 
 func (m *UpdateSegmentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateSegmentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

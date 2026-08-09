@@ -38,6 +38,11 @@ if (v.total !== undefined) { out.total = v.total; }
 return out;
 }
 
+export function validateInvoiceItem(v: InvoiceItem): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface InvoiceSummary {
 id?: string;
 invoiceNumber?: string;
@@ -86,6 +91,11 @@ if (v.amountPaid !== undefined) { out.amount_paid = v.amountPaid; }
 if (v.amountDue !== undefined) { out.amount_due = v.amountDue; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
+}
+
+export function validateInvoiceSummary(v: InvoiceSummary): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface InvoiceDetail {
@@ -180,6 +190,12 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeInvoiceIte
 return out;
 }
 
+export function validateInvoiceDetail(v: InvoiceDetail): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateInvoiceItem(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface Payment {
 id?: string;
 amount?: number;
@@ -213,6 +229,11 @@ if (v.method !== undefined) { out.method = v.method; }
 if (v.reference !== undefined) { out.reference = v.reference; }
 if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
+}
+
+export function validatePayment(v: Payment): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface RecordPaymentResponsePayload {
@@ -253,15 +274,20 @@ if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
 }
 
+export function validateRecordPaymentResponsePayload(v: RecordPaymentResponsePayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateInvoiceRequest {
-clientName?: string;
-clientEmail?: string;
+clientName: string;
+clientEmail: string;
 clientAddress?: string;
 clientTaxId?: string;
-issueDate?: string;
-dueDate?: string;
-currency?: string;
-discountType?: string;
+issueDate: string;
+dueDate: string;
+currency: string;
+discountType: string;
 discountValue?: number;
 taxRate?: number;
 notes?: string;
@@ -306,6 +332,22 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeInvoiceIte
 return out;
 }
 
+export function validateCreateInvoiceRequest(v: CreateInvoiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.clientName !== undefined && v.clientName !== null) || v.clientName === "") violations.push("client_name is required");
+if (!(v.clientEmail !== undefined && v.clientEmail !== null) || v.clientEmail === "") violations.push("client_email is required");
+if (v.clientEmail !== undefined && v.clientEmail !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.clientEmail)) violations.push("client_email must be a valid email");
+if (!(v.issueDate !== undefined && v.issueDate !== null) || v.issueDate === "") violations.push("issue_date is required");
+if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
+if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (!(v.discountType !== undefined && v.discountType !== null) || v.discountType === "") violations.push("discount_type is required");
+if (v.discountValue !== undefined && v.discountValue !== null && !(Number(v.discountValue) >= 0)) violations.push("discount_value violates @gte");
+if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) >= 0)) violations.push("tax_rate violates @gte");
+if (v.items !== undefined && v.items !== null && v.items.length < 1) violations.push("items must contain at least 1 items");
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateInvoiceItem(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface CreateInvoiceResponse {
 invoice?: InvoiceDetail;
 }
@@ -323,8 +365,14 @@ if (v.invoice !== undefined) { out.invoice = encodeInvoiceDetail(v.invoice); }
 return out;
 }
 
+export function validateCreateInvoiceResponse(v: CreateInvoiceResponse): string[] {
+const violations: string[] = [];
+if (v.invoice !== undefined && v.invoice !== null) violations.push(...validateInvoiceDetail(v.invoice).map((message) => "invoice: " + message));
+return violations;
+}
+
 export interface DeleteInvoiceRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteInvoiceRequest(v: any): DeleteInvoiceRequest {
@@ -338,6 +386,13 @@ export function encodeDeleteInvoiceRequest(v: DeleteInvoiceRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteInvoiceRequest(v: DeleteInvoiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteInvoiceResponse {
@@ -357,8 +412,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteInvoiceResponse(v: DeleteInvoiceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetInvoiceRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetInvoiceRequest(v: any): GetInvoiceRequest {
@@ -372,6 +432,13 @@ export function encodeGetInvoiceRequest(v: GetInvoiceRequest): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetInvoiceRequest(v: GetInvoiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetInvoiceResponse {
@@ -392,6 +459,13 @@ const out: Record<string, unknown> = {};
 if (v.invoice !== undefined) { out.invoice = encodeInvoiceDetail(v.invoice); }
 if (v.payments !== undefined) { out.payments = (v.payments as any[]).map(encodePayment); }
 return out;
+}
+
+export function validateGetInvoiceResponse(v: GetInvoiceResponse): string[] {
+const violations: string[] = [];
+if (v.invoice !== undefined && v.invoice !== null) violations.push(...validateInvoiceDetail(v.invoice).map((message) => "invoice: " + message));
+if (v.payments !== undefined && v.payments !== null) for (const item of v.payments) violations.push(...validatePayment(item).map((message) => "payments: " + message));
+return violations;
 }
 
 export interface ListInvoicesRequest {
@@ -426,6 +500,11 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListInvoicesRequest(v: ListInvoicesRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListInvoicesResponse {
 invoices?: (InvoiceSummary)[];
 page?: number;
@@ -452,8 +531,14 @@ if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
 return out;
 }
 
+export function validateListInvoicesResponse(v: ListInvoicesResponse): string[] {
+const violations: string[] = [];
+if (v.invoices !== undefined && v.invoices !== null) for (const item of v.invoices) violations.push(...validateInvoiceSummary(item).map((message) => "invoices: " + message));
+return violations;
+}
+
 export interface SendInvoiceRequest {
-id?: string;
+id: string;
 }
 
 export function decodeSendInvoiceRequest(v: any): SendInvoiceRequest {
@@ -467,6 +552,13 @@ export function encodeSendInvoiceRequest(v: SendInvoiceRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateSendInvoiceRequest(v: SendInvoiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface SendInvoiceResponse {
@@ -486,15 +578,20 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateSendInvoiceResponse(v: SendInvoiceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateInvoiceBody {
-clientName?: string;
-clientEmail?: string;
+clientName: string;
+clientEmail: string;
 clientAddress?: string;
 clientTaxId?: string;
-issueDate?: string;
-dueDate?: string;
-currency?: string;
-discountType?: string;
+issueDate: string;
+dueDate: string;
+currency: string;
+discountType: string;
 discountValue?: number;
 taxRate?: number;
 notes?: string;
@@ -539,8 +636,24 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeInvoiceIte
 return out;
 }
 
+export function validateUpdateInvoiceBody(v: UpdateInvoiceBody): string[] {
+const violations: string[] = [];
+if (!(v.clientName !== undefined && v.clientName !== null) || v.clientName === "") violations.push("client_name is required");
+if (!(v.clientEmail !== undefined && v.clientEmail !== null) || v.clientEmail === "") violations.push("client_email is required");
+if (v.clientEmail !== undefined && v.clientEmail !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.clientEmail)) violations.push("client_email must be a valid email");
+if (!(v.issueDate !== undefined && v.issueDate !== null) || v.issueDate === "") violations.push("issue_date is required");
+if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
+if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (!(v.discountType !== undefined && v.discountType !== null) || v.discountType === "") violations.push("discount_type is required");
+if (v.discountValue !== undefined && v.discountValue !== null && !(Number(v.discountValue) >= 0)) violations.push("discount_value violates @gte");
+if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) >= 0)) violations.push("tax_rate violates @gte");
+if (v.items !== undefined && v.items !== null && v.items.length < 1) violations.push("items must contain at least 1 items");
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateInvoiceItem(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface UpdateInvoiceRequest {
-id?: string;
+id: string;
 body?: UpdateInvoiceBody;
 }
 
@@ -557,6 +670,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateInvoiceBody(v.body); }
 return out;
+}
+
+export function validateUpdateInvoiceRequest(v: UpdateInvoiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateInvoiceBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateInvoiceResponse {
@@ -576,8 +697,14 @@ if (v.invoice !== undefined) { out.invoice = encodeInvoiceDetail(v.invoice); }
 return out;
 }
 
+export function validateUpdateInvoiceResponse(v: UpdateInvoiceResponse): string[] {
+const violations: string[] = [];
+if (v.invoice !== undefined && v.invoice !== null) violations.push(...validateInvoiceDetail(v.invoice).map((message) => "invoice: " + message));
+return violations;
+}
+
 export interface UpdateInvoiceStatusBody {
-status?: string;
+status: string;
 }
 
 export function decodeUpdateInvoiceStatusBody(v: any): UpdateInvoiceStatusBody {
@@ -593,8 +720,14 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdateInvoiceStatusBody(v: UpdateInvoiceStatusBody): string[] {
+const violations: string[] = [];
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+return violations;
+}
+
 export interface UpdateInvoiceStatusRequest {
-id?: string;
+id: string;
 body?: UpdateInvoiceStatusBody;
 }
 
@@ -613,6 +746,14 @@ if (v.body !== undefined) { out.body = encodeUpdateInvoiceStatusBody(v.body); }
 return out;
 }
 
+export function validateUpdateInvoiceStatusRequest(v: UpdateInvoiceStatusRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateInvoiceStatusBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateInvoiceStatusResponse {
 message?: string;
 }
@@ -628,5 +769,10 @@ export function encodeUpdateInvoiceStatusResponse(v: UpdateInvoiceStatusResponse
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateInvoiceStatusResponse(v: UpdateInvoiceStatusResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

@@ -20,7 +20,53 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Label) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListLabelsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListLabelsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Labels {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "labels: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateLabelRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.WorkspaceId <= 0 {
 		violations = append(violations, "workspace_id must be greater than 0")
@@ -37,7 +83,26 @@ func (m *CreateLabelRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateLabelResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Label != nil {
+		if err := m.Label.Validate(); err != nil {
+			violations = append(violations, "label: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateLabelRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -54,7 +119,21 @@ func (m *UpdateLabelRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdateLabelResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteLabelRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -65,11 +144,36 @@ func (m *DeleteLabelRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteLabelResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *SetTaskLabelsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TaskId <= 0 {
 		violations = append(violations, "task_id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *SetTaskLabelsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

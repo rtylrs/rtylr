@@ -23,6 +23,11 @@ func NewWarehouseServiceClient(baseURL string) *WarehouseServiceClient {
 }
 
 func (c *WarehouseServiceClient) ListWarehouses(ctx context.Context, req *ListWarehousesRequest) (*ListWarehousesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/warehouse/v1/warehouses"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *WarehouseServiceClient) ListWarehouses(ctx context.Context, req *ListWa
 }
 
 func (c *WarehouseServiceClient) CreateWarehouse(ctx context.Context, req *CreateWarehouseRequest) (*CreateWarehouseResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/warehouse/v1/warehouses"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *WarehouseServiceClient) CreateWarehouse(ctx context.Context, req *Creat
 }
 
 func (c *WarehouseServiceClient) UpdateWarehouse(ctx context.Context, req *UpdateWarehouseRequest) (*UpdateWarehouseResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/warehouse/v1/warehouses/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -116,6 +131,11 @@ func (c *WarehouseServiceClient) UpdateWarehouse(ctx context.Context, req *Updat
 }
 
 func (c *WarehouseServiceClient) DeleteWarehouse(ctx context.Context, req *DeleteWarehouseRequest) (*DeleteWarehouseResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/warehouse/v1/warehouses/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

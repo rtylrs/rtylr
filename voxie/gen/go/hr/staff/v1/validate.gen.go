@@ -20,7 +20,48 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Staff) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListStaffRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListStaffResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Staff {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "staff: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateStaffRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.UserId <= 0 {
 		violations = append(violations, "user_id must be greater than 0")
@@ -79,7 +120,21 @@ func (m *CreateStaffRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateStaffResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetStaffRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -90,7 +145,26 @@ func (m *GetStaffRequest) Validate() error {
 	return nil
 }
 
+func (m *GetStaffResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Staff != nil {
+		if err := m.Staff.Validate(); err != nil {
+			violations = append(violations, "staff: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateStaffBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.DepartmentId <= 0 {
 		violations = append(violations, "department_id must be greater than 0")
@@ -144,10 +218,29 @@ func (m *UpdateStaffBody) Validate() error {
 }
 
 func (m *UpdateStaffRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateStaffResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -155,6 +248,9 @@ func (m *UpdateStaffRequest) Validate() error {
 }
 
 func (m *DeleteStaffRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -165,7 +261,21 @@ func (m *DeleteStaffRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteStaffResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ClockInRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.StaffId <= 0 {
 		violations = append(violations, "staff_id must be greater than 0")
@@ -176,11 +286,36 @@ func (m *ClockInRequest) Validate() error {
 	return nil
 }
 
+func (m *ClockInResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ClockOutRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.StaffId <= 0 {
 		violations = append(violations, "staff_id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ClockOutResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

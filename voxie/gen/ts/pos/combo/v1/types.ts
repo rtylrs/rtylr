@@ -41,11 +41,16 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateCombo(v: Combo): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateComboRequest {
-name?: string;
-description?: string;
+name: string;
+description: string;
 price?: number;
-items?: string;
+items: string;
 isActive?: boolean;
 }
 
@@ -70,6 +75,15 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateCreateComboRequest(v: CreateComboRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.price !== undefined && v.price !== null && !(Number(v.price) >= 0)) violations.push("price violates @gte");
+if (!(v.items !== undefined && v.items !== null) || v.items === "") violations.push("items is required");
+return violations;
+}
+
 export interface CreateComboResponse {
 comboId?: string;
 message?: string;
@@ -90,11 +104,16 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateComboResponse(v: CreateComboResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateComboBody {
-name?: string;
-description?: string;
+name: string;
+description: string;
 price?: number;
-items?: string;
+items: string;
 isActive?: boolean;
 }
 
@@ -119,8 +138,17 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateComboBody(v: UpdateComboBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.price !== undefined && v.price !== null && !(Number(v.price) >= 0)) violations.push("price violates @gte");
+if (!(v.items !== undefined && v.items !== null) || v.items === "") violations.push("items is required");
+return violations;
+}
+
 export interface UpdateComboRequest {
-id?: string;
+id: string;
 body?: UpdateComboBody;
 }
 
@@ -137,6 +165,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateComboBody(v.body); }
 return out;
+}
+
+export function validateUpdateComboRequest(v: UpdateComboRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateComboBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateComboResponse {
@@ -156,8 +192,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateComboResponse(v: UpdateComboResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteComboRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteComboRequest(v: any): DeleteComboRequest {
@@ -171,6 +212,13 @@ export function encodeDeleteComboRequest(v: DeleteComboRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteComboRequest(v: DeleteComboRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteComboResponse {
@@ -190,6 +238,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteComboResponse(v: DeleteComboResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListCombosRequest {
 }
 
@@ -202,6 +255,11 @@ return {
 export function encodeListCombosRequest(v: ListCombosRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListCombosRequest(v: ListCombosRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListCombosResponse {
@@ -219,5 +277,11 @@ export function encodeListCombosResponse(v: ListCombosResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.combos !== undefined) { out.combos = (v.combos as any[]).map(encodeCombo); }
 return out;
+}
+
+export function validateListCombosResponse(v: ListCombosResponse): string[] {
+const violations: string[] = [];
+if (v.combos !== undefined && v.combos !== null) for (const item of v.combos) violations.push(...validateCombo(item).map((message) => "combos: " + message));
+return violations;
 }
 

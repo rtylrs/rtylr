@@ -47,10 +47,15 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateBookingService(v: BookingService): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateServiceRequest {
-name?: string;
+name: string;
 description?: string;
-durationMinutes?: number;
+durationMinutes: number;
 price?: number;
 color?: string;
 isActive?: boolean;
@@ -79,6 +84,15 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateCreateServiceRequest(v: CreateServiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.durationMinutes !== undefined && v.durationMinutes !== null)) violations.push("duration_minutes is required");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(Number(v.durationMinutes) > 0)) violations.push("duration_minutes violates @gt");
+if (v.price !== undefined && v.price !== null && !(Number(v.price) >= 0)) violations.push("price violates @gte");
+return violations;
+}
+
 export interface CreateServiceResponse {
 id?: string;
 message?: string;
@@ -99,8 +113,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateServiceResponse(v: CreateServiceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteServiceRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteServiceRequest(v: any): DeleteServiceRequest {
@@ -114,6 +133,13 @@ export function encodeDeleteServiceRequest(v: DeleteServiceRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteServiceRequest(v: DeleteServiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteServiceResponse {
@@ -133,6 +159,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteServiceResponse(v: DeleteServiceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListServicesRequest {
 }
 
@@ -145,6 +176,11 @@ return {
 export function encodeListServicesRequest(v: ListServicesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListServicesRequest(v: ListServicesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListServicesResponse {
@@ -164,11 +200,17 @@ if (v.services !== undefined) { out.services = (v.services as any[]).map(encodeB
 return out;
 }
 
+export function validateListServicesResponse(v: ListServicesResponse): string[] {
+const violations: string[] = [];
+if (v.services !== undefined && v.services !== null) for (const item of v.services) violations.push(...validateBookingService(item).map((message) => "services: " + message));
+return violations;
+}
+
 export interface UpdateServiceRequest {
-id?: string;
-name?: string;
+id: string;
+name: string;
 description?: string;
-durationMinutes?: number;
+durationMinutes: number;
 price?: number;
 color?: string;
 isActive?: boolean;
@@ -199,6 +241,17 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateServiceRequest(v: UpdateServiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.durationMinutes !== undefined && v.durationMinutes !== null)) violations.push("duration_minutes is required");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(Number(v.durationMinutes) > 0)) violations.push("duration_minutes violates @gt");
+if (v.price !== undefined && v.price !== null && !(Number(v.price) >= 0)) violations.push("price violates @gte");
+return violations;
+}
+
 export interface UpdateServiceResponse {
 message?: string;
 }
@@ -214,5 +267,10 @@ export function encodeUpdateServiceResponse(v: UpdateServiceResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateServiceResponse(v: UpdateServiceResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

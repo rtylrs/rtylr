@@ -44,11 +44,16 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateTemplate(v: Template): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateTemplateRequest {
-name?: string;
-type?: string;
+name: string;
+type: string;
 subject?: string;
-body?: string;
+body: string;
 variables?: string;
 isActive?: boolean;
 }
@@ -76,6 +81,14 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateCreateTemplateRequest(v: CreateTemplateRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (!(v.body !== undefined && v.body !== null) || v.body === "") violations.push("body is required");
+return violations;
+}
+
 export interface CreateTemplateResponse {
 templateId?: string;
 message?: string;
@@ -96,8 +109,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateTemplateResponse(v: CreateTemplateResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteTemplateRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteTemplateRequest(v: any): DeleteTemplateRequest {
@@ -111,6 +129,12 @@ export function encodeDeleteTemplateRequest(v: DeleteTemplateRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteTemplateRequest(v: DeleteTemplateRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+return violations;
 }
 
 export interface DeleteTemplateResponse {
@@ -130,6 +154,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteTemplateResponse(v: DeleteTemplateResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListTemplatesRequest {
 }
 
@@ -142,6 +171,11 @@ return {
 export function encodeListTemplatesRequest(v: ListTemplatesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListTemplatesRequest(v: ListTemplatesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListTemplatesResponse {
@@ -161,8 +195,14 @@ if (v.templates !== undefined) { out.templates = (v.templates as any[]).map(enco
 return out;
 }
 
+export function validateListTemplatesResponse(v: ListTemplatesResponse): string[] {
+const violations: string[] = [];
+if (v.templates !== undefined && v.templates !== null) for (const item of v.templates) violations.push(...validateTemplate(item).map((message) => "templates: " + message));
+return violations;
+}
+
 export interface UpdateTemplateBody {
-name?: string;
+name: string;
 type?: string;
 subject?: string;
 body?: string;
@@ -193,8 +233,14 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateTemplateBody(v: UpdateTemplateBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface UpdateTemplateRequest {
-id?: string;
+id: string;
 body?: UpdateTemplateBody;
 }
 
@@ -213,6 +259,13 @@ if (v.body !== undefined) { out.body = encodeUpdateTemplateBody(v.body); }
 return out;
 }
 
+export function validateUpdateTemplateRequest(v: UpdateTemplateRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTemplateBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateTemplateResponse {
 message?: string;
 }
@@ -228,5 +281,10 @@ export function encodeUpdateTemplateResponse(v: UpdateTemplateResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateTemplateResponse(v: UpdateTemplateResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

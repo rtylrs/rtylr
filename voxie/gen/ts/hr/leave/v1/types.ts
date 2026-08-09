@@ -50,6 +50,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateLeaveTypePayload(v: LeaveTypePayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface LeaveRequestPayload {
 id?: string;
 ownerId?: string;
@@ -103,6 +108,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateLeaveRequestPayload(v: LeaveRequestPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface LeaveBalancePayload {
 id?: string;
 ownerId?: string;
@@ -150,6 +160,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateLeaveBalancePayload(v: LeaveBalancePayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListLeaveRequestsRequest {
 employeeId?: string;
 status?: string;
@@ -168,6 +183,11 @@ const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.status !== undefined) { out.status = v.status; }
 return out;
+}
+
+export function validateListLeaveRequestsRequest(v: ListLeaveRequestsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListLeaveRequestsResponse {
@@ -196,12 +216,18 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListLeaveRequestsResponse(v: ListLeaveRequestsResponse): string[] {
+const violations: string[] = [];
+if (v.requests !== undefined && v.requests !== null) for (const item of v.requests) violations.push(...validateLeaveRequestPayload(item).map((message) => "requests: " + message));
+return violations;
+}
+
 export interface CreateLeaveRequestRequest {
-employeeId?: string;
-leaveTypeId?: string;
-startDate?: string;
-endDate?: string;
-totalDays?: number;
+employeeId: string;
+leaveTypeId: string;
+startDate: string;
+endDate: string;
+totalDays: number;
 notes?: string;
 }
 
@@ -228,6 +254,19 @@ if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
 }
 
+export function validateCreateLeaveRequestRequest(v: CreateLeaveRequestRequest): string[] {
+const violations: string[] = [];
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.leaveTypeId !== undefined && v.leaveTypeId !== null)) violations.push("leave_type_id is required");
+if (v.leaveTypeId !== undefined && v.leaveTypeId !== null && !(Number(v.leaveTypeId) > 0)) violations.push("leave_type_id violates @gt");
+if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (!(v.endDate !== undefined && v.endDate !== null) || v.endDate === "") violations.push("end_date is required");
+if (!(v.totalDays !== undefined && v.totalDays !== null)) violations.push("total_days is required");
+if (v.totalDays !== undefined && v.totalDays !== null && !(Number(v.totalDays) > 0)) violations.push("total_days violates @gt");
+return violations;
+}
+
 export interface CreateLeaveRequestResponse {
 request?: LeaveRequestPayload;
 }
@@ -243,6 +282,12 @@ export function encodeCreateLeaveRequestResponse(v: CreateLeaveRequestResponse):
 const out: Record<string, unknown> = {};
 if (v.request !== undefined) { out.request = encodeLeaveRequestPayload(v.request); }
 return out;
+}
+
+export function validateCreateLeaveRequestResponse(v: CreateLeaveRequestResponse): string[] {
+const violations: string[] = [];
+if (v.request !== undefined && v.request !== null) violations.push(...validateLeaveRequestPayload(v.request).map((message) => "request: " + message));
+return violations;
 }
 
 export interface ApproveLeaveBody {
@@ -265,8 +310,13 @@ if (v.rejectionReason !== undefined) { out.rejection_reason = v.rejectionReason;
 return out;
 }
 
+export function validateApproveLeaveBody(v: ApproveLeaveBody): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ApproveLeaveRequest {
-requestId?: string;
+requestId: string;
 body?: ApproveLeaveBody;
 }
 
@@ -283,6 +333,14 @@ const out: Record<string, unknown> = {};
 if (v.requestId !== undefined) { out.request_id = v.requestId; }
 if (v.body !== undefined) { out.body = encodeApproveLeaveBody(v.body); }
 return out;
+}
+
+export function validateApproveLeaveRequest(v: ApproveLeaveRequest): string[] {
+const violations: string[] = [];
+if (!(v.requestId !== undefined && v.requestId !== null)) violations.push("request_id is required");
+if (v.requestId !== undefined && v.requestId !== null && !(Number(v.requestId) > 0)) violations.push("request_id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateApproveLeaveBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface ApproveLeaveResponse {
@@ -302,6 +360,11 @@ if (v.success !== undefined) { out.success = v.success; }
 return out;
 }
 
+export function validateApproveLeaveResponse(v: ApproveLeaveResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListLeaveTypesRequest {
 }
 
@@ -314,6 +377,11 @@ return {
 export function encodeListLeaveTypesRequest(v: ListLeaveTypesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListLeaveTypesRequest(v: ListLeaveTypesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListLeaveTypesResponse {
@@ -342,13 +410,19 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListLeaveTypesResponse(v: ListLeaveTypesResponse): string[] {
+const violations: string[] = [];
+if (v.leaveTypes !== undefined && v.leaveTypes !== null) for (const item of v.leaveTypes) violations.push(...validateLeaveTypePayload(item).map((message) => "leave_types: " + message));
+return violations;
+}
+
 export interface CreateLeaveTypeRequest {
-name?: string;
+name: string;
 isPaid?: boolean;
 requiresApproval?: boolean;
 accrualRule?: string;
-maxCarryoverDays?: number;
-minNoticeDays?: number;
+maxCarryoverDays: number;
+minNoticeDays: number;
 requiresDocumentationAfterDays?: number;
 }
 
@@ -377,6 +451,16 @@ if (v.requiresDocumentationAfterDays !== undefined) { out.requires_documentation
 return out;
 }
 
+export function validateCreateLeaveTypeRequest(v: CreateLeaveTypeRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.maxCarryoverDays !== undefined && v.maxCarryoverDays !== null)) violations.push("max_carryover_days is required");
+if (v.maxCarryoverDays !== undefined && v.maxCarryoverDays !== null && !(Number(v.maxCarryoverDays) > 0)) violations.push("max_carryover_days violates @gt");
+if (!(v.minNoticeDays !== undefined && v.minNoticeDays !== null)) violations.push("min_notice_days is required");
+if (v.minNoticeDays !== undefined && v.minNoticeDays !== null && !(Number(v.minNoticeDays) > 0)) violations.push("min_notice_days violates @gt");
+return violations;
+}
+
 export interface CreateLeaveTypeResponse {
 leaveType?: LeaveTypePayload;
 }
@@ -392,6 +476,12 @@ export function encodeCreateLeaveTypeResponse(v: CreateLeaveTypeResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.leaveType !== undefined) { out.leave_type = encodeLeaveTypePayload(v.leaveType); }
 return out;
+}
+
+export function validateCreateLeaveTypeResponse(v: CreateLeaveTypeResponse): string[] {
+const violations: string[] = [];
+if (v.leaveType !== undefined && v.leaveType !== null) violations.push(...validateLeaveTypePayload(v.leaveType).map((message) => "leave_type: " + message));
+return violations;
 }
 
 export interface UpdateLeaveTypeBody {
@@ -432,8 +522,13 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateLeaveTypeBody(v: UpdateLeaveTypeBody): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateLeaveTypeRequest {
-id?: string;
+id: string;
 body?: UpdateLeaveTypeBody;
 }
 
@@ -452,6 +547,14 @@ if (v.body !== undefined) { out.body = encodeUpdateLeaveTypeBody(v.body); }
 return out;
 }
 
+export function validateUpdateLeaveTypeRequest(v: UpdateLeaveTypeRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateLeaveTypeBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateLeaveTypeResponse {
 leaveType?: LeaveTypePayload;
 }
@@ -467,6 +570,12 @@ export function encodeUpdateLeaveTypeResponse(v: UpdateLeaveTypeResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.leaveType !== undefined) { out.leave_type = encodeLeaveTypePayload(v.leaveType); }
 return out;
+}
+
+export function validateUpdateLeaveTypeResponse(v: UpdateLeaveTypeResponse): string[] {
+const violations: string[] = [];
+if (v.leaveType !== undefined && v.leaveType !== null) violations.push(...validateLeaveTypePayload(v.leaveType).map((message) => "leave_type: " + message));
+return violations;
 }
 
 export interface ListLeaveBalancesRequest {
@@ -487,6 +596,11 @@ const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.year !== undefined) { out.year = v.year; }
 return out;
+}
+
+export function validateListLeaveBalancesRequest(v: ListLeaveBalancesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListLeaveBalancesResponse {
@@ -513,5 +627,11 @@ if (v.total !== undefined) { out.total = v.total; }
 if (v.limit !== undefined) { out.limit = v.limit; }
 if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
+}
+
+export function validateListLeaveBalancesResponse(v: ListLeaveBalancesResponse): string[] {
+const violations: string[] = [];
+if (v.balances !== undefined && v.balances !== null) for (const item of v.balances) violations.push(...validateLeaveBalancePayload(item).map((message) => "balances: " + message));
+return violations;
 }
 

@@ -35,8 +35,13 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validatePriceList(v: PriceList): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreatePriceListRequest {
-name?: string;
+name: string;
 currency?: string;
 isDefault?: boolean;
 }
@@ -56,6 +61,12 @@ if (v.name !== undefined) { out.name = v.name; }
 if (v.currency !== undefined) { out.currency = v.currency; }
 if (v.isDefault !== undefined) { out.is_default = v.isDefault; }
 return out;
+}
+
+export function validateCreatePriceListRequest(v: CreatePriceListRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
 }
 
 export interface CreatePriceListResponse {
@@ -78,6 +89,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreatePriceListResponse(v: CreatePriceListResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListPriceListsRequest {
 }
 
@@ -90,6 +106,11 @@ return {
 export function encodeListPriceListsRequest(v: ListPriceListsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListPriceListsRequest(v: ListPriceListsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListPriceListsResponse {
@@ -107,5 +128,11 @@ export function encodeListPriceListsResponse(v: ListPriceListsResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.priceLists !== undefined) { out.price_lists = (v.priceLists as any[]).map(encodePriceList); }
 return out;
+}
+
+export function validateListPriceListsResponse(v: ListPriceListsResponse): string[] {
+const violations: string[] = [];
+if (v.priceLists !== undefined && v.priceLists !== null) for (const item of v.priceLists) violations.push(...validatePriceList(item).map((message) => "price_lists: " + message));
+return violations;
 }
 

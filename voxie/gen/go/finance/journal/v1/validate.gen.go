@@ -20,7 +20,37 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *JournalEntry) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Lines {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "lines: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *JournalLine) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateJournalEntryRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Date == "" {
 		violations = append(violations, "date is required")
@@ -31,6 +61,27 @@ func (m *CreateJournalEntryRequest) Validate() error {
 	if len(m.Lines) < 1 {
 		violations = append(violations, "lines must have at least 1 items")
 	}
+	for _, value := range m.Lines {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "lines: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateJournalEntryResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Entry != nil {
+		if err := m.Entry.Validate(); err != nil {
+			violations = append(violations, "entry: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -38,9 +89,60 @@ func (m *CreateJournalEntryRequest) Validate() error {
 }
 
 func (m *GetJournalEntryRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetJournalEntryResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Entry != nil {
+		if err := m.Entry.Validate(); err != nil {
+			violations = append(violations, "entry: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListJournalEntriesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListJournalEntriesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Entries {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "entries: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

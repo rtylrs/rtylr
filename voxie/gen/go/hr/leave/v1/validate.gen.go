@@ -20,7 +20,70 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *LeaveTypePayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *LeaveRequestPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *LeaveBalancePayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListLeaveRequestsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListLeaveRequestsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Requests {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "requests: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateLeaveRequestRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.EmployeeId <= 0 {
 		violations = append(violations, "employee_id must be greater than 0")
@@ -43,10 +106,83 @@ func (m *CreateLeaveRequestRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateLeaveRequestResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Request != nil {
+		if err := m.Request.Validate(); err != nil {
+			violations = append(violations, "request: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ApproveLeaveBody) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ApproveLeaveRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.RequestId <= 0 {
 		violations = append(violations, "request_id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ApproveLeaveResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListLeaveTypesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListLeaveTypesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.LeaveTypes {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "leave_types: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -55,6 +191,9 @@ func (m *ApproveLeaveRequest) Validate() error {
 }
 
 func (m *CreateLeaveTypeRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -71,10 +210,88 @@ func (m *CreateLeaveTypeRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateLeaveTypeResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.LeaveType != nil {
+		if err := m.LeaveType.Validate(); err != nil {
+			violations = append(violations, "leave_type: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateLeaveTypeBody) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateLeaveTypeRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateLeaveTypeResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.LeaveType != nil {
+		if err := m.LeaveType.Validate(); err != nil {
+			violations = append(violations, "leave_type: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListLeaveBalancesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListLeaveBalancesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Balances {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "balances: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

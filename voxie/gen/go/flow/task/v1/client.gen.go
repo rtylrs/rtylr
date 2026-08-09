@@ -24,6 +24,11 @@ func NewTaskServiceClient(baseURL string) *TaskServiceClient {
 }
 
 func (c *TaskServiceClient) ListTasks(ctx context.Context, req *ListTasksRequest) (*ListTasksResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks"
 	query := url.Values{}
 	if req.ProjectId != nil {
@@ -69,6 +74,11 @@ func (c *TaskServiceClient) ListTasks(ctx context.Context, req *ListTasksRequest
 }
 
 func (c *TaskServiceClient) GetMyTasks(ctx context.Context, req *GetMyTasksRequest) (*GetMyTasksResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/my"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -103,6 +113,11 @@ func (c *TaskServiceClient) GetMyTasks(ctx context.Context, req *GetMyTasksReque
 }
 
 func (c *TaskServiceClient) GetMyTasksProject(ctx context.Context, req *GetMyTasksProjectRequest) (*GetMyTasksProjectResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/my-project"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -133,6 +148,11 @@ func (c *TaskServiceClient) GetMyTasksProject(ctx context.Context, req *GetMyTas
 }
 
 func (c *TaskServiceClient) SearchTasks(ctx context.Context, req *SearchTasksRequest) (*SearchTasksResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/search"
 	query := url.Values{}
 	query.Set("q", req.Q)
@@ -169,6 +189,11 @@ func (c *TaskServiceClient) SearchTasks(ctx context.Context, req *SearchTasksReq
 }
 
 func (c *TaskServiceClient) CreateTask(ctx context.Context, req *CreateTaskRequest) (*CreateTaskResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -200,6 +225,11 @@ func (c *TaskServiceClient) CreateTask(ctx context.Context, req *CreateTaskReque
 }
 
 func (c *TaskServiceClient) GetTaskDetail(ctx context.Context, req *GetTaskDetailRequest) (*GetTaskDetailResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -231,9 +261,14 @@ func (c *TaskServiceClient) GetTaskDetail(ctx context.Context, req *GetTaskDetai
 }
 
 func (c *TaskServiceClient) UpdateTask(ctx context.Context, req *UpdateTaskRequest) (*UpdateTaskResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -263,9 +298,14 @@ func (c *TaskServiceClient) UpdateTask(ctx context.Context, req *UpdateTaskReque
 }
 
 func (c *TaskServiceClient) UpdateTaskStatus(ctx context.Context, req *UpdateTaskStatusRequest) (*UpdateTaskStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/{id}/status"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -295,6 +335,11 @@ func (c *TaskServiceClient) UpdateTaskStatus(ctx context.Context, req *UpdateTas
 }
 
 func (c *TaskServiceClient) DeleteTask(ctx context.Context, req *DeleteTaskRequest) (*DeleteTaskResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -326,6 +371,11 @@ func (c *TaskServiceClient) DeleteTask(ctx context.Context, req *DeleteTaskReque
 }
 
 func (c *TaskServiceClient) CreateSubtask(ctx context.Context, req *CreateSubtaskRequest) (*CreateSubtaskResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/subtasks"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -357,6 +407,11 @@ func (c *TaskServiceClient) CreateSubtask(ctx context.Context, req *CreateSubtas
 }
 
 func (c *TaskServiceClient) GetSubtasks(ctx context.Context, req *GetSubtasksRequest) (*GetSubtasksResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/{task_id}/subtasks"
 	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
 	query := url.Values{}
@@ -392,6 +447,11 @@ func (c *TaskServiceClient) GetSubtasks(ctx context.Context, req *GetSubtasksReq
 }
 
 func (c *TaskServiceClient) AddComment(ctx context.Context, req *AddCommentRequest) (*AddCommentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/{task_id}/comments"
 	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
 	body, err := json.Marshal(req)
@@ -424,6 +484,11 @@ func (c *TaskServiceClient) AddComment(ctx context.Context, req *AddCommentReque
 }
 
 func (c *TaskServiceClient) DeleteComment(ctx context.Context, req *DeleteCommentRequest) (*DeleteCommentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/comments/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -455,6 +520,11 @@ func (c *TaskServiceClient) DeleteComment(ctx context.Context, req *DeleteCommen
 }
 
 func (c *TaskServiceClient) GetTaskActivity(ctx context.Context, req *GetTaskActivityRequest) (*GetTaskActivityResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/{task_id}/activity"
 	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
 	query := url.Values{}
@@ -486,6 +556,11 @@ func (c *TaskServiceClient) GetTaskActivity(ctx context.Context, req *GetTaskAct
 }
 
 func (c *TaskServiceClient) CreateAttachment(ctx context.Context, req *CreateAttachmentRequest) (*CreateAttachmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/attachments"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -517,6 +592,11 @@ func (c *TaskServiceClient) CreateAttachment(ctx context.Context, req *CreateAtt
 }
 
 func (c *TaskServiceClient) GetAttachments(ctx context.Context, req *GetAttachmentsRequest) (*GetAttachmentsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/{task_id}/attachments"
 	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
 	query := url.Values{}
@@ -548,6 +628,11 @@ func (c *TaskServiceClient) GetAttachments(ctx context.Context, req *GetAttachme
 }
 
 func (c *TaskServiceClient) DeleteAttachment(ctx context.Context, req *DeleteAttachmentRequest) (*DeleteAttachmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/attachments/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -579,6 +664,11 @@ func (c *TaskServiceClient) DeleteAttachment(ctx context.Context, req *DeleteAtt
 }
 
 func (c *TaskServiceClient) CreateTimeLog(ctx context.Context, req *CreateTimeLogRequest) (*CreateTimeLogResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/{task_id}/time-logs"
 	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
 	body, err := json.Marshal(req)
@@ -611,6 +701,11 @@ func (c *TaskServiceClient) CreateTimeLog(ctx context.Context, req *CreateTimeLo
 }
 
 func (c *TaskServiceClient) GetTimeLogs(ctx context.Context, req *GetTimeLogsRequest) (*GetTimeLogsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/{task_id}/time-logs"
 	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
 	query := url.Values{}
@@ -642,6 +737,11 @@ func (c *TaskServiceClient) GetTimeLogs(ctx context.Context, req *GetTimeLogsReq
 }
 
 func (c *TaskServiceClient) DeleteTimeLog(ctx context.Context, req *DeleteTimeLogRequest) (*DeleteTimeLogResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/task/v1/tasks/time-logs/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

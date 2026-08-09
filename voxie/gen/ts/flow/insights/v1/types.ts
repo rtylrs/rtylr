@@ -27,6 +27,11 @@ if (v.completionRate !== undefined) { out.completion_rate = v.completionRate; }
 return out;
 }
 
+export function validateVelocityPoint(v: VelocityPoint): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface BurndownPoint {
 day?: number;
 ideal?: number;
@@ -48,6 +53,11 @@ if (v.day !== undefined) { out.day = v.day; }
 if (v.ideal !== undefined) { out.ideal = v.ideal; }
 if (v.actual !== undefined) { out.actual = v.actual; }
 return out;
+}
+
+export function validateBurndownPoint(v: BurndownPoint): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface MemberTime {
@@ -73,6 +83,11 @@ if (v.hours !== undefined) { out.hours = v.hours; }
 return out;
 }
 
+export function validateMemberTime(v: MemberTime): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ThroughputPoint {
 week?: string;
 completed?: number;
@@ -91,6 +106,11 @@ const out: Record<string, unknown> = {};
 if (v.week !== undefined) { out.week = v.week; }
 if (v.completed !== undefined) { out.completed = v.completed; }
 return out;
+}
+
+export function validateThroughputPoint(v: ThroughputPoint): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface TeamTaskSummary {
@@ -120,6 +140,11 @@ if (v.status !== undefined) { out.status = v.status; }
 if (v.priority !== undefined) { out.priority = v.priority; }
 if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
 return out;
+}
+
+export function validateTeamTaskSummary(v: TeamTaskSummary): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface TeamMemberWorkload {
@@ -155,6 +180,12 @@ if (v.assignedHours !== undefined) { out.assigned_hours = v.assignedHours; }
 if (v.load !== undefined) { out.load = v.load; }
 if (v.tasks !== undefined) { out.tasks = (v.tasks as any[]).map(encodeTeamTaskSummary); }
 return out;
+}
+
+export function validateTeamMemberWorkload(v: TeamMemberWorkload): string[] {
+const violations: string[] = [];
+if (v.tasks !== undefined && v.tasks !== null) for (const item of v.tasks) violations.push(...validateTeamTaskSummary(item).map((message) => "tasks: " + message));
+return violations;
 }
 
 export interface RoadmapProject {
@@ -201,6 +232,11 @@ if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
 return out;
 }
 
+export function validateRoadmapProject(v: RoadmapProject): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetInsightsRequest {
 workspaceId?: string;
 }
@@ -216,6 +252,11 @@ export function encodeGetInsightsRequest(v: GetInsightsRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
 return out;
+}
+
+export function validateGetInsightsRequest(v: GetInsightsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetInsightsResponse {
@@ -253,6 +294,15 @@ if (v.doneTasks !== undefined) { out.done_tasks = v.doneTasks; }
 return out;
 }
 
+export function validateGetInsightsResponse(v: GetInsightsResponse): string[] {
+const violations: string[] = [];
+if (v.velocity !== undefined && v.velocity !== null) for (const item of v.velocity) violations.push(...validateVelocityPoint(item).map((message) => "velocity: " + message));
+if (v.burndown !== undefined && v.burndown !== null) for (const item of v.burndown) violations.push(...validateBurndownPoint(item).map((message) => "burndown: " + message));
+if (v.timeByMember !== undefined && v.timeByMember !== null) for (const item of v.timeByMember) violations.push(...validateMemberTime(item).map((message) => "time_by_member: " + message));
+if (v.throughput !== undefined && v.throughput !== null) for (const item of v.throughput) violations.push(...validateThroughputPoint(item).map((message) => "throughput: " + message));
+return violations;
+}
+
 export interface GetTeamWorkloadRequest {
 workspaceId?: string;
 page?: number;
@@ -282,6 +332,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateGetTeamWorkloadRequest(v: GetTeamWorkloadRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetTeamWorkloadResponse {
 members?: (TeamMemberWorkload)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -300,6 +355,13 @@ const out: Record<string, unknown> = {};
 if (v.members !== undefined) { out.members = (v.members as any[]).map(encodeTeamMemberWorkload); }
 if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePaginationResponse(v.pagination); }
 return out;
+}
+
+export function validateGetTeamWorkloadResponse(v: GetTeamWorkloadResponse): string[] {
+const violations: string[] = [];
+if (v.members !== undefined && v.members !== null) for (const item of v.members) violations.push(...validateTeamMemberWorkload(item).map((message) => "members: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
 }
 
 export interface GetRoadmapRequest {
@@ -331,6 +393,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateGetRoadmapRequest(v: GetRoadmapRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetRoadmapResponse {
 projects?: (RoadmapProject)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -349,5 +416,12 @@ const out: Record<string, unknown> = {};
 if (v.projects !== undefined) { out.projects = (v.projects as any[]).map(encodeRoadmapProject); }
 if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePaginationResponse(v.pagination); }
 return out;
+}
+
+export function validateGetRoadmapResponse(v: GetRoadmapResponse): string[] {
+const violations: string[] = [];
+if (v.projects !== undefined && v.projects !== null) for (const item of v.projects) violations.push(...validateRoadmapProject(item).map((message) => "projects: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
 }
 

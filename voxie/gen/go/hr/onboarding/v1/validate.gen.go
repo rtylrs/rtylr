@@ -21,7 +21,91 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *ChecklistItemPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ChecklistTemplatePayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Items {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "items: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *EmployeeChecklistItemPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *EmployeeChecklistPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Items {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "items: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListChecklistTemplatesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListChecklistTemplatesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Templates {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "templates: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateChecklistTemplateRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -32,7 +116,26 @@ func (m *CreateChecklistTemplateRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateChecklistTemplateResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Template != nil {
+		if err := m.Template.Validate(); err != nil {
+			violations = append(violations, "template: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateChecklistTemplateBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -44,9 +147,17 @@ func (m *UpdateChecklistTemplateBody) Validate() error {
 }
 
 func (m *UpdateChecklistTemplateRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.RoleId <= 0 {
 		violations = append(violations, "role_id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -54,7 +165,21 @@ func (m *UpdateChecklistTemplateRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdateChecklistTemplateResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *AddItemToChecklistTemplateRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.RoleId <= 0 {
 		violations = append(violations, "role_id must be greater than 0")
@@ -68,10 +193,45 @@ func (m *AddItemToChecklistTemplateRequest) Validate() error {
 	return nil
 }
 
+func (m *AddItemToChecklistTemplateResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Item != nil {
+		if err := m.Item.Validate(); err != nil {
+			violations = append(violations, "item: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ListEmployeeChecklistsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.EmployeeId <= 0 {
 		violations = append(violations, "employee_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListEmployeeChecklistsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Checklists {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "checklists: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -80,6 +240,9 @@ func (m *ListEmployeeChecklistsRequest) Validate() error {
 }
 
 func (m *GetEmployeeChecklistRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.EmployeeId <= 0 {
 		violations = append(violations, "employee_id must be greater than 0")
@@ -90,7 +253,26 @@ func (m *GetEmployeeChecklistRequest) Validate() error {
 	return nil
 }
 
+func (m *GetEmployeeChecklistResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Checklist != nil {
+		if err := m.Checklist.Validate(); err != nil {
+			violations = append(violations, "checklist: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *TriggerChecklistRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.EmployeeId <= 0 {
 		violations = append(violations, "employee_id must be greater than 0")
@@ -104,6 +286,44 @@ func (m *TriggerChecklistRequest) Validate() error {
 	if m.TriggerDate != "" && !TriggerChecklistRequestTriggerDatePattern.MatchString(m.TriggerDate) {
 		violations = append(violations, "trigger_date has an invalid format")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *TriggerChecklistResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Checklist != nil {
+		if err := m.Checklist.Validate(); err != nil {
+			violations = append(violations, "checklist: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CompleteChecklistItemRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CompleteChecklistItemResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

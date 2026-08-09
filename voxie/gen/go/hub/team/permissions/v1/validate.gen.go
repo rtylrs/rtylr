@@ -21,6 +21,9 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *UpdatePermissionsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.UserId <= 0 {
 		violations = append(violations, "user_id must be greater than 0")
@@ -31,6 +34,17 @@ func (m *UpdatePermissionsRequest) Validate() error {
 	if m.Role == "" {
 		violations = append(violations, "role is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdatePermissionsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

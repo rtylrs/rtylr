@@ -22,6 +22,11 @@ func NewMembersServiceClient(baseURL string) *MembersServiceClient {
 }
 
 func (c *MembersServiceClient) ListTeam(ctx context.Context, req *ListTeamRequest) (*ListTeamResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/members/v1/members"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *MembersServiceClient) ListTeam(ctx context.Context, req *ListTeamReques
 }
 
 func (c *MembersServiceClient) GetMember(ctx context.Context, req *GetMemberRequest) (*GetMemberResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/members/v1/members/{user_id}"
 	path = strings.ReplaceAll(path, "{user_id}", fmt.Sprintf("%v", req.UserId))
 	query := url.Values{}
@@ -83,6 +93,11 @@ func (c *MembersServiceClient) GetMember(ctx context.Context, req *GetMemberRequ
 }
 
 func (c *MembersServiceClient) RemoveMember(ctx context.Context, req *RemoveMemberRequest) (*RemoveMemberResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/members/v1/members/{user_id}"
 	path = strings.ReplaceAll(path, "{user_id}", fmt.Sprintf("%v", req.UserId))
 	query := url.Values{}

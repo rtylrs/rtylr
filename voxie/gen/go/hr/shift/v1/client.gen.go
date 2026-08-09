@@ -24,6 +24,11 @@ func NewShiftServiceClient(baseURL string) *ShiftServiceClient {
 }
 
 func (c *ShiftServiceClient) ListShifts(ctx context.Context, req *ListShiftsRequest) (*ListShiftsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/shift/v1/shifts"
 	query := url.Values{}
 	if req.LocationId != nil {
@@ -57,6 +62,11 @@ func (c *ShiftServiceClient) ListShifts(ctx context.Context, req *ListShiftsRequ
 }
 
 func (c *ShiftServiceClient) CreateShift(ctx context.Context, req *CreateShiftRequest) (*CreateShiftResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/shift/v1/shifts"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -88,6 +98,11 @@ func (c *ShiftServiceClient) CreateShift(ctx context.Context, req *CreateShiftRe
 }
 
 func (c *ShiftServiceClient) CreateShiftAssignment(ctx context.Context, req *CreateShiftAssignmentRequest) (*CreateShiftAssignmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/shift/v1/assignments"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -119,6 +134,11 @@ func (c *ShiftServiceClient) CreateShiftAssignment(ctx context.Context, req *Cre
 }
 
 func (c *ShiftServiceClient) GetRoster(ctx context.Context, req *GetRosterRequest) (*GetRosterResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/shift/v1/roster/{location_id}"
 	path = strings.ReplaceAll(path, "{location_id}", fmt.Sprintf("%v", req.LocationId))
 	query := url.Values{}
@@ -151,6 +171,11 @@ func (c *ShiftServiceClient) GetRoster(ctx context.Context, req *GetRosterReques
 }
 
 func (c *ShiftServiceClient) PublishRoster(ctx context.Context, req *PublishRosterRequest) (*PublishRosterResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/shift/v1/roster/publish"
 	body, err := json.Marshal(req)
 	if err != nil {

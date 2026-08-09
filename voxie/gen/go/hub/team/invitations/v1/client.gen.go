@@ -21,6 +21,11 @@ func NewInvitationsServiceClient(baseURL string) *InvitationsServiceClient {
 }
 
 func (c *InvitationsServiceClient) InviteUser(ctx context.Context, req *InviteUserRequest) (*InviteUserResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/invitations/v1/invitations"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -52,6 +57,11 @@ func (c *InvitationsServiceClient) InviteUser(ctx context.Context, req *InviteUs
 }
 
 func (c *InvitationsServiceClient) BulkInvite(ctx context.Context, req *BulkInviteRequest) (*BulkInviteResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/invitations/v1/invitations/bulk"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -83,6 +93,11 @@ func (c *InvitationsServiceClient) BulkInvite(ctx context.Context, req *BulkInvi
 }
 
 func (c *InvitationsServiceClient) VerifyInvite(ctx context.Context, req *VerifyInviteRequest) (*VerifyInviteResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/invitations/v1/invitations/verify"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -114,6 +129,11 @@ func (c *InvitationsServiceClient) VerifyInvite(ctx context.Context, req *Verify
 }
 
 func (c *InvitationsServiceClient) AcceptInvite(ctx context.Context, req *AcceptInviteRequest) (*AcceptInviteResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/invitations/v1/invitations/accept"
 	body, err := json.Marshal(req)
 	if err != nil {

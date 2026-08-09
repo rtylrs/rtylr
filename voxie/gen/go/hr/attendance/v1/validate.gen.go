@@ -20,7 +20,21 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *AttendanceRecordPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *AttendanceClockInRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Method == "" {
 		violations = append(violations, "method is required")
@@ -34,10 +48,72 @@ func (m *AttendanceClockInRequest) Validate() error {
 	return nil
 }
 
+func (m *AttendanceClockInResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Record != nil {
+		if err := m.Record.Validate(); err != nil {
+			violations = append(violations, "record: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *AttendanceClockOutRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.AttendanceRecordId <= 0 {
 		violations = append(violations, "attendance_record_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AttendanceClockOutResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Record != nil {
+		if err := m.Record.Validate(); err != nil {
+			violations = append(violations, "record: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAttendanceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAttendanceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Records {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "records: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

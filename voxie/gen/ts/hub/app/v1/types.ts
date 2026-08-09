@@ -29,6 +29,11 @@ if (v.isEnabled !== undefined) { out.is_enabled = v.isEnabled; }
 return out;
 }
 
+export function validateApp(v: App): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface Addon {
 id?: string;
 name?: string;
@@ -70,6 +75,11 @@ if (v.disabledAt !== undefined) { out.disabled_at = v.disabledAt; }
 return out;
 }
 
+export function validateAddon(v: Addon): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListAppsRequest {
 }
 
@@ -82,6 +92,11 @@ return {
 export function encodeListAppsRequest(v: ListAppsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListAppsRequest(v: ListAppsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListAppsResponse {
@@ -101,6 +116,12 @@ if (v.apps !== undefined) { out.apps = (v.apps as any[]).map(encodeApp); }
 return out;
 }
 
+export function validateListAppsResponse(v: ListAppsResponse): string[] {
+const violations: string[] = [];
+if (v.apps !== undefined && v.apps !== null) for (const item of v.apps) violations.push(...validateApp(item).map((message) => "apps: " + message));
+return violations;
+}
+
 export interface ListAddonsRequest {
 }
 
@@ -113,6 +134,11 @@ return {
 export function encodeListAddonsRequest(v: ListAddonsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListAddonsRequest(v: ListAddonsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListAddonsResponse {
@@ -132,8 +158,14 @@ if (v.addons !== undefined) { out.addons = (v.addons as any[]).map(encodeAddon);
 return out;
 }
 
+export function validateListAddonsResponse(v: ListAddonsResponse): string[] {
+const violations: string[] = [];
+if (v.addons !== undefined && v.addons !== null) for (const item of v.addons) violations.push(...validateAddon(item).map((message) => "addons: " + message));
+return violations;
+}
+
 export interface AddonStatusRequest {
-addonId?: string;
+addonId: string;
 }
 
 export function decodeAddonStatusRequest(v: any): AddonStatusRequest {
@@ -147,6 +179,12 @@ export function encodeAddonStatusRequest(v: AddonStatusRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.addonId !== undefined) { out.addon_id = v.addonId; }
 return out;
+}
+
+export function validateAddonStatusRequest(v: AddonStatusRequest): string[] {
+const violations: string[] = [];
+if (!(v.addonId !== undefined && v.addonId !== null) || v.addonId === "") violations.push("addon_id is required");
+return violations;
 }
 
 export interface AddonStatusResponse {
@@ -166,8 +204,13 @@ if (v.isEnabled !== undefined) { out.is_enabled = v.isEnabled; }
 return out;
 }
 
+export function validateAddonStatusResponse(v: AddonStatusResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface EnableAddonRequest {
-addonId?: string;
+addonId: string;
 }
 
 export function decodeEnableAddonRequest(v: any): EnableAddonRequest {
@@ -181,6 +224,12 @@ export function encodeEnableAddonRequest(v: EnableAddonRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.addonId !== undefined) { out.addon_id = v.addonId; }
 return out;
+}
+
+export function validateEnableAddonRequest(v: EnableAddonRequest): string[] {
+const violations: string[] = [];
+if (!(v.addonId !== undefined && v.addonId !== null) || v.addonId === "") violations.push("addon_id is required");
+return violations;
 }
 
 export interface EnableAddonResponse {
@@ -200,8 +249,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateEnableAddonResponse(v: EnableAddonResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DisableAddonRequest {
-addonId?: string;
+addonId: string;
 }
 
 export function decodeDisableAddonRequest(v: any): DisableAddonRequest {
@@ -215,6 +269,12 @@ export function encodeDisableAddonRequest(v: DisableAddonRequest): Record<string
 const out: Record<string, unknown> = {};
 if (v.addonId !== undefined) { out.addon_id = v.addonId; }
 return out;
+}
+
+export function validateDisableAddonRequest(v: DisableAddonRequest): string[] {
+const violations: string[] = [];
+if (!(v.addonId !== undefined && v.addonId !== null) || v.addonId === "") violations.push("addon_id is required");
+return violations;
 }
 
 export interface DisableAddonResponse {
@@ -232,5 +292,10 @@ export function encodeDisableAddonResponse(v: DisableAddonResponse): Record<stri
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateDisableAddonResponse(v: DisableAddonResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

@@ -56,6 +56,12 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateQuote(v: Quote): string[] {
+const violations: string[] = [];
+if (v.lines !== undefined && v.lines !== null) for (const item of v.lines) violations.push(...validateQuoteLine(item).map((message) => "lines: " + message));
+return violations;
+}
+
 export interface QuoteLine {
 description?: string;
 quantity?: number;
@@ -85,15 +91,20 @@ if (v.total !== undefined) { out.total = v.total; }
 return out;
 }
 
+export function validateQuoteLine(v: QuoteLine): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateQuoteRequest {
-customerName?: string;
+customerName: string;
 customerEmail?: string;
 status?: string;
 lines?: (QuoteLine)[];
 subtotal?: number;
 tax?: number;
-validUntil?: string;
-discount?: number;
+validUntil: string;
+discount: number;
 total?: number;
 notes?: string;
 }
@@ -129,6 +140,20 @@ if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
 }
 
+export function validateCreateQuoteRequest(v: CreateQuoteRequest): string[] {
+const violations: string[] = [];
+if (!(v.customerName !== undefined && v.customerName !== null) || v.customerName === "") violations.push("customer_name is required");
+if (v.lines !== undefined && v.lines !== null && v.lines.length < 1) violations.push("lines must contain at least 1 items");
+if (v.lines !== undefined && v.lines !== null) for (const item of v.lines) violations.push(...validateQuoteLine(item).map((message) => "lines: " + message));
+if (v.subtotal !== undefined && v.subtotal !== null && !(Number(v.subtotal) >= 0)) violations.push("subtotal violates @gte");
+if (v.tax !== undefined && v.tax !== null && !(Number(v.tax) >= 0)) violations.push("tax violates @gte");
+if (!(v.validUntil !== undefined && v.validUntil !== null) || v.validUntil === "") violations.push("valid_until is required");
+if (!(v.discount !== undefined && v.discount !== null)) violations.push("discount is required");
+if (v.discount !== undefined && v.discount !== null && !(Number(v.discount) >= 0)) violations.push("discount violates @gte");
+if (v.total !== undefined && v.total !== null && !(Number(v.total) >= 0)) violations.push("total violates @gte");
+return violations;
+}
+
 export interface CreateQuoteResponse {
 quote?: Quote;
 }
@@ -146,8 +171,14 @@ if (v.quote !== undefined) { out.quote = encodeQuote(v.quote); }
 return out;
 }
 
+export function validateCreateQuoteResponse(v: CreateQuoteResponse): string[] {
+const violations: string[] = [];
+if (v.quote !== undefined && v.quote !== null) violations.push(...validateQuote(v.quote).map((message) => "quote: " + message));
+return violations;
+}
+
 export interface GetQuoteRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetQuoteRequest(v: any): GetQuoteRequest {
@@ -161,6 +192,13 @@ export function encodeGetQuoteRequest(v: GetQuoteRequest): Record<string, unknow
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetQuoteRequest(v: GetQuoteRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetQuoteResponse {
@@ -178,6 +216,12 @@ export function encodeGetQuoteResponse(v: GetQuoteResponse): Record<string, unkn
 const out: Record<string, unknown> = {};
 if (v.quote !== undefined) { out.quote = encodeQuote(v.quote); }
 return out;
+}
+
+export function validateGetQuoteResponse(v: GetQuoteResponse): string[] {
+const violations: string[] = [];
+if (v.quote !== undefined && v.quote !== null) violations.push(...validateQuote(v.quote).map((message) => "quote: " + message));
+return violations;
 }
 
 export interface ListQuotesRequest {
@@ -198,6 +242,11 @@ const out: Record<string, unknown> = {};
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
+}
+
+export function validateListQuotesRequest(v: ListQuotesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListQuotesResponse {
@@ -226,8 +275,14 @@ if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
 return out;
 }
 
+export function validateListQuotesResponse(v: ListQuotesResponse): string[] {
+const violations: string[] = [];
+if (v.quotes !== undefined && v.quotes !== null) for (const item of v.quotes) violations.push(...validateQuote(item).map((message) => "quotes: " + message));
+return violations;
+}
+
 export interface UpdateQuoteStatusBody {
-status?: string;
+status: string;
 }
 
 export function decodeUpdateQuoteStatusBody(v: any): UpdateQuoteStatusBody {
@@ -243,8 +298,14 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdateQuoteStatusBody(v: UpdateQuoteStatusBody): string[] {
+const violations: string[] = [];
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+return violations;
+}
+
 export interface UpdateQuoteStatusRequest {
-id?: string;
+id: string;
 body?: UpdateQuoteStatusBody;
 }
 
@@ -261,6 +322,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateQuoteStatusBody(v.body); }
 return out;
+}
+
+export function validateUpdateQuoteStatusRequest(v: UpdateQuoteStatusRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateQuoteStatusBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateQuoteStatusResponse {
@@ -280,8 +349,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateQuoteStatusResponse(v: UpdateQuoteStatusResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ConvertQuoteRequest {
-id?: string;
+id: string;
 }
 
 export function decodeConvertQuoteRequest(v: any): ConvertQuoteRequest {
@@ -295,6 +369,13 @@ export function encodeConvertQuoteRequest(v: ConvertQuoteRequest): Record<string
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateConvertQuoteRequest(v: ConvertQuoteRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface ConvertQuoteResponse {
@@ -315,5 +396,10 @@ const out: Record<string, unknown> = {};
 if (v.invoiceId !== undefined) { out.invoice_id = v.invoiceId; }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateConvertQuoteResponse(v: ConvertQuoteResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

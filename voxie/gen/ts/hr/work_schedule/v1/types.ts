@@ -50,6 +50,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateWorkSchedulePayload(v: WorkSchedulePayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListWorkSchedulesResponse {
 schedules?: (WorkSchedulePayload)[];
 }
@@ -67,15 +72,21 @@ if (v.schedules !== undefined) { out.schedules = (v.schedules as any[]).map(enco
 return out;
 }
 
+export function validateListWorkSchedulesResponse(v: ListWorkSchedulesResponse): string[] {
+const violations: string[] = [];
+if (v.schedules !== undefined && v.schedules !== null) for (const item of v.schedules) violations.push(...validateWorkSchedulePayload(item).map((message) => "schedules: " + message));
+return violations;
+}
+
 export interface CreateWorkScheduleRequest {
-name?: string;
+name: string;
 workingDays?: (string)[];
-startTime?: string;
-endTime?: string;
-breakMinutes?: number;
+startTime: string;
+endTime: string;
+breakMinutes: number;
 contractedHoursPerWeek?: number;
-dailyOtThresholdMinutes?: number;
-weeklyOtThresholdMinutes?: number;
+dailyOtThresholdMinutes: number;
+weeklyOtThresholdMinutes: number;
 }
 
 export function decodeCreateWorkScheduleRequest(v: any): CreateWorkScheduleRequest {
@@ -105,6 +116,22 @@ if (v.weeklyOtThresholdMinutes !== undefined) { out.weekly_ot_threshold_minutes 
 return out;
 }
 
+export function validateCreateWorkScheduleRequest(v: CreateWorkScheduleRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.workingDays !== undefined && v.workingDays !== null && v.workingDays.length < 1) violations.push("working_days must contain at least 1 items");
+if (!(v.startTime !== undefined && v.startTime !== null) || v.startTime === "") violations.push("start_time is required");
+if (!(v.endTime !== undefined && v.endTime !== null) || v.endTime === "") violations.push("end_time is required");
+if (!(v.breakMinutes !== undefined && v.breakMinutes !== null)) violations.push("break_minutes is required");
+if (v.breakMinutes !== undefined && v.breakMinutes !== null && !(Number(v.breakMinutes) >= 0)) violations.push("break_minutes violates @gte");
+if (v.contractedHoursPerWeek !== undefined && v.contractedHoursPerWeek !== null && !(Number(v.contractedHoursPerWeek) >= 0)) violations.push("contracted_hours_per_week violates @gte");
+if (!(v.dailyOtThresholdMinutes !== undefined && v.dailyOtThresholdMinutes !== null)) violations.push("daily_ot_threshold_minutes is required");
+if (v.dailyOtThresholdMinutes !== undefined && v.dailyOtThresholdMinutes !== null && !(Number(v.dailyOtThresholdMinutes) >= 0)) violations.push("daily_ot_threshold_minutes violates @gte");
+if (!(v.weeklyOtThresholdMinutes !== undefined && v.weeklyOtThresholdMinutes !== null)) violations.push("weekly_ot_threshold_minutes is required");
+if (v.weeklyOtThresholdMinutes !== undefined && v.weeklyOtThresholdMinutes !== null && !(Number(v.weeklyOtThresholdMinutes) >= 0)) violations.push("weekly_ot_threshold_minutes violates @gte");
+return violations;
+}
+
 export interface CreateWorkScheduleResponse {
 schedule?: WorkSchedulePayload;
 }
@@ -120,6 +147,12 @@ export function encodeCreateWorkScheduleResponse(v: CreateWorkScheduleResponse):
 const out: Record<string, unknown> = {};
 if (v.schedule !== undefined) { out.schedule = encodeWorkSchedulePayload(v.schedule); }
 return out;
+}
+
+export function validateCreateWorkScheduleResponse(v: CreateWorkScheduleResponse): string[] {
+const violations: string[] = [];
+if (v.schedule !== undefined && v.schedule !== null) violations.push(...validateWorkSchedulePayload(v.schedule).map((message) => "schedule: " + message));
+return violations;
 }
 
 export interface UpdateWorkScheduleBody {
@@ -160,8 +193,14 @@ if (v.weeklyOtThresholdMinutes !== undefined) { out.weekly_ot_threshold_minutes 
 return out;
 }
 
+export function validateUpdateWorkScheduleBody(v: UpdateWorkScheduleBody): string[] {
+const violations: string[] = [];
+if (v.workingDays !== undefined && v.workingDays !== null && v.workingDays.length < 1) violations.push("working_days must contain at least 1 items");
+return violations;
+}
+
 export interface UpdateWorkScheduleRequest {
-id?: string;
+id: string;
 body?: UpdateWorkScheduleBody;
 }
 
@@ -180,6 +219,14 @@ if (v.body !== undefined) { out.body = encodeUpdateWorkScheduleBody(v.body); }
 return out;
 }
 
+export function validateUpdateWorkScheduleRequest(v: UpdateWorkScheduleRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateWorkScheduleBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateWorkScheduleResponse {
 schedule?: WorkSchedulePayload;
 }
@@ -195,5 +242,11 @@ export function encodeUpdateWorkScheduleResponse(v: UpdateWorkScheduleResponse):
 const out: Record<string, unknown> = {};
 if (v.schedule !== undefined) { out.schedule = encodeWorkSchedulePayload(v.schedule); }
 return out;
+}
+
+export function validateUpdateWorkScheduleResponse(v: UpdateWorkScheduleResponse): string[] {
+const violations: string[] = [];
+if (v.schedule !== undefined && v.schedule !== null) violations.push(...validateWorkSchedulePayload(v.schedule).map((message) => "schedule: " + message));
+return violations;
 }
 

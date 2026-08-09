@@ -22,6 +22,11 @@ func NewAiServiceClient(baseURL string) *AiServiceClient {
 }
 
 func (c *AiServiceClient) GetAiUsage(ctx context.Context, req *GetAiUsageRequest) (*GetAiUsageResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/ai/v1/usage"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *AiServiceClient) GetAiUsage(ctx context.Context, req *GetAiUsageRequest
 }
 
 func (c *AiServiceClient) GetAiQuotaSettings(ctx context.Context, req *GetAiQuotaSettingsRequest) (*GetAiQuotaSettingsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/ai/v1/quota-settings"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -82,6 +92,11 @@ func (c *AiServiceClient) GetAiQuotaSettings(ctx context.Context, req *GetAiQuot
 }
 
 func (c *AiServiceClient) UpdateAiQuotaSettings(ctx context.Context, req *UpdateAiQuotaSettingsRequest) (*UpdateAiQuotaSettingsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/ai/v1/quota-settings"
 	body, err := json.Marshal(req)
 	if err != nil {

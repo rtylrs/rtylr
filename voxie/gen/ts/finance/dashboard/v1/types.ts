@@ -14,6 +14,11 @@ const out: Record<string, unknown> = {};
 return out;
 }
 
+export function validateGetFinanceDashboardRequest(v: GetFinanceDashboardRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetFinanceDashboardResponse {
 totalReceivable?: number;
 overdueAmount?: number;
@@ -38,5 +43,10 @@ if (v.overdueAmount !== undefined) { out.overdue_amount = v.overdueAmount; }
 if (v.totalExpensesMtd !== undefined) { out.total_expenses_mtd = v.totalExpensesMtd; }
 if (v.netProfitMtd !== undefined) { out.net_profit_mtd = v.netProfitMtd; }
 return out;
+}
+
+export function validateGetFinanceDashboardResponse(v: GetFinanceDashboardResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

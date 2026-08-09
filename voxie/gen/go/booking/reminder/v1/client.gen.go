@@ -22,6 +22,11 @@ func NewReminderServiceClient(baseURL string) *ReminderServiceClient {
 }
 
 func (c *ReminderServiceClient) ListReminders(ctx context.Context, req *ListRemindersRequest) (*ListRemindersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/booking/reminder/v1/reminders"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *ReminderServiceClient) ListReminders(ctx context.Context, req *ListRemi
 }
 
 func (c *ReminderServiceClient) CreateReminder(ctx context.Context, req *CreateReminderRequest) (*CreateReminderResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/booking/reminder/v1/reminders"
 	body, err := json.Marshal(req)
 	if err != nil {

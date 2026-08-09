@@ -23,6 +23,11 @@ func NewAccountServiceClient(baseURL string) *AccountServiceClient {
 }
 
 func (c *AccountServiceClient) ListAccounts(ctx context.Context, req *ListAccountsRequest) (*ListAccountsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/account/v1/accounts"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *AccountServiceClient) ListAccounts(ctx context.Context, req *ListAccoun
 }
 
 func (c *AccountServiceClient) CreateAccount(ctx context.Context, req *CreateAccountRequest) (*CreateAccountResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/account/v1/accounts"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,9 +94,14 @@ func (c *AccountServiceClient) CreateAccount(ctx context.Context, req *CreateAcc
 }
 
 func (c *AccountServiceClient) UpdateAccount(ctx context.Context, req *UpdateAccountRequest) (*UpdateAccountResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/account/v1/accounts/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -116,6 +131,11 @@ func (c *AccountServiceClient) UpdateAccount(ctx context.Context, req *UpdateAcc
 }
 
 func (c *AccountServiceClient) DeleteAccount(ctx context.Context, req *DeleteAccountRequest) (*DeleteAccountResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/account/v1/accounts/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -147,6 +167,11 @@ func (c *AccountServiceClient) DeleteAccount(ctx context.Context, req *DeleteAcc
 }
 
 func (c *AccountServiceClient) GetChartOfAccounts(ctx context.Context, req *GetChartOfAccountsRequest) (*GetChartOfAccountsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/account/v1/chart-of-accounts"
 	query := url.Values{}
 	if len(query) > 0 {

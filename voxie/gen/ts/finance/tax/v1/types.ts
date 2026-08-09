@@ -38,6 +38,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateTaxConfig(v: TaxConfig): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetTaxConfigRequest {
 }
 
@@ -50,6 +55,11 @@ return {
 export function encodeGetTaxConfigRequest(v: GetTaxConfigRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetTaxConfigRequest(v: GetTaxConfigRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetTaxConfigResponse {
@@ -69,8 +79,14 @@ if (v.config !== undefined) { out.config = encodeTaxConfig(v.config); }
 return out;
 }
 
+export function validateGetTaxConfigResponse(v: GetTaxConfigResponse): string[] {
+const violations: string[] = [];
+if (v.config !== undefined && v.config !== null) violations.push(...validateTaxConfig(v.config).map((message) => "config: " + message));
+return violations;
+}
+
 export interface UpdateTaxConfigRequest {
-taxName?: string;
+taxName: string;
 taxRate?: number;
 isInclusive?: boolean;
 isActive?: boolean;
@@ -95,6 +111,13 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateTaxConfigRequest(v: UpdateTaxConfigRequest): string[] {
+const violations: string[] = [];
+if (!(v.taxName !== undefined && v.taxName !== null) || v.taxName === "") violations.push("tax_name is required");
+if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) >= 0)) violations.push("tax_rate violates @gte");
+return violations;
+}
+
 export interface UpdateTaxConfigResponse {
 message?: string;
 }
@@ -112,6 +135,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateTaxConfigResponse(v: UpdateTaxConfigResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetPLReportRequest {
 }
 
@@ -124,6 +152,11 @@ return {
 export function encodeGetPLReportRequest(v: GetPLReportRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetPLReportRequest(v: GetPLReportRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetPLReportResponse {
@@ -150,5 +183,10 @@ if (v.totalExpenses !== undefined) { out.total_expenses = v.totalExpenses; }
 if (v.grossProfit !== undefined) { out.gross_profit = v.grossProfit; }
 if (v.netProfit !== undefined) { out.net_profit = v.netProfit; }
 return out;
+}
+
+export function validateGetPLReportResponse(v: GetPLReportResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

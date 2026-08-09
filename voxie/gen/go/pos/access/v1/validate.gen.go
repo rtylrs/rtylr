@@ -20,7 +20,43 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *MyLocation) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RosterEntry) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *MemberLocationEntry) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *AssignLocationRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.UserId <= 0 {
 		violations = append(violations, "user_id must be greater than 0")
@@ -34,10 +70,40 @@ func (m *AssignLocationRequest) Validate() error {
 	return nil
 }
 
+func (m *AssignLocationResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetLocationRosterRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.LocationId <= 0 {
 		violations = append(violations, "location_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetLocationRosterResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Roster {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "roster: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -46,6 +112,9 @@ func (m *GetLocationRosterRequest) Validate() error {
 }
 
 func (m *GetMemberLocationsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.UserId <= 0 {
 		violations = append(violations, "user_id must be greater than 0")
@@ -56,11 +125,68 @@ func (m *GetMemberLocationsRequest) Validate() error {
 	return nil
 }
 
+func (m *GetMemberLocationsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Locations {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "locations: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetMyLocationsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetMyLocationsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Locations {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "locations: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *RemoveLocationRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RemoveLocationResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

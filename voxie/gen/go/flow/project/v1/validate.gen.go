@@ -20,7 +20,75 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Project) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ProjectColumn) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ProjectMember) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListProjectsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListProjectsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Projects {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "projects: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateProjectRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.WorkspaceId <= 0 {
 		violations = append(violations, "workspace_id must be greater than 0")
@@ -49,7 +117,26 @@ func (m *CreateProjectRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateProjectResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Project != nil {
+		if err := m.Project.Validate(); err != nil {
+			violations = append(violations, "project: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateProjectBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -79,10 +166,29 @@ func (m *UpdateProjectBody) Validate() error {
 }
 
 func (m *UpdateProjectRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateProjectResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -90,6 +196,9 @@ func (m *UpdateProjectRequest) Validate() error {
 }
 
 func (m *DeleteProjectRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -100,10 +209,45 @@ func (m *DeleteProjectRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteProjectResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ListProjectColumnsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ProjectId <= 0 {
 		violations = append(violations, "project_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListProjectColumnsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Columns {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "columns: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -112,6 +256,9 @@ func (m *ListProjectColumnsRequest) Validate() error {
 }
 
 func (m *CreateProjectColumnRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ProjectId <= 0 {
 		violations = append(violations, "project_id must be greater than 0")
@@ -125,7 +272,26 @@ func (m *CreateProjectColumnRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateProjectColumnResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Column != nil {
+		if err := m.Column.Validate(); err != nil {
+			violations = append(violations, "column: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateProjectColumnRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -139,7 +305,21 @@ func (m *UpdateProjectColumnRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdateProjectColumnResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteProjectColumnRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -150,7 +330,21 @@ func (m *DeleteProjectColumnRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteProjectColumnResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *MoveTaskToColumnRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TaskId <= 0 {
 		violations = append(violations, "task_id must be greater than 0")
@@ -161,10 +355,45 @@ func (m *MoveTaskToColumnRequest) Validate() error {
 	return nil
 }
 
+func (m *MoveTaskToColumnResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ListProjectMembersRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ProjectId <= 0 {
 		violations = append(violations, "project_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListProjectMembersResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Members {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "members: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -173,6 +402,9 @@ func (m *ListProjectMembersRequest) Validate() error {
 }
 
 func (m *AddProjectMemberRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ProjectId <= 0 {
 		violations = append(violations, "project_id must be greater than 0")
@@ -180,6 +412,17 @@ func (m *AddProjectMemberRequest) Validate() error {
 	if m.UserId <= 0 {
 		violations = append(violations, "user_id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AddProjectMemberResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -187,6 +430,9 @@ func (m *AddProjectMemberRequest) Validate() error {
 }
 
 func (m *RemoveProjectMemberRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ProjectId <= 0 {
 		violations = append(violations, "project_id must be greater than 0")
@@ -200,7 +446,21 @@ func (m *RemoveProjectMemberRequest) Validate() error {
 	return nil
 }
 
+func (m *RemoveProjectMemberResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateProjectMemberRoleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ProjectId <= 0 {
 		violations = append(violations, "project_id must be greater than 0")
@@ -217,7 +477,21 @@ func (m *UpdateProjectMemberRoleRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdateProjectMemberRoleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *InviteProjectMemberRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ProjectId <= 0 {
 		violations = append(violations, "project_id must be greater than 0")
@@ -231,7 +505,21 @@ func (m *InviteProjectMemberRequest) Validate() error {
 	return nil
 }
 
+func (m *InviteProjectMemberResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *TransferProjectOwnershipRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ProjectId <= 0 {
 		violations = append(violations, "project_id must be greater than 0")
@@ -245,7 +533,21 @@ func (m *TransferProjectOwnershipRequest) Validate() error {
 	return nil
 }
 
+func (m *TransferProjectOwnershipResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *MoveProjectRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ProjectId <= 0 {
 		violations = append(violations, "project_id must be greater than 0")
@@ -253,6 +555,17 @@ func (m *MoveProjectRequest) Validate() error {
 	if m.WorkspaceId <= 0 {
 		violations = append(violations, "workspace_id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *MoveProjectResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

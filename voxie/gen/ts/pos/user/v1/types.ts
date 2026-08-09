@@ -47,6 +47,11 @@ if (v.canApplyDiscount !== undefined) { out.can_apply_discount = v.canApplyDisco
 return out;
 }
 
+export function validatePOSUser(v: POSUser): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListPOSUsersRequest {
 locationId?: string;
 }
@@ -62,6 +67,11 @@ export function encodeListPOSUsersRequest(v: ListPOSUsersRequest): Record<string
 const out: Record<string, unknown> = {};
 if (v.locationId !== undefined) { out.location_id = v.locationId; }
 return out;
+}
+
+export function validateListPOSUsersRequest(v: ListPOSUsersRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListPOSUsersResponse {
@@ -81,13 +91,19 @@ if (v.users !== undefined) { out.users = (v.users as any[]).map(encodePOSUser); 
 return out;
 }
 
+export function validateListPOSUsersResponse(v: ListPOSUsersResponse): string[] {
+const violations: string[] = [];
+if (v.users !== undefined && v.users !== null) for (const item of v.users) violations.push(...validatePOSUser(item).map((message) => "users: " + message));
+return violations;
+}
+
 export interface CreatePOSUserRequest {
-locationId?: string;
-name?: string;
-pin?: string;
-role?: string;
+locationId: string;
+name: string;
+pin: string;
+role: string;
 hourlyRate?: number;
-maxDiscountPct?: number;
+maxDiscountPct: number;
 canVoid?: boolean;
 canRefund?: boolean;
 canOpenDrawer?: boolean;
@@ -125,6 +141,19 @@ if (v.canApplyDiscount !== undefined) { out.can_apply_discount = v.canApplyDisco
 return out;
 }
 
+export function validateCreatePOSUserRequest(v: CreatePOSUserRequest): string[] {
+const violations: string[] = [];
+if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
+if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.pin !== undefined && v.pin !== null) || v.pin === "") violations.push("pin is required");
+if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
+if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(Number(v.hourlyRate) >= 0)) violations.push("hourly_rate violates @gte");
+if (!(v.maxDiscountPct !== undefined && v.maxDiscountPct !== null)) violations.push("max_discount_pct is required");
+if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(Number(v.maxDiscountPct) >= 0)) violations.push("max_discount_pct violates @gte");
+return violations;
+}
+
 export interface CreatePOSUserResponse {
 id?: string;
 }
@@ -142,14 +171,19 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateCreatePOSUserResponse(v: CreatePOSUserResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdatePOSUserRequest {
-id?: string;
-name?: string;
+id: string;
+name: string;
 pin?: string;
-role?: string;
+role: string;
 isActive?: boolean;
 hourlyRate?: number;
-maxDiscountPct?: number;
+maxDiscountPct: number;
 canVoid?: boolean;
 canRefund?: boolean;
 canOpenDrawer?: boolean;
@@ -189,6 +223,18 @@ if (v.canApplyDiscount !== undefined) { out.can_apply_discount = v.canApplyDisco
 return out;
 }
 
+export function validateUpdatePOSUserRequest(v: UpdatePOSUserRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
+if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(Number(v.hourlyRate) >= 0)) violations.push("hourly_rate violates @gte");
+if (!(v.maxDiscountPct !== undefined && v.maxDiscountPct !== null)) violations.push("max_discount_pct is required");
+if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(Number(v.maxDiscountPct) >= 0)) violations.push("max_discount_pct violates @gte");
+return violations;
+}
+
 export interface UpdatePOSUserResponse {
 success?: boolean;
 }
@@ -206,8 +252,13 @@ if (v.success !== undefined) { out.success = v.success; }
 return out;
 }
 
+export function validateUpdatePOSUserResponse(v: UpdatePOSUserResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeactivatePOSUserRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeactivatePOSUserRequest(v: any): DeactivatePOSUserRequest {
@@ -221,6 +272,13 @@ export function encodeDeactivatePOSUserRequest(v: DeactivatePOSUserRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeactivatePOSUserRequest(v: DeactivatePOSUserRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeactivatePOSUserResponse {
@@ -240,10 +298,15 @@ if (v.success !== undefined) { out.success = v.success; }
 return out;
 }
 
+export function validateDeactivatePOSUserResponse(v: DeactivatePOSUserResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface VerifyPOSUserPINRequest {
-locationId?: string;
-userId?: string;
-pin?: string;
+locationId: string;
+userId: string;
+pin: string;
 }
 
 export function decodeVerifyPOSUserPINRequest(v: any): VerifyPOSUserPINRequest {
@@ -261,6 +324,16 @@ if (v.locationId !== undefined) { out.location_id = v.locationId; }
 if (v.userId !== undefined) { out.user_id = v.userId; }
 if (v.pin !== undefined) { out.pin = v.pin; }
 return out;
+}
+
+export function validateVerifyPOSUserPINRequest(v: VerifyPOSUserPINRequest): string[] {
+const violations: string[] = [];
+if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
+if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (!(v.pin !== undefined && v.pin !== null) || v.pin === "") violations.push("pin is required");
+return violations;
 }
 
 export interface VerifyPOSUserPINResponse {
@@ -307,11 +380,16 @@ if (v.maxDiscountPct !== undefined) { out.max_discount_pct = v.maxDiscountPct; }
 return out;
 }
 
+export function validateVerifyPOSUserPINResponse(v: VerifyPOSUserPINResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface SetPINRequest {
-userId?: string;
-locationId?: string;
-name?: string;
-pin?: string;
+userId: string;
+locationId: string;
+name: string;
+pin: string;
 }
 
 export function decodeSetPINRequest(v: any): SetPINRequest {
@@ -333,6 +411,17 @@ if (v.pin !== undefined) { out.pin = v.pin; }
 return out;
 }
 
+export function validateSetPINRequest(v: SetPINRequest): string[] {
+const violations: string[] = [];
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
+if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.pin !== undefined && v.pin !== null) || v.pin === "") violations.push("pin is required");
+return violations;
+}
+
 export interface SetPINResponse {
 success?: boolean;
 }
@@ -348,5 +437,10 @@ export function encodeSetPINResponse(v: SetPINResponse): Record<string, unknown>
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateSetPINResponse(v: SetPINResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

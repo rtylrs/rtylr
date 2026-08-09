@@ -22,6 +22,11 @@ func NewReviewServiceClient(baseURL string) *ReviewServiceClient {
 }
 
 func (c *ReviewServiceClient) ListReviews(ctx context.Context, req *ListReviewsRequest) (*ListReviewsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/review/v1/reviews"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *ReviewServiceClient) ListReviews(ctx context.Context, req *ListReviewsR
 }
 
 func (c *ReviewServiceClient) CreateReview(ctx context.Context, req *CreateReviewRequest) (*CreateReviewResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/review/v1/reviews"
 	body, err := json.Marshal(req)
 	if err != nil {

@@ -22,7 +22,21 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *RecurringInvoice) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateRecurringInvoiceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TemplateInvoiceId <= 0 {
 		violations = append(violations, "template_invoice_id must be greater than 0")
@@ -42,10 +56,67 @@ func (m *CreateRecurringInvoiceRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateRecurringInvoiceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetRecurringInvoiceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetRecurringInvoiceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Invoice != nil {
+		if err := m.Invoice.Validate(); err != nil {
+			violations = append(violations, "invoice: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListRecurringInvoicesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListRecurringInvoicesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.RecurringInvoices {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "recurring_invoices: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -54,10 +125,24 @@ func (m *GetRecurringInvoiceRequest) Validate() error {
 }
 
 func (m *PauseRecurringInvoiceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *PauseRecurringInvoiceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -65,6 +150,9 @@ func (m *PauseRecurringInvoiceRequest) Validate() error {
 }
 
 func (m *ResumeRecurringInvoiceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -75,7 +163,21 @@ func (m *ResumeRecurringInvoiceRequest) Validate() error {
 	return nil
 }
 
+func (m *ResumeRecurringInvoiceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateRecurringInvoiceBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Frequency == "" {
 		violations = append(violations, "frequency is required")
@@ -93,10 +195,29 @@ func (m *UpdateRecurringInvoiceBody) Validate() error {
 }
 
 func (m *UpdateRecurringInvoiceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateRecurringInvoiceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

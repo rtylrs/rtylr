@@ -32,8 +32,13 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateCategory(v: Category): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateCategoryRequest {
-name?: string;
+name: string;
 description?: string;
 }
 
@@ -50,6 +55,12 @@ const out: Record<string, unknown> = {};
 if (v.name !== undefined) { out.name = v.name; }
 if (v.description !== undefined) { out.description = v.description; }
 return out;
+}
+
+export function validateCreateCategoryRequest(v: CreateCategoryRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
 }
 
 export interface CreateCategoryResponse {
@@ -72,8 +83,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateCategoryResponse(v: CreateCategoryResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateCategoryBody {
-name?: string;
+name: string;
 description?: string;
 }
 
@@ -92,8 +108,14 @@ if (v.description !== undefined) { out.description = v.description; }
 return out;
 }
 
+export function validateUpdateCategoryBody(v: UpdateCategoryBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface UpdateCategoryRequest {
-id?: string;
+id: string;
 body?: UpdateCategoryBody;
 }
 
@@ -110,6 +132,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateCategoryBody(v.body); }
 return out;
+}
+
+export function validateUpdateCategoryRequest(v: UpdateCategoryRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateCategoryBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateCategoryResponse {
@@ -129,8 +159,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateCategoryResponse(v: UpdateCategoryResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteCategoryRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteCategoryRequest(v: any): DeleteCategoryRequest {
@@ -144,6 +179,13 @@ export function encodeDeleteCategoryRequest(v: DeleteCategoryRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteCategoryRequest(v: DeleteCategoryRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteCategoryResponse {
@@ -163,6 +205,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteCategoryResponse(v: DeleteCategoryResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListCategoriesRequest {
 }
 
@@ -175,6 +222,11 @@ return {
 export function encodeListCategoriesRequest(v: ListCategoriesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListCategoriesRequest(v: ListCategoriesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListCategoriesResponse {
@@ -192,5 +244,11 @@ export function encodeListCategoriesResponse(v: ListCategoriesResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.categories !== undefined) { out.categories = (v.categories as any[]).map(encodeCategory); }
 return out;
+}
+
+export function validateListCategoriesResponse(v: ListCategoriesResponse): string[] {
+const violations: string[] = [];
+if (v.categories !== undefined && v.categories !== null) for (const item of v.categories) violations.push(...validateCategory(item).map((message) => "categories: " + message));
+return violations;
 }
 

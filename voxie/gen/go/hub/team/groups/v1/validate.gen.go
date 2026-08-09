@@ -20,10 +20,131 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *ResourcePermission) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GroupSummary) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *Group) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.ResourcePermissions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "resource_permissions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GroupMember) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GroupDetail) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.ResourcePermissions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "resource_permissions: "+err.Error())
+		}
+	}
+	for _, value := range m.Members {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "members: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListGroupsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListGroupsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Groups {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "groups: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateGroupRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
+	}
+	for _, value := range m.ResourcePermissions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "resource_permissions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateGroupResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Group != nil {
+		if err := m.Group.Validate(); err != nil {
+			violations = append(violations, "group: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -32,9 +153,28 @@ func (m *CreateGroupRequest) Validate() error {
 }
 
 func (m *GetGroupDetailRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetGroupDetailResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Group != nil {
+		if err := m.Group.Validate(); err != nil {
+			violations = append(violations, "group: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -43,12 +183,36 @@ func (m *GetGroupDetailRequest) Validate() error {
 }
 
 func (m *UpdateGroupRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
 	if m.Name == "" {
 		violations = append(violations, "name is required")
+	}
+	for _, value := range m.ResourcePermissions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "resource_permissions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateGroupResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Group != nil {
+		if err := m.Group.Validate(); err != nil {
+			violations = append(violations, "group: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -57,6 +221,9 @@ func (m *UpdateGroupRequest) Validate() error {
 }
 
 func (m *DeleteGroupRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -67,7 +234,21 @@ func (m *DeleteGroupRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteGroupResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *AddGroupMembersRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -81,7 +262,21 @@ func (m *AddGroupMembersRequest) Validate() error {
 	return nil
 }
 
+func (m *AddGroupMembersResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *RemoveGroupMemberRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -95,10 +290,40 @@ func (m *RemoveGroupMemberRequest) Validate() error {
 	return nil
 }
 
+func (m *RemoveGroupMemberResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetUserGroupsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.UserId <= 0 {
 		violations = append(violations, "user_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetUserGroupsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Groups {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "groups: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

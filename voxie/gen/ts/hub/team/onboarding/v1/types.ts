@@ -14,6 +14,11 @@ const out: Record<string, unknown> = {};
 return out;
 }
 
+export function validateMarkOnboardedRequest(v: MarkOnboardedRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface MarkOnboardedResponse {
 message?: string;
 }
@@ -29,5 +34,10 @@ export function encodeMarkOnboardedResponse(v: MarkOnboardedResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateMarkOnboardedResponse(v: MarkOnboardedResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

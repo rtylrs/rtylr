@@ -20,7 +20,48 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *OneOnOne) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListOneOnOnesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListOneOnOnesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.OneOnOnes {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "one_on_ones: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateOneOnOneRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ManagerId <= 0 {
 		violations = append(violations, "manager_id must be greater than 0")
@@ -31,6 +72,17 @@ func (m *CreateOneOnOneRequest) Validate() error {
 	if m.ScheduledAt == "" {
 		violations = append(violations, "scheduled_at is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateOneOnOneResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

@@ -22,6 +22,11 @@ func NewOrderDiscountServiceClient(baseURL string) *OrderDiscountServiceClient {
 }
 
 func (c *OrderDiscountServiceClient) DiscountOrder(ctx context.Context, req *DiscountOrderRequest) (*DiscountOrderResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/discounts/v1/orders/{order_id}/discount"
 	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
 	body, err := json.Marshal(req)

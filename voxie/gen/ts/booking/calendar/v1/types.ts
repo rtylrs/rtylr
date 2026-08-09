@@ -35,6 +35,11 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateCalendarAppointment(v: CalendarAppointment): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CalendarDay {
 date?: string;
 appointments?: (CalendarAppointment)[];
@@ -55,9 +60,15 @@ if (v.appointments !== undefined) { out.appointments = (v.appointments as any[])
 return out;
 }
 
+export function validateCalendarDay(v: CalendarDay): string[] {
+const violations: string[] = [];
+if (v.appointments !== undefined && v.appointments !== null) for (const item of v.appointments) violations.push(...validateCalendarAppointment(item).map((message) => "appointments: " + message));
+return violations;
+}
+
 export interface GetCalendarRequest {
-from?: string;
-to?: string;
+from: string;
+to: string;
 }
 
 export function decodeGetCalendarRequest(v: any): GetCalendarRequest {
@@ -75,6 +86,13 @@ if (v.to !== undefined) { out.to = v.to; }
 return out;
 }
 
+export function validateGetCalendarRequest(v: GetCalendarRequest): string[] {
+const violations: string[] = [];
+if (!(v.from !== undefined && v.from !== null) || v.from === "") violations.push("from is required");
+if (!(v.to !== undefined && v.to !== null) || v.to === "") violations.push("to is required");
+return violations;
+}
+
 export interface GetCalendarResponse {
 days?: (CalendarDay)[];
 }
@@ -90,5 +108,11 @@ export function encodeGetCalendarResponse(v: GetCalendarResponse): Record<string
 const out: Record<string, unknown> = {};
 if (v.days !== undefined) { out.days = (v.days as any[]).map(encodeCalendarDay); }
 return out;
+}
+
+export function validateGetCalendarResponse(v: GetCalendarResponse): string[] {
+const violations: string[] = [];
+if (v.days !== undefined && v.days !== null) for (const item of v.days) violations.push(...validateCalendarDay(item).map((message) => "days: " + message));
+return violations;
 }
 

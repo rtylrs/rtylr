@@ -2,8 +2,8 @@
 import * as pos_orders_v1 from "../../v1/types";
 
 export interface HoldOrderRequest {
-orderId?: string;
-reason?: string;
+orderId: string;
+reason: string;
 }
 
 export function decodeHoldOrderRequest(v: any): HoldOrderRequest {
@@ -19,6 +19,14 @@ const out: Record<string, unknown> = {};
 if (v.orderId !== undefined) { out.order_id = v.orderId; }
 if (v.reason !== undefined) { out.reason = v.reason; }
 return out;
+}
+
+export function validateHoldOrderRequest(v: HoldOrderRequest): string[] {
+const violations: string[] = [];
+if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
+if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
+return violations;
 }
 
 export interface HoldOrderResponse {
@@ -38,6 +46,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateHoldOrderResponse(v: HoldOrderResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListHeldOrdersRequest {
 }
 
@@ -50,6 +63,11 @@ return {
 export function encodeListHeldOrdersRequest(v: ListHeldOrdersRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListHeldOrdersRequest(v: ListHeldOrdersRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListHeldOrdersResponse {
@@ -67,5 +85,11 @@ export function encodeListHeldOrdersResponse(v: ListHeldOrdersResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.orders !== undefined) { out.orders = (v.orders as any[]).map(pos_orders_v1.encodeOrder); }
 return out;
+}
+
+export function validateListHeldOrdersResponse(v: ListHeldOrdersResponse): string[] {
+const violations: string[] = [];
+if (v.orders !== undefined && v.orders !== null) for (const item of v.orders) violations.push(...pos_orders_v1.validateOrder(item).map((message) => "orders: " + message));
+return violations;
 }
 

@@ -23,6 +23,11 @@ func NewLoyaltyServiceClient(baseURL string) *LoyaltyServiceClient {
 }
 
 func (c *LoyaltyServiceClient) GetLoyaltyConfig(ctx context.Context, req *GetLoyaltyConfigRequest) (*GetLoyaltyConfigResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/loyalty/v1/config"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *LoyaltyServiceClient) GetLoyaltyConfig(ctx context.Context, req *GetLoy
 }
 
 func (c *LoyaltyServiceClient) UpdateLoyaltyConfig(ctx context.Context, req *UpdateLoyaltyConfigRequest) (*UpdateLoyaltyConfigResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/loyalty/v1/config"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *LoyaltyServiceClient) UpdateLoyaltyConfig(ctx context.Context, req *Upd
 }
 
 func (c *LoyaltyServiceClient) ListLoyaltyTransactions(ctx context.Context, req *ListLoyaltyTransactionsRequest) (*ListLoyaltyTransactionsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/loyalty/v1/transactions"
 	query := url.Values{}
 	query.Set("customer_id", strconv.FormatInt(int64(req.CustomerId), 10))
@@ -115,6 +130,11 @@ func (c *LoyaltyServiceClient) ListLoyaltyTransactions(ctx context.Context, req 
 }
 
 func (c *LoyaltyServiceClient) EarnPoints(ctx context.Context, req *EarnPointsRequest) (*EarnPointsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/loyalty/v1/earn"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -146,6 +166,11 @@ func (c *LoyaltyServiceClient) EarnPoints(ctx context.Context, req *EarnPointsRe
 }
 
 func (c *LoyaltyServiceClient) RedeemPoints(ctx context.Context, req *RedeemPointsRequest) (*RedeemPointsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/loyalty/v1/redeem"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -177,6 +202,11 @@ func (c *LoyaltyServiceClient) RedeemPoints(ctx context.Context, req *RedeemPoin
 }
 
 func (c *LoyaltyServiceClient) GetLoyaltyBalance(ctx context.Context, req *GetLoyaltyBalanceRequest) (*GetLoyaltyBalanceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/loyalty/v1/balance"
 	query := url.Values{}
 	query.Set("customer_id", strconv.FormatInt(int64(req.CustomerId), 10))

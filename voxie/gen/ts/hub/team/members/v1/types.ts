@@ -36,6 +36,11 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateStaffUserPayload(v: StaffUserPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface StaffUserWithGroups {
 id?: string;
 email?: string;
@@ -74,6 +79,12 @@ if (v.groups !== undefined) { out.groups = (v.groups as any[]).map(hub_team_grou
 return out;
 }
 
+export function validateStaffUserWithGroups(v: StaffUserWithGroups): string[] {
+const violations: string[] = [];
+if (v.groups !== undefined && v.groups !== null) for (const item of v.groups) violations.push(...hub_team_groups_v1.validateGroupSummary(item).map((message) => "groups: " + message));
+return violations;
+}
+
 export interface ListTeamRequest {
 }
 
@@ -86,6 +97,11 @@ return {
 export function encodeListTeamRequest(v: ListTeamRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListTeamRequest(v: ListTeamRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListTeamResponse {
@@ -105,8 +121,14 @@ if (v.users !== undefined) { out.users = (v.users as any[]).map(encodeStaffUserP
 return out;
 }
 
+export function validateListTeamResponse(v: ListTeamResponse): string[] {
+const violations: string[] = [];
+if (v.users !== undefined && v.users !== null) for (const item of v.users) violations.push(...validateStaffUserPayload(item).map((message) => "users: " + message));
+return violations;
+}
+
 export interface GetMemberRequest {
-userId?: string;
+userId: string;
 }
 
 export function decodeGetMemberRequest(v: any): GetMemberRequest {
@@ -120,6 +142,13 @@ export function encodeGetMemberRequest(v: GetMemberRequest): Record<string, unkn
 const out: Record<string, unknown> = {};
 if (v.userId !== undefined) { out.user_id = v.userId; }
 return out;
+}
+
+export function validateGetMemberRequest(v: GetMemberRequest): string[] {
+const violations: string[] = [];
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+return violations;
 }
 
 export interface GetMemberResponse {
@@ -139,8 +168,14 @@ if (v.user !== undefined) { out.user = encodeStaffUserWithGroups(v.user); }
 return out;
 }
 
+export function validateGetMemberResponse(v: GetMemberResponse): string[] {
+const violations: string[] = [];
+if (v.user !== undefined && v.user !== null) violations.push(...validateStaffUserWithGroups(v.user).map((message) => "user: " + message));
+return violations;
+}
+
 export interface RemoveMemberRequest {
-userId?: string;
+userId: string;
 }
 
 export function decodeRemoveMemberRequest(v: any): RemoveMemberRequest {
@@ -154,6 +189,13 @@ export function encodeRemoveMemberRequest(v: RemoveMemberRequest): Record<string
 const out: Record<string, unknown> = {};
 if (v.userId !== undefined) { out.user_id = v.userId; }
 return out;
+}
+
+export function validateRemoveMemberRequest(v: RemoveMemberRequest): string[] {
+const violations: string[] = [];
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+return violations;
 }
 
 export interface RemoveMemberResponse {
@@ -171,5 +213,10 @@ export function encodeRemoveMemberResponse(v: RemoveMemberResponse): Record<stri
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateRemoveMemberResponse(v: RemoveMemberResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

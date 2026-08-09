@@ -38,6 +38,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateSettings(v: Settings): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetSettingsRequest {
 }
 
@@ -50,6 +55,11 @@ return {
 export function encodeGetSettingsRequest(v: GetSettingsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetSettingsRequest(v: GetSettingsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetSettingsResponse {
@@ -69,9 +79,15 @@ if (v.settings !== undefined) { out.settings = encodeSettings(v.settings); }
 return out;
 }
 
+export function validateGetSettingsResponse(v: GetSettingsResponse): string[] {
+const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null) violations.push(...validateSettings(v.settings).map((message) => "settings: " + message));
+return violations;
+}
+
 export interface UpdateSettingsRequest {
 autoAssign?: boolean;
-slaHours?: number;
+slaHours: number;
 businessHours?: string;
 notificationEmail?: string;
 }
@@ -95,6 +111,14 @@ if (v.notificationEmail !== undefined) { out.notification_email = v.notification
 return out;
 }
 
+export function validateUpdateSettingsRequest(v: UpdateSettingsRequest): string[] {
+const violations: string[] = [];
+if (!(v.slaHours !== undefined && v.slaHours !== null)) violations.push("sla_hours is required");
+if (v.slaHours !== undefined && v.slaHours !== null && !(Number(v.slaHours) > 0)) violations.push("sla_hours violates @gt");
+if (v.slaHours !== undefined && v.slaHours !== null && !(Number(v.slaHours) <= 1000)) violations.push("sla_hours violates @lte");
+return violations;
+}
+
 export interface UpdateSettingsResponse {
 message?: string;
 }
@@ -110,5 +134,10 @@ export function encodeUpdateSettingsResponse(v: UpdateSettingsResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateSettingsResponse(v: UpdateSettingsResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

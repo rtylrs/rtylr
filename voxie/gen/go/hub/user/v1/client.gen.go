@@ -22,6 +22,11 @@ func NewUserServiceClient(baseURL string) *UserServiceClient {
 }
 
 func (c *UserServiceClient) GetMe(ctx context.Context, req *GetMeRequest) (*GetMeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/user/v1/users/me"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *UserServiceClient) GetMe(ctx context.Context, req *GetMeRequest) (*GetM
 }
 
 func (c *UserServiceClient) UpdateProfile(ctx context.Context, req *UpdateProfileRequest) (*UpdateProfileResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/user/v1/users/me"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -83,6 +93,11 @@ func (c *UserServiceClient) UpdateProfile(ctx context.Context, req *UpdateProfil
 }
 
 func (c *UserServiceClient) ChangePassword(ctx context.Context, req *ChangePasswordRequest) (*ChangePasswordResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/user/v1/users/password"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -114,6 +129,11 @@ func (c *UserServiceClient) ChangePassword(ctx context.Context, req *ChangePassw
 }
 
 func (c *UserServiceClient) SwitchBusiness(ctx context.Context, req *SwitchBusinessRequest) (*SwitchBusinessResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/user/v1/users/switch-business"
 	body, err := json.Marshal(req)
 	if err != nil {

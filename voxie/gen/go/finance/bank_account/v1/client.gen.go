@@ -24,6 +24,11 @@ func NewBankAccountServiceClient(baseURL string) *BankAccountServiceClient {
 }
 
 func (c *BankAccountServiceClient) ListBankAccounts(ctx context.Context, req *ListBankAccountsRequest) (*ListBankAccountsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/bank-account/v1/bank-accounts"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -58,6 +63,11 @@ func (c *BankAccountServiceClient) ListBankAccounts(ctx context.Context, req *Li
 }
 
 func (c *BankAccountServiceClient) CreateBankAccount(ctx context.Context, req *CreateBankAccountRequest) (*CreateBankAccountResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/bank-account/v1/bank-accounts"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -89,6 +99,11 @@ func (c *BankAccountServiceClient) CreateBankAccount(ctx context.Context, req *C
 }
 
 func (c *BankAccountServiceClient) GetBankAccount(ctx context.Context, req *GetBankAccountRequest) (*GetBankAccountResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/bank-account/v1/bank-accounts/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

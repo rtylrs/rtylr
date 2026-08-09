@@ -35,6 +35,11 @@ if (v.loyaltyTier !== undefined) { out.loyalty_tier = v.loyaltyTier; }
 return out;
 }
 
+export function validateTopCustomer(v: TopCustomer): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetDashboardRequest {
 }
 
@@ -47,6 +52,11 @@ return {
 export function encodeGetDashboardRequest(v: GetDashboardRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetDashboardRequest(v: GetDashboardRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetDashboardResponse {
@@ -73,5 +83,11 @@ if (v.newThisMonth !== undefined) { out.new_this_month = v.newThisMonth; }
 if (v.activeLoyaltyMembers !== undefined) { out.active_loyalty_members = v.activeLoyaltyMembers; }
 if (v.topCustomers !== undefined) { out.top_customers = (v.topCustomers as any[]).map(encodeTopCustomer); }
 return out;
+}
+
+export function validateGetDashboardResponse(v: GetDashboardResponse): string[] {
+const violations: string[] = [];
+if (v.topCustomers !== undefined && v.topCustomers !== null) for (const item of v.topCustomers) violations.push(...validateTopCustomer(item).map((message) => "top_customers: " + message));
+return violations;
 }
 

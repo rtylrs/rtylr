@@ -33,6 +33,12 @@ if (v.growth !== undefined) { out.growth = (v.growth as any[]).map(encodeCustome
 return out;
 }
 
+export function validateCustomerAnalytics(v: CustomerAnalytics): string[] {
+const violations: string[] = [];
+if (v.growth !== undefined && v.growth !== null) for (const item of v.growth) violations.push(...validateCustomerGrowthPoint(item).map((message) => "growth: " + message));
+return violations;
+}
+
 export interface CustomerGrowthPoint {
 date?: string;
 newCustomers?: number;
@@ -54,6 +60,11 @@ if (v.date !== undefined) { out.date = v.date; }
 if (v.newCustomers !== undefined) { out.new_customers = v.newCustomers; }
 if (v.total !== undefined) { out.total = v.total; }
 return out;
+}
+
+export function validateCustomerGrowthPoint(v: CustomerGrowthPoint): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface TopCustomerEntry {
@@ -85,6 +96,11 @@ if (v.lastOrderAt !== undefined) { out.last_order_at = v.lastOrderAt; }
 return out;
 }
 
+export function validateTopCustomerEntry(v: TopCustomerEntry): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ChurnAnalysis {
 churnRate?: number;
 churnedCount?: number;
@@ -106,6 +122,12 @@ if (v.churnRate !== undefined) { out.churn_rate = v.churnRate; }
 if (v.churnedCount !== undefined) { out.churned_count = v.churnedCount; }
 if (v.reasons !== undefined) { out.reasons = (v.reasons as any[]).map(encodeChurnReason); }
 return out;
+}
+
+export function validateChurnAnalysis(v: ChurnAnalysis): string[] {
+const violations: string[] = [];
+if (v.reasons !== undefined && v.reasons !== null) for (const item of v.reasons) violations.push(...validateChurnReason(item).map((message) => "reasons: " + message));
+return violations;
 }
 
 export interface ChurnReason {
@@ -131,6 +153,11 @@ if (v.percentage !== undefined) { out.percentage = v.percentage; }
 return out;
 }
 
+export function validateChurnReason(v: ChurnReason): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface LTVAnalysis {
 average?: number;
 median?: number;
@@ -152,6 +179,12 @@ if (v.average !== undefined) { out.average = v.average; }
 if (v.median !== undefined) { out.median = v.median; }
 if (v.segments !== undefined) { out.segments = (v.segments as any[]).map(encodeLTVSegment); }
 return out;
+}
+
+export function validateLTVAnalysis(v: LTVAnalysis): string[] {
+const violations: string[] = [];
+if (v.segments !== undefined && v.segments !== null) for (const item of v.segments) violations.push(...validateLTVSegment(item).map((message) => "segments: " + message));
+return violations;
 }
 
 export interface LTVSegment {
@@ -177,6 +210,11 @@ if (v.customerCount !== undefined) { out.customer_count = v.customerCount; }
 return out;
 }
 
+export function validateLTVSegment(v: LTVSegment): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetCustomerAnalyticsRequest {
 period?: string;
 }
@@ -192,6 +230,11 @@ export function encodeGetCustomerAnalyticsRequest(v: GetCustomerAnalyticsRequest
 const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 return out;
+}
+
+export function validateGetCustomerAnalyticsRequest(v: GetCustomerAnalyticsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetCustomerAnalyticsResponse {
@@ -211,6 +254,12 @@ if (v.analytics !== undefined) { out.analytics = encodeCustomerAnalytics(v.analy
 return out;
 }
 
+export function validateGetCustomerAnalyticsResponse(v: GetCustomerAnalyticsResponse): string[] {
+const violations: string[] = [];
+if (v.analytics !== undefined && v.analytics !== null) violations.push(...validateCustomerAnalytics(v.analytics).map((message) => "analytics: " + message));
+return violations;
+}
+
 export interface GetChurnAnalysisRequest {
 period?: string;
 }
@@ -226,6 +275,11 @@ export function encodeGetChurnAnalysisRequest(v: GetChurnAnalysisRequest): Recor
 const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 return out;
+}
+
+export function validateGetChurnAnalysisRequest(v: GetChurnAnalysisRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetChurnAnalysisResponse {
@@ -245,6 +299,12 @@ if (v.analysis !== undefined) { out.analysis = encodeChurnAnalysis(v.analysis); 
 return out;
 }
 
+export function validateGetChurnAnalysisResponse(v: GetChurnAnalysisResponse): string[] {
+const violations: string[] = [];
+if (v.analysis !== undefined && v.analysis !== null) violations.push(...validateChurnAnalysis(v.analysis).map((message) => "analysis: " + message));
+return violations;
+}
+
 export interface GetLTVAnalysisRequest {
 }
 
@@ -257,6 +317,11 @@ return {
 export function encodeGetLTVAnalysisRequest(v: GetLTVAnalysisRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetLTVAnalysisRequest(v: GetLTVAnalysisRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetLTVAnalysisResponse {
@@ -274,6 +339,12 @@ export function encodeGetLTVAnalysisResponse(v: GetLTVAnalysisResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.analysis !== undefined) { out.analysis = encodeLTVAnalysis(v.analysis); }
 return out;
+}
+
+export function validateGetLTVAnalysisResponse(v: GetLTVAnalysisResponse): string[] {
+const violations: string[] = [];
+if (v.analysis !== undefined && v.analysis !== null) violations.push(...validateLTVAnalysis(v.analysis).map((message) => "analysis: " + message));
+return violations;
 }
 
 export interface GetTopCustomersRequest {
@@ -305,6 +376,11 @@ if (v.period !== undefined) { out.period = v.period; }
 return out;
 }
 
+export function validateGetTopCustomersRequest(v: GetTopCustomersRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetTopCustomersResponse {
 customers?: (TopCustomerEntry)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -323,5 +399,12 @@ const out: Record<string, unknown> = {};
 if (v.customers !== undefined) { out.customers = (v.customers as any[]).map(encodeTopCustomerEntry); }
 if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePaginationResponse(v.pagination); }
 return out;
+}
+
+export function validateGetTopCustomersResponse(v: GetTopCustomersResponse): string[] {
+const violations: string[] = [];
+if (v.customers !== undefined && v.customers !== null) for (const item of v.customers) violations.push(...validateTopCustomerEntry(item).map((message) => "customers: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
 }
 

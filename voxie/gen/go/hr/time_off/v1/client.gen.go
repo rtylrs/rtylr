@@ -22,6 +22,11 @@ func NewTimeOffServiceClient(baseURL string) *TimeOffServiceClient {
 }
 
 func (c *TimeOffServiceClient) ListTimeOff(ctx context.Context, req *ListTimeOffRequest) (*ListTimeOffResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/time-off/v1/requests"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *TimeOffServiceClient) ListTimeOff(ctx context.Context, req *ListTimeOff
 }
 
 func (c *TimeOffServiceClient) SubmitTimeOff(ctx context.Context, req *SubmitTimeOffRequest) (*SubmitTimeOffResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/time-off/v1/requests"
 	body, err := json.Marshal(req)
 	if err != nil {

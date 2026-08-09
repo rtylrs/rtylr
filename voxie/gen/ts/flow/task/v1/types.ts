@@ -105,6 +105,11 @@ if (v.archived !== undefined) { out.archived = v.archived; }
 return out;
 }
 
+export function validateTask(v: Task): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface TaskComment {
 id?: string;
 taskId?: string;
@@ -138,6 +143,11 @@ if (v.isEdited !== undefined) { out.is_edited = v.isEdited; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
+}
+
+export function validateTaskComment(v: TaskComment): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface TaskActivity {
@@ -175,6 +185,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateTaskActivity(v: TaskActivity): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface TaskPayloadCompact {
 id?: string;
 title?: string;
@@ -205,6 +220,11 @@ if (v.priority !== undefined) { out.priority = v.priority; }
 if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
+}
+
+export function validateTaskPayloadCompact(v: TaskPayloadCompact): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface Attachment {
@@ -242,6 +262,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateAttachment(v: Attachment): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface TimeLog {
 id?: string;
 taskId?: string;
@@ -275,6 +300,11 @@ if (v.description !== undefined) { out.description = v.description; }
 if (v.loggedAt !== undefined) { out.logged_at = v.loggedAt; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
+}
+
+export function validateTimeLog(v: TimeLog): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListTasksRequest {
@@ -318,6 +348,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListTasksRequest(v: ListTasksRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListTasksResponse {
 tasks?: (Task)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -336,6 +371,13 @@ const out: Record<string, unknown> = {};
 if (v.tasks !== undefined) { out.tasks = (v.tasks as any[]).map(encodeTask); }
 if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePaginationResponse(v.pagination); }
 return out;
+}
+
+export function validateListTasksResponse(v: ListTasksResponse): string[] {
+const violations: string[] = [];
+if (v.tasks !== undefined && v.tasks !== null) for (const item of v.tasks) violations.push(...validateTask(item).map((message) => "tasks: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
 }
 
 export interface GetMyTasksRequest {
@@ -364,6 +406,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateGetMyTasksRequest(v: GetMyTasksRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetMyTasksResponse {
 tasks?: (Task)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -384,6 +431,13 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateGetMyTasksResponse(v: GetMyTasksResponse): string[] {
+const violations: string[] = [];
+if (v.tasks !== undefined && v.tasks !== null) for (const item of v.tasks) violations.push(...validateTask(item).map((message) => "tasks: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface GetMyTasksProjectRequest {
 }
 
@@ -396,6 +450,11 @@ return {
 export function encodeGetMyTasksProjectRequest(v: GetMyTasksProjectRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetMyTasksProjectRequest(v: GetMyTasksProjectRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetMyTasksProjectResponse {
@@ -418,9 +477,14 @@ if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
 return out;
 }
 
+export function validateGetMyTasksProjectResponse(v: GetMyTasksProjectResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface SearchTasksRequest {
 q?: string;
-workspaceId?: string;
+workspaceId: string;
 page?: number;
 limit?: number;
 sortBy?: string;
@@ -450,6 +514,12 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateSearchTasksRequest(v: SearchTasksRequest): string[] {
+const violations: string[] = [];
+if (!(v.workspaceId !== undefined && v.workspaceId !== null) || v.workspaceId === "") violations.push("workspace_id is required");
+return violations;
+}
+
 export interface SearchTasksResponse {
 tasks?: (Task)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -470,16 +540,23 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateSearchTasksResponse(v: SearchTasksResponse): string[] {
+const violations: string[] = [];
+if (v.tasks !== undefined && v.tasks !== null) for (const item of v.tasks) violations.push(...validateTask(item).map((message) => "tasks: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface CreateTaskRequest {
-projectId?: string;
-workspaceId?: string;
+projectId: string;
+workspaceId: string;
 parentTaskId?: string;
-title?: string;
-description?: string;
-priority?: string;
+title: string;
+description: string;
+priority: string;
 assigneeId?: string;
-dueDate?: string;
-startDate?: string;
+dueDate: string;
+startDate: string;
 estimatedHours?: number;
 labels?: (string)[];
 }
@@ -517,6 +594,21 @@ if (v.labels !== undefined) { out.labels = v.labels; }
 return out;
 }
 
+export function validateCreateTaskRequest(v: CreateTaskRequest): string[] {
+const violations: string[] = [];
+if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
+if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.priority !== undefined && v.priority !== null) || v.priority === "") violations.push("priority is required");
+if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
+if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (v.labels !== undefined && v.labels !== null && v.labels.length < 1) violations.push("labels must contain at least 1 items");
+return violations;
+}
+
 export interface CreateTaskResponse {
 task?: Task;
 }
@@ -534,8 +626,14 @@ if (v.task !== undefined) { out.task = encodeTask(v.task); }
 return out;
 }
 
+export function validateCreateTaskResponse(v: CreateTaskResponse): string[] {
+const violations: string[] = [];
+if (v.task !== undefined && v.task !== null) violations.push(...validateTask(v.task).map((message) => "task: " + message));
+return violations;
+}
+
 export interface GetTaskDetailRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetTaskDetailRequest(v: any): GetTaskDetailRequest {
@@ -549,6 +647,13 @@ export function encodeGetTaskDetailRequest(v: GetTaskDetailRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetTaskDetailRequest(v: GetTaskDetailRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetTaskDetailResponse {
@@ -577,14 +682,23 @@ if (v.activity !== undefined) { out.activity = (v.activity as any[]).map(encodeT
 return out;
 }
 
+export function validateGetTaskDetailResponse(v: GetTaskDetailResponse): string[] {
+const violations: string[] = [];
+if (v.task !== undefined && v.task !== null) violations.push(...validateTask(v.task).map((message) => "task: " + message));
+if (v.subtasks !== undefined && v.subtasks !== null) for (const item of v.subtasks) violations.push(...validateTask(item).map((message) => "subtasks: " + message));
+if (v.comments !== undefined && v.comments !== null) for (const item of v.comments) violations.push(...validateTaskComment(item).map((message) => "comments: " + message));
+if (v.activity !== undefined && v.activity !== null) for (const item of v.activity) violations.push(...validateTaskActivity(item).map((message) => "activity: " + message));
+return violations;
+}
+
 export interface UpdateTaskBody {
-title?: string;
-description?: string;
-status?: string;
-priority?: string;
+title: string;
+description: string;
+status: string;
+priority: string;
 assigneeId?: string;
-dueDate?: string;
-startDate?: string;
+dueDate: string;
+startDate: string;
 labels?: (string)[];
 archived?: boolean;
 }
@@ -618,8 +732,20 @@ if (v.archived !== undefined) { out.archived = v.archived; }
 return out;
 }
 
+export function validateUpdateTaskBody(v: UpdateTaskBody): string[] {
+const violations: string[] = [];
+if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+if (!(v.priority !== undefined && v.priority !== null) || v.priority === "") violations.push("priority is required");
+if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
+if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (v.labels !== undefined && v.labels !== null && v.labels.length < 1) violations.push("labels must contain at least 1 items");
+return violations;
+}
+
 export interface UpdateTaskRequest {
-id?: string;
+id: string;
 body?: UpdateTaskBody;
 }
 
@@ -636,6 +762,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateTaskBody(v.body); }
 return out;
+}
+
+export function validateUpdateTaskRequest(v: UpdateTaskRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTaskBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateTaskResponse {
@@ -655,8 +789,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateTaskResponse(v: UpdateTaskResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateTaskStatusBody {
-status?: string;
+status: string;
 }
 
 export function decodeUpdateTaskStatusBody(v: any): UpdateTaskStatusBody {
@@ -672,8 +811,14 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdateTaskStatusBody(v: UpdateTaskStatusBody): string[] {
+const violations: string[] = [];
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+return violations;
+}
+
 export interface UpdateTaskStatusRequest {
-id?: string;
+id: string;
 body?: UpdateTaskStatusBody;
 }
 
@@ -690,6 +835,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateTaskStatusBody(v.body); }
 return out;
+}
+
+export function validateUpdateTaskStatusRequest(v: UpdateTaskStatusRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTaskStatusBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateTaskStatusResponse {
@@ -709,8 +862,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateTaskStatusResponse(v: UpdateTaskStatusResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteTaskRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteTaskRequest(v: any): DeleteTaskRequest {
@@ -724,6 +882,13 @@ export function encodeDeleteTaskRequest(v: DeleteTaskRequest): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteTaskRequest(v: DeleteTaskRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteTaskResponse {
@@ -743,16 +908,21 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteTaskResponse(v: DeleteTaskResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateSubtaskRequest {
-parentTaskId?: string;
-projectId?: string;
-workspaceId?: string;
-title?: string;
-description?: string;
-priority?: string;
+parentTaskId: string;
+projectId: string;
+workspaceId: string;
+title: string;
+description: string;
+priority: string;
 assigneeId?: string;
-dueDate?: string;
-startDate?: string;
+dueDate: string;
+startDate: string;
 estimatedHours?: number;
 }
 
@@ -787,6 +957,22 @@ if (v.estimatedHours !== undefined) { out.estimated_hours = v.estimatedHours; }
 return out;
 }
 
+export function validateCreateSubtaskRequest(v: CreateSubtaskRequest): string[] {
+const violations: string[] = [];
+if (!(v.parentTaskId !== undefined && v.parentTaskId !== null)) violations.push("parent_task_id is required");
+if (v.parentTaskId !== undefined && v.parentTaskId !== null && !(Number(v.parentTaskId) > 0)) violations.push("parent_task_id violates @gt");
+if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
+if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.priority !== undefined && v.priority !== null) || v.priority === "") violations.push("priority is required");
+if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
+if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+return violations;
+}
+
 export interface CreateSubtaskResponse {
 taskId?: string;
 message?: string;
@@ -807,8 +993,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateSubtaskResponse(v: CreateSubtaskResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetSubtasksRequest {
-taskId?: string;
+taskId: string;
 page?: number;
 limit?: number;
 sortBy?: string;
@@ -836,6 +1027,13 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateGetSubtasksRequest(v: GetSubtasksRequest): string[] {
+const violations: string[] = [];
+if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
+if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+return violations;
+}
+
 export interface GetSubtasksResponse {
 subtasks?: (TaskPayloadCompact)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -856,9 +1054,16 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateGetSubtasksResponse(v: GetSubtasksResponse): string[] {
+const violations: string[] = [];
+if (v.subtasks !== undefined && v.subtasks !== null) for (const item of v.subtasks) violations.push(...validateTaskPayloadCompact(item).map((message) => "subtasks: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface AddCommentRequest {
-taskId?: string;
-content?: string;
+taskId: string;
+content: string;
 }
 
 export function decodeAddCommentRequest(v: any): AddCommentRequest {
@@ -874,6 +1079,14 @@ const out: Record<string, unknown> = {};
 if (v.taskId !== undefined) { out.task_id = v.taskId; }
 if (v.content !== undefined) { out.content = v.content; }
 return out;
+}
+
+export function validateAddCommentRequest(v: AddCommentRequest): string[] {
+const violations: string[] = [];
+if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
+if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+if (!(v.content !== undefined && v.content !== null) || v.content === "") violations.push("content is required");
+return violations;
 }
 
 export interface AddCommentResponse {
@@ -893,8 +1106,14 @@ if (v.comment !== undefined) { out.comment = encodeTaskComment(v.comment); }
 return out;
 }
 
+export function validateAddCommentResponse(v: AddCommentResponse): string[] {
+const violations: string[] = [];
+if (v.comment !== undefined && v.comment !== null) violations.push(...validateTaskComment(v.comment).map((message) => "comment: " + message));
+return violations;
+}
+
 export interface DeleteCommentRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteCommentRequest(v: any): DeleteCommentRequest {
@@ -908,6 +1127,13 @@ export function encodeDeleteCommentRequest(v: DeleteCommentRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteCommentRequest(v: DeleteCommentRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteCommentResponse {
@@ -927,8 +1153,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteCommentResponse(v: DeleteCommentResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetTaskActivityRequest {
-taskId?: string;
+taskId: string;
 }
 
 export function decodeGetTaskActivityRequest(v: any): GetTaskActivityRequest {
@@ -942,6 +1173,13 @@ export function encodeGetTaskActivityRequest(v: GetTaskActivityRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.taskId !== undefined) { out.task_id = v.taskId; }
 return out;
+}
+
+export function validateGetTaskActivityRequest(v: GetTaskActivityRequest): string[] {
+const violations: string[] = [];
+if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
+if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+return violations;
 }
 
 export interface GetTaskActivityResponse {
@@ -961,11 +1199,17 @@ if (v.activity !== undefined) { out.activity = (v.activity as any[]).map(encodeT
 return out;
 }
 
+export function validateGetTaskActivityResponse(v: GetTaskActivityResponse): string[] {
+const violations: string[] = [];
+if (v.activity !== undefined && v.activity !== null) for (const item of v.activity) violations.push(...validateTaskActivity(item).map((message) => "activity: " + message));
+return violations;
+}
+
 export interface CreateAttachmentRequest {
-taskId?: string;
-name?: string;
-url?: string;
-size?: string;
+taskId: string;
+name: string;
+url: string;
+size: string;
 }
 
 export function decodeCreateAttachmentRequest(v: any): CreateAttachmentRequest {
@@ -985,6 +1229,17 @@ if (v.name !== undefined) { out.name = v.name; }
 if (v.url !== undefined) { out.url = v.url; }
 if (v.size !== undefined) { out.size = v.size; }
 return out;
+}
+
+export function validateCreateAttachmentRequest(v: CreateAttachmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
+if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.url !== undefined && v.url !== null) || v.url === "") violations.push("url is required");
+if (!(v.size !== undefined && v.size !== null)) violations.push("size is required");
+if (v.size !== undefined && v.size !== null && !(Number(v.size) > 0)) violations.push("size violates @gt");
+return violations;
 }
 
 export interface CreateAttachmentResponse {
@@ -1007,8 +1262,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateAttachmentResponse(v: CreateAttachmentResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetAttachmentsRequest {
-taskId?: string;
+taskId: string;
 }
 
 export function decodeGetAttachmentsRequest(v: any): GetAttachmentsRequest {
@@ -1022,6 +1282,13 @@ export function encodeGetAttachmentsRequest(v: GetAttachmentsRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.taskId !== undefined) { out.task_id = v.taskId; }
 return out;
+}
+
+export function validateGetAttachmentsRequest(v: GetAttachmentsRequest): string[] {
+const violations: string[] = [];
+if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
+if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+return violations;
 }
 
 export interface GetAttachmentsResponse {
@@ -1041,8 +1308,14 @@ if (v.attachments !== undefined) { out.attachments = (v.attachments as any[]).ma
 return out;
 }
 
+export function validateGetAttachmentsResponse(v: GetAttachmentsResponse): string[] {
+const violations: string[] = [];
+if (v.attachments !== undefined && v.attachments !== null) for (const item of v.attachments) violations.push(...validateAttachment(item).map((message) => "attachments: " + message));
+return violations;
+}
+
 export interface DeleteAttachmentRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteAttachmentRequest(v: any): DeleteAttachmentRequest {
@@ -1056,6 +1329,13 @@ export function encodeDeleteAttachmentRequest(v: DeleteAttachmentRequest): Recor
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteAttachmentRequest(v: DeleteAttachmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteAttachmentResponse {
@@ -1075,10 +1355,15 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteAttachmentResponse(v: DeleteAttachmentResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateTimeLogRequest {
-durationMinutes?: string;
-description?: string;
-taskId?: string;
+durationMinutes: string;
+description: string;
+taskId: string;
 }
 
 export function decodeCreateTimeLogRequest(v: any): CreateTimeLogRequest {
@@ -1096,6 +1381,16 @@ if (v.durationMinutes !== undefined) { out.duration_minutes = v.durationMinutes;
 if (v.description !== undefined) { out.description = v.description; }
 if (v.taskId !== undefined) { out.task_id = v.taskId; }
 return out;
+}
+
+export function validateCreateTimeLogRequest(v: CreateTimeLogRequest): string[] {
+const violations: string[] = [];
+if (!(v.durationMinutes !== undefined && v.durationMinutes !== null)) violations.push("duration_minutes is required");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(Number(v.durationMinutes) > 0)) violations.push("duration_minutes violates @gt");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
+if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+return violations;
 }
 
 export interface CreateTimeLogResponse {
@@ -1118,8 +1413,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateTimeLogResponse(v: CreateTimeLogResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetTimeLogsRequest {
-taskId?: string;
+taskId: string;
 }
 
 export function decodeGetTimeLogsRequest(v: any): GetTimeLogsRequest {
@@ -1133,6 +1433,13 @@ export function encodeGetTimeLogsRequest(v: GetTimeLogsRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.taskId !== undefined) { out.task_id = v.taskId; }
 return out;
+}
+
+export function validateGetTimeLogsRequest(v: GetTimeLogsRequest): string[] {
+const violations: string[] = [];
+if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
+if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+return violations;
 }
 
 export interface GetTimeLogsResponse {
@@ -1152,8 +1459,14 @@ if (v.timeLogs !== undefined) { out.time_logs = (v.timeLogs as any[]).map(encode
 return out;
 }
 
+export function validateGetTimeLogsResponse(v: GetTimeLogsResponse): string[] {
+const violations: string[] = [];
+if (v.timeLogs !== undefined && v.timeLogs !== null) for (const item of v.timeLogs) violations.push(...validateTimeLog(item).map((message) => "time_logs: " + message));
+return violations;
+}
+
 export interface DeleteTimeLogRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteTimeLogRequest(v: any): DeleteTimeLogRequest {
@@ -1167,6 +1480,13 @@ export function encodeDeleteTimeLogRequest(v: DeleteTimeLogRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteTimeLogRequest(v: DeleteTimeLogRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteTimeLogResponse {
@@ -1184,5 +1504,10 @@ export function encodeDeleteTimeLogResponse(v: DeleteTimeLogResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateDeleteTimeLogResponse(v: DeleteTimeLogResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

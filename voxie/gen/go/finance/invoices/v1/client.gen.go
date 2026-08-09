@@ -24,6 +24,11 @@ func NewInvoicesServiceClient(baseURL string) *InvoicesServiceClient {
 }
 
 func (c *InvoicesServiceClient) ListInvoices(ctx context.Context, req *ListInvoicesRequest) (*ListInvoicesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/invoices/v1/invoices"
 	query := url.Values{}
 	query.Set("status", req.Status)
@@ -60,6 +65,11 @@ func (c *InvoicesServiceClient) ListInvoices(ctx context.Context, req *ListInvoi
 }
 
 func (c *InvoicesServiceClient) CreateInvoice(ctx context.Context, req *CreateInvoiceRequest) (*CreateInvoiceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/invoices/v1/invoices"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -91,6 +101,11 @@ func (c *InvoicesServiceClient) CreateInvoice(ctx context.Context, req *CreateIn
 }
 
 func (c *InvoicesServiceClient) GetInvoice(ctx context.Context, req *GetInvoiceRequest) (*GetInvoiceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/invoices/v1/invoices/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -122,9 +137,14 @@ func (c *InvoicesServiceClient) GetInvoice(ctx context.Context, req *GetInvoiceR
 }
 
 func (c *InvoicesServiceClient) UpdateInvoice(ctx context.Context, req *UpdateInvoiceRequest) (*UpdateInvoiceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/invoices/v1/invoices/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -154,9 +174,14 @@ func (c *InvoicesServiceClient) UpdateInvoice(ctx context.Context, req *UpdateIn
 }
 
 func (c *InvoicesServiceClient) UpdateInvoiceStatus(ctx context.Context, req *UpdateInvoiceStatusRequest) (*UpdateInvoiceStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/invoices/v1/invoices/{id}/status"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -186,6 +211,11 @@ func (c *InvoicesServiceClient) UpdateInvoiceStatus(ctx context.Context, req *Up
 }
 
 func (c *InvoicesServiceClient) DeleteInvoice(ctx context.Context, req *DeleteInvoiceRequest) (*DeleteInvoiceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/invoices/v1/invoices/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -217,6 +247,11 @@ func (c *InvoicesServiceClient) DeleteInvoice(ctx context.Context, req *DeleteIn
 }
 
 func (c *InvoicesServiceClient) SendInvoice(ctx context.Context, req *SendInvoiceRequest) (*SendInvoiceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/invoices/v1/invoices/{id}/send"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

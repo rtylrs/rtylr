@@ -32,6 +32,11 @@ if (v.overtimeHours !== undefined) { out.overtime_hours = v.overtimeHours; }
 return out;
 }
 
+export function validateTimesheetEntry(v: TimesheetEntry): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListTimesheetsRequest {
 weekStart?: string;
 }
@@ -49,6 +54,11 @@ if (v.weekStart !== undefined) { out.week_start = v.weekStart; }
 return out;
 }
 
+export function validateListTimesheetsRequest(v: ListTimesheetsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListTimesheetsResponse {
 timesheets?: (TimesheetEntry)[];
 }
@@ -64,5 +74,11 @@ export function encodeListTimesheetsResponse(v: ListTimesheetsResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.timesheets !== undefined) { out.timesheets = (v.timesheets as any[]).map(encodeTimesheetEntry); }
 return out;
+}
+
+export function validateListTimesheetsResponse(v: ListTimesheetsResponse): string[] {
+const violations: string[] = [];
+if (v.timesheets !== undefined && v.timesheets !== null) for (const item of v.timesheets) violations.push(...validateTimesheetEntry(item).map((message) => "timesheets: " + message));
+return violations;
 }
 

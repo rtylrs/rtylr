@@ -116,6 +116,11 @@ if (v.imageUrl !== undefined) { out.image_url = v.imageUrl; }
 return out;
 }
 
+export function validateProduct(v: Product): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface FullProduct {
 id?: string;
 ownerId?: string;
@@ -232,6 +237,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateFullProduct(v: FullProduct): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ProductAttribute {
 id?: string;
 name?: string;
@@ -256,6 +266,11 @@ if (v.name !== undefined) { out.name = v.name; }
 if (v.value !== undefined) { out.value = v.value; }
 if (v.position !== undefined) { out.position = v.position; }
 return out;
+}
+
+export function validateProductAttribute(v: ProductAttribute): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface DashboardLowStockItem {
@@ -290,6 +305,11 @@ if (v.warehouseName !== undefined) { out.warehouse_name = v.warehouseName; }
 return out;
 }
 
+export function validateDashboardLowStockItem(v: DashboardLowStockItem): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DashboardRecentOrder {
 id?: string;
 poNumber?: string;
@@ -322,6 +342,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateDashboardRecentOrder(v: DashboardRecentOrder): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DashboardTopCategory {
 name?: string;
 productCount?: number;
@@ -340,6 +365,11 @@ const out: Record<string, unknown> = {};
 if (v.name !== undefined) { out.name = v.name; }
 if (v.productCount !== undefined) { out.product_count = v.productCount; }
 return out;
+}
+
+export function validateDashboardTopCategory(v: DashboardTopCategory): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ExpiringItem {
@@ -375,6 +405,11 @@ if (v.expiryDate !== undefined) { out.expiry_date = v.expiryDate; }
 if (v.quantity !== undefined) { out.quantity = v.quantity; }
 if (v.warehouseName !== undefined) { out.warehouse_name = v.warehouseName; }
 return out;
+}
+
+export function validateExpiringItem(v: ExpiringItem): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ReorderSuggestion {
@@ -418,6 +453,11 @@ if (v.confidence !== undefined) { out.confidence = v.confidence; }
 return out;
 }
 
+export function validateReorderSuggestion(v: ReorderSuggestion): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListProductsRequest {
 search?: string;
 categoryId?: string;
@@ -442,6 +482,11 @@ if (v.categoryId !== undefined) { out.category_id = v.categoryId; }
 if (v.limit !== undefined) { out.limit = v.limit; }
 if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
+}
+
+export function validateListProductsRequest(v: ListProductsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListProductsResponse {
@@ -473,14 +518,20 @@ if (v.total !== undefined) { out.total = v.total; }
 return out;
 }
 
+export function validateListProductsResponse(v: ListProductsResponse): string[] {
+const violations: string[] = [];
+if (v.products !== undefined && v.products !== null) for (const item of v.products) violations.push(...validateProduct(item).map((message) => "products: " + message));
+return violations;
+}
+
 export interface CreateProductRequest {
-categoryId?: string;
-supplierId?: string;
-name?: string;
-sku?: string;
-barcode?: string;
-description?: string;
-unit?: string;
+categoryId: string;
+supplierId: string;
+name: string;
+sku: string;
+barcode: string;
+description: string;
+unit: string;
 costPrice?: number;
 salePrice?: number;
 lowStockThreshold?: number;
@@ -574,6 +625,32 @@ if (v.imageUrl !== undefined) { out.image_url = v.imageUrl; }
 return out;
 }
 
+export function validateCreateProductRequest(v: CreateProductRequest): string[] {
+const violations: string[] = [];
+if (!(v.categoryId !== undefined && v.categoryId !== null)) violations.push("category_id is required");
+if (v.categoryId !== undefined && v.categoryId !== null && !(Number(v.categoryId) > 0)) violations.push("category_id violates @gt");
+if (!(v.supplierId !== undefined && v.supplierId !== null)) violations.push("supplier_id is required");
+if (v.supplierId !== undefined && v.supplierId !== null && !(Number(v.supplierId) > 0)) violations.push("supplier_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.sku !== undefined && v.sku !== null) || v.sku === "") violations.push("sku is required");
+if (!(v.barcode !== undefined && v.barcode !== null) || v.barcode === "") violations.push("barcode is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.unit !== undefined && v.unit !== null) || v.unit === "") violations.push("unit is required");
+if (v.costPrice !== undefined && v.costPrice !== null && !(Number(v.costPrice) >= 0)) violations.push("cost_price violates @gte");
+if (v.salePrice !== undefined && v.salePrice !== null && !(Number(v.salePrice) >= 0)) violations.push("sale_price violates @gte");
+if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(Number(v.lowStockThreshold) >= 0)) violations.push("low_stock_threshold violates @gte");
+if (v.reorderQuantity !== undefined && v.reorderQuantity !== null && !(Number(v.reorderQuantity) >= 0)) violations.push("reorder_quantity violates @gte");
+if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(Number(v.stockQuantity) >= 0)) violations.push("stock_quantity violates @gte");
+if (v.compareAtPrice !== undefined && v.compareAtPrice !== null && !(Number(v.compareAtPrice) >= 0)) violations.push("compare_at_price violates @gte");
+if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) >= 0)) violations.push("tax_rate violates @gte");
+if (v.weight !== undefined && v.weight !== null && !(Number(v.weight) >= 0)) violations.push("weight violates @gte");
+if (v.length !== undefined && v.length !== null && !(Number(v.length) >= 0)) violations.push("length violates @gte");
+if (v.width !== undefined && v.width !== null && !(Number(v.width) >= 0)) violations.push("width violates @gte");
+if (v.height !== undefined && v.height !== null && !(Number(v.height) >= 0)) violations.push("height violates @gte");
+if (v.leadTimeDays !== undefined && v.leadTimeDays !== null && !(Number(v.leadTimeDays) >= 0)) violations.push("lead_time_days violates @gte");
+return violations;
+}
+
 export interface CreateProductResponse {
 productId?: string;
 message?: string;
@@ -594,8 +671,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateProductResponse(v: CreateProductResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetProductByBarcodeRequest {
-code?: string;
+code: string;
 }
 
 export function decodeGetProductByBarcodeRequest(v: any): GetProductByBarcodeRequest {
@@ -609,6 +691,12 @@ export function encodeGetProductByBarcodeRequest(v: GetProductByBarcodeRequest):
 const out: Record<string, unknown> = {};
 if (v.code !== undefined) { out.code = v.code; }
 return out;
+}
+
+export function validateGetProductByBarcodeRequest(v: GetProductByBarcodeRequest): string[] {
+const violations: string[] = [];
+if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+return violations;
 }
 
 export interface GetProductByBarcodeResponse {
@@ -628,8 +716,14 @@ if (v.product !== undefined) { out.product = encodeProduct(v.product); }
 return out;
 }
 
+export function validateGetProductByBarcodeResponse(v: GetProductByBarcodeResponse): string[] {
+const violations: string[] = [];
+if (v.product !== undefined && v.product !== null) violations.push(...validateProduct(v.product).map((message) => "product: " + message));
+return violations;
+}
+
 export interface GetProductRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetProductRequest(v: any): GetProductRequest {
@@ -643,6 +737,13 @@ export function encodeGetProductRequest(v: GetProductRequest): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetProductRequest(v: GetProductRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetProductResponse {
@@ -662,8 +763,14 @@ if (v.product !== undefined) { out.product = encodeProduct(v.product); }
 return out;
 }
 
+export function validateGetProductResponse(v: GetProductResponse): string[] {
+const violations: string[] = [];
+if (v.product !== undefined && v.product !== null) violations.push(...validateProduct(v.product).map((message) => "product: " + message));
+return violations;
+}
+
 export interface GetProductFullRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetProductFullRequest(v: any): GetProductFullRequest {
@@ -677,6 +784,13 @@ export function encodeGetProductFullRequest(v: GetProductFullRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetProductFullRequest(v: GetProductFullRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetProductFullResponse {
@@ -696,8 +810,14 @@ if (v.product !== undefined) { out.product = encodeFullProduct(v.product); }
 return out;
 }
 
+export function validateGetProductFullResponse(v: GetProductFullResponse): string[] {
+const violations: string[] = [];
+if (v.product !== undefined && v.product !== null) violations.push(...validateFullProduct(v.product).map((message) => "product: " + message));
+return violations;
+}
+
 export interface ListProductAttributesRequest {
-id?: string;
+id: string;
 }
 
 export function decodeListProductAttributesRequest(v: any): ListProductAttributesRequest {
@@ -711,6 +831,13 @@ export function encodeListProductAttributesRequest(v: ListProductAttributesReque
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateListProductAttributesRequest(v: ListProductAttributesRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface ListProductAttributesResponse {
@@ -730,14 +857,20 @@ if (v.attributes !== undefined) { out.attributes = (v.attributes as any[]).map(e
 return out;
 }
 
+export function validateListProductAttributesResponse(v: ListProductAttributesResponse): string[] {
+const violations: string[] = [];
+if (v.attributes !== undefined && v.attributes !== null) for (const item of v.attributes) violations.push(...validateProductAttribute(item).map((message) => "attributes: " + message));
+return violations;
+}
+
 export interface UpdateProductBody {
-categoryId?: string;
-supplierId?: string;
-name?: string;
-sku?: string;
-barcode?: string;
-description?: string;
-unit?: string;
+categoryId: string;
+supplierId: string;
+name: string;
+sku: string;
+barcode: string;
+description: string;
+unit: string;
 costPrice?: number;
 salePrice?: number;
 lowStockThreshold?: number;
@@ -831,8 +964,34 @@ if (v.imageUrl !== undefined) { out.image_url = v.imageUrl; }
 return out;
 }
 
+export function validateUpdateProductBody(v: UpdateProductBody): string[] {
+const violations: string[] = [];
+if (!(v.categoryId !== undefined && v.categoryId !== null)) violations.push("category_id is required");
+if (v.categoryId !== undefined && v.categoryId !== null && !(Number(v.categoryId) > 0)) violations.push("category_id violates @gt");
+if (!(v.supplierId !== undefined && v.supplierId !== null)) violations.push("supplier_id is required");
+if (v.supplierId !== undefined && v.supplierId !== null && !(Number(v.supplierId) > 0)) violations.push("supplier_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.sku !== undefined && v.sku !== null) || v.sku === "") violations.push("sku is required");
+if (!(v.barcode !== undefined && v.barcode !== null) || v.barcode === "") violations.push("barcode is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.unit !== undefined && v.unit !== null) || v.unit === "") violations.push("unit is required");
+if (v.costPrice !== undefined && v.costPrice !== null && !(Number(v.costPrice) >= 0)) violations.push("cost_price violates @gte");
+if (v.salePrice !== undefined && v.salePrice !== null && !(Number(v.salePrice) >= 0)) violations.push("sale_price violates @gte");
+if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(Number(v.lowStockThreshold) >= 0)) violations.push("low_stock_threshold violates @gte");
+if (v.reorderQuantity !== undefined && v.reorderQuantity !== null && !(Number(v.reorderQuantity) >= 0)) violations.push("reorder_quantity violates @gte");
+if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(Number(v.stockQuantity) >= 0)) violations.push("stock_quantity violates @gte");
+if (v.compareAtPrice !== undefined && v.compareAtPrice !== null && !(Number(v.compareAtPrice) >= 0)) violations.push("compare_at_price violates @gte");
+if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) >= 0)) violations.push("tax_rate violates @gte");
+if (v.weight !== undefined && v.weight !== null && !(Number(v.weight) >= 0)) violations.push("weight violates @gte");
+if (v.length !== undefined && v.length !== null && !(Number(v.length) >= 0)) violations.push("length violates @gte");
+if (v.width !== undefined && v.width !== null && !(Number(v.width) >= 0)) violations.push("width violates @gte");
+if (v.height !== undefined && v.height !== null && !(Number(v.height) >= 0)) violations.push("height violates @gte");
+if (v.leadTimeDays !== undefined && v.leadTimeDays !== null && !(Number(v.leadTimeDays) >= 0)) violations.push("lead_time_days violates @gte");
+return violations;
+}
+
 export interface UpdateProductRequest {
-id?: string;
+id: string;
 body?: UpdateProductBody;
 }
 
@@ -849,6 +1008,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateProductBody(v.body); }
 return out;
+}
+
+export function validateUpdateProductRequest(v: UpdateProductRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateProductBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateProductResponse {
@@ -868,8 +1035,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateProductResponse(v: UpdateProductResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteProductRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteProductRequest(v: any): DeleteProductRequest {
@@ -883,6 +1055,13 @@ export function encodeDeleteProductRequest(v: DeleteProductRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteProductRequest(v: DeleteProductRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteProductResponse {
@@ -902,6 +1081,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteProductResponse(v: DeleteProductResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetDashboardRequest {
 }
 
@@ -914,6 +1098,11 @@ return {
 export function encodeGetDashboardRequest(v: GetDashboardRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetDashboardRequest(v: GetDashboardRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetDashboardResponse {
@@ -954,6 +1143,14 @@ if (v.topCategories !== undefined) { out.top_categories = (v.topCategories as an
 return out;
 }
 
+export function validateGetDashboardResponse(v: GetDashboardResponse): string[] {
+const violations: string[] = [];
+if (v.lowStockItems !== undefined && v.lowStockItems !== null) for (const item of v.lowStockItems) violations.push(...validateDashboardLowStockItem(item).map((message) => "low_stock_items: " + message));
+if (v.recentOrders !== undefined && v.recentOrders !== null) for (const item of v.recentOrders) violations.push(...validateDashboardRecentOrder(item).map((message) => "recent_orders: " + message));
+if (v.topCategories !== undefined && v.topCategories !== null) for (const item of v.topCategories) violations.push(...validateDashboardTopCategory(item).map((message) => "top_categories: " + message));
+return violations;
+}
+
 export interface ListReorderSuggestionsRequest {
 }
 
@@ -966,6 +1163,11 @@ return {
 export function encodeListReorderSuggestionsRequest(v: ListReorderSuggestionsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListReorderSuggestionsRequest(v: ListReorderSuggestionsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListReorderSuggestionsResponse {
@@ -985,6 +1187,12 @@ if (v.suggestions !== undefined) { out.suggestions = (v.suggestions as any[]).ma
 return out;
 }
 
+export function validateListReorderSuggestionsResponse(v: ListReorderSuggestionsResponse): string[] {
+const violations: string[] = [];
+if (v.suggestions !== undefined && v.suggestions !== null) for (const item of v.suggestions) violations.push(...validateReorderSuggestion(item).map((message) => "suggestions: " + message));
+return violations;
+}
+
 export interface ListExpiringItemsRequest {
 daysAhead?: number;
 }
@@ -1002,6 +1210,11 @@ if (v.daysAhead !== undefined) { out.days_ahead = v.daysAhead; }
 return out;
 }
 
+export function validateListExpiringItemsRequest(v: ListExpiringItemsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListExpiringItemsResponse {
 items?: (ExpiringItem)[];
 }
@@ -1017,5 +1230,11 @@ export function encodeListExpiringItemsResponse(v: ListExpiringItemsResponse): R
 const out: Record<string, unknown> = {};
 if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeExpiringItem); }
 return out;
+}
+
+export function validateListExpiringItemsResponse(v: ListExpiringItemsResponse): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateExpiringItem(item).map((message) => "items: " + message));
+return violations;
 }
 

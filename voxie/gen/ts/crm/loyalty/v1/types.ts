@@ -59,6 +59,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateLoyaltyConfig(v: LoyaltyConfig): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface LoyaltyTransaction {
 id?: string;
 ownerId?: string;
@@ -106,6 +111,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateLoyaltyTransaction(v: LoyaltyTransaction): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface LoyaltyTier {
 id?: string;
 ownerId?: string;
@@ -147,12 +157,17 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateLoyaltyTier(v: LoyaltyTier): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface AwardPointsRequest {
-customerId?: string;
-points?: string;
-description?: string;
+customerId: string;
+points: string;
+description: string;
 referenceId?: string;
-referenceType?: string;
+referenceType: string;
 }
 
 export function decodeAwardPointsRequest(v: any): AwardPointsRequest {
@@ -176,6 +191,17 @@ if (v.referenceType !== undefined) { out.reference_type = v.referenceType; }
 return out;
 }
 
+export function validateAwardPointsRequest(v: AwardPointsRequest): string[] {
+const violations: string[] = [];
+if (!(v.customerId !== undefined && v.customerId !== null)) violations.push("customer_id is required");
+if (v.customerId !== undefined && v.customerId !== null && !(Number(v.customerId) > 0)) violations.push("customer_id violates @gt");
+if (!(v.points !== undefined && v.points !== null)) violations.push("points is required");
+if (v.points !== undefined && v.points !== null && !(Number(v.points) > 0)) violations.push("points violates @gt");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.referenceType !== undefined && v.referenceType !== null) || v.referenceType === "") violations.push("reference_type is required");
+return violations;
+}
+
 export interface AwardPointsResponse {
 message?: string;
 }
@@ -193,12 +219,17 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateAwardPointsResponse(v: AwardPointsResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateLoyaltyTierRequest {
-name?: string;
-minPoints?: string;
-discountPct?: number;
-perks?: string;
-sortOrder?: string;
+name: string;
+minPoints: string;
+discountPct: number;
+perks: string;
+sortOrder: string;
 }
 
 export function decodeCreateLoyaltyTierRequest(v: any): CreateLoyaltyTierRequest {
@@ -222,6 +253,19 @@ if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
 return out;
 }
 
+export function validateCreateLoyaltyTierRequest(v: CreateLoyaltyTierRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.minPoints !== undefined && v.minPoints !== null)) violations.push("min_points is required");
+if (v.minPoints !== undefined && v.minPoints !== null && !(Number(v.minPoints) > 0)) violations.push("min_points violates @gt");
+if (!(v.discountPct !== undefined && v.discountPct !== null)) violations.push("discount_pct is required");
+if (v.discountPct !== undefined && v.discountPct !== null && !(Number(v.discountPct) > 0)) violations.push("discount_pct violates @gt");
+if (!(v.perks !== undefined && v.perks !== null) || v.perks === "") violations.push("perks is required");
+if (!(v.sortOrder !== undefined && v.sortOrder !== null)) violations.push("sort_order is required");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(Number(v.sortOrder) > 0)) violations.push("sort_order violates @gt");
+return violations;
+}
+
 export interface CreateLoyaltyTierResponse {
 tierId?: string;
 message?: string;
@@ -242,6 +286,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateLoyaltyTierResponse(v: CreateLoyaltyTierResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetLoyaltyConfigRequest {
 }
 
@@ -254,6 +303,11 @@ return {
 export function encodeGetLoyaltyConfigRequest(v: GetLoyaltyConfigRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetLoyaltyConfigRequest(v: GetLoyaltyConfigRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetLoyaltyConfigResponse {
@@ -273,6 +327,12 @@ if (v.config !== undefined) { out.config = encodeLoyaltyConfig(v.config); }
 return out;
 }
 
+export function validateGetLoyaltyConfigResponse(v: GetLoyaltyConfigResponse): string[] {
+const violations: string[] = [];
+if (v.config !== undefined && v.config !== null) violations.push(...validateLoyaltyConfig(v.config).map((message) => "config: " + message));
+return violations;
+}
+
 export interface ListLoyaltyTiersRequest {
 }
 
@@ -285,6 +345,11 @@ return {
 export function encodeListLoyaltyTiersRequest(v: ListLoyaltyTiersRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListLoyaltyTiersRequest(v: ListLoyaltyTiersRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListLoyaltyTiersResponse {
@@ -302,6 +367,12 @@ export function encodeListLoyaltyTiersResponse(v: ListLoyaltyTiersResponse): Rec
 const out: Record<string, unknown> = {};
 if (v.tiers !== undefined) { out.tiers = (v.tiers as any[]).map(encodeLoyaltyTier); }
 return out;
+}
+
+export function validateListLoyaltyTiersResponse(v: ListLoyaltyTiersResponse): string[] {
+const violations: string[] = [];
+if (v.tiers !== undefined && v.tiers !== null) for (const item of v.tiers) violations.push(...validateLoyaltyTier(item).map((message) => "tiers: " + message));
+return violations;
 }
 
 export interface ListLoyaltyTransactionsRequest {
@@ -325,6 +396,11 @@ if (v.customerId !== undefined) { out.customer_id = v.customerId; }
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
+}
+
+export function validateListLoyaltyTransactionsRequest(v: ListLoyaltyTransactionsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListLoyaltyTransactionsResponse {
@@ -353,12 +429,18 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListLoyaltyTransactionsResponse(v: ListLoyaltyTransactionsResponse): string[] {
+const violations: string[] = [];
+if (v.transactions !== undefined && v.transactions !== null) for (const item of v.transactions) violations.push(...validateLoyaltyTransaction(item).map((message) => "transactions: " + message));
+return violations;
+}
+
 export interface RedeemPointsRequest {
-customerId?: string;
-points?: string;
-description?: string;
+customerId: string;
+points: string;
+description: string;
 referenceId?: string;
-referenceType?: string;
+referenceType: string;
 }
 
 export function decodeRedeemPointsRequest(v: any): RedeemPointsRequest {
@@ -382,6 +464,17 @@ if (v.referenceType !== undefined) { out.reference_type = v.referenceType; }
 return out;
 }
 
+export function validateRedeemPointsRequest(v: RedeemPointsRequest): string[] {
+const violations: string[] = [];
+if (!(v.customerId !== undefined && v.customerId !== null)) violations.push("customer_id is required");
+if (v.customerId !== undefined && v.customerId !== null && !(Number(v.customerId) > 0)) violations.push("customer_id violates @gt");
+if (!(v.points !== undefined && v.points !== null)) violations.push("points is required");
+if (v.points !== undefined && v.points !== null && !(Number(v.points) > 0)) violations.push("points violates @gt");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.referenceType !== undefined && v.referenceType !== null) || v.referenceType === "") violations.push("reference_type is required");
+return violations;
+}
+
 export interface RedeemPointsResponse {
 message?: string;
 }
@@ -399,19 +492,24 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateRedeemPointsResponse(v: RedeemPointsResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateLoyaltyConfigRequest {
 isEnabled?: boolean;
-pointsPerCurrencyUnit?: number;
-currencyPerPoint?: number;
-bronzeMin?: string;
-silverMin?: string;
-goldMin?: string;
-platinumMin?: string;
-bronzeDiscountPct?: number;
-silverDiscountPct?: number;
-goldDiscountPct?: number;
-platinumDiscountPct?: number;
-pointsExpiryDays?: string;
+pointsPerCurrencyUnit: number;
+currencyPerPoint: number;
+bronzeMin: string;
+silverMin: string;
+goldMin: string;
+platinumMin: string;
+bronzeDiscountPct: number;
+silverDiscountPct: number;
+goldDiscountPct: number;
+platinumDiscountPct: number;
+pointsExpiryDays: string;
 }
 
 export function decodeUpdateLoyaltyConfigRequest(v: any): UpdateLoyaltyConfigRequest {
@@ -449,6 +547,33 @@ if (v.pointsExpiryDays !== undefined) { out.points_expiry_days = v.pointsExpiryD
 return out;
 }
 
+export function validateUpdateLoyaltyConfigRequest(v: UpdateLoyaltyConfigRequest): string[] {
+const violations: string[] = [];
+if (!(v.pointsPerCurrencyUnit !== undefined && v.pointsPerCurrencyUnit !== null)) violations.push("points_per_currency_unit is required");
+if (v.pointsPerCurrencyUnit !== undefined && v.pointsPerCurrencyUnit !== null && !(Number(v.pointsPerCurrencyUnit) > 0)) violations.push("points_per_currency_unit violates @gt");
+if (!(v.currencyPerPoint !== undefined && v.currencyPerPoint !== null)) violations.push("currency_per_point is required");
+if (v.currencyPerPoint !== undefined && v.currencyPerPoint !== null && !(Number(v.currencyPerPoint) > 0)) violations.push("currency_per_point violates @gt");
+if (!(v.bronzeMin !== undefined && v.bronzeMin !== null)) violations.push("bronze_min is required");
+if (v.bronzeMin !== undefined && v.bronzeMin !== null && !(Number(v.bronzeMin) > 0)) violations.push("bronze_min violates @gt");
+if (!(v.silverMin !== undefined && v.silverMin !== null)) violations.push("silver_min is required");
+if (v.silverMin !== undefined && v.silverMin !== null && !(Number(v.silverMin) > 0)) violations.push("silver_min violates @gt");
+if (!(v.goldMin !== undefined && v.goldMin !== null)) violations.push("gold_min is required");
+if (v.goldMin !== undefined && v.goldMin !== null && !(Number(v.goldMin) > 0)) violations.push("gold_min violates @gt");
+if (!(v.platinumMin !== undefined && v.platinumMin !== null)) violations.push("platinum_min is required");
+if (v.platinumMin !== undefined && v.platinumMin !== null && !(Number(v.platinumMin) > 0)) violations.push("platinum_min violates @gt");
+if (!(v.bronzeDiscountPct !== undefined && v.bronzeDiscountPct !== null)) violations.push("bronze_discount_pct is required");
+if (v.bronzeDiscountPct !== undefined && v.bronzeDiscountPct !== null && !(Number(v.bronzeDiscountPct) > 0)) violations.push("bronze_discount_pct violates @gt");
+if (!(v.silverDiscountPct !== undefined && v.silverDiscountPct !== null)) violations.push("silver_discount_pct is required");
+if (v.silverDiscountPct !== undefined && v.silverDiscountPct !== null && !(Number(v.silverDiscountPct) > 0)) violations.push("silver_discount_pct violates @gt");
+if (!(v.goldDiscountPct !== undefined && v.goldDiscountPct !== null)) violations.push("gold_discount_pct is required");
+if (v.goldDiscountPct !== undefined && v.goldDiscountPct !== null && !(Number(v.goldDiscountPct) > 0)) violations.push("gold_discount_pct violates @gt");
+if (!(v.platinumDiscountPct !== undefined && v.platinumDiscountPct !== null)) violations.push("platinum_discount_pct is required");
+if (v.platinumDiscountPct !== undefined && v.platinumDiscountPct !== null && !(Number(v.platinumDiscountPct) > 0)) violations.push("platinum_discount_pct violates @gt");
+if (!(v.pointsExpiryDays !== undefined && v.pointsExpiryDays !== null)) violations.push("points_expiry_days is required");
+if (v.pointsExpiryDays !== undefined && v.pointsExpiryDays !== null && !(Number(v.pointsExpiryDays) > 0)) violations.push("points_expiry_days violates @gt");
+return violations;
+}
+
 export interface UpdateLoyaltyConfigResponse {
 message?: string;
 }
@@ -466,12 +591,17 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateLoyaltyConfigResponse(v: UpdateLoyaltyConfigResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateLoyaltyTierBody {
-name?: string;
-minPoints?: string;
-discountPct?: number;
-perks?: string;
-sortOrder?: string;
+name: string;
+minPoints: string;
+discountPct: number;
+perks: string;
+sortOrder: string;
 }
 
 export function decodeUpdateLoyaltyTierBody(v: any): UpdateLoyaltyTierBody {
@@ -495,8 +625,21 @@ if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
 return out;
 }
 
+export function validateUpdateLoyaltyTierBody(v: UpdateLoyaltyTierBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.minPoints !== undefined && v.minPoints !== null)) violations.push("min_points is required");
+if (v.minPoints !== undefined && v.minPoints !== null && !(Number(v.minPoints) > 0)) violations.push("min_points violates @gt");
+if (!(v.discountPct !== undefined && v.discountPct !== null)) violations.push("discount_pct is required");
+if (v.discountPct !== undefined && v.discountPct !== null && !(Number(v.discountPct) > 0)) violations.push("discount_pct violates @gt");
+if (!(v.perks !== undefined && v.perks !== null) || v.perks === "") violations.push("perks is required");
+if (!(v.sortOrder !== undefined && v.sortOrder !== null)) violations.push("sort_order is required");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(Number(v.sortOrder) > 0)) violations.push("sort_order violates @gt");
+return violations;
+}
+
 export interface UpdateLoyaltyTierRequest {
-id?: string;
+id: string;
 body?: UpdateLoyaltyTierBody;
 }
 
@@ -515,6 +658,14 @@ if (v.body !== undefined) { out.body = encodeUpdateLoyaltyTierBody(v.body); }
 return out;
 }
 
+export function validateUpdateLoyaltyTierRequest(v: UpdateLoyaltyTierRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateLoyaltyTierBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateLoyaltyTierResponse {
 message?: string;
 }
@@ -530,5 +681,10 @@ export function encodeUpdateLoyaltyTierResponse(v: UpdateLoyaltyTierResponse): R
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateLoyaltyTierResponse(v: UpdateLoyaltyTierResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

@@ -24,6 +24,11 @@ func NewTimeEntryServiceClient(baseURL string) *TimeEntryServiceClient {
 }
 
 func (c *TimeEntryServiceClient) ListTimeEntries(ctx context.Context, req *ListTimeEntriesRequest) (*ListTimeEntriesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/time-entry/v1/time-entries"
 	query := url.Values{}
 	if req.EmployeeId != nil {
@@ -60,6 +65,11 @@ func (c *TimeEntryServiceClient) ListTimeEntries(ctx context.Context, req *ListT
 }
 
 func (c *TimeEntryServiceClient) CreateTimeEntry(ctx context.Context, req *CreateTimeEntryRequest) (*CreateTimeEntryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/time-entry/v1/time-entries"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -91,6 +101,11 @@ func (c *TimeEntryServiceClient) CreateTimeEntry(ctx context.Context, req *Creat
 }
 
 func (c *TimeEntryServiceClient) ListTimesheets(ctx context.Context, req *ListTimesheetsRequest) (*ListTimesheetsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/time-entry/v1/timesheets"
 	query := url.Values{}
 	if req.EmployeeId != nil {
@@ -127,6 +142,11 @@ func (c *TimeEntryServiceClient) ListTimesheets(ctx context.Context, req *ListTi
 }
 
 func (c *TimeEntryServiceClient) SubmitTimesheet(ctx context.Context, req *SubmitTimesheetRequest) (*SubmitTimesheetResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/time-entry/v1/timesheets"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -158,9 +178,14 @@ func (c *TimeEntryServiceClient) SubmitTimesheet(ctx context.Context, req *Submi
 }
 
 func (c *TimeEntryServiceClient) ApproveTimesheet(ctx context.Context, req *ApproveTimesheetRequest) (*ApproveTimesheetResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/time-entry/v1/timesheets/{id}/approve"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}

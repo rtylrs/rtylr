@@ -59,6 +59,11 @@ if (v.paddleSubscriptionId !== undefined) { out.paddle_subscription_id = v.paddl
 return out;
 }
 
+export function validateSubscription(v: Subscription): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface Plan {
 id?: string;
 name?: string;
@@ -119,6 +124,11 @@ if (v.isSolo !== undefined) { out.is_solo = v.isSolo; }
 if (v.isFeatured !== undefined) { out.is_featured = v.isFeatured; }
 if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
+}
+
+export function validatePlan(v: Plan): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface BillingLineItem {
@@ -183,6 +193,11 @@ if (v.unitPriceCents !== undefined) { out.unit_price_cents = v.unitPriceCents; }
 return out;
 }
 
+export function validateBillingLineItem(v: BillingLineItem): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface BillingDetail {
 billingMonth?: string;
 nextBillingDate?: string;
@@ -245,6 +260,12 @@ if (v.paddleSubscriptionId !== undefined) { out.paddle_subscription_id = v.paddl
 return out;
 }
 
+export function validateBillingDetail(v: BillingDetail): string[] {
+const violations: string[] = [];
+if (v.lineItems !== undefined && v.lineItems !== null) for (const item of v.lineItems) violations.push(...validateBillingLineItem(item).map((message) => "line_items: " + message));
+return violations;
+}
+
 export interface BillingHistoryMonth {
 month?: string;
 totalCents?: number;
@@ -271,6 +292,12 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateBillingHistoryMonth(v: BillingHistoryMonth): string[] {
+const violations: string[] = [];
+if (v.lineItems !== undefined && v.lineItems !== null) for (const item of v.lineItems) violations.push(...validateBillingLineItem(item).map((message) => "line_items: " + message));
+return violations;
+}
+
 export interface GetMySubscriptionRequest {
 }
 
@@ -283,6 +310,11 @@ return {
 export function encodeGetMySubscriptionRequest(v: GetMySubscriptionRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetMySubscriptionRequest(v: GetMySubscriptionRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetMySubscriptionResponse {
@@ -302,6 +334,12 @@ if (v.subscription !== undefined) { out.subscription = encodeSubscription(v.subs
 return out;
 }
 
+export function validateGetMySubscriptionResponse(v: GetMySubscriptionResponse): string[] {
+const violations: string[] = [];
+if (v.subscription !== undefined && v.subscription !== null) violations.push(...validateSubscription(v.subscription).map((message) => "subscription: " + message));
+return violations;
+}
+
 export interface ListPlansRequest {
 }
 
@@ -314,6 +352,11 @@ return {
 export function encodeListPlansRequest(v: ListPlansRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListPlansRequest(v: ListPlansRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListPlansResponse {
@@ -333,6 +376,12 @@ if (v.plans !== undefined) { out.plans = (v.plans as any[]).map(encodePlan); }
 return out;
 }
 
+export function validateListPlansResponse(v: ListPlansResponse): string[] {
+const violations: string[] = [];
+if (v.plans !== undefined && v.plans !== null) for (const item of v.plans) violations.push(...validatePlan(item).map((message) => "plans: " + message));
+return violations;
+}
+
 export interface GetBillingDetailRequest {
 }
 
@@ -345,6 +394,11 @@ return {
 export function encodeGetBillingDetailRequest(v: GetBillingDetailRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetBillingDetailRequest(v: GetBillingDetailRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetBillingDetailResponse {
@@ -364,6 +418,12 @@ if (v.billing !== undefined) { out.billing = encodeBillingDetail(v.billing); }
 return out;
 }
 
+export function validateGetBillingDetailResponse(v: GetBillingDetailResponse): string[] {
+const violations: string[] = [];
+if (v.billing !== undefined && v.billing !== null) violations.push(...validateBillingDetail(v.billing).map((message) => "billing: " + message));
+return violations;
+}
+
 export interface GetBillingHistoryRequest {
 }
 
@@ -376,6 +436,11 @@ return {
 export function encodeGetBillingHistoryRequest(v: GetBillingHistoryRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetBillingHistoryRequest(v: GetBillingHistoryRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetBillingHistoryResponse {
@@ -395,6 +460,12 @@ if (v.history !== undefined) { out.history = (v.history as any[]).map(encodeBill
 return out;
 }
 
+export function validateGetBillingHistoryResponse(v: GetBillingHistoryResponse): string[] {
+const violations: string[] = [];
+if (v.history !== undefined && v.history !== null) for (const item of v.history) violations.push(...validateBillingHistoryMonth(item).map((message) => "history: " + message));
+return violations;
+}
+
 export interface UpsertSubscriptionRequest {
 planSlug?: string;
 }
@@ -412,6 +483,11 @@ if (v.planSlug !== undefined) { out.plan_slug = v.planSlug; }
 return out;
 }
 
+export function validateUpsertSubscriptionRequest(v: UpsertSubscriptionRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpsertSubscriptionResponse {
 message?: string;
 }
@@ -427,6 +503,11 @@ export function encodeUpsertSubscriptionResponse(v: UpsertSubscriptionResponse):
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpsertSubscriptionResponse(v: UpsertSubscriptionResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface CreateCheckoutRequest {
@@ -449,6 +530,11 @@ if (v.email !== undefined) { out.email = v.email; }
 return out;
 }
 
+export function validateCreateCheckoutRequest(v: CreateCheckoutRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateCheckoutResponse {
 checkoutUrl?: string;
 }
@@ -464,5 +550,10 @@ export function encodeCreateCheckoutResponse(v: CreateCheckoutResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.checkoutUrl !== undefined) { out.checkout_url = v.checkoutUrl; }
 return out;
+}
+
+export function validateCreateCheckoutResponse(v: CreateCheckoutResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

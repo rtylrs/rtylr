@@ -24,6 +24,11 @@ func NewMilestoneServiceClient(baseURL string) *MilestoneServiceClient {
 }
 
 func (c *MilestoneServiceClient) ListMilestones(ctx context.Context, req *ListMilestonesRequest) (*ListMilestonesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/milestone/v1/milestones"
 	query := url.Values{}
 	query.Set("project_id", req.ProjectId)
@@ -60,6 +65,11 @@ func (c *MilestoneServiceClient) ListMilestones(ctx context.Context, req *ListMi
 }
 
 func (c *MilestoneServiceClient) CreateMilestone(ctx context.Context, req *CreateMilestoneRequest) (*CreateMilestoneResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/milestone/v1/milestones"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -91,6 +101,11 @@ func (c *MilestoneServiceClient) CreateMilestone(ctx context.Context, req *Creat
 }
 
 func (c *MilestoneServiceClient) UpdateMilestone(ctx context.Context, req *UpdateMilestoneRequest) (*UpdateMilestoneResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/milestone/v1/milestones/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

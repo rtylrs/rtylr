@@ -23,6 +23,11 @@ func NewStockServiceClient(baseURL string) *StockServiceClient {
 }
 
 func (c *StockServiceClient) ListStockMovements(ctx context.Context, req *ListStockMovementsRequest) (*ListStockMovementsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/stock/v1/movements"
 	query := url.Values{}
 	query.Set("branch_id", strconv.FormatInt(int64(req.BranchId), 10))
@@ -55,6 +60,11 @@ func (c *StockServiceClient) ListStockMovements(ctx context.Context, req *ListSt
 }
 
 func (c *StockServiceClient) ReceiveStock(ctx context.Context, req *ReceiveStockRequest) (*ReceiveStockResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/stock/v1/receive"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -86,6 +96,11 @@ func (c *StockServiceClient) ReceiveStock(ctx context.Context, req *ReceiveStock
 }
 
 func (c *StockServiceClient) AdjustStock(ctx context.Context, req *AdjustStockRequest) (*AdjustStockResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/stock/v1/adjust"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -117,6 +132,11 @@ func (c *StockServiceClient) AdjustStock(ctx context.Context, req *AdjustStockRe
 }
 
 func (c *StockServiceClient) WasteStock(ctx context.Context, req *WasteStockRequest) (*WasteStockResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/stock/v1/waste"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -148,6 +168,11 @@ func (c *StockServiceClient) WasteStock(ctx context.Context, req *WasteStockRequ
 }
 
 func (c *StockServiceClient) TransferStock(ctx context.Context, req *TransferStockRequest) (*TransferStockResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/stock/v1/transfer"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -179,6 +204,11 @@ func (c *StockServiceClient) TransferStock(ctx context.Context, req *TransferSto
 }
 
 func (c *StockServiceClient) ListInventory(ctx context.Context, req *ListInventoryRequest) (*ListInventoryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/stock/v1/inventory"
 	query := url.Values{}
 	query.Set("branch_id", strconv.FormatInt(int64(req.BranchId), 10))
@@ -210,6 +240,11 @@ func (c *StockServiceClient) ListInventory(ctx context.Context, req *ListInvento
 }
 
 func (c *StockServiceClient) LowStock(ctx context.Context, req *LowStockRequest) (*LowStockResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/stock/v1/low-stock"
 	query := url.Values{}
 	query.Set("branch_id", strconv.FormatInt(int64(req.BranchId), 10))

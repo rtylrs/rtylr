@@ -72,19 +72,24 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateEmployeePayload(v: EmployeePayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateEmployeeRequest {
 departmentId?: string;
 locationId?: string;
 workScheduleId?: string;
-firstName?: string;
-lastName?: string;
-email?: string;
+firstName: string;
+lastName: string;
+email: string;
 phone?: string;
-employmentType?: string;
+employmentType: string;
 salary?: number;
 hourlyRate?: number;
 overtimeRate?: number;
-startDate?: string;
+startDate: string;
 address?: string;
 }
 
@@ -125,6 +130,20 @@ if (v.address !== undefined) { out.address = v.address; }
 return out;
 }
 
+export function validateCreateEmployeeRequest(v: CreateEmployeeRequest): string[] {
+const violations: string[] = [];
+if (!(v.firstName !== undefined && v.firstName !== null) || v.firstName === "") violations.push("first_name is required");
+if (!(v.lastName !== undefined && v.lastName !== null) || v.lastName === "") violations.push("last_name is required");
+if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
+if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (!(v.employmentType !== undefined && v.employmentType !== null) || v.employmentType === "") violations.push("employment_type is required");
+if (v.salary !== undefined && v.salary !== null && !(Number(v.salary) >= 0)) violations.push("salary violates @gte");
+if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(Number(v.hourlyRate) >= 0)) violations.push("hourly_rate violates @gte");
+if (v.overtimeRate !== undefined && v.overtimeRate !== null && !(Number(v.overtimeRate) >= 0)) violations.push("overtime_rate violates @gte");
+if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+return violations;
+}
+
 export interface CreateEmployeeResponse {
 employee?: hr_staff_v1.Staff;
 }
@@ -142,9 +161,15 @@ if (v.employee !== undefined) { out.employee = hr_staff_v1.encodeStaff(v.employe
 return out;
 }
 
+export function validateCreateEmployeeResponse(v: CreateEmployeeResponse): string[] {
+const violations: string[] = [];
+if (v.employee !== undefined && v.employee !== null) violations.push(...hr_staff_v1.validateStaff(v.employee).map((message) => "employee: " + message));
+return violations;
+}
+
 export interface InviteEmployeeRequest {
-employeeId?: string;
-sendVia?: string;
+employeeId: string;
+sendVia: string;
 }
 
 export function decodeInviteEmployeeRequest(v: any): InviteEmployeeRequest {
@@ -160,6 +185,14 @@ const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.sendVia !== undefined) { out.send_via = v.sendVia; }
 return out;
+}
+
+export function validateInviteEmployeeRequest(v: InviteEmployeeRequest): string[] {
+const violations: string[] = [];
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.sendVia !== undefined && v.sendVia !== null) || v.sendVia === "") violations.push("send_via is required");
+return violations;
 }
 
 export interface InviteEmployeeResponse {
@@ -182,9 +215,14 @@ if (v.expiresAt !== undefined) { out.expires_at = v.expiresAt; }
 return out;
 }
 
+export function validateInviteEmployeeResponse(v: InviteEmployeeResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface AcceptInviteRequest {
-token?: string;
-password?: string;
+token: string;
+password: string;
 }
 
 export function decodeAcceptInviteRequest(v: any): AcceptInviteRequest {
@@ -202,6 +240,13 @@ if (v.password !== undefined) { out.password = v.password; }
 return out;
 }
 
+export function validateAcceptInviteRequest(v: AcceptInviteRequest): string[] {
+const violations: string[] = [];
+if (!(v.token !== undefined && v.token !== null) || v.token === "") violations.push("token is required");
+if (!(v.password !== undefined && v.password !== null) || v.password === "") violations.push("password is required");
+return violations;
+}
+
 export interface AcceptInviteResponse {
 success?: boolean;
 }
@@ -217,6 +262,11 @@ export function encodeAcceptInviteResponse(v: AcceptInviteResponse): Record<stri
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateAcceptInviteResponse(v: AcceptInviteResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListEmployeesRequest {
@@ -248,6 +298,11 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListEmployeesRequest(v: ListEmployeesRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListEmployeesResponse {
 employees?: (EmployeePayload)[];
 total?: number;
@@ -274,24 +329,30 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListEmployeesResponse(v: ListEmployeesResponse): string[] {
+const violations: string[] = [];
+if (v.employees !== undefined && v.employees !== null) for (const item of v.employees) violations.push(...validateEmployeePayload(item).map((message) => "employees: " + message));
+return violations;
+}
+
 export interface UpdateEmployeeBody {
 departmentId?: string;
 locationId?: string;
 workScheduleId?: string;
-firstName?: string;
-lastName?: string;
-email?: string;
+firstName: string;
+lastName: string;
+email: string;
 phone?: string;
-employmentType?: string;
-status?: string;
+employmentType: string;
+status: string;
 salary?: number;
 hourlyRate?: number;
 overtimeRate?: number;
-startDate?: string;
-endDate?: string;
+startDate: string;
+endDate: string;
 address?: string;
-emergencyContactName?: string;
-emergencyContactPhone?: string;
+emergencyContactName: string;
+emergencyContactPhone: string;
 notes?: string;
 }
 
@@ -342,8 +403,25 @@ if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
 }
 
+export function validateUpdateEmployeeBody(v: UpdateEmployeeBody): string[] {
+const violations: string[] = [];
+if (!(v.firstName !== undefined && v.firstName !== null) || v.firstName === "") violations.push("first_name is required");
+if (!(v.lastName !== undefined && v.lastName !== null) || v.lastName === "") violations.push("last_name is required");
+if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
+if (!(v.employmentType !== undefined && v.employmentType !== null) || v.employmentType === "") violations.push("employment_type is required");
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+if (v.salary !== undefined && v.salary !== null && !(Number(v.salary) >= 0)) violations.push("salary violates @gte");
+if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(Number(v.hourlyRate) >= 0)) violations.push("hourly_rate violates @gte");
+if (v.overtimeRate !== undefined && v.overtimeRate !== null && !(Number(v.overtimeRate) >= 0)) violations.push("overtime_rate violates @gte");
+if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (!(v.endDate !== undefined && v.endDate !== null) || v.endDate === "") violations.push("end_date is required");
+if (!(v.emergencyContactName !== undefined && v.emergencyContactName !== null) || v.emergencyContactName === "") violations.push("emergency_contact_name is required");
+if (!(v.emergencyContactPhone !== undefined && v.emergencyContactPhone !== null) || v.emergencyContactPhone === "") violations.push("emergency_contact_phone is required");
+return violations;
+}
+
 export interface UpdateEmployeeRequest {
-id?: string;
+id: string;
 body?: UpdateEmployeeBody;
 }
 
@@ -362,6 +440,14 @@ if (v.body !== undefined) { out.body = encodeUpdateEmployeeBody(v.body); }
 return out;
 }
 
+export function validateUpdateEmployeeRequest(v: UpdateEmployeeRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateEmployeeBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateEmployeeResponse {
 employee?: hr_staff_v1.Staff;
 }
@@ -377,5 +463,11 @@ export function encodeUpdateEmployeeResponse(v: UpdateEmployeeResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.employee !== undefined) { out.employee = hr_staff_v1.encodeStaff(v.employee); }
 return out;
+}
+
+export function validateUpdateEmployeeResponse(v: UpdateEmployeeResponse): string[] {
+const violations: string[] = [];
+if (v.employee !== undefined && v.employee !== null) violations.push(...hr_staff_v1.validateStaff(v.employee).map((message) => "employee: " + message));
+return violations;
 }
 

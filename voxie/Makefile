@@ -1,6 +1,7 @@
 .PHONY: clean generate install-onek install-js typecheck
 
-ONK_VERSION := v0.4.7
+# Use the merged OneKit status generator plus legacy-contract compatibility.
+ONK_VERSION := 09856d9bfdc14f8eb96c19224d878debd67267a0
 
 # Clean generated code
 clean:

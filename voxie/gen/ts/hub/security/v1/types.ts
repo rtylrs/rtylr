@@ -20,6 +20,12 @@ if (v.activeSessions !== undefined) { out.active_sessions = (v.activeSessions as
 return out;
 }
 
+export function validateSecurityState(v: SecurityState): string[] {
+const violations: string[] = [];
+if (v.activeSessions !== undefined && v.activeSessions !== null) for (const item of v.activeSessions) violations.push(...validateActiveSession(item).map((message) => "active_sessions: " + message));
+return violations;
+}
+
 export interface ActiveSession {
 id?: string;
 ip?: string;
@@ -47,6 +53,11 @@ if (v.userAgent !== undefined) { out.user_agent = v.userAgent; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 if (v.isCurrent !== undefined) { out.is_current = v.isCurrent; }
 return out;
+}
+
+export function validateActiveSession(v: ActiveSession): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface LoginEntry {
@@ -84,6 +95,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateLoginEntry(v: LoginEntry): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetSecurityStateRequest {
 }
 
@@ -96,6 +112,11 @@ return {
 export function encodeGetSecurityStateRequest(v: GetSecurityStateRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetSecurityStateRequest(v: GetSecurityStateRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetSecurityStateResponse {
@@ -113,6 +134,12 @@ export function encodeGetSecurityStateResponse(v: GetSecurityStateResponse): Rec
 const out: Record<string, unknown> = {};
 if (v.state !== undefined) { out.state = encodeSecurityState(v.state); }
 return out;
+}
+
+export function validateGetSecurityStateResponse(v: GetSecurityStateResponse): string[] {
+const violations: string[] = [];
+if (v.state !== undefined && v.state !== null) violations.push(...validateSecurityState(v.state).map((message) => "state: " + message));
+return violations;
 }
 
 export interface LoginHistoryRequest {
@@ -133,6 +160,11 @@ const out: Record<string, unknown> = {};
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
+}
+
+export function validateLoginHistoryRequest(v: LoginHistoryRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface LoginHistoryResponse {
@@ -164,6 +196,12 @@ if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
 return out;
 }
 
+export function validateLoginHistoryResponse(v: LoginHistoryResponse): string[] {
+const violations: string[] = [];
+if (v.history !== undefined && v.history !== null) for (const item of v.history) violations.push(...validateLoginEntry(item).map((message) => "history: " + message));
+return violations;
+}
+
 export interface InvalidateSessionsRequest {
 }
 
@@ -176,6 +214,11 @@ return {
 export function encodeInvalidateSessionsRequest(v: InvalidateSessionsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateInvalidateSessionsRequest(v: InvalidateSessionsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface InvalidateSessionsResponse {
@@ -195,6 +238,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateInvalidateSessionsResponse(v: InvalidateSessionsResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface Update2FARequest {
 enabled?: boolean;
 }
@@ -212,6 +260,11 @@ if (v.enabled !== undefined) { out.enabled = v.enabled; }
 return out;
 }
 
+export function validateUpdate2FARequest(v: Update2FARequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface Update2FAResponse {
 message?: string;
 }
@@ -227,5 +280,10 @@ export function encodeUpdate2FAResponse(v: Update2FAResponse): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdate2FAResponse(v: Update2FAResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

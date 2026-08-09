@@ -44,6 +44,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateChecklistItemPayload(v: ChecklistItemPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ChecklistTemplatePayload {
 id?: string;
 ownerId?: string;
@@ -80,6 +85,12 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeChecklistI
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
+}
+
+export function validateChecklistTemplatePayload(v: ChecklistTemplatePayload): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateChecklistItemPayload(item).map((message) => "items: " + message));
+return violations;
 }
 
 export interface EmployeeChecklistItemPayload {
@@ -129,6 +140,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateEmployeeChecklistItemPayload(v: EmployeeChecklistItemPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface EmployeeChecklistPayload {
 id?: string;
 ownerId?: string;
@@ -167,6 +183,12 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateEmployeeChecklistPayload(v: EmployeeChecklistPayload): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateEmployeeChecklistItemPayload(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface ListChecklistTemplatesRequest {
 triggerType?: string;
 }
@@ -182,6 +204,11 @@ export function encodeListChecklistTemplatesRequest(v: ListChecklistTemplatesReq
 const out: Record<string, unknown> = {};
 if (v.triggerType !== undefined) { out.trigger_type = v.triggerType; }
 return out;
+}
+
+export function validateListChecklistTemplatesRequest(v: ListChecklistTemplatesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListChecklistTemplatesResponse {
@@ -210,8 +237,14 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListChecklistTemplatesResponse(v: ListChecklistTemplatesResponse): string[] {
+const violations: string[] = [];
+if (v.templates !== undefined && v.templates !== null) for (const item of v.templates) violations.push(...validateChecklistTemplatePayload(item).map((message) => "templates: " + message));
+return violations;
+}
+
 export interface CreateChecklistTemplateRequest {
-name?: string;
+name: string;
 triggerType?: string;
 roleId?: string;
 }
@@ -233,6 +266,12 @@ if (v.roleId !== undefined) { out.role_id = v.roleId; }
 return out;
 }
 
+export function validateCreateChecklistTemplateRequest(v: CreateChecklistTemplateRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateChecklistTemplateResponse {
 template?: ChecklistTemplatePayload;
 }
@@ -250,8 +289,14 @@ if (v.template !== undefined) { out.template = encodeChecklistTemplatePayload(v.
 return out;
 }
 
+export function validateCreateChecklistTemplateResponse(v: CreateChecklistTemplateResponse): string[] {
+const violations: string[] = [];
+if (v.template !== undefined && v.template !== null) violations.push(...validateChecklistTemplatePayload(v.template).map((message) => "template: " + message));
+return violations;
+}
+
 export interface UpdateChecklistTemplateBody {
-name?: string;
+name: string;
 triggerType?: string;
 }
 
@@ -270,8 +315,14 @@ if (v.triggerType !== undefined) { out.trigger_type = v.triggerType; }
 return out;
 }
 
+export function validateUpdateChecklistTemplateBody(v: UpdateChecklistTemplateBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface UpdateChecklistTemplateRequest {
-roleId?: string;
+roleId: string;
 body?: UpdateChecklistTemplateBody;
 }
 
@@ -288,6 +339,14 @@ const out: Record<string, unknown> = {};
 if (v.roleId !== undefined) { out.role_id = v.roleId; }
 if (v.body !== undefined) { out.body = encodeUpdateChecklistTemplateBody(v.body); }
 return out;
+}
+
+export function validateUpdateChecklistTemplateRequest(v: UpdateChecklistTemplateRequest): string[] {
+const violations: string[] = [];
+if (!(v.roleId !== undefined && v.roleId !== null)) violations.push("role_id is required");
+if (v.roleId !== undefined && v.roleId !== null && !(Number(v.roleId) > 0)) violations.push("role_id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateChecklistTemplateBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateChecklistTemplateResponse {
@@ -307,9 +366,14 @@ if (v.success !== undefined) { out.success = v.success; }
 return out;
 }
 
+export function validateUpdateChecklistTemplateResponse(v: UpdateChecklistTemplateResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface AddItemToChecklistTemplateRequest {
-roleId?: string;
-title?: string;
+roleId: string;
+title: string;
 description?: string;
 assigneeRole?: string;
 dueOffsetDays?: number;
@@ -339,6 +403,14 @@ if (v.requiresAttachment !== undefined) { out.requires_attachment = v.requiresAt
 return out;
 }
 
+export function validateAddItemToChecklistTemplateRequest(v: AddItemToChecklistTemplateRequest): string[] {
+const violations: string[] = [];
+if (!(v.roleId !== undefined && v.roleId !== null)) violations.push("role_id is required");
+if (v.roleId !== undefined && v.roleId !== null && !(Number(v.roleId) > 0)) violations.push("role_id violates @gt");
+if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+return violations;
+}
+
 export interface AddItemToChecklistTemplateResponse {
 item?: ChecklistItemPayload;
 }
@@ -356,8 +428,14 @@ if (v.item !== undefined) { out.item = encodeChecklistItemPayload(v.item); }
 return out;
 }
 
+export function validateAddItemToChecklistTemplateResponse(v: AddItemToChecklistTemplateResponse): string[] {
+const violations: string[] = [];
+if (v.item !== undefined && v.item !== null) violations.push(...validateChecklistItemPayload(v.item).map((message) => "item: " + message));
+return violations;
+}
+
 export interface ListEmployeeChecklistsRequest {
-employeeId?: string;
+employeeId: string;
 limit?: number;
 offset?: number;
 }
@@ -377,6 +455,13 @@ if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.limit !== undefined) { out.limit = v.limit; }
 if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
+}
+
+export function validateListEmployeeChecklistsRequest(v: ListEmployeeChecklistsRequest): string[] {
+const violations: string[] = [];
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+return violations;
 }
 
 export interface ListEmployeeChecklistsResponse {
@@ -405,8 +490,14 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListEmployeeChecklistsResponse(v: ListEmployeeChecklistsResponse): string[] {
+const violations: string[] = [];
+if (v.checklists !== undefined && v.checklists !== null) for (const item of v.checklists) violations.push(...validateEmployeeChecklistPayload(item).map((message) => "checklists: " + message));
+return violations;
+}
+
 export interface GetEmployeeChecklistRequest {
-employeeId?: string;
+employeeId: string;
 }
 
 export function decodeGetEmployeeChecklistRequest(v: any): GetEmployeeChecklistRequest {
@@ -420,6 +511,13 @@ export function encodeGetEmployeeChecklistRequest(v: GetEmployeeChecklistRequest
 const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 return out;
+}
+
+export function validateGetEmployeeChecklistRequest(v: GetEmployeeChecklistRequest): string[] {
+const violations: string[] = [];
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+return violations;
 }
 
 export interface GetEmployeeChecklistResponse {
@@ -439,10 +537,16 @@ if (v.checklist !== undefined) { out.checklist = encodeEmployeeChecklistPayload(
 return out;
 }
 
+export function validateGetEmployeeChecklistResponse(v: GetEmployeeChecklistResponse): string[] {
+const violations: string[] = [];
+if (v.checklist !== undefined && v.checklist !== null) violations.push(...validateEmployeeChecklistPayload(v.checklist).map((message) => "checklist: " + message));
+return violations;
+}
+
 export interface TriggerChecklistRequest {
-employeeId?: string;
-templateId?: string;
-triggerDate?: string;
+employeeId: string;
+templateId: string;
+triggerDate: string;
 }
 
 export function decodeTriggerChecklistRequest(v: any): TriggerChecklistRequest {
@@ -462,6 +566,17 @@ if (v.triggerDate !== undefined) { out.trigger_date = v.triggerDate; }
 return out;
 }
 
+export function validateTriggerChecklistRequest(v: TriggerChecklistRequest): string[] {
+const violations: string[] = [];
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.templateId !== undefined && v.templateId !== null)) violations.push("template_id is required");
+if (v.templateId !== undefined && v.templateId !== null && !(Number(v.templateId) > 0)) violations.push("template_id violates @gt");
+if (!(v.triggerDate !== undefined && v.triggerDate !== null) || v.triggerDate === "") violations.push("trigger_date is required");
+if (v.triggerDate !== undefined && v.triggerDate !== null && !(new RegExp("^[0-9]{4}-[0-9]{2}-[0-9]{2}$")).test(v.triggerDate)) violations.push("trigger_date has invalid format");
+return violations;
+}
+
 export interface TriggerChecklistResponse {
 checklist?: EmployeeChecklistPayload;
 }
@@ -479,6 +594,12 @@ if (v.checklist !== undefined) { out.checklist = encodeEmployeeChecklistPayload(
 return out;
 }
 
+export function validateTriggerChecklistResponse(v: TriggerChecklistResponse): string[] {
+const violations: string[] = [];
+if (v.checklist !== undefined && v.checklist !== null) violations.push(...validateEmployeeChecklistPayload(v.checklist).map((message) => "checklist: " + message));
+return violations;
+}
+
 export interface CompleteChecklistItemRequest {
 }
 
@@ -491,6 +612,11 @@ return {
 export function encodeCompleteChecklistItemRequest(v: CompleteChecklistItemRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateCompleteChecklistItemRequest(v: CompleteChecklistItemRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface CompleteChecklistItemResponse {
@@ -508,5 +634,10 @@ export function encodeCompleteChecklistItemResponse(v: CompleteChecklistItemResp
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateCompleteChecklistItemResponse(v: CompleteChecklistItemResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

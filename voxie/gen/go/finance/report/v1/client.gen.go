@@ -22,6 +22,11 @@ func NewReportServiceClient(baseURL string) *ReportServiceClient {
 }
 
 func (c *ReportServiceClient) GetPLReport(ctx context.Context, req *GetPLReportRequest) (*GetPLReportResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/report/v1/pl"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -54,6 +59,11 @@ func (c *ReportServiceClient) GetPLReport(ctx context.Context, req *GetPLReportR
 }
 
 func (c *ReportServiceClient) GetTaxReport(ctx context.Context, req *GetTaxReportRequest) (*GetTaxReportResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/report/v1/tax"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -86,6 +96,11 @@ func (c *ReportServiceClient) GetTaxReport(ctx context.Context, req *GetTaxRepor
 }
 
 func (c *ReportServiceClient) ListExpenseCategoryDetails(ctx context.Context, req *ListExpenseCategoryDetailsRequest) (*ListExpenseCategoryDetailsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/report/v1/expense-categories"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -116,6 +131,11 @@ func (c *ReportServiceClient) ListExpenseCategoryDetails(ctx context.Context, re
 }
 
 func (c *ReportServiceClient) CreateExpenseCategoryDetail(ctx context.Context, req *CreateExpenseCategoryDetailRequest) (*CreateExpenseCategoryDetailResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/report/v1/expense-categories"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -147,6 +167,11 @@ func (c *ReportServiceClient) CreateExpenseCategoryDetail(ctx context.Context, r
 }
 
 func (c *ReportServiceClient) ListTaxConfig(ctx context.Context, req *ListTaxConfigRequest) (*ListTaxConfigResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/report/v1/tax-config"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -177,6 +202,11 @@ func (c *ReportServiceClient) ListTaxConfig(ctx context.Context, req *ListTaxCon
 }
 
 func (c *ReportServiceClient) CreateTaxConfig(ctx context.Context, req *CreateTaxConfigRequest) (*CreateTaxConfigResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/report/v1/tax-config"
 	body, err := json.Marshal(req)
 	if err != nil {

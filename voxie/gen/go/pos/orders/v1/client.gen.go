@@ -24,6 +24,11 @@ func NewOrderServiceClient(baseURL string) *OrderServiceClient {
 }
 
 func (c *OrderServiceClient) ListOrders(ctx context.Context, req *ListOrdersRequest) (*ListOrdersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/v1/orders"
 	query := url.Values{}
 	query.Set("session_id", strconv.FormatInt(int64(req.SessionId), 10))
@@ -61,6 +66,11 @@ func (c *OrderServiceClient) ListOrders(ctx context.Context, req *ListOrdersRequ
 }
 
 func (c *OrderServiceClient) CreateOrder(ctx context.Context, req *CreateOrderRequest) (*CreateOrderResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/v1/orders"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -92,6 +102,11 @@ func (c *OrderServiceClient) CreateOrder(ctx context.Context, req *CreateOrderRe
 }
 
 func (c *OrderServiceClient) CreatePublicOrder(ctx context.Context, req *CreatePublicOrderRequest) (*CreatePublicOrderResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/v1/orders/public"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -123,6 +138,11 @@ func (c *OrderServiceClient) CreatePublicOrder(ctx context.Context, req *CreateP
 }
 
 func (c *OrderServiceClient) GetPublicOrderStatus(ctx context.Context, req *GetPublicOrderStatusRequest) (*GetPublicOrderStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/v1/orders/{order_id}/public-status"
 	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
 	query := url.Values{}
@@ -155,6 +175,11 @@ func (c *OrderServiceClient) GetPublicOrderStatus(ctx context.Context, req *GetP
 }
 
 func (c *OrderServiceClient) GetOrderDetail(ctx context.Context, req *GetOrderDetailRequest) (*GetOrderDetailResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/v1/orders/{order_id}"
 	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
 	query := url.Values{}
@@ -186,9 +211,14 @@ func (c *OrderServiceClient) GetOrderDetail(ctx context.Context, req *GetOrderDe
 }
 
 func (c *OrderServiceClient) UpdateOrderStatus(ctx context.Context, req *UpdateOrderStatusRequest) (*UpdateOrderStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/v1/orders/{order_id}/status"
 	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -218,6 +248,11 @@ func (c *OrderServiceClient) UpdateOrderStatus(ctx context.Context, req *UpdateO
 }
 
 func (c *OrderServiceClient) VoidOrder(ctx context.Context, req *VoidOrderRequest) (*VoidOrderResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/v1/orders/{order_id}/void"
 	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
 	body, err := json.Marshal(req)

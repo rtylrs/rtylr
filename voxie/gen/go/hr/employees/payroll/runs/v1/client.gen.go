@@ -23,6 +23,11 @@ func NewRunsServiceClient(baseURL string) *RunsServiceClient {
 }
 
 func (c *RunsServiceClient) ListPayrollRuns(ctx context.Context, req *ListPayrollRunsRequest) (*ListPayrollRunsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/employees/payroll/runs/v1/runs"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *RunsServiceClient) ListPayrollRuns(ctx context.Context, req *ListPayrol
 }
 
 func (c *RunsServiceClient) TriggerPayrollRun(ctx context.Context, req *TriggerPayrollRunRequest) (*TriggerPayrollRunResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/employees/payroll/runs/v1/runs/trigger"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *RunsServiceClient) TriggerPayrollRun(ctx context.Context, req *TriggerP
 }
 
 func (c *RunsServiceClient) ApprovePayrollRun(ctx context.Context, req *ApprovePayrollRunRequest) (*ApprovePayrollRunResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/employees/payroll/runs/v1/runs/{id}/approve"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -116,6 +131,11 @@ func (c *RunsServiceClient) ApprovePayrollRun(ctx context.Context, req *ApproveP
 }
 
 func (c *RunsServiceClient) ExportPayroll(ctx context.Context, req *ExportPayrollRequest) (*ExportPayrollResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/employees/payroll/runs/v1/runs/export"
 	body, err := json.Marshal(req)
 	if err != nil {

@@ -23,6 +23,11 @@ func NewReceiptServiceClient(baseURL string) *ReceiptServiceClient {
 }
 
 func (c *ReceiptServiceClient) ListReceipts(ctx context.Context, req *ListReceiptsRequest) (*ListReceiptsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/receipt/v1/receipts"
 	query := url.Values{}
 	query.Set("from", req.From)
@@ -55,6 +60,11 @@ func (c *ReceiptServiceClient) ListReceipts(ctx context.Context, req *ListReceip
 }
 
 func (c *ReceiptServiceClient) EmailReceipt(ctx context.Context, req *EmailReceiptRequest) (*EmailReceiptResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/receipt/v1/receipts/{id}/email"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

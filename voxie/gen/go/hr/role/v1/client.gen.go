@@ -22,6 +22,11 @@ func NewRoleServiceClient(baseURL string) *RoleServiceClient {
 }
 
 func (c *RoleServiceClient) CreateRole(ctx context.Context, req *CreateRoleRequest) (*CreateRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/role/v1/roles"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -53,9 +58,14 @@ func (c *RoleServiceClient) CreateRole(ctx context.Context, req *CreateRoleReque
 }
 
 func (c *RoleServiceClient) UpdateRole(ctx context.Context, req *UpdateRoleRequest) (*UpdateRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/role/v1/roles/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -85,6 +95,11 @@ func (c *RoleServiceClient) UpdateRole(ctx context.Context, req *UpdateRoleReque
 }
 
 func (c *RoleServiceClient) AssignRole(ctx context.Context, req *AssignRoleRequest) (*AssignRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/role/v1/roles/assign"
 	body, err := json.Marshal(req)
 	if err != nil {

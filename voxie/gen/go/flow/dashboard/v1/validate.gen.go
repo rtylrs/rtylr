@@ -21,9 +21,28 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *GetFlowDashboardRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.WorkspaceId <= 0 {
 		violations = append(violations, "workspace_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetFlowDashboardResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.MyTasks {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "my_tasks: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

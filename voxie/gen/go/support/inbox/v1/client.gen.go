@@ -22,6 +22,11 @@ func NewInboxServiceClient(baseURL string) *InboxServiceClient {
 }
 
 func (c *InboxServiceClient) ListInbox(ctx context.Context, req *ListInboxRequest) (*ListInboxResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/inbox/v1/inbox"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -54,6 +59,11 @@ func (c *InboxServiceClient) ListInbox(ctx context.Context, req *ListInboxReques
 }
 
 func (c *InboxServiceClient) GetUnreadCount(ctx context.Context, req *GetUnreadCountRequest) (*GetUnreadCountResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/inbox/v1/inbox/unread-count"
 	query := url.Values{}
 	if len(query) > 0 {

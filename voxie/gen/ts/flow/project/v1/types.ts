@@ -66,6 +66,11 @@ if (v.code !== undefined) { out.code = v.code; }
 return out;
 }
 
+export function validateProject(v: Project): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ProjectColumn {
 id?: string;
 projectId?: string;
@@ -102,6 +107,11 @@ if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
+}
+
+export function validateProjectColumn(v: ProjectColumn): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ProjectMember {
@@ -142,6 +152,11 @@ if (v.addedAt !== undefined) { out.added_at = v.addedAt; }
 return out;
 }
 
+export function validateProjectMember(v: ProjectMember): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListProjectsRequest {
 workspaceId?: string;
 page?: number;
@@ -171,6 +186,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListProjectsRequest(v: ListProjectsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListProjectsResponse {
 projects?: (Project)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -191,14 +211,21 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListProjectsResponse(v: ListProjectsResponse): string[] {
+const violations: string[] = [];
+if (v.projects !== undefined && v.projects !== null) for (const item of v.projects) violations.push(...validateProject(item).map((message) => "projects: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface CreateProjectRequest {
-workspaceId?: string;
-name?: string;
-description?: string;
-icon?: string;
-color?: string;
-startDate?: string;
-dueDate?: string;
+workspaceId: string;
+name: string;
+description: string;
+icon: string;
+color: string;
+startDate: string;
+dueDate: string;
 }
 
 export function decodeCreateProjectRequest(v: any): CreateProjectRequest {
@@ -226,6 +253,19 @@ if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
 return out;
 }
 
+export function validateCreateProjectRequest(v: CreateProjectRequest): string[] {
+const violations: string[] = [];
+if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.icon !== undefined && v.icon !== null) || v.icon === "") violations.push("icon is required");
+if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
+if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
+return violations;
+}
+
 export interface CreateProjectResponse {
 project?: Project;
 }
@@ -243,14 +283,20 @@ if (v.project !== undefined) { out.project = encodeProject(v.project); }
 return out;
 }
 
+export function validateCreateProjectResponse(v: CreateProjectResponse): string[] {
+const violations: string[] = [];
+if (v.project !== undefined && v.project !== null) violations.push(...validateProject(v.project).map((message) => "project: " + message));
+return violations;
+}
+
 export interface UpdateProjectBody {
-name?: string;
-description?: string;
-icon?: string;
-color?: string;
-status?: string;
-startDate?: string;
-dueDate?: string;
+name: string;
+description: string;
+icon: string;
+color: string;
+status: string;
+startDate: string;
+dueDate: string;
 }
 
 export function decodeUpdateProjectBody(v: any): UpdateProjectBody {
@@ -278,8 +324,20 @@ if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
 return out;
 }
 
+export function validateUpdateProjectBody(v: UpdateProjectBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.icon !== undefined && v.icon !== null) || v.icon === "") violations.push("icon is required");
+if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
+return violations;
+}
+
 export interface UpdateProjectRequest {
-id?: string;
+id: string;
 body?: UpdateProjectBody;
 }
 
@@ -296,6 +354,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateProjectBody(v.body); }
 return out;
+}
+
+export function validateUpdateProjectRequest(v: UpdateProjectRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateProjectBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateProjectResponse {
@@ -315,8 +381,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateProjectResponse(v: UpdateProjectResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteProjectRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteProjectRequest(v: any): DeleteProjectRequest {
@@ -330,6 +401,13 @@ export function encodeDeleteProjectRequest(v: DeleteProjectRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteProjectRequest(v: DeleteProjectRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteProjectResponse {
@@ -349,8 +427,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteProjectResponse(v: DeleteProjectResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListProjectColumnsRequest {
-projectId?: string;
+projectId: string;
 page?: number;
 limit?: number;
 sortBy?: string;
@@ -378,6 +461,13 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListProjectColumnsRequest(v: ListProjectColumnsRequest): string[] {
+const violations: string[] = [];
+if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
+if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+return violations;
+}
+
 export interface ListProjectColumnsResponse {
 columns?: (ProjectColumn)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -398,10 +488,17 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListProjectColumnsResponse(v: ListProjectColumnsResponse): string[] {
+const violations: string[] = [];
+if (v.columns !== undefined && v.columns !== null) for (const item of v.columns) violations.push(...validateProjectColumn(item).map((message) => "columns: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface CreateProjectColumnRequest {
-projectId?: string;
+projectId: string;
 workspaceId?: string;
-name?: string;
+name: string;
 color?: string;
 sortOrder?: number;
 }
@@ -427,6 +524,14 @@ if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
 return out;
 }
 
+export function validateCreateProjectColumnRequest(v: CreateProjectColumnRequest): string[] {
+const violations: string[] = [];
+if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
+if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateProjectColumnResponse {
 column?: ProjectColumn;
 }
@@ -444,9 +549,15 @@ if (v.column !== undefined) { out.column = encodeProjectColumn(v.column); }
 return out;
 }
 
+export function validateCreateProjectColumnResponse(v: CreateProjectColumnResponse): string[] {
+const violations: string[] = [];
+if (v.column !== undefined && v.column !== null) violations.push(...validateProjectColumn(v.column).map((message) => "column: " + message));
+return violations;
+}
+
 export interface UpdateProjectColumnRequest {
-id?: string;
-name?: string;
+id: string;
+name: string;
 color?: string;
 sortOrder?: number;
 }
@@ -470,6 +581,14 @@ if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
 return out;
 }
 
+export function validateUpdateProjectColumnRequest(v: UpdateProjectColumnRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface UpdateProjectColumnResponse {
 message?: string;
 }
@@ -487,8 +606,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateProjectColumnResponse(v: UpdateProjectColumnResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteProjectColumnRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteProjectColumnRequest(v: any): DeleteProjectColumnRequest {
@@ -502,6 +626,13 @@ export function encodeDeleteProjectColumnRequest(v: DeleteProjectColumnRequest):
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteProjectColumnRequest(v: DeleteProjectColumnRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteProjectColumnResponse {
@@ -521,8 +652,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteProjectColumnResponse(v: DeleteProjectColumnResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface MoveTaskToColumnRequest {
-taskId?: string;
+taskId: string;
 columnId?: string;
 }
 
@@ -539,6 +675,13 @@ const out: Record<string, unknown> = {};
 if (v.taskId !== undefined) { out.task_id = v.taskId; }
 if (v.columnId !== undefined) { out.column_id = v.columnId; }
 return out;
+}
+
+export function validateMoveTaskToColumnRequest(v: MoveTaskToColumnRequest): string[] {
+const violations: string[] = [];
+if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
+if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+return violations;
 }
 
 export interface MoveTaskToColumnResponse {
@@ -558,8 +701,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateMoveTaskToColumnResponse(v: MoveTaskToColumnResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListProjectMembersRequest {
-projectId?: string;
+projectId: string;
 page?: number;
 limit?: number;
 sortBy?: string;
@@ -587,6 +735,13 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListProjectMembersRequest(v: ListProjectMembersRequest): string[] {
+const violations: string[] = [];
+if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
+if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+return violations;
+}
+
 export interface ListProjectMembersResponse {
 members?: (ProjectMember)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -607,9 +762,16 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListProjectMembersResponse(v: ListProjectMembersResponse): string[] {
+const violations: string[] = [];
+if (v.members !== undefined && v.members !== null) for (const item of v.members) violations.push(...validateProjectMember(item).map((message) => "members: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface AddProjectMemberRequest {
-projectId?: string;
-userId?: string;
+projectId: string;
+userId: string;
 role?: string;
 }
 
@@ -630,6 +792,15 @@ if (v.role !== undefined) { out.role = v.role; }
 return out;
 }
 
+export function validateAddProjectMemberRequest(v: AddProjectMemberRequest): string[] {
+const violations: string[] = [];
+if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
+if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+return violations;
+}
+
 export interface AddProjectMemberResponse {
 message?: string;
 }
@@ -647,9 +818,14 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateAddProjectMemberResponse(v: AddProjectMemberResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface RemoveProjectMemberRequest {
-projectId?: string;
-userId?: string;
+projectId: string;
+userId: string;
 }
 
 export function decodeRemoveProjectMemberRequest(v: any): RemoveProjectMemberRequest {
@@ -665,6 +841,15 @@ const out: Record<string, unknown> = {};
 if (v.projectId !== undefined) { out.project_id = v.projectId; }
 if (v.userId !== undefined) { out.user_id = v.userId; }
 return out;
+}
+
+export function validateRemoveProjectMemberRequest(v: RemoveProjectMemberRequest): string[] {
+const violations: string[] = [];
+if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
+if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+return violations;
 }
 
 export interface RemoveProjectMemberResponse {
@@ -684,10 +869,15 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateRemoveProjectMemberResponse(v: RemoveProjectMemberResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateProjectMemberRoleRequest {
-projectId?: string;
-userId?: string;
-role?: string;
+projectId: string;
+userId: string;
+role: string;
 }
 
 export function decodeUpdateProjectMemberRoleRequest(v: any): UpdateProjectMemberRoleRequest {
@@ -707,6 +897,16 @@ if (v.role !== undefined) { out.role = v.role; }
 return out;
 }
 
+export function validateUpdateProjectMemberRoleRequest(v: UpdateProjectMemberRoleRequest): string[] {
+const violations: string[] = [];
+if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
+if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
+return violations;
+}
+
 export interface UpdateProjectMemberRoleResponse {
 message?: string;
 }
@@ -724,9 +924,14 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateProjectMemberRoleResponse(v: UpdateProjectMemberRoleResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface InviteProjectMemberRequest {
-projectId?: string;
-email?: string;
+projectId: string;
+email: string;
 role?: string;
 }
 
@@ -747,6 +952,14 @@ if (v.role !== undefined) { out.role = v.role; }
 return out;
 }
 
+export function validateInviteProjectMemberRequest(v: InviteProjectMemberRequest): string[] {
+const violations: string[] = [];
+if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
+if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
+return violations;
+}
+
 export interface InviteProjectMemberResponse {
 message?: string;
 }
@@ -764,9 +977,14 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateInviteProjectMemberResponse(v: InviteProjectMemberResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface TransferProjectOwnershipRequest {
-projectId?: string;
-newOwnerId?: string;
+projectId: string;
+newOwnerId: string;
 }
 
 export function decodeTransferProjectOwnershipRequest(v: any): TransferProjectOwnershipRequest {
@@ -782,6 +1000,15 @@ const out: Record<string, unknown> = {};
 if (v.projectId !== undefined) { out.project_id = v.projectId; }
 if (v.newOwnerId !== undefined) { out.new_owner_id = v.newOwnerId; }
 return out;
+}
+
+export function validateTransferProjectOwnershipRequest(v: TransferProjectOwnershipRequest): string[] {
+const violations: string[] = [];
+if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
+if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (!(v.newOwnerId !== undefined && v.newOwnerId !== null)) violations.push("new_owner_id is required");
+if (v.newOwnerId !== undefined && v.newOwnerId !== null && !(Number(v.newOwnerId) > 0)) violations.push("new_owner_id violates @gt");
+return violations;
 }
 
 export interface TransferProjectOwnershipResponse {
@@ -801,9 +1028,14 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateTransferProjectOwnershipResponse(v: TransferProjectOwnershipResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface MoveProjectRequest {
-projectId?: string;
-workspaceId?: string;
+projectId: string;
+workspaceId: string;
 }
 
 export function decodeMoveProjectRequest(v: any): MoveProjectRequest {
@@ -821,6 +1053,15 @@ if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
 return out;
 }
 
+export function validateMoveProjectRequest(v: MoveProjectRequest): string[] {
+const violations: string[] = [];
+if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
+if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+return violations;
+}
+
 export interface MoveProjectResponse {
 message?: string;
 }
@@ -836,5 +1077,10 @@ export function encodeMoveProjectResponse(v: MoveProjectResponse): Record<string
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateMoveProjectResponse(v: MoveProjectResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

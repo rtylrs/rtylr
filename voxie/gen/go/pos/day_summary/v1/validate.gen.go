@@ -21,10 +21,24 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *DaySummaryRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Date == "" {
 		violations = append(violations, "date is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DaySummaryResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

@@ -20,6 +20,11 @@ if (v.permissionLevel !== undefined) { out.permission_level = v.permissionLevel;
 return out;
 }
 
+export function validateResourcePermission(v: ResourcePermission): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GroupSummary {
 id?: string;
 name?: string;
@@ -41,6 +46,11 @@ if (v.id !== undefined) { out.id = v.id; }
 if (v.name !== undefined) { out.name = v.name; }
 if (v.color !== undefined) { out.color = v.color; }
 return out;
+}
+
+export function validateGroupSummary(v: GroupSummary): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface Group {
@@ -84,6 +94,12 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateGroup(v: Group): string[] {
+const violations: string[] = [];
+if (v.resourcePermissions !== undefined && v.resourcePermissions !== null) for (const item of v.resourcePermissions) violations.push(...validateResourcePermission(item).map((message) => "resource_permissions: " + message));
+return violations;
+}
+
 export interface GroupMember {
 userId?: string;
 email?: string;
@@ -108,6 +124,11 @@ if (v.email !== undefined) { out.email = v.email; }
 if (v.fullName !== undefined) { out.full_name = v.fullName; }
 if (v.addedAt !== undefined) { out.added_at = v.addedAt; }
 return out;
+}
+
+export function validateGroupMember(v: GroupMember): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GroupDetail {
@@ -154,6 +175,13 @@ if (v.members !== undefined) { out.members = (v.members as any[]).map(encodeGrou
 return out;
 }
 
+export function validateGroupDetail(v: GroupDetail): string[] {
+const violations: string[] = [];
+if (v.resourcePermissions !== undefined && v.resourcePermissions !== null) for (const item of v.resourcePermissions) violations.push(...validateResourcePermission(item).map((message) => "resource_permissions: " + message));
+if (v.members !== undefined && v.members !== null) for (const item of v.members) violations.push(...validateGroupMember(item).map((message) => "members: " + message));
+return violations;
+}
+
 export interface ListGroupsRequest {
 }
 
@@ -166,6 +194,11 @@ return {
 export function encodeListGroupsRequest(v: ListGroupsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListGroupsRequest(v: ListGroupsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListGroupsResponse {
@@ -185,8 +218,14 @@ if (v.groups !== undefined) { out.groups = (v.groups as any[]).map(encodeGroup);
 return out;
 }
 
+export function validateListGroupsResponse(v: ListGroupsResponse): string[] {
+const violations: string[] = [];
+if (v.groups !== undefined && v.groups !== null) for (const item of v.groups) violations.push(...validateGroup(item).map((message) => "groups: " + message));
+return violations;
+}
+
 export interface CreateGroupRequest {
-name?: string;
+name: string;
 description?: string;
 color?: string;
 resourcePermissions?: (ResourcePermission)[];
@@ -211,6 +250,13 @@ if (v.resourcePermissions !== undefined) { out.resource_permissions = (v.resourc
 return out;
 }
 
+export function validateCreateGroupRequest(v: CreateGroupRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.resourcePermissions !== undefined && v.resourcePermissions !== null) for (const item of v.resourcePermissions) violations.push(...validateResourcePermission(item).map((message) => "resource_permissions: " + message));
+return violations;
+}
+
 export interface CreateGroupResponse {
 group?: Group;
 }
@@ -228,8 +274,14 @@ if (v.group !== undefined) { out.group = encodeGroup(v.group); }
 return out;
 }
 
+export function validateCreateGroupResponse(v: CreateGroupResponse): string[] {
+const violations: string[] = [];
+if (v.group !== undefined && v.group !== null) violations.push(...validateGroup(v.group).map((message) => "group: " + message));
+return violations;
+}
+
 export interface GetGroupDetailRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetGroupDetailRequest(v: any): GetGroupDetailRequest {
@@ -243,6 +295,13 @@ export function encodeGetGroupDetailRequest(v: GetGroupDetailRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetGroupDetailRequest(v: GetGroupDetailRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetGroupDetailResponse {
@@ -262,9 +321,15 @@ if (v.group !== undefined) { out.group = encodeGroupDetail(v.group); }
 return out;
 }
 
+export function validateGetGroupDetailResponse(v: GetGroupDetailResponse): string[] {
+const violations: string[] = [];
+if (v.group !== undefined && v.group !== null) violations.push(...validateGroupDetail(v.group).map((message) => "group: " + message));
+return violations;
+}
+
 export interface UpdateGroupRequest {
-id?: string;
-name?: string;
+id: string;
+name: string;
 description?: string;
 color?: string;
 resourcePermissions?: (ResourcePermission)[];
@@ -291,6 +356,15 @@ if (v.resourcePermissions !== undefined) { out.resource_permissions = (v.resourc
 return out;
 }
 
+export function validateUpdateGroupRequest(v: UpdateGroupRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.resourcePermissions !== undefined && v.resourcePermissions !== null) for (const item of v.resourcePermissions) violations.push(...validateResourcePermission(item).map((message) => "resource_permissions: " + message));
+return violations;
+}
+
 export interface UpdateGroupResponse {
 group?: Group;
 }
@@ -308,8 +382,14 @@ if (v.group !== undefined) { out.group = encodeGroup(v.group); }
 return out;
 }
 
+export function validateUpdateGroupResponse(v: UpdateGroupResponse): string[] {
+const violations: string[] = [];
+if (v.group !== undefined && v.group !== null) violations.push(...validateGroup(v.group).map((message) => "group: " + message));
+return violations;
+}
+
 export interface DeleteGroupRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteGroupRequest(v: any): DeleteGroupRequest {
@@ -323,6 +403,13 @@ export function encodeDeleteGroupRequest(v: DeleteGroupRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteGroupRequest(v: DeleteGroupRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteGroupResponse {
@@ -342,8 +429,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteGroupResponse(v: DeleteGroupResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface AddGroupMembersRequest {
-id?: string;
+id: string;
 userIds?: (string)[];
 }
 
@@ -360,6 +452,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.userIds !== undefined) { out.user_ids = v.userIds; }
 return out;
+}
+
+export function validateAddGroupMembersRequest(v: AddGroupMembersRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.userIds !== undefined && v.userIds !== null && v.userIds.length < 1) violations.push("user_ids must contain at least 1 items");
+return violations;
 }
 
 export interface AddGroupMembersResponse {
@@ -382,9 +482,14 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateAddGroupMembersResponse(v: AddGroupMembersResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface RemoveGroupMemberRequest {
-id?: string;
-userId?: string;
+id: string;
+userId: string;
 }
 
 export function decodeRemoveGroupMemberRequest(v: any): RemoveGroupMemberRequest {
@@ -400,6 +505,15 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.userId !== undefined) { out.user_id = v.userId; }
 return out;
+}
+
+export function validateRemoveGroupMemberRequest(v: RemoveGroupMemberRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+return violations;
 }
 
 export interface RemoveGroupMemberResponse {
@@ -419,8 +533,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateRemoveGroupMemberResponse(v: RemoveGroupMemberResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetUserGroupsRequest {
-userId?: string;
+userId: string;
 }
 
 export function decodeGetUserGroupsRequest(v: any): GetUserGroupsRequest {
@@ -434,6 +553,13 @@ export function encodeGetUserGroupsRequest(v: GetUserGroupsRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.userId !== undefined) { out.user_id = v.userId; }
 return out;
+}
+
+export function validateGetUserGroupsRequest(v: GetUserGroupsRequest): string[] {
+const violations: string[] = [];
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+return violations;
 }
 
 export interface GetUserGroupsResponse {
@@ -451,5 +577,11 @@ export function encodeGetUserGroupsResponse(v: GetUserGroupsResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.groups !== undefined) { out.groups = (v.groups as any[]).map(encodeGroupSummary); }
 return out;
+}
+
+export function validateGetUserGroupsResponse(v: GetUserGroupsResponse): string[] {
+const violations: string[] = [];
+if (v.groups !== undefined && v.groups !== null) for (const item of v.groups) violations.push(...validateGroupSummary(item).map((message) => "groups: " + message));
+return violations;
 }
 

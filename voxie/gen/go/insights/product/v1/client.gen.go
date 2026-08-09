@@ -22,6 +22,11 @@ func NewProductServiceClient(baseURL string) *ProductServiceClient {
 }
 
 func (c *ProductServiceClient) GetBestSellers(ctx context.Context, req *GetBestSellersRequest) (*GetBestSellersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/product/v1/best-sellers"
 	query := url.Values{}
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
@@ -53,6 +58,11 @@ func (c *ProductServiceClient) GetBestSellers(ctx context.Context, req *GetBestS
 }
 
 func (c *ProductServiceClient) GetCategoryPerformance(ctx context.Context, req *GetCategoryPerformanceRequest) (*GetCategoryPerformanceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/product/v1/categories"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -83,6 +93,11 @@ func (c *ProductServiceClient) GetCategoryPerformance(ctx context.Context, req *
 }
 
 func (c *ProductServiceClient) GetProductMargins(ctx context.Context, req *GetProductMarginsRequest) (*GetProductMarginsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/product/v1/margins"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -113,6 +128,11 @@ func (c *ProductServiceClient) GetProductMargins(ctx context.Context, req *GetPr
 }
 
 func (c *ProductServiceClient) GetSlowMovers(ctx context.Context, req *GetSlowMoversRequest) (*GetSlowMoversResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/product/v1/slow-movers"
 	query := url.Values{}
 	query.Set("days", strconv.FormatInt(int64(req.Days), 10))
@@ -144,6 +164,11 @@ func (c *ProductServiceClient) GetSlowMovers(ctx context.Context, req *GetSlowMo
 }
 
 func (c *ProductServiceClient) GetProductPerformance(ctx context.Context, req *GetProductPerformanceRequest) (*GetProductPerformanceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/product/v1/performance"
 	query := url.Values{}
 	if len(query) > 0 {

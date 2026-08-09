@@ -20,7 +20,64 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Workspace) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *WorkspaceMember) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListWorkspacesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListWorkspacesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Workspaces {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "workspaces: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateWorkspaceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -40,7 +97,26 @@ func (m *CreateWorkspaceRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateWorkspaceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Workspace != nil {
+		if err := m.Workspace.Validate(); err != nil {
+			violations = append(violations, "workspace: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateWorkspaceBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -61,10 +137,29 @@ func (m *UpdateWorkspaceBody) Validate() error {
 }
 
 func (m *UpdateWorkspaceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateWorkspaceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -72,6 +167,9 @@ func (m *UpdateWorkspaceRequest) Validate() error {
 }
 
 func (m *DeleteWorkspaceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -82,10 +180,45 @@ func (m *DeleteWorkspaceRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteWorkspaceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ListWorkspaceMembersRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.WorkspaceId <= 0 {
 		violations = append(violations, "workspace_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListWorkspaceMembersResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Members {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "members: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -94,6 +227,9 @@ func (m *ListWorkspaceMembersRequest) Validate() error {
 }
 
 func (m *AddWorkspaceMemberRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.WorkspaceId <= 0 {
 		violations = append(violations, "workspace_id must be greater than 0")
@@ -104,6 +240,17 @@ func (m *AddWorkspaceMemberRequest) Validate() error {
 	if m.Role == "" {
 		violations = append(violations, "role is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AddWorkspaceMemberResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -111,6 +258,9 @@ func (m *AddWorkspaceMemberRequest) Validate() error {
 }
 
 func (m *RemoveWorkspaceMemberRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.WorkspaceId <= 0 {
 		violations = append(violations, "workspace_id must be greater than 0")
@@ -124,7 +274,21 @@ func (m *RemoveWorkspaceMemberRequest) Validate() error {
 	return nil
 }
 
+func (m *RemoveWorkspaceMemberResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateWorkspaceMemberRoleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.WorkspaceId <= 0 {
 		violations = append(violations, "workspace_id must be greater than 0")
@@ -135,6 +299,17 @@ func (m *UpdateWorkspaceMemberRoleRequest) Validate() error {
 	if m.Role == "" {
 		violations = append(violations, "role is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateWorkspaceMemberRoleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

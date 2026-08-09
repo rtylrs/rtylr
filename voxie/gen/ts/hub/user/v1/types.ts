@@ -14,6 +14,11 @@ const out: Record<string, unknown> = {};
 return out;
 }
 
+export function validateGetMeRequest(v: GetMeRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetMeResponse {
 id?: string;
 email?: string;
@@ -58,8 +63,13 @@ if (v.onboarded !== undefined) { out.onboarded = v.onboarded; }
 return out;
 }
 
+export function validateGetMeResponse(v: GetMeResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateProfileRequest {
-name?: string;
+name: string;
 email?: string;
 }
 
@@ -76,6 +86,13 @@ const out: Record<string, unknown> = {};
 if (v.name !== undefined) { out.name = v.name; }
 if (v.email !== undefined) { out.email = v.email; }
 return out;
+}
+
+export function validateUpdateProfileRequest(v: UpdateProfileRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+return violations;
 }
 
 export interface UpdateProfileResponse {
@@ -95,9 +112,15 @@ if (v.user !== undefined) { out.user = encodeGetMeResponse(v.user); }
 return out;
 }
 
+export function validateUpdateProfileResponse(v: UpdateProfileResponse): string[] {
+const violations: string[] = [];
+if (v.user !== undefined && v.user !== null) violations.push(...validateGetMeResponse(v.user).map((message) => "user: " + message));
+return violations;
+}
+
 export interface ChangePasswordRequest {
-currentPassword?: string;
-newPassword?: string;
+currentPassword: string;
+newPassword: string;
 }
 
 export function decodeChangePasswordRequest(v: any): ChangePasswordRequest {
@@ -115,6 +138,13 @@ if (v.newPassword !== undefined) { out.new_password = v.newPassword; }
 return out;
 }
 
+export function validateChangePasswordRequest(v: ChangePasswordRequest): string[] {
+const violations: string[] = [];
+if (!(v.currentPassword !== undefined && v.currentPassword !== null) || v.currentPassword === "") violations.push("current_password is required");
+if (!(v.newPassword !== undefined && v.newPassword !== null) || v.newPassword === "") violations.push("new_password is required");
+return violations;
+}
+
 export interface ChangePasswordResponse {
 }
 
@@ -129,8 +159,13 @@ const out: Record<string, unknown> = {};
 return out;
 }
 
+export function validateChangePasswordResponse(v: ChangePasswordResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface SwitchBusinessRequest {
-businessId?: string;
+businessId: string;
 }
 
 export function decodeSwitchBusinessRequest(v: any): SwitchBusinessRequest {
@@ -144,6 +179,13 @@ export function encodeSwitchBusinessRequest(v: SwitchBusinessRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.businessId !== undefined) { out.business_id = v.businessId; }
 return out;
+}
+
+export function validateSwitchBusinessRequest(v: SwitchBusinessRequest): string[] {
+const violations: string[] = [];
+if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
+if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+return violations;
 }
 
 export interface SwitchBusinessResponse {
@@ -161,5 +203,10 @@ export function encodeSwitchBusinessResponse(v: SwitchBusinessResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.token !== undefined) { out.token = v.token; }
 return out;
+}
+
+export function validateSwitchBusinessResponse(v: SwitchBusinessResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

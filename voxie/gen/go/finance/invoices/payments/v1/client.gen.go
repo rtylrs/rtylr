@@ -22,6 +22,11 @@ func NewInvoicePaymentServiceClient(baseURL string) *InvoicePaymentServiceClient
 }
 
 func (c *InvoicePaymentServiceClient) RecordPayment(ctx context.Context, req *RecordPaymentRequest) (*RecordPaymentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/invoices/payments/v1/invoices/{invoice_id}/payment"
 	path = strings.ReplaceAll(path, "{invoice_id}", fmt.Sprintf("%v", req.InvoiceId))
 	body, err := json.Marshal(req)

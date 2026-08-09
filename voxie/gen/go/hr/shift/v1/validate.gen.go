@@ -20,7 +20,59 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *ShiftPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ShiftAssignmentPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListShiftsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListShiftsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Shifts {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "shifts: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateShiftRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.LocationId <= 0 {
 		violations = append(violations, "location_id must be greater than 0")
@@ -43,7 +95,26 @@ func (m *CreateShiftRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateShiftResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Shift != nil {
+		if err := m.Shift.Validate(); err != nil {
+			violations = append(violations, "shift: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateShiftAssignmentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.EmployeeId <= 0 {
 		violations = append(violations, "employee_id must be greater than 0")
@@ -60,7 +131,26 @@ func (m *CreateShiftAssignmentRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateShiftAssignmentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Assignment != nil {
+		if err := m.Assignment.Validate(); err != nil {
+			violations = append(violations, "assignment: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetRosterRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.LocationId <= 0 {
 		violations = append(violations, "location_id must be greater than 0")
@@ -74,7 +164,26 @@ func (m *GetRosterRequest) Validate() error {
 	return nil
 }
 
+func (m *GetRosterResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Assignments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "assignments: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *PublishRosterRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.LocationId <= 0 {
 		violations = append(violations, "location_id must be greater than 0")
@@ -82,6 +191,17 @@ func (m *PublishRosterRequest) Validate() error {
 	if m.WeekStart == "" {
 		violations = append(violations, "week_start is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *PublishRosterResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

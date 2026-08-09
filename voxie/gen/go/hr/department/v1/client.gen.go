@@ -23,6 +23,11 @@ func NewDepartmentServiceClient(baseURL string) *DepartmentServiceClient {
 }
 
 func (c *DepartmentServiceClient) ListDepartments(ctx context.Context, req *ListDepartmentsRequest) (*ListDepartmentsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/department/v1/departments"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *DepartmentServiceClient) ListDepartments(ctx context.Context, req *List
 }
 
 func (c *DepartmentServiceClient) CreateDepartment(ctx context.Context, req *CreateDepartmentRequest) (*CreateDepartmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/department/v1/departments"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,9 +94,14 @@ func (c *DepartmentServiceClient) CreateDepartment(ctx context.Context, req *Cre
 }
 
 func (c *DepartmentServiceClient) UpdateDepartment(ctx context.Context, req *UpdateDepartmentRequest) (*UpdateDepartmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/department/v1/departments/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -116,6 +131,11 @@ func (c *DepartmentServiceClient) UpdateDepartment(ctx context.Context, req *Upd
 }
 
 func (c *DepartmentServiceClient) DeleteDepartment(ctx context.Context, req *DeleteDepartmentRequest) (*DeleteDepartmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/department/v1/departments/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

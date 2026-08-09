@@ -21,6 +21,11 @@ if (v.color !== undefined) { out.color = v.color; }
 return out;
 }
 
+export function validateMilestoneProject(v: MilestoneProject): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface Milestone {
 id?: string;
 projectId?: string;
@@ -68,6 +73,12 @@ if (v.project !== undefined) { out.project = encodeMilestoneProject(v.project); 
 return out;
 }
 
+export function validateMilestone(v: Milestone): string[] {
+const violations: string[] = [];
+if (v.project !== undefined && v.project !== null) violations.push(...validateMilestoneProject(v.project).map((message) => "project: " + message));
+return violations;
+}
+
 export interface ListMilestonesRequest {
 projectId?: string;
 workspaceId?: string;
@@ -100,6 +111,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListMilestonesRequest(v: ListMilestonesRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListMilestonesResponse {
 milestones?: (Milestone)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -120,10 +136,17 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListMilestonesResponse(v: ListMilestonesResponse): string[] {
+const violations: string[] = [];
+if (v.milestones !== undefined && v.milestones !== null) for (const item of v.milestones) violations.push(...validateMilestone(item).map((message) => "milestones: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface CreateMilestoneRequest {
 projectId?: string;
 workspaceId?: string;
-name?: string;
+name: string;
 description?: string;
 targetDate?: string;
 }
@@ -149,6 +172,12 @@ if (v.targetDate !== undefined) { out.target_date = v.targetDate; }
 return out;
 }
 
+export function validateCreateMilestoneRequest(v: CreateMilestoneRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateMilestoneResponse {
 milestone?: Milestone;
 }
@@ -164,6 +193,12 @@ export function encodeCreateMilestoneResponse(v: CreateMilestoneResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.milestone !== undefined) { out.milestone = encodeMilestone(v.milestone); }
 return out;
+}
+
+export function validateCreateMilestoneResponse(v: CreateMilestoneResponse): string[] {
+const violations: string[] = [];
+if (v.milestone !== undefined && v.milestone !== null) violations.push(...validateMilestone(v.milestone).map((message) => "milestone: " + message));
+return violations;
 }
 
 export interface UpdateMilestoneRequest {
@@ -195,6 +230,11 @@ if (v.targetDate !== undefined) { out.target_date = v.targetDate; }
 return out;
 }
 
+export function validateUpdateMilestoneRequest(v: UpdateMilestoneRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateMilestoneResponse {
 }
 
@@ -207,5 +247,10 @@ return {
 export function encodeUpdateMilestoneResponse(v: UpdateMilestoneResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateUpdateMilestoneResponse(v: UpdateMilestoneResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

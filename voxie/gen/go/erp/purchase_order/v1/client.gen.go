@@ -24,6 +24,11 @@ func NewPurchaseOrderServiceClient(baseURL string) *PurchaseOrderServiceClient {
 }
 
 func (c *PurchaseOrderServiceClient) ListPurchaseOrders(ctx context.Context, req *ListPurchaseOrdersRequest) (*ListPurchaseOrdersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/purchase-order/v1/purchase-orders"
 	query := url.Values{}
 	query.Set("status", req.Status)
@@ -57,6 +62,11 @@ func (c *PurchaseOrderServiceClient) ListPurchaseOrders(ctx context.Context, req
 }
 
 func (c *PurchaseOrderServiceClient) CreatePurchaseOrder(ctx context.Context, req *CreatePurchaseOrderRequest) (*CreatePurchaseOrderResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/purchase-order/v1/purchase-orders"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -88,6 +98,11 @@ func (c *PurchaseOrderServiceClient) CreatePurchaseOrder(ctx context.Context, re
 }
 
 func (c *PurchaseOrderServiceClient) GetPurchaseOrder(ctx context.Context, req *GetPurchaseOrderRequest) (*GetPurchaseOrderResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/purchase-order/v1/purchase-orders/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -119,9 +134,14 @@ func (c *PurchaseOrderServiceClient) GetPurchaseOrder(ctx context.Context, req *
 }
 
 func (c *PurchaseOrderServiceClient) UpdatePurchaseOrderStatus(ctx context.Context, req *UpdatePurchaseOrderStatusRequest) (*UpdatePurchaseOrderStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/purchase-order/v1/purchase-orders/{id}/status"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -151,6 +171,11 @@ func (c *PurchaseOrderServiceClient) UpdatePurchaseOrderStatus(ctx context.Conte
 }
 
 func (c *PurchaseOrderServiceClient) ApprovePurchaseOrder(ctx context.Context, req *ApprovePurchaseOrderRequest) (*ApprovePurchaseOrderResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/purchase-order/v1/purchase-orders/{id}/approve"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

@@ -41,6 +41,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateOneOnOne(v: OneOnOne): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListOneOnOnesRequest {
 }
 
@@ -53,6 +58,11 @@ return {
 export function encodeListOneOnOnesRequest(v: ListOneOnOnesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListOneOnOnesRequest(v: ListOneOnOnesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListOneOnOnesResponse {
@@ -72,10 +82,16 @@ if (v.oneOnOnes !== undefined) { out.one_on_ones = (v.oneOnOnes as any[]).map(en
 return out;
 }
 
+export function validateListOneOnOnesResponse(v: ListOneOnOnesResponse): string[] {
+const violations: string[] = [];
+if (v.oneOnOnes !== undefined && v.oneOnOnes !== null) for (const item of v.oneOnOnes) violations.push(...validateOneOnOne(item).map((message) => "one_on_ones: " + message));
+return violations;
+}
+
 export interface CreateOneOnOneRequest {
-managerId?: string;
-staffId?: string;
-scheduledAt?: string;
+managerId: string;
+staffId: string;
+scheduledAt: string;
 notes?: string;
 actionItems?: string;
 status?: string;
@@ -104,6 +120,16 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateCreateOneOnOneRequest(v: CreateOneOnOneRequest): string[] {
+const violations: string[] = [];
+if (!(v.managerId !== undefined && v.managerId !== null)) violations.push("manager_id is required");
+if (v.managerId !== undefined && v.managerId !== null && !(Number(v.managerId) > 0)) violations.push("manager_id violates @gt");
+if (!(v.staffId !== undefined && v.staffId !== null)) violations.push("staff_id is required");
+if (v.staffId !== undefined && v.staffId !== null && !(Number(v.staffId) > 0)) violations.push("staff_id violates @gt");
+if (!(v.scheduledAt !== undefined && v.scheduledAt !== null) || v.scheduledAt === "") violations.push("scheduled_at is required");
+return violations;
+}
+
 export interface CreateOneOnOneResponse {
 id?: string;
 message?: string;
@@ -122,5 +148,10 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateCreateOneOnOneResponse(v: CreateOneOnOneResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

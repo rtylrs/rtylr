@@ -22,6 +22,11 @@ func NewWorkScheduleServiceClient(baseURL string) *WorkScheduleServiceClient {
 }
 
 func (c *WorkScheduleServiceClient) CreateWorkSchedule(ctx context.Context, req *CreateWorkScheduleRequest) (*CreateWorkScheduleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/work-schedule/v1/work-schedules"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -53,9 +58,14 @@ func (c *WorkScheduleServiceClient) CreateWorkSchedule(ctx context.Context, req 
 }
 
 func (c *WorkScheduleServiceClient) UpdateWorkSchedule(ctx context.Context, req *UpdateWorkScheduleRequest) (*UpdateWorkScheduleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/work-schedule/v1/work-schedules/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}

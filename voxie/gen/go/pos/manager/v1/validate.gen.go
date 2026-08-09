@@ -21,10 +21,24 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *VerifyPINRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Pin == "" {
 		violations = append(violations, "pin is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *VerifyPINResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

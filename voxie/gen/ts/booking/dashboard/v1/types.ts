@@ -14,6 +14,11 @@ const out: Record<string, unknown> = {};
 return out;
 }
 
+export function validateGetDashboardRequest(v: GetDashboardRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetDashboardResponse {
 todayCount?: number;
 upcomingCount?: number;
@@ -38,5 +43,10 @@ if (v.upcomingCount !== undefined) { out.upcoming_count = v.upcomingCount; }
 if (v.cancellationRate !== undefined) { out.cancellation_rate = v.cancellationRate; }
 if (v.revenue !== undefined) { out.revenue = v.revenue; }
 return out;
+}
+
+export function validateGetDashboardResponse(v: GetDashboardResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

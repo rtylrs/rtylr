@@ -24,6 +24,11 @@ func NewStockTransferServiceClient(baseURL string) *StockTransferServiceClient {
 }
 
 func (c *StockTransferServiceClient) ListStockTransfers(ctx context.Context, req *ListStockTransfersRequest) (*ListStockTransfersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/stock-transfer/v1/stock-transfers"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -56,6 +61,11 @@ func (c *StockTransferServiceClient) ListStockTransfers(ctx context.Context, req
 }
 
 func (c *StockTransferServiceClient) CreateStockTransfer(ctx context.Context, req *CreateStockTransferRequest) (*CreateStockTransferResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/stock-transfer/v1/stock-transfers"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -87,6 +97,11 @@ func (c *StockTransferServiceClient) CreateStockTransfer(ctx context.Context, re
 }
 
 func (c *StockTransferServiceClient) UpdateStockTransferStatus(ctx context.Context, req *UpdateStockTransferStatusRequest) (*UpdateStockTransferStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/stock-transfer/v1/stock-transfers/{id}/status"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

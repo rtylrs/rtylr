@@ -21,6 +21,11 @@ func NewRevenueServiceClient(baseURL string) *RevenueServiceClient {
 }
 
 func (c *RevenueServiceClient) GetRevenueOverview(ctx context.Context, req *GetRevenueOverviewRequest) (*GetRevenueOverviewResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/revenue/v1/overview"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -52,6 +57,11 @@ func (c *RevenueServiceClient) GetRevenueOverview(ctx context.Context, req *GetR
 }
 
 func (c *RevenueServiceClient) GetRevenueByApp(ctx context.Context, req *GetRevenueByAppRequest) (*GetRevenueByAppResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/revenue/v1/by-app"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -83,6 +93,11 @@ func (c *RevenueServiceClient) GetRevenueByApp(ctx context.Context, req *GetReve
 }
 
 func (c *RevenueServiceClient) GetRevenueComparison(ctx context.Context, req *GetRevenueComparisonRequest) (*GetRevenueComparisonResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/revenue/v1/comparison"
 	query := url.Values{}
 	query.Set("period", req.Period)

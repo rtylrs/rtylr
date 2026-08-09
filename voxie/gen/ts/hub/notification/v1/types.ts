@@ -35,6 +35,11 @@ if (v.link !== undefined) { out.link = v.link; }
 return out;
 }
 
+export function validateNotification(v: Notification): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListNotificationsRequest {
 }
 
@@ -47,6 +52,11 @@ return {
 export function encodeListNotificationsRequest(v: ListNotificationsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListNotificationsRequest(v: ListNotificationsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListNotificationsResponse {
@@ -66,6 +76,12 @@ if (v.notifications !== undefined) { out.notifications = (v.notifications as any
 return out;
 }
 
+export function validateListNotificationsResponse(v: ListNotificationsResponse): string[] {
+const violations: string[] = [];
+if (v.notifications !== undefined && v.notifications !== null) for (const item of v.notifications) violations.push(...validateNotification(item).map((message) => "notifications: " + message));
+return violations;
+}
+
 export interface MarkAllReadRequest {
 }
 
@@ -78,6 +94,11 @@ return {
 export function encodeMarkAllReadRequest(v: MarkAllReadRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateMarkAllReadRequest(v: MarkAllReadRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface MarkAllReadResponse {
@@ -97,8 +118,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateMarkAllReadResponse(v: MarkAllReadResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface MarkNotificationReadRequest {
-id?: string;
+id: string;
 }
 
 export function decodeMarkNotificationReadRequest(v: any): MarkNotificationReadRequest {
@@ -112,6 +138,13 @@ export function encodeMarkNotificationReadRequest(v: MarkNotificationReadRequest
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateMarkNotificationReadRequest(v: MarkNotificationReadRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface MarkNotificationReadResponse {
@@ -131,6 +164,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateMarkNotificationReadResponse(v: MarkNotificationReadResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface MarkNotificationsReadRequest {
 ids?: (string)[];
 }
@@ -148,6 +186,12 @@ if (v.ids !== undefined) { out.ids = v.ids; }
 return out;
 }
 
+export function validateMarkNotificationsReadRequest(v: MarkNotificationsReadRequest): string[] {
+const violations: string[] = [];
+if (v.ids !== undefined && v.ids !== null && v.ids.length < 1) violations.push("ids must contain at least 1 items");
+return violations;
+}
+
 export interface MarkNotificationsReadResponse {
 message?: string;
 }
@@ -163,5 +207,10 @@ export function encodeMarkNotificationsReadResponse(v: MarkNotificationsReadResp
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateMarkNotificationsReadResponse(v: MarkNotificationsReadResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

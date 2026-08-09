@@ -22,6 +22,11 @@ func NewActivityServiceClient(baseURL string) *ActivityServiceClient {
 }
 
 func (c *ActivityServiceClient) ListActivity(ctx context.Context, req *ListActivityRequest) (*ListActivityResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/activity/v1/activity"
 	query := url.Values{}
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))

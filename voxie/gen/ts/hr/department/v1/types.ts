@@ -38,8 +38,13 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateDepartmentPayload(v: DepartmentPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateDepartmentRequest {
-name?: string;
+name: string;
 description?: string;
 managerStaffId?: string;
 }
@@ -61,6 +66,12 @@ if (v.managerStaffId !== undefined) { out.manager_staff_id = v.managerStaffId; }
 return out;
 }
 
+export function validateCreateDepartmentRequest(v: CreateDepartmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateDepartmentResponse {
 id?: string;
 }
@@ -78,8 +89,13 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateCreateDepartmentResponse(v: CreateDepartmentResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteDepartmentRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteDepartmentRequest(v: any): DeleteDepartmentRequest {
@@ -93,6 +109,13 @@ export function encodeDeleteDepartmentRequest(v: DeleteDepartmentRequest): Recor
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteDepartmentRequest(v: DeleteDepartmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteDepartmentResponse {
@@ -112,6 +135,11 @@ if (v.success !== undefined) { out.success = v.success; }
 return out;
 }
 
+export function validateDeleteDepartmentResponse(v: DeleteDepartmentResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListDepartmentsRequest {
 }
 
@@ -124,6 +152,11 @@ return {
 export function encodeListDepartmentsRequest(v: ListDepartmentsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListDepartmentsRequest(v: ListDepartmentsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListDepartmentsResponse {
@@ -143,8 +176,14 @@ if (v.departments !== undefined) { out.departments = (v.departments as any[]).ma
 return out;
 }
 
+export function validateListDepartmentsResponse(v: ListDepartmentsResponse): string[] {
+const violations: string[] = [];
+if (v.departments !== undefined && v.departments !== null) for (const item of v.departments) violations.push(...validateDepartmentPayload(item).map((message) => "departments: " + message));
+return violations;
+}
+
 export interface UpdateDepartmentBody {
-name?: string;
+name: string;
 description?: string;
 managerStaffId?: string;
 }
@@ -166,8 +205,14 @@ if (v.managerStaffId !== undefined) { out.manager_staff_id = v.managerStaffId; }
 return out;
 }
 
+export function validateUpdateDepartmentBody(v: UpdateDepartmentBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface UpdateDepartmentRequest {
-id?: string;
+id: string;
 body?: UpdateDepartmentBody;
 }
 
@@ -186,6 +231,14 @@ if (v.body !== undefined) { out.body = encodeUpdateDepartmentBody(v.body); }
 return out;
 }
 
+export function validateUpdateDepartmentRequest(v: UpdateDepartmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateDepartmentBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateDepartmentResponse {
 success?: boolean;
 }
@@ -201,5 +254,10 @@ export function encodeUpdateDepartmentResponse(v: UpdateDepartmentResponse): Rec
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateUpdateDepartmentResponse(v: UpdateDepartmentResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

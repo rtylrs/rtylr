@@ -48,6 +48,11 @@ if (v.timestamp !== undefined) { out.timestamp = v.timestamp; }
 return out;
 }
 
+export function validateNotification(v: Notification): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListNotificationsRequest {
 page?: number;
 limit?: number;
@@ -74,6 +79,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListNotificationsRequest(v: ListNotificationsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListNotificationsResponse {
 notifications?: (Notification)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -94,6 +104,13 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListNotificationsResponse(v: ListNotificationsResponse): string[] {
+const violations: string[] = [];
+if (v.notifications !== undefined && v.notifications !== null) for (const item of v.notifications) violations.push(...validateNotification(item).map((message) => "notifications: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface MarkNotificationReadRequest {
 id?: string;
 }
@@ -111,6 +128,11 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateMarkNotificationReadRequest(v: MarkNotificationReadRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface MarkNotificationReadResponse {
 }
 
@@ -123,6 +145,11 @@ return {
 export function encodeMarkNotificationReadResponse(v: MarkNotificationReadResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateMarkNotificationReadResponse(v: MarkNotificationReadResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface MarkAllNotificationsReadRequest {
@@ -139,6 +166,11 @@ const out: Record<string, unknown> = {};
 return out;
 }
 
+export function validateMarkAllNotificationsReadRequest(v: MarkAllNotificationsReadRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface MarkAllNotificationsReadResponse {
 }
 
@@ -151,5 +183,10 @@ return {
 export function encodeMarkAllNotificationsReadResponse(v: MarkAllNotificationsReadResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateMarkAllNotificationsReadResponse(v: MarkAllNotificationsReadResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

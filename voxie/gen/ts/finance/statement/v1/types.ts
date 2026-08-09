@@ -14,6 +14,11 @@ const out: Record<string, unknown> = {};
 return out;
 }
 
+export function validateGetBalanceSheetRequest(v: GetBalanceSheetRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetBalanceSheetResponse {
 totalAssets?: number;
 totalLiabilities?: number;
@@ -46,6 +51,11 @@ if (v.accountsPayable !== undefined) { out.accounts_payable = v.accountsPayable;
 return out;
 }
 
+export function validateGetBalanceSheetResponse(v: GetBalanceSheetResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetCashFlowRequest {
 period?: string;
 }
@@ -61,6 +71,11 @@ export function encodeGetCashFlowRequest(v: GetCashFlowRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 return out;
+}
+
+export function validateGetCashFlowRequest(v: GetCashFlowRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetCashFlowResponse {
@@ -90,5 +105,10 @@ if (v.operatingOutflow !== undefined) { out.operating_outflow = v.operatingOutfl
 if (v.netOperating !== undefined) { out.net_operating = v.netOperating; }
 if (v.netCashFlow !== undefined) { out.net_cash_flow = v.netCashFlow; }
 return out;
+}
+
+export function validateGetCashFlowResponse(v: GetCashFlowResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

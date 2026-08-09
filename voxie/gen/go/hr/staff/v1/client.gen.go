@@ -23,6 +23,11 @@ func NewStaffServiceClient(baseURL string) *StaffServiceClient {
 }
 
 func (c *StaffServiceClient) ListStaff(ctx context.Context, req *ListStaffRequest) (*ListStaffResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/staff/v1/staff"
 	query := url.Values{}
 	query.Set("search", req.Search)
@@ -56,6 +61,11 @@ func (c *StaffServiceClient) ListStaff(ctx context.Context, req *ListStaffReques
 }
 
 func (c *StaffServiceClient) CreateStaff(ctx context.Context, req *CreateStaffRequest) (*CreateStaffResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/staff/v1/staff"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -87,6 +97,11 @@ func (c *StaffServiceClient) CreateStaff(ctx context.Context, req *CreateStaffRe
 }
 
 func (c *StaffServiceClient) GetStaff(ctx context.Context, req *GetStaffRequest) (*GetStaffResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/staff/v1/staff/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -118,9 +133,14 @@ func (c *StaffServiceClient) GetStaff(ctx context.Context, req *GetStaffRequest)
 }
 
 func (c *StaffServiceClient) UpdateStaff(ctx context.Context, req *UpdateStaffRequest) (*UpdateStaffResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/staff/v1/staff/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -150,6 +170,11 @@ func (c *StaffServiceClient) UpdateStaff(ctx context.Context, req *UpdateStaffRe
 }
 
 func (c *StaffServiceClient) DeleteStaff(ctx context.Context, req *DeleteStaffRequest) (*DeleteStaffResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/staff/v1/staff/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -181,6 +206,11 @@ func (c *StaffServiceClient) DeleteStaff(ctx context.Context, req *DeleteStaffRe
 }
 
 func (c *StaffServiceClient) ClockIn(ctx context.Context, req *ClockInRequest) (*ClockInResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/staff/v1/staff/clock-in"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -212,6 +242,11 @@ func (c *StaffServiceClient) ClockIn(ctx context.Context, req *ClockInRequest) (
 }
 
 func (c *StaffServiceClient) ClockOut(ctx context.Context, req *ClockOutRequest) (*ClockOutResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/staff/v1/staff/clock-out"
 	body, err := json.Marshal(req)
 	if err != nil {

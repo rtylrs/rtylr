@@ -24,6 +24,11 @@ func NewBusinessServiceClient(baseURL string) *BusinessServiceClient {
 }
 
 func (c *BusinessServiceClient) ListMyBusinesses(ctx context.Context, req *ListMyBusinessesRequest) (*ListMyBusinessesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/business/v1/businesses/mine"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -54,6 +59,11 @@ func (c *BusinessServiceClient) ListMyBusinesses(ctx context.Context, req *ListM
 }
 
 func (c *BusinessServiceClient) CreateSubBusiness(ctx context.Context, req *CreateSubBusinessRequest) (*CreateSubBusinessResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/business/v1/businesses"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -85,6 +95,11 @@ func (c *BusinessServiceClient) CreateSubBusiness(ctx context.Context, req *Crea
 }
 
 func (c *BusinessServiceClient) OnboardBusiness(ctx context.Context, req *OnboardBusinessRequest) (*OnboardBusinessResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/business/v1/businesses/onboard"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -116,6 +131,11 @@ func (c *BusinessServiceClient) OnboardBusiness(ctx context.Context, req *Onboar
 }
 
 func (c *BusinessServiceClient) CheckBusinessNameExists(ctx context.Context, req *CheckBusinessNameExistsRequest) (*CheckBusinessNameExistsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/business/v1/businesses/name-exists"
 	query := url.Values{}
 	query.Set("name", req.Name)
@@ -147,6 +167,11 @@ func (c *BusinessServiceClient) CheckBusinessNameExists(ctx context.Context, req
 }
 
 func (c *BusinessServiceClient) GetBusiness(ctx context.Context, req *GetBusinessRequest) (*GetBusinessResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/business/v1/businesses/{business_id}"
 	path = strings.ReplaceAll(path, "{business_id}", fmt.Sprintf("%v", req.BusinessId))
 	query := url.Values{}
@@ -178,6 +203,11 @@ func (c *BusinessServiceClient) GetBusiness(ctx context.Context, req *GetBusines
 }
 
 func (c *BusinessServiceClient) LookupBusinessBySlug(ctx context.Context, req *LookupBusinessBySlugRequest) (*LookupBusinessBySlugResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/business/v1/businesses/by-slug"
 	query := url.Values{}
 	query.Set("slug", req.Slug)
@@ -209,6 +239,11 @@ func (c *BusinessServiceClient) LookupBusinessBySlug(ctx context.Context, req *L
 }
 
 func (c *BusinessServiceClient) GetPublicBusiness(ctx context.Context, req *GetPublicBusinessRequest) (*GetPublicBusinessResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/business/v1/businesses/public"
 	query := url.Values{}
 	query.Set("business_id", strconv.FormatInt(int64(req.BusinessId), 10))
@@ -240,6 +275,11 @@ func (c *BusinessServiceClient) GetPublicBusiness(ctx context.Context, req *GetP
 }
 
 func (c *BusinessServiceClient) SetSlug(ctx context.Context, req *SetSlugRequest) (*SetSlugResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/business/v1/businesses/slug"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -271,6 +311,11 @@ func (c *BusinessServiceClient) SetSlug(ctx context.Context, req *SetSlugRequest
 }
 
 func (c *BusinessServiceClient) UpdateBusiness(ctx context.Context, req *UpdateBusinessRequest) (*UpdateBusinessResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/business/v1/businesses/{business_id}"
 	path = strings.ReplaceAll(path, "{business_id}", fmt.Sprintf("%v", req.BusinessId))
 	body, err := json.Marshal(req)
@@ -303,6 +348,11 @@ func (c *BusinessServiceClient) UpdateBusiness(ctx context.Context, req *UpdateB
 }
 
 func (c *BusinessServiceClient) RenameBusiness(ctx context.Context, req *RenameBusinessRequest) (*RenameBusinessResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/business/v1/businesses/{business_id}/name"
 	path = strings.ReplaceAll(path, "{business_id}", fmt.Sprintf("%v", req.BusinessId))
 	body, err := json.Marshal(req)
@@ -335,6 +385,11 @@ func (c *BusinessServiceClient) RenameBusiness(ctx context.Context, req *RenameB
 }
 
 func (c *BusinessServiceClient) DeleteBusiness(ctx context.Context, req *DeleteBusinessRequest) (*DeleteBusinessResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/business/v1/businesses/{business_id}"
 	path = strings.ReplaceAll(path, "{business_id}", fmt.Sprintf("%v", req.BusinessId))
 	query := url.Values{}

@@ -14,6 +14,11 @@ const out: Record<string, unknown> = {};
 return out;
 }
 
+export function validateDashboardRequest(v: DashboardRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DashboardResponse {
 totalSales?: number;
 orderCount?: number;
@@ -38,5 +43,10 @@ if (v.orderCount !== undefined) { out.order_count = v.orderCount; }
 if (v.avgOrder !== undefined) { out.avg_order = v.avgOrder; }
 if (v.tableTurnover !== undefined) { out.table_turnover = v.tableTurnover; }
 return out;
+}
+
+export function validateDashboardResponse(v: DashboardResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

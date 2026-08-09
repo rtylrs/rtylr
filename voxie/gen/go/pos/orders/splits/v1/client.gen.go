@@ -22,6 +22,11 @@ func NewOrderSplitServiceClient(baseURL string) *OrderSplitServiceClient {
 }
 
 func (c *OrderSplitServiceClient) SplitOrder(ctx context.Context, req *SplitOrderRequest) (*SplitOrderResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/splits/v1/orders/{order_id}/split"
 	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
 	body, err := json.Marshal(req)

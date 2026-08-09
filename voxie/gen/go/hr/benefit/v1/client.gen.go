@@ -23,6 +23,11 @@ func NewBenefitServiceClient(baseURL string) *BenefitServiceClient {
 }
 
 func (c *BenefitServiceClient) ListBenefits(ctx context.Context, req *ListBenefitsRequest) (*ListBenefitsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/benefit/v1/benefits"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *BenefitServiceClient) ListBenefits(ctx context.Context, req *ListBenefi
 }
 
 func (c *BenefitServiceClient) CreateBenefit(ctx context.Context, req *CreateBenefitRequest) (*CreateBenefitResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/benefit/v1/benefits"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *BenefitServiceClient) CreateBenefit(ctx context.Context, req *CreateBen
 }
 
 func (c *BenefitServiceClient) EnrollInBenefit(ctx context.Context, req *EnrollInBenefitRequest) (*EnrollInBenefitResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/benefit/v1/benefits/enrollments"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -115,6 +130,11 @@ func (c *BenefitServiceClient) EnrollInBenefit(ctx context.Context, req *EnrollI
 }
 
 func (c *BenefitServiceClient) ListMyBenefitEnrollments(ctx context.Context, req *ListMyBenefitEnrollmentsRequest) (*ListMyBenefitEnrollmentsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/benefit/v1/benefits/enrollments/mine"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))

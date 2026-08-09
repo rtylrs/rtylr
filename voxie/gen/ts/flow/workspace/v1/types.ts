@@ -51,6 +51,11 @@ if (v.isPersonal !== undefined) { out.is_personal = v.isPersonal; }
 return out;
 }
 
+export function validateWorkspace(v: Workspace): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface WorkspaceMember {
 id?: string;
 workspaceId?: string;
@@ -89,6 +94,11 @@ if (v.joinedAt !== undefined) { out.joined_at = v.joinedAt; }
 return out;
 }
 
+export function validateWorkspaceMember(v: WorkspaceMember): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListWorkspacesRequest {
 page?: number;
 limit?: number;
@@ -115,6 +125,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListWorkspacesRequest(v: ListWorkspacesRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListWorkspacesResponse {
 workspaces?: (Workspace)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -135,11 +150,18 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListWorkspacesResponse(v: ListWorkspacesResponse): string[] {
+const violations: string[] = [];
+if (v.workspaces !== undefined && v.workspaces !== null) for (const item of v.workspaces) violations.push(...validateWorkspace(item).map((message) => "workspaces: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface CreateWorkspaceRequest {
-name?: string;
-description?: string;
-icon?: string;
-color?: string;
+name: string;
+description: string;
+icon: string;
+color: string;
 }
 
 export function decodeCreateWorkspaceRequest(v: any): CreateWorkspaceRequest {
@@ -161,6 +183,15 @@ if (v.color !== undefined) { out.color = v.color; }
 return out;
 }
 
+export function validateCreateWorkspaceRequest(v: CreateWorkspaceRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.icon !== undefined && v.icon !== null) || v.icon === "") violations.push("icon is required");
+if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
+return violations;
+}
+
 export interface CreateWorkspaceResponse {
 workspace?: Workspace;
 }
@@ -178,11 +209,17 @@ if (v.workspace !== undefined) { out.workspace = encodeWorkspace(v.workspace); }
 return out;
 }
 
+export function validateCreateWorkspaceResponse(v: CreateWorkspaceResponse): string[] {
+const violations: string[] = [];
+if (v.workspace !== undefined && v.workspace !== null) violations.push(...validateWorkspace(v.workspace).map((message) => "workspace: " + message));
+return violations;
+}
+
 export interface UpdateWorkspaceBody {
-name?: string;
-description?: string;
-icon?: string;
-color?: string;
+name: string;
+description: string;
+icon: string;
+color: string;
 }
 
 export function decodeUpdateWorkspaceBody(v: any): UpdateWorkspaceBody {
@@ -204,8 +241,17 @@ if (v.color !== undefined) { out.color = v.color; }
 return out;
 }
 
+export function validateUpdateWorkspaceBody(v: UpdateWorkspaceBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.icon !== undefined && v.icon !== null) || v.icon === "") violations.push("icon is required");
+if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
+return violations;
+}
+
 export interface UpdateWorkspaceRequest {
-id?: string;
+id: string;
 body?: UpdateWorkspaceBody;
 }
 
@@ -222,6 +268,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateWorkspaceBody(v.body); }
 return out;
+}
+
+export function validateUpdateWorkspaceRequest(v: UpdateWorkspaceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateWorkspaceBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateWorkspaceResponse {
@@ -241,8 +295,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateWorkspaceResponse(v: UpdateWorkspaceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteWorkspaceRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteWorkspaceRequest(v: any): DeleteWorkspaceRequest {
@@ -256,6 +315,13 @@ export function encodeDeleteWorkspaceRequest(v: DeleteWorkspaceRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteWorkspaceRequest(v: DeleteWorkspaceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteWorkspaceResponse {
@@ -275,8 +341,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteWorkspaceResponse(v: DeleteWorkspaceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListWorkspaceMembersRequest {
-workspaceId?: string;
+workspaceId: string;
 page?: number;
 limit?: number;
 sortBy?: string;
@@ -304,6 +375,13 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListWorkspaceMembersRequest(v: ListWorkspaceMembersRequest): string[] {
+const violations: string[] = [];
+if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+return violations;
+}
+
 export interface ListWorkspaceMembersResponse {
 members?: (WorkspaceMember)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -324,10 +402,17 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListWorkspaceMembersResponse(v: ListWorkspaceMembersResponse): string[] {
+const violations: string[] = [];
+if (v.members !== undefined && v.members !== null) for (const item of v.members) violations.push(...validateWorkspaceMember(item).map((message) => "members: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface AddWorkspaceMemberRequest {
-workspaceId?: string;
-userId?: string;
-role?: string;
+workspaceId: string;
+userId: string;
+role: string;
 }
 
 export function decodeAddWorkspaceMemberRequest(v: any): AddWorkspaceMemberRequest {
@@ -347,6 +432,16 @@ if (v.role !== undefined) { out.role = v.role; }
 return out;
 }
 
+export function validateAddWorkspaceMemberRequest(v: AddWorkspaceMemberRequest): string[] {
+const violations: string[] = [];
+if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
+return violations;
+}
+
 export interface AddWorkspaceMemberResponse {
 message?: string;
 }
@@ -364,9 +459,14 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateAddWorkspaceMemberResponse(v: AddWorkspaceMemberResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface RemoveWorkspaceMemberRequest {
-workspaceId?: string;
-userId?: string;
+workspaceId: string;
+userId: string;
 }
 
 export function decodeRemoveWorkspaceMemberRequest(v: any): RemoveWorkspaceMemberRequest {
@@ -382,6 +482,15 @@ const out: Record<string, unknown> = {};
 if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
 if (v.userId !== undefined) { out.user_id = v.userId; }
 return out;
+}
+
+export function validateRemoveWorkspaceMemberRequest(v: RemoveWorkspaceMemberRequest): string[] {
+const violations: string[] = [];
+if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+return violations;
 }
 
 export interface RemoveWorkspaceMemberResponse {
@@ -401,10 +510,15 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateRemoveWorkspaceMemberResponse(v: RemoveWorkspaceMemberResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateWorkspaceMemberRoleRequest {
-workspaceId?: string;
-userId?: string;
-role?: string;
+workspaceId: string;
+userId: string;
+role: string;
 }
 
 export function decodeUpdateWorkspaceMemberRoleRequest(v: any): UpdateWorkspaceMemberRoleRequest {
@@ -424,6 +538,16 @@ if (v.role !== undefined) { out.role = v.role; }
 return out;
 }
 
+export function validateUpdateWorkspaceMemberRoleRequest(v: UpdateWorkspaceMemberRoleRequest): string[] {
+const violations: string[] = [];
+if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
+return violations;
+}
+
 export interface UpdateWorkspaceMemberRoleResponse {
 message?: string;
 }
@@ -439,5 +563,10 @@ export function encodeUpdateWorkspaceMemberRoleResponse(v: UpdateWorkspaceMember
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateWorkspaceMemberRoleResponse(v: UpdateWorkspaceMemberRoleResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

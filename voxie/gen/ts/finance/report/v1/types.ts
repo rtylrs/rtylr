@@ -38,6 +38,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateTaxConfig(v: TaxConfig): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ExpenseCategoryDetail {
 id?: string;
 ownerId?: string;
@@ -70,9 +75,14 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateExpenseCategoryDetail(v: ExpenseCategoryDetail): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetPLReportRequest {
 period?: string;
-date?: string;
+date: string;
 }
 
 export function decodeGetPLReportRequest(v: any): GetPLReportRequest {
@@ -88,6 +98,12 @@ const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 if (v.date !== undefined) { out.date = v.date; }
 return out;
+}
+
+export function validateGetPLReportRequest(v: GetPLReportRequest): string[] {
+const violations: string[] = [];
+if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
+return violations;
 }
 
 export interface GetPLReportResponse {
@@ -125,9 +141,14 @@ if (v.marginPct !== undefined) { out.margin_pct = v.marginPct; }
 return out;
 }
 
+export function validateGetPLReportResponse(v: GetPLReportResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetTaxReportRequest {
 period?: string;
-date?: string;
+date: string;
 }
 
 export function decodeGetTaxReportRequest(v: any): GetTaxReportRequest {
@@ -143,6 +164,12 @@ const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 if (v.date !== undefined) { out.date = v.date; }
 return out;
+}
+
+export function validateGetTaxReportRequest(v: GetTaxReportRequest): string[] {
+const violations: string[] = [];
+if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
+return violations;
 }
 
 export interface GetTaxReportResponse {
@@ -168,6 +195,11 @@ if (v.taxOwed !== undefined) { out.tax_owed = v.taxOwed; }
 return out;
 }
 
+export function validateGetTaxReportResponse(v: GetTaxReportResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListExpenseCategoryDetailsRequest {
 }
 
@@ -180,6 +212,11 @@ return {
 export function encodeListExpenseCategoryDetailsRequest(v: ListExpenseCategoryDetailsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListExpenseCategoryDetailsRequest(v: ListExpenseCategoryDetailsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListExpenseCategoryDetailsResponse {
@@ -199,10 +236,16 @@ if (v.categories !== undefined) { out.categories = (v.categories as any[]).map(e
 return out;
 }
 
+export function validateListExpenseCategoryDetailsResponse(v: ListExpenseCategoryDetailsResponse): string[] {
+const violations: string[] = [];
+if (v.categories !== undefined && v.categories !== null) for (const item of v.categories) violations.push(...validateExpenseCategoryDetail(item).map((message) => "categories: " + message));
+return violations;
+}
+
 export interface CreateExpenseCategoryDetailRequest {
-name?: string;
-color?: string;
-icon?: string;
+name: string;
+color: string;
+icon: string;
 }
 
 export function decodeCreateExpenseCategoryDetailRequest(v: any): CreateExpenseCategoryDetailRequest {
@@ -222,6 +265,14 @@ if (v.icon !== undefined) { out.icon = v.icon; }
 return out;
 }
 
+export function validateCreateExpenseCategoryDetailRequest(v: CreateExpenseCategoryDetailRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
+if (!(v.icon !== undefined && v.icon !== null) || v.icon === "") violations.push("icon is required");
+return violations;
+}
+
 export interface CreateExpenseCategoryDetailResponse {
 category?: ExpenseCategoryDetail;
 }
@@ -239,6 +290,12 @@ if (v.category !== undefined) { out.category = encodeExpenseCategoryDetail(v.cat
 return out;
 }
 
+export function validateCreateExpenseCategoryDetailResponse(v: CreateExpenseCategoryDetailResponse): string[] {
+const violations: string[] = [];
+if (v.category !== undefined && v.category !== null) violations.push(...validateExpenseCategoryDetail(v.category).map((message) => "category: " + message));
+return violations;
+}
+
 export interface ListTaxConfigRequest {
 }
 
@@ -251,6 +308,11 @@ return {
 export function encodeListTaxConfigRequest(v: ListTaxConfigRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListTaxConfigRequest(v: ListTaxConfigRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListTaxConfigResponse {
@@ -270,10 +332,16 @@ if (v.configs !== undefined) { out.configs = (v.configs as any[]).map(encodeTaxC
 return out;
 }
 
+export function validateListTaxConfigResponse(v: ListTaxConfigResponse): string[] {
+const violations: string[] = [];
+if (v.configs !== undefined && v.configs !== null) for (const item of v.configs) violations.push(...validateTaxConfig(item).map((message) => "configs: " + message));
+return violations;
+}
+
 export interface CreateTaxConfigRequest {
-name?: string;
+name: string;
 rate?: number;
-type?: string;
+type: string;
 isDefault?: boolean;
 }
 
@@ -296,6 +364,14 @@ if (v.isDefault !== undefined) { out.is_default = v.isDefault; }
 return out;
 }
 
+export function validateCreateTaxConfigRequest(v: CreateTaxConfigRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.rate !== undefined && v.rate !== null && !(Number(v.rate) >= 0)) violations.push("rate violates @gte");
+if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+return violations;
+}
+
 export interface CreateTaxConfigResponse {
 config?: TaxConfig;
 }
@@ -311,5 +387,11 @@ export function encodeCreateTaxConfigResponse(v: CreateTaxConfigResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.config !== undefined) { out.config = encodeTaxConfig(v.config); }
 return out;
+}
+
+export function validateCreateTaxConfigResponse(v: CreateTaxConfigResponse): string[] {
+const violations: string[] = [];
+if (v.config !== undefined && v.config !== null) violations.push(...validateTaxConfig(v.config).map((message) => "config: " + message));
+return violations;
 }
 

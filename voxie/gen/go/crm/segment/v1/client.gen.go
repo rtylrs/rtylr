@@ -24,6 +24,11 @@ func NewSegmentServiceClient(baseURL string) *SegmentServiceClient {
 }
 
 func (c *SegmentServiceClient) ListSegments(ctx context.Context, req *ListSegmentsRequest) (*ListSegmentsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/segment/v1/segments"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -54,6 +59,11 @@ func (c *SegmentServiceClient) ListSegments(ctx context.Context, req *ListSegmen
 }
 
 func (c *SegmentServiceClient) CreateSegment(ctx context.Context, req *CreateSegmentRequest) (*CreateSegmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/segment/v1/segments"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -85,6 +95,11 @@ func (c *SegmentServiceClient) CreateSegment(ctx context.Context, req *CreateSeg
 }
 
 func (c *SegmentServiceClient) GetSegmentDetail(ctx context.Context, req *GetSegmentDetailRequest) (*GetSegmentDetailResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/segment/v1/segments/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -116,6 +131,11 @@ func (c *SegmentServiceClient) GetSegmentDetail(ctx context.Context, req *GetSeg
 }
 
 func (c *SegmentServiceClient) GetSegmentCustomers(ctx context.Context, req *GetSegmentCustomersRequest) (*GetSegmentCustomersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/segment/v1/segments/{segment_id}/customers"
 	path = strings.ReplaceAll(path, "{segment_id}", fmt.Sprintf("%v", req.SegmentId))
 	query := url.Values{}
@@ -149,9 +169,14 @@ func (c *SegmentServiceClient) GetSegmentCustomers(ctx context.Context, req *Get
 }
 
 func (c *SegmentServiceClient) UpdateSegment(ctx context.Context, req *UpdateSegmentRequest) (*UpdateSegmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/segment/v1/segments/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -181,6 +206,11 @@ func (c *SegmentServiceClient) UpdateSegment(ctx context.Context, req *UpdateSeg
 }
 
 func (c *SegmentServiceClient) DeleteSegment(ctx context.Context, req *DeleteSegmentRequest) (*DeleteSegmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/segment/v1/segments/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

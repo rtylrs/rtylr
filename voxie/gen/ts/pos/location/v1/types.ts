@@ -38,8 +38,13 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateLocation(v: Location): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateLocationRequest {
-name?: string;
+name: string;
 address?: string;
 phone?: string;
 isActive?: boolean;
@@ -64,6 +69,12 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateCreateLocationRequest(v: CreateLocationRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateLocationResponse {
 locationId?: string;
 message?: string;
@@ -84,6 +95,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateLocationResponse(v: CreateLocationResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListLocationsRequest {
 }
 
@@ -96,6 +112,11 @@ return {
 export function encodeListLocationsRequest(v: ListLocationsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListLocationsRequest(v: ListLocationsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListLocationsResponse {
@@ -115,8 +136,14 @@ if (v.locations !== undefined) { out.locations = (v.locations as any[]).map(enco
 return out;
 }
 
+export function validateListLocationsResponse(v: ListLocationsResponse): string[] {
+const violations: string[] = [];
+if (v.locations !== undefined && v.locations !== null) for (const item of v.locations) violations.push(...validateLocation(item).map((message) => "locations: " + message));
+return violations;
+}
+
 export interface UpdateLocationBody {
-name?: string;
+name: string;
 address?: string;
 phone?: string;
 isActive?: boolean;
@@ -141,8 +168,14 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateLocationBody(v: UpdateLocationBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface UpdateLocationRequest {
-id?: string;
+id: string;
 body?: UpdateLocationBody;
 }
 
@@ -161,6 +194,14 @@ if (v.body !== undefined) { out.body = encodeUpdateLocationBody(v.body); }
 return out;
 }
 
+export function validateUpdateLocationRequest(v: UpdateLocationRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateLocationBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateLocationResponse {
 message?: string;
 }
@@ -176,5 +217,10 @@ export function encodeUpdateLocationResponse(v: UpdateLocationResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateLocationResponse(v: UpdateLocationResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

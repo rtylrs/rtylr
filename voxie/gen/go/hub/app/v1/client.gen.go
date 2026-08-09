@@ -23,6 +23,11 @@ func NewAppServiceClient(baseURL string) *AppServiceClient {
 }
 
 func (c *AppServiceClient) ListApps(ctx context.Context, req *ListAppsRequest) (*ListAppsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/app/v1/apps"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *AppServiceClient) ListApps(ctx context.Context, req *ListAppsRequest) (
 }
 
 func (c *AppServiceClient) ListAddons(ctx context.Context, req *ListAddonsRequest) (*ListAddonsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/app/v1/addons"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -83,6 +93,11 @@ func (c *AppServiceClient) ListAddons(ctx context.Context, req *ListAddonsReques
 }
 
 func (c *AppServiceClient) AddonStatus(ctx context.Context, req *AddonStatusRequest) (*AddonStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/app/v1/addons/{addon_id}/status"
 	path = strings.ReplaceAll(path, "{addon_id}", fmt.Sprintf("%v", req.AddonId))
 	query := url.Values{}
@@ -114,6 +129,11 @@ func (c *AppServiceClient) AddonStatus(ctx context.Context, req *AddonStatusRequ
 }
 
 func (c *AppServiceClient) EnableAddon(ctx context.Context, req *EnableAddonRequest) (*EnableAddonResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/app/v1/addons/{addon_id}/enable"
 	path = strings.ReplaceAll(path, "{addon_id}", fmt.Sprintf("%v", req.AddonId))
 	body, err := json.Marshal(req)
@@ -146,6 +166,11 @@ func (c *AppServiceClient) EnableAddon(ctx context.Context, req *EnableAddonRequ
 }
 
 func (c *AppServiceClient) DisableAddon(ctx context.Context, req *DisableAddonRequest) (*DisableAddonResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/app/v1/addons/{addon_id}/disable"
 	path = strings.ReplaceAll(path, "{addon_id}", fmt.Sprintf("%v", req.AddonId))
 	body, err := json.Marshal(req)

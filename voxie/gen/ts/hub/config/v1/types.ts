@@ -87,10 +87,15 @@ if (v.slug !== undefined) { out.slug = v.slug; }
 return out;
 }
 
+export function validateConfigPayload(v: ConfigPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateConfigRequest {
 owner?: string;
-key?: string;
-value?: string;
+key: string;
+value: string;
 description?: string;
 }
 
@@ -113,6 +118,13 @@ if (v.description !== undefined) { out.description = v.description; }
 return out;
 }
 
+export function validateCreateConfigRequest(v: CreateConfigRequest): string[] {
+const violations: string[] = [];
+if (!(v.key !== undefined && v.key !== null) || v.key === "") violations.push("key is required");
+if (!(v.value !== undefined && v.value !== null) || v.value === "") violations.push("value is required");
+return violations;
+}
+
 export interface CreateConfigResponse {
 configId?: string;
 message?: string;
@@ -133,6 +145,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateConfigResponse(v: CreateConfigResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetConfigRequest {
 }
 
@@ -145,6 +162,11 @@ return {
 export function encodeGetConfigRequest(v: GetConfigRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetConfigRequest(v: GetConfigRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetConfigResponse {
@@ -165,6 +187,12 @@ const out: Record<string, unknown> = {};
 if (v.business !== undefined) { out.business = hub_business_v1.encodeBusiness(v.business); }
 if (v.maintenance !== undefined) { out.maintenance = v.maintenance; }
 return out;
+}
+
+export function validateGetConfigResponse(v: GetConfigResponse): string[] {
+const violations: string[] = [];
+if (v.business !== undefined && v.business !== null) violations.push(...hub_business_v1.validateBusiness(v.business).map((message) => "business: " + message));
+return violations;
 }
 
 export interface IndustryType {
@@ -190,6 +218,11 @@ if (v.icon !== undefined) { out.icon = v.icon; }
 return out;
 }
 
+export function validateIndustryType(v: IndustryType): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface IndustryGroup {
 category?: string;
 types?: (IndustryType)[];
@@ -210,6 +243,12 @@ if (v.types !== undefined) { out.types = (v.types as any[]).map(encodeIndustryTy
 return out;
 }
 
+export function validateIndustryGroup(v: IndustryGroup): string[] {
+const violations: string[] = [];
+if (v.types !== undefined && v.types !== null) for (const item of v.types) violations.push(...validateIndustryType(item).map((message) => "types: " + message));
+return violations;
+}
+
 export interface GetIndustriesRequest {
 }
 
@@ -222,6 +261,11 @@ return {
 export function encodeGetIndustriesRequest(v: GetIndustriesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetIndustriesRequest(v: GetIndustriesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetIndustriesResponse {
@@ -239,6 +283,12 @@ export function encodeGetIndustriesResponse(v: GetIndustriesResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.groups !== undefined) { out.groups = (v.groups as any[]).map(encodeIndustryGroup); }
 return out;
+}
+
+export function validateGetIndustriesResponse(v: GetIndustriesResponse): string[] {
+const violations: string[] = [];
+if (v.groups !== undefined && v.groups !== null) for (const item of v.groups) violations.push(...validateIndustryGroup(item).map((message) => "groups: " + message));
+return violations;
 }
 
 export interface UpdateConfigRequest {
@@ -318,6 +368,11 @@ if (v.footerSubText !== undefined) { out.footer_sub_text = v.footerSubText; }
 return out;
 }
 
+export function validateUpdateConfigRequest(v: UpdateConfigRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateConfigResponse {
 message?: string;
 config?: ConfigPayload;
@@ -336,5 +391,11 @@ const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 if (v.config !== undefined) { out.config = encodeConfigPayload(v.config); }
 return out;
+}
+
+export function validateUpdateConfigResponse(v: UpdateConfigResponse): string[] {
+const violations: string[] = [];
+if (v.config !== undefined && v.config !== null) violations.push(...validateConfigPayload(v.config).map((message) => "config: " + message));
+return violations;
 }
 

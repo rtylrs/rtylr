@@ -20,13 +20,80 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *PermissionPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RolePayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Permissions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "permissions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListRolesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Roles {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "roles: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateRoleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
 	if len(m.Permissions) < 1 {
 		violations = append(violations, "permissions must have at least 1 items")
+	}
+	for _, value := range m.Permissions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "permissions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateRoleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Role != nil {
+		if err := m.Role.Validate(); err != nil {
+			violations = append(violations, "role: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -35,9 +102,17 @@ func (m *CreateRoleRequest) Validate() error {
 }
 
 func (m *UpdateRoleBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if len(m.Permissions) < 1 {
 		violations = append(violations, "permissions must have at least 1 items")
+	}
+	for _, value := range m.Permissions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "permissions: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -46,9 +121,33 @@ func (m *UpdateRoleBody) Validate() error {
 }
 
 func (m *UpdateRoleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateRoleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Role != nil {
+		if err := m.Role.Validate(); err != nil {
+			violations = append(violations, "role: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -57,6 +156,9 @@ func (m *UpdateRoleRequest) Validate() error {
 }
 
 func (m *AssignRoleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.EmployeeId <= 0 {
 		violations = append(violations, "employee_id must be greater than 0")
@@ -64,6 +166,17 @@ func (m *AssignRoleRequest) Validate() error {
 	if m.RoleId <= 0 {
 		violations = append(violations, "role_id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AssignRoleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

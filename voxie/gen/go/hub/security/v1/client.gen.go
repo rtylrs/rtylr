@@ -23,6 +23,11 @@ func NewSecurityServiceClient(baseURL string) *SecurityServiceClient {
 }
 
 func (c *SecurityServiceClient) GetSecurityState(ctx context.Context, req *GetSecurityStateRequest) (*GetSecurityStateResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/security/v1/state"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *SecurityServiceClient) GetSecurityState(ctx context.Context, req *GetSe
 }
 
 func (c *SecurityServiceClient) LoginHistory(ctx context.Context, req *LoginHistoryRequest) (*LoginHistoryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/security/v1/login-history"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -85,6 +95,11 @@ func (c *SecurityServiceClient) LoginHistory(ctx context.Context, req *LoginHist
 }
 
 func (c *SecurityServiceClient) InvalidateSessions(ctx context.Context, req *InvalidateSessionsRequest) (*InvalidateSessionsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/security/v1/invalidate-sessions"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -116,6 +131,11 @@ func (c *SecurityServiceClient) InvalidateSessions(ctx context.Context, req *Inv
 }
 
 func (c *SecurityServiceClient) Update2FA(ctx context.Context, req *Update2FARequest) (*Update2FAResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/security/v1/2fa"
 	body, err := json.Marshal(req)
 	if err != nil {

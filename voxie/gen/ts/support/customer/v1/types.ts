@@ -38,6 +38,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateCustomer(v: Customer): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListCustomersRequest {
 page?: number;
 pageSize?: number;
@@ -56,6 +61,11 @@ const out: Record<string, unknown> = {};
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
+}
+
+export function validateListCustomersRequest(v: ListCustomersRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListCustomersResponse {
@@ -84,8 +94,14 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListCustomersResponse(v: ListCustomersResponse): string[] {
+const violations: string[] = [];
+if (v.customers !== undefined && v.customers !== null) for (const item of v.customers) violations.push(...validateCustomer(item).map((message) => "customers: " + message));
+return violations;
+}
+
 export interface GetCustomerRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetCustomerRequest(v: any): GetCustomerRequest {
@@ -99,6 +115,13 @@ export function encodeGetCustomerRequest(v: GetCustomerRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetCustomerRequest(v: GetCustomerRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetCustomerResponse {
@@ -116,5 +139,11 @@ export function encodeGetCustomerResponse(v: GetCustomerResponse): Record<string
 const out: Record<string, unknown> = {};
 if (v.customer !== undefined) { out.customer = encodeCustomer(v.customer); }
 return out;
+}
+
+export function validateGetCustomerResponse(v: GetCustomerResponse): string[] {
+const violations: string[] = [];
+if (v.customer !== undefined && v.customer !== null) violations.push(...validateCustomer(v.customer).map((message) => "customer: " + message));
+return violations;
 }
 

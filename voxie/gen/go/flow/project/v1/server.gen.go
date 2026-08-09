@@ -3,10 +3,15 @@ package v1
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
+	"time"
 )
 
 func writeJSONError(w http.ResponseWriter, status int, message string) {
@@ -15,23 +20,182 @@ func writeJSONError(w http.ResponseWriter, status int, message string) {
 	_ = json.NewEncoder(w).Encode(map[string]string{"message": message})
 }
 
-func parseInt32(s string) int32     { v, _ := strconv.ParseInt(s, 10, 32); return int32(v) }
-func parseInt64(s string) int64     { v, _ := strconv.ParseInt(s, 10, 64); return v }
-func parseUint32(s string) uint32   { v, _ := strconv.ParseUint(s, 10, 32); return uint32(v) }
-func parseUint64(s string) uint64   { v, _ := strconv.ParseUint(s, 10, 64); return v }
-func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return float32(v) }
-func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
-func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
+func writeHandlerError(w http.ResponseWriter, err error) {
+	status := http.StatusInternalServerError
+	var statusErr interface{ HTTPStatusCode() int }
+	if errors.As(err, &statusErr) {
+		if candidate := statusErr.HTTPStatusCode(); candidate >= 100 && candidate <= 599 {
+			status = candidate
+		}
+	}
+	writeJSONError(w, status, err.Error())
+}
+
+func parseInt32(s string) (int32, error) { v, err := strconv.ParseInt(s, 10, 32); return int32(v), err }
+func parseInt64(s string) (int64, error) { return strconv.ParseInt(s, 10, 64) }
+func parseUint32(s string) (uint32, error) {
+	v, err := strconv.ParseUint(s, 10, 32)
+	return uint32(v), err
+}
+func parseUint64(s string) (uint64, error) { return strconv.ParseUint(s, 10, 64) }
+func parseFloat32(s string) (float32, error) {
+	v, err := strconv.ParseFloat(s, 32)
+	return float32(v), err
+}
+func parseFloat64(s string) (float64, error) { return strconv.ParseFloat(s, 64) }
+func parseBool(s string) (bool, error) {
+	if s == "true" {
+		return true, nil
+	}
+	if s == "false" {
+		return false, nil
+	}
+	return false, fmt.Errorf("must be true or false")
+}
+
+func validHeaderFormat(value, format string) bool {
+	switch format {
+	case "uuid":
+		return regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`).MatchString(value)
+	case "email":
+		return regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`).MatchString(value)
+	case "uri":
+		return regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9+.-]*://[^\s]+$`).MatchString(value)
+	default:
+		return true
+	}
+}
+
+// RequestMetadata identifies the generated route handling a request.
+type RequestMetadata struct {
+	Service     string
+	Method      string
+	HTTPMethod  string
+	Route       string
+	AuthSchemes []string
+}
+
+type requestMetadataContextKey struct{}
+type requestIDContextKey struct{}
+
+func RequestMetadataFromContext(ctx context.Context) (RequestMetadata, bool) {
+	metadata, ok := ctx.Value(requestMetadataContextKey{}).(RequestMetadata)
+	return metadata, ok
+}
+
+func RequestIDFromContext(ctx context.Context) (string, bool) {
+	requestID, ok := ctx.Value(requestIDContextKey{}).(string)
+	return requestID, ok && requestID != ""
+}
+
+type Middleware func(http.Handler) http.Handler
+type RequestIDGenerator func() string
+type Authorizer func(context.Context, RequestMetadata, *http.Request) error
+type RequestResult struct {
+	StatusCode int
+	Duration   time.Duration
+}
+type RequestObserver interface {
+	RequestStarted(context.Context, RequestMetadata) context.Context
+	RequestFinished(context.Context, RequestMetadata, RequestResult)
+}
 
 type ServerOption func(*serverOptions)
 
 type serverOptions struct {
-	mux *http.ServeMux
+	mux                *http.ServeMux
+	middlewares        []Middleware
+	requestIDHeader    string
+	requestIDGenerator RequestIDGenerator
+	authorizer         Authorizer
+	observer           RequestObserver
 }
 
-// WithMux supplies the http.ServeMux to register routes onto - required.
-func WithMux(mux *http.ServeMux) ServerOption {
-	return func(o *serverOptions) { o.mux = mux }
+// WithMux supports the options-first registration form.
+func WithMux(mux *http.ServeMux) ServerOption { return func(o *serverOptions) { o.mux = mux } }
+
+func WithMiddleware(middleware ...Middleware) ServerOption {
+	return func(o *serverOptions) { o.middlewares = append(o.middlewares, middleware...) }
+}
+
+func WithRequestID(headerName string) ServerOption {
+	return WithRequestIDGenerator(headerName, defaultRequestIDGenerator)
+}
+func WithRequestIDGenerator(headerName string, generate RequestIDGenerator) ServerOption {
+	return func(o *serverOptions) {
+		if headerName == "" {
+			headerName = "X-Request-ID"
+		}
+		o.requestIDHeader, o.requestIDGenerator = headerName, generate
+	}
+}
+
+func WithAuthorizer(authorizer Authorizer) ServerOption {
+	return func(o *serverOptions) { o.authorizer = authorizer }
+}
+func WithRequestObserver(observer RequestObserver) ServerOption {
+	return func(o *serverOptions) { o.observer = observer }
+}
+
+func defaultRequestIDGenerator() string {
+	var value [16]byte
+	if _, err := rand.Read(value[:]); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(value[:])
+}
+
+func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadata) http.Handler {
+	for i := len(o.middlewares) - 1; i >= 0; i-- {
+		if o.middlewares[i] != nil {
+			handler = o.middlewares[i](handler)
+		}
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), requestMetadataContextKey{}, metadata)
+		if o.requestIDHeader != "" {
+			requestID := r.Header.Get(o.requestIDHeader)
+			if requestID == "" && o.requestIDGenerator != nil {
+				requestID = o.requestIDGenerator()
+			}
+			if requestID != "" {
+				w.Header().Set(o.requestIDHeader, requestID)
+				ctx = context.WithValue(ctx, requestIDContextKey{}, requestID)
+			}
+		}
+		if o.authorizer != nil {
+			if err := o.authorizer(ctx, metadata, r); err != nil {
+				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				return
+			}
+		}
+		if o.observer == nil {
+			handler.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+		started := time.Now()
+		ctx = o.observer.RequestStarted(ctx, metadata)
+		rw := &statusResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		defer func() {
+			o.observer.RequestFinished(ctx, metadata, RequestResult{StatusCode: rw.statusCode, Duration: time.Since(started)})
+		}()
+		handler.ServeHTTP(rw, r.WithContext(ctx))
+	})
+}
+
+type statusResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	w.statusCode = statusCode
+	w.ResponseWriter.WriteHeader(statusCode)
+}
+func (w *statusResponseWriter) Flush() {
+	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
 }
 
 type ProjectServiceServer interface {
@@ -53,25 +217,63 @@ type ProjectServiceServer interface {
 	MoveProject(ctx context.Context, req *MoveProjectRequest) (*MoveProjectResponse, error)
 }
 
-func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption) error {
+func RegisterProjectServiceServer(first any, rest ...any) error {
 	var o serverOptions
-	for _, opt := range opts {
+	var srv ProjectServiceServer
+	if mux, ok := first.(*http.ServeMux); ok {
+		o.mux = mux
+		if len(rest) == 0 {
+			return fmt.Errorf("RegisterProjectServiceServer: implementation is required")
+		}
+		var ok bool
+		srv, ok = rest[0].(ProjectServiceServer)
+		if !ok {
+			return fmt.Errorf("RegisterProjectServiceServer: invalid implementation")
+		}
+		rest = rest[1:]
+	} else {
+		var ok bool
+		srv, ok = first.(ProjectServiceServer)
+		if !ok {
+			return fmt.Errorf("RegisterProjectServiceServer: invalid implementation")
+		}
+	}
+	for _, value := range rest {
+		opt, ok := value.(ServerOption)
+		if !ok {
+			return fmt.Errorf("RegisterProjectServiceServer: options must be ServerOption values")
+		}
 		opt(&o)
 	}
 	if o.mux == nil {
-		return fmt.Errorf("RegisterProjectServiceServer: WithMux option is required")
+		return fmt.Errorf("RegisterProjectServiceServer: mux is required")
 	}
 	mux := o.mux
-	mux.HandleFunc("GET /flow/project/v1/projects", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("GET /flow/project/v1/projects", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListProjectsRequest)
 		if r.URL.Query().Get("workspace_id") != "" {
-			req.WorkspaceId = parseInt64(r.URL.Query().Get("workspace_id"))
+			parsedWorkspaceId, err := parseInt64(r.URL.Query().Get("workspace_id"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter workspace_id: "+err.Error())
+				return
+			}
+			req.WorkspaceId = parsedWorkspaceId
 		}
 		if r.URL.Query().Get("page") != "" {
-			req.Page = parseInt32(r.URL.Query().Get("page"))
+			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
 		}
 		if r.URL.Query().Get("limit") != "" {
-			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
 		}
 		if r.URL.Query().Get("sort_by") != "" {
 			req.SortBy = r.URL.Query().Get("sort_by")
@@ -87,13 +289,13 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.ListProjects(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /flow/project/v1/projects", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "listProjects", HTTPMethod: "GET", Route: "/flow/project/v1/projects", AuthSchemes: nil}))
+	mux.Handle("POST /flow/project/v1/projects", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateProjectRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -109,21 +311,26 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.CreateProject(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("PUT /flow/project/v1/projects/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "createProject", HTTPMethod: "POST", Route: "/flow/project/v1/projects", AuthSchemes: nil}))
+	mux.Handle("PUT /flow/project/v1/projects/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateProjectRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && err.Error() != "EOF" {
 				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
 				return
 			}
 		}
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -132,15 +339,20 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.UpdateProject(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("DELETE /flow/project/v1/projects/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "updateProject", HTTPMethod: "PUT", Route: "/flow/project/v1/projects/{id}", AuthSchemes: nil}))
+	mux.Handle("DELETE /flow/project/v1/projects/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(DeleteProjectRequest)
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -149,22 +361,37 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.DeleteProject(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /flow/project/v1/projects/columns", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "deleteProject", HTTPMethod: "DELETE", Route: "/flow/project/v1/projects/{id}", AuthSchemes: nil}))
+	mux.Handle("GET /flow/project/v1/projects/columns", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListProjectColumnsRequest)
 		if r.URL.Query().Get("project_id") != "" {
-			req.ProjectId = parseInt64(r.URL.Query().Get("project_id"))
+			parsedProjectId, err := parseInt64(r.URL.Query().Get("project_id"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter project_id: "+err.Error())
+				return
+			}
+			req.ProjectId = parsedProjectId
 		}
 		if r.URL.Query().Get("page") != "" {
-			req.Page = parseInt32(r.URL.Query().Get("page"))
+			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
 		}
 		if r.URL.Query().Get("limit") != "" {
-			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
 		}
 		if r.URL.Query().Get("sort_by") != "" {
 			req.SortBy = r.URL.Query().Get("sort_by")
@@ -180,13 +407,13 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.ListProjectColumns(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /flow/project/v1/projects/columns", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "listProjectColumns", HTTPMethod: "GET", Route: "/flow/project/v1/projects/columns", AuthSchemes: nil}))
+	mux.Handle("POST /flow/project/v1/projects/columns", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateProjectColumnRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -202,13 +429,13 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.CreateProjectColumn(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("PUT /flow/project/v1/projects/columns/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "createProjectColumn", HTTPMethod: "POST", Route: "/flow/project/v1/projects/columns", AuthSchemes: nil}))
+	mux.Handle("PUT /flow/project/v1/projects/columns/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateProjectColumnRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -216,7 +443,12 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 				return
 			}
 		}
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -225,15 +457,20 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.UpdateProjectColumn(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("DELETE /flow/project/v1/projects/columns/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "updateProjectColumn", HTTPMethod: "PUT", Route: "/flow/project/v1/projects/columns/{id}", AuthSchemes: nil}))
+	mux.Handle("DELETE /flow/project/v1/projects/columns/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(DeleteProjectColumnRequest)
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -242,13 +479,13 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.DeleteProjectColumn(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("PUT /flow/project/v1/projects/columns/move", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "deleteProjectColumn", HTTPMethod: "DELETE", Route: "/flow/project/v1/projects/columns/{id}", AuthSchemes: nil}))
+	mux.Handle("PUT /flow/project/v1/projects/columns/move", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(MoveTaskToColumnRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -264,22 +501,37 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.MoveTaskToColumn(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /flow/project/v1/projects/members", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "moveTaskToColumn", HTTPMethod: "PUT", Route: "/flow/project/v1/projects/columns/move", AuthSchemes: nil}))
+	mux.Handle("GET /flow/project/v1/projects/members", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListProjectMembersRequest)
 		if r.URL.Query().Get("project_id") != "" {
-			req.ProjectId = parseInt64(r.URL.Query().Get("project_id"))
+			parsedProjectId, err := parseInt64(r.URL.Query().Get("project_id"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter project_id: "+err.Error())
+				return
+			}
+			req.ProjectId = parsedProjectId
 		}
 		if r.URL.Query().Get("page") != "" {
-			req.Page = parseInt32(r.URL.Query().Get("page"))
+			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
 		}
 		if r.URL.Query().Get("limit") != "" {
-			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
 		}
 		if r.URL.Query().Get("sort_by") != "" {
 			req.SortBy = r.URL.Query().Get("sort_by")
@@ -295,13 +547,13 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.ListProjectMembers(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /flow/project/v1/projects/members", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "listProjectMembers", HTTPMethod: "GET", Route: "/flow/project/v1/projects/members", AuthSchemes: nil}))
+	mux.Handle("POST /flow/project/v1/projects/members", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(AddProjectMemberRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -317,19 +569,29 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.AddProjectMember(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("DELETE /flow/project/v1/projects/members", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "addProjectMember", HTTPMethod: "POST", Route: "/flow/project/v1/projects/members", AuthSchemes: nil}))
+	mux.Handle("DELETE /flow/project/v1/projects/members", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(RemoveProjectMemberRequest)
 		if r.URL.Query().Get("project_id") != "" {
-			req.ProjectId = parseInt64(r.URL.Query().Get("project_id"))
+			parsedProjectId, err := parseInt64(r.URL.Query().Get("project_id"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter project_id: "+err.Error())
+				return
+			}
+			req.ProjectId = parsedProjectId
 		}
 		if r.URL.Query().Get("user_id") != "" {
-			req.UserId = parseInt64(r.URL.Query().Get("user_id"))
+			parsedUserId, err := parseInt64(r.URL.Query().Get("user_id"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter user_id: "+err.Error())
+				return
+			}
+			req.UserId = parsedUserId
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
@@ -339,13 +601,13 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.RemoveProjectMember(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("PUT /flow/project/v1/projects/members/role", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "removeProjectMember", HTTPMethod: "DELETE", Route: "/flow/project/v1/projects/members", AuthSchemes: nil}))
+	mux.Handle("PUT /flow/project/v1/projects/members/role", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateProjectMemberRoleRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -361,13 +623,13 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.UpdateProjectMemberRole(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /flow/project/v1/projects/members/invite", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "updateProjectMemberRole", HTTPMethod: "PUT", Route: "/flow/project/v1/projects/members/role", AuthSchemes: nil}))
+	mux.Handle("POST /flow/project/v1/projects/members/invite", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(InviteProjectMemberRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -383,13 +645,13 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.InviteProjectMember(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("PUT /flow/project/v1/projects/transfer", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "inviteProjectMember", HTTPMethod: "POST", Route: "/flow/project/v1/projects/members/invite", AuthSchemes: nil}))
+	mux.Handle("PUT /flow/project/v1/projects/transfer", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(TransferProjectOwnershipRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -405,13 +667,13 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.TransferProjectOwnership(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("PUT /flow/project/v1/projects/move", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ProjectService", Method: "transferProjectOwnership", HTTPMethod: "PUT", Route: "/flow/project/v1/projects/transfer", AuthSchemes: nil}))
+	mux.Handle("PUT /flow/project/v1/projects/move", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(MoveProjectRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -427,11 +689,11 @@ func RegisterProjectServiceServer(srv ProjectServiceServer, opts ...ServerOption
 		}
 		resp, err := srv.MoveProject(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
+	}), RequestMetadata{Service: "ProjectService", Method: "moveProject", HTTPMethod: "PUT", Route: "/flow/project/v1/projects/move", AuthSchemes: nil}))
 	return nil
 }

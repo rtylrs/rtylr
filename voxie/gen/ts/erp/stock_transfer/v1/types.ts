@@ -29,6 +29,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateStockTransferItem(v: StockTransferItem): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface StockTransfer {
 id?: string;
 ownerId?: string;
@@ -70,6 +75,12 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateStockTransfer(v: StockTransfer): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateStockTransferItem(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface CreateStockTransferItemRequest {
 productId?: string;
 quantity?: number;
@@ -90,9 +101,14 @@ if (v.quantity !== undefined) { out.quantity = v.quantity; }
 return out;
 }
 
+export function validateCreateStockTransferItemRequest(v: CreateStockTransferItemRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateStockTransferRequest {
-fromWarehouseId?: string;
-toWarehouseId?: string;
+fromWarehouseId: string;
+toWarehouseId: string;
 notes?: string;
 items?: (CreateStockTransferItemRequest)[];
 }
@@ -116,6 +132,16 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeCreateStoc
 return out;
 }
 
+export function validateCreateStockTransferRequest(v: CreateStockTransferRequest): string[] {
+const violations: string[] = [];
+if (!(v.fromWarehouseId !== undefined && v.fromWarehouseId !== null)) violations.push("from_warehouse_id is required");
+if (v.fromWarehouseId !== undefined && v.fromWarehouseId !== null && !(Number(v.fromWarehouseId) > 0)) violations.push("from_warehouse_id violates @gt");
+if (!(v.toWarehouseId !== undefined && v.toWarehouseId !== null)) violations.push("to_warehouse_id is required");
+if (v.toWarehouseId !== undefined && v.toWarehouseId !== null && !(Number(v.toWarehouseId) > 0)) violations.push("to_warehouse_id violates @gt");
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateCreateStockTransferItemRequest(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface CreateStockTransferResponse {
 transferId?: string;
 message?: string;
@@ -136,6 +162,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateStockTransferResponse(v: CreateStockTransferResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListStockTransfersRequest {
 page?: number;
 pageSize?: number;
@@ -154,6 +185,11 @@ const out: Record<string, unknown> = {};
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
+}
+
+export function validateListStockTransfersRequest(v: ListStockTransfersRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListStockTransfersResponse {
@@ -182,8 +218,14 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListStockTransfersResponse(v: ListStockTransfersResponse): string[] {
+const violations: string[] = [];
+if (v.stockTransfers !== undefined && v.stockTransfers !== null) for (const item of v.stockTransfers) violations.push(...validateStockTransfer(item).map((message) => "stock_transfers: " + message));
+return violations;
+}
+
 export interface UpdateStockTransferStatusBody {
-status?: string;
+status: string;
 }
 
 export function decodeUpdateStockTransferStatusBody(v: any): UpdateStockTransferStatusBody {
@@ -199,8 +241,14 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdateStockTransferStatusBody(v: UpdateStockTransferStatusBody): string[] {
+const violations: string[] = [];
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+return violations;
+}
+
 export interface UpdateStockTransferStatusRequest {
-id?: string;
+id: string;
 body?: UpdateStockTransferStatusBody;
 }
 
@@ -219,6 +267,14 @@ if (v.body !== undefined) { out.body = encodeUpdateStockTransferStatusBody(v.bod
 return out;
 }
 
+export function validateUpdateStockTransferStatusRequest(v: UpdateStockTransferStatusRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateStockTransferStatusBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateStockTransferStatusResponse {
 message?: string;
 }
@@ -234,5 +290,10 @@ export function encodeUpdateStockTransferStatusResponse(v: UpdateStockTransferSt
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateStockTransferStatusResponse(v: UpdateStockTransferStatusResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

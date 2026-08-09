@@ -23,6 +23,11 @@ func NewBrandServiceClient(baseURL string) *BrandServiceClient {
 }
 
 func (c *BrandServiceClient) ListBrands(ctx context.Context, req *ListBrandsRequest) (*ListBrandsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/brand/v1/brands"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *BrandServiceClient) ListBrands(ctx context.Context, req *ListBrandsRequ
 }
 
 func (c *BrandServiceClient) CreateBrand(ctx context.Context, req *CreateBrandRequest) (*CreateBrandResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/brand/v1/brands"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,9 +94,14 @@ func (c *BrandServiceClient) CreateBrand(ctx context.Context, req *CreateBrandRe
 }
 
 func (c *BrandServiceClient) UpdateBrand(ctx context.Context, req *UpdateBrandRequest) (*UpdateBrandResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/brand/v1/brands/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -116,6 +131,11 @@ func (c *BrandServiceClient) UpdateBrand(ctx context.Context, req *UpdateBrandRe
 }
 
 func (c *BrandServiceClient) DeleteBrand(ctx context.Context, req *DeleteBrandRequest) (*DeleteBrandResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/brand/v1/brands/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

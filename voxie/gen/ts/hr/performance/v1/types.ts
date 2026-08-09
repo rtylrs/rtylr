@@ -47,6 +47,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateReviewGoalPayload(v: ReviewGoalPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface PerformanceReviewPayload {
 id?: string;
 ownerId?: string;
@@ -97,6 +102,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validatePerformanceReviewPayload(v: PerformanceReviewPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ReviewCyclePayload {
 id?: string;
 ownerId?: string;
@@ -138,6 +148,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateReviewCyclePayload(v: ReviewCyclePayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListReviewCyclesRequest {
 }
 
@@ -150,6 +165,11 @@ return {
 export function encodeListReviewCyclesRequest(v: ListReviewCyclesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListReviewCyclesRequest(v: ListReviewCyclesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListReviewCyclesResponse {
@@ -178,11 +198,17 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListReviewCyclesResponse(v: ListReviewCyclesResponse): string[] {
+const violations: string[] = [];
+if (v.cycles !== undefined && v.cycles !== null) for (const item of v.cycles) violations.push(...validateReviewCyclePayload(item).map((message) => "cycles: " + message));
+return violations;
+}
+
 export interface CreateReviewCycleRequest {
-name?: string;
-type?: string;
-periodStart?: string;
-periodEnd?: string;
+name: string;
+type: string;
+periodStart: string;
+periodEnd: string;
 }
 
 export function decodeCreateReviewCycleRequest(v: any): CreateReviewCycleRequest {
@@ -204,6 +230,15 @@ if (v.periodEnd !== undefined) { out.period_end = v.periodEnd; }
 return out;
 }
 
+export function validateCreateReviewCycleRequest(v: CreateReviewCycleRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (!(v.periodStart !== undefined && v.periodStart !== null) || v.periodStart === "") violations.push("period_start is required");
+if (!(v.periodEnd !== undefined && v.periodEnd !== null) || v.periodEnd === "") violations.push("period_end is required");
+return violations;
+}
+
 export interface CreateReviewCycleResponse {
 cycle?: ReviewCyclePayload;
 }
@@ -221,8 +256,14 @@ if (v.cycle !== undefined) { out.cycle = encodeReviewCyclePayload(v.cycle); }
 return out;
 }
 
+export function validateCreateReviewCycleResponse(v: CreateReviewCycleResponse): string[] {
+const violations: string[] = [];
+if (v.cycle !== undefined && v.cycle !== null) violations.push(...validateReviewCyclePayload(v.cycle).map((message) => "cycle: " + message));
+return violations;
+}
+
 export interface OpenReviewCycleRequest {
-cycleId?: string;
+cycleId: string;
 }
 
 export function decodeOpenReviewCycleRequest(v: any): OpenReviewCycleRequest {
@@ -236,6 +277,13 @@ export function encodeOpenReviewCycleRequest(v: OpenReviewCycleRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.cycleId !== undefined) { out.cycle_id = v.cycleId; }
 return out;
+}
+
+export function validateOpenReviewCycleRequest(v: OpenReviewCycleRequest): string[] {
+const violations: string[] = [];
+if (!(v.cycleId !== undefined && v.cycleId !== null)) violations.push("cycle_id is required");
+if (v.cycleId !== undefined && v.cycleId !== null && !(Number(v.cycleId) > 0)) violations.push("cycle_id violates @gt");
+return violations;
 }
 
 export interface OpenReviewCycleResponse {
@@ -253,6 +301,12 @@ export function encodeOpenReviewCycleResponse(v: OpenReviewCycleResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.cycle !== undefined) { out.cycle = encodeReviewCyclePayload(v.cycle); }
 return out;
+}
+
+export function validateOpenReviewCycleResponse(v: OpenReviewCycleResponse): string[] {
+const violations: string[] = [];
+if (v.cycle !== undefined && v.cycle !== null) violations.push(...validateReviewCyclePayload(v.cycle).map((message) => "cycle: " + message));
+return violations;
 }
 
 export interface ListGoalsRequest {
@@ -273,6 +327,11 @@ const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.reviewCycleId !== undefined) { out.review_cycle_id = v.reviewCycleId; }
 return out;
+}
+
+export function validateListGoalsRequest(v: ListGoalsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListGoalsResponse {
@@ -301,10 +360,16 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListGoalsResponse(v: ListGoalsResponse): string[] {
+const violations: string[] = [];
+if (v.goals !== undefined && v.goals !== null) for (const item of v.goals) violations.push(...validateReviewGoalPayload(item).map((message) => "goals: " + message));
+return violations;
+}
+
 export interface SubmitReviewRequest {
-reviewId?: string;
-overallRating?: string;
-narrative?: string;
+reviewId: string;
+overallRating: string;
+narrative: string;
 }
 
 export function decodeSubmitReviewRequest(v: any): SubmitReviewRequest {
@@ -324,6 +389,15 @@ if (v.narrative !== undefined) { out.narrative = v.narrative; }
 return out;
 }
 
+export function validateSubmitReviewRequest(v: SubmitReviewRequest): string[] {
+const violations: string[] = [];
+if (!(v.reviewId !== undefined && v.reviewId !== null)) violations.push("review_id is required");
+if (v.reviewId !== undefined && v.reviewId !== null && !(Number(v.reviewId) > 0)) violations.push("review_id violates @gt");
+if (!(v.overallRating !== undefined && v.overallRating !== null) || v.overallRating === "") violations.push("overall_rating is required");
+if (!(v.narrative !== undefined && v.narrative !== null) || v.narrative === "") violations.push("narrative is required");
+return violations;
+}
+
 export interface SubmitReviewResponse {
 review?: PerformanceReviewPayload;
 }
@@ -339,5 +413,11 @@ export function encodeSubmitReviewResponse(v: SubmitReviewResponse): Record<stri
 const out: Record<string, unknown> = {};
 if (v.review !== undefined) { out.review = encodePerformanceReviewPayload(v.review); }
 return out;
+}
+
+export function validateSubmitReviewResponse(v: SubmitReviewResponse): string[] {
+const violations: string[] = [];
+if (v.review !== undefined && v.review !== null) violations.push(...validatePerformanceReviewPayload(v.review).map((message) => "review: " + message));
+return violations;
 }
 

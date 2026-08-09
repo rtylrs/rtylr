@@ -23,6 +23,11 @@ func NewNotificationServiceClient(baseURL string) *NotificationServiceClient {
 }
 
 func (c *NotificationServiceClient) ListNotifications(ctx context.Context, req *ListNotificationsRequest) (*ListNotificationsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/notification/v1/notifications"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *NotificationServiceClient) ListNotifications(ctx context.Context, req *
 }
 
 func (c *NotificationServiceClient) MarkAllRead(ctx context.Context, req *MarkAllReadRequest) (*MarkAllReadResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/notification/v1/notifications/read-all"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *NotificationServiceClient) MarkAllRead(ctx context.Context, req *MarkAl
 }
 
 func (c *NotificationServiceClient) MarkNotificationRead(ctx context.Context, req *MarkNotificationReadRequest) (*MarkNotificationReadResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/notification/v1/notifications/{id}/read"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

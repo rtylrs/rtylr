@@ -68,6 +68,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validatePayrollRecord(v: PayrollRecord): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListPayrollRequest {
 periodLabel?: string;
 }
@@ -83,6 +88,11 @@ export function encodeListPayrollRequest(v: ListPayrollRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.periodLabel !== undefined) { out.period_label = v.periodLabel; }
 return out;
+}
+
+export function validateListPayrollRequest(v: ListPayrollRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListPayrollResponse {
@@ -102,10 +112,16 @@ if (v.records !== undefined) { out.records = (v.records as any[]).map(encodePayr
 return out;
 }
 
+export function validateListPayrollResponse(v: ListPayrollResponse): string[] {
+const violations: string[] = [];
+if (v.records !== undefined && v.records !== null) for (const item of v.records) violations.push(...validatePayrollRecord(item).map((message) => "records: " + message));
+return violations;
+}
+
 export interface RunPayrollRequest {
-periodStart?: string;
-periodEnd?: string;
-periodLabel?: string;
+periodStart: string;
+periodEnd: string;
+periodLabel: string;
 }
 
 export function decodeRunPayrollRequest(v: any): RunPayrollRequest {
@@ -125,6 +141,14 @@ if (v.periodLabel !== undefined) { out.period_label = v.periodLabel; }
 return out;
 }
 
+export function validateRunPayrollRequest(v: RunPayrollRequest): string[] {
+const violations: string[] = [];
+if (!(v.periodStart !== undefined && v.periodStart !== null) || v.periodStart === "") violations.push("period_start is required");
+if (!(v.periodEnd !== undefined && v.periodEnd !== null) || v.periodEnd === "") violations.push("period_end is required");
+if (!(v.periodLabel !== undefined && v.periodLabel !== null) || v.periodLabel === "") violations.push("period_label is required");
+return violations;
+}
+
 export interface RunPayrollResponse {
 recordsCreated?: number;
 }
@@ -142,8 +166,13 @@ if (v.recordsCreated !== undefined) { out.records_created = v.recordsCreated; }
 return out;
 }
 
+export function validateRunPayrollResponse(v: RunPayrollResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface MarkPayrollPaidRequest {
-id?: number;
+id: number;
 }
 
 export function decodeMarkPayrollPaidRequest(v: any): MarkPayrollPaidRequest {
@@ -157,6 +186,13 @@ export function encodeMarkPayrollPaidRequest(v: MarkPayrollPaidRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateMarkPayrollPaidRequest(v: MarkPayrollPaidRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface MarkPayrollPaidResponse {
@@ -174,5 +210,10 @@ export function encodeMarkPayrollPaidResponse(v: MarkPayrollPaidResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateMarkPayrollPaidResponse(v: MarkPayrollPaidResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

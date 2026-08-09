@@ -15,6 +15,11 @@ const out: Record<string, unknown> = {};
 return out;
 }
 
+export function validateListMenuRequest(v: ListMenuRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListMenuResponse {
 items?: (pos_menu_item_v1.MenuItem)[];
 }
@@ -30,6 +35,12 @@ export function encodeListMenuResponse(v: ListMenuResponse): Record<string, unkn
 const out: Record<string, unknown> = {};
 if (v.items !== undefined) { out.items = (v.items as any[]).map(pos_menu_item_v1.encodeMenuItem); }
 return out;
+}
+
+export function validateListMenuResponse(v: ListMenuResponse): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...pos_menu_item_v1.validateMenuItem(item).map((message) => "items: " + message));
+return violations;
 }
 
 export interface UpdateMenuRequest {
@@ -49,6 +60,13 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(pos_menu_item_v1
 return out;
 }
 
+export function validateUpdateMenuRequest(v: UpdateMenuRequest): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null && v.items.length < 1) violations.push("items must contain at least 1 items");
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...pos_menu_item_v1.validateMenuItem(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface UpdateMenuResponse {
 success?: boolean;
 }
@@ -64,5 +82,10 @@ export function encodeUpdateMenuResponse(v: UpdateMenuResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateUpdateMenuResponse(v: UpdateMenuResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

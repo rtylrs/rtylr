@@ -47,6 +47,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateStockMovement(v: StockMovement): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface BranchInventory {
 id?: string;
 businessId?: string;
@@ -103,12 +108,17 @@ if (v.lowStockThreshold !== undefined) { out.low_stock_threshold = v.lowStockThr
 return out;
 }
 
+export function validateBranchInventory(v: BranchInventory): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface AdjustStockRequest {
-branchId?: string;
-productId?: string;
-quantity?: number;
+branchId: string;
+productId: string;
+quantity: number;
 note?: string;
-employeeId?: string;
+employeeId: string;
 }
 
 export function decodeAdjustStockRequest(v: any): AdjustStockRequest {
@@ -132,6 +142,19 @@ if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 return out;
 }
 
+export function validateAdjustStockRequest(v: AdjustStockRequest): string[] {
+const violations: string[] = [];
+if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
+if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (!(v.productId !== undefined && v.productId !== null)) violations.push("product_id is required");
+if (v.productId !== undefined && v.productId !== null && !(Number(v.productId) > 0)) violations.push("product_id violates @gt");
+if (!(v.quantity !== undefined && v.quantity !== null)) violations.push("quantity is required");
+if (v.quantity !== undefined && v.quantity !== null && !(Number(v.quantity) > 0)) violations.push("quantity violates @gt");
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+return violations;
+}
+
 export interface AdjustStockResponse {
 movementId?: string;
 message?: string;
@@ -152,6 +175,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateAdjustStockResponse(v: AdjustStockResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListInventoryRequest {
 branchId?: string;
 }
@@ -169,6 +197,11 @@ if (v.branchId !== undefined) { out.branch_id = v.branchId; }
 return out;
 }
 
+export function validateListInventoryRequest(v: ListInventoryRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListInventoryResponse {
 inventory?: (BranchInventory)[];
 }
@@ -184,6 +217,12 @@ export function encodeListInventoryResponse(v: ListInventoryResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.inventory !== undefined) { out.inventory = (v.inventory as any[]).map(encodeBranchInventory); }
 return out;
+}
+
+export function validateListInventoryResponse(v: ListInventoryResponse): string[] {
+const violations: string[] = [];
+if (v.inventory !== undefined && v.inventory !== null) for (const item of v.inventory) violations.push(...validateBranchInventory(item).map((message) => "inventory: " + message));
+return violations;
 }
 
 export interface ListStockMovementsRequest {
@@ -206,6 +245,11 @@ if (v.productId !== undefined) { out.product_id = v.productId; }
 return out;
 }
 
+export function validateListStockMovementsRequest(v: ListStockMovementsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListStockMovementsResponse {
 movements?: (StockMovement)[];
 }
@@ -223,8 +267,14 @@ if (v.movements !== undefined) { out.movements = (v.movements as any[]).map(enco
 return out;
 }
 
+export function validateListStockMovementsResponse(v: ListStockMovementsResponse): string[] {
+const violations: string[] = [];
+if (v.movements !== undefined && v.movements !== null) for (const item of v.movements) violations.push(...validateStockMovement(item).map((message) => "movements: " + message));
+return violations;
+}
+
 export interface LowStockRequest {
-branchId?: string;
+branchId: string;
 }
 
 export function decodeLowStockRequest(v: any): LowStockRequest {
@@ -238,6 +288,13 @@ export function encodeLowStockRequest(v: LowStockRequest): Record<string, unknow
 const out: Record<string, unknown> = {};
 if (v.branchId !== undefined) { out.branch_id = v.branchId; }
 return out;
+}
+
+export function validateLowStockRequest(v: LowStockRequest): string[] {
+const violations: string[] = [];
+if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
+if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+return violations;
 }
 
 export interface LowStockResponse {
@@ -257,12 +314,18 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeBranchInve
 return out;
 }
 
+export function validateLowStockResponse(v: LowStockResponse): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateBranchInventory(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface ReceiveStockRequest {
-branchId?: string;
-productId?: string;
-quantity?: number;
-note?: string;
-employeeId?: string;
+branchId: string;
+productId: string;
+quantity: number;
+note: string;
+employeeId: string;
 }
 
 export function decodeReceiveStockRequest(v: any): ReceiveStockRequest {
@@ -286,6 +349,20 @@ if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 return out;
 }
 
+export function validateReceiveStockRequest(v: ReceiveStockRequest): string[] {
+const violations: string[] = [];
+if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
+if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (!(v.productId !== undefined && v.productId !== null)) violations.push("product_id is required");
+if (v.productId !== undefined && v.productId !== null && !(Number(v.productId) > 0)) violations.push("product_id violates @gt");
+if (!(v.quantity !== undefined && v.quantity !== null)) violations.push("quantity is required");
+if (v.quantity !== undefined && v.quantity !== null && !(Number(v.quantity) > 0)) violations.push("quantity violates @gt");
+if (!(v.note !== undefined && v.note !== null) || v.note === "") violations.push("note is required");
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+return violations;
+}
+
 export interface ReceiveStockResponse {
 movementId?: string;
 message?: string;
@@ -306,13 +383,18 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateReceiveStockResponse(v: ReceiveStockResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface TransferStockRequest {
-fromBranchId?: string;
-toBranchId?: string;
-productId?: string;
-quantity?: number;
-note?: string;
-employeeId?: string;
+fromBranchId: string;
+toBranchId: string;
+productId: string;
+quantity: number;
+note: string;
+employeeId: string;
 }
 
 export function decodeTransferStockRequest(v: any): TransferStockRequest {
@@ -338,6 +420,22 @@ if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 return out;
 }
 
+export function validateTransferStockRequest(v: TransferStockRequest): string[] {
+const violations: string[] = [];
+if (!(v.fromBranchId !== undefined && v.fromBranchId !== null)) violations.push("from_branch_id is required");
+if (v.fromBranchId !== undefined && v.fromBranchId !== null && !(Number(v.fromBranchId) > 0)) violations.push("from_branch_id violates @gt");
+if (!(v.toBranchId !== undefined && v.toBranchId !== null)) violations.push("to_branch_id is required");
+if (v.toBranchId !== undefined && v.toBranchId !== null && !(Number(v.toBranchId) > 0)) violations.push("to_branch_id violates @gt");
+if (!(v.productId !== undefined && v.productId !== null)) violations.push("product_id is required");
+if (v.productId !== undefined && v.productId !== null && !(Number(v.productId) > 0)) violations.push("product_id violates @gt");
+if (!(v.quantity !== undefined && v.quantity !== null)) violations.push("quantity is required");
+if (v.quantity !== undefined && v.quantity !== null && !(Number(v.quantity) > 0)) violations.push("quantity violates @gt");
+if (!(v.note !== undefined && v.note !== null) || v.note === "") violations.push("note is required");
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+return violations;
+}
+
 export interface TransferStockResponse {
 movementId?: string;
 message?: string;
@@ -358,12 +456,17 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateTransferStockResponse(v: TransferStockResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface WasteStockRequest {
-branchId?: string;
-productId?: string;
-quantity?: number;
-note?: string;
-employeeId?: string;
+branchId: string;
+productId: string;
+quantity: number;
+note: string;
+employeeId: string;
 }
 
 export function decodeWasteStockRequest(v: any): WasteStockRequest {
@@ -387,6 +490,20 @@ if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 return out;
 }
 
+export function validateWasteStockRequest(v: WasteStockRequest): string[] {
+const violations: string[] = [];
+if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
+if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (!(v.productId !== undefined && v.productId !== null)) violations.push("product_id is required");
+if (v.productId !== undefined && v.productId !== null && !(Number(v.productId) > 0)) violations.push("product_id violates @gt");
+if (!(v.quantity !== undefined && v.quantity !== null)) violations.push("quantity is required");
+if (v.quantity !== undefined && v.quantity !== null && !(Number(v.quantity) > 0)) violations.push("quantity violates @gt");
+if (!(v.note !== undefined && v.note !== null) || v.note === "") violations.push("note is required");
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+return violations;
+}
+
 export interface WasteStockResponse {
 movementId?: string;
 message?: string;
@@ -405,5 +522,10 @@ const out: Record<string, unknown> = {};
 if (v.movementId !== undefined) { out.movement_id = v.movementId; }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateWasteStockResponse(v: WasteStockResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

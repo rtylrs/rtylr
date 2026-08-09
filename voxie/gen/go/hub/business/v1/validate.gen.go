@@ -22,7 +22,65 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Business) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *BusinessEntry) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *PublicLocation) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *PublicBusinessSummary) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *PublicBusinessProfile) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetBusinessRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BusinessId <= 0 {
 		violations = append(violations, "business_id must be greater than 0")
@@ -33,7 +91,26 @@ func (m *GetBusinessRequest) Validate() error {
 	return nil
 }
 
+func (m *GetBusinessResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Business != nil {
+		if err := m.Business.Validate(); err != nil {
+			violations = append(violations, "business: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateSubBusinessRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -47,11 +124,36 @@ func (m *CreateSubBusinessRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateSubBusinessResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *OnboardBusinessRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *OnboardBusinessResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -59,6 +161,9 @@ func (m *OnboardBusinessRequest) Validate() error {
 }
 
 func (m *CheckBusinessNameExistsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -69,7 +174,21 @@ func (m *CheckBusinessNameExistsRequest) Validate() error {
 	return nil
 }
 
+func (m *CheckBusinessNameExistsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetPublicBusinessRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BusinessId <= 0 {
 		violations = append(violations, "business_id must be greater than 0")
@@ -80,7 +199,53 @@ func (m *GetPublicBusinessRequest) Validate() error {
 	return nil
 }
 
+func (m *GetPublicBusinessResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Business != nil {
+		if err := m.Business.Validate(); err != nil {
+			violations = append(violations, "business: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListMyBusinessesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListMyBusinessesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Businesses {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "businesses: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *LookupBusinessBySlugRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Slug == "" {
 		violations = append(violations, "slug is required")
@@ -94,7 +259,31 @@ func (m *LookupBusinessBySlugRequest) Validate() error {
 	return nil
 }
 
+func (m *LookupBusinessBySlugResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Business != nil {
+		if err := m.Business.Validate(); err != nil {
+			violations = append(violations, "business: "+err.Error())
+		}
+	}
+	for _, value := range m.Locations {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "locations: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *SetSlugRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Slug == "" {
 		violations = append(violations, "slug is required")
@@ -108,7 +297,21 @@ func (m *SetSlugRequest) Validate() error {
 	return nil
 }
 
+func (m *SetSlugResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateBusinessRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BusinessId <= 0 {
 		violations = append(violations, "business_id must be greater than 0")
@@ -137,7 +340,26 @@ func (m *UpdateBusinessRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdateBusinessResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Business != nil {
+		if err := m.Business.Validate(); err != nil {
+			violations = append(violations, "business: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *RenameBusinessRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BusinessId <= 0 {
 		violations = append(violations, "business_id must be greater than 0")
@@ -151,11 +373,41 @@ func (m *RenameBusinessRequest) Validate() error {
 	return nil
 }
 
+func (m *RenameBusinessResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Business != nil {
+		if err := m.Business.Validate(); err != nil {
+			violations = append(violations, "business: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteBusinessRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BusinessId <= 0 {
 		violations = append(violations, "business_id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteBusinessResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

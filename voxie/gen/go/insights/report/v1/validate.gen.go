@@ -20,7 +20,64 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *ReportTemplate) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ScheduledReport) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListReportTemplatesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListReportTemplatesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Templates {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "templates: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateReportTemplateRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -43,10 +100,77 @@ func (m *CreateReportTemplateRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateReportTemplateResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Template != nil {
+		if err := m.Template.Validate(); err != nil {
+			violations = append(violations, "template: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetReportTemplateRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetReportTemplateResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Template != nil {
+		if err := m.Template.Validate(); err != nil {
+			violations = append(violations, "template: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListScheduledReportsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListScheduledReportsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Reports {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "reports: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -55,6 +179,9 @@ func (m *GetReportTemplateRequest) Validate() error {
 }
 
 func (m *CreateScheduledReportRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TemplateSlug == "" {
 		violations = append(violations, "template_slug is required")
@@ -70,6 +197,22 @@ func (m *CreateScheduledReportRequest) Validate() error {
 	}
 	if m.RecipientEmail != "" && !emailPattern.MatchString(m.RecipientEmail) {
 		violations = append(violations, "recipient_email must be a valid email")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateScheduledReportResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Report != nil {
+		if err := m.Report.Validate(); err != nil {
+			violations = append(violations, "report: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -78,6 +221,9 @@ func (m *CreateScheduledReportRequest) Validate() error {
 }
 
 func (m *UpdateScheduledReportRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -103,10 +249,100 @@ func (m *UpdateScheduledReportRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdateScheduledReportResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Report != nil {
+		if err := m.Report.Validate(); err != nil {
+			violations = append(violations, "report: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteScheduledReportRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteScheduledReportResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GenerateRevenueReportRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GenerateRevenueReportResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ExportRevenueReportRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ExportRevenueRow) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ExportRevenueReportResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Rows {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "rows: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

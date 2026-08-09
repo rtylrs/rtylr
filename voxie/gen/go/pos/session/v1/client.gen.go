@@ -23,6 +23,11 @@ func NewSessionServiceClient(baseURL string) *SessionServiceClient {
 }
 
 func (c *SessionServiceClient) ListSessions(ctx context.Context, req *ListSessionsRequest) (*ListSessionsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/session/v1/sessions"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *SessionServiceClient) ListSessions(ctx context.Context, req *ListSessio
 }
 
 func (c *SessionServiceClient) OpenSession(ctx context.Context, req *OpenSessionRequest) (*OpenSessionResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/session/v1/sessions/open"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *SessionServiceClient) OpenSession(ctx context.Context, req *OpenSession
 }
 
 func (c *SessionServiceClient) CloseSession(ctx context.Context, req *CloseSessionRequest) (*CloseSessionResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/session/v1/sessions/{id}/close"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

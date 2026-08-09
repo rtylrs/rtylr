@@ -23,6 +23,12 @@ if (v.trend !== undefined) { out.trend = (v.trend as any[]).map(encodeRevenuePoi
 return out;
 }
 
+export function validateRevenueOverview(v: RevenueOverview): string[] {
+const violations: string[] = [];
+if (v.trend !== undefined && v.trend !== null) for (const item of v.trend) violations.push(...validateRevenuePoint(item).map((message) => "trend: " + message));
+return violations;
+}
+
 export interface RevenuePoint {
 date?: string;
 amount?: number;
@@ -41,6 +47,11 @@ const out: Record<string, unknown> = {};
 if (v.date !== undefined) { out.date = v.date; }
 if (v.amount !== undefined) { out.amount = v.amount; }
 return out;
+}
+
+export function validateRevenuePoint(v: RevenuePoint): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface RevenueByApp {
@@ -64,6 +75,11 @@ if (v.app !== undefined) { out.app = v.app; }
 if (v.amount !== undefined) { out.amount = v.amount; }
 if (v.percentage !== undefined) { out.percentage = v.percentage; }
 return out;
+}
+
+export function validateRevenueByApp(v: RevenueByApp): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface RevenueComparison {
@@ -92,6 +108,11 @@ if (v.change !== undefined) { out.change = v.change; }
 return out;
 }
 
+export function validateRevenueComparison(v: RevenueComparison): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetRevenueOverviewRequest {
 period?: string;
 }
@@ -107,6 +128,11 @@ export function encodeGetRevenueOverviewRequest(v: GetRevenueOverviewRequest): R
 const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 return out;
+}
+
+export function validateGetRevenueOverviewRequest(v: GetRevenueOverviewRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetRevenueOverviewResponse {
@@ -126,6 +152,12 @@ if (v.overview !== undefined) { out.overview = encodeRevenueOverview(v.overview)
 return out;
 }
 
+export function validateGetRevenueOverviewResponse(v: GetRevenueOverviewResponse): string[] {
+const violations: string[] = [];
+if (v.overview !== undefined && v.overview !== null) violations.push(...validateRevenueOverview(v.overview).map((message) => "overview: " + message));
+return violations;
+}
+
 export interface GetRevenueByAppRequest {
 period?: string;
 }
@@ -141,6 +173,11 @@ export function encodeGetRevenueByAppRequest(v: GetRevenueByAppRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 return out;
+}
+
+export function validateGetRevenueByAppRequest(v: GetRevenueByAppRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetRevenueByAppResponse {
@@ -160,9 +197,15 @@ if (v.apps !== undefined) { out.apps = (v.apps as any[]).map(encodeRevenueByApp)
 return out;
 }
 
+export function validateGetRevenueByAppResponse(v: GetRevenueByAppResponse): string[] {
+const violations: string[] = [];
+if (v.apps !== undefined && v.apps !== null) for (const item of v.apps) violations.push(...validateRevenueByApp(item).map((message) => "apps: " + message));
+return violations;
+}
+
 export interface GetRevenueComparisonRequest {
 period?: string;
-compareTo?: string;
+compareTo: string;
 }
 
 export function decodeGetRevenueComparisonRequest(v: any): GetRevenueComparisonRequest {
@@ -180,6 +223,12 @@ if (v.compareTo !== undefined) { out.compare_to = v.compareTo; }
 return out;
 }
 
+export function validateGetRevenueComparisonRequest(v: GetRevenueComparisonRequest): string[] {
+const violations: string[] = [];
+if (!(v.compareTo !== undefined && v.compareTo !== null) || v.compareTo === "") violations.push("compare_to is required");
+return violations;
+}
+
 export interface GetRevenueComparisonResponse {
 comparisons?: (RevenueComparison)[];
 }
@@ -195,5 +244,11 @@ export function encodeGetRevenueComparisonResponse(v: GetRevenueComparisonRespon
 const out: Record<string, unknown> = {};
 if (v.comparisons !== undefined) { out.comparisons = (v.comparisons as any[]).map(encodeRevenueComparison); }
 return out;
+}
+
+export function validateGetRevenueComparisonResponse(v: GetRevenueComparisonResponse): string[] {
+const violations: string[] = [];
+if (v.comparisons !== undefined && v.comparisons !== null) for (const item of v.comparisons) violations.push(...validateRevenueComparison(item).map((message) => "comparisons: " + message));
+return violations;
 }
 

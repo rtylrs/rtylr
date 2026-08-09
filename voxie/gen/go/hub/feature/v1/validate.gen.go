@@ -20,7 +20,97 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *FeatureResolution) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *FeatureFlag) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *FeatureTarget) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *FeatureCondition) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *FeatureRule) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Conditions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "conditions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListFlagsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListFlagsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Flags {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "flags: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpsertFlagRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Key == "" {
 		violations = append(violations, "key is required")
@@ -31,10 +121,89 @@ func (m *UpsertFlagRequest) Validate() error {
 	return nil
 }
 
+func (m *UpsertFlagResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteFlagRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Key == "" {
 		violations = append(violations, "key is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteFlagResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ResolveFeaturesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ResolveFeaturesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Features {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "features: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ResolveMyFeaturesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ResolveMyFeaturesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Features {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "features: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -43,9 +212,28 @@ func (m *DeleteFlagRequest) Validate() error {
 }
 
 func (m *ListRulesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.FeatureKey == "" {
 		violations = append(violations, "feature_key is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListRulesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Rules {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "rules: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -54,6 +242,88 @@ func (m *ListRulesRequest) Validate() error {
 }
 
 func (m *CreateRuleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.FeatureKey == "" {
+		violations = append(violations, "feature_key is required")
+	}
+	for _, value := range m.Conditions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "conditions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateRuleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateRuleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Conditions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "conditions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateRuleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteRuleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteRuleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTargetsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.FeatureKey == "" {
 		violations = append(violations, "feature_key is required")
@@ -64,10 +334,15 @@ func (m *CreateRuleRequest) Validate() error {
 	return nil
 }
 
-func (m *ListTargetsRequest) Validate() error {
+func (m *ListTargetsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
-	if m.FeatureKey == "" {
-		violations = append(violations, "feature_key is required")
+	for _, value := range m.Targets {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "targets: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -76,6 +351,9 @@ func (m *ListTargetsRequest) Validate() error {
 }
 
 func (m *UpsertTargetRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.FeatureKey == "" {
 		violations = append(violations, "feature_key is required")
@@ -86,11 +364,36 @@ func (m *UpsertTargetRequest) Validate() error {
 	return nil
 }
 
+func (m *UpsertTargetResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteTargetRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.FeatureKey == "" {
 		violations = append(violations, "feature_key is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteTargetResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

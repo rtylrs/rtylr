@@ -23,6 +23,11 @@ func NewGiftCardServiceClient(baseURL string) *GiftCardServiceClient {
 }
 
 func (c *GiftCardServiceClient) ListGiftCards(ctx context.Context, req *ListGiftCardsRequest) (*ListGiftCardsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/gift-card/v1/gift-cards"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *GiftCardServiceClient) ListGiftCards(ctx context.Context, req *ListGift
 }
 
 func (c *GiftCardServiceClient) CreateGiftCard(ctx context.Context, req *CreateGiftCardRequest) (*CreateGiftCardResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/gift-card/v1/gift-cards"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *GiftCardServiceClient) CreateGiftCard(ctx context.Context, req *CreateG
 }
 
 func (c *GiftCardServiceClient) RedeemGiftCard(ctx context.Context, req *RedeemGiftCardRequest) (*RedeemGiftCardResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/gift-card/v1/gift-cards/{code}/redeem"
 	path = strings.ReplaceAll(path, "{code}", fmt.Sprintf("%v", req.Code))
 	body, err := json.Marshal(req)
@@ -116,6 +131,11 @@ func (c *GiftCardServiceClient) RedeemGiftCard(ctx context.Context, req *RedeemG
 }
 
 func (c *GiftCardServiceClient) GetGiftCardByCode(ctx context.Context, req *GetGiftCardByCodeRequest) (*GetGiftCardByCodeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/gift-card/v1/gift-cards/{code}"
 	path = strings.ReplaceAll(path, "{code}", fmt.Sprintf("%v", req.Code))
 	query := url.Values{}

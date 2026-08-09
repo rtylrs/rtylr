@@ -22,6 +22,11 @@ func NewSubscriptionServiceClient(baseURL string) *SubscriptionServiceClient {
 }
 
 func (c *SubscriptionServiceClient) GetMySubscription(ctx context.Context, req *GetMySubscriptionRequest) (*GetMySubscriptionResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/subscription/v1/my"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *SubscriptionServiceClient) GetMySubscription(ctx context.Context, req *
 }
 
 func (c *SubscriptionServiceClient) ListPlans(ctx context.Context, req *ListPlansRequest) (*ListPlansResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/subscription/v1/plans"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -82,6 +92,11 @@ func (c *SubscriptionServiceClient) ListPlans(ctx context.Context, req *ListPlan
 }
 
 func (c *SubscriptionServiceClient) GetBillingDetail(ctx context.Context, req *GetBillingDetailRequest) (*GetBillingDetailResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/subscription/v1/billing"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -112,6 +127,11 @@ func (c *SubscriptionServiceClient) GetBillingDetail(ctx context.Context, req *G
 }
 
 func (c *SubscriptionServiceClient) GetBillingHistory(ctx context.Context, req *GetBillingHistoryRequest) (*GetBillingHistoryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/subscription/v1/billing/history"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -142,6 +162,11 @@ func (c *SubscriptionServiceClient) GetBillingHistory(ctx context.Context, req *
 }
 
 func (c *SubscriptionServiceClient) UpsertSubscription(ctx context.Context, req *UpsertSubscriptionRequest) (*UpsertSubscriptionResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/subscription/v1/my"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -173,6 +198,11 @@ func (c *SubscriptionServiceClient) UpsertSubscription(ctx context.Context, req 
 }
 
 func (c *SubscriptionServiceClient) CreateCheckout(ctx context.Context, req *CreateCheckoutRequest) (*CreateCheckoutResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/subscription/v1/checkout"
 	body, err := json.Marshal(req)
 	if err != nil {

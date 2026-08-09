@@ -20,10 +20,26 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
-func (m *CreateOrderRequest) Validate() error {
+func (m *OrderItem) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
-	if len(m.Items) < 1 {
-		violations = append(violations, "items must have at least 1 items")
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *Order) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Items {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "items: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -31,7 +47,62 @@ func (m *CreateOrderRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateOrderItemInput) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *SplitGroup) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateOrderRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(m.Items) < 1 {
+		violations = append(violations, "items must have at least 1 items")
+	}
+	for _, value := range m.Items {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "items: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateOrderResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *PublicOrderItemInput) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.MenuItemId <= 0 {
 		violations = append(violations, "menu_item_id must be greater than 0")
@@ -46,6 +117,9 @@ func (m *PublicOrderItemInput) Validate() error {
 }
 
 func (m *CreatePublicOrderRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.OwnerId <= 0 {
 		violations = append(violations, "owner_id must be greater than 0")
@@ -53,6 +127,22 @@ func (m *CreatePublicOrderRequest) Validate() error {
 	if len(m.Items) < 1 {
 		violations = append(violations, "items must have at least 1 items")
 	}
+	for _, value := range m.Items {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "items: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreatePublicOrderResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -60,6 +150,9 @@ func (m *CreatePublicOrderRequest) Validate() error {
 }
 
 func (m *GetOrderDetailRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
@@ -70,7 +163,26 @@ func (m *GetOrderDetailRequest) Validate() error {
 	return nil
 }
 
+func (m *GetOrderDetailResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Order != nil {
+		if err := m.Order.Validate(); err != nil {
+			violations = append(violations, "order: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetPublicOrderStatusRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
@@ -84,7 +196,21 @@ func (m *GetPublicOrderStatusRequest) Validate() error {
 	return nil
 }
 
+func (m *GetPublicOrderStatusResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ListOrdersRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.SessionId <= 0 {
 		violations = append(violations, "session_id must be greater than 0")
@@ -95,7 +221,26 @@ func (m *ListOrdersRequest) Validate() error {
 	return nil
 }
 
+func (m *ListOrdersResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Orders {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "orders: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *SendToKitchenRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
@@ -106,7 +251,21 @@ func (m *SendToKitchenRequest) Validate() error {
 	return nil
 }
 
+func (m *SendToKitchenResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *TransferTableRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
@@ -120,7 +279,21 @@ func (m *TransferTableRequest) Validate() error {
 	return nil
 }
 
+func (m *TransferTableResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateOrderStatusBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Status == "" {
 		violations = append(violations, "status is required")
@@ -132,9 +305,17 @@ func (m *UpdateOrderStatusBody) Validate() error {
 }
 
 func (m *UpdateOrderStatusRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -142,7 +323,21 @@ func (m *UpdateOrderStatusRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdateOrderStatusResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *VoidOrderRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
@@ -150,6 +345,17 @@ func (m *VoidOrderRequest) Validate() error {
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *VoidOrderResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

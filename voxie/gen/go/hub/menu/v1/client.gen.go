@@ -22,6 +22,11 @@ func NewMenuServiceClient(baseURL string) *MenuServiceClient {
 }
 
 func (c *MenuServiceClient) ListMenu(ctx context.Context, req *ListMenuRequest) (*ListMenuResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/menu/v1/menu"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *MenuServiceClient) ListMenu(ctx context.Context, req *ListMenuRequest) 
 }
 
 func (c *MenuServiceClient) UpdateMenu(ctx context.Context, req *UpdateMenuRequest) (*UpdateMenuResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/menu/v1/menu"
 	body, err := json.Marshal(req)
 	if err != nil {

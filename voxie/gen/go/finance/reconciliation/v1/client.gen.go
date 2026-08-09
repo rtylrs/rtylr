@@ -22,6 +22,11 @@ func NewReconciliationServiceClient(baseURL string) *ReconciliationServiceClient
 }
 
 func (c *ReconciliationServiceClient) GetOverview(ctx context.Context, req *GetOverviewRequest) (*GetOverviewResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/reconciliation/v1/reconciliation"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *ReconciliationServiceClient) GetOverview(ctx context.Context, req *GetO
 }
 
 func (c *ReconciliationServiceClient) Match(ctx context.Context, req *MatchRequest) (*MatchResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/reconciliation/v1/reconciliation/match"
 	body, err := json.Marshal(req)
 	if err != nil {

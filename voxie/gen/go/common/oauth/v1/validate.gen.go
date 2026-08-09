@@ -21,6 +21,9 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *IssueRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ClientId == "" {
 		violations = append(violations, "client_id is required")
@@ -49,7 +52,21 @@ func (m *IssueRequest) Validate() error {
 	return nil
 }
 
+func (m *IssueResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *TokenRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.GrantType == "" {
 		violations = append(violations, "grant_type is required")
@@ -63,11 +80,58 @@ func (m *TokenRequest) Validate() error {
 	return nil
 }
 
+func (m *TokenResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *RevokeRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Token == "" {
 		violations = append(violations, "token is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RevokeResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *MeRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *MeResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

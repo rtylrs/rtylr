@@ -23,6 +23,11 @@ func NewAttendanceServiceClient(baseURL string) *AttendanceServiceClient {
 }
 
 func (c *AttendanceServiceClient) ListAttendance(ctx context.Context, req *ListAttendanceRequest) (*ListAttendanceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/attendance/v1/attendance"
 	query := url.Values{}
 	if req.EmployeeId != nil {
@@ -59,6 +64,11 @@ func (c *AttendanceServiceClient) ListAttendance(ctx context.Context, req *ListA
 }
 
 func (c *AttendanceServiceClient) AttendanceClockIn(ctx context.Context, req *AttendanceClockInRequest) (*AttendanceClockInResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/attendance/v1/attendance/clock-in"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -90,6 +100,11 @@ func (c *AttendanceServiceClient) AttendanceClockIn(ctx context.Context, req *At
 }
 
 func (c *AttendanceServiceClient) AttendanceClockOut(ctx context.Context, req *AttendanceClockOutRequest) (*AttendanceClockOutResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/attendance/v1/attendance/clock-out"
 	body, err := json.Marshal(req)
 	if err != nil {

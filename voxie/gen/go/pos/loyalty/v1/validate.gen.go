@@ -20,7 +20,32 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *LoyaltyConfig) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *LoyaltyTransaction) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *EarnPointsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.CustomerId <= 0 {
 		violations = append(violations, "customer_id must be greater than 0")
@@ -37,7 +62,21 @@ func (m *EarnPointsRequest) Validate() error {
 	return nil
 }
 
+func (m *EarnPointsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetLoyaltyBalanceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.CustomerId <= 0 {
 		violations = append(violations, "customer_id must be greater than 0")
@@ -48,7 +87,75 @@ func (m *GetLoyaltyBalanceRequest) Validate() error {
 	return nil
 }
 
+func (m *GetLoyaltyBalanceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetLoyaltyConfigRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetLoyaltyConfigResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Config != nil {
+		if err := m.Config.Validate(); err != nil {
+			violations = append(violations, "config: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListLoyaltyTransactionsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListLoyaltyTransactionsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Transactions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "transactions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *RedeemPointsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.CustomerId <= 0 {
 		violations = append(violations, "customer_id must be greater than 0")
@@ -62,7 +169,21 @@ func (m *RedeemPointsRequest) Validate() error {
 	return nil
 }
 
+func (m *RedeemPointsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateLoyaltyConfigRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.PointsPerDollar <= 0 {
 		violations = append(violations, "points_per_dollar must be greater than 0")
@@ -73,6 +194,17 @@ func (m *UpdateLoyaltyConfigRequest) Validate() error {
 	if m.MinRedeemPoints <= 0 {
 		violations = append(violations, "min_redeem_points must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateLoyaltyConfigResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

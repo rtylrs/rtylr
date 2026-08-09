@@ -23,6 +23,11 @@ func NewPerformanceServiceClient(baseURL string) *PerformanceServiceClient {
 }
 
 func (c *PerformanceServiceClient) ListReviewCycles(ctx context.Context, req *ListReviewCyclesRequest) (*ListReviewCyclesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/performance/v1/review-cycles"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *PerformanceServiceClient) ListReviewCycles(ctx context.Context, req *Li
 }
 
 func (c *PerformanceServiceClient) CreateReviewCycle(ctx context.Context, req *CreateReviewCycleRequest) (*CreateReviewCycleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/performance/v1/review-cycles"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *PerformanceServiceClient) CreateReviewCycle(ctx context.Context, req *C
 }
 
 func (c *PerformanceServiceClient) OpenReviewCycle(ctx context.Context, req *OpenReviewCycleRequest) (*OpenReviewCycleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/performance/v1/review-cycles/open"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -115,6 +130,11 @@ func (c *PerformanceServiceClient) OpenReviewCycle(ctx context.Context, req *Ope
 }
 
 func (c *PerformanceServiceClient) ListGoals(ctx context.Context, req *ListGoalsRequest) (*ListGoalsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/performance/v1/goals"
 	query := url.Values{}
 	if req.EmployeeId != nil {
@@ -151,6 +171,11 @@ func (c *PerformanceServiceClient) ListGoals(ctx context.Context, req *ListGoals
 }
 
 func (c *PerformanceServiceClient) SubmitReview(ctx context.Context, req *SubmitReviewRequest) (*SubmitReviewResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/performance/v1/reviews"
 	body, err := json.Marshal(req)
 	if err != nil {

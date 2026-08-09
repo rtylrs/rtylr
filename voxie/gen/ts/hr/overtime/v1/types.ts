@@ -50,6 +50,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateOvertimeRequestPayload(v: OvertimeRequestPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListOvertimeRequestsRequest {
 employeeId?: string;
 status?: string;
@@ -68,6 +73,11 @@ const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.status !== undefined) { out.status = v.status; }
 return out;
+}
+
+export function validateListOvertimeRequestsRequest(v: ListOvertimeRequestsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListOvertimeRequestsResponse {
@@ -96,11 +106,17 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListOvertimeRequestsResponse(v: ListOvertimeRequestsResponse): string[] {
+const violations: string[] = [];
+if (v.requests !== undefined && v.requests !== null) for (const item of v.requests) violations.push(...validateOvertimeRequestPayload(item).map((message) => "requests: " + message));
+return violations;
+}
+
 export interface CreateOvertimeRequestRequest {
-employeeId?: string;
-date?: string;
-plannedExtraMinutes?: number;
-reason?: string;
+employeeId: string;
+date: string;
+plannedExtraMinutes: number;
+reason: string;
 }
 
 export function decodeCreateOvertimeRequestRequest(v: any): CreateOvertimeRequestRequest {
@@ -122,6 +138,17 @@ if (v.reason !== undefined) { out.reason = v.reason; }
 return out;
 }
 
+export function validateCreateOvertimeRequestRequest(v: CreateOvertimeRequestRequest): string[] {
+const violations: string[] = [];
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
+if (!(v.plannedExtraMinutes !== undefined && v.plannedExtraMinutes !== null)) violations.push("planned_extra_minutes is required");
+if (v.plannedExtraMinutes !== undefined && v.plannedExtraMinutes !== null && !(Number(v.plannedExtraMinutes) > 0)) violations.push("planned_extra_minutes violates @gt");
+if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
+return violations;
+}
+
 export interface CreateOvertimeRequestResponse {
 request?: OvertimeRequestPayload;
 }
@@ -137,6 +164,12 @@ export function encodeCreateOvertimeRequestResponse(v: CreateOvertimeRequestResp
 const out: Record<string, unknown> = {};
 if (v.request !== undefined) { out.request = encodeOvertimeRequestPayload(v.request); }
 return out;
+}
+
+export function validateCreateOvertimeRequestResponse(v: CreateOvertimeRequestResponse): string[] {
+const violations: string[] = [];
+if (v.request !== undefined && v.request !== null) violations.push(...validateOvertimeRequestPayload(v.request).map((message) => "request: " + message));
+return violations;
 }
 
 export interface ApproveOvertimeBody {
@@ -162,8 +195,13 @@ if (v.rejectionReason !== undefined) { out.rejection_reason = v.rejectionReason;
 return out;
 }
 
+export function validateApproveOvertimeBody(v: ApproveOvertimeBody): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ApproveOvertimeRequest {
-overtimeRequestId?: string;
+overtimeRequestId: string;
 body?: ApproveOvertimeBody;
 }
 
@@ -182,6 +220,14 @@ if (v.body !== undefined) { out.body = encodeApproveOvertimeBody(v.body); }
 return out;
 }
 
+export function validateApproveOvertimeRequest(v: ApproveOvertimeRequest): string[] {
+const violations: string[] = [];
+if (!(v.overtimeRequestId !== undefined && v.overtimeRequestId !== null)) violations.push("overtime_request_id is required");
+if (v.overtimeRequestId !== undefined && v.overtimeRequestId !== null && !(Number(v.overtimeRequestId) > 0)) violations.push("overtime_request_id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateApproveOvertimeBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface ApproveOvertimeResponse {
 success?: boolean;
 }
@@ -197,5 +243,10 @@ export function encodeApproveOvertimeResponse(v: ApproveOvertimeResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateApproveOvertimeResponse(v: ApproveOvertimeResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

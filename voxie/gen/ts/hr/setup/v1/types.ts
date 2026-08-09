@@ -32,6 +32,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateSetupWizardStepPayload(v: SetupWizardStepPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface HRCompanyConfigPayload {
 id?: string;
 ownerId?: string;
@@ -79,6 +84,11 @@ if (v.subscribedApps !== undefined) { out.subscribed_apps = v.subscribedApps; }
 return out;
 }
 
+export function validateHRCompanyConfigPayload(v: HRCompanyConfigPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetSetupStatusResponse {
 steps?: (SetupWizardStepPayload)[];
 config?: HRCompanyConfigPayload;
@@ -102,8 +112,15 @@ if (v.isComplete !== undefined) { out.is_complete = v.isComplete; }
 return out;
 }
 
+export function validateGetSetupStatusResponse(v: GetSetupStatusResponse): string[] {
+const violations: string[] = [];
+if (v.steps !== undefined && v.steps !== null) for (const item of v.steps) violations.push(...validateSetupWizardStepPayload(item).map((message) => "steps: " + message));
+if (v.config !== undefined && v.config !== null) violations.push(...validateHRCompanyConfigPayload(v.config).map((message) => "config: " + message));
+return violations;
+}
+
 export interface CompleteSetupStepRequest {
-stepKey?: string;
+stepKey: string;
 }
 
 export function decodeCompleteSetupStepRequest(v: any): CompleteSetupStepRequest {
@@ -117,6 +134,12 @@ export function encodeCompleteSetupStepRequest(v: CompleteSetupStepRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.stepKey !== undefined) { out.step_key = v.stepKey; }
 return out;
+}
+
+export function validateCompleteSetupStepRequest(v: CompleteSetupStepRequest): string[] {
+const violations: string[] = [];
+if (!(v.stepKey !== undefined && v.stepKey !== null) || v.stepKey === "") violations.push("step_key is required");
+return violations;
 }
 
 export interface CompleteSetupStepResponse {
@@ -134,5 +157,11 @@ export function encodeCompleteSetupStepResponse(v: CompleteSetupStepResponse): R
 const out: Record<string, unknown> = {};
 if (v.step !== undefined) { out.step = encodeSetupWizardStepPayload(v.step); }
 return out;
+}
+
+export function validateCompleteSetupStepResponse(v: CompleteSetupStepResponse): string[] {
+const violations: string[] = [];
+if (v.step !== undefined && v.step !== null) violations.push(...validateSetupWizardStepPayload(v.step).map((message) => "step: " + message));
+return violations;
 }
 

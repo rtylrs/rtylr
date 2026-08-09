@@ -3,10 +3,15 @@ package v1
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
+	"time"
 )
 
 func writeJSONError(w http.ResponseWriter, status int, message string) {
@@ -15,23 +20,182 @@ func writeJSONError(w http.ResponseWriter, status int, message string) {
 	_ = json.NewEncoder(w).Encode(map[string]string{"message": message})
 }
 
-func parseInt32(s string) int32     { v, _ := strconv.ParseInt(s, 10, 32); return int32(v) }
-func parseInt64(s string) int64     { v, _ := strconv.ParseInt(s, 10, 64); return v }
-func parseUint32(s string) uint32   { v, _ := strconv.ParseUint(s, 10, 32); return uint32(v) }
-func parseUint64(s string) uint64   { v, _ := strconv.ParseUint(s, 10, 64); return v }
-func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return float32(v) }
-func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
-func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
+func writeHandlerError(w http.ResponseWriter, err error) {
+	status := http.StatusInternalServerError
+	var statusErr interface{ HTTPStatusCode() int }
+	if errors.As(err, &statusErr) {
+		if candidate := statusErr.HTTPStatusCode(); candidate >= 100 && candidate <= 599 {
+			status = candidate
+		}
+	}
+	writeJSONError(w, status, err.Error())
+}
+
+func parseInt32(s string) (int32, error) { v, err := strconv.ParseInt(s, 10, 32); return int32(v), err }
+func parseInt64(s string) (int64, error) { return strconv.ParseInt(s, 10, 64) }
+func parseUint32(s string) (uint32, error) {
+	v, err := strconv.ParseUint(s, 10, 32)
+	return uint32(v), err
+}
+func parseUint64(s string) (uint64, error) { return strconv.ParseUint(s, 10, 64) }
+func parseFloat32(s string) (float32, error) {
+	v, err := strconv.ParseFloat(s, 32)
+	return float32(v), err
+}
+func parseFloat64(s string) (float64, error) { return strconv.ParseFloat(s, 64) }
+func parseBool(s string) (bool, error) {
+	if s == "true" {
+		return true, nil
+	}
+	if s == "false" {
+		return false, nil
+	}
+	return false, fmt.Errorf("must be true or false")
+}
+
+func validHeaderFormat(value, format string) bool {
+	switch format {
+	case "uuid":
+		return regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`).MatchString(value)
+	case "email":
+		return regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`).MatchString(value)
+	case "uri":
+		return regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9+.-]*://[^\s]+$`).MatchString(value)
+	default:
+		return true
+	}
+}
+
+// RequestMetadata identifies the generated route handling a request.
+type RequestMetadata struct {
+	Service     string
+	Method      string
+	HTTPMethod  string
+	Route       string
+	AuthSchemes []string
+}
+
+type requestMetadataContextKey struct{}
+type requestIDContextKey struct{}
+
+func RequestMetadataFromContext(ctx context.Context) (RequestMetadata, bool) {
+	metadata, ok := ctx.Value(requestMetadataContextKey{}).(RequestMetadata)
+	return metadata, ok
+}
+
+func RequestIDFromContext(ctx context.Context) (string, bool) {
+	requestID, ok := ctx.Value(requestIDContextKey{}).(string)
+	return requestID, ok && requestID != ""
+}
+
+type Middleware func(http.Handler) http.Handler
+type RequestIDGenerator func() string
+type Authorizer func(context.Context, RequestMetadata, *http.Request) error
+type RequestResult struct {
+	StatusCode int
+	Duration   time.Duration
+}
+type RequestObserver interface {
+	RequestStarted(context.Context, RequestMetadata) context.Context
+	RequestFinished(context.Context, RequestMetadata, RequestResult)
+}
 
 type ServerOption func(*serverOptions)
 
 type serverOptions struct {
-	mux *http.ServeMux
+	mux                *http.ServeMux
+	middlewares        []Middleware
+	requestIDHeader    string
+	requestIDGenerator RequestIDGenerator
+	authorizer         Authorizer
+	observer           RequestObserver
 }
 
-// WithMux supplies the http.ServeMux to register routes onto - required.
-func WithMux(mux *http.ServeMux) ServerOption {
-	return func(o *serverOptions) { o.mux = mux }
+// WithMux supports the options-first registration form.
+func WithMux(mux *http.ServeMux) ServerOption { return func(o *serverOptions) { o.mux = mux } }
+
+func WithMiddleware(middleware ...Middleware) ServerOption {
+	return func(o *serverOptions) { o.middlewares = append(o.middlewares, middleware...) }
+}
+
+func WithRequestID(headerName string) ServerOption {
+	return WithRequestIDGenerator(headerName, defaultRequestIDGenerator)
+}
+func WithRequestIDGenerator(headerName string, generate RequestIDGenerator) ServerOption {
+	return func(o *serverOptions) {
+		if headerName == "" {
+			headerName = "X-Request-ID"
+		}
+		o.requestIDHeader, o.requestIDGenerator = headerName, generate
+	}
+}
+
+func WithAuthorizer(authorizer Authorizer) ServerOption {
+	return func(o *serverOptions) { o.authorizer = authorizer }
+}
+func WithRequestObserver(observer RequestObserver) ServerOption {
+	return func(o *serverOptions) { o.observer = observer }
+}
+
+func defaultRequestIDGenerator() string {
+	var value [16]byte
+	if _, err := rand.Read(value[:]); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(value[:])
+}
+
+func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadata) http.Handler {
+	for i := len(o.middlewares) - 1; i >= 0; i-- {
+		if o.middlewares[i] != nil {
+			handler = o.middlewares[i](handler)
+		}
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), requestMetadataContextKey{}, metadata)
+		if o.requestIDHeader != "" {
+			requestID := r.Header.Get(o.requestIDHeader)
+			if requestID == "" && o.requestIDGenerator != nil {
+				requestID = o.requestIDGenerator()
+			}
+			if requestID != "" {
+				w.Header().Set(o.requestIDHeader, requestID)
+				ctx = context.WithValue(ctx, requestIDContextKey{}, requestID)
+			}
+		}
+		if o.authorizer != nil {
+			if err := o.authorizer(ctx, metadata, r); err != nil {
+				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				return
+			}
+		}
+		if o.observer == nil {
+			handler.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+		started := time.Now()
+		ctx = o.observer.RequestStarted(ctx, metadata)
+		rw := &statusResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		defer func() {
+			o.observer.RequestFinished(ctx, metadata, RequestResult{StatusCode: rw.statusCode, Duration: time.Since(started)})
+		}()
+		handler.ServeHTTP(rw, r.WithContext(ctx))
+	})
+}
+
+type statusResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	w.statusCode = statusCode
+	w.ResponseWriter.WriteHeader(statusCode)
+}
+func (w *statusResponseWriter) Flush() {
+	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
 }
 
 type TaskServiceServer interface {
@@ -57,27 +221,58 @@ type TaskServiceServer interface {
 	DeleteTimeLog(ctx context.Context, req *DeleteTimeLogRequest) (*DeleteTimeLogResponse, error)
 }
 
-func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) error {
+func RegisterTaskServiceServer(first any, rest ...any) error {
 	var o serverOptions
-	for _, opt := range opts {
+	var srv TaskServiceServer
+	if mux, ok := first.(*http.ServeMux); ok {
+		o.mux = mux
+		if len(rest) == 0 {
+			return fmt.Errorf("RegisterTaskServiceServer: implementation is required")
+		}
+		var ok bool
+		srv, ok = rest[0].(TaskServiceServer)
+		if !ok {
+			return fmt.Errorf("RegisterTaskServiceServer: invalid implementation")
+		}
+		rest = rest[1:]
+	} else {
+		var ok bool
+		srv, ok = first.(TaskServiceServer)
+		if !ok {
+			return fmt.Errorf("RegisterTaskServiceServer: invalid implementation")
+		}
+	}
+	for _, value := range rest {
+		opt, ok := value.(ServerOption)
+		if !ok {
+			return fmt.Errorf("RegisterTaskServiceServer: options must be ServerOption values")
+		}
 		opt(&o)
 	}
 	if o.mux == nil {
-		return fmt.Errorf("RegisterTaskServiceServer: WithMux option is required")
+		return fmt.Errorf("RegisterTaskServiceServer: mux is required")
 	}
 	mux := o.mux
-	mux.HandleFunc("GET /flow/task/v1/tasks", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("GET /flow/task/v1/tasks", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListTasksRequest)
 		if r.URL.Query().Get("project_id") != "" {
-			projectIdVal := parseInt64(r.URL.Query().Get("project_id"))
-			req.ProjectId = &projectIdVal
+			parsedProjectId, err := parseInt64(r.URL.Query().Get("project_id"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter project_id: "+err.Error())
+				return
+			}
+			req.ProjectId = &parsedProjectId
 		}
 		if r.URL.Query().Get("status") != "" {
 			req.Status = r.URL.Query().Get("status")
 		}
 		if r.URL.Query().Get("assignee_id") != "" {
-			assigneeIdVal := parseInt64(r.URL.Query().Get("assignee_id"))
-			req.AssigneeId = &assigneeIdVal
+			parsedAssigneeId, err := parseInt64(r.URL.Query().Get("assignee_id"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter assignee_id: "+err.Error())
+				return
+			}
+			req.AssigneeId = &parsedAssigneeId
 		}
 		if r.URL.Query().Get("priority") != "" {
 			req.Priority = r.URL.Query().Get("priority")
@@ -87,10 +282,20 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 			req.WorkspaceId = &workspaceIdVal
 		}
 		if r.URL.Query().Get("page") != "" {
-			req.Page = parseInt32(r.URL.Query().Get("page"))
+			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
 		}
 		if r.URL.Query().Get("limit") != "" {
-			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
 		}
 		if r.URL.Query().Get("sort_by") != "" {
 			req.SortBy = r.URL.Query().Get("sort_by")
@@ -106,19 +311,29 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.ListTasks(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /flow/task/v1/tasks/my", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "listTasks", HTTPMethod: "GET", Route: "/flow/task/v1/tasks", AuthSchemes: nil}))
+	mux.Handle("GET /flow/task/v1/tasks/my", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetMyTasksRequest)
 		if r.URL.Query().Get("page") != "" {
-			req.Page = parseInt32(r.URL.Query().Get("page"))
+			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
 		}
 		if r.URL.Query().Get("limit") != "" {
-			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
 		}
 		if r.URL.Query().Get("sort_by") != "" {
 			req.SortBy = r.URL.Query().Get("sort_by")
@@ -134,13 +349,13 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetMyTasks(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /flow/task/v1/tasks/my-project", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "getMyTasks", HTTPMethod: "GET", Route: "/flow/task/v1/tasks/my", AuthSchemes: nil}))
+	mux.Handle("GET /flow/task/v1/tasks/my-project", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetMyTasksProjectRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
@@ -150,13 +365,13 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetMyTasksProject(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /flow/task/v1/tasks/search", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "getMyTasksProject", HTTPMethod: "GET", Route: "/flow/task/v1/tasks/my-project", AuthSchemes: nil}))
+	mux.Handle("GET /flow/task/v1/tasks/search", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(SearchTasksRequest)
 		if r.URL.Query().Get("q") != "" {
 			req.Q = r.URL.Query().Get("q")
@@ -165,10 +380,20 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 			req.WorkspaceId = r.URL.Query().Get("workspace_id")
 		}
 		if r.URL.Query().Get("page") != "" {
-			req.Page = parseInt32(r.URL.Query().Get("page"))
+			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
 		}
 		if r.URL.Query().Get("limit") != "" {
-			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
 		}
 		if r.URL.Query().Get("sort_by") != "" {
 			req.SortBy = r.URL.Query().Get("sort_by")
@@ -184,13 +409,13 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.SearchTasks(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /flow/task/v1/tasks", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "searchTasks", HTTPMethod: "GET", Route: "/flow/task/v1/tasks/search", AuthSchemes: nil}))
+	mux.Handle("POST /flow/task/v1/tasks", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateTaskRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -206,15 +431,20 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.CreateTask(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /flow/task/v1/tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "createTask", HTTPMethod: "POST", Route: "/flow/task/v1/tasks", AuthSchemes: nil}))
+	mux.Handle("GET /flow/task/v1/tasks/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetTaskDetailRequest)
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -223,21 +453,26 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetTaskDetail(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("PUT /flow/task/v1/tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "getTaskDetail", HTTPMethod: "GET", Route: "/flow/task/v1/tasks/{id}", AuthSchemes: nil}))
+	mux.Handle("PUT /flow/task/v1/tasks/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateTaskRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && err.Error() != "EOF" {
 				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
 				return
 			}
 		}
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -246,21 +481,26 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.UpdateTask(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("PATCH /flow/task/v1/tasks/{id}/status", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "updateTask", HTTPMethod: "PUT", Route: "/flow/task/v1/tasks/{id}", AuthSchemes: nil}))
+	mux.Handle("PATCH /flow/task/v1/tasks/{id}/status", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateTaskStatusRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && err.Error() != "EOF" {
 				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
 				return
 			}
 		}
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -269,15 +509,20 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.UpdateTaskStatus(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("DELETE /flow/task/v1/tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "updateTaskStatus", HTTPMethod: "PATCH", Route: "/flow/task/v1/tasks/{id}/status", AuthSchemes: nil}))
+	mux.Handle("DELETE /flow/task/v1/tasks/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(DeleteTaskRequest)
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -286,13 +531,13 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.DeleteTask(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /flow/task/v1/tasks/subtasks", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "deleteTask", HTTPMethod: "DELETE", Route: "/flow/task/v1/tasks/{id}", AuthSchemes: nil}))
+	mux.Handle("POST /flow/task/v1/tasks/subtasks", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateSubtaskRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -308,20 +553,35 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.CreateSubtask(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /flow/task/v1/tasks/{task_id}/subtasks", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "createSubtask", HTTPMethod: "POST", Route: "/flow/task/v1/tasks/subtasks", AuthSchemes: nil}))
+	mux.Handle("GET /flow/task/v1/tasks/{task_id}/subtasks", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetSubtasksRequest)
-		req.TaskId = parseInt64(r.PathValue("task_id"))
+		parsedTaskId, err := parseInt64(r.PathValue("task_id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter task_id: "+err.Error())
+			return
+		}
+		req.TaskId = parsedTaskId
 		if r.URL.Query().Get("page") != "" {
-			req.Page = parseInt32(r.URL.Query().Get("page"))
+			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
 		}
 		if r.URL.Query().Get("limit") != "" {
-			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
 		}
 		if r.URL.Query().Get("sort_by") != "" {
 			req.SortBy = r.URL.Query().Get("sort_by")
@@ -337,13 +597,13 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetSubtasks(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /flow/task/v1/tasks/{task_id}/comments", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "getSubtasks", HTTPMethod: "GET", Route: "/flow/task/v1/tasks/{task_id}/subtasks", AuthSchemes: nil}))
+	mux.Handle("POST /flow/task/v1/tasks/{task_id}/comments", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(AddCommentRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -351,7 +611,12 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 				return
 			}
 		}
-		req.TaskId = parseInt64(r.PathValue("task_id"))
+		parsedTaskId, err := parseInt64(r.PathValue("task_id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter task_id: "+err.Error())
+			return
+		}
+		req.TaskId = parsedTaskId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -360,15 +625,20 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.AddComment(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("DELETE /flow/task/v1/tasks/comments/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "addComment", HTTPMethod: "POST", Route: "/flow/task/v1/tasks/{task_id}/comments", AuthSchemes: nil}))
+	mux.Handle("DELETE /flow/task/v1/tasks/comments/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(DeleteCommentRequest)
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -377,15 +647,20 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.DeleteComment(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /flow/task/v1/tasks/{task_id}/activity", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "deleteComment", HTTPMethod: "DELETE", Route: "/flow/task/v1/tasks/comments/{id}", AuthSchemes: nil}))
+	mux.Handle("GET /flow/task/v1/tasks/{task_id}/activity", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetTaskActivityRequest)
-		req.TaskId = parseInt64(r.PathValue("task_id"))
+		parsedTaskId, err := parseInt64(r.PathValue("task_id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter task_id: "+err.Error())
+			return
+		}
+		req.TaskId = parsedTaskId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -394,13 +669,13 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetTaskActivity(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /flow/task/v1/tasks/attachments", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "getTaskActivity", HTTPMethod: "GET", Route: "/flow/task/v1/tasks/{task_id}/activity", AuthSchemes: nil}))
+	mux.Handle("POST /flow/task/v1/tasks/attachments", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateAttachmentRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -416,15 +691,20 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.CreateAttachment(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /flow/task/v1/tasks/{task_id}/attachments", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "createAttachment", HTTPMethod: "POST", Route: "/flow/task/v1/tasks/attachments", AuthSchemes: nil}))
+	mux.Handle("GET /flow/task/v1/tasks/{task_id}/attachments", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetAttachmentsRequest)
-		req.TaskId = parseInt64(r.PathValue("task_id"))
+		parsedTaskId, err := parseInt64(r.PathValue("task_id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter task_id: "+err.Error())
+			return
+		}
+		req.TaskId = parsedTaskId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -433,15 +713,20 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetAttachments(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("DELETE /flow/task/v1/tasks/attachments/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "getAttachments", HTTPMethod: "GET", Route: "/flow/task/v1/tasks/{task_id}/attachments", AuthSchemes: nil}))
+	mux.Handle("DELETE /flow/task/v1/tasks/attachments/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(DeleteAttachmentRequest)
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -450,13 +735,13 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.DeleteAttachment(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /flow/task/v1/tasks/{task_id}/time-logs", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "deleteAttachment", HTTPMethod: "DELETE", Route: "/flow/task/v1/tasks/attachments/{id}", AuthSchemes: nil}))
+	mux.Handle("POST /flow/task/v1/tasks/{task_id}/time-logs", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateTimeLogRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -464,7 +749,12 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 				return
 			}
 		}
-		req.TaskId = parseInt64(r.PathValue("task_id"))
+		parsedTaskId, err := parseInt64(r.PathValue("task_id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter task_id: "+err.Error())
+			return
+		}
+		req.TaskId = parsedTaskId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -473,15 +763,20 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.CreateTimeLog(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /flow/task/v1/tasks/{task_id}/time-logs", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "createTimeLog", HTTPMethod: "POST", Route: "/flow/task/v1/tasks/{task_id}/time-logs", AuthSchemes: nil}))
+	mux.Handle("GET /flow/task/v1/tasks/{task_id}/time-logs", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetTimeLogsRequest)
-		req.TaskId = parseInt64(r.PathValue("task_id"))
+		parsedTaskId, err := parseInt64(r.PathValue("task_id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter task_id: "+err.Error())
+			return
+		}
+		req.TaskId = parsedTaskId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -490,15 +785,20 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetTimeLogs(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("DELETE /flow/task/v1/tasks/time-logs/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "TaskService", Method: "getTimeLogs", HTTPMethod: "GET", Route: "/flow/task/v1/tasks/{task_id}/time-logs", AuthSchemes: nil}))
+	mux.Handle("DELETE /flow/task/v1/tasks/time-logs/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(DeleteTimeLogRequest)
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -507,11 +807,11 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.DeleteTimeLog(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
+	}), RequestMetadata{Service: "TaskService", Method: "deleteTimeLog", HTTPMethod: "DELETE", Route: "/flow/task/v1/tasks/time-logs/{id}", AuthSchemes: nil}))
 	return nil
 }

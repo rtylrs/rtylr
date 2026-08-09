@@ -23,6 +23,11 @@ func NewPermissionServiceClient(baseURL string) *PermissionServiceClient {
 }
 
 func (c *PermissionServiceClient) GetPermissions(ctx context.Context, req *GetPermissionsRequest) (*GetPermissionsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/permission/v1/permissions"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *PermissionServiceClient) GetPermissions(ctx context.Context, req *GetPe
 }
 
 func (c *PermissionServiceClient) ListRoles(ctx context.Context, req *ListRolesRequest) (*ListRolesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/permission/v1/roles"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -83,6 +93,11 @@ func (c *PermissionServiceClient) ListRoles(ctx context.Context, req *ListRolesR
 }
 
 func (c *PermissionServiceClient) CreateRole(ctx context.Context, req *CreateRoleRequest) (*CreateRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/permission/v1/roles"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -114,9 +129,14 @@ func (c *PermissionServiceClient) CreateRole(ctx context.Context, req *CreateRol
 }
 
 func (c *PermissionServiceClient) UpdateRole(ctx context.Context, req *UpdateRoleRequest) (*UpdateRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/permission/v1/roles/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -146,6 +166,11 @@ func (c *PermissionServiceClient) UpdateRole(ctx context.Context, req *UpdateRol
 }
 
 func (c *PermissionServiceClient) DeleteRole(ctx context.Context, req *DeleteRoleRequest) (*DeleteRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/permission/v1/roles/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -177,6 +202,11 @@ func (c *PermissionServiceClient) DeleteRole(ctx context.Context, req *DeleteRol
 }
 
 func (c *PermissionServiceClient) UpdatePermissionMatrix(ctx context.Context, req *UpdatePermissionMatrixRequest) (*UpdatePermissionMatrixResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/permission/v1/matrix"
 	body, err := json.Marshal(req)
 	if err != nil {

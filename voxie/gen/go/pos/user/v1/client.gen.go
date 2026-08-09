@@ -23,6 +23,11 @@ func NewUserServiceClient(baseURL string) *UserServiceClient {
 }
 
 func (c *UserServiceClient) ListPOSUsers(ctx context.Context, req *ListPOSUsersRequest) (*ListPOSUsersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/user/v1/users"
 	query := url.Values{}
 	query.Set("location_id", strconv.FormatInt(int64(req.LocationId), 10))
@@ -54,6 +59,11 @@ func (c *UserServiceClient) ListPOSUsers(ctx context.Context, req *ListPOSUsersR
 }
 
 func (c *UserServiceClient) CreatePOSUser(ctx context.Context, req *CreatePOSUserRequest) (*CreatePOSUserResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/user/v1/users"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -85,6 +95,11 @@ func (c *UserServiceClient) CreatePOSUser(ctx context.Context, req *CreatePOSUse
 }
 
 func (c *UserServiceClient) UpdatePOSUser(ctx context.Context, req *UpdatePOSUserRequest) (*UpdatePOSUserResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/user/v1/users/update"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -116,6 +131,11 @@ func (c *UserServiceClient) UpdatePOSUser(ctx context.Context, req *UpdatePOSUse
 }
 
 func (c *UserServiceClient) DeactivatePOSUser(ctx context.Context, req *DeactivatePOSUserRequest) (*DeactivatePOSUserResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/user/v1/users/deactivate"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -147,6 +167,11 @@ func (c *UserServiceClient) DeactivatePOSUser(ctx context.Context, req *Deactiva
 }
 
 func (c *UserServiceClient) VerifyPOSUserPIN(ctx context.Context, req *VerifyPOSUserPINRequest) (*VerifyPOSUserPINResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/user/v1/users/verify-pin"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -178,6 +203,11 @@ func (c *UserServiceClient) VerifyPOSUserPIN(ctx context.Context, req *VerifyPOS
 }
 
 func (c *UserServiceClient) SetPIN(ctx context.Context, req *SetPINRequest) (*SetPINResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/user/v1/users/set-pin"
 	body, err := json.Marshal(req)
 	if err != nil {

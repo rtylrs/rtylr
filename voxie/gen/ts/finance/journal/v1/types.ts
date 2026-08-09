@@ -36,6 +36,12 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateJournalEntry(v: JournalEntry): string[] {
+const violations: string[] = [];
+if (v.lines !== undefined && v.lines !== null) for (const item of v.lines) violations.push(...validateJournalLine(item).map((message) => "lines: " + message));
+return violations;
+}
+
 export interface JournalLine {
 accountId?: string;
 accountName?: string;
@@ -65,9 +71,14 @@ if (v.description !== undefined) { out.description = v.description; }
 return out;
 }
 
+export function validateJournalLine(v: JournalLine): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateJournalEntryRequest {
-date?: string;
-description?: string;
+date: string;
+description: string;
 lines?: (JournalLine)[];
 }
 
@@ -88,6 +99,15 @@ if (v.lines !== undefined) { out.lines = (v.lines as any[]).map(encodeJournalLin
 return out;
 }
 
+export function validateCreateJournalEntryRequest(v: CreateJournalEntryRequest): string[] {
+const violations: string[] = [];
+if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.lines !== undefined && v.lines !== null && v.lines.length < 1) violations.push("lines must contain at least 1 items");
+if (v.lines !== undefined && v.lines !== null) for (const item of v.lines) violations.push(...validateJournalLine(item).map((message) => "lines: " + message));
+return violations;
+}
+
 export interface CreateJournalEntryResponse {
 entry?: JournalEntry;
 }
@@ -105,8 +125,14 @@ if (v.entry !== undefined) { out.entry = encodeJournalEntry(v.entry); }
 return out;
 }
 
+export function validateCreateJournalEntryResponse(v: CreateJournalEntryResponse): string[] {
+const violations: string[] = [];
+if (v.entry !== undefined && v.entry !== null) violations.push(...validateJournalEntry(v.entry).map((message) => "entry: " + message));
+return violations;
+}
+
 export interface GetJournalEntryRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetJournalEntryRequest(v: any): GetJournalEntryRequest {
@@ -120,6 +146,13 @@ export function encodeGetJournalEntryRequest(v: GetJournalEntryRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetJournalEntryRequest(v: GetJournalEntryRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetJournalEntryResponse {
@@ -137,6 +170,12 @@ export function encodeGetJournalEntryResponse(v: GetJournalEntryResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.entry !== undefined) { out.entry = encodeJournalEntry(v.entry); }
 return out;
+}
+
+export function validateGetJournalEntryResponse(v: GetJournalEntryResponse): string[] {
+const violations: string[] = [];
+if (v.entry !== undefined && v.entry !== null) violations.push(...validateJournalEntry(v.entry).map((message) => "entry: " + message));
+return violations;
 }
 
 export interface ListJournalEntriesRequest {
@@ -171,6 +210,11 @@ if (v.toDate !== undefined) { out.to_date = v.toDate; }
 return out;
 }
 
+export function validateListJournalEntriesRequest(v: ListJournalEntriesRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListJournalEntriesResponse {
 entries?: (JournalEntry)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -189,5 +233,12 @@ const out: Record<string, unknown> = {};
 if (v.entries !== undefined) { out.entries = (v.entries as any[]).map(encodeJournalEntry); }
 if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePaginationResponse(v.pagination); }
 return out;
+}
+
+export function validateListJournalEntriesResponse(v: ListJournalEntriesResponse): string[] {
+const violations: string[] = [];
+if (v.entries !== undefined && v.entries !== null) for (const item of v.entries) violations.push(...validateJournalEntry(item).map((message) => "entries: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
 }
 

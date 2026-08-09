@@ -29,6 +29,11 @@ if (v.nextBillingDate !== undefined) { out.next_billing_date = v.nextBillingDate
 return out;
 }
 
+export function validateBillingSummary(v: BillingSummary): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface Invoice {
 id?: string;
 amount?: number;
@@ -61,6 +66,11 @@ if (v.paidAt !== undefined) { out.paid_at = v.paidAt; }
 return out;
 }
 
+export function validateInvoice(v: Invoice): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetBillingSummaryRequest {
 }
 
@@ -73,6 +83,11 @@ return {
 export function encodeGetBillingSummaryRequest(v: GetBillingSummaryRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetBillingSummaryRequest(v: GetBillingSummaryRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetBillingSummaryResponse {
@@ -92,6 +107,12 @@ if (v.summary !== undefined) { out.summary = encodeBillingSummary(v.summary); }
 return out;
 }
 
+export function validateGetBillingSummaryResponse(v: GetBillingSummaryResponse): string[] {
+const violations: string[] = [];
+if (v.summary !== undefined && v.summary !== null) violations.push(...validateBillingSummary(v.summary).map((message) => "summary: " + message));
+return violations;
+}
+
 export interface ListInvoicesRequest {
 }
 
@@ -104,6 +125,11 @@ return {
 export function encodeListInvoicesRequest(v: ListInvoicesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListInvoicesRequest(v: ListInvoicesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListInvoicesResponse {
@@ -121,5 +147,11 @@ export function encodeListInvoicesResponse(v: ListInvoicesResponse): Record<stri
 const out: Record<string, unknown> = {};
 if (v.invoices !== undefined) { out.invoices = (v.invoices as any[]).map(encodeInvoice); }
 return out;
+}
+
+export function validateListInvoicesResponse(v: ListInvoicesResponse): string[] {
+const violations: string[] = [];
+if (v.invoices !== undefined && v.invoices !== null) for (const item of v.invoices) violations.push(...validateInvoice(item).map((message) => "invoices: " + message));
+return violations;
 }
 

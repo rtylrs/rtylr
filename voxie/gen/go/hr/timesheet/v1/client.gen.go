@@ -21,6 +21,11 @@ func NewTimesheetServiceClient(baseURL string) *TimesheetServiceClient {
 }
 
 func (c *TimesheetServiceClient) ListTimesheets(ctx context.Context, req *ListTimesheetsRequest) (*ListTimesheetsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/timesheet/v1/timesheets"
 	query := url.Values{}
 	query.Set("week_start", req.WeekStart)

@@ -21,6 +21,9 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *ProcessPaymentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
@@ -31,6 +34,17 @@ func (m *ProcessPaymentRequest) Validate() error {
 	if m.AmountPaid <= 0 {
 		violations = append(violations, "amount_paid must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ProcessPaymentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

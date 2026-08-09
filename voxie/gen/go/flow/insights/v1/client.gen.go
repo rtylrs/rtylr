@@ -22,6 +22,11 @@ func NewInsightsServiceClient(baseURL string) *InsightsServiceClient {
 }
 
 func (c *InsightsServiceClient) GetInsights(ctx context.Context, req *GetInsightsRequest) (*GetInsightsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/insights/v1/overview"
 	query := url.Values{}
 	query.Set("workspace_id", req.WorkspaceId)
@@ -53,6 +58,11 @@ func (c *InsightsServiceClient) GetInsights(ctx context.Context, req *GetInsight
 }
 
 func (c *InsightsServiceClient) GetTeamWorkload(ctx context.Context, req *GetTeamWorkloadRequest) (*GetTeamWorkloadResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/insights/v1/team/workload"
 	query := url.Values{}
 	query.Set("workspace_id", req.WorkspaceId)
@@ -88,6 +98,11 @@ func (c *InsightsServiceClient) GetTeamWorkload(ctx context.Context, req *GetTea
 }
 
 func (c *InsightsServiceClient) GetRoadmap(ctx context.Context, req *GetRoadmapRequest) (*GetRoadmapResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/insights/v1/roadmap"
 	query := url.Values{}
 	query.Set("workspace_id", req.WorkspaceId)

@@ -26,6 +26,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validatePaginationRequest(v: PaginationRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface PaginationResponse {
 page?: number;
 limit?: number;
@@ -58,6 +63,11 @@ if (v.hasPrev !== undefined) { out.has_prev = v.hasPrev; }
 return out;
 }
 
+export function validatePaginationResponse(v: PaginationResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface Timestamp {
 value?: string;
 }
@@ -73,5 +83,10 @@ export function encodeTimestamp(v: Timestamp): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.value !== undefined) { out.value = v.value; }
 return out;
+}
+
+export function validateTimestamp(v: Timestamp): string[] {
+const violations: string[] = [];
+return violations;
 }
 

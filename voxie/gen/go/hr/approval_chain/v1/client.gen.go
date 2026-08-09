@@ -21,6 +21,11 @@ func NewApprovalChainServiceClient(baseURL string) *ApprovalChainServiceClient {
 }
 
 func (c *ApprovalChainServiceClient) UpsertApprovalChain(ctx context.Context, req *UpsertApprovalChainRequest) (*UpsertApprovalChainResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/approval-chain/v1/approval-chains"
 	body, err := json.Marshal(req)
 	if err != nil {

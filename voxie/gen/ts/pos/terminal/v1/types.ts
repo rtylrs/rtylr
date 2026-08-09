@@ -38,6 +38,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateTerminal(v: Terminal): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListTerminalsRequest {
 }
 
@@ -50,6 +55,11 @@ return {
 export function encodeListTerminalsRequest(v: ListTerminalsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListTerminalsRequest(v: ListTerminalsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListTerminalsResponse {
@@ -69,10 +79,16 @@ if (v.terminals !== undefined) { out.terminals = (v.terminals as any[]).map(enco
 return out;
 }
 
+export function validateListTerminalsResponse(v: ListTerminalsResponse): string[] {
+const violations: string[] = [];
+if (v.terminals !== undefined && v.terminals !== null) for (const item of v.terminals) violations.push(...validateTerminal(item).map((message) => "terminals: " + message));
+return violations;
+}
+
 export interface CreateTerminalRequest {
-branchId?: string;
-name?: string;
-deviceId?: string;
+branchId: string;
+name: string;
+deviceId: string;
 }
 
 export function decodeCreateTerminalRequest(v: any): CreateTerminalRequest {
@@ -90,6 +106,15 @@ if (v.branchId !== undefined) { out.branch_id = v.branchId; }
 if (v.name !== undefined) { out.name = v.name; }
 if (v.deviceId !== undefined) { out.device_id = v.deviceId; }
 return out;
+}
+
+export function validateCreateTerminalRequest(v: CreateTerminalRequest): string[] {
+const violations: string[] = [];
+if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
+if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.deviceId !== undefined && v.deviceId !== null) || v.deviceId === "") violations.push("device_id is required");
+return violations;
 }
 
 export interface CreateTerminalResponse {
@@ -112,10 +137,15 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateTerminalResponse(v: CreateTerminalResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateTerminalBody {
-branchId?: string;
-name?: string;
-deviceId?: string;
+branchId: string;
+name: string;
+deviceId: string;
 isActive?: boolean;
 }
 
@@ -138,8 +168,17 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateTerminalBody(v: UpdateTerminalBody): string[] {
+const violations: string[] = [];
+if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
+if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.deviceId !== undefined && v.deviceId !== null) || v.deviceId === "") violations.push("device_id is required");
+return violations;
+}
+
 export interface UpdateTerminalRequest {
-id?: string;
+id: string;
 body?: UpdateTerminalBody;
 }
 
@@ -156,6 +195,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateTerminalBody(v.body); }
 return out;
+}
+
+export function validateUpdateTerminalRequest(v: UpdateTerminalRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTerminalBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateTerminalResponse {
@@ -175,8 +222,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateTerminalResponse(v: UpdateTerminalResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface HeartbeatTerminalRequest {
-terminalId?: string;
+terminalId: string;
 }
 
 export function decodeHeartbeatTerminalRequest(v: any): HeartbeatTerminalRequest {
@@ -190,6 +242,13 @@ export function encodeHeartbeatTerminalRequest(v: HeartbeatTerminalRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.terminalId !== undefined) { out.terminal_id = v.terminalId; }
 return out;
+}
+
+export function validateHeartbeatTerminalRequest(v: HeartbeatTerminalRequest): string[] {
+const violations: string[] = [];
+if (!(v.terminalId !== undefined && v.terminalId !== null)) violations.push("terminal_id is required");
+if (v.terminalId !== undefined && v.terminalId !== null && !(Number(v.terminalId) > 0)) violations.push("terminal_id violates @gt");
+return violations;
 }
 
 export interface HeartbeatTerminalResponse {
@@ -207,5 +266,10 @@ export function encodeHeartbeatTerminalResponse(v: HeartbeatTerminalResponse): R
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateHeartbeatTerminalResponse(v: HeartbeatTerminalResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

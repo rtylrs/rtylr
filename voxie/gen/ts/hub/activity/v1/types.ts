@@ -44,6 +44,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateActivityEntry(v: ActivityEntry): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListActivityRequest {
 limit?: number;
 }
@@ -61,6 +66,11 @@ if (v.limit !== undefined) { out.limit = v.limit; }
 return out;
 }
 
+export function validateListActivityRequest(v: ListActivityRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListActivityResponse {
 activities?: (ActivityEntry)[];
 }
@@ -76,5 +86,11 @@ export function encodeListActivityResponse(v: ListActivityResponse): Record<stri
 const out: Record<string, unknown> = {};
 if (v.activities !== undefined) { out.activities = (v.activities as any[]).map(encodeActivityEntry); }
 return out;
+}
+
+export function validateListActivityResponse(v: ListActivityResponse): string[] {
+const violations: string[] = [];
+if (v.activities !== undefined && v.activities !== null) for (const item of v.activities) violations.push(...validateActivityEntry(item).map((message) => "activities: " + message));
+return violations;
 }
 

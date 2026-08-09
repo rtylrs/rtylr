@@ -20,7 +20,21 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *GiftCard) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateGiftCardRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Code == "" {
 		violations = append(violations, "code is required")
@@ -46,7 +60,21 @@ func (m *CreateGiftCardRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateGiftCardResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetGiftCardByCodeRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Code == "" {
 		violations = append(violations, "code is required")
@@ -57,13 +85,75 @@ func (m *GetGiftCardByCodeRequest) Validate() error {
 	return nil
 }
 
+func (m *GetGiftCardByCodeResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.GiftCard != nil {
+		if err := m.GiftCard.Validate(); err != nil {
+			violations = append(violations, "gift_card: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListGiftCardsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListGiftCardsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.GiftCards {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "gift_cards: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *RedeemGiftCardRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Code == "" {
 		violations = append(violations, "code is required")
 	}
 	if m.Amount < 0 {
 		violations = append(violations, "amount must be greater than or equal to 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RedeemGiftCardResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.GiftCard != nil {
+		if err := m.GiftCard.Validate(); err != nil {
+			violations = append(violations, "gift_card: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

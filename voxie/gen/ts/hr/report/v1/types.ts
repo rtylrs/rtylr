@@ -35,6 +35,11 @@ if (v.format !== undefined) { out.format = v.format; }
 return out;
 }
 
+export function validateReportRequestPayload(v: ReportRequestPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ReportPayload {
 reportType?: string;
 generatedAt?: string;
@@ -61,8 +66,13 @@ if (v.format !== undefined) { out.format = v.format; }
 return out;
 }
 
+export function validateReportPayload(v: ReportPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GenerateReportRequest {
-request?: ReportRequestPayload;
+request: ReportRequestPayload;
 }
 
 export function decodeGenerateReportRequest(v: any): GenerateReportRequest {
@@ -76,6 +86,13 @@ export function encodeGenerateReportRequest(v: GenerateReportRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.request !== undefined) { out.request = encodeReportRequestPayload(v.request); }
 return out;
+}
+
+export function validateGenerateReportRequest(v: GenerateReportRequest): string[] {
+const violations: string[] = [];
+if (!(v.request !== undefined && v.request !== null)) violations.push("request is required");
+if (v.request !== undefined && v.request !== null) violations.push(...validateReportRequestPayload(v.request).map((message) => "request: " + message));
+return violations;
 }
 
 export interface GenerateReportResponse {
@@ -93,5 +110,11 @@ export function encodeGenerateReportResponse(v: GenerateReportResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.report !== undefined) { out.report = encodeReportPayload(v.report); }
 return out;
+}
+
+export function validateGenerateReportResponse(v: GenerateReportResponse): string[] {
+const violations: string[] = [];
+if (v.report !== undefined && v.report !== null) violations.push(...validateReportPayload(v.report).map((message) => "report: " + message));
+return violations;
 }
 

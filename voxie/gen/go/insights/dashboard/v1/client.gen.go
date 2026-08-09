@@ -21,6 +21,11 @@ func NewDashboardServiceClient(baseURL string) *DashboardServiceClient {
 }
 
 func (c *DashboardServiceClient) GetInsights(ctx context.Context, req *GetInsightsRequest) (*GetInsightsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/dashboard/v1/insights"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -51,6 +56,11 @@ func (c *DashboardServiceClient) GetInsights(ctx context.Context, req *GetInsigh
 }
 
 func (c *DashboardServiceClient) GetKPIs(ctx context.Context, req *GetKPIsRequest) (*GetKPIsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/dashboard/v1/kpis"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -81,6 +91,11 @@ func (c *DashboardServiceClient) GetKPIs(ctx context.Context, req *GetKPIsReques
 }
 
 func (c *DashboardServiceClient) GetRoadmap(ctx context.Context, req *GetRoadmapRequest) (*GetRoadmapResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/dashboard/v1/roadmap"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -111,6 +126,11 @@ func (c *DashboardServiceClient) GetRoadmap(ctx context.Context, req *GetRoadmap
 }
 
 func (c *DashboardServiceClient) GetWorkload(ctx context.Context, req *GetWorkloadRequest) (*GetWorkloadResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/dashboard/v1/workload"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -141,6 +161,11 @@ func (c *DashboardServiceClient) GetWorkload(ctx context.Context, req *GetWorklo
 }
 
 func (c *DashboardServiceClient) GetDashboardSummary(ctx context.Context, req *GetDashboardSummaryRequest) (*GetDashboardSummaryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/dashboard/v1/summary"
 	query := url.Values{}
 	if len(query) > 0 {

@@ -22,6 +22,11 @@ func NewInventoryServiceClient(baseURL string) *InventoryServiceClient {
 }
 
 func (c *InventoryServiceClient) GetInventoryReport(ctx context.Context, req *GetInventoryReportRequest) (*GetInventoryReportResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/inventory/v1/report"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *InventoryServiceClient) GetInventoryReport(ctx context.Context, req *Ge
 }
 
 func (c *InventoryServiceClient) GetLowStock(ctx context.Context, req *GetLowStockRequest) (*GetLowStockResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/inventory/v1/low-stock"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -82,6 +92,11 @@ func (c *InventoryServiceClient) GetLowStock(ctx context.Context, req *GetLowSto
 }
 
 func (c *InventoryServiceClient) GetValuation(ctx context.Context, req *GetValuationRequest) (*GetValuationResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/inventory/v1/valuation"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -112,6 +127,11 @@ func (c *InventoryServiceClient) GetValuation(ctx context.Context, req *GetValua
 }
 
 func (c *InventoryServiceClient) AdjustInventory(ctx context.Context, req *AdjustInventoryRequest) (*AdjustInventoryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/inventory/v1/adjust"
 	body, err := json.Marshal(req)
 	if err != nil {

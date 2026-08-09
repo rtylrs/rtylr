@@ -59,15 +59,20 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateAppointment(v: Appointment): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateAppointmentRequest {
-serviceId?: string;
+serviceId: string;
 resourceId?: string;
 staffId?: string;
-customerName?: string;
+customerName: string;
 customerEmail?: string;
 customerPhone?: string;
-startTime?: string;
-endTime?: string;
+startTime: string;
+endTime: string;
 status?: string;
 notes?: string;
 }
@@ -103,6 +108,16 @@ if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
 }
 
+export function validateCreateAppointmentRequest(v: CreateAppointmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.serviceId !== undefined && v.serviceId !== null)) violations.push("service_id is required");
+if (v.serviceId !== undefined && v.serviceId !== null && !(Number(v.serviceId) > 0)) violations.push("service_id violates @gt");
+if (!(v.customerName !== undefined && v.customerName !== null) || v.customerName === "") violations.push("customer_name is required");
+if (!(v.startTime !== undefined && v.startTime !== null) || v.startTime === "") violations.push("start_time is required");
+if (!(v.endTime !== undefined && v.endTime !== null) || v.endTime === "") violations.push("end_time is required");
+return violations;
+}
+
 export interface CreateAppointmentResponse {
 id?: string;
 message?: string;
@@ -123,8 +138,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateAppointmentResponse(v: CreateAppointmentResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteAppointmentRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteAppointmentRequest(v: any): DeleteAppointmentRequest {
@@ -138,6 +158,13 @@ export function encodeDeleteAppointmentRequest(v: DeleteAppointmentRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteAppointmentRequest(v: DeleteAppointmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteAppointmentResponse {
@@ -157,6 +184,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteAppointmentResponse(v: DeleteAppointmentResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListAppointmentsRequest {
 }
 
@@ -169,6 +201,11 @@ return {
 export function encodeListAppointmentsRequest(v: ListAppointmentsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListAppointmentsRequest(v: ListAppointmentsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListAppointmentsResponse {
@@ -188,6 +225,12 @@ if (v.appointments !== undefined) { out.appointments = (v.appointments as any[])
 return out;
 }
 
+export function validateListAppointmentsResponse(v: ListAppointmentsResponse): string[] {
+const violations: string[] = [];
+if (v.appointments !== undefined && v.appointments !== null) for (const item of v.appointments) violations.push(...validateAppointment(item).map((message) => "appointments: " + message));
+return violations;
+}
+
 export interface ListTodayAppointmentsRequest {
 }
 
@@ -200,6 +243,11 @@ return {
 export function encodeListTodayAppointmentsRequest(v: ListTodayAppointmentsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListTodayAppointmentsRequest(v: ListTodayAppointmentsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListTodayAppointmentsResponse {
@@ -219,8 +267,14 @@ if (v.appointments !== undefined) { out.appointments = (v.appointments as any[])
 return out;
 }
 
+export function validateListTodayAppointmentsResponse(v: ListTodayAppointmentsResponse): string[] {
+const violations: string[] = [];
+if (v.appointments !== undefined && v.appointments !== null) for (const item of v.appointments) violations.push(...validateAppointment(item).map((message) => "appointments: " + message));
+return violations;
+}
+
 export interface UpdateAppointmentRequest {
-id?: string;
+id: string;
 serviceId?: string;
 resourceId?: string;
 staffId?: string;
@@ -266,6 +320,13 @@ if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
 }
 
+export function validateUpdateAppointmentRequest(v: UpdateAppointmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface UpdateAppointmentResponse {
 message?: string;
 }
@@ -281,5 +342,10 @@ export function encodeUpdateAppointmentResponse(v: UpdateAppointmentResponse): R
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateAppointmentResponse(v: UpdateAppointmentResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

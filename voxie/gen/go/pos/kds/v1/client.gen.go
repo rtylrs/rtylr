@@ -23,6 +23,11 @@ func NewKDSServiceClient(baseURL string) *KDSServiceClient {
 }
 
 func (c *KDSServiceClient) ListKDSOrders(ctx context.Context, req *ListKDSOrdersRequest) (*ListKDSOrdersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/kds/v1/orders"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,10 +58,15 @@ func (c *KDSServiceClient) ListKDSOrders(ctx context.Context, req *ListKDSOrders
 }
 
 func (c *KDSServiceClient) UpdateKDSItemStatus(ctx context.Context, req *UpdateKDSItemStatusRequest) (*UpdateKDSItemStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/kds/v1/{order_id}/items/{item_id}"
 	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
 	path = strings.ReplaceAll(path, "{item_id}", fmt.Sprintf("%v", req.ItemId))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}

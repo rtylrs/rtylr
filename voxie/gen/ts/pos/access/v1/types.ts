@@ -26,6 +26,11 @@ if (v.phone !== undefined) { out.phone = v.phone; }
 return out;
 }
 
+export function validateMyLocation(v: MyLocation): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface RosterEntry {
 userId?: string;
 name?: string;
@@ -53,6 +58,11 @@ if (v.hasPin !== undefined) { out.has_pin = v.hasPin; }
 if (v.isManager !== undefined) { out.is_manager = v.isManager; }
 if (v.posRole !== undefined) { out.pos_role = v.posRole; }
 return out;
+}
+
+export function validateRosterEntry(v: RosterEntry): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface MemberLocationEntry {
@@ -84,9 +94,14 @@ if (v.canViewReports !== undefined) { out.can_view_reports = v.canViewReports; }
 return out;
 }
 
+export function validateMemberLocationEntry(v: MemberLocationEntry): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface AssignLocationRequest {
-userId?: string;
-locationId?: string;
+userId: string;
+locationId: string;
 canManagePosUsers?: boolean;
 canManageTerminals?: boolean;
 canViewReports?: boolean;
@@ -113,6 +128,15 @@ if (v.canViewReports !== undefined) { out.can_view_reports = v.canViewReports; }
 return out;
 }
 
+export function validateAssignLocationRequest(v: AssignLocationRequest): string[] {
+const violations: string[] = [];
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
+if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+return violations;
+}
+
 export interface AssignLocationResponse {
 id?: string;
 }
@@ -130,8 +154,13 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateAssignLocationResponse(v: AssignLocationResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetLocationRosterRequest {
-locationId?: string;
+locationId: string;
 }
 
 export function decodeGetLocationRosterRequest(v: any): GetLocationRosterRequest {
@@ -145,6 +174,13 @@ export function encodeGetLocationRosterRequest(v: GetLocationRosterRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.locationId !== undefined) { out.location_id = v.locationId; }
 return out;
+}
+
+export function validateGetLocationRosterRequest(v: GetLocationRosterRequest): string[] {
+const violations: string[] = [];
+if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
+if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+return violations;
 }
 
 export interface GetLocationRosterResponse {
@@ -164,8 +200,14 @@ if (v.roster !== undefined) { out.roster = (v.roster as any[]).map(encodeRosterE
 return out;
 }
 
+export function validateGetLocationRosterResponse(v: GetLocationRosterResponse): string[] {
+const violations: string[] = [];
+if (v.roster !== undefined && v.roster !== null) for (const item of v.roster) violations.push(...validateRosterEntry(item).map((message) => "roster: " + message));
+return violations;
+}
+
 export interface GetMemberLocationsRequest {
-userId?: string;
+userId: string;
 }
 
 export function decodeGetMemberLocationsRequest(v: any): GetMemberLocationsRequest {
@@ -179,6 +221,13 @@ export function encodeGetMemberLocationsRequest(v: GetMemberLocationsRequest): R
 const out: Record<string, unknown> = {};
 if (v.userId !== undefined) { out.user_id = v.userId; }
 return out;
+}
+
+export function validateGetMemberLocationsRequest(v: GetMemberLocationsRequest): string[] {
+const violations: string[] = [];
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+return violations;
 }
 
 export interface GetMemberLocationsResponse {
@@ -198,6 +247,12 @@ if (v.locations !== undefined) { out.locations = (v.locations as any[]).map(enco
 return out;
 }
 
+export function validateGetMemberLocationsResponse(v: GetMemberLocationsResponse): string[] {
+const violations: string[] = [];
+if (v.locations !== undefined && v.locations !== null) for (const item of v.locations) violations.push(...validateMemberLocationEntry(item).map((message) => "locations: " + message));
+return violations;
+}
+
 export interface GetMyLocationsRequest {
 }
 
@@ -210,6 +265,11 @@ return {
 export function encodeGetMyLocationsRequest(v: GetMyLocationsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetMyLocationsRequest(v: GetMyLocationsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetMyLocationsResponse {
@@ -229,8 +289,14 @@ if (v.locations !== undefined) { out.locations = (v.locations as any[]).map(enco
 return out;
 }
 
+export function validateGetMyLocationsResponse(v: GetMyLocationsResponse): string[] {
+const violations: string[] = [];
+if (v.locations !== undefined && v.locations !== null) for (const item of v.locations) violations.push(...validateMyLocation(item).map((message) => "locations: " + message));
+return violations;
+}
+
 export interface RemoveLocationRequest {
-id?: string;
+id: string;
 }
 
 export function decodeRemoveLocationRequest(v: any): RemoveLocationRequest {
@@ -244,6 +310,13 @@ export function encodeRemoveLocationRequest(v: RemoveLocationRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateRemoveLocationRequest(v: RemoveLocationRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface RemoveLocationResponse {
@@ -261,5 +334,10 @@ export function encodeRemoveLocationResponse(v: RemoveLocationResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateRemoveLocationResponse(v: RemoveLocationResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

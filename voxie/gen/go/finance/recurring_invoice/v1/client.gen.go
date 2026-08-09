@@ -23,6 +23,11 @@ func NewRecurringInvoiceServiceClient(baseURL string) *RecurringInvoiceServiceCl
 }
 
 func (c *RecurringInvoiceServiceClient) ListRecurringInvoices(ctx context.Context, req *ListRecurringInvoicesRequest) (*ListRecurringInvoicesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/recurring-invoice/v1/recurring-invoices"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *RecurringInvoiceServiceClient) ListRecurringInvoices(ctx context.Contex
 }
 
 func (c *RecurringInvoiceServiceClient) CreateRecurringInvoice(ctx context.Context, req *CreateRecurringInvoiceRequest) (*CreateRecurringInvoiceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/recurring-invoice/v1/recurring-invoices"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *RecurringInvoiceServiceClient) CreateRecurringInvoice(ctx context.Conte
 }
 
 func (c *RecurringInvoiceServiceClient) GetRecurringInvoice(ctx context.Context, req *GetRecurringInvoiceRequest) (*GetRecurringInvoiceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/recurring-invoice/v1/recurring-invoices/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -115,6 +130,11 @@ func (c *RecurringInvoiceServiceClient) GetRecurringInvoice(ctx context.Context,
 }
 
 func (c *RecurringInvoiceServiceClient) UpdateRecurringInvoice(ctx context.Context, req *UpdateRecurringInvoiceRequest) (*UpdateRecurringInvoiceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/recurring-invoice/v1/recurring-invoices/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -147,6 +167,11 @@ func (c *RecurringInvoiceServiceClient) UpdateRecurringInvoice(ctx context.Conte
 }
 
 func (c *RecurringInvoiceServiceClient) PauseRecurringInvoice(ctx context.Context, req *PauseRecurringInvoiceRequest) (*PauseRecurringInvoiceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/recurring-invoice/v1/recurring-invoices/{id}/pause"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -179,6 +204,11 @@ func (c *RecurringInvoiceServiceClient) PauseRecurringInvoice(ctx context.Contex
 }
 
 func (c *RecurringInvoiceServiceClient) ResumeRecurringInvoice(ctx context.Context, req *ResumeRecurringInvoiceRequest) (*ResumeRecurringInvoiceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/recurring-invoice/v1/recurring-invoices/{id}/resume"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

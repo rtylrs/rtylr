@@ -23,6 +23,11 @@ func NewAccessServiceClient(baseURL string) *AccessServiceClient {
 }
 
 func (c *AccessServiceClient) GetMyLocations(ctx context.Context, req *GetMyLocationsRequest) (*GetMyLocationsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/access/v1/my-locations"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *AccessServiceClient) GetMyLocations(ctx context.Context, req *GetMyLoca
 }
 
 func (c *AccessServiceClient) GetMemberLocations(ctx context.Context, req *GetMemberLocationsRequest) (*GetMemberLocationsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/access/v1/member-locations"
 	query := url.Values{}
 	query.Set("user_id", strconv.FormatInt(int64(req.UserId), 10))
@@ -84,6 +94,11 @@ func (c *AccessServiceClient) GetMemberLocations(ctx context.Context, req *GetMe
 }
 
 func (c *AccessServiceClient) GetLocationRoster(ctx context.Context, req *GetLocationRosterRequest) (*GetLocationRosterResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/access/v1/location-roster"
 	query := url.Values{}
 	query.Set("location_id", strconv.FormatInt(int64(req.LocationId), 10))
@@ -115,6 +130,11 @@ func (c *AccessServiceClient) GetLocationRoster(ctx context.Context, req *GetLoc
 }
 
 func (c *AccessServiceClient) AssignLocation(ctx context.Context, req *AssignLocationRequest) (*AssignLocationResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/access/v1/assign"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -146,6 +166,11 @@ func (c *AccessServiceClient) AssignLocation(ctx context.Context, req *AssignLoc
 }
 
 func (c *AccessServiceClient) RemoveLocation(ctx context.Context, req *RemoveLocationRequest) (*RemoveLocationResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/access/v1/remove"
 	body, err := json.Marshal(req)
 	if err != nil {

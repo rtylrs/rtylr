@@ -21,6 +21,9 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *UpdateOrderItemStatusBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Status == "" {
 		violations = append(violations, "status is required")
@@ -32,6 +35,42 @@ func (m *UpdateOrderItemStatusBody) Validate() error {
 }
 
 func (m *UpdateOrderItemStatusRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.OrderId <= 0 {
+		violations = append(violations, "order_id must be greater than 0")
+	}
+	if m.ItemId <= 0 {
+		violations = append(violations, "item_id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateOrderItemStatusResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *VoidOrderItemRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
@@ -45,14 +84,11 @@ func (m *UpdateOrderItemStatusRequest) Validate() error {
 	return nil
 }
 
-func (m *VoidOrderItemRequest) Validate() error {
+func (m *VoidOrderItemResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
-	if m.OrderId <= 0 {
-		violations = append(violations, "order_id must be greater than 0")
-	}
-	if m.ItemId <= 0 {
-		violations = append(violations, "item_id must be greater than 0")
-	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

@@ -38,6 +38,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateTable(v: Table): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListTablesRequest {
 }
 
@@ -50,6 +55,11 @@ return {
 export function encodeListTablesRequest(v: ListTablesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListTablesRequest(v: ListTablesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListTablesResponse {
@@ -69,10 +79,16 @@ if (v.tables !== undefined) { out.tables = (v.tables as any[]).map(encodeTable);
 return out;
 }
 
+export function validateListTablesResponse(v: ListTablesResponse): string[] {
+const violations: string[] = [];
+if (v.tables !== undefined && v.tables !== null) for (const item of v.tables) violations.push(...validateTable(item).map((message) => "tables: " + message));
+return violations;
+}
+
 export interface CreateTableRequest {
 locationId?: string;
-label?: string;
-seats?: number;
+label: string;
+seats: number;
 }
 
 export function decodeCreateTableRequest(v: any): CreateTableRequest {
@@ -90,6 +106,14 @@ if (v.locationId !== undefined) { out.location_id = v.locationId; }
 if (v.label !== undefined) { out.label = v.label; }
 if (v.seats !== undefined) { out.seats = v.seats; }
 return out;
+}
+
+export function validateCreateTableRequest(v: CreateTableRequest): string[] {
+const violations: string[] = [];
+if (!(v.label !== undefined && v.label !== null) || v.label === "") violations.push("label is required");
+if (!(v.seats !== undefined && v.seats !== null)) violations.push("seats is required");
+if (v.seats !== undefined && v.seats !== null && !(Number(v.seats) > 0)) violations.push("seats violates @gt");
+return violations;
 }
 
 export interface CreateTableResponse {
@@ -112,11 +136,16 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateTableResponse(v: CreateTableResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateTableBody {
 locationId?: string;
-label?: string;
-seats?: number;
-status?: string;
+label: string;
+seats: number;
+status: string;
 }
 
 export function decodeUpdateTableBody(v: any): UpdateTableBody {
@@ -138,8 +167,17 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdateTableBody(v: UpdateTableBody): string[] {
+const violations: string[] = [];
+if (!(v.label !== undefined && v.label !== null) || v.label === "") violations.push("label is required");
+if (!(v.seats !== undefined && v.seats !== null)) violations.push("seats is required");
+if (v.seats !== undefined && v.seats !== null && !(Number(v.seats) > 0)) violations.push("seats violates @gt");
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+return violations;
+}
+
 export interface UpdateTableRequest {
-id?: string;
+id: string;
 body?: UpdateTableBody;
 }
 
@@ -156,6 +194,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateTableBody(v.body); }
 return out;
+}
+
+export function validateUpdateTableRequest(v: UpdateTableRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTableBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateTableResponse {
@@ -175,8 +221,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateTableResponse(v: UpdateTableResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateTableStatusBody {
-status?: string;
+status: string;
 }
 
 export function decodeUpdateTableStatusBody(v: any): UpdateTableStatusBody {
@@ -192,8 +243,14 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdateTableStatusBody(v: UpdateTableStatusBody): string[] {
+const violations: string[] = [];
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+return violations;
+}
+
 export interface UpdateTableStatusRequest {
-id?: string;
+id: string;
 body?: UpdateTableStatusBody;
 }
 
@@ -210,6 +267,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateTableStatusBody(v.body); }
 return out;
+}
+
+export function validateUpdateTableStatusRequest(v: UpdateTableStatusRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTableStatusBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateTableStatusResponse {
@@ -229,8 +294,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateTableStatusResponse(v: UpdateTableStatusResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteTableRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteTableRequest(v: any): DeleteTableRequest {
@@ -244,6 +314,13 @@ export function encodeDeleteTableRequest(v: DeleteTableRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteTableRequest(v: DeleteTableRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteTableResponse {
@@ -261,5 +338,10 @@ export function encodeDeleteTableResponse(v: DeleteTableResponse): Record<string
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateDeleteTableResponse(v: DeleteTableResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

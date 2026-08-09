@@ -21,6 +21,9 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *InviteUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Email == "" {
 		violations = append(violations, "email is required")
@@ -46,7 +49,21 @@ func (m *InviteUserRequest) Validate() error {
 	return nil
 }
 
+func (m *InviteUserResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *BulkInviteRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if len(m.Emails) < 1 {
 		violations = append(violations, "emails must have at least 1 items")
@@ -57,7 +74,37 @@ func (m *BulkInviteRequest) Validate() error {
 	return nil
 }
 
+func (m *BulkInviteResult) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *BulkInviteResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Results {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "results: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *VerifyInviteRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Token == "" {
 		violations = append(violations, "token is required")
@@ -68,7 +115,21 @@ func (m *VerifyInviteRequest) Validate() error {
 	return nil
 }
 
+func (m *VerifyInviteResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *AcceptInviteRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Token == "" {
 		violations = append(violations, "token is required")
@@ -76,6 +137,17 @@ func (m *AcceptInviteRequest) Validate() error {
 	if m.Password == "" {
 		violations = append(violations, "password is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AcceptInviteResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

@@ -22,6 +22,11 @@ func NewPriceListServiceClient(baseURL string) *PriceListServiceClient {
 }
 
 func (c *PriceListServiceClient) ListPriceLists(ctx context.Context, req *ListPriceListsRequest) (*ListPriceListsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/price-list/v1/price-lists"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *PriceListServiceClient) ListPriceLists(ctx context.Context, req *ListPr
 }
 
 func (c *PriceListServiceClient) CreatePriceList(ctx context.Context, req *CreatePriceListRequest) (*CreatePriceListResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/price-list/v1/price-lists"
 	body, err := json.Marshal(req)
 	if err != nil {

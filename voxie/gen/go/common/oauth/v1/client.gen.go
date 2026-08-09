@@ -22,6 +22,11 @@ func NewOauthServiceClient(baseURL string) *OauthServiceClient {
 }
 
 func (c *OauthServiceClient) Issue(ctx context.Context, req *IssueRequest) (*IssueResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/oauth/v1/issue"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -53,6 +58,11 @@ func (c *OauthServiceClient) Issue(ctx context.Context, req *IssueRequest) (*Iss
 }
 
 func (c *OauthServiceClient) Token(ctx context.Context, req *TokenRequest) (*TokenResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/oauth/v1/token"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *OauthServiceClient) Token(ctx context.Context, req *TokenRequest) (*Tok
 }
 
 func (c *OauthServiceClient) Revoke(ctx context.Context, req *RevokeRequest) (*RevokeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/oauth/v1/revoke"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -115,6 +130,11 @@ func (c *OauthServiceClient) Revoke(ctx context.Context, req *RevokeRequest) (*R
 }
 
 func (c *OauthServiceClient) Me(ctx context.Context, req *MeRequest) (*MeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/oauth/v1/me"
 	query := url.Values{}
 	if len(query) > 0 {

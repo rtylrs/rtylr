@@ -35,6 +35,11 @@ if (v.externalId !== undefined) { out.external_id = v.externalId; }
 return out;
 }
 
+export function validateUnmatchedBankTransaction(v: UnmatchedBankTransaction): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UnmatchedInvoice {
 id?: string;
 invoiceNumber?: string;
@@ -70,6 +75,11 @@ if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
 return out;
 }
 
+export function validateUnmatchedInvoice(v: UnmatchedInvoice): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface MatchSuggestion {
 bankFeedId?: string;
 targetType?: string;
@@ -102,6 +112,11 @@ if (v.score !== undefined) { out.score = v.score; }
 return out;
 }
 
+export function validateMatchSuggestion(v: MatchSuggestion): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetOverviewRequest {
 }
 
@@ -114,6 +129,11 @@ return {
 export function encodeGetOverviewRequest(v: GetOverviewRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetOverviewRequest(v: GetOverviewRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetOverviewResponse {
@@ -139,10 +159,18 @@ if (v.suggestions !== undefined) { out.suggestions = (v.suggestions as any[]).ma
 return out;
 }
 
+export function validateGetOverviewResponse(v: GetOverviewResponse): string[] {
+const violations: string[] = [];
+if (v.unmatchedBankTxns !== undefined && v.unmatchedBankTxns !== null) for (const item of v.unmatchedBankTxns) violations.push(...validateUnmatchedBankTransaction(item).map((message) => "unmatched_bank_txns: " + message));
+if (v.unmatchedInvoices !== undefined && v.unmatchedInvoices !== null) for (const item of v.unmatchedInvoices) violations.push(...validateUnmatchedInvoice(item).map((message) => "unmatched_invoices: " + message));
+if (v.suggestions !== undefined && v.suggestions !== null) for (const item of v.suggestions) violations.push(...validateMatchSuggestion(item).map((message) => "suggestions: " + message));
+return violations;
+}
+
 export interface MatchRequest {
-bankFeedId?: string;
-targetType?: string;
-targetId?: string;
+bankFeedId: string;
+targetType: string;
+targetId: string;
 }
 
 export function decodeMatchRequest(v: any): MatchRequest {
@@ -160,6 +188,14 @@ if (v.bankFeedId !== undefined) { out.bank_feed_id = v.bankFeedId; }
 if (v.targetType !== undefined) { out.target_type = v.targetType; }
 if (v.targetId !== undefined) { out.target_id = v.targetId; }
 return out;
+}
+
+export function validateMatchRequest(v: MatchRequest): string[] {
+const violations: string[] = [];
+if (!(v.bankFeedId !== undefined && v.bankFeedId !== null)) violations.push("bank_feed_id is required");
+if (!(v.targetType !== undefined && v.targetType !== null) || v.targetType === "") violations.push("target_type is required");
+if (!(v.targetId !== undefined && v.targetId !== null)) violations.push("target_id is required");
+return violations;
 }
 
 export interface MatchResponse {
@@ -180,5 +216,10 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateMatchResponse(v: MatchResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

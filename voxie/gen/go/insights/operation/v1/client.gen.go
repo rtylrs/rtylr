@@ -21,6 +21,11 @@ func NewOperationServiceClient(baseURL string) *OperationServiceClient {
 }
 
 func (c *OperationServiceClient) GetHeadcountMetrics(ctx context.Context, req *GetHeadcountMetricsRequest) (*GetHeadcountMetricsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/operation/v1/headcount"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -52,6 +57,11 @@ func (c *OperationServiceClient) GetHeadcountMetrics(ctx context.Context, req *G
 }
 
 func (c *OperationServiceClient) GetShiftMetrics(ctx context.Context, req *GetShiftMetricsRequest) (*GetShiftMetricsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/operation/v1/shifts"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -83,6 +93,11 @@ func (c *OperationServiceClient) GetShiftMetrics(ctx context.Context, req *GetSh
 }
 
 func (c *OperationServiceClient) GetTimeOffMetrics(ctx context.Context, req *GetTimeOffMetricsRequest) (*GetTimeOffMetricsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/operation/v1/time-off"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -114,6 +129,11 @@ func (c *OperationServiceClient) GetTimeOffMetrics(ctx context.Context, req *Get
 }
 
 func (c *OperationServiceClient) GetUtilization(ctx context.Context, req *GetUtilizationRequest) (*GetUtilizationResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/operation/v1/utilization"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -145,6 +165,11 @@ func (c *OperationServiceClient) GetUtilization(ctx context.Context, req *GetUti
 }
 
 func (c *OperationServiceClient) GetOperationsSummary(ctx context.Context, req *GetOperationsSummaryRequest) (*GetOperationsSummaryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/operation/v1/summary"
 	query := url.Values{}
 	if len(query) > 0 {
