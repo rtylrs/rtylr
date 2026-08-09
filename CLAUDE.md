@@ -116,7 +116,7 @@ rtylr/
 
 > **Removed apps:** `landing` (marketing site) now lives in its own repo. `hub` was renamed to `dash`. `vbitez` (POS desktop) is not part of this monorepo. Empty `apps/hub`, `apps/vbitez`, or `apps/landing` folders on disk are untracked leftovers - safe to delete.
 >
-> **Submodules:** `packages/` (tryrtylr/packages) is the only top-level submodule here, and it carries `packages/voxie` as a nested submodule. Voxie owns the `.onk` contracts and committed generated `gen/go` + `gen/ts`; Onion and the frontend consume that exact generated commit. Update contract versions by advancing the Voxie pointer in Onion and packages, then advancing the packages pointer here—never copy contract or generated files. Run `git submodule update --init --recursive` after every pull, then `pnpm install`. `pos/` (the separate POS terminal repo) shares this same packages submodule and gets contracts the same way.
+> **Submodules:** `packages/` (tryrtylr/packages) is the only top-level submodule here, and it carries `packages/voxie` as a nested submodule. Voxie owns the `.onk` contracts and committed generated `gen/go` + `gen/ts`; each consumer uses the exact generated commit recorded by its own submodule pointer. Consumers may intentionally pin different Voxie commits, including an older one—never copy contract or generated files. Run `git submodule update --init --recursive` after every pull, then `pnpm install`. `pos/` (the separate POS terminal repo) shares this same packages submodule and gets contracts the same way.
 
 ### Tech Stack
 

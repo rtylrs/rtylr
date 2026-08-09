@@ -105,8 +105,8 @@ git submodule update --init --recursive
 
 ```bash
 # Edit `.onk` files and regenerate in the Voxie repository; commit and push it
-# there. Advance the `voxie` pointers in Onion and packages, push packages,
-# then advance this repository's packages pointer:
+# there. Advance whichever consumer pointers should receive that contract
+# version. Consumers may intentionally remain on older Voxie commits:
 git submodule update --remote packages
 git add packages && git commit -m "chore: bump shared packages"
 ```

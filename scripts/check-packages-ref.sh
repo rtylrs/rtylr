@@ -1,25 +1,46 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-git -C packages fetch --quiet origin main
+repo_root="$(git rev-parse --show-toplevel)"
 
-expected_packages="$(git -C packages rev-parse origin/main)"
-actual_packages="$(git -C packages rev-parse HEAD)"
-
-if [[ "$actual_packages" != "$expected_packages" ]]; then
-  echo "::error::rtylr/packages points to $actual_packages, but packages main is $expected_packages. Update the submodule pointer in rtylr." >&2
+recorded_packages="$(git -C "$repo_root" ls-files -s -- packages | awk '$1 == "160000" { print $2; exit }')"
+if [[ -z "$recorded_packages" ]]; then
+  echo "::error::rtylr/packages is not recorded as a git submodule." >&2
   exit 1
 fi
 
-git -C packages/voxie fetch --quiet origin main
-
-expected_voxie="$(git -C packages/voxie rev-parse origin/main)"
-actual_voxie="$(git -C packages/voxie rev-parse HEAD)"
-
-if [[ "$actual_voxie" != "$expected_voxie" ]]; then
-  echo "::error::packages/voxie points to $actual_voxie, but Voxie main is $expected_voxie. Update the nested submodule pointer in packages." >&2
+if ! actual_packages="$(git -C "$repo_root/packages" rev-parse --verify HEAD^{commit} 2>/dev/null)"; then
+  echo "::error::rtylr/packages is not initialized at a commit. Run git submodule update --init --recursive." >&2
   exit 1
 fi
 
-echo "rtylr/packages is pinned to packages main at $actual_packages"
-echo "packages/voxie is pinned to Voxie main at $actual_voxie"
+if [[ "$actual_packages" != "$recorded_packages" ]]; then
+  echo "::error::rtylr/packages is checked out at $actual_packages, but rtylr records $recorded_packages. Run git submodule update --init --recursive." >&2
+  exit 1
+fi
+
+recorded_voxie="$(git -C "$repo_root/packages" ls-files -s -- voxie | awk '$1 == "160000" { print $2; exit }')"
+if [[ -z "$recorded_voxie" ]]; then
+  echo "::error::packages/voxie is not recorded as a nested git submodule." >&2
+  exit 1
+fi
+
+if ! actual_voxie="$(git -C "$repo_root/packages/voxie" rev-parse --verify HEAD^{commit} 2>/dev/null)"; then
+  echo "::error::packages/voxie is not initialized at a commit. Run git submodule update --init --recursive." >&2
+  exit 1
+fi
+
+if [[ "$actual_voxie" != "$recorded_voxie" ]]; then
+  echo "::error::packages/voxie is checked out at $actual_voxie, but packages records $recorded_voxie. Run git submodule update --init --recursive." >&2
+  exit 1
+fi
+
+for generated_dir in gen/go gen/ts; do
+  if [[ ! -d "$repo_root/packages/voxie/$generated_dir" ]]; then
+    echo "::error::packages/voxie@$actual_voxie is missing $generated_dir output." >&2
+    exit 1
+  fi
+done
+
+echo "rtylr/packages is pinned to packages commit $actual_packages"
+echo "packages/voxie is pinned to generated Voxie commit $actual_voxie"
