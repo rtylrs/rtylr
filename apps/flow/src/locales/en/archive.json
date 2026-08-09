@@ -1,0 +1,9 @@
+{
+  "title": "Archive",
+  "count_one": "{{count}} archived task",
+  "count_other": "{{count}} archived tasks",
+  "emptyTitle": "Nothing archived",
+  "emptyDescription": "Archived tasks will show up here.",
+  "restore": "Restore",
+  "restoreTitle": "Restore task"
+}

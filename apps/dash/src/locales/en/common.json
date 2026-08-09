@@ -1,6 +1,9 @@
 {
   "cancel": "Cancel",
   "save": "Save",
+  "saveChanges": "Save changes",
+  "unsavedChanges": "Unsaved changes",
+  "saving": "Saving...",
   "confirm": "Confirm",
   "delete": "Delete",
   "edit": "Edit",

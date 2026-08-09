@@ -36,6 +36,7 @@ import {
   useUpdateTask,
   useDeleteTask,
   useUpdateTaskStatus,
+  useBulkUpdateArchive,
 } from './useTasks';
 import { flowApi } from '../../shared/services/flowApi';
 
@@ -171,5 +172,24 @@ describe('useUpdateTaskStatus', () => {
     });
     await act(() => result.current.mutateAsync({ id: 't-1', status: 'done' as any }));
     expect(flowApi.updateTaskStatus).toHaveBeenCalledWith('t-1', 'done');
+  });
+});
+
+describe('useBulkUpdateArchive', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls updateTask with archived:true for every selected id', async () => {
+    // Regression guard: BulkEditBar's Archive button used to call
+    // useBulkUpdateStatus with status:'cancelled' - a different field
+    // entirely. This hook must touch `archived`, not `status`.
+    (flowApi.updateTask as any).mockResolvedValue({ ok: true });
+    const { result } = renderHook(() => useBulkUpdateArchive(), {
+      wrapper: createWrapper(),
+    });
+    await act(() => result.current.mutateAsync({ ids: ['t-1', 't-2'] }));
+    expect(flowApi.updateTask).toHaveBeenCalledWith('t-1', { archived: true });
+    expect(flowApi.updateTask).toHaveBeenCalledWith('t-2', { archived: true });
   });
 });

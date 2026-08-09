@@ -18,7 +18,9 @@
   "assignee": "Assigné à",
   "priority": "Priorité",
   "readOnlyAccess": "Vous disposez d'un accès en lecture seule et ne pouvez pas apporter de modifications",
-  "deleteRestricted": "Seuls les propriétaires et administrateurs de l'espace peuvent supprimer cet élément",
+  "deleteRestricted": "Seuls les administrateurs du projet peuvent supprimer cet élément",
+  "comingSoon": "Bientôt disponible",
+  "emojiPickerComingSoon": "Sélecteur d'émojis (bientôt disponible)",
   "focusToday": {
     "emptyTitle": "Nothing pinned for today",
     "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway."
@@ -40,7 +42,8 @@
     "in3Days": "In 3 days",
     "nextWeek": "Next week",
     "in2Weeks": "In 2 weeks",
-    "setDate": "Set date"
+    "setDate": "Set date",
+    "clearDate": "Effacer la date"
   },
   "insights": {
     "burndown": "Burndown (active cycle)",

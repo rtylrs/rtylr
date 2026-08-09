@@ -498,6 +498,8 @@ export const PRIORITY_ORDER: Record<Task['priority'], number> = {
   no_priority: 4,
 };
 
+// Hardcoded pending per-tenant workflow config (statuses/labels differ by business type);
+// tracked as separate follow-up work, not in scope here.
 export const STATUS_LABELS: Record<Task['status'], string> = {
   backlog: 'Backlog',
   todo: 'Todo',
@@ -524,6 +526,8 @@ export const PRIORITY_COLORS: Record<Task['priority'], string> = {
   no_priority: '#4b5563',
 };
 
+// Hardcoded pending per-tenant workflow config (priorities/labels differ by business type);
+// tracked as separate follow-up work, not in scope here.
 export const PRIORITY_LABELS: Record<Task['priority'], string> = {
   urgent: 'Urgent',
   high: 'High',

@@ -6,6 +6,7 @@ import {
   canCreateProject,
   canEditTask,
   canDelete,
+  mostRestrictiveProjectRole,
   canInviteMembers,
   rolePriority,
   sortMembersByRole,
@@ -59,24 +60,51 @@ describe('canCreateProject', () => {
 });
 
 describe('canEditTask', () => {
-  it('returns true for non-viewers', () => {
+  it('returns true for non-viewer project roles', () => {
     expect(canEditTask('member')).toBe(true);
     expect(canEditTask('admin')).toBe(true);
   });
 
-  it('returns false for viewer', () => {
+  it('returns false for a project viewer', () => {
     expect(canEditTask('viewer')).toBe(false);
   });
 });
 
 describe('canDelete', () => {
-  it('returns true for owner and admin', () => {
-    expect(canDelete('owner')).toBe(true);
+  it('returns true for a project admin', () => {
     expect(canDelete('admin')).toBe(true);
   });
 
-  it('returns false for member and viewer', () => {
+  it('returns false for project members and viewers', () => {
     expect(canDelete('member')).toBe(false);
+    expect(canDelete('viewer')).toBe(false);
+  });
+});
+
+describe('mostRestrictiveProjectRole', () => {
+  it('returns undefined for an empty list', () => {
+    expect(mostRestrictiveProjectRole([])).toBeUndefined();
+  });
+
+  it('returns the only role for a single project', () => {
+    expect(mostRestrictiveProjectRole(['admin'])).toBe('admin');
+  });
+
+  it('picks the least privileged role across projects', () => {
+    expect(mostRestrictiveProjectRole(['admin', 'viewer'])).toBe('viewer');
+    expect(mostRestrictiveProjectRole(['admin', 'member'])).toBe('member');
+    expect(mostRestrictiveProjectRole(['member', 'viewer', 'admin'])).toBe('viewer');
+  });
+
+  it('is order independent', () => {
+    expect(mostRestrictiveProjectRole(['viewer', 'admin'])).toBe(
+      mostRestrictiveProjectRole(['admin', 'viewer'])
+    );
+  });
+
+  it('denies editing when one project in the selection is view-only', () => {
+    const role = mostRestrictiveProjectRole(['admin', 'admin', 'viewer']);
+    expect(role !== undefined && canEditTask(role)).toBe(false);
   });
 });
 

@@ -221,6 +221,20 @@ export function useBulkUpdatePriority() {
   });
 }
 
+export function useBulkUpdateArchive() {
+  const qc = useQueryClient();
+  return useMutation<BulkResult, unknown, { ids: string[] }>({
+    mutationFn: ({ ids }) =>
+      bulkSettle(ids, (id) => unwrap(flowApi.updateTask(id, { archived: true }))),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+    },
+    onSuccess: (res) => reportBulk(res, 'toasts.task.bulkUpdated', 'toasts.task.bulkUpdateFailed'),
+    onError: () => toast.error(t('toasts.task.bulkUpdateFailed')),
+  });
+}
+
 export function useBulkDelete() {
   const qc = useQueryClient();
   return useMutation<BulkResult, unknown, string[]>({

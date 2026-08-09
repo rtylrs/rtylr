@@ -23,7 +23,9 @@ const KANBAN_COLUMNS: { status: string; label: string; color: string }[] = [
 
 const MyIssues: React.FC = () => {
   const { data: rawTasks = [], isLoading } = useMyIssues();
-  const tasks = useMemo(() => rawTasks.map(apiTaskToTask), [rawTasks]);
+  // GetMyTasks doesn't filter archived server-side, so exclude client-side
+  // to match Triage/FocusToday/FlowLayout.
+  const tasks = useMemo(() => rawTasks.map(apiTaskToTask).filter((t) => !t.archived), [rawTasks]);
   const { selectedTaskIds } = useFlowStore();
 
   const byStatus = useMemo(() => {

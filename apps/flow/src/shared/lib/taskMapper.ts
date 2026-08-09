@@ -64,5 +64,10 @@ export function apiTaskToTask(t: ApiTask): Task {
     decisionNote: t.decisionNote,
     focusPin: t.focusPin,
     sectionId,
+    // `archived` is omitempty on the contract, so an unarchived task arrives
+    // as `undefined`, not `false`. Normalise here so store consumers get a
+    // concrete boolean and nobody is tempted to write `archived === false`
+    // (which would silently match nothing).
+    archived: t.archived ?? false,
   };
 }

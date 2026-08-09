@@ -1,3 +1,5 @@
+import type { Task as ContractTask } from '@voxire/voxie/flow/task/v1/types';
+
 import { safe } from '../lib/api';
 
 // -- Types ----------------------------------------------------------------
@@ -63,12 +65,24 @@ export interface ApiTask {
   assigneeId?: string;
   assigneeInitials: string;
   dueDate: string;
+  // Write path only for now. The wire carries start_date on both Task and
+  // UpdateTaskBody, but the response mapping never populates it, so reading
+  // this off a fetched task still yields undefined (see ProjectTimeline).
+  // It exists here so updateTask can forward a caller-supplied value instead
+  // of hardcoding a placeholder.
+  startDate?: string;
   subtaskCount: number;
   projectName: string;
   estimate?: number;
   estimatedHours?: number | null;
   actualHours?: number | null;
-  archived?: boolean;
+  // Pinned to the generated contract rather than re-declared. ApiTask is
+  // hand-rolled and drifts from the wire (see apiTaskToTask on the numeric
+  // ids); swapping the whole interface for the generated Task is the Phase 3
+  // migration, but `archived` is the field this archive work turns on, so it
+  // tracks voxie directly - if the contract drops it or makes it required,
+  // this file stops compiling instead of silently disagreeing.
+  archived?: ContractTask['archived'];
   identifier?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -276,13 +290,24 @@ export interface ApiWorkspaceMember {
   joinedAt: string;
 }
 
+/**
+ * A member's role on a single project, backed by the `flow_project_members.role`
+ * enum. Distinct from the business-wide team role (`Member['role']` in flowStore),
+ * which is company scoped and says nothing about a given project.
+ *
+ * The enum is admin|member|viewer. onion still accepts "manager" as an input alias
+ * when writing a role, but never stores it and never returns it, so anything read
+ * back from the API is one of these three.
+ */
+export type FlowProjectRole = 'admin' | 'member' | 'viewer';
+
 export interface ApiProjectMember {
   id: string;
   projectId: string;
   userId: string;
   name: string;
   email: string;
-  role: 'manager' | 'member' | 'viewer';
+  role: FlowProjectRole;
   addedBy?: string;
   addedAt: string;
 }
@@ -545,17 +570,28 @@ export const flowApi = {
     estimatedHours?: number;
   }) => safe.post<{ task: ApiTask }>('/flow/task/v1/tasks', toTaskCreatePayload(data)),
 
+  // Partial update: a key the caller did not supply must stay omitted. Undefined
+  // keys are dropped before the request goes out, and onion leaves a column
+  // untouched when its param arrives NULL (COALESCE(?, col)). Substituting a
+  // placeholder is what previously overwrote every field the caller never
+  // touched, rewriting a task's title to "-" on a priority-only edit, so do not
+  // reintroduce `?? '-'` style defaults here.
+  //
+  // `archived` is load bearing in both directions: `false` is what un-archives a
+  // task so it must be sent as `false`, while `undefined` must stay omitted.
+  // Never collapse it to a truthiness check - flowApi.test pins both directions.
   updateTask: (id: string, data: Partial<ApiTask>) =>
     safe.put<{ message: string }>(`/flow/task/v1/tasks/${id}`, {
       body: {
-        title: data.title ?? '-',
-        description: data.description ?? '-',
-        status: data.status ?? 'todo',
-        priority: data.priority ?? 'medium',
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
         assignee_id: data.assigneeId ? Number(data.assigneeId) : undefined,
-        due_date: data.dueDate ?? '-',
-        start_date: '-',
-        labels: data.labels?.map((l) => Number(l)) ?? [0],
+        due_date: data.dueDate,
+        start_date: data.startDate,
+        labels: data.labels?.map((l) => Number(l)),
+        archived: data.archived,
       },
     }),
 
