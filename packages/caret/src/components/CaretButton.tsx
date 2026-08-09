@@ -9,7 +9,7 @@ interface CaretButtonProps {
 }
 
 const CaretButton = ({ className, 'data-tour': dataTour }: CaretButtonProps): React.JSX.Element => {
-  const { isOpen, toggle } = useCaretStore();
+  const toggle = useCaretStore((state) => state.toggle);
 
   return (
     <button
@@ -23,27 +23,23 @@ const CaretButton = ({ className, 'data-tour': dataTour }: CaretButtonProps): Re
         gap: '6px',
         height: '28px',
         padding: '0 12px',
-        borderRadius: '8px',
-        background: isOpen ? caretTokens.accentSoft : 'rgba(100, 197, 185, 0.1)',
-        border: `1px solid ${isOpen ? caretTokens.accentBorder : 'rgba(100, 197, 185, 0.22)'}`,
+        borderRadius: '4px',
+        background: caretTokens.accentSoft,
+        border: `1px solid ${caretTokens.accentBorder}`,
         color: caretTokens.accent,
         cursor: 'pointer',
         fontSize: '11px',
         fontWeight: 600,
-        boxShadow: isOpen ? `0 0 0 2px rgba(100, 197, 185, 0.1)` : 'none',
-        transition: 'background 0.15s, border-color 0.15s, box-shadow 0.15s',
+        boxShadow: 'none',
+        transition: 'background 0.15s, border-color 0.15s',
       }}
       onMouseEnter={(e) => {
         (e.currentTarget as HTMLButtonElement).style.background = caretTokens.accentSoft;
         (e.currentTarget as HTMLButtonElement).style.borderColor = caretTokens.accentBorder;
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.background = isOpen
-          ? caretTokens.accentSoft
-          : 'rgba(100, 197, 185, 0.1)';
-        (e.currentTarget as HTMLButtonElement).style.borderColor = isOpen
-          ? caretTokens.accentBorder
-          : 'rgba(100, 197, 185, 0.22)';
+        (e.currentTarget as HTMLButtonElement).style.background = caretTokens.accentSoft;
+        (e.currentTarget as HTMLButtonElement).style.borderColor = caretTokens.accentBorder;
       }}
     >
       <CaretLogo variant="teal" size={21} scale={1.18} />

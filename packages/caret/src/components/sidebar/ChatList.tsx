@@ -43,14 +43,44 @@ export const ChatList: React.FC<ChatListProps> = ({
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 8,
-        padding: 12,
-        borderBottom: `1px solid ${caretTokens.border}`,
+        gap: 9,
+        padding: '18px 14px 14px',
+        flex: 1,
+        minHeight: 0,
+        overflow: 'hidden',
+        boxSizing: 'border-box',
       }}
     >
+      <div style={{ margin: '0 2px 7px' }}>
+        <h2
+          style={{
+            margin: 0,
+            color: caretTokens.text,
+            fontSize: 15,
+            fontWeight: 650,
+            lineHeight: 1.4,
+          }}
+        >
+          History
+        </h2>
+        <p style={{ margin: '3px 0 0', color: caretTokens.textMuted, fontSize: 11.5 }}>
+          Open a past chat or start another.
+        </p>
+      </div>
       <NewChatButton onClick={onNew} />
       <ChatSearch value={query} onChange={setQuery} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <div
+        className="caret-chat-list-scroll"
+        style={{
+          display: 'flex',
+          flex: 1,
+          flexDirection: 'column',
+          gap: 2,
+          minHeight: 0,
+          overflowY: 'auto',
+          paddingRight: 2,
+        }}
+      >
         {filtered.length === 0 && (
           <p
             style={{

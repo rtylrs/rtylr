@@ -74,10 +74,30 @@ const APP_STARTERS: Record<string, CaretStarter[]> = {
     starter('What should sales do next?', 'agent'),
   ],
   dash: [
-    starter('What should I handle first today?', 'ask'),
-    starter('Which numbers need attention?', 'analyst'),
-    starter('Summarize the business right now', 'analyst'),
-    starter('What changed since yesterday?', 'analyst'),
+    starter(
+      'What should I handle first today?',
+      'ask',
+      'Find my priority',
+      'What matters most today.'
+    ),
+    starter(
+      'Which numbers need attention?',
+      'analyst',
+      'Spot the risks',
+      'Changes that deserve a closer look.'
+    ),
+    starter(
+      'Summarize the business right now',
+      'analyst',
+      'Give me a business brief',
+      'A concise read on the current state.'
+    ),
+    starter(
+      'What changed since yesterday?',
+      'analyst',
+      'Compare with yesterday',
+      'The changes worth knowing.'
+    ),
   ],
   erp: [
     starter('What needs attention in operations?', 'ask'),
@@ -327,8 +347,8 @@ function buildReadyBrief({
 }
 
 function buildComposerPlaceholder(page: string | null, appName: string): string {
-  if (isUsefulLabel(page)) return `Ask Caret about ${truncate(page, 34)}...`;
-  return `Ask Caret about ${appName}...`;
+  if (isUsefulLabel(page)) return 'Ask a question about this page…';
+  return `Ask Caret about ${appName}…`;
 }
 
 function firstSelectedLabel(selected: CaretPageContext['selected']): string | null {
@@ -383,7 +403,11 @@ function buildContextSignals({
 }): CaretContextSignal[] {
   const signals: CaretContextSignal[] = [];
   const role = cleanText(pageContext?.role);
-  const freshness = formatContextValue(pageContext?.dataFreshness);
+  const freshnessValue = pageContext?.dataFreshness;
+  const freshness =
+    freshnessValue !== null && typeof freshnessValue !== 'object'
+      ? formatContextValue(freshnessValue)
+      : null;
   const firstHint = cleanText(pageContext?.hints?.[0]);
   const filterCount = entryCount(pageContext?.filters);
   const memoryCount = entryCount(pageContext?.businessMemory);
@@ -662,7 +686,9 @@ export function buildCaretEmptyState({
     .slice(0, 4);
 
   return {
-    title: 'Ask Caret',
+    title: 'What should we work on?',
+    subtitle:
+      'Caret is ready with this screen’s context. Start with a quick brief or ask in your own words.',
     briefItems: buildReadyBrief({
       appKey,
       contextKey,

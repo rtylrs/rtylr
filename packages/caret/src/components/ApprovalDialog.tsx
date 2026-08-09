@@ -34,8 +34,8 @@ export const ApprovalDialog: React.FC<ApprovalDialogProps> = ({
       aria-label={`Approve ${toolName}`}
       style={{
         margin: '0 12px',
-        background: 'rgba(245, 158, 11, 0.08)',
-        border: `1px solid rgba(245,158,11,0.45)`,
+        background: caretTokens.warnSoft,
+        border: `1px solid ${caretTokens.warn}`,
         borderRadius: caretRadius.md,
         padding: 10,
       }}
@@ -67,7 +67,7 @@ export const ApprovalDialog: React.FC<ApprovalDialogProps> = ({
             style={{
               margin: '6px 0 0',
               padding: 6,
-              background: caretTokens.bg,
+              background: caretTokens.surfaceHigh,
               borderRadius: caretRadius.sm,
               fontSize: 11,
               color: caretTokens.textMuted,
@@ -103,7 +103,7 @@ export const ApprovalDialog: React.FC<ApprovalDialogProps> = ({
           style={{
             padding: '5px 10px',
             background: caretTokens.accent,
-            color: '#ffffff',
+            color: caretTokens.accentInk,
             border: 'none',
             borderRadius: caretRadius.sm,
             fontSize: 12,

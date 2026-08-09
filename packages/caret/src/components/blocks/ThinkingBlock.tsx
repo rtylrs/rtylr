@@ -21,8 +21,8 @@ export const ThinkingBlock: React.FC<ThinkingBlockProps> = ({
   return (
     <div
       style={{
-        background: 'rgba(99, 102, 241, 0.06)',
-        border: `1px solid ${caretTokens.thinking}33`,
+        background: caretTokens.accentSoft,
+        border: `1px solid ${caretTokens.accentBorder}`,
         borderRadius: caretRadius.md,
         padding: '6px 8px',
         margin: '4px 0',

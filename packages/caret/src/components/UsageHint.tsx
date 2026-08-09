@@ -15,7 +15,7 @@ export const UsageHint: React.FC<UsageHintProps> = ({ children }) => (
       gap: 6,
       padding: '4px 6px',
       borderRadius: caretRadius.sm,
-      background: 'rgba(255,255,255,0.03)',
+      background: caretTokens.surfaceHigh,
       color: caretTokens.textMuted,
       fontSize: 11.5,
       lineHeight: 1.45,

@@ -9,17 +9,20 @@ export interface ChatSearchProps {
 
 export const ChatSearch: React.FC<ChatSearchProps> = ({ value, onChange }) => (
   <div
+    className="caret-chat-search"
     style={{
       display: 'flex',
       alignItems: 'center',
       gap: 6,
-      padding: '6px 8px',
-      background: caretTokens.surface,
-      borderRadius: caretRadius.md,
-      border: `1px solid ${caretTokens.border}`,
+      minHeight: 36,
+      padding: '7px 10px',
+      background: caretTokens.surfaceHigh,
+      borderRadius: caretRadius.lg,
+      border: '1px solid transparent',
+      transition: 'border-color 0.14s ease, box-shadow 0.14s ease',
     }}
   >
-    <Search size={12} style={{ color: caretTokens.textDim }} />
+    <Search size={13} style={{ color: caretTokens.textDim }} />
     <input
       value={value}
       onChange={(e) => onChange(e.target.value)}

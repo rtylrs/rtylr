@@ -31,7 +31,12 @@ export const AttachButton: React.FC<AttachButtonProps> = ({ onFiles, accept }) =
         style={{ display: 'none' }}
       />
       <Tooltip label="Attach files">
-        <IconButton size="md" label="Attach files" onClick={() => ref.current?.click()}>
+        <IconButton
+          className="caret-composer-icon"
+          size="md"
+          label="Attach files"
+          onClick={() => ref.current?.click()}
+        >
           <Paperclip size={14} />
         </IconButton>
       </Tooltip>

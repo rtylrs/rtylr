@@ -1,6 +1,7 @@
 import React from 'react';
 import MessageBlocks from './MessageBlocks';
 import StreamingDot from './blocks/StreamingDot';
+import { caretTokens } from '../ui/tokens';
 import type { CaretMessage as CaretMessageType } from '../stores/caretStore';
 import type { ContentBlock } from '../types/message';
 
@@ -43,10 +44,10 @@ const CaretMessage = ({ message, isStreaming = false }: CaretMessageProps): Reac
         style={{
           maxWidth: '80%',
           padding: '10px 14px',
-          borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-          background: isUser ? 'var(--caret-accent, #64c5b9)' : 'var(--caret-card, #1e1e1e)',
-          color: '#ffffff',
-          border: isUser ? 'none' : '1px solid var(--caret-border, #2a2a2a)',
+          borderRadius: 4,
+          background: isUser ? caretTokens.surfaceHigh : 'transparent',
+          color: caretTokens.text,
+          border: isUser ? `1px solid ${caretTokens.border}` : 'none',
           fontSize: '14px',
           lineHeight: '1.6',
           whiteSpace: 'pre-wrap',

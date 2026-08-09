@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare, Trash2, Pin, PinOff } from 'lucide-react';
+import { Trash2, Pin, PinOff } from 'lucide-react';
 import { caretTokens, caretRadius } from '../../ui/tokens';
 import IconButton from '../../ui/IconButton';
 import type { CaretChatSummary } from '../../types/chat';
@@ -21,37 +21,51 @@ export const ChatListItem: React.FC<ChatListItemProps> = ({
 }) => {
   return (
     <div
-      className="caret-chat-row"
-      onClick={() => onSelect(chat.id)}
+      className={active ? 'caret-chat-row is-active' : 'caret-chat-row'}
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 8,
-        padding: '6px 8px',
+        minHeight: 36,
+        padding: '0 4px 0 0',
         borderRadius: caretRadius.sm,
-        background: active ? caretTokens.accentSoft : 'transparent',
+        background: active ? caretTokens.surfaceHigh : 'transparent',
         color: active ? caretTokens.text : caretTokens.textMuted,
-        cursor: 'pointer',
         position: 'relative',
       }}
     >
-      <MessageSquare size={13} style={{ flexShrink: 0 }} />
-      <span
+      <button
+        type="button"
+        onClick={() => onSelect(chat.id)}
         style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0,
           flex: 1,
-          fontSize: 13,
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
+          minWidth: 0,
+          minHeight: 36,
+          padding: '7px 6px 7px 10px',
+          background: 'transparent',
+          border: 'none',
+          borderRadius: caretRadius.sm,
+          color: 'inherit',
+          cursor: 'pointer',
+          textAlign: 'left',
         }}
       >
-        {chat.title || 'New chat'}
-      </span>
-      <div
-        className="caret-chat-actions"
-        onClick={(e) => e.stopPropagation()}
-        style={{ display: 'flex', gap: 2 }}
-      >
+        <span
+          style={{
+            flex: 1,
+            minWidth: 0,
+            fontSize: 13,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {chat.title || 'New chat'}
+        </span>
+      </button>
+      <div className="caret-chat-actions" style={{ display: 'flex', gap: 2 }}>
         {onTogglePin && (
           <IconButton
             size="sm"

@@ -52,6 +52,7 @@ describe('useSpeechToText', () => {
       });
     });
     expect(result.current.transcript).toBe('');
+    expect(result.current.interimTranscript).toBe('sub');
 
     act(() => {
       recognition?.onresult?.({
@@ -62,6 +63,7 @@ describe('useSpeechToText', () => {
       });
     });
     expect(result.current.transcript).toBe('sub ');
+    expect(result.current.interimTranscript).toBe('sub');
 
     act(() => {
       recognition?.onresult?.({
@@ -72,5 +74,6 @@ describe('useSpeechToText', () => {
       });
     });
     expect(result.current.transcript).toBe('sub again');
+    expect(result.current.interimTranscript).toBe('');
   });
 });

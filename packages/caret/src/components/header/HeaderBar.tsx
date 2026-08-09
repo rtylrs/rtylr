@@ -1,74 +1,67 @@
 import React from 'react';
-import { Settings, X, Plus } from 'lucide-react';
+import { ArrowLeft, Settings, SquarePen, X } from 'lucide-react';
 import { caretTokens } from '../../ui/tokens';
 import IconButton from '../../ui/IconButton';
 import Tooltip from '../../ui/Tooltip';
 import { useCaretStore } from '../../stores/caretStore';
 import { useCaretUIStore } from '../../stores/uiStore';
-import CaretLogo from '../CaretLogo';
 import HistoryHover from './HistoryHover';
 
 export interface HeaderBarProps {
   onNewChat?: () => void;
-  onSelectChat?: (id: string) => void;
-  onDeleteChat?: (id: string) => void | Promise<void>;
 }
 
-export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat, onSelectChat, onDeleteChat }) => {
+export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat }) => {
   const close = useCaretStore((s) => s.close);
   const view = useCaretUIStore((s) => s.view);
   const setView = useCaretUIStore((s) => s.setView);
 
   return (
     <div
+      className="caret-header-bar"
       style={{
         height: 44,
         display: 'flex',
         alignItems: 'center',
         gap: 4,
-        padding: '0 8px',
-        borderBottom: `1px solid ${caretTokens.border}`,
+        padding: '0 10px',
+        background: caretTokens.bg,
         flexShrink: 0,
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          padding: '0 4px',
-        }}
-      >
-        <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <CaretLogo variant="teal" size={20} />
-        </span>
-        <span style={{ color: caretTokens.text, fontSize: 13, fontWeight: 600 }}>Caret</span>
-      </div>
+      {view === 'chat' ? (
+        onNewChat && (
+          <Tooltip label="New chat">
+            <IconButton
+              className="caret-chrome-button"
+              size="md"
+              label="New chat"
+              onClick={onNewChat}
+            >
+              <SquarePen size={15} />
+            </IconButton>
+          </Tooltip>
+        )
+      ) : (
+        <Tooltip label="Back to chat">
+          <IconButton
+            className="caret-chrome-button"
+            size="md"
+            label="Back to chat"
+            onClick={() => setView('chat')}
+          >
+            <ArrowLeft size={15} />
+          </IconButton>
+        </Tooltip>
+      )}
 
       <span style={{ flex: 1 }} />
 
-      <Tooltip label="Chat">
-        <IconButton
-          size="md"
-          label="Chat"
-          active={view === 'chat'}
-          onClick={() => setView('chat')}
-          style={{ background: 'transparent' }}
-        >
-          <CaretLogo variant="teal" size={16} />
-        </IconButton>
-      </Tooltip>
-
-      <HistoryHover onSelectChat={onSelectChat} onDeleteChat={onDeleteChat} />
+      <HistoryHover />
 
       <Tooltip label="Settings">
         <IconButton
+          className="caret-chrome-button"
           size="md"
           label="Settings"
           active={view === 'settings'}
@@ -78,17 +71,9 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({ onNewChat, onSelectChat, o
         </IconButton>
       </Tooltip>
 
-      {onNewChat && (
-        <Tooltip label="New chat">
-          <IconButton size="md" label="New chat" onClick={onNewChat}>
-            <Plus size={13} />
-          </IconButton>
-        </Tooltip>
-      )}
-
       <Tooltip label="Close">
-        <IconButton size="md" label="Close Caret" onClick={close}>
-          <X size={13} />
+        <IconButton className="caret-chrome-button" size="md" label="Close Caret" onClick={close}>
+          <X size={15} />
         </IconButton>
       </Tooltip>
     </div>

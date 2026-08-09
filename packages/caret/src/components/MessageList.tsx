@@ -7,6 +7,7 @@ import type { CaretMessage } from '../types/message';
 export interface MessageListProps {
   messages: CaretMessage[];
   isStreaming: boolean;
+  scrollKey?: string;
   showThinking?: boolean;
   onApproveTool?: (id: string) => void;
   onDenyTool?: (id: string) => void;
@@ -17,16 +18,18 @@ export interface MessageListProps {
 export const MessageList: React.FC<MessageListProps> = ({
   messages,
   isStreaming,
+  scrollKey,
   showThinking,
   onApproveTool,
   onDenyTool,
   followUps = [],
   onFollowUp,
 }) => {
-  const scrollRef = useScrollToBottom<HTMLDivElement>([messages.length, isStreaming]);
+  const scrollRef = useScrollToBottom<HTMLDivElement>([messages.length, isStreaming], scrollKey);
 
   return (
     <div
+      className="caret-message-list"
       ref={scrollRef}
       style={{
         flex: 1,
