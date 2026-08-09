@@ -7,7 +7,7 @@ export const inventoryReport: Tool = {
   inputSchema: { type: 'object', properties: {} },
   handler: async (_input, api) => {
     try {
-      const res = await api.get('/erp/inventory/report');
+      const res = await api.get('/api/erp/inventory/v1/report');
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -21,7 +21,7 @@ export const listPriceLists: Tool = {
   inputSchema: { type: 'object', properties: {} },
   handler: async (_input, api) => {
     try {
-      const res = await api.get('/erp/price-lists');
+      const res = await api.get('/api/erp/price-list/v1/price-lists');
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -43,7 +43,7 @@ export const createPriceList: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.post('/erp/price-lists', input);
+      const res = await api.post('/api/erp/price-list/v1/price-lists', input);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -64,7 +64,7 @@ export const listStockTransfers: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/erp/transfers${qs(input, ['status', 'limit', 'offset'])}`);
+      const res = await api.get(`/api/erp/stock-transfer/v1/stock-transfers${qs(input, ['status', 'limit', 'offset'])}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -85,7 +85,7 @@ export const listStockTakes: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/erp/stock-takes${qs(input, ['status', 'limit', 'offset'])}`);
+      const res = await api.get(`/api/erp/stock-take/v1/stock-takes${qs(input, ['status', 'limit', 'offset'])}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

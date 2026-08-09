@@ -1,42 +1,72 @@
 #!/usr/bin/env node
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { createServer as createHttpServer } from 'node:http';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 
 import { ALL_TOOLS } from './tools/index.js';
+import { jsonSchemaToZodShape } from './tools/types.js';
 import { createClient } from './client.js';
 
-const server = new Server(
-  { name: 'rtylr-mcp', version: '0.1.0' },
-  { capabilities: { tools: {} } }
-);
+export function createRtylrMcpServer(): McpServer {
+  const server = new McpServer(
+    { name: 'rtylr-mcp', version: '0.1.0' }
+  );
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: ALL_TOOLS.map(({ handler: _h, ...tool }) => tool),
-}));
+  const api = createClient();
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const tool = ALL_TOOLS.find((t) => t.name === request.params.name);
-
-  if (!tool) {
-    return {
-      content: [{ type: 'text', text: `Unknown tool: ${request.params.name}` }],
-      isError: true,
-    };
+  for (const tool of ALL_TOOLS) {
+    server.registerTool(
+      tool.name,
+      {
+        description: tool.description,
+        inputSchema: jsonSchemaToZodShape(tool.inputSchema) as any,
+      },
+      (async (args: Record<string, unknown>) => {
+        return tool.handler((args ?? {}) as Record<string, unknown>, api);
+      }) as any
+    );
   }
 
-  const input = (request.params.arguments ?? {}) as Record<string, unknown>;
-  const api = createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return tool.handler(input, api) as any;
-});
+  return server;
+}
 
 async function main(): Promise<void> {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+  const args = process.argv.slice(2);
+  const portArg = args.find((a) => a.startsWith('--port='));
+  const isPortFlag = args.includes('--port');
+  const isHttp = args.includes('--http') || !!portArg || isPortFlag;
+
+  const server = createRtylrMcpServer();
+
+  if (isHttp) {
+    let port = 3000;
+    if (portArg) {
+      port = parseInt(portArg.split('=')[1], 10) || 3000;
+    } else if (isPortFlag) {
+      const idx = args.indexOf('--port');
+      if (idx !== -1 && args[idx + 1]) {
+        port = parseInt(args[idx + 1], 10) || 3000;
+      }
+    }
+
+    const transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: undefined, // Stateless mode per MCP 2.0 (2026-07-28 spec)
+    });
+
+    await server.connect(transport);
+
+    const httpServer = createHttpServer((req, res) => {
+      transport.handleRequest(req, res);
+    });
+
+    httpServer.listen(port, () => {
+      process.stderr.write(`rtylr-mcp HTTP server listening statelessly on http://localhost:${port}/mcp\n`);
+    });
+  } else {
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+  }
 }
 
 main().catch((err) => {

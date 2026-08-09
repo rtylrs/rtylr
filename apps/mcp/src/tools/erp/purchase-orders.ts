@@ -1,6 +1,7 @@
 import type { Tool } from '../types.js';
 import { ok, apiErr, qs } from '../types.js';
 
+const PO_BASE = '/api/erp/purchase-order/v1/purchase-orders';
 const STATUS_ENUM = ['draft', 'sent', 'approved', 'partial', 'received', 'cancelled'];
 
 export const listPurchaseOrders: Tool = {
@@ -17,7 +18,7 @@ export const listPurchaseOrders: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/erp/purchase-orders${qs(input, ['status', 'supplier_id', 'limit', 'offset'])}`);
+      const res = await api.get(`${PO_BASE}${qs(input, ['status', 'supplier_id', 'limit', 'offset'])}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -37,7 +38,7 @@ export const getPurchaseOrder: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/erp/purchase-orders/${input.po_id}`);
+      const res = await api.get(`${PO_BASE}/${input.po_id}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -64,7 +65,7 @@ export const createPurchaseOrder: Tool = {
       if (typeof input.items === 'string') {
         try { body.items = JSON.parse(input.items as string); } catch { body.items = []; }
       }
-      const res = await api.post('/erp/purchase-orders', body);
+      const res = await api.post(PO_BASE, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -84,7 +85,7 @@ export const approvePurchaseOrder: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.post(`/erp/purchase-orders/${input.po_id}/approve`, {});
+      const res = await api.post(`${PO_BASE}/${input.po_id}/approve`, {});
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

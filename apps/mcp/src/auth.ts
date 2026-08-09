@@ -106,6 +106,7 @@ function waitForCallback(port: number, expectedState: string, onReady: () => Pro
       const code = url.searchParams.get('code');
       const state = url.searchParams.get('state');
       const error = url.searchParams.get('error');
+      const iss = url.searchParams.get('iss');
 
       if (error) {
         res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -129,6 +130,27 @@ function waitForCallback(port: number, expectedState: string, onReady: () => Pro
         server.close();
         reject(new Error('State mismatch'));
         return;
+      }
+
+      // RFC 9207: Validate issuer parameter if present
+      if (iss) {
+        let isValid = iss === 'rtylr';
+        if (!isValid) {
+          try {
+            const expectedIss = new URL(API_BASE).origin;
+            const actualIss = new URL(iss).origin;
+            isValid = expectedIss === actualIss;
+          } catch {
+            isValid = false;
+          }
+        }
+        if (!isValid) {
+          res.writeHead(400, { 'Content-Type': 'text/html' });
+          res.end(callbackHTML('Issuer mismatch — potential authorization mix-up attack.', false));
+          server.close();
+          reject(new Error(`RFC 9207 issuer mismatch: got ${iss}`));
+          return;
+        }
       }
 
       res.writeHead(200, { 'Content-Type': 'text/html' });

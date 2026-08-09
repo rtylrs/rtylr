@@ -1,6 +1,8 @@
 import type { Tool } from '../types.js';
 import { ok, apiErr, qs } from '../types.js';
 
+const productsBase = '/api/erp/product/v1/products';
+
 export const listProducts: Tool = {
   name: 'erp_list_products',
   description: 'List ERP products / inventory items.',
@@ -15,7 +17,7 @@ export const listProducts: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/erp/products${qs(input, ['search', 'category_id', 'limit', 'offset'])}`);
+      const res = await api.get(`${productsBase}${qs(input, ['search', 'category_id', 'limit', 'offset'])}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -35,7 +37,7 @@ export const getProduct: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/erp/products/${input.product_id}`);
+      const res = await api.get(`${productsBase}/${input.product_id}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -55,7 +57,7 @@ export const getProductByBarcode: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/erp/products/barcode/${input.barcode}`);
+      const res = await api.get(`${productsBase}/barcode/${input.barcode}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -81,7 +83,7 @@ export const createProduct: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.post('/erp/products', input);
+      const res = await api.post(productsBase, input);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -107,7 +109,7 @@ export const updateProduct: Tool = {
   handler: async (input, api) => {
     try {
       const { product_id, ...body } = input;
-      const res = await api.put(`/erp/products/${product_id}`, body);
+      const res = await api.put(`${productsBase}/${product_id}`, { body });
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -127,7 +129,7 @@ export const deleteProduct: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.delete(`/erp/products/${input.product_id}`);
+      const res = await api.delete(`${productsBase}/${input.product_id}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
