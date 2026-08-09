@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Building2, Check, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ArrowRightLeft, Building2, Check, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
 import { setCookie, removeCookie, getDefaultCookieDomain } from '@voxire/auth';
+import { cn } from '../../../../../shared/lib/utils';
 import {
   Button,
   Card,
@@ -56,6 +57,7 @@ const Businesses: React.FC = () => {
 
   const businesses = data?.businesses ?? [];
   const currentBusinessId = Number(user?.businessId ?? 0);
+  const currentBusiness = businesses.find((business) => business.id === currentBusinessId);
   const ownedBusinesses = businesses.filter((business) => business.isOwned !== false);
   const activeOwnedBusinesses = ownedBusinesses.filter((business) => business.isActive !== false);
   const isTrialMode = subscription?.status === 'trial' || billing?.status === 'trial';
@@ -71,6 +73,30 @@ const Businesses: React.FC = () => {
   const [renameTarget, setRenameTarget] = useState<OwnedBusiness | null>(null);
   const [renameName, setRenameName] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<OwnedBusiness | null>(null);
+  const [switchingId, setSwitchingId] = useState<number | null>(null);
+
+  const handleSwitch = (business: OwnedBusiness, event?: React.MouseEvent): void => {
+    event?.stopPropagation();
+    if (business.id === currentBusinessId || switchBusiness.isPending) return;
+
+    setSwitchingId(business.id);
+    switchBusiness.mutate(business.id, {
+      onSuccess: ({ token }) => {
+        removeCookie('token');
+        setCookie('token', token, {
+          days: 30,
+          sameSite: 'lax',
+          domain: getDefaultCookieDomain(),
+        });
+        toast.success(t('businesses.switchSuccess', { name: business.name }));
+        window.location.reload();
+      },
+      onError: (error) => {
+        setSwitchingId(null);
+        toast.error(errorMessage(error, t('businesses.switchError')));
+      },
+    });
+  };
 
   const closeCreate = (open: boolean): void => {
     setCreateOpen(open);
@@ -175,124 +201,182 @@ const Businesses: React.FC = () => {
   return (
     <>
       <HelmetContainer title={`${t('businesses.manageTitle')} · rtylr`} />
-      <div className="max-w-3xl space-y-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
-              {t('businesses.manageTitle')}
-            </h1>
-            <p className="mt-0.5 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-              {t('businesses.manageDescription')}
-            </p>
+      <div className="w-full max-w-6xl space-y-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3.5">
+            <div
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+              style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+            >
+              <Building2 size={22} />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight" style={{ color: 'var(--dash-text)' }}>
+                {t('businesses.manageTitle')}
+              </h1>
+              <p className="mt-0.5 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+                {t('businesses.manageDescription')}
+              </p>
+            </div>
           </div>
           <Button
+            className="shrink-0 cursor-pointer gap-2 self-start sm:self-auto"
             onClick={() => setCreateOpen(true)}
             disabled={isTrialMode || !parentBusinessId}
             title={isTrialMode ? t('businesses.trialSingleBusinessTooltip') : undefined}
           >
-            <Plus size={15} />
+            <Plus size={16} />
             {t('businesses.addBusiness')}
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('businesses.manageCardTitle')}</CardTitle>
-            <CardDescription>{t('businesses.manageCardDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2
-                  size={20}
-                  className="animate-spin"
-                  style={{ color: 'var(--dash-text-dim)' }}
-                />
-              </div>
-            ) : businesses.length === 0 ? (
-              <div
-                className="rounded-lg border border-dashed px-4 py-10 text-center"
-                style={{ borderColor: 'var(--dash-border)' }}
-              >
-                <Building2
-                  size={24}
-                  className="mx-auto mb-2"
-                  style={{ color: 'var(--dash-text-dim)' }}
-                />
-                <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-                  {t('businesses.noBusinesses')}
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y" style={{ borderColor: 'var(--dash-border)' }}>
-                {businesses.map((business) => {
+        <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+          <Card className="overflow-hidden">
+            <CardHeader
+              className="border-b px-6 py-5"
+              style={{ borderColor: 'var(--dash-border)' }}
+            >
+              <CardTitle className="text-base font-semibold">{t('businesses.manageCardTitle')}</CardTitle>
+              <CardDescription>{t('businesses.manageCardDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 p-4 sm:p-6">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2
+                    size={20}
+                    className="animate-spin"
+                    style={{ color: 'var(--dash-text-dim)' }}
+                  />
+                </div>
+              ) : businesses.length === 0 ? (
+                <div
+                  className="rounded-xl border border-dashed px-4 py-10 text-center"
+                  style={{ borderColor: 'var(--dash-border)' }}
+                >
+                  <Building2
+                    size={24}
+                    className="mx-auto mb-2"
+                    style={{ color: 'var(--dash-text-dim)' }}
+                  />
+                  <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+                    {t('businesses.noBusinesses')}
+                  </p>
+                </div>
+              ) : (
+                businesses.map((business) => {
                   const isCurrent = business.id === currentBusinessId;
                   const isOwned = business.isOwned !== false;
+                  const isSwitching = switchingId === business.id;
                   const isDeleteDisabled =
-                    !isOwned || !canDeleteBusiness || deleteBusiness.isPending;
+                    !isOwned || !canDeleteBusiness || deleteBusiness.isPending || switchBusiness.isPending;
 
                   return (
                     <div
                       key={business.id}
-                      className="flex items-center gap-3 py-4 first:pt-0 last:pb-0"
+                      onClick={(e) => {
+                        if (!isCurrent) handleSwitch(business, e);
+                      }}
+                      className={cn(
+                        'group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border p-4 transition-all duration-150',
+                        !isCurrent &&
+                          'cursor-pointer hover:border-[var(--dash-border-hover)] hover:bg-[var(--dash-hover)]'
+                      )}
+                      style={{
+                        background: isCurrent ? 'rgba(69,131,196,0.05)' : undefined,
+                        borderColor: isCurrent ? 'rgba(69,131,196,0.35)' : 'var(--dash-border)',
+                      }}
                     >
-                      <div
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-                        style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
-                      >
-                        <Building2 size={18} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p
-                            className="truncate text-sm font-semibold"
-                            style={{ color: 'var(--dash-text)' }}
-                          >
-                            {business.name}
-                          </p>
-                          {isCurrent && (
-                            <span
-                              className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
-                              style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
-                            >
-                              <Check size={10} />
-                              {t('businesses.current')}
-                            </span>
-                          )}
-                          {!isOwned && (
-                            <span
-                              className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                              style={{
-                                background: 'var(--dash-hover)',
-                                color: 'var(--dash-text-dim)',
-                              }}
-                            >
-                              {t('businesses.teamAccess')}
-                            </span>
-                          )}
+                      <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
+                        <div
+                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105"
+                          style={{
+                            background: isCurrent ? 'rgba(69,131,196,0.14)' : 'var(--dash-hover)',
+                            color: isCurrent ? '#4583C4' : 'var(--dash-text-muted)',
+                          }}
+                        >
+                          <Building2 size={20} />
                         </div>
-                        <p className="mt-0.5 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-                          {isOwned
-                            ? t('businesses.ownerAccess')
-                            : t('businesses.teamAccessDescription')}
-                        </p>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p
+                              className="truncate text-base font-semibold"
+                              style={{ color: 'var(--dash-text)' }}
+                            >
+                              {business.name}
+                            </p>
+                            {isCurrent && (
+                              <span
+                                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                                style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                              >
+                                <Check size={12} />
+                                {t('businesses.current')}
+                              </span>
+                            )}
+                            {!isOwned && (
+                              <span
+                                className="rounded-full px-2.5 py-0.5 text-xs font-medium"
+                                style={{
+                                  background: 'var(--dash-hover)',
+                                  color: 'var(--dash-text-dim)',
+                                }}
+                              >
+                                {t('businesses.teamAccess')}
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                            {isOwned
+                              ? t('businesses.ownerAccess')
+                              : t('businesses.teamAccessDescription')}
+                          </p>
+                        </div>
                       </div>
-                      {isOwned && (
-                        <div className="flex shrink-0 items-center gap-1">
+
+                      <div className="flex shrink-0 items-center gap-2 self-end sm:self-auto">
+                        {!isCurrent && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8.5 gap-1.5 cursor-pointer px-3 text-xs font-medium border-blue-500/20 hover:border-blue-500/40 hover:bg-blue-500/10 hover:text-[#4583C4]"
+                            disabled={switchBusiness.isPending}
+                            onClick={(e) => handleSwitch(business, e)}
+                          >
+                            {isSwitching ? (
+                              <Loader2 size={13} className="animate-spin" />
+                            ) : (
+                              <ArrowRightLeft size={13} />
+                            )}
+                            <span>{isSwitching ? t('businesses.switching') : t('businesses.switch')}</span>
+                          </Button>
+                        )}
+
+                        {isOwned && (
                           <Button
                             variant="ghost"
-                            size="icon"
-                            onClick={() => openRename(business)}
+                            size="sm"
+                            className="h-8.5 cursor-pointer px-2.5 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openRename(business);
+                            }}
                             aria-label={`${t('businesses.rename')} ${business.name}`}
-                            title={t('businesses.rename')}
                             style={{ color: 'var(--dash-text-muted)' }}
                           >
-                            <Pencil size={15} />
+                            <Pencil size={13} />
+                            <span>{t('businesses.rename')}</span>
                           </Button>
+                        )}
+
+                        {isOwned && (
                           <Button
                             variant="ghost"
-                            size="icon"
-                            onClick={() => setDeleteTarget(business)}
+                            size="sm"
+                            className="h-8.5 cursor-pointer px-2.5 text-xs hover:bg-red-500/10"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteTarget(business);
+                            }}
                             disabled={isDeleteDisabled}
                             aria-label={`${t('businesses.delete')} ${business.name}`}
                             title={
@@ -302,21 +386,61 @@ const Businesses: React.FC = () => {
                             }
                             style={{ color: '#ef4444' }}
                           >
-                            <Trash2 size={15} />
+                            <Trash2 size={13} />
+                            <span>{t('businesses.delete')}</span>
                           </Button>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                })
+              )}
+            </CardContent>
+          </Card>
 
-        <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-          {t('businesses.manageNote')}
-        </p>
+          <div className="space-y-5">
+            <Card className="overflow-hidden">
+              <div
+                className="p-5"
+                style={{
+                  background:
+                    'linear-gradient(145deg, rgba(69,131,196,0.15), rgba(69,131,196,0.03))',
+                  borderBottom: '1px solid var(--dash-border)',
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-widest"
+                    style={{ color: '#4583C4' }}
+                  >
+                    {t('businesses.current')}
+                  </span>
+                  <span className="flex h-2 w-2 rounded-full bg-[#4583C4]" />
+                </div>
+                <p
+                  className="mt-2.5 truncate text-lg font-bold"
+                  style={{ color: 'var(--dash-text)' }}
+                >
+                  {currentBusiness?.name ?? user?.businessName ?? t('businesses.myBusinesses')}
+                </p>
+                <div
+                  className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium"
+                  style={{ color: 'var(--dash-text-muted)' }}
+                >
+                  <Check size={13} style={{ color: '#4583C4' }} />
+                  {currentBusiness?.isOwned === false
+                    ? t('businesses.teamAccess')
+                    : t('businesses.ownerAccess')}
+                </div>
+              </div>
+              <CardContent className="p-5">
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--dash-text-dim)' }}>
+                  {t('businesses.manageNote')}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
 
       <Dialog open={createOpen} onOpenChange={closeCreate}>
