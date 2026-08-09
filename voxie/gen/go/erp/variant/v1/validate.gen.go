@@ -25,6 +25,15 @@ func (m *Variant) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if m.ProductId <= 0 {
+		violations = append(violations, "product_id must be greater than 0")
+	}
+	if m.Name == "" {
+		violations = append(violations, "name is required")
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

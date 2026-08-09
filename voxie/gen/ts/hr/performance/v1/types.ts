@@ -53,7 +53,7 @@ return violations;
 }
 
 export interface PerformanceReviewPayload {
-id?: string;
+id: string;
 ownerId?: string;
 employeeId?: string;
 reviewCycleId?: string;
@@ -104,11 +104,13 @@ return out;
 
 export function validatePerformanceReviewPayload(v: PerformanceReviewPayload): string[] {
 const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
 
 export interface ReviewCyclePayload {
-id?: string;
+id: string;
 ownerId?: string;
 name?: string;
 type?: string;
@@ -150,6 +152,8 @@ return out;
 
 export function validateReviewCyclePayload(v: ReviewCyclePayload): string[] {
 const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
 

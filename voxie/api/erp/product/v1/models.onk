@@ -1,7 +1,7 @@
 package erp.product.v1
 
 message Product {
-  id: int64
+  id: int64 @required @gt(0)
   owner_id: int64
   category_id: int64
   supplier_id: int64

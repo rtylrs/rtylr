@@ -31,7 +31,7 @@ message LeaveTypePayload {
 /// LeaveRequestPayload is a single employee's request for time off.
 message LeaveRequestPayload {
   /// Unique identifier for the leave request.
-  id: int64
+  id: int64 @required @gt(0)
   /// Tenant owner this request belongs to.
   owner_id: int64
   /// Employee who is requesting leave.

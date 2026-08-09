@@ -36,6 +36,9 @@ func (m *LeaveRequestPayload) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
