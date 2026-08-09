@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/go-sql-driver/mysql"
+
 	"github.com/voxire/onion/internal/modules/benefits/internal/domain"
 	"github.com/voxire/onion/internal/modules/benefits/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
