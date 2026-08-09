@@ -5,7 +5,7 @@ email: string;
 fullName: string;
 role: string;
 apps?: (string)[];
-password: string;
+password?: string;
 }
 
 export function decodeInviteUserRequest(v: any): InviteUserRequest {
@@ -36,7 +36,6 @@ if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.t
 if (!(v.fullName !== undefined && v.fullName !== null) || v.fullName === "") violations.push("full_name is required");
 if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
 if (v.apps !== undefined && v.apps !== null && v.apps.length < 1) violations.push("apps must contain at least 1 items");
-if (!(v.password !== undefined && v.password !== null) || v.password === "") violations.push("password is required");
 return violations;
 }
 

@@ -5,8 +5,8 @@ message InviteUserRequest {
   full_name: string @required
   role: string @required
   apps: string[] @min_items(1)
-  /// User-provided secret for authentication.
-  password: string @required
+  /// Optional user-provided secret; omit it to send an invitation link.
+  password: string?
 }
 
 message InviteUserResponse {

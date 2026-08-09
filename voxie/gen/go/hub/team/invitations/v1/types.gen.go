@@ -11,7 +11,7 @@ type InviteUserRequest struct {
 	FullName string   `json:"full_name,omitempty"`
 	Role     string   `json:"role,omitempty"`
 	Apps     []string `json:"apps,omitempty"`
-	Password string   `json:"password,omitempty"`
+	Password *string  `json:"password,omitempty"`
 }
 
 func (x *InviteUserRequest) GetEmail() string {
@@ -51,7 +51,11 @@ func (x *InviteUserRequest) GetPassword() string {
 		var zero string
 		return zero
 	}
-	return x.Password
+	if x.Password == nil {
+		var zero string
+		return zero
+	}
+	return *x.Password
 }
 
 type InviteUserResponse struct {

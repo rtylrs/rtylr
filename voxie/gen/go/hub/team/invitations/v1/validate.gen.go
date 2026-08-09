@@ -40,9 +40,6 @@ func (m *InviteUserRequest) Validate() error {
 	if len(m.Apps) < 1 {
 		violations = append(violations, "apps must have at least 1 items")
 	}
-	if m.Password == "" {
-		violations = append(violations, "password is required")
-	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
