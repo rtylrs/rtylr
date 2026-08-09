@@ -30,6 +30,11 @@ export function useTaskRealtime(taskId: string | undefined): void {
       if (e.type.startsWith('task.')) {
         qc.invalidateQueries({ queryKey: ['task', taskId] });
         qc.invalidateQueries({ queryKey: ['tasks'] });
+        // Distinct key from `tasks`, so it needs its own call. Matters most
+        // when the edit reassigns this task away from the current user: the
+        // detail screen refreshes, but My tasks and Today would keep listing
+        // it as theirs until the cache expires.
+        qc.invalidateQueries({ queryKey: ['my-tasks'] });
         qc.invalidateQueries({ queryKey: ['task-activity', taskId] });
       }
       if (e.type.startsWith('comment.')) {
