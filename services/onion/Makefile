@@ -11,6 +11,7 @@ build:
 
 # Build all service binaries
 build-all:
+	./scripts/check-voxie-ref.sh
 	@echo "Building API binary..."
 	@mkdir -p ./bin
 	@VERSION=$$(git describe --tags --always --dirty 2>/dev/null || echo "dev"); \

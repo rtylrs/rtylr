@@ -39,6 +39,9 @@ jobs:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
 
+      - name: Verify Voxie contract ref
+        run: ./scripts/check-voxie-ref.sh
+
       - name: SQL keyword case
         run: ./scripts/check_sql_case.sh
 
@@ -107,6 +110,9 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Verify Voxie contract ref
+        run: ./scripts/check-voxie-ref.sh
 
       - name: Setup Go
         uses: actions/setup-go@v6

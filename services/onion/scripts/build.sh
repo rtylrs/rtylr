@@ -6,6 +6,10 @@ for dir in ./db/dbmodels/*/; do
  find "$dir" -type f ! -name 'queries.go' ! -name 'utils.go' ! -name 'queries_input.go' -delete
 done
 
+# The generated Voxie module is a pinned submodule. A stale pointer must fail
+# the normal build before Go compiles against an older contract.
+./scripts/check-voxie-ref.sh
+
 # Check sql case
 ./scripts/check_sql_case.sh
 
