@@ -25,8 +25,9 @@ Shared frontend packages for the voxire platform. Used as a git submodule in `vo
 
 `voxie/` is a nested git submodule pointing at the generated contract source.
 Edit and regenerate contracts in the Voxie repository; update this repository
-with a submodule pointer only. Do not copy contract or generated files into
-this repository.
+with a submodule pointer only. The pointer may intentionally refer to an older
+Voxie commit; consumers do not have to follow Voxie main immediately. Do not
+copy contract or generated files into this repository.
 
 ## Usage
 

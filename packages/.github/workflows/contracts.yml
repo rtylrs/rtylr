@@ -18,7 +18,7 @@ jobs:
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
 
-      - name: Verify Voxie points at main
+      - name: Verify Voxie submodule
         run: ./scripts/check-voxie-ref.sh
 
       - name: Setup pnpm
