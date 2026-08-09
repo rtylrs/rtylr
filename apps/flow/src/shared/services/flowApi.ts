@@ -65,6 +65,12 @@ export interface ApiTask {
   assigneeId?: string;
   assigneeInitials: string;
   dueDate: string;
+  // Write path only for now. The wire carries start_date on both Task and
+  // UpdateTaskBody, but the response mapping never populates it, so reading
+  // this off a fetched task still yields undefined (see ProjectTimeline).
+  // It exists here so updateTask can forward a caller-supplied value instead
+  // of hardcoding a placeholder.
+  startDate?: string;
   subtaskCount: number;
   projectName: string;
   estimate?: number;
@@ -564,27 +570,27 @@ export const flowApi = {
     estimatedHours?: number;
   }) => safe.post<{ task: ApiTask }>('/flow/task/v1/tasks', toTaskCreatePayload(data)),
 
-  // `archived` is now part of the wire contract (UpdateTaskBody.archived in
-  // voxie flow/task/v1). It is omitempty, so the distinction below is load
-  // bearing: `false` must be sent as `false` because that is what un-archives
-  // a task, while `undefined` must stay omitted so a partial update doesn't
-  // touch the column. Never collapse this to a truthiness check - flowApi.test
-  // pins both directions.
+  // Partial update: a key the caller did not supply must stay omitted. Undefined
+  // keys are dropped before the request goes out, and onion leaves a column
+  // untouched when its param arrives NULL (COALESCE(?, col)). Substituting a
+  // placeholder is what previously overwrote every field the caller never
+  // touched, rewriting a task's title to "-" on a priority-only edit, so do not
+  // reintroduce `?? '-'` style defaults here.
   //
-  // Still a no-op end to end until onion reads it: TaskAPI.UpdateTask builds
-  // domain.UpdateTaskInput without Archived, even though the SQL write path
-  // already handles it via COALESCE(?, archived).
+  // `archived` is load bearing in both directions: `false` is what un-archives a
+  // task so it must be sent as `false`, while `undefined` must stay omitted.
+  // Never collapse it to a truthiness check - flowApi.test pins both directions.
   updateTask: (id: string, data: Partial<ApiTask>) =>
     safe.put<{ message: string }>(`/flow/task/v1/tasks/${id}`, {
       body: {
-        title: data.title ?? '-',
-        description: data.description ?? '-',
-        status: data.status ?? 'todo',
-        priority: data.priority ?? 'medium',
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
         assignee_id: data.assigneeId ? Number(data.assigneeId) : undefined,
-        due_date: data.dueDate ?? '-',
-        start_date: '-',
-        labels: data.labels?.map((l) => Number(l)) ?? [0],
+        due_date: data.dueDate,
+        start_date: data.startDate,
+        labels: data.labels?.map((l) => Number(l)),
         archived: data.archived,
       },
     }),

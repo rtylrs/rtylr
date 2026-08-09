@@ -143,15 +143,81 @@ describe('flowApi', () => {
     expect(safe.put).toHaveBeenCalledWith('/flow/task/v1/tasks/9', {
       body: {
         title: 'Updated',
-        description: '-',
-        status: 'todo',
-        priority: 'medium',
+        description: undefined,
+        status: undefined,
+        priority: undefined,
         assignee_id: undefined,
-        due_date: '-',
-        start_date: '-',
-        labels: [0],
+        due_date: undefined,
+        start_date: undefined,
+        labels: undefined,
         archived: undefined,
       },
+    });
+  });
+
+  // Serialising the way the transport does is the only assertion that proves
+  // wire omission: `toHaveBeenCalledWith` treats an explicit `undefined`
+  // property and a missing one as equal, so it cannot tell a dropped key from a
+  // key sent as null. JSON.stringify drops undefined values outright, which is
+  // what decides whether onion sees a NULL param and holds the column.
+  const wireBody = (): Record<string, unknown> => {
+    const [, config] = (safe.put as unknown as { mock: { calls: [string, { body: unknown }][] } })
+      .mock.calls[0];
+    return JSON.parse(JSON.stringify(config.body)) as Record<string, unknown>;
+  };
+
+  // One case per field: a partial update must not resurrect the placeholder
+  // defaults that used to rewrite untouched columns (title/description to "-",
+  // status to "todo", priority to "medium", labels to [0]).
+  const partialUpdateFields: [string, Partial<Parameters<typeof flowApi.updateTask>[1]>][] = [
+    ['title', { priority: 'high' }],
+    ['description', { priority: 'high' }],
+    ['status', { priority: 'high' }],
+    ['priority', { title: 'Only the title' }],
+    ['due_date', { priority: 'high' }],
+    ['start_date', { priority: 'high' }],
+    ['labels', { priority: 'high' }],
+  ];
+
+  it.each(partialUpdateFields)(
+    'updateTask omits %s entirely when the caller did not supply it',
+    (field, data) => {
+      flowApi.updateTask('9', data);
+      expect(wireBody()).not.toHaveProperty(field);
+    }
+  );
+
+  it('updateTask sends only the keys the caller supplied', () => {
+    flowApi.updateTask('9', { priority: 'high' });
+    expect(Object.keys(wireBody())).toEqual(['priority']);
+  });
+
+  it('updateTask forwards an empty labels array rather than dropping it', () => {
+    // An explicit [] means "clear every label" and must reach the wire. Only a
+    // caller that never mentioned labels may be omitted, which is the nil vs
+    // empty distinction onion's labelsParam guard depends on.
+    flowApi.updateTask('9', { labels: [] });
+    expect(wireBody()).toEqual({ labels: [] });
+  });
+
+  it('updateTask forwards supplied values unchanged', () => {
+    flowApi.updateTask('9', {
+      title: 'Ship Q4 billing migration',
+      description: 'Real description',
+      status: 'in_progress',
+      priority: 'urgent',
+      dueDate: '2026-08-20',
+      startDate: '2026-08-10',
+      labels: ['3', '7'],
+    });
+    expect(wireBody()).toEqual({
+      title: 'Ship Q4 billing migration',
+      description: 'Real description',
+      status: 'in_progress',
+      priority: 'urgent',
+      due_date: '2026-08-20',
+      start_date: '2026-08-10',
+      labels: [3, 7],
     });
   });
 
