@@ -193,6 +193,13 @@ func (a *TaskAPI) UpdateTask(ctx context.Context, req *flowtaskv1.UpdateTaskRequ
 	}
 
 	body := req.GetBody()
+	// AssigneeId and Archived below are read as raw pointers, not through the
+	// nil-safe GetX() accessors, so a request that omitted the body entirely
+	// would dereference nil and panic into a 500. The request is malformed.
+	if body == nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Missing update body")
+	}
+
 	dueDate, err := parseTaskDate(body.GetDueDate())
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid due_date")
