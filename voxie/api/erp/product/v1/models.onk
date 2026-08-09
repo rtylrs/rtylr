@@ -40,7 +40,7 @@ message Product {
 }
 
 message FullProduct {
-  id: int64
+  id: int64 @required @gt(0)
   owner_id: int64
   business_id: int64
   category_id: int64
