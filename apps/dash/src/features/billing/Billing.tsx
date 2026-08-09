@@ -73,12 +73,18 @@ const STATUS_MAP: Record<SubStatus, StatusConfig> = {
 };
 
 function formatMonth(iso: string): string {
-  const date = new Date(iso);
+  if (!iso) return 'Billing Period';
+  const normalizedIso = iso.includes('-') && iso.length === 7 ? `${iso}-01` : iso;
+  const date = new Date(normalizedIso);
+  if (Number.isNaN(date.getTime())) return iso;
   return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
+  if (!iso) return '';
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -900,20 +906,19 @@ const InvoiceHistorySection: React.FC<{ history: BillingHistoryMonth[]; loading:
             <span className="text-right">Status</span>
             <span className="text-right">Total</span>
           </div>
-          {history.map((month) => {
-            const seatItems = month.lineItems.filter(
-              (item: BillingLineItem) => item.type !== 'addon'
-            );
+          {history.map((month, idx) => {
+            const lineItems = month.lineItems ?? [];
+            const seatItems = lineItems.filter((item: BillingLineItem) => item.type !== 'addon');
             const periodCount = seatItems.length;
             const averageSeats =
               periodCount > 0
                 ? Math.round(seatItems.reduce((sum, item) => sum + item.seatCount, 0) / periodCount)
                 : 0;
-            const addonCount = month.lineItems.length - seatItems.length;
+            const addonCount = lineItems.length - seatItems.length;
 
             return (
               <div
-                key={month.month}
+                key={month.month || idx}
                 className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 sm:gap-4 px-5 py-4 items-center"
                 style={{ borderBottom: '1px solid var(--dash-border)' }}
               >

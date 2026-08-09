@@ -152,6 +152,11 @@ type RawBillingDetailPayload = Partial<BillingDetailPayload> & {
 };
 
 type RawBillingHistoryMonth = Partial<BillingHistoryMonth> & {
+  billing_month?: string;
+  billingMonth?: string;
+  month_iso?: string;
+  period?: string;
+  date?: string;
   total_cents?: ApiScalar;
   line_items?: RawBillingLineItem[];
 };
@@ -283,7 +288,14 @@ function normalizeBilling(
 function normalizeBillingHistory(raw: RawBillingHistoryMonth): BillingHistoryMonth {
   const lineItems = raw.lineItems ?? raw.line_items ?? [];
   return {
-    month: raw.month ?? '',
+    month:
+      raw.month ??
+      raw.billingMonth ??
+      raw.billing_month ??
+      raw.month_iso ??
+      raw.period ??
+      raw.date ??
+      '',
     totalCents: num(raw.totalCents ?? raw.total_cents),
     lineItems: lineItems.map(normalizeLineItem),
     status: raw.status ?? 'draft',
