@@ -298,7 +298,7 @@ func (h *SubmitApplicationHandler) Serve(ctx context.Context, req *SubmitApplica
 			return SubmitApplicationResponse{}, onekiterrors.New(http.StatusBadRequest, "Resume upload was not found")
 		}
 		if err := validateResumeMetadata(metadata); err != nil {
-			return SubmitApplicationResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+			return SubmitApplicationResponse{}, err
 		}
 	}
 
@@ -357,12 +357,16 @@ func isInternalResumeKey(resumeURL string) bool {
 	return resumeURL != "" && !strings.HasPrefix(resumeURL, "http://") && !strings.HasPrefix(resumeURL, "https://")
 }
 
+// The messages are shown to the applicant verbatim, so they stay sentence-case.
+// Building them with onekiterrors rather than fmt.Errorf keeps that copy intact
+// while satisfying the lowercase-error-string rule, and matches how the sibling
+// upload handler reports the same two validation failures.
 func validateResumeMetadata(metadata storage.ObjectMetadata) error {
 	if !storage.AllowedResumeContentTypes[metadata.ContentType] {
-		return fmt.Errorf("Only PDF or Word resumes are accepted")
+		return onekiterrors.New(http.StatusBadRequest, "Only PDF or Word resumes are accepted")
 	}
 	if metadata.Size > storage.MaxResumeBytes {
-		return fmt.Errorf("Resume must be 10 MB or smaller")
+		return onekiterrors.New(http.StatusBadRequest, "Resume must be 10 MB or smaller")
 	}
 	return nil
 }
