@@ -1,9 +1,8 @@
 #!/bin/bash
 set -xe
 
-# The generated Voxie module is a pinned submodule. A stale pointer must fail
-# the normal build before Go compiles against an older contract or build
-# artifacts are cleaned.
+# Voxie owns the generated Go module. Verify that the checked-out submodule
+# matches Onion's recorded commit before Go compiles against that contract.
 ./scripts/check-voxie-ref.sh
 
 for dir in ./db/dbmodels/*/; do
