@@ -124,7 +124,7 @@ return violations;
 }
 
 export interface FullProduct {
-id?: string;
+id: string;
 ownerId?: string;
 businessId?: string;
 categoryId?: string;
@@ -241,6 +241,8 @@ return out;
 
 export function validateFullProduct(v: FullProduct): string[] {
 const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
 
