@@ -1,6 +1,10 @@
 #!/bin/bash
 set -xe
 
+# Voxie owns the generated Go module. Verify that the checked-out submodule
+# matches Onion's recorded commit before Go compiles against that contract.
+./scripts/check-voxie-ref.sh
+
 for dir in ./db/dbmodels/*/; do
  [ -d "$dir" ] || continue
  find "$dir" -type f ! -name 'queries.go' ! -name 'utils.go' ! -name 'queries_input.go' -delete
