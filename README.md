@@ -98,21 +98,17 @@ git clone --recurse-submodules git@github.com:voxire/rtylr.git
 # Or if already cloned
 git submodule update --init --recursive
 
-# Generate TypeScript types from proto files
-cd voxie && make generate
+# Voxie contains the committed generated TypeScript output.
 ```
 
 ### Updating contracts
 
 ```bash
-cd voxie
-# Edit proto files in proto/{module}/v1/
-make generate    # Regenerate Go + TypeScript types
-git add -A && git commit -m "feat: add X contract"
-git push
-
-# Then update the shared packages ref in frontend apps
-cd .. && git add packages && git commit -m "chore: update shared packages"
+# Edit `.onk` files and regenerate in the Voxie repository; commit and push it
+# there. Advance the `voxie` pointers in Onion and packages, push packages,
+# then advance this repository's packages pointer:
+git submodule update --remote packages
+git add packages && git commit -m "chore: bump shared packages"
 ```
 
 ## API Layer

@@ -116,7 +116,7 @@ rtylr/
 
 > **Removed apps:** `landing` (marketing site) now lives in its own repo. `hub` was renamed to `dash`. `vbitez` (POS desktop) is not part of this monorepo. Empty `apps/hub`, `apps/vbitez`, or `apps/landing` folders on disk are untracked leftovers - safe to delete.
 >
-> **Submodules:** `packages/` (tryrtylr/packages) is the only top-level submodule here. It carries `packages/voxie` as vendored files, **not** as a nested submodule (proto contracts + generated `gen/ts`, which `@voxire/voxie` re-exports), so there is no inner pointer to bump. Run `git submodule update --init --recursive` after every pull, then `pnpm install`. `pos/` (the separate POS terminal repo) shares this same `packages` submodule and gets contracts the same way.
+> **Submodules:** `packages/` (tryrtylr/packages) is the only top-level submodule here, and it carries `packages/voxie` as a nested submodule. Voxie owns the `.onk` contracts and committed generated `gen/go` + `gen/ts`; Onion and the frontend consume that exact generated commit. Update contract versions by advancing the Voxie pointer in Onion and packages, then advancing the packages pointer here—never copy contract or generated files. Run `git submodule update --init --recursive` after every pull, then `pnpm install`. `pos/` (the separate POS terminal repo) shares this same packages submodule and gets contracts the same way.
 
 ### Tech Stack
 
@@ -776,13 +776,13 @@ pnpm test:e2e      # Playwright e2e tests
 
 ### Submodules (packages)
 
-`packages/` (tryrtylr/packages — all shared workspace packages) is a git submodule, and it carries `packages/voxie` as vendored files rather than as a nested submodule (proto contracts + committed `gen/ts`). There is no `.gitmodules` entry in `packages`, and `git ls-files -s voxie` returns plain `100644` blobs instead of a `160000` gitlink. That means there is no inner pointer to bump and nothing to `git pull` inside `packages/voxie`: new contracts land in `packages` as a direct file sync, and `packages` is the only submodule pointer this repo moves. After cloning or pulling:
+`packages/` (tryrtylr/packages — all shared workspace packages) is a git submodule, and it carries `packages/voxie` as a nested git submodule. `git ls-files -s packages/voxie` must report mode `160000`, not ordinary file blobs. New contracts land in Voxie; update the nested Voxie pointer in packages and then update the packages pointer in this repository. Do not copy or regenerate contract files in either consumer. After cloning or pulling:
 
 ```bash
 git submodule update --init --recursive
 ```
 
-`gen/ts` is generated and committed by `voxie` itself — there is nothing to run locally to sync contracts. To pick up a newer voxie commit and audit usage:
+`gen/ts` is generated and committed by `voxie` itself — there is nothing to run locally to sync contracts. The normal frontend build verifies both submodule pointers and typechecks the generated package. To verify the contract chain and audit usage explicitly:
 
 ```bash
 pnpm contracts:sync             # typechecks the @voxire/voxie package
