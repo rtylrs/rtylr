@@ -1,7 +1,7 @@
 package erp.category.v1
 
 message Category {
-  id: int64
+  id: int64 @required @gt(0)
   owner_id: int64
   name: string
   description: string
