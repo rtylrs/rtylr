@@ -82,5 +82,5 @@ INSERT INTO config (
     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 );
 
--- name: GetBusinessSlugByOwnerID :one
-SELECT slug FROM businesses WHERE owner_id = ? LIMIT 1;
+-- name: GetBusinessSlugByID :one
+SELECT slug FROM businesses WHERE id = ? LIMIT 1;

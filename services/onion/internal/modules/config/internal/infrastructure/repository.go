@@ -55,9 +55,10 @@ func (r *Repository) GetConfig(ctx context.Context, ownerID string) (domain.Conf
 	var config domain.Config
 	config.FromRows(rows[0])
 
-	// Enrich with business slug from the businesses table.
-	// cross-schema read from businesses — resolve config's business slug
-	slug, slugErr := r.queries.GetBusinessSlugByOwnerID(ctx, int64(rows[0].OwnerID))
+	// Enrich with the slug belonging to the business whose config we loaded.
+	// The config endpoint is business-scoped; using the config owner's ID here
+	// returns a different business when one owner manages multiple businesses.
+	slug, slugErr := r.queries.GetBusinessSlugByID(ctx, businessIDInt)
 	if slugErr != nil && !errors.Is(slugErr, sql.ErrNoRows) {
 		logger.Ctx(ctx).Warn("Failed to load business slug for config", logger.Error(slugErr))
 	} else if slug.Valid {

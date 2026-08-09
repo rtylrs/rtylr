@@ -248,11 +248,16 @@ func (a *TaskAPI) UpdateTaskStatus(ctx context.Context, req *flowtaskv1.UpdateTa
 		return nil, onekiterrors.PermissionDenied()
 	}
 
+	body := req.GetBody()
+	if body == nil || !domain.IsValidTaskStatus(body.GetStatus()) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid task status")
+	}
+
 	input := domain.UpdateTaskStatusInput{
 		ID:         req.GetId(),
 		OwnerID:    authUser.UserID,
 		BusinessID: businessID,
-		Status:     req.GetBody().GetStatus(),
+		Status:     body.GetStatus(),
 	}
 
 	if err := a.Service.UpdateTaskStatus(ctx, input, authUser.UserID); err != nil {

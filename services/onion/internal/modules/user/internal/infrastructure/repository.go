@@ -103,7 +103,12 @@ func (r *Repository) EmailExists(ctx context.Context, email string) (bool, error
 func (r *Repository) GetUserByID(ctx context.Context, id int64) (*domain.User, error) {
 	row, err := r.queries.GetUserByID(ctx, id)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get user by ID", logger.Error(err))
+		// A missing user is a normal outcome while rejecting stale or forged
+		// tokens. Keep it out of the server-error stream; callers still receive
+		// sql.ErrNoRows and can map it to authentication/not-found behavior.
+		if !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Error("Failed to get user by ID", logger.Error(err))
+		}
 
 		return nil, err
 	}
