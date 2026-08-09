@@ -38,6 +38,7 @@ export interface UseSpeechToTextResult {
   supported: boolean;
   listening: boolean;
   transcript: string;
+  interimTranscript: string;
   error: string | null;
   start: () => void;
   stop: () => void;
@@ -50,6 +51,7 @@ export function useSpeechToText(lang = 'en-US'): UseSpeechToTextResult {
   const [supported, setSupported] = useState(false);
   const [listening, setListening] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [interimTranscript, setInterimTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -63,20 +65,29 @@ export function useSpeechToText(lang = 'en-US'): UseSpeechToTextResult {
     rec.interimResults = true;
     rec.lang = lang;
     rec.onresult = (e) => {
-      let out = '';
+      let finalOut = '';
+      let interimOut = '';
       for (let i = 0; i < e.results.length; i++) {
         const result = e.results[i];
-        if (result?.isFinal) out += result[0]?.transcript ?? '';
+        if (!result) continue;
+        const text = result[0]?.transcript ?? '';
+        if (result.isFinal) finalOut += text;
+        else interimOut += text;
       }
       // The browser keeps prior results in the list and revisits interim
       // results as they change. Rebuilding from final results prevents the
       // same words from being appended once per interim event.
-      setTranscript(out);
+      setTranscript(finalOut);
+      setInterimTranscript(interimOut);
     };
-    rec.onend = () => setListening(false);
+    rec.onend = () => {
+      setListening(false);
+      setInterimTranscript('');
+    };
     rec.onerror = (ev) => {
       setError(ev.error);
       setListening(false);
+      setInterimTranscript('');
     };
     recRef.current = rec;
     setSupported(true);
@@ -92,6 +103,7 @@ export function useSpeechToText(lang = 'en-US'): UseSpeechToTextResult {
   const start = useCallback((): void => {
     setError(null);
     setTranscript('');
+    setInterimTranscript('');
     const rec = recRef.current;
     if (!rec) return;
     try {
@@ -112,7 +124,19 @@ export function useSpeechToText(lang = 'en-US'): UseSpeechToTextResult {
     }
   }, []);
 
-  const reset = useCallback((): void => setTranscript(''), []);
+  const reset = useCallback((): void => {
+    setTranscript('');
+    setInterimTranscript('');
+  }, []);
 
-  return { supported, listening, transcript, error, start, stop, reset };
+  return {
+    supported,
+    listening,
+    transcript,
+    interimTranscript,
+    error,
+    start,
+    stop,
+    reset,
+  };
 }

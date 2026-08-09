@@ -1,5 +1,5 @@
 import React from 'react';
-import { caretTokens, caretRadius } from '../ui/tokens';
+import { caretTokens } from '../ui/tokens';
 import MessageBlocks from './MessageBlocks';
 import MessageActions from './MessageActions';
 import FollowUpChips from './FollowUpChips';
@@ -50,24 +50,25 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   const text = isUser ? (message.content ?? blocksToText(blocks)) : blocksToText(blocks);
 
-  // User message - right-aligned bubble (ChatGPT-style).
+  // User message - quiet, right-aligned bubble.
   if (isUser) {
     return (
       <div
         style={{
           display: 'flex',
           justifyContent: 'flex-end',
-          margin: '14px 0',
+          margin: '12px 0',
         }}
       >
         <div
           style={{
-            maxWidth: '85%',
-            padding: '8px 12px',
-            borderRadius: caretRadius.lg,
-            background: caretTokens.accent,
-            color: '#ffffff',
-            fontSize: 14,
+            maxWidth: '88%',
+            padding: '8px 11px',
+            borderRadius: 4,
+            border: `1px solid ${caretTokens.border}`,
+            background: caretTokens.surfaceHigh,
+            color: caretTokens.text,
+            fontSize: 13.5,
             lineHeight: 1.5,
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
@@ -81,7 +82,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   // Assistant message - full-width plain text, no avatar, no bubble (ChatGPT-style).
   return (
-    <div style={{ margin: '14px 0' }}>
+    <div className="caret-assistant-message" style={{ margin: '12px 0' }}>
       <div
         style={{
           color: caretTokens.text,

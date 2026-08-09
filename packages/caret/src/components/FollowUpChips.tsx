@@ -22,14 +22,15 @@ export const FollowUpChips: React.FC<FollowUpChipsProps> = ({ items, onSelect })
       {items.map((item) => (
         <button
           key={item.prompt}
+          className="caret-follow-up"
           type="button"
           onClick={() => onSelect?.(item)}
           style={{
             border: `1px solid ${caretTokens.border}`,
-            background: caretTokens.surface,
+            background: 'transparent',
             color: caretTokens.textMuted,
             borderRadius: caretRadius.sm,
-            padding: '6px 8px',
+            padding: '6px 9px',
             fontSize: 12,
             lineHeight: '16px',
             cursor: 'pointer',

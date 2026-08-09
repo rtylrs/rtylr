@@ -1,15 +1,14 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { X } from 'lucide-react';
 import { caretTokens, caretRadius } from '../../ui/tokens';
 import ModePicker from './ModePicker';
-import MicButton from './MicButton';
+import MicButton, { type VoiceInputStatus } from './MicButton';
 import AttachButton from './AttachButton';
 import SendButton from './SendButton';
 import StopButton from './StopButton';
 import { useAutosize } from '../../hooks/useAutosize';
 import { CARET_FOCUS_COMPOSER_EVENT } from '../../lib/focusComposer';
-import { inferCaretModeForPrompt } from '../../lib/modeIntent';
 import { useCaretSettingsStore } from '../../stores/settingsStore';
-import { CARET_MODES } from '../../types/mode';
 
 export interface ComposerProps {
   isStreaming: boolean;
@@ -18,6 +17,22 @@ export interface ComposerProps {
   onAttach?: (files: File[]) => void;
   placeholder?: string;
   autoFocus?: boolean;
+}
+
+function voiceErrorMessage(error: string): string {
+  switch (error) {
+    case 'not-allowed':
+    case 'service-not-allowed':
+      return 'Microphone access is blocked. Allow it in your browser, then try again.';
+    case 'audio-capture':
+      return 'No microphone was found. Check your input device and try again.';
+    case 'no-speech':
+      return "I didn't catch that. Try dictating again.";
+    case 'network':
+      return 'Voice input lost its connection. Try again.';
+    default:
+      return 'Voice input stopped unexpectedly. Try again.';
+  }
 }
 
 export const Composer: React.FC<ComposerProps> = ({
@@ -29,12 +44,11 @@ export const Composer: React.FC<ComposerProps> = ({
   autoFocus = true,
 }) => {
   const [value, setValue] = useState('');
+  const [voiceStatus, setVoiceStatus] = useState<VoiceInputStatus | null>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
-  const mode = useCaretSettingsStore((s) => s.mode);
+  const voiceFeedbackId = useId();
   const voiceEnabled = useCaretSettingsStore((s) => s.voiceEnabled);
   useAutosize(taRef, value);
-  const inferredMode = useMemo(() => inferCaretModeForPrompt(value, mode), [mode, value]);
-  const showModeHint = value.trim().length > 0 && inferredMode !== mode && !isStreaming;
 
   const focusComposer = useCallback((): void => {
     const el = taRef.current;
@@ -66,6 +80,10 @@ export const Composer: React.FC<ComposerProps> = ({
     setValue((prev) => (prev.length && !prev.endsWith(' ') ? `${prev} ` : prev) + normalized);
   }, []);
 
+  const updateVoiceStatus = useCallback((status: VoiceInputStatus): void => {
+    setVoiceStatus(status);
+  }, []);
+
   const handleKey = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -75,90 +93,142 @@ export const Composer: React.FC<ComposerProps> = ({
 
   return (
     <div
+      className="caret-composer"
       style={{
-        margin: 12,
-        background: caretTokens.surface,
+        margin: '10px 10px 11px',
+        background: caretTokens.surfaceRaised,
         border: `1px solid ${caretTokens.border}`,
-        borderRadius: caretRadius.lg,
-        padding: 8,
+        borderRadius: caretRadius.xl,
+        padding: '8px 8px 8px 12px',
         display: 'flex',
         flexDirection: 'column',
         gap: 6,
+        boxShadow: 'none',
       }}
     >
-      <textarea
-        ref={taRef}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleKey}
-        placeholder={placeholder}
-        rows={1}
-        aria-label="Message Caret"
-        style={{
-          resize: 'none',
-          width: '100%',
-          background: 'transparent',
-          border: 'none',
-          outline: 'none',
-          color: caretTokens.text,
-          fontSize: 14,
-          lineHeight: '20px',
-          padding: '4px 6px',
-          fontFamily: 'inherit',
-          height: 28,
-          minHeight: 28,
-          maxHeight: 140,
-          overflowY: 'auto',
-          boxSizing: 'border-box',
-          display: 'block',
-          flex: 'none',
-        }}
-      />
-      {showModeHint && (
+      {(voiceStatus?.listening || voiceStatus?.error) && (
         <div
+          id={voiceFeedbackId}
+          role="status"
+          aria-live="polite"
+          className={voiceStatus.error ? 'caret-voice-status is-error' : 'caret-voice-status'}
           style={{
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
-            alignSelf: 'flex-start',
-            gap: 5,
-            maxWidth: '100%',
-            marginLeft: 4,
-            padding: '3px 7px',
-            border: `1px solid ${caretTokens.border}`,
-            borderRadius: caretRadius.sm,
-            background: 'rgba(255, 255, 255, 0.02)',
-            color: caretTokens.textMuted,
+            gap: 7,
+            minWidth: 0,
+            margin: '0 4px 0 0',
+            padding: '6px 8px',
+            borderRadius: caretRadius.md,
+            background: voiceStatus.error ? caretTokens.dangerSoft : caretTokens.accentSoft,
+            color: voiceStatus.error ? caretTokens.dangerText : caretTokens.accentStrong,
             fontSize: 11.5,
-            lineHeight: '15px',
+            lineHeight: 1.35,
           }}
         >
-          <span style={{ color: caretTokens.textDim }}>Mode</span>
           <span
+            className={voiceStatus.listening ? 'caret-listening-dot' : undefined}
+            aria-hidden="true"
             style={{
-              color: caretTokens.text,
-              fontWeight: 600,
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: voiceStatus.error ? caretTokens.danger : caretTokens.accent,
+              flexShrink: 0,
             }}
-          >
-            {CARET_MODES[inferredMode].label}
+          />
+          <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', flex: 1 }}>
+            {voiceStatus.error
+              ? voiceErrorMessage(voiceStatus.error)
+              : voiceStatus.interimTranscript.trim()
+                ? `Listening · ${voiceStatus.interimTranscript.trim()}`
+                : 'Listening… speak naturally, then tap the mic to stop.'}
           </span>
+          {voiceStatus.error && (
+            <button
+              type="button"
+              aria-label="Dismiss voice message"
+              onClick={() => setVoiceStatus(null)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 24,
+                height: 24,
+                margin: -4,
+                border: 'none',
+                borderRadius: caretRadius.sm,
+                background: 'transparent',
+                color: caretTokens.dangerText,
+                cursor: 'pointer',
+                flexShrink: 0,
+              }}
+            >
+              <X size={12} />
+            </button>
+          )}
         </div>
       )}
       <div
+        className="caret-composer-row"
         style={{
           display: 'flex',
-          alignItems: 'center',
-          gap: 6,
+          alignItems: 'flex-end',
+          minWidth: 0,
+          gap: 5,
         }}
       >
-        <ModePicker />
-        <span style={{ flex: 1 }} />
-        {onAttach && <AttachButton onFiles={onAttach} />}
-        {voiceEnabled && <MicButton onTranscript={appendTranscript} />}
-        {isStreaming ? (
-          <StopButton onStop={onStop} />
-        ) : (
-          <SendButton disabled={!value.trim()} onClick={send} />
-        )}
+        <textarea
+          className="caret-composer-input"
+          ref={taRef}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={handleKey}
+          placeholder={placeholder}
+          rows={1}
+          aria-label="Message Caret"
+          aria-describedby={
+            voiceStatus?.listening || voiceStatus?.error ? voiceFeedbackId : undefined
+          }
+          spellCheck
+          style={{
+            resize: 'none',
+            width: '100%',
+            minWidth: 0,
+            background: 'transparent',
+            border: 'none',
+            outline: 'none',
+            color: caretTokens.text,
+            fontSize: 14,
+            lineHeight: '20px',
+            padding: '6px 3px',
+            fontFamily: 'inherit',
+            height: 32,
+            minHeight: 32,
+            maxHeight: 140,
+            overflowY: 'auto',
+            boxSizing: 'border-box',
+            display: 'block',
+            flex: 1,
+            whiteSpace: 'pre-wrap',
+            overflowWrap: 'anywhere',
+          }}
+        />
+        <div
+          className="caret-composer-actions"
+          style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}
+        >
+          <ModePicker compact />
+          {onAttach && <AttachButton onFiles={onAttach} />}
+          {voiceEnabled && (
+            <MicButton onTranscript={appendTranscript} onStatusChange={updateVoiceStatus} />
+          )}
+          {isStreaming ? (
+            <StopButton onStop={onStop} />
+          ) : (
+            <SendButton disabled={!value.trim()} onClick={send} />
+          )}
+        </div>
       </div>
     </div>
   );

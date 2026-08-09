@@ -107,6 +107,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const caret = useCaretStore();
   const activeTab = caret.tabs.find((tab) => tab.id === caret.activeTabId) ?? caret.tabs[0];
   const activeTabId = activeTab?.id ?? caret.activeTabId;
+  const showTabStrip = caret.tabs.length > 1;
   const sessionId = activeTab?.sessionId ?? null;
   const messages = activeTab?.messages ?? EMPTY_MESSAGES;
   const isStreaming = activeTab?.isStreaming ?? false;
@@ -361,6 +362,8 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
           width: '100%',
           height: '100%',
           background: caretTokens.bg,
+          boxSizing: 'border-box',
+          minWidth: 0,
           borderLeft: `1px solid ${caretTokens.border}`,
           display: 'flex',
           flexDirection: 'column',
@@ -374,6 +377,8 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
           height: '100dvh',
           zIndex: 9999,
           background: caretTokens.bg,
+          boxSizing: 'border-box',
+          minWidth: 0,
           borderLeft: `1px solid ${caretTokens.border}`,
           display: 'flex',
           flexDirection: 'column',
@@ -386,7 +391,7 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     <aside
       role="complementary"
       aria-label="Caret AI assistant"
-      className={introPlaying ? 'caret-intro' : undefined}
+      className={introPlaying ? 'caret-panel-shell caret-intro' : 'caret-panel-shell'}
       style={rootStyle}
     >
       <span
@@ -405,55 +410,61 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
         }}
       />
 
-      <HeaderBar onSelectChat={selectChat} onDeleteChat={deleteChat} />
-      <ChatTabs
-        tabs={caret.tabs}
-        activeTabId={activeTabId}
-        onSelect={caret.setActiveTab}
-        onNew={newChat}
-        onClose={closeChatTab}
-      />
-
+      <HeaderBar onNewChat={newChat} />
       {view === 'chat' && (
         <>
-          {isLoading ? (
-            <div
-              style={{
-                flex: 1,
-                overflowY: 'auto',
-                padding: 18,
-              }}
-            >
-              <MessageSkeleton />
-            </div>
-          ) : messages.length === 0 ? (
-            <EmptyState
-              title={emptyState.title}
-              subtitle={emptyState.subtitle}
-              briefItems={emptyState.briefItems}
-              contextSignals={emptyState.contextSignals}
-              primaryAction={emptyState.primaryAction}
-              suggestions={emptyState.suggestions}
-              onSuggestion={sendStarter}
-            />
-          ) : (
-            <MessageList
-              messages={messages}
-              isStreaming={isStreaming}
-              showThinking={showThinking}
-              onApproveTool={onApprove}
-              onDenyTool={onDeny}
-              followUps={followUps}
-              onFollowUp={sendStarter}
+          {showTabStrip && (
+            <ChatTabs
+              tabs={caret.tabs}
+              activeTabId={activeTabId}
+              onSelect={caret.setActiveTab}
+              onClose={closeChatTab}
             />
           )}
-          <Composer
-            key={activeTabId}
-            isStreaming={isStreaming}
-            onSubmit={(t) => sendPromptWithIntent(t)}
-            onStop={() => stopStreaming(activeTabId)}
-            placeholder={emptyState.composerPlaceholder}
-          />
+          <div
+            id={`caret-chat-panel-${activeTabId}`}
+            role={showTabStrip ? 'tabpanel' : undefined}
+            aria-labelledby={showTabStrip ? `caret-chat-tab-${activeTabId}` : undefined}
+            style={{
+              display: 'flex',
+              flex: 1,
+              flexDirection: 'column',
+              minHeight: 0,
+              overflow: 'hidden',
+            }}
+          >
+            {isLoading ? (
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: 'auto',
+                  padding: 18,
+                }}
+              >
+                <MessageSkeleton />
+              </div>
+            ) : messages.length === 0 ? (
+              <EmptyState label={`No messages yet. ${emptyState.composerPlaceholder}`} />
+            ) : (
+              <MessageList
+                messages={messages}
+                isStreaming={isStreaming}
+                scrollKey={activeTabId}
+                showThinking={showThinking}
+                onApproveTool={onApprove}
+                onDenyTool={onDeny}
+                followUps={followUps}
+                onFollowUp={sendStarter}
+              />
+            )}
+            <Composer
+              key={activeTabId}
+              isStreaming={isStreaming}
+              onSubmit={(t) => sendPromptWithIntent(t)}
+              onStop={() => stopStreaming(activeTabId)}
+              placeholder={emptyState.composerPlaceholder}
+            />
+          </div>
         </>
       )}
 

@@ -16,6 +16,7 @@ export const MessageActions: React.FC<MessageActionsProps> = ({ text, onRetry })
   const { copy, copied } = useClipboard();
   return (
     <div
+      className="caret-message-actions"
       style={{
         display: 'flex',
         alignItems: 'center',

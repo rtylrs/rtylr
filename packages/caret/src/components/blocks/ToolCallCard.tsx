@@ -37,7 +37,7 @@ const detailLabelStyle: React.CSSProperties = {
 const detailPreStyle: React.CSSProperties = {
   margin: 0,
   padding: '8px 9px',
-  background: 'rgba(255,255,255,0.03)',
+  background: caretTokens.surfaceHigh,
   border: `1px solid ${caretTokens.border}`,
   borderRadius: caretRadius.sm,
   overflowX: 'auto',
@@ -49,7 +49,7 @@ const detailPreStyle: React.CSSProperties = {
 
 const summaryStyle: React.CSSProperties = {
   padding: '7px 9px',
-  background: 'rgba(255,255,255,0.025)',
+  background: caretTokens.surfaceHigh,
   border: `1px solid ${caretTokens.border}`,
   borderRadius: caretRadius.sm,
   color: caretTokens.textMuted,
@@ -144,7 +144,7 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
             marginTop: quiet ? 4 : 6,
             marginLeft: quiet ? 18 : 21,
             padding: quiet ? '3px 0 1px 10px' : '4px 0 2px 12px',
-            borderLeft: `1px solid ${quiet ? 'rgba(255,255,255,0.08)' : caretTokens.border}`,
+            borderLeft: `1px solid ${caretTokens.border}`,
             fontFamily: 'inherit',
             fontSize: 11,
             color: caretTokens.textMuted,
@@ -189,7 +189,7 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
                 alignItems: 'flex-start',
                 gap: 6,
                 padding: '8px 9px',
-                background: 'rgba(255,255,255,0.03)',
+                background: caretTokens.surfaceHigh,
                 border: `1px solid ${caretTokens.border}`,
                 color: caretTokens.textMuted,
                 borderRadius: caretRadius.sm,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { caretRadius } from '../ui/tokens';
+import { caretRadius, caretTokens } from '../ui/tokens';
 
 export interface SkeletonProps {
   width?: number | string;
@@ -20,8 +20,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
       width,
       height,
       borderRadius: radius,
-      background:
-        'linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.12), rgba(255,255,255,0.04))',
+      background: `linear-gradient(90deg, ${caretTokens.surfaceHigh}, ${caretTokens.borderStrong}, ${caretTokens.surfaceHigh})`,
       backgroundSize: '200% 100%',
       animation: 'caret-shimmer 1.2s linear infinite',
     }}
