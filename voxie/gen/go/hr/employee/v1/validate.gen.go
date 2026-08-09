@@ -20,7 +20,21 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *EmployeePayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateEmployeeRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.FirstName == "" {
 		violations = append(violations, "first_name is required")
@@ -55,7 +69,26 @@ func (m *CreateEmployeeRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateEmployeeResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Employee != nil {
+		if err := m.Employee.Validate(); err != nil {
+			violations = append(violations, "employee: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *InviteEmployeeRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.EmployeeId <= 0 {
 		violations = append(violations, "employee_id must be greater than 0")
@@ -69,7 +102,21 @@ func (m *InviteEmployeeRequest) Validate() error {
 	return nil
 }
 
+func (m *InviteEmployeeResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *AcceptInviteRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Token == "" {
 		violations = append(violations, "token is required")
@@ -83,7 +130,48 @@ func (m *AcceptInviteRequest) Validate() error {
 	return nil
 }
 
+func (m *AcceptInviteResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListEmployeesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListEmployeesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Employees {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "employees: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateEmployeeBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.FirstName == "" {
 		violations = append(violations, "first_name is required")
@@ -128,9 +216,33 @@ func (m *UpdateEmployeeBody) Validate() error {
 }
 
 func (m *UpdateEmployeeRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateEmployeeResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Employee != nil {
+		if err := m.Employee.Validate(); err != nil {
+			violations = append(violations, "employee: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

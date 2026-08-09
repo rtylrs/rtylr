@@ -24,6 +24,11 @@ func NewEmployeeServiceClient(baseURL string) *EmployeeServiceClient {
 }
 
 func (c *EmployeeServiceClient) ListEmployees(ctx context.Context, req *ListEmployeesRequest) (*ListEmployeesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/employee/v1/employees"
 	query := url.Values{}
 	if req.DepartmentId != nil {
@@ -65,6 +70,11 @@ func (c *EmployeeServiceClient) ListEmployees(ctx context.Context, req *ListEmpl
 }
 
 func (c *EmployeeServiceClient) CreateEmployee(ctx context.Context, req *CreateEmployeeRequest) (*CreateEmployeeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/employee/v1/employees"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -96,9 +106,14 @@ func (c *EmployeeServiceClient) CreateEmployee(ctx context.Context, req *CreateE
 }
 
 func (c *EmployeeServiceClient) UpdateEmployee(ctx context.Context, req *UpdateEmployeeRequest) (*UpdateEmployeeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/employee/v1/employees/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -128,6 +143,11 @@ func (c *EmployeeServiceClient) UpdateEmployee(ctx context.Context, req *UpdateE
 }
 
 func (c *EmployeeServiceClient) InviteEmployee(ctx context.Context, req *InviteEmployeeRequest) (*InviteEmployeeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/employee/v1/employees/invite"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -159,6 +179,11 @@ func (c *EmployeeServiceClient) InviteEmployee(ctx context.Context, req *InviteE
 }
 
 func (c *EmployeeServiceClient) AcceptInvite(ctx context.Context, req *AcceptInviteRequest) (*AcceptInviteResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/employee/v1/employees/invite/accept"
 	body, err := json.Marshal(req)
 	if err != nil {

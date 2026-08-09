@@ -24,6 +24,11 @@ func NewFloorServiceClient(baseURL string) *FloorServiceClient {
 }
 
 func (c *FloorServiceClient) ListFloors(ctx context.Context, req *ListFloorsRequest) (*ListFloorsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/floor/v1/floors"
 	query := url.Values{}
 	query.Set("branch_id", strconv.FormatInt(int64(req.BranchId), 10))
@@ -55,6 +60,11 @@ func (c *FloorServiceClient) ListFloors(ctx context.Context, req *ListFloorsRequ
 }
 
 func (c *FloorServiceClient) CreateFloor(ctx context.Context, req *CreateFloorRequest) (*CreateFloorResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/floor/v1/floors"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -86,9 +96,14 @@ func (c *FloorServiceClient) CreateFloor(ctx context.Context, req *CreateFloorRe
 }
 
 func (c *FloorServiceClient) UpdateFloor(ctx context.Context, req *UpdateFloorRequest) (*UpdateFloorResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/floor/v1/floors/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -118,6 +133,11 @@ func (c *FloorServiceClient) UpdateFloor(ctx context.Context, req *UpdateFloorRe
 }
 
 func (c *FloorServiceClient) DeleteFloor(ctx context.Context, req *DeleteFloorRequest) (*DeleteFloorResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/floor/v1/floors/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

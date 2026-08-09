@@ -24,6 +24,11 @@ func NewReportServiceClient(baseURL string) *ReportServiceClient {
 }
 
 func (c *ReportServiceClient) ListReportTemplates(ctx context.Context, req *ListReportTemplatesRequest) (*ListReportTemplatesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/report/v1/templates"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -59,6 +64,11 @@ func (c *ReportServiceClient) ListReportTemplates(ctx context.Context, req *List
 }
 
 func (c *ReportServiceClient) CreateReportTemplate(ctx context.Context, req *CreateReportTemplateRequest) (*CreateReportTemplateResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/report/v1/templates"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -90,6 +100,11 @@ func (c *ReportServiceClient) CreateReportTemplate(ctx context.Context, req *Cre
 }
 
 func (c *ReportServiceClient) GetReportTemplate(ctx context.Context, req *GetReportTemplateRequest) (*GetReportTemplateResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/report/v1/templates/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -121,6 +136,11 @@ func (c *ReportServiceClient) GetReportTemplate(ctx context.Context, req *GetRep
 }
 
 func (c *ReportServiceClient) ListScheduledReports(ctx context.Context, req *ListScheduledReportsRequest) (*ListScheduledReportsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/report/v1/scheduled"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -155,6 +175,11 @@ func (c *ReportServiceClient) ListScheduledReports(ctx context.Context, req *Lis
 }
 
 func (c *ReportServiceClient) CreateScheduledReport(ctx context.Context, req *CreateScheduledReportRequest) (*CreateScheduledReportResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/report/v1/scheduled"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -186,6 +211,11 @@ func (c *ReportServiceClient) CreateScheduledReport(ctx context.Context, req *Cr
 }
 
 func (c *ReportServiceClient) UpdateScheduledReport(ctx context.Context, req *UpdateScheduledReportRequest) (*UpdateScheduledReportResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/report/v1/scheduled/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -218,6 +248,11 @@ func (c *ReportServiceClient) UpdateScheduledReport(ctx context.Context, req *Up
 }
 
 func (c *ReportServiceClient) DeleteScheduledReport(ctx context.Context, req *DeleteScheduledReportRequest) (*DeleteScheduledReportResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/report/v1/scheduled/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -249,6 +284,11 @@ func (c *ReportServiceClient) DeleteScheduledReport(ctx context.Context, req *De
 }
 
 func (c *ReportServiceClient) GenerateRevenueReport(ctx context.Context, req *GenerateRevenueReportRequest) (*GenerateRevenueReportResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/report/v1/reports/revenue/generate"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -280,6 +320,11 @@ func (c *ReportServiceClient) GenerateRevenueReport(ctx context.Context, req *Ge
 }
 
 func (c *ReportServiceClient) ExportRevenueReport(ctx context.Context, req *ExportRevenueReportRequest) (*ExportRevenueReportResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/report/v1/reports/revenue/export"
 	query := url.Values{}
 	query.Set("from", req.From)

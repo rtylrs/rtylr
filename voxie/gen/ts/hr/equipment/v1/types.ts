@@ -53,6 +53,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateEquipmentRequestPayload(v: EquipmentRequestPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface AssetPayload {
 id?: string;
 ownerId?: string;
@@ -97,6 +102,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateAssetPayload(v: AssetPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListAssetsRequest {
 employeeId?: string;
 condition?: string;
@@ -115,6 +125,11 @@ const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.condition !== undefined) { out.condition = v.condition; }
 return out;
+}
+
+export function validateListAssetsRequest(v: ListAssetsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListAssetsResponse {
@@ -143,6 +158,12 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListAssetsResponse(v: ListAssetsResponse): string[] {
+const violations: string[] = [];
+if (v.assets !== undefined && v.assets !== null) for (const item of v.assets) violations.push(...validateAssetPayload(item).map((message) => "assets: " + message));
+return violations;
+}
+
 export interface ListEquipmentRequestsRequest {
 employeeId?: string;
 status?: string;
@@ -161,6 +182,11 @@ const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.status !== undefined) { out.status = v.status; }
 return out;
+}
+
+export function validateListEquipmentRequestsRequest(v: ListEquipmentRequestsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListEquipmentRequestsResponse {
@@ -189,11 +215,17 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListEquipmentRequestsResponse(v: ListEquipmentRequestsResponse): string[] {
+const violations: string[] = [];
+if (v.requests !== undefined && v.requests !== null) for (const item of v.requests) violations.push(...validateEquipmentRequestPayload(item).map((message) => "requests: " + message));
+return violations;
+}
+
 export interface CreateEquipmentRequestRequest {
-employeeId?: string;
-equipmentType?: string;
-description?: string;
-urgency?: string;
+employeeId: string;
+equipmentType: string;
+description: string;
+urgency: string;
 neededByDate?: string;
 }
 
@@ -218,6 +250,16 @@ if (v.neededByDate !== undefined) { out.needed_by_date = v.neededByDate; }
 return out;
 }
 
+export function validateCreateEquipmentRequestRequest(v: CreateEquipmentRequestRequest): string[] {
+const violations: string[] = [];
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.equipmentType !== undefined && v.equipmentType !== null) || v.equipmentType === "") violations.push("equipment_type is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.urgency !== undefined && v.urgency !== null) || v.urgency === "") violations.push("urgency is required");
+return violations;
+}
+
 export interface CreateEquipmentRequestResponse {
 request?: EquipmentRequestPayload;
 }
@@ -233,6 +275,12 @@ export function encodeCreateEquipmentRequestResponse(v: CreateEquipmentRequestRe
 const out: Record<string, unknown> = {};
 if (v.request !== undefined) { out.request = encodeEquipmentRequestPayload(v.request); }
 return out;
+}
+
+export function validateCreateEquipmentRequestResponse(v: CreateEquipmentRequestResponse): string[] {
+const violations: string[] = [];
+if (v.request !== undefined && v.request !== null) violations.push(...validateEquipmentRequestPayload(v.request).map((message) => "request: " + message));
+return violations;
 }
 
 export interface ApproveEquipmentBody {
@@ -252,8 +300,13 @@ if (v.approved !== undefined) { out.approved = v.approved; }
 return out;
 }
 
+export function validateApproveEquipmentBody(v: ApproveEquipmentBody): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ApproveEquipmentRequest {
-equipmentRequestId?: string;
+equipmentRequestId: string;
 body?: ApproveEquipmentBody;
 }
 
@@ -272,6 +325,14 @@ if (v.body !== undefined) { out.body = encodeApproveEquipmentBody(v.body); }
 return out;
 }
 
+export function validateApproveEquipmentRequest(v: ApproveEquipmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.equipmentRequestId !== undefined && v.equipmentRequestId !== null)) violations.push("equipment_request_id is required");
+if (v.equipmentRequestId !== undefined && v.equipmentRequestId !== null && !(Number(v.equipmentRequestId) > 0)) violations.push("equipment_request_id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateApproveEquipmentBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface ApproveEquipmentResponse {
 success?: boolean;
 }
@@ -287,5 +348,10 @@ export function encodeApproveEquipmentResponse(v: ApproveEquipmentResponse): Rec
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateApproveEquipmentResponse(v: ApproveEquipmentResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

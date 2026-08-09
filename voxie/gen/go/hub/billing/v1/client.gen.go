@@ -21,6 +21,11 @@ func NewBillingServiceClient(baseURL string) *BillingServiceClient {
 }
 
 func (c *BillingServiceClient) GetBillingSummary(ctx context.Context, req *GetBillingSummaryRequest) (*GetBillingSummaryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/billing/v1/summary"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -51,6 +56,11 @@ func (c *BillingServiceClient) GetBillingSummary(ctx context.Context, req *GetBi
 }
 
 func (c *BillingServiceClient) ListInvoices(ctx context.Context, req *ListInvoicesRequest) (*ListInvoicesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/billing/v1/invoices"
 	query := url.Values{}
 	if len(query) > 0 {

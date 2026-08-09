@@ -23,6 +23,11 @@ func NewCashServiceClient(baseURL string) *CashServiceClient {
 }
 
 func (c *CashServiceClient) ListCashMovements(ctx context.Context, req *ListCashMovementsRequest) (*ListCashMovementsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/cash/v1/movements"
 	query := url.Values{}
 	query.Set("session_id", strconv.FormatInt(int64(req.SessionId), 10))
@@ -54,6 +59,11 @@ func (c *CashServiceClient) ListCashMovements(ctx context.Context, req *ListCash
 }
 
 func (c *CashServiceClient) CashDrop(ctx context.Context, req *CashDropRequest) (*CashDropResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/cash/v1/drop"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -85,6 +95,11 @@ func (c *CashServiceClient) CashDrop(ctx context.Context, req *CashDropRequest) 
 }
 
 func (c *CashServiceClient) CashPickup(ctx context.Context, req *CashPickupRequest) (*CashPickupResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/cash/v1/pickup"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -116,6 +131,11 @@ func (c *CashServiceClient) CashPickup(ctx context.Context, req *CashPickupReque
 }
 
 func (c *CashServiceClient) CashAdjust(ctx context.Context, req *CashAdjustRequest) (*CashAdjustResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/cash/v1/adjust"
 	body, err := json.Marshal(req)
 	if err != nil {

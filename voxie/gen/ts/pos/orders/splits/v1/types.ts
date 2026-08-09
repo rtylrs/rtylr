@@ -2,7 +2,7 @@
 import * as pos_orders_v1 from "../../v1/types";
 
 export interface SplitOrderRequest {
-orderId?: string;
+orderId: string;
 splits?: (pos_orders_v1.SplitGroup)[];
 }
 
@@ -19,6 +19,15 @@ const out: Record<string, unknown> = {};
 if (v.orderId !== undefined) { out.order_id = v.orderId; }
 if (v.splits !== undefined) { out.splits = (v.splits as any[]).map(pos_orders_v1.encodeSplitGroup); }
 return out;
+}
+
+export function validateSplitOrderRequest(v: SplitOrderRequest): string[] {
+const violations: string[] = [];
+if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
+if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.splits !== undefined && v.splits !== null && v.splits.length < 1) violations.push("splits must contain at least 1 items");
+if (v.splits !== undefined && v.splits !== null) for (const item of v.splits) violations.push(...pos_orders_v1.validateSplitGroup(item).map((message) => "splits: " + message));
+return violations;
 }
 
 export interface SplitOrderResponse {
@@ -39,5 +48,10 @@ const out: Record<string, unknown> = {};
 if (v.orderIds !== undefined) { out.order_ids = v.orderIds; }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateSplitOrderResponse(v: SplitOrderResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

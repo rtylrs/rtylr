@@ -20,7 +20,21 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *AccessRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *RequestAccessRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.App == "" {
 		violations = append(violations, "app is required")
@@ -31,7 +45,48 @@ func (m *RequestAccessRequest) Validate() error {
 	return nil
 }
 
+func (m *RequestAccessResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAccessRequestsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAccessRequestsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Requests {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "requests: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ApproveAccessRequestRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -42,6 +97,17 @@ func (m *ApproveAccessRequestRequest) Validate() error {
 	if m.App == "" {
 		violations = append(violations, "app is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ApproveAccessRequestResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

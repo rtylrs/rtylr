@@ -20,13 +20,146 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *ConfigPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateConfigRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Key == "" {
 		violations = append(violations, "key is required")
 	}
 	if m.Value == "" {
 		violations = append(violations, "value is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateConfigResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetConfigRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetConfigResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Business != nil {
+		if err := m.Business.Validate(); err != nil {
+			violations = append(violations, "business: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *IndustryType) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *IndustryGroup) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Types {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "types: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetIndustriesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetIndustriesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Groups {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "groups: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateConfigRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateConfigResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Config != nil {
+		if err := m.Config.Validate(); err != nil {
+			violations = append(violations, "config: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

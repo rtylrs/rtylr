@@ -24,6 +24,11 @@ func NewKnowledgeServiceClient(baseURL string) *KnowledgeServiceClient {
 }
 
 func (c *KnowledgeServiceClient) ListArticles(ctx context.Context, req *ListArticlesRequest) (*ListArticlesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/knowledge/v1/articles"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -56,6 +61,11 @@ func (c *KnowledgeServiceClient) ListArticles(ctx context.Context, req *ListArti
 }
 
 func (c *KnowledgeServiceClient) CreateArticle(ctx context.Context, req *CreateArticleRequest) (*CreateArticleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/knowledge/v1/articles"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -87,6 +97,11 @@ func (c *KnowledgeServiceClient) CreateArticle(ctx context.Context, req *CreateA
 }
 
 func (c *KnowledgeServiceClient) UpdateArticle(ctx context.Context, req *UpdateArticleRequest) (*UpdateArticleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/knowledge/v1/articles/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -119,6 +134,11 @@ func (c *KnowledgeServiceClient) UpdateArticle(ctx context.Context, req *UpdateA
 }
 
 func (c *KnowledgeServiceClient) DeleteArticle(ctx context.Context, req *DeleteArticleRequest) (*DeleteArticleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/knowledge/v1/articles/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

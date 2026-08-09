@@ -20,7 +20,32 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *StockMovement) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *BranchInventory) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *AdjustStockRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BranchId <= 0 {
 		violations = append(violations, "branch_id must be greater than 0")
@@ -40,7 +65,75 @@ func (m *AdjustStockRequest) Validate() error {
 	return nil
 }
 
+func (m *AdjustStockResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListInventoryRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListInventoryResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Inventory {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "inventory: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListStockMovementsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListStockMovementsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Movements {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "movements: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *LowStockRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BranchId <= 0 {
 		violations = append(violations, "branch_id must be greater than 0")
@@ -51,7 +144,26 @@ func (m *LowStockRequest) Validate() error {
 	return nil
 }
 
+func (m *LowStockResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Items {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "items: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ReceiveStockRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BranchId <= 0 {
 		violations = append(violations, "branch_id must be greater than 0")
@@ -74,7 +186,21 @@ func (m *ReceiveStockRequest) Validate() error {
 	return nil
 }
 
+func (m *ReceiveStockResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *TransferStockRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.FromBranchId <= 0 {
 		violations = append(violations, "from_branch_id must be greater than 0")
@@ -100,7 +226,21 @@ func (m *TransferStockRequest) Validate() error {
 	return nil
 }
 
+func (m *TransferStockResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *WasteStockRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BranchId <= 0 {
 		violations = append(violations, "branch_id must be greater than 0")
@@ -117,6 +257,17 @@ func (m *WasteStockRequest) Validate() error {
 	if m.EmployeeId <= 0 {
 		violations = append(violations, "employee_id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *WasteStockResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

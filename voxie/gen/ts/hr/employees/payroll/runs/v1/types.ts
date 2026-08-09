@@ -53,6 +53,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validatePayrollEntryPayload(v: PayrollEntryPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface PayrollRunPayload {
 id?: string;
 ownerId?: string;
@@ -106,6 +111,12 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validatePayrollRunPayload(v: PayrollRunPayload): string[] {
+const violations: string[] = [];
+if (v.entries !== undefined && v.entries !== null) for (const item of v.entries) violations.push(...validatePayrollEntryPayload(item).map((message) => "entries: " + message));
+return violations;
+}
+
 export interface ListPayrollRunsRequest {
 }
 
@@ -118,6 +129,11 @@ return {
 export function encodeListPayrollRunsRequest(v: ListPayrollRunsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListPayrollRunsRequest(v: ListPayrollRunsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListPayrollRunsResponse {
@@ -146,9 +162,15 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListPayrollRunsResponse(v: ListPayrollRunsResponse): string[] {
+const violations: string[] = [];
+if (v.runs !== undefined && v.runs !== null) for (const item of v.runs) violations.push(...validatePayrollRunPayload(item).map((message) => "runs: " + message));
+return violations;
+}
+
 export interface TriggerPayrollRunRequest {
-periodStart?: string;
-periodEnd?: string;
+periodStart: string;
+periodEnd: string;
 }
 
 export function decodeTriggerPayrollRunRequest(v: any): TriggerPayrollRunRequest {
@@ -164,6 +186,13 @@ const out: Record<string, unknown> = {};
 if (v.periodStart !== undefined) { out.period_start = v.periodStart; }
 if (v.periodEnd !== undefined) { out.period_end = v.periodEnd; }
 return out;
+}
+
+export function validateTriggerPayrollRunRequest(v: TriggerPayrollRunRequest): string[] {
+const violations: string[] = [];
+if (!(v.periodStart !== undefined && v.periodStart !== null) || v.periodStart === "") violations.push("period_start is required");
+if (!(v.periodEnd !== undefined && v.periodEnd !== null) || v.periodEnd === "") violations.push("period_end is required");
+return violations;
 }
 
 export interface TriggerPayrollRunResponse {
@@ -183,8 +212,14 @@ if (v.run !== undefined) { out.run = encodePayrollRunPayload(v.run); }
 return out;
 }
 
+export function validateTriggerPayrollRunResponse(v: TriggerPayrollRunResponse): string[] {
+const violations: string[] = [];
+if (v.run !== undefined && v.run !== null) violations.push(...validatePayrollRunPayload(v.run).map((message) => "run: " + message));
+return violations;
+}
+
 export interface ApprovePayrollRunRequest {
-id?: string;
+id: string;
 }
 
 export function decodeApprovePayrollRunRequest(v: any): ApprovePayrollRunRequest {
@@ -198,6 +233,13 @@ export function encodeApprovePayrollRunRequest(v: ApprovePayrollRunRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateApprovePayrollRunRequest(v: ApprovePayrollRunRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface ApprovePayrollRunResponse {
@@ -217,8 +259,14 @@ if (v.run !== undefined) { out.run = encodePayrollRunPayload(v.run); }
 return out;
 }
 
+export function validateApprovePayrollRunResponse(v: ApprovePayrollRunResponse): string[] {
+const violations: string[] = [];
+if (v.run !== undefined && v.run !== null) violations.push(...validatePayrollRunPayload(v.run).map((message) => "run: " + message));
+return violations;
+}
+
 export interface ExportPayrollRequest {
-runId?: string;
+runId: string;
 }
 
 export function decodeExportPayrollRequest(v: any): ExportPayrollRequest {
@@ -232,6 +280,13 @@ export function encodeExportPayrollRequest(v: ExportPayrollRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.runId !== undefined) { out.run_id = v.runId; }
 return out;
+}
+
+export function validateExportPayrollRequest(v: ExportPayrollRequest): string[] {
+const violations: string[] = [];
+if (!(v.runId !== undefined && v.runId !== null)) violations.push("run_id is required");
+if (v.runId !== undefined && v.runId !== null && !(Number(v.runId) > 0)) violations.push("run_id violates @gt");
+return violations;
 }
 
 export interface ExportPayrollResponse {
@@ -249,5 +304,10 @@ export function encodeExportPayrollResponse(v: ExportPayrollResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.batchId !== undefined) { out.batch_id = v.batchId; }
 return out;
+}
+
+export function validateExportPayrollResponse(v: ExportPayrollResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

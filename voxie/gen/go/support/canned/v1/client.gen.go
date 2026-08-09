@@ -23,6 +23,11 @@ func NewCannedResponseServiceClient(baseURL string) *CannedResponseServiceClient
 }
 
 func (c *CannedResponseServiceClient) ListCannedResponses(ctx context.Context, req *ListCannedResponsesRequest) (*ListCannedResponsesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/canned/v1/canned-responses"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *CannedResponseServiceClient) ListCannedResponses(ctx context.Context, r
 }
 
 func (c *CannedResponseServiceClient) CreateCannedResponse(ctx context.Context, req *CreateCannedResponseRequest) (*CreateCannedResponseResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/canned/v1/canned-responses"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *CannedResponseServiceClient) CreateCannedResponse(ctx context.Context, 
 }
 
 func (c *CannedResponseServiceClient) UpdateCannedResponse(ctx context.Context, req *UpdateCannedResponseRequest) (*UpdateCannedResponseResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/canned/v1/canned-responses/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -116,6 +131,11 @@ func (c *CannedResponseServiceClient) UpdateCannedResponse(ctx context.Context, 
 }
 
 func (c *CannedResponseServiceClient) DeleteCannedResponse(ctx context.Context, req *DeleteCannedResponseRequest) (*DeleteCannedResponseResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/canned/v1/canned-responses/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

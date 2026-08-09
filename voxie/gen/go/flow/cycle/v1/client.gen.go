@@ -24,6 +24,11 @@ func NewCycleServiceClient(baseURL string) *CycleServiceClient {
 }
 
 func (c *CycleServiceClient) ListCycles(ctx context.Context, req *ListCyclesRequest) (*ListCyclesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/cycle/v1/cycles"
 	query := url.Values{}
 	query.Set("workspace_id", req.WorkspaceId)
@@ -59,6 +64,11 @@ func (c *CycleServiceClient) ListCycles(ctx context.Context, req *ListCyclesRequ
 }
 
 func (c *CycleServiceClient) CreateCycle(ctx context.Context, req *CreateCycleRequest) (*CreateCycleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/cycle/v1/cycles"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -90,6 +100,11 @@ func (c *CycleServiceClient) CreateCycle(ctx context.Context, req *CreateCycleRe
 }
 
 func (c *CycleServiceClient) UpdateCycle(ctx context.Context, req *UpdateCycleRequest) (*UpdateCycleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/cycle/v1/cycles/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

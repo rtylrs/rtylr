@@ -38,6 +38,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateDocument(v: Document): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface EmployeeDocumentPayload {
 id?: string;
 ownerId?: string;
@@ -88,9 +93,14 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateEmployeeDocumentPayload(v: EmployeeDocumentPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateDocumentRequest {
 staffId?: string;
-name?: string;
+name: string;
 type?: string;
 fileUrl?: string;
 expiryDate?: string;
@@ -117,6 +127,12 @@ if (v.expiryDate !== undefined) { out.expiry_date = v.expiryDate; }
 return out;
 }
 
+export function validateCreateDocumentRequest(v: CreateDocumentRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateDocumentResponse {
 id?: string;
 message?: string;
@@ -137,8 +153,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateDocumentResponse(v: CreateDocumentResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteDocumentRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteDocumentRequest(v: any): DeleteDocumentRequest {
@@ -152,6 +173,13 @@ export function encodeDeleteDocumentRequest(v: DeleteDocumentRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteDocumentRequest(v: DeleteDocumentRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteDocumentResponse {
@@ -171,6 +199,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteDocumentResponse(v: DeleteDocumentResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListDocumentsRequest {
 }
 
@@ -183,6 +216,11 @@ return {
 export function encodeListDocumentsRequest(v: ListDocumentsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListDocumentsRequest(v: ListDocumentsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListDocumentsResponse {
@@ -200,5 +238,11 @@ export function encodeListDocumentsResponse(v: ListDocumentsResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.documents !== undefined) { out.documents = (v.documents as any[]).map(encodeDocument); }
 return out;
+}
+
+export function validateListDocumentsResponse(v: ListDocumentsResponse): string[] {
+const violations: string[] = [];
+if (v.documents !== undefined && v.documents !== null) for (const item of v.documents) violations.push(...validateDocument(item).map((message) => "documents: " + message));
+return violations;
 }
 

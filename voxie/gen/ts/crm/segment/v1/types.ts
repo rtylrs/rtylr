@@ -42,10 +42,15 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateSegment(v: Segment): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateSegmentRequest {
-name?: string;
-description?: string;
-filters?: string;
+name: string;
+description: string;
+filters: string;
 }
 
 export function decodeCreateSegmentRequest(v: any): CreateSegmentRequest {
@@ -63,6 +68,14 @@ if (v.name !== undefined) { out.name = v.name; }
 if (v.description !== undefined) { out.description = v.description; }
 if (v.filters !== undefined) { out.filters = v.filters; }
 return out;
+}
+
+export function validateCreateSegmentRequest(v: CreateSegmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.filters !== undefined && v.filters !== null) || v.filters === "") violations.push("filters is required");
+return violations;
 }
 
 export interface CreateSegmentResponse {
@@ -85,8 +98,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateSegmentResponse(v: CreateSegmentResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteSegmentRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteSegmentRequest(v: any): DeleteSegmentRequest {
@@ -100,6 +118,13 @@ export function encodeDeleteSegmentRequest(v: DeleteSegmentRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteSegmentRequest(v: DeleteSegmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteSegmentResponse {
@@ -119,10 +144,15 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteSegmentResponse(v: DeleteSegmentResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetSegmentCustomersRequest {
-segmentId?: string;
-page?: string;
-pageSize?: string;
+segmentId: string;
+page: string;
+pageSize: string;
 }
 
 export function decodeGetSegmentCustomersRequest(v: any): GetSegmentCustomersRequest {
@@ -140,6 +170,17 @@ if (v.segmentId !== undefined) { out.segment_id = v.segmentId; }
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
+}
+
+export function validateGetSegmentCustomersRequest(v: GetSegmentCustomersRequest): string[] {
+const violations: string[] = [];
+if (!(v.segmentId !== undefined && v.segmentId !== null)) violations.push("segment_id is required");
+if (v.segmentId !== undefined && v.segmentId !== null && !(Number(v.segmentId) > 0)) violations.push("segment_id violates @gt");
+if (!(v.page !== undefined && v.page !== null)) violations.push("page is required");
+if (v.page !== undefined && v.page !== null && !(Number(v.page) > 0)) violations.push("page violates @gt");
+if (!(v.pageSize !== undefined && v.pageSize !== null)) violations.push("page_size is required");
+if (v.pageSize !== undefined && v.pageSize !== null && !(Number(v.pageSize) > 0)) violations.push("page_size violates @gt");
+return violations;
 }
 
 export interface GetSegmentCustomersResponse {
@@ -168,8 +209,14 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateGetSegmentCustomersResponse(v: GetSegmentCustomersResponse): string[] {
+const violations: string[] = [];
+if (v.customers !== undefined && v.customers !== null) for (const item of v.customers) violations.push(...crm_customer_v1.validateCustomer(item).map((message) => "customers: " + message));
+return violations;
+}
+
 export interface GetSegmentDetailRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetSegmentDetailRequest(v: any): GetSegmentDetailRequest {
@@ -183,6 +230,13 @@ export function encodeGetSegmentDetailRequest(v: GetSegmentDetailRequest): Recor
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetSegmentDetailRequest(v: GetSegmentDetailRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetSegmentDetailResponse {
@@ -205,6 +259,13 @@ if (v.customers !== undefined) { out.customers = (v.customers as any[]).map(crm_
 return out;
 }
 
+export function validateGetSegmentDetailResponse(v: GetSegmentDetailResponse): string[] {
+const violations: string[] = [];
+if (v.segment !== undefined && v.segment !== null) violations.push(...validateSegment(v.segment).map((message) => "segment: " + message));
+if (v.customers !== undefined && v.customers !== null) for (const item of v.customers) violations.push(...crm_customer_v1.validateCustomer(item).map((message) => "customers: " + message));
+return violations;
+}
+
 export interface ListSegmentsRequest {
 }
 
@@ -217,6 +278,11 @@ return {
 export function encodeListSegmentsRequest(v: ListSegmentsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListSegmentsRequest(v: ListSegmentsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListSegmentsResponse {
@@ -236,10 +302,16 @@ if (v.segments !== undefined) { out.segments = (v.segments as any[]).map(encodeS
 return out;
 }
 
+export function validateListSegmentsResponse(v: ListSegmentsResponse): string[] {
+const violations: string[] = [];
+if (v.segments !== undefined && v.segments !== null) for (const item of v.segments) violations.push(...validateSegment(item).map((message) => "segments: " + message));
+return violations;
+}
+
 export interface UpdateSegmentBody {
-name?: string;
-description?: string;
-filters?: string;
+name: string;
+description: string;
+filters: string;
 }
 
 export function decodeUpdateSegmentBody(v: any): UpdateSegmentBody {
@@ -259,8 +331,16 @@ if (v.filters !== undefined) { out.filters = v.filters; }
 return out;
 }
 
+export function validateUpdateSegmentBody(v: UpdateSegmentBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.filters !== undefined && v.filters !== null) || v.filters === "") violations.push("filters is required");
+return violations;
+}
+
 export interface UpdateSegmentRequest {
-id?: string;
+id: string;
 body?: UpdateSegmentBody;
 }
 
@@ -279,6 +359,14 @@ if (v.body !== undefined) { out.body = encodeUpdateSegmentBody(v.body); }
 return out;
 }
 
+export function validateUpdateSegmentRequest(v: UpdateSegmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateSegmentBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateSegmentResponse {
 message?: string;
 }
@@ -294,5 +382,10 @@ export function encodeUpdateSegmentResponse(v: UpdateSegmentResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateSegmentResponse(v: UpdateSegmentResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

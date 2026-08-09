@@ -22,6 +22,11 @@ func NewAuthServiceClient(baseURL string) *AuthServiceClient {
 }
 
 func (c *AuthServiceClient) Register(ctx context.Context, req *RegisterRequest) (*RegisterResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/auth/v1/register"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -53,6 +58,11 @@ func (c *AuthServiceClient) Register(ctx context.Context, req *RegisterRequest) 
 }
 
 func (c *AuthServiceClient) Login(ctx context.Context, req *LoginRequest) (*LoginResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/auth/v1/login"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *AuthServiceClient) Login(ctx context.Context, req *LoginRequest) (*Logi
 }
 
 func (c *AuthServiceClient) GoogleAuth(ctx context.Context, req *GoogleAuthRequest) (*GoogleAuthResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/auth/v1/register/google"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -115,6 +130,11 @@ func (c *AuthServiceClient) GoogleAuth(ctx context.Context, req *GoogleAuthReque
 }
 
 func (c *AuthServiceClient) ResetPassword(ctx context.Context, req *ResetPasswordRequest) (*ResetPasswordResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/auth/v1/password-reset/request"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -146,6 +166,11 @@ func (c *AuthServiceClient) ResetPassword(ctx context.Context, req *ResetPasswor
 }
 
 func (c *AuthServiceClient) ResetPasswordConfirm(ctx context.Context, req *ResetPasswordConfirmRequest) (*ResetPasswordConfirmResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/auth/v1/password-reset/confirm"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -177,6 +202,11 @@ func (c *AuthServiceClient) ResetPasswordConfirm(ctx context.Context, req *Reset
 }
 
 func (c *AuthServiceClient) VerifyEmail(ctx context.Context, req *VerifyEmailRequest) (*VerifyEmailResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/auth/v1/verify-email"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -208,6 +238,11 @@ func (c *AuthServiceClient) VerifyEmail(ctx context.Context, req *VerifyEmailReq
 }
 
 func (c *AuthServiceClient) ResendVerification(ctx context.Context, req *ResendVerificationRequest) (*ResendVerificationResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/auth/v1/resend-verification"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -239,6 +274,11 @@ func (c *AuthServiceClient) ResendVerification(ctx context.Context, req *ResendV
 }
 
 func (c *AuthServiceClient) InviteAccept(ctx context.Context, req *InviteAcceptRequest) (*InviteAcceptResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/auth/v1/invite/accept"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -270,6 +310,11 @@ func (c *AuthServiceClient) InviteAccept(ctx context.Context, req *InviteAcceptR
 }
 
 func (c *AuthServiceClient) CheckEmailExists(ctx context.Context, req *CheckEmailExistsRequest) (*CheckEmailExistsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/auth/v1/email-exists"
 	query := url.Values{}
 	query.Set("email", req.Email)
@@ -301,6 +346,11 @@ func (c *AuthServiceClient) CheckEmailExists(ctx context.Context, req *CheckEmai
 }
 
 func (c *AuthServiceClient) SocialAuthorize(ctx context.Context, req *SocialAuthorizeRequest) (*SocialAuthorizeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/common/auth/v1/social/authorize"
 	query := url.Values{}
 	query.Set("provider", req.Provider)

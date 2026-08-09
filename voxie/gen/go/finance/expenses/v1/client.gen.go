@@ -23,6 +23,11 @@ func NewExpensesServiceClient(baseURL string) *ExpensesServiceClient {
 }
 
 func (c *ExpensesServiceClient) ListExpenses(ctx context.Context, req *ListExpensesRequest) (*ListExpensesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/expenses/v1/expenses"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *ExpensesServiceClient) ListExpenses(ctx context.Context, req *ListExpen
 }
 
 func (c *ExpensesServiceClient) CreateExpense(ctx context.Context, req *CreateExpenseRequest) (*CreateExpenseResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/expenses/v1/expenses"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,9 +94,14 @@ func (c *ExpensesServiceClient) CreateExpense(ctx context.Context, req *CreateEx
 }
 
 func (c *ExpensesServiceClient) UpdateExpense(ctx context.Context, req *UpdateExpenseRequest) (*UpdateExpenseResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/expenses/v1/expenses/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -116,6 +131,11 @@ func (c *ExpensesServiceClient) UpdateExpense(ctx context.Context, req *UpdateEx
 }
 
 func (c *ExpensesServiceClient) DeleteExpense(ctx context.Context, req *DeleteExpenseRequest) (*DeleteExpenseResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/expenses/v1/expenses/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -147,6 +167,11 @@ func (c *ExpensesServiceClient) DeleteExpense(ctx context.Context, req *DeleteEx
 }
 
 func (c *ExpensesServiceClient) GetExpense(ctx context.Context, req *GetExpenseRequest) (*GetExpenseResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/expenses/v1/expenses/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -178,9 +203,14 @@ func (c *ExpensesServiceClient) GetExpense(ctx context.Context, req *GetExpenseR
 }
 
 func (c *ExpensesServiceClient) UpdateExpenseStatus(ctx context.Context, req *UpdateExpenseStatusRequest) (*UpdateExpenseStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/expenses/v1/expenses/{id}/status"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -210,6 +240,11 @@ func (c *ExpensesServiceClient) UpdateExpenseStatus(ctx context.Context, req *Up
 }
 
 func (c *ExpensesServiceClient) ListExpenseCategories(ctx context.Context, req *ListExpenseCategoriesRequest) (*ListExpenseCategoriesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/expenses/v1/categories"
 	query := url.Values{}
 	if len(query) > 0 {

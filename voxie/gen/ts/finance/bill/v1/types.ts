@@ -44,13 +44,18 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateBill(v: Bill): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateBillRequest {
-supplierId?: string;
+supplierId: string;
 amount?: number;
-currency?: string;
-dueDate?: string;
-status?: string;
-description?: string;
+currency: string;
+dueDate: string;
+status: string;
+description: string;
 }
 
 export function decodeCreateBillRequest(v: any): CreateBillRequest {
@@ -76,6 +81,18 @@ if (v.description !== undefined) { out.description = v.description; }
 return out;
 }
 
+export function validateCreateBillRequest(v: CreateBillRequest): string[] {
+const violations: string[] = [];
+if (!(v.supplierId !== undefined && v.supplierId !== null)) violations.push("supplier_id is required");
+if (v.supplierId !== undefined && v.supplierId !== null && !(Number(v.supplierId) > 0)) violations.push("supplier_id violates @gt");
+if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
+if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+return violations;
+}
+
 export interface CreateBillResponse {
 id?: string;
 message?: string;
@@ -96,8 +113,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateBillResponse(v: CreateBillResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteBillRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteBillRequest(v: any): DeleteBillRequest {
@@ -111,6 +133,13 @@ export function encodeDeleteBillRequest(v: DeleteBillRequest): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteBillRequest(v: DeleteBillRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteBillResponse {
@@ -130,8 +159,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteBillResponse(v: DeleteBillResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetBillRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetBillRequest(v: any): GetBillRequest {
@@ -145,6 +179,13 @@ export function encodeGetBillRequest(v: GetBillRequest): Record<string, unknown>
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetBillRequest(v: GetBillRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetBillResponse {
@@ -164,6 +205,12 @@ if (v.bill !== undefined) { out.bill = encodeBill(v.bill); }
 return out;
 }
 
+export function validateGetBillResponse(v: GetBillResponse): string[] {
+const violations: string[] = [];
+if (v.bill !== undefined && v.bill !== null) violations.push(...validateBill(v.bill).map((message) => "bill: " + message));
+return violations;
+}
+
 export interface ListBillsRequest {
 }
 
@@ -176,6 +223,11 @@ return {
 export function encodeListBillsRequest(v: ListBillsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListBillsRequest(v: ListBillsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListBillsResponse {
@@ -195,13 +247,19 @@ if (v.bills !== undefined) { out.bills = (v.bills as any[]).map(encodeBill); }
 return out;
 }
 
+export function validateListBillsResponse(v: ListBillsResponse): string[] {
+const violations: string[] = [];
+if (v.bills !== undefined && v.bills !== null) for (const item of v.bills) violations.push(...validateBill(item).map((message) => "bills: " + message));
+return violations;
+}
+
 export interface UpdateBillBody {
-supplierId?: string;
+supplierId: string;
 amount?: number;
-currency?: string;
-dueDate?: string;
-status?: string;
-description?: string;
+currency: string;
+dueDate: string;
+status: string;
+description: string;
 }
 
 export function decodeUpdateBillBody(v: any): UpdateBillBody {
@@ -227,8 +285,20 @@ if (v.description !== undefined) { out.description = v.description; }
 return out;
 }
 
+export function validateUpdateBillBody(v: UpdateBillBody): string[] {
+const violations: string[] = [];
+if (!(v.supplierId !== undefined && v.supplierId !== null)) violations.push("supplier_id is required");
+if (v.supplierId !== undefined && v.supplierId !== null && !(Number(v.supplierId) > 0)) violations.push("supplier_id violates @gt");
+if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
+if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+return violations;
+}
+
 export interface UpdateBillRequest {
-id?: string;
+id: string;
 body?: UpdateBillBody;
 }
 
@@ -247,6 +317,14 @@ if (v.body !== undefined) { out.body = encodeUpdateBillBody(v.body); }
 return out;
 }
 
+export function validateUpdateBillRequest(v: UpdateBillRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateBillBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateBillResponse {
 message?: string;
 }
@@ -262,5 +340,10 @@ export function encodeUpdateBillResponse(v: UpdateBillResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateBillResponse(v: UpdateBillResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

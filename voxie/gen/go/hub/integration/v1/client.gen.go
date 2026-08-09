@@ -22,6 +22,11 @@ func NewIntegrationServiceClient(baseURL string) *IntegrationServiceClient {
 }
 
 func (c *IntegrationServiceClient) ListIntegrations(ctx context.Context, req *ListIntegrationsRequest) (*ListIntegrationsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/integration/v1/integrations"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *IntegrationServiceClient) ListIntegrations(ctx context.Context, req *Li
 }
 
 func (c *IntegrationServiceClient) ConnectIntegration(ctx context.Context, req *ConnectIntegrationRequest) (*ConnectIntegrationResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/integration/v1/integrations/connect"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -83,6 +93,11 @@ func (c *IntegrationServiceClient) ConnectIntegration(ctx context.Context, req *
 }
 
 func (c *IntegrationServiceClient) DisconnectIntegration(ctx context.Context, req *DisconnectIntegrationRequest) (*DisconnectIntegrationResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/integration/v1/integrations/disconnect"
 	body, err := json.Marshal(req)
 	if err != nil {

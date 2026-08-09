@@ -26,6 +26,11 @@ if (v.payrollDraft !== undefined) { out.payroll_draft = v.payrollDraft; }
 return out;
 }
 
+export function validateDashboardStats(v: DashboardStats): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DashboardWidgetPayload {
 id?: string;
 ownerId?: string;
@@ -73,6 +78,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateDashboardWidgetPayload(v: DashboardWidgetPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DashboardDataPayload {
 widgetType?: string;
 data?: string;
@@ -93,6 +103,11 @@ if (v.data !== undefined) { out.data = v.data; }
 return out;
 }
 
+export function validateDashboardDataPayload(v: DashboardDataPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetHRDashboardRequest {
 }
 
@@ -105,6 +120,11 @@ return {
 export function encodeGetHRDashboardRequest(v: GetHRDashboardRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetHRDashboardRequest(v: GetHRDashboardRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetHRDashboardResponse {
@@ -124,6 +144,12 @@ if (v.stats !== undefined) { out.stats = encodeDashboardStats(v.stats); }
 return out;
 }
 
+export function validateGetHRDashboardResponse(v: GetHRDashboardResponse): string[] {
+const violations: string[] = [];
+if (v.stats !== undefined && v.stats !== null) violations.push(...validateDashboardStats(v.stats).map((message) => "stats: " + message));
+return violations;
+}
+
 export interface GetDashboardWidgetsRequest {
 }
 
@@ -136,6 +162,11 @@ return {
 export function encodeGetDashboardWidgetsRequest(v: GetDashboardWidgetsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetDashboardWidgetsRequest(v: GetDashboardWidgetsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetDashboardWidgetsResponse {
@@ -158,6 +189,13 @@ if (v.data !== undefined) { out.data = Object.fromEntries(Object.entries(v.data 
 return out;
 }
 
+export function validateGetDashboardWidgetsResponse(v: GetDashboardWidgetsResponse): string[] {
+const violations: string[] = [];
+if (v.widgets !== undefined && v.widgets !== null) for (const item of v.widgets) violations.push(...validateDashboardWidgetPayload(item).map((message) => "widgets: " + message));
+if (v.data !== undefined && v.data !== null) for (const item of Object.values(v.data)) violations.push(...validateDashboardDataPayload(item).map((message) => "data: " + message));
+return violations;
+}
+
 export interface UpdateDashboardWidgetsRequest {
 widgets?: (DashboardWidgetPayload)[];
 }
@@ -175,6 +213,13 @@ if (v.widgets !== undefined) { out.widgets = (v.widgets as any[]).map(encodeDash
 return out;
 }
 
+export function validateUpdateDashboardWidgetsRequest(v: UpdateDashboardWidgetsRequest): string[] {
+const violations: string[] = [];
+if (v.widgets !== undefined && v.widgets !== null && v.widgets.length < 1) violations.push("widgets must contain at least 1 items");
+if (v.widgets !== undefined && v.widgets !== null) for (const item of v.widgets) violations.push(...validateDashboardWidgetPayload(item).map((message) => "widgets: " + message));
+return violations;
+}
+
 export interface UpdateDashboardWidgetsResponse {
 success?: boolean;
 }
@@ -190,5 +235,10 @@ export function encodeUpdateDashboardWidgetsResponse(v: UpdateDashboardWidgetsRe
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateUpdateDashboardWidgetsResponse(v: UpdateDashboardWidgetsResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

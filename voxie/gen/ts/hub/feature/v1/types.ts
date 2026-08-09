@@ -23,6 +23,11 @@ if (v.variant !== undefined) { out.variant = v.variant; }
 return out;
 }
 
+export function validateFeatureResolution(v: FeatureResolution): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface FeatureFlag {
 key?: string;
 description?: string;
@@ -55,6 +60,11 @@ if (v.variantOff !== undefined) { out.variant_off = v.variantOff; }
 return out;
 }
 
+export function validateFeatureFlag(v: FeatureFlag): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface FeatureTarget {
 featureKey?: string;
 ownerId?: string;
@@ -81,6 +91,11 @@ if (v.variant !== undefined) { out.variant = v.variant; }
 return out;
 }
 
+export function validateFeatureTarget(v: FeatureTarget): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface FeatureCondition {
 attribute?: string;
 operator?: string;
@@ -102,6 +117,11 @@ if (v.attribute !== undefined) { out.attribute = v.attribute; }
 if (v.operator !== undefined) { out.operator = v.operator; }
 if (v.value !== undefined) { out.value = v.value; }
 return out;
+}
+
+export function validateFeatureCondition(v: FeatureCondition): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface FeatureRule {
@@ -142,6 +162,12 @@ if (v.conditions !== undefined) { out.conditions = (v.conditions as any[]).map(e
 return out;
 }
 
+export function validateFeatureRule(v: FeatureRule): string[] {
+const violations: string[] = [];
+if (v.conditions !== undefined && v.conditions !== null) for (const item of v.conditions) violations.push(...validateFeatureCondition(item).map((message) => "conditions: " + message));
+return violations;
+}
+
 export interface ListFlagsRequest {
 }
 
@@ -154,6 +180,11 @@ return {
 export function encodeListFlagsRequest(v: ListFlagsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListFlagsRequest(v: ListFlagsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListFlagsResponse {
@@ -173,8 +204,14 @@ if (v.flags !== undefined) { out.flags = (v.flags as any[]).map(encodeFeatureFla
 return out;
 }
 
+export function validateListFlagsResponse(v: ListFlagsResponse): string[] {
+const violations: string[] = [];
+if (v.flags !== undefined && v.flags !== null) for (const item of v.flags) violations.push(...validateFeatureFlag(item).map((message) => "flags: " + message));
+return violations;
+}
+
 export interface UpsertFlagRequest {
-key?: string;
+key: string;
 description?: string;
 enabled?: boolean;
 rolloutPercentage?: number;
@@ -205,6 +242,12 @@ if (v.variantOff !== undefined) { out.variant_off = v.variantOff; }
 return out;
 }
 
+export function validateUpsertFlagRequest(v: UpsertFlagRequest): string[] {
+const violations: string[] = [];
+if (!(v.key !== undefined && v.key !== null) || v.key === "") violations.push("key is required");
+return violations;
+}
+
 export interface UpsertFlagResponse {
 message?: string;
 }
@@ -222,8 +265,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpsertFlagResponse(v: UpsertFlagResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteFlagRequest {
-key?: string;
+key: string;
 }
 
 export function decodeDeleteFlagRequest(v: any): DeleteFlagRequest {
@@ -237,6 +285,12 @@ export function encodeDeleteFlagRequest(v: DeleteFlagRequest): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.key !== undefined) { out.key = v.key; }
 return out;
+}
+
+export function validateDeleteFlagRequest(v: DeleteFlagRequest): string[] {
+const violations: string[] = [];
+if (!(v.key !== undefined && v.key !== null) || v.key === "") violations.push("key is required");
+return violations;
 }
 
 export interface DeleteFlagResponse {
@@ -254,6 +308,11 @@ export function encodeDeleteFlagResponse(v: DeleteFlagResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateDeleteFlagResponse(v: DeleteFlagResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ResolveFeaturesRequest {
@@ -276,6 +335,11 @@ if (v.attributes !== undefined) { out.attributes = v.attributes; }
 return out;
 }
 
+export function validateResolveFeaturesRequest(v: ResolveFeaturesRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ResolveFeaturesResponse {
 features?: Record<string, FeatureResolution>;
 variant?: string;
@@ -296,6 +360,12 @@ if (v.variant !== undefined) { out.variant = v.variant; }
 return out;
 }
 
+export function validateResolveFeaturesResponse(v: ResolveFeaturesResponse): string[] {
+const violations: string[] = [];
+if (v.features !== undefined && v.features !== null) for (const item of Object.values(v.features)) violations.push(...validateFeatureResolution(item).map((message) => "features: " + message));
+return violations;
+}
+
 export interface ResolveMyFeaturesRequest {
 attributes?: Record<string, string>;
 }
@@ -311,6 +381,11 @@ export function encodeResolveMyFeaturesRequest(v: ResolveMyFeaturesRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.attributes !== undefined) { out.attributes = v.attributes; }
 return out;
+}
+
+export function validateResolveMyFeaturesRequest(v: ResolveMyFeaturesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ResolveMyFeaturesResponse {
@@ -333,8 +408,14 @@ if (v.variant !== undefined) { out.variant = v.variant; }
 return out;
 }
 
+export function validateResolveMyFeaturesResponse(v: ResolveMyFeaturesResponse): string[] {
+const violations: string[] = [];
+if (v.features !== undefined && v.features !== null) for (const item of Object.values(v.features)) violations.push(...validateFeatureResolution(item).map((message) => "features: " + message));
+return violations;
+}
+
 export interface ListRulesRequest {
-featureKey?: string;
+featureKey: string;
 }
 
 export function decodeListRulesRequest(v: any): ListRulesRequest {
@@ -348,6 +429,12 @@ export function encodeListRulesRequest(v: ListRulesRequest): Record<string, unkn
 const out: Record<string, unknown> = {};
 if (v.featureKey !== undefined) { out.feature_key = v.featureKey; }
 return out;
+}
+
+export function validateListRulesRequest(v: ListRulesRequest): string[] {
+const violations: string[] = [];
+if (!(v.featureKey !== undefined && v.featureKey !== null) || v.featureKey === "") violations.push("feature_key is required");
+return violations;
 }
 
 export interface ListRulesResponse {
@@ -367,8 +454,14 @@ if (v.rules !== undefined) { out.rules = (v.rules as any[]).map(encodeFeatureRul
 return out;
 }
 
+export function validateListRulesResponse(v: ListRulesResponse): string[] {
+const violations: string[] = [];
+if (v.rules !== undefined && v.rules !== null) for (const item of v.rules) violations.push(...validateFeatureRule(item).map((message) => "rules: " + message));
+return violations;
+}
+
 export interface CreateRuleRequest {
-featureKey?: string;
+featureKey: string;
 priority?: number;
 description?: string;
 variant?: string;
@@ -402,6 +495,13 @@ if (v.conditions !== undefined) { out.conditions = (v.conditions as any[]).map(e
 return out;
 }
 
+export function validateCreateRuleRequest(v: CreateRuleRequest): string[] {
+const violations: string[] = [];
+if (!(v.featureKey !== undefined && v.featureKey !== null) || v.featureKey === "") violations.push("feature_key is required");
+if (v.conditions !== undefined && v.conditions !== null) for (const item of v.conditions) violations.push(...validateFeatureCondition(item).map((message) => "conditions: " + message));
+return violations;
+}
+
 export interface CreateRuleResponse {
 ruleId?: string;
 message?: string;
@@ -420,6 +520,11 @@ const out: Record<string, unknown> = {};
 if (v.ruleId !== undefined) { out.rule_id = v.ruleId; }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateCreateRuleResponse(v: CreateRuleResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface UpdateRuleRequest {
@@ -457,6 +562,12 @@ if (v.conditions !== undefined) { out.conditions = (v.conditions as any[]).map(e
 return out;
 }
 
+export function validateUpdateRuleRequest(v: UpdateRuleRequest): string[] {
+const violations: string[] = [];
+if (v.conditions !== undefined && v.conditions !== null) for (const item of v.conditions) violations.push(...validateFeatureCondition(item).map((message) => "conditions: " + message));
+return violations;
+}
+
 export interface UpdateRuleResponse {
 message?: string;
 }
@@ -472,6 +583,11 @@ export function encodeUpdateRuleResponse(v: UpdateRuleResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateRuleResponse(v: UpdateRuleResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface DeleteRuleRequest {
@@ -491,6 +607,11 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateDeleteRuleRequest(v: DeleteRuleRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteRuleResponse {
 message?: string;
 }
@@ -508,8 +629,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteRuleResponse(v: DeleteRuleResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListTargetsRequest {
-featureKey?: string;
+featureKey: string;
 }
 
 export function decodeListTargetsRequest(v: any): ListTargetsRequest {
@@ -523,6 +649,12 @@ export function encodeListTargetsRequest(v: ListTargetsRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.featureKey !== undefined) { out.feature_key = v.featureKey; }
 return out;
+}
+
+export function validateListTargetsRequest(v: ListTargetsRequest): string[] {
+const violations: string[] = [];
+if (!(v.featureKey !== undefined && v.featureKey !== null) || v.featureKey === "") violations.push("feature_key is required");
+return violations;
 }
 
 export interface ListTargetsResponse {
@@ -542,8 +674,14 @@ if (v.targets !== undefined) { out.targets = (v.targets as any[]).map(encodeFeat
 return out;
 }
 
+export function validateListTargetsResponse(v: ListTargetsResponse): string[] {
+const violations: string[] = [];
+if (v.targets !== undefined && v.targets !== null) for (const item of v.targets) violations.push(...validateFeatureTarget(item).map((message) => "targets: " + message));
+return violations;
+}
+
 export interface UpsertTargetRequest {
-featureKey?: string;
+featureKey: string;
 ownerId?: string;
 enabled?: boolean;
 variant?: string;
@@ -568,6 +706,12 @@ if (v.variant !== undefined) { out.variant = v.variant; }
 return out;
 }
 
+export function validateUpsertTargetRequest(v: UpsertTargetRequest): string[] {
+const violations: string[] = [];
+if (!(v.featureKey !== undefined && v.featureKey !== null) || v.featureKey === "") violations.push("feature_key is required");
+return violations;
+}
+
 export interface UpsertTargetResponse {
 message?: string;
 }
@@ -585,8 +729,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpsertTargetResponse(v: UpsertTargetResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteTargetRequest {
-featureKey?: string;
+featureKey: string;
 ownerId?: string;
 }
 
@@ -605,6 +754,12 @@ if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
 return out;
 }
 
+export function validateDeleteTargetRequest(v: DeleteTargetRequest): string[] {
+const violations: string[] = [];
+if (!(v.featureKey !== undefined && v.featureKey !== null) || v.featureKey === "") violations.push("feature_key is required");
+return violations;
+}
+
 export interface DeleteTargetResponse {
 message?: string;
 }
@@ -620,5 +775,10 @@ export function encodeDeleteTargetResponse(v: DeleteTargetResponse): Record<stri
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateDeleteTargetResponse(v: DeleteTargetResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

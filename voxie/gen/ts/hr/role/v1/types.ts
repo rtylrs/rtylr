@@ -23,6 +23,11 @@ if (v.isGranted !== undefined) { out.is_granted = v.isGranted; }
 return out;
 }
 
+export function validatePermissionPayload(v: PermissionPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface RolePayload {
 id?: string;
 ownerId?: string;
@@ -58,6 +63,12 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateRolePayload(v: RolePayload): string[] {
+const violations: string[] = [];
+if (v.permissions !== undefined && v.permissions !== null) for (const item of v.permissions) violations.push(...validatePermissionPayload(item).map((message) => "permissions: " + message));
+return violations;
+}
+
 export interface ListRolesResponse {
 roles?: (RolePayload)[];
 }
@@ -75,8 +86,14 @@ if (v.roles !== undefined) { out.roles = (v.roles as any[]).map(encodeRolePayloa
 return out;
 }
 
+export function validateListRolesResponse(v: ListRolesResponse): string[] {
+const violations: string[] = [];
+if (v.roles !== undefined && v.roles !== null) for (const item of v.roles) violations.push(...validateRolePayload(item).map((message) => "roles: " + message));
+return violations;
+}
+
 export interface CreateRoleRequest {
-name?: string;
+name: string;
 permissions?: (PermissionPayload)[];
 }
 
@@ -95,6 +112,14 @@ if (v.permissions !== undefined) { out.permissions = (v.permissions as any[]).ma
 return out;
 }
 
+export function validateCreateRoleRequest(v: CreateRoleRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.permissions !== undefined && v.permissions !== null && v.permissions.length < 1) violations.push("permissions must contain at least 1 items");
+if (v.permissions !== undefined && v.permissions !== null) for (const item of v.permissions) violations.push(...validatePermissionPayload(item).map((message) => "permissions: " + message));
+return violations;
+}
+
 export interface CreateRoleResponse {
 role?: RolePayload;
 }
@@ -110,6 +135,12 @@ export function encodeCreateRoleResponse(v: CreateRoleResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.role !== undefined) { out.role = encodeRolePayload(v.role); }
 return out;
+}
+
+export function validateCreateRoleResponse(v: CreateRoleResponse): string[] {
+const violations: string[] = [];
+if (v.role !== undefined && v.role !== null) violations.push(...validateRolePayload(v.role).map((message) => "role: " + message));
+return violations;
 }
 
 export interface UpdateRoleBody {
@@ -132,8 +163,15 @@ if (v.permissions !== undefined) { out.permissions = (v.permissions as any[]).ma
 return out;
 }
 
+export function validateUpdateRoleBody(v: UpdateRoleBody): string[] {
+const violations: string[] = [];
+if (v.permissions !== undefined && v.permissions !== null && v.permissions.length < 1) violations.push("permissions must contain at least 1 items");
+if (v.permissions !== undefined && v.permissions !== null) for (const item of v.permissions) violations.push(...validatePermissionPayload(item).map((message) => "permissions: " + message));
+return violations;
+}
+
 export interface UpdateRoleRequest {
-id?: string;
+id: string;
 body?: UpdateRoleBody;
 }
 
@@ -150,6 +188,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateRoleBody(v.body); }
 return out;
+}
+
+export function validateUpdateRoleRequest(v: UpdateRoleRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateRoleBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateRoleResponse {
@@ -169,9 +215,15 @@ if (v.role !== undefined) { out.role = encodeRolePayload(v.role); }
 return out;
 }
 
+export function validateUpdateRoleResponse(v: UpdateRoleResponse): string[] {
+const violations: string[] = [];
+if (v.role !== undefined && v.role !== null) violations.push(...validateRolePayload(v.role).map((message) => "role: " + message));
+return violations;
+}
+
 export interface AssignRoleRequest {
-employeeId?: string;
-roleId?: string;
+employeeId: string;
+roleId: string;
 }
 
 export function decodeAssignRoleRequest(v: any): AssignRoleRequest {
@@ -189,6 +241,15 @@ if (v.roleId !== undefined) { out.role_id = v.roleId; }
 return out;
 }
 
+export function validateAssignRoleRequest(v: AssignRoleRequest): string[] {
+const violations: string[] = [];
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.roleId !== undefined && v.roleId !== null)) violations.push("role_id is required");
+if (v.roleId !== undefined && v.roleId !== null && !(Number(v.roleId) > 0)) violations.push("role_id violates @gt");
+return violations;
+}
+
 export interface AssignRoleResponse {
 success?: boolean;
 }
@@ -204,5 +265,10 @@ export function encodeAssignRoleResponse(v: AssignRoleResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateAssignRoleResponse(v: AssignRoleResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

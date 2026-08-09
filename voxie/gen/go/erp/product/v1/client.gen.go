@@ -24,6 +24,11 @@ func NewProductServiceClient(baseURL string) *ProductServiceClient {
 }
 
 func (c *ProductServiceClient) ListProducts(ctx context.Context, req *ListProductsRequest) (*ListProductsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/product/v1/products"
 	query := url.Values{}
 	query.Set("search", req.Search)
@@ -58,6 +63,11 @@ func (c *ProductServiceClient) ListProducts(ctx context.Context, req *ListProduc
 }
 
 func (c *ProductServiceClient) CreateProduct(ctx context.Context, req *CreateProductRequest) (*CreateProductResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/product/v1/products"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -89,6 +99,11 @@ func (c *ProductServiceClient) CreateProduct(ctx context.Context, req *CreatePro
 }
 
 func (c *ProductServiceClient) GetProductByBarcode(ctx context.Context, req *GetProductByBarcodeRequest) (*GetProductByBarcodeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/product/v1/barcodes/{code}/product"
 	path = strings.ReplaceAll(path, "{code}", fmt.Sprintf("%v", req.Code))
 	query := url.Values{}
@@ -120,6 +135,11 @@ func (c *ProductServiceClient) GetProductByBarcode(ctx context.Context, req *Get
 }
 
 func (c *ProductServiceClient) GetProduct(ctx context.Context, req *GetProductRequest) (*GetProductResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/product/v1/products/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -151,6 +171,11 @@ func (c *ProductServiceClient) GetProduct(ctx context.Context, req *GetProductRe
 }
 
 func (c *ProductServiceClient) GetProductFull(ctx context.Context, req *GetProductFullRequest) (*GetProductFullResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/product/v1/products/{id}/full"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -182,6 +207,11 @@ func (c *ProductServiceClient) GetProductFull(ctx context.Context, req *GetProdu
 }
 
 func (c *ProductServiceClient) ListProductAttributes(ctx context.Context, req *ListProductAttributesRequest) (*ListProductAttributesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/product/v1/products/{id}/attributes"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -213,9 +243,14 @@ func (c *ProductServiceClient) ListProductAttributes(ctx context.Context, req *L
 }
 
 func (c *ProductServiceClient) UpdateProduct(ctx context.Context, req *UpdateProductRequest) (*UpdateProductResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/product/v1/products/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -245,6 +280,11 @@ func (c *ProductServiceClient) UpdateProduct(ctx context.Context, req *UpdatePro
 }
 
 func (c *ProductServiceClient) DeleteProduct(ctx context.Context, req *DeleteProductRequest) (*DeleteProductResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/product/v1/products/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -276,6 +316,11 @@ func (c *ProductServiceClient) DeleteProduct(ctx context.Context, req *DeletePro
 }
 
 func (c *ProductServiceClient) GetDashboard(ctx context.Context, req *GetDashboardRequest) (*GetDashboardResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/product/v1/dashboard"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -306,6 +351,11 @@ func (c *ProductServiceClient) GetDashboard(ctx context.Context, req *GetDashboa
 }
 
 func (c *ProductServiceClient) ListReorderSuggestions(ctx context.Context, req *ListReorderSuggestionsRequest) (*ListReorderSuggestionsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/product/v1/reorder-suggestions"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -336,6 +386,11 @@ func (c *ProductServiceClient) ListReorderSuggestions(ctx context.Context, req *
 }
 
 func (c *ProductServiceClient) ListExpiringItems(ctx context.Context, req *ListExpiringItemsRequest) (*ListExpiringItemsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/product/v1/expiry"
 	query := url.Values{}
 	query.Set("days_ahead", strconv.FormatInt(int64(req.DaysAhead), 10))

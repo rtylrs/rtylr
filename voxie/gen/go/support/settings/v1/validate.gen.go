@@ -20,7 +20,48 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Settings) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetSettingsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetSettingsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Settings != nil {
+		if err := m.Settings.Validate(); err != nil {
+			violations = append(violations, "settings: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateSettingsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.SlaHours <= 0 {
 		violations = append(violations, "sla_hours must be greater than 0")
@@ -28,6 +69,17 @@ func (m *UpdateSettingsRequest) Validate() error {
 	if m.SlaHours > 1000 {
 		violations = append(violations, "sla_hours must be less than or equal to 1000")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateSettingsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

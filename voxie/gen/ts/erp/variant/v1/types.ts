@@ -56,9 +56,14 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateVariant(v: Variant): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateVariantRequest {
-productId?: string;
-name?: string;
+productId: string;
+name: string;
 sku?: string;
 barcode?: string;
 costPrice?: number;
@@ -97,6 +102,14 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateCreateVariantRequest(v: CreateVariantRequest): string[] {
+const violations: string[] = [];
+if (!(v.productId !== undefined && v.productId !== null)) violations.push("product_id is required");
+if (v.productId !== undefined && v.productId !== null && !(Number(v.productId) > 0)) violations.push("product_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateVariantResponse {
 variantId?: string;
 message?: string;
@@ -117,8 +130,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateVariantResponse(v: CreateVariantResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteVariantRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteVariantRequest(v: any): DeleteVariantRequest {
@@ -132,6 +150,13 @@ export function encodeDeleteVariantRequest(v: DeleteVariantRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteVariantRequest(v: DeleteVariantRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteVariantResponse {
@@ -151,6 +176,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteVariantResponse(v: DeleteVariantResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListVariantsRequest {
 productId?: string;
 }
@@ -166,6 +196,11 @@ export function encodeListVariantsRequest(v: ListVariantsRequest): Record<string
 const out: Record<string, unknown> = {};
 if (v.productId !== undefined) { out.product_id = v.productId; }
 return out;
+}
+
+export function validateListVariantsRequest(v: ListVariantsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListVariantsResponse {
@@ -185,9 +220,15 @@ if (v.variants !== undefined) { out.variants = (v.variants as any[]).map(encodeV
 return out;
 }
 
+export function validateListVariantsResponse(v: ListVariantsResponse): string[] {
+const violations: string[] = [];
+if (v.variants !== undefined && v.variants !== null) for (const item of v.variants) violations.push(...validateVariant(item).map((message) => "variants: " + message));
+return violations;
+}
+
 export interface UpdateVariantBody {
 productId?: string;
-name?: string;
+name: string;
 sku?: string;
 barcode?: string;
 costPrice?: number;
@@ -226,8 +267,14 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateVariantBody(v: UpdateVariantBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface UpdateVariantRequest {
-id?: string;
+id: string;
 body?: UpdateVariantBody;
 }
 
@@ -246,6 +293,14 @@ if (v.body !== undefined) { out.body = encodeUpdateVariantBody(v.body); }
 return out;
 }
 
+export function validateUpdateVariantRequest(v: UpdateVariantRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateVariantBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateVariantResponse {
 message?: string;
 }
@@ -261,5 +316,10 @@ export function encodeUpdateVariantResponse(v: UpdateVariantResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateVariantResponse(v: UpdateVariantResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

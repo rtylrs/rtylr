@@ -22,6 +22,11 @@ func NewDashboardServiceClient(baseURL string) *DashboardServiceClient {
 }
 
 func (c *DashboardServiceClient) GetFlowDashboard(ctx context.Context, req *GetFlowDashboardRequest) (*GetFlowDashboardResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/dashboard/v1/dashboard"
 	query := url.Values{}
 	query.Set("workspace_id", strconv.FormatInt(int64(req.WorkspaceId), 10))

@@ -56,13 +56,18 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateSupplier(v: Supplier): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateSupplierRequest {
-name?: string;
-email?: string;
+name: string;
+email: string;
 phone?: string;
 address?: string;
-city?: string;
-country?: string;
+city: string;
+country: string;
 taxId?: string;
 paymentTerms?: string;
 notes?: string;
@@ -100,6 +105,16 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateCreateSupplierRequest(v: CreateSupplierRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
+if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (!(v.city !== undefined && v.city !== null) || v.city === "") violations.push("city is required");
+if (!(v.country !== undefined && v.country !== null) || v.country === "") violations.push("country is required");
+return violations;
+}
+
 export interface CreateSupplierResponse {
 supplierId?: string;
 message?: string;
@@ -120,8 +135,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateSupplierResponse(v: CreateSupplierResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteSupplierRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteSupplierRequest(v: any): DeleteSupplierRequest {
@@ -135,6 +155,13 @@ export function encodeDeleteSupplierRequest(v: DeleteSupplierRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteSupplierRequest(v: DeleteSupplierRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteSupplierResponse {
@@ -152,6 +179,11 @@ export function encodeDeleteSupplierResponse(v: DeleteSupplierResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateDeleteSupplierResponse(v: DeleteSupplierResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListSuppliersRequest {
@@ -172,6 +204,11 @@ const out: Record<string, unknown> = {};
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
+}
+
+export function validateListSuppliersRequest(v: ListSuppliersRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListSuppliersResponse {
@@ -200,13 +237,19 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListSuppliersResponse(v: ListSuppliersResponse): string[] {
+const violations: string[] = [];
+if (v.suppliers !== undefined && v.suppliers !== null) for (const item of v.suppliers) violations.push(...validateSupplier(item).map((message) => "suppliers: " + message));
+return violations;
+}
+
 export interface UpdateSupplierBody {
-name?: string;
-email?: string;
+name: string;
+email: string;
 phone?: string;
 address?: string;
-city?: string;
-country?: string;
+city: string;
+country: string;
 taxId?: string;
 paymentTerms?: string;
 notes?: string;
@@ -244,8 +287,18 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateSupplierBody(v: UpdateSupplierBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
+if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (!(v.city !== undefined && v.city !== null) || v.city === "") violations.push("city is required");
+if (!(v.country !== undefined && v.country !== null) || v.country === "") violations.push("country is required");
+return violations;
+}
+
 export interface UpdateSupplierRequest {
-id?: string;
+id: string;
 body?: UpdateSupplierBody;
 }
 
@@ -264,6 +317,14 @@ if (v.body !== undefined) { out.body = encodeUpdateSupplierBody(v.body); }
 return out;
 }
 
+export function validateUpdateSupplierRequest(v: UpdateSupplierRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateSupplierBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateSupplierResponse {
 message?: string;
 }
@@ -279,5 +340,10 @@ export function encodeUpdateSupplierResponse(v: UpdateSupplierResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateSupplierResponse(v: UpdateSupplierResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

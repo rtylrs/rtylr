@@ -20,7 +20,86 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *EquipmentRequestPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AssetPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAssetsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAssetsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Assets {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "assets: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListEquipmentRequestsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListEquipmentRequestsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Requests {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "requests: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateEquipmentRequestRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.EmployeeId <= 0 {
 		violations = append(violations, "employee_id must be greater than 0")
@@ -40,11 +119,57 @@ func (m *CreateEquipmentRequestRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateEquipmentRequestResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Request != nil {
+		if err := m.Request.Validate(); err != nil {
+			violations = append(violations, "request: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ApproveEquipmentBody) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ApproveEquipmentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.EquipmentRequestId <= 0 {
 		violations = append(violations, "equipment_request_id must be greater than 0")
 	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ApproveEquipmentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

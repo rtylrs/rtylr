@@ -23,6 +23,11 @@ func NewAccessServiceClient(baseURL string) *AccessServiceClient {
 }
 
 func (c *AccessServiceClient) RequestAccess(ctx context.Context, req *RequestAccessRequest) (*RequestAccessResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/access/v1/requests"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -54,6 +59,11 @@ func (c *AccessServiceClient) RequestAccess(ctx context.Context, req *RequestAcc
 }
 
 func (c *AccessServiceClient) ListAccessRequests(ctx context.Context, req *ListAccessRequestsRequest) (*ListAccessRequestsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/access/v1/requests"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -84,6 +94,11 @@ func (c *AccessServiceClient) ListAccessRequests(ctx context.Context, req *ListA
 }
 
 func (c *AccessServiceClient) ApproveAccessRequest(ctx context.Context, req *ApproveAccessRequestRequest) (*ApproveAccessRequestResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/access/v1/requests/{id}/approve"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

@@ -22,6 +22,11 @@ func NewDashboardServiceClient(baseURL string) *DashboardServiceClient {
 }
 
 func (c *DashboardServiceClient) GetHRDashboard(ctx context.Context, req *GetHRDashboardRequest) (*GetHRDashboardResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/dashboard/v1/dashboard"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *DashboardServiceClient) GetHRDashboard(ctx context.Context, req *GetHRD
 }
 
 func (c *DashboardServiceClient) GetDashboardWidgets(ctx context.Context, req *GetDashboardWidgetsRequest) (*GetDashboardWidgetsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/dashboard/v1/dashboard/widgets"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -82,6 +92,11 @@ func (c *DashboardServiceClient) GetDashboardWidgets(ctx context.Context, req *G
 }
 
 func (c *DashboardServiceClient) UpdateDashboardWidgets(ctx context.Context, req *UpdateDashboardWidgetsRequest) (*UpdateDashboardWidgetsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/dashboard/v1/dashboard/widgets"
 	body, err := json.Marshal(req)
 	if err != nil {

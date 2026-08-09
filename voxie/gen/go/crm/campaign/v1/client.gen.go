@@ -23,6 +23,11 @@ func NewCampaignServiceClient(baseURL string) *CampaignServiceClient {
 }
 
 func (c *CampaignServiceClient) ListCampaigns(ctx context.Context, req *ListCampaignsRequest) (*ListCampaignsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/campaign/v1/campaigns"
 	query := url.Values{}
 	query.Set("status", req.Status)
@@ -54,6 +59,11 @@ func (c *CampaignServiceClient) ListCampaigns(ctx context.Context, req *ListCamp
 }
 
 func (c *CampaignServiceClient) CreateCampaign(ctx context.Context, req *CreateCampaignRequest) (*CreateCampaignResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/campaign/v1/campaigns"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -85,6 +95,11 @@ func (c *CampaignServiceClient) CreateCampaign(ctx context.Context, req *CreateC
 }
 
 func (c *CampaignServiceClient) GetCampaignDetail(ctx context.Context, req *GetCampaignDetailRequest) (*GetCampaignDetailResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/campaign/v1/campaigns/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -116,6 +131,11 @@ func (c *CampaignServiceClient) GetCampaignDetail(ctx context.Context, req *GetC
 }
 
 func (c *CampaignServiceClient) GetCampaignStats(ctx context.Context, req *GetCampaignStatsRequest) (*GetCampaignStatsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/campaign/v1/campaigns/{campaign_id}/stats"
 	path = strings.ReplaceAll(path, "{campaign_id}", fmt.Sprintf("%v", req.CampaignId))
 	query := url.Values{}
@@ -147,9 +167,14 @@ func (c *CampaignServiceClient) GetCampaignStats(ctx context.Context, req *GetCa
 }
 
 func (c *CampaignServiceClient) UpdateCampaign(ctx context.Context, req *UpdateCampaignRequest) (*UpdateCampaignResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/campaign/v1/campaigns/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -179,6 +204,11 @@ func (c *CampaignServiceClient) UpdateCampaign(ctx context.Context, req *UpdateC
 }
 
 func (c *CampaignServiceClient) UpdateCampaignStatus(ctx context.Context, req *UpdateCampaignStatusRequest) (*UpdateCampaignStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/campaign/v1/campaigns/status"
 	body, err := json.Marshal(req)
 	if err != nil {

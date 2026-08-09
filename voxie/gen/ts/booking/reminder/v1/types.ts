@@ -38,10 +38,15 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateReminder(v: Reminder): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateReminderRequest {
-appointmentId?: string;
-type?: string;
-scheduledAt?: string;
+appointmentId: string;
+type: string;
+scheduledAt: string;
 }
 
 export function decodeCreateReminderRequest(v: any): CreateReminderRequest {
@@ -59,6 +64,15 @@ if (v.appointmentId !== undefined) { out.appointment_id = v.appointmentId; }
 if (v.type !== undefined) { out.type = v.type; }
 if (v.scheduledAt !== undefined) { out.scheduled_at = v.scheduledAt; }
 return out;
+}
+
+export function validateCreateReminderRequest(v: CreateReminderRequest): string[] {
+const violations: string[] = [];
+if (!(v.appointmentId !== undefined && v.appointmentId !== null)) violations.push("appointment_id is required");
+if (v.appointmentId !== undefined && v.appointmentId !== null && !(Number(v.appointmentId) > 0)) violations.push("appointment_id violates @gt");
+if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (!(v.scheduledAt !== undefined && v.scheduledAt !== null) || v.scheduledAt === "") violations.push("scheduled_at is required");
+return violations;
 }
 
 export interface CreateReminderResponse {
@@ -81,6 +95,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateReminderResponse(v: CreateReminderResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListRemindersRequest {
 }
 
@@ -93,6 +112,11 @@ return {
 export function encodeListRemindersRequest(v: ListRemindersRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListRemindersRequest(v: ListRemindersRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListRemindersResponse {
@@ -110,5 +134,11 @@ export function encodeListRemindersResponse(v: ListRemindersResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.reminders !== undefined) { out.reminders = (v.reminders as any[]).map(encodeReminder); }
 return out;
+}
+
+export function validateListRemindersResponse(v: ListRemindersResponse): string[] {
+const violations: string[] = [];
+if (v.reminders !== undefined && v.reminders !== null) for (const item of v.reminders) violations.push(...validateReminder(item).map((message) => "reminders: " + message));
+return violations;
 }
 

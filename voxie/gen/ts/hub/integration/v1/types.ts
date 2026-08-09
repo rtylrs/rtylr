@@ -32,8 +32,13 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateIntegration(v: Integration): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ConnectIntegrationRequest {
-provider?: string;
+provider: string;
 config?: string;
 }
 
@@ -50,6 +55,12 @@ const out: Record<string, unknown> = {};
 if (v.provider !== undefined) { out.provider = v.provider; }
 if (v.config !== undefined) { out.config = v.config; }
 return out;
+}
+
+export function validateConnectIntegrationRequest(v: ConnectIntegrationRequest): string[] {
+const violations: string[] = [];
+if (!(v.provider !== undefined && v.provider !== null) || v.provider === "") violations.push("provider is required");
+return violations;
 }
 
 export interface ConnectIntegrationResponse {
@@ -72,8 +83,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateConnectIntegrationResponse(v: ConnectIntegrationResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DisconnectIntegrationRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDisconnectIntegrationRequest(v: any): DisconnectIntegrationRequest {
@@ -87,6 +103,13 @@ export function encodeDisconnectIntegrationRequest(v: DisconnectIntegrationReque
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDisconnectIntegrationRequest(v: DisconnectIntegrationRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DisconnectIntegrationResponse {
@@ -106,6 +129,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDisconnectIntegrationResponse(v: DisconnectIntegrationResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListIntegrationsRequest {
 }
 
@@ -118,6 +146,11 @@ return {
 export function encodeListIntegrationsRequest(v: ListIntegrationsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListIntegrationsRequest(v: ListIntegrationsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListIntegrationsResponse {
@@ -135,5 +168,11 @@ export function encodeListIntegrationsResponse(v: ListIntegrationsResponse): Rec
 const out: Record<string, unknown> = {};
 if (v.integrations !== undefined) { out.integrations = (v.integrations as any[]).map(encodeIntegration); }
 return out;
+}
+
+export function validateListIntegrationsResponse(v: ListIntegrationsResponse): string[] {
+const violations: string[] = [];
+if (v.integrations !== undefined && v.integrations !== null) for (const item of v.integrations) violations.push(...validateIntegration(item).map((message) => "integrations: " + message));
+return violations;
 }
 

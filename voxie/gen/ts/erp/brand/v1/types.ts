@@ -38,8 +38,13 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateBrand(v: Brand): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateBrandRequest {
-name?: string;
+name: string;
 logoUrl?: string;
 description?: string;
 }
@@ -59,6 +64,12 @@ if (v.name !== undefined) { out.name = v.name; }
 if (v.logoUrl !== undefined) { out.logo_url = v.logoUrl; }
 if (v.description !== undefined) { out.description = v.description; }
 return out;
+}
+
+export function validateCreateBrandRequest(v: CreateBrandRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
 }
 
 export interface CreateBrandResponse {
@@ -81,8 +92,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateBrandResponse(v: CreateBrandResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateBrandBody {
-name?: string;
+name: string;
 logoUrl?: string;
 description?: string;
 }
@@ -104,8 +120,14 @@ if (v.description !== undefined) { out.description = v.description; }
 return out;
 }
 
+export function validateUpdateBrandBody(v: UpdateBrandBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface UpdateBrandRequest {
-id?: string;
+id: string;
 body?: UpdateBrandBody;
 }
 
@@ -122,6 +144,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateBrandBody(v.body); }
 return out;
+}
+
+export function validateUpdateBrandRequest(v: UpdateBrandRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateBrandBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateBrandResponse {
@@ -141,8 +171,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateBrandResponse(v: UpdateBrandResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteBrandRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteBrandRequest(v: any): DeleteBrandRequest {
@@ -156,6 +191,13 @@ export function encodeDeleteBrandRequest(v: DeleteBrandRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteBrandRequest(v: DeleteBrandRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteBrandResponse {
@@ -175,6 +217,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteBrandResponse(v: DeleteBrandResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListBrandsRequest {
 }
 
@@ -187,6 +234,11 @@ return {
 export function encodeListBrandsRequest(v: ListBrandsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListBrandsRequest(v: ListBrandsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListBrandsResponse {
@@ -204,5 +256,11 @@ export function encodeListBrandsResponse(v: ListBrandsResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.brands !== undefined) { out.brands = (v.brands as any[]).map(encodeBrand); }
 return out;
+}
+
+export function validateListBrandsResponse(v: ListBrandsResponse): string[] {
+const violations: string[] = [];
+if (v.brands !== undefined && v.brands !== null) for (const item of v.brands) violations.push(...validateBrand(item).map((message) => "brands: " + message));
+return violations;
 }
 

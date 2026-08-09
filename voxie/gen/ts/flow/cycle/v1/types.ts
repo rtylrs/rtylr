@@ -39,6 +39,11 @@ if (v.completed !== undefined) { out.completed = v.completed; }
 return out;
 }
 
+export function validateCycle(v: Cycle): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListCyclesRequest {
 workspaceId?: string;
 page?: number;
@@ -68,6 +73,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListCyclesRequest(v: ListCyclesRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListCyclesResponse {
 cycles?: (Cycle)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -88,8 +98,15 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListCyclesResponse(v: ListCyclesResponse): string[] {
+const violations: string[] = [];
+if (v.cycles !== undefined && v.cycles !== null) for (const item of v.cycles) violations.push(...validateCycle(item).map((message) => "cycles: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface CreateCycleRequest {
-name?: string;
+name: string;
 workspaceId?: string;
 startDate?: string;
 endDate?: string;
@@ -114,6 +131,12 @@ if (v.endDate !== undefined) { out.end_date = v.endDate; }
 return out;
 }
 
+export function validateCreateCycleRequest(v: CreateCycleRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateCycleResponse {
 cycle?: Cycle;
 }
@@ -129,6 +152,12 @@ export function encodeCreateCycleResponse(v: CreateCycleResponse): Record<string
 const out: Record<string, unknown> = {};
 if (v.cycle !== undefined) { out.cycle = encodeCycle(v.cycle); }
 return out;
+}
+
+export function validateCreateCycleResponse(v: CreateCycleResponse): string[] {
+const violations: string[] = [];
+if (v.cycle !== undefined && v.cycle !== null) violations.push(...validateCycle(v.cycle).map((message) => "cycle: " + message));
+return violations;
 }
 
 export interface UpdateCycleRequest {
@@ -157,6 +186,11 @@ if (v.endDate !== undefined) { out.end_date = v.endDate; }
 return out;
 }
 
+export function validateUpdateCycleRequest(v: UpdateCycleRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateCycleResponse {
 }
 
@@ -169,5 +203,10 @@ return {
 export function encodeUpdateCycleResponse(v: UpdateCycleResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateUpdateCycleResponse(v: UpdateCycleResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

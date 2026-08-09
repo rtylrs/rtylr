@@ -23,6 +23,11 @@ func NewBillServiceClient(baseURL string) *BillServiceClient {
 }
 
 func (c *BillServiceClient) ListBills(ctx context.Context, req *ListBillsRequest) (*ListBillsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/bill/v1/bills"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *BillServiceClient) ListBills(ctx context.Context, req *ListBillsRequest
 }
 
 func (c *BillServiceClient) CreateBill(ctx context.Context, req *CreateBillRequest) (*CreateBillResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/bill/v1/bills"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,9 +94,14 @@ func (c *BillServiceClient) CreateBill(ctx context.Context, req *CreateBillReque
 }
 
 func (c *BillServiceClient) UpdateBill(ctx context.Context, req *UpdateBillRequest) (*UpdateBillResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/bill/v1/bills/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -116,6 +131,11 @@ func (c *BillServiceClient) UpdateBill(ctx context.Context, req *UpdateBillReque
 }
 
 func (c *BillServiceClient) GetBill(ctx context.Context, req *GetBillRequest) (*GetBillResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/bill/v1/bills/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -147,6 +167,11 @@ func (c *BillServiceClient) GetBill(ctx context.Context, req *GetBillRequest) (*
 }
 
 func (c *BillServiceClient) DeleteBill(ctx context.Context, req *DeleteBillRequest) (*DeleteBillResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/bill/v1/bills/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

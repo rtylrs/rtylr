@@ -20,7 +20,32 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Document) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *EmployeeDocumentPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateDocumentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -31,10 +56,62 @@ func (m *CreateDocumentRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateDocumentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteDocumentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteDocumentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListDocumentsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListDocumentsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Documents {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "documents: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

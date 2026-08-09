@@ -1,4 +1,4 @@
-package v1
+package tests
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	v1 "github.com/voxire/voxie/gen/go/hub/user/v1"
 )
 
 type generatedStatusError struct{}
@@ -16,25 +18,25 @@ func (generatedStatusError) HTTPStatusCode() int { return http.StatusForbidden }
 
 type statusAwareUserServer struct{}
 
-func (statusAwareUserServer) GetMe(context.Context, *GetMeRequest) (*GetMeResponse, error) {
-	return &GetMeResponse{}, nil
+func (statusAwareUserServer) GetMe(context.Context, *v1.GetMeRequest) (*v1.GetMeResponse, error) {
+	return &v1.GetMeResponse{}, nil
 }
 
-func (statusAwareUserServer) UpdateProfile(context.Context, *UpdateProfileRequest) (*UpdateProfileResponse, error) {
-	return &UpdateProfileResponse{}, nil
+func (statusAwareUserServer) UpdateProfile(context.Context, *v1.UpdateProfileRequest) (*v1.UpdateProfileResponse, error) {
+	return &v1.UpdateProfileResponse{}, nil
 }
 
-func (statusAwareUserServer) ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error) {
-	return &ChangePasswordResponse{}, nil
+func (statusAwareUserServer) ChangePassword(context.Context, *v1.ChangePasswordRequest) (*v1.ChangePasswordResponse, error) {
+	return &v1.ChangePasswordResponse{}, nil
 }
 
-func (statusAwareUserServer) SwitchBusiness(context.Context, *SwitchBusinessRequest) (*SwitchBusinessResponse, error) {
+func (statusAwareUserServer) SwitchBusiness(context.Context, *v1.SwitchBusinessRequest) (*v1.SwitchBusinessResponse, error) {
 	return nil, generatedStatusError{}
 }
 
 func TestGeneratedServerPreservesOneKitHTTPStatus(t *testing.T) {
 	mux := http.NewServeMux()
-	if err := RegisterUserServiceServer(statusAwareUserServer{}, WithMux(mux)); err != nil {
+	if err := v1.RegisterUserServiceServer(statusAwareUserServer{}, v1.WithMux(mux)); err != nil {
 		t.Fatalf("register user service: %v", err)
 	}
 

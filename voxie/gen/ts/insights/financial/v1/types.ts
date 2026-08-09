@@ -26,6 +26,13 @@ if (v.trend !== undefined) { out.trend = (v.trend as any[]).map(encodeExpensePoi
 return out;
 }
 
+export function validateExpenseAnalytics(v: ExpenseAnalytics): string[] {
+const violations: string[] = [];
+if (v.byCategory !== undefined && v.byCategory !== null) for (const item of v.byCategory) violations.push(...validateExpenseByCategory(item).map((message) => "by_category: " + message));
+if (v.trend !== undefined && v.trend !== null) for (const item of v.trend) violations.push(...validateExpensePoint(item).map((message) => "trend: " + message));
+return violations;
+}
+
 export interface ExpenseByCategory {
 category?: string;
 amount?: number;
@@ -55,6 +62,11 @@ if (v.utilization !== undefined) { out.utilization = v.utilization; }
 return out;
 }
 
+export function validateExpenseByCategory(v: ExpenseByCategory): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ExpensePoint {
 date?: string;
 amount?: number;
@@ -73,6 +85,11 @@ const out: Record<string, unknown> = {};
 if (v.date !== undefined) { out.date = v.date; }
 if (v.amount !== undefined) { out.amount = v.amount; }
 return out;
+}
+
+export function validateExpensePoint(v: ExpensePoint): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface InvoiceAgingBucket {
@@ -98,6 +115,11 @@ if (v.amount !== undefined) { out.amount = v.amount; }
 return out;
 }
 
+export function validateInvoiceAgingBucket(v: InvoiceAgingBucket): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface InvoiceAging {
 totalOutstanding?: number;
 buckets?: (InvoiceAgingBucket)[];
@@ -116,6 +138,12 @@ const out: Record<string, unknown> = {};
 if (v.totalOutstanding !== undefined) { out.total_outstanding = v.totalOutstanding; }
 if (v.buckets !== undefined) { out.buckets = (v.buckets as any[]).map(encodeInvoiceAgingBucket); }
 return out;
+}
+
+export function validateInvoiceAging(v: InvoiceAging): string[] {
+const violations: string[] = [];
+if (v.buckets !== undefined && v.buckets !== null) for (const item of v.buckets) violations.push(...validateInvoiceAgingBucket(item).map((message) => "buckets: " + message));
+return violations;
 }
 
 export interface CashFlowAnalytics {
@@ -144,6 +172,12 @@ if (v.trend !== undefined) { out.trend = (v.trend as any[]).map(encodeCashFlowPo
 return out;
 }
 
+export function validateCashFlowAnalytics(v: CashFlowAnalytics): string[] {
+const violations: string[] = [];
+if (v.trend !== undefined && v.trend !== null) for (const item of v.trend) violations.push(...validateCashFlowPoint(item).map((message) => "trend: " + message));
+return violations;
+}
+
 export interface CashFlowPoint {
 date?: string;
 inflow?: number;
@@ -170,6 +204,11 @@ if (v.net !== undefined) { out.net = v.net; }
 return out;
 }
 
+export function validateCashFlowPoint(v: CashFlowPoint): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetCashFlowAnalyticsRequest {
 period?: string;
 }
@@ -185,6 +224,11 @@ export function encodeGetCashFlowAnalyticsRequest(v: GetCashFlowAnalyticsRequest
 const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 return out;
+}
+
+export function validateGetCashFlowAnalyticsRequest(v: GetCashFlowAnalyticsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetCashFlowAnalyticsResponse {
@@ -204,6 +248,12 @@ if (v.analytics !== undefined) { out.analytics = encodeCashFlowAnalytics(v.analy
 return out;
 }
 
+export function validateGetCashFlowAnalyticsResponse(v: GetCashFlowAnalyticsResponse): string[] {
+const violations: string[] = [];
+if (v.analytics !== undefined && v.analytics !== null) violations.push(...validateCashFlowAnalytics(v.analytics).map((message) => "analytics: " + message));
+return violations;
+}
+
 export interface GetExpenseAnalyticsRequest {
 period?: string;
 }
@@ -219,6 +269,11 @@ export function encodeGetExpenseAnalyticsRequest(v: GetExpenseAnalyticsRequest):
 const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 return out;
+}
+
+export function validateGetExpenseAnalyticsRequest(v: GetExpenseAnalyticsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetExpenseAnalyticsResponse {
@@ -238,6 +293,12 @@ if (v.analytics !== undefined) { out.analytics = encodeExpenseAnalytics(v.analyt
 return out;
 }
 
+export function validateGetExpenseAnalyticsResponse(v: GetExpenseAnalyticsResponse): string[] {
+const violations: string[] = [];
+if (v.analytics !== undefined && v.analytics !== null) violations.push(...validateExpenseAnalytics(v.analytics).map((message) => "analytics: " + message));
+return violations;
+}
+
 export interface GetInvoiceAgingRequest {
 }
 
@@ -250,6 +311,11 @@ return {
 export function encodeGetInvoiceAgingRequest(v: GetInvoiceAgingRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetInvoiceAgingRequest(v: GetInvoiceAgingRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetInvoiceAgingResponse {
@@ -267,5 +333,11 @@ export function encodeGetInvoiceAgingResponse(v: GetInvoiceAgingResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.aging !== undefined) { out.aging = encodeInvoiceAging(v.aging); }
 return out;
+}
+
+export function validateGetInvoiceAgingResponse(v: GetInvoiceAgingResponse): string[] {
+const violations: string[] = [];
+if (v.aging !== undefined && v.aging !== null) violations.push(...validateInvoiceAging(v.aging).map((message) => "aging: " + message));
+return violations;
 }
 

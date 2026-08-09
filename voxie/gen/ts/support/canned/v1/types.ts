@@ -35,6 +35,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateCannedResponse(v: CannedResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListCannedResponsesRequest {
 }
 
@@ -47,6 +52,11 @@ return {
 export function encodeListCannedResponsesRequest(v: ListCannedResponsesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListCannedResponsesRequest(v: ListCannedResponsesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListCannedResponsesResponse {
@@ -66,9 +76,15 @@ if (v.cannedResponses !== undefined) { out.canned_responses = (v.cannedResponses
 return out;
 }
 
+export function validateListCannedResponsesResponse(v: ListCannedResponsesResponse): string[] {
+const violations: string[] = [];
+if (v.cannedResponses !== undefined && v.cannedResponses !== null) for (const item of v.cannedResponses) violations.push(...validateCannedResponse(item).map((message) => "canned_responses: " + message));
+return violations;
+}
+
 export interface CreateCannedResponseRequest {
-name?: string;
-body?: string;
+name: string;
+body: string;
 category?: string;
 shortcut?: string;
 }
@@ -92,6 +108,13 @@ if (v.shortcut !== undefined) { out.shortcut = v.shortcut; }
 return out;
 }
 
+export function validateCreateCannedResponseRequest(v: CreateCannedResponseRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.body !== undefined && v.body !== null) || v.body === "") violations.push("body is required");
+return violations;
+}
+
 export interface CreateCannedResponseResponse {
 cannedResponseId?: string;
 message?: string;
@@ -112,8 +135,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateCannedResponseResponse(v: CreateCannedResponseResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateCannedResponseRequest {
-id?: string;
+id: string;
 name?: string;
 body?: string;
 category?: string;
@@ -141,6 +169,13 @@ if (v.shortcut !== undefined) { out.shortcut = v.shortcut; }
 return out;
 }
 
+export function validateUpdateCannedResponseRequest(v: UpdateCannedResponseRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface UpdateCannedResponseResponse {
 message?: string;
 }
@@ -158,8 +193,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateCannedResponseResponse(v: UpdateCannedResponseResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteCannedResponseRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteCannedResponseRequest(v: any): DeleteCannedResponseRequest {
@@ -173,6 +213,13 @@ export function encodeDeleteCannedResponseRequest(v: DeleteCannedResponseRequest
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteCannedResponseRequest(v: DeleteCannedResponseRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteCannedResponseResponse {
@@ -190,5 +237,10 @@ export function encodeDeleteCannedResponseResponse(v: DeleteCannedResponseRespon
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateDeleteCannedResponseResponse(v: DeleteCannedResponseResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

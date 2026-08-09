@@ -20,11 +20,122 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *DashboardStats) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DashboardWidgetPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DashboardDataPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetHRDashboardRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetHRDashboardResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Stats != nil {
+		if err := m.Stats.Validate(); err != nil {
+			violations = append(violations, "stats: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetDashboardWidgetsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetDashboardWidgetsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Widgets {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "widgets: "+err.Error())
+		}
+	}
+	for _, value := range m.Data {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "data: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateDashboardWidgetsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if len(m.Widgets) < 1 {
 		violations = append(violations, "widgets must have at least 1 items")
 	}
+	for _, value := range m.Widgets {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "widgets: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateDashboardWidgetsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

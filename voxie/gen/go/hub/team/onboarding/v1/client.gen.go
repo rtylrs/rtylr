@@ -21,6 +21,11 @@ func NewOnboardingServiceClient(baseURL string) *OnboardingServiceClient {
 }
 
 func (c *OnboardingServiceClient) MarkOnboarded(ctx context.Context, req *MarkOnboardedRequest) (*MarkOnboardedResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/onboarding/v1/onboarded"
 	body, err := json.Marshal(req)
 	if err != nil {

@@ -24,6 +24,11 @@ func NewConsoleAdminServiceClient(baseURL string) *ConsoleAdminServiceClient {
 }
 
 func (c *ConsoleAdminServiceClient) GetStats(ctx context.Context, req *GetStatsRequest) (*GetStatsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/stats"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -54,6 +59,11 @@ func (c *ConsoleAdminServiceClient) GetStats(ctx context.Context, req *GetStatsR
 }
 
 func (c *ConsoleAdminServiceClient) ListUsers(ctx context.Context, req *ListUsersRequest) (*ListUsersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/users"
 	query := url.Values{}
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
@@ -91,6 +101,11 @@ func (c *ConsoleAdminServiceClient) ListUsers(ctx context.Context, req *ListUser
 }
 
 func (c *ConsoleAdminServiceClient) GetUser(ctx context.Context, req *GetUserRequest) (*GetUserResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/users/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -122,6 +137,11 @@ func (c *ConsoleAdminServiceClient) GetUser(ctx context.Context, req *GetUserReq
 }
 
 func (c *ConsoleAdminServiceClient) CreateUser(ctx context.Context, req *CreateUserRequest) (*CreateUserResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/users"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -153,6 +173,11 @@ func (c *ConsoleAdminServiceClient) CreateUser(ctx context.Context, req *CreateU
 }
 
 func (c *ConsoleAdminServiceClient) UpdateUser(ctx context.Context, req *UpdateUserRequest) (*UpdateUserResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/users/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -185,6 +210,11 @@ func (c *ConsoleAdminServiceClient) UpdateUser(ctx context.Context, req *UpdateU
 }
 
 func (c *ConsoleAdminServiceClient) DeleteUser(ctx context.Context, req *DeleteUserRequest) (*DeleteUserResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/users/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -216,6 +246,11 @@ func (c *ConsoleAdminServiceClient) DeleteUser(ctx context.Context, req *DeleteU
 }
 
 func (c *ConsoleAdminServiceClient) BanUser(ctx context.Context, req *BanUserRequest) (*BanUserResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/users/{id}/ban"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -248,6 +283,11 @@ func (c *ConsoleAdminServiceClient) BanUser(ctx context.Context, req *BanUserReq
 }
 
 func (c *ConsoleAdminServiceClient) UnbanUser(ctx context.Context, req *UnbanUserRequest) (*UnbanUserResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/users/{id}/unban"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -280,6 +320,11 @@ func (c *ConsoleAdminServiceClient) UnbanUser(ctx context.Context, req *UnbanUse
 }
 
 func (c *ConsoleAdminServiceClient) SetConsoleAdmin(ctx context.Context, req *SetConsoleAdminRequest) (*SetConsoleAdminResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/users/{id}/set-console-admin"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -312,6 +357,11 @@ func (c *ConsoleAdminServiceClient) SetConsoleAdmin(ctx context.Context, req *Se
 }
 
 func (c *ConsoleAdminServiceClient) GetUserSubscription(ctx context.Context, req *GetUserSubscriptionRequest) (*GetUserSubscriptionResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/users/{user_id}/subscription"
 	path = strings.ReplaceAll(path, "{user_id}", fmt.Sprintf("%v", req.UserId))
 	query := url.Values{}
@@ -343,6 +393,11 @@ func (c *ConsoleAdminServiceClient) GetUserSubscription(ctx context.Context, req
 }
 
 func (c *ConsoleAdminServiceClient) ListBusinesses(ctx context.Context, req *ListBusinessesRequest) (*ListBusinessesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/businesses"
 	query := url.Values{}
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
@@ -382,6 +437,11 @@ func (c *ConsoleAdminServiceClient) ListBusinesses(ctx context.Context, req *Lis
 }
 
 func (c *ConsoleAdminServiceClient) UpdateBusiness(ctx context.Context, req *UpdateBusinessRequest) (*UpdateBusinessResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/businesses/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -414,6 +474,11 @@ func (c *ConsoleAdminServiceClient) UpdateBusiness(ctx context.Context, req *Upd
 }
 
 func (c *ConsoleAdminServiceClient) DeleteBusiness(ctx context.Context, req *DeleteBusinessRequest) (*DeleteBusinessResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/businesses/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -445,6 +510,11 @@ func (c *ConsoleAdminServiceClient) DeleteBusiness(ctx context.Context, req *Del
 }
 
 func (c *ConsoleAdminServiceClient) CreateBusinessOwner(ctx context.Context, req *CreateBusinessOwnerRequest) (*CreateBusinessOwnerResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/internal-onboarding/business-owner"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -476,6 +546,11 @@ func (c *ConsoleAdminServiceClient) CreateBusinessOwner(ctx context.Context, req
 }
 
 func (c *ConsoleAdminServiceClient) ListSubscriptions(ctx context.Context, req *ListSubscriptionsRequest) (*ListSubscriptionsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/subscriptions"
 	query := url.Values{}
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
@@ -509,6 +584,11 @@ func (c *ConsoleAdminServiceClient) ListSubscriptions(ctx context.Context, req *
 }
 
 func (c *ConsoleAdminServiceClient) UpsertSubscription(ctx context.Context, req *UpsertSubscriptionRequest) (*UpsertSubscriptionResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/subscriptions/upsert"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -540,6 +620,11 @@ func (c *ConsoleAdminServiceClient) UpsertSubscription(ctx context.Context, req 
 }
 
 func (c *ConsoleAdminServiceClient) DeleteSubscription(ctx context.Context, req *DeleteSubscriptionRequest) (*DeleteSubscriptionResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/subscriptions/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -571,6 +656,11 @@ func (c *ConsoleAdminServiceClient) DeleteSubscription(ctx context.Context, req 
 }
 
 func (c *ConsoleAdminServiceClient) ListPlans(ctx context.Context, req *ListPlansRequest) (*ListPlansResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/plans"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -601,6 +691,11 @@ func (c *ConsoleAdminServiceClient) ListPlans(ctx context.Context, req *ListPlan
 }
 
 func (c *ConsoleAdminServiceClient) UpdatePlan(ctx context.Context, req *UpdatePlanRequest) (*UpdatePlanResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/console/admin/v1/console/plans/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

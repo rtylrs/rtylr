@@ -20,7 +20,162 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Task) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *TaskComment) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *TaskActivity) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *TaskPayloadCompact) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *Attachment) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *TimeLog) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTasksRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTasksResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Tasks {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "tasks: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetMyTasksRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetMyTasksResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Tasks {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "tasks: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetMyTasksProjectRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetMyTasksProjectResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *SearchTasksRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.WorkspaceId == "" {
 		violations = append(violations, "workspace_id is required")
@@ -31,7 +186,31 @@ func (m *SearchTasksRequest) Validate() error {
 	return nil
 }
 
+func (m *SearchTasksResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Tasks {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "tasks: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateTaskRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ProjectId <= 0 {
 		violations = append(violations, "project_id must be greater than 0")
@@ -63,7 +242,26 @@ func (m *CreateTaskRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateTaskResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Task != nil {
+		if err := m.Task.Validate(); err != nil {
+			violations = append(violations, "task: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetTaskDetailRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -74,7 +272,41 @@ func (m *GetTaskDetailRequest) Validate() error {
 	return nil
 }
 
+func (m *GetTaskDetailResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Task != nil {
+		if err := m.Task.Validate(); err != nil {
+			violations = append(violations, "task: "+err.Error())
+		}
+	}
+	for _, value := range m.Subtasks {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "subtasks: "+err.Error())
+		}
+	}
+	for _, value := range m.Comments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "comments: "+err.Error())
+		}
+	}
+	for _, value := range m.Activity {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "activity: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateTaskBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Title == "" {
 		violations = append(violations, "title is required")
@@ -104,9 +336,17 @@ func (m *UpdateTaskBody) Validate() error {
 }
 
 func (m *UpdateTaskRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -114,7 +354,21 @@ func (m *UpdateTaskRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdateTaskResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateTaskStatusBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Status == "" {
 		violations = append(violations, "status is required")
@@ -126,10 +380,29 @@ func (m *UpdateTaskStatusBody) Validate() error {
 }
 
 func (m *UpdateTaskStatusRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateTaskStatusResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -137,6 +410,9 @@ func (m *UpdateTaskStatusRequest) Validate() error {
 }
 
 func (m *DeleteTaskRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -147,7 +423,21 @@ func (m *DeleteTaskRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteTaskResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateSubtaskRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ParentTaskId <= 0 {
 		violations = append(violations, "parent_task_id must be greater than 0")
@@ -179,7 +469,21 @@ func (m *CreateSubtaskRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateSubtaskResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetSubtasksRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TaskId <= 0 {
 		violations = append(violations, "task_id must be greater than 0")
@@ -190,7 +494,31 @@ func (m *GetSubtasksRequest) Validate() error {
 	return nil
 }
 
+func (m *GetSubtasksResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Subtasks {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "subtasks: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *AddCommentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TaskId <= 0 {
 		violations = append(violations, "task_id must be greater than 0")
@@ -204,7 +532,26 @@ func (m *AddCommentRequest) Validate() error {
 	return nil
 }
 
+func (m *AddCommentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Comment != nil {
+		if err := m.Comment.Validate(); err != nil {
+			violations = append(violations, "comment: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteCommentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -215,7 +562,21 @@ func (m *DeleteCommentRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteCommentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetTaskActivityRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TaskId <= 0 {
 		violations = append(violations, "task_id must be greater than 0")
@@ -226,7 +587,26 @@ func (m *GetTaskActivityRequest) Validate() error {
 	return nil
 }
 
+func (m *GetTaskActivityResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Activity {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "activity: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateAttachmentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TaskId <= 0 {
 		violations = append(violations, "task_id must be greater than 0")
@@ -246,7 +626,21 @@ func (m *CreateAttachmentRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateAttachmentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetAttachmentsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TaskId <= 0 {
 		violations = append(violations, "task_id must be greater than 0")
@@ -257,7 +651,26 @@ func (m *GetAttachmentsRequest) Validate() error {
 	return nil
 }
 
+func (m *GetAttachmentsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Attachments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "attachments: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteAttachmentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -268,7 +681,21 @@ func (m *DeleteAttachmentRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteAttachmentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateTimeLogRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.DurationMinutes <= 0 {
 		violations = append(violations, "duration_minutes must be greater than 0")
@@ -285,7 +712,21 @@ func (m *CreateTimeLogRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateTimeLogResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetTimeLogsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TaskId <= 0 {
 		violations = append(violations, "task_id must be greater than 0")
@@ -296,11 +737,41 @@ func (m *GetTimeLogsRequest) Validate() error {
 	return nil
 }
 
+func (m *GetTimeLogsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.TimeLogs {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "time_logs: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteTimeLogRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteTimeLogResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

@@ -24,6 +24,11 @@ func NewVariantServiceClient(baseURL string) *VariantServiceClient {
 }
 
 func (c *VariantServiceClient) ListVariants(ctx context.Context, req *ListVariantsRequest) (*ListVariantsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/variant/v1/variants"
 	query := url.Values{}
 	query.Set("product_id", strconv.FormatInt(int64(req.ProductId), 10))
@@ -55,6 +60,11 @@ func (c *VariantServiceClient) ListVariants(ctx context.Context, req *ListVarian
 }
 
 func (c *VariantServiceClient) CreateVariant(ctx context.Context, req *CreateVariantRequest) (*CreateVariantResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/variant/v1/variants"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -86,6 +96,11 @@ func (c *VariantServiceClient) CreateVariant(ctx context.Context, req *CreateVar
 }
 
 func (c *VariantServiceClient) UpdateVariant(ctx context.Context, req *UpdateVariantRequest) (*UpdateVariantResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/variant/v1/variants/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -118,6 +133,11 @@ func (c *VariantServiceClient) UpdateVariant(ctx context.Context, req *UpdateVar
 }
 
 func (c *VariantServiceClient) DeleteVariant(ctx context.Context, req *DeleteVariantRequest) (*DeleteVariantResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/variant/v1/variants/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

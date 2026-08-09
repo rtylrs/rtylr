@@ -24,6 +24,11 @@ func NewQuoteServiceClient(baseURL string) *QuoteServiceClient {
 }
 
 func (c *QuoteServiceClient) ListQuotes(ctx context.Context, req *ListQuotesRequest) (*ListQuotesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/quote/v1/quotes"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -56,6 +61,11 @@ func (c *QuoteServiceClient) ListQuotes(ctx context.Context, req *ListQuotesRequ
 }
 
 func (c *QuoteServiceClient) CreateQuote(ctx context.Context, req *CreateQuoteRequest) (*CreateQuoteResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/quote/v1/quotes"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -87,6 +97,11 @@ func (c *QuoteServiceClient) CreateQuote(ctx context.Context, req *CreateQuoteRe
 }
 
 func (c *QuoteServiceClient) GetQuote(ctx context.Context, req *GetQuoteRequest) (*GetQuoteResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/quote/v1/quotes/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -118,6 +133,11 @@ func (c *QuoteServiceClient) GetQuote(ctx context.Context, req *GetQuoteRequest)
 }
 
 func (c *QuoteServiceClient) UpdateQuoteStatus(ctx context.Context, req *UpdateQuoteStatusRequest) (*UpdateQuoteStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/quote/v1/quotes/{id}/status"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -150,6 +170,11 @@ func (c *QuoteServiceClient) UpdateQuoteStatus(ctx context.Context, req *UpdateQ
 }
 
 func (c *QuoteServiceClient) ConvertQuote(ctx context.Context, req *ConvertQuoteRequest) (*ConvertQuoteResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/quote/v1/quotes/{id}/convert"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

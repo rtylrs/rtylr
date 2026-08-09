@@ -23,6 +23,11 @@ func NewOrderHoldServiceClient(baseURL string) *OrderHoldServiceClient {
 }
 
 func (c *OrderHoldServiceClient) HoldOrder(ctx context.Context, req *HoldOrderRequest) (*HoldOrderResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/holds/v1/orders/{order_id}/hold"
 	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
 	body, err := json.Marshal(req)
@@ -55,6 +60,11 @@ func (c *OrderHoldServiceClient) HoldOrder(ctx context.Context, req *HoldOrderRe
 }
 
 func (c *OrderHoldServiceClient) ListHeldOrders(ctx context.Context, req *ListHeldOrdersRequest) (*ListHeldOrdersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/holds/v1/orders/held"
 	query := url.Values{}
 	if len(query) > 0 {

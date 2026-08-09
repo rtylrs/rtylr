@@ -20,11 +20,101 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *App) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *Addon) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAppsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAppsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Apps {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "apps: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAddonsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAddonsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Addons {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "addons: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *AddonStatusRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.AddonId == "" {
 		violations = append(violations, "addon_id is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AddonStatusResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -32,6 +122,9 @@ func (m *AddonStatusRequest) Validate() error {
 }
 
 func (m *EnableAddonRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.AddonId == "" {
 		violations = append(violations, "addon_id is required")
@@ -42,11 +135,36 @@ func (m *EnableAddonRequest) Validate() error {
 	return nil
 }
 
+func (m *EnableAddonResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DisableAddonRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.AddonId == "" {
 		violations = append(violations, "addon_id is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DisableAddonResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

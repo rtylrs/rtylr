@@ -20,13 +20,59 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *CalendarAppointment) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CalendarDay) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Appointments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "appointments: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetCalendarRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.From == "" {
 		violations = append(violations, "from is required")
 	}
 	if m.To == "" {
 		violations = append(violations, "to is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetCalendarResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Days {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "days: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

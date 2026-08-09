@@ -36,6 +36,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateReportTemplate(v: ReportTemplate): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ScheduledReport {
 id?: string;
 templateId?: string;
@@ -80,6 +85,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateScheduledReport(v: ScheduledReport): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListReportTemplatesRequest {
 page?: number;
 limit?: number;
@@ -109,6 +119,11 @@ if (v.type !== undefined) { out.type = v.type; }
 return out;
 }
 
+export function validateListReportTemplatesRequest(v: ListReportTemplatesRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListReportTemplatesResponse {
 templates?: (ReportTemplate)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -129,12 +144,19 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListReportTemplatesResponse(v: ListReportTemplatesResponse): string[] {
+const violations: string[] = [];
+if (v.templates !== undefined && v.templates !== null) for (const item of v.templates) violations.push(...validateReportTemplate(item).map((message) => "templates: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface CreateReportTemplateRequest {
-name?: string;
-description?: string;
-type?: string;
+name: string;
+description: string;
+type: string;
 metrics?: (string)[];
-format?: string;
+format: string;
 }
 
 export function decodeCreateReportTemplateRequest(v: any): CreateReportTemplateRequest {
@@ -158,6 +180,16 @@ if (v.format !== undefined) { out.format = v.format; }
 return out;
 }
 
+export function validateCreateReportTemplateRequest(v: CreateReportTemplateRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.metrics !== undefined && v.metrics !== null && v.metrics.length < 1) violations.push("metrics must contain at least 1 items");
+if (!(v.format !== undefined && v.format !== null) || v.format === "") violations.push("format is required");
+return violations;
+}
+
 export interface CreateReportTemplateResponse {
 template?: ReportTemplate;
 }
@@ -175,8 +207,14 @@ if (v.template !== undefined) { out.template = encodeReportTemplate(v.template);
 return out;
 }
 
+export function validateCreateReportTemplateResponse(v: CreateReportTemplateResponse): string[] {
+const violations: string[] = [];
+if (v.template !== undefined && v.template !== null) violations.push(...validateReportTemplate(v.template).map((message) => "template: " + message));
+return violations;
+}
+
 export interface GetReportTemplateRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetReportTemplateRequest(v: any): GetReportTemplateRequest {
@@ -190,6 +228,13 @@ export function encodeGetReportTemplateRequest(v: GetReportTemplateRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetReportTemplateRequest(v: GetReportTemplateRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetReportTemplateResponse {
@@ -207,6 +252,12 @@ export function encodeGetReportTemplateResponse(v: GetReportTemplateResponse): R
 const out: Record<string, unknown> = {};
 if (v.template !== undefined) { out.template = encodeReportTemplate(v.template); }
 return out;
+}
+
+export function validateGetReportTemplateResponse(v: GetReportTemplateResponse): string[] {
+const violations: string[] = [];
+if (v.template !== undefined && v.template !== null) violations.push(...validateReportTemplate(v.template).map((message) => "template: " + message));
+return violations;
 }
 
 export interface ListScheduledReportsRequest {
@@ -235,6 +286,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListScheduledReportsRequest(v: ListScheduledReportsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListScheduledReportsResponse {
 reports?: (ScheduledReport)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -255,11 +311,18 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListScheduledReportsResponse(v: ListScheduledReportsResponse): string[] {
+const violations: string[] = [];
+if (v.reports !== undefined && v.reports !== null) for (const item of v.reports) violations.push(...validateScheduledReport(item).map((message) => "reports: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface CreateScheduledReportRequest {
-templateSlug?: string;
-frequency?: string;
-channel?: string;
-recipientEmail?: string;
+templateSlug: string;
+frequency: string;
+channel: string;
+recipientEmail: string;
 isActive?: boolean;
 }
 
@@ -284,6 +347,16 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateCreateScheduledReportRequest(v: CreateScheduledReportRequest): string[] {
+const violations: string[] = [];
+if (!(v.templateSlug !== undefined && v.templateSlug !== null) || v.templateSlug === "") violations.push("template_slug is required");
+if (!(v.frequency !== undefined && v.frequency !== null) || v.frequency === "") violations.push("frequency is required");
+if (!(v.channel !== undefined && v.channel !== null) || v.channel === "") violations.push("channel is required");
+if (!(v.recipientEmail !== undefined && v.recipientEmail !== null) || v.recipientEmail === "") violations.push("recipient_email is required");
+if (v.recipientEmail !== undefined && v.recipientEmail !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.recipientEmail)) violations.push("recipient_email must be a valid email");
+return violations;
+}
+
 export interface CreateScheduledReportResponse {
 report?: ScheduledReport;
 }
@@ -301,12 +374,18 @@ if (v.report !== undefined) { out.report = encodeScheduledReport(v.report); }
 return out;
 }
 
+export function validateCreateScheduledReportResponse(v: CreateScheduledReportResponse): string[] {
+const violations: string[] = [];
+if (v.report !== undefined && v.report !== null) violations.push(...validateScheduledReport(v.report).map((message) => "report: " + message));
+return violations;
+}
+
 export interface UpdateScheduledReportRequest {
-id?: string;
-templateSlug?: string;
-frequency?: string;
-channel?: string;
-recipientEmail?: string;
+id: string;
+templateSlug: string;
+frequency: string;
+channel: string;
+recipientEmail: string;
 isActive?: boolean;
 }
 
@@ -333,6 +412,18 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateScheduledReportRequest(v: UpdateScheduledReportRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.templateSlug !== undefined && v.templateSlug !== null) || v.templateSlug === "") violations.push("template_slug is required");
+if (!(v.frequency !== undefined && v.frequency !== null) || v.frequency === "") violations.push("frequency is required");
+if (!(v.channel !== undefined && v.channel !== null) || v.channel === "") violations.push("channel is required");
+if (!(v.recipientEmail !== undefined && v.recipientEmail !== null) || v.recipientEmail === "") violations.push("recipient_email is required");
+if (v.recipientEmail !== undefined && v.recipientEmail !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.recipientEmail)) violations.push("recipient_email must be a valid email");
+return violations;
+}
+
 export interface UpdateScheduledReportResponse {
 report?: ScheduledReport;
 }
@@ -350,8 +441,14 @@ if (v.report !== undefined) { out.report = encodeScheduledReport(v.report); }
 return out;
 }
 
+export function validateUpdateScheduledReportResponse(v: UpdateScheduledReportResponse): string[] {
+const violations: string[] = [];
+if (v.report !== undefined && v.report !== null) violations.push(...validateScheduledReport(v.report).map((message) => "report: " + message));
+return violations;
+}
+
 export interface DeleteScheduledReportRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteScheduledReportRequest(v: any): DeleteScheduledReportRequest {
@@ -365,6 +462,13 @@ export function encodeDeleteScheduledReportRequest(v: DeleteScheduledReportReque
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteScheduledReportRequest(v: DeleteScheduledReportRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteScheduledReportResponse {
@@ -382,6 +486,11 @@ export function encodeDeleteScheduledReportResponse(v: DeleteScheduledReportResp
 const out: Record<string, unknown> = {};
 if (v.deleted !== undefined) { out.deleted = v.deleted; }
 return out;
+}
+
+export function validateDeleteScheduledReportResponse(v: DeleteScheduledReportResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GenerateRevenueReportRequest {
@@ -407,6 +516,11 @@ if (v.format !== undefined) { out.format = v.format; }
 return out;
 }
 
+export function validateGenerateRevenueReportRequest(v: GenerateRevenueReportRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GenerateRevenueReportResponse {
 reportId?: string;
 url?: string;
@@ -430,6 +544,11 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateGenerateRevenueReportResponse(v: GenerateRevenueReportResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ExportRevenueReportRequest {
 from?: string;
 to?: string;
@@ -450,6 +569,11 @@ if (v.to !== undefined) { out.to = v.to; }
 return out;
 }
 
+export function validateExportRevenueReportRequest(v: ExportRevenueReportRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ExportRevenueRow {
 date?: string;
 amountMinorUnits?: string;
@@ -468,6 +592,11 @@ const out: Record<string, unknown> = {};
 if (v.date !== undefined) { out.date = v.date; }
 if (v.amountMinorUnits !== undefined) { out.amount_minor_units = v.amountMinorUnits; }
 return out;
+}
+
+export function validateExportRevenueRow(v: ExportRevenueRow): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ExportRevenueReportResponse {
@@ -494,5 +623,11 @@ if (v.contentType !== undefined) { out.content_type = v.contentType; }
 if (v.csv !== undefined) { out.csv = v.csv; }
 if (v.rows !== undefined) { out.rows = (v.rows as any[]).map(encodeExportRevenueRow); }
 return out;
+}
+
+export function validateExportRevenueReportResponse(v: ExportRevenueReportResponse): string[] {
+const violations: string[] = [];
+if (v.rows !== undefined && v.rows !== null) for (const item of v.rows) violations.push(...validateExportRevenueRow(item).map((message) => "rows: " + message));
+return violations;
 }
 

@@ -24,6 +24,11 @@ func NewEquipmentServiceClient(baseURL string) *EquipmentServiceClient {
 }
 
 func (c *EquipmentServiceClient) ListAssets(ctx context.Context, req *ListAssetsRequest) (*ListAssetsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/equipment/v1/assets"
 	query := url.Values{}
 	if req.EmployeeId != nil {
@@ -60,6 +65,11 @@ func (c *EquipmentServiceClient) ListAssets(ctx context.Context, req *ListAssets
 }
 
 func (c *EquipmentServiceClient) ListEquipmentRequests(ctx context.Context, req *ListEquipmentRequestsRequest) (*ListEquipmentRequestsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/equipment/v1/requests"
 	query := url.Values{}
 	if req.EmployeeId != nil {
@@ -96,6 +106,11 @@ func (c *EquipmentServiceClient) ListEquipmentRequests(ctx context.Context, req 
 }
 
 func (c *EquipmentServiceClient) CreateEquipmentRequest(ctx context.Context, req *CreateEquipmentRequestRequest) (*CreateEquipmentRequestResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/equipment/v1/requests"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -127,9 +142,14 @@ func (c *EquipmentServiceClient) CreateEquipmentRequest(ctx context.Context, req
 }
 
 func (c *EquipmentServiceClient) ApproveEquipment(ctx context.Context, req *ApproveEquipmentRequest) (*ApproveEquipmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/equipment/v1/requests/{equipment_request_id}/approve"
 	path = strings.ReplaceAll(path, "{equipment_request_id}", fmt.Sprintf("%v", req.EquipmentRequestId))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}

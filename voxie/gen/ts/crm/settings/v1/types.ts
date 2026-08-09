@@ -41,6 +41,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateSettings(v: Settings): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetSettingsRequest {
 }
 
@@ -53,6 +58,11 @@ return {
 export function encodeGetSettingsRequest(v: GetSettingsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetSettingsRequest(v: GetSettingsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetSettingsResponse {
@@ -70,6 +80,12 @@ export function encodeGetSettingsResponse(v: GetSettingsResponse): Record<string
 const out: Record<string, unknown> = {};
 if (v.settings !== undefined) { out.settings = encodeSettings(v.settings); }
 return out;
+}
+
+export function validateGetSettingsResponse(v: GetSettingsResponse): string[] {
+const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null) violations.push(...validateSettings(v.settings).map((message) => "settings: " + message));
+return violations;
 }
 
 export interface UpdateSettingsRequest {
@@ -101,6 +117,11 @@ if (v.timezone !== undefined) { out.timezone = v.timezone; }
 return out;
 }
 
+export function validateUpdateSettingsRequest(v: UpdateSettingsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateSettingsResponse {
 message?: string;
 }
@@ -116,5 +137,10 @@ export function encodeUpdateSettingsResponse(v: UpdateSettingsResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateSettingsResponse(v: UpdateSettingsResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

@@ -21,6 +21,11 @@ func NewDashboardServiceClient(baseURL string) *DashboardServiceClient {
 }
 
 func (c *DashboardServiceClient) Dashboard(ctx context.Context, req *DashboardRequest) (*DashboardResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/dashboard/v1/dashboard"
 	query := url.Values{}
 	if len(query) > 0 {

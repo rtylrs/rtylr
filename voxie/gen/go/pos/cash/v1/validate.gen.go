@@ -20,7 +20,21 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *CashMovement) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CashAdjustRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BranchId <= 0 {
 		violations = append(violations, "branch_id must be greater than 0")
@@ -40,6 +54,17 @@ func (m *CashAdjustRequest) Validate() error {
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CashAdjustResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -47,6 +72,9 @@ func (m *CashAdjustRequest) Validate() error {
 }
 
 func (m *CashDropRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BranchId <= 0 {
 		violations = append(violations, "branch_id must be greater than 0")
@@ -66,6 +94,17 @@ func (m *CashDropRequest) Validate() error {
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CashDropResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -73,6 +112,9 @@ func (m *CashDropRequest) Validate() error {
 }
 
 func (m *CashPickupRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.BranchId <= 0 {
 		violations = append(violations, "branch_id must be greater than 0")
@@ -98,10 +140,40 @@ func (m *CashPickupRequest) Validate() error {
 	return nil
 }
 
+func (m *CashPickupResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ListCashMovementsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.SessionId <= 0 {
 		violations = append(violations, "session_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListCashMovementsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Movements {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "movements: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

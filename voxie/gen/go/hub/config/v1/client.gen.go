@@ -22,6 +22,11 @@ func NewConfigServiceClient(baseURL string) *ConfigServiceClient {
 }
 
 func (c *ConfigServiceClient) GetConfig(ctx context.Context, req *GetConfigRequest) (*GetConfigResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/config/v1/config"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *ConfigServiceClient) GetConfig(ctx context.Context, req *GetConfigReque
 }
 
 func (c *ConfigServiceClient) CreateConfig(ctx context.Context, req *CreateConfigRequest) (*CreateConfigResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/config/v1/config"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -83,6 +93,11 @@ func (c *ConfigServiceClient) CreateConfig(ctx context.Context, req *CreateConfi
 }
 
 func (c *ConfigServiceClient) UpdateConfig(ctx context.Context, req *UpdateConfigRequest) (*UpdateConfigResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/config/v1/config"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -114,6 +129,11 @@ func (c *ConfigServiceClient) UpdateConfig(ctx context.Context, req *UpdateConfi
 }
 
 func (c *ConfigServiceClient) GetIndustries(ctx context.Context, req *GetIndustriesRequest) (*GetIndustriesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/config/v1/industries"
 	query := url.Values{}
 	if len(query) > 0 {

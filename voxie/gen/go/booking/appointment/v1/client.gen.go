@@ -23,6 +23,11 @@ func NewAppointmentServiceClient(baseURL string) *AppointmentServiceClient {
 }
 
 func (c *AppointmentServiceClient) ListAppointments(ctx context.Context, req *ListAppointmentsRequest) (*ListAppointmentsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/booking/appointment/v1/appointments"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *AppointmentServiceClient) ListAppointments(ctx context.Context, req *Li
 }
 
 func (c *AppointmentServiceClient) ListTodayAppointments(ctx context.Context, req *ListTodayAppointmentsRequest) (*ListTodayAppointmentsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/booking/appointment/v1/appointments/today"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -83,6 +93,11 @@ func (c *AppointmentServiceClient) ListTodayAppointments(ctx context.Context, re
 }
 
 func (c *AppointmentServiceClient) CreateAppointment(ctx context.Context, req *CreateAppointmentRequest) (*CreateAppointmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/booking/appointment/v1/appointments"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -114,6 +129,11 @@ func (c *AppointmentServiceClient) CreateAppointment(ctx context.Context, req *C
 }
 
 func (c *AppointmentServiceClient) UpdateAppointment(ctx context.Context, req *UpdateAppointmentRequest) (*UpdateAppointmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/booking/appointment/v1/appointments/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -146,6 +166,11 @@ func (c *AppointmentServiceClient) UpdateAppointment(ctx context.Context, req *U
 }
 
 func (c *AppointmentServiceClient) DeleteAppointment(ctx context.Context, req *DeleteAppointmentRequest) (*DeleteAppointmentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/booking/appointment/v1/appointments/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

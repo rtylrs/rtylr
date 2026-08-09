@@ -20,7 +20,70 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *InvoiceItem) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *InvoiceSummary) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *InvoiceDetail) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Items {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "items: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *Payment) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RecordPaymentResponsePayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateInvoiceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ClientName == "" {
 		violations = append(violations, "client_name is required")
@@ -51,6 +114,27 @@ func (m *CreateInvoiceRequest) Validate() error {
 	}
 	if len(m.Items) < 1 {
 		violations = append(violations, "items must have at least 1 items")
+	}
+	for _, value := range m.Items {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "items: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateInvoiceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Invoice != nil {
+		if err := m.Invoice.Validate(); err != nil {
+			violations = append(violations, "invoice: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -59,6 +143,9 @@ func (m *CreateInvoiceRequest) Validate() error {
 }
 
 func (m *DeleteInvoiceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -69,10 +156,72 @@ func (m *DeleteInvoiceRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteInvoiceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetInvoiceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetInvoiceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Invoice != nil {
+		if err := m.Invoice.Validate(); err != nil {
+			violations = append(violations, "invoice: "+err.Error())
+		}
+	}
+	for _, value := range m.Payments {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "payments: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListInvoicesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListInvoicesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Invoices {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "invoices: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -81,6 +230,9 @@ func (m *GetInvoiceRequest) Validate() error {
 }
 
 func (m *SendInvoiceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -91,7 +243,21 @@ func (m *SendInvoiceRequest) Validate() error {
 	return nil
 }
 
+func (m *SendInvoiceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateInvoiceBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ClientName == "" {
 		violations = append(violations, "client_name is required")
@@ -123,6 +289,11 @@ func (m *UpdateInvoiceBody) Validate() error {
 	if len(m.Items) < 1 {
 		violations = append(violations, "items must have at least 1 items")
 	}
+	for _, value := range m.Items {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "items: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -130,9 +301,33 @@ func (m *UpdateInvoiceBody) Validate() error {
 }
 
 func (m *UpdateInvoiceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateInvoiceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Invoice != nil {
+		if err := m.Invoice.Validate(); err != nil {
+			violations = append(violations, "invoice: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -141,6 +336,9 @@ func (m *UpdateInvoiceRequest) Validate() error {
 }
 
 func (m *UpdateInvoiceStatusBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Status == "" {
 		violations = append(violations, "status is required")
@@ -152,10 +350,29 @@ func (m *UpdateInvoiceStatusBody) Validate() error {
 }
 
 func (m *UpdateInvoiceStatusRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateInvoiceStatusResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

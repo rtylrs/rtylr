@@ -24,6 +24,11 @@ func NewViewServiceClient(baseURL string) *ViewServiceClient {
 }
 
 func (c *ViewServiceClient) ListViews(ctx context.Context, req *ListViewsRequest) (*ListViewsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/view/v1/views"
 	query := url.Values{}
 	query.Set("workspace_id", req.WorkspaceId)
@@ -59,6 +64,11 @@ func (c *ViewServiceClient) ListViews(ctx context.Context, req *ListViewsRequest
 }
 
 func (c *ViewServiceClient) CreateView(ctx context.Context, req *CreateViewRequest) (*CreateViewResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/view/v1/views"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -90,6 +100,11 @@ func (c *ViewServiceClient) CreateView(ctx context.Context, req *CreateViewReque
 }
 
 func (c *ViewServiceClient) UpdateView(ctx context.Context, req *UpdateViewRequest) (*UpdateViewResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/view/v1/views/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -122,6 +137,11 @@ func (c *ViewServiceClient) UpdateView(ctx context.Context, req *UpdateViewReque
 }
 
 func (c *ViewServiceClient) DeleteView(ctx context.Context, req *DeleteViewRequest) (*DeleteViewResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/view/v1/views/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

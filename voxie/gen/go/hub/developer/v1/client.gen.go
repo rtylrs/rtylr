@@ -23,6 +23,11 @@ func NewDeveloperServiceClient(baseURL string) *DeveloperServiceClient {
 }
 
 func (c *DeveloperServiceClient) ListApiKeys(ctx context.Context, req *ListApiKeysRequest) (*ListApiKeysResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/developer/v1/api-keys"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *DeveloperServiceClient) ListApiKeys(ctx context.Context, req *ListApiKe
 }
 
 func (c *DeveloperServiceClient) CreateApiKey(ctx context.Context, req *CreateApiKeyRequest) (*CreateApiKeyResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/developer/v1/api-keys"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *DeveloperServiceClient) CreateApiKey(ctx context.Context, req *CreateAp
 }
 
 func (c *DeveloperServiceClient) RevokeApiKey(ctx context.Context, req *RevokeApiKeyRequest) (*RevokeApiKeyResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/developer/v1/api-keys/revoke"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -115,6 +130,11 @@ func (c *DeveloperServiceClient) RevokeApiKey(ctx context.Context, req *RevokeAp
 }
 
 func (c *DeveloperServiceClient) ListWebhooks(ctx context.Context, req *ListWebhooksRequest) (*ListWebhooksResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/developer/v1/webhooks"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -145,6 +165,11 @@ func (c *DeveloperServiceClient) ListWebhooks(ctx context.Context, req *ListWebh
 }
 
 func (c *DeveloperServiceClient) CreateWebhook(ctx context.Context, req *CreateWebhookRequest) (*CreateWebhookResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/developer/v1/webhooks"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -176,6 +201,11 @@ func (c *DeveloperServiceClient) CreateWebhook(ctx context.Context, req *CreateW
 }
 
 func (c *DeveloperServiceClient) UpdateWebhook(ctx context.Context, req *UpdateWebhookRequest) (*UpdateWebhookResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/developer/v1/webhooks/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -208,6 +238,11 @@ func (c *DeveloperServiceClient) UpdateWebhook(ctx context.Context, req *UpdateW
 }
 
 func (c *DeveloperServiceClient) DeleteWebhook(ctx context.Context, req *DeleteWebhookRequest) (*DeleteWebhookResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/developer/v1/webhooks/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

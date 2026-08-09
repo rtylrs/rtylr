@@ -56,6 +56,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateOrderItem(v: OrderItem): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface Order {
 id?: string;
 ownerId?: string;
@@ -145,6 +150,12 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeOrderItem)
 return out;
 }
 
+export function validateOrder(v: Order): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateOrderItem(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface CreateOrderItemInput {
 menuItemId?: string;
 name?: string;
@@ -183,6 +194,11 @@ if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
 }
 
+export function validateCreateOrderItemInput(v: CreateOrderItemInput): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface SplitGroup {
 itemIds?: (string)[];
 }
@@ -198,6 +214,11 @@ export function encodeSplitGroup(v: SplitGroup): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.itemIds !== undefined) { out.item_ids = v.itemIds; }
 return out;
+}
+
+export function validateSplitGroup(v: SplitGroup): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface CreateOrderRequest {
@@ -244,6 +265,13 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeCreateOrde
 return out;
 }
 
+export function validateCreateOrderRequest(v: CreateOrderRequest): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null && v.items.length < 1) violations.push("items must contain at least 1 items");
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateCreateOrderItemInput(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface CreateOrderResponse {
 orderId?: string;
 orderNumber?: string;
@@ -265,6 +293,11 @@ if (v.orderId !== undefined) { out.order_id = v.orderId; }
 if (v.orderNumber !== undefined) { out.order_number = v.orderNumber; }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateCreateOrderResponse(v: CreateOrderResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface PublicOrderItemInput {
@@ -294,6 +327,13 @@ if (v.quantity !== undefined) { out.quantity = v.quantity; }
 if (v.unitPrice !== undefined) { out.unit_price = v.unitPrice; }
 if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
+}
+
+export function validatePublicOrderItemInput(v: PublicOrderItemInput): string[] {
+const violations: string[] = [];
+if (v.menuItemId !== undefined && v.menuItemId !== null && !(Number(v.menuItemId) > 0)) violations.push("menu_item_id violates @gt");
+if (v.quantity !== undefined && v.quantity !== null && !(Number(v.quantity) > 0)) violations.push("quantity violates @gt");
+return violations;
 }
 
 export interface CreatePublicOrderRequest {
@@ -328,6 +368,14 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodePublicOrde
 return out;
 }
 
+export function validateCreatePublicOrderRequest(v: CreatePublicOrderRequest): string[] {
+const violations: string[] = [];
+if (v.ownerId !== undefined && v.ownerId !== null && !(Number(v.ownerId) > 0)) violations.push("owner_id violates @gt");
+if (v.items !== undefined && v.items !== null && v.items.length < 1) violations.push("items must contain at least 1 items");
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validatePublicOrderItemInput(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface CreatePublicOrderResponse {
 orderId?: string;
 orderNumber?: string;
@@ -351,8 +399,13 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateCreatePublicOrderResponse(v: CreatePublicOrderResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetOrderDetailRequest {
-orderId?: string;
+orderId: string;
 }
 
 export function decodeGetOrderDetailRequest(v: any): GetOrderDetailRequest {
@@ -366,6 +419,13 @@ export function encodeGetOrderDetailRequest(v: GetOrderDetailRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.orderId !== undefined) { out.order_id = v.orderId; }
 return out;
+}
+
+export function validateGetOrderDetailRequest(v: GetOrderDetailRequest): string[] {
+const violations: string[] = [];
+if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
+if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+return violations;
 }
 
 export interface GetOrderDetailResponse {
@@ -385,9 +445,15 @@ if (v.order !== undefined) { out.order = encodeOrder(v.order); }
 return out;
 }
 
+export function validateGetOrderDetailResponse(v: GetOrderDetailResponse): string[] {
+const violations: string[] = [];
+if (v.order !== undefined && v.order !== null) violations.push(...validateOrder(v.order).map((message) => "order: " + message));
+return violations;
+}
+
 export interface GetPublicOrderStatusRequest {
-orderId?: string;
-businessId?: string;
+orderId: string;
+businessId: string;
 }
 
 export function decodeGetPublicOrderStatusRequest(v: any): GetPublicOrderStatusRequest {
@@ -403,6 +469,15 @@ const out: Record<string, unknown> = {};
 if (v.orderId !== undefined) { out.order_id = v.orderId; }
 if (v.businessId !== undefined) { out.business_id = v.businessId; }
 return out;
+}
+
+export function validateGetPublicOrderStatusRequest(v: GetPublicOrderStatusRequest): string[] {
+const violations: string[] = [];
+if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
+if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
+if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+return violations;
 }
 
 export interface GetPublicOrderStatusResponse {
@@ -428,8 +503,13 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateGetPublicOrderStatusResponse(v: GetPublicOrderStatusResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListOrdersRequest {
-sessionId?: string;
+sessionId: string;
 status?: string;
 dateFrom?: string;
 dateTo?: string;
@@ -463,6 +543,13 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListOrdersRequest(v: ListOrdersRequest): string[] {
+const violations: string[] = [];
+if (!(v.sessionId !== undefined && v.sessionId !== null)) violations.push("session_id is required");
+if (v.sessionId !== undefined && v.sessionId !== null && !(Number(v.sessionId) > 0)) violations.push("session_id violates @gt");
+return violations;
+}
+
 export interface ListOrdersResponse {
 orders?: (Order)[];
 total?: number;
@@ -492,8 +579,14 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListOrdersResponse(v: ListOrdersResponse): string[] {
+const violations: string[] = [];
+if (v.orders !== undefined && v.orders !== null) for (const item of v.orders) violations.push(...validateOrder(item).map((message) => "orders: " + message));
+return violations;
+}
+
 export interface SendToKitchenRequest {
-orderId?: string;
+orderId: string;
 }
 
 export function decodeSendToKitchenRequest(v: any): SendToKitchenRequest {
@@ -507,6 +600,13 @@ export function encodeSendToKitchenRequest(v: SendToKitchenRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.orderId !== undefined) { out.order_id = v.orderId; }
 return out;
+}
+
+export function validateSendToKitchenRequest(v: SendToKitchenRequest): string[] {
+const violations: string[] = [];
+if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
+if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+return violations;
 }
 
 export interface SendToKitchenResponse {
@@ -526,9 +626,14 @@ if (v.success !== undefined) { out.success = v.success; }
 return out;
 }
 
+export function validateSendToKitchenResponse(v: SendToKitchenResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface TransferTableRequest {
-orderId?: string;
-newTableId?: string;
+orderId: string;
+newTableId: string;
 }
 
 export function decodeTransferTableRequest(v: any): TransferTableRequest {
@@ -544,6 +649,15 @@ const out: Record<string, unknown> = {};
 if (v.orderId !== undefined) { out.order_id = v.orderId; }
 if (v.newTableId !== undefined) { out.new_table_id = v.newTableId; }
 return out;
+}
+
+export function validateTransferTableRequest(v: TransferTableRequest): string[] {
+const violations: string[] = [];
+if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
+if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (!(v.newTableId !== undefined && v.newTableId !== null)) violations.push("new_table_id is required");
+if (v.newTableId !== undefined && v.newTableId !== null && !(Number(v.newTableId) > 0)) violations.push("new_table_id violates @gt");
+return violations;
 }
 
 export interface TransferTableResponse {
@@ -563,8 +677,13 @@ if (v.success !== undefined) { out.success = v.success; }
 return out;
 }
 
+export function validateTransferTableResponse(v: TransferTableResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateOrderStatusBody {
-status?: string;
+status: string;
 }
 
 export function decodeUpdateOrderStatusBody(v: any): UpdateOrderStatusBody {
@@ -580,8 +699,14 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdateOrderStatusBody(v: UpdateOrderStatusBody): string[] {
+const violations: string[] = [];
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+return violations;
+}
+
 export interface UpdateOrderStatusRequest {
-orderId?: string;
+orderId: string;
 body?: UpdateOrderStatusBody;
 }
 
@@ -598,6 +723,14 @@ const out: Record<string, unknown> = {};
 if (v.orderId !== undefined) { out.order_id = v.orderId; }
 if (v.body !== undefined) { out.body = encodeUpdateOrderStatusBody(v.body); }
 return out;
+}
+
+export function validateUpdateOrderStatusRequest(v: UpdateOrderStatusRequest): string[] {
+const violations: string[] = [];
+if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
+if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateOrderStatusBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateOrderStatusResponse {
@@ -617,9 +750,14 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateOrderStatusResponse(v: UpdateOrderStatusResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface VoidOrderRequest {
-orderId?: string;
-reason?: string;
+orderId: string;
+reason: string;
 }
 
 export function decodeVoidOrderRequest(v: any): VoidOrderRequest {
@@ -637,6 +775,14 @@ if (v.reason !== undefined) { out.reason = v.reason; }
 return out;
 }
 
+export function validateVoidOrderRequest(v: VoidOrderRequest): string[] {
+const violations: string[] = [];
+if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
+if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
+return violations;
+}
+
 export interface VoidOrderResponse {
 message?: string;
 }
@@ -652,5 +798,10 @@ export function encodeVoidOrderResponse(v: VoidOrderResponse): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateVoidOrderResponse(v: VoidOrderResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

@@ -20,10 +20,72 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *InsightsSettings) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetInsightsSettingsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetInsightsSettingsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Settings != nil {
+		if err := m.Settings.Validate(); err != nil {
+			violations = append(violations, "settings: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateInsightsSettingsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Settings == nil {
 		violations = append(violations, "settings is required")
+	}
+	if m.Settings != nil {
+		if err := m.Settings.Validate(); err != nil {
+			violations = append(violations, "settings: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateInsightsSettingsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Settings != nil {
+		if err := m.Settings.Validate(); err != nil {
+			violations = append(violations, "settings: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

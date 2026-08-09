@@ -23,6 +23,11 @@ func NewDocumentServiceClient(baseURL string) *DocumentServiceClient {
 }
 
 func (c *DocumentServiceClient) ListDocuments(ctx context.Context, req *ListDocumentsRequest) (*ListDocumentsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/document/v1/documents"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *DocumentServiceClient) ListDocuments(ctx context.Context, req *ListDocu
 }
 
 func (c *DocumentServiceClient) CreateDocument(ctx context.Context, req *CreateDocumentRequest) (*CreateDocumentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/document/v1/documents"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *DocumentServiceClient) CreateDocument(ctx context.Context, req *CreateD
 }
 
 func (c *DocumentServiceClient) DeleteDocument(ctx context.Context, req *DeleteDocumentRequest) (*DeleteDocumentResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/document/v1/documents/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

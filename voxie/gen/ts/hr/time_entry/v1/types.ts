@@ -68,6 +68,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateTimeEntryPayload(v: TimeEntryPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface TimesheetPayload {
 id?: string;
 ownerId?: string;
@@ -118,6 +123,12 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateTimesheetPayload(v: TimesheetPayload): string[] {
+const violations: string[] = [];
+if (v.entries !== undefined && v.entries !== null) for (const item of v.entries) violations.push(...validateTimeEntryPayload(item).map((message) => "entries: " + message));
+return violations;
+}
+
 export interface ListTimeEntriesRequest {
 employeeId?: string;
 date?: string;
@@ -136,6 +147,11 @@ const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.date !== undefined) { out.date = v.date; }
 return out;
+}
+
+export function validateListTimeEntriesRequest(v: ListTimeEntriesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListTimeEntriesResponse {
@@ -164,18 +180,24 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListTimeEntriesResponse(v: ListTimeEntriesResponse): string[] {
+const violations: string[] = [];
+if (v.entries !== undefined && v.entries !== null) for (const item of v.entries) violations.push(...validateTimeEntryPayload(item).map((message) => "entries: " + message));
+return violations;
+}
+
 export interface CreateTimeEntryRequest {
-employeeId?: string;
+employeeId: string;
 projectId?: string;
 taskId?: string;
 categoryId?: string;
-date?: string;
-durationMinutes?: number;
+date: string;
+durationMinutes: number;
 startTime?: string;
 endTime?: string;
-description?: string;
+description: string;
 isBillable?: boolean;
-source?: string;
+source: string;
 }
 
 export function decodeCreateTimeEntryRequest(v: any): CreateTimeEntryRequest {
@@ -211,6 +233,18 @@ if (v.source !== undefined) { out.source = v.source; }
 return out;
 }
 
+export function validateCreateTimeEntryRequest(v: CreateTimeEntryRequest): string[] {
+const violations: string[] = [];
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
+if (!(v.durationMinutes !== undefined && v.durationMinutes !== null)) violations.push("duration_minutes is required");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(Number(v.durationMinutes) > 0)) violations.push("duration_minutes violates @gt");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.source !== undefined && v.source !== null) || v.source === "") violations.push("source is required");
+return violations;
+}
+
 export interface CreateTimeEntryResponse {
 entry?: TimeEntryPayload;
 }
@@ -226,6 +260,12 @@ export function encodeCreateTimeEntryResponse(v: CreateTimeEntryResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.entry !== undefined) { out.entry = encodeTimeEntryPayload(v.entry); }
 return out;
+}
+
+export function validateCreateTimeEntryResponse(v: CreateTimeEntryResponse): string[] {
+const violations: string[] = [];
+if (v.entry !== undefined && v.entry !== null) violations.push(...validateTimeEntryPayload(v.entry).map((message) => "entry: " + message));
+return violations;
 }
 
 export interface ListTimesheetsRequest {
@@ -246,6 +286,11 @@ const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.status !== undefined) { out.status = v.status; }
 return out;
+}
+
+export function validateListTimesheetsRequest(v: ListTimesheetsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListTimesheetsResponse {
@@ -274,8 +319,14 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListTimesheetsResponse(v: ListTimesheetsResponse): string[] {
+const violations: string[] = [];
+if (v.timesheets !== undefined && v.timesheets !== null) for (const item of v.timesheets) violations.push(...validateTimesheetPayload(item).map((message) => "timesheets: " + message));
+return violations;
+}
+
 export interface SubmitTimesheetRequest {
-timesheetId?: string;
+timesheetId: string;
 }
 
 export function decodeSubmitTimesheetRequest(v: any): SubmitTimesheetRequest {
@@ -289,6 +340,13 @@ export function encodeSubmitTimesheetRequest(v: SubmitTimesheetRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.timesheetId !== undefined) { out.timesheet_id = v.timesheetId; }
 return out;
+}
+
+export function validateSubmitTimesheetRequest(v: SubmitTimesheetRequest): string[] {
+const violations: string[] = [];
+if (!(v.timesheetId !== undefined && v.timesheetId !== null)) violations.push("timesheet_id is required");
+if (v.timesheetId !== undefined && v.timesheetId !== null && !(Number(v.timesheetId) > 0)) violations.push("timesheet_id violates @gt");
+return violations;
 }
 
 export interface SubmitTimesheetResponse {
@@ -306,6 +364,11 @@ export function encodeSubmitTimesheetResponse(v: SubmitTimesheetResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateSubmitTimesheetResponse(v: SubmitTimesheetResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ApproveTimesheetBody {
@@ -328,8 +391,13 @@ if (v.rejectionReason !== undefined) { out.rejection_reason = v.rejectionReason;
 return out;
 }
 
+export function validateApproveTimesheetBody(v: ApproveTimesheetBody): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ApproveTimesheetRequest {
-id?: string;
+id: string;
 body?: ApproveTimesheetBody;
 }
 
@@ -348,6 +416,14 @@ if (v.body !== undefined) { out.body = encodeApproveTimesheetBody(v.body); }
 return out;
 }
 
+export function validateApproveTimesheetRequest(v: ApproveTimesheetRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateApproveTimesheetBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface ApproveTimesheetResponse {
 success?: boolean;
 }
@@ -363,5 +439,10 @@ export function encodeApproveTimesheetResponse(v: ApproveTimesheetResponse): Rec
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validateApproveTimesheetResponse(v: ApproveTimesheetResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

@@ -20,7 +20,48 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Table) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTablesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTablesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Tables {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "tables: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateTableRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Label == "" {
 		violations = append(violations, "label is required")
@@ -34,7 +75,21 @@ func (m *CreateTableRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateTableResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateTableBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Label == "" {
 		violations = append(violations, "label is required")
@@ -52,9 +107,17 @@ func (m *UpdateTableBody) Validate() error {
 }
 
 func (m *UpdateTableRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -62,7 +125,21 @@ func (m *UpdateTableRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdateTableResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateTableStatusBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Status == "" {
 		violations = append(violations, "status is required")
@@ -74,6 +151,39 @@ func (m *UpdateTableStatusBody) Validate() error {
 }
 
 func (m *UpdateTableStatusRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateTableStatusResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteTableRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -84,11 +194,11 @@ func (m *UpdateTableStatusRequest) Validate() error {
 	return nil
 }
 
-func (m *DeleteTableRequest) Validate() error {
-	var violations []string
-	if m.Id <= 0 {
-		violations = append(violations, "id must be greater than 0")
+func (m *DeleteTableResponse) Validate() error {
+	if m == nil {
+		return nil
 	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

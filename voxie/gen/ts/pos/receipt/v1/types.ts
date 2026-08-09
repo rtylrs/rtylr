@@ -32,9 +32,14 @@ if (v.paidAt !== undefined) { out.paid_at = v.paidAt; }
 return out;
 }
 
+export function validateReceipt(v: Receipt): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface EmailReceiptRequest {
-id?: string;
-email?: string;
+id: string;
+email: string;
 }
 
 export function decodeEmailReceiptRequest(v: any): EmailReceiptRequest {
@@ -52,6 +57,14 @@ if (v.email !== undefined) { out.email = v.email; }
 return out;
 }
 
+export function validateEmailReceiptRequest(v: EmailReceiptRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
+return violations;
+}
+
 export interface EmailReceiptResponse {
 message?: string;
 }
@@ -67,6 +80,11 @@ export function encodeEmailReceiptResponse(v: EmailReceiptResponse): Record<stri
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateEmailReceiptResponse(v: EmailReceiptResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListReceiptsRequest {
@@ -89,6 +107,11 @@ if (v.to !== undefined) { out.to = v.to; }
 return out;
 }
 
+export function validateListReceiptsRequest(v: ListReceiptsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListReceiptsResponse {
 receipts?: (Receipt)[];
 }
@@ -104,5 +127,11 @@ export function encodeListReceiptsResponse(v: ListReceiptsResponse): Record<stri
 const out: Record<string, unknown> = {};
 if (v.receipts !== undefined) { out.receipts = (v.receipts as any[]).map(encodeReceipt); }
 return out;
+}
+
+export function validateListReceiptsResponse(v: ListReceiptsResponse): string[] {
+const violations: string[] = [];
+if (v.receipts !== undefined && v.receipts !== null) for (const item of v.receipts) violations.push(...validateReceipt(item).map((message) => "receipts: " + message));
+return violations;
 }
 

@@ -21,6 +21,11 @@ func NewFinancialServiceClient(baseURL string) *FinancialServiceClient {
 }
 
 func (c *FinancialServiceClient) GetCashFlowAnalytics(ctx context.Context, req *GetCashFlowAnalyticsRequest) (*GetCashFlowAnalyticsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/financial/v1/cash-flow"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -52,6 +57,11 @@ func (c *FinancialServiceClient) GetCashFlowAnalytics(ctx context.Context, req *
 }
 
 func (c *FinancialServiceClient) GetExpenseAnalytics(ctx context.Context, req *GetExpenseAnalyticsRequest) (*GetExpenseAnalyticsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/financial/v1/expenses"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -83,6 +93,11 @@ func (c *FinancialServiceClient) GetExpenseAnalytics(ctx context.Context, req *G
 }
 
 func (c *FinancialServiceClient) GetInvoiceAging(ctx context.Context, req *GetInvoiceAgingRequest) (*GetInvoiceAgingResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/financial/v1/invoice-aging"
 	query := url.Values{}
 	if len(query) > 0 {

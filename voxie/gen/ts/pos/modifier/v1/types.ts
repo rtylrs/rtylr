@@ -38,10 +38,15 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateModifier(v: Modifier): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateModifierRequest {
-name?: string;
+name: string;
 priceDelta?: number;
-groupName?: string;
+groupName: string;
 isRequired?: boolean;
 }
 
@@ -64,6 +69,14 @@ if (v.isRequired !== undefined) { out.is_required = v.isRequired; }
 return out;
 }
 
+export function validateCreateModifierRequest(v: CreateModifierRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.priceDelta !== undefined && v.priceDelta !== null && !(Number(v.priceDelta) >= 0)) violations.push("price_delta violates @gte");
+if (!(v.groupName !== undefined && v.groupName !== null) || v.groupName === "") violations.push("group_name is required");
+return violations;
+}
+
 export interface CreateModifierResponse {
 modifierId?: string;
 message?: string;
@@ -84,8 +97,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateModifierResponse(v: CreateModifierResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteModifierRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteModifierRequest(v: any): DeleteModifierRequest {
@@ -99,6 +117,13 @@ export function encodeDeleteModifierRequest(v: DeleteModifierRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteModifierRequest(v: DeleteModifierRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteModifierResponse {
@@ -118,6 +143,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteModifierResponse(v: DeleteModifierResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListModifiersRequest {
 }
 
@@ -130,6 +160,11 @@ return {
 export function encodeListModifiersRequest(v: ListModifiersRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListModifiersRequest(v: ListModifiersRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListModifiersResponse {
@@ -149,10 +184,16 @@ if (v.modifiers !== undefined) { out.modifiers = (v.modifiers as any[]).map(enco
 return out;
 }
 
+export function validateListModifiersResponse(v: ListModifiersResponse): string[] {
+const violations: string[] = [];
+if (v.modifiers !== undefined && v.modifiers !== null) for (const item of v.modifiers) violations.push(...validateModifier(item).map((message) => "modifiers: " + message));
+return violations;
+}
+
 export interface UpdateModifierBody {
-name?: string;
+name: string;
 priceDelta?: number;
-groupName?: string;
+groupName: string;
 isRequired?: boolean;
 }
 
@@ -175,8 +216,16 @@ if (v.isRequired !== undefined) { out.is_required = v.isRequired; }
 return out;
 }
 
+export function validateUpdateModifierBody(v: UpdateModifierBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.priceDelta !== undefined && v.priceDelta !== null && !(Number(v.priceDelta) >= 0)) violations.push("price_delta violates @gte");
+if (!(v.groupName !== undefined && v.groupName !== null) || v.groupName === "") violations.push("group_name is required");
+return violations;
+}
+
 export interface UpdateModifierRequest {
-id?: string;
+id: string;
 body?: UpdateModifierBody;
 }
 
@@ -195,6 +244,14 @@ if (v.body !== undefined) { out.body = encodeUpdateModifierBody(v.body); }
 return out;
 }
 
+export function validateUpdateModifierRequest(v: UpdateModifierRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateModifierBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateModifierResponse {
 message?: string;
 }
@@ -210,5 +267,10 @@ export function encodeUpdateModifierResponse(v: UpdateModifierResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateModifierResponse(v: UpdateModifierResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

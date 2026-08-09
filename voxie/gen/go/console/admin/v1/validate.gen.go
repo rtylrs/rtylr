@@ -20,7 +20,119 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *User) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *Business) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *Subscription) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *Plan) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *Stats) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetStatsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetStatsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Stats != nil {
+		if err := m.Stats.Validate(); err != nil {
+			violations = append(violations, "stats: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListUsersRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListUsersResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Users {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "users: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -31,7 +143,26 @@ func (m *GetUserRequest) Validate() error {
 	return nil
 }
 
+func (m *GetUserResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.User != nil {
+		if err := m.User.Validate(); err != nil {
+			violations = append(violations, "user: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Email != "" && !emailPattern.MatchString(m.Email) {
 		violations = append(violations, "email must be a valid email")
@@ -42,11 +173,41 @@ func (m *CreateUserRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateUserResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.User != nil {
+		if err := m.User.Validate(); err != nil {
+			violations = append(violations, "user: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateUserResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -54,10 +215,24 @@ func (m *UpdateUserRequest) Validate() error {
 }
 
 func (m *DeleteUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteUserResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -65,10 +240,24 @@ func (m *DeleteUserRequest) Validate() error {
 }
 
 func (m *BanUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *BanUserResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -76,10 +265,24 @@ func (m *BanUserRequest) Validate() error {
 }
 
 func (m *UnbanUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UnbanUserResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -87,6 +290,9 @@ func (m *UnbanUserRequest) Validate() error {
 }
 
 func (m *SetConsoleAdminRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -97,7 +303,21 @@ func (m *SetConsoleAdminRequest) Validate() error {
 	return nil
 }
 
+func (m *SetConsoleAdminResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetUserSubscriptionRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.UserId <= 0 {
 		violations = append(violations, "user_id must be greater than 0")
@@ -108,11 +328,68 @@ func (m *GetUserSubscriptionRequest) Validate() error {
 	return nil
 }
 
+func (m *GetUserSubscriptionResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Subscription != nil {
+		if err := m.Subscription.Validate(); err != nil {
+			violations = append(violations, "subscription: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListBusinessesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListBusinessesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Businesses {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "businesses: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateBusinessRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateBusinessResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -120,6 +397,9 @@ func (m *UpdateBusinessRequest) Validate() error {
 }
 
 func (m *DeleteBusinessRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -130,7 +410,21 @@ func (m *DeleteBusinessRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteBusinessResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateBusinessOwnerRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Email != "" && !emailPattern.MatchString(m.Email) {
 		violations = append(violations, "email must be a valid email")
@@ -141,7 +435,63 @@ func (m *CreateBusinessOwnerRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateBusinessOwnerResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Owner != nil {
+		if err := m.Owner.Validate(); err != nil {
+			violations = append(violations, "owner: "+err.Error())
+		}
+	}
+	if m.Business != nil {
+		if err := m.Business.Validate(); err != nil {
+			violations = append(violations, "business: "+err.Error())
+		}
+	}
+	if m.Subscription != nil {
+		if err := m.Subscription.Validate(); err != nil {
+			violations = append(violations, "subscription: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListSubscriptionsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListSubscriptionsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Subscriptions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "subscriptions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpsertSubscriptionRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.OwnerId <= 0 {
 		violations = append(violations, "owner_id must be greater than 0")
@@ -155,7 +505,21 @@ func (m *UpsertSubscriptionRequest) Validate() error {
 	return nil
 }
 
+func (m *UpsertSubscriptionResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteSubscriptionRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -166,11 +530,63 @@ func (m *DeleteSubscriptionRequest) Validate() error {
 	return nil
 }
 
+func (m *DeleteSubscriptionResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListPlansRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListPlansResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Plans {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "plans: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdatePlanRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdatePlanResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

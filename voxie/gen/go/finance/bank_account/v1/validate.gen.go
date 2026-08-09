@@ -20,7 +20,21 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *BankAccount) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateBankAccountRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -46,10 +60,77 @@ func (m *CreateBankAccountRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateBankAccountResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Account != nil {
+		if err := m.Account.Validate(); err != nil {
+			violations = append(violations, "account: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetBankAccountRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetBankAccountResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Account != nil {
+		if err := m.Account.Validate(); err != nil {
+			violations = append(violations, "account: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListBankAccountsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListBankAccountsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Accounts {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "accounts: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

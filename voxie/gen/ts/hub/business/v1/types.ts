@@ -56,6 +56,11 @@ if (v.slug !== undefined) { out.slug = v.slug; }
 return out;
 }
 
+export function validateBusiness(v: Business): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface BusinessEntry {
 id?: string;
 name?: string;
@@ -88,6 +93,11 @@ if (v.isOwned !== undefined) { out.is_owned = v.isOwned; }
 return out;
 }
 
+export function validateBusinessEntry(v: BusinessEntry): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface PublicLocation {
 id?: string;
 name?: string;
@@ -118,6 +128,11 @@ if (v.address !== undefined) { out.address = v.address; }
 if (v.timezone !== undefined) { out.timezone = v.timezone; }
 if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
+}
+
+export function validatePublicLocation(v: PublicLocation): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface PublicBusinessSummary {
@@ -155,6 +170,11 @@ if (v.timezone !== undefined) { out.timezone = v.timezone; }
 return out;
 }
 
+export function validatePublicBusinessSummary(v: PublicBusinessSummary): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface PublicBusinessProfile {
 id?: string;
 name?: string;
@@ -184,8 +204,13 @@ if (v.timezone !== undefined) { out.timezone = v.timezone; }
 return out;
 }
 
+export function validatePublicBusinessProfile(v: PublicBusinessProfile): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetBusinessRequest {
-businessId?: string;
+businessId: string;
 }
 
 export function decodeGetBusinessRequest(v: any): GetBusinessRequest {
@@ -199,6 +224,13 @@ export function encodeGetBusinessRequest(v: GetBusinessRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.businessId !== undefined) { out.business_id = v.businessId; }
 return out;
+}
+
+export function validateGetBusinessRequest(v: GetBusinessRequest): string[] {
+const violations: string[] = [];
+if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
+if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+return violations;
 }
 
 export interface GetBusinessResponse {
@@ -218,9 +250,15 @@ if (v.business !== undefined) { out.business = encodeBusiness(v.business); }
 return out;
 }
 
+export function validateGetBusinessResponse(v: GetBusinessResponse): string[] {
+const violations: string[] = [];
+if (v.business !== undefined && v.business !== null) violations.push(...validateBusiness(v.business).map((message) => "business: " + message));
+return violations;
+}
+
 export interface CreateSubBusinessRequest {
-name?: string;
-parentBusinessId?: string;
+name: string;
+parentBusinessId: string;
 }
 
 export function decodeCreateSubBusinessRequest(v: any): CreateSubBusinessRequest {
@@ -236,6 +274,14 @@ const out: Record<string, unknown> = {};
 if (v.name !== undefined) { out.name = v.name; }
 if (v.parentBusinessId !== undefined) { out.parent_business_id = v.parentBusinessId; }
 return out;
+}
+
+export function validateCreateSubBusinessRequest(v: CreateSubBusinessRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.parentBusinessId !== undefined && v.parentBusinessId !== null)) violations.push("parent_business_id is required");
+if (v.parentBusinessId !== undefined && v.parentBusinessId !== null && !(Number(v.parentBusinessId) > 0)) violations.push("parent_business_id violates @gt");
+return violations;
 }
 
 export interface CreateSubBusinessResponse {
@@ -255,8 +301,13 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateCreateSubBusinessResponse(v: CreateSubBusinessResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface OnboardBusinessRequest {
-name?: string;
+name: string;
 }
 
 export function decodeOnboardBusinessRequest(v: any): OnboardBusinessRequest {
@@ -270,6 +321,12 @@ export function encodeOnboardBusinessRequest(v: OnboardBusinessRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.name !== undefined) { out.name = v.name; }
 return out;
+}
+
+export function validateOnboardBusinessRequest(v: OnboardBusinessRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
 }
 
 export interface OnboardBusinessResponse {
@@ -289,8 +346,13 @@ if (v.token !== undefined) { out.token = v.token; }
 return out;
 }
 
+export function validateOnboardBusinessResponse(v: OnboardBusinessResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CheckBusinessNameExistsRequest {
-name?: string;
+name: string;
 }
 
 export function decodeCheckBusinessNameExistsRequest(v: any): CheckBusinessNameExistsRequest {
@@ -304,6 +366,12 @@ export function encodeCheckBusinessNameExistsRequest(v: CheckBusinessNameExistsR
 const out: Record<string, unknown> = {};
 if (v.name !== undefined) { out.name = v.name; }
 return out;
+}
+
+export function validateCheckBusinessNameExistsRequest(v: CheckBusinessNameExistsRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
 }
 
 export interface CheckBusinessNameExistsResponse {
@@ -323,6 +391,11 @@ if (v.exists !== undefined) { out.exists = v.exists; }
 return out;
 }
 
+export function validateCheckBusinessNameExistsResponse(v: CheckBusinessNameExistsResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetPublicBusinessRequest {
 businessId?: string;
 }
@@ -338,6 +411,12 @@ export function encodeGetPublicBusinessRequest(v: GetPublicBusinessRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.businessId !== undefined) { out.business_id = v.businessId; }
 return out;
+}
+
+export function validateGetPublicBusinessRequest(v: GetPublicBusinessRequest): string[] {
+const violations: string[] = [];
+if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+return violations;
 }
 
 export interface GetPublicBusinessResponse {
@@ -357,6 +436,12 @@ if (v.business !== undefined) { out.business = encodePublicBusinessProfile(v.bus
 return out;
 }
 
+export function validateGetPublicBusinessResponse(v: GetPublicBusinessResponse): string[] {
+const violations: string[] = [];
+if (v.business !== undefined && v.business !== null) violations.push(...validatePublicBusinessProfile(v.business).map((message) => "business: " + message));
+return violations;
+}
+
 export interface ListMyBusinessesRequest {
 }
 
@@ -369,6 +454,11 @@ return {
 export function encodeListMyBusinessesRequest(v: ListMyBusinessesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListMyBusinessesRequest(v: ListMyBusinessesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListMyBusinessesResponse {
@@ -388,8 +478,14 @@ if (v.businesses !== undefined) { out.businesses = (v.businesses as any[]).map(e
 return out;
 }
 
+export function validateListMyBusinessesResponse(v: ListMyBusinessesResponse): string[] {
+const violations: string[] = [];
+if (v.businesses !== undefined && v.businesses !== null) for (const item of v.businesses) violations.push(...validateBusinessEntry(item).map((message) => "businesses: " + message));
+return violations;
+}
+
 export interface LookupBusinessBySlugRequest {
-slug?: string;
+slug: string;
 }
 
 export function decodeLookupBusinessBySlugRequest(v: any): LookupBusinessBySlugRequest {
@@ -403,6 +499,13 @@ export function encodeLookupBusinessBySlugRequest(v: LookupBusinessBySlugRequest
 const out: Record<string, unknown> = {};
 if (v.slug !== undefined) { out.slug = v.slug; }
 return out;
+}
+
+export function validateLookupBusinessBySlugRequest(v: LookupBusinessBySlugRequest): string[] {
+const violations: string[] = [];
+if (!(v.slug !== undefined && v.slug !== null) || v.slug === "") violations.push("slug is required");
+if (v.slug !== undefined && v.slug !== null && !(new RegExp("^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$")).test(v.slug)) violations.push("slug has invalid format");
+return violations;
 }
 
 export interface LookupBusinessBySlugResponse {
@@ -425,8 +528,15 @@ if (v.locations !== undefined) { out.locations = (v.locations as any[]).map(enco
 return out;
 }
 
+export function validateLookupBusinessBySlugResponse(v: LookupBusinessBySlugResponse): string[] {
+const violations: string[] = [];
+if (v.business !== undefined && v.business !== null) violations.push(...validatePublicBusinessSummary(v.business).map((message) => "business: " + message));
+if (v.locations !== undefined && v.locations !== null) for (const item of v.locations) violations.push(...validatePublicLocation(item).map((message) => "locations: " + message));
+return violations;
+}
+
 export interface SetSlugRequest {
-slug?: string;
+slug: string;
 }
 
 export function decodeSetSlugRequest(v: any): SetSlugRequest {
@@ -440,6 +550,13 @@ export function encodeSetSlugRequest(v: SetSlugRequest): Record<string, unknown>
 const out: Record<string, unknown> = {};
 if (v.slug !== undefined) { out.slug = v.slug; }
 return out;
+}
+
+export function validateSetSlugRequest(v: SetSlugRequest): string[] {
+const violations: string[] = [];
+if (!(v.slug !== undefined && v.slug !== null) || v.slug === "") violations.push("slug is required");
+if (v.slug !== undefined && v.slug !== null && !(new RegExp("^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$")).test(v.slug)) violations.push("slug has invalid format");
+return violations;
 }
 
 export interface SetSlugResponse {
@@ -459,16 +576,21 @@ if (v.slug !== undefined) { out.slug = v.slug; }
 return out;
 }
 
+export function validateSetSlugResponse(v: SetSlugResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateBusinessRequest {
-businessId?: string;
-name?: string;
-type?: string;
+businessId: string;
+name: string;
+type: string;
 address?: string;
 phone?: string;
-email?: string;
+email: string;
 website?: string;
-timezone?: string;
-currency?: string;
+timezone: string;
+currency: string;
 slug?: string;
 }
 
@@ -503,6 +625,19 @@ if (v.slug !== undefined) { out.slug = v.slug; }
 return out;
 }
 
+export function validateUpdateBusinessRequest(v: UpdateBusinessRequest): string[] {
+const violations: string[] = [];
+if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
+if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
+if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (!(v.timezone !== undefined && v.timezone !== null) || v.timezone === "") violations.push("timezone is required");
+if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+return violations;
+}
+
 export interface UpdateBusinessResponse {
 business?: Business;
 }
@@ -520,9 +655,15 @@ if (v.business !== undefined) { out.business = encodeBusiness(v.business); }
 return out;
 }
 
+export function validateUpdateBusinessResponse(v: UpdateBusinessResponse): string[] {
+const violations: string[] = [];
+if (v.business !== undefined && v.business !== null) violations.push(...validateBusiness(v.business).map((message) => "business: " + message));
+return violations;
+}
+
 export interface RenameBusinessRequest {
-businessId?: string;
-name?: string;
+businessId: string;
+name: string;
 }
 
 export function decodeRenameBusinessRequest(v: any): RenameBusinessRequest {
@@ -538,6 +679,14 @@ const out: Record<string, unknown> = {};
 if (v.businessId !== undefined) { out.business_id = v.businessId; }
 if (v.name !== undefined) { out.name = v.name; }
 return out;
+}
+
+export function validateRenameBusinessRequest(v: RenameBusinessRequest): string[] {
+const violations: string[] = [];
+if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
+if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
 }
 
 export interface RenameBusinessResponse {
@@ -557,8 +706,14 @@ if (v.business !== undefined) { out.business = encodeBusiness(v.business); }
 return out;
 }
 
+export function validateRenameBusinessResponse(v: RenameBusinessResponse): string[] {
+const violations: string[] = [];
+if (v.business !== undefined && v.business !== null) violations.push(...validateBusiness(v.business).map((message) => "business: " + message));
+return violations;
+}
+
 export interface DeleteBusinessRequest {
-businessId?: string;
+businessId: string;
 }
 
 export function decodeDeleteBusinessRequest(v: any): DeleteBusinessRequest {
@@ -572,6 +727,13 @@ export function encodeDeleteBusinessRequest(v: DeleteBusinessRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.businessId !== undefined) { out.business_id = v.businessId; }
 return out;
+}
+
+export function validateDeleteBusinessRequest(v: DeleteBusinessRequest): string[] {
+const violations: string[] = [];
+if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
+if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+return violations;
 }
 
 export interface DeleteBusinessResponse {
@@ -589,5 +751,10 @@ export function encodeDeleteBusinessResponse(v: DeleteBusinessResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateDeleteBusinessResponse(v: DeleteBusinessResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

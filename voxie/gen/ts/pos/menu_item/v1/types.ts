@@ -59,9 +59,14 @@ if (v.stock !== undefined) { out.stock = v.stock; }
 return out;
 }
 
+export function validateMenuItem(v: MenuItem): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateMenuItemRequest {
-name?: string;
-sku?: string;
+name: string;
+sku: string;
 salePrice?: number;
 }
 
@@ -80,6 +85,14 @@ if (v.name !== undefined) { out.name = v.name; }
 if (v.sku !== undefined) { out.sku = v.sku; }
 if (v.salePrice !== undefined) { out.sale_price = v.salePrice; }
 return out;
+}
+
+export function validateCreateMenuItemRequest(v: CreateMenuItemRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.sku !== undefined && v.sku !== null) || v.sku === "") violations.push("sku is required");
+if (v.salePrice !== undefined && v.salePrice !== null && !(Number(v.salePrice) >= 0)) violations.push("sale_price violates @gte");
+return violations;
 }
 
 export interface CreateMenuItemResponse {
@@ -102,6 +115,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateMenuItemResponse(v: CreateMenuItemResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListMenuItemsRequest {
 }
 
@@ -114,6 +132,11 @@ return {
 export function encodeListMenuItemsRequest(v: ListMenuItemsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListMenuItemsRequest(v: ListMenuItemsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListMenuItemsResponse {
@@ -131,6 +154,12 @@ export function encodeListMenuItemsResponse(v: ListMenuItemsResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeMenuItem); }
 return out;
+}
+
+export function validateListMenuItemsResponse(v: ListMenuItemsResponse): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateMenuItem(item).map((message) => "items: " + message));
+return violations;
 }
 
 export interface ListPublicMenuItemsRequest {
@@ -153,6 +182,12 @@ if (v.locationId !== undefined) { out.location_id = v.locationId; }
 return out;
 }
 
+export function validateListPublicMenuItemsRequest(v: ListPublicMenuItemsRequest): string[] {
+const violations: string[] = [];
+if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+return violations;
+}
+
 export interface ListPublicMenuItemsResponse {
 items?: (MenuItem)[];
 }
@@ -168,6 +203,12 @@ export function encodeListPublicMenuItemsResponse(v: ListPublicMenuItemsResponse
 const out: Record<string, unknown> = {};
 if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeMenuItem); }
 return out;
+}
+
+export function validateListPublicMenuItemsResponse(v: ListPublicMenuItemsResponse): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateMenuItem(item).map((message) => "items: " + message));
+return violations;
 }
 
 export interface UpdateMenuItemBody {
@@ -196,8 +237,15 @@ if (v.stock !== undefined) { out.stock = v.stock; }
 return out;
 }
 
+export function validateUpdateMenuItemBody(v: UpdateMenuItemBody): string[] {
+const violations: string[] = [];
+if (v.salePrice !== undefined && v.salePrice !== null && !(Number(v.salePrice) >= 0)) violations.push("sale_price violates @gte");
+if (v.stock !== undefined && v.stock !== null && !(Number(v.stock) >= 0)) violations.push("stock violates @gte");
+return violations;
+}
+
 export interface UpdateMenuItemRequest {
-id?: string;
+id: string;
 body?: UpdateMenuItemBody;
 }
 
@@ -216,6 +264,14 @@ if (v.body !== undefined) { out.body = encodeUpdateMenuItemBody(v.body); }
 return out;
 }
 
+export function validateUpdateMenuItemRequest(v: UpdateMenuItemRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateMenuItemBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateMenuItemResponse {
 message?: string;
 }
@@ -231,5 +287,10 @@ export function encodeUpdateMenuItemResponse(v: UpdateMenuItemResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateMenuItemResponse(v: UpdateMenuItemResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

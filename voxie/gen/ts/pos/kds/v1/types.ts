@@ -32,6 +32,11 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateKDSItem(v: KDSItem): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface KDSOrder {
 id?: string;
 orderNumber?: string;
@@ -73,6 +78,12 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeKDSItem); 
 return out;
 }
 
+export function validateKDSOrder(v: KDSOrder): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateKDSItem(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface ListKDSOrdersRequest {
 }
 
@@ -85,6 +96,11 @@ return {
 export function encodeListKDSOrdersRequest(v: ListKDSOrdersRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListKDSOrdersRequest(v: ListKDSOrdersRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListKDSOrdersResponse {
@@ -104,8 +120,14 @@ if (v.orders !== undefined) { out.orders = (v.orders as any[]).map(encodeKDSOrde
 return out;
 }
 
+export function validateListKDSOrdersResponse(v: ListKDSOrdersResponse): string[] {
+const violations: string[] = [];
+if (v.orders !== undefined && v.orders !== null) for (const item of v.orders) violations.push(...validateKDSOrder(item).map((message) => "orders: " + message));
+return violations;
+}
+
 export interface UpdateKDSItemByIDBody {
-status?: string;
+status: string;
 }
 
 export function decodeUpdateKDSItemByIDBody(v: any): UpdateKDSItemByIDBody {
@@ -121,8 +143,14 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdateKDSItemByIDBody(v: UpdateKDSItemByIDBody): string[] {
+const violations: string[] = [];
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+return violations;
+}
+
 export interface UpdateKDSItemByIDRequest {
-itemId?: string;
+itemId: string;
 body?: UpdateKDSItemByIDBody;
 }
 
@@ -139,6 +167,14 @@ const out: Record<string, unknown> = {};
 if (v.itemId !== undefined) { out.item_id = v.itemId; }
 if (v.body !== undefined) { out.body = encodeUpdateKDSItemByIDBody(v.body); }
 return out;
+}
+
+export function validateUpdateKDSItemByIDRequest(v: UpdateKDSItemByIDRequest): string[] {
+const violations: string[] = [];
+if (!(v.itemId !== undefined && v.itemId !== null)) violations.push("item_id is required");
+if (v.itemId !== undefined && v.itemId !== null && !(Number(v.itemId) > 0)) violations.push("item_id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateKDSItemByIDBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateKDSItemByIDResponse {
@@ -158,8 +194,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateKDSItemByIDResponse(v: UpdateKDSItemByIDResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateKDSItemStatusBody {
-status?: string;
+status: string;
 }
 
 export function decodeUpdateKDSItemStatusBody(v: any): UpdateKDSItemStatusBody {
@@ -175,9 +216,15 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdateKDSItemStatusBody(v: UpdateKDSItemStatusBody): string[] {
+const violations: string[] = [];
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+return violations;
+}
+
 export interface UpdateKDSItemStatusRequest {
 orderId?: string;
-itemId?: string;
+itemId: string;
 body?: UpdateKDSItemStatusBody;
 }
 
@@ -198,6 +245,15 @@ if (v.body !== undefined) { out.body = encodeUpdateKDSItemStatusBody(v.body); }
 return out;
 }
 
+export function validateUpdateKDSItemStatusRequest(v: UpdateKDSItemStatusRequest): string[] {
+const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (!(v.itemId !== undefined && v.itemId !== null)) violations.push("item_id is required");
+if (v.itemId !== undefined && v.itemId !== null && !(Number(v.itemId) > 0)) violations.push("item_id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateKDSItemStatusBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateKDSItemStatusResponse {
 message?: string;
 }
@@ -213,5 +269,10 @@ export function encodeUpdateKDSItemStatusResponse(v: UpdateKDSItemStatusResponse
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateKDSItemStatusResponse(v: UpdateKDSItemStatusResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

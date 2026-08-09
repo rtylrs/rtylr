@@ -24,6 +24,11 @@ func NewMemoryServiceClient(baseURL string) *MemoryServiceClient {
 }
 
 func (c *MemoryServiceClient) ListChats(ctx context.Context, req *ListChatsRequest) (*ListChatsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/memory/v1/chats"
 	query := url.Values{}
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
@@ -56,6 +61,11 @@ func (c *MemoryServiceClient) ListChats(ctx context.Context, req *ListChatsReque
 }
 
 func (c *MemoryServiceClient) GetChatMessages(ctx context.Context, req *GetChatMessagesRequest) (*GetChatMessagesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/memory/v1/chats/{session_id}/messages"
 	path = strings.ReplaceAll(path, "{session_id}", fmt.Sprintf("%v", req.SessionId))
 	query := url.Values{}
@@ -87,6 +97,11 @@ func (c *MemoryServiceClient) GetChatMessages(ctx context.Context, req *GetChatM
 }
 
 func (c *MemoryServiceClient) DeleteChat(ctx context.Context, req *DeleteChatRequest) (*DeleteChatResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/memory/v1/chats/{session_id}"
 	path = strings.ReplaceAll(path, "{session_id}", fmt.Sprintf("%v", req.SessionId))
 	query := url.Values{}
@@ -118,6 +133,11 @@ func (c *MemoryServiceClient) DeleteChat(ctx context.Context, req *DeleteChatReq
 }
 
 func (c *MemoryServiceClient) RenameChat(ctx context.Context, req *RenameChatRequest) (*RenameChatResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/memory/v1/chats/{session_id}"
 	path = strings.ReplaceAll(path, "{session_id}", fmt.Sprintf("%v", req.SessionId))
 	body, err := json.Marshal(req)
@@ -150,6 +170,11 @@ func (c *MemoryServiceClient) RenameChat(ctx context.Context, req *RenameChatReq
 }
 
 func (c *MemoryServiceClient) PinChat(ctx context.Context, req *PinChatRequest) (*PinChatResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/memory/v1/chats/{session_id}/pin"
 	path = strings.ReplaceAll(path, "{session_id}", fmt.Sprintf("%v", req.SessionId))
 	body, err := json.Marshal(req)

@@ -1,4 +1,5 @@
 module = "github.com/voxire/voxie/gen/go"
+allow_legacy_contracts = true
 
 [generate.go-server]
 out = "../gen/go"

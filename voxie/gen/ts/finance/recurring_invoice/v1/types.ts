@@ -38,10 +38,15 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateRecurringInvoice(v: RecurringInvoice): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateRecurringInvoiceRequest {
-templateInvoiceId?: string;
-frequency?: string;
-nextInvoiceDate?: string;
+templateInvoiceId: string;
+frequency: string;
+nextInvoiceDate: string;
 endDate?: string;
 isActive?: boolean;
 }
@@ -67,6 +72,16 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateCreateRecurringInvoiceRequest(v: CreateRecurringInvoiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.templateInvoiceId !== undefined && v.templateInvoiceId !== null)) violations.push("template_invoice_id is required");
+if (v.templateInvoiceId !== undefined && v.templateInvoiceId !== null && !(Number(v.templateInvoiceId) > 0)) violations.push("template_invoice_id violates @gt");
+if (!(v.frequency !== undefined && v.frequency !== null) || v.frequency === "") violations.push("frequency is required");
+if (!(v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null) || v.nextInvoiceDate === "") violations.push("next_invoice_date is required");
+if (v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null && !(new RegExp("^\\d{4}-\\d{2}-\\d{2}$")).test(v.nextInvoiceDate)) violations.push("next_invoice_date has invalid format");
+return violations;
+}
+
 export interface CreateRecurringInvoiceResponse {
 id?: string;
 message?: string;
@@ -87,8 +102,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateRecurringInvoiceResponse(v: CreateRecurringInvoiceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetRecurringInvoiceRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetRecurringInvoiceRequest(v: any): GetRecurringInvoiceRequest {
@@ -102,6 +122,13 @@ export function encodeGetRecurringInvoiceRequest(v: GetRecurringInvoiceRequest):
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetRecurringInvoiceRequest(v: GetRecurringInvoiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetRecurringInvoiceResponse {
@@ -121,6 +148,12 @@ if (v.invoice !== undefined) { out.invoice = encodeRecurringInvoice(v.invoice); 
 return out;
 }
 
+export function validateGetRecurringInvoiceResponse(v: GetRecurringInvoiceResponse): string[] {
+const violations: string[] = [];
+if (v.invoice !== undefined && v.invoice !== null) violations.push(...validateRecurringInvoice(v.invoice).map((message) => "invoice: " + message));
+return violations;
+}
+
 export interface ListRecurringInvoicesRequest {
 }
 
@@ -133,6 +166,11 @@ return {
 export function encodeListRecurringInvoicesRequest(v: ListRecurringInvoicesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListRecurringInvoicesRequest(v: ListRecurringInvoicesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListRecurringInvoicesResponse {
@@ -152,8 +190,14 @@ if (v.recurringInvoices !== undefined) { out.recurring_invoices = (v.recurringIn
 return out;
 }
 
+export function validateListRecurringInvoicesResponse(v: ListRecurringInvoicesResponse): string[] {
+const violations: string[] = [];
+if (v.recurringInvoices !== undefined && v.recurringInvoices !== null) for (const item of v.recurringInvoices) violations.push(...validateRecurringInvoice(item).map((message) => "recurring_invoices: " + message));
+return violations;
+}
+
 export interface PauseRecurringInvoiceRequest {
-id?: string;
+id: string;
 }
 
 export function decodePauseRecurringInvoiceRequest(v: any): PauseRecurringInvoiceRequest {
@@ -167,6 +211,13 @@ export function encodePauseRecurringInvoiceRequest(v: PauseRecurringInvoiceReque
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validatePauseRecurringInvoiceRequest(v: PauseRecurringInvoiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface PauseRecurringInvoiceResponse {
@@ -186,8 +237,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validatePauseRecurringInvoiceResponse(v: PauseRecurringInvoiceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ResumeRecurringInvoiceRequest {
-id?: string;
+id: string;
 }
 
 export function decodeResumeRecurringInvoiceRequest(v: any): ResumeRecurringInvoiceRequest {
@@ -201,6 +257,13 @@ export function encodeResumeRecurringInvoiceRequest(v: ResumeRecurringInvoiceReq
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateResumeRecurringInvoiceRequest(v: ResumeRecurringInvoiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface ResumeRecurringInvoiceResponse {
@@ -220,10 +283,15 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateResumeRecurringInvoiceResponse(v: ResumeRecurringInvoiceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateRecurringInvoiceBody {
 templateInvoiceId?: string;
-frequency?: string;
-nextInvoiceDate?: string;
+frequency: string;
+nextInvoiceDate: string;
 endDate?: string;
 isActive?: boolean;
 }
@@ -249,8 +317,16 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateRecurringInvoiceBody(v: UpdateRecurringInvoiceBody): string[] {
+const violations: string[] = [];
+if (!(v.frequency !== undefined && v.frequency !== null) || v.frequency === "") violations.push("frequency is required");
+if (!(v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null) || v.nextInvoiceDate === "") violations.push("next_invoice_date is required");
+if (v.nextInvoiceDate !== undefined && v.nextInvoiceDate !== null && !(new RegExp("^\\d{4}-\\d{2}-\\d{2}$")).test(v.nextInvoiceDate)) violations.push("next_invoice_date has invalid format");
+return violations;
+}
+
 export interface UpdateRecurringInvoiceRequest {
-id?: string;
+id: string;
 body?: UpdateRecurringInvoiceBody;
 }
 
@@ -269,6 +345,14 @@ if (v.body !== undefined) { out.body = encodeUpdateRecurringInvoiceBody(v.body);
 return out;
 }
 
+export function validateUpdateRecurringInvoiceRequest(v: UpdateRecurringInvoiceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateRecurringInvoiceBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateRecurringInvoiceResponse {
 message?: string;
 }
@@ -284,5 +368,10 @@ export function encodeUpdateRecurringInvoiceResponse(v: UpdateRecurringInvoiceRe
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateRecurringInvoiceResponse(v: UpdateRecurringInvoiceResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

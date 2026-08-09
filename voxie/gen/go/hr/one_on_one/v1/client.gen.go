@@ -22,6 +22,11 @@ func NewOneOnOneServiceClient(baseURL string) *OneOnOneServiceClient {
 }
 
 func (c *OneOnOneServiceClient) ListOneOnOnes(ctx context.Context, req *ListOneOnOnesRequest) (*ListOneOnOnesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/one-on-one/v1/one-on-ones"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *OneOnOneServiceClient) ListOneOnOnes(ctx context.Context, req *ListOneO
 }
 
 func (c *OneOnOneServiceClient) CreateOneOnOne(ctx context.Context, req *CreateOneOnOneRequest) (*CreateOneOnOneResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/one-on-one/v1/one-on-ones"
 	body, err := json.Marshal(req)
 	if err != nil {

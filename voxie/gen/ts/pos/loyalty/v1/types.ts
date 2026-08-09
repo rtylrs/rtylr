@@ -38,6 +38,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateLoyaltyConfig(v: LoyaltyConfig): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface LoyaltyTransaction {
 id?: string;
 businessId?: string;
@@ -79,10 +84,15 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateLoyaltyTransaction(v: LoyaltyTransaction): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface EarnPointsRequest {
-customerId?: string;
-orderId?: string;
-points?: number;
+customerId: string;
+orderId: string;
+points: number;
 }
 
 export function decodeEarnPointsRequest(v: any): EarnPointsRequest {
@@ -100,6 +110,17 @@ if (v.customerId !== undefined) { out.customer_id = v.customerId; }
 if (v.orderId !== undefined) { out.order_id = v.orderId; }
 if (v.points !== undefined) { out.points = v.points; }
 return out;
+}
+
+export function validateEarnPointsRequest(v: EarnPointsRequest): string[] {
+const violations: string[] = [];
+if (!(v.customerId !== undefined && v.customerId !== null)) violations.push("customer_id is required");
+if (v.customerId !== undefined && v.customerId !== null && !(Number(v.customerId) > 0)) violations.push("customer_id violates @gt");
+if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
+if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (!(v.points !== undefined && v.points !== null)) violations.push("points is required");
+if (v.points !== undefined && v.points !== null && !(Number(v.points) > 0)) violations.push("points violates @gt");
+return violations;
 }
 
 export interface EarnPointsResponse {
@@ -122,8 +143,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateEarnPointsResponse(v: EarnPointsResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetLoyaltyBalanceRequest {
-customerId?: string;
+customerId: string;
 }
 
 export function decodeGetLoyaltyBalanceRequest(v: any): GetLoyaltyBalanceRequest {
@@ -137,6 +163,13 @@ export function encodeGetLoyaltyBalanceRequest(v: GetLoyaltyBalanceRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.customerId !== undefined) { out.customer_id = v.customerId; }
 return out;
+}
+
+export function validateGetLoyaltyBalanceRequest(v: GetLoyaltyBalanceRequest): string[] {
+const violations: string[] = [];
+if (!(v.customerId !== undefined && v.customerId !== null)) violations.push("customer_id is required");
+if (v.customerId !== undefined && v.customerId !== null && !(Number(v.customerId) > 0)) violations.push("customer_id violates @gt");
+return violations;
 }
 
 export interface GetLoyaltyBalanceResponse {
@@ -159,6 +192,11 @@ if (v.balance !== undefined) { out.balance = v.balance; }
 return out;
 }
 
+export function validateGetLoyaltyBalanceResponse(v: GetLoyaltyBalanceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetLoyaltyConfigRequest {
 }
 
@@ -171,6 +209,11 @@ return {
 export function encodeGetLoyaltyConfigRequest(v: GetLoyaltyConfigRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetLoyaltyConfigRequest(v: GetLoyaltyConfigRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetLoyaltyConfigResponse {
@@ -190,6 +233,12 @@ if (v.config !== undefined) { out.config = encodeLoyaltyConfig(v.config); }
 return out;
 }
 
+export function validateGetLoyaltyConfigResponse(v: GetLoyaltyConfigResponse): string[] {
+const violations: string[] = [];
+if (v.config !== undefined && v.config !== null) violations.push(...validateLoyaltyConfig(v.config).map((message) => "config: " + message));
+return violations;
+}
+
 export interface ListLoyaltyTransactionsRequest {
 customerId?: string;
 }
@@ -205,6 +254,11 @@ export function encodeListLoyaltyTransactionsRequest(v: ListLoyaltyTransactionsR
 const out: Record<string, unknown> = {};
 if (v.customerId !== undefined) { out.customer_id = v.customerId; }
 return out;
+}
+
+export function validateListLoyaltyTransactionsRequest(v: ListLoyaltyTransactionsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListLoyaltyTransactionsResponse {
@@ -224,9 +278,15 @@ if (v.transactions !== undefined) { out.transactions = (v.transactions as any[])
 return out;
 }
 
+export function validateListLoyaltyTransactionsResponse(v: ListLoyaltyTransactionsResponse): string[] {
+const violations: string[] = [];
+if (v.transactions !== undefined && v.transactions !== null) for (const item of v.transactions) violations.push(...validateLoyaltyTransaction(item).map((message) => "transactions: " + message));
+return violations;
+}
+
 export interface RedeemPointsRequest {
-customerId?: string;
-points?: number;
+customerId: string;
+points: number;
 }
 
 export function decodeRedeemPointsRequest(v: any): RedeemPointsRequest {
@@ -242,6 +302,15 @@ const out: Record<string, unknown> = {};
 if (v.customerId !== undefined) { out.customer_id = v.customerId; }
 if (v.points !== undefined) { out.points = v.points; }
 return out;
+}
+
+export function validateRedeemPointsRequest(v: RedeemPointsRequest): string[] {
+const violations: string[] = [];
+if (!(v.customerId !== undefined && v.customerId !== null)) violations.push("customer_id is required");
+if (v.customerId !== undefined && v.customerId !== null && !(Number(v.customerId) > 0)) violations.push("customer_id violates @gt");
+if (!(v.points !== undefined && v.points !== null)) violations.push("points is required");
+if (v.points !== undefined && v.points !== null && !(Number(v.points) > 0)) violations.push("points violates @gt");
+return violations;
 }
 
 export interface RedeemPointsResponse {
@@ -264,11 +333,16 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateRedeemPointsResponse(v: RedeemPointsResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateLoyaltyConfigRequest {
 isEnabled?: boolean;
-pointsPerDollar?: number;
+pointsPerDollar: number;
 redemptionRate?: number;
-minRedeemPoints?: number;
+minRedeemPoints: number;
 }
 
 export function decodeUpdateLoyaltyConfigRequest(v: any): UpdateLoyaltyConfigRequest {
@@ -290,6 +364,16 @@ if (v.minRedeemPoints !== undefined) { out.min_redeem_points = v.minRedeemPoints
 return out;
 }
 
+export function validateUpdateLoyaltyConfigRequest(v: UpdateLoyaltyConfigRequest): string[] {
+const violations: string[] = [];
+if (!(v.pointsPerDollar !== undefined && v.pointsPerDollar !== null)) violations.push("points_per_dollar is required");
+if (v.pointsPerDollar !== undefined && v.pointsPerDollar !== null && !(Number(v.pointsPerDollar) > 0)) violations.push("points_per_dollar violates @gt");
+if (v.redemptionRate !== undefined && v.redemptionRate !== null && !(Number(v.redemptionRate) >= 0)) violations.push("redemption_rate violates @gte");
+if (!(v.minRedeemPoints !== undefined && v.minRedeemPoints !== null)) violations.push("min_redeem_points is required");
+if (v.minRedeemPoints !== undefined && v.minRedeemPoints !== null && !(Number(v.minRedeemPoints) > 0)) violations.push("min_redeem_points violates @gt");
+return violations;
+}
+
 export interface UpdateLoyaltyConfigResponse {
 message?: string;
 }
@@ -305,5 +389,10 @@ export function encodeUpdateLoyaltyConfigResponse(v: UpdateLoyaltyConfigResponse
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateLoyaltyConfigResponse(v: UpdateLoyaltyConfigResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

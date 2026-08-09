@@ -62,9 +62,14 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateAttendanceRecordPayload(v: AttendanceRecordPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface AttendanceClockInRequest {
-method?: string;
-locationId?: string;
+method: string;
+locationId: string;
 lat?: number;
 lng?: number;
 qrToken?: string;
@@ -94,6 +99,14 @@ if (v.pin !== undefined) { out.pin = v.pin; }
 return out;
 }
 
+export function validateAttendanceClockInRequest(v: AttendanceClockInRequest): string[] {
+const violations: string[] = [];
+if (!(v.method !== undefined && v.method !== null) || v.method === "") violations.push("method is required");
+if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
+if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+return violations;
+}
+
 export interface AttendanceClockInResponse {
 record?: AttendanceRecordPayload;
 }
@@ -111,8 +124,14 @@ if (v.record !== undefined) { out.record = encodeAttendanceRecordPayload(v.recor
 return out;
 }
 
+export function validateAttendanceClockInResponse(v: AttendanceClockInResponse): string[] {
+const violations: string[] = [];
+if (v.record !== undefined && v.record !== null) violations.push(...validateAttendanceRecordPayload(v.record).map((message) => "record: " + message));
+return violations;
+}
+
 export interface AttendanceClockOutRequest {
-attendanceRecordId?: string;
+attendanceRecordId: string;
 }
 
 export function decodeAttendanceClockOutRequest(v: any): AttendanceClockOutRequest {
@@ -126,6 +145,13 @@ export function encodeAttendanceClockOutRequest(v: AttendanceClockOutRequest): R
 const out: Record<string, unknown> = {};
 if (v.attendanceRecordId !== undefined) { out.attendance_record_id = v.attendanceRecordId; }
 return out;
+}
+
+export function validateAttendanceClockOutRequest(v: AttendanceClockOutRequest): string[] {
+const violations: string[] = [];
+if (!(v.attendanceRecordId !== undefined && v.attendanceRecordId !== null)) violations.push("attendance_record_id is required");
+if (v.attendanceRecordId !== undefined && v.attendanceRecordId !== null && !(Number(v.attendanceRecordId) > 0)) violations.push("attendance_record_id violates @gt");
+return violations;
 }
 
 export interface AttendanceClockOutResponse {
@@ -143,6 +169,12 @@ export function encodeAttendanceClockOutResponse(v: AttendanceClockOutResponse):
 const out: Record<string, unknown> = {};
 if (v.record !== undefined) { out.record = encodeAttendanceRecordPayload(v.record); }
 return out;
+}
+
+export function validateAttendanceClockOutResponse(v: AttendanceClockOutResponse): string[] {
+const violations: string[] = [];
+if (v.record !== undefined && v.record !== null) violations.push(...validateAttendanceRecordPayload(v.record).map((message) => "record: " + message));
+return violations;
 }
 
 export interface ListAttendanceRequest {
@@ -163,6 +195,11 @@ const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.date !== undefined) { out.date = v.date; }
 return out;
+}
+
+export function validateListAttendanceRequest(v: ListAttendanceRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListAttendanceResponse {
@@ -189,5 +226,11 @@ if (v.total !== undefined) { out.total = v.total; }
 if (v.limit !== undefined) { out.limit = v.limit; }
 if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
+}
+
+export function validateListAttendanceResponse(v: ListAttendanceResponse): string[] {
+const violations: string[] = [];
+if (v.records !== undefined && v.records !== null) for (const item of v.records) violations.push(...validateAttendanceRecordPayload(item).map((message) => "records: " + message));
+return violations;
 }
 

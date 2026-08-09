@@ -44,6 +44,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateArticle(v: Article): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListArticlesRequest {
 page?: number;
 pageSize?: number;
@@ -62,6 +67,11 @@ const out: Record<string, unknown> = {};
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
+}
+
+export function validateListArticlesRequest(v: ListArticlesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListArticlesResponse {
@@ -90,9 +100,15 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListArticlesResponse(v: ListArticlesResponse): string[] {
+const violations: string[] = [];
+if (v.articles !== undefined && v.articles !== null) for (const item of v.articles) violations.push(...validateArticle(item).map((message) => "articles: " + message));
+return violations;
+}
+
 export interface CreateArticleRequest {
-title?: string;
-slug?: string;
+title: string;
+slug: string;
 body?: string;
 category?: string;
 isPublished?: boolean;
@@ -119,6 +135,13 @@ if (v.isPublished !== undefined) { out.is_published = v.isPublished; }
 return out;
 }
 
+export function validateCreateArticleRequest(v: CreateArticleRequest): string[] {
+const violations: string[] = [];
+if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+if (!(v.slug !== undefined && v.slug !== null) || v.slug === "") violations.push("slug is required");
+return violations;
+}
+
 export interface CreateArticleResponse {
 articleId?: string;
 message?: string;
@@ -139,8 +162,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateArticleResponse(v: CreateArticleResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateArticleRequest {
-id?: string;
+id: string;
 title?: string;
 slug?: string;
 body?: string;
@@ -171,6 +199,13 @@ if (v.isPublished !== undefined) { out.is_published = v.isPublished; }
 return out;
 }
 
+export function validateUpdateArticleRequest(v: UpdateArticleRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface UpdateArticleResponse {
 message?: string;
 }
@@ -188,8 +223,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateArticleResponse(v: UpdateArticleResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteArticleRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteArticleRequest(v: any): DeleteArticleRequest {
@@ -203,6 +243,13 @@ export function encodeDeleteArticleRequest(v: DeleteArticleRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteArticleRequest(v: DeleteArticleRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteArticleResponse {
@@ -220,5 +267,10 @@ export function encodeDeleteArticleResponse(v: DeleteArticleResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateDeleteArticleResponse(v: DeleteArticleResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

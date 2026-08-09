@@ -35,6 +35,12 @@ if (v.byStaff !== undefined) { out.by_staff = (v.byStaff as any[]).map(encodeSta
 return out;
 }
 
+export function validateUtilizationMetrics(v: UtilizationMetrics): string[] {
+const violations: string[] = [];
+if (v.byStaff !== undefined && v.byStaff !== null) for (const item of v.byStaff) violations.push(...validateStaffUtilization(item).map((message) => "by_staff: " + message));
+return violations;
+}
+
 export interface StaffUtilization {
 staffId?: string;
 name?: string;
@@ -62,6 +68,11 @@ if (v.hoursWorked !== undefined) { out.hours_worked = v.hoursWorked; }
 if (v.hoursScheduled !== undefined) { out.hours_scheduled = v.hoursScheduled; }
 if (v.utilization !== undefined) { out.utilization = v.utilization; }
 return out;
+}
+
+export function validateStaffUtilization(v: StaffUtilization): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ShiftMetrics {
@@ -93,6 +104,12 @@ if (v.byDay !== undefined) { out.by_day = (v.byDay as any[]).map(encodeShiftsByD
 return out;
 }
 
+export function validateShiftMetrics(v: ShiftMetrics): string[] {
+const violations: string[] = [];
+if (v.byDay !== undefined && v.byDay !== null) for (const item of v.byDay) violations.push(...validateShiftsByDay(item).map((message) => "by_day: " + message));
+return violations;
+}
+
 export interface ShiftsByDay {
 day?: string;
 scheduled?: number;
@@ -114,6 +131,11 @@ if (v.day !== undefined) { out.day = v.day; }
 if (v.scheduled !== undefined) { out.scheduled = v.scheduled; }
 if (v.completed !== undefined) { out.completed = v.completed; }
 return out;
+}
+
+export function validateShiftsByDay(v: ShiftsByDay): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface TimeOffMetrics {
@@ -145,6 +167,12 @@ if (v.byType !== undefined) { out.by_type = (v.byType as any[]).map(encodeTimeOf
 return out;
 }
 
+export function validateTimeOffMetrics(v: TimeOffMetrics): string[] {
+const violations: string[] = [];
+if (v.byType !== undefined && v.byType !== null) for (const item of v.byType) violations.push(...validateTimeOffByType(item).map((message) => "by_type: " + message));
+return violations;
+}
+
 export interface TimeOffByType {
 type?: string;
 days?: number;
@@ -166,6 +194,11 @@ if (v.type !== undefined) { out.type = v.type; }
 if (v.days !== undefined) { out.days = v.days; }
 if (v.requests !== undefined) { out.requests = v.requests; }
 return out;
+}
+
+export function validateTimeOffByType(v: TimeOffByType): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface HeadcountMetrics {
@@ -197,6 +230,12 @@ if (v.trend !== undefined) { out.trend = (v.trend as any[]).map(encodeHeadcountP
 return out;
 }
 
+export function validateHeadcountMetrics(v: HeadcountMetrics): string[] {
+const violations: string[] = [];
+if (v.trend !== undefined && v.trend !== null) for (const item of v.trend) violations.push(...validateHeadcountPoint(item).map((message) => "trend: " + message));
+return violations;
+}
+
 export interface HeadcountPoint {
 date?: string;
 count?: number;
@@ -217,6 +256,11 @@ if (v.count !== undefined) { out.count = v.count; }
 return out;
 }
 
+export function validateHeadcountPoint(v: HeadcountPoint): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetHeadcountMetricsRequest {
 period?: string;
 }
@@ -232,6 +276,11 @@ export function encodeGetHeadcountMetricsRequest(v: GetHeadcountMetricsRequest):
 const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 return out;
+}
+
+export function validateGetHeadcountMetricsRequest(v: GetHeadcountMetricsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetHeadcountMetricsResponse {
@@ -251,6 +300,12 @@ if (v.metrics !== undefined) { out.metrics = encodeHeadcountMetrics(v.metrics); 
 return out;
 }
 
+export function validateGetHeadcountMetricsResponse(v: GetHeadcountMetricsResponse): string[] {
+const violations: string[] = [];
+if (v.metrics !== undefined && v.metrics !== null) violations.push(...validateHeadcountMetrics(v.metrics).map((message) => "metrics: " + message));
+return violations;
+}
+
 export interface GetOperationsSummaryRequest {
 }
 
@@ -263,6 +318,11 @@ return {
 export function encodeGetOperationsSummaryRequest(v: GetOperationsSummaryRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetOperationsSummaryRequest(v: GetOperationsSummaryRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetOperationsSummaryResponse {
@@ -291,6 +351,11 @@ if (v.openLeaveRequests !== undefined) { out.open_leave_requests = v.openLeaveRe
 return out;
 }
 
+export function validateGetOperationsSummaryResponse(v: GetOperationsSummaryResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetShiftMetricsRequest {
 period?: string;
 }
@@ -306,6 +371,11 @@ export function encodeGetShiftMetricsRequest(v: GetShiftMetricsRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 return out;
+}
+
+export function validateGetShiftMetricsRequest(v: GetShiftMetricsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetShiftMetricsResponse {
@@ -325,6 +395,12 @@ if (v.metrics !== undefined) { out.metrics = encodeShiftMetrics(v.metrics); }
 return out;
 }
 
+export function validateGetShiftMetricsResponse(v: GetShiftMetricsResponse): string[] {
+const violations: string[] = [];
+if (v.metrics !== undefined && v.metrics !== null) violations.push(...validateShiftMetrics(v.metrics).map((message) => "metrics: " + message));
+return violations;
+}
+
 export interface GetTimeOffMetricsRequest {
 period?: string;
 }
@@ -340,6 +416,11 @@ export function encodeGetTimeOffMetricsRequest(v: GetTimeOffMetricsRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.period !== undefined) { out.period = v.period; }
 return out;
+}
+
+export function validateGetTimeOffMetricsRequest(v: GetTimeOffMetricsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetTimeOffMetricsResponse {
@@ -359,6 +440,12 @@ if (v.metrics !== undefined) { out.metrics = encodeTimeOffMetrics(v.metrics); }
 return out;
 }
 
+export function validateGetTimeOffMetricsResponse(v: GetTimeOffMetricsResponse): string[] {
+const violations: string[] = [];
+if (v.metrics !== undefined && v.metrics !== null) violations.push(...validateTimeOffMetrics(v.metrics).map((message) => "metrics: " + message));
+return violations;
+}
+
 export interface GetUtilizationRequest {
 period?: string;
 }
@@ -376,6 +463,11 @@ if (v.period !== undefined) { out.period = v.period; }
 return out;
 }
 
+export function validateGetUtilizationRequest(v: GetUtilizationRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetUtilizationResponse {
 metrics?: UtilizationMetrics;
 }
@@ -391,5 +483,11 @@ export function encodeGetUtilizationResponse(v: GetUtilizationResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.metrics !== undefined) { out.metrics = encodeUtilizationMetrics(v.metrics); }
 return out;
+}
+
+export function validateGetUtilizationResponse(v: GetUtilizationResponse): string[] {
+const violations: string[] = [];
+if (v.metrics !== undefined && v.metrics !== null) violations.push(...validateUtilizationMetrics(v.metrics).map((message) => "metrics: " + message));
+return violations;
 }
 

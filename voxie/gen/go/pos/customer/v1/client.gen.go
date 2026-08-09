@@ -21,6 +21,11 @@ func NewCustomerServiceClient(baseURL string) *CustomerServiceClient {
 }
 
 func (c *CustomerServiceClient) SearchCustomers(ctx context.Context, req *SearchCustomersRequest) (*SearchCustomersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/customer/v1/customers"
 	query := url.Values{}
 	query.Set("query", req.Query)

@@ -35,6 +35,11 @@ if (v.totalCost !== undefined) { out.total_cost = v.totalCost; }
 return out;
 }
 
+export function validatePurchaseOrderItem(v: PurchaseOrderItem): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface PurchaseOrder {
 id?: string;
 ownerId?: string;
@@ -94,8 +99,14 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodePurchaseOr
 return out;
 }
 
+export function validatePurchaseOrder(v: PurchaseOrder): string[] {
+const violations: string[] = [];
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validatePurchaseOrderItem(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface CreatePurchaseOrderItemRequest {
-productId?: string;
+productId: string;
 quantityOrdered?: number;
 unitCost?: number;
 }
@@ -115,6 +126,15 @@ if (v.productId !== undefined) { out.product_id = v.productId; }
 if (v.quantityOrdered !== undefined) { out.quantity_ordered = v.quantityOrdered; }
 if (v.unitCost !== undefined) { out.unit_cost = v.unitCost; }
 return out;
+}
+
+export function validateCreatePurchaseOrderItemRequest(v: CreatePurchaseOrderItemRequest): string[] {
+const violations: string[] = [];
+if (!(v.productId !== undefined && v.productId !== null)) violations.push("product_id is required");
+if (v.productId !== undefined && v.productId !== null && !(Number(v.productId) > 0)) violations.push("product_id violates @gt");
+if (v.quantityOrdered !== undefined && v.quantityOrdered !== null && !(Number(v.quantityOrdered) >= 0)) violations.push("quantity_ordered violates @gte");
+if (v.unitCost !== undefined && v.unitCost !== null && !(Number(v.unitCost) >= 0)) violations.push("unit_cost violates @gte");
+return violations;
 }
 
 export interface ListPurchaseOrdersRequest {
@@ -138,6 +158,11 @@ if (v.status !== undefined) { out.status = v.status; }
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
+}
+
+export function validateListPurchaseOrdersRequest(v: ListPurchaseOrdersRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListPurchaseOrdersResponse {
@@ -166,11 +191,17 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListPurchaseOrdersResponse(v: ListPurchaseOrdersResponse): string[] {
+const violations: string[] = [];
+if (v.purchaseOrders !== undefined && v.purchaseOrders !== null) for (const item of v.purchaseOrders) violations.push(...validatePurchaseOrder(item).map((message) => "purchase_orders: " + message));
+return violations;
+}
+
 export interface CreatePurchaseOrderRequest {
-supplierId?: string;
-poNumber?: string;
+supplierId: string;
+poNumber: string;
 taxAmount?: number;
-expectedDelivery?: string;
+expectedDelivery: string;
 notes?: string;
 items?: (CreatePurchaseOrderItemRequest)[];
 }
@@ -198,6 +229,18 @@ if (v.items !== undefined) { out.items = (v.items as any[]).map(encodeCreatePurc
 return out;
 }
 
+export function validateCreatePurchaseOrderRequest(v: CreatePurchaseOrderRequest): string[] {
+const violations: string[] = [];
+if (!(v.supplierId !== undefined && v.supplierId !== null)) violations.push("supplier_id is required");
+if (v.supplierId !== undefined && v.supplierId !== null && !(Number(v.supplierId) > 0)) violations.push("supplier_id violates @gt");
+if (!(v.poNumber !== undefined && v.poNumber !== null) || v.poNumber === "") violations.push("po_number is required");
+if (v.taxAmount !== undefined && v.taxAmount !== null && !(Number(v.taxAmount) >= 0)) violations.push("tax_amount violates @gte");
+if (!(v.expectedDelivery !== undefined && v.expectedDelivery !== null) || v.expectedDelivery === "") violations.push("expected_delivery is required");
+if (v.items !== undefined && v.items !== null && v.items.length < 1) violations.push("items must contain at least 1 items");
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateCreatePurchaseOrderItemRequest(item).map((message) => "items: " + message));
+return violations;
+}
+
 export interface CreatePurchaseOrderResponse {
 purchaseOrderId?: string;
 message?: string;
@@ -218,8 +261,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreatePurchaseOrderResponse(v: CreatePurchaseOrderResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetPurchaseOrderRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetPurchaseOrderRequest(v: any): GetPurchaseOrderRequest {
@@ -233,6 +281,13 @@ export function encodeGetPurchaseOrderRequest(v: GetPurchaseOrderRequest): Recor
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetPurchaseOrderRequest(v: GetPurchaseOrderRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetPurchaseOrderResponse {
@@ -252,8 +307,14 @@ if (v.purchaseOrder !== undefined) { out.purchase_order = encodePurchaseOrder(v.
 return out;
 }
 
+export function validateGetPurchaseOrderResponse(v: GetPurchaseOrderResponse): string[] {
+const violations: string[] = [];
+if (v.purchaseOrder !== undefined && v.purchaseOrder !== null) violations.push(...validatePurchaseOrder(v.purchaseOrder).map((message) => "purchase_order: " + message));
+return violations;
+}
+
 export interface UpdatePurchaseOrderStatusBody {
-status?: string;
+status: string;
 }
 
 export function decodeUpdatePurchaseOrderStatusBody(v: any): UpdatePurchaseOrderStatusBody {
@@ -269,8 +330,14 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdatePurchaseOrderStatusBody(v: UpdatePurchaseOrderStatusBody): string[] {
+const violations: string[] = [];
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+return violations;
+}
+
 export interface UpdatePurchaseOrderStatusRequest {
-id?: string;
+id: string;
 body?: UpdatePurchaseOrderStatusBody;
 }
 
@@ -287,6 +354,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdatePurchaseOrderStatusBody(v.body); }
 return out;
+}
+
+export function validateUpdatePurchaseOrderStatusRequest(v: UpdatePurchaseOrderStatusRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdatePurchaseOrderStatusBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdatePurchaseOrderStatusResponse {
@@ -306,8 +381,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdatePurchaseOrderStatusResponse(v: UpdatePurchaseOrderStatusResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ApprovePurchaseOrderRequest {
-id?: string;
+id: string;
 }
 
 export function decodeApprovePurchaseOrderRequest(v: any): ApprovePurchaseOrderRequest {
@@ -321,6 +401,13 @@ export function encodeApprovePurchaseOrderRequest(v: ApprovePurchaseOrderRequest
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateApprovePurchaseOrderRequest(v: ApprovePurchaseOrderRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface ApprovePurchaseOrderResponse {
@@ -338,5 +425,10 @@ export function encodeApprovePurchaseOrderResponse(v: ApprovePurchaseOrderRespon
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateApprovePurchaseOrderResponse(v: ApprovePurchaseOrderResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

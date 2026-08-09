@@ -47,9 +47,14 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateWaitlistEntry(v: WaitlistEntry): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateEntryRequest {
 serviceId?: string;
-customerName?: string;
+customerName: string;
 customerEmail?: string;
 customerPhone?: string;
 preferredDate?: string;
@@ -79,6 +84,12 @@ if (v.preferredTime !== undefined) { out.preferred_time = v.preferredTime; }
 return out;
 }
 
+export function validateCreateEntryRequest(v: CreateEntryRequest): string[] {
+const violations: string[] = [];
+if (!(v.customerName !== undefined && v.customerName !== null) || v.customerName === "") violations.push("customer_name is required");
+return violations;
+}
+
 export interface CreateEntryResponse {
 id?: string;
 message?: string;
@@ -99,6 +110,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateEntryResponse(v: CreateEntryResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListEntriesRequest {
 }
 
@@ -111,6 +127,11 @@ return {
 export function encodeListEntriesRequest(v: ListEntriesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListEntriesRequest(v: ListEntriesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListEntriesResponse {
@@ -130,8 +151,14 @@ if (v.entries !== undefined) { out.entries = (v.entries as any[]).map(encodeWait
 return out;
 }
 
+export function validateListEntriesResponse(v: ListEntriesResponse): string[] {
+const violations: string[] = [];
+if (v.entries !== undefined && v.entries !== null) for (const item of v.entries) violations.push(...validateWaitlistEntry(item).map((message) => "entries: " + message));
+return violations;
+}
+
 export interface UpdateEntryRequest {
-id?: string;
+id: string;
 serviceId?: string;
 customerName?: string;
 customerEmail?: string;
@@ -168,6 +195,13 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdateEntryRequest(v: UpdateEntryRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface UpdateEntryResponse {
 message?: string;
 }
@@ -183,5 +217,10 @@ export function encodeUpdateEntryResponse(v: UpdateEntryResponse): Record<string
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateEntryResponse(v: UpdateEntryResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

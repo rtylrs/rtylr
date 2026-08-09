@@ -20,11 +20,95 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *UnmatchedBankTransaction) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UnmatchedInvoice) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *MatchSuggestion) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetOverviewRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetOverviewResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.UnmatchedBankTxns {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "unmatched_bank_txns: "+err.Error())
+		}
+	}
+	for _, value := range m.UnmatchedInvoices {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "unmatched_invoices: "+err.Error())
+		}
+	}
+	for _, value := range m.Suggestions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "suggestions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *MatchRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TargetType == "" {
 		violations = append(violations, "target_type is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *MatchResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

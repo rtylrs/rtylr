@@ -24,6 +24,11 @@ func NewCustomerServiceClient(baseURL string) *CustomerServiceClient {
 }
 
 func (c *CustomerServiceClient) ListCustomers(ctx context.Context, req *ListCustomersRequest) (*ListCustomersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/customer/v1/customers"
 	query := url.Values{}
 	query.Set("search", req.Search)
@@ -59,6 +64,11 @@ func (c *CustomerServiceClient) ListCustomers(ctx context.Context, req *ListCust
 }
 
 func (c *CustomerServiceClient) CreateCustomer(ctx context.Context, req *CreateCustomerRequest) (*CreateCustomerResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/customer/v1/customers"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -90,6 +100,11 @@ func (c *CustomerServiceClient) CreateCustomer(ctx context.Context, req *CreateC
 }
 
 func (c *CustomerServiceClient) GetCustomer(ctx context.Context, req *GetCustomerRequest) (*GetCustomerResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/customer/v1/customers/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -121,9 +136,14 @@ func (c *CustomerServiceClient) GetCustomer(ctx context.Context, req *GetCustome
 }
 
 func (c *CustomerServiceClient) UpdateCustomer(ctx context.Context, req *UpdateCustomerRequest) (*UpdateCustomerResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/customer/v1/customers/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -153,6 +173,11 @@ func (c *CustomerServiceClient) UpdateCustomer(ctx context.Context, req *UpdateC
 }
 
 func (c *CustomerServiceClient) DeleteCustomer(ctx context.Context, req *DeleteCustomerRequest) (*DeleteCustomerResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/customer/v1/customers/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

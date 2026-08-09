@@ -42,13 +42,18 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateBankAccount(v: BankAccount): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateBankAccountRequest {
-name?: string;
-bankName?: string;
-accountType?: string;
-lastFour?: string;
-balance?: number;
-currency?: string;
+name: string;
+bankName: string;
+accountType: string;
+lastFour: string;
+balance: number;
+currency: string;
 isPrimary?: boolean;
 }
 
@@ -77,6 +82,18 @@ if (v.isPrimary !== undefined) { out.is_primary = v.isPrimary; }
 return out;
 }
 
+export function validateCreateBankAccountRequest(v: CreateBankAccountRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.bankName !== undefined && v.bankName !== null) || v.bankName === "") violations.push("bank_name is required");
+if (!(v.accountType !== undefined && v.accountType !== null) || v.accountType === "") violations.push("account_type is required");
+if (!(v.lastFour !== undefined && v.lastFour !== null) || v.lastFour === "") violations.push("last_four is required");
+if (!(v.balance !== undefined && v.balance !== null)) violations.push("balance is required");
+if (v.balance !== undefined && v.balance !== null && !(Number(v.balance) >= 0)) violations.push("balance violates @gte");
+if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+return violations;
+}
+
 export interface CreateBankAccountResponse {
 account?: BankAccount;
 }
@@ -94,8 +111,14 @@ if (v.account !== undefined) { out.account = encodeBankAccount(v.account); }
 return out;
 }
 
+export function validateCreateBankAccountResponse(v: CreateBankAccountResponse): string[] {
+const violations: string[] = [];
+if (v.account !== undefined && v.account !== null) violations.push(...validateBankAccount(v.account).map((message) => "account: " + message));
+return violations;
+}
+
 export interface GetBankAccountRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetBankAccountRequest(v: any): GetBankAccountRequest {
@@ -109,6 +132,13 @@ export function encodeGetBankAccountRequest(v: GetBankAccountRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetBankAccountRequest(v: GetBankAccountRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetBankAccountResponse {
@@ -126,6 +156,12 @@ export function encodeGetBankAccountResponse(v: GetBankAccountResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.account !== undefined) { out.account = encodeBankAccount(v.account); }
 return out;
+}
+
+export function validateGetBankAccountResponse(v: GetBankAccountResponse): string[] {
+const violations: string[] = [];
+if (v.account !== undefined && v.account !== null) violations.push(...validateBankAccount(v.account).map((message) => "account: " + message));
+return violations;
 }
 
 export interface ListBankAccountsRequest {
@@ -154,6 +190,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListBankAccountsRequest(v: ListBankAccountsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListBankAccountsResponse {
 accounts?: (BankAccount)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -172,5 +213,12 @@ const out: Record<string, unknown> = {};
 if (v.accounts !== undefined) { out.accounts = (v.accounts as any[]).map(encodeBankAccount); }
 if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePaginationResponse(v.pagination); }
 return out;
+}
+
+export function validateListBankAccountsResponse(v: ListBankAccountsResponse): string[] {
+const violations: string[] = [];
+if (v.accounts !== undefined && v.accounts !== null) for (const item of v.accounts) violations.push(...validateBankAccount(item).map((message) => "accounts: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
 }
 

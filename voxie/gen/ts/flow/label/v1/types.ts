@@ -30,6 +30,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateLabel(v: Label): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListLabelsRequest {
 workspaceId?: string;
 page?: number;
@@ -59,6 +64,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListLabelsRequest(v: ListLabelsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListLabelsResponse {
 labels?: (Label)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -79,10 +89,17 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListLabelsResponse(v: ListLabelsResponse): string[] {
+const violations: string[] = [];
+if (v.labels !== undefined && v.labels !== null) for (const item of v.labels) violations.push(...validateLabel(item).map((message) => "labels: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface CreateLabelRequest {
-workspaceId?: string;
-name?: string;
-color?: string;
+workspaceId: string;
+name: string;
+color: string;
 }
 
 export function decodeCreateLabelRequest(v: any): CreateLabelRequest {
@@ -102,6 +119,15 @@ if (v.color !== undefined) { out.color = v.color; }
 return out;
 }
 
+export function validateCreateLabelRequest(v: CreateLabelRequest): string[] {
+const violations: string[] = [];
+if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
+return violations;
+}
+
 export interface CreateLabelResponse {
 label?: Label;
 }
@@ -119,10 +145,16 @@ if (v.label !== undefined) { out.label = encodeLabel(v.label); }
 return out;
 }
 
+export function validateCreateLabelResponse(v: CreateLabelResponse): string[] {
+const violations: string[] = [];
+if (v.label !== undefined && v.label !== null) violations.push(...validateLabel(v.label).map((message) => "label: " + message));
+return violations;
+}
+
 export interface UpdateLabelRequest {
-id?: string;
-name?: string;
-color?: string;
+id: string;
+name: string;
+color: string;
 }
 
 export function decodeUpdateLabelRequest(v: any): UpdateLabelRequest {
@@ -142,6 +174,15 @@ if (v.color !== undefined) { out.color = v.color; }
 return out;
 }
 
+export function validateUpdateLabelRequest(v: UpdateLabelRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
+return violations;
+}
+
 export interface UpdateLabelResponse {
 message?: string;
 }
@@ -159,8 +200,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateLabelResponse(v: UpdateLabelResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteLabelRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteLabelRequest(v: any): DeleteLabelRequest {
@@ -174,6 +220,13 @@ export function encodeDeleteLabelRequest(v: DeleteLabelRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteLabelRequest(v: DeleteLabelRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteLabelResponse {
@@ -193,8 +246,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteLabelResponse(v: DeleteLabelResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface SetTaskLabelsRequest {
-taskId?: string;
+taskId: string;
 labelIds?: (string)[];
 }
 
@@ -213,6 +271,13 @@ if (v.labelIds !== undefined) { out.label_ids = v.labelIds; }
 return out;
 }
 
+export function validateSetTaskLabelsRequest(v: SetTaskLabelsRequest): string[] {
+const violations: string[] = [];
+if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
+if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+return violations;
+}
+
 export interface SetTaskLabelsResponse {
 message?: string;
 }
@@ -228,5 +293,10 @@ export function encodeSetTaskLabelsResponse(v: SetTaskLabelsResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateSetTaskLabelsResponse(v: SetTaskLabelsResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

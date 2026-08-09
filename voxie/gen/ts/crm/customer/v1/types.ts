@@ -77,16 +77,21 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateCustomer(v: Customer): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateCustomerRequest {
-firstName?: string;
-lastName?: string;
-email?: string;
+firstName: string;
+lastName: string;
+email: string;
 phone?: string;
-dateOfBirth?: string;
-gender?: string;
+dateOfBirth: string;
+gender: string;
 address?: string;
-city?: string;
-country?: string;
+city: string;
+country: string;
 tags?: (string)[];
 notes?: string;
 }
@@ -124,6 +129,20 @@ if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
 }
 
+export function validateCreateCustomerRequest(v: CreateCustomerRequest): string[] {
+const violations: string[] = [];
+if (!(v.firstName !== undefined && v.firstName !== null) || v.firstName === "") violations.push("first_name is required");
+if (!(v.lastName !== undefined && v.lastName !== null) || v.lastName === "") violations.push("last_name is required");
+if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
+if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (!(v.dateOfBirth !== undefined && v.dateOfBirth !== null) || v.dateOfBirth === "") violations.push("date_of_birth is required");
+if (!(v.gender !== undefined && v.gender !== null) || v.gender === "") violations.push("gender is required");
+if (!(v.city !== undefined && v.city !== null) || v.city === "") violations.push("city is required");
+if (!(v.country !== undefined && v.country !== null) || v.country === "") violations.push("country is required");
+if (v.tags !== undefined && v.tags !== null && v.tags.length < 1) violations.push("tags must contain at least 1 items");
+return violations;
+}
+
 export interface CreateCustomerResponse {
 customerId?: string;
 message?: string;
@@ -144,8 +163,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateCustomerResponse(v: CreateCustomerResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteCustomerRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteCustomerRequest(v: any): DeleteCustomerRequest {
@@ -159,6 +183,13 @@ export function encodeDeleteCustomerRequest(v: DeleteCustomerRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteCustomerRequest(v: DeleteCustomerRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteCustomerResponse {
@@ -178,8 +209,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteCustomerResponse(v: DeleteCustomerResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetCustomerRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetCustomerRequest(v: any): GetCustomerRequest {
@@ -193,6 +229,13 @@ export function encodeGetCustomerRequest(v: GetCustomerRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetCustomerRequest(v: GetCustomerRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetCustomerResponse {
@@ -210,6 +253,12 @@ export function encodeGetCustomerResponse(v: GetCustomerResponse): Record<string
 const out: Record<string, unknown> = {};
 if (v.customer !== undefined) { out.customer = encodeCustomer(v.customer); }
 return out;
+}
+
+export function validateGetCustomerResponse(v: GetCustomerResponse): string[] {
+const violations: string[] = [];
+if (v.customer !== undefined && v.customer !== null) violations.push(...validateCustomer(v.customer).map((message) => "customer: " + message));
+return violations;
 }
 
 export interface ListCustomersRequest {
@@ -241,6 +290,11 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListCustomersRequest(v: ListCustomersRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListCustomersResponse {
 customers?: (Customer)[];
 total?: string;
@@ -267,16 +321,22 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListCustomersResponse(v: ListCustomersResponse): string[] {
+const violations: string[] = [];
+if (v.customers !== undefined && v.customers !== null) for (const item of v.customers) violations.push(...validateCustomer(item).map((message) => "customers: " + message));
+return violations;
+}
+
 export interface UpdateCustomerBody {
-firstName?: string;
-lastName?: string;
-email?: string;
+firstName: string;
+lastName: string;
+email: string;
 phone?: string;
-dateOfBirth?: string;
-gender?: string;
+dateOfBirth: string;
+gender: string;
 address?: string;
-city?: string;
-country?: string;
+city: string;
+country: string;
 tags?: (string)[];
 notes?: string;
 isActive?: boolean;
@@ -317,8 +377,22 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateCustomerBody(v: UpdateCustomerBody): string[] {
+const violations: string[] = [];
+if (!(v.firstName !== undefined && v.firstName !== null) || v.firstName === "") violations.push("first_name is required");
+if (!(v.lastName !== undefined && v.lastName !== null) || v.lastName === "") violations.push("last_name is required");
+if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
+if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (!(v.dateOfBirth !== undefined && v.dateOfBirth !== null) || v.dateOfBirth === "") violations.push("date_of_birth is required");
+if (!(v.gender !== undefined && v.gender !== null) || v.gender === "") violations.push("gender is required");
+if (!(v.city !== undefined && v.city !== null) || v.city === "") violations.push("city is required");
+if (!(v.country !== undefined && v.country !== null) || v.country === "") violations.push("country is required");
+if (v.tags !== undefined && v.tags !== null && v.tags.length < 1) violations.push("tags must contain at least 1 items");
+return violations;
+}
+
 export interface UpdateCustomerRequest {
-id?: string;
+id: string;
 body?: UpdateCustomerBody;
 }
 
@@ -337,6 +411,14 @@ if (v.body !== undefined) { out.body = encodeUpdateCustomerBody(v.body); }
 return out;
 }
 
+export function validateUpdateCustomerRequest(v: UpdateCustomerRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateCustomerBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateCustomerResponse {
 message?: string;
 }
@@ -352,5 +434,10 @@ export function encodeUpdateCustomerResponse(v: UpdateCustomerResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateCustomerResponse(v: UpdateCustomerResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

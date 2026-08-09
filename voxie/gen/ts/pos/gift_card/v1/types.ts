@@ -53,12 +53,17 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateGiftCard(v: GiftCard): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateGiftCardRequest {
-code?: string;
+code: string;
 initialAmount?: number;
-customerName?: string;
-customerEmail?: string;
-expiresAt?: string;
+customerName: string;
+customerEmail: string;
+expiresAt: string;
 }
 
 export function decodeCreateGiftCardRequest(v: any): CreateGiftCardRequest {
@@ -82,6 +87,17 @@ if (v.expiresAt !== undefined) { out.expires_at = v.expiresAt; }
 return out;
 }
 
+export function validateCreateGiftCardRequest(v: CreateGiftCardRequest): string[] {
+const violations: string[] = [];
+if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+if (v.initialAmount !== undefined && v.initialAmount !== null && !(Number(v.initialAmount) >= 0)) violations.push("initial_amount violates @gte");
+if (!(v.customerName !== undefined && v.customerName !== null) || v.customerName === "") violations.push("customer_name is required");
+if (!(v.customerEmail !== undefined && v.customerEmail !== null) || v.customerEmail === "") violations.push("customer_email is required");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.customerEmail)) violations.push("customer_email must be a valid email");
+if (!(v.expiresAt !== undefined && v.expiresAt !== null) || v.expiresAt === "") violations.push("expires_at is required");
+return violations;
+}
+
 export interface CreateGiftCardResponse {
 giftCardId?: string;
 message?: string;
@@ -102,8 +118,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateGiftCardResponse(v: CreateGiftCardResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetGiftCardByCodeRequest {
-code?: string;
+code: string;
 }
 
 export function decodeGetGiftCardByCodeRequest(v: any): GetGiftCardByCodeRequest {
@@ -117,6 +138,12 @@ export function encodeGetGiftCardByCodeRequest(v: GetGiftCardByCodeRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.code !== undefined) { out.code = v.code; }
 return out;
+}
+
+export function validateGetGiftCardByCodeRequest(v: GetGiftCardByCodeRequest): string[] {
+const violations: string[] = [];
+if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+return violations;
 }
 
 export interface GetGiftCardByCodeResponse {
@@ -136,6 +163,12 @@ if (v.giftCard !== undefined) { out.gift_card = encodeGiftCard(v.giftCard); }
 return out;
 }
 
+export function validateGetGiftCardByCodeResponse(v: GetGiftCardByCodeResponse): string[] {
+const violations: string[] = [];
+if (v.giftCard !== undefined && v.giftCard !== null) violations.push(...validateGiftCard(v.giftCard).map((message) => "gift_card: " + message));
+return violations;
+}
+
 export interface ListGiftCardsRequest {
 }
 
@@ -148,6 +181,11 @@ return {
 export function encodeListGiftCardsRequest(v: ListGiftCardsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListGiftCardsRequest(v: ListGiftCardsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListGiftCardsResponse {
@@ -167,8 +205,14 @@ if (v.giftCards !== undefined) { out.gift_cards = (v.giftCards as any[]).map(enc
 return out;
 }
 
+export function validateListGiftCardsResponse(v: ListGiftCardsResponse): string[] {
+const violations: string[] = [];
+if (v.giftCards !== undefined && v.giftCards !== null) for (const item of v.giftCards) violations.push(...validateGiftCard(item).map((message) => "gift_cards: " + message));
+return violations;
+}
+
 export interface RedeemGiftCardRequest {
-code?: string;
+code: string;
 amount?: number;
 }
 
@@ -185,6 +229,13 @@ const out: Record<string, unknown> = {};
 if (v.code !== undefined) { out.code = v.code; }
 if (v.amount !== undefined) { out.amount = v.amount; }
 return out;
+}
+
+export function validateRedeemGiftCardRequest(v: RedeemGiftCardRequest): string[] {
+const violations: string[] = [];
+if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
+return violations;
 }
 
 export interface RedeemGiftCardResponse {
@@ -205,5 +256,11 @@ const out: Record<string, unknown> = {};
 if (v.giftCard !== undefined) { out.gift_card = encodeGiftCard(v.giftCard); }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateRedeemGiftCardResponse(v: RedeemGiftCardResponse): string[] {
+const violations: string[] = [];
+if (v.giftCard !== undefined && v.giftCard !== null) violations.push(...validateGiftCard(v.giftCard).map((message) => "gift_card: " + message));
+return violations;
 }
 

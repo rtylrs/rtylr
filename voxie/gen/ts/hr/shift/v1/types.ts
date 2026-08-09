@@ -41,6 +41,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateShiftPayload(v: ShiftPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ShiftAssignmentPayload {
 id?: string;
 ownerId?: string;
@@ -79,6 +84,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateShiftAssignmentPayload(v: ShiftAssignmentPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListShiftsRequest {
 locationId?: string;
 }
@@ -94,6 +104,11 @@ export function encodeListShiftsRequest(v: ListShiftsRequest): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.locationId !== undefined) { out.location_id = v.locationId; }
 return out;
+}
+
+export function validateListShiftsRequest(v: ListShiftsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListShiftsResponse {
@@ -122,12 +137,18 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListShiftsResponse(v: ListShiftsResponse): string[] {
+const violations: string[] = [];
+if (v.shifts !== undefined && v.shifts !== null) for (const item of v.shifts) violations.push(...validateShiftPayload(item).map((message) => "shifts: " + message));
+return violations;
+}
+
 export interface CreateShiftRequest {
-locationId?: string;
-name?: string;
-startTime?: string;
-endTime?: string;
-color?: string;
+locationId: string;
+name: string;
+startTime: string;
+endTime: string;
+color: string;
 }
 
 export function decodeCreateShiftRequest(v: any): CreateShiftRequest {
@@ -151,6 +172,17 @@ if (v.color !== undefined) { out.color = v.color; }
 return out;
 }
 
+export function validateCreateShiftRequest(v: CreateShiftRequest): string[] {
+const violations: string[] = [];
+if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
+if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.startTime !== undefined && v.startTime !== null) || v.startTime === "") violations.push("start_time is required");
+if (!(v.endTime !== undefined && v.endTime !== null) || v.endTime === "") violations.push("end_time is required");
+if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
+return violations;
+}
+
 export interface CreateShiftResponse {
 shift?: ShiftPayload;
 }
@@ -168,10 +200,16 @@ if (v.shift !== undefined) { out.shift = encodeShiftPayload(v.shift); }
 return out;
 }
 
+export function validateCreateShiftResponse(v: CreateShiftResponse): string[] {
+const violations: string[] = [];
+if (v.shift !== undefined && v.shift !== null) violations.push(...validateShiftPayload(v.shift).map((message) => "shift: " + message));
+return violations;
+}
+
 export interface CreateShiftAssignmentRequest {
-employeeId?: string;
-shiftId?: string;
-date?: string;
+employeeId: string;
+shiftId: string;
+date: string;
 }
 
 export function decodeCreateShiftAssignmentRequest(v: any): CreateShiftAssignmentRequest {
@@ -191,6 +229,16 @@ if (v.date !== undefined) { out.date = v.date; }
 return out;
 }
 
+export function validateCreateShiftAssignmentRequest(v: CreateShiftAssignmentRequest): string[] {
+const violations: string[] = [];
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.shiftId !== undefined && v.shiftId !== null)) violations.push("shift_id is required");
+if (v.shiftId !== undefined && v.shiftId !== null && !(Number(v.shiftId) > 0)) violations.push("shift_id violates @gt");
+if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
+return violations;
+}
+
 export interface CreateShiftAssignmentResponse {
 assignment?: ShiftAssignmentPayload;
 }
@@ -208,9 +256,15 @@ if (v.assignment !== undefined) { out.assignment = encodeShiftAssignmentPayload(
 return out;
 }
 
+export function validateCreateShiftAssignmentResponse(v: CreateShiftAssignmentResponse): string[] {
+const violations: string[] = [];
+if (v.assignment !== undefined && v.assignment !== null) violations.push(...validateShiftAssignmentPayload(v.assignment).map((message) => "assignment: " + message));
+return violations;
+}
+
 export interface GetRosterRequest {
-locationId?: string;
-weekStart?: string;
+locationId: string;
+weekStart: string;
 }
 
 export function decodeGetRosterRequest(v: any): GetRosterRequest {
@@ -226,6 +280,14 @@ const out: Record<string, unknown> = {};
 if (v.locationId !== undefined) { out.location_id = v.locationId; }
 if (v.weekStart !== undefined) { out.week_start = v.weekStart; }
 return out;
+}
+
+export function validateGetRosterRequest(v: GetRosterRequest): string[] {
+const violations: string[] = [];
+if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
+if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (!(v.weekStart !== undefined && v.weekStart !== null) || v.weekStart === "") violations.push("week_start is required");
+return violations;
 }
 
 export interface GetRosterResponse {
@@ -248,9 +310,15 @@ if (v.conflicts !== undefined) { out.conflicts = v.conflicts; }
 return out;
 }
 
+export function validateGetRosterResponse(v: GetRosterResponse): string[] {
+const violations: string[] = [];
+if (v.assignments !== undefined && v.assignments !== null) for (const item of v.assignments) violations.push(...validateShiftAssignmentPayload(item).map((message) => "assignments: " + message));
+return violations;
+}
+
 export interface PublishRosterRequest {
-locationId?: string;
-weekStart?: string;
+locationId: string;
+weekStart: string;
 }
 
 export function decodePublishRosterRequest(v: any): PublishRosterRequest {
@@ -268,6 +336,14 @@ if (v.weekStart !== undefined) { out.week_start = v.weekStart; }
 return out;
 }
 
+export function validatePublishRosterRequest(v: PublishRosterRequest): string[] {
+const violations: string[] = [];
+if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
+if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (!(v.weekStart !== undefined && v.weekStart !== null) || v.weekStart === "") violations.push("week_start is required");
+return violations;
+}
+
 export interface PublishRosterResponse {
 success?: boolean;
 }
@@ -283,5 +359,10 @@ export function encodePublishRosterResponse(v: PublishRosterResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.success !== undefined) { out.success = v.success; }
 return out;
+}
+
+export function validatePublishRosterResponse(v: PublishRosterResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

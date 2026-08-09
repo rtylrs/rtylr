@@ -24,6 +24,11 @@ func NewJournalServiceClient(baseURL string) *JournalServiceClient {
 }
 
 func (c *JournalServiceClient) ListJournalEntries(ctx context.Context, req *ListJournalEntriesRequest) (*ListJournalEntriesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/journal/v1/entries"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -60,6 +65,11 @@ func (c *JournalServiceClient) ListJournalEntries(ctx context.Context, req *List
 }
 
 func (c *JournalServiceClient) CreateJournalEntry(ctx context.Context, req *CreateJournalEntryRequest) (*CreateJournalEntryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/journal/v1/entries"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -91,6 +101,11 @@ func (c *JournalServiceClient) CreateJournalEntry(ctx context.Context, req *Crea
 }
 
 func (c *JournalServiceClient) GetJournalEntry(ctx context.Context, req *GetJournalEntryRequest) (*GetJournalEntryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/journal/v1/entries/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

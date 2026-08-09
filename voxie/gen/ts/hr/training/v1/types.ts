@@ -35,6 +35,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateTrainingCourse(v: TrainingCourse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListTrainingCoursesRequest {
 }
 
@@ -47,6 +52,11 @@ return {
 export function encodeListTrainingCoursesRequest(v: ListTrainingCoursesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListTrainingCoursesRequest(v: ListTrainingCoursesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListTrainingCoursesResponse {
@@ -66,8 +76,14 @@ if (v.courses !== undefined) { out.courses = (v.courses as any[]).map(encodeTrai
 return out;
 }
 
+export function validateListTrainingCoursesResponse(v: ListTrainingCoursesResponse): string[] {
+const violations: string[] = [];
+if (v.courses !== undefined && v.courses !== null) for (const item of v.courses) violations.push(...validateTrainingCourse(item).map((message) => "courses: " + message));
+return violations;
+}
+
 export interface CreateTrainingCourseRequest {
-name?: string;
+name: string;
 description?: string;
 durationHours?: number;
 isRequired?: boolean;
@@ -92,6 +108,12 @@ if (v.isRequired !== undefined) { out.is_required = v.isRequired; }
 return out;
 }
 
+export function validateCreateTrainingCourseRequest(v: CreateTrainingCourseRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateTrainingCourseResponse {
 id?: string;
 message?: string;
@@ -110,5 +132,10 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateCreateTrainingCourseResponse(v: CreateTrainingCourseResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

@@ -21,6 +21,11 @@ func NewStatementServiceClient(baseURL string) *StatementServiceClient {
 }
 
 func (c *StatementServiceClient) GetBalanceSheet(ctx context.Context, req *GetBalanceSheetRequest) (*GetBalanceSheetResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/statement/v1/balance-sheet"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -51,6 +56,11 @@ func (c *StatementServiceClient) GetBalanceSheet(ctx context.Context, req *GetBa
 }
 
 func (c *StatementServiceClient) GetCashFlow(ctx context.Context, req *GetCashFlowRequest) (*GetCashFlowResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/statement/v1/cash-flow"
 	query := url.Values{}
 	query.Set("period", req.Period)

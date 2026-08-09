@@ -53,6 +53,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateReview(v: Review): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListReviewsRequest {
 }
 
@@ -65,6 +70,11 @@ return {
 export function encodeListReviewsRequest(v: ListReviewsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListReviewsRequest(v: ListReviewsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListReviewsResponse {
@@ -84,10 +94,16 @@ if (v.reviews !== undefined) { out.reviews = (v.reviews as any[]).map(encodeRevi
 return out;
 }
 
+export function validateListReviewsResponse(v: ListReviewsResponse): string[] {
+const violations: string[] = [];
+if (v.reviews !== undefined && v.reviews !== null) for (const item of v.reviews) violations.push(...validateReview(item).map((message) => "reviews: " + message));
+return violations;
+}
+
 export interface CreateReviewRequest {
-staffId?: string;
+staffId: string;
 reviewerId?: string;
-period?: string;
+period: string;
 rating?: number;
 goalsRating?: number;
 valuesRating?: number;
@@ -125,6 +141,13 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateCreateReviewRequest(v: CreateReviewRequest): string[] {
+const violations: string[] = [];
+if (!(v.staffId !== undefined && v.staffId !== null)) violations.push("staff_id is required");
+if (!(v.period !== undefined && v.period !== null) || v.period === "") violations.push("period is required");
+return violations;
+}
+
 export interface CreateReviewResponse {
 id?: string;
 message?: string;
@@ -143,5 +166,10 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateCreateReviewResponse(v: CreateReviewResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

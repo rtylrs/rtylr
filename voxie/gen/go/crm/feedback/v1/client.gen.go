@@ -23,6 +23,11 @@ func NewFeedbackServiceClient(baseURL string) *FeedbackServiceClient {
 }
 
 func (c *FeedbackServiceClient) ListFeedback(ctx context.Context, req *ListFeedbackRequest) (*ListFeedbackResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/feedback/v1/feedback"
 	query := url.Values{}
 	query.Set("type", req.Type)
@@ -63,6 +68,11 @@ func (c *FeedbackServiceClient) ListFeedback(ctx context.Context, req *ListFeedb
 }
 
 func (c *FeedbackServiceClient) CreateFeedback(ctx context.Context, req *CreateFeedbackRequest) (*CreateFeedbackResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/feedback/v1/feedback"
 	body, err := json.Marshal(req)
 	if err != nil {

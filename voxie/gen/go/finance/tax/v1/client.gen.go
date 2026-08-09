@@ -22,6 +22,11 @@ func NewTaxServiceClient(baseURL string) *TaxServiceClient {
 }
 
 func (c *TaxServiceClient) GetTaxConfig(ctx context.Context, req *GetTaxConfigRequest) (*GetTaxConfigResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/tax/v1/tax"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -52,6 +57,11 @@ func (c *TaxServiceClient) GetTaxConfig(ctx context.Context, req *GetTaxConfigRe
 }
 
 func (c *TaxServiceClient) UpdateTaxConfig(ctx context.Context, req *UpdateTaxConfigRequest) (*UpdateTaxConfigResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/tax/v1/tax"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -83,6 +93,11 @@ func (c *TaxServiceClient) UpdateTaxConfig(ctx context.Context, req *UpdateTaxCo
 }
 
 func (c *TaxServiceClient) GetPLReport(ctx context.Context, req *GetPLReportRequest) (*GetPLReportResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/finance/tax/v1/pl"
 	query := url.Values{}
 	if len(query) > 0 {

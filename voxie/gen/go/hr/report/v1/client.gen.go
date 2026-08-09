@@ -21,6 +21,11 @@ func NewReportServiceClient(baseURL string) *ReportServiceClient {
 }
 
 func (c *ReportServiceClient) GenerateReport(ctx context.Context, req *GenerateReportRequest) (*GenerateReportResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/report/v1/reports/generate"
 	body, err := json.Marshal(req)
 	if err != nil {

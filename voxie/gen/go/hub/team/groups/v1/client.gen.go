@@ -23,6 +23,11 @@ func NewGroupsServiceClient(baseURL string) *GroupsServiceClient {
 }
 
 func (c *GroupsServiceClient) ListGroups(ctx context.Context, req *ListGroupsRequest) (*ListGroupsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/groups/v1/groups"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *GroupsServiceClient) ListGroups(ctx context.Context, req *ListGroupsReq
 }
 
 func (c *GroupsServiceClient) CreateGroup(ctx context.Context, req *CreateGroupRequest) (*CreateGroupResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/groups/v1/groups"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,6 +94,11 @@ func (c *GroupsServiceClient) CreateGroup(ctx context.Context, req *CreateGroupR
 }
 
 func (c *GroupsServiceClient) GetGroupDetail(ctx context.Context, req *GetGroupDetailRequest) (*GetGroupDetailResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/groups/v1/groups/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -115,6 +130,11 @@ func (c *GroupsServiceClient) GetGroupDetail(ctx context.Context, req *GetGroupD
 }
 
 func (c *GroupsServiceClient) UpdateGroup(ctx context.Context, req *UpdateGroupRequest) (*UpdateGroupResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/groups/v1/groups/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -147,6 +167,11 @@ func (c *GroupsServiceClient) UpdateGroup(ctx context.Context, req *UpdateGroupR
 }
 
 func (c *GroupsServiceClient) DeleteGroup(ctx context.Context, req *DeleteGroupRequest) (*DeleteGroupResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/groups/v1/groups/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -178,6 +203,11 @@ func (c *GroupsServiceClient) DeleteGroup(ctx context.Context, req *DeleteGroupR
 }
 
 func (c *GroupsServiceClient) AddGroupMembers(ctx context.Context, req *AddGroupMembersRequest) (*AddGroupMembersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/groups/v1/groups/{id}/members"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -210,6 +240,11 @@ func (c *GroupsServiceClient) AddGroupMembers(ctx context.Context, req *AddGroup
 }
 
 func (c *GroupsServiceClient) RemoveGroupMember(ctx context.Context, req *RemoveGroupMemberRequest) (*RemoveGroupMemberResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/groups/v1/groups/{id}/members/{user_id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	path = strings.ReplaceAll(path, "{user_id}", fmt.Sprintf("%v", req.UserId))
@@ -242,6 +277,11 @@ func (c *GroupsServiceClient) RemoveGroupMember(ctx context.Context, req *Remove
 }
 
 func (c *GroupsServiceClient) GetUserGroups(ctx context.Context, req *GetUserGroupsRequest) (*GetUserGroupsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/team/groups/v1/users/{user_id}/groups"
 	path = strings.ReplaceAll(path, "{user_id}", fmt.Sprintf("%v", req.UserId))
 	query := url.Values{}

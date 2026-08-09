@@ -24,6 +24,11 @@ func NewStockTakeServiceClient(baseURL string) *StockTakeServiceClient {
 }
 
 func (c *StockTakeServiceClient) ListStockTakes(ctx context.Context, req *ListStockTakesRequest) (*ListStockTakesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/stock-take/v1/stock-takes"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -56,6 +61,11 @@ func (c *StockTakeServiceClient) ListStockTakes(ctx context.Context, req *ListSt
 }
 
 func (c *StockTakeServiceClient) CreateStockTake(ctx context.Context, req *CreateStockTakeRequest) (*CreateStockTakeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/stock-take/v1/stock-takes"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -87,6 +97,11 @@ func (c *StockTakeServiceClient) CreateStockTake(ctx context.Context, req *Creat
 }
 
 func (c *StockTakeServiceClient) UpdateStockTake(ctx context.Context, req *UpdateStockTakeRequest) (*UpdateStockTakeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/erp/stock-take/v1/stock-takes/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

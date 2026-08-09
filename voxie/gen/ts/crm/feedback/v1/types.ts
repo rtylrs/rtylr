@@ -41,9 +41,14 @@ if (v.customerName !== undefined) { out.customer_name = v.customerName; }
 return out;
 }
 
+export function validateFeedback(v: Feedback): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateFeedbackRequest {
 customerId?: string;
-type?: string;
+type: string;
 score?: number;
 comment?: string;
 source?: string;
@@ -70,6 +75,12 @@ if (v.source !== undefined) { out.source = v.source; }
 return out;
 }
 
+export function validateCreateFeedbackRequest(v: CreateFeedbackRequest): string[] {
+const violations: string[] = [];
+if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+return violations;
+}
+
 export interface CreateFeedbackResponse {
 feedbackId?: string;
 message?: string;
@@ -88,6 +99,11 @@ const out: Record<string, unknown> = {};
 if (v.feedbackId !== undefined) { out.feedback_id = v.feedbackId; }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateCreateFeedbackResponse(v: CreateFeedbackResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListFeedbackRequest {
@@ -122,6 +138,11 @@ if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
+export function validateListFeedbackRequest(v: ListFeedbackRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListFeedbackResponse {
 feedback?: (Feedback)[];
 total?: number;
@@ -146,5 +167,11 @@ if (v.total !== undefined) { out.total = v.total; }
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
+}
+
+export function validateListFeedbackResponse(v: ListFeedbackResponse): string[] {
+const violations: string[] = [];
+if (v.feedback !== undefined && v.feedback !== null) for (const item of v.feedback) violations.push(...validateFeedback(item).map((message) => "feedback: " + message));
+return violations;
 }
 

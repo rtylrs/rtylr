@@ -32,6 +32,11 @@ if (v.archived !== undefined) { out.archived = v.archived; }
 return out;
 }
 
+export function validateChatSummary(v: ChatSummary): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ChatMessage {
 id?: string;
 role?: string;
@@ -61,6 +66,11 @@ if (v.tokensUsed !== undefined) { out.tokens_used = v.tokensUsed; }
 return out;
 }
 
+export function validateChatMessage(v: ChatMessage): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListChatsRequest {
 limit?: number;
 offset?: number;
@@ -81,6 +91,11 @@ if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
+export function validateListChatsRequest(v: ListChatsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListChatsResponse {
 chats?: (ChatSummary)[];
 }
@@ -96,6 +111,12 @@ export function encodeListChatsResponse(v: ListChatsResponse): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.chats !== undefined) { out.chats = (v.chats as any[]).map(encodeChatSummary); }
 return out;
+}
+
+export function validateListChatsResponse(v: ListChatsResponse): string[] {
+const violations: string[] = [];
+if (v.chats !== undefined && v.chats !== null) for (const item of v.chats) violations.push(...validateChatSummary(item).map((message) => "chats: " + message));
+return violations;
 }
 
 export interface GetChatMessagesRequest {
@@ -115,6 +136,11 @@ if (v.sessionId !== undefined) { out.session_id = v.sessionId; }
 return out;
 }
 
+export function validateGetChatMessagesRequest(v: GetChatMessagesRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetChatMessagesResponse {
 messages?: (ChatMessage)[];
 }
@@ -130,6 +156,12 @@ export function encodeGetChatMessagesResponse(v: GetChatMessagesResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.messages !== undefined) { out.messages = (v.messages as any[]).map(encodeChatMessage); }
 return out;
+}
+
+export function validateGetChatMessagesResponse(v: GetChatMessagesResponse): string[] {
+const violations: string[] = [];
+if (v.messages !== undefined && v.messages !== null) for (const item of v.messages) violations.push(...validateChatMessage(item).map((message) => "messages: " + message));
+return violations;
 }
 
 export interface DeleteChatRequest {
@@ -149,6 +181,11 @@ if (v.sessionId !== undefined) { out.session_id = v.sessionId; }
 return out;
 }
 
+export function validateDeleteChatRequest(v: DeleteChatRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteChatResponse {
 deleted?: boolean;
 }
@@ -164,6 +201,11 @@ export function encodeDeleteChatResponse(v: DeleteChatResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.deleted !== undefined) { out.deleted = v.deleted; }
 return out;
+}
+
+export function validateDeleteChatResponse(v: DeleteChatResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface RenameChatRequest {
@@ -186,6 +228,11 @@ if (v.title !== undefined) { out.title = v.title; }
 return out;
 }
 
+export function validateRenameChatRequest(v: RenameChatRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface RenameChatResponse {
 updated?: boolean;
 }
@@ -201,6 +248,11 @@ export function encodeRenameChatResponse(v: RenameChatResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.updated !== undefined) { out.updated = v.updated; }
 return out;
+}
+
+export function validateRenameChatResponse(v: RenameChatResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface PinChatRequest {
@@ -223,6 +275,11 @@ if (v.pinned !== undefined) { out.pinned = v.pinned; }
 return out;
 }
 
+export function validatePinChatRequest(v: PinChatRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface PinChatResponse {
 updated?: boolean;
 }
@@ -238,5 +295,10 @@ export function encodePinChatResponse(v: PinChatResponse): Record<string, unknow
 const out: Record<string, unknown> = {};
 if (v.updated !== undefined) { out.updated = v.updated; }
 return out;
+}
+
+export function validatePinChatResponse(v: PinChatResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

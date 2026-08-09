@@ -23,6 +23,11 @@ func NewLocationServiceClient(baseURL string) *LocationServiceClient {
 }
 
 func (c *LocationServiceClient) ListLocations(ctx context.Context, req *ListLocationsRequest) (*ListLocationsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/location/v1/locations"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *LocationServiceClient) ListLocations(ctx context.Context, req *ListLoca
 }
 
 func (c *LocationServiceClient) CreateLocation(ctx context.Context, req *CreateLocationRequest) (*CreateLocationResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/location/v1/locations"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,9 +94,14 @@ func (c *LocationServiceClient) CreateLocation(ctx context.Context, req *CreateL
 }
 
 func (c *LocationServiceClient) UpdateLocation(ctx context.Context, req *UpdateLocationRequest) (*UpdateLocationResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/location/v1/locations/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}

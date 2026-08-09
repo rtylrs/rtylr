@@ -23,6 +23,11 @@ func NewFeatureServiceClient(baseURL string) *FeatureServiceClient {
 }
 
 func (c *FeatureServiceClient) ResolveFeatures(ctx context.Context, req *ResolveFeaturesRequest) (*ResolveFeaturesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -54,6 +59,11 @@ func (c *FeatureServiceClient) ResolveFeatures(ctx context.Context, req *Resolve
 }
 
 func (c *FeatureServiceClient) ResolveMyFeatures(ctx context.Context, req *ResolveMyFeaturesRequest) (*ResolveMyFeaturesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features/me"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -85,6 +95,11 @@ func (c *FeatureServiceClient) ResolveMyFeatures(ctx context.Context, req *Resol
 }
 
 func (c *FeatureServiceClient) ListFlags(ctx context.Context, req *ListFlagsRequest) (*ListFlagsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features/admin/flags"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -115,6 +130,11 @@ func (c *FeatureServiceClient) ListFlags(ctx context.Context, req *ListFlagsRequ
 }
 
 func (c *FeatureServiceClient) UpsertFlag(ctx context.Context, req *UpsertFlagRequest) (*UpsertFlagResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features/admin/flags"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -146,6 +166,11 @@ func (c *FeatureServiceClient) UpsertFlag(ctx context.Context, req *UpsertFlagRe
 }
 
 func (c *FeatureServiceClient) DeleteFlag(ctx context.Context, req *DeleteFlagRequest) (*DeleteFlagResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features/admin/flags/{key}"
 	path = strings.ReplaceAll(path, "{key}", fmt.Sprintf("%v", req.Key))
 	query := url.Values{}
@@ -177,6 +202,11 @@ func (c *FeatureServiceClient) DeleteFlag(ctx context.Context, req *DeleteFlagRe
 }
 
 func (c *FeatureServiceClient) ListTargets(ctx context.Context, req *ListTargetsRequest) (*ListTargetsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features/admin/targets"
 	query := url.Values{}
 	query.Set("feature_key", req.FeatureKey)
@@ -208,6 +238,11 @@ func (c *FeatureServiceClient) ListTargets(ctx context.Context, req *ListTargets
 }
 
 func (c *FeatureServiceClient) UpsertTarget(ctx context.Context, req *UpsertTargetRequest) (*UpsertTargetResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features/admin/targets"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -239,6 +274,11 @@ func (c *FeatureServiceClient) UpsertTarget(ctx context.Context, req *UpsertTarg
 }
 
 func (c *FeatureServiceClient) DeleteTarget(ctx context.Context, req *DeleteTargetRequest) (*DeleteTargetResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features/admin/targets/{feature_key}/{owner_id}"
 	path = strings.ReplaceAll(path, "{feature_key}", fmt.Sprintf("%v", req.FeatureKey))
 	path = strings.ReplaceAll(path, "{owner_id}", fmt.Sprintf("%v", req.OwnerId))
@@ -271,6 +311,11 @@ func (c *FeatureServiceClient) DeleteTarget(ctx context.Context, req *DeleteTarg
 }
 
 func (c *FeatureServiceClient) ListRules(ctx context.Context, req *ListRulesRequest) (*ListRulesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features/admin/rules"
 	query := url.Values{}
 	query.Set("feature_key", req.FeatureKey)
@@ -302,6 +347,11 @@ func (c *FeatureServiceClient) ListRules(ctx context.Context, req *ListRulesRequ
 }
 
 func (c *FeatureServiceClient) CreateRule(ctx context.Context, req *CreateRuleRequest) (*CreateRuleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features/admin/rules"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -333,6 +383,11 @@ func (c *FeatureServiceClient) CreateRule(ctx context.Context, req *CreateRuleRe
 }
 
 func (c *FeatureServiceClient) UpdateRule(ctx context.Context, req *UpdateRuleRequest) (*UpdateRuleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features/admin/rules"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -364,6 +419,11 @@ func (c *FeatureServiceClient) UpdateRule(ctx context.Context, req *UpdateRuleRe
 }
 
 func (c *FeatureServiceClient) DeleteRule(ctx context.Context, req *DeleteRuleRequest) (*DeleteRuleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/feature/v1/features/admin/rules/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

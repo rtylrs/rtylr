@@ -20,7 +20,70 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *ReviewGoalPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *PerformanceReviewPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ReviewCyclePayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListReviewCyclesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListReviewCyclesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Cycles {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "cycles: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateReviewCycleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -40,7 +103,26 @@ func (m *CreateReviewCycleRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateReviewCycleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Cycle != nil {
+		if err := m.Cycle.Validate(); err != nil {
+			violations = append(violations, "cycle: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *OpenReviewCycleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.CycleId <= 0 {
 		violations = append(violations, "cycle_id must be greater than 0")
@@ -51,7 +133,53 @@ func (m *OpenReviewCycleRequest) Validate() error {
 	return nil
 }
 
+func (m *OpenReviewCycleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Cycle != nil {
+		if err := m.Cycle.Validate(); err != nil {
+			violations = append(violations, "cycle: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListGoalsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListGoalsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Goals {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "goals: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *SubmitReviewRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.ReviewId <= 0 {
 		violations = append(violations, "review_id must be greater than 0")
@@ -61,6 +189,22 @@ func (m *SubmitReviewRequest) Validate() error {
 	}
 	if m.Narrative == "" {
 		violations = append(violations, "narrative is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *SubmitReviewResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Review != nil {
+		if err := m.Review.Validate(); err != nil {
+			violations = append(violations, "review: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

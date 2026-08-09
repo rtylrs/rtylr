@@ -24,6 +24,11 @@ func NewLoyaltyServiceClient(baseURL string) *LoyaltyServiceClient {
 }
 
 func (c *LoyaltyServiceClient) GetLoyaltyConfig(ctx context.Context, req *GetLoyaltyConfigRequest) (*GetLoyaltyConfigResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/loyalty/v1/config"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -54,6 +59,11 @@ func (c *LoyaltyServiceClient) GetLoyaltyConfig(ctx context.Context, req *GetLoy
 }
 
 func (c *LoyaltyServiceClient) UpdateLoyaltyConfig(ctx context.Context, req *UpdateLoyaltyConfigRequest) (*UpdateLoyaltyConfigResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/loyalty/v1/config"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -85,6 +95,11 @@ func (c *LoyaltyServiceClient) UpdateLoyaltyConfig(ctx context.Context, req *Upd
 }
 
 func (c *LoyaltyServiceClient) ListLoyaltyTiers(ctx context.Context, req *ListLoyaltyTiersRequest) (*ListLoyaltyTiersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/loyalty/v1/tiers"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -115,6 +130,11 @@ func (c *LoyaltyServiceClient) ListLoyaltyTiers(ctx context.Context, req *ListLo
 }
 
 func (c *LoyaltyServiceClient) CreateLoyaltyTier(ctx context.Context, req *CreateLoyaltyTierRequest) (*CreateLoyaltyTierResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/loyalty/v1/tiers"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -146,9 +166,14 @@ func (c *LoyaltyServiceClient) CreateLoyaltyTier(ctx context.Context, req *Creat
 }
 
 func (c *LoyaltyServiceClient) UpdateLoyaltyTier(ctx context.Context, req *UpdateLoyaltyTierRequest) (*UpdateLoyaltyTierResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/loyalty/v1/tiers/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -178,6 +203,11 @@ func (c *LoyaltyServiceClient) UpdateLoyaltyTier(ctx context.Context, req *Updat
 }
 
 func (c *LoyaltyServiceClient) ListLoyaltyTransactions(ctx context.Context, req *ListLoyaltyTransactionsRequest) (*ListLoyaltyTransactionsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/loyalty/v1/transactions"
 	query := url.Values{}
 	query.Set("customer_id", strconv.FormatInt(int64(req.CustomerId), 10))
@@ -211,6 +241,11 @@ func (c *LoyaltyServiceClient) ListLoyaltyTransactions(ctx context.Context, req 
 }
 
 func (c *LoyaltyServiceClient) AwardPoints(ctx context.Context, req *AwardPointsRequest) (*AwardPointsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/loyalty/v1/award"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -242,6 +277,11 @@ func (c *LoyaltyServiceClient) AwardPoints(ctx context.Context, req *AwardPoints
 }
 
 func (c *LoyaltyServiceClient) RedeemPoints(ctx context.Context, req *RedeemPointsRequest) (*RedeemPointsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/crm/loyalty/v1/redeem"
 	body, err := json.Marshal(req)
 	if err != nil {

@@ -29,6 +29,11 @@ if (v.favoriteReports !== undefined) { out.favorite_reports = v.favoriteReports;
 return out;
 }
 
+export function validateInsightsSettings(v: InsightsSettings): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetInsightsSettingsRequest {
 }
 
@@ -41,6 +46,11 @@ return {
 export function encodeGetInsightsSettingsRequest(v: GetInsightsSettingsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetInsightsSettingsRequest(v: GetInsightsSettingsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetInsightsSettingsResponse {
@@ -60,8 +70,14 @@ if (v.settings !== undefined) { out.settings = encodeInsightsSettings(v.settings
 return out;
 }
 
+export function validateGetInsightsSettingsResponse(v: GetInsightsSettingsResponse): string[] {
+const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null) violations.push(...validateInsightsSettings(v.settings).map((message) => "settings: " + message));
+return violations;
+}
+
 export interface UpdateInsightsSettingsRequest {
-settings?: InsightsSettings;
+settings: InsightsSettings;
 }
 
 export function decodeUpdateInsightsSettingsRequest(v: any): UpdateInsightsSettingsRequest {
@@ -75,6 +91,13 @@ export function encodeUpdateInsightsSettingsRequest(v: UpdateInsightsSettingsReq
 const out: Record<string, unknown> = {};
 if (v.settings !== undefined) { out.settings = encodeInsightsSettings(v.settings); }
 return out;
+}
+
+export function validateUpdateInsightsSettingsRequest(v: UpdateInsightsSettingsRequest): string[] {
+const violations: string[] = [];
+if (!(v.settings !== undefined && v.settings !== null)) violations.push("settings is required");
+if (v.settings !== undefined && v.settings !== null) violations.push(...validateInsightsSettings(v.settings).map((message) => "settings: " + message));
+return violations;
 }
 
 export interface UpdateInsightsSettingsResponse {
@@ -92,5 +115,11 @@ export function encodeUpdateInsightsSettingsResponse(v: UpdateInsightsSettingsRe
 const out: Record<string, unknown> = {};
 if (v.settings !== undefined) { out.settings = encodeInsightsSettings(v.settings); }
 return out;
+}
+
+export function validateUpdateInsightsSettingsResponse(v: UpdateInsightsSettingsResponse): string[] {
+const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null) violations.push(...validateInsightsSettings(v.settings).map((message) => "settings: " + message));
+return violations;
 }
 

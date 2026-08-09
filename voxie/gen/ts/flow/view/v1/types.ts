@@ -36,6 +36,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateView(v: View): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListViewsRequest {
 workspaceId?: string;
 page?: number;
@@ -65,6 +70,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListViewsRequest(v: ListViewsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListViewsResponse {
 views?: (View)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -85,9 +95,16 @@ if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePa
 return out;
 }
 
+export function validateListViewsResponse(v: ListViewsResponse): string[] {
+const violations: string[] = [];
+if (v.views !== undefined && v.views !== null) for (const item of v.views) violations.push(...validateView(item).map((message) => "views: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface CreateViewRequest {
 workspaceId?: string;
-name?: string;
+name: string;
 icon?: string;
 filters?: string;
 groupBy?: string;
@@ -120,6 +137,12 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateCreateViewRequest(v: CreateViewRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateViewResponse {
 view?: View;
 }
@@ -135,6 +158,12 @@ export function encodeCreateViewResponse(v: CreateViewResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.view !== undefined) { out.view = encodeView(v.view); }
 return out;
+}
+
+export function validateCreateViewResponse(v: CreateViewResponse): string[] {
+const violations: string[] = [];
+if (v.view !== undefined && v.view !== null) violations.push(...validateView(v.view).map((message) => "view: " + message));
+return violations;
 }
 
 export interface UpdateViewRequest {
@@ -172,6 +201,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateUpdateViewRequest(v: UpdateViewRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateViewResponse {
 }
 
@@ -184,6 +218,11 @@ return {
 export function encodeUpdateViewResponse(v: UpdateViewResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateUpdateViewResponse(v: UpdateViewResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface DeleteViewRequest {
@@ -203,6 +242,11 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateDeleteViewRequest(v: DeleteViewRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteViewResponse {
 }
 
@@ -215,5 +259,10 @@ return {
 export function encodeDeleteViewResponse(v: DeleteViewResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateDeleteViewResponse(v: DeleteViewResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

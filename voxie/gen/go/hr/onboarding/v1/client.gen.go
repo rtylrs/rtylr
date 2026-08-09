@@ -24,6 +24,11 @@ func NewOnboardingServiceClient(baseURL string) *OnboardingServiceClient {
 }
 
 func (c *OnboardingServiceClient) ListChecklistTemplates(ctx context.Context, req *ListChecklistTemplatesRequest) (*ListChecklistTemplatesResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/onboarding/v1/templates"
 	query := url.Values{}
 	if req.TriggerType != nil {
@@ -57,6 +62,11 @@ func (c *OnboardingServiceClient) ListChecklistTemplates(ctx context.Context, re
 }
 
 func (c *OnboardingServiceClient) CreateChecklistTemplate(ctx context.Context, req *CreateChecklistTemplateRequest) (*CreateChecklistTemplateResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/onboarding/v1/templates"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -88,9 +98,14 @@ func (c *OnboardingServiceClient) CreateChecklistTemplate(ctx context.Context, r
 }
 
 func (c *OnboardingServiceClient) UpdateChecklistTemplate(ctx context.Context, req *UpdateChecklistTemplateRequest) (*UpdateChecklistTemplateResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/onboarding/v1/templates/{role_id}"
 	path = strings.ReplaceAll(path, "{role_id}", fmt.Sprintf("%v", req.RoleId))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -120,6 +135,11 @@ func (c *OnboardingServiceClient) UpdateChecklistTemplate(ctx context.Context, r
 }
 
 func (c *OnboardingServiceClient) AddItemToChecklistTemplate(ctx context.Context, req *AddItemToChecklistTemplateRequest) (*AddItemToChecklistTemplateResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/onboarding/v1/templates/{role_id}/items"
 	path = strings.ReplaceAll(path, "{role_id}", fmt.Sprintf("%v", req.RoleId))
 	body, err := json.Marshal(req)
@@ -152,6 +172,11 @@ func (c *OnboardingServiceClient) AddItemToChecklistTemplate(ctx context.Context
 }
 
 func (c *OnboardingServiceClient) ListEmployeeChecklists(ctx context.Context, req *ListEmployeeChecklistsRequest) (*ListEmployeeChecklistsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/onboarding/v1/checklists"
 	query := url.Values{}
 	query.Set("employee_id", strconv.FormatInt(int64(req.EmployeeId), 10))
@@ -189,6 +214,11 @@ func (c *OnboardingServiceClient) ListEmployeeChecklists(ctx context.Context, re
 }
 
 func (c *OnboardingServiceClient) GetEmployeeChecklist(ctx context.Context, req *GetEmployeeChecklistRequest) (*GetEmployeeChecklistResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/onboarding/v1/employees/{employee_id}"
 	path = strings.ReplaceAll(path, "{employee_id}", fmt.Sprintf("%v", req.EmployeeId))
 	query := url.Values{}
@@ -220,6 +250,11 @@ func (c *OnboardingServiceClient) GetEmployeeChecklist(ctx context.Context, req 
 }
 
 func (c *OnboardingServiceClient) TriggerChecklist(ctx context.Context, req *TriggerChecklistRequest) (*TriggerChecklistResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/onboarding/v1/checklists/trigger"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -251,6 +286,11 @@ func (c *OnboardingServiceClient) TriggerChecklist(ctx context.Context, req *Tri
 }
 
 func (c *OnboardingServiceClient) CompleteChecklistItem(ctx context.Context, req *CompleteChecklistItemRequest) (*CompleteChecklistItemResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/onboarding/v1/checklists/items/complete"
 	body, err := json.Marshal(req)
 	if err != nil {

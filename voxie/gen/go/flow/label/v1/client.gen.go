@@ -24,6 +24,11 @@ func NewLabelServiceClient(baseURL string) *LabelServiceClient {
 }
 
 func (c *LabelServiceClient) ListLabels(ctx context.Context, req *ListLabelsRequest) (*ListLabelsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/label/v1/labels"
 	query := url.Values{}
 	query.Set("workspace_id", strconv.FormatInt(int64(req.WorkspaceId), 10))
@@ -59,6 +64,11 @@ func (c *LabelServiceClient) ListLabels(ctx context.Context, req *ListLabelsRequ
 }
 
 func (c *LabelServiceClient) CreateLabel(ctx context.Context, req *CreateLabelRequest) (*CreateLabelResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/label/v1/labels"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -90,6 +100,11 @@ func (c *LabelServiceClient) CreateLabel(ctx context.Context, req *CreateLabelRe
 }
 
 func (c *LabelServiceClient) UpdateLabel(ctx context.Context, req *UpdateLabelRequest) (*UpdateLabelResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/label/v1/labels/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -122,6 +137,11 @@ func (c *LabelServiceClient) UpdateLabel(ctx context.Context, req *UpdateLabelRe
 }
 
 func (c *LabelServiceClient) DeleteLabel(ctx context.Context, req *DeleteLabelRequest) (*DeleteLabelResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/label/v1/labels/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -153,6 +173,11 @@ func (c *LabelServiceClient) DeleteLabel(ctx context.Context, req *DeleteLabelRe
 }
 
 func (c *LabelServiceClient) SetTaskLabels(ctx context.Context, req *SetTaskLabelsRequest) (*SetTaskLabelsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/label/v1/tasks/labels"
 	body, err := json.Marshal(req)
 	if err != nil {

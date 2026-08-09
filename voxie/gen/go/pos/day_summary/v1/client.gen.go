@@ -21,6 +21,11 @@ func NewDaySummaryServiceClient(baseURL string) *DaySummaryServiceClient {
 }
 
 func (c *DaySummaryServiceClient) DaySummary(ctx context.Context, req *DaySummaryRequest) (*DaySummaryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/day-summary/v1/day-summary"
 	query := url.Values{}
 	query.Set("date", req.Date)

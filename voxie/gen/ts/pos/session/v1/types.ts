@@ -47,6 +47,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateSession(v: Session): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CurrentSession {
 id?: string;
 ownerId?: string;
@@ -91,8 +96,13 @@ if (v.closedAt !== undefined) { out.closed_at = v.closedAt; }
 return out;
 }
 
+export function validateCurrentSession(v: CurrentSession): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetSessionRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetSessionRequest(v: any): GetSessionRequest {
@@ -106,6 +116,13 @@ export function encodeGetSessionRequest(v: GetSessionRequest): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetSessionRequest(v: GetSessionRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetSessionResponse {
@@ -125,6 +142,12 @@ if (v.session !== undefined) { out.session = encodeSession(v.session); }
 return out;
 }
 
+export function validateGetSessionResponse(v: GetSessionResponse): string[] {
+const violations: string[] = [];
+if (v.session !== undefined && v.session !== null) violations.push(...validateSession(v.session).map((message) => "session: " + message));
+return violations;
+}
+
 export interface GetCurrentSessionRequest {
 }
 
@@ -137,6 +160,11 @@ return {
 export function encodeGetCurrentSessionRequest(v: GetCurrentSessionRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetCurrentSessionRequest(v: GetCurrentSessionRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetCurrentSessionResponse {
@@ -156,6 +184,12 @@ if (v.session !== undefined) { out.session = encodeCurrentSession(v.session); }
 return out;
 }
 
+export function validateGetCurrentSessionResponse(v: GetCurrentSessionResponse): string[] {
+const violations: string[] = [];
+if (v.session !== undefined && v.session !== null) violations.push(...validateCurrentSession(v.session).map((message) => "session: " + message));
+return violations;
+}
+
 export interface ListSessionsRequest {
 }
 
@@ -168,6 +202,11 @@ return {
 export function encodeListSessionsRequest(v: ListSessionsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListSessionsRequest(v: ListSessionsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListSessionsResponse {
@@ -187,10 +226,16 @@ if (v.sessions !== undefined) { out.sessions = (v.sessions as any[]).map(encodeS
 return out;
 }
 
+export function validateListSessionsResponse(v: ListSessionsResponse): string[] {
+const violations: string[] = [];
+if (v.sessions !== undefined && v.sessions !== null) for (const item of v.sessions) violations.push(...validateSession(item).map((message) => "sessions: " + message));
+return violations;
+}
+
 export interface OpenSessionRequest {
-locationId?: string;
-staffId?: string;
-openingFloat?: number;
+locationId: string;
+staffId: string;
+openingFloat: number;
 }
 
 export function decodeOpenSessionRequest(v: any): OpenSessionRequest {
@@ -208,6 +253,17 @@ if (v.locationId !== undefined) { out.location_id = v.locationId; }
 if (v.staffId !== undefined) { out.staff_id = v.staffId; }
 if (v.openingFloat !== undefined) { out.opening_float = v.openingFloat; }
 return out;
+}
+
+export function validateOpenSessionRequest(v: OpenSessionRequest): string[] {
+const violations: string[] = [];
+if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
+if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (!(v.staffId !== undefined && v.staffId !== null)) violations.push("staff_id is required");
+if (v.staffId !== undefined && v.staffId !== null && !(Number(v.staffId) > 0)) violations.push("staff_id violates @gt");
+if (!(v.openingFloat !== undefined && v.openingFloat !== null)) violations.push("opening_float is required");
+if (v.openingFloat !== undefined && v.openingFloat !== null && !(Number(v.openingFloat) >= 0)) violations.push("opening_float violates @gte");
+return violations;
 }
 
 export interface OpenSessionResponse {
@@ -230,9 +286,14 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateOpenSessionResponse(v: OpenSessionResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CloseSessionRequest {
-closingFloat?: number;
-id?: string;
+closingFloat: number;
+id: string;
 }
 
 export function decodeCloseSessionRequest(v: any): CloseSessionRequest {
@@ -250,6 +311,15 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateCloseSessionRequest(v: CloseSessionRequest): string[] {
+const violations: string[] = [];
+if (!(v.closingFloat !== undefined && v.closingFloat !== null)) violations.push("closing_float is required");
+if (v.closingFloat !== undefined && v.closingFloat !== null && !(Number(v.closingFloat) >= 0)) violations.push("closing_float violates @gte");
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface CloseSessionResponse {
 message?: string;
 }
@@ -265,5 +335,10 @@ export function encodeCloseSessionResponse(v: CloseSessionResponse): Record<stri
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateCloseSessionResponse(v: CloseSessionResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

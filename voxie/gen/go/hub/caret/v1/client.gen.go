@@ -21,6 +21,11 @@ func NewCaretServiceClient(baseURL string) *CaretServiceClient {
 }
 
 func (c *CaretServiceClient) ListCaretTools(ctx context.Context, req *ListCaretToolsRequest) (*ListCaretToolsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/caret/v1/tools"
 	body, err := json.Marshal(req)
 	if err != nil {

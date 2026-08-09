@@ -20,7 +20,32 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *ApiKey) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *Webhook) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateApiKeyRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -34,7 +59,21 @@ func (m *CreateApiKeyRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateApiKeyResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateWebhookRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Url == "" {
 		violations = append(violations, "url is required")
@@ -48,10 +87,89 @@ func (m *CreateWebhookRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateWebhookResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteWebhookRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteWebhookResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListApiKeysRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListApiKeysResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Keys {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "keys: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListWebhooksRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListWebhooksResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Webhooks {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "webhooks: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -60,6 +178,9 @@ func (m *DeleteWebhookRequest) Validate() error {
 }
 
 func (m *RevokeApiKeyRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -70,7 +191,21 @@ func (m *RevokeApiKeyRequest) Validate() error {
 	return nil
 }
 
+func (m *RevokeApiKeyResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateWebhookRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -80,6 +215,22 @@ func (m *UpdateWebhookRequest) Validate() error {
 	}
 	if len(m.Events) < 1 {
 		violations = append(violations, "events must have at least 1 items")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateWebhookResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Webhook != nil {
+		if err := m.Webhook.Validate(); err != nil {
+			violations = append(violations, "webhook: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

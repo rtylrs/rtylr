@@ -23,6 +23,11 @@ func NewCustomerServiceClient(baseURL string) *CustomerServiceClient {
 }
 
 func (c *CustomerServiceClient) ListCustomers(ctx context.Context, req *ListCustomersRequest) (*ListCustomersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/customer/v1/customers"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
@@ -55,6 +60,11 @@ func (c *CustomerServiceClient) ListCustomers(ctx context.Context, req *ListCust
 }
 
 func (c *CustomerServiceClient) GetCustomer(ctx context.Context, req *GetCustomerRequest) (*GetCustomerResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/support/customer/v1/customers/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

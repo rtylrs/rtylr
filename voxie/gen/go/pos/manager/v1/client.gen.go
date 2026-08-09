@@ -21,6 +21,11 @@ func NewManagerServiceClient(baseURL string) *ManagerServiceClient {
 }
 
 func (c *ManagerServiceClient) VerifyPIN(ctx context.Context, req *VerifyPINRequest) (*VerifyPINResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/manager/v1/verify"
 	body, err := json.Marshal(req)
 	if err != nil {

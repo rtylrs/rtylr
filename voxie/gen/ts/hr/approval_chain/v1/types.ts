@@ -53,6 +53,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateApprovalChainLevelPayload(v: ApprovalChainLevelPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ApprovalChainPayload {
 id?: string;
 ownerId?: string;
@@ -91,10 +96,16 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateApprovalChainPayload(v: ApprovalChainPayload): string[] {
+const violations: string[] = [];
+if (v.levels !== undefined && v.levels !== null) for (const item of v.levels) violations.push(...validateApprovalChainLevelPayload(item).map((message) => "levels: " + message));
+return violations;
+}
+
 export interface UpsertApprovalChainRequest {
-id?: string;
-requestType?: string;
-name?: string;
+id: string;
+requestType: string;
+name: string;
 delegationEnabled?: boolean;
 levels?: (ApprovalChainLevelPayload)[];
 }
@@ -120,6 +131,17 @@ if (v.levels !== undefined) { out.levels = (v.levels as any[]).map(encodeApprova
 return out;
 }
 
+export function validateUpsertApprovalChainRequest(v: UpsertApprovalChainRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.requestType !== undefined && v.requestType !== null) || v.requestType === "") violations.push("request_type is required");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.levels !== undefined && v.levels !== null && v.levels.length < 1) violations.push("levels must contain at least 1 items");
+if (v.levels !== undefined && v.levels !== null) for (const item of v.levels) violations.push(...validateApprovalChainLevelPayload(item).map((message) => "levels: " + message));
+return violations;
+}
+
 export interface UpsertApprovalChainResponse {
 chain?: ApprovalChainPayload;
 }
@@ -135,5 +157,11 @@ export function encodeUpsertApprovalChainResponse(v: UpsertApprovalChainResponse
 const out: Record<string, unknown> = {};
 if (v.chain !== undefined) { out.chain = encodeApprovalChainPayload(v.chain); }
 return out;
+}
+
+export function validateUpsertApprovalChainResponse(v: UpsertApprovalChainResponse): string[] {
+const violations: string[] = [];
+if (v.chain !== undefined && v.chain !== null) violations.push(...validateApprovalChainPayload(v.chain).map((message) => "chain: " + message));
+return violations;
 }
 

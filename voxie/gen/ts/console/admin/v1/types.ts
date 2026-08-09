@@ -41,6 +41,11 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateUser(v: User): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface Business {
 id?: number;
 ownerId?: number;
@@ -68,6 +73,11 @@ if (v.name !== undefined) { out.name = v.name; }
 if (v.slug !== undefined) { out.slug = v.slug; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
+}
+
+export function validateBusiness(v: Business): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface Subscription {
@@ -150,6 +160,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateSubscription(v: Subscription): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface Plan {
 id?: number;
 name?: string;
@@ -180,6 +195,11 @@ if (v.annualPricePerSeatCents !== undefined) { out.annual_price_per_seat_cents =
 if (v.isActive !== undefined) { out.is_active = v.isActive; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
+}
+
+export function validatePlan(v: Plan): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface Stats {
@@ -217,6 +237,11 @@ if (v.consoleAdmins !== undefined) { out.console_admins = v.consoleAdmins; }
 return out;
 }
 
+export function validateStats(v: Stats): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetStatsRequest {
 }
 
@@ -229,6 +254,11 @@ return {
 export function encodeGetStatsRequest(v: GetStatsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetStatsRequest(v: GetStatsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetStatsResponse {
@@ -246,6 +276,12 @@ export function encodeGetStatsResponse(v: GetStatsResponse): Record<string, unkn
 const out: Record<string, unknown> = {};
 if (v.stats !== undefined) { out.stats = encodeStats(v.stats); }
 return out;
+}
+
+export function validateGetStatsResponse(v: GetStatsResponse): string[] {
+const violations: string[] = [];
+if (v.stats !== undefined && v.stats !== null) violations.push(...validateStats(v.stats).map((message) => "stats: " + message));
+return violations;
 }
 
 export interface ListUsersRequest {
@@ -277,6 +313,11 @@ if (v.name !== undefined) { out.name = v.name; }
 return out;
 }
 
+export function validateListUsersRequest(v: ListUsersRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListUsersResponse {
 users?: (User)[];
 total?: number;
@@ -297,6 +338,12 @@ if (v.total !== undefined) { out.total = v.total; }
 return out;
 }
 
+export function validateListUsersResponse(v: ListUsersResponse): string[] {
+const violations: string[] = [];
+if (v.users !== undefined && v.users !== null) for (const item of v.users) violations.push(...validateUser(item).map((message) => "users: " + message));
+return violations;
+}
+
 export interface GetUserRequest {
 id?: number;
 }
@@ -314,6 +361,12 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateGetUserRequest(v: GetUserRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface GetUserResponse {
 user?: User;
 }
@@ -329,6 +382,12 @@ export function encodeGetUserResponse(v: GetUserResponse): Record<string, unknow
 const out: Record<string, unknown> = {};
 if (v.user !== undefined) { out.user = encodeUser(v.user); }
 return out;
+}
+
+export function validateGetUserResponse(v: GetUserResponse): string[] {
+const violations: string[] = [];
+if (v.user !== undefined && v.user !== null) violations.push(...validateUser(v.user).map((message) => "user: " + message));
+return violations;
 }
 
 export interface CreateUserRequest {
@@ -357,6 +416,12 @@ if (v.isConsoleAdmin !== undefined) { out.is_console_admin = v.isConsoleAdmin; }
 return out;
 }
 
+export function validateCreateUserRequest(v: CreateUserRequest): string[] {
+const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+return violations;
+}
+
 export interface CreateUserResponse {
 user?: User;
 message?: string;
@@ -375,6 +440,12 @@ const out: Record<string, unknown> = {};
 if (v.user !== undefined) { out.user = encodeUser(v.user); }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateCreateUserResponse(v: CreateUserResponse): string[] {
+const violations: string[] = [];
+if (v.user !== undefined && v.user !== null) violations.push(...validateUser(v.user).map((message) => "user: " + message));
+return violations;
 }
 
 export interface UpdateUserRequest {
@@ -400,6 +471,12 @@ if (v.email !== undefined) { out.email = v.email; }
 return out;
 }
 
+export function validateUpdateUserRequest(v: UpdateUserRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface UpdateUserResponse {
 message?: string;
 }
@@ -415,6 +492,11 @@ export function encodeUpdateUserResponse(v: UpdateUserResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateUserResponse(v: UpdateUserResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface DeleteUserRequest {
@@ -434,6 +516,12 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateDeleteUserRequest(v: DeleteUserRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface DeleteUserResponse {
 message?: string;
 }
@@ -449,6 +537,11 @@ export function encodeDeleteUserResponse(v: DeleteUserResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateDeleteUserResponse(v: DeleteUserResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface BanUserRequest {
@@ -471,6 +564,12 @@ if (v.reason !== undefined) { out.reason = v.reason; }
 return out;
 }
 
+export function validateBanUserRequest(v: BanUserRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface BanUserResponse {
 message?: string;
 }
@@ -486,6 +585,11 @@ export function encodeBanUserResponse(v: BanUserResponse): Record<string, unknow
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateBanUserResponse(v: BanUserResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface UnbanUserRequest {
@@ -505,6 +609,12 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateUnbanUserRequest(v: UnbanUserRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface UnbanUserResponse {
 message?: string;
 }
@@ -520,6 +630,11 @@ export function encodeUnbanUserResponse(v: UnbanUserResponse): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUnbanUserResponse(v: UnbanUserResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface SetConsoleAdminRequest {
@@ -542,6 +657,12 @@ if (v.isConsoleAdmin !== undefined) { out.is_console_admin = v.isConsoleAdmin; }
 return out;
 }
 
+export function validateSetConsoleAdminRequest(v: SetConsoleAdminRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface SetConsoleAdminResponse {
 message?: string;
 }
@@ -557,6 +678,11 @@ export function encodeSetConsoleAdminResponse(v: SetConsoleAdminResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateSetConsoleAdminResponse(v: SetConsoleAdminResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetUserSubscriptionRequest {
@@ -576,6 +702,12 @@ if (v.userId !== undefined) { out.user_id = v.userId; }
 return out;
 }
 
+export function validateGetUserSubscriptionRequest(v: GetUserSubscriptionRequest): string[] {
+const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+return violations;
+}
+
 export interface GetUserSubscriptionResponse {
 subscription?: Subscription;
 }
@@ -591,6 +723,12 @@ export function encodeGetUserSubscriptionResponse(v: GetUserSubscriptionResponse
 const out: Record<string, unknown> = {};
 if (v.subscription !== undefined) { out.subscription = encodeSubscription(v.subscription); }
 return out;
+}
+
+export function validateGetUserSubscriptionResponse(v: GetUserSubscriptionResponse): string[] {
+const violations: string[] = [];
+if (v.subscription !== undefined && v.subscription !== null) violations.push(...validateSubscription(v.subscription).map((message) => "subscription: " + message));
+return violations;
 }
 
 export interface ListBusinessesRequest {
@@ -622,6 +760,11 @@ if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
 return out;
 }
 
+export function validateListBusinessesRequest(v: ListBusinessesRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListBusinessesResponse {
 businesses?: (Business)[];
 total?: number;
@@ -640,6 +783,12 @@ const out: Record<string, unknown> = {};
 if (v.businesses !== undefined) { out.businesses = (v.businesses as any[]).map(encodeBusiness); }
 if (v.total !== undefined) { out.total = v.total; }
 return out;
+}
+
+export function validateListBusinessesResponse(v: ListBusinessesResponse): string[] {
+const violations: string[] = [];
+if (v.businesses !== undefined && v.businesses !== null) for (const item of v.businesses) violations.push(...validateBusiness(item).map((message) => "businesses: " + message));
+return violations;
 }
 
 export interface UpdateBusinessRequest {
@@ -662,6 +811,12 @@ if (v.name !== undefined) { out.name = v.name; }
 return out;
 }
 
+export function validateUpdateBusinessRequest(v: UpdateBusinessRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface UpdateBusinessResponse {
 message?: string;
 }
@@ -677,6 +832,11 @@ export function encodeUpdateBusinessResponse(v: UpdateBusinessResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateBusinessResponse(v: UpdateBusinessResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface DeleteBusinessRequest {
@@ -696,6 +856,12 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateDeleteBusinessRequest(v: DeleteBusinessRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface DeleteBusinessResponse {
 message?: string;
 }
@@ -711,6 +877,11 @@ export function encodeDeleteBusinessResponse(v: DeleteBusinessResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateDeleteBusinessResponse(v: DeleteBusinessResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface CreateBusinessOwnerRequest {
@@ -763,6 +934,12 @@ if (v.grantDays !== undefined) { out.grant_days = v.grantDays; }
 return out;
 }
 
+export function validateCreateBusinessOwnerRequest(v: CreateBusinessOwnerRequest): string[] {
+const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+return violations;
+}
+
 export interface CreateBusinessOwnerResponse {
 owner?: User;
 business?: Business;
@@ -789,6 +966,14 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateBusinessOwnerResponse(v: CreateBusinessOwnerResponse): string[] {
+const violations: string[] = [];
+if (v.owner !== undefined && v.owner !== null) violations.push(...validateUser(v.owner).map((message) => "owner: " + message));
+if (v.business !== undefined && v.business !== null) violations.push(...validateBusiness(v.business).map((message) => "business: " + message));
+if (v.subscription !== undefined && v.subscription !== null) violations.push(...validateSubscription(v.subscription).map((message) => "subscription: " + message));
+return violations;
+}
+
 export interface ListSubscriptionsRequest {
 limit?: number;
 offset?: number;
@@ -812,6 +997,11 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateListSubscriptionsRequest(v: ListSubscriptionsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListSubscriptionsResponse {
 subscriptions?: (Subscription)[];
 total?: number;
@@ -830,6 +1020,12 @@ const out: Record<string, unknown> = {};
 if (v.subscriptions !== undefined) { out.subscriptions = (v.subscriptions as any[]).map(encodeSubscription); }
 if (v.total !== undefined) { out.total = v.total; }
 return out;
+}
+
+export function validateListSubscriptionsResponse(v: ListSubscriptionsResponse): string[] {
+const violations: string[] = [];
+if (v.subscriptions !== undefined && v.subscriptions !== null) for (const item of v.subscriptions) violations.push(...validateSubscription(item).map((message) => "subscriptions: " + message));
+return violations;
 }
 
 export interface UpsertSubscriptionRequest {
@@ -876,6 +1072,13 @@ if (v.paddleCustomerId !== undefined) { out.paddle_customer_id = v.paddleCustome
 return out;
 }
 
+export function validateUpsertSubscriptionRequest(v: UpsertSubscriptionRequest): string[] {
+const violations: string[] = [];
+if (v.ownerId !== undefined && v.ownerId !== null && !(Number(v.ownerId) > 0)) violations.push("owner_id violates @gt");
+if (v.planId !== undefined && v.planId !== null && !(Number(v.planId) > 0)) violations.push("plan_id violates @gt");
+return violations;
+}
+
 export interface UpsertSubscriptionResponse {
 message?: string;
 }
@@ -891,6 +1094,11 @@ export function encodeUpsertSubscriptionResponse(v: UpsertSubscriptionResponse):
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpsertSubscriptionResponse(v: UpsertSubscriptionResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface DeleteSubscriptionRequest {
@@ -910,6 +1118,12 @@ if (v.id !== undefined) { out.id = v.id; }
 return out;
 }
 
+export function validateDeleteSubscriptionRequest(v: DeleteSubscriptionRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface DeleteSubscriptionResponse {
 message?: string;
 }
@@ -927,6 +1141,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteSubscriptionResponse(v: DeleteSubscriptionResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListPlansRequest {
 }
 
@@ -939,6 +1158,11 @@ return {
 export function encodeListPlansRequest(v: ListPlansRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListPlansRequest(v: ListPlansRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListPlansResponse {
@@ -956,6 +1180,12 @@ export function encodeListPlansResponse(v: ListPlansResponse): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.plans !== undefined) { out.plans = (v.plans as any[]).map(encodePlan); }
 return out;
+}
+
+export function validateListPlansResponse(v: ListPlansResponse): string[] {
+const violations: string[] = [];
+if (v.plans !== undefined && v.plans !== null) for (const item of v.plans) violations.push(...validatePlan(item).map((message) => "plans: " + message));
+return violations;
 }
 
 export interface UpdatePlanRequest {
@@ -987,6 +1217,12 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdatePlanRequest(v: UpdatePlanRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface UpdatePlanResponse {
 message?: string;
 }
@@ -1002,5 +1238,10 @@ export function encodeUpdatePlanResponse(v: UpdatePlanResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdatePlanResponse(v: UpdatePlanResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

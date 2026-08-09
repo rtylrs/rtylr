@@ -23,6 +23,11 @@ func NewComboServiceClient(baseURL string) *ComboServiceClient {
 }
 
 func (c *ComboServiceClient) ListCombos(ctx context.Context, req *ListCombosRequest) (*ListCombosResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/combo/v1/combos"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *ComboServiceClient) ListCombos(ctx context.Context, req *ListCombosRequ
 }
 
 func (c *ComboServiceClient) CreateCombo(ctx context.Context, req *CreateComboRequest) (*CreateComboResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/combo/v1/combos"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,9 +94,14 @@ func (c *ComboServiceClient) CreateCombo(ctx context.Context, req *CreateComboRe
 }
 
 func (c *ComboServiceClient) UpdateCombo(ctx context.Context, req *UpdateComboRequest) (*UpdateComboResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/combo/v1/combos/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -116,6 +131,11 @@ func (c *ComboServiceClient) UpdateCombo(ctx context.Context, req *UpdateComboRe
 }
 
 func (c *ComboServiceClient) DeleteCombo(ctx context.Context, req *DeleteComboRequest) (*DeleteComboResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/combo/v1/combos/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

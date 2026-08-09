@@ -23,6 +23,11 @@ func NewPayrollServiceClient(baseURL string) *PayrollServiceClient {
 }
 
 func (c *PayrollServiceClient) ListPayroll(ctx context.Context, req *ListPayrollRequest) (*ListPayrollResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/payroll/v1/payroll"
 	query := url.Values{}
 	query.Set("period_label", req.PeriodLabel)
@@ -54,6 +59,11 @@ func (c *PayrollServiceClient) ListPayroll(ctx context.Context, req *ListPayroll
 }
 
 func (c *PayrollServiceClient) RunPayroll(ctx context.Context, req *RunPayrollRequest) (*RunPayrollResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/payroll/v1/payroll/run"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -85,6 +95,11 @@ func (c *PayrollServiceClient) RunPayroll(ctx context.Context, req *RunPayrollRe
 }
 
 func (c *PayrollServiceClient) MarkPayrollPaid(ctx context.Context, req *MarkPayrollPaidRequest) (*MarkPayrollPaidResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/payroll/v1/payroll/{id}/mark-paid"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)

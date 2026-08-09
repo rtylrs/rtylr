@@ -21,6 +21,11 @@ func NewDashboardServiceClient(baseURL string) *DashboardServiceClient {
 }
 
 func (c *DashboardServiceClient) GetKPIs(ctx context.Context, req *GetKPIsRequest) (*GetKPIsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hub/dashboard/v1/kpis"
 	query := url.Values{}
 	if len(query) > 0 {

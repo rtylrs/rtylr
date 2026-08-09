@@ -41,6 +41,11 @@ if (v.cashDrawer !== undefined) { out.cash_drawer = v.cashDrawer; }
 return out;
 }
 
+export function validatePOSFeatureSettings(v: POSFeatureSettings): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface POSBusinessSettings {
 id?: string;
 businessId?: string;
@@ -79,6 +84,12 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validatePOSBusinessSettings(v: POSBusinessSettings): string[] {
+const violations: string[] = [];
+if (v.features !== undefined && v.features !== null) violations.push(...validatePOSFeatureSettings(v.features).map((message) => "features: " + message));
+return violations;
+}
+
 export interface GetPOSSettingsRequest {
 }
 
@@ -91,6 +102,11 @@ return {
 export function encodeGetPOSSettingsRequest(v: GetPOSSettingsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetPOSSettingsRequest(v: GetPOSSettingsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetPOSSettingsResponse {
@@ -108,6 +124,12 @@ export function encodeGetPOSSettingsResponse(v: GetPOSSettingsResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.settings !== undefined) { out.settings = encodePOSBusinessSettings(v.settings); }
 return out;
+}
+
+export function validateGetPOSSettingsResponse(v: GetPOSSettingsResponse): string[] {
+const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null) violations.push(...validatePOSBusinessSettings(v.settings).map((message) => "settings: " + message));
+return violations;
 }
 
 export interface UpdatePOSSettingsRequest {
@@ -136,6 +158,12 @@ if (v.receiptFooter !== undefined) { out.receipt_footer = v.receiptFooter; }
 return out;
 }
 
+export function validateUpdatePOSSettingsRequest(v: UpdatePOSSettingsRequest): string[] {
+const violations: string[] = [];
+if (v.features !== undefined && v.features !== null) violations.push(...validatePOSFeatureSettings(v.features).map((message) => "features: " + message));
+return violations;
+}
+
 export interface UpdatePOSSettingsResponse {
 settings?: POSBusinessSettings;
 message?: string;
@@ -154,5 +182,11 @@ const out: Record<string, unknown> = {};
 if (v.settings !== undefined) { out.settings = encodePOSBusinessSettings(v.settings); }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdatePOSSettingsResponse(v: UpdatePOSSettingsResponse): string[] {
+const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null) violations.push(...validatePOSBusinessSettings(v.settings).map((message) => "settings: " + message));
+return violations;
 }
 

@@ -14,6 +14,11 @@ const out: Record<string, unknown> = {};
 return out;
 }
 
+export function validateGetKPIsRequest(v: GetKPIsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetKPIsResponse {
 revenue?: number;
 orderCount?: string;
@@ -44,5 +49,10 @@ if (v.customerCount !== undefined) { out.customer_count = v.customerCount; }
 if (v.lowStockCount !== undefined) { out.low_stock_count = v.lowStockCount; }
 if (v.activeApps !== undefined) { out.active_apps = v.activeApps; }
 return out;
+}
+
+export function validateGetKPIsResponse(v: GetKPIsResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

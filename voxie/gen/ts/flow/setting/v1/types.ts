@@ -14,6 +14,11 @@ const out: Record<string, unknown> = {};
 return out;
 }
 
+export function validateGetUserSettingsRequest(v: GetUserSettingsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetUserSettingsResponse {
 taskAssigned?: boolean;
 taskComments?: boolean;
@@ -44,6 +49,11 @@ if (v.statusChanges !== undefined) { out.status_changes = v.statusChanges; }
 if (v.weeklyDigest !== undefined) { out.weekly_digest = v.weeklyDigest; }
 if (v.emailNotifications !== undefined) { out.email_notifications = v.emailNotifications; }
 return out;
+}
+
+export function validateGetUserSettingsResponse(v: GetUserSettingsResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface UpdateUserSettingsRequest {
@@ -78,6 +88,11 @@ if (v.emailNotifications !== undefined) { out.email_notifications = v.emailNotif
 return out;
 }
 
+export function validateUpdateUserSettingsRequest(v: UpdateUserSettingsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateUserSettingsResponse {
 }
 
@@ -90,5 +105,10 @@ return {
 export function encodeUpdateUserSettingsResponse(v: UpdateUserSettingsResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateUpdateUserSettingsResponse(v: UpdateUserSettingsResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

@@ -24,6 +24,11 @@ func NewOvertimeServiceClient(baseURL string) *OvertimeServiceClient {
 }
 
 func (c *OvertimeServiceClient) ListOvertimeRequests(ctx context.Context, req *ListOvertimeRequestsRequest) (*ListOvertimeRequestsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/overtime/v1/requests"
 	query := url.Values{}
 	if req.EmployeeId != nil {
@@ -60,6 +65,11 @@ func (c *OvertimeServiceClient) ListOvertimeRequests(ctx context.Context, req *L
 }
 
 func (c *OvertimeServiceClient) CreateOvertimeRequest(ctx context.Context, req *CreateOvertimeRequestRequest) (*CreateOvertimeRequestResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/overtime/v1/requests"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -91,9 +101,14 @@ func (c *OvertimeServiceClient) CreateOvertimeRequest(ctx context.Context, req *
 }
 
 func (c *OvertimeServiceClient) ApproveOvertime(ctx context.Context, req *ApproveOvertimeRequest) (*ApproveOvertimeResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/hr/overtime/v1/requests/{overtime_request_id}/approve"
 	path = strings.ReplaceAll(path, "{overtime_request_id}", fmt.Sprintf("%v", req.OvertimeRequestId))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}

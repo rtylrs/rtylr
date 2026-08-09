@@ -42,8 +42,13 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateBenefitPlan(v: BenefitPlan): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateBenefitRequest {
-name?: string;
+name: string;
 type?: string;
 provider?: string;
 costEmployer?: number;
@@ -74,6 +79,12 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateCreateBenefitRequest(v: CreateBenefitRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateBenefitResponse {
 id?: string;
 message?: string;
@@ -94,6 +105,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateBenefitResponse(v: CreateBenefitResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListBenefitsRequest {
 }
 
@@ -106,6 +122,11 @@ return {
 export function encodeListBenefitsRequest(v: ListBenefitsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListBenefitsRequest(v: ListBenefitsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListBenefitsResponse {
@@ -123,6 +144,12 @@ export function encodeListBenefitsResponse(v: ListBenefitsResponse): Record<stri
 const out: Record<string, unknown> = {};
 if (v.plans !== undefined) { out.plans = (v.plans as any[]).map(encodeBenefitPlan); }
 return out;
+}
+
+export function validateListBenefitsResponse(v: ListBenefitsResponse): string[] {
+const violations: string[] = [];
+if (v.plans !== undefined && v.plans !== null) for (const item of v.plans) violations.push(...validateBenefitPlan(item).map((message) => "plans: " + message));
+return violations;
 }
 
 export interface BenefitEnrollment {
@@ -160,8 +187,13 @@ if (v.cancelledAt !== undefined) { out.cancelled_at = v.cancelledAt; }
 return out;
 }
 
+export function validateBenefitEnrollment(v: BenefitEnrollment): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface EnrollInBenefitRequest {
-planId?: string;
+planId: string;
 }
 
 export function decodeEnrollInBenefitRequest(v: any): EnrollInBenefitRequest {
@@ -175,6 +207,12 @@ export function encodeEnrollInBenefitRequest(v: EnrollInBenefitRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.planId !== undefined) { out.plan_id = v.planId; }
 return out;
+}
+
+export function validateEnrollInBenefitRequest(v: EnrollInBenefitRequest): string[] {
+const violations: string[] = [];
+if (!(v.planId !== undefined && v.planId !== null)) violations.push("plan_id is required");
+return violations;
 }
 
 export interface EnrollInBenefitResponse {
@@ -192,6 +230,12 @@ export function encodeEnrollInBenefitResponse(v: EnrollInBenefitResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.enrollment !== undefined) { out.enrollment = encodeBenefitEnrollment(v.enrollment); }
 return out;
+}
+
+export function validateEnrollInBenefitResponse(v: EnrollInBenefitResponse): string[] {
+const violations: string[] = [];
+if (v.enrollment !== undefined && v.enrollment !== null) violations.push(...validateBenefitEnrollment(v.enrollment).map((message) => "enrollment: " + message));
+return violations;
 }
 
 export interface ListMyBenefitEnrollmentsRequest {
@@ -220,6 +264,11 @@ if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
 return out;
 }
 
+export function validateListMyBenefitEnrollmentsRequest(v: ListMyBenefitEnrollmentsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListMyBenefitEnrollmentsResponse {
 enrollments?: (BenefitEnrollment)[];
 pagination?: common_pagination_v1.PaginationResponse;
@@ -238,5 +287,12 @@ const out: Record<string, unknown> = {};
 if (v.enrollments !== undefined) { out.enrollments = (v.enrollments as any[]).map(encodeBenefitEnrollment); }
 if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePaginationResponse(v.pagination); }
 return out;
+}
+
+export function validateListMyBenefitEnrollmentsResponse(v: ListMyBenefitEnrollmentsResponse): string[] {
+const violations: string[] = [];
+if (v.enrollments !== undefined && v.enrollments !== null) for (const item of v.enrollments) violations.push(...validateBenefitEnrollment(item).map((message) => "enrollments: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
 }
 

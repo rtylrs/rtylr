@@ -21,6 +21,9 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *TimeOffRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -55,7 +58,59 @@ func (m *TimeOffRequest) Validate() error {
 	return nil
 }
 
+func (m *ApproveTimeOffRequestMsg) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ApproveTimeOffResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTimeOffRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTimeOffResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Requests {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "requests: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *SubmitTimeOffRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.StaffId <= 0 {
 		violations = append(violations, "staff_id must be greater than 0")
@@ -75,6 +130,17 @@ func (m *SubmitTimeOffRequest) Validate() error {
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *SubmitTimeOffResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

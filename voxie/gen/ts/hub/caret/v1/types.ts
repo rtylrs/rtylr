@@ -32,6 +32,11 @@ if (v.scope !== undefined) { out.scope = v.scope; }
 return out;
 }
 
+export function validateCaretTool(v: CaretTool): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListCaretToolsRequest {
 mode?: string;
 }
@@ -49,6 +54,11 @@ if (v.mode !== undefined) { out.mode = v.mode; }
 return out;
 }
 
+export function validateListCaretToolsRequest(v: ListCaretToolsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListCaretToolsResponse {
 tools?: (CaretTool)[];
 }
@@ -64,5 +74,11 @@ export function encodeListCaretToolsResponse(v: ListCaretToolsResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.tools !== undefined) { out.tools = (v.tools as any[]).map(encodeCaretTool); }
 return out;
+}
+
+export function validateListCaretToolsResponse(v: ListCaretToolsResponse): string[] {
+const violations: string[] = [];
+if (v.tools !== undefined && v.tools !== null) for (const item of v.tools) violations.push(...validateCaretTool(item).map((message) => "tools: " + message));
+return violations;
 }
 

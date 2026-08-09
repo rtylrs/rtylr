@@ -23,6 +23,11 @@ func NewModifierServiceClient(baseURL string) *ModifierServiceClient {
 }
 
 func (c *ModifierServiceClient) ListModifiers(ctx context.Context, req *ListModifiersRequest) (*ListModifiersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/modifier/v1/modifiers"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *ModifierServiceClient) ListModifiers(ctx context.Context, req *ListModi
 }
 
 func (c *ModifierServiceClient) CreateModifier(ctx context.Context, req *CreateModifierRequest) (*CreateModifierResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/modifier/v1/modifiers"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,9 +94,14 @@ func (c *ModifierServiceClient) CreateModifier(ctx context.Context, req *CreateM
 }
 
 func (c *ModifierServiceClient) UpdateModifier(ctx context.Context, req *UpdateModifierRequest) (*UpdateModifierResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/modifier/v1/modifiers/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -116,6 +131,11 @@ func (c *ModifierServiceClient) UpdateModifier(ctx context.Context, req *UpdateM
 }
 
 func (c *ModifierServiceClient) DeleteModifier(ctx context.Context, req *DeleteModifierRequest) (*DeleteModifierResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/modifier/v1/modifiers/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}

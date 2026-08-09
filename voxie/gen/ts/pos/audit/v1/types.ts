@@ -47,15 +47,20 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateAuditLog(v: AuditLog): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateAuditRequest {
-branchId?: string;
-terminalId?: string;
-employeeId?: string;
-action?: string;
-entityType?: string;
-entityId?: string;
-details?: string;
-ipAddress?: string;
+branchId: string;
+terminalId: string;
+employeeId: string;
+action: string;
+entityType: string;
+entityId: string;
+details: string;
+ipAddress: string;
 }
 
 export function decodeCreateAuditRequest(v: any): CreateAuditRequest {
@@ -85,6 +90,23 @@ if (v.ipAddress !== undefined) { out.ip_address = v.ipAddress; }
 return out;
 }
 
+export function validateCreateAuditRequest(v: CreateAuditRequest): string[] {
+const violations: string[] = [];
+if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
+if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (!(v.terminalId !== undefined && v.terminalId !== null)) violations.push("terminal_id is required");
+if (v.terminalId !== undefined && v.terminalId !== null && !(Number(v.terminalId) > 0)) violations.push("terminal_id violates @gt");
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.action !== undefined && v.action !== null) || v.action === "") violations.push("action is required");
+if (!(v.entityType !== undefined && v.entityType !== null) || v.entityType === "") violations.push("entity_type is required");
+if (!(v.entityId !== undefined && v.entityId !== null)) violations.push("entity_id is required");
+if (v.entityId !== undefined && v.entityId !== null && !(Number(v.entityId) > 0)) violations.push("entity_id violates @gt");
+if (!(v.details !== undefined && v.details !== null) || v.details === "") violations.push("details is required");
+if (!(v.ipAddress !== undefined && v.ipAddress !== null) || v.ipAddress === "") violations.push("ip_address is required");
+return violations;
+}
+
 export interface CreateAuditResponse {
 auditLogId?: string;
 message?: string;
@@ -105,12 +127,17 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateAuditResponse(v: CreateAuditResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListAuditRequest {
 action?: string;
 entityType?: string;
 employeeId?: string;
-startDate?: string;
-endDate?: string;
+startDate: string;
+endDate: string;
 }
 
 export function decodeListAuditRequest(v: any): ListAuditRequest {
@@ -134,6 +161,13 @@ if (v.endDate !== undefined) { out.end_date = v.endDate; }
 return out;
 }
 
+export function validateListAuditRequest(v: ListAuditRequest): string[] {
+const violations: string[] = [];
+if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (!(v.endDate !== undefined && v.endDate !== null) || v.endDate === "") violations.push("end_date is required");
+return violations;
+}
+
 export interface ListAuditResponse {
 logs?: (AuditLog)[];
 }
@@ -149,5 +183,11 @@ export function encodeListAuditResponse(v: ListAuditResponse): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.logs !== undefined) { out.logs = (v.logs as any[]).map(encodeAuditLog); }
 return out;
+}
+
+export function validateListAuditResponse(v: ListAuditResponse): string[] {
+const violations: string[] = [];
+if (v.logs !== undefined && v.logs !== null) for (const item of v.logs) violations.push(...validateAuditLog(item).map((message) => "logs: " + message));
+return violations;
 }
 

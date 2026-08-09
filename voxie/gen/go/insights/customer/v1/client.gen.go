@@ -22,6 +22,11 @@ func NewCustomerServiceClient(baseURL string) *CustomerServiceClient {
 }
 
 func (c *CustomerServiceClient) GetCustomerAnalytics(ctx context.Context, req *GetCustomerAnalyticsRequest) (*GetCustomerAnalyticsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/customer/v1/analytics"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -53,6 +58,11 @@ func (c *CustomerServiceClient) GetCustomerAnalytics(ctx context.Context, req *G
 }
 
 func (c *CustomerServiceClient) GetChurnAnalysis(ctx context.Context, req *GetChurnAnalysisRequest) (*GetChurnAnalysisResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/customer/v1/churn"
 	query := url.Values{}
 	query.Set("period", req.Period)
@@ -84,6 +94,11 @@ func (c *CustomerServiceClient) GetChurnAnalysis(ctx context.Context, req *GetCh
 }
 
 func (c *CustomerServiceClient) GetLTVAnalysis(ctx context.Context, req *GetLTVAnalysisRequest) (*GetLTVAnalysisResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/customer/v1/ltv"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -114,6 +129,11 @@ func (c *CustomerServiceClient) GetLTVAnalysis(ctx context.Context, req *GetLTVA
 }
 
 func (c *CustomerServiceClient) GetTopCustomers(ctx context.Context, req *GetTopCustomersRequest) (*GetTopCustomersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/insights/customer/v1/top"
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))

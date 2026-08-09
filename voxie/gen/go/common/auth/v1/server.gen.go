@@ -3,11 +3,15 @@ package v1
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
+	"time"
 )
 
 func writeJSONError(w http.ResponseWriter, status int, message string) {
@@ -27,23 +31,171 @@ func writeHandlerError(w http.ResponseWriter, err error) {
 	writeJSONError(w, status, err.Error())
 }
 
-func parseInt32(s string) int32     { v, _ := strconv.ParseInt(s, 10, 32); return int32(v) }
-func parseInt64(s string) int64     { v, _ := strconv.ParseInt(s, 10, 64); return v }
-func parseUint32(s string) uint32   { v, _ := strconv.ParseUint(s, 10, 32); return uint32(v) }
-func parseUint64(s string) uint64   { v, _ := strconv.ParseUint(s, 10, 64); return v }
-func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return float32(v) }
-func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
-func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
+func parseInt32(s string) (int32, error) { v, err := strconv.ParseInt(s, 10, 32); return int32(v), err }
+func parseInt64(s string) (int64, error) { return strconv.ParseInt(s, 10, 64) }
+func parseUint32(s string) (uint32, error) {
+	v, err := strconv.ParseUint(s, 10, 32)
+	return uint32(v), err
+}
+func parseUint64(s string) (uint64, error) { return strconv.ParseUint(s, 10, 64) }
+func parseFloat32(s string) (float32, error) {
+	v, err := strconv.ParseFloat(s, 32)
+	return float32(v), err
+}
+func parseFloat64(s string) (float64, error) { return strconv.ParseFloat(s, 64) }
+func parseBool(s string) (bool, error) {
+	if s == "true" {
+		return true, nil
+	}
+	if s == "false" {
+		return false, nil
+	}
+	return false, fmt.Errorf("must be true or false")
+}
+
+func validHeaderFormat(value, format string) bool {
+	switch format {
+	case "uuid":
+		return regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`).MatchString(value)
+	case "email":
+		return regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`).MatchString(value)
+	case "uri":
+		return regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9+.-]*://[^\s]+$`).MatchString(value)
+	default:
+		return true
+	}
+}
+
+// RequestMetadata identifies the generated route handling a request.
+type RequestMetadata struct {
+	Service     string
+	Method      string
+	HTTPMethod  string
+	Route       string
+	AuthSchemes []string
+}
+
+type requestMetadataContextKey struct{}
+type requestIDContextKey struct{}
+
+func RequestMetadataFromContext(ctx context.Context) (RequestMetadata, bool) {
+	metadata, ok := ctx.Value(requestMetadataContextKey{}).(RequestMetadata)
+	return metadata, ok
+}
+
+func RequestIDFromContext(ctx context.Context) (string, bool) {
+	requestID, ok := ctx.Value(requestIDContextKey{}).(string)
+	return requestID, ok && requestID != ""
+}
+
+type Middleware func(http.Handler) http.Handler
+type RequestIDGenerator func() string
+type Authorizer func(context.Context, RequestMetadata, *http.Request) error
+type RequestResult struct {
+	StatusCode int
+	Duration   time.Duration
+}
+type RequestObserver interface {
+	RequestStarted(context.Context, RequestMetadata) context.Context
+	RequestFinished(context.Context, RequestMetadata, RequestResult)
+}
 
 type ServerOption func(*serverOptions)
 
 type serverOptions struct {
-	mux *http.ServeMux
+	mux                *http.ServeMux
+	middlewares        []Middleware
+	requestIDHeader    string
+	requestIDGenerator RequestIDGenerator
+	authorizer         Authorizer
+	observer           RequestObserver
 }
 
-// WithMux supplies the http.ServeMux to register routes onto - required.
-func WithMux(mux *http.ServeMux) ServerOption {
-	return func(o *serverOptions) { o.mux = mux }
+// WithMux supports the options-first registration form.
+func WithMux(mux *http.ServeMux) ServerOption { return func(o *serverOptions) { o.mux = mux } }
+
+func WithMiddleware(middleware ...Middleware) ServerOption {
+	return func(o *serverOptions) { o.middlewares = append(o.middlewares, middleware...) }
+}
+
+func WithRequestID(headerName string) ServerOption {
+	return WithRequestIDGenerator(headerName, defaultRequestIDGenerator)
+}
+func WithRequestIDGenerator(headerName string, generate RequestIDGenerator) ServerOption {
+	return func(o *serverOptions) {
+		if headerName == "" {
+			headerName = "X-Request-ID"
+		}
+		o.requestIDHeader, o.requestIDGenerator = headerName, generate
+	}
+}
+
+func WithAuthorizer(authorizer Authorizer) ServerOption {
+	return func(o *serverOptions) { o.authorizer = authorizer }
+}
+func WithRequestObserver(observer RequestObserver) ServerOption {
+	return func(o *serverOptions) { o.observer = observer }
+}
+
+func defaultRequestIDGenerator() string {
+	var value [16]byte
+	if _, err := rand.Read(value[:]); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(value[:])
+}
+
+func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadata) http.Handler {
+	for i := len(o.middlewares) - 1; i >= 0; i-- {
+		if o.middlewares[i] != nil {
+			handler = o.middlewares[i](handler)
+		}
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), requestMetadataContextKey{}, metadata)
+		if o.requestIDHeader != "" {
+			requestID := r.Header.Get(o.requestIDHeader)
+			if requestID == "" && o.requestIDGenerator != nil {
+				requestID = o.requestIDGenerator()
+			}
+			if requestID != "" {
+				w.Header().Set(o.requestIDHeader, requestID)
+				ctx = context.WithValue(ctx, requestIDContextKey{}, requestID)
+			}
+		}
+		if o.authorizer != nil {
+			if err := o.authorizer(ctx, metadata, r); err != nil {
+				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				return
+			}
+		}
+		if o.observer == nil {
+			handler.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+		started := time.Now()
+		ctx = o.observer.RequestStarted(ctx, metadata)
+		rw := &statusResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		defer func() {
+			o.observer.RequestFinished(ctx, metadata, RequestResult{StatusCode: rw.statusCode, Duration: time.Since(started)})
+		}()
+		handler.ServeHTTP(rw, r.WithContext(ctx))
+	})
+}
+
+type statusResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	w.statusCode = statusCode
+	w.ResponseWriter.WriteHeader(statusCode)
+}
+func (w *statusResponseWriter) Flush() {
+	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
 }
 
 type AuthServiceServer interface {
@@ -59,16 +211,39 @@ type AuthServiceServer interface {
 	SocialAuthorize(ctx context.Context, req *SocialAuthorizeRequest) (*SocialAuthorizeResponse, error)
 }
 
-func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) error {
+func RegisterAuthServiceServer(first any, rest ...any) error {
 	var o serverOptions
-	for _, opt := range opts {
+	var srv AuthServiceServer
+	if mux, ok := first.(*http.ServeMux); ok {
+		o.mux = mux
+		if len(rest) == 0 {
+			return fmt.Errorf("RegisterAuthServiceServer: implementation is required")
+		}
+		var ok bool
+		srv, ok = rest[0].(AuthServiceServer)
+		if !ok {
+			return fmt.Errorf("RegisterAuthServiceServer: invalid implementation")
+		}
+		rest = rest[1:]
+	} else {
+		var ok bool
+		srv, ok = first.(AuthServiceServer)
+		if !ok {
+			return fmt.Errorf("RegisterAuthServiceServer: invalid implementation")
+		}
+	}
+	for _, value := range rest {
+		opt, ok := value.(ServerOption)
+		if !ok {
+			return fmt.Errorf("RegisterAuthServiceServer: options must be ServerOption values")
+		}
 		opt(&o)
 	}
 	if o.mux == nil {
-		return fmt.Errorf("RegisterAuthServiceServer: WithMux option is required")
+		return fmt.Errorf("RegisterAuthServiceServer: mux is required")
 	}
 	mux := o.mux
-	mux.HandleFunc("POST /common/auth/v1/register", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("POST /common/auth/v1/register", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(RegisterRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -89,8 +264,8 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /common/auth/v1/login", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "AuthService", Method: "register", HTTPMethod: "POST", Route: "/common/auth/v1/register", AuthSchemes: nil}))
+	mux.Handle("POST /common/auth/v1/login", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(LoginRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -111,8 +286,8 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /common/auth/v1/register/google", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "AuthService", Method: "login", HTTPMethod: "POST", Route: "/common/auth/v1/login", AuthSchemes: nil}))
+	mux.Handle("POST /common/auth/v1/register/google", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GoogleAuthRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -133,8 +308,8 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /common/auth/v1/password-reset/request", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "AuthService", Method: "googleAuth", HTTPMethod: "POST", Route: "/common/auth/v1/register/google", AuthSchemes: nil}))
+	mux.Handle("POST /common/auth/v1/password-reset/request", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ResetPasswordRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -155,8 +330,8 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /common/auth/v1/password-reset/confirm", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "AuthService", Method: "resetPassword", HTTPMethod: "POST", Route: "/common/auth/v1/password-reset/request", AuthSchemes: nil}))
+	mux.Handle("POST /common/auth/v1/password-reset/confirm", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ResetPasswordConfirmRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -177,8 +352,8 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /common/auth/v1/verify-email", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "AuthService", Method: "resetPasswordConfirm", HTTPMethod: "POST", Route: "/common/auth/v1/password-reset/confirm", AuthSchemes: nil}))
+	mux.Handle("POST /common/auth/v1/verify-email", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(VerifyEmailRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -199,8 +374,8 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /common/auth/v1/resend-verification", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "AuthService", Method: "verifyEmail", HTTPMethod: "POST", Route: "/common/auth/v1/verify-email", AuthSchemes: nil}))
+	mux.Handle("POST /common/auth/v1/resend-verification", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ResendVerificationRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -221,8 +396,8 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /common/auth/v1/invite/accept", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "AuthService", Method: "resendVerification", HTTPMethod: "POST", Route: "/common/auth/v1/resend-verification", AuthSchemes: nil}))
+	mux.Handle("POST /common/auth/v1/invite/accept", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(InviteAcceptRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -243,8 +418,8 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /common/auth/v1/email-exists", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "AuthService", Method: "inviteAccept", HTTPMethod: "POST", Route: "/common/auth/v1/invite/accept", AuthSchemes: nil}))
+	mux.Handle("GET /common/auth/v1/email-exists", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CheckEmailExistsRequest)
 		if r.URL.Query().Get("email") != "" {
 			req.Email = r.URL.Query().Get("email")
@@ -262,8 +437,8 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /common/auth/v1/social/authorize", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "AuthService", Method: "checkEmailExists", HTTPMethod: "GET", Route: "/common/auth/v1/email-exists", AuthSchemes: nil}))
+	mux.Handle("GET /common/auth/v1/social/authorize", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(SocialAuthorizeRequest)
 		if r.URL.Query().Get("provider") != "" {
 			req.Provider = r.URL.Query().Get("provider")
@@ -281,6 +456,6 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
+	}), RequestMetadata{Service: "AuthService", Method: "socialAuthorize", HTTPMethod: "GET", Route: "/common/auth/v1/social/authorize", AuthSchemes: nil}))
 	return nil
 }

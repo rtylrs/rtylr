@@ -20,7 +20,64 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *PayrollEntryPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *PayrollRunPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Entries {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "entries: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListPayrollRunsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListPayrollRunsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Runs {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "runs: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *TriggerPayrollRunRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.PeriodStart == "" {
 		violations = append(violations, "period_start is required")
@@ -34,7 +91,26 @@ func (m *TriggerPayrollRunRequest) Validate() error {
 	return nil
 }
 
+func (m *TriggerPayrollRunResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Run != nil {
+		if err := m.Run.Validate(); err != nil {
+			violations = append(violations, "run: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ApprovePayrollRunRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -45,11 +121,41 @@ func (m *ApprovePayrollRunRequest) Validate() error {
 	return nil
 }
 
+func (m *ApprovePayrollRunResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Run != nil {
+		if err := m.Run.Validate(); err != nil {
+			violations = append(violations, "run: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ExportPayrollRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.RunId <= 0 {
 		violations = append(violations, "run_id must be greater than 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ExportPayrollResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

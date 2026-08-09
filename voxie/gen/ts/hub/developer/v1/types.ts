@@ -38,6 +38,11 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateApiKey(v: ApiKey): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface Webhook {
 id?: string;
 url?: string;
@@ -70,8 +75,13 @@ if (v.lastTriggeredAt !== undefined) { out.last_triggered_at = v.lastTriggeredAt
 return out;
 }
 
+export function validateWebhook(v: Webhook): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateApiKeyRequest {
-name?: string;
+name: string;
 scopes?: (string)[];
 }
 
@@ -88,6 +98,13 @@ const out: Record<string, unknown> = {};
 if (v.name !== undefined) { out.name = v.name; }
 if (v.scopes !== undefined) { out.scopes = v.scopes; }
 return out;
+}
+
+export function validateCreateApiKeyRequest(v: CreateApiKeyRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.scopes !== undefined && v.scopes !== null && v.scopes.length < 1) violations.push("scopes must contain at least 1 items");
+return violations;
 }
 
 export interface CreateApiKeyResponse {
@@ -113,8 +130,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateApiKeyResponse(v: CreateApiKeyResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateWebhookRequest {
-url?: string;
+url: string;
 events?: (string)[];
 }
 
@@ -131,6 +153,13 @@ const out: Record<string, unknown> = {};
 if (v.url !== undefined) { out.url = v.url; }
 if (v.events !== undefined) { out.events = v.events; }
 return out;
+}
+
+export function validateCreateWebhookRequest(v: CreateWebhookRequest): string[] {
+const violations: string[] = [];
+if (!(v.url !== undefined && v.url !== null) || v.url === "") violations.push("url is required");
+if (v.events !== undefined && v.events !== null && v.events.length < 1) violations.push("events must contain at least 1 items");
+return violations;
 }
 
 export interface CreateWebhookResponse {
@@ -153,8 +182,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateWebhookResponse(v: CreateWebhookResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteWebhookRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteWebhookRequest(v: any): DeleteWebhookRequest {
@@ -168,6 +202,13 @@ export function encodeDeleteWebhookRequest(v: DeleteWebhookRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteWebhookRequest(v: DeleteWebhookRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteWebhookResponse {
@@ -187,6 +228,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteWebhookResponse(v: DeleteWebhookResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListApiKeysRequest {
 }
 
@@ -199,6 +245,11 @@ return {
 export function encodeListApiKeysRequest(v: ListApiKeysRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListApiKeysRequest(v: ListApiKeysRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListApiKeysResponse {
@@ -218,6 +269,12 @@ if (v.keys !== undefined) { out.keys = (v.keys as any[]).map(encodeApiKey); }
 return out;
 }
 
+export function validateListApiKeysResponse(v: ListApiKeysResponse): string[] {
+const violations: string[] = [];
+if (v.keys !== undefined && v.keys !== null) for (const item of v.keys) violations.push(...validateApiKey(item).map((message) => "keys: " + message));
+return violations;
+}
+
 export interface ListWebhooksRequest {
 }
 
@@ -230,6 +287,11 @@ return {
 export function encodeListWebhooksRequest(v: ListWebhooksRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListWebhooksRequest(v: ListWebhooksRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListWebhooksResponse {
@@ -249,8 +311,14 @@ if (v.webhooks !== undefined) { out.webhooks = (v.webhooks as any[]).map(encodeW
 return out;
 }
 
+export function validateListWebhooksResponse(v: ListWebhooksResponse): string[] {
+const violations: string[] = [];
+if (v.webhooks !== undefined && v.webhooks !== null) for (const item of v.webhooks) violations.push(...validateWebhook(item).map((message) => "webhooks: " + message));
+return violations;
+}
+
 export interface RevokeApiKeyRequest {
-id?: string;
+id: string;
 }
 
 export function decodeRevokeApiKeyRequest(v: any): RevokeApiKeyRequest {
@@ -264,6 +332,13 @@ export function encodeRevokeApiKeyRequest(v: RevokeApiKeyRequest): Record<string
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateRevokeApiKeyRequest(v: RevokeApiKeyRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface RevokeApiKeyResponse {
@@ -283,9 +358,14 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateRevokeApiKeyResponse(v: RevokeApiKeyResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateWebhookRequest {
-id?: string;
-url?: string;
+id: string;
+url: string;
 events?: (string)[];
 isActive?: boolean;
 }
@@ -309,6 +389,15 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateWebhookRequest(v: UpdateWebhookRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.url !== undefined && v.url !== null) || v.url === "") violations.push("url is required");
+if (v.events !== undefined && v.events !== null && v.events.length < 1) violations.push("events must contain at least 1 items");
+return violations;
+}
+
 export interface UpdateWebhookResponse {
 webhook?: Webhook;
 }
@@ -324,5 +413,11 @@ export function encodeUpdateWebhookResponse(v: UpdateWebhookResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.webhook !== undefined) { out.webhook = encodeWebhook(v.webhook); }
 return out;
+}
+
+export function validateUpdateWebhookResponse(v: UpdateWebhookResponse): string[] {
+const violations: string[] = [];
+if (v.webhook !== undefined && v.webhook !== null) violations.push(...validateWebhook(v.webhook).map((message) => "webhook: " + message));
+return violations;
 }
 

@@ -41,6 +41,11 @@ if (v.periodEnd !== undefined) { out.period_end = v.periodEnd; }
 return out;
 }
 
+export function validateAiQuotaStatus(v: AiQuotaStatus): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface AiQuotaSettings {
 mode?: string;
 }
@@ -58,6 +63,11 @@ if (v.mode !== undefined) { out.mode = v.mode; }
 return out;
 }
 
+export function validateAiQuotaSettings(v: AiQuotaSettings): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetAiUsageRequest {
 }
 
@@ -70,6 +80,11 @@ return {
 export function encodeGetAiUsageRequest(v: GetAiUsageRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetAiUsageRequest(v: GetAiUsageRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetAiUsageResponse {
@@ -89,6 +104,12 @@ if (v.usage !== undefined) { out.usage = encodeAiQuotaStatus(v.usage); }
 return out;
 }
 
+export function validateGetAiUsageResponse(v: GetAiUsageResponse): string[] {
+const violations: string[] = [];
+if (v.usage !== undefined && v.usage !== null) violations.push(...validateAiQuotaStatus(v.usage).map((message) => "usage: " + message));
+return violations;
+}
+
 export interface GetAiQuotaSettingsRequest {
 }
 
@@ -101,6 +122,11 @@ return {
 export function encodeGetAiQuotaSettingsRequest(v: GetAiQuotaSettingsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetAiQuotaSettingsRequest(v: GetAiQuotaSettingsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetAiQuotaSettingsResponse {
@@ -120,8 +146,14 @@ if (v.settings !== undefined) { out.settings = encodeAiQuotaSettings(v.settings)
 return out;
 }
 
+export function validateGetAiQuotaSettingsResponse(v: GetAiQuotaSettingsResponse): string[] {
+const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null) violations.push(...validateAiQuotaSettings(v.settings).map((message) => "settings: " + message));
+return violations;
+}
+
 export interface UpdateAiQuotaSettingsRequest {
-mode?: string;
+mode: string;
 }
 
 export function decodeUpdateAiQuotaSettingsRequest(v: any): UpdateAiQuotaSettingsRequest {
@@ -135,6 +167,12 @@ export function encodeUpdateAiQuotaSettingsRequest(v: UpdateAiQuotaSettingsReque
 const out: Record<string, unknown> = {};
 if (v.mode !== undefined) { out.mode = v.mode; }
 return out;
+}
+
+export function validateUpdateAiQuotaSettingsRequest(v: UpdateAiQuotaSettingsRequest): string[] {
+const violations: string[] = [];
+if (!(v.mode !== undefined && v.mode !== null) || v.mode === "") violations.push("mode is required");
+return violations;
 }
 
 export interface UpdateAiQuotaSettingsResponse {
@@ -152,5 +190,11 @@ export function encodeUpdateAiQuotaSettingsResponse(v: UpdateAiQuotaSettingsResp
 const out: Record<string, unknown> = {};
 if (v.settings !== undefined) { out.settings = encodeAiQuotaSettings(v.settings); }
 return out;
+}
+
+export function validateUpdateAiQuotaSettingsResponse(v: UpdateAiQuotaSettingsResponse): string[] {
+const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null) violations.push(...validateAiQuotaSettings(v.settings).map((message) => "settings: " + message));
+return violations;
 }
 

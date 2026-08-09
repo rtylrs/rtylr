@@ -21,12 +21,53 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *HoldOrderRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.OrderId <= 0 {
 		violations = append(violations, "order_id must be greater than 0")
 	}
 	if m.Reason == "" {
 		violations = append(violations, "reason is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *HoldOrderResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListHeldOrdersRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListHeldOrdersResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Orders {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "orders: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

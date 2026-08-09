@@ -20,7 +20,37 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *ApprovalChainLevelPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ApprovalChainPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Levels {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "levels: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpsertApprovalChainRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -33,6 +63,27 @@ func (m *UpsertApprovalChainRequest) Validate() error {
 	}
 	if len(m.Levels) < 1 {
 		violations = append(violations, "levels must have at least 1 items")
+	}
+	for _, value := range m.Levels {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "levels: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpsertApprovalChainResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Chain != nil {
+		if err := m.Chain.Validate(); err != nil {
+			violations = append(violations, "chain: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

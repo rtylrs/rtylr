@@ -24,6 +24,11 @@ func NewMenuItemServiceClient(baseURL string) *MenuItemServiceClient {
 }
 
 func (c *MenuItemServiceClient) ListMenuItems(ctx context.Context, req *ListMenuItemsRequest) (*ListMenuItemsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/menu-item/v1/menu-items"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -54,6 +59,11 @@ func (c *MenuItemServiceClient) ListMenuItems(ctx context.Context, req *ListMenu
 }
 
 func (c *MenuItemServiceClient) ListPublicMenuItems(ctx context.Context, req *ListPublicMenuItemsRequest) (*ListPublicMenuItemsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/menu-item/v1/menu-items/public"
 	query := url.Values{}
 	query.Set("business_id", strconv.FormatInt(int64(req.BusinessId), 10))
@@ -86,6 +96,11 @@ func (c *MenuItemServiceClient) ListPublicMenuItems(ctx context.Context, req *Li
 }
 
 func (c *MenuItemServiceClient) CreateMenuItem(ctx context.Context, req *CreateMenuItemRequest) (*CreateMenuItemResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/menu-item/v1/menu-items"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -117,9 +132,14 @@ func (c *MenuItemServiceClient) CreateMenuItem(ctx context.Context, req *CreateM
 }
 
 func (c *MenuItemServiceClient) UpdateMenuItem(ctx context.Context, req *UpdateMenuItemRequest) (*UpdateMenuItemResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/menu-item/v1/menu-items/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}

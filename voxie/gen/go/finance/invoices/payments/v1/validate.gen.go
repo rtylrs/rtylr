@@ -21,6 +21,9 @@ func inSet(v string, allowed ...string) bool {
 }
 
 func (m *RecordPaymentRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.InvoiceId <= 0 {
 		violations = append(violations, "invoice_id must be greater than 0")
@@ -39,6 +42,22 @@ func (m *RecordPaymentRequest) Validate() error {
 	}
 	if m.Reference == "" {
 		violations = append(violations, "reference is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RecordPaymentResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Payment != nil {
+		if err := m.Payment.Validate(); err != nil {
+			violations = append(violations, "payment: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

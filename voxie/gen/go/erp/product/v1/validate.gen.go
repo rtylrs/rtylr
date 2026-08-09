@@ -20,7 +20,125 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Product) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *FullProduct) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ProductAttribute) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DashboardLowStockItem) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DashboardRecentOrder) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DashboardTopCategory) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ExpiringItem) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ReorderSuggestion) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListProductsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListProductsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Products {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "products: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateProductRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.CategoryId <= 0 {
 		violations = append(violations, "category_id must be greater than 0")
@@ -85,7 +203,21 @@ func (m *CreateProductRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateProductResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetProductByBarcodeRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Code == "" {
 		violations = append(violations, "code is required")
@@ -96,10 +228,45 @@ func (m *GetProductByBarcodeRequest) Validate() error {
 	return nil
 }
 
+func (m *GetProductByBarcodeResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Product != nil {
+		if err := m.Product.Validate(); err != nil {
+			violations = append(violations, "product: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetProductRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetProductResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Product != nil {
+		if err := m.Product.Validate(); err != nil {
+			violations = append(violations, "product: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -108,9 +275,28 @@ func (m *GetProductRequest) Validate() error {
 }
 
 func (m *GetProductFullRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetProductFullResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Product != nil {
+		if err := m.Product.Validate(); err != nil {
+			violations = append(violations, "product: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -119,6 +305,9 @@ func (m *GetProductFullRequest) Validate() error {
 }
 
 func (m *ListProductAttributesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -129,7 +318,26 @@ func (m *ListProductAttributesRequest) Validate() error {
 	return nil
 }
 
+func (m *ListProductAttributesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Attributes {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "attributes: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateProductBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.CategoryId <= 0 {
 		violations = append(violations, "category_id must be greater than 0")
@@ -195,6 +403,39 @@ func (m *UpdateProductBody) Validate() error {
 }
 
 func (m *UpdateProductRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateProductResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteProductRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -205,10 +446,101 @@ func (m *UpdateProductRequest) Validate() error {
 	return nil
 }
 
-func (m *DeleteProductRequest) Validate() error {
+func (m *DeleteProductResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
-	if m.Id <= 0 {
-		violations = append(violations, "id must be greater than 0")
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetDashboardRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetDashboardResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.LowStockItems {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "low_stock_items: "+err.Error())
+		}
+	}
+	for _, value := range m.RecentOrders {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "recent_orders: "+err.Error())
+		}
+	}
+	for _, value := range m.TopCategories {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "top_categories: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListReorderSuggestionsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListReorderSuggestionsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Suggestions {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "suggestions: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListExpiringItemsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListExpiringItemsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Items {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "items: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

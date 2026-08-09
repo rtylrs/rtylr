@@ -35,10 +35,15 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateFloor(v: Floor): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateFloorRequest {
-branchId?: string;
-name?: string;
-sortOrder?: number;
+branchId: string;
+name: string;
+sortOrder: number;
 }
 
 export function decodeCreateFloorRequest(v: any): CreateFloorRequest {
@@ -56,6 +61,16 @@ if (v.branchId !== undefined) { out.branch_id = v.branchId; }
 if (v.name !== undefined) { out.name = v.name; }
 if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
 return out;
+}
+
+export function validateCreateFloorRequest(v: CreateFloorRequest): string[] {
+const violations: string[] = [];
+if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
+if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.sortOrder !== undefined && v.sortOrder !== null)) violations.push("sort_order is required");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(Number(v.sortOrder) > 0)) violations.push("sort_order violates @gt");
+return violations;
 }
 
 export interface CreateFloorResponse {
@@ -78,9 +93,14 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateFloorResponse(v: CreateFloorResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateFloorBody {
-name?: string;
-sortOrder?: number;
+name: string;
+sortOrder: number;
 }
 
 export function decodeUpdateFloorBody(v: any): UpdateFloorBody {
@@ -98,8 +118,16 @@ if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
 return out;
 }
 
+export function validateUpdateFloorBody(v: UpdateFloorBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.sortOrder !== undefined && v.sortOrder !== null)) violations.push("sort_order is required");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(Number(v.sortOrder) > 0)) violations.push("sort_order violates @gt");
+return violations;
+}
+
 export interface UpdateFloorRequest {
-id?: string;
+id: string;
 body?: UpdateFloorBody;
 }
 
@@ -116,6 +144,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateFloorBody(v.body); }
 return out;
+}
+
+export function validateUpdateFloorRequest(v: UpdateFloorRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateFloorBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateFloorResponse {
@@ -135,8 +171,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateFloorResponse(v: UpdateFloorResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteFloorRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteFloorRequest(v: any): DeleteFloorRequest {
@@ -150,6 +191,13 @@ export function encodeDeleteFloorRequest(v: DeleteFloorRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteFloorRequest(v: DeleteFloorRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteFloorResponse {
@@ -169,6 +217,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteFloorResponse(v: DeleteFloorResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListFloorsRequest {
 branchId?: string;
 }
@@ -186,6 +239,11 @@ if (v.branchId !== undefined) { out.branch_id = v.branchId; }
 return out;
 }
 
+export function validateListFloorsRequest(v: ListFloorsRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListFloorsResponse {
 floors?: (Floor)[];
 }
@@ -201,5 +259,11 @@ export function encodeListFloorsResponse(v: ListFloorsResponse): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.floors !== undefined) { out.floors = (v.floors as any[]).map(encodeFloor); }
 return out;
+}
+
+export function validateListFloorsResponse(v: ListFloorsResponse): string[] {
+const violations: string[] = [];
+if (v.floors !== undefined && v.floors !== null) for (const item of v.floors) violations.push(...validateFloor(item).map((message) => "floors: " + message));
+return violations;
 }
 

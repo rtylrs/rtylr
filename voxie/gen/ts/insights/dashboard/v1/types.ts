@@ -32,6 +32,11 @@ if (v.totalActive !== undefined) { out.total_active = v.totalActive; }
 return out;
 }
 
+export function validateWorkloadEntry(v: WorkloadEntry): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface RoadmapProject {
 projectId?: string;
 projectName?: string;
@@ -70,6 +75,11 @@ if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
 return out;
 }
 
+export function validateRoadmapProject(v: RoadmapProject): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface InsightsMetricCard {
 value?: string;
 deltaPct?: number;
@@ -88,6 +98,11 @@ const out: Record<string, unknown> = {};
 if (v.value !== undefined) { out.value = v.value; }
 if (v.deltaPct !== undefined) { out.delta_pct = v.deltaPct; }
 return out;
+}
+
+export function validateInsightsMetricCard(v: InsightsMetricCard): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface InsightsPctCard {
@@ -110,6 +125,11 @@ if (v.deltaPct !== undefined) { out.delta_pct = v.deltaPct; }
 return out;
 }
 
+export function validateInsightsPctCard(v: InsightsPctCard): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetInsightsRequest {
 }
 
@@ -122,6 +142,11 @@ return {
 export function encodeGetInsightsRequest(v: GetInsightsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetInsightsRequest(v: GetInsightsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetInsightsResponse {
@@ -159,6 +184,11 @@ if (v.velocityChange !== undefined) { out.velocity_change = v.velocityChange; }
 return out;
 }
 
+export function validateGetInsightsResponse(v: GetInsightsResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetKPIsRequest {
 }
 
@@ -171,6 +201,11 @@ return {
 export function encodeGetKPIsRequest(v: GetKPIsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetKPIsRequest(v: GetKPIsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetKPIsResponse {
@@ -205,6 +240,11 @@ if (v.activeApps !== undefined) { out.active_apps = v.activeApps; }
 return out;
 }
 
+export function validateGetKPIsResponse(v: GetKPIsResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetRoadmapRequest {
 }
 
@@ -217,6 +257,11 @@ return {
 export function encodeGetRoadmapRequest(v: GetRoadmapRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetRoadmapRequest(v: GetRoadmapRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetRoadmapResponse {
@@ -236,6 +281,12 @@ if (v.projects !== undefined) { out.projects = (v.projects as any[]).map(encodeR
 return out;
 }
 
+export function validateGetRoadmapResponse(v: GetRoadmapResponse): string[] {
+const violations: string[] = [];
+if (v.projects !== undefined && v.projects !== null) for (const item of v.projects) violations.push(...validateRoadmapProject(item).map((message) => "projects: " + message));
+return violations;
+}
+
 export interface GetWorkloadRequest {
 }
 
@@ -248,6 +299,11 @@ return {
 export function encodeGetWorkloadRequest(v: GetWorkloadRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetWorkloadRequest(v: GetWorkloadRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetWorkloadResponse {
@@ -267,6 +323,12 @@ if (v.workload !== undefined) { out.workload = (v.workload as any[]).map(encodeW
 return out;
 }
 
+export function validateGetWorkloadResponse(v: GetWorkloadResponse): string[] {
+const violations: string[] = [];
+if (v.workload !== undefined && v.workload !== null) for (const item of v.workload) violations.push(...validateWorkloadEntry(item).map((message) => "workload: " + message));
+return violations;
+}
+
 export interface GetDashboardSummaryRequest {
 }
 
@@ -279,6 +341,11 @@ return {
 export function encodeGetDashboardSummaryRequest(v: GetDashboardSummaryRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetDashboardSummaryRequest(v: GetDashboardSummaryRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetDashboardSummaryResponse {
@@ -305,5 +372,14 @@ if (v.customers !== undefined) { out.customers = encodeInsightsMetricCard(v.cust
 if (v.orders !== undefined) { out.orders = encodeInsightsMetricCard(v.orders); }
 if (v.margin !== undefined) { out.margin = encodeInsightsPctCard(v.margin); }
 return out;
+}
+
+export function validateGetDashboardSummaryResponse(v: GetDashboardSummaryResponse): string[] {
+const violations: string[] = [];
+if (v.revenue !== undefined && v.revenue !== null) violations.push(...validateInsightsMetricCard(v.revenue).map((message) => "revenue: " + message));
+if (v.customers !== undefined && v.customers !== null) violations.push(...validateInsightsMetricCard(v.customers).map((message) => "customers: " + message));
+if (v.orders !== undefined && v.orders !== null) violations.push(...validateInsightsMetricCard(v.orders).map((message) => "orders: " + message));
+if (v.margin !== undefined && v.margin !== null) violations.push(...validateInsightsPctCard(v.margin).map((message) => "margin: " + message));
+return violations;
 }
 

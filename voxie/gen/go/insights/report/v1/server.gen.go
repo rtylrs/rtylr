@@ -3,11 +3,15 @@ package v1
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
+	"time"
 )
 
 func writeJSONError(w http.ResponseWriter, status int, message string) {
@@ -27,23 +31,171 @@ func writeHandlerError(w http.ResponseWriter, err error) {
 	writeJSONError(w, status, err.Error())
 }
 
-func parseInt32(s string) int32     { v, _ := strconv.ParseInt(s, 10, 32); return int32(v) }
-func parseInt64(s string) int64     { v, _ := strconv.ParseInt(s, 10, 64); return v }
-func parseUint32(s string) uint32   { v, _ := strconv.ParseUint(s, 10, 32); return uint32(v) }
-func parseUint64(s string) uint64   { v, _ := strconv.ParseUint(s, 10, 64); return v }
-func parseFloat32(s string) float32 { v, _ := strconv.ParseFloat(s, 32); return float32(v) }
-func parseFloat64(s string) float64 { v, _ := strconv.ParseFloat(s, 64); return v }
-func parseBool(s string) bool       { v, _ := strconv.ParseBool(s); return v }
+func parseInt32(s string) (int32, error) { v, err := strconv.ParseInt(s, 10, 32); return int32(v), err }
+func parseInt64(s string) (int64, error) { return strconv.ParseInt(s, 10, 64) }
+func parseUint32(s string) (uint32, error) {
+	v, err := strconv.ParseUint(s, 10, 32)
+	return uint32(v), err
+}
+func parseUint64(s string) (uint64, error) { return strconv.ParseUint(s, 10, 64) }
+func parseFloat32(s string) (float32, error) {
+	v, err := strconv.ParseFloat(s, 32)
+	return float32(v), err
+}
+func parseFloat64(s string) (float64, error) { return strconv.ParseFloat(s, 64) }
+func parseBool(s string) (bool, error) {
+	if s == "true" {
+		return true, nil
+	}
+	if s == "false" {
+		return false, nil
+	}
+	return false, fmt.Errorf("must be true or false")
+}
+
+func validHeaderFormat(value, format string) bool {
+	switch format {
+	case "uuid":
+		return regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`).MatchString(value)
+	case "email":
+		return regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`).MatchString(value)
+	case "uri":
+		return regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9+.-]*://[^\s]+$`).MatchString(value)
+	default:
+		return true
+	}
+}
+
+// RequestMetadata identifies the generated route handling a request.
+type RequestMetadata struct {
+	Service     string
+	Method      string
+	HTTPMethod  string
+	Route       string
+	AuthSchemes []string
+}
+
+type requestMetadataContextKey struct{}
+type requestIDContextKey struct{}
+
+func RequestMetadataFromContext(ctx context.Context) (RequestMetadata, bool) {
+	metadata, ok := ctx.Value(requestMetadataContextKey{}).(RequestMetadata)
+	return metadata, ok
+}
+
+func RequestIDFromContext(ctx context.Context) (string, bool) {
+	requestID, ok := ctx.Value(requestIDContextKey{}).(string)
+	return requestID, ok && requestID != ""
+}
+
+type Middleware func(http.Handler) http.Handler
+type RequestIDGenerator func() string
+type Authorizer func(context.Context, RequestMetadata, *http.Request) error
+type RequestResult struct {
+	StatusCode int
+	Duration   time.Duration
+}
+type RequestObserver interface {
+	RequestStarted(context.Context, RequestMetadata) context.Context
+	RequestFinished(context.Context, RequestMetadata, RequestResult)
+}
 
 type ServerOption func(*serverOptions)
 
 type serverOptions struct {
-	mux *http.ServeMux
+	mux                *http.ServeMux
+	middlewares        []Middleware
+	requestIDHeader    string
+	requestIDGenerator RequestIDGenerator
+	authorizer         Authorizer
+	observer           RequestObserver
 }
 
-// WithMux supplies the http.ServeMux to register routes onto - required.
-func WithMux(mux *http.ServeMux) ServerOption {
-	return func(o *serverOptions) { o.mux = mux }
+// WithMux supports the options-first registration form.
+func WithMux(mux *http.ServeMux) ServerOption { return func(o *serverOptions) { o.mux = mux } }
+
+func WithMiddleware(middleware ...Middleware) ServerOption {
+	return func(o *serverOptions) { o.middlewares = append(o.middlewares, middleware...) }
+}
+
+func WithRequestID(headerName string) ServerOption {
+	return WithRequestIDGenerator(headerName, defaultRequestIDGenerator)
+}
+func WithRequestIDGenerator(headerName string, generate RequestIDGenerator) ServerOption {
+	return func(o *serverOptions) {
+		if headerName == "" {
+			headerName = "X-Request-ID"
+		}
+		o.requestIDHeader, o.requestIDGenerator = headerName, generate
+	}
+}
+
+func WithAuthorizer(authorizer Authorizer) ServerOption {
+	return func(o *serverOptions) { o.authorizer = authorizer }
+}
+func WithRequestObserver(observer RequestObserver) ServerOption {
+	return func(o *serverOptions) { o.observer = observer }
+}
+
+func defaultRequestIDGenerator() string {
+	var value [16]byte
+	if _, err := rand.Read(value[:]); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(value[:])
+}
+
+func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadata) http.Handler {
+	for i := len(o.middlewares) - 1; i >= 0; i-- {
+		if o.middlewares[i] != nil {
+			handler = o.middlewares[i](handler)
+		}
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), requestMetadataContextKey{}, metadata)
+		if o.requestIDHeader != "" {
+			requestID := r.Header.Get(o.requestIDHeader)
+			if requestID == "" && o.requestIDGenerator != nil {
+				requestID = o.requestIDGenerator()
+			}
+			if requestID != "" {
+				w.Header().Set(o.requestIDHeader, requestID)
+				ctx = context.WithValue(ctx, requestIDContextKey{}, requestID)
+			}
+		}
+		if o.authorizer != nil {
+			if err := o.authorizer(ctx, metadata, r); err != nil {
+				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				return
+			}
+		}
+		if o.observer == nil {
+			handler.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+		started := time.Now()
+		ctx = o.observer.RequestStarted(ctx, metadata)
+		rw := &statusResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+		defer func() {
+			o.observer.RequestFinished(ctx, metadata, RequestResult{StatusCode: rw.statusCode, Duration: time.Since(started)})
+		}()
+		handler.ServeHTTP(rw, r.WithContext(ctx))
+	})
+}
+
+type statusResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	w.statusCode = statusCode
+	w.ResponseWriter.WriteHeader(statusCode)
+}
+func (w *statusResponseWriter) Flush() {
+	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
+		flusher.Flush()
+	}
 }
 
 type ReportServiceServer interface {
@@ -58,22 +210,55 @@ type ReportServiceServer interface {
 	ExportRevenueReport(ctx context.Context, req *ExportRevenueReportRequest) (*ExportRevenueReportResponse, error)
 }
 
-func RegisterReportServiceServer(srv ReportServiceServer, opts ...ServerOption) error {
+func RegisterReportServiceServer(first any, rest ...any) error {
 	var o serverOptions
-	for _, opt := range opts {
+	var srv ReportServiceServer
+	if mux, ok := first.(*http.ServeMux); ok {
+		o.mux = mux
+		if len(rest) == 0 {
+			return fmt.Errorf("RegisterReportServiceServer: implementation is required")
+		}
+		var ok bool
+		srv, ok = rest[0].(ReportServiceServer)
+		if !ok {
+			return fmt.Errorf("RegisterReportServiceServer: invalid implementation")
+		}
+		rest = rest[1:]
+	} else {
+		var ok bool
+		srv, ok = first.(ReportServiceServer)
+		if !ok {
+			return fmt.Errorf("RegisterReportServiceServer: invalid implementation")
+		}
+	}
+	for _, value := range rest {
+		opt, ok := value.(ServerOption)
+		if !ok {
+			return fmt.Errorf("RegisterReportServiceServer: options must be ServerOption values")
+		}
 		opt(&o)
 	}
 	if o.mux == nil {
-		return fmt.Errorf("RegisterReportServiceServer: WithMux option is required")
+		return fmt.Errorf("RegisterReportServiceServer: mux is required")
 	}
 	mux := o.mux
-	mux.HandleFunc("GET /insights/report/v1/templates", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("GET /insights/report/v1/templates", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListReportTemplatesRequest)
 		if r.URL.Query().Get("page") != "" {
-			req.Page = parseInt32(r.URL.Query().Get("page"))
+			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
 		}
 		if r.URL.Query().Get("limit") != "" {
-			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
 		}
 		if r.URL.Query().Get("sort_by") != "" {
 			req.SortBy = r.URL.Query().Get("sort_by")
@@ -97,8 +282,8 @@ func RegisterReportServiceServer(srv ReportServiceServer, opts ...ServerOption) 
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /insights/report/v1/templates", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ReportService", Method: "listReportTemplates", HTTPMethod: "GET", Route: "/insights/report/v1/templates", AuthSchemes: nil}))
+	mux.Handle("POST /insights/report/v1/templates", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateReportTemplateRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -119,10 +304,15 @@ func RegisterReportServiceServer(srv ReportServiceServer, opts ...ServerOption) 
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /insights/report/v1/templates/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ReportService", Method: "createReportTemplate", HTTPMethod: "POST", Route: "/insights/report/v1/templates", AuthSchemes: nil}))
+	mux.Handle("GET /insights/report/v1/templates/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetReportTemplateRequest)
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -136,14 +326,24 @@ func RegisterReportServiceServer(srv ReportServiceServer, opts ...ServerOption) 
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /insights/report/v1/scheduled", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ReportService", Method: "getReportTemplate", HTTPMethod: "GET", Route: "/insights/report/v1/templates/{id}", AuthSchemes: nil}))
+	mux.Handle("GET /insights/report/v1/scheduled", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListScheduledReportsRequest)
 		if r.URL.Query().Get("page") != "" {
-			req.Page = parseInt32(r.URL.Query().Get("page"))
+			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
 		}
 		if r.URL.Query().Get("limit") != "" {
-			req.Limit = parseInt32(r.URL.Query().Get("limit"))
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
 		}
 		if r.URL.Query().Get("sort_by") != "" {
 			req.SortBy = r.URL.Query().Get("sort_by")
@@ -164,8 +364,8 @@ func RegisterReportServiceServer(srv ReportServiceServer, opts ...ServerOption) 
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /insights/report/v1/scheduled", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ReportService", Method: "listScheduledReports", HTTPMethod: "GET", Route: "/insights/report/v1/scheduled", AuthSchemes: nil}))
+	mux.Handle("POST /insights/report/v1/scheduled", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateScheduledReportRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -186,8 +386,8 @@ func RegisterReportServiceServer(srv ReportServiceServer, opts ...ServerOption) 
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("PUT /insights/report/v1/scheduled/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ReportService", Method: "createScheduledReport", HTTPMethod: "POST", Route: "/insights/report/v1/scheduled", AuthSchemes: nil}))
+	mux.Handle("PUT /insights/report/v1/scheduled/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateScheduledReportRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -195,7 +395,12 @@ func RegisterReportServiceServer(srv ReportServiceServer, opts ...ServerOption) 
 				return
 			}
 		}
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -209,10 +414,15 @@ func RegisterReportServiceServer(srv ReportServiceServer, opts ...ServerOption) 
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("DELETE /insights/report/v1/scheduled/{id}", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ReportService", Method: "updateScheduledReport", HTTPMethod: "PUT", Route: "/insights/report/v1/scheduled/{id}", AuthSchemes: nil}))
+	mux.Handle("DELETE /insights/report/v1/scheduled/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(DeleteScheduledReportRequest)
-		req.Id = parseInt64(r.PathValue("id"))
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -226,8 +436,8 @@ func RegisterReportServiceServer(srv ReportServiceServer, opts ...ServerOption) 
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("POST /insights/report/v1/reports/revenue/generate", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ReportService", Method: "deleteScheduledReport", HTTPMethod: "DELETE", Route: "/insights/report/v1/scheduled/{id}", AuthSchemes: nil}))
+	mux.Handle("POST /insights/report/v1/reports/revenue/generate", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GenerateRevenueReportRequest)
 		if r.Body != nil {
 			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
@@ -248,8 +458,8 @@ func RegisterReportServiceServer(srv ReportServiceServer, opts ...ServerOption) 
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
-	mux.HandleFunc("GET /insights/report/v1/reports/revenue/export", func(w http.ResponseWriter, r *http.Request) {
+	}), RequestMetadata{Service: "ReportService", Method: "generateRevenueReport", HTTPMethod: "POST", Route: "/insights/report/v1/reports/revenue/generate", AuthSchemes: nil}))
+	mux.Handle("GET /insights/report/v1/reports/revenue/export", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ExportRevenueReportRequest)
 		if r.URL.Query().Get("from") != "" {
 			req.From = r.URL.Query().Get("from")
@@ -270,6 +480,6 @@ func RegisterReportServiceServer(srv ReportServiceServer, opts ...ServerOption) 
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	})
+	}), RequestMetadata{Service: "ReportService", Method: "exportRevenueReport", HTTPMethod: "GET", Route: "/insights/report/v1/reports/revenue/export", AuthSchemes: nil}))
 	return nil
 }

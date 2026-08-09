@@ -20,7 +20,32 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *Campaign) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CampaignStats) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateCampaignRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -46,7 +71,21 @@ func (m *CreateCampaignRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateCampaignResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetCampaignDetailRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -57,7 +96,31 @@ func (m *GetCampaignDetailRequest) Validate() error {
 	return nil
 }
 
+func (m *GetCampaignDetailResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Campaign != nil {
+		if err := m.Campaign.Validate(); err != nil {
+			violations = append(violations, "campaign: "+err.Error())
+		}
+	}
+	if m.Stats != nil {
+		if err := m.Stats.Validate(); err != nil {
+			violations = append(violations, "stats: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetCampaignStatsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.CampaignId <= 0 {
 		violations = append(violations, "campaign_id must be greater than 0")
@@ -68,7 +131,53 @@ func (m *GetCampaignStatsRequest) Validate() error {
 	return nil
 }
 
+func (m *GetCampaignStatsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Stats != nil {
+		if err := m.Stats.Validate(); err != nil {
+			violations = append(violations, "stats: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListCampaignsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListCampaignsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Campaigns {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "campaigns: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateCampaignBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -95,9 +204,17 @@ func (m *UpdateCampaignBody) Validate() error {
 }
 
 func (m *UpdateCampaignRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -105,7 +222,21 @@ func (m *UpdateCampaignRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdateCampaignResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateCampaignStatusRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -113,6 +244,17 @@ func (m *UpdateCampaignStatusRequest) Validate() error {
 	if m.Status == "" {
 		violations = append(violations, "status is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateCampaignStatusResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

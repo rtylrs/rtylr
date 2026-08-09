@@ -26,6 +26,11 @@ if (v.revenueMinorUnits !== undefined) { out.revenue_minor_units = v.revenueMino
 return out;
 }
 
+export function validateBestSeller(v: BestSeller): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface SlowMover {
 productId?: string;
 name?: string;
@@ -47,6 +52,11 @@ if (v.productId !== undefined) { out.product_id = v.productId; }
 if (v.name !== undefined) { out.name = v.name; }
 if (v.stockQuantity !== undefined) { out.stock_quantity = v.stockQuantity; }
 return out;
+}
+
+export function validateSlowMover(v: SlowMover): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface MarginBucket {
@@ -75,6 +85,11 @@ if (v.productCount !== undefined) { out.product_count = v.productCount; }
 return out;
 }
 
+export function validateMarginBucket(v: MarginBucket): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CategorySales {
 categoryId?: string;
 categoryName?: string;
@@ -101,6 +116,11 @@ if (v.revenueMinorUnits !== undefined) { out.revenue_minor_units = v.revenueMino
 return out;
 }
 
+export function validateCategorySales(v: CategorySales): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetBestSellersRequest {
 limit?: number;
 }
@@ -116,6 +136,11 @@ export function encodeGetBestSellersRequest(v: GetBestSellersRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.limit !== undefined) { out.limit = v.limit; }
 return out;
+}
+
+export function validateGetBestSellersRequest(v: GetBestSellersRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetBestSellersResponse {
@@ -135,6 +160,12 @@ if (v.products !== undefined) { out.products = (v.products as any[]).map(encodeB
 return out;
 }
 
+export function validateGetBestSellersResponse(v: GetBestSellersResponse): string[] {
+const violations: string[] = [];
+if (v.products !== undefined && v.products !== null) for (const item of v.products) violations.push(...validateBestSeller(item).map((message) => "products: " + message));
+return violations;
+}
+
 export interface GetCategoryPerformanceRequest {
 }
 
@@ -147,6 +178,11 @@ return {
 export function encodeGetCategoryPerformanceRequest(v: GetCategoryPerformanceRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetCategoryPerformanceRequest(v: GetCategoryPerformanceRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetCategoryPerformanceResponse {
@@ -166,6 +202,12 @@ if (v.categories !== undefined) { out.categories = (v.categories as any[]).map(e
 return out;
 }
 
+export function validateGetCategoryPerformanceResponse(v: GetCategoryPerformanceResponse): string[] {
+const violations: string[] = [];
+if (v.categories !== undefined && v.categories !== null) for (const item of v.categories) violations.push(...validateCategorySales(item).map((message) => "categories: " + message));
+return violations;
+}
+
 export interface GetProductMarginsRequest {
 }
 
@@ -178,6 +220,11 @@ return {
 export function encodeGetProductMarginsRequest(v: GetProductMarginsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetProductMarginsRequest(v: GetProductMarginsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetProductMarginsResponse {
@@ -197,6 +244,12 @@ if (v.buckets !== undefined) { out.buckets = (v.buckets as any[]).map(encodeMarg
 return out;
 }
 
+export function validateGetProductMarginsResponse(v: GetProductMarginsResponse): string[] {
+const violations: string[] = [];
+if (v.buckets !== undefined && v.buckets !== null) for (const item of v.buckets) violations.push(...validateMarginBucket(item).map((message) => "buckets: " + message));
+return violations;
+}
+
 export interface GetProductPerformanceRequest {
 }
 
@@ -209,6 +262,11 @@ return {
 export function encodeGetProductPerformanceRequest(v: GetProductPerformanceRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetProductPerformanceRequest(v: GetProductPerformanceRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetProductPerformanceResponse {
@@ -237,6 +295,11 @@ if (v.avgMarginPct !== undefined) { out.avg_margin_pct = v.avgMarginPct; }
 return out;
 }
 
+export function validateGetProductPerformanceResponse(v: GetProductPerformanceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetSlowMoversRequest {
 days?: number;
 }
@@ -254,6 +317,11 @@ if (v.days !== undefined) { out.days = v.days; }
 return out;
 }
 
+export function validateGetSlowMoversRequest(v: GetSlowMoversRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetSlowMoversResponse {
 products?: (SlowMover)[];
 }
@@ -269,5 +337,11 @@ export function encodeGetSlowMoversResponse(v: GetSlowMoversResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.products !== undefined) { out.products = (v.products as any[]).map(encodeSlowMover); }
 return out;
+}
+
+export function validateGetSlowMoversResponse(v: GetSlowMoversResponse): string[] {
+const violations: string[] = [];
+if (v.products !== undefined && v.products !== null) for (const item of v.products) violations.push(...validateSlowMover(item).map((message) => "products: " + message));
+return violations;
 }
 

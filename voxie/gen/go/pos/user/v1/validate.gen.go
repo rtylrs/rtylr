@@ -20,7 +20,48 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *POSUser) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListPOSUsersRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListPOSUsersResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Users {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "users: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreatePOSUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.LocationId <= 0 {
 		violations = append(violations, "location_id must be greater than 0")
@@ -40,6 +81,17 @@ func (m *CreatePOSUserRequest) Validate() error {
 	if m.MaxDiscountPct < 0 {
 		violations = append(violations, "max_discount_pct must be greater than or equal to 0")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreatePOSUserResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -47,6 +99,9 @@ func (m *CreatePOSUserRequest) Validate() error {
 }
 
 func (m *UpdatePOSUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -69,7 +124,21 @@ func (m *UpdatePOSUserRequest) Validate() error {
 	return nil
 }
 
+func (m *UpdatePOSUserResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeactivatePOSUserRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
@@ -80,7 +149,21 @@ func (m *DeactivatePOSUserRequest) Validate() error {
 	return nil
 }
 
+func (m *DeactivatePOSUserResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *VerifyPOSUserPINRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.LocationId <= 0 {
 		violations = append(violations, "location_id must be greater than 0")
@@ -97,7 +180,21 @@ func (m *VerifyPOSUserPINRequest) Validate() error {
 	return nil
 }
 
+func (m *VerifyPOSUserPINResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *SetPINRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.UserId <= 0 {
 		violations = append(violations, "user_id must be greater than 0")
@@ -111,6 +208,17 @@ func (m *SetPINRequest) Validate() error {
 	if m.Pin == "" {
 		violations = append(violations, "pin is required")
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *SetPINResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

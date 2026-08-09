@@ -38,8 +38,13 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateResource(v: Resource): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateResourceRequest {
-name?: string;
+name: string;
 type?: string;
 capacity?: number;
 isActive?: boolean;
@@ -64,6 +69,12 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateCreateResourceRequest(v: CreateResourceRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateResourceResponse {
 id?: string;
 message?: string;
@@ -84,8 +95,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateResourceResponse(v: CreateResourceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteResourceRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteResourceRequest(v: any): DeleteResourceRequest {
@@ -99,6 +115,13 @@ export function encodeDeleteResourceRequest(v: DeleteResourceRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteResourceRequest(v: DeleteResourceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteResourceResponse {
@@ -118,6 +141,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteResourceResponse(v: DeleteResourceResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListResourcesRequest {
 }
 
@@ -130,6 +158,11 @@ return {
 export function encodeListResourcesRequest(v: ListResourcesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListResourcesRequest(v: ListResourcesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListResourcesResponse {
@@ -149,8 +182,14 @@ if (v.resources !== undefined) { out.resources = (v.resources as any[]).map(enco
 return out;
 }
 
+export function validateListResourcesResponse(v: ListResourcesResponse): string[] {
+const violations: string[] = [];
+if (v.resources !== undefined && v.resources !== null) for (const item of v.resources) violations.push(...validateResource(item).map((message) => "resources: " + message));
+return violations;
+}
+
 export interface UpdateResourceRequest {
-id?: string;
+id: string;
 name?: string;
 type?: string;
 capacity?: number;
@@ -178,6 +217,13 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateResourceRequest(v: UpdateResourceRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
 export interface UpdateResourceResponse {
 message?: string;
 }
@@ -193,5 +239,10 @@ export function encodeUpdateResourceResponse(v: UpdateResourceResponse): Record<
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateResourceResponse(v: UpdateResourceResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

@@ -20,7 +20,64 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *TimeEntryPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *TimesheetPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Entries {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "entries: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTimeEntriesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTimeEntriesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Entries {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "entries: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateTimeEntryRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.EmployeeId <= 0 {
 		violations = append(violations, "employee_id must be greater than 0")
@@ -43,7 +100,53 @@ func (m *CreateTimeEntryRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateTimeEntryResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Entry != nil {
+		if err := m.Entry.Validate(); err != nil {
+			violations = append(violations, "entry: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTimesheetsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTimesheetsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Timesheets {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "timesheets: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *SubmitTimesheetRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.TimesheetId <= 0 {
 		violations = append(violations, "timesheet_id must be greater than 0")
@@ -54,11 +157,52 @@ func (m *SubmitTimesheetRequest) Validate() error {
 	return nil
 }
 
+func (m *SubmitTimesheetResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ApproveTimesheetBody) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ApproveTimesheetRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
 	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ApproveTimesheetResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

@@ -41,6 +41,11 @@ if (v.code !== undefined) { out.code = v.code; }
 return out;
 }
 
+export function validateAccount(v: Account): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ChartOfAccountsNode {
 id?: string;
 name?: string;
@@ -70,11 +75,17 @@ if (v.children !== undefined) { out.children = (v.children as any[]).map(encodeC
 return out;
 }
 
+export function validateChartOfAccountsNode(v: ChartOfAccountsNode): string[] {
+const violations: string[] = [];
+if (v.children !== undefined && v.children !== null) for (const item of v.children) violations.push(...validateChartOfAccountsNode(item).map((message) => "children: " + message));
+return violations;
+}
+
 export interface CreateAccountRequest {
-name?: string;
-type?: string;
-currency?: string;
-balance?: number;
+name: string;
+type: string;
+currency: string;
+balance: number;
 isActive?: boolean;
 code?: string;
 }
@@ -102,6 +113,16 @@ if (v.code !== undefined) { out.code = v.code; }
 return out;
 }
 
+export function validateCreateAccountRequest(v: CreateAccountRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (!(v.balance !== undefined && v.balance !== null)) violations.push("balance is required");
+if (v.balance !== undefined && v.balance !== null && !(Number(v.balance) >= 0)) violations.push("balance violates @gte");
+return violations;
+}
+
 export interface CreateAccountResponse {
 id?: string;
 message?: string;
@@ -122,8 +143,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateAccountResponse(v: CreateAccountResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteAccountRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteAccountRequest(v: any): DeleteAccountRequest {
@@ -137,6 +163,13 @@ export function encodeDeleteAccountRequest(v: DeleteAccountRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteAccountRequest(v: DeleteAccountRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteAccountResponse {
@@ -156,6 +189,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteAccountResponse(v: DeleteAccountResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetChartOfAccountsRequest {
 }
 
@@ -168,6 +206,11 @@ return {
 export function encodeGetChartOfAccountsRequest(v: GetChartOfAccountsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateGetChartOfAccountsRequest(v: GetChartOfAccountsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface GetChartOfAccountsResponse {
@@ -187,6 +230,12 @@ if (v.tree !== undefined) { out.tree = (v.tree as any[]).map(encodeChartOfAccoun
 return out;
 }
 
+export function validateGetChartOfAccountsResponse(v: GetChartOfAccountsResponse): string[] {
+const violations: string[] = [];
+if (v.tree !== undefined && v.tree !== null) for (const item of v.tree) violations.push(...validateChartOfAccountsNode(item).map((message) => "tree: " + message));
+return violations;
+}
+
 export interface ListAccountsRequest {
 }
 
@@ -199,6 +248,11 @@ return {
 export function encodeListAccountsRequest(v: ListAccountsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListAccountsRequest(v: ListAccountsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListAccountsResponse {
@@ -218,9 +272,15 @@ if (v.accounts !== undefined) { out.accounts = (v.accounts as any[]).map(encodeA
 return out;
 }
 
+export function validateListAccountsResponse(v: ListAccountsResponse): string[] {
+const violations: string[] = [];
+if (v.accounts !== undefined && v.accounts !== null) for (const item of v.accounts) violations.push(...validateAccount(item).map((message) => "accounts: " + message));
+return violations;
+}
+
 export interface UpdateAccountBody {
-name?: string;
-type?: string;
+name: string;
+type: string;
 currency?: string;
 balance?: number;
 isActive?: boolean;
@@ -250,8 +310,16 @@ if (v.code !== undefined) { out.code = v.code; }
 return out;
 }
 
+export function validateUpdateAccountBody(v: UpdateAccountBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.balance !== undefined && v.balance !== null && !(Number(v.balance) >= 0)) violations.push("balance violates @gte");
+return violations;
+}
+
 export interface UpdateAccountRequest {
-id?: string;
+id: string;
 body?: UpdateAccountBody;
 }
 
@@ -270,6 +338,14 @@ if (v.body !== undefined) { out.body = encodeUpdateAccountBody(v.body); }
 return out;
 }
 
+export function validateUpdateAccountRequest(v: UpdateAccountRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateAccountBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateAccountResponse {
 message?: string;
 }
@@ -285,5 +361,10 @@ export function encodeUpdateAccountResponse(v: UpdateAccountResponse): Record<st
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateAccountResponse(v: UpdateAccountResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

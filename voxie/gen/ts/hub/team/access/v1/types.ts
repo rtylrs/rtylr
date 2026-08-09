@@ -32,8 +32,13 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateAccessRequest(v: AccessRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface RequestAccessRequest {
-app?: string;
+app: string;
 }
 
 export function decodeRequestAccessRequest(v: any): RequestAccessRequest {
@@ -47,6 +52,12 @@ export function encodeRequestAccessRequest(v: RequestAccessRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.app !== undefined) { out.app = v.app; }
 return out;
+}
+
+export function validateRequestAccessRequest(v: RequestAccessRequest): string[] {
+const violations: string[] = [];
+if (!(v.app !== undefined && v.app !== null) || v.app === "") violations.push("app is required");
+return violations;
 }
 
 export interface RequestAccessResponse {
@@ -66,6 +77,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateRequestAccessResponse(v: RequestAccessResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListAccessRequestsRequest {
 }
 
@@ -78,6 +94,11 @@ return {
 export function encodeListAccessRequestsRequest(v: ListAccessRequestsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListAccessRequestsRequest(v: ListAccessRequestsRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListAccessRequestsResponse {
@@ -97,10 +118,16 @@ if (v.requests !== undefined) { out.requests = (v.requests as any[]).map(encodeA
 return out;
 }
 
+export function validateListAccessRequestsResponse(v: ListAccessRequestsResponse): string[] {
+const violations: string[] = [];
+if (v.requests !== undefined && v.requests !== null) for (const item of v.requests) violations.push(...validateAccessRequest(item).map((message) => "requests: " + message));
+return violations;
+}
+
 export interface ApproveAccessRequestRequest {
-id?: string;
-userId?: string;
-app?: string;
+id: string;
+userId: string;
+app: string;
 }
 
 export function decodeApproveAccessRequestRequest(v: any): ApproveAccessRequestRequest {
@@ -120,6 +147,16 @@ if (v.app !== undefined) { out.app = v.app; }
 return out;
 }
 
+export function validateApproveAccessRequestRequest(v: ApproveAccessRequestRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
+if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (!(v.app !== undefined && v.app !== null) || v.app === "") violations.push("app is required");
+return violations;
+}
+
 export interface ApproveAccessRequestResponse {
 message?: string;
 }
@@ -135,5 +172,10 @@ export function encodeApproveAccessRequestResponse(v: ApproveAccessRequestRespon
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateApproveAccessRequestResponse(v: ApproveAccessRequestResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

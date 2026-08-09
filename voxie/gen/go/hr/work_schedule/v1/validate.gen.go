@@ -20,7 +20,37 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *WorkSchedulePayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListWorkSchedulesResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Schedules {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "schedules: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateWorkScheduleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -52,7 +82,26 @@ func (m *CreateWorkScheduleRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateWorkScheduleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Schedule != nil {
+		if err := m.Schedule.Validate(); err != nil {
+			violations = append(violations, "schedule: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *UpdateWorkScheduleBody) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if len(m.WorkingDays) < 1 {
 		violations = append(violations, "working_days must have at least 1 items")
@@ -64,9 +113,33 @@ func (m *UpdateWorkScheduleBody) Validate() error {
 }
 
 func (m *UpdateWorkScheduleRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Id <= 0 {
 		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateWorkScheduleResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Schedule != nil {
+		if err := m.Schedule.Validate(); err != nil {
+			violations = append(violations, "schedule: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

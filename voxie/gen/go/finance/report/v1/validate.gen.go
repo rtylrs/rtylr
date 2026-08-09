@@ -20,7 +20,32 @@ func inSet(v string, allowed ...string) bool {
 	return false
 }
 
+func (m *TaxConfig) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ExpenseCategoryDetail) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetPLReportRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Date == "" {
 		violations = append(violations, "date is required")
@@ -31,10 +56,62 @@ func (m *GetPLReportRequest) Validate() error {
 	return nil
 }
 
+func (m *GetPLReportResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetTaxReportRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Date == "" {
 		violations = append(violations, "date is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetTaxReportResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListExpenseCategoryDetailsRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListExpenseCategoryDetailsResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Categories {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "categories: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -43,6 +120,9 @@ func (m *GetTaxReportRequest) Validate() error {
 }
 
 func (m *CreateExpenseCategoryDetailRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -59,7 +139,53 @@ func (m *CreateExpenseCategoryDetailRequest) Validate() error {
 	return nil
 }
 
+func (m *CreateExpenseCategoryDetailResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Category != nil {
+		if err := m.Category.Validate(); err != nil {
+			violations = append(violations, "category: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTaxConfigRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListTaxConfigResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Configs {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "configs: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateTaxConfigRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
 	var violations []string
 	if m.Name == "" {
 		violations = append(violations, "name is required")
@@ -69,6 +195,22 @@ func (m *CreateTaxConfigRequest) Validate() error {
 	}
 	if m.Type == "" {
 		violations = append(violations, "type is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateTaxConfigResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Config != nil {
+		if err := m.Config.Validate(); err != nil {
+			violations = append(violations, "config: "+err.Error())
+		}
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

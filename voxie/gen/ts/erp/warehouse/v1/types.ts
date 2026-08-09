@@ -50,8 +50,13 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateWarehouse(v: Warehouse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateWarehouseRequest {
-name?: string;
+name: string;
 address?: string;
 city?: string;
 country?: string;
@@ -88,6 +93,12 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateCreateWarehouseRequest(v: CreateWarehouseRequest): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface CreateWarehouseResponse {
 warehouseId?: string;
 message?: string;
@@ -108,8 +119,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateWarehouseResponse(v: CreateWarehouseResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteWarehouseRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteWarehouseRequest(v: any): DeleteWarehouseRequest {
@@ -123,6 +139,13 @@ export function encodeDeleteWarehouseRequest(v: DeleteWarehouseRequest): Record<
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteWarehouseRequest(v: DeleteWarehouseRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteWarehouseResponse {
@@ -142,6 +165,11 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteWarehouseResponse(v: DeleteWarehouseResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListWarehousesRequest {
 }
 
@@ -154,6 +182,11 @@ return {
 export function encodeListWarehousesRequest(v: ListWarehousesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListWarehousesRequest(v: ListWarehousesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListWarehousesResponse {
@@ -173,8 +206,14 @@ if (v.warehouses !== undefined) { out.warehouses = (v.warehouses as any[]).map(e
 return out;
 }
 
+export function validateListWarehousesResponse(v: ListWarehousesResponse): string[] {
+const violations: string[] = [];
+if (v.warehouses !== undefined && v.warehouses !== null) for (const item of v.warehouses) violations.push(...validateWarehouse(item).map((message) => "warehouses: " + message));
+return violations;
+}
+
 export interface UpdateWarehouseBody {
-name?: string;
+name: string;
 address?: string;
 city?: string;
 country?: string;
@@ -211,8 +250,14 @@ if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }
 
+export function validateUpdateWarehouseBody(v: UpdateWarehouseBody): string[] {
+const violations: string[] = [];
+if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+return violations;
+}
+
 export interface UpdateWarehouseRequest {
-id?: string;
+id: string;
 body?: UpdateWarehouseBody;
 }
 
@@ -231,6 +276,14 @@ if (v.body !== undefined) { out.body = encodeUpdateWarehouseBody(v.body); }
 return out;
 }
 
+export function validateUpdateWarehouseRequest(v: UpdateWarehouseRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateWarehouseBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateWarehouseResponse {
 message?: string;
 }
@@ -246,5 +299,10 @@ export function encodeUpdateWarehouseResponse(v: UpdateWarehouseResponse): Recor
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateWarehouseResponse(v: UpdateWarehouseResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

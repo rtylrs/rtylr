@@ -47,13 +47,18 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateCashMovement(v: CashMovement): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CashAdjustRequest {
-branchId?: string;
-terminalId?: string;
-sessionId?: string;
-employeeId?: string;
-amount?: number;
-reason?: string;
+branchId: string;
+terminalId: string;
+sessionId: string;
+employeeId: string;
+amount: number;
+reason: string;
 }
 
 export function decodeCashAdjustRequest(v: any): CashAdjustRequest {
@@ -79,6 +84,22 @@ if (v.reason !== undefined) { out.reason = v.reason; }
 return out;
 }
 
+export function validateCashAdjustRequest(v: CashAdjustRequest): string[] {
+const violations: string[] = [];
+if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
+if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (!(v.terminalId !== undefined && v.terminalId !== null)) violations.push("terminal_id is required");
+if (v.terminalId !== undefined && v.terminalId !== null && !(Number(v.terminalId) > 0)) violations.push("terminal_id violates @gt");
+if (!(v.sessionId !== undefined && v.sessionId !== null)) violations.push("session_id is required");
+if (v.sessionId !== undefined && v.sessionId !== null && !(Number(v.sessionId) > 0)) violations.push("session_id violates @gt");
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.amount !== undefined && v.amount !== null)) violations.push("amount is required");
+if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) > 0)) violations.push("amount violates @gt");
+if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
+return violations;
+}
+
 export interface CashAdjustResponse {
 movementId?: string;
 message?: string;
@@ -99,13 +120,18 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCashAdjustResponse(v: CashAdjustResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CashDropRequest {
-branchId?: string;
-terminalId?: string;
-sessionId?: string;
-employeeId?: string;
-amount?: number;
-reason?: string;
+branchId: string;
+terminalId: string;
+sessionId: string;
+employeeId: string;
+amount: number;
+reason: string;
 }
 
 export function decodeCashDropRequest(v: any): CashDropRequest {
@@ -131,6 +157,22 @@ if (v.reason !== undefined) { out.reason = v.reason; }
 return out;
 }
 
+export function validateCashDropRequest(v: CashDropRequest): string[] {
+const violations: string[] = [];
+if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
+if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (!(v.terminalId !== undefined && v.terminalId !== null)) violations.push("terminal_id is required");
+if (v.terminalId !== undefined && v.terminalId !== null && !(Number(v.terminalId) > 0)) violations.push("terminal_id violates @gt");
+if (!(v.sessionId !== undefined && v.sessionId !== null)) violations.push("session_id is required");
+if (v.sessionId !== undefined && v.sessionId !== null && !(Number(v.sessionId) > 0)) violations.push("session_id violates @gt");
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.amount !== undefined && v.amount !== null)) violations.push("amount is required");
+if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) > 0)) violations.push("amount violates @gt");
+if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
+return violations;
+}
+
 export interface CashDropResponse {
 movementId?: string;
 message?: string;
@@ -151,13 +193,18 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCashDropResponse(v: CashDropResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CashPickupRequest {
-branchId?: string;
-terminalId?: string;
-sessionId?: string;
-employeeId?: string;
-amount?: number;
-reason?: string;
+branchId: string;
+terminalId: string;
+sessionId: string;
+employeeId: string;
+amount: number;
+reason: string;
 }
 
 export function decodeCashPickupRequest(v: any): CashPickupRequest {
@@ -183,6 +230,22 @@ if (v.reason !== undefined) { out.reason = v.reason; }
 return out;
 }
 
+export function validateCashPickupRequest(v: CashPickupRequest): string[] {
+const violations: string[] = [];
+if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
+if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (!(v.terminalId !== undefined && v.terminalId !== null)) violations.push("terminal_id is required");
+if (v.terminalId !== undefined && v.terminalId !== null && !(Number(v.terminalId) > 0)) violations.push("terminal_id violates @gt");
+if (!(v.sessionId !== undefined && v.sessionId !== null)) violations.push("session_id is required");
+if (v.sessionId !== undefined && v.sessionId !== null && !(Number(v.sessionId) > 0)) violations.push("session_id violates @gt");
+if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (!(v.amount !== undefined && v.amount !== null)) violations.push("amount is required");
+if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) > 0)) violations.push("amount violates @gt");
+if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
+return violations;
+}
+
 export interface CashPickupResponse {
 movementId?: string;
 message?: string;
@@ -203,8 +266,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCashPickupResponse(v: CashPickupResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListCashMovementsRequest {
-sessionId?: string;
+sessionId: string;
 }
 
 export function decodeListCashMovementsRequest(v: any): ListCashMovementsRequest {
@@ -218,6 +286,13 @@ export function encodeListCashMovementsRequest(v: ListCashMovementsRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.sessionId !== undefined) { out.session_id = v.sessionId; }
 return out;
+}
+
+export function validateListCashMovementsRequest(v: ListCashMovementsRequest): string[] {
+const violations: string[] = [];
+if (!(v.sessionId !== undefined && v.sessionId !== null)) violations.push("session_id is required");
+if (v.sessionId !== undefined && v.sessionId !== null && !(Number(v.sessionId) > 0)) violations.push("session_id violates @gt");
+return violations;
 }
 
 export interface ListCashMovementsResponse {
@@ -235,5 +310,11 @@ export function encodeListCashMovementsResponse(v: ListCashMovementsResponse): R
 const out: Record<string, unknown> = {};
 if (v.movements !== undefined) { out.movements = (v.movements as any[]).map(encodeCashMovement); }
 return out;
+}
+
+export function validateListCashMovementsResponse(v: ListCashMovementsResponse): string[] {
+const violations: string[] = [];
+if (v.movements !== undefined && v.movements !== null) for (const item of v.movements) violations.push(...validateCashMovement(item).map((message) => "movements: " + message));
+return violations;
 }
 

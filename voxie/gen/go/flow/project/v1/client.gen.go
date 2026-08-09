@@ -24,6 +24,11 @@ func NewProjectServiceClient(baseURL string) *ProjectServiceClient {
 }
 
 func (c *ProjectServiceClient) ListProjects(ctx context.Context, req *ListProjectsRequest) (*ListProjectsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects"
 	query := url.Values{}
 	query.Set("workspace_id", strconv.FormatInt(int64(req.WorkspaceId), 10))
@@ -59,6 +64,11 @@ func (c *ProjectServiceClient) ListProjects(ctx context.Context, req *ListProjec
 }
 
 func (c *ProjectServiceClient) CreateProject(ctx context.Context, req *CreateProjectRequest) (*CreateProjectResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -90,9 +100,14 @@ func (c *ProjectServiceClient) CreateProject(ctx context.Context, req *CreatePro
 }
 
 func (c *ProjectServiceClient) UpdateProject(ctx context.Context, req *UpdateProjectRequest) (*UpdateProjectResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -122,6 +137,11 @@ func (c *ProjectServiceClient) UpdateProject(ctx context.Context, req *UpdatePro
 }
 
 func (c *ProjectServiceClient) DeleteProject(ctx context.Context, req *DeleteProjectRequest) (*DeleteProjectResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -153,6 +173,11 @@ func (c *ProjectServiceClient) DeleteProject(ctx context.Context, req *DeletePro
 }
 
 func (c *ProjectServiceClient) ListProjectColumns(ctx context.Context, req *ListProjectColumnsRequest) (*ListProjectColumnsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/columns"
 	query := url.Values{}
 	query.Set("project_id", strconv.FormatInt(int64(req.ProjectId), 10))
@@ -188,6 +213,11 @@ func (c *ProjectServiceClient) ListProjectColumns(ctx context.Context, req *List
 }
 
 func (c *ProjectServiceClient) CreateProjectColumn(ctx context.Context, req *CreateProjectColumnRequest) (*CreateProjectColumnResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/columns"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -219,6 +249,11 @@ func (c *ProjectServiceClient) CreateProjectColumn(ctx context.Context, req *Cre
 }
 
 func (c *ProjectServiceClient) UpdateProjectColumn(ctx context.Context, req *UpdateProjectColumnRequest) (*UpdateProjectColumnResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/columns/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	body, err := json.Marshal(req)
@@ -251,6 +286,11 @@ func (c *ProjectServiceClient) UpdateProjectColumn(ctx context.Context, req *Upd
 }
 
 func (c *ProjectServiceClient) DeleteProjectColumn(ctx context.Context, req *DeleteProjectColumnRequest) (*DeleteProjectColumnResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/columns/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
 	query := url.Values{}
@@ -282,6 +322,11 @@ func (c *ProjectServiceClient) DeleteProjectColumn(ctx context.Context, req *Del
 }
 
 func (c *ProjectServiceClient) MoveTaskToColumn(ctx context.Context, req *MoveTaskToColumnRequest) (*MoveTaskToColumnResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/columns/move"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -313,6 +358,11 @@ func (c *ProjectServiceClient) MoveTaskToColumn(ctx context.Context, req *MoveTa
 }
 
 func (c *ProjectServiceClient) ListProjectMembers(ctx context.Context, req *ListProjectMembersRequest) (*ListProjectMembersResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/members"
 	query := url.Values{}
 	query.Set("project_id", strconv.FormatInt(int64(req.ProjectId), 10))
@@ -348,6 +398,11 @@ func (c *ProjectServiceClient) ListProjectMembers(ctx context.Context, req *List
 }
 
 func (c *ProjectServiceClient) AddProjectMember(ctx context.Context, req *AddProjectMemberRequest) (*AddProjectMemberResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/members"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -379,6 +434,11 @@ func (c *ProjectServiceClient) AddProjectMember(ctx context.Context, req *AddPro
 }
 
 func (c *ProjectServiceClient) RemoveProjectMember(ctx context.Context, req *RemoveProjectMemberRequest) (*RemoveProjectMemberResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/members"
 	query := url.Values{}
 	query.Set("project_id", strconv.FormatInt(int64(req.ProjectId), 10))
@@ -411,6 +471,11 @@ func (c *ProjectServiceClient) RemoveProjectMember(ctx context.Context, req *Rem
 }
 
 func (c *ProjectServiceClient) UpdateProjectMemberRole(ctx context.Context, req *UpdateProjectMemberRoleRequest) (*UpdateProjectMemberRoleResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/members/role"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -442,6 +507,11 @@ func (c *ProjectServiceClient) UpdateProjectMemberRole(ctx context.Context, req 
 }
 
 func (c *ProjectServiceClient) InviteProjectMember(ctx context.Context, req *InviteProjectMemberRequest) (*InviteProjectMemberResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/members/invite"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -473,6 +543,11 @@ func (c *ProjectServiceClient) InviteProjectMember(ctx context.Context, req *Inv
 }
 
 func (c *ProjectServiceClient) TransferProjectOwnership(ctx context.Context, req *TransferProjectOwnershipRequest) (*TransferProjectOwnershipResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/transfer"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -504,6 +579,11 @@ func (c *ProjectServiceClient) TransferProjectOwnership(ctx context.Context, req
 }
 
 func (c *ProjectServiceClient) MoveProject(ctx context.Context, req *MoveProjectRequest) (*MoveProjectResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/flow/project/v1/projects/move"
 	body, err := json.Marshal(req)
 	if err != nil {

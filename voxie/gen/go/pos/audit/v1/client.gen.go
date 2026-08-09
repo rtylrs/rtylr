@@ -23,6 +23,11 @@ func NewAuditServiceClient(baseURL string) *AuditServiceClient {
 }
 
 func (c *AuditServiceClient) ListAudit(ctx context.Context, req *ListAuditRequest) (*ListAuditResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/audit/v1/audit"
 	query := url.Values{}
 	query.Set("action", req.Action)
@@ -58,6 +63,11 @@ func (c *AuditServiceClient) ListAudit(ctx context.Context, req *ListAuditReques
 }
 
 func (c *AuditServiceClient) CreateAudit(ctx context.Context, req *CreateAuditRequest) (*CreateAuditResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/audit/v1/audit"
 	body, err := json.Marshal(req)
 	if err != nil {

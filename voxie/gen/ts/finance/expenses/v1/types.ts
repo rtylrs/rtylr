@@ -50,6 +50,11 @@ if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
 }
 
+export function validateExpense(v: Expense): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ExpenseCategory {
 id?: string;
 ownerId?: string;
@@ -79,14 +84,19 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 return out;
 }
 
+export function validateExpenseCategory(v: ExpenseCategory): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface CreateExpenseRequest {
 categoryId?: string;
 amount?: number;
-currency?: string;
-description?: string;
-vendor?: string;
-receiptUrl?: string;
-expenseDate?: string;
+currency: string;
+description: string;
+vendor: string;
+receiptUrl: string;
+expenseDate: string;
 }
 
 export function decodeCreateExpenseRequest(v: any): CreateExpenseRequest {
@@ -114,6 +124,17 @@ if (v.expenseDate !== undefined) { out.expense_date = v.expenseDate; }
 return out;
 }
 
+export function validateCreateExpenseRequest(v: CreateExpenseRequest): string[] {
+const violations: string[] = [];
+if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
+if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.vendor !== undefined && v.vendor !== null) || v.vendor === "") violations.push("vendor is required");
+if (!(v.receiptUrl !== undefined && v.receiptUrl !== null) || v.receiptUrl === "") violations.push("receipt_url is required");
+if (!(v.expenseDate !== undefined && v.expenseDate !== null) || v.expenseDate === "") violations.push("expense_date is required");
+return violations;
+}
+
 export interface CreateExpenseResponse {
 expenseId?: string;
 message?: string;
@@ -134,8 +155,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateCreateExpenseResponse(v: CreateExpenseResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface DeleteExpenseRequest {
-id?: string;
+id: string;
 }
 
 export function decodeDeleteExpenseRequest(v: any): DeleteExpenseRequest {
@@ -149,6 +175,13 @@ export function encodeDeleteExpenseRequest(v: DeleteExpenseRequest): Record<stri
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateDeleteExpenseRequest(v: DeleteExpenseRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface DeleteExpenseResponse {
@@ -168,8 +201,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateDeleteExpenseResponse(v: DeleteExpenseResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface GetExpenseRequest {
-id?: string;
+id: string;
 }
 
 export function decodeGetExpenseRequest(v: any): GetExpenseRequest {
@@ -183,6 +221,13 @@ export function encodeGetExpenseRequest(v: GetExpenseRequest): Record<string, un
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 return out;
+}
+
+export function validateGetExpenseRequest(v: GetExpenseRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
 }
 
 export interface GetExpenseResponse {
@@ -202,6 +247,12 @@ if (v.expense !== undefined) { out.expense = encodeExpense(v.expense); }
 return out;
 }
 
+export function validateGetExpenseResponse(v: GetExpenseResponse): string[] {
+const violations: string[] = [];
+if (v.expense !== undefined && v.expense !== null) violations.push(...validateExpense(v.expense).map((message) => "expense: " + message));
+return violations;
+}
+
 export interface ListExpenseCategoriesRequest {
 }
 
@@ -214,6 +265,11 @@ return {
 export function encodeListExpenseCategoriesRequest(v: ListExpenseCategoriesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListExpenseCategoriesRequest(v: ListExpenseCategoriesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListExpenseCategoriesResponse {
@@ -233,6 +289,12 @@ if (v.categories !== undefined) { out.categories = (v.categories as any[]).map(e
 return out;
 }
 
+export function validateListExpenseCategoriesResponse(v: ListExpenseCategoriesResponse): string[] {
+const violations: string[] = [];
+if (v.categories !== undefined && v.categories !== null) for (const item of v.categories) violations.push(...validateExpenseCategory(item).map((message) => "categories: " + message));
+return violations;
+}
+
 export interface ListExpensesRequest {
 }
 
@@ -245,6 +307,11 @@ return {
 export function encodeListExpensesRequest(v: ListExpensesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 return out;
+}
+
+export function validateListExpensesRequest(v: ListExpensesRequest): string[] {
+const violations: string[] = [];
+return violations;
 }
 
 export interface ListExpensesResponse {
@@ -264,14 +331,20 @@ if (v.expenses !== undefined) { out.expenses = (v.expenses as any[]).map(encodeE
 return out;
 }
 
+export function validateListExpensesResponse(v: ListExpensesResponse): string[] {
+const violations: string[] = [];
+if (v.expenses !== undefined && v.expenses !== null) for (const item of v.expenses) violations.push(...validateExpense(item).map((message) => "expenses: " + message));
+return violations;
+}
+
 export interface UpdateExpenseBody {
 categoryId?: string;
 amount?: number;
-currency?: string;
-description?: string;
-vendor?: string;
-receiptUrl?: string;
-expenseDate?: string;
+currency: string;
+description: string;
+vendor: string;
+receiptUrl: string;
+expenseDate: string;
 }
 
 export function decodeUpdateExpenseBody(v: any): UpdateExpenseBody {
@@ -299,8 +372,19 @@ if (v.expenseDate !== undefined) { out.expense_date = v.expenseDate; }
 return out;
 }
 
+export function validateUpdateExpenseBody(v: UpdateExpenseBody): string[] {
+const violations: string[] = [];
+if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
+if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (!(v.vendor !== undefined && v.vendor !== null) || v.vendor === "") violations.push("vendor is required");
+if (!(v.receiptUrl !== undefined && v.receiptUrl !== null) || v.receiptUrl === "") violations.push("receipt_url is required");
+if (!(v.expenseDate !== undefined && v.expenseDate !== null) || v.expenseDate === "") violations.push("expense_date is required");
+return violations;
+}
+
 export interface UpdateExpenseRequest {
-id?: string;
+id: string;
 body?: UpdateExpenseBody;
 }
 
@@ -317,6 +401,14 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.body !== undefined) { out.body = encodeUpdateExpenseBody(v.body); }
 return out;
+}
+
+export function validateUpdateExpenseRequest(v: UpdateExpenseRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateExpenseBody(v.body).map((message) => "body: " + message));
+return violations;
 }
 
 export interface UpdateExpenseResponse {
@@ -336,8 +428,13 @@ if (v.message !== undefined) { out.message = v.message; }
 return out;
 }
 
+export function validateUpdateExpenseResponse(v: UpdateExpenseResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface UpdateExpenseStatusBody {
-status?: string;
+status: string;
 }
 
 export function decodeUpdateExpenseStatusBody(v: any): UpdateExpenseStatusBody {
@@ -353,8 +450,14 @@ if (v.status !== undefined) { out.status = v.status; }
 return out;
 }
 
+export function validateUpdateExpenseStatusBody(v: UpdateExpenseStatusBody): string[] {
+const violations: string[] = [];
+if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+return violations;
+}
+
 export interface UpdateExpenseStatusRequest {
-id?: string;
+id: string;
 body?: UpdateExpenseStatusBody;
 }
 
@@ -373,6 +476,14 @@ if (v.body !== undefined) { out.body = encodeUpdateExpenseStatusBody(v.body); }
 return out;
 }
 
+export function validateUpdateExpenseStatusRequest(v: UpdateExpenseStatusRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateExpenseStatusBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
 export interface UpdateExpenseStatusResponse {
 message?: string;
 }
@@ -388,5 +499,10 @@ export function encodeUpdateExpenseStatusResponse(v: UpdateExpenseStatusResponse
 const out: Record<string, unknown> = {};
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateUpdateExpenseStatusResponse(v: UpdateExpenseStatusResponse): string[] {
+const violations: string[] = [];
+return violations;
 }
 

@@ -23,6 +23,11 @@ func NewTerminalServiceClient(baseURL string) *TerminalServiceClient {
 }
 
 func (c *TerminalServiceClient) ListTerminals(ctx context.Context, req *ListTerminalsRequest) (*ListTerminalsResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/terminal/v1/terminals"
 	query := url.Values{}
 	if len(query) > 0 {
@@ -53,6 +58,11 @@ func (c *TerminalServiceClient) ListTerminals(ctx context.Context, req *ListTerm
 }
 
 func (c *TerminalServiceClient) CreateTerminal(ctx context.Context, req *CreateTerminalRequest) (*CreateTerminalResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/terminal/v1/terminals"
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -84,9 +94,14 @@ func (c *TerminalServiceClient) CreateTerminal(ctx context.Context, req *CreateT
 }
 
 func (c *TerminalServiceClient) UpdateTerminal(ctx context.Context, req *UpdateTerminalRequest) (*UpdateTerminalResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/terminal/v1/terminals/{id}"
 	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
@@ -116,6 +131,11 @@ func (c *TerminalServiceClient) UpdateTerminal(ctx context.Context, req *UpdateT
 }
 
 func (c *TerminalServiceClient) HeartbeatTerminal(ctx context.Context, req *HeartbeatTerminalRequest) (*HeartbeatTerminalResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/terminal/v1/terminals/heartbeat"
 	body, err := json.Marshal(req)
 	if err != nil {

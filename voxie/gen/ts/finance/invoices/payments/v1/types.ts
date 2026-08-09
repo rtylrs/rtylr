@@ -2,12 +2,12 @@
 import * as finance_invoices_v1 from "../../v1/types";
 
 export interface RecordPaymentRequest {
-invoiceId?: string;
+invoiceId: string;
 amount?: number;
-currency?: string;
-paymentDate?: string;
-method?: string;
-reference?: string;
+currency: string;
+paymentDate: string;
+method: string;
+reference: string;
 notes?: string;
 }
 
@@ -36,6 +36,18 @@ if (v.notes !== undefined) { out.notes = v.notes; }
 return out;
 }
 
+export function validateRecordPaymentRequest(v: RecordPaymentRequest): string[] {
+const violations: string[] = [];
+if (!(v.invoiceId !== undefined && v.invoiceId !== null)) violations.push("invoice_id is required");
+if (v.invoiceId !== undefined && v.invoiceId !== null && !(Number(v.invoiceId) > 0)) violations.push("invoice_id violates @gt");
+if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
+if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (!(v.paymentDate !== undefined && v.paymentDate !== null) || v.paymentDate === "") violations.push("payment_date is required");
+if (!(v.method !== undefined && v.method !== null) || v.method === "") violations.push("method is required");
+if (!(v.reference !== undefined && v.reference !== null) || v.reference === "") violations.push("reference is required");
+return violations;
+}
+
 export interface RecordPaymentResponse {
 payment?: finance_invoices_v1.RecordPaymentResponsePayload;
 message?: string;
@@ -54,5 +66,11 @@ const out: Record<string, unknown> = {};
 if (v.payment !== undefined) { out.payment = finance_invoices_v1.encodeRecordPaymentResponsePayload(v.payment); }
 if (v.message !== undefined) { out.message = v.message; }
 return out;
+}
+
+export function validateRecordPaymentResponse(v: RecordPaymentResponse): string[] {
+const violations: string[] = [];
+if (v.payment !== undefined && v.payment !== null) violations.push(...finance_invoices_v1.validateRecordPaymentResponsePayload(v.payment).map((message) => "payment: " + message));
+return violations;
 }
 

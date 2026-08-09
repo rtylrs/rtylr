@@ -22,10 +22,15 @@ func NewOrderItemServiceClient(baseURL string) *OrderItemServiceClient {
 }
 
 func (c *OrderItemServiceClient) UpdateOrderItemStatus(ctx context.Context, req *UpdateOrderItemStatusRequest) (*UpdateOrderItemStatusResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
 	path := "/pos/orders/items/v1/orders/{order_id}/items/{item_id}/status"
 	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
 	path = strings.ReplaceAll(path, "{item_id}", fmt.Sprintf("%v", req.ItemId))
-	body, err := json.Marshal(req)
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
