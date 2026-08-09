@@ -1,7 +1,0 @@
-package hr.report.v1
-
-/// ReportService defines HR report generation endpoints.
-service ReportService {
-  /// Generates an HR report.
-  generateReport(GenerateReportRequest) -> GenerateReportResponse @post("/reports/generate")
-}

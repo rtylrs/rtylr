@@ -23,6 +23,11 @@ Shared frontend packages for the voxire platform. Used as a git submodule in `vo
 | `@voxire/ui`              | Headless UI primitives (shadcn-based)          |
 | `@voxire/utils`           | Formatting, validation, and common hooks       |
 
+`voxie/` is a nested git submodule pointing at the generated contract source.
+Edit and regenerate contracts in the Voxie repository; update this repository
+with a submodule pointer only. Do not copy contract or generated files into
+this repository.
+
 ## Usage
 
 This repo is consumed as a git submodule, not published to npm.
@@ -41,6 +46,13 @@ Your `pnpm-workspace.yaml` must include `packages/*` so pnpm resolves `@voxire/*
 ```bash
 git submodule update --remote packages
 git add packages && git commit -m "chore: bump voxire/packages"
+```
+
+To update the nested contract submodule from this repository:
+
+```bash
+git submodule update --remote voxie
+git add voxie && git commit -m "chore: bump Voxie contract submodule"
 ```
 
 ### CI (GitHub Actions / Cloud Build)

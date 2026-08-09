@@ -1,7 +1,0 @@
-package crm.dashboard.v1
-
-/// DashboardService defines the CRM dashboard endpoint.
-service DashboardService {
-  /// Returns CRM summary metrics for the active business.
-  getDashboard(GetDashboardRequest) -> GetDashboardResponse @get("/dashboard")
-}

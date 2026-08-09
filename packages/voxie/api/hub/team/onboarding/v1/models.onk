@@ -1,7 +1,0 @@
-package hub.team.onboarding.v1
-
-message MarkOnboardedRequest {}
-
-message MarkOnboardedResponse {
-  message: string
-}

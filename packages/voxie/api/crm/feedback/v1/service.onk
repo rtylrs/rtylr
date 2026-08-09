@@ -1,7 +1,0 @@
-package crm.feedback.v1
-
-service FeedbackService {
-  listFeedback(ListFeedbackRequest) -> ListFeedbackResponse @get("/feedback")
-
-  createFeedback(CreateFeedbackRequest) -> CreateFeedbackResponse @post("/feedback")
-}

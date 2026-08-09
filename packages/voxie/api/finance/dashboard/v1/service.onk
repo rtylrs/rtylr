@@ -1,6 +1,0 @@
-package finance.dashboard.v1
-
-/// DashboardService defines the finance dashboard endpoint.
-service DashboardService {
-  getFinanceDashboard(GetFinanceDashboardRequest) -> GetFinanceDashboardResponse @get("/dashboard")
-}

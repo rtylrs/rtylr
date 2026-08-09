@@ -1,5 +1,0 @@
-package flow.dashboard.v1
-
-service DashboardService {
-  getFlowDashboard(GetFlowDashboardRequest) -> GetFlowDashboardResponse @get("/dashboard")
-}

@@ -1,7 +1,0 @@
-package booking.reminder.v1
-
-service ReminderService {
-  listReminders(ListRemindersRequest) -> ListRemindersResponse @get("/reminders")
-
-  createReminder(CreateReminderRequest) -> CreateReminderResponse @post("/reminders")
-}

@@ -1,7 +1,0 @@
-package crm.settings.v1
-
-service SettingsService {
-  getSettings(GetSettingsRequest) -> GetSettingsResponse @get("/settings")
-
-  updateSettings(UpdateSettingsRequest) -> UpdateSettingsResponse @put("/settings")
-}
