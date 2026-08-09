@@ -1,8 +1,23 @@
--- Unified stock model — Slice 1 (backfill; idempotent, re-runnable).
+-- Unified stock model — Slice 1 (backfill; one-time seed per tenant).
 -- Seeds a default native warehouse per tenant, copies the legacy
 -- erp_products.stock_quantity scalar into per-location stock_levels, and writes
--- an 'opening' ledger row documenting the migration origin. No code path
--- changes; the scalar remains authoritative for reads.
+-- an 'opening' ledger row documenting the migration origin.
+--
+-- The scalar is no longer authoritative for reads. stock_core.ApplyMovementTx
+-- now maintains stock_levels and stock_ledger as the record of on-hand and
+-- keeps the scalar in step by applying the same delta in the same transaction.
+-- ERP reads still select the scalar and are correct because of that sync, but
+-- POS branch-inventory reads select stock_levels.on_hand directly and POS
+-- movement history reads stock_ledger as its only source.
+--
+-- Re-run caution: steps 1 and 3 remain idempotent, but step 2's
+-- ON DUPLICATE KEY UPDATE on_hand = VALUES(on_hand) now overwrites a live,
+-- ledger-maintained balance with the scalar. Because SyncProductStockScalar
+-- accumulates every location's movements into one per-product scalar, that
+-- value is the owner-wide total; re-seeding a tenant that has more than one
+-- location writes the owner-wide total into the default warehouse row and
+-- desynchronizes it from stock_ledger. Treat this as a one-time seed for a
+-- tenant whose stock_levels rows do not exist yet, not as a safe repeat.
 
 -- 1. One default native warehouse per tenant that has products.
 INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_id, name, is_default, is_active)
