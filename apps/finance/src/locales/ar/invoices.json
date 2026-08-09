@@ -1,9 +1,0 @@
-{
-  "created": "Invoice created",
-  "updated": "Invoice updated",
-  "deleted": "Invoice deleted",
-  "paymentRecorded": "Payment recorded",
-  "statusUpdated": "Invoice status updated",
-  "markedPaid": "Marked {{id}} paid",
-  "markPaidFailed": "Failed to mark {{id}} paid"
-}
