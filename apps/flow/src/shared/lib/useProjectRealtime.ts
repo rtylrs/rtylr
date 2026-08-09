@@ -35,6 +35,14 @@ export function useProjectRealtime(projectId: string | undefined): void {
       // project, the overview aggregate, etc.).
       if (e.type.startsWith('task.') || e.type.startsWith('column.')) {
         qc.invalidateQueries({ queryKey: ['tasks'] });
+        // `my-tasks` is a separate key from `tasks`, so the line above does
+        // not cover it. Any task in this project can be assigned to the
+        // current user, which means a teammate's edit can change what My
+        // tasks and Today should show. Every task mutation in useTasks.ts
+        // already invalidates both keys together; realtime has to match, or
+        // the cache stays stale until the 60s staleTime lapses
+        // (refetchOnWindowFocus is off, so nothing else refreshes it).
+        qc.invalidateQueries({ queryKey: ['my-tasks'] });
         qc.invalidateQueries({ queryKey: ['columns', projectId] });
         qc.invalidateQueries({ queryKey: ['project-overview', projectId] });
         qc.invalidateQueries({ queryKey: ['milestones', projectId] });
