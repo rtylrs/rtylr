@@ -466,7 +466,7 @@ export const flowApi = {
     description?: string;
   }) =>
     safe.post<{ project: ApiProject }>('/flow/project/v1/projects', {
-      workspace_id: Number(data.workspaceId),
+      workspace_id: Number(data.workspaceId) || 0,
       name: data.name,
       description: data.description ?? '-',
       icon: 'folder',
