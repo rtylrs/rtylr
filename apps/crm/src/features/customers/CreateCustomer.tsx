@@ -1,0 +1,258 @@
+import React, { useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
+import { useNavigate } from '@tanstack/react-router';
+import { toast } from 'sonner';
+import { Check, ArrowLeft, ArrowRight } from 'lucide-react';
+import { useCreateCustomer } from '../../shared/hooks/queries/useCustomers';
+import { Breadcrumbs, Button, Card, Input, PageHeader } from '../../shared/components/ui';
+
+interface FormData {
+  name: string;
+  email: string;
+  phone: string;
+  birthday: string;
+  address: string;
+  consentEmail: boolean;
+  consentSms: boolean;
+  consentMarketing: boolean;
+}
+
+const steps = [
+  { key: 'info', label: 'Info' },
+  { key: 'contact', label: 'Contact' },
+  { key: 'consent', label: 'Consent' },
+];
+
+const CreateCustomer: React.FC = () => {
+  const navigate = useNavigate();
+  const create = useCreateCustomer();
+  const [step, setStep] = useState(0);
+  const [data, setData] = useState<FormData>({
+    name: '',
+    email: '',
+    phone: '',
+    birthday: '',
+    address: '',
+    consentEmail: true,
+    consentSms: false,
+    consentMarketing: true,
+  });
+
+  const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
+    setData((d) => ({ ...d, [k]: v }));
+
+  const canNext = () => {
+    if (step === 0) return data.name.trim().length > 0;
+    if (step === 1) return data.email.trim().length > 0 || data.phone.trim().length > 0;
+    return true;
+  };
+
+  const handleSubmit = () => {
+    create.mutate(
+      {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        initials: data.name
+          .split(' ')
+          .map((p) => p[0])
+          .join('')
+          .slice(0, 2)
+          .toUpperCase(),
+        totalSpent: 0,
+        visits: 0,
+        loyaltyPoints: 0,
+        lastVisit: 'Never',
+        birthday: data.birthday,
+        consent: {
+          email: data.consentEmail,
+          sms: data.consentSms,
+          marketing: data.consentMarketing,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success('Customer created');
+          navigate({ to: '/customers' });
+        },
+        onError: () => {
+          toast.error('Failed to create customer');
+        },
+      }
+    );
+  };
+
+  return (
+    <>
+      <HelmetContainer title="New customer · rtylr" />
+      <div style={{ maxWidth: '680px' }}>
+        <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: 'New' }]} />
+        <PageHeader title="New customer" subtitle="Add a customer in 3 short steps" />
+
+        {/* Stepper */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+          {steps.map((s, i) => (
+            <div
+              key={s.key}
+              style={{
+                flex: 1,
+                padding: '10px 14px',
+                borderRadius: '10px',
+                background: i <= step ? 'rgba(59,130,246,0.1)' : 'var(--hub-card)',
+                border:
+                  i === step ? '1px solid rgba(59,130,246,0.4)' : '1px solid var(--hub-border)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <div
+                style={{
+                  width: '22px',
+                  height: '22px',
+                  borderRadius: '50%',
+                  background:
+                    i < step ? '#3b82f6' : i === step ? 'rgba(59,130,246,0.2)' : 'var(--hub-hover)',
+                  color: i < step ? '#fff' : i === step ? '#3b82f6' : 'var(--hub-text-muted)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                }}
+              >
+                {i < step ? <Check size={12} /> : i + 1}
+              </div>
+              <span
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: i <= step ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+                }}
+              >
+                {s.label}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <Card>
+          {step === 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <Input
+                label="Full name"
+                value={data.name}
+                onChange={(e) => set('name', e.target.value)}
+                placeholder="Jane Doe"
+              />
+              <Input
+                label="Birthday"
+                type="date"
+                value={data.birthday}
+                onChange={(e) => set('birthday', e.target.value)}
+              />
+              <Input
+                label="Address"
+                value={data.address}
+                onChange={(e) => set('address', e.target.value)}
+                placeholder="Street, city, zip"
+              />
+            </div>
+          )}
+          {step === 1 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <Input
+                label="Email"
+                type="email"
+                value={data.email}
+                onChange={(e) => set('email', e.target.value)}
+                placeholder="jane@example.com"
+              />
+              <Input
+                label="Phone"
+                type="tel"
+                value={data.phone}
+                onChange={(e) => set('phone', e.target.value)}
+                placeholder="+1 555-000-0000"
+              />
+            </div>
+          )}
+          {step === 2 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {[
+                {
+                  key: 'consentEmail' as const,
+                  label: 'Email updates',
+                  desc: 'Order confirmations, product news',
+                },
+                {
+                  key: 'consentSms' as const,
+                  label: 'SMS updates',
+                  desc: 'Text reminders and alerts',
+                },
+                {
+                  key: 'consentMarketing' as const,
+                  label: 'Marketing',
+                  desc: 'Promotional offers and campaigns',
+                },
+              ].map((c) => (
+                <label
+                  key={c.key}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '12px 14px',
+                    borderRadius: '10px',
+                    background: 'var(--hub-hover)',
+                    cursor: 'pointer',
+                    border: '1px solid var(--hub-border)',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={data[c.key]}
+                    onChange={(e) => set(c.key, e.target.checked)}
+                    style={{ accentColor: '#3b82f6', width: '16px', height: '16px' }}
+                  />
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+                      {c.label}
+                    </div>
+                    <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{c.desc}</div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+          <Button
+            variant="outline"
+            disabled={step === 0}
+            onClick={() => (step > 0 ? setStep(step - 1) : navigate({ to: '/customers' }))}
+          >
+            <ArrowLeft size={13} />
+            {step === 0 ? 'Cancel' : 'Back'}
+          </Button>
+          {step < steps.length - 1 ? (
+            <Button variant="primary" disabled={!canNext()} onClick={() => setStep(step + 1)}>
+              Next <ArrowRight size={13} />
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              onClick={handleSubmit}
+              disabled={create.isPending || !data.name.trim()}
+            >
+              {create.isPending ? 'Creating…' : 'Create customer'}
+            </Button>
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default CreateCustomer;

@@ -1,0 +1,18 @@
+{
+  "title": "Inbox",
+  "unreadCount_one": "{{count}} unread notification",
+  "unreadCount_other": "{{count}} unread notifications",
+  "markAllRead": "Mark all read",
+  "filters": {
+    "all": "All",
+    "unread": "Unread",
+    "assigned": "Assigned to me"
+  },
+  "emptyTitle": "All caught up!",
+  "emptyDescription": "No notifications to show.",
+  "time": {
+    "justNow": "Just now",
+    "hoursAgo": "{{count}}h ago",
+    "yesterday": "Yesterday"
+  }
+}

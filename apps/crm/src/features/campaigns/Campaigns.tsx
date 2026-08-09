@@ -1,0 +1,596 @@
+import React, { useMemo, useState } from 'react';
+import { HelmetContainer } from '@voxire/components';
+import { useNavigate } from '@tanstack/react-router';
+import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
+import {
+  Plus,
+  Mail,
+  MessageSquare,
+  Bell,
+  Users,
+  Send,
+  Eye,
+  TrendingUp,
+  Trash2,
+} from 'lucide-react';
+import {
+  useListCampaigns,
+  useUpdateCampaignStatus,
+  useDeleteCampaign,
+} from '../../shared/hooks/queries/useCampaigns';
+import { useListSegments } from '../../shared/hooks/queries/useSegments';
+import {
+  calculateOpenRate,
+  type Campaign as CampaignPayload,
+} from '../../shared/schemas/campaigns';
+import { ConfirmModal } from '../../shared/components/ui';
+
+const ACCENT = '#3b82f6';
+
+type CampaignStatus = 'Draft' | 'Active' | 'Paused' | 'Completed';
+type Channel = 'Email' | 'SMS' | 'Push';
+
+interface Campaign {
+  id: number;
+  name: string;
+  description: string;
+  channel: Channel;
+  status: CampaignStatus;
+  audienceSegmentId?: number | null;
+  audience: number;
+  sent: number;
+  openRate: string;
+  clickRate: string;
+  revenue: string;
+  updatedAt: string;
+}
+
+const TYPE_TO_CHANNEL: Record<string, Channel> = {
+  email: 'Email',
+  sms: 'SMS',
+  push: 'Push',
+};
+
+const STATUS_TO_DISPLAY: Record<string, CampaignStatus> = {
+  draft: 'Draft',
+  active: 'Active',
+  paused: 'Paused',
+  completed: 'Completed',
+  scheduled: 'Draft',
+};
+
+/** Projects a backend campaign payload onto the local display shape. */
+function toDisplayCampaign(c: CampaignPayload, audienceBySegment: Map<number, number>): Campaign {
+  const segmentAudience =
+    c.audienceSegmentId !== null && c.audienceSegmentId !== undefined
+      ? audienceBySegment.get(c.audienceSegmentId)
+      : undefined;
+  return {
+    id: c.id,
+    name: c.name,
+    description: c.subject ?? '',
+    channel: TYPE_TO_CHANNEL[c.type] ?? 'Email',
+    status: STATUS_TO_DISPLAY[c.status] ?? 'Draft',
+    audienceSegmentId: c.audienceSegmentId,
+    audience: segmentAudience ?? c.audienceCount ?? c.sentCount,
+    sent: c.sentCount,
+    openRate: `${Math.round(calculateOpenRate(c))}%`,
+    clickRate: '-',
+    revenue: '-',
+    updatedAt: c.updatedAt ?? '',
+  };
+}
+
+const statusColor: Record<CampaignStatus, { bg: string; text: string; dot: string }> = {
+  Draft: { bg: 'rgba(148,163,184,0.12)', text: '#94a3b8', dot: '#94a3b8' },
+  Active: { bg: 'rgba(16,185,129,0.12)', text: '#10b981', dot: '#10b981' },
+  Paused: { bg: 'rgba(245,158,11,0.12)', text: '#f59e0b', dot: '#f59e0b' },
+  Completed: { bg: 'rgba(59,130,246,0.12)', text: ACCENT, dot: ACCENT },
+};
+
+const channelIcon: Record<Channel, React.ComponentType<{ size?: number }>> = {
+  Email: Mail,
+  SMS: MessageSquare,
+  Push: Bell,
+};
+
+const channelColor: Record<Channel, string> = {
+  Email: ACCENT,
+  SMS: '#10b981',
+  Push: '#8b5cf6',
+};
+
+const statusFilters: Array<'All' | CampaignStatus> = [
+  'All',
+  'Active',
+  'Draft',
+  'Paused',
+  'Completed',
+];
+
+function StatusBadge({ status }: { status: CampaignStatus }) {
+  const s = statusColor[status];
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '5px',
+        padding: '2px 10px',
+        borderRadius: '9999px',
+        fontSize: '11px',
+        fontWeight: 600,
+        background: s.bg,
+        color: s.text,
+      }}
+    >
+      <span
+        style={{
+          width: '5px',
+          height: '5px',
+          borderRadius: '50%',
+          background: s.dot,
+          display: 'inline-block',
+        }}
+      />
+      {status}
+    </span>
+  );
+}
+
+function CampaignCard({
+  campaign,
+  index,
+  onClick,
+  onLaunch,
+  onPause,
+  onEdit,
+  onDelete,
+  statusPending,
+  deletePending,
+}: {
+  campaign: Campaign;
+  index: number;
+  onClick?: () => void;
+  onLaunch: () => void;
+  onPause: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  statusPending: boolean;
+  deletePending: boolean;
+}) {
+  const ChannelIcon = channelIcon[campaign.channel];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ delay: index * 0.05, duration: 0.2 }}
+      onClick={onClick}
+      style={{
+        background: 'var(--hub-card)',
+        border: '1px solid var(--hub-border)',
+        borderRadius: '12px',
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        cursor: onClick ? 'pointer' : 'default',
+      }}
+    >
+      {/* Card header */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: '12px',
+        }}
+      >
+        <div
+          style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1, minWidth: 0 }}
+        >
+          <div
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '10px',
+              background: `${channelColor[campaign.channel]}15`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <ChannelIcon
+              size={16}
+              {...({ style: { color: channelColor[campaign.channel] } } as any)}
+            />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: '14px',
+                fontWeight: 600,
+                color: 'var(--hub-text)',
+                marginBottom: '2px',
+              }}
+            >
+              {campaign.name}
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--hub-text-muted)', lineHeight: 1.4 }}>
+              {campaign.description}
+            </div>
+          </div>
+        </div>
+        <StatusBadge status={campaign.status} />
+      </div>
+
+      {/* Stats row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+        {[
+          {
+            label: 'Audience',
+            value: campaign.audience ? campaign.audience.toLocaleString() : '-',
+            icon: Users,
+          },
+          {
+            label: 'Sent',
+            value: campaign.sent ? campaign.sent.toLocaleString() : '-',
+            icon: Send,
+          },
+          { label: 'Open Rate', value: campaign.openRate, icon: Eye },
+          { label: 'Click Rate', value: campaign.clickRate, icon: TrendingUp },
+        ].map(({ label, value, icon: Icon }) => (
+          <div
+            key={label}
+            style={{
+              padding: '10px 12px',
+              borderRadius: '8px',
+              background: 'var(--hub-hover)',
+              border: '1px solid var(--hub-border)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '4px' }}>
+              <Icon size={11} style={{ color: 'var(--hub-text-dim)' }} />
+              <span
+                style={{
+                  fontSize: '10px',
+                  color: 'var(--hub-text-dim)',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                {label}
+              </span>
+            </div>
+            <span style={{ fontSize: '16px', fontWeight: 700, color: 'var(--hub-text)' }}>
+              {value}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
+          Updated {campaign.updatedAt}
+        </span>
+        <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
+          {campaign.status === 'Draft' && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onLaunch();
+              }}
+              disabled={statusPending}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '7px',
+                fontSize: '12px',
+                fontWeight: 600,
+                background: ACCENT,
+                color: '#fff',
+                border: 'none',
+                cursor: statusPending ? 'not-allowed' : 'pointer',
+                opacity: statusPending ? 0.6 : 1,
+              }}
+            >
+              {statusPending ? 'Launching…' : 'Launch'}
+            </button>
+          )}
+          {campaign.status === 'Active' && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onPause();
+              }}
+              disabled={statusPending}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '7px',
+                fontSize: '12px',
+                fontWeight: 600,
+                background: 'rgba(245,158,11,0.12)',
+                color: '#f59e0b',
+                border: '1px solid rgba(245,158,11,0.25)',
+                cursor: statusPending ? 'not-allowed' : 'pointer',
+                opacity: statusPending ? 0.6 : 1,
+              }}
+            >
+              {statusPending ? 'Pausing…' : 'Pause'}
+            </button>
+          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            style={{
+              padding: '6px 14px',
+              borderRadius: '7px',
+              fontSize: '12px',
+              fontWeight: 500,
+              background: 'var(--hub-hover)',
+              color: 'var(--hub-text-muted)',
+              border: '1px solid var(--hub-border)',
+              cursor: 'pointer',
+            }}
+          >
+            {campaign.status === 'Completed' ? 'View Report' : 'Edit'}
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            disabled={deletePending}
+            aria-label="Delete campaign"
+            style={{
+              padding: '6px 10px',
+              borderRadius: '7px',
+              fontSize: '12px',
+              fontWeight: 500,
+              background: 'rgba(239,68,68,0.08)',
+              color: '#ef4444',
+              border: '1px solid rgba(239,68,68,0.25)',
+              cursor: deletePending ? 'not-allowed' : 'pointer',
+              opacity: deletePending ? 0.6 : 1,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Trash2 size={12} />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+const Campaigns: React.FC = () => {
+  const navigate = useNavigate();
+  const { data: fetchedCampaigns } = useListCampaigns();
+  const { data: fetchedSegments } = useListSegments();
+  const updateStatus = useUpdateCampaignStatus();
+  const removeCampaign = useDeleteCampaign();
+  const audienceBySegment = useMemo(
+    () =>
+      new Map(
+        (fetchedSegments ?? []).map((segment) => [Number(segment.id), segment.customerCount])
+      ),
+    [fetchedSegments]
+  );
+  const campaigns: Campaign[] = useMemo(
+    () =>
+      (fetchedCampaigns ?? []).map((campaign) => toDisplayCampaign(campaign, audienceBySegment)),
+    [audienceBySegment, fetchedCampaigns]
+  );
+  const [statusFilter, setStatusFilter] = useState<'All' | CampaignStatus>('All');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+  const filtered = campaigns.filter((c) => statusFilter === 'All' || c.status === statusFilter);
+
+  const handleLaunch = (id: number): void => {
+    const campaign = campaigns.find((c) => c.id === id);
+    if (fetchedSegments !== undefined && (campaign?.audience ?? 0) <= 0) {
+      toast.error('No eligible recipients for this campaign');
+      return;
+    }
+    updateStatus.mutate(
+      { id, status: 'active' },
+      {
+        onSuccess: () => toast.success('Campaign launched'),
+        onError: () => toast.error('Failed to launch campaign'),
+      }
+    );
+  };
+
+  const handlePause = (id: number): void => {
+    updateStatus.mutate(
+      { id, status: 'paused' },
+      {
+        onSuccess: () => toast.success('Campaign paused'),
+        onError: () => toast.error('Failed to pause campaign'),
+      }
+    );
+  };
+
+  const handleEdit = (c: Campaign): void => {
+    if (c.status === 'Completed') {
+      navigate({ to: `/campaigns/${c.id}` });
+      return;
+    }
+    const target = c.channel === 'SMS' ? '/campaigns/sms' : '/campaigns/email';
+    navigate({ to: `${target}?id=${c.id}` });
+  };
+
+  const handleDelete = (id: number): void => {
+    removeCampaign.mutate(id, {
+      onSuccess: () => {
+        toast.success('Campaign deleted');
+        setConfirmDeleteId(null);
+      },
+      onError: () => {
+        toast.error('Failed to delete campaign');
+        setConfirmDeleteId(null);
+      },
+    });
+  };
+
+  const deleteTarget = campaigns.find((c) => c.id === confirmDeleteId);
+
+  return (
+    <>
+      <HelmetContainer title="Campaigns · rtylr" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
+              Campaigns
+            </h2>
+            <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
+              {campaigns.filter((c) => c.status === 'Active').length} active campaigns
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => navigate({ to: '/campaigns/sms' })}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                background: 'transparent',
+                color: 'var(--hub-text)',
+                border: '1px solid var(--hub-border)',
+                cursor: 'pointer',
+              }}
+            >
+              <MessageSquare size={14} /> New SMS
+            </button>
+            <button
+              onClick={() => navigate({ to: '/campaigns/email' })}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                background: ACCENT,
+                color: '#fff',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <Plus size={15} /> New email campaign
+            </button>
+          </div>
+        </div>
+
+        {/* Filter tabs */}
+        <div
+          style={{
+            display: 'flex',
+            gap: '4px',
+            background: 'var(--hub-card)',
+            border: '1px solid var(--hub-border)',
+            borderRadius: '10px',
+            padding: '4px',
+            width: 'fit-content',
+          }}
+        >
+          {statusFilters.map((f) => (
+            <button
+              key={f}
+              onClick={() => setStatusFilter(f)}
+              style={{
+                padding: '6px 16px',
+                borderRadius: '7px',
+                fontSize: '12px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                border: 'none',
+                background: statusFilter === f ? ACCENT : 'transparent',
+                color: statusFilter === f ? '#fff' : 'var(--hub-text-muted)',
+                transition: 'all 0.15s',
+              }}
+            >
+              {f}
+              {f !== 'All' && (
+                <span
+                  style={{
+                    marginLeft: '6px',
+                    padding: '1px 5px',
+                    borderRadius: '9999px',
+                    fontSize: '10px',
+                    background: statusFilter === f ? 'rgba(255,255,255,0.25)' : 'var(--hub-hover)',
+                  }}
+                >
+                  {campaigns.filter((c) => c.status === f).length}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Campaign cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <AnimatePresence mode="popLayout">
+            {filtered.map((c, i) => (
+              <CampaignCard
+                key={c.id}
+                campaign={c}
+                index={i}
+                onClick={() => navigate({ to: `/campaigns/${c.id}` })}
+                onLaunch={() => handleLaunch(c.id)}
+                onPause={() => handlePause(c.id)}
+                onEdit={() => handleEdit(c)}
+                onDelete={() => setConfirmDeleteId(c.id)}
+                statusPending={updateStatus.isPending}
+                deletePending={removeCampaign.isPending}
+              />
+            ))}
+          </AnimatePresence>
+          {filtered.length === 0 && (
+            <div
+              style={{
+                padding: '60px',
+                textAlign: 'center',
+                color: 'var(--hub-text-muted)',
+                fontSize: '13px',
+              }}
+            >
+              No campaigns in this status.
+            </div>
+          )}
+        </div>
+
+        <ConfirmModal
+          open={confirmDeleteId !== null}
+          onClose={() => setConfirmDeleteId(null)}
+          onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
+          title="Delete campaign?"
+          description={
+            deleteTarget
+              ? `Are you sure you want to delete ${deleteTarget.name}? This action cannot be undone.`
+              : ''
+          }
+          confirmLabel="Delete"
+          variant="danger"
+        />
+      </div>
+    </>
+  );
+};
+
+export default Campaigns;

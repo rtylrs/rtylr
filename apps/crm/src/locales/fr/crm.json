@@ -1,0 +1,101 @@
+{
+  "customers": {
+    "title": "Customers",
+    "new": "New customer",
+    "import": "Import",
+    "exportCsv": "Export CSV",
+    "empty": "No customers found",
+    "createFirst": "Create your first customer to get started.",
+    "created": "Customer created",
+    "createFailed": "Failed to create customer",
+    "updated": "Customer updated",
+    "deleted": "Customer deleted",
+    "deleteFailed": "Failed to delete customer",
+    "deleteConfirmTitle": "Delete customer?",
+    "deleteConfirmDescription": "Are you sure you want to delete {{name}}? This action cannot be undone.",
+    "visitRecorded": "Visit recorded",
+    "exported": "Customer data exported",
+    "exportStarted": "Customer data export started",
+    "exportFailed": "Failed to export customer data",
+    "merged": "Customers merged",
+    "mergeFailed": "Failed to merge customers",
+    "imported": "Imported {{count}} customers",
+    "importFailed": "Failed to import customers",
+    "tagAdded": "Tag \"{{tag}}\" added",
+    "tagRemoved": "Tag \"{{tag}}\" removed",
+    "tagFailed": "Failed to update tag",
+    "notesSaved": "Notes saved",
+    "notesFailed": "Failed to save notes"
+  },
+  "loyalty": {
+    "configUpdated": "Loyalty config updated",
+    "tierSaved": "Tier saved",
+    "rewardSaved": "Reward saved",
+    "pointsAwarded": "Points awarded",
+    "pointsRedeemed": "Points redeemed"
+  },
+  "campaigns": {
+    "created": "Campaign created",
+    "updated": "Campaign updated",
+    "deleted": "Campaign deleted",
+    "deleteFailed": "Failed to delete campaign",
+    "deleteConfirmTitle": "Delete campaign?",
+    "statusUpdated": "Campaign status updated",
+    "launched": "Campaign launched",
+    "launchFailed": "Failed to launch campaign",
+    "paused": "Campaign paused",
+    "pauseFailed": "Failed to pause campaign",
+    "sent": "Campaign sent",
+    "sendFailed": "Failed to send campaign",
+    "draftSaved": "Draft saved",
+    "draftFailed": "Failed to save draft"
+  },
+  "segments": {
+    "created": "Segment created",
+    "createFailed": "Failed to create segment",
+    "updated": "Segment updated",
+    "deleted": "Segment deleted",
+    "deleteFailed": "Failed to delete segment",
+    "deleteConfirmTitle": "Delete segment?"
+  },
+  "automations": {
+    "created": "Automation created",
+    "updated": "Automation updated",
+    "deleted": "Automation deleted",
+    "deleteFailed": "Failed to delete automation",
+    "deleteConfirmTitle": "Delete automation?",
+    "saved": "Automation saved",
+    "saveFailed": "Failed to save automation",
+    "paused": "Automation paused",
+    "resumed": "Automation resumed",
+    "updateFailed": "Failed to update automation"
+  },
+  "settings": {
+    "updated": "Settings updated"
+  },
+  "team": {
+    "inviteSent": "Invitation sent",
+    "inviteFailed": "Failed to send invitation",
+    "memberRemoved": "Member removed",
+    "removeFailed": "Failed to remove member"
+  },
+  "actions": {
+    "launch": "Launch",
+    "pause": "Pause",
+    "resume": "Resume",
+    "edit": "Edit",
+    "delete": "Delete",
+    "viewReport": "View Report"
+  },
+  "states": {
+    "launching": "Launching…",
+    "pausing": "Pausing…",
+    "saving": "Saving…",
+    "sending": "Sending…",
+    "deleting": "Deleting…",
+    "importing": "Importing…",
+    "merging": "Merging…",
+    "creating": "Creating…",
+    "exporting": "Exporting…"
+  }
+}

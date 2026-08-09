@@ -1,0 +1,371 @@
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  Search,
+  LayoutGrid,
+  ListTodo,
+  Inbox,
+  Calendar,
+  Timer,
+  Users,
+  Milestone,
+  Map,
+  BarChart3,
+  Settings,
+  Plus,
+  FolderKanban,
+  Eye,
+  Archive,
+} from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
+import { useFlowStore } from '../stores/flowStore';
+import { useTasks } from '../../features/tasks/useTasks';
+import { useProjects } from '../../features/projects/useProjects';
+import { apiTaskToTask } from '../lib/taskMapper';
+import { flowApi } from '../services/flowApi';
+
+interface CommandItem {
+  id: string;
+  label: string;
+  hint?: string;
+  icon: React.ComponentType<{ size?: number }>;
+  action: () => void;
+  keywords?: string[];
+  group: 'nav' | 'task' | 'project' | 'action';
+}
+
+export const CommandBar: React.FC = () => {
+  const navigate = useNavigate();
+  const { commandBarOpen, setCommandBarOpen, setQuickCreateOpen, activeWorkspaceId } =
+    useFlowStore();
+  const { data: apiTasks = [] } = useTasks({});
+  const { data: apiProjects = [] } = useProjects(activeWorkspaceId || undefined);
+  const tasks = apiTasks.map(apiTaskToTask);
+  const projects = apiProjects;
+  const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [selected, setSelected] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query), 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  const { data: searchResults } = useQuery({
+    queryKey: ['task-search', debouncedQuery, activeWorkspaceId],
+    queryFn: () =>
+      unwrap(flowApi.searchTasks(debouncedQuery, activeWorkspaceId || '')).then(
+        (r) => r.tasks ?? []
+      ),
+    enabled: debouncedQuery.trim().length >= 3 && !!activeWorkspaceId,
+  });
+
+  useEffect(() => {
+    if (commandBarOpen) {
+      setQuery('');
+      setSelected(0);
+      setTimeout(() => inputRef.current?.focus(), 10);
+    }
+  }, [commandBarOpen]);
+
+  const items = useMemo<CommandItem[]>(() => {
+    const navItems: CommandItem[] = [
+      {
+        id: 'nav-inbox',
+        label: 'Go to Inbox',
+        icon: Inbox,
+        action: () => navigate({ to: '/inbox' }),
+        group: 'nav',
+        hint: 'G I',
+      },
+      {
+        id: 'nav-my',
+        label: 'My tasks',
+        icon: ListTodo,
+        action: () => navigate({ to: '/my-issues' }),
+        group: 'nav',
+        hint: 'G M',
+      },
+      {
+        id: 'nav-dash',
+        label: 'Workspace Dashboard',
+        icon: LayoutGrid,
+        action: () => navigate({ to: `/w/${activeWorkspaceId}` as string }),
+        group: 'nav',
+      },
+      {
+        id: 'nav-cal',
+        label: 'Calendar',
+        icon: Calendar,
+        action: () => navigate({ to: '/calendar' }),
+        group: 'nav',
+      },
+      {
+        id: 'nav-timeline',
+        label: 'Timeline',
+        icon: Timer,
+        action: () => navigate({ to: '/timeline' }),
+        group: 'nav',
+      },
+      {
+        id: 'nav-cycles',
+        label: 'Cycles',
+        icon: Timer,
+        action: () => navigate({ to: '/cycles' }),
+        group: 'nav',
+      },
+      {
+        id: 'nav-milestones',
+        label: 'Milestones',
+        icon: Milestone,
+        action: () => navigate({ to: '/milestones' }),
+        group: 'nav',
+      },
+      {
+        id: 'nav-roadmap',
+        label: 'Roadmap',
+        icon: Map,
+        action: () => navigate({ to: '/roadmap' }),
+        group: 'nav',
+      },
+      {
+        id: 'nav-insights',
+        label: 'Insights',
+        icon: BarChart3,
+        action: () => navigate({ to: '/insights' }),
+        group: 'nav',
+      },
+      {
+        id: 'nav-team',
+        label: 'Team',
+        icon: Users,
+        action: () => navigate({ to: '/team' }),
+        group: 'nav',
+      },
+      {
+        id: 'nav-triage',
+        label: 'Triage',
+        icon: Eye,
+        action: () => navigate({ to: '/triage' }),
+        group: 'nav',
+      },
+      {
+        id: 'nav-archive',
+        label: 'Archive',
+        icon: Archive,
+        action: () => navigate({ to: '/archive' }),
+        group: 'nav',
+      },
+      {
+        id: 'nav-views',
+        label: 'Views',
+        icon: Eye,
+        action: () => navigate({ to: '/views' }),
+        group: 'nav',
+      },
+      {
+        id: 'nav-settings',
+        label: 'Settings',
+        icon: Settings,
+        action: () => navigate({ to: '/settings' }),
+        group: 'nav',
+      },
+    ];
+    const actionItems: CommandItem[] = [
+      {
+        id: 'act-new-task',
+        label: 'New task',
+        icon: Plus,
+        hint: 'C',
+        action: () => setQuickCreateOpen(true),
+        group: 'action',
+      },
+    ];
+    const taskSource =
+      query.trim().length >= 3 ? (searchResults?.map(apiTaskToTask) ?? []) : tasks.slice(0, 30);
+    const taskItems: CommandItem[] = taskSource.map((t) => ({
+      id: `task-${t.id}`,
+      label: t.title,
+      hint: t.identifier,
+      icon: ListTodo,
+      action: () => navigate({ to: `/task/${t.id}` as string }),
+      keywords: [t.identifier, t.projectName],
+      group: 'task',
+    }));
+    const projectItems: CommandItem[] = projects.map((p) => ({
+      id: `proj-${p.id}`,
+      label: p.name,
+      icon: FolderKanban,
+      action: () => navigate({ to: `/w/${p.workspaceId}/p/${p.id}` as string }),
+      group: 'project',
+    }));
+    return [...actionItems, ...navItems, ...projectItems, ...taskItems];
+  }, [tasks, projects, activeWorkspaceId, navigate, setQuickCreateOpen, query, searchResults]);
+
+  const filtered = useMemo(() => {
+    if (!query.trim()) return items;
+    const q = query.toLowerCase();
+    return items.filter(
+      (i) =>
+        i.label.toLowerCase().includes(q) ||
+        i.hint?.toLowerCase().includes(q) ||
+        i.keywords?.some((k) => k.toLowerCase().includes(q))
+    );
+  }, [items, query]);
+
+  useEffect(() => {
+    if (selected >= filtered.length) setSelected(0);
+  }, [filtered, selected]);
+
+  const run = (item: CommandItem) => {
+    item.action();
+    setCommandBarOpen(false);
+  };
+
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setCommandBarOpen(false);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelected((s) => Math.min(filtered.length - 1, s + 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelected((s) => Math.max(0, s - 1));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const item = filtered[selected];
+      if (item) run(item);
+    }
+  };
+
+  const grouped = useMemo(() => {
+    const groups: Record<string, CommandItem[]> = { action: [], nav: [], project: [], task: [] };
+    filtered.forEach((i) => groups[i.group].push(i));
+    return groups;
+  }, [filtered]);
+
+  const groupLabels: Record<string, string> = {
+    action: 'Actions',
+    nav: 'Navigation',
+    project: 'Projects',
+    task: 'Tasks',
+  };
+
+  return (
+    <AnimatePresence>
+      {commandBarOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.12 }}
+          onClick={() => setCommandBarOpen(false)}
+          className="fixed inset-0 z-[100] flex items-start justify-center px-3 pt-4 sm:px-4 sm:pt-[10vh]"
+          style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+            transition={{ duration: 0.14 }}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={handleKey}
+            className="max-h-[min(85dvh,720px)] w-full max-w-xl overflow-hidden rounded-xl"
+            style={{
+              background: 'var(--flow-card)',
+              border: '1px solid var(--flow-border)',
+              boxShadow: 'var(--flow-shadow)',
+            }}
+          >
+            {/* Search input */}
+            <div
+              className="flex items-center gap-2 px-4 py-3"
+              style={{ borderBottom: '1px solid var(--flow-border)' }}
+            >
+              <Search size={15} style={{ color: 'var(--flow-text-dim)' }} />
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Type a command or search…"
+                className="flex-1 bg-transparent outline-none text-[13px]"
+                style={{ color: 'var(--flow-text)' }}
+              />
+              <span
+                className="text-[10px] px-1.5 py-0.5 rounded font-mono"
+                style={{
+                  background: 'var(--flow-hover)',
+                  color: 'var(--flow-text-dim)',
+                }}
+              >
+                ESC
+              </span>
+            </div>
+
+            {/* Results */}
+            <div className="max-h-[min(50vh,360px)] overflow-y-auto py-1 sm:max-h-[60vh]">
+              {filtered.length === 0 && (
+                <div
+                  className="text-[12px] text-center py-8"
+                  style={{ color: 'var(--flow-text-dim)' }}
+                >
+                  No results
+                </div>
+              )}
+              {(['action', 'nav', 'project', 'task'] as const).map((g) => {
+                const list = grouped[g];
+                if (!list || list.length === 0) return null;
+                return (
+                  <div key={g} className="mb-1">
+                    <div
+                      className="px-3 py-1 text-[9px] font-semibold uppercase tracking-widest"
+                      style={{ color: 'var(--flow-text-dim)' }}
+                    >
+                      {groupLabels[g]}
+                    </div>
+                    {list.map((item) => {
+                      const idx = filtered.indexOf(item);
+                      const active = idx === selected;
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.id}
+                          onMouseEnter={() => setSelected(idx)}
+                          onClick={() => run(item)}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[12px]"
+                          style={{
+                            background: active ? 'var(--flow-hover)' : 'transparent',
+                            color: 'var(--flow-text)',
+                          }}
+                        >
+                          <Icon size={13} />
+                          <span className="flex-1 truncate">{item.label}</span>
+                          {item.hint && (
+                            <span
+                              className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+                              style={{
+                                background: 'var(--flow-active)',
+                                color: 'var(--flow-text-dim)',
+                              }}
+                            >
+                              {item.hint}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+export default CommandBar;

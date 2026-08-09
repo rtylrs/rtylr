@@ -1,0 +1,10 @@
+node_modules
+dist
+.next
+.turbo
+pnpm-lock.yaml
+coverage
+*.min.js
+*.min.css
+voxie
+**/next-env.d.ts

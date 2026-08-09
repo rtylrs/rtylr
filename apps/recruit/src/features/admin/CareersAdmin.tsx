@@ -1,0 +1,221 @@
+import React, { useState } from 'react';
+import { toast } from 'sonner';
+import { Plus, Trash2, ExternalLink, Edit3 } from 'lucide-react';
+import { APP_URLS } from '@voxire/config';
+import { HelmetContainer } from '@voxire/components';
+
+import {
+  useAdminCareers,
+  useAdminSubmissions,
+  useCreateCareer,
+  useDeleteCareer,
+  useUpdateCareer,
+  useAdminCustomization,
+} from '../../shared/hooks/queries/useAdmin';
+import type { RecruitCareer } from '../../shared/lib/types';
+import CareerEditor from './CareerEditor';
+
+/**
+ * CareersAdmin - the HR-facing list of this business's openings. Lets
+ * an admin create, edit, publish/unpublish, and archive roles. The
+ * editor opens as a side drawer rather than a separate route so the
+ * list stays visible (and rank-ordered by created_at) while editing.
+ */
+const CareersAdmin: React.FC = (): React.JSX.Element => {
+  const { data: careersData, isLoading } = useAdminCareers();
+  const { data: customData } = useAdminCustomization();
+  const { data: submissionsData } = useAdminSubmissions();
+  const create = useCreateCareer();
+  const update = useUpdateCareer();
+  const del = useDeleteCareer();
+
+  const [editing, setEditing] = useState<RecruitCareer | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  const careers = careersData?.careers ?? [];
+  const submissions = submissionsData?.submissions ?? [];
+  const slug = customData?.customization?.slug;
+
+  return (
+    <>
+      <HelmetContainer title="Careers · rtylr" />
+      <div className="px-10 py-8">
+        <div className="flex items-baseline justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight">Careers</h1>
+            <p className="mt-1 text-sm text-white/60">
+              {careers.length} {careers.length === 1 ? 'role' : 'roles'} ·{' '}
+              {careers.filter((c) => c.isPublished).length} published
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {slug && (
+              <a
+                href={`${APP_URLS.recruit}/${slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm hover:bg-white/5"
+              >
+                <ExternalLink className="h-4 w-4" />
+                View public page
+              </a>
+            )}
+            <button
+              onClick={() => setCreating(true)}
+              className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90"
+            >
+              <Plus className="h-4 w-4" />
+              New role
+            </button>
+          </div>
+        </div>
+
+        <div
+          className="mt-8 overflow-hidden rounded-lg border"
+          style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+        >
+          {isLoading ? (
+            <div className="p-10 text-center text-sm text-white/60">Loading…</div>
+          ) : careers.length === 0 ? (
+            <div className="p-10 text-center text-sm text-white/60">
+              No roles yet. Click "New role" to create your first posting.
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead>
+                <tr className="border-b" style={{ borderColor: '#1f1f1f' }}>
+                  <Th>Title</Th>
+                  <Th>Department</Th>
+                  <Th>Location</Th>
+                  <Th>Status</Th>
+                  <Th align="right">Actions</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {careers.map((c) => (
+                  <tr
+                    key={c.id}
+                    className="border-b transition hover:bg-white/5"
+                    style={{ borderColor: '#1f1f1f' }}
+                  >
+                    <td className="px-4 py-3 font-medium">{c.title}</td>
+                    <td className="px-4 py-3 text-sm text-white/70">{c.department || '-'}</td>
+                    <td className="px-4 py-3 text-sm text-white/70">{c.location || '-'}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium"
+                        style={{
+                          background: c.isPublished
+                            ? 'rgba(16,185,129,0.15)'
+                            : 'rgba(255,255,255,0.08)',
+                          color: c.isPublished ? '#10b981' : 'rgba(255,255,255,0.6)',
+                        }}
+                      >
+                        {c.isPublished ? 'Published' : 'Draft'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="inline-flex items-center gap-1">
+                        <IconButton onClick={() => setEditing(c)} title="Edit">
+                          <Edit3 className="h-4 w-4" />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => {
+                            const openCount =
+                              submissions.filter(
+                                (s) =>
+                                  s.careerId === c.id &&
+                                  s.status !== 'hired' &&
+                                  s.status !== 'rejected'
+                              ).length ?? 0;
+                            const message =
+                              openCount > 0
+                                ? `Archive "${c.title}"? It has ${openCount} open application(s).`
+                                : `Archive "${c.title}"?`;
+                            toast.warning(message, {
+                              action: {
+                                label: 'Archive',
+                                onClick: () =>
+                                  del.mutate(c.id, {
+                                    onSuccess: () => toast.success('Role archived'),
+                                    onError: () => toast.error("Couldn't archive"),
+                                  }),
+                              },
+                            });
+                          }}
+                          title="Archive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </IconButton>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {(creating || editing) && (
+          <CareerEditor
+            career={editing ?? undefined}
+            onClose={() => {
+              setEditing(null);
+              setCreating(false);
+            }}
+            onSave={(body) => {
+              if (editing) {
+                update.mutate(
+                  { ...body, id: editing.id },
+                  {
+                    onSuccess: () => {
+                      toast.success('Role updated');
+                      setEditing(null);
+                    },
+                    onError: () => toast.error("Couldn't update"),
+                  }
+                );
+              } else {
+                create.mutate(body, {
+                  onSuccess: () => {
+                    toast.success('Role created');
+                    setCreating(false);
+                  },
+                  onError: () => toast.error("Couldn't create"),
+                });
+              }
+            }}
+          />
+        )}
+      </div>
+    </>
+  );
+};
+
+const Th: React.FC<{ children: React.ReactNode; align?: 'left' | 'right' }> = ({
+  children,
+  align = 'left',
+}) => (
+  <th
+    className="px-4 py-3 text-xs font-medium uppercase tracking-wider text-white/50"
+    style={{ textAlign: align }}
+  >
+    {children}
+  </th>
+);
+
+const IconButton: React.FC<{
+  children: React.ReactNode;
+  onClick: () => void;
+  title: string;
+}> = ({ children, onClick, title }) => (
+  <button
+    onClick={onClick}
+    title={title}
+    className="rounded-md p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"
+  >
+    {children}
+  </button>
+);
+
+export default CareersAdmin;

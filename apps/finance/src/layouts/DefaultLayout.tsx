@@ -1,0 +1,600 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { Avatar } from '@voxire/ui';
+import { signOut, useUserStore } from '@voxire/auth';
+import { unwrap } from '@voxire/api';
+import { LicenseBanner } from '@voxire/components';
+import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
+import TrialBanner from '../shared/components/TrialBanner';
+import { safe } from '../shared/lib/api';
+import { useForesightLinks } from '@voxire/utils';
+import { useNavigate, Link, Outlet, useRouterState } from '@tanstack/react-router';
+import { motion, AnimatePresence } from 'motion/react';
+import { getAvatarUrl } from '@voxire/config';
+import {
+  LayoutDashboard,
+  FileText,
+  Receipt,
+  TrendingUp,
+  Calculator,
+  Bell,
+  ChevronRight,
+  Sun,
+  Moon,
+  Monitor,
+  LogOut,
+  Search as SearchIcon,
+  Repeat,
+  ClipboardList,
+  Wallet,
+  Building2,
+  Shuffle,
+  BarChart2,
+  LineChart,
+  BookOpen,
+  Settings as SettingsIcon,
+  Tag,
+  FileCheck,
+} from 'lucide-react';
+import GlobalSearch from '../shared/components/GlobalSearch';
+
+const ACCENT = 'var(--finance-accent, #10b981)';
+
+interface NavItem {
+  label: string;
+  path: string;
+  icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
+}
+
+interface NavGroup {
+  title: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
+  {
+    title: 'Overview',
+    items: [{ label: 'Dashboard', path: '/', icon: LayoutDashboard }],
+  },
+  {
+    title: 'Sales',
+    items: [
+      { label: 'Invoices', path: '/invoices', icon: FileText },
+      { label: 'Recurring', path: '/invoices/recurring', icon: Repeat },
+      { label: 'Quotes', path: '/quotes', icon: ClipboardList },
+    ],
+  },
+  {
+    title: 'Spend',
+    items: [
+      { label: 'Expenses', path: '/expenses', icon: Receipt },
+      { label: 'Categories', path: '/categories', icon: Tag },
+      { label: 'Bills', path: '/bills', icon: Wallet },
+    ],
+  },
+  {
+    title: 'Banking',
+    items: [
+      { label: 'Bank Feeds', path: '/bank', icon: Building2 },
+      { label: 'Reconcile', path: '/reconcile', icon: Shuffle },
+    ],
+  },
+  {
+    title: 'Reports',
+    items: [
+      { label: 'Profit & Loss', path: '/pl', icon: TrendingUp },
+      { label: 'Balance Sheet', path: '/reports/balance-sheet', icon: BarChart2 },
+      { label: 'Cash Flow', path: '/reports/cash-flow', icon: LineChart },
+      { label: 'Tax Summary', path: '/reports/tax', icon: FileCheck },
+    ],
+  },
+  {
+    title: 'Accounting',
+    items: [
+      { label: 'Journal', path: '/journal', icon: BookOpen },
+      { label: 'Accounts', path: '/accounts', icon: FileText },
+      { label: 'Tax Config', path: '/tax', icon: Calculator },
+    ],
+  },
+];
+
+const routeLabels: Record<string, string> = {
+  '/': 'Dashboard',
+  '/invoices': 'Invoices',
+  '/invoices/new': 'New Invoice',
+  '/invoices/recurring': 'Recurring',
+  '/quotes': 'Quotes',
+  '/expenses': 'Expenses',
+  '/expenses/new': 'New Expense',
+  '/categories': 'Categories',
+  '/bills': 'Bills',
+  '/bank': 'Bank Feeds',
+  '/reconcile': 'Reconcile',
+  '/pl': 'Profit & Loss',
+  '/reports/balance-sheet': 'Balance Sheet',
+  '/reports/cash-flow': 'Cash Flow',
+  '/reports/tax': 'Tax Summary',
+  '/tax': 'Tax',
+  '/journal': 'Journal',
+  '/accounts': 'Chart of Accounts',
+  '/settings': 'Settings',
+};
+
+function getPageTitle(pathname: string): string {
+  if (routeLabels[pathname]) return routeLabels[pathname];
+  if (pathname.startsWith('/invoices/')) return 'Invoice';
+  if (pathname.startsWith('/expenses/')) return 'Expense';
+  return 'Finance';
+}
+
+type Theme = 'light' | 'dark' | 'system';
+
+function applyTheme(t: Theme) {
+  const resolved =
+    t === 'system'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light'
+      : t;
+  document.documentElement.setAttribute('data-theme', resolved);
+  localStorage.setItem('finance-theme', t);
+}
+
+const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isActive =
+    path === '/' ? pathname === '/' : pathname === path || pathname.startsWith(path + '/');
+
+  return (
+    <Link
+      to={path}
+      style={{
+        color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)',
+        textDecoration: 'none',
+      }}
+      className={[
+        'relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150',
+        isActive ? '' : 'hover:bg-[var(--hub-hover)]',
+      ].join(' ')}
+    >
+      {isActive && (
+        <motion.span
+          layoutId="sidebar-active"
+          className="absolute inset-0 rounded-lg"
+          style={{ background: 'var(--hub-active)' }}
+          transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+        />
+      )}
+      <Icon size={15} style={{ position: 'relative', flexShrink: 0 }} />
+      <span style={{ position: 'relative', fontSize: 12.5 }}>{label}</span>
+      {isActive && (
+        <span
+          style={{
+            position: 'relative',
+            marginLeft: 'auto',
+            height: 6,
+            width: 6,
+            borderRadius: '50%',
+            flexShrink: 0,
+            background: ACCENT,
+          }}
+        />
+      )}
+    </Link>
+  );
+};
+
+const DefaultLayout: React.FC = () => {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const search = useRouterState({ select: (s) => s.location.searchStr });
+  const navigate = useNavigate();
+  const pageTitle = getPageTitle(pathname);
+  const caretPageContext = React.useMemo(
+    () =>
+      buildCaretRouteContext({
+        appId: 'finance',
+        appName: 'Finance',
+        pathname,
+        search,
+        page: pageTitle,
+        routeLabels,
+      }),
+    [pathname, search, pageTitle]
+  );
+  const [theme, setThemeState] = useState<Theme>(
+    () => (localStorage.getItem('finance-theme') as Theme) || 'dark'
+  );
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const sidebarRef = useRef<HTMLElement | null>(null);
+  const financeUser = useUserStore((s) => s.user);
+  const setAuthUser = useUserStore((s) => s.setUser);
+  const userId = Number(financeUser?.id) || 0;
+  const userEmail = financeUser?.email || financeUser?.emailAddress || null;
+  const userName = financeUser?.name || financeUser?.firstName || userEmail || 'User';
+  const { isOpen: caretOpen } = useCaretStore();
+
+  useEffect(() => {
+    if (financeUser?.name || financeUser?.email) return;
+    unwrap(safe.get<{ user: { id: number; name: string; email: string } | null }>('/account'))
+      .then((res) => {
+        if (res?.user) {
+          setAuthUser({ id: String(res.user.id), name: res.user.name, email: res.user.email });
+        }
+      })
+      .catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [financeUser]);
+
+  useForesightLinks(sidebarRef, {
+    '/': () => import('../features/dashboard/Dashboard'),
+    '/invoices': () => import('../features/invoices/Invoices'),
+    '/invoices/recurring': () => import('../features/recurring-invoices/RecurringInvoices'),
+    '/quotes': () => import('../features/quotes/Quotes'),
+    '/expenses': () => import('../features/expenses/Expenses'),
+    '/categories': () => import('../features/categories/Categories'),
+    '/bills': () => import('../features/bills/Bills'),
+    '/bank': () => import('../features/bank-feeds/BankFeeds'),
+    '/reconcile': () => import('../features/reconcile/Reconcile'),
+    '/pl': () => import('../features/profit-loss/ProfitLoss'),
+    '/reports/balance-sheet': () => import('../features/balance-sheet/BalanceSheet'),
+    '/reports/cash-flow': () => import('../features/cash-flow/CashFlow'),
+    '/reports/tax': () => import('../features/tax/TaxReport'),
+    '/journal': () => import('../features/journal/Journal'),
+    '/accounts': () => import('../features/chart-of-accounts/ChartOfAccounts'),
+    '/tax': () => import('../features/tax/Tax'),
+    '/settings': () => import('../features/settings/Settings'),
+  });
+
+  const handleTheme = (t: Theme) => {
+    setThemeState(t);
+    applyTheme(t);
+  };
+
+  // Keyboard shortcuts: cmd+k search, n new invoice, e new expense, / focus search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isEditing =
+        target &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+      if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !isEditing)) {
+        e.preventDefault();
+        setSearchOpen(true);
+        return;
+      }
+      if (isEditing) return;
+      if (e.key === 'n') {
+        e.preventDefault();
+        navigate({ to: '/invoices/new' });
+      } else if (e.key === 'e') {
+        e.preventDefault();
+        navigate({ to: '/expenses/new' });
+      } else if (e.key === 'Escape') {
+        setSearchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [navigate]);
+
+  return (
+    <>
+      <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
+        <aside
+          style={{
+            width: 224,
+            display: 'flex',
+            flexDirection: 'column',
+            flexShrink: 0,
+            overflow: 'hidden',
+            background: 'var(--hub-surface)',
+            borderRight: '1px solid var(--hub-border)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: 16,
+              borderBottom: '1px solid var(--hub-border)',
+            }}
+          >
+            <img src="/logo.png?v=2" alt="rtylr" className="rtylr-logo h-6 w-auto" />
+          </div>
+
+          <div style={{ padding: '6px 8px' }}>
+            <button
+              onClick={() => setSearchOpen(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                width: '100%',
+                padding: '6px 12px',
+                borderRadius: 8,
+                background: 'var(--hub-hover)',
+                border: '1px solid var(--hub-border)',
+                color: 'var(--hub-text-muted)',
+                fontSize: 12,
+                cursor: 'pointer',
+              }}
+            >
+              <SearchIcon size={12} />
+              <span>Search</span>
+              <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}>
+                Cmd K
+              </span>
+            </button>
+          </div>
+
+          <nav
+            ref={sidebarRef}
+            style={{
+              flex: 1,
+              overflowY: 'auto',
+              padding: 8,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}
+          >
+            {navGroups.map((group) => (
+              <div key={group.title} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <p
+                  style={{
+                    padding: '4px 12px 4px',
+                    fontSize: 9,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    color: 'var(--hub-text-dim)',
+                    margin: 0,
+                  }}
+                >
+                  {group.title}
+                </p>
+                {group.items.map((item) => (
+                  <SidebarNavItem key={item.path} {...item} />
+                ))}
+              </div>
+            ))}
+          </nav>
+
+          <div className="p-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
+            <Link
+              to="/settings"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs mb-1"
+              style={{ color: 'var(--hub-text-muted)', textDecoration: 'none' }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = 'transparent';
+              }}
+            >
+              <SettingsIcon size={12} /> Settings
+            </Link>
+            <CaretButton className="w-full justify-start mb-1" />
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu((v) => !v)}
+                className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150"
+                style={{ background: 'transparent' }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
+              >
+                <Avatar
+                  src={getAvatarUrl(userEmail || userName)}
+                  alt={userName}
+                  size="sm"
+                  className="h-6 w-6"
+                  style={{
+                    background:
+                      'color-mix(in srgb, var(--finance-accent, #10b981) 15%, transparent)',
+                  }}
+                />
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                  <span
+                    className="text-xs font-medium truncate w-full text-left"
+                    style={{ color: 'var(--hub-text)' }}
+                  >
+                    {userName}
+                  </span>
+                  {userEmail && (
+                    <span
+                      className="text-[10px] truncate w-full text-left"
+                      style={{ color: 'var(--hub-text-muted)' }}
+                    >
+                      {userEmail}
+                    </span>
+                  )}
+                </div>
+                <ChevronRight
+                  size={12}
+                  className="shrink-0"
+                  style={{ color: 'var(--hub-text-dim)' }}
+                />
+              </button>
+
+              <AnimatePresence>
+                {showUserMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute bottom-full left-0 right-0 mb-1 rounded-xl p-2 z-50"
+                    style={{
+                      background: 'var(--hub-card)',
+                      border: '1px solid var(--hub-border)',
+                      boxShadow: 'var(--hub-shadow)',
+                    }}
+                  >
+                    <p
+                      className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider"
+                      style={{ color: 'var(--hub-text-dim)' }}
+                    >
+                      Appearance
+                    </p>
+                    <div className="flex gap-1 mb-2">
+                      {(
+                        [
+                          { value: 'light' as Theme, icon: Sun, label: 'Light' },
+                          { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
+                          { value: 'system' as Theme, icon: Monitor, label: 'System' },
+                        ] as const
+                      ).map(({ value, icon: Icon, label }) => (
+                        <button
+                          key={value}
+                          onClick={() => handleTheme(value)}
+                          className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
+                          style={{
+                            background:
+                              theme === value
+                                ? 'color-mix(in srgb, var(--finance-accent, #10b981) 12%, transparent)'
+                                : 'var(--hub-hover)',
+                            color: theme === value ? ACCENT : 'var(--hub-text-muted)',
+                            border:
+                              theme === value
+                                ? `1px solid color-mix(in srgb, ${ACCENT} 25%, transparent)`
+                                : '1px solid transparent',
+                          }}
+                        >
+                          <Icon size={13} />
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <div
+                      className="my-1"
+                      style={{ height: '1px', background: 'var(--hub-border)' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => signOut('finance')}
+                      className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
+                      style={{ color: 'var(--hr-error, #ef4444)' }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.background =
+                          'color-mix(in srgb, var(--hr-error, #ef4444) 8%, transparent)';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = 'transparent';
+                      }}
+                    >
+                      <LogOut size={14} />
+                      Sign out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main content + Caret AI inline column */}
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+            <header
+              style={{
+                height: 44,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0 24px',
+                flexShrink: 0,
+                background: 'var(--hub-surface)',
+                borderBottom: '1px solid var(--hub-border)',
+              }}
+            >
+              <h1 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
+                {pageTitle}
+              </h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <button
+                  onClick={() => setSearchOpen(true)}
+                  style={{
+                    height: 28,
+                    width: 28,
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--hub-text-muted)',
+                  }}
+                >
+                  <SearchIcon size={14} />
+                </button>
+                <button
+                  onClick={undefined}
+                  aria-label="Notifications"
+                  style={{
+                    height: 28,
+                    width: 28,
+                    borderRadius: 8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'var(--hub-text-muted)',
+                  }}
+                >
+                  <Bell size={14} />
+                </button>
+                <CaretButton />
+              </div>
+            </header>
+
+            <LicenseBanner safe={safe} />
+            <TrialBanner />
+            <AnimatePresence mode="wait">
+              <motion.main
+                key={pathname}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18, ease: 'easeOut' }}
+                style={{ flex: 1, overflowY: 'auto', padding: 24 }}
+              >
+                <Outlet />
+              </motion.main>
+            </AnimatePresence>
+          </div>
+
+          {/* Caret AI - inline third column, pushes content left */}
+          <div
+            style={{
+              width: caretOpen ? '360px' : '0px',
+              flexShrink: 0,
+              overflow: 'hidden',
+              transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <CaretPanel
+              variant="inline"
+              appId="finance"
+              userId={userId}
+              apiBaseUrl={import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/'}
+              systemContext="User is in the Finance app (invoices, expenses, bills, P&L, tax)"
+              pageContext={caretPageContext}
+            />
+          </div>
+        </div>
+
+        <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
+      </div>
+    </>
+  );
+};
+
+export default DefaultLayout;

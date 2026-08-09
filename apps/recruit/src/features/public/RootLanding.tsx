@@ -1,0 +1,50 @@
+import React from 'react';
+import { APP_URLS } from '@voxire/config';
+import { ArrowRight } from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
+
+/**
+ * RootLanding - what a candidate sees if they hit recruit.rtylr.com
+ * with no business slug. Almost nobody reaches this in practice (the
+ * entry is always a direct link to a business's page), but we render
+ * a tight marketing blurb rather than a 404 so crawlers get something
+ * indexable.
+ */
+const RootLanding: React.FC = (): React.JSX.Element => (
+  <>
+    <HelmetContainer title="Recruit · rtylr" />
+    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      <div className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--recruit-muted)' }}>
+        rtylr · recruit
+      </div>
+      <h1 className="mt-4 max-w-3xl text-5xl font-semibold leading-tight tracking-tight sm:text-6xl">
+        Hiring pages,
+        <br />
+        without the careers-site tax.
+      </h1>
+      <p className="mt-6 max-w-xl text-base" style={{ color: 'var(--recruit-muted)' }}>
+        Post roles, collect applications, and move candidates through your funnel - all from the
+        same account you run the rest of your business from.
+      </p>
+      <div className="mt-10 flex items-center gap-3">
+        <a
+          href={`${APP_URLS.landing}/pricing`}
+          className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+          style={{ background: 'var(--recruit-accent)' }}
+        >
+          See pricing
+          <ArrowRight className="h-4 w-4" />
+        </a>
+        <a
+          href={`${APP_URLS.auth}/register?redirect=recruit`}
+          className="inline-flex items-center gap-2 rounded-lg border px-6 py-3 text-sm font-semibold"
+          style={{ borderColor: 'var(--recruit-border)' }}
+        >
+          Start free
+        </a>
+      </div>
+    </div>
+  </>
+);
+
+export default RootLanding;

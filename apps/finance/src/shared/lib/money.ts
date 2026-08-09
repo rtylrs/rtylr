@@ -1,0 +1,84 @@
+// Shared money formatting helpers.
+
+import { toFiniteNumber } from '@voxire/api';
+
+export type Currency = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'CAD' | 'AUD' | 'CHF' | 'CNY';
+
+const CURRENCY_SYMBOL: Record<Currency, string> = {
+  USD: '$',
+  EUR: '\u20AC',
+  GBP: '\u00A3',
+  JPY: '\u00A5',
+  CAD: 'CA$',
+  AUD: 'A$',
+  CHF: 'CHF',
+  CNY: '\u00A5',
+};
+
+export const CURRENCY_OPTIONS: Currency[] = [
+  'USD',
+  'EUR',
+  'GBP',
+  'JPY',
+  'CAD',
+  'AUD',
+  'CHF',
+  'CNY',
+];
+
+export function getCurrencySymbol(c: Currency): string {
+  return CURRENCY_SYMBOL[c] ?? c;
+}
+
+export function formatMoney(
+  value: number | string | null | undefined,
+  currency: Currency = 'USD',
+  fractionDigits = 2
+): string {
+  const n = typeof value === 'string' ? parseFloat(value) : (value ?? 0);
+  if (!isFinite(n as number)) return '-';
+  try {
+    return (n as number).toLocaleString('en-US', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: fractionDigits,
+      maximumFractionDigits: fractionDigits,
+    });
+  } catch {
+    return `${getCurrencySymbol(currency)}${(n as number).toFixed(fractionDigits)}`;
+  }
+}
+
+export function formatCompact(n: number, currency: Currency = 'USD'): string {
+  const safeNumber = toFiniteNumber(n);
+  const abs = Math.abs(safeNumber);
+  if (abs >= 1_000_000_000)
+    return `${getCurrencySymbol(currency)}${(safeNumber / 1_000_000_000).toFixed(1)}B`;
+  if (abs >= 1_000_000)
+    return `${getCurrencySymbol(currency)}${(safeNumber / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `${getCurrencySymbol(currency)}${(safeNumber / 1_000).toFixed(1)}K`;
+  return `${getCurrencySymbol(currency)}${safeNumber.toFixed(0)}`;
+}
+
+// Static FX rate table used for display-only currency conversion.
+export const FX_RATES: Record<Currency, number> = {
+  USD: 1,
+  EUR: 0.93,
+  GBP: 0.79,
+  JPY: 156.0,
+  CAD: 1.37,
+  AUD: 1.52,
+  CHF: 0.89,
+  CNY: 7.23,
+};
+
+export function convert(amount: number, from: Currency, to: Currency): number {
+  const usd = amount / (FX_RATES[from] ?? 1);
+  return usd * (FX_RATES[to] ?? 1);
+}
+
+export function parseMoney(input: string): number {
+  const cleaned = input.replace(/[^0-9.\-]/g, '');
+  const n = parseFloat(cleaned);
+  return isFinite(n) ? n : 0;
+}

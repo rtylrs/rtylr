@@ -1,0 +1,272 @@
+import React from 'react';
+import { useParams } from '@tanstack/react-router';
+import { motion } from 'motion/react';
+import {
+  Activity,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  Users,
+  Milestone as MilestoneIcon,
+} from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
+import { useProjectOverview } from './useProjectOverview';
+import { useFlowStore } from '../../shared/stores/flowStore';
+import { AvatarStack } from '../../shared/components/AssigneeAvatar';
+import { formatDate } from '../../shared/lib/utils';
+import ProjectViewTabs from './ProjectViewTabs';
+import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
+import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
+
+const HEALTH: Record<string, { color: string; label: string }> = {
+  on_track: { color: '#22c55e', label: 'On track' },
+  at_risk: { color: '#f59e0b', label: 'At risk' },
+  off_track: { color: '#ef4444', label: 'Off track' },
+};
+
+const ProjectOverview: React.FC = () => {
+  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
+  useProjectRealtime(projectId);
+
+  const { data, isLoading } = useProjectOverview(projectId);
+  const { projects, members } = useFlowStore();
+  const project = projects.find((p) => p.id === projectId);
+
+  if (isLoading)
+    return (
+      <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
+        Loading project...
+      </div>
+    );
+
+  if (!data || !project) {
+    return (
+      <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
+        Project not found.
+      </div>
+    );
+  }
+  const { stats, milestones } = data;
+  const team = members.filter((m) => project.memberAvatars.includes(m.initials));
+  const recentComments: {
+    id: string;
+    author: string;
+    authorInitials: string;
+    body: string;
+    createdAt: string;
+  }[] = [];
+  const health = HEALTH[project.health];
+
+  return (
+    <div className="flex flex-col h-full overflow-auto">
+      <HelmetContainer title="Overview · rtylr" />
+      <ProjectViewTabs
+        project={project}
+        workspaceId={workspaceId}
+        projectId={projectId}
+        taskCount={stats.total}
+        onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
+        rightSlot={
+          <span
+            className="text-[11px] px-2 py-0.5 rounded-full font-semibold"
+            style={{
+              background: `${health.color}1a`,
+              color: health.color,
+              border: `1px solid ${health.color}33`,
+            }}
+          >
+            {health.label}
+          </span>
+        }
+      />
+
+      {project.description && (
+        <div
+          className="px-5 py-3 shrink-0"
+          style={{ borderBottom: '1px solid var(--flow-border)' }}
+        >
+          <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+            {project.description}
+          </p>
+        </div>
+      )}
+
+      <div className="p-5 space-y-5 max-w-5xl w-full mx-auto">
+        {/* Progress */}
+        <motion.section
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl p-5"
+          style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h3
+              className="text-[12px] font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Progress
+            </h3>
+            <span className="text-[24px] font-bold" style={{ color: 'var(--flow-text)' }}>
+              {stats.progress}%
+            </span>
+          </div>
+          <div
+            className="h-2 rounded-full overflow-hidden mb-4"
+            style={{ background: 'var(--flow-hover)' }}
+          >
+            <div
+              className="h-full rounded-full transition-all"
+              style={{ width: `${stats.progress}%`, background: project.color }}
+            />
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            <StatCard icon={CheckCircle2} label="Done" value={stats.done} color="#22c55e" />
+            <StatCard
+              icon={Activity}
+              label="In progress"
+              value={stats.inProgress}
+              color="#3b82f6"
+            />
+            <StatCard icon={Clock} label="Total" value={stats.total} color="var(--accent)" />
+            <StatCard icon={AlertCircle} label="Overdue" value={stats.overdue} color="#ef4444" />
+          </div>
+        </motion.section>
+
+        {/* Milestones */}
+        <section
+          className="rounded-xl p-5"
+          style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h3
+              className="text-[12px] font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Milestones
+            </h3>
+            <MilestoneIcon size={12} style={{ color: 'var(--flow-text-dim)' }} />
+          </div>
+          {milestones.length === 0 ? (
+            <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
+              No milestones defined.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {milestones.map((m) => (
+                <div key={m.id}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text)' }}>
+                      {m.name}
+                    </span>
+                    <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+                      {formatDate(m.targetDate)}
+                    </span>
+                  </div>
+                  <div
+                    className="h-1.5 rounded-full overflow-hidden"
+                    style={{ background: 'var(--flow-hover)' }}
+                  >
+                    <div
+                      className="h-full"
+                      style={{ width: `${m.progress}%`, background: 'var(--accent)' }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Team */}
+        <section
+          className="rounded-xl p-5"
+          style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <h3
+              className="text-[12px] font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              Team
+            </h3>
+            <Users size={12} style={{ color: 'var(--flow-text-dim)' }} />
+          </div>
+          <div className="flex items-center gap-3">
+            <AvatarStack
+              members={team.map((t) => ({ name: t.name, initials: t.initials }))}
+              size={30}
+              max={6}
+            />
+            <div className="flex-1 text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+              {team.length} {team.length === 1 ? 'member' : 'members'}
+            </div>
+          </div>
+        </section>
+
+        {/* Recent activity */}
+        <section
+          className="rounded-xl p-5"
+          style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
+        >
+          <h3
+            className="text-[12px] font-semibold uppercase tracking-wider mb-3"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            Recent comments
+          </h3>
+          {recentComments.length === 0 ? (
+            <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
+              No recent comments.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {recentComments.map((c) => (
+                <div key={c.id} className="flex items-start gap-2 text-[12px]">
+                  <span
+                    className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 mt-0.5"
+                    style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
+                  >
+                    {c.authorInitials}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-semibold" style={{ color: 'var(--flow-text)' }}>
+                      {c.author}
+                    </span>{' '}
+                    <span style={{ color: 'var(--flow-text-muted)' }}>{c.body}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+};
+
+const StatCard: React.FC<{
+  icon: React.ComponentType<{ size?: number }>;
+  label: string;
+  value: number;
+  color: string;
+}> = ({ icon: Icon, label, value, color }) => (
+  <div
+    className="rounded-lg p-3"
+    style={{ background: 'var(--flow-hover)', border: '1px solid var(--flow-border)' }}
+  >
+    <div className="flex items-center gap-1.5 mb-1">
+      <Icon size={11} />
+      <span
+        className="text-[10px] uppercase tracking-wider font-semibold"
+        style={{ color: 'var(--flow-text-dim)' }}
+      >
+        {label}
+      </span>
+    </div>
+    <p className="text-[18px] font-bold" style={{ color }}>
+      {value}
+    </p>
+  </div>
+);
+
+export default ProjectOverview;

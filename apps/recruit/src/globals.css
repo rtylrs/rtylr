@@ -1,0 +1,46 @@
+@import 'tailwindcss';
+
+/* v4 auto-detects content relative to this CSS file. We add an
+ * explicit @source for the cross-workspace packages we pull classes
+ * from (shared components, menu package, etc.). The shared
+ * `@voxire/tailwind-config` theme extensions are ported below into
+ * v4's native `@theme` block - JS configs via `@config` break v4's
+ * auto content scanner in monorepo setups. */
+@source '../../../packages/**/*.{ts,tsx}';
+
+:root {
+  /* Template tokens - overridden per-business at runtime from the
+     Customization record. Defaults are a neutral editorial palette so a
+     freshly-deployed careers site still looks finished before branding
+     is applied. */
+  --recruit-accent: #111111;
+  --recruit-accent-2: #111111;
+  --recruit-bg: #fafaf9;
+  --recruit-fg: #18181b;
+  --recruit-muted: #6b7280;
+  --recruit-surface: #ffffff;
+  --recruit-border: #e7e5e4;
+
+  /* Typography - swapped per-business by loadFontPairing(). */
+  --recruit-font-body: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+  --recruit-font-display: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+}
+
+html,
+body {
+  background: var(--recruit-bg);
+  color: var(--recruit-fg);
+  font-family: var(--recruit-font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--recruit-font-display);
+}
+
+/* iOS auto-zoom guard. All inputs are 16px+ by default. */
+input,
+select,
+textarea {
+  font-size: 16px;
+}

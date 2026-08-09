@@ -1,0 +1,175 @@
+// @vitest-environment happy-dom
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook, waitFor, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+
+vi.mock('../../shared/services/flowApi', () => ({
+  flowApi: {
+    getTasks: vi.fn(),
+    getMyTasks: vi.fn(),
+    getTaskDetail: vi.fn(),
+    createTask: vi.fn(),
+    updateTask: vi.fn(),
+    deleteTask: vi.fn(),
+    updateTaskStatus: vi.fn(),
+  },
+}));
+
+vi.mock('../../shared/lib/currentUser', () => ({
+  isTaskMine: vi.fn(() => false),
+}));
+
+vi.mock('../../shared/stores/flowStore', () => ({
+  useFlowStore: vi.fn(() => ({ activeWorkspaceId: 'ws-1' })),
+}));
+
+vi.mock('@voxire/api', () => ({
+  unwrap: vi.fn((val) => val),
+}));
+
+import {
+  useTasks,
+  useMyTasks,
+  useTaskDetail,
+  useCreateTask,
+  useUpdateTask,
+  useDeleteTask,
+  useUpdateTaskStatus,
+} from './useTasks';
+import { flowApi } from '../../shared/services/flowApi';
+
+const createWrapper = () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client }, children);
+};
+
+describe('useTasks (remote mode)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('fetches tasks on mount', async () => {
+    const data = [{ id: 't-1', title: 'Fix bug' }];
+    (flowApi.getTasks as any).mockResolvedValue(data);
+    const params = { projectId: 'p-1' };
+    const { result } = renderHook(() => useTasks(params), {
+      wrapper: createWrapper(),
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(data);
+    expect(flowApi.getTasks).toHaveBeenCalledWith(params);
+  });
+
+  it('starts in loading state when projectId provided', () => {
+    (flowApi.getTasks as any).mockReturnValue(new Promise(() => {}));
+    const { result } = renderHook(() => useTasks({ projectId: 'p-1' }), {
+      wrapper: createWrapper(),
+    });
+    expect(result.current.isLoading).toBe(true);
+  });
+});
+
+describe('useMyTasks', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('fetches current user tasks', async () => {
+    const data = [{ id: 't-2', title: 'My task' }];
+    (flowApi.getMyTasks as any).mockResolvedValue(data);
+    const { result } = renderHook(() => useMyTasks(), {
+      wrapper: createWrapper(),
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(data);
+  });
+});
+
+describe('useTaskDetail', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('fetches task detail by id', async () => {
+    const task = { id: 't-5', title: 'Detail task' };
+    (flowApi.getTaskDetail as any).mockResolvedValue(task);
+    const { result } = renderHook(() => useTaskDetail('t-5'), {
+      wrapper: createWrapper(),
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(task);
+  });
+
+  it('does not fetch when id is undefined', () => {
+    const { result } = renderHook(() => useTaskDetail(undefined), {
+      wrapper: createWrapper(),
+    });
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(flowApi.getTaskDetail).not.toHaveBeenCalled();
+  });
+});
+
+describe('useCreateTask', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls createTask service method', async () => {
+    (flowApi.createTask as any).mockResolvedValue({ id: 't-new' });
+    const { result } = renderHook(() => useCreateTask(), {
+      wrapper: createWrapper(),
+    });
+    const input = { projectId: 'p-1', workspaceId: 'ws-1', title: 'New task' };
+    await act(() => result.current.mutateAsync(input));
+    expect(flowApi.createTask).toHaveBeenCalledWith(input);
+  });
+});
+
+describe('useUpdateTask', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls updateTask with id and data', async () => {
+    (flowApi.updateTask as any).mockResolvedValue({});
+    const { result } = renderHook(() => useUpdateTask(), {
+      wrapper: createWrapper(),
+    });
+    await act(() => result.current.mutateAsync({ id: 't-1', data: { title: 'Updated' } as any }));
+    expect(flowApi.updateTask).toHaveBeenCalledWith('t-1', { title: 'Updated' });
+  });
+});
+
+describe('useDeleteTask', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls deleteTask with id', async () => {
+    (flowApi.deleteTask as any).mockResolvedValue({ ok: true });
+    const { result } = renderHook(() => useDeleteTask(), {
+      wrapper: createWrapper(),
+    });
+    await act(() => result.current.mutateAsync('t-3'));
+    expect(flowApi.deleteTask).toHaveBeenCalledWith('t-3');
+  });
+});
+
+describe('useUpdateTaskStatus', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls updateTaskStatus with id and status', async () => {
+    (flowApi.updateTaskStatus as any).mockResolvedValue({ ok: true });
+    const { result } = renderHook(() => useUpdateTaskStatus(), {
+      wrapper: createWrapper(),
+    });
+    await act(() => result.current.mutateAsync({ id: 't-1', status: 'done' as any }));
+    expect(flowApi.updateTaskStatus).toHaveBeenCalledWith('t-1', 'done');
+  });
+});

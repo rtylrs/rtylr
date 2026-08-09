@@ -1,0 +1,313 @@
+import { unwrap } from '@voxire/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import i18next from '../../shared/services/i18next';
+import { flowApi, ApiAttachment, ApiTask } from '../../shared/services/flowApi';
+import { useFlowStore } from '../../shared/stores/flowStore';
+import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
+
+const t = (key: string, opts?: Record<string, unknown>): string => i18next.t(key, opts) as string;
+
+export function useTasks(params: {
+  projectId?: string;
+  status?: ApiTask['status'];
+  assigneeId?: string;
+  activeOnly?: boolean;
+  compact?: boolean;
+}) {
+  const { activeWorkspaceId } = useFlowStore();
+  const effectiveParams = {
+    ...params,
+    workspaceId: params.projectId ? undefined : activeWorkspaceId || undefined,
+  };
+  return useQuery<ApiTask[]>({
+    queryKey: ['tasks', effectiveParams],
+    queryFn: async () => {
+      const res = await unwrap(flowApi.getTasks(effectiveParams));
+      return unwrapListResponse<ApiTask>(res, 'tasks');
+    },
+    enabled: !!(effectiveParams.projectId || effectiveParams.workspaceId),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
+}
+
+export function useMyTasks() {
+  return useQuery<ApiTask[]>({
+    queryKey: ['my-tasks'],
+    queryFn: async () => {
+      const res = await unwrap(flowApi.getMyTasks());
+      return unwrapListResponse<ApiTask>(res, 'tasks');
+    },
+  });
+}
+
+export function useTaskDetail(id: string | undefined) {
+  return useQuery({
+    queryKey: ['task', id],
+    queryFn: () => unwrap(flowApi.getTaskDetail(id!)),
+    enabled: !!id,
+  });
+}
+
+export function useCreateTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      // projectId is optional: the backend resolves the caller's auto-created
+      // Inbox project when it is omitted (quick-create from My Tasks).
+      projectId?: string;
+      workspaceId: string;
+      title: string;
+      description?: string;
+      status?: ApiTask['status'];
+      priority?: ApiTask['priority'];
+      assigneeId?: string;
+      dueDate?: string;
+      effortMinutes?: number;
+      estimatedHours?: number;
+    }) => {
+      return unwrap(flowApi.createTask(data));
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+    },
+    onError: () => toast.error(t('toasts.task.createFailed')),
+  });
+}
+
+export function useUpdateTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<ApiTask> }) => {
+      return unwrap(flowApi.updateTask(id, data)).then(() => {});
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+    onError: () => toast.error(t('toasts.task.updateFailed')),
+  });
+}
+
+export function useDeleteTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => {
+      return unwrap(flowApi.deleteTask(id));
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+    },
+    onError: () => toast.error(t('toasts.task.deleteFailed')),
+  });
+}
+
+export function useTaskAttachments(taskId: string | undefined) {
+  return useQuery<{ attachments: ApiAttachment[] }>({
+    queryKey: ['task-attachments', taskId],
+    queryFn: async () => unwrap(flowApi.getAttachments(taskId!)),
+    enabled: !!taskId,
+  });
+}
+
+export function useAddAttachment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      taskId,
+      name,
+      size,
+      mime,
+      url,
+    }: {
+      taskId: string;
+      name: string;
+      size: number;
+      mime: string;
+      url?: string;
+    }) => unwrap(flowApi.addAttachment(taskId, { name, size, mime, url })),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['task', variables.taskId] });
+      qc.invalidateQueries({ queryKey: ['task-attachments', variables.taskId] });
+    },
+    onError: () => toast.error(t('toasts.attachment.addFailed')),
+  });
+}
+
+export function useRemoveAttachment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, attachmentId }: { taskId: string; attachmentId: string }) =>
+      unwrap(flowApi.removeAttachment(taskId, attachmentId)),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['task', variables.taskId] });
+      qc.invalidateQueries({ queryKey: ['task-attachments', variables.taskId] });
+    },
+    onError: () => toast.error(t('toasts.attachment.removeFailed')),
+  });
+}
+
+export function useUpdateTaskStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: ApiTask['status'] }) => {
+      return unwrap(flowApi.updateTaskStatus(id, status));
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+    },
+    onError: () => toast.error(t('toasts.task.statusUpdateFailed')),
+  });
+}
+
+// Bulk operations: report partial-success accurately and ALWAYS
+// invalidate caches on settle, so items that did succeed don't show
+// stale state when one item in the batch fails.
+type BulkResult = { ok: number; failed: number };
+
+async function bulkSettle<T>(items: T[], op: (item: T) => Promise<unknown>): Promise<BulkResult> {
+  const results = await Promise.allSettled(items.map((item) => op(item)));
+  let ok = 0;
+  let failed = 0;
+  for (const r of results) {
+    if (r.status === 'fulfilled') ok++;
+    else failed++;
+  }
+  return { ok, failed };
+}
+
+function reportBulk(result: BulkResult, successKey: string, failKey: string) {
+  if (result.failed === 0) {
+    toast.success(t(successKey, { count: result.ok }));
+  } else if (result.ok === 0) {
+    toast.error(t(failKey));
+  } else {
+    toast.warning(
+      `${result.ok} updated, ${result.failed} failed - refreshing the list to show current state.`
+    );
+  }
+}
+
+export function useBulkUpdateStatus() {
+  const qc = useQueryClient();
+  return useMutation<BulkResult, unknown, { ids: string[]; status: ApiTask['status'] }>({
+    mutationFn: ({ ids, status }) =>
+      bulkSettle(ids, (id) => unwrap(flowApi.updateTaskStatus(id, status))),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+    },
+    onSuccess: (res) => reportBulk(res, 'toasts.task.bulkUpdated', 'toasts.task.bulkUpdateFailed'),
+    onError: () => toast.error(t('toasts.task.bulkUpdateFailed')),
+  });
+}
+
+export function useBulkUpdatePriority() {
+  const qc = useQueryClient();
+  return useMutation<BulkResult, unknown, { ids: string[]; priority: ApiTask['priority'] }>({
+    mutationFn: ({ ids, priority }) =>
+      bulkSettle(ids, (id) => unwrap(flowApi.updateTask(id, { priority }))),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+    },
+    onSuccess: (res) => reportBulk(res, 'toasts.task.bulkUpdated', 'toasts.task.bulkUpdateFailed'),
+    onError: () => toast.error(t('toasts.task.bulkUpdateFailed')),
+  });
+}
+
+export function useBulkDelete() {
+  const qc = useQueryClient();
+  return useMutation<BulkResult, unknown, string[]>({
+    mutationFn: (ids) => bulkSettle(ids, (id) => unwrap(flowApi.deleteTask(id))),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      qc.invalidateQueries({ queryKey: ['my-tasks'] });
+    },
+    onSuccess: (res) => reportBulk(res, 'toasts.task.bulkDeleted', 'toasts.task.bulkDeleteFailed'),
+    onError: () => toast.error(t('toasts.task.bulkDeleteFailed')),
+  });
+}
+
+export function useAddComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { taskId: string; content: string }) => {
+      return unwrap(flowApi.addComment(data)).then(() => {});
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+    onError: () => toast.error(t('toasts.comment.postFailed')),
+  });
+}
+
+export function useDeleteComment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => {
+      return unwrap(flowApi.deleteComment(id));
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+    onError: () => toast.error(t('toasts.comment.deleteFailed')),
+  });
+}
+
+export function useAddSubtask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ taskId, title }: { taskId: string; title: string }) => {
+      return unwrap(flowApi.createSubtask(taskId, { title })).then(() => {});
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+    onError: () => toast.error(t('toasts.subtask.addFailed')),
+  });
+}
+
+export function useToggleSubtask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
+      unwrap(flowApi.updateTask(id, { status: completed ? 'todo' : 'done' })).then(() => {}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+    onError: () => toast.error(t('toasts.subtask.updateFailed')),
+  });
+}
+
+export function useLogTime() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      task_id,
+      duration_minutes,
+      description,
+    }: {
+      task_id: number;
+      duration_minutes: number;
+      description?: string;
+    }) => {
+      return unwrap(
+        flowApi.logTime({
+          task_id,
+          duration_minutes,
+          description,
+        })
+      ).then(() => {});
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task'] });
+    },
+    onError: () => toast.error(t('toasts.time.logFailed')),
+  });
+}

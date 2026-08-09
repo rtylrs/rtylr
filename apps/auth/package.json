@@ -1,0 +1,24 @@
+{
+  "name": "@rtylr/auth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/react-router": "^1.170.8",
+    "@voxire/api": "workspace:*",
+    "@voxire/auth": "workspace:*",
+    "@voxire/voxie": "workspace:*",
+    "@voxire/i18n": "workspace:*",
+    "@voxire/observability": "workspace:*",
+    "@voxire/tailwind-config": "workspace:*",
+    "@voxire/ui": "workspace:*",
+    "lucide-react": "^1.8.0",
+    "motion": "^12.38.0"
+  }
+}

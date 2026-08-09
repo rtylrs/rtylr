@@ -1,0 +1,242 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import {
+  AtSign,
+  CheckCircle2,
+  Circle,
+  MessageSquare,
+  Bell,
+  CheckCheck,
+  Loader2,
+} from 'lucide-react';
+import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from '@voxire/i18n';
+import type { TFunction } from 'i18next';
+import {
+  useNotifications,
+  useMarkNotificationRead,
+  useMarkAllNotificationsRead,
+} from './useNotifications';
+import type { ApiNotification } from '../../shared/services/flowApi';
+
+type FilterType = 'all' | 'unread' | 'assigned';
+
+const TYPE_ICONS: Record<ApiNotification['type'], React.ReactNode> = {
+  assigned: <CheckCircle2 size={14} style={{ color: 'var(--accent)' }} />,
+  mention: <AtSign size={14} style={{ color: '#f59e0b' }} />,
+  comment: <MessageSquare size={14} style={{ color: '#3b82f6' }} />,
+  status_change: <Circle size={14} style={{ color: '#22c55e' }} />,
+  due_soon: <Bell size={14} style={{ color: '#ef4444' }} />,
+};
+
+function formatTimestamp(ts: string, t: TFunction, lang: string): string {
+  const d = new Date(ts);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const diffH = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffD = Math.floor(diffH / 24);
+
+  if (diffH < 1) return t('inbox.time.justNow');
+  if (diffH < 24) return t('inbox.time.hoursAgo', { count: diffH });
+  if (diffD === 1) return t('inbox.time.yesterday');
+  return d.toLocaleDateString(lang || 'en-US', { month: 'short', day: 'numeric' });
+}
+
+const NotificationRow: React.FC<{
+  notification: ApiNotification;
+  onMarkRead: (id: string) => void;
+}> = ({ notification, onMarkRead }) => {
+  const { t, i18n } = useTranslation();
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -12 }}
+      transition={{ duration: 0.18 }}
+      onClick={() => onMarkRead(notification.id)}
+      className="flex items-start gap-3.5 px-5 py-4 cursor-pointer group hover:bg-[var(--flow-hover)] transition-colors relative"
+      style={{ borderBottom: '1px solid var(--flow-border)' }}
+    >
+      {!notification.read && (
+        <span
+          className="absolute left-2 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full"
+          style={{ background: 'var(--accent)' }}
+        />
+      )}
+
+      <span
+        className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5"
+        style={{
+          background: `${notification.projectColor || '#64C5B9'}22`,
+          color: notification.projectColor || 'var(--accent)',
+        }}
+      >
+        {notification.actorInitials || '?'}
+      </span>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-0.5">
+          {TYPE_ICONS[notification.type]}
+          <span
+            className="text-[12px] font-semibold"
+            style={{
+              color: notification.read ? 'var(--flow-text-muted)' : 'var(--flow-text)',
+            }}
+          >
+            {notification.title}
+          </span>
+          <span className="text-[11px] ml-auto shrink-0" style={{ color: 'var(--flow-text-dim)' }}>
+            {formatTimestamp(notification.timestamp, t, i18n.language)}
+          </span>
+        </div>
+
+        <p className="text-[12px] mb-1" style={{ color: 'var(--flow-text-muted)' }}>
+          {notification.description}
+        </p>
+
+        <div className="flex items-center gap-2">
+          {notification.projectColor && (
+            <span
+              className="h-2 w-2 rounded-full"
+              style={{ background: notification.projectColor }}
+            />
+          )}
+          <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+            {notification.project}
+          </span>
+          {notification.taskTitle && (
+            <>
+              <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+                ·
+              </span>
+              <span className="text-[11px] truncate" style={{ color: 'var(--flow-text-dim)' }}>
+                {notification.taskTitle}
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const Inbox: React.FC = () => {
+  const { t } = useTranslation();
+  const { data: notifications = [], isLoading } = useNotifications();
+  const markRead = useMarkNotificationRead();
+  const markAll = useMarkAllNotificationsRead();
+  const [activeFilter, setActiveFilter] = useState<FilterType>('all');
+
+  const filtered = notifications.filter((n) => {
+    if (activeFilter === 'unread') return !n.read;
+    if (activeFilter === 'assigned') return n.type === 'assigned';
+    return true;
+  });
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const filterDefs = [
+    { id: 'all' as const, label: t('inbox.filters.all') },
+    { id: 'unread' as const, label: t('inbox.filters.unread') },
+    { id: 'assigned' as const, label: t('inbox.filters.assigned') },
+  ];
+
+  return (
+    <div className="flex flex-col h-full max-w-3xl mx-auto">
+      <HelmetContainer title="Inbox · rtylr" />
+      <div
+        className="flex items-center justify-between px-6 py-5 shrink-0"
+        style={{ borderBottom: '1px solid var(--flow-border)' }}
+      >
+        <div>
+          <h1 className="text-[18px] font-bold" style={{ color: 'var(--flow-text)' }}>
+            {t('inbox.title')}
+          </h1>
+          {unreadCount > 0 && (
+            <p className="text-[12px] mt-0.5" style={{ color: 'var(--flow-text-muted)' }}>
+              {t('inbox.unreadCount', { count: unreadCount })}
+            </p>
+          )}
+        </div>
+
+        <button
+          onClick={() => markAll.mutate()}
+          disabled={markAll.isPending || unreadCount === 0}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)] disabled:opacity-40"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
+          {markAll.isPending ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : (
+            <CheckCheck size={13} />
+          )}
+          {t('inbox.markAllRead')}
+        </button>
+      </div>
+
+      <div
+        className="flex items-center gap-1 px-6 py-2 shrink-0"
+        style={{ borderBottom: '1px solid var(--flow-border)' }}
+      >
+        {filterDefs.map(({ id, label }) => (
+          <button
+            key={id}
+            onClick={() => setActiveFilter(id)}
+            className="px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors"
+            style={{
+              background: activeFilter === id ? 'var(--accent-muted)' : 'transparent',
+              color: activeFilter === id ? 'var(--accent)' : 'var(--flow-text-muted)',
+            }}
+          >
+            {label}
+            {id === 'unread' && unreadCount > 0 && (
+              <span
+                className="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+              >
+                {unreadCount}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 size={20} className="animate-spin" style={{ color: 'var(--flow-text-dim)' }} />
+          </div>
+        ) : (
+          <AnimatePresence>
+            {filtered.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center py-20"
+              >
+                <Bell size={32} style={{ color: 'var(--flow-text-dim)' }} className="mb-3" />
+                <p className="text-[14px] font-medium" style={{ color: 'var(--flow-text-muted)' }}>
+                  {t('inbox.emptyTitle')}
+                </p>
+                <p className="text-[12px] mt-1" style={{ color: 'var(--flow-text-dim)' }}>
+                  {t('inbox.emptyDescription')}
+                </p>
+              </motion.div>
+            ) : (
+              filtered.map((n) => (
+                <NotificationRow
+                  key={n.id}
+                  notification={n}
+                  onMarkRead={(id) => markRead.mutate(id)}
+                />
+              ))
+            )}
+          </AnimatePresence>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default Inbox;

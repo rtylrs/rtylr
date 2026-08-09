@@ -1,0 +1,529 @@
+import React, { useState, useEffect } from 'react';
+import { HelmetContainer } from '@voxire/components';
+import { toast } from 'sonner';
+import { Save, Users, Settings2, UserPlus, UserMinus } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCrmSettings, useUpdateCrmSettings } from '../../shared/hooks/queries/useCrmSettings';
+import { PageHeader, Card, Input, Select, Button, ACCENT } from '../../shared/components/ui';
+import type { Settings } from '../../shared/schemas/settings';
+import {
+  useCrmTeam,
+  useCrmInviteMember,
+  useCrmDeactivateMember,
+} from '../../shared/hooks/queries/useCrmTeam';
+import {
+  useCrmSubscription,
+  centsToDisplay,
+  computeSeatProration,
+} from '../../shared/hooks/queries/useCrmSubscription';
+
+type TabId = 'general' | 'team';
+
+interface TabDef {
+  id: TabId;
+  label: string;
+  icon: React.ComponentType<{ size?: number }>;
+}
+
+const TABS: TabDef[] = [
+  { id: 'general', label: 'General', icon: Settings2 },
+  { id: 'team', label: 'Team', icon: Users },
+];
+
+// ── General Tab ───────────────────────────────────────────────────────────────
+
+const GeneralTab: React.FC = () => {
+  const { data: fetched } = useCrmSettings();
+  const update = useUpdateCrmSettings();
+  const defaultSettings: Settings = {
+    defaultConsent: true,
+    timezone: 'America/Los_Angeles',
+    fromEmail: '',
+    fromName: '',
+    smsSenderId: '',
+    businessName: '',
+    atRiskDays: 60,
+    currency: 'USD',
+  };
+  const [form, setForm] = useState<Settings>(defaultSettings);
+
+  useEffect(() => {
+    if (fetched) setForm(fetched);
+  }, [fetched]);
+
+  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]): void =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSave = (): void => {
+    update.mutate(form, {
+      onSuccess: () => toast.success('Settings saved'),
+      onError: () => toast.error('Failed to save settings'),
+    });
+  };
+
+  return (
+    <div style={{ maxWidth: '680px' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <Button variant="primary" onClick={handleSave}>
+          <Save size={13} />
+          Save changes
+        </Button>
+      </div>
+
+      <Card style={{ marginBottom: '16px' }}>
+        <h4
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--hub-text)',
+            margin: '0 0 14px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
+          Business
+        </h4>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <Input
+            label="Business name"
+            value={form.businessName}
+            onChange={(e) => set('businessName', e.target.value)}
+          />
+          <Select
+            label="Currency"
+            value={form.currency}
+            onChange={(e) => set('currency', e.target.value)}
+          >
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="CAD">CAD ($)</option>
+          </Select>
+          <Select
+            label="Timezone"
+            value={form.timezone}
+            onChange={(e) => set('timezone', e.target.value)}
+          >
+            <option value="America/Los_Angeles">Pacific Time (Los Angeles)</option>
+            <option value="America/New_York">Eastern Time (New York)</option>
+            <option value="Europe/London">London</option>
+            <option value="Europe/Paris">Paris</option>
+            <option value="Asia/Tokyo">Tokyo</option>
+          </Select>
+          <Input
+            label="At-risk after (days)"
+            type="number"
+            value={form.atRiskDays}
+            onChange={(e) => set('atRiskDays', Number(e.target.value))}
+          />
+        </div>
+      </Card>
+
+      <Card style={{ marginBottom: '16px' }}>
+        <h4
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--hub-text)',
+            margin: '0 0 14px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
+          Messaging
+        </h4>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <Input
+            label="From email"
+            type="email"
+            value={form.fromEmail}
+            onChange={(e) => set('fromEmail', e.target.value)}
+          />
+          <Input
+            label="From name"
+            value={form.fromName}
+            onChange={(e) => set('fromName', e.target.value)}
+          />
+          <Input
+            label="SMS sender ID"
+            value={form.smsSenderId}
+            onChange={(e) => set('smsSenderId', e.target.value)}
+          />
+        </div>
+      </Card>
+
+      <Card>
+        <h4
+          style={{
+            fontSize: '12px',
+            fontWeight: 600,
+            color: 'var(--hub-text)',
+            margin: '0 0 14px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
+          Consent defaults
+        </h4>
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            cursor: 'pointer',
+            padding: '10px 0',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={form.defaultConsent}
+            onChange={(e) => set('defaultConsent', e.target.checked)}
+            style={{ accentColor: ACCENT, width: '16px', height: '16px' }}
+          />
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
+              Opt in new customers by default
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+              New customers will be opted into marketing unless they say otherwise
+            </div>
+          </div>
+        </label>
+      </Card>
+    </div>
+  );
+};
+
+// ── Team Tab ──────────────────────────────────────────────────────────────────
+
+const TeamTab: React.FC = () => {
+  const { data: members = [], isLoading } = useCrmTeam();
+  const invite = useCrmInviteMember();
+  const deactivate = useCrmDeactivateMember();
+  const { data: sub } = useCrmSubscription();
+
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [showInvite, setShowInvite] = useState(false);
+
+  const handleInvite = (): void => {
+    if (!email.trim() || !fullName.trim()) {
+      toast.error('Email and full name are required');
+      return;
+    }
+    invite.mutate(
+      { email: email.trim(), fullName: fullName.trim(), role: 'member' },
+      {
+        onSuccess: () => {
+          setEmail('');
+          setFullName('');
+          setShowInvite(false);
+        },
+      }
+    );
+  };
+
+  const inputStyle: React.CSSProperties = {
+    padding: '8px 12px',
+    borderRadius: 8,
+    border: '1px solid var(--hub-border)',
+    background: 'var(--hub-input-bg)',
+    color: 'var(--hub-text)',
+    fontSize: 13,
+    outline: 'none',
+    width: '100%',
+    boxSizing: 'border-box',
+  };
+
+  return (
+    <div style={{ maxWidth: '680px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 4px' }}>
+          Team
+        </h2>
+        <p style={{ fontSize: 12, color: 'var(--hub-text-muted)', margin: 0 }}>
+          People who have access to CRM.
+        </p>
+      </div>
+
+      {showInvite ? (
+        <Card>
+          <h3
+            style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 12px' }}
+          >
+            Invite someone to CRM
+          </h3>
+          <div
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}
+          >
+            <div>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  marginBottom: 4,
+                  color: 'var(--hub-text-muted)',
+                }}
+              >
+                Full name
+              </label>
+              <input
+                type="text"
+                placeholder="Jane Smith"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                style={inputStyle}
+              />
+            </div>
+            <div>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: 11,
+                  fontWeight: 500,
+                  marginBottom: 4,
+                  color: 'var(--hub-text-muted)',
+                }}
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                placeholder="jane@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleInvite();
+                }}
+                style={inputStyle}
+              />
+            </div>
+          </div>
+          {sub &&
+            (sub.pricePerSeatCents ?? 0) > 0 &&
+            (() => {
+              const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                computeSeatProration(sub.pricePerSeatCents ?? 0);
+              return (
+                <p style={{ fontSize: 11, color: 'var(--hub-text-muted)' }}>
+                  Adding this member costs{' '}
+                  <strong style={{ color: 'var(--hub-text)' }}>
+                    {centsToDisplay(proratedCents)}
+                  </strong>{' '}
+                  this month ({daysRemaining}/{daysInMonth} days), then{' '}
+                  <strong style={{ color: 'var(--hub-text)' }}>
+                    {centsToDisplay(sub.pricePerSeatCents ?? 0)}/mo
+                  </strong>{' '}
+                  from {nextMonthName} 1st.
+                </p>
+              );
+            })()}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button
+              variant="primary"
+              disabled={!email.trim() || !fullName.trim() || invite.isPending}
+              onClick={handleInvite}
+            >
+              <UserPlus size={13} />
+              {invite.isPending ? 'Sending…' : 'Send invite'}
+            </Button>
+            <Button variant="ghost" onClick={() => setShowInvite(false)}>
+              Cancel
+            </Button>
+          </div>
+        </Card>
+      ) : (
+        <div>
+          <Button variant="primary" onClick={() => setShowInvite(true)}>
+            <UserPlus size={13} />
+            Invite member
+          </Button>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              style={{
+                height: 56,
+                borderRadius: 12,
+                background: 'var(--hub-hover)',
+              }}
+            />
+          ))}
+        </div>
+      ) : members.length === 0 ? (
+        <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--hub-text-muted)' }}>
+          <Users size={24} style={{ margin: '0 auto 8px', opacity: 0.4, display: 'block' }} />
+          <p style={{ fontSize: 13, margin: 0 }}>No team members yet.</p>
+        </div>
+      ) : (
+        <Card padded={false}>
+          {members.map((m, idx) => (
+            <div
+              key={m.id}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '12px 16px',
+                borderBottom: idx < members.length - 1 ? '1px solid var(--hub-border)' : 'none',
+              }}
+            >
+              <div
+                style={{
+                  height: 32,
+                  width: 32,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  flexShrink: 0,
+                  background: 'color-mix(in srgb, var(--crm-accent, #3b82f6) 20%, transparent)',
+                  color: 'var(--crm-accent, #3b82f6)',
+                }}
+              >
+                {(m.fullName || m.email || '').charAt(0).toUpperCase()}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: 'var(--hub-text)',
+                    margin: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {m.fullName || m.email}
+                </p>
+                <p
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--hub-text-muted)',
+                    margin: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {m.email}
+                </p>
+              </div>
+              <span
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  padding: '2px 8px',
+                  borderRadius: 999,
+                  background: 'var(--hub-hover)',
+                  color: 'var(--hub-text-muted)',
+                  flexShrink: 0,
+                }}
+              >
+                {m.role}
+              </span>
+              <button
+                type="button"
+                aria-label={`Remove ${m.fullName || m.email}`}
+                onClick={() => {
+                  deactivate.mutate(m.id ?? '');
+                }}
+                style={{
+                  height: 28,
+                  width: 28,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 6,
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'var(--hub-text-muted)',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              >
+                <UserMinus size={13} />
+              </button>
+            </div>
+          ))}
+        </Card>
+      )}
+    </div>
+  );
+};
+
+// ── Main Settings Component ───────────────────────────────────────────────────
+
+const SettingsScreen: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<TabId>('general');
+
+  return (
+    <>
+      <HelmetContainer title="Settings · rtylr" />
+      <div>
+        <PageHeader title="Settings" subtitle="Configure your CRM defaults" />
+
+        {/* Tab bar */}
+        <div
+          style={{
+            display: 'flex',
+            borderBottom: '1px solid var(--hub-border)',
+            marginBottom: 24,
+          }}
+        >
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '10px 16px',
+                  fontSize: 13,
+                  fontWeight: isActive ? 600 : 500,
+                  color: isActive ? 'var(--crm-accent, #3b82f6)' : 'var(--hub-text-muted)',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: isActive
+                    ? '2px solid var(--crm-accent, #3b82f6)'
+                    : '2px solid transparent',
+                  marginBottom: -1,
+                  cursor: 'pointer',
+                  transition: 'color 0.15s, border-color 0.15s',
+                }}
+              >
+                <Icon size={14} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.15 }}
+        >
+          {activeTab === 'general' && <GeneralTab />}
+          {activeTab === 'team' && <TeamTab />}
+        </motion.div>
+      </div>
+    </>
+  );
+};
+
+export default SettingsScreen;

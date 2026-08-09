@@ -1,0 +1,58 @@
+import { createOneKitClient } from '@voxire/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { PurchaseOrderServiceClient } from '@voxire/voxie/erp/purchase_order/v1/client';
+import type {
+  ApprovePurchaseOrderResponse,
+  CreatePurchaseOrderRequest,
+  CreatePurchaseOrderResponse,
+  ListPurchaseOrdersResponse,
+  PurchaseOrder,
+  UpdatePurchaseOrderStatusRequest,
+  UpdatePurchaseOrderStatusResponse,
+} from '@voxire/voxie/erp/purchase_order/v1/types';
+
+const purchaseOrderClient = createOneKitClient(PurchaseOrderServiceClient, 'erp');
+
+export type { CreatePurchaseOrderRequest, PurchaseOrder };
+
+interface UsePurchaseOrdersParams {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+}
+
+export function usePurchaseOrders(params: UsePurchaseOrdersParams = {}) {
+  const { page = 1, pageSize = 50, status = '' } = params;
+  return useQuery<ListPurchaseOrdersResponse>({
+    queryKey: ['purchase-orders', { page, pageSize, status }],
+    queryFn: () => purchaseOrderClient.listPurchaseOrders({ page, pageSize, status }),
+  });
+}
+
+export function useCreatePurchaseOrder() {
+  const qc = useQueryClient();
+  return useMutation<CreatePurchaseOrderResponse, Error, CreatePurchaseOrderRequest>({
+    mutationFn: (data) => purchaseOrderClient.createPurchaseOrder(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
+    onError: () => toast.error('Failed to create purchase order'),
+  });
+}
+
+export function useUpdatePurchaseOrderStatus() {
+  const qc = useQueryClient();
+  return useMutation<UpdatePurchaseOrderStatusResponse, Error, UpdatePurchaseOrderStatusRequest>({
+    mutationFn: (data) => purchaseOrderClient.updatePurchaseOrderStatus(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
+    onError: () => toast.error('Failed to update purchase order status'),
+  });
+}
+
+export function useApprovePurchaseOrder() {
+  const qc = useQueryClient();
+  return useMutation<ApprovePurchaseOrderResponse, Error, string>({
+    mutationFn: (id) => purchaseOrderClient.approvePurchaseOrder({ id }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['purchase-orders'] }),
+    onError: () => toast.error('Failed to approve purchase order'),
+  });
+}
