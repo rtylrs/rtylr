@@ -575,9 +575,9 @@ const ProjectSettings: React.FC = () => {
                   className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-muted)' }}
                   disabled
-                  onClick={undefined}
+                  title={t('common.comingSoon')}
                 >
-                  Connect
+                  {t('common.comingSoon')}
                 </button>
               </div>
             ))}

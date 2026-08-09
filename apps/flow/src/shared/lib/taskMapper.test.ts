@@ -112,4 +112,20 @@ describe('apiTaskToTask', () => {
     const out = apiTaskToTask(baseApiTask({ labels: [1, 2, 3] as unknown as string[] }));
     expect(out.labelIds).toEqual([1, 2, 3]);
   });
+
+  it('preserves the archived flag', () => {
+    // Dropping this silently defeats every `!t.archived` filter downstream
+    // (Triage, FocusToday, FlowLayout sidebar counts all read the mapped
+    // Task, not the raw ApiTask) - they'd never actually exclude anything.
+    const out = apiTaskToTask(baseApiTask({ archived: true }));
+    expect(out.archived).toBe(true);
+  });
+
+  it('normalises a missing archived field to false', () => {
+    // `archived` is omitempty on the contract, so an unarchived task comes
+    // back with the key absent. The mapper resolves that to a real `false`
+    // rather than leaking `undefined` into the store.
+    const out = apiTaskToTask(baseApiTask());
+    expect(out.archived).toBe(false);
+  });
 });

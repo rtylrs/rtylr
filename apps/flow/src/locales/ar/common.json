@@ -18,7 +18,9 @@
   "assignee": "المسؤول",
   "priority": "الأولوية",
   "readOnlyAccess": "لديك صلاحية العرض فقط ولا يمكنك إجراء أي تغييرات",
-  "deleteRestricted": "يمكن للمالكين والمشرفين فقط حذف هذا العنصر",
+  "deleteRestricted": "يمكن لمشرفي المشروع فقط حذف هذا العنصر",
+  "comingSoon": "قريباً",
+  "emojiPickerComingSoon": "منتقي الرموز التعبيرية (قريباً)",
   "focusToday": {
     "emptyTitle": "Nothing pinned for today",
     "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway."
@@ -40,7 +42,8 @@
     "in3Days": "In 3 days",
     "nextWeek": "Next week",
     "in2Weeks": "In 2 weeks",
-    "setDate": "Set date"
+    "setDate": "Set date",
+    "clearDate": "مسح التاريخ"
   },
   "insights": {
     "burndown": "Burndown (active cycle)",

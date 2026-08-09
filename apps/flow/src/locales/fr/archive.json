@@ -1,0 +1,9 @@
+{
+  "title": "Archives",
+  "count_one": "{{count}} tâche archivée",
+  "count_other": "{{count}} tâches archivées",
+  "emptyTitle": "Rien n'est archivé",
+  "emptyDescription": "Les tâches archivées apparaîtront ici.",
+  "restore": "Restaurer",
+  "restoreTitle": "Restaurer la tâche"
+}

@@ -211,7 +211,10 @@ const Businesses: React.FC = () => {
               <Building2 size={22} />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight" style={{ color: 'var(--dash-text)' }}>
+              <h1
+                className="text-xl font-bold tracking-tight"
+                style={{ color: 'var(--dash-text)' }}
+              >
                 {t('businesses.manageTitle')}
               </h1>
               <p className="mt-0.5 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
@@ -236,7 +239,9 @@ const Businesses: React.FC = () => {
               className="border-b px-6 py-5"
               style={{ borderColor: 'var(--dash-border)' }}
             >
-              <CardTitle className="text-base font-semibold">{t('businesses.manageCardTitle')}</CardTitle>
+              <CardTitle className="text-base font-semibold">
+                {t('businesses.manageCardTitle')}
+              </CardTitle>
               <CardDescription>{t('businesses.manageCardDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 p-4 sm:p-6">
@@ -268,7 +273,10 @@ const Businesses: React.FC = () => {
                   const isOwned = business.isOwned !== false;
                   const isSwitching = switchingId === business.id;
                   const isDeleteDisabled =
-                    !isOwned || !canDeleteBusiness || deleteBusiness.isPending || switchBusiness.isPending;
+                    !isOwned ||
+                    !canDeleteBusiness ||
+                    deleteBusiness.isPending ||
+                    switchBusiness.isPending;
 
                   return (
                     <div
@@ -347,7 +355,9 @@ const Businesses: React.FC = () => {
                             ) : (
                               <ArrowRightLeft size={13} />
                             )}
-                            <span>{isSwitching ? t('businesses.switching') : t('businesses.switch')}</span>
+                            <span>
+                              {isSwitching ? t('businesses.switching') : t('businesses.switch')}
+                            </span>
                           </Button>
                         )}
 

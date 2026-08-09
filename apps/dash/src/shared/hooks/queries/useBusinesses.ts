@@ -115,7 +115,9 @@ export const useSwitchBusiness = () =>
     mutationFn: (businessId: number) =>
       unwrap(
         safe.post<SwitchBusinessResponse>('/hub/user/v1/users/switch-business', {
-          business_id: businessId,
+          // OneKit serializes int64 request fields as JSON strings so values
+          // remain lossless across JavaScript clients and the Go server.
+          business_id: String(businessId),
         })
       ),
   });

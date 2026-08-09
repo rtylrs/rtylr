@@ -2,11 +2,17 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { useDeleteBusiness, useListMyBusinesses, useRenameBusiness } from './useBusinesses';
+import {
+  useDeleteBusiness,
+  useListMyBusinesses,
+  useRenameBusiness,
+  useSwitchBusiness,
+} from './useBusinesses';
 
 const mockGet = vi.fn();
 const mockPatch = vi.fn();
 const mockDelete = vi.fn();
+const mockPost = vi.fn();
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((value) => value),
@@ -17,6 +23,7 @@ vi.mock('../../lib/api', () => ({
     get: (...args: unknown[]) => mockGet(...args),
     patch: (...args: unknown[]) => mockPatch(...args),
     delete: (...args: unknown[]) => mockDelete(...args),
+    post: (...args: unknown[]) => mockPost(...args),
   },
 }));
 
@@ -80,5 +87,20 @@ describe('business queries', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockDelete).toHaveBeenCalledWith('/hub/business/v1/businesses/42');
+  });
+
+  it('sends int64 business IDs as JSON strings when switching', async () => {
+    mockPost.mockResolvedValue({ token: 'new-token' });
+
+    const { result } = renderHook(() => useSwitchBusiness(), { wrapper: createWrapper() });
+
+    act(() => {
+      result.current.mutate(42);
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockPost).toHaveBeenCalledWith('/hub/user/v1/users/switch-business', {
+      business_id: '42',
+    });
   });
 });

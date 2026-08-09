@@ -1,6 +1,9 @@
 {
   "cancel": "إلغاء",
   "save": "حفظ",
+  "saveChanges": "حفظ التغييرات",
+  "unsavedChanges": "تغييرات غير محفوظة",
+  "saving": "جارٍ الحفظ...",
   "confirm": "تأكيد",
   "delete": "حذف",
   "edit": "تعديل",

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Check, Trash2, Archive, Flag } from 'lucide-react';
 import { toast } from 'sonner';
@@ -7,23 +7,49 @@ import { useFlowStore } from '../stores/flowStore';
 import {
   useBulkUpdateStatus,
   useBulkUpdatePriority,
+  useBulkUpdateArchive,
   useBulkDelete,
 } from '../../features/tasks/useTasks';
-import { useCanEditTask, useCanDeleteResource } from '../lib/currentUser';
+import { useMostRestrictiveProjectRole } from '../lib/currentUser';
+import { canEditTask, canDelete } from '../lib/roleUtils';
 
 const t = (key: string): string => i18next.t(key) as string;
 
 export const BulkEditBar: React.FC = () => {
-  const { selectedTaskIds, clearSelection } = useFlowStore();
+  const { selectedTaskIds, clearSelection, tasks } = useFlowStore();
   const bulkStatus = useBulkUpdateStatus();
   const bulkPriority = useBulkUpdatePriority();
+  const bulkArchive = useBulkUpdateArchive();
   const bulkDelete = useBulkDelete();
-  const canEdit = useCanEditTask();
-  const canRemove = useCanDeleteResource();
+
+  // Selection is global and cross-project views (Triage, My issues) let it span
+  // projects, so a bulk action can reach several projects at once. Gate on the
+  // most restrictive role the user holds across them, and deny outright if any
+  // selected task can't be resolved to a project - a missing task must not
+  // quietly shrink the set of projects being checked.
+  const { projectIds, allResolved } = useMemo(() => {
+    const ids = new Set<string>();
+    let resolved = true;
+    for (const taskId of selectedTaskIds) {
+      const task = tasks.find((candidate) => candidate.id === taskId);
+      if (!task) {
+        resolved = false;
+        continue;
+      }
+      ids.add(task.projectId);
+    }
+    return { projectIds: [...ids].sort(), allResolved: resolved };
+  }, [selectedTaskIds, tasks]);
+
+  const restrictingRole = useMostRestrictiveProjectRole(projectIds);
+  const effectiveRole = allResolved ? restrictingRole : undefined;
+  const canEdit = effectiveRole !== undefined && canEditTask(effectiveRole);
+  const canRemove = effectiveRole !== undefined && canDelete(effectiveRole);
 
   if (selectedTaskIds.length === 0) return null;
 
-  const isPending = bulkStatus.isPending || bulkPriority.isPending || bulkDelete.isPending;
+  const isPending =
+    bulkStatus.isPending || bulkPriority.isPending || bulkArchive.isPending || bulkDelete.isPending;
 
   return (
     <AnimatePresence>
@@ -76,8 +102,8 @@ export const BulkEditBar: React.FC = () => {
           disabled={isPending || !canEdit}
           title={!canEdit ? t('common.readOnlyAccess') : undefined}
           onClick={() =>
-            bulkStatus
-              .mutateAsync({ ids: selectedTaskIds, status: 'cancelled' })
+            bulkArchive
+              .mutateAsync({ ids: selectedTaskIds })
               .then(() => clearSelection())
               .catch(() => toast.error(t('errors.generic')))
           }

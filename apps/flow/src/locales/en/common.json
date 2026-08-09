@@ -18,7 +18,9 @@
   "assignee": "Assignee",
   "priority": "Priority",
   "readOnlyAccess": "You have view-only access and can't make changes",
-  "deleteRestricted": "Only workspace admins and owners can delete this",
+  "deleteRestricted": "Only project admins can delete this",
+  "comingSoon": "Coming soon",
+  "emojiPickerComingSoon": "Emoji picker (coming soon)",
   "focusToday": {
     "emptyTitle": "Nothing pinned for today",
     "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway."
@@ -40,7 +42,8 @@
     "in3Days": "In 3 days",
     "nextWeek": "Next week",
     "in2Weeks": "In 2 weeks",
-    "setDate": "Set date"
+    "setDate": "Set date",
+    "clearDate": "Clear date"
   },
   "insights": {
     "burndown": "Burndown (active cycle)",

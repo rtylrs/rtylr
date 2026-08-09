@@ -1,6 +1,9 @@
 {
   "cancel": "Annuler",
   "save": "Enregistrer",
+  "saveChanges": "Enregistrer les modifications",
+  "unsavedChanges": "Modifications non enregistrées",
+  "saving": "Enregistrement...",
   "confirm": "Confirmer",
   "delete": "Supprimer",
   "edit": "Modifier",
