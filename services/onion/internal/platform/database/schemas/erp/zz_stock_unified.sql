@@ -1,11 +1,24 @@
--- Unified stock model — Slice 0 (foundation only; zero behavior change).
+-- Unified stock model — Slice 0 (foundation: the three tables stock_core needs).
 -- Introduces one location namespace, one per-location balance table, and one
--- ledger that BOTH POS and ERP will eventually share (POS menu items already
--- ARE erp_products). Nothing reads or writes these yet — erp_products.stock_quantity
--- remains the authoritative on-hand value until the read-cutover slice. Additive
--- and reversible. Later slices: backfill -> dual-write (adjust, PO receive,
--- stock-take) -> POS sale deduction (gated on a tenant-ownership guard) ->
--- transfers -> read cutover -> decommission. See vault/rtylr/erp-readiness.md.
+-- ledger that BOTH POS and ERP share (POS menu items already ARE erp_products).
+-- These tables are live and required at runtime. stock_core.ApplyMovementTx
+-- (internal/platform/stock_core/stock_core.go) is the only sanctioned write
+-- path, and 8 modules route through it: products, inventory, purchase_orders,
+-- stock_takes, stock_transfers, pos_orders, pos_stock_movements, store_orders.
+-- Each movement row-locks the stock_levels row, appends to stock_ledger, and
+-- adds the same delta to erp_products.stock_quantity in the same transaction
+-- (an incremental add, deliberately not a SUM recompute, so it cannot be
+-- clobbered by a stale REPEATABLE READ snapshot). The legacy scalar therefore
+-- stays equal to the owner-wide SUM(on_hand) by construction.
+-- Additive and reversible.
+-- Slice status: backfill, dual-write (adjust, PO receive, stock-take), POS sale
+-- deduction and transfers have all shipped. A read cutover is NOT required:
+-- existing ERP reads still select the scalar and are already correct via that
+-- sync, while POS branch-inventory reads select stock_levels.on_hand directly
+-- today. The scalar is not yet decommissioned. Still outstanding: POS manual
+-- ops and POS stock reads that go through pos_branch_inventory, which need a
+-- fail-closed business_id -> owner_id reconciliation first.
+-- See vault/rtylr/erp-readiness.md.
 
 CREATE TABLE IF NOT EXISTS stock_locations (
     id           BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
