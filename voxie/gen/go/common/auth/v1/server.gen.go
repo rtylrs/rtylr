@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -13,6 +14,17 @@ func writeJSONError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(map[string]string{"message": message})
+}
+
+func writeHandlerError(w http.ResponseWriter, err error) {
+	status := http.StatusInternalServerError
+	var statusErr interface{ HTTPStatusCode() int }
+	if errors.As(err, &statusErr) {
+		if candidate := statusErr.HTTPStatusCode(); candidate >= 100 && candidate <= 599 {
+			status = candidate
+		}
+	}
+	writeJSONError(w, status, err.Error())
 }
 
 func parseInt32(s string) int32     { v, _ := strconv.ParseInt(s, 10, 32); return int32(v) }
@@ -72,7 +84,7 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.Register(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -94,7 +106,7 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.Login(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -116,7 +128,7 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GoogleAuth(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -138,7 +150,7 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.ResetPassword(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -160,7 +172,7 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.ResetPasswordConfirm(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -182,7 +194,7 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.VerifyEmail(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -204,7 +216,7 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.ResendVerification(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -226,7 +238,7 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.InviteAccept(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -245,7 +257,7 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.CheckEmailExists(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -264,7 +276,7 @@ func RegisterAuthServiceServer(srv AuthServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.SocialAuthorize(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")

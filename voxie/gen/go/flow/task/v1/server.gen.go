@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -13,6 +14,17 @@ func writeJSONError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(map[string]string{"message": message})
+}
+
+func writeHandlerError(w http.ResponseWriter, err error) {
+	status := http.StatusInternalServerError
+	var statusErr interface{ HTTPStatusCode() int }
+	if errors.As(err, &statusErr) {
+		if candidate := statusErr.HTTPStatusCode(); candidate >= 100 && candidate <= 599 {
+			status = candidate
+		}
+	}
+	writeJSONError(w, status, err.Error())
 }
 
 func parseInt32(s string) int32     { v, _ := strconv.ParseInt(s, 10, 32); return int32(v) }
@@ -106,7 +118,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.ListTasks(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -134,7 +146,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetMyTasks(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -150,7 +162,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetMyTasksProject(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -184,7 +196,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.SearchTasks(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -206,7 +218,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.CreateTask(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -223,7 +235,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetTaskDetail(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -246,7 +258,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.UpdateTask(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -269,7 +281,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.UpdateTaskStatus(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -286,7 +298,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.DeleteTask(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -308,7 +320,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.CreateSubtask(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -337,7 +349,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetSubtasks(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -360,7 +372,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.AddComment(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -377,7 +389,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.DeleteComment(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -394,7 +406,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetTaskActivity(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -416,7 +428,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.CreateAttachment(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -433,7 +445,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetAttachments(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -450,7 +462,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.DeleteAttachment(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -473,7 +485,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.CreateTimeLog(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -490,7 +502,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.GetTimeLogs(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -507,7 +519,7 @@ func RegisterTaskServiceServer(srv TaskServiceServer, opts ...ServerOption) erro
 		}
 		resp, err := srv.DeleteTimeLog(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")

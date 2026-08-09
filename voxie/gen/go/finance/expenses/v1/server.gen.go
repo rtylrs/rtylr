@@ -4,6 +4,7 @@ package v1
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -13,6 +14,17 @@ func writeJSONError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(map[string]string{"message": message})
+}
+
+func writeHandlerError(w http.ResponseWriter, err error) {
+	status := http.StatusInternalServerError
+	var statusErr interface{ HTTPStatusCode() int }
+	if errors.As(err, &statusErr) {
+		if candidate := statusErr.HTTPStatusCode(); candidate >= 100 && candidate <= 599 {
+			status = candidate
+		}
+	}
+	writeJSONError(w, status, err.Error())
 }
 
 func parseInt32(s string) int32     { v, _ := strconv.ParseInt(s, 10, 32); return int32(v) }
@@ -63,7 +75,7 @@ func RegisterExpensesServiceServer(srv ExpensesServiceServer, opts ...ServerOpti
 		}
 		resp, err := srv.ListExpenses(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -85,7 +97,7 @@ func RegisterExpensesServiceServer(srv ExpensesServiceServer, opts ...ServerOpti
 		}
 		resp, err := srv.CreateExpense(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -108,7 +120,7 @@ func RegisterExpensesServiceServer(srv ExpensesServiceServer, opts ...ServerOpti
 		}
 		resp, err := srv.UpdateExpense(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -125,7 +137,7 @@ func RegisterExpensesServiceServer(srv ExpensesServiceServer, opts ...ServerOpti
 		}
 		resp, err := srv.DeleteExpense(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -142,7 +154,7 @@ func RegisterExpensesServiceServer(srv ExpensesServiceServer, opts ...ServerOpti
 		}
 		resp, err := srv.GetExpense(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -165,7 +177,7 @@ func RegisterExpensesServiceServer(srv ExpensesServiceServer, opts ...ServerOpti
 		}
 		resp, err := srv.UpdateExpenseStatus(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -181,7 +193,7 @@ func RegisterExpensesServiceServer(srv ExpensesServiceServer, opts ...ServerOpti
 		}
 		resp, err := srv.ListExpenseCategories(r.Context(), req)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			writeHandlerError(w, err)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
