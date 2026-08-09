@@ -2,6 +2,28 @@ package domain
 
 import "time"
 
+const (
+	TaskStatusBacklog    = "backlog"
+	TaskStatusTodo       = "todo"
+	TaskStatusInProgress = "in_progress"
+	TaskStatusInReview   = "in_review"
+	TaskStatusDone       = "done"
+	TaskStatusCancelled  = "cancelled"
+)
+
+// IsValidTaskStatus keeps writes aligned with the flow_tasks.status enum. The
+// database reports invalid enum values as a warning/error after coercion, so
+// validate at the API boundary and return a client error instead.
+func IsValidTaskStatus(status string) bool {
+	switch status {
+	case TaskStatusBacklog, TaskStatusTodo, TaskStatusInProgress,
+		TaskStatusInReview, TaskStatusDone, TaskStatusCancelled:
+		return true
+	default:
+		return false
+	}
+}
+
 type Task struct {
 	ID             int64
 	ProjectID      int64

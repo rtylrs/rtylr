@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -96,7 +97,11 @@ func testLocalCache(ctx context.Context) error {
 
 // testRedisCache performs a basic health check on the Redis cache.
 func testRedisCache(ctx context.Context) error {
-	testKey := "cache-init-test-redis"
+	// Multiple API/worker/upload processes can initialize concurrently. A
+	// shared probe key lets one process delete another process's value and
+	// falsely report a mismatch, which used to produce noisy ERROR events and
+	// unnecessarily disable Redis for a healthy process.
+	testKey := fmt.Sprintf("cache-init-test-redis:%d", time.Now().UnixNano())
 	testValue := []byte("test-value-redis")
 	ttl := 1 * time.Second
 

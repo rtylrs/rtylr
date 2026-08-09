@@ -381,12 +381,10 @@ func normalizeTaskToolStatus(value any) string {
 	}
 	status = strings.ReplaceAll(status, "-", "_")
 	status = strings.ReplaceAll(status, " ", "_")
-	switch status {
-	case "todo", "in_progress", "done", "cancelled":
+	if domain.IsValidTaskStatus(status) {
 		return status
-	default:
-		return ""
 	}
+	return ""
 }
 
 func normalizeTaskFilterPriority(value any) string {
