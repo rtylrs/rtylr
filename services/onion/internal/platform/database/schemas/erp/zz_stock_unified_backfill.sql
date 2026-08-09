@@ -25,7 +25,8 @@ SELECT DISTINCT owner_id, 0, 'warehouse', 'native', 0, 'Default Warehouse', TRUE
 FROM erp_products
 ON DUPLICATE KEY UPDATE source_id = VALUES(source_id);
 
--- 2. Seed per-location on_hand from the scalar (re-seed is idempotent).
+-- 2. Seed per-location on_hand from the scalar. NOT safe to re-run once
+--    stock_core is live: see the re-run caution in the header above.
 INSERT INTO stock_levels (owner_id, location_id, product_id, on_hand)
 SELECT p.owner_id, l.id, p.id, p.stock_quantity
 FROM erp_products p
