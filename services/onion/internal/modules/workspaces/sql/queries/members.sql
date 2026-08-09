@@ -21,7 +21,8 @@ WHERE workspace_id = ? AND user_id = ?;
 -- name: GetPersonalWorkspaceByOwner :one
 SELECT id
 FROM flow_workspaces
-WHERE owner_id = ? AND is_personal = TRUE
+WHERE owner_id = ? AND (is_personal = TRUE OR is_default = TRUE)
+ORDER BY is_personal DESC, is_default DESC, id ASC
 LIMIT 1;
 
 -- name: CreatePersonalWorkspace :execresult
