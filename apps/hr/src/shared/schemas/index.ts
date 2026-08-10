@@ -29,8 +29,13 @@ export type {
   OvertimeAlert,
 } from './shifts';
 
-export { payrollConfigSchema, payrollRunEntrySchema, payrollRunSchema } from './payroll';
-export type { PayrollConfigForm, PayrollRunEntry, PayrollRun } from './payroll';
+export {
+  payrollConfigSchema,
+  payrollRunEntrySchema,
+  payrollRunSchema,
+  paySlipSearchSchema,
+} from './payroll';
+export type { PayrollConfigForm, PayrollRunEntry, PayrollRun, PaySlipSearch } from './payroll';
 
 export { timeOffRequestSchema, timeOffEntrySchema } from './timeOff';
 export type { TimeOffRequest, TimeOffEntry } from './timeOff';

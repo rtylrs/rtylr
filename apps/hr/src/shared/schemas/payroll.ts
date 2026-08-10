@@ -6,6 +6,27 @@ const finiteNumber = z.preprocess((value) => {
   return Number.isFinite(parsed) ? parsed : value;
 }, z.number());
 
+/**
+ * Search params for the pay slip view route (`/payroll/my-payslips/view`).
+ *
+ * No `z.coerce` here, for two reasons. The router's `defaultParseSearch` already
+ * JSON-parses query values, so `?runId=12` arrives as a number. And `z.coerce`
+ * widens the schema's input type to `unknown`, which would silently disable
+ * type checking on the `search` prop at every `<Link>` call site.
+ *
+ * `.catch(undefined)` keeps the route tolerant: a missing, empty or malformed
+ * `runId` resolves to `undefined` rather than throwing. `validateSearch` runs
+ * before the route renders, so a throw would swap the "pay slip not found"
+ * empty state for the router error boundary on any stale or hand-edited URL.
+ * `useGetMyPayrollRun` treats `undefined` as "do not fetch", which is what
+ * produces that empty state.
+ */
+export const paySlipSearchSchema = z.object({
+  runId: z.number().int().positive().optional().catch(undefined),
+});
+
+export type PaySlipSearch = z.infer<typeof paySlipSearchSchema>;
+
 export const payrollConfigSchema = z.object({
   grossModel: z.enum(['hourly', 'salary', 'both']),
   period: z.enum(['weekly', 'biweekly', 'monthly']),
