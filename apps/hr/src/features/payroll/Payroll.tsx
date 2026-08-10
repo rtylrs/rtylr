@@ -192,7 +192,8 @@ const Payroll = (): React.JSX.Element => {
             {filteredRuns.map((run: PayrollRunPayload) => (
               <Link
                 key={run.id}
-                to={`/payroll/${run.id}` as any}
+                to="/payroll/$id"
+                params={{ id: Number(run.id) }}
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >
                 <Card
