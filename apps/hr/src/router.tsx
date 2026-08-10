@@ -10,7 +10,7 @@ import { AppGuard } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
 import { safe } from './shared/lib/api';
 import { ErrorBoundary } from '@voxire/ui';
-import { paySlipSearchSchema } from './shared/schemas';
+import { paySlipSearchSchema, payrollRunParamsSchema } from './shared/schemas';
 import HRConfigRoute from './features/setup-wizard/HRConfigRoute';
 import DefaultLayout from './layouts/DefaultLayout';
 import WizardLayout from './layouts/WizardLayout';
@@ -332,6 +332,10 @@ const paySlipViewRoute = createRoute({
 const payrollRunDetailRoute = createRoute({
   getParentRoute: () => hrConfigRoute,
   path: '/payroll/$id',
+  params: {
+    parse: (raw) => payrollRunParamsSchema.parse(raw),
+    stringify: ({ id }) => ({ id: String(id) }),
+  },
   component: () =>
     wrap(
       <Suspense fallback={<PageLoader />}>

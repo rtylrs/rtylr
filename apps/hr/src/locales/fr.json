@@ -631,7 +631,9 @@
     "runDetail": {
       "subtitle": "{{count}} entrées dans ce cycle",
       "approve": "Approuver le cycle",
-      "exportCsv": "Exporter CSV"
+      "exportCsv": "Exporter CSV",
+      "notFound": "Cycle de paie introuvable",
+      "notFoundDescription": "Ce cycle de paie n’a pas pu être chargé."
     },
     "paySlip": {
       "title": "Fiche de paie",

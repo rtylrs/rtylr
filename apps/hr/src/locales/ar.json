@@ -631,7 +631,9 @@
     "runDetail": {
       "subtitle": "{{count}} إدخالات في هذه الدورة",
       "approve": "الموافقة على الدورة",
-      "exportCsv": "تصدير CSV"
+      "exportCsv": "تصدير CSV",
+      "notFound": "دورة الرواتب غير موجودة",
+      "notFoundDescription": "تعذر تحميل دورة الرواتب هذه."
     },
     "paySlip": {
       "title": "كشف الراتب",

@@ -105,6 +105,14 @@ export default defineConfig({
       stderr: 'pipe',
     },
     {
+      command: 'pnpm --filter @rtylr/hr dev',
+      url: 'http://localhost:5180',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+    {
       command: 'pnpm --filter @rtylr/flow dev',
       url: 'http://localhost:5183',
       reuseExistingServer: !process.env.CI,

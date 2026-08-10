@@ -291,6 +291,8 @@ const { runId } = routeApi.useSearch();
 
 Passing `pnpm typecheck` does not prove the wiring is live. To confirm, temporarily assign the value to a deliberately wrong type and check that `tsc` errors.
 
+**Path params get the same treatment** through the route's `params: { parse, stringify }` option, with one difference: path segments are never JSON-parsed, so the schema needs an explicit string-to-number transform (still not `z.coerce`). Reference: `payrollRunDetailRoute` in `apps/hr/src/router.tsx` and the "Path params" section of `docs/routing-search-params.md`. Never `useParams({ strict: false })` followed by a manual `Number()`.
+
 ### Error Boundary Placement
 
 Every top-level route group must be wrapped in an `<ErrorBoundary>` (exported from `@voxire/ui`). This prevents a crash in one feature from taking down the entire app.
