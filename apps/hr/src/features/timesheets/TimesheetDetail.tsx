@@ -55,7 +55,7 @@ const TimesheetDetail = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
-  const timesheetId = id ? parseInt(id, 10) : undefined;
+  const timesheetId = id != null ? Number(id) : undefined;
   const { data: timesheet, isLoading } = useGetTimesheet(timesheetId);
   const submitTimesheet = useSubmitTimesheet();
 

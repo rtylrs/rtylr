@@ -35,7 +35,7 @@ import { initials, paletteFor } from '../../shared/components/EmployeeCard';
 const EmployeeProfile: React.FC = () => {
   const isMobile = useIsMobile(900);
   const { id } = useParams({ strict: false });
-  const staffId = id ? parseInt(id, 10) : undefined;
+  const staffId = id != null ? Number(id) : undefined;
   const { data: staff, isLoading } = useStaffById(staffId);
   const { data: profile } = useEmployeeProfile(staffId);
   const { data: docs = [] } = useDocuments();
