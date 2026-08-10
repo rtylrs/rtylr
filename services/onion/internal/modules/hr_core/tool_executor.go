@@ -103,7 +103,7 @@ func (m *Module) executeListEmployeesTool(ctx context.Context, input map[string]
 		return nil, err
 	}
 
-	employees, total, err := m.service.ListEmployees(ctx, authUser.UserID, parsed.Limit, parsed.Offset)
+	employees, total, err := m.service.ListEmployeesForViewer(ctx, authUser.UserID, authUser.UserID, parsed.Limit, parsed.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (m *Module) executeGetEmployeeTool(ctx context.Context, input map[string]an
 		return nil, err
 	}
 
-	employee, err := m.service.GetEmployee(ctx, authUser.UserID, employeeID)
+	employee, err := m.service.GetEmployeeForViewer(ctx, authUser.UserID, authUser.UserID, employeeID)
 	if err != nil {
 		return nil, err
 	}
