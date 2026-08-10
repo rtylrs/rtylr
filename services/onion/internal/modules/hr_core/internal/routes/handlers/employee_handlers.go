@@ -191,8 +191,11 @@ func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRe
 		}
 	}
 
-	created, err := h.Service.CreateEmployee(ctx, device.User.UserID, emp)
+	created, err := h.Service.CreateEmployeeForWriter(ctx, device.User.UserID, device.User.UserID, emp)
 	if err != nil {
+		if errors.Is(err, domain.ErrPermissionDenied) {
+			return CreateEmployeeResponse{}, onekiterrors.PermissionDenied()
+		}
 		logger.Ctx(ctx).Error("failed to create employee", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return CreateEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create employee")
 	}
@@ -293,8 +296,11 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 		}
 	}
 
-	updated, err := h.Service.UpdateEmployee(ctx, device.User.UserID, emp)
+	updated, err := h.Service.UpdateEmployeeForWriter(ctx, device.User.UserID, device.User.UserID, emp)
 	if err != nil {
+		if errors.Is(err, domain.ErrPermissionDenied) {
+			return UpdateEmployeeResponse{}, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrEmployeeNotFound) {
 			return UpdateEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "Employee not found")
 		}
@@ -330,8 +336,11 @@ func (h *DeleteEmployeeHandler) Serve(ctx context.Context, _ *DeleteEmployeeRequ
 	}
 
 	emp := domain.EmployeeRecord{ID: id, Status: "terminated"}
-	_, err := h.Service.UpdateEmployee(ctx, device.User.UserID, emp)
+	_, err := h.Service.UpdateEmployeeForWriter(ctx, device.User.UserID, device.User.UserID, emp)
 	if err != nil {
+		if errors.Is(err, domain.ErrPermissionDenied) {
+			return DeleteEmployeeResponse{}, onekiterrors.PermissionDenied()
+		}
 		logger.Ctx(ctx).Error("failed to delete employee", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", id), logger.Error(err))
 		return DeleteEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete employee")
 	}
