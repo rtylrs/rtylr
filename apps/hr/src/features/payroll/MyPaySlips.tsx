@@ -46,7 +46,12 @@ const MyPaySlips = (): React.JSX.Element => {
             {runs.map((run: PayrollRunPayload) => (
               <Link
                 key={run.id}
-                to={`/payroll/my-payslips/view?runId=${run.id}` as any}
+                to="/payroll/my-payslips/view"
+                // `PayrollRunPayload.id` is an `int64`, which the contract
+                // generator emits as `string`. The route carries it as a
+                // number; a run with no id yields NaN, which the search schema
+                // resolves to `undefined` and renders as the empty state.
+                search={{ runId: Number(run.id) }}
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >
                 <Card

@@ -255,6 +255,42 @@ const rootRoute = createRootRoute({
 
 `AppGuard` (from `@voxire/auth`) replaces the old per-app `ProtectedRoute` wiring: it checks the cookie, loads the user, and enforces `allowedRoles` from `APP_CONFIG`. Feature-flagged apps additionally wrap with `AppFlagGuard` from `@voxire/config`. Unknown paths render a `CatchAllRedirect` that sends the user back to `/`.
 
+### Route Search Params - `validateSearch`
+
+A route that reads query params declares a Zod schema through `validateSearch`. Never parse the query string by hand, and never cast a `to=` prop to reach a route. Reference implementation: `paySlipViewRoute` in `apps/hr/src/router.tsx`. Full rationale in `docs/routing-search-params.md`.
+
+```ts
+// shared/schemas/<domain>.ts - route search schemas live beside the app's other schemas
+export const paySlipSearchSchema = z.object({
+  runId: z.number().int().positive().optional().catch(undefined),
+});
+
+// router.tsx
+const paySlipViewRoute = createRoute({
+  getParentRoute: () => hrConfigRoute,
+  path: '/payroll/my-payslips/view',
+  validateSearch: paySlipSearchSchema,
+  component: wrap(<PaySlip />),
+});
+```
+
+Three rules, each of which has already caused a real defect:
+
+1. **Never use `z.coerce` in a search schema.** The router's `defaultParseSearch` already JSON-parses query values, so `?runId=12` arrives as a number. Worse, `z.coerce.number()` has an _input_ type of `unknown`, and `<Link>`'s `search` prop is typed against the schema's input, so `search={{ runId: 'nonsense' }}` would compile clean and silently defeat the point of the schema.
+2. **Always end optional params with `.catch(undefined)`.** `validateSearch` runs before the route renders, so a schema that throws replaces the feature's own empty state with the router error boundary on any stale or hand-edited URL.
+3. **`getRouteApi` takes a route id, not a path.** Where the parent is pathless (`hrConfigRoute` has `id: 'hr-config'`), the id is `/hr-config/payroll/my-payslips/view` while `<Link to>` uses `/payroll/my-payslips/view`. Prefer `getRouteApi` over importing the route object, which would create an import cycle with the lazy route component.
+
+```tsx
+// The component reads the validated value. No parsing, no Number(), no cast.
+const routeApi = getRouteApi('/hr-config/payroll/my-payslips/view');
+const { runId } = routeApi.useSearch();
+
+// The call site is type-checked against the schema.
+<Link to="/payroll/my-payslips/view" search={{ runId: run.id }}>
+```
+
+Passing `pnpm typecheck` does not prove the wiring is live. To confirm, temporarily assign the value to a deliberately wrong type and check that `tsc` errors.
+
 ### Error Boundary Placement
 
 Every top-level route group must be wrapped in an `<ErrorBoundary>` (exported from `@voxire/ui`). This prevents a crash in one feature from taking down the entire app.

@@ -18,6 +18,11 @@ export default tseslint.config(
       'voxie/**',
       'packages/voxie/**',
       'dist/**',
+      // Scratch files written by the Remember plugin, in this repo and in the
+      // packages submodule. They are gitignored but still reachable by the
+      // linter, and one of them fails `no-unused-expressions`, which failed
+      // `pnpm lint` and the pre-commit hook for every unrelated change.
+      '**/.remember/**',
     ],
   },
   ...tseslint.configs.recommended,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRouterState, Link } from '@tanstack/react-router';
+import { getRouteApi, Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, FileText } from 'lucide-react';
@@ -61,11 +61,13 @@ const BreakdownRow = ({ label, value, color, bold }: BreakdownRowProps): React.J
   </div>
 );
 
+// Route id, not path: `hrConfigRoute` is pathless with `id: 'hr-config'`, so
+// every feature route is registered beneath it.
+const routeApi = getRouteApi('/hr-config/payroll/my-payslips/view');
+
 const PaySlip = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  const sp = new URLSearchParams(searchStr);
-  const runId = sp.get('runId') ? Number(sp.get('runId')) : undefined;
+  const { runId } = routeApi.useSearch();
 
   const { data: run, isLoading } = useGetMyPayrollRun(runId);
 

@@ -8,3 +8,7 @@ coverage
 *.min.css
 voxie
 **/next-env.d.ts
+# Scratch files written by the Remember plugin, in this repo and in the packages
+# submodule. They are gitignored, but the pre-commit hook runs `prettier --check`
+# over the whole tree, so they failed every unrelated commit.
+**/.remember/**
