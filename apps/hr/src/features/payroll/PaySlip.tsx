@@ -3,7 +3,7 @@ import { useRouterState, Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, FileText } from 'lucide-react';
-import { useGetPayrollRun } from '../../shared/hooks/queries/usePayroll';
+import { useGetMyPayrollRun } from '../../shared/hooks/queries/usePayroll';
 import type { PayrollEntryPayload } from '../../shared/hooks/queries/usePayroll';
 import {
   Card,
@@ -66,9 +66,8 @@ const PaySlip = (): React.JSX.Element => {
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const sp = new URLSearchParams(searchStr);
   const runId = sp.get('runId') ? Number(sp.get('runId')) : undefined;
-  const employeeId = sp.get('employeeId') ? Number(sp.get('employeeId')) : undefined;
 
-  const { data: run, isLoading } = useGetPayrollRun(runId);
+  const { data: run, isLoading } = useGetMyPayrollRun(runId);
 
   if (isLoading) {
     return (
@@ -79,9 +78,9 @@ const PaySlip = (): React.JSX.Element => {
     );
   }
 
-  const entry: PayrollEntryPayload | undefined = run?.entries?.find(
-    (e: PayrollEntryPayload) => e.employeeId === employeeId
-  );
+  // `/hr/payroll/my-runs/{id}` returns exactly the caller's own entry, so there
+  // is nothing to match on here, and nothing else to accidentally render.
+  const entry: PayrollEntryPayload | undefined = run?.entries?.[0];
 
   if (!run || !entry) {
     return (

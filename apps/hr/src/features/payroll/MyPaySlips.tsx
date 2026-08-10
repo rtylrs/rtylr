@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { FileText, DollarSign } from 'lucide-react';
-import { useListPayrollRuns } from '../../shared/hooks/queries/usePayroll';
+import { useListMyPayrollRuns } from '../../shared/hooks/queries/usePayroll';
 import type { PayrollRunPayload } from '../../shared/hooks/queries/usePayroll';
 import { SectionHeader, Card, Pill, Skeleton, EmptyState } from '../../shared/components/ui';
 
@@ -17,7 +17,7 @@ function fmt(n: number): string {
 
 const MyPaySlips = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data, isLoading } = useListPayrollRuns({ status: 'exported', limit: 50, offset: 0 });
+  const { data, isLoading } = useListMyPayrollRuns({ limit: 50, offset: 0 });
   const runs = data?.runs ?? [];
 
   return (
