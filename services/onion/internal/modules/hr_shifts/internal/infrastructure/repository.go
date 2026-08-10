@@ -262,13 +262,21 @@ func (r *Repository) CreateShiftAssignment(ctx context.Context, businessID int64
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
+		logger.Ctx(ctx).Error("failed to read created assignment id", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
-	assignment.ID = id
-	assignment.OwnerID = businessID
-	assignment.BusinessID = businessID
-	assignment.Status = domain.AssignmentStatusScheduled
-	return &assignment, nil
+
+	// Read the row back rather than reconstructing it, so the caller gets the
+	// stored status and the real created_at and updated_at instead of a zero time.
+	row, err := r.queries.GetShiftAssignment(ctx, sqlc.GetShiftAssignmentParams{BusinessID: businessID, ID: id})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to read back created assignment",
+			logger.Any("business_id", businessID), logger.Any("assignment_id", id), logger.Error(err))
+		return nil, err
+	}
+
+	created := assignmentFromRow(row)
+	return &created, nil
 }
 
 func (r *Repository) PublishRosterAssignments(ctx context.Context, businessID int64, weekStart, weekEnd string) error {

@@ -275,6 +275,15 @@ func TestRosterFlow_UnchangedByMerge(t *testing.T) {
 	if assignment.Status != domain.AssignmentStatusScheduled {
 		t.Errorf("assignment status = %q, want scheduled", assignment.Status)
 	}
+	// The create response has to carry the stored timestamps. Reconstructing the
+	// record in Go instead of reading it back left these zero, which serialises
+	// as a nonsense Unix value.
+	if assignment.CreatedAt.IsZero() {
+		t.Error("assignment CreatedAt is zero, want the stored timestamp")
+	}
+	if assignment.UpdatedAt.IsZero() {
+		t.Error("assignment UpdatedAt is zero, want the stored timestamp")
+	}
 
 	// The roster listing must find it, and it starts out unpublished.
 	assignments, err := repo.ListRosterAssignments(ctx, testutil.OwnerID, weekStart, weekEnd)
