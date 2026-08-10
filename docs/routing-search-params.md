@@ -1,7 +1,8 @@
 # Route Search Params
 
 **Status:** adopted 2026-08-10. First implementation: `paySlipViewRoute` in
-`apps/hr/src/router.tsx`.
+`apps/hr/src/router.tsx`. Extended to path params (`params.parse`) the same
+day: `payrollRunDetailRoute` in the same file.
 
 TanStack Router routes that read query params validate them with a Zod schema
 through `validateSearch`. Components read the result with `getRouteApi(...)
@@ -88,6 +89,49 @@ router lazy-imports the route component, so importing it back would create a
 module cycle. `getRouteApi` resolves off the `Register` interface at type level
 and the router instance at runtime, with no import edge.
 
+## Path params: the same rule, one difference
+
+Dynamic segments (`/payroll/$id`) get the same treatment through the route's
+`params` option. Reference implementation: `payrollRunDetailRoute` in
+`apps/hr/src/router.tsx`, schema `payrollRunParamsSchema` in
+`shared/schemas/payroll.ts`.
+
+```ts
+const payrollRunDetailRoute = createRoute({
+  getParentRoute: () => hrConfigRoute,
+  path: '/payroll/$id',
+  params: {
+    parse: (raw) => payrollRunParamsSchema.parse(raw),
+    stringify: ({ id }) => ({ id: String(id) }),
+  },
+  // ...
+});
+```
+
+The one difference from search params: the router never JSON-parses path
+segments, so `params.parse` receives raw strings and the schema needs an
+explicit string-to-number transform:
+
+```ts
+export const payrollRunParamsSchema = z.object({
+  id: z
+    .string()
+    .transform((value) => Number(value))
+    .pipe(z.number().int().positive())
+    .optional()
+    .catch(undefined),
+});
+```
+
+It is still not `z.coerce`, for the same input-type reason as above - and
+`Number('')` is `0`, which the `.pipe` would have to reject anyway. Everything
+else carries over unchanged: `.catch(undefined)` degrades a malformed segment
+to the feature's own not-found state instead of the router error boundary,
+components read the parsed value with `getRouteApi('...').useParams()`, and
+callers navigate with `<Link to="/payroll/$id" params={{ id }}>` - never a
+template string cast with `as any`, and never `useParams({ strict: false })`
+followed by a manual `Number()`.
+
 ## Verifying
 
 `pnpm typecheck` passing does **not** prove the wiring is live. A route with no
@@ -98,3 +142,5 @@ checking that `tsc` errors, then revert.
 `e2e/hr-payslip-search.spec.ts` covers the runtime half: that a valid id resolves
 the run the user clicked, that malformed ids render the empty state rather than
 the error boundary, and that out-of-range ids issue no backend request at all.
+`e2e/hr-payroll-run-params.spec.ts` covers the same three properties for the
+`/payroll/$id` path param.
