@@ -631,7 +631,9 @@
     "runDetail": {
       "subtitle": "{{count}} entries in this run",
       "approve": "Approve Run",
-      "exportCsv": "Export CSV"
+      "exportCsv": "Export CSV",
+      "notFound": "Payroll run not found",
+      "notFoundDescription": "This payroll run could not be loaded."
     },
     "paySlip": {
       "title": "Pay Slip",
