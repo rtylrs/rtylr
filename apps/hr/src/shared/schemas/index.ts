@@ -34,8 +34,15 @@ export {
   payrollRunEntrySchema,
   payrollRunSchema,
   paySlipSearchSchema,
+  payrollRunParamsSchema,
 } from './payroll';
-export type { PayrollConfigForm, PayrollRunEntry, PayrollRun, PaySlipSearch } from './payroll';
+export type {
+  PayrollConfigForm,
+  PayrollRunEntry,
+  PayrollRun,
+  PaySlipSearch,
+  PayrollRunParams,
+} from './payroll';
 
 export { timeOffRequestSchema, timeOffEntrySchema } from './timeOff';
 export type { TimeOffRequest, TimeOffEntry } from './timeOff';

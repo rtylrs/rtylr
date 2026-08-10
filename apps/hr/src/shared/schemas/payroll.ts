@@ -27,6 +27,40 @@ export const paySlipSearchSchema = z.object({
 
 export type PaySlipSearch = z.infer<typeof paySlipSearchSchema>;
 
+/**
+ * Path params for the payroll run detail route (`/payroll/$id`).
+ *
+ * Unlike search params, path params are never JSON-parsed by the router -
+ * `params.parse` always receives raw strings - so a string-to-number
+ * transform is required here. It is still not `z.coerce`: coercion widens
+ * the schema's input to `unknown`, and `Number('')` is `0`, which
+ * `.pipe(z.number().int().positive())` would have to reject anyway.
+ *
+ * Malformed segments resolve to `undefined` instead of throwing, mirroring
+ * `paySlipSearchSchema`'s `.catch(undefined)`: `params.parse` runs before the
+ * route renders, so a throw would replace the feature's own not-found state
+ * with the router error boundary. Run ids are backend serial primary keys,
+ * so `-3` or `12.5` is always malformed input; resolving them to `undefined`
+ * keeps `useGetPayrollRun` disabled (`enabled: !!id`) and no request is
+ * issued.
+ *
+ * The validation lives inside the transform (rather than
+ * `.pipe(...).optional().catch(...)`) for two typing constraints: the
+ * router's `ValidateParsedParams` requires every path segment to stay a
+ * REQUIRED key of the parsed type (`id: number | undefined`, never
+ * `id?: number`), and Zod's `.pipe`/`.catch` cannot produce that shape
+ * without an unsafe widening cast.
+ */
+export const payrollRunParamsSchema = z.object({
+  id: z.string().transform((value): number | undefined => {
+    const parsed = Number(value);
+    // Same rule as `paySlipSearchSchema.runId`: a positive integer, or nothing.
+    return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+  }),
+});
+
+export type PayrollRunParams = z.infer<typeof payrollRunParamsSchema>;
+
 export const payrollConfigSchema = z.object({
   grossModel: z.enum(['hourly', 'salary', 'both']),
   period: z.enum(['weekly', 'biweekly', 'monthly']),
