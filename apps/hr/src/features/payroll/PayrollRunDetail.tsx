@@ -1,13 +1,20 @@
 import React, { useRef, useCallback } from 'react';
-import { useParams, Link } from '@tanstack/react-router';
+import { getRouteApi, Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { CheckCircle, Download, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { CheckCircle, Download, ArrowLeft, AlertTriangle, DollarSign } from 'lucide-react';
 import { useGetPayrollRun, useApprovePayrollRun } from '../../shared/hooks/queries/usePayroll';
 import type { PayrollEntryPayload } from '../../shared/hooks/queries/usePayroll';
 import { ErrorBoundary } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
-import { SectionHeader, Button, Skeleton, Pill, Breadcrumbs } from '../../shared/components/ui';
+import {
+  SectionHeader,
+  Button,
+  Skeleton,
+  Pill,
+  Breadcrumbs,
+  EmptyState,
+} from '../../shared/components/ui';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'var(--hr-text-muted)',
@@ -29,9 +36,12 @@ const HEADER_HEIGHT = 44;
 const COLUMNS = '2fr 1fr 1fr 1fr 1fr 1fr 1fr';
 const MIN_WIDTH = 860;
 
+// Route id, not path: `hrConfigRoute` is pathless with `id: 'hr-config'`, so
+// every feature route is registered beneath it.
+const routeApi = getRouteApi('/hr-config/payroll/$id');
+
 const PayrollRunDetailContent = (): React.JSX.Element => {
-  const { id } = useParams({ strict: false });
-  const runId = id ? Number(id) : undefined;
+  const { id: runId } = routeApi.useParams();
   const { t } = useTranslation();
   const { data: run, isLoading } = useGetPayrollRun(runId);
   const approveRun = useApprovePayrollRun();
@@ -80,12 +90,33 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
     URL.revokeObjectURL(url);
   }, [run]);
 
-  if (isLoading || !run) {
+  if (isLoading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <Skeleton height={32} width={200} />
         <Skeleton height={400} />
       </div>
+    );
+  }
+
+  // Either the param failed `payrollRunParamsSchema` (so the query never ran)
+  // or the backend has no run with this id. Both are the same user-facing
+  // condition: this URL does not name a run.
+  if (!run) {
+    return (
+      <EmptyState
+        icon={<DollarSign size={20} />}
+        title={t('payroll.runDetail.notFound')}
+        description={t('payroll.runDetail.notFoundDescription')}
+        action={
+          <Link
+            to="/payroll"
+            style={{ color: 'var(--hr-accent)', textDecoration: 'none', fontSize: 12 }}
+          >
+            {t('payroll.backToRuns')}
+          </Link>
+        }
+      />
     );
   }
 
