@@ -5,6 +5,9 @@ sql:
     schema:
       - "../../../../internal/platform/database/schemas/shared"
       - "../../../../internal/platform/database/schemas/hr"
+      # hr_shifts lives in its own schema directory; the clock-in and clock-out
+      # queries in this module write to it.
+      - "../../../../internal/platform/database/schemas/hr_shifts"
       - "../../../../internal/platform/database/schemas/hr_core/schema.sql"
     gen:
       go:

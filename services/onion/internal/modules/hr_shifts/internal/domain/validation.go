@@ -7,6 +7,7 @@ import (
 
 var (
 	ErrEmptyShiftName  = errors.New("shift name is required")
+	ErrEmptyShiftDate  = errors.New("shift date is required for a staff shift")
 	ErrEmptyShiftTime  = errors.New("shift start and end times are required")
 	ErrEmptyAssignDate = errors.New("assignment date is required")
 	ErrZeroShiftID     = errors.New("shift ID must be non-zero")
@@ -22,9 +23,16 @@ func IsValidAssignmentStatus(status string) bool {
 	return false
 }
 
-// ValidateShift checks that required shift fields are present.
+// ValidateShift checks that the fields required for this shift's kind are
+// present. A template row needs a name; an attendance row needs a date instead,
+// because it belongs to a staff member on a specific day and carries no name.
+// Both kinds need a start and end time.
 func ValidateShift(s ShiftRecord) error {
-	if strings.TrimSpace(s.Name) == "" {
+	if s.Kind() == ShiftKindAttendance {
+		if strings.TrimSpace(s.Date) == "" {
+			return ErrEmptyShiftDate
+		}
+	} else if strings.TrimSpace(s.Name) == "" {
 		return ErrEmptyShiftName
 	}
 	if strings.TrimSpace(s.StartTime) == "" || strings.TrimSpace(s.EndTime) == "" {
