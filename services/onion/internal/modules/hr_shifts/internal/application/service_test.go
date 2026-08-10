@@ -34,6 +34,7 @@ func (m *mockRepo) GetShift(_ context.Context, _, _ int64) (*domain.ShiftRecord,
 func (m *mockRepo) CreateShift(_ context.Context, _ int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error) {
 	return &shift, m.err
 }
+
 func (m *mockRepo) UpdateShift(_ context.Context, _ int64, shift domain.ShiftRecord) error {
 	m.updated = shift
 	return m.err
