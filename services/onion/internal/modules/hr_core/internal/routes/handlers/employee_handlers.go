@@ -68,7 +68,10 @@ func (h *ListEmployeesHandler) Serve(ctx context.Context, req *ListEmployeesRequ
 		return ListEmployeesResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	employees, total, err := h.Service.ListEmployees(ctx, device.User.UserID, req.Limit, req.Offset)
+	// The caller is both the tenant scope and the viewer whose compensation
+	// entitlement is resolved; this module keys employee rows off the calling
+	// user's id.
+	employees, total, err := h.Service.ListEmployeesForViewer(ctx, device.User.UserID, device.User.UserID, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list employees", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return ListEmployeesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list employees")
@@ -106,7 +109,7 @@ func (h *GetEmployeeHandler) Serve(ctx context.Context, _ *GetEmployeeRequest) (
 		return GetEmployeeResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")
 	}
 
-	emp, err := h.Service.GetEmployee(ctx, device.User.UserID, id)
+	emp, err := h.Service.GetEmployeeForViewer(ctx, device.User.UserID, device.User.UserID, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrEmployeeNotFound) {
 			return GetEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "Employee not found")
