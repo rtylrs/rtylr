@@ -145,9 +145,9 @@ const EmployeeDetail = (): React.JSX.Element => {
               {infoRow(t('employees.form.probationEndDate'), employee.probationEndDate)}
               {infoRow(
                 t('employees.salary'),
-                employee.monthlySalary != null
+                employee.monthlySalary != null && employee.currency
                   ? `${employee.monthlySalary} ${employee.currency}/mo`
-                  : employee.hourlyRate != null
+                  : employee.hourlyRate != null && employee.currency
                     ? `${employee.hourlyRate} ${employee.currency}/hr`
                     : '-'
               )}
