@@ -321,7 +321,7 @@ func (m *Module) executeCreateEmployeeTool(ctx context.Context, input map[string
 		Notes:                 parsed.Notes,
 	}
 
-	created, err := m.service.CreateEmployee(ctx, authUser.UserID, employee)
+	created, err := m.service.CreateEmployeeForWriter(ctx, authUser.UserID, authUser.UserID, employee)
 	if err != nil {
 		return nil, err
 	}
