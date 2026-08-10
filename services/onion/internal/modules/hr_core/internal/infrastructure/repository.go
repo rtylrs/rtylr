@@ -90,6 +90,7 @@ func (r *Repository) CreateEmployee(ctx context.Context, businessID int64, emp d
 		return nil, err
 	}
 	emp.ID = id
+	emp.OwnerID = businessID
 	emp.BusinessID = businessID
 	return &emp, nil
 }
@@ -121,6 +122,7 @@ func (r *Repository) UpdateEmployee(ctx context.Context, businessID int64, emp d
 		logger.Ctx(ctx).Error("failed to update employee", logger.Any("business_id", businessID), logger.Any("employee_id", emp.ID), logger.Error(err))
 		return nil, err
 	}
+	emp.OwnerID = businessID
 	emp.BusinessID = businessID
 	return &emp, nil
 }
@@ -173,6 +175,7 @@ func (r *Repository) CreateEmployeeWithBalances(ctx context.Context, businessID 
 	}
 
 	emp.ID = employeeID
+	emp.OwnerID = businessID
 	emp.BusinessID = businessID
 	return &emp, nil
 }
@@ -267,6 +270,7 @@ func (r *Repository) CreateLocation(ctx context.Context, businessID int64, loc d
 		return nil, err
 	}
 	loc.ID = id
+	loc.OwnerID = businessID
 	loc.BusinessID = businessID
 	return &loc, nil
 }
@@ -288,6 +292,7 @@ func (r *Repository) UpdateLocation(ctx context.Context, businessID int64, loc d
 		logger.Ctx(ctx).Error("failed to update location", logger.Any("business_id", businessID), logger.Any("location_id", loc.ID), logger.Error(err))
 		return nil, err
 	}
+	loc.OwnerID = businessID
 	loc.BusinessID = businessID
 	return &loc, nil
 }
@@ -325,6 +330,7 @@ func (r *Repository) CreateDepartment(ctx context.Context, businessID int64, dep
 		return nil, err
 	}
 	dept.ID = id
+	dept.OwnerID = businessID
 	dept.BusinessID = businessID
 	return &dept, nil
 }
@@ -342,6 +348,7 @@ func (r *Repository) UpdateDepartment(ctx context.Context, businessID int64, dep
 		logger.Ctx(ctx).Error("failed to update department", logger.Any("business_id", businessID), logger.Any("department_id", dept.ID), logger.Error(err))
 		return nil, err
 	}
+	dept.OwnerID = businessID
 	dept.BusinessID = businessID
 	return &dept, nil
 }
@@ -390,6 +397,7 @@ func (r *Repository) CreateWorkSchedule(ctx context.Context, businessID int64, w
 		return nil, err
 	}
 	ws.ID = id
+	ws.OwnerID = businessID
 	ws.BusinessID = businessID
 	return &ws, nil
 }
@@ -406,6 +414,7 @@ func (r *Repository) UpdateWorkSchedule(ctx context.Context, businessID int64, w
 		logger.Ctx(ctx).Error("failed to update work schedule", logger.Any("business_id", businessID), logger.Any("schedule_id", ws.ID), logger.Error(err))
 		return nil, err
 	}
+	ws.OwnerID = businessID
 	ws.BusinessID = businessID
 	return &ws, nil
 }
@@ -443,6 +452,7 @@ func (r *Repository) CreateRole(ctx context.Context, businessID int64, role doma
 		return nil, err
 	}
 	role.ID = id
+	role.OwnerID = businessID
 	role.BusinessID = businessID
 	return &role, nil
 }
@@ -459,6 +469,7 @@ func (r *Repository) UpdateRole(ctx context.Context, businessID int64, role doma
 		logger.Ctx(ctx).Error("failed to update role", logger.Any("business_id", businessID), logger.Any("role_id", role.ID), logger.Error(err))
 		return nil, err
 	}
+	role.OwnerID = businessID
 	role.BusinessID = businessID
 	return &role, nil
 }
