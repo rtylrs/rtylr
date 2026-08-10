@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { payrollConfigSchema, payrollRunEntrySchema, payrollRunSchema } from './payroll';
+import {
+  payrollConfigSchema,
+  payrollRunEntrySchema,
+  payrollRunSchema,
+  paySlipSearchSchema,
+} from './payroll';
 
 // ─── payroll Zod schemas - pure parse/validation tests ───────────────────────
 
@@ -225,5 +230,39 @@ describe('payrollRunSchema', () => {
         createdAt: '2026-05-01T00:00:00',
       })
     ).toThrow();
+  });
+});
+
+// ─── paySlipSearchSchema - route search params ──────────────────────────────
+//
+// These cases exist to protect the fix in #44. `validateSearch` runs before the
+// route renders, so a schema that throws (or that resolves a bad `runId` to a
+// truthy value) would either trip the router error boundary or send the pay
+// slip view back to always rendering empty. The reference is the manual
+// `URLSearchParams` parsing this schema replaced.
+
+describe('paySlipSearchSchema', () => {
+  // The router's `defaultParseSearch` JSON-parses query values, so a numeric
+  // `runId` reaches the schema as a number rather than a string.
+  it('passes a valid run id through unchanged', () => {
+    expect(paySlipSearchSchema.parse({ runId: 12 }).runId).toBe(12);
+  });
+
+  it.each([
+    ['missing', {}],
+    ['empty string', { runId: '' }],
+    ['non-numeric', { runId: 'abc' }],
+    ['null', { runId: null }],
+    ['NaN', { runId: Number(undefined) }],
+    ['zero', { runId: 0 }],
+    ['negative', { runId: -3 }],
+    ['fractional', { runId: 12.5 }],
+  ])('resolves a %s run id to undefined instead of throwing', (_label, search) => {
+    expect(() => paySlipSearchSchema.parse(search)).not.toThrow();
+    expect(paySlipSearchSchema.parse(search).runId).toBeUndefined();
+  });
+
+  it('drops unknown search params', () => {
+    expect(paySlipSearchSchema.parse({ runId: 7, employeeId: 99 })).toEqual({ runId: 7 });
   });
 });
