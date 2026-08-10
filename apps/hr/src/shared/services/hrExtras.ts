@@ -243,20 +243,23 @@ const toTimeOffPayload = (data: Omit<TimeOffEntry, 'id' | 'status' | 'createdAt'
   notes: data.note,
 });
 
+// Keys are snake_case to match the API's request binding. "published" is not a
+// shift status -- the status column only accepts scheduled, in_progress,
+// completed, absent or cancelled, and publishing is a property of a roster
+// assignment, not of the shift row -- so it is no longer sent here. Use
+// publishWeek to publish a roster.
 const toScheduleShiftCreatePayload = (shift: Omit<ScheduleShift, 'id'> & { id?: number }) => ({
-  staffId: shift.staffId,
+  staff_id: shift.staffId,
   date: shift.day,
-  startTime: shift.start,
-  endTime: shift.end,
-  status: shift.published ? 'published' : undefined,
+  start_time: shift.start,
+  end_time: shift.end,
 });
 
 const toScheduleShiftUpdatePayload = (shift: Omit<ScheduleShift, 'id'> & { id?: number }) => ({
   id: shift.id,
   date: shift.day,
-  startTime: shift.start,
-  endTime: shift.end,
-  status: shift.published ? 'published' : undefined,
+  start_time: shift.start,
+  end_time: shift.end,
 });
 
 const toReviewPayload = (data: Omit<Review, 'id'>) => ({
@@ -324,15 +327,18 @@ export const hrExtras = {
 
   // Schedule
   listSchedule: (weekStart?: string) =>
-    safe.get<ScheduleShift[]>('/hr/shifts', { params: weekStart ? { weekStart } : {} }),
+    safe.get<ScheduleShift[]>('/hr/shifts', { params: weekStart ? { date: weekStart } : {} }),
   upsertScheduleShift: (shift: Omit<ScheduleShift, 'id'> & { id?: number }) =>
     shift.id
       ? safe.put<{ success: boolean }>('/hr/shifts', toScheduleShiftUpdatePayload(shift))
       : safe.post<{ success: boolean }>('/hr/shifts', toScheduleShiftCreatePayload(shift)),
   deleteScheduleShift: (id: number) =>
     safe.delete<{ success: boolean }>('/hr/shifts', { data: { id } }),
+  // Publishing a roster is a POST to its own endpoint. This used to GET
+  // /hr/shifts with view=publish, which no handler ever read, so it returned a
+  // shift list and published nothing.
   publishWeek: (weekStart: string) =>
-    safe.get<{ success: boolean }>('/hr/shifts', { params: { weekStart, view: 'publish' } }),
+    safe.post<{ success: boolean }>('/hr/shifts/roster/publish', { week_start: weekStart }),
 
   // Timesheets
   listTimesheets: () => safe.get<TimesheetRow[]>('/hr/timesheets'),
