@@ -45,7 +45,23 @@ interface ListPayrollRunsParams {
   offset?: number;
 }
 
-export type { PayrollConfigData, PayrollRunPayload, PayrollEntryPayload, ListPayrollRunsParams };
+/**
+ * The self-service endpoints take no `status`: onion restricts them to
+ * approved/exported server-side and resolves the employee from the session,
+ * so there is deliberately no way to widen the scope from the client.
+ */
+interface ListMyPayrollRunsParams {
+  limit?: number;
+  offset?: number;
+}
+
+export type {
+  PayrollConfigData,
+  PayrollRunPayload,
+  PayrollEntryPayload,
+  ListPayrollRunsParams,
+  ListMyPayrollRunsParams,
+};
 
 /* ── Config hooks ── */
 
@@ -113,6 +129,45 @@ export const useGetPayrollRun = (id: number | undefined) => {
     queryKey: ['payroll-run', id],
     queryFn: async (): Promise<PayrollRunPayload> => {
       const res = await unwrap(safe.get<{ run: PayrollRunPayload }>(`/hr/payroll/runs/${id}`));
+      return (res as { run: PayrollRunPayload }).run;
+    },
+    enabled: !!id,
+  });
+};
+
+/* ── Self-service run hooks ── */
+
+/**
+ * Employee-scoped counterparts to `useListPayrollRuns` / `useGetPayrollRun`.
+ * The admin hooks hit `/hr/payroll/runs`, which onion gates on the
+ * `manage_payroll` permission and which returns every employee's runs: wrong
+ * on both counts for "My Pay Slips". These read `/hr/payroll/my-runs`, which
+ * resolves the caller's own employee id from the session.
+ *
+ * Their query keys are deliberately distinct from the admin hooks' so that
+ * invalidating one never serves company-wide data into a self-service screen.
+ */
+export const useListMyPayrollRuns = (params?: ListMyPayrollRunsParams) => {
+  return useQuery<ListPayrollRunsResponse>({
+    queryKey: ['my-payroll-runs', params],
+    queryFn: async (): Promise<ListPayrollRunsResponse> => {
+      const res = await unwrap(
+        safe.get<ListPayrollRunsResponse>('/hr/payroll/my-runs', { params })
+      );
+      return res as ListPayrollRunsResponse;
+    },
+  });
+};
+
+/**
+ * Returns the run with `entries` containing exactly the caller's own entry.
+ * A run that isn't theirs, or isn't approved/exported, comes back as a 404.
+ */
+export const useGetMyPayrollRun = (id: number | undefined) => {
+  return useQuery<PayrollRunPayload>({
+    queryKey: ['my-payroll-run', id],
+    queryFn: async (): Promise<PayrollRunPayload> => {
+      const res = await unwrap(safe.get<{ run: PayrollRunPayload }>(`/hr/payroll/my-runs/${id}`));
       return (res as { run: PayrollRunPayload }).run;
     },
     enabled: !!id,
