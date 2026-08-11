@@ -34,6 +34,21 @@ func (c *ShiftServiceClient) ListShifts(ctx context.Context, req *ListShiftsRequ
 	if req.LocationId != nil {
 		query.Set("location_id", strconv.FormatInt(int64(*req.LocationId), 10))
 	}
+	if req.StaffId != nil {
+		query.Set("staff_id", strconv.FormatInt(int64(*req.StaffId), 10))
+	}
+	if req.Date != nil {
+		query.Set("date", *req.Date)
+	}
+	if req.Kind != nil {
+		query.Set("kind", *req.Kind)
+	}
+	if req.Limit != nil {
+		query.Set("limit", strconv.FormatInt(int64(*req.Limit), 10))
+	}
+	if req.Offset != nil {
+		query.Set("offset", strconv.FormatInt(int64(*req.Offset), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -91,6 +106,77 @@ func (c *ShiftServiceClient) CreateShift(ctx context.Context, req *CreateShiftRe
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(CreateShiftResponse)
+	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *ShiftServiceClient) UpdateShift(ctx context.Context, req *UpdateShiftRequest) (*UpdateShiftResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hr/shift/v1/shifts"
+	body, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("marshal request: %w", err)
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "PUT", c.BaseURL+path, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(UpdateShiftResponse)
+	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *ShiftServiceClient) DeleteShift(ctx context.Context, req *DeleteShiftRequest) (*DeleteShiftResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hr/shift/v1/shifts"
+	query := url.Values{}
+	if len(query) > 0 {
+		path += "?" + query.Encode()
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "DELETE", c.BaseURL+path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(DeleteShiftResponse)
 	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}

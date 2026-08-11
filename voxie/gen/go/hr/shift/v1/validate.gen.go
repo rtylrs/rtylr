@@ -74,20 +74,11 @@ func (m *CreateShiftRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.LocationId <= 0 {
-		violations = append(violations, "location_id must be greater than 0")
-	}
-	if m.Name == "" {
-		violations = append(violations, "name is required")
-	}
 	if m.StartTime == "" {
 		violations = append(violations, "start_time is required")
 	}
 	if m.EndTime == "" {
 		violations = append(violations, "end_time is required")
-	}
-	if m.Color == "" {
-		violations = append(violations, "color is required")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -105,6 +96,61 @@ func (m *CreateShiftResponse) Validate() error {
 			violations = append(violations, "shift: "+err.Error())
 		}
 	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateShiftRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateShiftResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Shift != nil {
+		if err := m.Shift.Validate(); err != nil {
+			violations = append(violations, "shift: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteShiftRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteShiftResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -185,9 +231,6 @@ func (m *PublishRosterRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.LocationId <= 0 {
-		violations = append(violations, "location_id must be greater than 0")
-	}
 	if m.WeekStart == "" {
 		violations = append(violations, "week_start is required")
 	}

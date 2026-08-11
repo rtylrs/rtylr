@@ -8,6 +8,12 @@ service ShiftService {
   /// Creates a new shift.
   createShift(CreateShiftRequest) -> CreateShiftResponse @post("/shifts")
 
+  /// Updates an existing shift.
+  updateShift(UpdateShiftRequest) -> UpdateShiftResponse @put("/shifts")
+
+  /// Deletes a shift.
+  deleteShift(DeleteShiftRequest) -> DeleteShiftResponse @delete("/shifts")
+
   /// Assigns an employee to a shift.
   createShiftAssignment(CreateShiftAssignmentRequest) -> CreateShiftAssignmentResponse @post("/assignments")
 

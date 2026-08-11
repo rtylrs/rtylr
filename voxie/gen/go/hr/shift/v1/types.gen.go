@@ -7,15 +7,25 @@ import (
 )
 
 type ShiftPayload struct {
-	Id         int64  `json:"id,omitempty"`
-	OwnerId    int64  `json:"owner_id,omitempty"`
-	LocationId int64  `json:"location_id,omitempty"`
-	Name       string `json:"name,omitempty"`
-	StartTime  string `json:"start_time,omitempty"`
-	EndTime    string `json:"end_time,omitempty"`
-	Color      string `json:"color,omitempty"`
-	CreatedAt  int64  `json:"created_at,omitempty"`
-	UpdatedAt  int64  `json:"updated_at,omitempty"`
+	Id                   int64    `json:"id,omitempty"`
+	OwnerId              int64    `json:"owner_id,omitempty"`
+	LocationId           int64    `json:"location_id,omitempty"`
+	Name                 string   `json:"name,omitempty"`
+	StartTime            string   `json:"start_time,omitempty"`
+	EndTime              string   `json:"end_time,omitempty"`
+	Color                string   `json:"color,omitempty"`
+	StaffId              *int64   `json:"staff_id,omitempty"`
+	DepartmentId         *int64   `json:"department_id,omitempty"`
+	Date                 *string  `json:"date,omitempty"`
+	BreakDurationMinutes *int32   `json:"break_duration_minutes,omitempty"`
+	Status               *string  `json:"status,omitempty"`
+	ClockInAt            *int64   `json:"clock_in_at,omitempty"`
+	ClockOutAt           *int64   `json:"clock_out_at,omitempty"`
+	HoursWorked          *float64 `json:"hours_worked,omitempty"`
+	OvertimeHours        *float64 `json:"overtime_hours,omitempty"`
+	Notes                *string  `json:"notes,omitempty"`
+	CreatedAt            int64    `json:"created_at,omitempty"`
+	UpdatedAt            int64    `json:"updated_at,omitempty"`
 }
 
 func (m *ShiftPayload) MarshalJSON() ([]byte, error) {
@@ -141,6 +151,126 @@ func (x *ShiftPayload) GetColor() string {
 		return zero
 	}
 	return x.Color
+}
+
+func (x *ShiftPayload) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
+}
+
+func (x *ShiftPayload) GetDepartmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.DepartmentId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.DepartmentId
+}
+
+func (x *ShiftPayload) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Date == nil {
+		var zero string
+		return zero
+	}
+	return *x.Date
+}
+
+func (x *ShiftPayload) GetBreakDurationMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.BreakDurationMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.BreakDurationMinutes
+}
+
+func (x *ShiftPayload) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Status == nil {
+		var zero string
+		return zero
+	}
+	return *x.Status
+}
+
+func (x *ShiftPayload) GetClockInAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ClockInAt == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ClockInAt
+}
+
+func (x *ShiftPayload) GetClockOutAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ClockOutAt == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ClockOutAt
+}
+
+func (x *ShiftPayload) GetHoursWorked() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.HoursWorked == nil {
+		var zero float64
+		return zero
+	}
+	return *x.HoursWorked
+}
+
+func (x *ShiftPayload) GetOvertimeHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.OvertimeHours == nil {
+		var zero float64
+		return zero
+	}
+	return *x.OvertimeHours
+}
+
+func (x *ShiftPayload) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Notes == nil {
+		var zero string
+		return zero
+	}
+	return *x.Notes
 }
 
 func (x *ShiftPayload) GetCreatedAt() int64 {
@@ -314,7 +444,12 @@ func (x *ShiftAssignmentPayload) GetUpdatedAt() int64 {
 }
 
 type ListShiftsRequest struct {
-	LocationId *int64 `json:"location_id,omitempty"`
+	LocationId *int64  `json:"location_id,omitempty"`
+	StaffId    *int64  `json:"staff_id,omitempty"`
+	Date       *string `json:"date,omitempty"`
+	Kind       *string `json:"kind,omitempty"`
+	Limit      *int32  `json:"limit,omitempty"`
+	Offset     *int32  `json:"offset,omitempty"`
 }
 
 func (x *ListShiftsRequest) GetLocationId() int64 {
@@ -327,6 +462,66 @@ func (x *ListShiftsRequest) GetLocationId() int64 {
 		return zero
 	}
 	return *x.LocationId
+}
+
+func (x *ListShiftsRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
+}
+
+func (x *ListShiftsRequest) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Date == nil {
+		var zero string
+		return zero
+	}
+	return *x.Date
+}
+
+func (x *ListShiftsRequest) GetKind() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Kind == nil {
+		var zero string
+		return zero
+	}
+	return *x.Kind
+}
+
+func (x *ListShiftsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Limit == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Limit
+}
+
+func (x *ListShiftsRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Offset == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Offset
 }
 
 type ListShiftsResponse struct {
@@ -369,40 +564,17 @@ func (x *ListShiftsResponse) GetOffset() int32 {
 }
 
 type CreateShiftRequest struct {
-	LocationId int64  `json:"location_id,omitempty"`
-	Name       string `json:"name,omitempty"`
-	StartTime  string `json:"start_time,omitempty"`
-	EndTime    string `json:"end_time,omitempty"`
-	Color      string `json:"color,omitempty"`
-}
-
-func (m *CreateShiftRequest) MarshalJSON() ([]byte, error) {
-	type alias CreateShiftRequest
-	aux := struct {
-		*alias
-		LocationId string `json:"location_id,omitempty"`
-	}{alias: (*alias)(m)}
-	aux.LocationId = strconv.FormatInt(m.LocationId, 10)
-	return json.Marshal(aux)
-}
-
-func (m *CreateShiftRequest) UnmarshalJSON(data []byte) error {
-	type alias CreateShiftRequest
-	aux := struct {
-		*alias
-		LocationId string `json:"location_id,omitempty"`
-	}{alias: (*alias)(m)}
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
-	if aux.LocationId != "" {
-		v, err := strconv.ParseInt(aux.LocationId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.LocationId = v
-	}
-	return nil
+	LocationId           *int64  `json:"location_id,omitempty"`
+	Name                 *string `json:"name,omitempty"`
+	StartTime            string  `json:"start_time,omitempty"`
+	EndTime              string  `json:"end_time,omitempty"`
+	Color                *string `json:"color,omitempty"`
+	StaffId              *int64  `json:"staff_id,omitempty"`
+	DepartmentId         *int64  `json:"department_id,omitempty"`
+	Date                 *string `json:"date,omitempty"`
+	BreakDurationMinutes *int32  `json:"break_duration_minutes,omitempty"`
+	Status               *string `json:"status,omitempty"`
+	Notes                *string `json:"notes,omitempty"`
 }
 
 func (x *CreateShiftRequest) GetLocationId() int64 {
@@ -410,7 +582,11 @@ func (x *CreateShiftRequest) GetLocationId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.LocationId
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
 }
 
 func (x *CreateShiftRequest) GetName() string {
@@ -418,7 +594,11 @@ func (x *CreateShiftRequest) GetName() string {
 		var zero string
 		return zero
 	}
-	return x.Name
+	if x.Name == nil {
+		var zero string
+		return zero
+	}
+	return *x.Name
 }
 
 func (x *CreateShiftRequest) GetStartTime() string {
@@ -442,7 +622,83 @@ func (x *CreateShiftRequest) GetColor() string {
 		var zero string
 		return zero
 	}
-	return x.Color
+	if x.Color == nil {
+		var zero string
+		return zero
+	}
+	return *x.Color
+}
+
+func (x *CreateShiftRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
+}
+
+func (x *CreateShiftRequest) GetDepartmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.DepartmentId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.DepartmentId
+}
+
+func (x *CreateShiftRequest) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Date == nil {
+		var zero string
+		return zero
+	}
+	return *x.Date
+}
+
+func (x *CreateShiftRequest) GetBreakDurationMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.BreakDurationMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.BreakDurationMinutes
+}
+
+func (x *CreateShiftRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Status == nil {
+		var zero string
+		return zero
+	}
+	return *x.Status
+}
+
+func (x *CreateShiftRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Notes == nil {
+		var zero string
+		return zero
+	}
+	return *x.Notes
 }
 
 type CreateShiftResponse struct {
@@ -455,6 +711,242 @@ func (x *CreateShiftResponse) GetShift() *ShiftPayload {
 		return zero
 	}
 	return x.Shift
+}
+
+type UpdateShiftRequest struct {
+	Id                   int64   `json:"id,omitempty"`
+	LocationId           *int64  `json:"location_id,omitempty"`
+	Name                 *string `json:"name,omitempty"`
+	StartTime            *string `json:"start_time,omitempty"`
+	EndTime              *string `json:"end_time,omitempty"`
+	Color                *string `json:"color,omitempty"`
+	DepartmentId         *int64  `json:"department_id,omitempty"`
+	Date                 *string `json:"date,omitempty"`
+	BreakDurationMinutes *int32  `json:"break_duration_minutes,omitempty"`
+	Status               *string `json:"status,omitempty"`
+	Notes                *string `json:"notes,omitempty"`
+}
+
+func (m *UpdateShiftRequest) MarshalJSON() ([]byte, error) {
+	type alias UpdateShiftRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	return json.Marshal(aux)
+}
+
+func (m *UpdateShiftRequest) UnmarshalJSON(data []byte) error {
+	type alias UpdateShiftRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	return nil
+}
+
+func (x *UpdateShiftRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *UpdateShiftRequest) GetLocationId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
+}
+
+func (x *UpdateShiftRequest) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Name == nil {
+		var zero string
+		return zero
+	}
+	return *x.Name
+}
+
+func (x *UpdateShiftRequest) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.StartTime == nil {
+		var zero string
+		return zero
+	}
+	return *x.StartTime
+}
+
+func (x *UpdateShiftRequest) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.EndTime == nil {
+		var zero string
+		return zero
+	}
+	return *x.EndTime
+}
+
+func (x *UpdateShiftRequest) GetColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Color == nil {
+		var zero string
+		return zero
+	}
+	return *x.Color
+}
+
+func (x *UpdateShiftRequest) GetDepartmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.DepartmentId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.DepartmentId
+}
+
+func (x *UpdateShiftRequest) GetDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Date == nil {
+		var zero string
+		return zero
+	}
+	return *x.Date
+}
+
+func (x *UpdateShiftRequest) GetBreakDurationMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.BreakDurationMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.BreakDurationMinutes
+}
+
+func (x *UpdateShiftRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Status == nil {
+		var zero string
+		return zero
+	}
+	return *x.Status
+}
+
+func (x *UpdateShiftRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Notes == nil {
+		var zero string
+		return zero
+	}
+	return *x.Notes
+}
+
+type UpdateShiftResponse struct {
+	Shift *ShiftPayload `json:"shift,omitempty"`
+}
+
+func (x *UpdateShiftResponse) GetShift() *ShiftPayload {
+	if x == nil {
+		var zero *ShiftPayload
+		return zero
+	}
+	return x.Shift
+}
+
+type DeleteShiftRequest struct {
+	Id int64 `json:"id,omitempty"`
+}
+
+func (m *DeleteShiftRequest) MarshalJSON() ([]byte, error) {
+	type alias DeleteShiftRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	return json.Marshal(aux)
+}
+
+func (m *DeleteShiftRequest) UnmarshalJSON(data []byte) error {
+	type alias DeleteShiftRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	return nil
+}
+
+func (x *DeleteShiftRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+type DeleteShiftResponse struct {
+	Success bool `json:"success,omitempty"`
+}
+
+func (x *DeleteShiftResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
 }
 
 type CreateShiftAssignmentRequest struct {
@@ -610,37 +1102,8 @@ func (x *GetRosterResponse) GetConflicts() []string {
 }
 
 type PublishRosterRequest struct {
-	LocationId int64  `json:"location_id,omitempty"`
+	LocationId *int64 `json:"location_id,omitempty"`
 	WeekStart  string `json:"week_start,omitempty"`
-}
-
-func (m *PublishRosterRequest) MarshalJSON() ([]byte, error) {
-	type alias PublishRosterRequest
-	aux := struct {
-		*alias
-		LocationId string `json:"location_id,omitempty"`
-	}{alias: (*alias)(m)}
-	aux.LocationId = strconv.FormatInt(m.LocationId, 10)
-	return json.Marshal(aux)
-}
-
-func (m *PublishRosterRequest) UnmarshalJSON(data []byte) error {
-	type alias PublishRosterRequest
-	aux := struct {
-		*alias
-		LocationId string `json:"location_id,omitempty"`
-	}{alias: (*alias)(m)}
-	if err := json.Unmarshal(data, &aux); err != nil {
-		return err
-	}
-	if aux.LocationId != "" {
-		v, err := strconv.ParseInt(aux.LocationId, 10, 64)
-		if err != nil {
-			return err
-		}
-		m.LocationId = v
-	}
-	return nil
 }
 
 func (x *PublishRosterRequest) GetLocationId() int64 {
@@ -648,7 +1111,11 @@ func (x *PublishRosterRequest) GetLocationId() int64 {
 		var zero int64
 		return zero
 	}
-	return x.LocationId
+	if x.LocationId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.LocationId
 }
 
 func (x *PublishRosterRequest) GetWeekStart() string {
