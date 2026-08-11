@@ -138,18 +138,21 @@ const toDepartmentUpdatePayload = (data: UpdateDepartmentInput) => ({
   description: data.description,
 });
 
+// The API binds request fields by their snake_case JSON tag. Its decoder tries
+// the tag, then a lower-first variant, then an all-lower variant, so camelCase
+// keys like startTime match nothing and arrive as zero values.
 const toShiftCreatePayload = (data: CreateShiftInput) => ({
-  staffId: data.staffId,
+  staff_id: data.staffId,
   date: data.day,
-  startTime: data.start,
-  endTime: data.end,
+  start_time: data.start,
+  end_time: data.end,
 });
 
 const toShiftUpdatePayload = (data: UpdateShiftInput) => ({
   id: data.id,
   date: data.day,
-  startTime: data.start,
-  endTime: data.end,
+  start_time: data.start,
+  end_time: data.end,
 });
 
 // ─── API ─────────────────────────────────────────────────────────────────────
@@ -176,7 +179,12 @@ export const hrApi = {
 
   // Shifts
   listShifts: (params?: { day?: string; staffId?: number }) =>
-    safe.get<Shift[]>('/hr/shifts', { params }),
+    safe.get<Shift[]>('/hr/shifts', {
+      params: {
+        ...(params?.day ? { date: params.day } : {}),
+        ...(params?.staffId ? { staff_id: params.staffId } : {}),
+      },
+    }),
   createShift: (data: CreateShiftInput) =>
     safe.post<Shift>('/hr/shifts', toShiftCreatePayload(data)),
   updateShift: (data: UpdateShiftInput) =>

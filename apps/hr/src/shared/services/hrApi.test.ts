@@ -73,20 +73,36 @@ describe('hrApi', () => {
   });
 
   // Shifts
-  it('listShifts calls GET /hr/shifts with params', () => {
-    const params = { day: 'Monday' };
-    hrApi.listShifts(params);
-    expect(safe.get).toHaveBeenCalledWith('/hr/shifts', { params });
+  it('listShifts maps filters to the snake_case keys the API binds', () => {
+    hrApi.listShifts({ day: '2026-06-01', staffId: 4101 });
+    expect(safe.get).toHaveBeenCalledWith('/hr/shifts', {
+      params: { date: '2026-06-01', staff_id: 4101 },
+    });
   });
 
-  it('createShift calls POST /hr/shifts', () => {
-    const data = { staffId: 1, start: '09:00', end: '17:00', day: 'Monday' };
+  it('listShifts omits filters that were not supplied', () => {
+    hrApi.listShifts();
+    expect(safe.get).toHaveBeenCalledWith('/hr/shifts', { params: {} });
+  });
+
+  it('createShift calls POST /hr/shifts with snake_case keys', () => {
+    const data = { staffId: 1, start: '09:00', end: '17:00', day: '2026-06-01' };
     hrApi.createShift(data);
     expect(safe.post).toHaveBeenCalledWith('/hr/shifts', {
-      staffId: 1,
-      date: 'Monday',
-      startTime: '09:00',
-      endTime: '17:00',
+      staff_id: 1,
+      date: '2026-06-01',
+      start_time: '09:00',
+      end_time: '17:00',
+    });
+  });
+
+  it('updateShift calls PUT /hr/shifts with snake_case keys', () => {
+    hrApi.updateShift({ id: 7, start: '10:00', end: '18:00', day: '2026-06-02' });
+    expect(safe.put).toHaveBeenCalledWith('/hr/shifts', {
+      id: 7,
+      date: '2026-06-02',
+      start_time: '10:00',
+      end_time: '18:00',
     });
   });
 
