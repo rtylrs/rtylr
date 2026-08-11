@@ -2,57 +2,24 @@ package application
 
 import (
 	"context"
-	"errors"
 
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
-	"github.com/voxire/onion/internal/platform/logger"
 )
 
 // compensationPermissionKeys are the role permission keys that grant visibility
 // of another employee's compensation. Either one is sufficient: HR administers
 // employee records, payroll administers what they are paid.
-var compensationPermissionKeys = []string{"manage_employees", "manage_payroll"}
-
-// compensationViewer resolves which hr_employees row belongs to the calling
-// platform user and checks that employee's role permissions. *Service satisfies
-// it; tests supply a fake so the gating rules can be exercised without a
-// database.
-type compensationViewer interface {
-	GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error)
-	HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error)
-}
+var compensationPermissionKeys = []string{permissionManageEmployees, permissionManagePayroll}
 
 // canViewAllCompensation reports whether the caller may see compensation on
 // employee records other than their own. It is resolved once per request: the
 // caller's employee row is looked up once and each permission key is checked at
 // most once, never per listed employee.
 //
-// It fails closed. A caller with no employee row (so no role) and any lookup
-// error both yield false, so a degraded permission store hides compensation
-// rather than exposing it.
-func canViewAllCompensation(ctx context.Context, viewer compensationViewer, ownerID, viewerUserID int64) bool {
-	viewerEmployeeID, err := viewer.GetEmployeeIDByUserID(ctx, ownerID, viewerUserID)
-	if err != nil {
-		if !errors.Is(err, domain.ErrEmployeeNotFound) {
-			logger.Ctx(ctx).Warn("failed to resolve caller employee row for compensation gating",
-				logger.Any("owner_id", ownerID), logger.Any("user_id", viewerUserID), logger.Error(err))
-		}
-		return false
-	}
-
-	for _, key := range compensationPermissionKeys {
-		allowed, permErr := viewer.HasPermission(ctx, ownerID, viewerEmployeeID, key)
-		if permErr != nil {
-			logger.Ctx(ctx).Warn("failed to check compensation permission",
-				logger.Any("owner_id", ownerID), logger.Any("employee_id", viewerEmployeeID),
-				logger.Any("permission_key", key), logger.Error(permErr))
-			return false
-		}
-		if allowed {
-			return true
-		}
-	}
-	return false
+// It fails closed, so a degraded permission store hides compensation rather
+// than exposing it.
+func canViewAllCompensation(ctx context.Context, viewer permissionResolver, ownerID, viewerUserID int64) bool {
+	return hasAnyPermission(ctx, viewer, ownerID, viewerUserID, compensationPermissionKeys...)
 }
 
 // maskCompensation returns a copy of the record with the compensation fields
@@ -122,7 +89,7 @@ func (s *Service) GetEmployeeForViewer(
 // every row with a single field comparison.
 func gateCompensation(
 	ctx context.Context,
-	viewer compensationViewer,
+	viewer permissionResolver,
 	ownerID, viewerUserID int64,
 	records []domain.EmployeeRecord,
 ) []domain.EmployeeRecord {

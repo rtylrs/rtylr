@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -97,8 +98,11 @@ func (h *CreateRoleHandler) Serve(ctx context.Context, req *CreateRoleRequest) (
 	}
 
 	role := domain.RoleRecord{Name: req.Name, Description: req.Description, Permissions: req.Permissions}
-	created, err := h.Service.CreateRole(ctx, device.User.UserID, role)
+	created, err := h.Service.CreateRoleForWriter(ctx, device.User.UserID, device.User.UserID, role)
 	if err != nil {
+		if errors.Is(err, domain.ErrPermissionDenied) {
+			return CreateRoleResponse{}, onekiterrors.PermissionDenied()
+		}
 		logger.Ctx(ctx).Error("failed to create role", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return CreateRoleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create role")
 	}
@@ -143,8 +147,11 @@ func (h *UpdateRoleHandler) Serve(ctx context.Context, req *UpdateRoleRequest) (
 	}
 
 	role := domain.RoleRecord{ID: id, Name: req.Name, Description: req.Description, Permissions: req.Permissions}
-	updated, err := h.Service.UpdateRole(ctx, device.User.UserID, role)
+	updated, err := h.Service.UpdateRoleForWriter(ctx, device.User.UserID, device.User.UserID, role)
 	if err != nil {
+		if errors.Is(err, domain.ErrPermissionDenied) {
+			return UpdateRoleResponse{}, onekiterrors.PermissionDenied()
+		}
 		logger.Ctx(ctx).Error("failed to update role", logger.Any("owner_id", device.User.UserID), logger.Any("role_id", id), logger.Error(err))
 		return UpdateRoleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update role")
 	}
@@ -186,8 +193,11 @@ func (h *AssignRoleHandler) Serve(ctx context.Context, req *AssignRoleRequest) (
 		return AssignRoleResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")
 	}
 
-	err := h.Service.AssignRole(ctx, device.User.UserID, employeeID, req.RoleID)
+	err := h.Service.AssignRoleForWriter(ctx, device.User.UserID, device.User.UserID, employeeID, req.RoleID)
 	if err != nil {
+		if errors.Is(err, domain.ErrPermissionDenied) {
+			return AssignRoleResponse{}, onekiterrors.PermissionDenied()
+		}
 		logger.Ctx(ctx).Error("failed to assign role", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return AssignRoleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to assign role")
 	}

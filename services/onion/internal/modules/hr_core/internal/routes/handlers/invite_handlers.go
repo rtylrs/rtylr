@@ -65,8 +65,11 @@ func (h *InviteEmployeeHandler) Serve(ctx context.Context, req *InviteEmployeeRe
 		LocationID:     req.LocationID,
 	}
 
-	token, err := h.Service.InviteEmployee(ctx, device.User.UserID, emp)
+	token, err := h.Service.InviteEmployeeForWriter(ctx, device.User.UserID, device.User.UserID, emp)
 	if err != nil {
+		if errors.Is(err, domain.ErrPermissionDenied) {
+			return InviteEmployeeResponse{}, onekiterrors.PermissionDenied()
+		}
 		logger.Ctx(ctx).Error("failed to invite employee", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return InviteEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to invite employee")
 	}
