@@ -42,29 +42,11 @@ CREATE TABLE IF NOT EXISTS hr_staff (
     INDEX idx_hr_staff_employee (owner_id, employee_id)
 );
 
-CREATE TABLE IF NOT EXISTS hr_shifts (
-    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    business_id BIGINT NOT NULL DEFAULT 0,
-    staff_id BIGINT DEFAULT NULL,
-    department_id BIGINT DEFAULT NULL,
-    date DATE DEFAULT NULL,
-    start_time TIME NOT NULL DEFAULT '00:00:00',
-    end_time TIME NOT NULL DEFAULT '00:00:00',
-    break_duration_minutes INT DEFAULT 0,
-    status ENUM('scheduled','in_progress','completed','absent','cancelled') DEFAULT 'scheduled',
-    clock_in_at TIMESTAMP NULL,
-    clock_out_at TIMESTAMP NULL,
-    hours_worked DECIMAL(5,2) DEFAULT NULL,
-    overtime_hours DECIMAL(5,2) DEFAULT 0,
-    notes TEXT,
-    location_id BIGINT DEFAULT NULL,
-    name VARCHAR(100) DEFAULT NULL,
-    color VARCHAR(10) DEFAULT '#4CAF50',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_shifts_owner (owner_id)
-);
+-- hr_shifts is defined in schemas/hr_shifts/schema.sql, which is its single
+-- canonical definition. It used to be declared here as well; because migrate.sh
+-- applies the hr directory before hr_shifts, this copy won and the hr_shifts
+-- copy was a silent no-op, letting the two definitions drift apart. Modules
+-- that query hr_shifts list schemas/hr_shifts in their own sqlc.yaml.
 
 CREATE TABLE IF NOT EXISTS hr_time_off_requests (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
