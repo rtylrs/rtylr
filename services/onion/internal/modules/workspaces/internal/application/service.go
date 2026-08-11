@@ -33,6 +33,35 @@ func invalidateWorkspacesScope(ctx context.Context, businessID int64) {
 	}
 }
 
+// invalidateUserScope clears the per-user cache bucket, `cache:user:<id>:*`.
+// GetMyTasks caches there because the list is scoped to the person reading it
+// rather than to the business that owns the task, which puts it out of reach of
+// invalidateWorkspacesScope: the two patterns share no segment.
+//
+// This has to stay a prefix delete. Page and limit are baked into every
+// my-tasks key, so deleting one exact key would leave every other cached page
+// serving pre-mutation rows until the TTL expires.
+//
+// userID 0 means "unassigned" on the task write paths; there is no reader to
+// evict, so skip the SCAN rather than wipe `cache:user:0:*`.
+func invalidateUserScope(ctx context.Context, userID int64) {
+	if userID == 0 {
+		return
+	}
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
+	}
+}
+
+// assigneeID flattens an optional assignee to a plain id, 0 meaning unassigned,
+// so the task write paths can hand it straight to invalidateUserScope.
+func assigneeID(id *int64) int64 {
+	if id == nil {
+		return 0
+	}
+	return *id
+}
+
 type Service struct {
 	repo *infrastructure.Repository
 }
@@ -380,6 +409,9 @@ func (s *Service) ListTasks(ctx context.Context, filter domain.ListTasksFilter) 
 
 func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domain.Task, error) {
 	defer invalidateWorkspacesScope(ctx, input.BusinessID)
+	// A new task lands in the assignee's my-tasks list, whose cached pages were
+	// computed before it existed.
+	defer invalidateUserScope(ctx, assigneeID(input.AssigneeID))
 	id, err := s.repo.CreateTask(ctx, input)
 	if err != nil {
 		return domain.Task{}, err
@@ -443,6 +475,11 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 		return err
 	}
 
+	// Any edit changes what the current assignee's my-tasks list should show,
+	// title and status included, so their cached pages go regardless of whether
+	// this update touches the assignee.
+	defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
+
 	// This is a partial update — only log a change for a field the request
 	// actually supplied. An omitted field arrives as the zero value (empty
 	// string / nil) and means "leave unchanged", so comparing it against the
@@ -473,6 +510,11 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 			); actErr != nil {
 				logger.Ctx(ctx).Error("UpdateTask: failed to log assignee activity", logger.Error(actErr))
 			}
+			// Both sides of a reassignment need evicting. The previous
+			// assignee's eviction is already deferred above; without this one
+			// the new assignee keeps serving pages that predate the task
+			// arriving in their list.
+			defer invalidateUserScope(ctx, newAssignee)
 		}
 	}
 
@@ -485,6 +527,10 @@ func (s *Service) UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskS
 		return err
 	}
 
+	// The my-tasks list filters on status and hides done and cancelled work, so
+	// a status change can add or remove the task from the assignee's list.
+	defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
+
 	if existing.Status != input.Status {
 		if actErr := s.repo.LogActivity(ctx, input.ID, userID, "status_changed", existing.Status, input.Status); actErr != nil {
 			logger.Ctx(ctx).Error("UpdateTaskStatus: failed to log activity", logger.Error(actErr))
@@ -496,6 +542,17 @@ func (s *Service) UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskS
 
 func (s *Service) DeleteTask(ctx context.Context, taskID, businessID int64) error {
 	defer invalidateWorkspacesScope(ctx, businessID)
+
+	// Read the assignee before the row goes. Once the task is deleted there is
+	// nothing left to say whose cached my-tasks pages still list it.
+	existing, err := s.repo.GetTaskByID(ctx, taskID)
+	if err != nil {
+		logger.Ctx(ctx).Error("DeleteTask: failed to read task before delete, my-tasks cache left to expire",
+			logger.Error(err))
+	} else {
+		defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
+	}
+
 	return s.repo.DeleteTask(ctx, taskID, businessID)
 }
 
@@ -903,7 +960,19 @@ func (s *Service) DeleteColumn(ctx context.Context, id, actorID int64) error {
 	return s.repo.DeleteColumn(ctx, id, actorID)
 }
 
+// MoveTaskToColumn is the board's drag-and-drop write path, reached from the
+// flow project API. It reassigns the task to a different column, and the column
+// a task sits in is part of every my-tasks payload, so the assignee's cached
+// pages have to go with it.
 func (s *Service) MoveTaskToColumn(ctx context.Context, taskID, columnID, actorID int64) error {
+	existing, err := s.repo.GetTaskByID(ctx, taskID)
+	if err != nil {
+		logger.Ctx(ctx).Error("MoveTaskToColumn: failed to read task, my-tasks cache left to expire",
+			logger.Error(err))
+	} else {
+		defer invalidateUserScope(ctx, assigneeID(existing.AssigneeID))
+	}
+
 	return s.repo.MoveTaskToColumn(ctx, taskID, columnID, actorID)
 }
 
