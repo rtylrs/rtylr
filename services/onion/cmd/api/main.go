@@ -111,7 +111,6 @@ import (
 	"github.com/voxire/onion/internal/modules/roles"
 	"github.com/voxire/onion/internal/modules/security"
 	"github.com/voxire/onion/internal/modules/segments"
-	"github.com/voxire/onion/internal/modules/shifts"
 	"github.com/voxire/onion/internal/modules/staff"
 	stocktakes "github.com/voxire/onion/internal/modules/stock_takes"
 	stocktransfers "github.com/voxire/onion/internal/modules/stock_transfers"
@@ -407,7 +406,6 @@ type apiModules struct {
 	Roles                 *roles.Module
 	Security              *security.Module
 	Segments              *segments.Module
-	Shifts                *shifts.Module
 	Staff                 *staff.Module
 	StockTakes            *stocktakes.Module
 	StockTransfers        *stocktransfers.Module
@@ -606,7 +604,6 @@ func initializeModules(ctx context.Context) *apiModules {
 		Roles:                 roles.NewModule(ctx, dbclient.Pool()),
 		Security:              security.NewModule(ctx, dbclient.Pool()),
 		Segments:              segmentsModule,
-		Shifts:                shifts.NewModule(ctx, dbclient.Pool()),
 		Staff:                 staff.NewModule(ctx, dbclient.Pool()),
 		StockTakes:            stocktakes.NewModule(ctx, dbclient.Pool()),
 		StockTransfers:        stockTransfersModule,

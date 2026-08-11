@@ -17,9 +17,16 @@ func ListShiftsRoutes() []string { return []string{"/hr/shifts"} }
 
 type ListShiftsHandler struct{ Service *application.Service }
 
+// ListShiftsRequest filters the listing. Every filter is optional; with none
+// set the response covers both template and attendance rows, because both live
+// in the same table and both are read through this route.
 type ListShiftsRequest struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	Limit      int32  `json:"limit"`
+	Offset     int32  `json:"offset"`
+	StaffID    int64  `json:"staff_id"`
+	Date       string `json:"date"`
+	LocationID int64  `json:"location_id"`
+	Kind       string `json:"kind"`
 }
 
 type ListShiftsResponse struct {
@@ -40,8 +47,18 @@ func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (
 		return ListShiftsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	kind := domain.ShiftKind(req.Kind)
+	if !domain.IsValidShiftKind(kind) {
+		return ListShiftsResponse{}, onekiterrors.New(http.StatusBadRequest, "kind must be either template or attendance")
+	}
+
 	shifts, total, err := h.Service.ListShifts(ctx, businessID, domain.ListShiftsParams{
-		Limit: req.Limit, Offset: req.Offset,
+		Limit:      req.Limit,
+		Offset:     req.Offset,
+		StaffID:    req.StaffID,
+		Date:       req.Date,
+		LocationID: req.LocationID,
+		Kind:       kind,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list shifts", logger.Any("business_id", businessID), logger.Error(err))

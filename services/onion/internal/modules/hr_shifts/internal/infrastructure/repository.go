@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
@@ -25,7 +26,13 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListShifts(ctx context.Context, businessID int64, params domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error) {
-	total, err := r.queries.CountShifts(ctx, businessID)
+	total, err := r.queries.CountShifts(ctx, sqlc.CountShiftsParams{
+		BusinessID: businessID,
+		StaffID:    nullInt64(params.StaffID),
+		Date:       nullDate(params.Date),
+		LocationID: nullInt64(params.LocationID),
+		Kind:       nullKind(params.Kind),
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to count shifts", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, 0, err
@@ -33,6 +40,10 @@ func (r *Repository) ListShifts(ctx context.Context, businessID int64, params do
 
 	rows, err := r.queries.ListShifts(ctx, sqlc.ListShiftsParams{
 		BusinessID: businessID,
+		StaffID:    nullInt64(params.StaffID),
+		Date:       nullDate(params.Date),
+		LocationID: nullInt64(params.LocationID),
+		Kind:       nullKind(params.Kind),
 		Limit:      params.Limit,
 		Offset:     params.Offset,
 	})
@@ -63,46 +74,139 @@ func (r *Repository) GetShift(ctx context.Context, businessID, shiftID int64) (*
 
 func (r *Repository) CreateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error) {
 	result, err := r.queries.CreateShift(ctx, sqlc.CreateShiftParams{
-		OwnerID:    businessID,
-		BusinessID: businessID,
-		LocationID: shift.LocationID,
-		Name:       shift.Name,
-		StartTime:  shift.StartTime,
-		EndTime:    shift.EndTime,
-		Color:      shift.Color,
+		OwnerID:              businessID,
+		BusinessID:           businessID,
+		StaffID:              nullInt64(shift.StaffID),
+		DepartmentID:         nullInt64(shift.DepartmentID),
+		Date:                 nullDate(shift.Date),
+		StartTime:            shift.StartTime,
+		EndTime:              shift.EndTime,
+		BreakDurationMinutes: nullInt32(shift.BreakDurationMinutes),
+		Status:               nullStatus(shift.Status),
+		Notes:                nullString(shift.Notes),
+		LocationID:           nullInt64(shift.LocationID),
+		Name:                 nullString(shift.Name),
+		Color:                nullString(shift.Color),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to create shift", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
+
 	id, err := result.LastInsertId()
 	if err != nil {
+		logger.Ctx(ctx).Error("failed to read created shift id", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
-	shift.ID = id
-	shift.OwnerID = businessID
-	shift.BusinessID = businessID
-	return &shift, nil
+
+	// Read the row back so the caller sees the stored values, including the
+	// column defaults for status and color rather than the empty input.
+	return r.GetShift(ctx, businessID, id)
 }
 
+// UpdateShift row-locks the target shift and then writes it, so two concurrent
+// updates to the same shift serialise instead of interleaving.
 func (r *Repository) UpdateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) error {
-	return r.queries.UpdateShift(ctx, sqlc.UpdateShiftParams{
-		LocationID: shift.LocationID,
-		Name:       shift.Name,
-		StartTime:  shift.StartTime,
-		EndTime:    shift.EndTime,
-		Color:      shift.Color,
-		ID:         shift.ID,
-		BusinessID: businessID,
-	})
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to begin shift update transaction", logger.Any("business_id", businessID), logger.Error(err))
+		return err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			if rbErr := tx.Rollback(); rbErr != nil {
+				logger.Ctx(ctx).Error("failed to roll back after panic", logger.Error(rbErr))
+			}
+			panic(p)
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
+	if _, err := qtx.GetShiftForUpdate(ctx, sqlc.GetShiftForUpdateParams{BusinessID: businessID, ID: shift.ID}); err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			logger.Ctx(ctx).Error("failed to roll back shift update", logger.Error(rbErr))
+		}
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrShiftNotFound
+		}
+		logger.Ctx(ctx).Error("failed to lock shift for update", logger.Any("business_id", businessID), logger.Any("shift_id", shift.ID), logger.Error(err))
+		return err
+	}
+
+	if err := qtx.UpdateShift(ctx, sqlc.UpdateShiftParams{
+		StaffID:              nullInt64(shift.StaffID),
+		DepartmentID:         nullInt64(shift.DepartmentID),
+		Date:                 nullDate(shift.Date),
+		StartTime:            shift.StartTime,
+		EndTime:              shift.EndTime,
+		BreakDurationMinutes: nullInt32(shift.BreakDurationMinutes),
+		Status:               nullStatus(shift.Status),
+		Notes:                nullString(shift.Notes),
+		LocationID:           nullInt64(shift.LocationID),
+		Name:                 nullString(shift.Name),
+		Color:                nullString(shift.Color),
+		ID:                   shift.ID,
+		BusinessID:           businessID,
+	}); err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			logger.Ctx(ctx).Error("failed to roll back shift update", logger.Error(rbErr))
+		}
+		logger.Ctx(ctx).Error("failed to update shift", logger.Any("business_id", businessID), logger.Any("shift_id", shift.ID), logger.Error(err))
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// DeleteShift row-locks the target shift before removing it, so a concurrent
+// update cannot land between the existence check and the delete.
+func (r *Repository) DeleteShift(ctx context.Context, businessID, shiftID int64) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to begin shift delete transaction", logger.Any("business_id", businessID), logger.Error(err))
+		return err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			if rbErr := tx.Rollback(); rbErr != nil {
+				logger.Ctx(ctx).Error("failed to roll back after panic", logger.Error(rbErr))
+			}
+			panic(p)
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+
+	if _, err := qtx.GetShiftForUpdate(ctx, sqlc.GetShiftForUpdateParams{BusinessID: businessID, ID: shiftID}); err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			logger.Ctx(ctx).Error("failed to roll back shift delete", logger.Error(rbErr))
+		}
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrShiftNotFound
+		}
+		logger.Ctx(ctx).Error("failed to lock shift for delete", logger.Any("business_id", businessID), logger.Any("shift_id", shiftID), logger.Error(err))
+		return err
+	}
+
+	if err := qtx.DeleteShift(ctx, sqlc.DeleteShiftParams{ID: shiftID, BusinessID: businessID}); err != nil {
+		if rbErr := tx.Rollback(); rbErr != nil {
+			logger.Ctx(ctx).Error("failed to roll back shift delete", logger.Error(rbErr))
+		}
+		logger.Ctx(ctx).Error("failed to delete shift", logger.Any("business_id", businessID), logger.Any("shift_id", shiftID), logger.Error(err))
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (r *Repository) ListShiftsByLocation(ctx context.Context, businessID, locationID int64) ([]domain.ShiftRecord, error) {
 	rows, err := r.queries.ListShiftsByLocation(ctx, sqlc.ListShiftsByLocationParams{
 		BusinessID: businessID,
-		LocationID: locationID,
+		LocationID: nullInt64(locationID),
 	})
 	if err != nil {
+		logger.Ctx(ctx).Error("failed to list shifts by location", logger.Any("business_id", businessID), logger.Any("location_id", locationID), logger.Error(err))
 		return nil, err
 	}
 	shifts := make([]domain.ShiftRecord, 0, len(rows))
@@ -113,11 +217,11 @@ func (r *Repository) ListShiftsByLocation(ctx context.Context, businessID, locat
 }
 
 func (r *Repository) ListRosterAssignments(ctx context.Context, businessID int64, weekStart, weekEnd string) ([]domain.ShiftAssignmentRecord, error) {
-	ws, err := time.Parse("2006-01-02", weekStart)
+	ws, err := time.Parse(time.DateOnly, weekStart)
 	if err != nil {
 		return nil, err
 	}
-	we, err := time.Parse("2006-01-02", weekEnd)
+	we, err := time.Parse(time.DateOnly, weekEnd)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +244,7 @@ func (r *Repository) ListRosterAssignments(ctx context.Context, businessID int64
 }
 
 func (r *Repository) CreateShiftAssignment(ctx context.Context, businessID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error) {
-	assignDate, err := time.Parse("2006-01-02", assignment.Date)
+	assignDate, err := time.Parse(time.DateOnly, assignment.Date)
 	if err != nil {
 		return nil, err
 	}
@@ -158,21 +262,29 @@ func (r *Repository) CreateShiftAssignment(ctx context.Context, businessID int64
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
+		logger.Ctx(ctx).Error("failed to read created assignment id", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
-	assignment.ID = id
-	assignment.OwnerID = businessID
-	assignment.BusinessID = businessID
-	assignment.Status = "scheduled"
-	return &assignment, nil
+
+	// Read the row back rather than reconstructing it, so the caller gets the
+	// stored status and the real created_at and updated_at instead of a zero time.
+	row, err := r.queries.GetShiftAssignment(ctx, sqlc.GetShiftAssignmentParams{BusinessID: businessID, ID: id})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to read back created assignment",
+			logger.Any("business_id", businessID), logger.Any("assignment_id", id), logger.Error(err))
+		return nil, err
+	}
+
+	created := assignmentFromRow(row)
+	return &created, nil
 }
 
 func (r *Repository) PublishRosterAssignments(ctx context.Context, businessID int64, weekStart, weekEnd string) error {
-	ws, err := time.Parse("2006-01-02", weekStart)
+	ws, err := time.Parse(time.DateOnly, weekStart)
 	if err != nil {
 		return err
 	}
-	we, err := time.Parse("2006-01-02", weekEnd)
+	we, err := time.Parse(time.DateOnly, weekEnd)
 	if err != nil {
 		return err
 	}
@@ -184,7 +296,7 @@ func (r *Repository) PublishRosterAssignments(ctx context.Context, businessID in
 }
 
 func (r *Repository) ListEmployeeAssignmentsForDate(ctx context.Context, businessID, employeeID int64, date string) ([]domain.ShiftAssignmentRecord, error) {
-	d, err := time.Parse("2006-01-02", date)
+	d, err := time.Parse(time.DateOnly, date)
 	if err != nil {
 		return nil, err
 	}
@@ -204,18 +316,59 @@ func (r *Repository) ListEmployeeAssignmentsForDate(ctx context.Context, busines
 }
 
 func shiftFromRow(row sqlc.HrShift) domain.ShiftRecord {
-	return domain.ShiftRecord{
+	s := domain.ShiftRecord{
 		ID:         row.ID,
 		OwnerID:    row.OwnerID,
 		BusinessID: row.BusinessID,
-		LocationID: row.LocationID,
-		Name:       row.Name,
 		StartTime:  row.StartTime,
 		EndTime:    row.EndTime,
-		Color:      row.Color,
-		CreatedAt:  row.CreatedAt,
-		UpdatedAt:  row.UpdatedAt,
 	}
+	if row.LocationID.Valid {
+		s.LocationID = row.LocationID.Int64
+	}
+	if row.Name.Valid {
+		s.Name = row.Name.String
+	}
+	if row.Color.Valid {
+		s.Color = row.Color.String
+	}
+	if row.StaffID.Valid {
+		s.StaffID = row.StaffID.Int64
+	}
+	if row.DepartmentID.Valid {
+		s.DepartmentID = row.DepartmentID.Int64
+	}
+	if row.Date.Valid {
+		s.Date = row.Date.Time.Format(time.DateOnly)
+	}
+	if row.BreakDurationMinutes.Valid {
+		s.BreakDurationMinutes = row.BreakDurationMinutes.Int32
+	}
+	if row.Status.Valid {
+		s.Status = string(row.Status.HrShiftsStatus)
+	}
+	if row.ClockInAt.Valid {
+		s.ClockInAt = row.ClockInAt.Time
+	}
+	if row.ClockOutAt.Valid {
+		s.ClockOutAt = row.ClockOutAt.Time
+	}
+	if row.HoursWorked.Valid {
+		s.HoursWorked = parseDecimal(row.HoursWorked.String)
+	}
+	if row.OvertimeHours.Valid {
+		s.OvertimeHours = parseDecimal(row.OvertimeHours.String)
+	}
+	if row.Notes.Valid {
+		s.Notes = row.Notes.String
+	}
+	if row.CreatedAt.Valid {
+		s.CreatedAt = row.CreatedAt.Time
+	}
+	if row.UpdatedAt.Valid {
+		s.UpdatedAt = row.UpdatedAt.Time
+	}
+	return s
 }
 
 func assignmentFromRow(row sqlc.HrShiftAssignment) domain.ShiftAssignmentRecord {
@@ -225,10 +378,68 @@ func assignmentFromRow(row sqlc.HrShiftAssignment) domain.ShiftAssignmentRecord 
 		BusinessID: row.BusinessID,
 		EmployeeID: row.EmployeeID,
 		ShiftID:    row.ShiftID,
-		Date:       row.Date.Format("2006-01-02"),
+		Date:       row.Date.Format(time.DateOnly),
 		Status:     row.Status,
 		Published:  row.Published,
 		CreatedAt:  row.CreatedAt,
 		UpdatedAt:  row.UpdatedAt,
 	}
+}
+
+func nullInt64(v int64) sql.NullInt64 {
+	return sql.NullInt64{Int64: v, Valid: v != 0}
+}
+
+func nullInt32(v int32) sql.NullInt32 {
+	return sql.NullInt32{Int32: v, Valid: v != 0}
+}
+
+func nullString(v string) sql.NullString {
+	return sql.NullString{String: v, Valid: v != ""}
+}
+
+func nullStatus(v string) sqlc.NullHrShiftsStatus {
+	return sqlc.NullHrShiftsStatus{
+		HrShiftsStatus: sqlc.HrShiftsStatus(v),
+		Valid:          v != "",
+	}
+}
+
+// nullKind renders the kind filter for the generated query, whose parameter is
+// untyped because it is compared against string literals in SQL. A nil value
+// leaves the filter off, so both kinds are returned.
+func nullKind(kind domain.ShiftKind) interface{} {
+	if kind == domain.ShiftKindAny {
+		return nil
+	}
+	return string(kind)
+}
+
+// nullDate converts an ISO-8601 date to a nullable DATE. An unparseable or
+// empty value leaves the filter off rather than silently matching nothing.
+func nullDate(s string) sql.NullTime {
+	if s == "" {
+		return sql.NullTime{}
+	}
+	t, err := time.Parse(time.DateOnly, s)
+	if err != nil {
+		logger.Global().Warn("failed to parse shift date", logger.String("value", s), logger.Error(err))
+		return sql.NullTime{}
+	}
+	return sql.NullTime{Time: t, Valid: true}
+}
+
+// parseDecimal reads a DECIMAL column, which the MySQL driver returns as a
+// string. A corrupt value logs and reads as zero rather than failing the row.
+func parseDecimal(s string) float64 {
+	if s == "" {
+		return 0
+	}
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse shift decimal value from database",
+			logger.String("value", s), logger.Error(err))
+		return 0
+	}
+	return f
 }

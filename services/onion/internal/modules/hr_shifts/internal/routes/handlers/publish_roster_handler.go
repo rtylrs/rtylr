@@ -24,10 +24,13 @@ type PublishRosterResponse struct {
 	Success bool `json:"success"`
 }
 
+// Validate requires only week_start. location_id is accepted for forward
+// compatibility but is not required, because publishing is not scoped by it:
+// PublishRosterAssignments matches on business and date range only, so a publish
+// covers every location's assignments for that week. Rejecting a request for
+// omitting a field that has no effect was a bug. Scoping publish per location is
+// a separate behaviour change.
 func (h *PublishRosterHandler) Validate(_ context.Context, req *PublishRosterRequest) error {
-	if req.LocationID == 0 {
-		return onekiterrors.New(http.StatusBadRequest, "location_id is required")
-	}
 	if req.WeekStart == "" {
 		return onekiterrors.New(http.StatusBadRequest, "week_start is required")
 	}

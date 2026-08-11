@@ -7,6 +7,7 @@ type Repository interface {
 	GetShift(ctx context.Context, businessID, shiftID int64) (*ShiftRecord, error)
 	CreateShift(ctx context.Context, businessID int64, shift ShiftRecord) (*ShiftRecord, error)
 	UpdateShift(ctx context.Context, businessID int64, shift ShiftRecord) error
+	DeleteShift(ctx context.Context, businessID, shiftID int64) error
 	ListShiftsByLocation(ctx context.Context, businessID, locationID int64) ([]ShiftRecord, error)
 
 	ListRosterAssignments(ctx context.Context, businessID int64, weekStart, weekEnd string) ([]ShiftAssignmentRecord, error)

@@ -17,6 +17,12 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPOSTWithValidation[handlers.CreateShiftRequest, handlers.CreateShiftResponse](
 		ctx, router, handlers.CreateShiftRoutes(), &handlers.CreateShiftHandler{Service: service},
 	)
+	serverHttp.RegisterPUTWithValidation[handlers.UpdateShiftRequest, handlers.UpdateShiftResponse](
+		ctx, router, handlers.UpdateShiftRoutes(), &handlers.UpdateShiftHandler{Service: service},
+	)
+	serverHttp.RegisterDELETEWithValidation[handlers.DeleteShiftRequest, handlers.DeleteShiftResponse](
+		ctx, router, handlers.DeleteShiftRoutes(), &handlers.DeleteShiftHandler{Service: service},
+	)
 	serverHttp.RegisterGET[handlers.GetRosterRequest, handlers.GetRosterResponse](
 		ctx, router, handlers.GetRosterRoutes(), &handlers.GetRosterHandler{Service: service},
 	)

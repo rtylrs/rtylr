@@ -15,9 +15,15 @@ type mockRepo struct {
 	assignments []domain.ShiftAssignmentRecord
 	dateAssigns []domain.ShiftAssignmentRecord
 	err         error
+
+	lastParams  domain.ListShiftsParams
+	updated     domain.ShiftRecord
+	deletedID   int64
+	deleteCalls int
 }
 
-func (m *mockRepo) ListShifts(_ context.Context, _ int64, _ domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error) {
+func (m *mockRepo) ListShifts(_ context.Context, _ int64, params domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error) {
+	m.lastParams = params
 	return m.shifts, m.totalShifts, m.err
 }
 
@@ -28,7 +34,18 @@ func (m *mockRepo) GetShift(_ context.Context, _, _ int64) (*domain.ShiftRecord,
 func (m *mockRepo) CreateShift(_ context.Context, _ int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error) {
 	return &shift, m.err
 }
-func (m *mockRepo) UpdateShift(_ context.Context, _ int64, _ domain.ShiftRecord) error { return m.err }
+
+func (m *mockRepo) UpdateShift(_ context.Context, _ int64, shift domain.ShiftRecord) error {
+	m.updated = shift
+	return m.err
+}
+
+func (m *mockRepo) DeleteShift(_ context.Context, _, shiftID int64) error {
+	m.deletedID = shiftID
+	m.deleteCalls++
+	return m.err
+}
+
 func (m *mockRepo) ListShiftsByLocation(_ context.Context, _, _ int64) ([]domain.ShiftRecord, error) {
 	return m.shifts, m.err
 }
@@ -94,20 +111,53 @@ func TestListShifts_PropagatesRepoError(t *testing.T) {
 
 // ---- CreateShift ----
 
+// templateShift is a valid template row for tests: a location and name, no staff.
+func templateShift() domain.ShiftRecord {
+	return domain.ShiftRecord{
+		LocationID: 7,
+		Name:       "Evening",
+		StartTime:  "18:00:00",
+		EndTime:    "23:00:00",
+	}
+}
+
+// attendanceShift is a valid attendance row for tests: a staff member and date.
+func attendanceShift() domain.ShiftRecord {
+	return domain.ShiftRecord{
+		StaffID:   4101,
+		Date:      "2026-06-01",
+		StartTime: "09:00:00",
+		EndTime:   "17:00:00",
+	}
+}
+
 func TestCreateShift_DefaultsColor(t *testing.T) {
 	s := &Service{repo: &mockRepo{shift: &domain.ShiftRecord{}}}
-	got, err := s.CreateShift(context.Background(), 1, domain.ShiftRecord{Name: "Evening"})
+	got, err := s.CreateShift(context.Background(), 1, templateShift())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if got.Color != "#4CAF50" {
+	if got.Color != domain.DefaultShiftColor {
 		t.Errorf("expected default color, got %s", got.Color)
+	}
+}
+
+func TestCreateShift_DefaultsStatus(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	got, err := s.CreateShift(context.Background(), 1, attendanceShift())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.Status != domain.DefaultShiftStatus {
+		t.Errorf("expected default status, got %q", got.Status)
 	}
 }
 
 func TestCreateShift_PreservesProvidedColor(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	got, err := s.CreateShift(context.Background(), 1, domain.ShiftRecord{Name: "Night", Color: "#FF0000"})
+	shift := templateShift()
+	shift.Color = "#FF0000"
+	got, err := s.CreateShift(context.Background(), 1, shift)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -119,28 +169,172 @@ func TestCreateShift_PreservesProvidedColor(t *testing.T) {
 func TestCreateShift_PropagatesRepoError(t *testing.T) {
 	want := errors.New("create error")
 	s := &Service{repo: &mockRepo{err: want}}
-	_, err := s.CreateShift(context.Background(), 1, domain.ShiftRecord{Name: "Night"})
+	_, err := s.CreateShift(context.Background(), 1, templateShift())
 	if !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+// A template row has no staff member, so it needs a name to be identifiable.
+func TestCreateShift_RejectsTemplateWithoutName(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	shift := templateShift()
+	shift.Name = ""
+	if _, err := s.CreateShift(context.Background(), 1, shift); !errors.Is(err, domain.ErrEmptyShiftName) {
+		t.Errorf("expected ErrEmptyShiftName, got %v", err)
+	}
+}
+
+// An attendance row is a specific staff member on a specific day, so the date
+// is required even though a name is not.
+func TestCreateShift_RejectsAttendanceWithoutDate(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	shift := attendanceShift()
+	shift.Date = ""
+	if _, err := s.CreateShift(context.Background(), 1, shift); !errors.Is(err, domain.ErrEmptyShiftDate) {
+		t.Errorf("expected ErrEmptyShiftDate, got %v", err)
+	}
+}
+
+// An attendance row carries no name, so it must not be rejected for missing one.
+func TestCreateShift_AcceptsAttendanceWithoutName(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if _, err := s.CreateShift(context.Background(), 1, attendanceShift()); err != nil {
+		t.Errorf("expected attendance row without a name to be accepted, got %v", err)
+	}
+}
+
+// ---- ListShifts filters ----
+
+func TestListShifts_PassesFiltersThrough(t *testing.T) {
+	repo := &mockRepo{}
+	s := &Service{repo: repo}
+	want := domain.ListShiftsParams{
+		Limit: 10, Offset: 5, StaffID: 4101, Date: "2026-06-01",
+		LocationID: 7, Kind: domain.ShiftKindAttendance,
+	}
+	if _, _, err := s.ListShifts(context.Background(), 1, want); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if repo.lastParams != want {
+		t.Errorf("filters not passed through: got %+v, want %+v", repo.lastParams, want)
 	}
 }
 
 // ---- UpdateShift ----
 
 func TestUpdateShift_HappyPath(t *testing.T) {
-	s := &Service{repo: &mockRepo{}}
-	err := s.UpdateShift(context.Background(), 1, domain.ShiftRecord{ID: 1, Name: "Updated"})
+	stored := templateShift()
+	stored.ID = 1
+	s := &Service{repo: &mockRepo{shift: &stored}}
+	got, err := s.UpdateShift(context.Background(), 1, domain.ShiftRecord{ID: 1, Name: "Updated"})
 	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got == nil {
+		t.Fatal("expected the updated shift to be returned")
+	}
+}
+
+// A partial update must not blank the fields it leaves out. This is the failure
+// mode where a caller sending only one field wipes the rest of the row.
+func TestUpdateShift_PartialEditPreservesOtherFields(t *testing.T) {
+	stored := attendanceShift()
+	stored.ID = 42
+	stored.Notes = "original note"
+	stored.DepartmentID = 9
+	stored.BreakDurationMinutes = 30
+
+	repo := &mockRepo{shift: &stored}
+	s := &Service{repo: repo}
+
+	if _, err := s.UpdateShift(context.Background(), 1, domain.ShiftRecord{ID: 42, Status: "completed"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if repo.updated.Status != "completed" {
+		t.Errorf("Status = %q, want completed", repo.updated.Status)
+	}
+	if repo.updated.Notes != "original note" {
+		t.Errorf("Notes = %q, want it preserved", repo.updated.Notes)
+	}
+	if repo.updated.DepartmentID != 9 {
+		t.Errorf("DepartmentID = %d, want 9 preserved", repo.updated.DepartmentID)
+	}
+	if repo.updated.BreakDurationMinutes != 30 {
+		t.Errorf("BreakDurationMinutes = %d, want 30 preserved", repo.updated.BreakDurationMinutes)
+	}
+	if repo.updated.StartTime != stored.StartTime {
+		t.Errorf("StartTime = %q, want %q preserved", repo.updated.StartTime, stored.StartTime)
+	}
+}
+
+// StaffID decides whether a row is a template or an attendance record, so an
+// update must never flip one into the other.
+func TestUpdateShift_DoesNotChangeShiftKind(t *testing.T) {
+	stored := attendanceShift()
+	stored.ID = 42
+	repo := &mockRepo{shift: &stored}
+	s := &Service{repo: repo}
+
+	if _, err := s.UpdateShift(context.Background(), 1, domain.ShiftRecord{ID: 42, StaffID: 999, Name: "Sneaky"}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if repo.updated.StaffID != stored.StaffID {
+		t.Errorf("StaffID = %d, want %d unchanged", repo.updated.StaffID, stored.StaffID)
+	}
+	if repo.updated.Kind() != domain.ShiftKindAttendance {
+		t.Errorf("kind = %q, want it to stay attendance", repo.updated.Kind())
+	}
+}
+
+func TestUpdateShift_MissingShiftReturnsNotFound(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if _, err := s.UpdateShift(context.Background(), 1, domain.ShiftRecord{ID: 7}); !errors.Is(err, domain.ErrShiftNotFound) {
+		t.Errorf("expected ErrShiftNotFound, got %v", err)
 	}
 }
 
 func TestUpdateShift_PropagatesRepoError(t *testing.T) {
 	want := errors.New("update error")
 	s := &Service{repo: &mockRepo{err: want}}
-	err := s.UpdateShift(context.Background(), 1, domain.ShiftRecord{ID: 1})
-	if !errors.Is(err, want) {
+	if _, err := s.UpdateShift(context.Background(), 1, domain.ShiftRecord{ID: 1}); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+// ---- DeleteShift ----
+
+func TestDeleteShift_DelegatesID(t *testing.T) {
+	repo := &mockRepo{}
+	s := &Service{repo: repo}
+	if err := s.DeleteShift(context.Background(), 1, 55); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if repo.deletedID != 55 {
+		t.Errorf("deleted id = %d, want 55", repo.deletedID)
+	}
+	if repo.deleteCalls != 1 {
+		t.Errorf("delete called %d times, want 1", repo.deleteCalls)
+	}
+}
+
+func TestDeleteShift_PropagatesRepoError(t *testing.T) {
+	want := errors.New("delete error")
+	s := &Service{repo: &mockRepo{err: want}}
+	if err := s.DeleteShift(context.Background(), 1, 55); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+// ---- Kind discrimination ----
+
+func TestShiftKind_StaffIDDiscriminates(t *testing.T) {
+	if got := templateShift().Kind(); got != domain.ShiftKindTemplate {
+		t.Errorf("template kind = %q, want template", got)
+	}
+	if got := attendanceShift().Kind(); got != domain.ShiftKindAttendance {
+		t.Errorf("attendance kind = %q, want attendance", got)
 	}
 }
 

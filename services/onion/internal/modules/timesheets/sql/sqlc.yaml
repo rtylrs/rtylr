@@ -5,6 +5,8 @@ sql:
     schema:
       - "../../../../internal/platform/database/schemas/shared"
       - "../../../../internal/platform/database/schemas/hr"
+      # hr_shifts lives in its own schema directory; this module reads it.
+      - "../../../../internal/platform/database/schemas/hr_shifts"
     gen:
       go:
         package: "sqlc"

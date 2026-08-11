@@ -30,6 +30,7 @@ type repository interface {
 	GetShift(ctx context.Context, businessID, shiftID int64) (*domain.ShiftRecord, error)
 	CreateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error)
 	UpdateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) error
+	DeleteShift(ctx context.Context, businessID, shiftID int64) error
 	ListShiftsByLocation(ctx context.Context, businessID, locationID int64) ([]domain.ShiftRecord, error)
 	ListRosterAssignments(ctx context.Context, businessID int64, weekStart, weekEnd string) ([]domain.ShiftAssignmentRecord, error)
 	CreateShiftAssignment(ctx context.Context, businessID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error)
@@ -60,7 +61,12 @@ func (s *Service) ListShifts(ctx context.Context, businessID int64, params domai
 		Items []domain.ShiftRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrShiftsScope, businessID, fmt.Sprintf("list|l=%d|o=%d", params.Limit, params.Offset))
+	// Every filter has to be part of the key, or one filter's result set gets
+	// served to a request using a different one.
+	key := cacheKeys.Scoped(hrShiftsScope, businessID, fmt.Sprintf(
+		"list|l=%d|o=%d|staff=%d|date=%s|loc=%d|kind=%s",
+		params.Limit, params.Offset, params.StaffID, params.Date, params.LocationID, params.Kind,
+	))
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
 			items, total, err := s.repo.ListShifts(ctx, businessID, params)
@@ -73,8 +79,15 @@ func (s *Service) ListShifts(ctx context.Context, businessID int64, params domai
 
 func (s *Service) CreateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error) {
 	if shift.Color == "" {
-		shift.Color = "#4CAF50"
+		shift.Color = domain.DefaultShiftColor
 	}
+	if shift.Status == "" {
+		shift.Status = domain.DefaultShiftStatus
+	}
+	if err := domain.ValidateShift(shift); err != nil {
+		return nil, err
+	}
+
 	rec, err := s.repo.CreateShift(ctx, businessID, shift)
 	if err == nil {
 		invalidateHRShiftsScope(ctx, businessID)
@@ -82,12 +95,77 @@ func (s *Service) CreateShift(ctx context.Context, businessID int64, shift domai
 	return rec, err
 }
 
-func (s *Service) UpdateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) error {
-	if err := s.repo.UpdateShift(ctx, businessID, shift); err != nil {
+// UpdateShift applies a partial edit. Fields absent from the request keep their
+// stored value, so a caller editing one field cannot blank the others.
+func (s *Service) UpdateShift(ctx context.Context, businessID int64, shift domain.ShiftRecord) (*domain.ShiftRecord, error) {
+	existing, err := s.repo.GetShift(ctx, businessID, shift.ID)
+	if err != nil {
+		return nil, err
+	}
+	if existing == nil {
+		return nil, domain.ErrShiftNotFound
+	}
+
+	merged := mergeShift(*existing, shift)
+	if err := domain.ValidateShift(merged); err != nil {
+		return nil, err
+	}
+
+	if err := s.repo.UpdateShift(ctx, businessID, merged); err != nil {
+		return nil, err
+	}
+	invalidateHRShiftsScope(ctx, businessID)
+
+	return s.repo.GetShift(ctx, businessID, shift.ID)
+}
+
+func (s *Service) DeleteShift(ctx context.Context, businessID, shiftID int64) error {
+	if err := s.repo.DeleteShift(ctx, businessID, shiftID); err != nil {
 		return err
 	}
 	invalidateHRShiftsScope(ctx, businessID)
 	return nil
+}
+
+// mergeShift overlays the populated fields of patch onto existing. StaffID is
+// deliberately not overlaid: it is the discriminator between a template and an
+// attendance row, so an update must not silently convert one kind into the other.
+func mergeShift(existing, patch domain.ShiftRecord) domain.ShiftRecord {
+	merged := existing
+	merged.ID = existing.ID
+
+	if patch.LocationID != 0 {
+		merged.LocationID = patch.LocationID
+	}
+	if patch.Name != "" {
+		merged.Name = patch.Name
+	}
+	if patch.StartTime != "" {
+		merged.StartTime = patch.StartTime
+	}
+	if patch.EndTime != "" {
+		merged.EndTime = patch.EndTime
+	}
+	if patch.Color != "" {
+		merged.Color = patch.Color
+	}
+	if patch.DepartmentID != 0 {
+		merged.DepartmentID = patch.DepartmentID
+	}
+	if patch.Date != "" {
+		merged.Date = patch.Date
+	}
+	if patch.BreakDurationMinutes != 0 {
+		merged.BreakDurationMinutes = patch.BreakDurationMinutes
+	}
+	if patch.Status != "" {
+		merged.Status = patch.Status
+	}
+	if patch.Notes != "" {
+		merged.Notes = patch.Notes
+	}
+
+	return merged
 }
 
 func (s *Service) GetRoster(ctx context.Context, businessID int64, params domain.RosterParams) ([]domain.ShiftAssignmentRecord, []domain.ConflictInfo, error) {
