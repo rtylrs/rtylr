@@ -25,6 +25,24 @@ const (
 	// rather than a paginated list RPC. Matches the cap these reads already
 	// used before pagination existed.
 	internalListCap = int64(500)
+
+	// taskUpdatedEvent is the realtime type the task write paths already
+	// publish on the task and project topics. The user-topic publish reuses it
+	// instead of minting a `task.assigned`: the events carry no payload,
+	// consumers branch on the `task.` prefix to invalidate their task queries,
+	// and a second type would be one more string for every consumer to learn
+	// carrying no extra information.
+	taskUpdatedEvent = "task.updated"
+
+	// assignedNotification is the flow_notifications.type enum value for "this
+	// task is yours now".
+	assignedNotification = "assigned"
+
+	// assignedNotificationTitle is the headline stored on the inbox row. The
+	// column holds a plain string, so the copy is written once here rather than
+	// resolved per reader; the task title, project and actor travel in their own
+	// columns alongside it.
+	assignedNotificationTitle = "Assigned to you"
 )
 
 func invalidateWorkspacesScope(ctx context.Context, businessID int64) {
@@ -469,6 +487,17 @@ func (s *Service) GetTaskDetail(ctx context.Context, taskID int64) (domain.TaskD
 }
 
 func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, userID int64) error {
+	// Registered ahead of the cache evictions below so that it runs after all
+	// of them: announcing tells the affected clients to refetch, and that
+	// refetch must not be able to find a pre-update my-tasks page still cached.
+	// Stays nil unless the update both changed the assignee and landed.
+	var announced *assigneeChange
+	defer func() {
+		if announced != nil {
+			s.announceAssigneeChange(ctx, *announced)
+		}
+	}()
+
 	defer invalidateWorkspacesScope(ctx, input.BusinessID)
 	existing, err := s.repo.GetTaskByID(ctx, input.ID)
 	if err != nil {
@@ -496,6 +525,7 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 		}
 	}
 
+	var reassignment *assigneeChange
 	if input.AssigneeID != nil {
 		existingAssignee := int64(0)
 		if existing.AssigneeID != nil {
@@ -515,10 +545,123 @@ func (s *Service) UpdateTask(ctx context.Context, input domain.UpdateTaskInput, 
 			// the new assignee keeps serving pages that predate the task
 			// arriving in their list.
 			defer invalidateUserScope(ctx, newAssignee)
+
+			// The title comes from the request when the same call renames the
+			// task, so the inbox row names what the assignee will actually see.
+			title := existing.Title
+			if input.Title != "" {
+				title = input.Title
+			}
+			reassignment = &assigneeChange{
+				taskID:       input.ID,
+				workspaceID:  existing.WorkspaceID,
+				taskTitle:    title,
+				project:      existing.ProjectName,
+				projectColor: existing.ProjectColor,
+				actorID:      userID,
+				previous:     existingAssignee,
+				next:         newAssignee,
+			}
 		}
 	}
 
-	return s.repo.UpdateTask(ctx, input)
+	if updateErr := s.repo.UpdateTask(ctx, input); updateErr != nil {
+		return updateErr
+	}
+
+	announced = reassignment
+	return nil
+}
+
+// assigneeChange is what a reassignment needs in order to announce itself once
+// the write has landed: who lost the task, who picked it up, and enough of the
+// task to render an inbox row without reading it back.
+type assigneeChange struct {
+	taskID       int64
+	workspaceID  int64
+	taskTitle    string
+	project      string
+	projectColor string
+	actorID      int64
+	previous     int64
+	next         int64
+}
+
+// announceAssigneeChange is the realtime half of a reassignment.
+//
+// Both sides get a task event on their own `user:<id>` topic. The previous
+// assignee's my-tasks list has to drop the task and the new assignee's has to
+// pick it up, and neither of them is subscribed to the `task:<id>` or
+// `project:<id>` topics the write already publishes on. A client sitting on My
+// tasks or Today subscribes to `workspace:<id>` and `user:<id>` only, so a
+// reassignment reached it through no topic at all.
+//
+// The new assignee also gets an inbox row, which is what makes "you were
+// assigned a task" visible outside the flow board. That row is skipped when
+// they turned task-assignment notifications off, and when they assigned the
+// task to themselves and already know. The realtime event is deliberately not
+// gated on either: it is an invalidation hint that keeps a list correct rather
+// than a notification, and muting an inbox should not leave My tasks stale.
+func (s *Service) announceAssigneeChange(ctx context.Context, change assigneeChange) {
+	publishUserTaskEvent(change.previous, change.taskID, change.actorID)
+	publishUserTaskEvent(change.next, change.taskID, change.actorID)
+
+	if change.next == 0 || change.next == change.actorID {
+		return
+	}
+
+	settings, err := s.repo.GetUserSettings(ctx, change.next)
+	if err != nil {
+		logger.Ctx(ctx).Error("announceAssigneeChange: failed to read notification settings, no inbox row created",
+			logger.Error(err))
+		return
+	}
+	if !settings.TaskAssigned {
+		return
+	}
+
+	notification := domain.CreateNotificationInput{
+		UserID:       change.next,
+		Type:         assignedNotification,
+		Title:        assignedNotificationTitle,
+		TaskID:       &change.taskID,
+		TaskTitle:    change.taskTitle,
+		ActorID:      &change.actorID,
+		Project:      change.project,
+		ProjectColor: change.projectColor,
+	}
+	if change.workspaceID != 0 {
+		notification.WorkspaceID = &change.workspaceID
+	}
+
+	// CreateNotification publishes `notification.created` to the same user
+	// topic, so the inbox badge updates off the same call.
+	if notifyErr := s.CreateNotification(ctx, notification); notifyErr != nil {
+		logger.Ctx(ctx).Error("announceAssigneeChange: failed to create the assignment notification",
+			logger.Error(notifyErr))
+	}
+}
+
+// publishUserTaskEvent sends a task event to one person's own user topic.
+//
+// This is the only place a task event reaches a `user:<id>` topic, and it only
+// ever addresses the two people a reassignment is about, never a third party's
+// topic. Topic authorization is checked once at subscribe time rather than per
+// event, and the `user` scope resolves to "the caller must be that user", so a
+// self-scoped topic needs no membership reasoning of its own.
+//
+// userID 0 means the task was unassigned, or was assigned from nobody. There is
+// no topic to publish to.
+func publishUserTaskEvent(userID, taskID, actorID int64) {
+	if userID == 0 {
+		return
+	}
+	wsbus.Publish(wsbus.Event{
+		Topic:    fmt.Sprintf("user:%d", userID),
+		Type:     taskUpdatedEvent,
+		EntityID: taskID,
+		ActorID:  actorID,
+	})
 }
 
 func (s *Service) UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskStatusInput, userID int64) error {
