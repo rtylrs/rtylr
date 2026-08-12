@@ -24,7 +24,10 @@
     "no": "Non",
     "confirm": "Confirmer",
     "close": "Fermer",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "approve": "Approuver",
+    "reject": "Refuser",
+    "optionalNote": "Note optionnelle"
   },
   "nav": {
     "dashboard": "Tableau de bord",
