@@ -12,19 +12,15 @@ interface PendingRequest {
 }
 
 const PendingWidget: React.FC = () => {
-  const { data: raw } = useQuery({
+  const { data: raw, isError } = useQuery({
     queryKey: ['pending-widget'],
     queryFn: async (): Promise<PendingRequest[]> => {
-      try {
-        const res = await unwrap(
-          safe.get<{ requests?: PendingRequest[] } | PendingRequest[]>('/hr/time-off/v1/requests')
-        );
-        return ((Array.isArray(res) ? res : res.requests) ?? []).filter(
-          (request) => request.status?.toLowerCase() === 'pending'
-        );
-      } catch {
-        return [];
-      }
+      const res = await unwrap(
+        safe.get<{ requests?: PendingRequest[] } | PendingRequest[]>('/hr/time-off/v1/requests')
+      );
+      return ((Array.isArray(res) ? res : res.requests) ?? []).filter(
+        (request) => request.status?.toLowerCase() === 'pending'
+      );
     },
     staleTime: 60_000,
   });
@@ -40,11 +36,15 @@ const PendingWidget: React.FC = () => {
       >
         <Clock size={14} style={{ color: '#f59e0b' }} />
         <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          Pending approvals
+          Pending HR approvals
         </p>
       </div>
       <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
-        {requests.length === 0 ? (
+        {isError ? (
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <p className="text-xs text-red-500">Failed to load pending approvals</p>
+          </div>
+        ) : requests.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
               Nothing pending

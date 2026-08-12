@@ -454,14 +454,24 @@ function BusinessRoute(): React.JSX.Element | null {
     return <CreateBusinessOnboarding />;
   }
 
-  // Staff users (non-owner) see the app cards launcher.
-  // Account settings are always accessible regardless of role.
+  // Non-owner staff without management roles or app assignments see the app cards launcher.
+  // Admins, managers, billing/menu roles, and members with app assignments access authorized routes.
+  const role = (user?.role ?? '').toLowerCase();
+  const hasManagementRole = ['admin', 'manager', 'billing', 'menu_manager'].includes(role);
+  const hasAssignedApps = Array.isArray(user?.apps) && user.apps.length > 0;
   const staffAllowedPaths = ['/settings/account'];
-  if (user && user.isOwner === false && !staffAllowedPaths.some((p) => pathname.startsWith(p))) {
+
+  if (
+    user &&
+    user.isOwner === false &&
+    !hasManagementRole &&
+    !hasAssignedApps &&
+    !staffAllowedPaths.some((p) => pathname.startsWith(p))
+  ) {
     return <StaffView user={user} />;
   }
 
-  // Owners and admins get the full Dash experience.
+  // Owners, admins, and authorized roles get full route access.
   return <Outlet />;
 }
 
