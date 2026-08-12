@@ -145,6 +145,9 @@ func (a *InvoicesAPI) UpdateInvoice(ctx context.Context, req *financeinvoicesv1.
 		if errors.Is(err, domain.ErrInvoiceNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Invoice not found")
 		}
+		if errors.Is(err, domain.ErrInvoiceNotDraft) {
+			return nil, onekiterrors.New(http.StatusConflict, "Only draft invoices can be edited")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update invoice")
 	}
 
@@ -166,6 +169,12 @@ func (a *InvoicesAPI) UpdateInvoiceStatus(ctx context.Context, req *financeinvoi
 	}
 
 	if err := a.Service.UpdateInvoiceStatus(ctx, businessID, req.GetId(), body.GetStatus()); err != nil {
+		if errors.Is(err, domain.ErrInvoiceNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Invoice not found")
+		}
+		if errors.Is(err, domain.ErrInvoiceNotDraft) {
+			return nil, onekiterrors.New(http.StatusConflict, "Invoice lifecycle does not allow this status change")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update invoice status")
 	}
 

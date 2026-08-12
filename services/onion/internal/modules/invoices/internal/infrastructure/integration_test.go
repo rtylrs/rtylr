@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -340,6 +341,59 @@ func TestUpdateInvoiceStatus_ToPaid(t *testing.T) {
 	}
 	if inv.Status != "paid" {
 		t.Errorf("Status = %q after UpdateInvoiceStatus, want 'paid'", inv.Status)
+	}
+}
+
+func TestInvoiceLifecycle_PreventsReopeningAndEditingPaidInvoice(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	invID, err := repo.CreateInvoice(ctx, testutil.OwnerID, domain.Invoice{
+		InvoiceNumber: "TEST-LIFECYCLE",
+		ClientName:    "Lifecycle Corp",
+		IssueDate:     time.Now(),
+		DueDate:       time.Now().Add(30 * 24 * time.Hour),
+		Currency:      "USD",
+		Status:        domain.StatusDraft,
+		Total:         100,
+		AmountDue:     100,
+	})
+	if err != nil {
+		t.Fatalf("CreateInvoice: %v", err)
+	}
+	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM finance_invoice_items WHERE invoice_id = ?", invID)
+		db.ExecContext(ctx, "DELETE FROM finance_invoices WHERE id = ?", invID)
+	})
+
+	if err := repo.UpdateInvoiceStatus(ctx, testutil.OwnerID, invID, domain.StatusPaid); err != nil {
+		t.Fatalf("mark invoice paid: %v", err)
+	}
+	if err := repo.UpdateInvoiceStatus(ctx, testutil.OwnerID, invID, domain.StatusDraft); err != nil {
+		t.Fatalf("attempt to reopen paid invoice: %v", err)
+	}
+
+	paid, err := repo.GetInvoiceByID(ctx, testutil.OwnerID, invID)
+	if err != nil {
+		t.Fatalf("GetInvoiceByID after reopen attempt: %v", err)
+	}
+	if paid.Status != domain.StatusPaid {
+		t.Fatalf("paid invoice status changed to %q after reopen attempt", paid.Status)
+	}
+
+	paid.ClientName = "Tampered Corp"
+	paid.Total = 999
+	if err := repo.UpdateInvoice(ctx, testutil.OwnerID, *paid); !errors.Is(err, domain.ErrInvoiceNotDraft) {
+		t.Fatalf("expected paid invoice edit to return ErrInvoiceNotDraft, got %v", err)
+	}
+
+	unchanged, err := repo.GetInvoiceByID(ctx, testutil.OwnerID, invID)
+	if err != nil {
+		t.Fatalf("GetInvoiceByID after edit attempt: %v", err)
+	}
+	if unchanged.ClientName != "Lifecycle Corp" || unchanged.Total != 100 {
+		t.Fatalf("paid invoice was edited: client=%q total=%g", unchanged.ClientName, unchanged.Total)
 	}
 }
 

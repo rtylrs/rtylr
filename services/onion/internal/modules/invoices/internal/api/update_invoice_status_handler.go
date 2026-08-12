@@ -2,9 +2,11 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
+	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -67,6 +69,12 @@ func (h *UpdateInvoiceStatusHandler) Serve(ctx context.Context, req *UpdateInvoi
 	}
 
 	if err := h.FinanceService.UpdateInvoiceStatus(ctx, businessID, req.ID, req.Status); err != nil {
+		if errors.Is(err, domain.ErrInvoiceNotFound) {
+			return UpdateInvoiceStatusResponse{}, onekiterrors.New(http.StatusNotFound, "Invoice not found")
+		}
+		if errors.Is(err, domain.ErrInvoiceNotDraft) {
+			return UpdateInvoiceStatusResponse{}, onekiterrors.New(http.StatusConflict, "Invoice lifecycle does not allow this status change")
+		}
 		return UpdateInvoiceStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update invoice status")
 	}
 

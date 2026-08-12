@@ -118,6 +118,9 @@ func (h *UpdateInvoiceHandler) Serve(ctx context.Context, req *UpdateInvoiceRequ
 		if errors.Is(err, domain.ErrInvoiceNotFound) {
 			return UpdateInvoiceResponse{}, onekiterrors.New(http.StatusNotFound, "Invoice not found")
 		}
+		if errors.Is(err, domain.ErrInvoiceNotDraft) {
+			return UpdateInvoiceResponse{}, onekiterrors.New(http.StatusConflict, "Only draft invoices can be edited")
+		}
 
 		return UpdateInvoiceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update invoice")
 	}

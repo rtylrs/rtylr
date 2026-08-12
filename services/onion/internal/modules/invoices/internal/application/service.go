@@ -256,6 +256,9 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 	if err != nil {
 		return nil, err
 	}
+	if existing.Status != domain.StatusDraft {
+		return nil, domain.ErrInvoiceNotDraft
+	}
 
 	issueDate, err := time.Parse("2006-01-02", input.IssueDate)
 	if err != nil {
@@ -357,6 +360,13 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 
 func (s *Service) UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID int64, status string) error {
 	defer invalidateInvoicesScope(ctx, businessID)
+	existing, err := s.repo.GetInvoiceByID(ctx, businessID, invoiceID)
+	if err != nil {
+		return err
+	}
+	if domain.IsTerminal(existing.Status) || (status == domain.StatusDraft && existing.Status != domain.StatusDraft) {
+		return domain.ErrInvoiceNotDraft
+	}
 	return s.repo.UpdateInvoiceStatus(ctx, businessID, invoiceID, status)
 }
 
@@ -406,6 +416,9 @@ func (s *Service) RecordPayment(ctx context.Context, businessID int64, input dom
 	inv, err := s.repo.GetInvoiceByID(ctx, businessID, input.InvoiceID)
 	if err != nil {
 		return nil, err
+	}
+	if domain.IsTerminal(inv.Status) {
+		return nil, domain.ErrInvoiceNotDraft
 	}
 
 	paymentDate, err := time.Parse("2006-01-02", input.PaymentDate)
