@@ -7,7 +7,15 @@ export const timeOffRequestSchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
   reason: z.string(),
-  status: z.enum(['Pending', 'Approved', 'Rejected']).catch('Pending'),
+  status: z
+    .string()
+    .transform((s) => {
+      const lower = (s || '').toLowerCase();
+      if (lower === 'approved') return 'Approved';
+      if (lower === 'rejected') return 'Rejected';
+      return 'Pending';
+    })
+    .catch('Pending'),
 });
 
 export const timeOffEntrySchema = z.object({
@@ -18,7 +26,15 @@ export const timeOffEntrySchema = z.object({
   startDate: z.string(),
   endDate: z.string(),
   reason: z.string(),
-  status: z.enum(['Pending', 'Approved', 'Rejected']).catch('Pending'),
+  status: z
+    .string()
+    .transform((s) => {
+      const lower = (s || '').toLowerCase();
+      if (lower === 'approved') return 'Approved';
+      if (lower === 'rejected') return 'Rejected';
+      return 'Pending';
+    })
+    .catch('Pending'),
   note: z.string().optional(),
   createdAt: z.string(),
 });
