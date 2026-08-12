@@ -30,6 +30,7 @@ import {
   useIsMobile,
 } from '../../shared/components/ui';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
+import { formatCurrency } from '../../shared/lib/hrNumberUtils';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
 
 const TABS = ['Labor Cost', 'Swap Shifts', 'Availability', 'Breaks', 'Overtime'] as const;
@@ -149,7 +150,7 @@ const Operations: React.FC = () => {
                   </span>
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>
-                  ${weeklyCost.toLocaleString()}
+                  {formatCurrency(weeklyCost, settings?.currency)}
                 </div>
               </Card>
               <Card>
@@ -165,7 +166,7 @@ const Operations: React.FC = () => {
                   Monthly (est)
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>
-                  ${monthlyCost.toLocaleString()}
+                  {formatCurrency(monthlyCost, settings?.currency)}
                 </div>
               </Card>
               <Card>
@@ -197,7 +198,7 @@ const Operations: React.FC = () => {
                   Blended rate
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>
-                  ${blendedRate.toFixed(2)}/h
+                  {formatCurrency(blendedRate, settings?.currency)}/h
                 </div>
               </Card>
             </div>

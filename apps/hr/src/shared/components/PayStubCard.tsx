@@ -3,21 +3,15 @@ import { DollarSign } from 'lucide-react';
 import { PayrollRow } from '../services/hrApi';
 import { Card, Pill, ACCENT } from './ui';
 import { initials, paletteFor } from './EmployeeCard';
+import { formatCurrency } from '../lib/hrNumberUtils';
 
 interface Props {
   row: PayrollRow;
   onPay?: (id: number) => void;
+  currency?: string;
 }
 
-function formatCurrency(n: number) {
-  return n.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  });
-}
-
-const PayStubCard: React.FC<Props> = ({ row, onPay }) => {
+const PayStubCard: React.FC<Props> = ({ row, onPay, currency }) => {
   const { bg, fg } = paletteFor(row.id);
   const net = row.basePay + row.overtime - row.deductions;
   return (
@@ -54,18 +48,20 @@ const PayStubCard: React.FC<Props> = ({ row, onPay }) => {
         <div>
           <div style={{ color: 'var(--hr-text-muted)' }}>Base</div>
           <div style={{ fontWeight: 600, color: 'var(--hr-text)' }}>
-            {formatCurrency(row.basePay)}
+            {formatCurrency(row.basePay, currency)}
           </div>
         </div>
         <div>
           <div style={{ color: 'var(--hr-text-muted)' }}>Overtime</div>
           <div style={{ fontWeight: 600, color: 'var(--hr-text)' }}>
-            {formatCurrency(row.overtime)}
+            {formatCurrency(row.overtime, currency)}
           </div>
         </div>
         <div>
           <div style={{ color: 'var(--hr-text-muted)' }}>Deductions</div>
-          <div style={{ fontWeight: 600, color: '#ef4444' }}>{formatCurrency(row.deductions)}</div>
+          <div style={{ fontWeight: 600, color: '#ef4444' }}>
+            {formatCurrency(row.deductions, currency)}
+          </div>
         </div>
       </div>
 
@@ -80,7 +76,9 @@ const PayStubCard: React.FC<Props> = ({ row, onPay }) => {
       >
         <div>
           <div style={{ fontSize: 10, color: 'var(--hr-text-muted)' }}>Net pay</div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: ACCENT }}>{formatCurrency(net)}</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: ACCENT }}>
+            {formatCurrency(net, currency)}
+          </div>
         </div>
         {row.status !== 'Paid' && onPay && (
           <button

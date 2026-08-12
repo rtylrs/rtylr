@@ -23,7 +23,11 @@ import {
 import { useGetDashboard, useUpdateWidgetLayout } from './useDashboard';
 import { useHRDashboard } from './useDashboard';
 import { useStaff } from '../staff/useStaff';
-import { useExpiringDocuments, useOvertimeAlerts } from '../../shared/hooks/useHrExtras';
+import {
+  useExpiringDocuments,
+  useOvertimeAlerts,
+  useHrSettings,
+} from '../../shared/hooks/useHrExtras';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import { ErrorBoundary } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
@@ -40,6 +44,7 @@ import PayrollCostWidget from './widgets/PayrollCostWidget';
 import SetupCompletionWidget from './widgets/SetupCompletionWidget';
 import type { DashboardWidget } from '../../shared/schemas/dashboard';
 import { safeRatio, toFiniteNumber } from '@voxire/api';
+import { formatCurrency } from '../../shared/lib/hrNumberUtils';
 
 const ACCENT = 'var(--hr-accent)';
 
@@ -204,6 +209,7 @@ const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const isMobile = useIsMobile(900);
   const config = useHRConfigStore((s) => s.config);
+  const { data: settings } = useHrSettings();
 
   const { data: dashboardResponse, isLoading: widgetsLoading } = useGetDashboard();
   const { data: legacyDashboard, isLoading: statsLoading } = useHRDashboard();
@@ -309,7 +315,7 @@ const Dashboard: React.FC = () => {
     },
     {
       label: t('dashboard.stats.monthlyPayroll'),
-      value: loading ? '…' : `$${dashData.monthlyPayroll.toLocaleString()}`,
+      value: loading ? '…' : formatCurrency(dashData.monthlyPayroll, settings?.currency),
       change: '',
       trend: 'up' as const,
       icon: DollarSign,
