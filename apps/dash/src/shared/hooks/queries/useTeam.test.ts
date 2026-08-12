@@ -6,6 +6,7 @@ import React from 'react';
 const mockMembersClient = vi.hoisted(() => ({
   listTeam: vi.fn(),
   getMember: vi.fn(),
+  updateMember: vi.fn(),
   removeMember: vi.fn(),
 }));
 const mockPermissionsClient = vi.hoisted(() => ({

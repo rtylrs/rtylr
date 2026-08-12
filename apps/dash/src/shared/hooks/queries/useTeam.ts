@@ -127,13 +127,12 @@ export const useInviteMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: InviteMemberPayload) => {
-      // hub.team.invitations.v1.InviteUser has no group_id field - group
-      // assignment at invite time isn't supported by the backend yet.
       return invitationsClient.inviteUser({
         email: payload.email,
         fullName: payload.fullName,
         role: payload.role,
         apps: payload.apps,
+        ...(payload.groupId ? { groupId: String(payload.groupId) } : {}),
         ...(payload.password ? { password: payload.password } : {}),
       });
     },
@@ -149,6 +148,13 @@ export const useUpdateMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<TeamMember> }) => {
+      const nameUpdate = patch.fullName ?? patch.name;
+      if (nameUpdate) {
+        await membersClient.updateMember({
+          userId: id,
+          fullName: nameUpdate,
+        });
+      }
       return permissionsClient.updatePermissions({
         userId: id,
         apps: patch.apps ?? [],
