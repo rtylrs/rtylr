@@ -84,17 +84,18 @@ function isTeamListResult(value: unknown): value is TeamListResult {
   );
 }
 
-// hub.team.members.v1.ListTeam has no pagination support - the whole list is
-// always returned in one call. page/pageSize are UI-only and echoed back.
 export const useTeam = (params: UseTeamParams = {}) => {
   const { page = 1, pageSize = 50 } = params;
   return useQuery<TeamListResult>({
     queryKey: ['team', { page, pageSize }],
     queryFn: async (): Promise<TeamListResult> => {
-      const res = await membersClient.listTeam({});
+      const res = await membersClient.listTeam({ page, pageSize } as any);
+      const allMembers = (res.users ?? []).map(fromApiMember);
+      const total = (res as any).total ?? allMembers.length;
+      const hasMore = page * pageSize < total;
       return {
-        members: (res.users ?? []).map(fromApiMember),
-        hasMore: false,
+        members: allMembers,
+        hasMore,
         page,
         pageSize,
       };

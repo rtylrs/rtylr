@@ -78,21 +78,20 @@ export interface AuditPage {
   pageSize: number;
 }
 
-// useAuditLog is client-side paginated over a single large fetch (see
-// AUDIT_FETCH_LIMIT above) - `total` is capped at that fetch size.
 export const useAuditLog = (params: { page: number; pageSize: number }) => {
   const { page, pageSize } = params;
-  return useQuery<ActivityEntry[], Error, AuditPage>({
-    queryKey: ['audit'],
-    queryFn: async (): Promise<ActivityEntry[]> => {
-      const res = await activityClient.listActivity({ limit: AUDIT_FETCH_LIMIT });
-      return (res.activities ?? []).map(mapEntry);
-    },
-    select: (entries): AuditPage => {
-      const start = Math.max(0, (page - 1) * pageSize);
+  return useQuery<AuditPage>({
+    queryKey: ['audit', { page, pageSize }],
+    queryFn: async (): Promise<AuditPage> => {
+      const res = await activityClient.listActivity({
+        offset: (page - 1) * pageSize,
+        limit: pageSize,
+      } as any);
+      const entries = (res.activities ?? []).map(mapEntry);
+      const total = (res as any).total ?? entries.length;
       return {
-        entries: entries.slice(start, start + pageSize),
-        total: entries.length,
+        entries,
+        total,
         page,
         pageSize,
       };
