@@ -9,9 +9,11 @@ import {
   getProductStockStatus,
   useProducts,
   useDeleteProduct,
+  useCreateProduct,
   type Product,
   type ProductFilters,
 } from './useProducts';
+import { importProducts } from './importProducts';
 import { useCategories } from '../categories/useCategories';
 import ProductCard from '../../shared/components/ProductCard';
 import StockBadge from '../../shared/components/StockBadge';
@@ -71,6 +73,7 @@ const Products: React.FC = () => {
   const hasMore = productResult?.hasMore ?? false;
   const { data: categories = [] } = useCategories();
   const deleteMut = useDeleteProduct();
+  const createProduct = useCreateProduct();
   const categoryNameById = useMemo(() => {
     const map = new Map<string, string>();
     categories.forEach((category) => map.set(String(category.id), category.name ?? ''));
@@ -142,10 +145,17 @@ const Products: React.FC = () => {
         actions={
           <>
             <ImportCSV
-              onImport={(rows) =>
-                toast.info(`${rows.length} rows parsed - bulk import coming soon`)
-              }
-              expectedColumns={['name', 'sku', 'category', 'stock']}
+              onImport={(rows) => importProducts(rows, (input) => createProduct.mutateAsync(input))}
+              expectedColumns={[
+                'name',
+                'sku',
+                'category_id',
+                'supplier_id',
+                'barcode',
+                'description',
+                'unit',
+                'stock_quantity',
+              ]}
             />
             <ExportButton data={exportable} filename="products.csv" />
             <button
