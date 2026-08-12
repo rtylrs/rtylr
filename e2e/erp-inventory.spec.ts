@@ -551,7 +551,7 @@ async function installCategoryStubs(
 
 // ─── Test suites ──────────────────────────────────────────────────────────────
 
-test.describe.skip('ERP inventory flow', () => {
+test.describe('ERP inventory flow', () => {
   // AppGuard redirects to auth when there's no token cookie. A dummy
   // value is enough because we stub /hub/user/v1/users/me - the guard only checks
   // presence, not validity.
@@ -682,7 +682,7 @@ test.describe.skip('ERP inventory flow', () => {
 
 // ─── Suppliers flow ───────────────────────────────────────────────────────────
 
-test.describe.skip('ERP suppliers flow', () => {
+test.describe('ERP suppliers flow', () => {
   test.beforeEach(async ({ context }) => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: ERP_URL }]);
   });
@@ -743,7 +743,7 @@ test.describe.skip('ERP suppliers flow', () => {
 
 // ─── Purchase orders flow ──────────────────────────────────────────────────────
 
-test.describe.skip('ERP purchase orders flow', () => {
+test.describe('ERP purchase orders flow', () => {
   test.beforeEach(async ({ context }) => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: ERP_URL }]);
   });
@@ -818,7 +818,7 @@ test.describe.skip('ERP purchase orders flow', () => {
 
 // ─── Categories flow ───────────────────────────────────────────────────────────
 
-test.describe.skip('ERP categories flow', () => {
+test.describe('ERP categories flow', () => {
   test.beforeEach(async ({ context }) => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: ERP_URL }]);
   });
@@ -869,7 +869,7 @@ test.describe.skip('ERP categories flow', () => {
 
 // ─── Low-stock indicator ───────────────────────────────────────────────────────
 
-test.describe.skip('ERP inventory low-stock indicator', () => {
+test.describe('ERP inventory low-stock indicator', () => {
   test.beforeEach(async ({ context }) => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: ERP_URL }]);
   });
