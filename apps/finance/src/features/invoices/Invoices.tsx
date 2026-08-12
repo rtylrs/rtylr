@@ -136,8 +136,8 @@ const Invoices: React.FC = () => {
           }
         />
       ) : (
-        <div style={{ ...cardStyle, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div style={{ ...cardStyle, overflowX: 'auto' }}>
+          <table style={{ width: '100%', minWidth: 720, borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
                 {['', 'Invoice #', 'Client', 'Amount', 'Status', 'Due Date', 'Actions'].map(
