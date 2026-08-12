@@ -49,6 +49,10 @@ func (a *hrCoreApprovalAdapter) HasPermission(ctx context.Context, ownerID, empl
 	return a.core.HasPermission(ctx, ownerID, employeeID, permissionKey)
 }
 
+func (a *hrCoreApprovalAdapter) HasRole(ctx context.Context, ownerID, employeeID, roleID int64) (bool, error) {
+	return a.core.HasRole(ctx, ownerID, employeeID, roleID)
+}
+
 type Module struct {
 	service *application.Service
 }

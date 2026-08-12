@@ -42,6 +42,7 @@ type Repository interface {
 	UpdateRole(ctx context.Context, ownerID int64, role RoleRecord) (*RoleRecord, error)
 	AssignRole(ctx context.Context, ownerID, employeeID, roleID int64) error
 	HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error)
+	HasRole(ctx context.Context, ownerID, employeeID, roleID int64) (bool, error)
 
 	// Setup wizard
 	GetSetupSteps(ctx context.Context, ownerID int64) ([]SetupStepRecord, error)

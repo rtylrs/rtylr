@@ -503,6 +503,18 @@ func (r *Repository) HasPermission(ctx context.Context, businessID, employeeID i
 	return false, nil
 }
 
+func (r *Repository) HasRole(ctx context.Context, businessID, employeeID, roleID int64) (bool, error) {
+	count, err := r.queries.HasEmployeeRole(ctx, sqlc.HasEmployeeRoleParams{
+		BusinessID: businessID,
+		EmployeeID: employeeID,
+		RoleID:     roleID,
+	})
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
 // --- Setup Wizard ---
 
 func (r *Repository) GetSetupSteps(ctx context.Context, businessID int64) ([]domain.SetupStepRecord, error) {

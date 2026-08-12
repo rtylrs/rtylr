@@ -54,6 +54,10 @@ func (m *Module) HasPermission(ctx context.Context, ownerID, employeeID int64, p
 	return m.service.HasPermission(ctx, ownerID, employeeID, permissionKey)
 }
 
+func (m *Module) HasRole(ctx context.Context, ownerID, employeeID, roleID int64) (bool, error) {
+	return m.service.HasRole(ctx, ownerID, employeeID, roleID)
+}
+
 func (m *Module) GetApprovalChain(ctx context.Context, ownerID int64, requestType string) (*ApprovalChainInfo, error) {
 	chain, err := m.service.GetApprovalChain(ctx, ownerID, requestType)
 	if err != nil {

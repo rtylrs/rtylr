@@ -10,6 +10,8 @@ var (
 	ErrTimesheetNotApproved       = errors.New("not all timesheets are approved for this period")
 	ErrOvertimeConfigMissing      = errors.New("overtime is enabled but overtime rates are not configured")
 	ErrApprovalChainNotConfigured = errors.New("approval chain not configured for payroll")
+	ErrPayrollSelfApproval        = errors.New("payroll run creator cannot approve the same run")
+	ErrPayrollApproverNotAllowed  = errors.New("approver is not allowed by the payroll approval chain")
 	ErrInvalidDateRange           = errors.New("period start must be before period end")
 	ErrPayrollRunNotApproved      = errors.New("payroll run must be approved before export")
 )
