@@ -1,0 +1,46 @@
+-- Unified stock model — Slice 1 (backfill; one-time seed per tenant).
+-- Seeds a default native warehouse per tenant, copies the legacy
+-- erp_products.stock_quantity scalar into per-location stock_levels, and writes
+-- an 'opening' ledger row documenting the migration origin.
+--
+-- The scalar is no longer authoritative for reads. stock_core.ApplyMovementTx
+-- now maintains stock_levels and stock_ledger as the record of on-hand and
+-- keeps the scalar in step by applying the same delta in the same transaction.
+-- ERP reads still select the scalar and are correct because of that sync, but
+-- POS branch-inventory reads select stock_levels.on_hand directly and POS
+-- movement history reads stock_ledger as its only source.
+--
+-- Re-run caution: steps 1 and 3 remain idempotent, but step 2's
+-- ON DUPLICATE KEY UPDATE on_hand = VALUES(on_hand) now overwrites a live,
+-- ledger-maintained balance with the scalar. Because SyncProductStockScalar
+-- accumulates every location's movements into one per-product scalar, that
+-- value is the owner-wide total; re-seeding a tenant that has more than one
+-- location writes the owner-wide total into the default warehouse row and
+-- desynchronizes it from stock_ledger. Treat this as a one-time seed for a
+-- tenant whose stock_levels rows do not exist yet, not as a safe repeat.
+
+-- 1. One default native warehouse per tenant that has products.
+INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_id, name, is_default, is_active)
+SELECT DISTINCT owner_id, 0, 'warehouse', 'native', 0, 'Default Warehouse', TRUE, TRUE
+FROM erp_products
+ON DUPLICATE KEY UPDATE source_id = VALUES(source_id);
+
+-- 2. Seed per-location on_hand from the scalar. NOT safe to re-run once
+--    stock_core is live: see the re-run caution in the header above.
+INSERT INTO stock_levels (owner_id, location_id, product_id, on_hand)
+SELECT p.owner_id, l.id, p.id, p.stock_quantity
+FROM erp_products p
+JOIN stock_locations l
+  ON l.owner_id = p.owner_id AND l.source_table = 'native' AND l.source_id = 0 AND l.kind = 'warehouse'
+ON DUPLICATE KEY UPDATE on_hand = VALUES(on_hand);
+
+-- 3. Opening ledger row per seeded level (only once).
+INSERT INTO stock_ledger
+  (owner_id, location_id, product_id, entry_type, quantity_change, quantity_before, quantity_after, reference_type, channel, note)
+SELECT sl.owner_id, sl.location_id, sl.product_id, 'opening', sl.on_hand, 0, sl.on_hand, 'migration', 'erp', 'opening balance backfill'
+FROM stock_levels sl
+WHERE NOT EXISTS (
+  SELECT 1 FROM stock_ledger g
+  WHERE g.owner_id = sl.owner_id AND g.location_id = sl.location_id
+    AND g.product_id = sl.product_id AND g.entry_type = 'opening'
+);

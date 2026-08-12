@@ -1,0 +1,3 @@
+ALTER TABLE activity_log ADD COLUMN IF NOT EXISTS old_values JSON;
+ALTER TABLE activity_log ADD COLUMN IF NOT EXISTS new_values JSON;
+ALTER TABLE activity_log ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45);
