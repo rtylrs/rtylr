@@ -18,7 +18,7 @@ import (
 // finance.expenses.v1.ListExpensesRequest contract has no pagination fields
 // yet, so the endpoint returns at most one maximum-size page instead of every
 // row.
-const listExpensesPageSize int32 = 100
+const listExpensesPageSize int32 = 500
 
 type ExpensesAPI struct {
 	Service *application.Service
