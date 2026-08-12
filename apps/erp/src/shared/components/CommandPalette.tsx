@@ -141,7 +141,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4"
-      style={{ background: 'rgba(0,0,0,0.55)' }}
+      style={{ background: 'var(--hub-overlay-medium)' }}
       onClick={onClose}
     >
       <div
@@ -193,7 +193,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left"
                   style={{ background: active ? 'var(--hub-hover)' : 'transparent' }}
                 >
-                  <Icon size={14} style={{ color: '#f59e0b' }} />
+                  <Icon size={14} style={{ color: 'var(--erp-accent)' }} />
                   <div className="flex-1 min-w-0">
                     <p
                       className="text-sm font-medium truncate"

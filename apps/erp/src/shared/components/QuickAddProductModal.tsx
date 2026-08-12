@@ -290,7 +290,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       aria-label={t('erp.products.new')}
       data-testid="quick-add-product-modal"
       className="fixed inset-0 z-50 flex items-center justify-center p-6"
-      style={{ background: 'rgba(0,0,0,0.6)' }}
+      style={{ background: 'var(--hub-overlay-heavy)' }}
       onClick={onClose}
     >
       <div
@@ -303,7 +303,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
             className="text-sm font-semibold flex items-center gap-2"
             style={{ color: 'var(--hub-text)' }}
           >
-            <PackagePlus size={14} style={{ color: '#f59e0b' }} />
+            <PackagePlus size={14} style={{ color: 'var(--erp-accent)' }} />
             {t('erp.products.new')}
           </h3>
           <button onClick={onClose} aria-label={t('common.close')}>
@@ -455,7 +455,8 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
           </div>
           {margin !== null && (
             <div className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-              {t('erp.products.fields.margin')}: <span style={{ color: '#22c55e' }}>{margin}%</span>
+              {t('erp.products.fields.margin')}:{' '}
+              <span style={{ color: 'var(--erp-success)' }}>{margin}%</span>
             </div>
           )}
           <div className="grid grid-cols-3 gap-3">
@@ -686,7 +687,11 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
             onClick={handleSubmit}
             disabled={pending}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-            style={{ background: '#f59e0b', color: '#000', opacity: pending ? 0.6 : 1 }}
+            style={{
+              background: 'var(--erp-accent)',
+              color: 'var(--erp-accent-foreground)',
+              opacity: pending ? 0.6 : 1,
+            }}
           >
             {pending
               ? t('erp.products.creating')

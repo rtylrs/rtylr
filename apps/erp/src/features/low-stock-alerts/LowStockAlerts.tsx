@@ -8,7 +8,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
 import { toast } from 'sonner';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const LowStockAlerts: React.FC = () => {
   const { data: items = [], isLoading } = useLowStock();
@@ -36,7 +36,11 @@ const LowStockAlerts: React.FC = () => {
             onClick={handleReorderAll}
             disabled={items.length === 0}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000', opacity: items.length === 0 ? 0.5 : 1 }}
+            style={{
+              background: AMBER,
+              color: 'var(--erp-accent-foreground)',
+              opacity: items.length === 0 ? 0.5 : 1,
+            }}
           >
             <RefreshCw size={14} /> Reorder All
           </button>
@@ -73,10 +77,15 @@ const LowStockAlerts: React.FC = () => {
                 <div
                   className="h-9 w-9 rounded-lg flex items-center justify-center"
                   style={{
-                    background: critical ? 'rgba(248,113,113,0.12)' : 'rgba(245,158,11,0.12)',
+                    background: critical
+                      ? 'color-mix(in srgb, var(--erp-danger) 12%, transparent)'
+                      : 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
                   }}
                 >
-                  <AlertTriangle size={14} style={{ color: critical ? '#f87171' : AMBER }} />
+                  <AlertTriangle
+                    size={14}
+                    style={{ color: critical ? 'var(--erp-danger)' : AMBER }}
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
@@ -87,7 +96,10 @@ const LowStockAlerts: React.FC = () => {
                   </p>
                 </div>
                 <div className="text-right pr-3">
-                  <p className="text-sm font-bold" style={{ color: critical ? '#f87171' : AMBER }}>
+                  <p
+                    className="text-sm font-bold"
+                    style={{ color: critical ? 'var(--erp-danger)' : AMBER }}
+                  >
                     {item.stockQuantity} {item.unit}
                   </p>
                   <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
@@ -97,7 +109,10 @@ const LowStockAlerts: React.FC = () => {
                 <button
                   onClick={() => handleReorder(item.productName ?? '')}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                  style={{ background: 'rgba(245,158,11,0.15)', color: AMBER }}
+                  style={{
+                    background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)',
+                    color: AMBER,
+                  }}
                 >
                   <ShoppingCart size={12} /> Reorder
                 </button>

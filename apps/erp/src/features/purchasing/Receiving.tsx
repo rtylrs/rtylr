@@ -11,7 +11,7 @@ import { Skeleton } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
 import { toast } from 'sonner';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 interface ReceiveLine {
   sku: string;
@@ -143,8 +143,11 @@ const Receiving: React.FC = () => {
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full min-w-[48px] text-center"
                     style={{
-                      background: variance === 0 ? 'rgba(16,185,129,0.1)' : 'rgba(248,113,113,0.1)',
-                      color: variance === 0 ? '#10b981' : '#f87171',
+                      background:
+                        variance === 0
+                          ? 'color-mix(in srgb, var(--erp-success) 10%, transparent)'
+                          : 'color-mix(in srgb, var(--erp-danger) 10%, transparent)',
+                      color: variance === 0 ? 'var(--erp-success)' : 'var(--erp-danger)',
                     }}
                   >
                     {variance === 0 ? 'OK' : `${variance > 0 ? '+' : ''}${variance}`}
@@ -156,7 +159,7 @@ const Receiving: React.FC = () => {
           <button
             onClick={completeReceipt}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Check size={14} /> Mark Received
           </button>
@@ -179,7 +182,8 @@ const Receiving: React.FC = () => {
                 border: '1px solid var(--hub-border)',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.4)';
+                (e.currentTarget as HTMLElement).style.borderColor =
+                  'color-mix(in srgb, var(--erp-accent) 40%, transparent)';
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
@@ -187,7 +191,7 @@ const Receiving: React.FC = () => {
             >
               <div
                 className="h-9 w-9 rounded-lg flex items-center justify-center"
-                style={{ background: 'rgba(245,158,11,0.12)' }}
+                style={{ background: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)' }}
               >
                 <PackageCheck size={14} style={{ color: AMBER }} />
               </div>
@@ -201,7 +205,10 @@ const Receiving: React.FC = () => {
               </div>
               <span
                 className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                style={{ background: 'rgba(245,158,11,0.1)', color: AMBER }}
+                style={{
+                  background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
+                  color: AMBER,
+                }}
               >
                 {o.status}
               </span>

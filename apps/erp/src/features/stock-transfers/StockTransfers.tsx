@@ -12,7 +12,7 @@ import { formatDate } from '../../shared/lib/format';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -27,9 +27,21 @@ const inputStyle: React.CSSProperties = {
 };
 
 function statusConfig(status: string): { color: string; bg: string } {
-  if (status === 'received') return { color: '#10b981', bg: 'rgba(16,185,129,0.12)' };
-  if (status === 'in_transit') return { color: AMBER, bg: 'rgba(245,158,11,0.12)' };
-  if (status === 'cancelled') return { color: '#f87171', bg: 'rgba(248,113,113,0.12)' };
+  if (status === 'received')
+    return {
+      color: 'var(--erp-success)',
+      bg: 'color-mix(in srgb, var(--erp-success) 12%, transparent)',
+    };
+  if (status === 'in_transit')
+    return {
+      color: AMBER,
+      bg: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
+    };
+  if (status === 'cancelled')
+    return {
+      color: 'var(--erp-danger)',
+      bg: 'color-mix(in srgb, var(--erp-danger) 12%, transparent)',
+    };
   return { color: 'var(--hub-text-dim)', bg: 'var(--hub-hover)' };
 }
 
@@ -89,7 +101,7 @@ const StockTransfers: React.FC = () => {
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} /> New Transfer
           </button>
@@ -175,7 +187,7 @@ const StockTransfers: React.FC = () => {
       {showCreate && (
         <div
           className="fixed inset-0 flex items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          style={{ background: 'var(--hub-overlay)', zIndex: 9999 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowCreate(false);
           }}
@@ -229,7 +241,7 @@ const StockTransfers: React.FC = () => {
                 onClick={handleCreate}
                 disabled={createMut.isPending || !fromWarehouseId || !toWarehouseId}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: '#000' }}
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create Draft'}
               </button>

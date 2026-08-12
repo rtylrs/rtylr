@@ -166,7 +166,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
       {isActive && (
         <span
           className="relative ml-auto h-1 w-1 rounded-full shrink-0"
-          style={{ background: '#f59e0b' }}
+          style={{ background: 'var(--erp-accent)' }}
         />
       )}
     </Link>
@@ -415,7 +415,7 @@ const DefaultLayout: React.FC = () => {
                   alt={userName}
                   size="sm"
                   className="h-6 w-6"
-                  style={{ background: 'rgba(245,158,11,0.15)' }}
+                  style={{ background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)' }}
                 />
                 <div className="flex flex-col items-start min-w-0 flex-1">
                   <span
@@ -474,11 +474,13 @@ const DefaultLayout: React.FC = () => {
                           className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
                           style={{
                             background:
-                              theme === value ? 'rgba(245,158,11,0.12)' : 'var(--hub-hover)',
-                            color: theme === value ? '#f59e0b' : 'var(--hub-text-muted)',
+                              theme === value
+                                ? 'color-mix(in srgb, var(--erp-accent) 12%, transparent)'
+                                : 'var(--hub-hover)',
+                            color: theme === value ? 'var(--erp-accent)' : 'var(--hub-text-muted)',
                             border:
                               theme === value
-                                ? '1px solid rgba(245,158,11,0.3)'
+                                ? '1px solid color-mix(in srgb, var(--erp-accent) 30%, transparent)'
                                 : '1px solid transparent',
                           }}
                         >
@@ -494,9 +496,10 @@ const DefaultLayout: React.FC = () => {
                     <button
                       onClick={handleLogout}
                       className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
-                      style={{ color: '#ef4444' }}
+                      style={{ color: 'var(--erp-danger-strong)' }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)';
+                        (e.currentTarget as HTMLElement).style.background =
+                          'color-mix(in srgb, var(--erp-danger-strong) 8%, transparent)';
                       }}
                       onMouseLeave={(e) => {
                         (e.currentTarget as HTMLElement).style.background = 'transparent';

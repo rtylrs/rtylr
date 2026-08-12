@@ -19,7 +19,7 @@ import { formatCurrency } from '../../shared/lib/format';
 import { useCategories } from '../categories/useCategories';
 import { useBrands } from '../brands/useBrands';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 // Placeholder chart data - will be replaced with real API data
 const stockHistory: number[] = [];
@@ -56,7 +56,11 @@ const MiniLineChart: React.FC<{ data: number[]; color: string; height?: number }
         vectorEffect="non-scaling-stroke"
         points={points}
       />
-      <polyline fill={`${color}22`} stroke="none" points={`0,100 ${points} 100,100`} />
+      <polyline
+        fill={`color-mix(in srgb, ${color} 13%, transparent)`}
+        stroke="none"
+        points={`0,100 ${points} 100,100`}
+      />
     </svg>
   );
 };
@@ -115,7 +119,11 @@ const ProductDetail: React.FC = () => {
           <Link
             to="/inventory"
             className="px-3 py-2 rounded-lg text-xs font-semibold"
-            style={{ background: AMBER, color: '#000', textDecoration: 'none' }}
+            style={{
+              background: AMBER,
+              color: 'var(--erp-accent-foreground)',
+              textDecoration: 'none',
+            }}
           >
             {t('erp.products.detail.backToInventory')}
           </Link>
@@ -177,8 +185,8 @@ const ProductDetail: React.FC = () => {
             disabled={deleteProduct.isPending}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
             style={{
-              color: '#f87171',
-              border: '1px solid rgba(248,113,113,0.3)',
+              color: 'var(--erp-danger)',
+              border: '1px solid color-mix(in srgb, var(--erp-danger) 30%, transparent)',
               opacity: deleteProduct.isPending ? 0.6 : 1,
             }}
           >
@@ -218,7 +226,10 @@ const ProductDetail: React.FC = () => {
                   {product.brandId !== '0' && (
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                      style={{ background: 'rgba(245,158,11,0.1)', color: AMBER }}
+                      style={{
+                        background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
+                        color: AMBER,
+                      }}
                     >
                       {brandNameById.get(product.brandId ?? '') || `Brand #${product.brandId}`}
                     </span>
@@ -264,7 +275,7 @@ const ProductDetail: React.FC = () => {
                 >
                   Margin
                 </p>
-                <p className="text-lg font-bold mt-0.5" style={{ color: '#10b981' }}>
+                <p className="text-lg font-bold mt-0.5" style={{ color: 'var(--erp-success)' }}>
                   {(() => {
                     const salePrice = product.salePrice ?? 0;
                     const costPrice = product.costPrice ?? 0;
@@ -322,12 +333,12 @@ const ProductDetail: React.FC = () => {
                 className="text-sm font-semibold flex items-center gap-2"
                 style={{ color: 'var(--hub-text)' }}
               >
-                <TrendingUp size={14} style={{ color: '#10b981' }} />
+                <TrendingUp size={14} style={{ color: 'var(--erp-success)' }} />
                 Sales History (7 days)
               </h3>
             </div>
             {salesHistory.length > 0 ? (
-              <MiniLineChart data={salesHistory} color="#10b981" height={80} />
+              <MiniLineChart data={salesHistory} color="var(--erp-success)" height={80} />
             ) : (
               <p className="text-xs py-4 text-center" style={{ color: 'var(--hub-text-dim)' }}>
                 No sales history data yet.

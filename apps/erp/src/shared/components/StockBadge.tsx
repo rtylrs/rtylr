@@ -7,7 +7,7 @@ interface StockBadgeProps {
   showLabel?: boolean;
 }
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 export function getStockLevel(
   stock: number,
@@ -28,10 +28,26 @@ const StockBadge: React.FC<StockBadgeProps> = ({
 }) => {
   const level = getStockLevel(stock, lowStock, excessThreshold);
   const cfg = {
-    out: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', label: 'Out of Stock' },
-    low: { color: AMBER, bg: 'rgba(245,158,11,0.12)', label: 'Low Stock' },
-    good: { color: '#10b981', bg: 'rgba(16,185,129,0.12)', label: 'In Stock' },
-    excess: { color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', label: 'Excess' },
+    out: {
+      color: 'var(--erp-danger)',
+      bg: 'color-mix(in srgb, var(--erp-danger) 12%, transparent)',
+      label: 'Out of Stock',
+    },
+    low: {
+      color: AMBER,
+      bg: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
+      label: 'Low Stock',
+    },
+    good: {
+      color: 'var(--erp-success)',
+      bg: 'color-mix(in srgb, var(--erp-success) 12%, transparent)',
+      label: 'In Stock',
+    },
+    excess: {
+      color: 'var(--erp-info)',
+      bg: 'color-mix(in srgb, var(--erp-info) 12%, transparent)',
+      label: 'Excess',
+    },
   }[level];
 
   return (

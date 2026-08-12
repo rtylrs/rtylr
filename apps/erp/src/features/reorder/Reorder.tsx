@@ -7,7 +7,7 @@ import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const Reorder: React.FC = () => {
   const { data: suggestions = [], isLoading } = useReorderSuggestions();
@@ -28,7 +28,7 @@ const Reorder: React.FC = () => {
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{
               background: AMBER,
-              color: '#000',
+              color: 'var(--erp-accent-foreground)',
               opacity: 0.5,
               cursor: 'not-allowed',
             }}
@@ -40,7 +40,10 @@ const Reorder: React.FC = () => {
 
       <div
         className="rounded-xl p-4 flex items-center gap-3"
-        style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}
+        style={{
+          background: 'color-mix(in srgb, var(--erp-accent) 8%, transparent)',
+          border: '1px solid color-mix(in srgb, var(--erp-accent) 20%, transparent)',
+        }}
       >
         <Sparkles size={16} style={{ color: AMBER }} />
         <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
@@ -76,7 +79,7 @@ const Reorder: React.FC = () => {
           suggestions.map((s) => {
             const confColor =
               s.confidence === 'high'
-                ? '#10b981'
+                ? 'var(--erp-success)'
                 : s.confidence === 'medium'
                   ? AMBER
                   : 'var(--hub-text-dim)';
@@ -99,7 +102,9 @@ const Reorder: React.FC = () => {
                 </div>
                 <span
                   className="text-sm font-semibold"
-                  style={{ color: s.currentStock === 0 ? '#f87171' : 'var(--hub-text)' }}
+                  style={{
+                    color: s.currentStock === 0 ? 'var(--erp-danger)' : 'var(--hub-text)',
+                  }}
                 >
                   {s.currentStock}
                 </span>
@@ -118,7 +123,10 @@ const Reorder: React.FC = () => {
                 <span>
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                    style={{ background: `${confColor}20`, color: confColor }}
+                    style={{
+                      background: `color-mix(in srgb, ${confColor} 13%, transparent)`,
+                      color: confColor,
+                    }}
                   >
                     {s.confidence}
                   </span>
@@ -127,7 +135,7 @@ const Reorder: React.FC = () => {
                   disabled
                   className="text-[10px] font-semibold px-2 py-1 rounded-md"
                   style={{
-                    background: 'rgba(245,158,11,0.15)',
+                    background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)',
                     color: AMBER,
                     cursor: 'not-allowed',
                     opacity: 0.65,

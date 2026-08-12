@@ -23,7 +23,7 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ open, o
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-6"
-      style={{ background: 'rgba(0,0,0,0.6)' }}
+      style={{ background: 'var(--hub-overlay-heavy)' }}
       onClick={onClose}
     >
       <div
@@ -36,7 +36,7 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ open, o
             className="text-sm font-semibold flex items-center gap-2"
             style={{ color: 'var(--hub-text)' }}
           >
-            <Keyboard size={14} style={{ color: '#f59e0b' }} />
+            <Keyboard size={14} style={{ color: 'var(--erp-accent)' }} />
             Keyboard Shortcuts
           </h3>
           <button onClick={onClose}>

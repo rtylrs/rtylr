@@ -76,7 +76,7 @@ const TaxRateSelector: React.FC<TaxRateSelectorProps> = ({
         </div>
         <div className="flex justify-between text-sm font-semibold">
           <span style={{ color: 'var(--hub-text)' }}>Total</span>
-          <span style={{ color: '#f59e0b' }}>{formatCurrency(grossPrice)}</span>
+          <span style={{ color: 'var(--erp-accent)' }}>{formatCurrency(grossPrice)}</span>
         </div>
       </div>
     </div>

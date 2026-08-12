@@ -24,7 +24,7 @@ import ExportButton from '../../shared/components/ExportButton';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 type DisplayStatus = 'Draft' | 'Sent' | 'Approved' | 'Received' | 'Partial' | 'Cancelled';
 
@@ -55,11 +55,31 @@ const statusConfig: Record<
   }
 > = {
   Draft: { color: 'var(--hub-text-muted)', bg: 'var(--hub-hover)', icon: FileText },
-  Partial: { color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', icon: ClockIcon },
-  Approved: { color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', icon: ThumbsUp },
-  Sent: { color: AMBER, bg: 'rgba(245,158,11,0.1)', icon: Send },
-  Received: { color: '#10b981', bg: 'rgba(16,185,129,0.1)', icon: CheckCircle },
-  Cancelled: { color: '#f87171', bg: 'rgba(248,113,113,0.12)', icon: Trash2 },
+  Partial: {
+    color: 'var(--erp-purple)',
+    bg: 'color-mix(in srgb, var(--erp-purple) 12%, transparent)',
+    icon: ClockIcon,
+  },
+  Approved: {
+    color: 'var(--erp-info)',
+    bg: 'color-mix(in srgb, var(--erp-info) 12%, transparent)',
+    icon: ThumbsUp,
+  },
+  Sent: {
+    color: AMBER,
+    bg: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
+    icon: Send,
+  },
+  Received: {
+    color: 'var(--erp-success)',
+    bg: 'color-mix(in srgb, var(--erp-success) 10%, transparent)',
+    icon: CheckCircle,
+  },
+  Cancelled: {
+    color: 'var(--erp-danger)',
+    bg: 'color-mix(in srgb, var(--erp-danger) 12%, transparent)',
+    icon: Trash2,
+  },
 };
 
 const containerVariants: Variants = {
@@ -207,7 +227,7 @@ const Purchasing: React.FC = () => {
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} />
             New Order
@@ -228,7 +248,9 @@ const Purchasing: React.FC = () => {
               className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
               style={{
                 background: 'var(--hub-card)',
-                border: active ? '1px solid rgba(245,158,11,0.5)' : '1px solid var(--hub-border)',
+                border: active
+                  ? '1px solid color-mix(in srgb, var(--erp-accent) 50%, transparent)'
+                  : '1px solid var(--hub-border)',
               }}
             >
               <span
@@ -325,7 +347,10 @@ const Purchasing: React.FC = () => {
                         <button
                           onClick={() => handleApprove(order.id ?? '')}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
-                          style={{ background: 'rgba(96,165,250,0.15)', color: '#60a5fa' }}
+                          style={{
+                            background: 'color-mix(in srgb, var(--erp-info) 15%, transparent)',
+                            color: 'var(--erp-info)',
+                          }}
                         >
                           Approve
                         </button>
@@ -334,7 +359,10 @@ const Purchasing: React.FC = () => {
                         <button
                           onClick={() => handleSend(order.id ?? '')}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
-                          style={{ background: 'rgba(245,158,11,0.15)', color: AMBER }}
+                          style={{
+                            background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)',
+                            color: AMBER,
+                          }}
                         >
                           Send
                         </button>
@@ -355,7 +383,7 @@ const Purchasing: React.FC = () => {
       {showCreate && (
         <div
           className="fixed inset-0 flex items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          style={{ background: 'var(--hub-overlay)', zIndex: 9999 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowCreate(false);
           }}
@@ -519,7 +547,7 @@ const Purchasing: React.FC = () => {
                 onClick={handleCreatePO}
                 disabled={createMut.isPending || !newSupplierId || !newPoNumber.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: '#000' }}
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create Draft'}
               </button>

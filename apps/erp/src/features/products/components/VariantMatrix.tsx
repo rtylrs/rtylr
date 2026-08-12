@@ -11,7 +11,7 @@ import {
   type Variant,
 } from '../useVariants';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '6px 10px',
@@ -163,7 +163,7 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
             disabled={updateMut.isPending}
             aria-label={t('erp.products.variants.save')}
             className="h-7 px-2 rounded-lg text-[11px] font-semibold disabled:opacity-40 flex items-center gap-1"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Check size={12} /> {t('erp.products.variants.save')}
           </button>
@@ -175,7 +175,10 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
               disabled={deleteMut.isPending}
               aria-label={t('common.delete')}
               className="h-7 px-2 rounded-lg text-[11px] font-semibold disabled:opacity-40"
-              style={{ background: 'rgba(248,113,113,0.15)', color: '#f87171' }}
+              style={{
+                background: 'color-mix(in srgb, var(--erp-danger) 15%, transparent)',
+                color: 'var(--erp-danger)',
+              }}
             >
               {t('common.delete')}
             </button>
@@ -193,7 +196,10 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
             onClick={() => setConfirming(true)}
             aria-label={t('common.delete')}
             className="h-7 w-7 rounded-lg flex items-center justify-center"
-            style={{ color: '#f87171', border: '1px solid rgba(248,113,113,0.3)' }}
+            style={{
+              color: 'var(--erp-danger)',
+              border: '1px solid color-mix(in srgb, var(--erp-danger) 30%, transparent)',
+            }}
           >
             <Trash2 size={12} />
           </button>
@@ -367,7 +373,10 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
                 onClick={() => removeGroup(idx)}
                 aria-label={t('common.remove')}
                 className="h-8 w-8 shrink-0 rounded-lg flex items-center justify-center"
-                style={{ color: '#f87171', border: '1px solid rgba(248,113,113,0.3)' }}
+                style={{
+                  color: 'var(--erp-danger)',
+                  border: '1px solid color-mix(in srgb, var(--erp-danger) 30%, transparent)',
+                }}
               >
                 <X size={14} />
               </button>
@@ -418,7 +427,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
             <button
               onClick={generate}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-              style={{ background: AMBER, color: '#000' }}
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
             >
               <Wand2 size={13} />{' '}
               {t('erp.products.variants.generateBtn', { count: newCombos.length })}
@@ -488,7 +497,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
             onClick={createAll}
             disabled={createMut.isPending}
             className="px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             {createMut.isPending
               ? t('erp.products.variants.creating')

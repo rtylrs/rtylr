@@ -9,7 +9,7 @@ import { Skeleton } from '../../shared/components/Skeleton';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { toast } from 'sonner';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -66,7 +66,7 @@ const Brands: React.FC = () => {
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} /> New Brand
           </button>
@@ -89,7 +89,8 @@ const Brands: React.FC = () => {
               className="rounded-xl p-4 transition-colors"
               style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.3)';
+                (e.currentTarget as HTMLElement).style.borderColor =
+                  'color-mix(in srgb, var(--erp-accent) 30%, transparent)';
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
@@ -98,7 +99,10 @@ const Brands: React.FC = () => {
               <div className="flex items-center gap-3 mb-3">
                 <div
                   className="h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm"
-                  style={{ background: 'rgba(245,158,11,0.12)', color: AMBER }}
+                  style={{
+                    background: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
+                    color: AMBER,
+                  }}
                 >
                   {(b.name ?? '')
                     .split(' ')
@@ -122,9 +126,10 @@ const Brands: React.FC = () => {
                   aria-label="Delete brand"
                   onClick={() => setConfirmDeleteId(b.id ?? null)}
                   className="h-7 w-7 rounded-lg flex items-center justify-center"
-                  style={{ color: '#f87171' }}
+                  style={{ color: 'var(--erp-danger)' }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)';
+                    (e.currentTarget as HTMLElement).style.background =
+                      'color-mix(in srgb, var(--erp-danger) 10%, transparent)';
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background = 'transparent';
@@ -166,7 +171,7 @@ const Brands: React.FC = () => {
       {showCreate && (
         <div
           className="fixed inset-0 flex items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          style={{ background: 'var(--hub-overlay)', zIndex: 9999 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowCreate(false);
           }}
@@ -202,7 +207,7 @@ const Brands: React.FC = () => {
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: '#000' }}
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>
