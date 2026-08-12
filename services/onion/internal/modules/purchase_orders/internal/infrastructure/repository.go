@@ -400,6 +400,14 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		}); err != nil {
 			return err
 		}
+
+		if _, err = tx.ExecContext(ctx, `
+			INSERT INTO inventory_cost_layers
+			(owner_id, business_id, product_id, location_id, quantity_remaining, unit_cost, reference_id, reference_type)
+			VALUES (?, ?, ?, ?, ?, ?, ?, 'purchase_order')`,
+			businessID, businessID, it.ProductID, locID, qty, it.UnitCost, poID); err != nil {
+			return err
+		}
 	}
 
 	if err = qtx.MarkPurchaseOrderItemsReceived(ctx, poID); err != nil {

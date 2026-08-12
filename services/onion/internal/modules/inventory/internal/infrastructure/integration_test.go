@@ -150,6 +150,14 @@ func TestGetValuation_ReturnsAtLeastOneRow(t *testing.T) {
 	if len(items) == 0 {
 		t.Fatal("expected at least one valuation row, got none")
 	}
+	for _, item := range items {
+		if item.WarehouseName == "" {
+			t.Error("expected valuation row to include a warehouse name")
+		}
+		if item.TotalValue != item.TotalCost {
+			t.Errorf("valuation total_value=%.2f, want cost-based total_cost=%.2f", item.TotalValue, item.TotalCost)
+		}
+	}
 }
 
 func TestGetValuation_ProductHasPositiveCost(t *testing.T) {
