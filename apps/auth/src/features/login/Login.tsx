@@ -70,6 +70,7 @@ const Login: React.FC = (): React.JSX.Element => {
   }, [redirectParam]);
 
   const handleSubmit = (): void => {
+    if (emailError) return;
     loginMutation.mutate({ email, password }, { onSuccess: () => void redirectTo() });
   };
 

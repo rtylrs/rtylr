@@ -105,19 +105,11 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
   };
 
   const handleDeny = (): void => {
-    let u: URL;
-    try {
-      u = new URL(params.redirectUri);
-    } catch {
-      setError('Invalid redirect URI in authorization request.');
-      return;
-    }
-    const host = u.hostname;
-    const allowed = host === 'localhost' || host.endsWith('.rtylr.com') || host === 'rtylr.com';
-    if (!allowed) {
+    if (!params.redirectUri || !isAllowedOAuthRedirect(params.redirectUri)) {
       setError('Redirect URI is not on an allowed domain.');
       return;
     }
+    const u = new URL(params.redirectUri);
     u.searchParams.set('error', 'access_denied');
     u.searchParams.set('error_description', 'User denied access');
     if (params.state) u.searchParams.set('state', params.state);
