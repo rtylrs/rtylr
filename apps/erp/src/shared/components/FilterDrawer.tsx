@@ -22,6 +22,8 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
 }) => {
   const titleId = useId();
   const dialogRef = useDialogFocus<HTMLElement>({ open, onClose });
+  const isRTL = typeof document !== 'undefined' && document.documentElement.dir === 'rtl';
+  const drawerOffset = isRTL ? -320 : 320;
 
   return (
     <AnimatePresence>
@@ -37,17 +39,21 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
             aria-hidden="true"
           />
           <motion.aside
-            initial={{ x: 320 }}
+            initial={{ x: drawerOffset }}
             animate={{ x: 0 }}
-            exit={{ x: 320 }}
+            exit={{ x: drawerOffset }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}
             tabIndex={-1}
-            className="fixed right-0 top-0 bottom-0 w-80 z-50 flex flex-col"
-            style={{ background: 'var(--hub-card)', borderLeft: '1px solid var(--hub-border)' }}
+            className="fixed top-0 bottom-0 w-80 z-50 flex flex-col"
+            style={{
+              background: 'var(--hub-card)',
+              borderInlineStart: '1px solid var(--hub-border)',
+              insetInlineEnd: 0,
+            }}
           >
             <div
               className="flex items-center justify-between px-4 py-3"

@@ -46,7 +46,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
           className="flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium disabled:opacity-30"
           style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
         >
-          <ChevronLeft size={12} />
+          <ChevronLeft size={12} className="erp-directional-icon" />
           Prev
         </button>
         <button
@@ -57,7 +57,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
           style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
         >
           Next
-          <ChevronRight size={12} />
+          <ChevronRight size={12} className="erp-directional-icon" />
         </button>
       </div>
     </div>

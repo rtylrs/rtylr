@@ -116,3 +116,9 @@
   --accent-color: #4583c4;
   --primary-font: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
 }
+
+/* Directional affordances should follow the language direction without
+ * requiring each control to choose a separate icon. */
+[dir='rtl'] .erp-directional-icon {
+  transform: scaleX(-1);
+}

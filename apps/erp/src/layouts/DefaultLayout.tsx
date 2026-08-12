@@ -165,8 +165,8 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
       <span className="relative">{label}</span>
       {isActive && (
         <span
-          className="relative ml-auto h-1 w-1 rounded-full shrink-0"
-          style={{ background: 'var(--erp-accent)' }}
+          className="relative h-1 w-1 rounded-full shrink-0"
+          style={{ background: 'var(--erp-accent)', marginInlineStart: 'auto' }}
         />
       )}
     </Link>
@@ -314,10 +314,11 @@ const DefaultLayout: React.FC = () => {
       <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
         {/* Mobile top bar */}
         <div
-          className="fixed top-0 left-0 right-0 z-40 flex md:hidden items-center justify-between h-11 px-4 shrink-0"
+          className="fixed top-0 z-40 flex md:hidden items-center justify-between h-11 px-4 shrink-0"
           style={{
             background: 'var(--hub-surface)',
             borderBottom: '1px solid var(--hub-border)',
+            insetInline: 0,
           }}
         >
           <button
@@ -349,12 +350,13 @@ const DefaultLayout: React.FC = () => {
           id="erp-sidebar"
           aria-label="Primary navigation"
           className={cn(
-            sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden',
+            sidebarOpen ? 'fixed inset-y-0 z-50 flex' : 'hidden',
             'md:flex w-56 flex-col shrink-0 overflow-hidden'
           )}
           style={{
             background: 'var(--hub-surface)',
-            borderRight: '1px solid var(--hub-border)',
+            borderInlineEnd: '1px solid var(--hub-border)',
+            insetInlineStart: sidebarOpen ? 0 : undefined,
           }}
         >
           <div
@@ -429,15 +431,15 @@ const DefaultLayout: React.FC = () => {
                 />
                 <div className="flex flex-col items-start min-w-0 flex-1">
                   <span
-                    className="text-xs font-medium truncate w-full text-left"
-                    style={{ color: 'var(--hub-text)' }}
+                    className="text-xs font-medium truncate w-full"
+                    style={{ color: 'var(--hub-text)', textAlign: 'start' }}
                   >
                     {userName}
                   </span>
                   {userEmail && (
                     <span
-                      className="text-[10px] truncate w-full text-left"
-                      style={{ color: 'var(--hub-text-muted)' }}
+                      className="text-[10px] truncate w-full"
+                      style={{ color: 'var(--hub-text-muted)', textAlign: 'start' }}
                     >
                       {userEmail}
                     </span>
@@ -445,7 +447,7 @@ const DefaultLayout: React.FC = () => {
                 </div>
                 <ChevronRight
                   size={12}
-                  className="shrink-0"
+                  className="erp-directional-icon shrink-0"
                   style={{ color: 'var(--hub-text-dim)' }}
                 />
               </button>
@@ -457,11 +459,12 @@ const DefaultLayout: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 4 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute bottom-full left-0 right-0 mb-1 rounded-xl p-2 z-50"
+                    className="absolute bottom-full mb-1 rounded-xl p-2 z-50"
                     style={{
                       background: 'var(--hub-card)',
                       border: '1px solid var(--hub-border)',
                       boxShadow: 'var(--hub-shadow)',
+                      insetInline: 0,
                     }}
                   >
                     <p
