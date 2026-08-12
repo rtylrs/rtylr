@@ -14,5 +14,7 @@ export function signOut(appId: AppId): void {
   removeCookie('token', { domain: getDefaultCookieDomain() });
   removeCookie('token');
   useUserStore.getState().logout();
-  window.location.href = `${resolveAuthUrl()}?redirect=${appId}`;
+  const u = new URL(resolveAuthUrl());
+  u.searchParams.set('redirect', appId);
+  window.location.href = u.toString();
 }

@@ -1,5 +1,5 @@
-import React from 'react';
-import { APP_URLS } from '@voxire/config';
+import React, { useEffect } from 'react';
+import { resolveAuthUrl } from '@voxire/config';
 import { getCookie } from '../cookies';
 import type { AppId } from '../types';
 
@@ -11,8 +11,16 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ appId, children }: ProtectedRouteProps) {
   const token = getCookie('token');
 
+  useEffect(() => {
+    if (!token) {
+      const baseUrl = resolveAuthUrl();
+      const u = new URL(baseUrl);
+      u.searchParams.set('redirect', appId);
+      window.location.href = u.toString();
+    }
+  }, [token, appId]);
+
   if (!token) {
-    window.location.href = `${APP_URLS.auth}?redirect=${appId}`;
     return null;
   }
 
