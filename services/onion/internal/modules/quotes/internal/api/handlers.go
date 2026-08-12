@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/application"
@@ -115,13 +114,17 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) error {
-	if strings.TrimSpace(req.CustomerName) == "" {
-		return onekiterrors.New(http.StatusBadRequest, "customerName is required")
-	}
-	if req.ValidUntil != "" {
-		if _, err := time.Parse("2006-01-02", req.ValidUntil); err != nil {
-			return onekiterrors.New(http.StatusBadRequest, "validUntil must be in YYYY-MM-DD format")
-		}
+	err := domain.ValidateQuoteInput(domain.QuoteInput{
+		CustomerName: req.CustomerName,
+		Status:       req.Status,
+		Subtotal:     req.Subtotal,
+		Tax:          req.Tax,
+		Discount:     req.Discount,
+		Total:        req.Total,
+		ValidUntil:   req.ValidUntil,
+	})
+	if err != nil {
+		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 	return nil
 }
@@ -181,13 +184,17 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) error {
 	if req.ID == 0 {
 		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
-	if strings.TrimSpace(req.CustomerName) == "" {
-		return onekiterrors.New(http.StatusBadRequest, "customerName is required")
-	}
-	if req.ValidUntil != "" {
-		if _, err := time.Parse("2006-01-02", req.ValidUntil); err != nil {
-			return onekiterrors.New(http.StatusBadRequest, "validUntil must be in YYYY-MM-DD format")
-		}
+	err := domain.ValidateQuoteInput(domain.QuoteInput{
+		CustomerName: req.CustomerName,
+		Status:       req.Status,
+		Subtotal:     req.Subtotal,
+		Tax:          req.Tax,
+		Discount:     req.Discount,
+		Total:        req.Total,
+		ValidUntil:   req.ValidUntil,
+	})
+	if err != nil {
+		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 	return nil
 }
