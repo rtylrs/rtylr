@@ -47,7 +47,7 @@ const CashFlowChart: React.FC<CashFlowChartProps> = ({ data, height = 200 }) => 
         />
       ))}
       <path d={inflowPath} stroke={ACCENT} strokeWidth={2} fill="none" />
-      <path d={outflowPath} stroke="#ef4444" strokeWidth={2} fill="none" />
+      <path d={outflowPath} stroke="var(--finance-danger)" strokeWidth={2} fill="none" />
       {data.map((d, i) => {
         const x = pad + i * step;
         const y1 = pad + chartH - (d.inflow / max) * chartH;
@@ -55,7 +55,7 @@ const CashFlowChart: React.FC<CashFlowChartProps> = ({ data, height = 200 }) => 
         return (
           <g key={i}>
             <circle cx={x} cy={y1} r={4} fill={ACCENT} />
-            <circle cx={x} cy={y2} r={4} fill="#ef4444" />
+            <circle cx={x} cy={y2} r={4} fill="var(--finance-danger)" />
             <text x={x} y={height - 6} textAnchor="middle" fontSize={10} fill="var(--hub-text-dim)">
               {d.month}
             </text>
@@ -67,7 +67,7 @@ const CashFlowChart: React.FC<CashFlowChartProps> = ({ data, height = 200 }) => 
         <text x={pad + 8} y={pad - 8} fontSize={10} fill="var(--hub-text-muted)">
           Inflow
         </text>
-        <circle cx={pad + 64} cy={pad - 12} r={4} fill="#ef4444" />
+        <circle cx={pad + 64} cy={pad - 12} r={4} fill="var(--finance-danger)" />
         <text x={pad + 72} y={pad - 8} fontSize={10} fill="var(--hub-text-muted)">
           Outflow
         </text>

@@ -21,10 +21,10 @@ import {
 } from '../../shared/lib/tokens';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  unpaid: { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
-  paid: { background: 'rgba(16,185,129,0.12)', color: '#10b981' },
-  overdue: { background: 'rgba(239,68,68,0.12)', color: '#ef4444' },
-  scheduled: { background: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
+  unpaid: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
+  paid: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
+  overdue: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
+  scheduled: { background: 'var(--finance-info-soft)', color: 'var(--finance-info)' },
 };
 
 interface NewBillForm {
@@ -244,9 +244,7 @@ const Bills: React.FC = () => {
                       padding: '12px 16px',
                       fontSize: 12,
                       color:
-                        b.status === 'overdue'
-                          ? 'var(--finance-danger, #ef4444)'
-                          : 'var(--hub-text-muted)',
+                        b.status === 'overdue' ? 'var(--finance-danger)' : 'var(--hub-text-muted)',
                     }}
                   >
                     {b.dueDate}

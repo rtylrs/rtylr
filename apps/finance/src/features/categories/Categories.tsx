@@ -69,7 +69,7 @@ const Categories: React.FC = () => {
                   <span
                     style={{
                       fontSize: 11,
-                      color: over ? 'var(--finance-error, #ef4444)' : 'var(--hub-text-dim)',
+                      color: over ? 'var(--finance-error)' : 'var(--hub-text-dim)',
                     }}
                   >
                     {pct}%
@@ -100,7 +100,7 @@ const Categories: React.FC = () => {
                     style={{
                       width: `${pct}%`,
                       height: '100%',
-                      background: over ? 'var(--finance-error, #ef4444)' : c.color,
+                      background: over ? 'var(--finance-error)' : c.color,
                       transition: 'width 0.3s',
                     }}
                   />

@@ -39,7 +39,7 @@ import {
 } from 'lucide-react';
 import GlobalSearch from '../shared/components/GlobalSearch';
 
-const ACCENT = 'var(--finance-accent, #10b981)';
+const ACCENT = 'var(--finance-accent)';
 
 interface NavItem {
   label: string;
@@ -445,8 +445,7 @@ const DefaultLayout: React.FC = () => {
                   size="sm"
                   className="h-6 w-6"
                   style={{
-                    background:
-                      'color-mix(in srgb, var(--finance-accent, #10b981) 15%, transparent)',
+                    background: 'color-mix(in srgb, var(--finance-accent) 15%, transparent)',
                   }}
                 />
                 <div className="flex flex-col items-start min-w-0 flex-1">
@@ -507,7 +506,7 @@ const DefaultLayout: React.FC = () => {
                           style={{
                             background:
                               theme === value
-                                ? 'color-mix(in srgb, var(--finance-accent, #10b981) 12%, transparent)'
+                                ? 'color-mix(in srgb, var(--finance-accent) 12%, transparent)'
                                 : 'var(--hub-hover)',
                             color: theme === value ? ACCENT : 'var(--hub-text-muted)',
                             border:
@@ -529,10 +528,10 @@ const DefaultLayout: React.FC = () => {
                       type="button"
                       onClick={() => signOut('finance')}
                       className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
-                      style={{ color: 'var(--hr-error, #ef4444)' }}
+                      style={{ color: 'var(--finance-danger)' }}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLElement).style.background =
-                          'color-mix(in srgb, var(--hr-error, #ef4444) 8%, transparent)';
+                          'color-mix(in srgb, var(--finance-danger) 8%, transparent)';
                       }}
                       onMouseLeave={(e) => {
                         (e.currentTarget as HTMLElement).style.background = 'transparent';

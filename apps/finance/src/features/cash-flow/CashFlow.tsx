@@ -46,7 +46,9 @@ const CashFlow: React.FC = () => {
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Total outflow</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#ef4444', marginTop: 6 }}>
+          <div
+            style={{ fontSize: 22, fontWeight: 700, color: 'var(--finance-danger)', marginTop: 6 }}
+          >
             <MoneyDisplay amount={totalOut} />
           </div>
         </div>
@@ -56,7 +58,7 @@ const CashFlow: React.FC = () => {
             style={{
               fontSize: 22,
               fontWeight: 700,
-              color: net >= 0 ? ACCENT : '#ef4444',
+              color: net >= 0 ? ACCENT : 'var(--finance-danger)',
               marginTop: 6,
             }}
           >

@@ -67,7 +67,7 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
             zIndex: 20,
             maxHeight: 260,
             overflowY: 'auto',
-            boxShadow: '0 10px 28px rgba(0,0,0,0.3)',
+            boxShadow: '0 10px 28px var(--finance-overlay-light)',
           }}
         >
           <div

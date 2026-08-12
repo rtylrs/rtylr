@@ -244,8 +244,10 @@ const RecurringInvoices: React.FC = () => {
                         fontWeight: 600,
                         padding: '3px 10px',
                         borderRadius: 20,
-                        background: r.isActive ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)',
-                        color: r.isActive ? ACCENT : '#f59e0b',
+                        background: r.isActive
+                          ? 'var(--finance-accent-soft)'
+                          : 'var(--finance-warning-soft)',
+                        color: r.isActive ? ACCENT : 'var(--finance-warning)',
                       }}
                     >
                       {r.isActive ? 'Active' : 'Paused'}

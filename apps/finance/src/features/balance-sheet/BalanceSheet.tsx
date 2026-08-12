@@ -121,8 +121,8 @@ const BalanceSheet: React.FC = () => {
         }}
       >
         <Stat label="Total Assets" value={totalAssets} />
-        <Stat label="Total Liabilities" value={totalLiab} color="#ef4444" />
-        <Stat label="Total Equity" value={totalEquity} color="#8b5cf6" />
+        <Stat label="Total Liabilities" value={totalLiab} color="var(--finance-danger)" />
+        <Stat label="Total Equity" value={totalEquity} color="var(--finance-purple)" />
         <Stat label="Check" value={totalAssets - (totalLiab + totalEquity)} color={ACCENT} />
       </div>
     </motion.div>

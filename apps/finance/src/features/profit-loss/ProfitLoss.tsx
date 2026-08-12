@@ -28,7 +28,7 @@ const fmt = (n: number) =>
 
 const pct = (n: number, of: number) => (of === 0 ? '0.0%' : `${((n / of) * 100).toFixed(1)}%`);
 
-const ACCENT = 'var(--finance-accent, #10b981)';
+const ACCENT = 'var(--finance-accent)';
 
 const cardStyle: React.CSSProperties = {
   background: 'var(--hub-card)',
@@ -61,9 +61,9 @@ const PLRow: React.FC<RowProps> = ({
   large,
 }) => {
   const color = positive
-    ? 'var(--finance-accent, #10b981)'
+    ? 'var(--finance-accent)'
     : negative
-      ? 'var(--finance-danger, #ef4444)'
+      ? 'var(--finance-danger)'
       : 'var(--hub-text)';
   return (
     <div
@@ -141,25 +141,25 @@ const ProfitLoss: React.FC = () => {
     {
       label: 'Revenue',
       value: data.revenue,
-      color: 'var(--finance-accent, #10b981)',
+      color: 'var(--finance-accent)',
       Icon: TrendingUp,
     },
     {
       label: 'Gross Profit',
       value: grossProfit,
-      color: 'var(--finance-info, #3b82f6)',
+      color: 'var(--finance-info)',
       Icon: TrendingUp,
     },
     {
       label: 'Net Profit',
       value: netProfit,
-      color: netProfit >= 0 ? 'var(--finance-accent, #10b981)' : 'var(--finance-danger, #ef4444)',
+      color: netProfit >= 0 ? 'var(--finance-accent)' : 'var(--finance-danger)',
       Icon: netProfit >= 0 ? TrendingUp : TrendingDown,
     },
     {
       label: 'Net Margin',
       value: parseFloat(netMargin),
-      color: 'var(--finance-warning, #f59e0b)',
+      color: 'var(--finance-warning)',
       Icon: TrendingUp,
       isMeta: true,
       display: netMargin,
@@ -221,10 +221,9 @@ const ProfitLoss: React.FC = () => {
               gap: 6,
               padding: '7px 14px',
               borderRadius: 8,
-              border:
-                '1px solid color-mix(in srgb, var(--finance-warning, #f59e0b) 30%, transparent)',
-              background: 'color-mix(in srgb, var(--finance-warning, #f59e0b) 8%, transparent)',
-              color: 'var(--finance-warning, #f59e0b)',
+              border: '1px solid color-mix(in srgb, var(--finance-warning) 30%, transparent)',
+              background: 'color-mix(in srgb, var(--finance-warning) 8%, transparent)',
+              color: 'var(--finance-warning)',
               fontSize: 13,
               cursor: 'pointer',
               fontWeight: 600,
@@ -260,7 +259,7 @@ const ProfitLoss: React.FC = () => {
               fontWeight: 500,
               cursor: 'pointer',
               background: period === p ? ACCENT : 'transparent',
-              color: period === p ? '#fff' : 'var(--hub-text-muted)',
+              color: period === p ? 'var(--finance-white)' : 'var(--hub-text-muted)',
               transition: 'all 0.15s',
             }}
           >
@@ -415,7 +414,7 @@ const ProfitLoss: React.FC = () => {
               style={{
                 fontSize: 12,
                 fontWeight: 600,
-                color: 'var(--finance-danger, #ef4444)',
+                color: 'var(--finance-danger)',
                 fontVariantNumeric: 'tabular-nums',
               }}
             >

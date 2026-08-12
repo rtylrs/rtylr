@@ -7,19 +7,19 @@ import { safeRatio, toFiniteNumber } from '@voxire/api';
 import { Expense } from '../../shared/services/financeApi';
 import { useExpenses, useExpenseCategories } from './useExpenses';
 
-const ACCENT = '#10b981';
+const ACCENT = 'var(--finance-accent)';
 
 const categoryColors: Record<string, string> = {
-  'Food & Bev': '#f59e0b',
-  Utilities: '#3b82f6',
-  Rent: '#8b5cf6',
-  Staff: '#10b981',
-  Marketing: '#f43f5e',
-  Other: '#71717a',
+  'Food & Bev': 'var(--finance-warning)',
+  Utilities: 'var(--finance-info)',
+  Rent: 'var(--finance-purple)',
+  Staff: 'var(--finance-accent)',
+  Marketing: 'var(--finance-rose)',
+  Other: 'var(--finance-neutral)',
 };
 
 function getCategoryColor(cat: string): string {
-  return categoryColors[cat] ?? '#6b7280';
+  return categoryColors[cat] ?? 'var(--finance-gray)';
 }
 
 type CategoryNameLookup = (categoryId?: number | null) => string;
@@ -161,7 +161,7 @@ const Expenses: React.FC = () => {
             padding: '8px 16px',
             borderRadius: 8,
             background: ACCENT,
-            color: '#fff',
+            color: 'var(--finance-white)',
             border: 'none',
             fontSize: 13,
             fontWeight: 600,
@@ -256,7 +256,7 @@ const Expenses: React.FC = () => {
                     padding: '11px 16px',
                     fontSize: 13,
                     fontWeight: 600,
-                    color: '#ef4444',
+                    color: 'var(--finance-danger)',
                     fontVariantNumeric: 'tabular-nums',
                   }}
                 >
@@ -270,7 +270,7 @@ const Expenses: React.FC = () => {
                         alignItems: 'center',
                         gap: 4,
                         fontSize: 11,
-                        color: '#10b981',
+                        color: 'var(--finance-accent)',
                       }}
                     >
                       <Check size={12} /> Yes
@@ -312,7 +312,7 @@ const Expenses: React.FC = () => {
                   padding: '10px 16px',
                   fontSize: 14,
                   fontWeight: 700,
-                  color: '#ef4444',
+                  color: 'var(--finance-danger)',
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
