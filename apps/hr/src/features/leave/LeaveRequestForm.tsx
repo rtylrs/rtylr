@@ -76,16 +76,30 @@ const LeaveRequestForm = (): React.JSX.Element => {
     setErrors({});
     const { leaveTypeId, startDate, endDate, notes } = result.data;
 
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     if (startDate < today || endDate < today) {
       toast.error(t('leave.form.errorPastDate'));
       return;
     }
 
-    const approvedRequests = (existingRequests ?? []).filter((r) => r.status === 'approved');
-    const hasOverlap = approvedRequests.some(
-      (r) => startDate <= (r.endDate ?? '') && endDate >= (r.startDate ?? '')
-    );
+    const requestedDays = daysBetween(startDate, endDate);
+    if (selectedBalance && requestedDays > selectedBalance.remainingDays) {
+      toast.error(
+        `Requested ${requestedDays} day(s) exceeds remaining balance of ${selectedBalance.remainingDays} day(s)`
+      );
+      return;
+    }
+
+    const activeRequests = (existingRequests ?? []).filter((r) => {
+      const st = (r.status || '').toLowerCase();
+      return st === 'approved' || st === 'pending';
+    });
+    const hasOverlap = activeRequests.some((r) => {
+      const rStart = r.startDate || '';
+      const rEnd = r.endDate || r.startDate || '';
+      return startDate <= rEnd && endDate >= rStart;
+    });
     if (hasOverlap) {
       toast.error(t('leave.form.errorOverlap'));
       return;

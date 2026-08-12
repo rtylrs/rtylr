@@ -18,17 +18,22 @@ import ActiveTimer from './ActiveTimer';
 import TimeEntryForm from './TimeEntryForm';
 import FlowImportButton from './FlowImportButton';
 
+function toLocalDateString(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function getWeekRange(): { start: string; end: string } {
   const now = new Date();
   const day = now.getDay();
   const diff = day === 0 ? 6 : day - 1; // Monday-based
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - diff);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diff);
+  const sunday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diff + 6);
   return {
-    start: monday.toISOString().slice(0, 10),
-    end: sunday.toISOString().slice(0, 10),
+    start: toLocalDateString(monday),
+    end: toLocalDateString(sunday),
   };
 }
 
