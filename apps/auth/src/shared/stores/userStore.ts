@@ -61,7 +61,7 @@ export const useUserStore = create<UserStore>()(
       getToken: () => getCookie('token'),
     }),
     {
-      name: 'rtylr:voxire:user',
+      name: 'rtylr:auth:app:user',
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
         role: state.role,
