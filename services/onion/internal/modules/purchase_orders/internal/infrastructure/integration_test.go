@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
@@ -432,6 +433,66 @@ func TestUpdatePurchaseOrderStatus_SetsReceived(t *testing.T) {
 	}
 	if status != string(domain.POStatusReceived) {
 		t.Errorf("expected status=received, got %q", status)
+	}
+}
+
+func TestUpdatePurchaseOrderStatus_ReceivedIsTerminal(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreatePurchaseOrder(ctx, testutil.OwnerID, domain.PurchaseOrderInput{
+		SupplierID: fixtureSupplierID,
+		PONumber:   "PO-RECEIVED-TERMINAL-001",
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 5201, QuantityOrdered: 1, UnitCost: 5.0},
+		},
+	}, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CreatePurchaseOrder: %v", err)
+	}
+
+	if err := repo.UpdatePurchaseOrderStatus(ctx, testutil.OwnerID, id, string(domain.POStatusReceived)); err != nil {
+		t.Fatalf("UpdatePurchaseOrderStatus(received): %v", err)
+	}
+
+	err = repo.UpdatePurchaseOrderStatus(ctx, testutil.OwnerID, id, string(domain.POStatusDraft))
+	if !errors.Is(err, domain.ErrPurchaseOrderAlreadyReceived) {
+		t.Fatalf("reopening received purchase order error = %v, want ErrPurchaseOrderAlreadyReceived", err)
+	}
+
+	status, err := repo.GetPurchaseOrderStatus(ctx, testutil.OwnerID, id)
+	if err != nil {
+		t.Fatalf("GetPurchaseOrderStatus: %v", err)
+	}
+	if status != string(domain.POStatusReceived) {
+		t.Fatalf("status after rejected reopen = %q, want received", status)
+	}
+}
+
+func TestApprovePurchaseOrder_ReceivedIsTerminal(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreatePurchaseOrder(ctx, testutil.OwnerID, domain.PurchaseOrderInput{
+		SupplierID: fixtureSupplierID,
+		PONumber:   "PO-RECEIVED-TERMINAL-002",
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 5201, QuantityOrdered: 1, UnitCost: 5.0},
+		},
+	}, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CreatePurchaseOrder: %v", err)
+	}
+
+	if err := repo.UpdatePurchaseOrderStatus(ctx, testutil.OwnerID, id, string(domain.POStatusReceived)); err != nil {
+		t.Fatalf("UpdatePurchaseOrderStatus(received): %v", err)
+	}
+
+	err = repo.ApprovePurchaseOrder(ctx, testutil.OwnerID, id)
+	if !errors.Is(err, domain.ErrPurchaseOrderAlreadyReceived) {
+		t.Fatalf("approving received purchase order error = %v, want ErrPurchaseOrderAlreadyReceived", err)
 	}
 }
 
