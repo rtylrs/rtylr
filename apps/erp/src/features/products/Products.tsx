@@ -6,6 +6,7 @@ import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown, Package } 
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
 import {
+  fetchAllProducts,
   getProductStockStatus,
   useProducts,
   useDeleteProduct,
@@ -32,6 +33,29 @@ import { Link } from '@tanstack/react-router';
 
 const AMBER = 'var(--erp-accent)';
 
+function filterAndSortProducts(rawProducts: Product[], filters: ProductFilters): Product[] {
+  let out = rawProducts;
+
+  if (filters.status) {
+    out = out.filter((product) => getProductStockStatus(product) === filters.status);
+  }
+
+  if (filters.sort) {
+    const direction = filters.sortDir === 'desc' ? -1 : 1;
+    out = [...out].sort((a, b) => {
+      if (filters.sort === 'name') return (a.name ?? '').localeCompare(b.name ?? '') * direction;
+      if (filters.sort === 'stock')
+        return ((a.stockQuantity ?? 0) - (b.stockQuantity ?? 0)) * direction;
+      if (filters.sort === 'price') return ((a.salePrice ?? 0) - (b.salePrice ?? 0)) * direction;
+      if (filters.sort === 'category')
+        return (a.categoryId ?? '').localeCompare(b.categoryId ?? '') * direction;
+      return 0;
+    });
+  }
+
+  return out;
+}
+
 const Products: React.FC = () => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
@@ -46,29 +70,10 @@ const Products: React.FC = () => {
 
   const mergedFilters: ProductFilters = { ...filters, search: debouncedSearch, page, pageSize };
   const { data: productResult, isLoading } = useProducts(mergedFilters);
-  const rawProducts = productResult?.products ?? [];
-  const products = useMemo(() => {
-    let out = rawProducts;
-
-    if (filters.status) {
-      out = out.filter((product) => getProductStockStatus(product) === filters.status);
-    }
-
-    if (filters.sort) {
-      const direction = filters.sortDir === 'desc' ? -1 : 1;
-      out = [...out].sort((a, b) => {
-        if (filters.sort === 'name') return (a.name ?? '').localeCompare(b.name ?? '') * direction;
-        if (filters.sort === 'stock')
-          return ((a.stockQuantity ?? 0) - (b.stockQuantity ?? 0)) * direction;
-        if (filters.sort === 'price') return ((a.salePrice ?? 0) - (b.salePrice ?? 0)) * direction;
-        if (filters.sort === 'category')
-          return (a.categoryId ?? '').localeCompare(b.categoryId ?? '') * direction;
-        return 0;
-      });
-    }
-
-    return out;
-  }, [rawProducts, filters.status, filters.sort, filters.sortDir]);
+  const products = useMemo(
+    () => filterAndSortProducts(productResult?.products ?? [], filters),
+    [productResult?.products, filters]
+  );
   const totalProducts = productResult?.total ?? products.length;
   const hasMore = productResult?.hasMore ?? false;
   const { data: categories = [] } = useCategories();
@@ -116,9 +121,9 @@ const Products: React.FC = () => {
     }
   };
 
-  const exportable = useMemo(
-    () =>
-      products.map((p) => ({
+  const toExportRows = useCallback(
+    (items: Product[]) =>
+      items.map((p) => ({
         id: p.id,
         name: p.name,
         sku: p.sku,
@@ -129,8 +134,16 @@ const Products: React.FC = () => {
         salePrice: p.salePrice,
         status: getProductStockStatus(p),
       })),
-    [products, categoryNameFor]
+    [categoryNameFor]
   );
+  const exportable = useMemo(() => toExportRows(products), [products, toExportRows]);
+  const getAllExportable = useCallback(async () => {
+    const allProducts = await fetchAllProducts({
+      search: debouncedSearch,
+      categoryId: filters.categoryId,
+    });
+    return toExportRows(filterAndSortProducts(allProducts, filters));
+  }, [debouncedSearch, filters, toExportRows]);
 
   return (
     <motion.div
@@ -157,7 +170,7 @@ const Products: React.FC = () => {
                 'stock_quantity',
               ]}
             />
-            <ExportButton data={exportable} filename="products.csv" />
+            <ExportButton data={exportable} getData={getAllExportable} filename="products.csv" />
             <button
               data-testid="products-new-button"
               onClick={() => setShowAdd(true)}

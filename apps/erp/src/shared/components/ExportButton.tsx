@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 interface ExportButtonProps {
   data: Array<Record<string, any>>;
+  getData?: () => Promise<Array<Record<string, any>>>;
   filename?: string;
   columns?: string[];
 }
@@ -24,21 +25,38 @@ function toCSV(data: Array<Record<string, any>>, columns?: string[]): string {
   return [header, ...rows].join('\n');
 }
 
-const ExportButton: React.FC<ExportButtonProps> = ({ data, filename = 'export.csv', columns }) => {
-  const handleExport = () => {
-    if (data.length === 0) {
-      toast.error('No data to export');
-      return;
+const ExportButton: React.FC<ExportButtonProps> = ({
+  data,
+  getData,
+  filename = 'export.csv',
+  columns,
+}) => {
+  const [isExporting, setIsExporting] = React.useState(false);
+
+  const handleExport = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+
+    try {
+      const exportData = getData ? await getData() : data;
+      if (exportData.length === 0) {
+        toast.error('No data to export');
+        return;
+      }
+      const csv = toCSV(exportData, columns);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success(`Exported ${exportData.length} rows`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to export data');
+    } finally {
+      setIsExporting(false);
     }
-    const csv = toCSV(data, columns);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
-    toast.success(`Exported ${data.length} rows`);
   };
 
   return (
@@ -56,9 +74,10 @@ const ExportButton: React.FC<ExportButtonProps> = ({ data, filename = 'export.cs
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.color = 'var(--hub-text-muted)';
       }}
+      disabled={isExporting}
     >
       <Download size={12} />
-      Export CSV
+      {isExporting ? 'Exporting…' : 'Export CSV'}
     </button>
   );
 };
