@@ -17,7 +17,15 @@ import {
   useUpdatePurchaseOrderStatus,
   useCreatePurchaseOrder,
   fetchAllPurchaseOrders,
+  useAllPurchaseOrders,
 } from './usePurchaseOrders';
+import {
+  displayPurchaseOrderStatus,
+  getPurchaseOrderStatusCounts,
+  purchaseOrderStatusFilter,
+  type PurchaseOrderFilter,
+  type PurchaseOrderStatusCard,
+} from './purchaseOrderStatusUtils';
 import { useSuppliers } from '../suppliers/useSuppliers';
 import { useProducts } from '../products/useProducts';
 import PrintPOButton from '../../shared/components/PrintPOButton';
@@ -27,25 +35,7 @@ import { toast } from 'sonner';
 
 const AMBER = 'var(--erp-accent)';
 
-type DisplayStatus = 'Draft' | 'Sent' | 'Approved' | 'Received' | 'Partial' | 'Cancelled';
-
-function displayStatus(status: string): DisplayStatus {
-  switch (status) {
-    case 'sent':
-      return 'Sent';
-    case 'approved':
-      return 'Approved';
-    case 'received':
-      return 'Received';
-    case 'partial':
-      return 'Partial';
-    case 'cancelled':
-      return 'Cancelled';
-    case 'draft':
-    default:
-      return 'Draft';
-  }
-}
+type DisplayStatus = ReturnType<typeof displayPurchaseOrderStatus>;
 
 const statusConfig: Record<
   DisplayStatus,
@@ -112,7 +102,10 @@ const SkeletonTableRow: React.FC = () => (
 
 const Purchasing: React.FC = () => {
   const [page, setPage] = useState(1);
-  const { data: ordersResult, isLoading } = usePurchaseOrders({ page });
+  const [filter, setFilter] = useState<PurchaseOrderFilter>('All');
+  const status = purchaseOrderStatusFilter(filter);
+  const { data: ordersResult, isLoading } = usePurchaseOrders({ page, status });
+  const { data: allOrders = [], isLoading: isLoadingAllOrders } = useAllPurchaseOrders();
   const orders = ordersResult?.purchaseOrders ?? [];
   const hasMore = ordersResult?.hasMore ?? false;
   const approveMut = useApprovePurchaseOrder();
@@ -122,7 +115,6 @@ const Purchasing: React.FC = () => {
   const suppliers = supplierResult?.suppliers ?? [];
   const { data: productResult } = useProducts();
   const products = productResult?.products ?? [];
-  const [filter, setFilter] = useState<DisplayStatus | 'All'>('All');
   const [showCreate, setShowCreate] = useState(false);
   const [newSupplierId, setNewSupplierId] = useState('');
   const [newPoNumber, setNewPoNumber] = useState('');
@@ -140,10 +132,7 @@ const Purchasing: React.FC = () => {
     [supplierResult?.suppliers]
   );
 
-  const filteredOrders =
-    filter === 'All'
-      ? orders
-      : orders.filter((order) => displayStatus(order.status ?? '') === filter);
+  const filteredOrders = orders;
 
   const toExportRows = useCallback(
     (purchaseOrders: PurchaseOrder[]) =>
@@ -154,26 +143,17 @@ const Purchasing: React.FC = () => {
         expectedDelivery: o.expectedDelivery ?? '',
         items: (o.items ?? []).length,
         total: o.total,
-        status: displayStatus(o.status ?? ''),
+        status: displayPurchaseOrderStatus(o.status ?? ''),
       })),
     [supplierNameById]
   );
   const exportable = useMemo(() => toExportRows(filteredOrders), [filteredOrders, toExportRows]);
   const getAllExportable = useCallback(async () => {
-    const allOrders = await fetchAllPurchaseOrders();
-    const filtered =
-      filter === 'All'
-        ? allOrders
-        : allOrders.filter((order) => displayStatus(order.status ?? '') === filter);
-    return toExportRows(filtered);
-  }, [filter, toExportRows]);
+    const allFilteredOrders = await fetchAllPurchaseOrders({ status });
+    return toExportRows(allFilteredOrders);
+  }, [status, toExportRows]);
 
-  const statusCounts: Record<string, number> = {
-    Draft: orders.filter((o) => displayStatus(o.status ?? '') === 'Draft').length,
-    Sent: orders.filter((o) => displayStatus(o.status ?? '') === 'Sent').length,
-    Approved: orders.filter((o) => displayStatus(o.status ?? '') === 'Approved').length,
-    Received: orders.filter((o) => displayStatus(o.status ?? '') === 'Received').length,
-  };
+  const statusCounts = getPurchaseOrderStatusCounts(allOrders);
 
   const handleApprove = (id: string): void => {
     approveMut.mutate(id, {
@@ -257,40 +237,45 @@ const Purchasing: React.FC = () => {
       </motion.div>
 
       <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {(Object.entries(statusCounts) as [DisplayStatus, number][]).map(([status, count]) => {
-          const sc = statusConfig[status];
-          if (!sc) return null;
-          const Icon = sc.icon;
-          const active = filter === status;
-          return (
-            <button
-              key={status}
-              onClick={() => setFilter(active ? 'All' : status)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
-              style={{
-                background: 'var(--hub-card)',
-                border: active
-                  ? '1px solid color-mix(in srgb, var(--erp-accent) 50%, transparent)'
-                  : '1px solid var(--hub-border)',
-              }}
-            >
-              <span
-                className="flex items-center justify-center h-8 w-8 rounded-lg shrink-0"
-                style={{ background: sc.bg }}
+        {(Object.entries(statusCounts) as [PurchaseOrderStatusCard, number][]).map(
+          ([status, count]) => {
+            const sc = statusConfig[status];
+            if (!sc) return null;
+            const Icon = sc.icon;
+            const active = filter === status;
+            return (
+              <button
+                key={status}
+                onClick={() => {
+                  setFilter(active ? 'All' : status);
+                  setPage(1);
+                }}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left"
+                style={{
+                  background: 'var(--hub-card)',
+                  border: active
+                    ? '1px solid color-mix(in srgb, var(--erp-accent) 50%, transparent)'
+                    : '1px solid var(--hub-border)',
+                }}
               >
-                <Icon size={15} style={{ color: sc.color }} />
-              </span>
-              <div>
-                <p className="text-lg font-bold" style={{ color: 'var(--hub-text)' }}>
-                  {isLoading ? '…' : count}
-                </p>
-                <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                  {status}
-                </p>
-              </div>
-            </button>
-          );
-        })}
+                <span
+                  className="flex items-center justify-center h-8 w-8 rounded-lg shrink-0"
+                  style={{ background: sc.bg }}
+                >
+                  <Icon size={15} style={{ color: sc.color }} />
+                </span>
+                <div>
+                  <p className="text-lg font-bold" style={{ color: 'var(--hub-text)' }}>
+                    {isLoadingAllOrders ? '…' : count}
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+                    {status}
+                  </p>
+                </div>
+              </button>
+            );
+          }
+        )}
       </motion.div>
 
       <motion.div
@@ -320,7 +305,7 @@ const Purchasing: React.FC = () => {
           {isLoading
             ? Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} />)
             : filteredOrders.map((order) => {
-                const status = displayStatus(order.status ?? '');
+                const status = displayPurchaseOrderStatus(order.status ?? '');
                 const sc = statusConfig[status] || statusConfig['Draft'];
                 return (
                   <div
