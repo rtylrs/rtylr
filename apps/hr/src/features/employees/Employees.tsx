@@ -30,7 +30,11 @@ const Employees = (): React.JSX.Element => {
   const parentRef = useRef<HTMLDivElement>(null);
 
   const filteredEmployees = searchTerm
-    ? employees.filter((e) => (e.jobTitle ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
+    ? employees.filter((e) =>
+        `${e.fullName ?? ''} ${e.email ?? ''} ${e.jobTitle ?? ''} ${e.department ?? ''}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
     : employees;
 
   // Count must track the filtered list, otherwise searching leaves the
