@@ -65,8 +65,10 @@ function formatDate(date: Date): string {
 const Shifts = (): React.JSX.Element => {
   const { t } = useTranslation();
   const isMobile = useIsMobile(900);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [selectedDay, setSelectedDay] = useState(todayIdx);
   const week = useMemo(() => getWeekRange(weekOffset), [weekOffset]);
-  const { data: fetchedShifts, isLoading } = useShifts({ weekStart: week.start });
+  const { data: fetchedShifts, isLoading } = useShifts();
   const shifts: Shift[] = fetchedShifts ?? [];
   const days = DAY_KEYS.map((k) => t(`timesheets.days.${k}`));
 

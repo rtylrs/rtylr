@@ -31,7 +31,9 @@ const Employees = (): React.JSX.Element => {
 
   const filteredEmployees = searchTerm
     ? employees.filter((e) =>
-        `${e.fullName ?? ''} ${e.email ?? ''} ${e.jobTitle ?? ''} ${e.department ?? ''}`
+        Object.values(e)
+          .filter((value): value is string => typeof value === 'string')
+          .join(' ')
           .toLowerCase()
           .includes(searchTerm.toLowerCase())
       )
