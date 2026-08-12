@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Button } from '@voxire/components';
-import { ASSETS, APP_URLS } from '@voxire/config';
+import { ASSETS, APP_URLS, resolveAuthUrl } from '@voxire/config';
 import { ManageConsentLink } from '@voxire/consent';
 import React from 'react';
 import { motion } from 'motion/react';
@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
   const isDemoPage = router.pathname === '/demo';
 
   const handleSignupClick = () => {
-    navigateExternal(`${APP_URLS.auth}/register`);
+    navigateExternal(`${resolveAuthUrl()}/register`);
   };
 
   const handleBookDemoClick = () => {

@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import Link from 'next/link';
 
 import { Button } from '@voxire/components';
-import { APP_URLS, ASSETS } from '@voxire/config';
+import { APP_URLS, ASSETS, resolveAuthUrl } from '@voxire/config';
 import { selectLanguage } from '../../../../services/i18next';
 import { getCookie } from '../../../../lib/cookies';
 import { navigateExternal } from '../../../../lib/navigation';
@@ -179,11 +179,11 @@ const HeaderDesktop: React.FC = () => {
   }, []);
 
   const handleSignupClick = useCallback(() => {
-    navigateExternal(`${APP_URLS.auth}/register`);
+    navigateExternal(`${resolveAuthUrl()}/register`);
   }, []);
 
   const handleLoginClick = useCallback(() => {
-    navigateExternal(APP_URLS.auth);
+    navigateExternal(resolveAuthUrl());
   }, []);
 
   const closeDropdowns = useCallback(() => {

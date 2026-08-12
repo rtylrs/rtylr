@@ -8,10 +8,12 @@ export interface SetCookieOptions {
   sameSite?: CookieSameSite;
 }
 
-const isBrowser = typeof document !== 'undefined' && typeof window !== 'undefined';
+function isBrowser(): boolean {
+  return typeof document !== 'undefined' && typeof window !== 'undefined';
+}
 
 export function getCookie(name: string): string | null {
-  if (!isBrowser) return null;
+  if (!isBrowser()) return null;
   const nameEQ = `${name}=`;
   const parts = document.cookie.split('; ');
   for (const part of parts) {
@@ -23,13 +25,13 @@ export function getCookie(name: string): string | null {
 }
 
 export function setCookie(name: string, value: string, options: SetCookieOptions = {}): void {
-  if (!isBrowser) return;
+  if (!isBrowser()) return;
 
   const {
     days,
     path = '/',
     domain,
-    secure = process.env.NODE_ENV === 'production',
+    secure = options.secure ?? (typeof window !== 'undefined' ? window.location.protocol === 'https:' : false),
     sameSite = 'lax',
   } = options;
 
@@ -50,7 +52,7 @@ export function setCookie(name: string, value: string, options: SetCookieOptions
 }
 
 export function removeCookie(name: string, options: { path?: string; domain?: string } = {}): void {
-  if (!isBrowser) return;
+  if (!isBrowser()) return;
   const { path = '/', domain } = options;
   let cookie = `${name}=; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=${path}`;
   if (domain) cookie += `; Domain=${domain}`;
@@ -58,7 +60,7 @@ export function removeCookie(name: string, options: { path?: string; domain?: st
 }
 
 export function getDefaultCookieDomain(): string | undefined {
-  if (!isBrowser) return undefined;
+  if (!isBrowser()) return undefined;
   const hostname = window.location.hostname.toLowerCase();
 
   const isLocalhost = hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
