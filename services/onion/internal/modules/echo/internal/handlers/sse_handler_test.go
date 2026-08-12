@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	echoapp "github.com/voxire/onion/internal/modules/echo/internal/application"
 	"github.com/voxire/onion/internal/platform/snips"
 )
 
@@ -224,7 +225,6 @@ func (s *recordingQuotaService) RecordUsage(_ context.Context, _, _ int64, token
 }
 
 func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {
-	handler := &GenerateTextStreamHandler{}
 	now := time.Date(2026, 6, 19, 11, 0, 0, 0, time.UTC)
 	req := &GenerateTextStreamRequest{
 		Prompt:        "Show my top customers",
@@ -232,22 +232,22 @@ func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {
 		Mode:          string(ModeAsk),
 	}
 
-	first := handler.buildCacheWritePlan(
-		context.Background(),
-		ModeAsk,
-		req,
+	first := echoapp.BuildCacheWritePlan(
+		echoapp.ModeAsk,
+		echoapp.TurnRequest{Prompt: req.Prompt, SystemContext: req.SystemContext, PageContext: req.PageContext},
 		"Recent messages (oldest first):\nuser: Show my top customers\n\nCurrent request: Show my top customers",
 		11,
 		22,
+		"",
 		now,
 	)
-	second := handler.buildCacheWritePlan(
-		context.Background(),
-		ModeAsk,
-		req,
+	second := echoapp.BuildCacheWritePlan(
+		echoapp.ModeAsk,
+		echoapp.TurnRequest{Prompt: req.Prompt, SystemContext: req.SystemContext, PageContext: req.PageContext},
 		"Recent messages (oldest first):\nuser: Show my top customers\nassistant: cached answer\nuser: Show my top customers\n\nCurrent request: Show my top customers",
 		11,
 		22,
+		"",
 		now,
 	)
 
@@ -263,13 +263,13 @@ func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {
 
 	otherReq := *req
 	otherReq.SystemContext = "User is in the POS app."
-	other := handler.buildCacheWritePlan(
-		context.Background(),
-		ModeAsk,
-		&otherReq,
+	other := echoapp.BuildCacheWritePlan(
+		echoapp.ModeAsk,
+		echoapp.TurnRequest{Prompt: otherReq.Prompt, SystemContext: otherReq.SystemContext, PageContext: otherReq.PageContext},
 		"Current request: Show my top customers",
 		11,
 		22,
+		"",
 		now,
 	)
 	if first.Key == other.Key {
@@ -278,7 +278,6 @@ func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {
 }
 
 func TestBuildCacheWritePlanIncludesDataFreshness(t *testing.T) {
-	handler := &GenerateTextStreamHandler{}
 	now := time.Date(2026, 6, 20, 11, 0, 0, 0, time.UTC)
 	req := &GenerateTextStreamRequest{
 		Prompt:        "Which products are low?",
@@ -290,9 +289,9 @@ func TestBuildCacheWritePlanIncludesDataFreshness(t *testing.T) {
 		},
 	}
 
-	first := handler.buildCacheWritePlan(context.Background(), ModeAsk, req, "Current request: Which products are low?", 11, 22, now)
+	first := echoapp.BuildCacheWritePlan(echoapp.ModeAsk, echoapp.TurnRequest{Prompt: req.Prompt, SystemContext: req.SystemContext, PageContext: req.PageContext}, "Current request: Which products are low?", 11, 22, "", now)
 	req.PageContext["dataFreshness"] = "products:2"
-	second := handler.buildCacheWritePlan(context.Background(), ModeAsk, req, "Current request: Which products are low?", 11, 22, now)
+	second := echoapp.BuildCacheWritePlan(echoapp.ModeAsk, echoapp.TurnRequest{Prompt: req.Prompt, SystemContext: req.SystemContext, PageContext: req.PageContext}, "Current request: Which products are low?", 11, 22, "", now)
 
 	if first.Key == "" || second.Key == "" {
 		t.Fatalf("expected cache keys, got first=%q second=%q", first.Key, second.Key)
@@ -303,7 +302,6 @@ func TestBuildCacheWritePlanIncludesDataFreshness(t *testing.T) {
 }
 
 func TestBuildCacheWritePlanIncludesGroundingFreshness(t *testing.T) {
-	handler := &GenerateTextStreamHandler{}
 	now := time.Date(2026, 6, 20, 11, 0, 0, 0, time.UTC)
 	req := &GenerateTextStreamRequest{
 		Prompt:        "How much revenue today?",
@@ -324,8 +322,9 @@ func TestBuildCacheWritePlanIncludesGroundingFreshness(t *testing.T) {
 		RowCount: 1,
 	}
 
-	first := handler.buildCacheWritePlan(context.Background(), ModeAsk, req, "grounded prompt", 11, 22, now, firstGrounding)
-	second := handler.buildCacheWritePlan(context.Background(), ModeAsk, req, "grounded prompt", 11, 22, now, secondGrounding)
+	turnRequest := echoapp.TurnRequest{Prompt: req.Prompt, SystemContext: req.SystemContext, PageContext: req.PageContext}
+	first := echoapp.BuildCacheWritePlan(echoapp.ModeAsk, turnRequest, "grounded prompt", 11, 22, "", now, firstGrounding)
+	second := echoapp.BuildCacheWritePlan(echoapp.ModeAsk, turnRequest, "grounded prompt", 11, 22, "", now, secondGrounding)
 
 	if first.Key == "" || second.Key == "" {
 		t.Fatalf("expected cache keys, got first=%q second=%q", first.Key, second.Key)
@@ -344,15 +343,15 @@ func TestShouldGroundBeforeExactCacheForLiveBusinessQuestions(t *testing.T) {
 		"Which products are low on stock?",
 	}
 	for _, prompt := range cases {
-		if !shouldGroundBeforeExactCache(ModeAsk, prompt, nil) {
+		if !echoapp.BuildCaretResponsePolicy(echoapp.ModeAsk, prompt, "", nil).GroundBeforeCache {
 			t.Fatalf("expected %q to ground before cache", prompt)
 		}
 	}
 
-	if shouldGroundBeforeExactCache(ModeSupport, "How much revenue today?", nil) {
+	if echoapp.BuildCaretResponsePolicy(echoapp.ModeSupport, "How much revenue today?", "", nil).GroundBeforeCache {
 		t.Fatal("support mode should not use business grounding")
 	}
-	if shouldGroundBeforeExactCache(ModeAsk, "How do I use Caret?", nil) {
+	if echoapp.BuildCaretResponsePolicy(echoapp.ModeAsk, "How do I use Caret?", "", nil).GroundBeforeCache {
 		t.Fatal("product help should not force live business grounding")
 	}
 }

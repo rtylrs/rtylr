@@ -19,13 +19,13 @@ var aiStreamRateLimit = serverHttp.AIUserRateLimit(5, time.Minute)
 
 type Module struct {
 	snipsService   *application.Service
-	memoryService  handlers.MemoryService
+	memoryService  application.MemoryService
 	quotaService   handlers.QuotaService
-	analystService handlers.AnalystService
-	toolExecutors  []handlers.ToolExecutor
+	analystService application.AnalystService
+	toolExecutors  []application.ToolExecutor
 }
 
-func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaService handlers.QuotaService, analystService handlers.AnalystService, toolExecutors ...handlers.ToolExecutor) *Module {
+func NewModule(ctx context.Context, memoryService application.MemoryService, quotaService handlers.QuotaService, analystService application.AnalystService, toolExecutors ...application.ToolExecutor) *Module {
 	if err := application.ValidateToolRegistry(); err != nil {
 		panic(fmt.Errorf("invalid Caret tool registry: %w", err))
 	}
@@ -34,7 +34,7 @@ func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaS
 		snipsService = nil
 	}
 	if analystService != nil {
-		toolExecutors = append([]handlers.ToolExecutor{application.NewBusinessSnapshotToolExecutor(analystService)}, toolExecutors...)
+		toolExecutors = append([]application.ToolExecutor{application.NewBusinessSnapshotToolExecutor(analystService)}, toolExecutors...)
 	}
 
 	return &Module{

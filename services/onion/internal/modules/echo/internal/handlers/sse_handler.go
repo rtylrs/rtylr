@@ -21,17 +21,6 @@ import (
 	"github.com/voxire/onion/internal/platform/snips"
 )
 
-type MemoryService interface {
-	CreateSession(ctx context.Context, userID int, title string) (string, error)
-	StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokens int) (any, error)
-	SummarizeSession(ctx context.Context, sessionID string, userID int) error
-	BuildEnhancedPrompt(ctx context.Context, sessionID string, userID int, currentRequest string) string
-}
-
-type MemorySessionAuthorizer interface {
-	EnsureSessionOwnership(ctx context.Context, sessionID string, userID int) error
-}
-
 // QuotaService gates AI requests against the tenant's monthly token allowance
 // and records consumption. Implemented by the aiquota module; kept as a local
 // interface (primitive signatures) so echo doesn't depend on its internals.
@@ -43,7 +32,6 @@ type QuotaService interface {
 
 const (
 	caretSmokeCheckReply = "Caret is working. What would you like help with?"
-	maxSessionTitleRunes = 80
 )
 
 const (
@@ -63,18 +51,6 @@ const (
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
 
-type cacheWritePlan struct {
-	Enabled            bool
-	Key                string
-	Mode               string
-	Provider           string
-	Policy             aicache.ExactPolicy
-	StartedAt          time.Time
-	PromptChars        int
-	ToolBudget         int
-	ContinuationBudget int
-}
-
 func GenerateTextStreamRoutes() []string {
 	return []string{
 		"/ai/generate-text-stream",
@@ -83,7 +59,7 @@ func GenerateTextStreamRoutes() []string {
 
 type GenerateTextStreamHandler struct {
 	AiService      *application.Service
-	MemoryService  MemoryService
+	MemoryService  application.MemoryService
 	QuotaService   QuotaService
 	AnalystService AnalystService
 	ToolExecutors  []ToolExecutor
@@ -159,11 +135,6 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	// Neutralize control markers and bound length before the input is stored or
-	// folded into the prompt (prompt-injection defense).
-	req.Prompt = sanitizeUserInput(req.Prompt, maxUserPromptLen)
-	req.SystemContext = buildRequestSystemContext(req.SystemContext, req.PageContext)
-
 	if h.AiService == nil || !h.AiService.IsAvailable() {
 		log.Warn("AI service not available")
 		http.Error(w, "AI service not available", http.StatusServiceUnavailable)
@@ -212,12 +183,26 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		}
 	}
 
-	if setupErr := h.setupSessionAndStoreMessage(ctx, req); setupErr != nil {
+	requestNow := time.Now()
+	prepared, setupErr := application.PrepareTurn(ctx, h.MemoryService, application.TurnRequest{
+		Prompt:        req.Prompt,
+		SessionID:     req.SessionID,
+		UserID:        req.UserID,
+		SystemContext: req.SystemContext,
+		Mode:          req.Mode,
+		PageContext:   req.PageContext,
+	}, requestNow)
+	if setupErr != nil {
 		log.Error("Failed to setup session and store message", logger.Error(setupErr))
 		http.Error(w, "Failed to setup session", http.StatusInternalServerError)
 
 		return
 	}
+	req.Prompt = prepared.Request.Prompt
+	req.SessionID = prepared.Request.SessionID
+	req.UserID = prepared.Request.UserID
+	req.SystemContext = prepared.Request.SystemContext
+	req.PageContext = prepared.Request.PageContext
 
 	// Do not spend a model call on connectivity checks. A content-free prompt
 	// gives a generative model room to invent a plausible business report even
@@ -228,19 +213,11 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	mode := ParseMode(req.Mode)
-	requestNow := time.Now()
-
-	enhancedPrompt, contextErr := h.buildEnhancedPromptWithContext(ctx, req, mode, requestNow)
-	if contextErr != nil {
-		log.Error("Failed to get conversation context", logger.Error(contextErr))
-		http.Error(w, "Failed to get context", http.StatusInternalServerError)
-
-		return
-	}
+	mode := prepared.Mode
+	enhancedPrompt := prepared.EnhancedPrompt
 
 	var liveGrounding *analystGroundingResult
-	requestPolicy := BuildCaretResponsePolicy(mode, req.Prompt, req.SystemContext, req.PageContext)
+	requestPolicy := prepared.ResponsePolicy
 	groundBeforeCache := requestPolicy.GroundBeforeCache
 	if groundBeforeCache {
 		if grounding, ok := h.analystGroundingWithContext(ctx, req.Prompt, businessID, authUserID, req.SystemContext); ok {
@@ -249,9 +226,13 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		}
 	}
 
-	cachePlan := h.buildCacheWritePlan(ctx, mode, req, enhancedPrompt, businessID, authUserID, requestNow, liveGrounding)
+	cachePlan := application.BuildCacheWritePlan(mode, application.TurnRequest{
+		Prompt:        req.Prompt,
+		SystemContext: req.SystemContext,
+		PageContext:   req.PageContext,
+	}, enhancedPrompt, businessID, authUserID, h.AiService.GetPrimaryProvider(), requestNow, liveGrounding)
 	if groundBeforeCache && liveGrounding == nil {
-		cachePlan = disableExactCachePlan(cachePlan, "live business request needs fresh grounding")
+		cachePlan = application.DisableExactCachePlan(cachePlan, "live business request needs fresh grounding")
 	}
 
 	h.setupSSEHeaders(w)
@@ -297,7 +278,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		if grounding, ok := h.analystGroundingWithContext(ctx, req.Prompt, businessID, authUserID, req.SystemContext); ok {
 			enhancedPrompt = grounding.Prompt + "\n\n---\n\n" + enhancedPrompt
 			liveGrounding = grounding
-			cachePlan = disableExactCachePlan(cachePlan, "live business grounding resolved after exact cache lookup")
+			cachePlan = application.DisableExactCachePlan(cachePlan, "live business grounding resolved after exact cache lookup")
 			cachePlan.PromptChars = len(enhancedPrompt)
 		}
 	}
@@ -328,7 +309,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 }
 
 func isCaretSmokeCheck(prompt string) bool {
-	return ClassifyCaretRequest(prompt, "").IsSmokeCheck
+	return application.ClassifyCaretRequest(prompt, "").IsSmokeCheck
 }
 
 func (h *GenerateTextStreamHandler) streamDirectResponse(ctx context.Context, w http.ResponseWriter, req *GenerateTextStreamRequest, response string) {
@@ -338,7 +319,7 @@ func (h *GenerateTextStreamHandler) streamDirectResponse(ctx context.Context, w 
 	}
 
 	var fullResponse strings.Builder
-	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse, withStreamMode(ParseMode(req.Mode)))
+	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse, withStreamMode(application.ParseMode(req.Mode)))
 	if err := renderer.AppendText(response); err != nil {
 		return
 	}
@@ -427,82 +408,6 @@ func (h *GenerateTextStreamHandler) validateRequest(ctx context.Context, req *Ge
 	return h.Validate(ctx, req)
 }
 
-func (h *GenerateTextStreamHandler) setupSessionAndStoreMessage(ctx context.Context, req *GenerateTextStreamRequest) error {
-	log := logger.Ctx(ctx)
-
-	log.Info("Setting up session and storing message",
-		logger.String("session_id", req.SessionID),
-		logger.Int("user_id", int(req.UserID)),
-		logger.String("prompt_length", strconv.Itoa(len(req.Prompt))))
-
-	if req.SessionID == "" {
-		log.Info("Creating new session for user", logger.Int("user_id", int(req.UserID)))
-
-		sessionID, err := h.MemoryService.CreateSession(ctx, int(req.UserID), sessionTitleFromPrompt(req.Prompt))
-		if err != nil {
-			log.Error("Failed to create session", logger.Error(err), logger.Int("user_id", int(req.UserID)))
-
-			return fmt.Errorf("failed to create session: %w", err)
-		}
-
-		req.SessionID = sessionID
-		log.Info("Session created successfully", logger.String("session_id", req.SessionID))
-	} else {
-		log.Info("Using existing session", logger.String("session_id", req.SessionID))
-		if authorizer, ok := h.MemoryService.(MemorySessionAuthorizer); ok {
-			if err := authorizer.EnsureSessionOwnership(ctx, req.SessionID, int(req.UserID)); err != nil {
-				return fmt.Errorf("session is not available to this user: %w", err)
-			}
-		}
-	}
-
-	log.Info("Storing user message",
-		logger.String("session_id", req.SessionID),
-		logger.Int("user_id", int(req.UserID)),
-		logger.String("role", "user"))
-
-	_, err := h.MemoryService.StoreMessage(ctx, req.SessionID, int(req.UserID), "user", req.Prompt, len(req.Prompt)/4)
-	if err != nil {
-		log.Error("Failed to store message", logger.Error(err),
-			logger.String("session_id", req.SessionID),
-			logger.Int("user_id", int(req.UserID)))
-
-		return fmt.Errorf("failed to store message: %w", err)
-	}
-
-	log.Info("Message stored successfully")
-
-	return nil
-}
-
-func sessionTitleFromPrompt(prompt string) string {
-	title := strings.Join(strings.Fields(prompt), " ")
-	if title == "" {
-		return "New chat"
-	}
-
-	runes := []rune(title)
-	if len(runes) <= maxSessionTitleRunes {
-		return title
-	}
-	return string(runes[:maxSessionTitleRunes]) + "..."
-}
-
-func (h *GenerateTextStreamHandler) buildEnhancedPromptWithContext(ctx context.Context, req *GenerateTextStreamRequest, mode CaretMode, now time.Time) (string, error) {
-	logger.Ctx(ctx).Info("Building enhanced prompt with context",
-		logger.String("session_id", req.SessionID),
-		logger.Int("user_id", int(req.UserID)))
-
-	conversationPrompt := h.MemoryService.BuildEnhancedPrompt(ctx, req.SessionID, int(req.UserID), req.Prompt)
-	return buildCaretPrompt(caretPromptInput{
-		Mode:               mode,
-		ConversationPrompt: conversationPrompt,
-		CurrentRequest:     req.Prompt,
-		SystemContext:      req.SystemContext,
-		Now:                now,
-	}), nil
-}
-
 func (h *GenerateTextStreamHandler) setupSSEHeaders(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -541,56 +446,6 @@ func (h *GenerateTextStreamHandler) writeErrorResponse(w http.ResponseWriter, er
 	}
 }
 
-func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode CaretMode, req *GenerateTextStreamRequest, enhancedPrompt string, businessID, userID int64, now time.Time, groundings ...*analystGroundingResult) cacheWritePlan {
-	policy := aicache.ExactPolicyForMode(string(mode))
-	requestPolicy := BuildCaretResponsePolicy(mode, req.Prompt, req.SystemContext, req.PageContext)
-	provider := ""
-	if h.AiService != nil {
-		provider = h.AiService.GetPrimaryProvider()
-	}
-	dataFreshness := buildCacheFreshness(req.PageContext)
-	if len(groundings) > 0 {
-		dataFreshness = combineCacheFreshness(dataFreshness, buildGroundingCacheFreshness(groundings[0]))
-	}
-	plan := cacheWritePlan{
-		Enabled:            policy.Enabled,
-		Mode:               string(mode),
-		Provider:           provider,
-		Policy:             policy,
-		StartedAt:          time.Now(),
-		PromptChars:        len(enhancedPrompt),
-		ToolBudget:         requestPolicy.ToolBudget,
-		ContinuationBudget: requestPolicy.ContinuationBudget,
-	}
-	if policy.Enabled {
-		plan.Key = aicache.ExactKey(aicache.ExactKeyParts{
-			BusinessID:    businessID,
-			UserID:        userID,
-			Mode:          string(mode),
-			Provider:      provider,
-			RequestDate:   now.UTC().Format("2006-01-02"),
-			SystemContext: req.SystemContext,
-			DataFreshness: dataFreshness,
-			Prompt:        req.Prompt,
-		})
-	}
-	// Live grounding is decided around the cache lookup by the request handler;
-	// keep the provisional key available for that phase. Clarifications and
-	// mutating intent, however, must never replay an older answer.
-	if requestPolicy.AskClarification || requestPolicy.Plan.Kind == IntentAction || requestPolicy.Plan.Kind == IntentMemory {
-		plan = disableExactCachePlan(plan, requestPolicy.CacheReason)
-	}
-	return plan
-}
-
-func disableExactCachePlan(plan cacheWritePlan, reason string) cacheWritePlan {
-	plan.Enabled = false
-	plan.Key = ""
-	plan.Policy.Enabled = false
-	plan.Policy.Reason = reason
-	return plan
-}
-
 func (h *GenerateTextStreamHandler) streamCachedResponse(ctx context.Context, w http.ResponseWriter, clientGone chan bool, req *GenerateTextStreamRequest, cached aicache.ExactResponse, plan cacheWritePlan, businessID, userID int64) {
 	started := time.Now()
 	messageID := newAssistantMessageID()
@@ -599,7 +454,7 @@ func (h *GenerateTextStreamHandler) streamCachedResponse(ctx context.Context, w 
 	}
 
 	var fullResponse strings.Builder
-	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse, withStreamMode(ParseMode(plan.Mode)))
+	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse, withStreamMode(application.ParseMode(plan.Mode)))
 
 	chunks := cachedReplayChunks(cached.Response)
 	replayDelay := cachedReplayDelay(len(chunks))
@@ -793,7 +648,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		flushResponse(w),
 		messageID,
 		&fullResponse,
-		withStreamMode(ParseMode(cachePlan.Mode)),
+		withStreamMode(application.ParseMode(cachePlan.Mode)),
 		withStreamToolExecution(ctx, h.ToolExecutors),
 		withStreamToolBudget(cachePlan.ToolBudget),
 	)
@@ -828,7 +683,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		if len(newToolResults) > 0 {
 			// A live read can change independently of the request/page context, so
 			// never replay an answer that was informed by a tool result.
-			cachePlan = disableExactCachePlan(cachePlan, "live tool result informed the response")
+			cachePlan = application.DisableExactCachePlan(cachePlan, "live tool result informed the response")
 		}
 		continuationBudget := cachePlan.ContinuationBudget
 		if continuationBudget <= 0 {
@@ -967,7 +822,7 @@ func buildToolResultContinuationPrompt(basePrompt, assistantSoFar string, result
 	b.WriteString("Continue the same assistant answer using these results as evidence. Prefer each result summary for business language, then use raw output only for exact values. Do not repeat text already sent. Do not mention JSON, tool internals, rows, tenant, or implementation details unless the user asks.\n")
 	if trimmed := strings.TrimSpace(assistantSoFar); trimmed != "" {
 		b.WriteString("\nAssistant text already sent:\n")
-		b.WriteString(truncateUTF8ToBytes(trimmed, maxContinuationAnswerBytes))
+		b.WriteString(application.TruncateUTF8ToBytes(trimmed, maxContinuationAnswerBytes))
 		b.WriteString("\n")
 	}
 	b.WriteString("\nTool results:\n")
@@ -1006,10 +861,10 @@ func boundedToolResultsJSON(results []streamToolExecution) []byte {
 	}
 	for _, result := range results {
 		metadata.Results = append(metadata.Results, continuationToolResult{
-			Name:    truncateUTF8ToBytes(result.Name, 256),
-			Status:  truncateUTF8ToBytes(result.Status, 64),
-			Summary: truncateUTF8ToBytes(result.Summary, 512),
-			Error:   truncateUTF8ToBytes(result.Error, 512),
+			Name:    application.TruncateUTF8ToBytes(result.Name, 256),
+			Status:  application.TruncateUTF8ToBytes(result.Status, 64),
+			Summary: application.TruncateUTF8ToBytes(result.Summary, 512),
+			Error:   application.TruncateUTF8ToBytes(result.Error, 512),
 		})
 	}
 
@@ -1083,7 +938,10 @@ func (h *GenerateTextStreamHandler) writeAnalystToolEvents(w http.ResponseWriter
 		return nil
 	}
 
-	toolName := groundingToolName(grounding)
+	toolName := "analytics.query"
+	if strings.TrimSpace(grounding.ToolName) != "" {
+		toolName = strings.TrimSpace(grounding.ToolName)
+	}
 	blockID := fmt.Sprintf("tool-%s-%d", strings.ReplaceAll(toolName, ".", "-"), time.Now().UnixNano())
 	input := map[string]any{
 		"question": grounding.Question,
