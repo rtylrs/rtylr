@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
@@ -23,6 +24,7 @@ type repository interface {
 
 type Service struct {
 	repo repository
+	db   *sql.DB
 }
 
 type stockTransfersPageResult struct {
@@ -35,6 +37,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 	return &Service{
 		repo: repo,
+		db:   db,
 	}
 }
 
@@ -74,6 +77,9 @@ func (s *Service) CreateStockTransfer(ctx context.Context, businessID int64, inp
 	if err != nil {
 		return 0, err
 	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "stock_transfer", EntityID: id, Action: "created", NewValues: input}); err != nil {
+		return 0, err
+	}
 
 	s.invalidateCache(ctx, businessID)
 
@@ -81,8 +87,15 @@ func (s *Service) CreateStockTransfer(ctx context.Context, businessID int64, inp
 }
 
 func (s *Service) UpdateStockTransferStatus(ctx context.Context, businessID, id int64, status domain.StockTransferStatus) error {
-	err := s.repo.UpdateStockTransferStatus(ctx, businessID, id, status)
+	old, err := s.repo.GetByID(ctx, businessID, id)
 	if err != nil {
+		return err
+	}
+	err = s.repo.UpdateStockTransferStatus(ctx, businessID, id, status)
+	if err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "stock_transfer", EntityID: id, Action: "status_changed", OldValues: old, NewValues: map[string]domain.StockTransferStatus{"status": status}}); err != nil {
 		return err
 	}
 
