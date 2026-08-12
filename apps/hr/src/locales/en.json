@@ -702,6 +702,31 @@
       "emptyDescription": "Add employees to this location to build the roster."
     }
   },
+  "operations": {
+    "availability": {
+      "emptyTitle": "No availability set",
+      "emptyDescription": "Ask your team to mark the hours they can work.",
+      "available": "Available",
+      "blocked": "Blocked",
+      "saved": "Availability saved",
+      "saveFailed": "Could not save availability",
+      "columns": {
+        "employee": "Employee",
+        "day": "Day",
+        "available": "Available",
+        "hours": "Hours"
+      },
+      "weekdays": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      }
+    }
+  },
   "equipment": {
     "title": "Equipment",
     "subtitle": "Request equipment and manage approvals",
