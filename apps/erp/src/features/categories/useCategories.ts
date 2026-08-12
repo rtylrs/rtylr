@@ -10,6 +10,7 @@ import type {
   UpdateCategoryRequest,
   UpdateCategoryResponse,
 } from '@voxire/voxie/erp/category/v1/types';
+import { withErpListBounds } from '../../shared/lib/erpListBounds';
 
 const categoryClient = createOneKitClient(CategoryServiceClient, 'erp');
 
@@ -19,7 +20,7 @@ export function useCategories() {
   return useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await categoryClient.listCategories({});
+      const response = await categoryClient.listCategories(withErpListBounds({}));
       return response.categories ?? [];
     },
   });
