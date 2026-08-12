@@ -232,6 +232,42 @@ func (r *Repository) SetPayrollRunExported(ctx context.Context, businessID, runI
 	})
 }
 
+func (r *Repository) ClaimPayrollRunForExport(ctx context.Context, businessID, runID int64) error {
+	result, err := r.queries.ClaimPayrollRunForExport(ctx, sqlc.ClaimPayrollRunForExportParams{
+		BusinessID: businessID,
+		ID:         runID,
+	})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 1 {
+		return nil
+	}
+
+	run, err := r.GetPayrollRun(ctx, businessID, runID)
+	if err != nil {
+		return err
+	}
+	if run.Status == domain.PayrollStatusExported || !run.ExportedAt.IsZero() {
+		return domain.ErrPayrollAlreadyExported
+	}
+	if run.Status == domain.PayrollStatusExporting {
+		return domain.ErrPayrollExportInProgress
+	}
+	return domain.ErrPayrollRunNotApproved
+}
+
+func (r *Repository) ReleasePayrollRunExportClaim(ctx context.Context, businessID, runID int64) error {
+	return r.queries.ReleasePayrollRunExportClaim(ctx, sqlc.ReleasePayrollRunExportClaimParams{
+		BusinessID: businessID,
+		ID:         runID,
+	})
+}
+
 // --- Payroll Entries ---
 
 func (r *Repository) ListPayrollEntries(ctx context.Context, businessID, runID int64) ([]domain.PayrollEntryRecord, error) {

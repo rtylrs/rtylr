@@ -359,12 +359,8 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 		return err
 	}
 
-	if run.Status != "approved" {
-		return domain.ErrPayrollRunNotApproved
-	}
-
-	if !run.ExportedAt.IsZero() {
-		return domain.ErrPayrollAlreadyExported
+	if err := s.repo.ClaimPayrollRunForExport(ctx, ownerID, runID); err != nil {
+		return err
 	}
 
 	if postErr := s.financePoster.PostPayrollJournal(ctx, domain.PayrollJournalEntry{
@@ -375,6 +371,10 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 		TotalGross:  run.TotalGross,
 		TotalNet:    run.TotalNet,
 	}); postErr != nil {
+		if releaseErr := s.repo.ReleasePayrollRunExportClaim(ctx, ownerID, runID); releaseErr != nil {
+			logger.Ctx(ctx).Error("failed to release payroll export claim after finance error",
+				logger.Any("owner_id", ownerID), logger.Any("run_id", runID), logger.Error(releaseErr))
+		}
 		logger.Ctx(ctx).Error("finance journal post failed",
 			logger.Any("owner_id", ownerID),
 			logger.Any("run_id", runID),
@@ -384,6 +384,8 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 	}
 
 	if err := s.repo.SetPayrollRunExported(ctx, ownerID, runID); err != nil {
+		logger.Ctx(ctx).Error("finance journal posted but payroll export could not be finalized",
+			logger.Any("owner_id", ownerID), logger.Any("run_id", runID), logger.Error(err))
 		return err
 	}
 
