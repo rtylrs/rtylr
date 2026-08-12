@@ -53,12 +53,18 @@ export default defineConfig(() => ({
         assetFileNames: 'assets/[name]-[hash].[ext]',
         // Vite 8 (Rolldown) only accepts function form of manualChunks.
         manualChunks(id: string): string | undefined {
+          if (/@react-pdf\/|pdfjs-dist/.test(id)) {
+            return 'pdf-vendor';
+          }
           if (
-            /node_modules\/(react|react-dom|react-router-dom|zustand|motion|lucide-react)\//.test(
+            /node_modules\/(react|react-dom|react-router-dom|@tanstack\/react-router|zustand)\//.test(
               id
             )
           ) {
-            return 'vendor';
+            return 'react-vendor';
+          }
+          if (/node_modules\/(motion|lucide-react)\//.test(id)) {
+            return 'ui-vendor';
           }
           return undefined;
         },

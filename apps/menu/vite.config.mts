@@ -68,14 +68,18 @@ export default defineConfig(() => ({
         entryFileNames: 'assets/[name]-[hash].js',
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
-        manualChunks(id) {
+        manualChunks(id: string): string | undefined {
           if (
-            /node_modules\/(react|react-dom|react-router-dom|zustand|motion|lucide-react)\//.test(
+            /node_modules\/(react|react-dom|react-router-dom|@tanstack\/react-router|zustand)\//.test(
               id
             )
           ) {
-            return 'vendor';
+            return 'react-vendor';
           }
+          if (/node_modules\/(motion|lucide-react)\//.test(id)) {
+            return 'ui-vendor';
+          }
+          return undefined;
         },
       },
     },
