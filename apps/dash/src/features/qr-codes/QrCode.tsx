@@ -27,8 +27,9 @@ function QrCode() {
   const qrRef = useRef(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setQrOptions({ ...qrOptions, [name]: value });
+    const target = e.target as HTMLInputElement;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    setQrOptions({ ...qrOptions, [target.name]: value });
   };
 
   const handleDownload = async () => {

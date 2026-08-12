@@ -26,12 +26,14 @@ const statusBadgeVariant: Record<string, any> = {
   pending: 'warning',
   in_progress: 'default',
   completed: 'success',
+  cancelled: 'destructive',
 };
 
 const statusLabel: Record<string, string> = {
   pending: 'Pending',
   in_progress: 'In Progress',
   completed: 'Completed',
+  cancelled: 'Cancelled',
 };
 
 const tabIcons: Record<string, React.ReactNode> = {
@@ -90,7 +92,9 @@ const OrdersTable: React.FC<{
             <TableCell>${order.subtotal.toFixed(2)}</TableCell>
             <TableCell>${order.total.toFixed(2)}</TableCell>
             <TableCell>
-              <Badge variant={statusBadgeVariant[order.status]}>{statusLabel[order.status]}</Badge>
+              <Badge variant={statusBadgeVariant[order.status] || 'outline'}>
+                {statusLabel[order.status] || order.status.replace('_', ' ')}
+              </Badge>
             </TableCell>
             <TableCell className="text-gray-400 text-xs">{formatTime(order.createdAt)}</TableCell>
             <TableCell className="text-right">
