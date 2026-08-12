@@ -7,9 +7,11 @@ import (
 )
 
 var (
-	ErrPurchaseOrderNotFound        = errors.New("purchase order not found")
-	ErrPurchaseOrderAlreadyApproved = errors.New("purchase order already approved")
-	ErrPurchaseOrderAlreadyReceived = errors.New("purchase order already received")
+	ErrInvalidPurchaseOrder           = errors.New("invalid purchase order")
+	ErrPurchaseOrderNotFound          = errors.New("purchase order not found")
+	ErrPurchaseOrderAlreadyApproved   = errors.New("purchase order already approved")
+	ErrPurchaseOrderAlreadyReceived   = errors.New("purchase order already received")
+	ErrPurchaseOrderReferenceNotFound = errors.New("purchase order reference not found in business")
 )
 
 type PurchaseOrderStatus string

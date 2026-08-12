@@ -521,7 +521,7 @@ func TestGetTaxReport_PeriodPassedThrough(t *testing.T) {
 // ---- UpdateInvoiceStatus ----
 
 func TestUpdateInvoiceStatus_HappyPath(t *testing.T) {
-	s := &Service{repo: &mockRepo{}}
+	s := &Service{repo: &mockRepo{invoice: &domain.Invoice{Status: domain.StatusDraft}}}
 	err := s.UpdateInvoiceStatus(context.Background(), 1, 10, "sent")
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -530,8 +530,29 @@ func TestUpdateInvoiceStatus_HappyPath(t *testing.T) {
 
 func TestUpdateInvoiceStatus_PropagatesError(t *testing.T) {
 	want := errors.New("status err")
-	s := &Service{repo: &mockRepo{err: want}}
+	s := &Service{repo: &mockRepo{invoice: &domain.Invoice{Status: domain.StatusDraft}, err: want}}
 	if err := s.UpdateInvoiceStatus(context.Background(), 1, 10, "sent"); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestUpdateInvoice_RejectsNonDraftInvoice(t *testing.T) {
+	s := &Service{repo: &mockRepo{invoice: &domain.Invoice{Status: domain.StatusPaid}}}
+	if _, err := s.UpdateInvoice(context.Background(), 1, 10, domain.InvoiceUpdateInput{}); !errors.Is(err, domain.ErrInvoiceNotDraft) {
+		t.Fatalf("expected ErrInvoiceNotDraft, got %v", err)
+	}
+}
+
+func TestUpdateInvoiceStatus_RejectsTerminalInvoice(t *testing.T) {
+	s := &Service{repo: &mockRepo{invoice: &domain.Invoice{Status: domain.StatusPaid}}}
+	if err := s.UpdateInvoiceStatus(context.Background(), 1, 10, domain.StatusDraft); !errors.Is(err, domain.ErrInvoiceNotDraft) {
+		t.Fatalf("expected ErrInvoiceNotDraft, got %v", err)
+	}
+}
+
+func TestUpdateInvoiceStatus_RejectsReopeningInvoice(t *testing.T) {
+	s := &Service{repo: &mockRepo{invoice: &domain.Invoice{Status: domain.StatusSent}}}
+	if err := s.UpdateInvoiceStatus(context.Background(), 1, 10, domain.StatusDraft); !errors.Is(err, domain.ErrInvoiceNotDraft) {
+		t.Fatalf("expected ErrInvoiceNotDraft, got %v", err)
 	}
 }

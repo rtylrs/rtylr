@@ -11,6 +11,8 @@ var (
 	ErrLeaveBalanceNotFound       = errors.New("leave balance not found")
 	ErrLeaveConflict              = errors.New("leave request overlaps with existing approved or pending leave")
 	ErrApprovalChainNotConfigured = errors.New("approval chain not configured for leave requests")
+	ErrLeaveAccessDenied          = errors.New("leave access denied")
+	ErrLeaveApproverNotAllowed    = errors.New("approver is not allowed by the leave approval chain")
 	ErrInvalidDateRange           = errors.New("start date must be before or equal to end date")
 	ErrInsufficientNotice         = errors.New("insufficient notice period for this leave type")
 )

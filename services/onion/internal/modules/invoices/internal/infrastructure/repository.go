@@ -261,6 +261,21 @@ func (r *Repository) UpdateInvoice(ctx context.Context, businessID int64, inv do
 		}
 	}()
 
+	qtx := r.queries.WithTx(tx)
+	status, err := qtx.GetInvoiceStatusForUpdate(ctx, sqlc.GetInvoiceStatusForUpdateParams{
+		ID:         inv.ID,
+		BusinessID: businessID,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrInvoiceNotFound
+	}
+	if err != nil {
+		return err
+	}
+	if !status.Valid || string(status.FinanceInvoicesStatus) != domain.StatusDraft {
+		return domain.ErrInvoiceNotDraft
+	}
+
 	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  inv.ClientName,
 		Email: inv.ClientEmail,
@@ -269,7 +284,7 @@ func (r *Repository) UpdateInvoice(ctx context.Context, businessID int64, inv do
 		return err
 	}
 
-	err = r.queries.WithTx(tx).UpdateInvoice(ctx, sqlc.UpdateInvoiceParams{
+	err = qtx.UpdateInvoice(ctx, sqlc.UpdateInvoiceParams{
 		ClientName:     inv.ClientName,
 		ClientEmail:    sqlNullString(inv.ClientEmail),
 		ClientAddress:  sqlNullString(inv.ClientAddress),
@@ -304,7 +319,7 @@ func (r *Repository) UpdateInvoice(ctx context.Context, businessID int64, inv do
 }
 
 func (r *Repository) UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID int64, status string) error {
-	err := r.queries.UpdateInvoiceStatus(ctx, sqlc.UpdateInvoiceStatusParams{
+	_, err := r.queries.UpdateInvoiceStatus(ctx, sqlc.UpdateInvoiceStatusParams{
 		Status:     sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(status), Valid: status != ""},
 		ID:         invoiceID,
 		BusinessID: businessID,

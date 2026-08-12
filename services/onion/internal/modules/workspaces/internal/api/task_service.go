@@ -301,17 +301,24 @@ func (a *TaskAPI) CreateSubtask(ctx context.Context, req *flowtaskv1.CreateSubta
 	}
 
 	parentID := req.GetParentTaskId()
+	parent, err := a.Service.GetTaskDetail(ctx, parentID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusNotFound, "Parent task not found")
+	}
+	parentProjectID := parent.Task.ProjectID
+	parentWorkspaceID := parent.Task.WorkspaceID
 
-	// Gate on the parent task's project, and additionally on project_id when
-	// the request names one — the two can disagree, and writing into a project
-	// the caller cannot write to must not ride in on the parent's permission.
+	// Gate on the parent task's scope. Project and workspace IDs are derived
+	// from the trusted parent row so a child cannot be persisted into a
+	// different tenant or project hierarchy.
 	if roleErr := a.Service.RequireTaskRole(ctx, parentID, authUser.UserID, domain.FlowRoleMember); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if req.GetProjectId() != 0 {
-		if roleErr := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
-			return nil, onekiterrors.PermissionDenied()
-		}
+	if req.GetProjectId() != 0 && req.GetProjectId() != parentProjectID {
+		return nil, onekiterrors.New(http.StatusBadRequest, "project_id must match the parent task")
+	}
+	if req.GetWorkspaceId() != 0 && req.GetWorkspaceId() != parentWorkspaceID {
+		return nil, onekiterrors.New(http.StatusBadRequest, "workspace_id must match the parent task")
 	}
 
 	dueDate, err := parseTaskDate(req.GetDueDate())
@@ -324,8 +331,8 @@ func (a *TaskAPI) CreateSubtask(ctx context.Context, req *flowtaskv1.CreateSubta
 	}
 
 	task, createErr := a.Service.CreateSubtask(ctx, domain.TaskInput{
-		ProjectID:      req.GetProjectId(),
-		WorkspaceID:    req.GetWorkspaceId(),
+		ProjectID:      parentProjectID,
+		WorkspaceID:    parentWorkspaceID,
 		OwnerID:        authUser.UserID,
 		BusinessID:     businessID,
 		ParentTaskID:   &parentID,

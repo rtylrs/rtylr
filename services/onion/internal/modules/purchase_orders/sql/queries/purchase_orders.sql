@@ -31,13 +31,21 @@ INSERT INTO erp_purchase_orders
  expected_delivery, notes, created_by)
 VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?);
 
+-- name: GetSupplierReference :one
+SELECT id FROM erp_suppliers WHERE business_id = ? AND id = ?;
+
+-- name: GetProductReference :one
+SELECT id FROM erp_products WHERE business_id = ? AND id = ?;
+
 -- name: InsertPurchaseOrderItem :execresult
 INSERT INTO erp_purchase_order_items
 (purchase_order_id, product_id, quantity_ordered, quantity_received, unit_cost, total_cost)
 VALUES (?, ?, ?, 0, ?, ?);
 
--- name: UpdatePurchaseOrderStatus :exec
-UPDATE erp_purchase_orders SET status = ? WHERE business_id = ? AND id = ?;
+-- name: UpdatePurchaseOrderStatus :execresult
+UPDATE erp_purchase_orders
+SET status = ?
+WHERE business_id = ? AND id = ? AND (status IS NULL OR status <> 'received');
 
 -- name: UpdatePurchaseOrderStatusReceived :exec
 UPDATE erp_purchase_orders SET status = ?, received_at = NOW() WHERE business_id = ? AND id = ?;
@@ -45,8 +53,10 @@ UPDATE erp_purchase_orders SET status = ?, received_at = NOW() WHERE business_id
 -- name: GetPurchaseOrderStatus :one
 SELECT status FROM erp_purchase_orders WHERE business_id = ? AND id = ?;
 
--- name: ApprovePurchaseOrder :exec
-UPDATE erp_purchase_orders SET status = 'approved' WHERE business_id = ? AND id = ?;
+-- name: ApprovePurchaseOrder :execresult
+UPDATE erp_purchase_orders
+SET status = 'approved'
+WHERE business_id = ? AND id = ? AND (status IS NULL OR status <> 'received');
 
 -- name: GetPurchaseOrderForUpdate :one
 SELECT status FROM erp_purchase_orders WHERE business_id = ? AND id = ? FOR UPDATE;

@@ -4,13 +4,15 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 )
 
-func TestNoopFinancePoster_DoesNotError(t *testing.T) {
-	if err := (noopFinancePoster{}).PostPayrollJournal(context.Background(), domain.PayrollJournalEntry{}); err != nil {
-		t.Fatalf("noop finance poster returned error: %v", err)
+func TestNoopFinancePoster_ReportsUnavailable(t *testing.T) {
+	err := (noopFinancePoster{}).PostPayrollJournal(context.Background(), domain.PayrollJournalEntry{})
+	if !errors.Is(err, domain.ErrFinanceIntegrationUnavailable) {
+		t.Fatalf("noop finance poster error = %v, want %v", err, domain.ErrFinanceIntegrationUnavailable)
 	}
 }
 
@@ -28,7 +30,6 @@ func TestTriggerPayrollRun_RejectsInvalidDates(t *testing.T) {
 		{"unparseable start", "not-a-date", "2026-04-30"},
 		{"unparseable end", "2026-04-01", "31-04-2026"},
 		{"end before start", "2026-04-30", "2026-04-01"},
-		{"end equal to start", "2026-04-15", "2026-04-15"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -92,11 +93,58 @@ func TestSetFinancePoster_RealOverridesNoop(t *testing.T) {
 	}
 }
 
-func TestTriggerPayrollRun_EqualDatesRejected(t *testing.T) {
-	s := &Service{}
-	_, _, err := s.TriggerPayrollRun(context.Background(), 1, 1, "2026-05-01", "2026-05-01")
-	if !errors.Is(err, domain.ErrInvalidDateRange) {
-		t.Errorf("equal dates should return ErrInvalidDateRange, got %v", err)
+func TestCalculateMonthlyBasePay_UsesInclusiveCalendarDays(t *testing.T) {
+	start := time.Date(2026, time.April, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(2026, time.April, 30, 0, 0, 0, 0, time.UTC)
+
+	if got := calculateMonthlyBasePay(3000, start, end); got != 3000 {
+		t.Errorf("full April salary = %.2f, want 3000.00", got)
+	}
+}
+
+func TestCalculateMonthlyBasePay_HandlesMonthLengths(t *testing.T) {
+	cases := []struct {
+		name  string
+		start time.Time
+		end   time.Time
+		want  float64
+	}{
+		{
+			name:  "February in a non-leap year",
+			start: time.Date(2025, time.February, 1, 0, 0, 0, 0, time.UTC),
+			end:   time.Date(2025, time.February, 28, 0, 0, 0, 0, time.UTC),
+			want:  3000,
+		},
+		{
+			name:  "February in a leap year",
+			start: time.Date(2024, time.February, 1, 0, 0, 0, 0, time.UTC),
+			end:   time.Date(2024, time.February, 29, 0, 0, 0, 0, time.UTC),
+			want:  3000,
+		},
+		{
+			name:  "single inclusive day",
+			start: time.Date(2026, time.May, 15, 0, 0, 0, 0, time.UTC),
+			end:   time.Date(2026, time.May, 15, 0, 0, 0, 0, time.UTC),
+			want:  3000.0 / 31.0,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := calculateMonthlyBasePay(3000, tc.start, tc.end); got != tc.want {
+				t.Errorf("base pay = %.8f, want %.8f", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestCalculateMonthlyBasePay_SplitsCrossMonthPeriods(t *testing.T) {
+	start := time.Date(2026, time.April, 15, 0, 0, 0, 0, time.UTC)
+	end := time.Date(2026, time.May, 14, 0, 0, 0, 0, time.UTC)
+	want := 3000.0*16.0/30.0 + 3000.0*14.0/31.0
+
+	if got := calculateMonthlyBasePay(3000, start, end); got != want {
+		t.Errorf("cross-month base pay = %.8f, want %.8f", got, want)
 	}
 }
 
@@ -147,6 +195,10 @@ func (f fakePermissionProvider) HasPermission(_ context.Context, _, _ int64, _ s
 	return f.allowed, f.permErr
 }
 
+func (f fakePermissionProvider) HasRole(_ context.Context, _, _, _ int64) (bool, error) {
+	return f.allowed, f.permErr
+}
+
 func TestService_GetEmployeeIDByUserID_DelegatesToPermissionProvider(t *testing.T) {
 	s := &Service{permissions: fakePermissionProvider{employeeID: 4101}}
 	id, err := s.GetEmployeeIDByUserID(context.Background(), 1001, 5555)
@@ -177,6 +229,52 @@ func TestService_HasPermission_FalseWhenNotGranted(t *testing.T) {
 	}
 	if allowed {
 		t.Error("expected allowed=false")
+	}
+}
+
+func TestValidatePayrollApprover_RejectsRunCreator(t *testing.T) {
+	err := validatePayrollApprover(&domain.PayrollRunRecord{CreatedBy: 4101}, 4101)
+	if !errors.Is(err, domain.ErrPayrollSelfApproval) {
+		t.Fatalf("expected ErrPayrollSelfApproval, got %v", err)
+	}
+}
+
+func TestValidatePayrollApprover_AllowsDifferentApprover(t *testing.T) {
+	if err := validatePayrollApprover(&domain.PayrollRunRecord{CreatedBy: 4101}, 4102); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestApproverMatchesChain_ExplicitEmployee(t *testing.T) {
+	s := &Service{permissions: fakePermissionProvider{}}
+	allowed, err := s.approverMatchesChain(context.Background(), 1001, 4101, []domain.ApprovalLevelInfo{
+		{ApproverEmployeeID: 4101},
+	})
+	if err != nil || !allowed {
+		t.Fatalf("expected explicit employee approver to match, allowed=%v err=%v", allowed, err)
+	}
+}
+
+func TestApproverMatchesChain_Role(t *testing.T) {
+	s := &Service{permissions: fakePermissionProvider{allowed: true}}
+	allowed, err := s.approverMatchesChain(context.Background(), 1001, 4101, []domain.ApprovalLevelInfo{
+		{ApproverRoleID: 7},
+	})
+	if err != nil || !allowed {
+		t.Fatalf("expected role approver to match, allowed=%v err=%v", allowed, err)
+	}
+}
+
+func TestApproverMatchesChain_RejectsUnmatchedApprover(t *testing.T) {
+	s := &Service{permissions: fakePermissionProvider{}}
+	allowed, err := s.approverMatchesChain(context.Background(), 1001, 4101, []domain.ApprovalLevelInfo{
+		{ApproverEmployeeID: 4102},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if allowed {
+		t.Fatal("expected unmatched approver to be rejected")
 	}
 }
 

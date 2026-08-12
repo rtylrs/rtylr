@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
@@ -15,10 +16,11 @@ const poCacheTTL = 5 * time.Minute
 
 type Service struct {
 	repo *infrastructure.Repository
+	db   *sql.DB
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
-	return &Service{repo: infrastructure.NewRepository(db)}
+	return &Service{repo: infrastructure.NewRepository(db), db: db}
 }
 
 func (s *Service) GetByID(ctx context.Context, businessID, id int64) (domain.PurchaseOrder, error) {
@@ -56,8 +58,15 @@ func paginate(page, pageSize int64) (int, int) {
 }
 
 func (s *Service) CreatePurchaseOrder(ctx context.Context, businessID int64, input domain.PurchaseOrderInput, createdBy int64) (int64, error) {
+	if err := input.Validate(); err != nil {
+		return 0, fmt.Errorf("%w: %w", domain.ErrInvalidPurchaseOrder, err)
+	}
+
 	id, err := s.repo.CreatePurchaseOrder(ctx, businessID, input, createdBy)
 	if err != nil {
+		return 0, err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: createdBy, EntityType: "purchase_order", EntityID: id, Action: "created", NewValues: input}); err != nil {
 		return 0, err
 	}
 	s.invalidateCache(ctx, businessID)
@@ -76,8 +85,15 @@ func (s *Service) ApprovePurchaseOrder(ctx context.Context, businessID, poID int
 	if status == string(domain.POStatusApproved) {
 		return domain.ErrPurchaseOrderAlreadyApproved
 	}
+	if status == string(domain.POStatusReceived) {
+		return domain.ErrPurchaseOrderAlreadyReceived
+	}
+	old := map[string]string{"status": status}
 
 	if err := s.repo.ApprovePurchaseOrder(ctx, businessID, poID); err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "purchase_order", EntityID: poID, Action: "approved", OldValues: old, NewValues: map[string]string{"status": "approved"}}); err != nil {
 		return err
 	}
 
@@ -87,7 +103,14 @@ func (s *Service) ApprovePurchaseOrder(ctx context.Context, businessID, poID int
 }
 
 func (s *Service) ReceivePurchaseOrder(ctx context.Context, businessID, poID, receivedBy int64) error {
+	old, err := s.repo.GetByID(ctx, businessID, poID)
+	if err != nil {
+		return err
+	}
 	if err := s.repo.ReceivePurchaseOrder(ctx, businessID, poID, receivedBy); err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: receivedBy, EntityType: "purchase_order", EntityID: poID, Action: "received", OldValues: old, NewValues: map[string]string{"status": "received"}}); err != nil {
 		return err
 	}
 	s.invalidateCache(ctx, businessID)
@@ -95,6 +118,10 @@ func (s *Service) ReceivePurchaseOrder(ctx context.Context, businessID, poID, re
 }
 
 func (s *Service) UpdatePurchaseOrderStatus(ctx context.Context, businessID, id int64, status string) error {
+	oldStatus, err := s.repo.GetPurchaseOrderStatus(ctx, businessID, id)
+	if err != nil {
+		return err
+	}
 	// Receiving is special: it must verify ownership, increment stock for every
 	// line item, and ledger the movement — all atomically and idempotently.
 	// ReceivePurchaseOrder owns that whole transaction.
@@ -103,6 +130,9 @@ func (s *Service) UpdatePurchaseOrderStatus(ctx context.Context, businessID, id 
 	}
 
 	if err := s.repo.UpdatePurchaseOrderStatus(ctx, businessID, id, status); err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "purchase_order", EntityID: id, Action: "status_changed", OldValues: map[string]string{"status": oldStatus}, NewValues: map[string]string{"status": status}}); err != nil {
 		return err
 	}
 

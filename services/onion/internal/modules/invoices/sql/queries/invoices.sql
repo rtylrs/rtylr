@@ -6,6 +6,12 @@ SELECT id, owner_id, business_id, invoice_number, client_name, client_email, cli
 FROM finance_invoices
 WHERE id = ? AND business_id = ?;
 
+-- name: GetInvoiceStatusForUpdate :one
+SELECT status
+FROM finance_invoices
+WHERE id = ? AND business_id = ?
+FOR UPDATE;
+
 -- name: ListInvoicesByOwner :many
 SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
        status, issue_date, due_date, paid_date, currency, subtotal, discount_type,
@@ -41,10 +47,14 @@ UPDATE finance_invoices SET
   issue_date = ?, due_date = ?, currency = ?, subtotal = ?, discount_type = ?,
   discount_value = ?, discount_amount = ?, tax_rate = ?, tax_amount = ?,
   total = ?, amount_due = ?, notes = ?, terms = ?
-WHERE id = ? AND business_id = ?;
+WHERE id = ? AND business_id = ? AND status = 'draft';
 
--- name: UpdateInvoiceStatus :exec
-UPDATE finance_invoices SET status = ? WHERE id = ? AND business_id = ?;
+-- name: UpdateInvoiceStatus :execresult
+UPDATE finance_invoices
+SET status = sqlc.arg(status)
+WHERE id = ? AND business_id = ?
+  AND status NOT IN ('paid', 'void', 'cancelled')
+  AND (sqlc.arg(status) <> 'draft' OR status = 'draft');
 
 -- name: UpdateInvoicePaymentTotalsWithPaidDate :exec
 UPDATE finance_invoices SET amount_paid = ?, amount_due = ?, status = ?, paid_date = ? WHERE id = ? AND business_id = ?;

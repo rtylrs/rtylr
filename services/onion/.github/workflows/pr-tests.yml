@@ -53,9 +53,11 @@ jobs:
 
       - name: Install sqlc
         run: |
-          curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
-            | tar -xz -C /usr/local/bin sqlc
-          sqlc version
+          GOBIN="$RUNNER_TEMP/bin"
+          mkdir -p "$GOBIN"
+          GOBIN="$GOBIN" go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.29.0
+          echo "$GOBIN" >> "$GITHUB_PATH"
+          "$GOBIN/sqlc" version
 
       # sqlc only parses the .sql files against the schema files to generate Go
       # code (the generated package is gitignored). It does not connect to any
@@ -64,6 +66,11 @@ jobs:
         run: |
           chmod +x scripts/generate_sqlc.sh
           ./scripts/generate_sqlc.sh
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.11
 
       - name: go vet
         run: go vet ./...
@@ -122,9 +129,11 @@ jobs:
 
       - name: Install sqlc
         run: |
-          curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
-            | tar -xz -C /usr/local/bin sqlc
-          sqlc version
+          GOBIN="$RUNNER_TEMP/bin"
+          mkdir -p "$GOBIN"
+          GOBIN="$GOBIN" go install github.com/sqlc-dev/sqlc/cmd/sqlc@v1.29.0
+          echo "$GOBIN" >> "$GITHUB_PATH"
+          "$GOBIN/sqlc" version
 
       - name: Generate sqlc code
         run: |

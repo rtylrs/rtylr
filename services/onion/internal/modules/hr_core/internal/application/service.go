@@ -285,6 +285,10 @@ func (s *Service) HasPermission(ctx context.Context, ownerID, employeeID int64, 
 	return s.repo.HasPermission(ctx, ownerID, employeeID, permissionKey)
 }
 
+func (s *Service) HasRole(ctx context.Context, ownerID, employeeID, roleID int64) (bool, error) {
+	return s.repo.HasRole(ctx, ownerID, employeeID, roleID)
+}
+
 func (s *Service) SeedDefaultRoles(ctx context.Context, ownerID int64) error {
 	defaultRoles := []domain.RoleRecord{
 		{Name: "Employee", Description: "Standard employee with basic access", IsSystem: true, Permissions: mustJSON(map[string]bool{

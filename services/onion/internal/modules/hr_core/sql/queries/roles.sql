@@ -33,3 +33,8 @@ SELECT r.id, r.owner_id, r.business_id, r.name, r.description, r.permissions, r.
 FROM hr_roles r
 JOIN hr_employee_roles er ON er.role_id = r.id AND er.business_id = r.business_id
 WHERE er.business_id = ? AND er.employee_id = ?;
+
+-- name: HasEmployeeRole :one
+SELECT COUNT(*)
+FROM hr_employee_roles
+WHERE business_id = ? AND employee_id = ? AND role_id = ?;

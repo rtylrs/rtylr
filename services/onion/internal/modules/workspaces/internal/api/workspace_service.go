@@ -93,7 +93,6 @@ func (a *WorkspaceAPI) CreateWorkspace(ctx context.Context, req *flowworkspacev1
 	if err != nil {
 		return nil, err
 	}
-
 	input := domain.WorkspaceInput{
 		BusinessID:  businessID,
 		OwnerID:     authUser.UserID,
@@ -121,6 +120,9 @@ func (a *WorkspaceAPI) UpdateWorkspace(ctx context.Context, req *flowworkspacev1
 	if err != nil {
 		return nil, err
 	}
+	if err := a.Service.RequireWorkspaceRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
 	body := req.GetBody()
 	input := domain.UpdateWorkspaceInput{
@@ -141,9 +143,16 @@ func (a *WorkspaceAPI) UpdateWorkspace(ctx context.Context, req *flowworkspacev1
 }
 
 func (a *WorkspaceAPI) DeleteWorkspace(ctx context.Context, req *flowworkspacev1.DeleteWorkspaceRequest) (*flowworkspacev1.DeleteWorkspaceResponse, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	businessID, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if err := a.Service.RequireWorkspaceRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	if err := a.Service.DeleteWorkspace(ctx, req.GetId(), businessID); err != nil {
@@ -158,14 +167,21 @@ func (a *WorkspaceAPI) AddWorkspaceMember(ctx context.Context, req *flowworkspac
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, req.GetWorkspaceId()) {
+	if err := a.Service.RequireWorkspaceRole(ctx, req.GetWorkspaceId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
+	}
+	role := req.GetRole()
+	if role == "" {
+		role = domain.FlowRoleMember
+	}
+	if !validFlowMemberRole(role) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
 	}
 
 	input := domain.AddWorkspaceMemberInput{
 		WorkspaceID: req.GetWorkspaceId(),
 		UserID:      req.GetUserId(),
-		Role:        req.GetRole(),
+		Role:        role,
 	}
 
 	if err := a.Service.AddWorkspaceMember(ctx, input); err != nil {
@@ -186,7 +202,7 @@ func (a *WorkspaceAPI) RemoveWorkspaceMember(ctx context.Context, req *flowworks
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, req.GetWorkspaceId()) {
+	if err := a.Service.RequireWorkspaceRole(ctx, req.GetWorkspaceId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -284,7 +300,7 @@ func (a *WorkspaceAPI) UpdateWorkspaceMemberRole(ctx context.Context, req *floww
 	if !validFlowMemberRole(req.GetRole()) {
 		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
 	}
-	if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, req.GetWorkspaceId()) {
+	if err := a.Service.RequireWorkspaceRole(ctx, req.GetWorkspaceId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

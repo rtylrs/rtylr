@@ -128,7 +128,11 @@ func (r *Repository) ListDistinctOwnerIDs(ctx context.Context) ([]int64, error) 
 // --- Leave Requests ---
 
 func (r *Repository) ListLeaveRequests(ctx context.Context, ownerID int64, params domain.ListLeaveRequestsParams) ([]domain.LeaveRequestRecord, int64, error) {
-	total, err := r.queries.CountLeaveRequests(ctx, ownerID)
+	total, err := r.queries.CountLeaveRequests(ctx, sqlc.CountLeaveRequestsParams{
+		BusinessID: ownerID,
+		EmployeeID: params.EmployeeID,
+		Status:     params.Status,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to count leave requests", logger.Any("owner_id", ownerID), logger.Error(err))
 		return nil, 0, err
@@ -136,6 +140,8 @@ func (r *Repository) ListLeaveRequests(ctx context.Context, ownerID int64, param
 
 	rows, err := r.queries.ListLeaveRequests(ctx, sqlc.ListLeaveRequestsParams{
 		BusinessID: ownerID,
+		EmployeeID: params.EmployeeID,
+		Status:     params.Status,
 		Limit:      params.Limit,
 		Offset:     params.Offset,
 	})

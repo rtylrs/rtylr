@@ -87,6 +87,12 @@ func (a *PurchaseOrderAPI) CreatePurchaseOrder(ctx context.Context, req *erppurc
 		Items:            items,
 	}, authUser.UserID)
 	if createErr != nil {
+		if errors.Is(createErr, domain.ErrInvalidPurchaseOrder) {
+			return nil, purchaseOrderStatusError(http.StatusBadRequest, createErr.Error())
+		}
+		if errors.Is(createErr, domain.ErrPurchaseOrderReferenceNotFound) {
+			return nil, purchaseOrderStatusError(http.StatusNotFound, createErr.Error())
+		}
 		return nil, purchaseOrderStatusError(http.StatusInternalServerError, "Failed to create purchase order")
 	}
 	return &erppurchaseorderv1.CreatePurchaseOrderResponse{PurchaseOrderId: id, Message: "Purchase order created successfully"}, nil
@@ -128,6 +134,12 @@ func (a *PurchaseOrderAPI) UpdatePurchaseOrderStatus(ctx context.Context, req *e
 		return nil, purchaseOrderStatusError(http.StatusBadRequest, "Invalid status. Must be one of: draft, sent, approved, partial, received, cancelled")
 	}
 	if updateErr := a.Service.UpdatePurchaseOrderStatus(ctx, ownerID, req.GetId(), body.GetStatus()); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrPurchaseOrderNotFound) {
+			return nil, purchaseOrderStatusError(http.StatusNotFound, "Purchase order not found")
+		}
+		if errors.Is(updateErr, domain.ErrPurchaseOrderAlreadyReceived) {
+			return nil, purchaseOrderStatusError(http.StatusConflict, "Received purchase orders cannot be reopened")
+		}
 		return nil, purchaseOrderStatusError(http.StatusInternalServerError, "Failed to update purchase order status")
 	}
 	return &erppurchaseorderv1.UpdatePurchaseOrderStatusResponse{Message: "Purchase order status updated successfully"}, nil
@@ -144,6 +156,9 @@ func (a *PurchaseOrderAPI) ApprovePurchaseOrder(ctx context.Context, req *erppur
 		}
 		if errors.Is(approveErr, domain.ErrPurchaseOrderAlreadyApproved) {
 			return nil, purchaseOrderStatusError(http.StatusConflict, "Purchase order is already approved")
+		}
+		if errors.Is(approveErr, domain.ErrPurchaseOrderAlreadyReceived) {
+			return nil, purchaseOrderStatusError(http.StatusConflict, "Received purchase orders cannot be reopened")
 		}
 		return nil, purchaseOrderStatusError(http.StatusInternalServerError, "Failed to approve purchase order")
 	}

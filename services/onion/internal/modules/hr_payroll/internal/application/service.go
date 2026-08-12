@@ -51,10 +51,14 @@ func (s *Service) HasPermission(ctx context.Context, ownerID, employeeID int64, 
 	return s.permissions.HasPermission(ctx, ownerID, employeeID, permissionKey)
 }
 
+func (s *Service) HasRole(ctx context.Context, ownerID, employeeID, roleID int64) (bool, error) {
+	return s.permissions.HasRole(ctx, ownerID, employeeID, roleID)
+}
+
 // SetFinancePoster wires a finance module implementation into the payroll
 // service. Call this from the module bootstrap after both modules have been
-// constructed. Until called, exports are recorded but no journal entry is
-// posted (the warning is logged).
+// constructed. Until called, payroll exports fail instead of being marked as
+// exported without a corresponding finance journal entry.
 func (s *Service) SetFinancePoster(p domain.FinanceJournalPoster) {
 	if p != nil {
 		s.financePoster = p
@@ -76,7 +80,7 @@ func (noopFinancePoster) PostPayrollJournal(ctx context.Context, entry domain.Pa
 		logger.Any("owner_id", entry.OwnerID),
 		logger.Any("run_id", entry.RunID),
 	)
-	return nil
+	return domain.ErrFinanceIntegrationUnavailable
 }
 
 type noopNotifier struct{}
@@ -124,7 +128,7 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 	if err != nil {
 		return nil, nil, domain.ErrInvalidDateRange
 	}
-	if !endDate.After(startDate) {
+	if endDate.Before(startDate) {
 		return nil, nil, domain.ErrInvalidDateRange
 	}
 
@@ -187,8 +191,6 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 		otMap[ot.EmployeeID] = ot
 	}
 
-	periodDays := endDate.Sub(startDate).Hours() / 24
-
 	entries := make([]domain.PayrollEntryRecord, 0, len(employees))
 	var totalGross, totalNet float64
 
@@ -210,10 +212,9 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 		case "hourly":
 			basePay = hoursWorked * emp.HourlyRate
 		case "monthly":
-			daysInMonth := 30.0
-			basePay = emp.MonthlySalary * (periodDays / daysInMonth)
+			basePay = calculateMonthlyBasePay(emp.MonthlySalary, startDate, endDate)
 		default:
-			basePay = emp.MonthlySalary * (periodDays / 30.0)
+			basePay = calculateMonthlyBasePay(emp.MonthlySalary, startDate, endDate)
 		}
 
 		overtimePay := 0.0
@@ -259,10 +260,39 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 	return createdRun, createdEntries, nil
 }
 
+// calculateMonthlyBasePay prorates a monthly salary over an inclusive calendar
+// date range. Each calendar month contributes its salary fraction using that
+// month's actual number of days, so a complete calendar month always pays the
+// configured monthly salary regardless of whether it has 28, 29, 30, or 31
+// days.
+func calculateMonthlyBasePay(monthlySalary float64, startDate, endDate time.Time) float64 {
+	if endDate.Before(startDate) {
+		return 0
+	}
+
+	var basePay float64
+	for current := startDate; !current.After(endDate); {
+		monthEnd := time.Date(current.Year(), current.Month()+1, 0, 0, 0, 0, 0, time.UTC)
+		segmentEnd := monthEnd
+		if endDate.Before(segmentEnd) {
+			segmentEnd = endDate
+		}
+
+		inclusiveDays := float64(int(segmentEnd.Sub(current)/(24*time.Hour)) + 1)
+		basePay += monthlySalary * inclusiveDays / float64(monthEnd.Day())
+		current = segmentEnd.AddDate(0, 0, 1)
+	}
+
+	return basePay
+}
+
 func (s *Service) ApprovePayrollRun(ctx context.Context, ownerID, runID, approverID int64) error {
 	defer invalidateHRPayrollScope(ctx, ownerID)
 	run, err := s.repo.GetPayrollRun(ctx, ownerID, runID)
 	if err != nil {
+		return err
+	}
+	if err := validatePayrollApprover(run, approverID); err != nil {
 		return err
 	}
 
@@ -273,6 +303,19 @@ func (s *Service) ApprovePayrollRun(ctx context.Context, ownerID, runID, approve
 	if chain == nil {
 		return domain.ErrApprovalChainNotConfigured
 	}
+	if len(chain.Levels) > 0 {
+		employeeID, err := s.permissions.GetEmployeeIDByUserID(ctx, ownerID, approverID)
+		if err != nil {
+			return err
+		}
+		allowed, err := s.approverMatchesChain(ctx, ownerID, employeeID, chain.Levels)
+		if err != nil {
+			return err
+		}
+		if !allowed {
+			return domain.ErrPayrollApproverNotAllowed
+		}
+	}
 
 	if run.Status == "draft" {
 		if err := s.repo.UpdatePayrollRunStatus(ctx, ownerID, runID, "in_review"); err != nil {
@@ -281,6 +324,32 @@ func (s *Service) ApprovePayrollRun(ctx context.Context, ownerID, runID, approve
 	}
 
 	return s.repo.SetPayrollRunApproved(ctx, ownerID, runID, approverID)
+}
+
+func validatePayrollApprover(run *domain.PayrollRunRecord, approverID int64) error {
+	if run != nil && run.CreatedBy == approverID {
+		return domain.ErrPayrollSelfApproval
+	}
+	return nil
+}
+
+func (s *Service) approverMatchesChain(ctx context.Context, ownerID, employeeID int64, levels []domain.ApprovalLevelInfo) (bool, error) {
+	for _, level := range levels {
+		if level.ApproverEmployeeID > 0 && level.ApproverEmployeeID == employeeID {
+			return true, nil
+		}
+		if level.ApproverRoleID <= 0 {
+			continue
+		}
+		allowed, err := s.permissions.HasRole(ctx, ownerID, employeeID, level.ApproverRoleID)
+		if err != nil {
+			return false, err
+		}
+		if allowed {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int64) error {
@@ -296,6 +365,9 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 
 	if !run.ExportedAt.IsZero() {
 		return domain.ErrPayrollAlreadyExported
+	}
+	if s.financePoster == nil {
+		return domain.ErrFinanceIntegrationUnavailable
 	}
 
 	if postErr := s.financePoster.PostPayrollJournal(ctx, domain.PayrollJournalEntry{

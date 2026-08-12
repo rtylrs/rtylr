@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/application"
@@ -68,6 +69,9 @@ func (a *StockTakeAPI) CreateStockTake(ctx context.Context, req *erpstocktakev1.
 		Items:       items,
 	})
 	if createErr != nil {
+		if errors.Is(createErr, domain.ErrStockTakeReferenceNotFound) {
+			return nil, stockTakeStatusError(http.StatusNotFound, createErr.Error())
+		}
 		return nil, stockTakeStatusError(http.StatusInternalServerError, "Failed to create stock take")
 	}
 	return &erpstocktakev1.CreateStockTakeResponse{
