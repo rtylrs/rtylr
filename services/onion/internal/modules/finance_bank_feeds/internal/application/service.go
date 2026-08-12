@@ -13,12 +13,14 @@ import (
 )
 
 const (
-	bankFeedsScope = "finance_bank_feeds"
-	bankFeedsTTL   = 2 * time.Minute
+	bankFeedsScope    = "finance_bank_feeds"
+	bankFeedsTTL      = 2 * time.Minute
+	bankAccountsScope = "bank_accounts"
 )
 
 type repository interface {
 	List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error)
+	Sync(ctx context.Context, businessID int64) (int, error)
 }
 
 type Service struct {
@@ -55,8 +57,15 @@ func (s *Service) List(ctx context.Context, businessID int64, limit, offset int3
 	return res.Items, res.Total, err
 }
 
-// Sync is a stub until the real bank connector (Plaid, MX, etc.) lands
-// post-launch. Currently a no-op that returns zero count.
-func (s *Service) Sync(_ context.Context, _ int64) (int, error) {
-	return 0, nil
+func (s *Service) Sync(ctx context.Context, businessID int64) (int, error) {
+	imported, err := s.repo.Sync(ctx, businessID)
+	if err != nil {
+		return 0, err
+	}
+
+	if cache := cacher.GetRedisCache(); cache != nil {
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(bankFeedsScope, businessID))
+		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(bankAccountsScope, businessID))
+	}
+	return imported, nil
 }
