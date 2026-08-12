@@ -14,11 +14,9 @@
 //	project:7        — task changes in that project (created/updated/moved)
 //	task:88          — comments + activity on a specific task
 //
-// Authorization is enforced on `subscribe`: the per-module `AuthorizeFn`
-// callback decides whether `userID` may subscribe to a given topic. The
-// check runs once at subscribe time and is not re-evaluated per event —
-// if membership is revoked, the client will stop receiving events the
-// next time it reconnects (fine for our threat model).
+// Authorization is enforced on subscribe and again before each event is
+// fanned out. Rechecking at fan-out prevents a client whose membership was
+// revoked after subscribing from receiving later invalidation events.
 package wsbus
 
 import (
@@ -182,7 +180,7 @@ func (h *Hub) Publish(e Event) {
 	}
 }
 
-func (h *Hub) fanout(_ context.Context, e Event) {
+func (h *Hub) fanout(ctx context.Context, e Event) {
 	msg := serverMessage{Op: "event", Event: &e}
 	raw, err := json.Marshal(msg)
 	if err != nil {
@@ -191,21 +189,49 @@ func (h *Hub) fanout(_ context.Context, e Event) {
 	}
 
 	h.mu.RLock()
-	defer h.mu.RUnlock()
-
+	subscribers := make([]*client, 0, len(h.topics[e.Topic]))
 	for c := range h.topics[e.Topic] {
-		select {
-		case c.send <- raw:
-		default:
-			// Client send buffer is full — drop this message for that
-			// client rather than block the whole hub. The next event
-			// or reconnect will re-sync state.
-			logger.Global().Warn("wsbus client send buffer full, dropping",
-				logger.Any("user_id", c.userID),
-				logger.String("topic", e.Topic),
-			)
+		subscribers = append(subscribers, c)
+	}
+	h.mu.RUnlock()
+
+	for _, c := range subscribers {
+		if h.auth != nil && !h.auth(ctx, c.userID, e.Topic) {
+			h.removeSubscription(c, e.Topic)
+			continue
+		}
+
+		// Reacquire the lock before touching c.send. A concurrent unregister
+		// may close the channel after the subscriber snapshot above.
+		h.mu.RLock()
+		_, stillSubscribed := h.topics[e.Topic][c]
+		if stillSubscribed {
+			select {
+			case c.send <- raw:
+			default:
+				// Client send buffer is full — drop this message for that
+				// client rather than block the whole hub. The next event
+				// or reconnect will re-sync state.
+				logger.Global().Warn("wsbus client send buffer full, dropping",
+					logger.Any("user_id", c.userID),
+					logger.String("topic", e.Topic),
+				)
+			}
+		}
+		h.mu.RUnlock()
+	}
+}
+
+func (h *Hub) removeSubscription(c *client, topic string) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if set := h.topics[topic]; set != nil {
+		delete(set, c)
+		if len(set) == 0 {
+			delete(h.topics, topic)
 		}
 	}
+	delete(c.topics, topic)
 }
 
 func (h *Hub) shutdown() {
