@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"encoding/json"
@@ -7,14 +7,12 @@ import (
 	"unicode"
 )
 
-const maxToolOutputBytes = 24000
-
 var camelBoundary = regexp.MustCompile(`([a-z0-9])([A-Z])`)
 
 // normalizeToolInput gives every executor one stable shape even when a model
 // emits common camelCase aliases or wraps write fields in a fields/data
 // object. It is intentionally conservative: it never invents IDs or values.
-func normalizeToolInput(name string, input map[string]any) map[string]any {
+func NormalizeToolInput(name string, input map[string]any) map[string]any {
 	if len(input) == 0 {
 		return map[string]any{}
 	}
@@ -72,7 +70,7 @@ func normalizeToolValue(value any) any {
 	}
 }
 
-func sanitizeToolOutput(output map[string]any) map[string]any {
+func SanitizeToolOutput(output map[string]any) map[string]any {
 	if output == nil {
 		return nil
 	}
@@ -82,7 +80,7 @@ func sanitizeToolOutput(output map[string]any) map[string]any {
 		return map[string]any{"result": value}
 	}
 	encoded, err := json.Marshal(clean)
-	if err == nil && len(encoded) <= maxToolOutputBytes {
+	if err == nil && len(encoded) <= MaxToolOutputBytes {
 		return clean
 	}
 	return map[string]any{

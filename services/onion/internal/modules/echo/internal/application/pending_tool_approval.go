@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"context"
@@ -31,12 +31,12 @@ var pendingToolApprovals = struct {
 	items map[string]pendingToolApproval
 }{items: make(map[string]pendingToolApproval)}
 
-func registerPendingToolApproval(ctx context.Context, id string, tool ToolDef, input map[string]any, mode CaretMode) error {
+func RegisterPendingToolApproval(ctx context.Context, id string, tool ToolDef, input map[string]any, mode CaretMode) error {
 	id = strings.TrimSpace(id)
 	if id == "" {
 		return errPendingToolApproval
 	}
-	businessID, userID := authenticatedIdentity(ctx)
+	businessID, userID := AuthenticatedIdentity(ctx)
 	now := time.Now()
 	pendingToolApprovals.Lock()
 	defer pendingToolApprovals.Unlock()
@@ -50,7 +50,7 @@ func registerPendingToolApproval(ctx context.Context, id string, tool ToolDef, i
 	}
 	pendingToolApprovals.items[id] = pendingToolApproval{
 		Name:             tool.Name,
-		InputFingerprint: toolCallFingerprint(tool.Name, input),
+		InputFingerprint: ToolCallFingerprint(tool.Name, input),
 		Mode:             mode,
 		BusinessID:       businessID,
 		UserID:           userID,
@@ -59,10 +59,10 @@ func registerPendingToolApproval(ctx context.Context, id string, tool ToolDef, i
 	return nil
 }
 
-func consumePendingToolApproval(ctx context.Context, id string, tool ToolDef, input map[string]any, mode CaretMode) error {
+func ConsumePendingToolApproval(ctx context.Context, id string, tool ToolDef, input map[string]any, mode CaretMode) error {
 	id = strings.TrimSpace(id)
 	now := time.Now()
-	businessID, userID := authenticatedIdentity(ctx)
+	businessID, userID := AuthenticatedIdentity(ctx)
 	pendingToolApprovals.Lock()
 	defer pendingToolApprovals.Unlock()
 	item, ok := pendingToolApprovals.items[id]
@@ -70,7 +70,7 @@ func consumePendingToolApproval(ctx context.Context, id string, tool ToolDef, in
 		delete(pendingToolApprovals.items, id)
 		return errPendingToolApproval
 	}
-	if item.Name != tool.Name || item.InputFingerprint != toolCallFingerprint(tool.Name, input) || (mode != "" && item.Mode != mode) {
+	if item.Name != tool.Name || item.InputFingerprint != ToolCallFingerprint(tool.Name, input) || (mode != "" && item.Mode != mode) {
 		return errPendingToolApproval
 	}
 	if item.BusinessID > 0 && (businessID != item.BusinessID || userID != item.UserID) {
@@ -80,7 +80,7 @@ func consumePendingToolApproval(ctx context.Context, id string, tool ToolDef, in
 	return nil
 }
 
-func authenticatedIdentity(ctx context.Context) (businessID, userID int64) {
+func AuthenticatedIdentity(ctx context.Context) (businessID, userID int64) {
 	if ctx == nil {
 		return 0, 0
 	}

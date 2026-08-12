@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"context"
@@ -12,17 +12,34 @@ import (
 )
 
 const (
-	maxToolCallsPerTurn   = 6
+	MaxToolCallsPerTurn   = 6
 	maxToolInputBytes     = 12 * 1024
 	maxToolInputKeys      = 32
-	toolExecutionTimeout  = 15 * time.Second
-	maxToolStringValueLen = 4000
+	ToolExecutionTimeout  = 15 * time.Second
+	MaxToolStringValueLen = 4000
+	MaxToolOutputBytes    = 24000
 )
 
 var (
 	ErrToolCallLimit     = errors.New("tool call limit reached for this response")
 	ErrDuplicateToolCall = errors.New("the same tool call was already executed")
 )
+
+type ToolExecutor interface {
+	ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (output map[string]any, executed bool, err error)
+}
+
+type ToolCallExecutionState = toolCallExecutionState
+
+func NewToolCallExecutionState() *ToolCallExecutionState { return newToolCallExecutionState() }
+func (s *toolCallExecutionState) Admit(name string, input map[string]any) error {
+	return s.admit(name, input)
+}
+func (s *toolCallExecutionState) SetLimit(limit int) {
+	if s != nil && limit > 0 {
+		s.limit = limit
+	}
+}
 
 type toolCallExecutionState struct {
 	count int
@@ -31,7 +48,7 @@ type toolCallExecutionState struct {
 }
 
 func newToolCallExecutionState() *toolCallExecutionState {
-	return &toolCallExecutionState{seen: make(map[string]struct{}), limit: maxToolCallsPerTurn}
+	return &toolCallExecutionState{seen: make(map[string]struct{}), limit: MaxToolCallsPerTurn}
 }
 
 func (s *toolCallExecutionState) admit(name string, input map[string]any) error {
@@ -40,12 +57,12 @@ func (s *toolCallExecutionState) admit(name string, input map[string]any) error 
 	}
 	limit := s.limit
 	if limit <= 0 {
-		limit = maxToolCallsPerTurn
+		limit = MaxToolCallsPerTurn
 	}
 	if s.count >= limit {
 		return ErrToolCallLimit
 	}
-	key := toolCallFingerprint(name, input)
+	key := ToolCallFingerprint(name, input)
 	if _, ok := s.seen[key]; ok {
 		return ErrDuplicateToolCall
 	}
@@ -54,7 +71,7 @@ func (s *toolCallExecutionState) admit(name string, input map[string]any) error 
 	return nil
 }
 
-func toolCallFingerprint(name string, input map[string]any) string {
+func ToolCallFingerprint(name string, input map[string]any) string {
 	payload, err := json.Marshal(struct {
 		Name  string         `json:"name"`
 		Input map[string]any `json:"input,omitempty"`
@@ -66,9 +83,9 @@ func toolCallFingerprint(name string, input map[string]any) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func validateToolInvocation(mode CaretMode, tool ToolDef, input map[string]any) error {
-	input = normalizeToolInput(tool.Name, input)
-	if !toolAllowedForMode(mode, tool) {
+func ValidateToolInvocation(mode CaretMode, tool ToolDef, input map[string]any) error {
+	input = NormalizeToolInput(tool.Name, input)
+	if !ToolAllowedForMode(mode, tool) {
 		return fmt.Errorf("tool %q is not available in %s mode", tool.Name, mode)
 	}
 	if len(input) > maxToolInputKeys {
@@ -98,7 +115,7 @@ func validateToolValue(value any, depth int) error {
 	}
 	switch value := value.(type) {
 	case string:
-		if len(value) > maxToolStringValueLen {
+		if len(value) > MaxToolStringValueLen {
 			return errors.New("string value is too long")
 		}
 	case map[string]any:
@@ -126,7 +143,7 @@ func validateToolValue(value any, depth int) error {
 	return nil
 }
 
-func executeToolWithTimeout(ctx context.Context, executors []ToolExecutor, name string, input map[string]any) (output map[string]any, executed bool, err error, duration time.Duration) {
+func ExecuteToolWithTimeout(ctx context.Context, executors []ToolExecutor, name string, input map[string]any) (output map[string]any, executed bool, err error, duration time.Duration) {
 	started := time.Now()
 	defer func() {
 		duration = time.Since(started)
@@ -137,14 +154,14 @@ func executeToolWithTimeout(ctx context.Context, executors []ToolExecutor, name 
 		}
 	}()
 
-	callCtx, cancel := context.WithTimeout(ctx, toolExecutionTimeout)
+	callCtx, cancel := context.WithTimeout(ctx, ToolExecutionTimeout)
 	defer cancel()
 	for _, executor := range executors {
 		if executor == nil {
 			continue
 		}
 		output, executed, err = executor.ExecuteCaretTool(callCtx, name, input)
-		output = sanitizeToolOutput(output)
+		output = SanitizeToolOutput(output)
 		if err != nil || executed {
 			return output, executed, err, 0
 		}

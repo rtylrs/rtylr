@@ -66,7 +66,7 @@ func withStreamMode(mode CaretMode) streamRendererOption {
 func withStreamToolBudget(limit int) streamRendererOption {
 	return func(r *streamEventRenderer) {
 		if limit > 0 && r.toolState != nil {
-			r.toolState.limit = minInt(limit, maxToolCallsPerTurn)
+			r.toolState.SetLimit(minInt(limit, maxToolCallsPerTurn))
 		}
 	}
 }
@@ -301,7 +301,7 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	if err := r.toolState.admit(call.Name, call.Input); err != nil {
+	if err := r.toolState.Admit(call.Name, call.Input); err != nil {
 		if errors.Is(err, ErrDuplicateToolCall) {
 			return r.emitToolExecutionNotice(call, "skipped", "I already checked that exact request; use the existing result.", "")
 		}

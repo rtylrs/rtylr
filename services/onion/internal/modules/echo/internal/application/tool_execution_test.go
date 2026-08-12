@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"context"
@@ -15,7 +15,7 @@ func TestToolCallExecutionStateRejectsDuplicatesAndRunawayLoops(t *testing.T) {
 	if !errors.Is(state.admit("crm.list_customers", input), ErrDuplicateToolCall) {
 		t.Fatal("expected duplicate tool call to be rejected")
 	}
-	for i := state.count; i < maxToolCallsPerTurn; i++ {
+	for i := state.count; i < MaxToolCallsPerTurn; i++ {
 		if err := state.admit("crm.list_customers", map[string]any{"limit": i + 100}); err != nil {
 			t.Fatalf("unique call %d rejected: %v", i, err)
 		}
@@ -30,13 +30,13 @@ func TestValidateToolInvocationBoundsInputsAndMode(t *testing.T) {
 	if !ok {
 		t.Fatal("crm.list_customers missing from registry")
 	}
-	if err := validateToolInvocation(ModeAsk, tool, map[string]any{"limit": 10}); err != nil {
+	if err := ValidateToolInvocation(ModeAsk, tool, map[string]any{"limit": 10}); err != nil {
 		t.Fatalf("valid read input rejected: %v", err)
 	}
-	if err := validateToolInvocation(ModeSupport, tool, nil); err == nil {
+	if err := ValidateToolInvocation(ModeSupport, tool, nil); err == nil {
 		t.Fatal("support mode should not invoke business tools")
 	}
-	if err := validateToolInvocation(ModeAsk, tool, map[string]any{"payload": string(make([]byte, maxToolStringValueLen+1))}); err == nil {
+	if err := ValidateToolInvocation(ModeAsk, tool, map[string]any{"payload": string(make([]byte, MaxToolStringValueLen+1))}); err == nil {
 		t.Fatal("oversized string input should be rejected")
 	}
 }
@@ -44,7 +44,7 @@ func TestValidateToolInvocationBoundsInputsAndMode(t *testing.T) {
 func TestExecuteToolWithTimeoutStopsAtFirstMatchingExecutor(t *testing.T) {
 	first := recordingToolExecutor{output: map[string]any{"total": 3}, executed: true}
 	second := recordingToolExecutor{output: map[string]any{"total": 9}, executed: true}
-	output, executed, err, duration := executeToolWithTimeout(context.Background(), []ToolExecutor{first, second}, "crm.list_customers", nil)
+	output, executed, err, duration := ExecuteToolWithTimeout(context.Background(), []ToolExecutor{first, second}, "crm.list_customers", nil)
 	if err != nil || !executed {
 		t.Fatalf("executeToolWithTimeout = output=%#v executed=%v err=%v", output, executed, err)
 	}
@@ -57,7 +57,7 @@ func TestExecuteToolWithTimeoutStopsAtFirstMatchingExecutor(t *testing.T) {
 }
 
 func TestExecuteToolWithTimeoutRecoversExecutorPanic(t *testing.T) {
-	output, executed, err, _ := executeToolWithTimeout(context.Background(), []ToolExecutor{panicToolExecutor{}}, "crm.list_customers", nil)
+	output, executed, err, _ := ExecuteToolWithTimeout(context.Background(), []ToolExecutor{panicToolExecutor{}}, "crm.list_customers", nil)
 	if err == nil || executed || output != nil {
 		t.Fatalf("panic should become an error: output=%#v executed=%v err=%v", output, executed, err)
 	}
@@ -81,7 +81,7 @@ func (panicToolExecutor) ExecuteCaretTool(context.Context, string, map[string]an
 func TestExecuteToolWithTimeoutHonorsCanceledParentContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	_, _, err, _ := executeToolWithTimeout(ctx, []ToolExecutor{recordingToolExecutor{}}, "crm.list_customers", nil)
+	_, _, err, _ := ExecuteToolWithTimeout(ctx, []ToolExecutor{recordingToolExecutor{}}, "crm.list_customers", nil)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected canceled context, got %v", err)
 	}

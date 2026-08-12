@@ -23,10 +23,6 @@ func ToolDecisionRoutes() []string { return []string{"/caret/tools/decision"} }
 // gate tools by the caller's role + active plan.
 type ListToolsHandler struct{}
 
-type ToolExecutor interface {
-	ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (output map[string]any, executed bool, err error)
-}
-
 type ToolDecisionHandler struct {
 	Executor               ToolExecutor
 	Executors              []ToolExecutor
