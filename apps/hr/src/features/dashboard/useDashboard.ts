@@ -16,7 +16,7 @@ export function useHRDashboard() {
 
 export function useGetDashboard() {
   return useQuery({
-    queryKey: ['hr-dashboard'],
+    queryKey: ['hr-dashboard-widgets'],
     queryFn: async () => {
       const res = await unwrap(hrApi.getDashboardWidgets());
       return getDashboardResponseSchema.parse(res);
@@ -33,6 +33,7 @@ export function useUpdateWidgetLayout(): ReturnType<
     mutationFn: (widgets: DashboardWidget[]) => unwrap(hrApi.updateWidgetLayout(widgets)),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['hr-dashboard'] });
+      qc.invalidateQueries({ queryKey: ['hr-dashboard-widgets'] });
     },
   });
 }
