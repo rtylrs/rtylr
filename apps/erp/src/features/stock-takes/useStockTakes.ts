@@ -10,6 +10,7 @@ import type {
   UpdateStockTakeRequest,
   UpdateStockTakeResponse,
 } from '@voxire/voxie/erp/stock_take/v1/types';
+import { invalidateStockDerivedQueries } from '../../shared/lib/stockInvalidation';
 
 const stockTakeClient = createOneKitClient(StockTakeServiceClient, 'erp');
 
@@ -46,7 +47,10 @@ export function useUpdateStockTake() {
   const qc = useQueryClient();
   return useMutation<UpdateStockTakeResponse, Error, UpdateStockTakeRequest>({
     mutationFn: (data) => stockTakeClient.updateStockTake(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-takes'] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['stock-takes'] });
+      invalidateStockDerivedQueries(qc);
+    },
     onError: () => toast.error('Failed to update stock take'),
   });
 }

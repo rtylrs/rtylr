@@ -7,6 +7,7 @@ import type {
   AdjustInventoryResponse,
   InventoryReportItem,
 } from '@voxire/voxie/erp/inventory/v1/types';
+import { invalidateStockDerivedQueries } from '../../shared/lib/stockInvalidation';
 
 const inventoryClient = createOneKitClient(InventoryServiceClient, 'erp');
 
@@ -39,9 +40,7 @@ export function useAdjustInventory() {
   return useMutation<AdjustInventoryResponse, Error, AdjustInventoryInput>({
     mutationFn: (data) => inventoryClient.adjustInventory(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['inventory-report'] });
-      qc.invalidateQueries({ queryKey: ['low-stock'] });
-      qc.invalidateQueries({ queryKey: ['products'] });
+      invalidateStockDerivedQueries(qc);
     },
     onError: () => toast.error('Failed to adjust inventory'),
   });
