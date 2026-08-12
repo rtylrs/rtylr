@@ -19,6 +19,8 @@ const VerifyEmail = React.lazy(() => import('./features/email-verification/Verif
 const InviteAccept = React.lazy(() => import('./features/invite/InviteAccept'));
 const OAuthConsent = React.lazy(() => import('./features/oauth/OAuthConsent'));
 
+const NotFound = React.lazy(() => import('./features/not-found/NotFound'));
+
 const rootRoute = createRootRoute({
   component: () => (
     <ErrorBoundary>
@@ -42,6 +44,16 @@ const publicLayoutRoute = createRoute({
 const indexRoute = createRoute({
   getParentRoute: () => publicLayoutRoute,
   path: '/',
+  component: () => (
+    <Suspense fallback={<FullScreenLoader />}>
+      <Login />
+    </Suspense>
+  ),
+});
+
+const loginRoute = createRoute({
+  getParentRoute: () => publicLayoutRoute,
+  path: '/login',
   component: () => (
     <Suspense fallback={<FullScreenLoader />}>
       <Login />
@@ -132,6 +144,7 @@ const oauthRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   publicLayoutRoute.addChildren([
     indexRoute,
+    loginRoute,
     registerRoute,
     passwordResetRoute,
     passwordResetConfirmRoute,
@@ -143,7 +156,14 @@ const routeTree = rootRoute.addChildren([
   ]),
 ]);
 
-export const router = createRouter({ routeTree });
+export const router = createRouter({
+  routeTree,
+  defaultNotFoundComponent: () => (
+    <Suspense fallback={<FullScreenLoader />}>
+      <NotFound />
+    </Suspense>
+  ),
+});
 
 declare module '@tanstack/react-router' {
   interface Register {
