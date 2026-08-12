@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-var ErrStockTransferNotFound = errors.New("stock transfer not found")
+var (
+	ErrStockTransferNotFound          = errors.New("stock transfer not found")
+	ErrStockTransferReferenceNotFound = errors.New("stock transfer reference not found in business")
+)
 
 type StockTransferStatus string
 

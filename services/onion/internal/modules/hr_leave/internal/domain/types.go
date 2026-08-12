@@ -57,8 +57,10 @@ type ListLeaveTypesParams struct {
 }
 
 type ListLeaveRequestsParams struct {
-	Limit  int32
-	Offset int32
+	EmployeeID int64
+	Status     string
+	Limit      int32
+	Offset     int32
 }
 
 type LeaveCalendarParams struct {

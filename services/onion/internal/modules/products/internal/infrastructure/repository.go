@@ -200,6 +200,9 @@ func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input dom
 	defer tx.Rollback()
 
 	qtx := r.queries.WithTx(tx)
+	if err := validateProductReferences(ctx, qtx, ownerID, input); err != nil {
+		return 0, err
+	}
 	result, err := qtx.CreateProduct(ctx, sqlc.CreateProductParams{
 		OwnerID:           ownerID,
 		BusinessID:        ownerID,
@@ -279,6 +282,9 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		}
 		return err
 	}
+	if err := validateProductReferences(ctx, qtx, ownerID, input); err != nil {
+		return err
+	}
 
 	err = qtx.UpdateProduct(ctx, sqlc.UpdateProductParams{
 		CategoryID:        nullInt64(input.CategoryID),
@@ -330,6 +336,34 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 	}
 
 	return tx.Commit()
+}
+
+func validateProductReferences(ctx context.Context, qtx *sqlc.Queries, ownerID int64, input domain.ProductInput) error {
+	if input.CategoryID > 0 {
+		if _, err := qtx.GetCategoryReference(ctx, sqlc.GetCategoryReferenceParams{BusinessID: ownerID, ID: input.CategoryID}); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrProductReferenceNotFound
+			}
+			return err
+		}
+	}
+	if input.SupplierID > 0 {
+		if _, err := qtx.GetSupplierReference(ctx, sqlc.GetSupplierReferenceParams{BusinessID: ownerID, ID: input.SupplierID}); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrProductReferenceNotFound
+			}
+			return err
+		}
+	}
+	if input.BrandID > 0 {
+		if _, err := qtx.GetBrandReference(ctx, sqlc.GetBrandReferenceParams{BusinessID: ownerID, ID: input.BrandID}); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrProductReferenceNotFound
+			}
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *Repository) replacePrimaryProductImage(ctx context.Context, qtx *sqlc.Queries, ownerID, productID int64, alt, imageURL string) error {

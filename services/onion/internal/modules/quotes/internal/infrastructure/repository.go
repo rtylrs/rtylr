@@ -107,11 +107,24 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		logger.Ctx(ctx).Error("Failed to begin quote update transaction", logger.Error(err))
 		return err
 	}
+	committed := false
 	defer func() {
-		if err != nil {
+		if !committed {
 			_ = tx.Rollback()
 		}
 	}()
+
+	quoteRow, err := r.queries.WithTx(tx).GetQuote(ctx, sqlc.GetQuoteParams{ID: id, BusinessID: businessID})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrQuoteNotFound
+		}
+		return err
+	}
+	status := string(quoteRow.Status.FinanceQuotesStatus)
+	if status != "draft" && status != "sent" {
+		return domain.ErrQuoteNotEditable
+	}
 
 	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
@@ -121,7 +134,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		return err
 	}
 
-	err = r.queries.WithTx(tx).UpdateQuote(ctx, sqlc.UpdateQuoteParams{
+	result, err := r.queries.WithTx(tx).UpdateQuote(ctx, sqlc.UpdateQuoteParams{
 		CustomerName:  input.CustomerName,
 		CustomerEmail: nullableString(input.CustomerEmail),
 		Status:        sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus(input.Status), Valid: input.Status != ""},
@@ -139,11 +152,19 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		logger.Ctx(ctx).Error("Failed to update quote", logger.Error(err))
 		return err
 	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return domain.ErrQuoteNotEditable
+	}
 
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit quote update transaction", logger.Error(err))
 		return err
 	}
+	committed = true
 
 	return nil
 }
@@ -163,13 +184,31 @@ func (r *Repository) UpdateStatus(ctx context.Context, businessID, id int64, sta
 }
 
 func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
-	err := r.queries.DeleteQuote(ctx, sqlc.DeleteQuoteParams{
+	result, err := r.queries.DeleteQuote(ctx, sqlc.DeleteQuoteParams{
 		ID:         id,
 		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete quote", logger.Error(err))
 		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected != 0 {
+		return nil
+	}
+
+	quote, err := r.Get(ctx, businessID, id)
+	if errors.Is(err, domain.ErrQuoteNotFound) {
+		return domain.ErrQuoteNotFound
+	}
+	if err != nil {
+		return err
+	}
+	if !quote.IsEditable() {
+		return domain.ErrQuoteNotEditable
 	}
 
 	return nil

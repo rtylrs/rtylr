@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
@@ -55,6 +56,20 @@ func TestCreateStockTake_ReturnsInsertedID(t *testing.T) {
 	}
 	if id <= 0 {
 		t.Fatalf("stock_takes.CreateStockTake: expected positive ID, got %d", id)
+	}
+}
+
+func TestCreateStockTake_RejectsUnscopedProductReference(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	_, err := repo.CreateStockTake(context.Background(), testutil.OwnerID, domain.StockTakeInput{
+		Items: []domain.StockTakeItemInput{
+			{ProductID: 999999999, ExpectedQty: 1, CountedQty: 1},
+		},
+	})
+	if !errors.Is(err, domain.ErrStockTakeReferenceNotFound) {
+		t.Fatalf("CreateStockTake cross-business product error = %v, want ErrStockTakeReferenceNotFound", err)
 	}
 }
 
