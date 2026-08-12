@@ -580,20 +580,25 @@ export const flowApi = {
   // `archived` is load bearing in both directions: `false` is what un-archives a
   // task so it must be sent as `false`, while `undefined` must stay omitted.
   // Never collapse it to a truthiness check - flowApi.test pins both directions.
-  updateTask: (id: string, data: Partial<ApiTask>) => {
-    const body: Record<string, unknown> = {};
-    if (data.title !== undefined) body.title = data.title;
-    if (data.description !== undefined) body.description = data.description;
-    if (data.status !== undefined) body.status = data.status;
-    if (data.priority !== undefined) body.priority = data.priority;
-    if (data.assigneeId !== undefined)
-      body.assignee_id = data.assigneeId ? Number(data.assigneeId) : null;
-    if (data.dueDate !== undefined) body.due_date = data.dueDate;
-    if (data.startDate !== undefined) body.start_date = data.startDate;
-    if (data.labels !== undefined) body.labels = data.labels.map((l) => Number(l));
-    if (data.archived !== undefined) body.archived = data.archived;
-    return safe.put<{ message: string }>(`/flow/task/v1/tasks/${id}`, body);
-  },
+  updateTask: (id: string, data: Partial<ApiTask>) =>
+    safe.put<{ message: string }>(`/flow/task/v1/tasks/${id}`, {
+      body: {
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        priority: data.priority,
+        assignee_id:
+          data.assigneeId !== undefined
+            ? data.assigneeId
+              ? Number(data.assigneeId)
+              : null
+            : undefined,
+        due_date: data.dueDate,
+        start_date: data.startDate,
+        labels: data.labels?.map((l) => Number(l)),
+        archived: data.archived,
+      },
+    }),
 
   deleteTask: (id: string) => safe.delete<{ message: string }>(`/flow/task/v1/tasks/${id}`),
 
