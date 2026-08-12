@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	ErrProductNotFound      = errors.New("product not found")
-	ErrProductAlreadyExists = errors.New("product SKU or barcode already exists")
+	ErrProductNotFound          = errors.New("product not found")
+	ErrProductAlreadyExists     = errors.New("product SKU or barcode already exists")
+	ErrProductReferenceNotFound = errors.New("product reference not found in business")
 )
 
 type Product struct {
