@@ -36,17 +36,37 @@ type repository interface {
 	CreateShiftAssignment(ctx context.Context, businessID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error)
 	PublishRosterAssignments(ctx context.Context, businessID int64, weekStart, weekEnd string) error
 	ListEmployeeAssignmentsForDate(ctx context.Context, businessID, employeeID int64, date string) ([]domain.ShiftAssignmentRecord, error)
+
+	ListAvailability(ctx context.Context, businessID int64, params domain.ListAvailabilityParams) ([]domain.AvailabilityRecord, int64, error)
+	GetAvailability(ctx context.Context, businessID, id int64) (*domain.AvailabilityRecord, error)
+	UpsertAvailability(ctx context.Context, businessID int64, entry domain.AvailabilityRecord) (*domain.AvailabilityRecord, error)
+	DeleteAvailability(ctx context.Context, businessID, id int64) error
+	ListAvailabilityForStaffDate(ctx context.Context, businessID, staffID int64, date string, dayOfWeek int32) ([]domain.AvailabilityRecord, error)
 }
 
 type Service struct {
 	repo                 repository
 	leaveConflictChecker domain.LeaveConflictChecker
+	// permissions gates writes against another staff member's availability. Nil
+	// means no provider was wired, which is treated as "no permission".
+	permissions domain.PermissionProvider
+	// staffResolver maps between hr_staff.id and hr_employees.id. Nil disables
+	// the availability check rather than failing the assignment.
+	staffResolver domain.StaffResolver
 }
 
-func NewService(_ context.Context, db *sql.DB, leaveChecker domain.LeaveConflictChecker) *Service {
+func NewService(
+	_ context.Context,
+	db *sql.DB,
+	leaveChecker domain.LeaveConflictChecker,
+	permissions domain.PermissionProvider,
+) *Service {
+	repo := infrastructure.NewRepository(db)
 	return &Service{
-		repo:                 infrastructure.NewRepository(db),
+		repo:                 repo,
 		leaveConflictChecker: leaveChecker,
+		permissions:          permissions,
+		staffResolver:        repo,
 	}
 }
 
@@ -215,24 +235,47 @@ func (s *Service) GetRoster(ctx context.Context, businessID int64, params domain
 	return assignments, conflicts, nil
 }
 
-func (s *Service) CreateShiftAssignment(ctx context.Context, businessID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, error) {
-	_, err := s.repo.GetShift(ctx, businessID, assignment.ShiftID)
+// CreateShiftAssignment assigns an employee to a shift and returns any advisory
+// warnings alongside the new row.
+//
+// Approved leave still blocks the write, because leave is an entitlement the
+// business has already granted. Declared availability does not: it is a stated
+// preference, and a scheduler legitimately needs to staff against one to cover a
+// no-show or an agreed swap. Those conflicts come back as warnings so the caller
+// is told without being stopped.
+func (s *Service) CreateShiftAssignment(ctx context.Context, businessID int64, assignment domain.ShiftAssignmentRecord) (*domain.ShiftAssignmentRecord, []string, error) {
+	shift, err := s.repo.GetShift(ctx, businessID, assignment.ShiftID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	conflicts := s.DetectConflicts(ctx, businessID, assignment.EmployeeID, assignment.Date)
 	for _, c := range conflicts {
 		if c.ConflictType == "leave" {
-			return nil, domain.ErrRosterConflict
+			return nil, nil, domain.ErrRosterConflict
 		}
 	}
 
+	availabilityConflicts := s.detectAvailabilityConflicts(
+		ctx, businessID, assignment.EmployeeID, assignment.Date, shift.StartTime, shift.EndTime,
+	)
+
 	rec, err := s.repo.CreateShiftAssignment(ctx, businessID, assignment)
-	if err == nil {
-		invalidateHRShiftsScope(ctx, businessID)
+	if err != nil {
+		return nil, nil, err
 	}
-	return rec, err
+	invalidateHRShiftsScope(ctx, businessID)
+
+	warnings := describeConflicts(availabilityConflicts)
+	if len(warnings) > 0 {
+		logger.Ctx(ctx).Info("shift assignment created against declared availability",
+			logger.Any("business_id", businessID),
+			logger.Any("employee_id", assignment.EmployeeID),
+			logger.Any("date", assignment.Date),
+			logger.Any("warning_count", len(warnings)))
+	}
+
+	return rec, warnings, nil
 }
 
 func (s *Service) PublishRoster(ctx context.Context, businessID, locationID int64, weekStart string) error {
