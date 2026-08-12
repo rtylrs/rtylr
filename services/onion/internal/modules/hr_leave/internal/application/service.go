@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
@@ -14,8 +15,9 @@ import (
 )
 
 const (
-	hrLeaveScope = "hr_leave"
-	hrLeaveTTL   = 2 * time.Minute
+	hrLeaveScope             = "hr_leave"
+	hrLeaveTTL               = 2 * time.Minute
+	permissionApproveTimeOff = "approve_time_off"
 )
 
 func invalidateHRLeaveScope(ctx context.Context, ownerID int64) {
@@ -27,12 +29,14 @@ func invalidateHRLeaveScope(ctx context.Context, ownerID int64) {
 type Service struct {
 	repo             *infrastructure.Repository
 	approvalProvider domain.ApprovalChainProvider
+	permissions      domain.PermissionProvider
 }
 
-func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider) *Service {
+func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider, permissions domain.PermissionProvider) *Service {
 	return &Service{
 		repo:             infrastructure.NewRepository(db),
 		approvalProvider: approvalProvider,
+		permissions:      permissions,
 	}
 }
 
@@ -164,18 +168,24 @@ func (s *Service) CreateLeaveRequest(ctx context.Context, ownerID int64, req dom
 	return created, nil
 }
 
-func (s *Service) ListLeaveRequests(ctx context.Context, ownerID int64, params domain.ListLeaveRequestsParams) ([]domain.LeaveRequestRecord, int64, error) {
+func (s *Service) ListLeaveRequests(ctx context.Context, ownerID, callerUserID int64, params domain.ListLeaveRequestsParams) ([]domain.LeaveRequestRecord, int64, error) {
 	if params.Limit <= 0 {
 		params.Limit = 20
 	}
 	if params.Limit > 100 {
 		params.Limit = 100
 	}
+	effectiveEmployeeID, err := s.scopeLeaveRequests(ctx, ownerID, callerUserID, params.EmployeeID)
+	if err != nil {
+		return nil, 0, err
+	}
+	params.EmployeeID = effectiveEmployeeID
+	params.Status = strings.ToLower(strings.TrimSpace(params.Status))
 	type lr struct {
 		Items []domain.LeaveRequestRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("reqs|l=%d|o=%d", params.Limit, params.Offset))
+	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("reqs|e=%d|s=%s|l=%d|o=%d", params.EmployeeID, params.Status, params.Limit, params.Offset))
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
 			items, total, err := s.repo.ListLeaveRequests(ctx, ownerID, params)
@@ -186,13 +196,8 @@ func (s *Service) ListLeaveRequests(ctx context.Context, ownerID int64, params d
 	return res.Items, res.Total, err
 }
 
-func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID int64) error {
-	req, err := s.repo.GetLeaveRequest(ctx, ownerID, requestID)
-	if err != nil {
-		return err
-	}
-
-	lt, err := s.repo.GetLeaveType(ctx, ownerID, req.LeaveTypeID)
+func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID, approverUserID int64) error {
+	req, lt, err := s.authorizedLeaveDecision(ctx, ownerID, requestID, approverUserID)
 	if err != nil {
 		return err
 	}
@@ -236,8 +241,8 @@ func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID int64) er
 	return nil
 }
 
-func (s *Service) RejectLeave(ctx context.Context, ownerID, requestID int64, reason string) error {
-	req, err := s.repo.GetLeaveRequest(ctx, ownerID, requestID)
+func (s *Service) RejectLeave(ctx context.Context, ownerID, requestID, approverUserID int64, reason string) error {
+	req, _, err := s.authorizedLeaveDecision(ctx, ownerID, requestID, approverUserID)
 	if err != nil {
 		return err
 	}
@@ -261,6 +266,116 @@ func (s *Service) RejectLeave(ctx context.Context, ownerID, requestID int64, rea
 
 	invalidateHRLeaveScope(ctx, ownerID)
 	return nil
+}
+
+// scopeLeaveRequests resolves the authenticated user's employee row before
+// applying any client-supplied filter. A caller with the leave approval
+// permission may request the team feed; every other caller is forced to their
+// own employee row, even when employee_id is supplied by the client.
+func (s *Service) scopeLeaveRequests(ctx context.Context, ownerID, callerUserID, requestedEmployeeID int64) (int64, error) {
+	if s.permissions == nil || callerUserID <= 0 {
+		return 0, domain.ErrLeaveAccessDenied
+	}
+
+	employeeID, err := s.permissions.GetEmployeeIDByUserID(ctx, ownerID, callerUserID)
+	if err != nil || employeeID <= 0 {
+		return 0, domain.ErrLeaveAccessDenied
+	}
+
+	canViewTeam, permissionErr := s.permissions.HasPermission(ctx, ownerID, employeeID, permissionApproveTimeOff)
+	if permissionErr == nil && canViewTeam {
+		return requestedEmployeeID, nil
+	}
+	return employeeID, nil
+}
+
+// authorizedLeaveDecision performs the permission and approval-chain checks
+// before loading the requested row. This keeps an unauthorised caller from
+// using a request id to probe another employee's leave data or mutate it.
+func (s *Service) authorizedLeaveDecision(ctx context.Context, ownerID, requestID, approverUserID int64) (*domain.LeaveRequestRecord, *domain.LeaveTypeRecord, error) {
+	if s.permissions == nil || approverUserID <= 0 {
+		return nil, nil, domain.ErrLeaveAccessDenied
+	}
+
+	employeeID, err := s.permissions.GetEmployeeIDByUserID(ctx, ownerID, approverUserID)
+	if err != nil || employeeID <= 0 {
+		return nil, nil, domain.ErrLeaveAccessDenied
+	}
+	allowed, err := s.permissions.HasPermission(ctx, ownerID, employeeID, permissionApproveTimeOff)
+	if err != nil {
+		return nil, nil, err
+	}
+	if !allowed {
+		return nil, nil, domain.ErrLeaveApproverNotAllowed
+	}
+
+	req, err := s.repo.GetLeaveRequest(ctx, ownerID, requestID)
+	if err != nil {
+		return nil, nil, err
+	}
+	lt, err := s.repo.GetLeaveType(ctx, ownerID, req.LeaveTypeID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if !lt.RequiresApproval {
+		return req, lt, nil
+	}
+	if s.approvalProvider == nil {
+		return nil, nil, domain.ErrApprovalChainNotConfigured
+	}
+	chain, err := s.approvalProvider.GetApprovalChain(ctx, ownerID, "leave")
+	if err != nil {
+		return nil, nil, err
+	}
+	if chain == nil {
+		return nil, nil, domain.ErrApprovalChainNotConfigured
+	}
+	if len(chain.Levels) == 0 {
+		return req, lt, nil
+	}
+
+	matched, err := s.approverMatchesChain(ctx, ownerID, employeeID, req.CurrentApprovalLevel, chain.Levels)
+	if err != nil {
+		return nil, nil, err
+	}
+	if !matched {
+		return nil, nil, domain.ErrLeaveApproverNotAllowed
+	}
+	return req, lt, nil
+}
+
+func (s *Service) approverMatchesChain(ctx context.Context, ownerID, employeeID int64, currentLevel int32, levels []domain.ApprovalLevelInfo) (bool, error) {
+	if len(levels) == 0 {
+		return true, nil
+	}
+
+	targetLevel := currentLevel + 1
+	levelIndex := -1
+	for index, level := range levels {
+		if level.LevelOrder == targetLevel {
+			levelIndex = index
+			break
+		}
+	}
+	// Older approval-chain rows may not have a level_order value. The stored
+	// order is still represented by the slice returned from SQL, so use the
+	// current zero-based position as a backwards-compatible fallback.
+	if levelIndex < 0 && currentLevel >= 0 && int(currentLevel) < len(levels) {
+		levelIndex = int(currentLevel)
+	}
+	if levelIndex < 0 {
+		return false, nil
+	}
+
+	level := levels[levelIndex]
+	if level.ApproverEmployeeID > 0 && level.ApproverEmployeeID == employeeID {
+		return true, nil
+	}
+	if level.ApproverRoleID <= 0 {
+		return false, nil
+	}
+	return s.permissions.HasRole(ctx, ownerID, employeeID, level.ApproverRoleID)
 }
 
 func (s *Service) GetLeaveBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {

@@ -11,14 +11,15 @@ INSERT INTO finance_quotes
 (owner_id, business_id, customer_name, customer_email, status, items, subtotal, tax, discount, total, valid_until, notes)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: UpdateQuote :exec
+-- name: UpdateQuote :execresult
 UPDATE finance_quotes
 SET customer_name = ?, customer_email = ?, status = ?, items = ?,
     subtotal = ?, tax = ?, discount = ?, total = ?, valid_until = ?, notes = ?
-WHERE id = ? AND business_id = ?;
+WHERE id = ? AND business_id = ? AND status IN ('draft', 'sent');
 
--- name: DeleteQuote :exec
-DELETE FROM finance_quotes WHERE id = ? AND business_id = ?;
+-- name: DeleteQuote :execresult
+DELETE FROM finance_quotes
+WHERE id = ? AND business_id = ? AND status IN ('draft', 'sent');
 
 -- name: GetQuote :one
 SELECT id, owner_id, business_id, customer_name, customer_email, status,

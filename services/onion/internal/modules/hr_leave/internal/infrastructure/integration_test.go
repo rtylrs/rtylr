@@ -2,12 +2,63 @@ package infrastructure_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
+
+func TestListLeaveRequests_EmployeeAndStatusFilters(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	name := fmt.Sprintf("Scope filter %d", time.Now().UnixNano())
+
+	lt, err := repo.CreateLeaveType(ctx, testutil.OwnerID, domain.LeaveTypeRecord{
+		Name:             name,
+		RequiresApproval: false,
+		IsActive:         true,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveType: %v", err)
+	}
+	var requestIDs []int64
+	t.Cleanup(func() {
+		for _, requestID := range requestIDs {
+			_, _ = db.ExecContext(ctx, "DELETE FROM hr_leave_requests WHERE id = ?", requestID)
+		}
+		_, _ = db.ExecContext(ctx, "DELETE FROM hr_leave_types WHERE id = ?", lt.ID)
+	})
+
+	for _, request := range []domain.LeaveRequestRecord{
+		{EmployeeID: 4101, LeaveTypeID: lt.ID, StartDate: "2035-01-01", EndDate: "2035-01-02", TotalDays: 2, Status: domain.LeaveStatusPending},
+		{EmployeeID: 4102, LeaveTypeID: lt.ID, StartDate: "2035-02-01", EndDate: "2035-02-02", TotalDays: 2, Status: domain.LeaveStatusApproved},
+	} {
+		created, createErr := repo.CreateLeaveRequest(ctx, testutil.OwnerID, request)
+		if createErr != nil {
+			t.Fatalf("CreateLeaveRequest: %v", createErr)
+		}
+		requestIDs = append(requestIDs, created.ID)
+	}
+
+	requests, total, err := repo.ListLeaveRequests(ctx, testutil.OwnerID, domain.ListLeaveRequestsParams{
+		EmployeeID: 4101,
+		Status:     domain.LeaveStatusPending,
+		Limit:      100,
+	})
+	if err != nil {
+		t.Fatalf("ListLeaveRequests: %v", err)
+	}
+	if total != 1 || len(requests) != 1 {
+		t.Fatalf("filtered requests total=%d len=%d, want 1", total, len(requests))
+	}
+	if requests[0].EmployeeID != 4101 || requests[0].Status != domain.LeaveStatusPending {
+		t.Fatalf("filtered request = employee %d status %q, want employee 4101 pending", requests[0].EmployeeID, requests[0].Status)
+	}
+}
 
 func TestListLeaveRequests_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)

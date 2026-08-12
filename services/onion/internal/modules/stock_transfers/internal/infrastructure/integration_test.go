@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
@@ -57,6 +58,22 @@ func TestCreateStockTransfer_ReturnsInsertedID(t *testing.T) {
 	}
 	if id <= 0 {
 		t.Fatalf("stock_transfers.CreateStockTransfer: expected positive ID, got %d", id)
+	}
+}
+
+func TestCreateStockTransfer_RejectsUnscopedWarehouseReference(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	_, err := repo.CreateStockTransfer(context.Background(), testutil.OwnerID, domain.StockTransferInput{
+		FromWarehouseID: 999999999,
+		ToWarehouseID:   2,
+		Items: []domain.StockTransferItemInput{
+			{ProductID: 5201, Quantity: 1},
+		},
+	})
+	if !errors.Is(err, domain.ErrStockTransferReferenceNotFound) {
+		t.Fatalf("CreateStockTransfer cross-business warehouse error = %v, want ErrStockTransferReferenceNotFound", err)
 	}
 }
 

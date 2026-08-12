@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
@@ -22,6 +23,7 @@ type repository interface {
 
 type Service struct {
 	repo repository
+	db   *sql.DB
 }
 
 type stockTakesPageResult struct {
@@ -34,6 +36,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 	return &Service{
 		repo: repo,
+		db:   db,
 	}
 }
 
@@ -69,6 +72,9 @@ func (s *Service) CreateStockTake(ctx context.Context, businessID int64, input d
 	if err != nil {
 		return 0, err
 	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "stock_take", EntityID: id, Action: "created", NewValues: input}); err != nil {
+		return 0, err
+	}
 
 	s.invalidateCache(ctx, businessID)
 
@@ -78,6 +84,9 @@ func (s *Service) CreateStockTake(ctx context.Context, businessID int64, input d
 func (s *Service) UpdateStockTake(ctx context.Context, businessID int64, input domain.StockTakeUpdateInput) error {
 	err := s.repo.UpdateStockTake(ctx, businessID, input)
 	if err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "stock_take", EntityID: input.ID, Action: "updated", NewValues: input}); err != nil {
 		return err
 	}
 

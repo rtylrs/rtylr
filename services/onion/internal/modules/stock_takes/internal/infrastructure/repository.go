@@ -137,6 +137,9 @@ func (r *Repository) CreateStockTake(ctx context.Context, businessID int64, inpu
 	}()
 
 	qtx := r.queries.WithTx(tx)
+	if err := validateStockTakeReferences(ctx, qtx, businessID, input); err != nil {
+		return 0, err
+	}
 
 	res, err := qtx.InsertStockTake(ctx, sqlc.InsertStockTakeParams{
 		OwnerID:     businessID,
@@ -178,6 +181,26 @@ func (r *Repository) CreateStockTake(ctx context.Context, businessID int64, inpu
 	}
 
 	return stockTakeID, nil
+}
+
+func validateStockTakeReferences(ctx context.Context, qtx *sqlc.Queries, businessID int64, input domain.StockTakeInput) error {
+	if input.WarehouseID > 0 {
+		if _, err := qtx.GetWarehouseReference(ctx, sqlc.GetWarehouseReferenceParams{BusinessID: businessID, ID: input.WarehouseID}); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrStockTakeReferenceNotFound
+			}
+			return err
+		}
+	}
+	for _, item := range input.Items {
+		if _, err := qtx.GetProductReference(ctx, sqlc.GetProductReferenceParams{BusinessID: businessID, ID: item.ProductID}); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrStockTakeReferenceNotFound
+			}
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, input domain.StockTakeUpdateInput) error {

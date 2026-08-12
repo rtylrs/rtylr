@@ -57,8 +57,8 @@ func (s *Service) HasRole(ctx context.Context, ownerID, employeeID, roleID int64
 
 // SetFinancePoster wires a finance module implementation into the payroll
 // service. Call this from the module bootstrap after both modules have been
-// constructed. Until called, exports are recorded but no journal entry is
-// posted (the warning is logged).
+// constructed. Until called, payroll exports fail instead of being marked as
+// exported without a corresponding finance journal entry.
 func (s *Service) SetFinancePoster(p domain.FinanceJournalPoster) {
 	if p != nil {
 		s.financePoster = p
@@ -80,7 +80,7 @@ func (noopFinancePoster) PostPayrollJournal(ctx context.Context, entry domain.Pa
 		logger.Any("owner_id", entry.OwnerID),
 		logger.Any("run_id", entry.RunID),
 	)
-	return nil
+	return domain.ErrFinanceIntegrationUnavailable
 }
 
 type noopNotifier struct{}
@@ -361,6 +361,9 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 
 	if err := s.repo.ClaimPayrollRunForExport(ctx, ownerID, runID); err != nil {
 		return err
+	}
+	if s.financePoster == nil {
+		return domain.ErrFinanceIntegrationUnavailable
 	}
 
 	if postErr := s.financePoster.PostPayrollJournal(ctx, domain.PayrollJournalEntry{

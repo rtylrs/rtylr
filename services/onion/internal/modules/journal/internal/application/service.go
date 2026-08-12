@@ -19,6 +19,7 @@ const (
 
 type repository interface {
 	List(ctx context.Context, businessID int64, limit, offset int32) ([]domain.JournalEntry, error)
+	Get(ctx context.Context, businessID, id int64) (domain.JournalEntry, error)
 	Create(ctx context.Context, ownerID, businessID int64, input domain.JournalEntryInput) (int64, error)
 	Post(ctx context.Context, businessID, id int64) error
 }
@@ -54,6 +55,10 @@ func (s *Service) List(ctx context.Context, businessID, page, pageSize int64) ([
 		rows = rows[:limit]
 	}
 	return rows, hasMore, nil
+}
+
+func (s *Service) Get(ctx context.Context, businessID, id int64) (domain.JournalEntry, error) {
+	return s.repo.Get(ctx, businessID, id)
 }
 
 func paginate(page, pageSize int64) (int, int) {

@@ -96,6 +96,69 @@ func (r *Repository) CountUnmatched(ctx context.Context, businessID int64) (int6
 	return cnt, nil
 }
 
+// Sync applies imported feed rows to connected account balances exactly once.
+// The account's last_synced_at is the cursor, and both the balance update and
+// cursor advance are committed in one transaction so retries are idempotent.
+func (r *Repository) Sync(ctx context.Context, businessID int64) (int, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+	accounts, err := qtx.ListSyncBankAccounts(ctx, businessID)
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+
+	imported := 0
+	for _, account := range accounts {
+		var amounts []int64
+		if account.LastSyncedAt.Valid {
+			amounts, err = qtx.ListBankFeedAmountsSince(ctx, sqlc.ListBankFeedAmountsSinceParams{
+				BusinessID:    businessID,
+				BankAccountID: account.ID,
+				CreatedAt:     account.LastSyncedAt,
+			})
+		} else {
+			amounts, err = qtx.ListBankFeedAmounts(ctx, sqlc.ListBankFeedAmountsParams{
+				BusinessID:    businessID,
+				BankAccountID: account.ID,
+			})
+		}
+		if err != nil {
+			_ = tx.Rollback()
+			return 0, err
+		}
+
+		balance := parseFloatNull(account.Balance)
+		for _, amount := range amounts {
+			balance += float64(amount) / 100
+		}
+		if _, err := qtx.UpdateSyncedBankAccount(ctx, sqlc.UpdateSyncedBankAccountParams{
+			Balance:    nullableString(fmtFloat(balance)),
+			ID:         account.ID,
+			BusinessID: businessID,
+		}); err != nil {
+			_ = tx.Rollback()
+			return 0, err
+		}
+		imported += len(amounts)
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return imported, nil
+}
+
 // ---------------------------------------------------------------------------
 // Conversion helpers
 // ---------------------------------------------------------------------------
@@ -105,6 +168,29 @@ func nullStr(s sql.NullString) string {
 		return s.String
 	}
 	return ""
+}
+
+func parseFloatNull(s sql.NullString) float64 {
+	if !s.Valid {
+		return 0
+	}
+	v, err := strconv.ParseFloat(s.String, 64)
+	if err != nil {
+		logger.Global().Warn("failed to parse synced bank account balance",
+			logger.String("value", s.String),
+			logger.Error(err),
+		)
+		return 0
+	}
+	return v
+}
+
+func nullableString(s string) sql.NullString {
+	return sql.NullString{String: s, Valid: s != ""}
+}
+
+func fmtFloat(f float64) string {
+	return strconv.FormatFloat(f, 'f', 2, 64)
 }
 
 func nullInt64Ptr(n sql.NullInt64) *int64 {
