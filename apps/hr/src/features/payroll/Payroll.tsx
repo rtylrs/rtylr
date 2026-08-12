@@ -20,6 +20,8 @@ import {
   Tabs,
   Pill,
 } from '../../shared/components/ui';
+import { useHrSettings } from '../../shared/hooks/useHrExtras';
+import { formatCurrency } from '../../shared/lib/hrNumberUtils';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -32,17 +34,10 @@ const STATUS_COLORS: Record<string, string> = {
 const FILTER_STATUSES = ['all', 'draft', 'in_review', 'approved', 'exported'] as const;
 type StatusFilter = (typeof FILTER_STATUSES)[number];
 
-function fmt(n: number): string {
-  return n.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  });
-}
-
 const Payroll = (): React.JSX.Element => {
   const { t } = useTranslation();
   const config = useHRConfigStore((s) => s.config);
+  const { data: settings } = useHrSettings();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -123,14 +118,14 @@ const Payroll = (): React.JSX.Element => {
           {[
             {
               label: t('payroll.stats.totalGross'),
-              value: fmt(totalGross),
+              value: formatCurrency(totalGross, settings?.currency),
               icon: DollarSign,
               color: 'var(--accent)',
               bg: 'var(--accent-muted)',
             },
             {
               label: t('payroll.stats.totalNet'),
-              value: fmt(totalNet),
+              value: formatCurrency(totalNet, settings?.currency),
               icon: TrendingUp,
               color: 'var(--hr-status-approved)',
               bg: 'color-mix(in srgb, var(--hr-status-approved) 12%, transparent)',
@@ -228,7 +223,8 @@ const Payroll = (): React.JSX.Element => {
                     <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
                       <Users size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                       {t('payroll.employeeCount', { count: run.entries?.length ?? 0 })} ·{' '}
-                      {t('payroll.netTotal')}: {fmt(run.totalNet ?? 0)}
+                      {t('payroll.netTotal')}:{' '}
+                      {formatCurrency(run.totalNet ?? 0, settings?.currency)}
                     </div>
                   </div>
                 </Card>

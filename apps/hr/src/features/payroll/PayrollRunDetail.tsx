@@ -17,6 +17,8 @@ import {
   EmptyState,
 } from '../../shared/components/ui';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
+import { useHrSettings } from '../../shared/hooks/useHrExtras';
+import { formatCurrency } from '../../shared/lib/hrNumberUtils';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'var(--hr-text-muted)',
@@ -24,14 +26,6 @@ const STATUS_COLORS: Record<string, string> = {
   approved: 'var(--hr-status-approved)',
   exported: 'var(--hr-status-paid)',
 };
-
-function fmt(n: number): string {
-  return n.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  });
-}
 
 const ROW_HEIGHT = 56;
 const HEADER_HEIGHT = 44;
@@ -45,6 +39,7 @@ const routeApi = getRouteApi('/hr-config/payroll/$id');
 const PayrollRunDetailContent = (): React.JSX.Element => {
   const { id: runId } = routeApi.useParams();
   const { t } = useTranslation();
+  const { data: settings } = useHrSettings();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
   const { data: run, isLoading } = useGetPayrollRun(runId);
@@ -176,17 +171,17 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
         {[
           {
             label: t('payroll.stats.totalGross'),
-            value: fmt(run.totalGross ?? 0),
+            value: formatCurrency(run.totalGross ?? 0, settings?.currency),
             color: 'var(--accent)',
           },
           {
             label: t('payroll.stats.totalDeductions'),
-            value: fmt(totalDeductions),
+            value: formatCurrency(totalDeductions, settings?.currency),
             color: 'var(--hr-error)',
           },
           {
             label: t('payroll.stats.totalNet'),
-            value: fmt(run.totalNet ?? 0),
+            value: formatCurrency(run.totalNet ?? 0, settings?.currency),
             color: 'var(--hr-status-approved)',
           },
         ].map((stat) => (
@@ -341,7 +336,9 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                   <span style={{ fontSize: 13, color: 'var(--hr-text)' }}>
                     {entry.hoursWorked}h
                   </span>
-                  <span style={{ fontSize: 13, color: 'var(--hr-text)' }}>{fmt(basePay)}</span>
+                  <span style={{ fontSize: 13, color: 'var(--hr-text)' }}>
+                    {formatCurrency(basePay, settings?.currency)}
+                  </span>
                   <span
                     style={{
                       fontSize: 13,
@@ -349,7 +346,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                         overtimePay > 0 ? 'var(--hr-status-submitted)' : 'var(--hr-text-muted)',
                     }}
                   >
-                    {overtimePay > 0 ? fmt(overtimePay) : '-'}
+                    {overtimePay > 0 ? formatCurrency(overtimePay, settings?.currency) : '-'}
                   </span>
                   <span
                     style={{
@@ -357,7 +354,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                       color: deductions > 0 ? 'var(--hr-error)' : 'var(--hr-text-muted)',
                     }}
                   >
-                    {deductions > 0 ? fmt(deductions) : '-'}
+                    {deductions > 0 ? formatCurrency(deductions, settings?.currency) : '-'}
                   </span>
                   <span
                     style={{
@@ -365,7 +362,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                       color: bonuses > 0 ? 'var(--hr-status-approved)' : 'var(--hr-text-muted)',
                     }}
                   >
-                    {bonuses > 0 ? fmt(bonuses) : '-'}
+                    {bonuses > 0 ? formatCurrency(bonuses, settings?.currency) : '-'}
                   </span>
                   <span
                     style={{
@@ -374,7 +371,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                       color: 'var(--hr-status-approved)',
                     }}
                   >
-                    {fmt(netPay)}
+                    {formatCurrency(netPay, settings?.currency)}
                   </span>
                 </div>
               );

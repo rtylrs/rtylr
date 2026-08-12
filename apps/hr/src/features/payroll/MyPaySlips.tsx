@@ -6,17 +6,12 @@ import { FileText, DollarSign } from 'lucide-react';
 import { useListMyPayrollRuns } from '../../shared/hooks/queries/usePayroll';
 import type { PayrollRunPayload } from '../../shared/hooks/queries/usePayroll';
 import { SectionHeader, Card, Pill, Skeleton, EmptyState } from '../../shared/components/ui';
-
-function fmt(n: number): string {
-  return n.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  });
-}
+import { useHrSettings } from '../../shared/hooks/useHrExtras';
+import { formatCurrency } from '../../shared/lib/hrNumberUtils';
 
 const MyPaySlips = (): React.JSX.Element => {
   const { t } = useTranslation();
+  const { data: settings } = useHrSettings();
   const { data, isLoading } = useListMyPayrollRuns({ limit: 50, offset: 0 });
   const runs = data?.runs ?? [];
 
@@ -87,7 +82,8 @@ const MyPaySlips = (): React.JSX.Element => {
                       </Pill>
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                      {t('payroll.netTotal')}: {fmt(run.totalNet ?? 0)}
+                      {t('payroll.netTotal')}:{' '}
+                      {formatCurrency(run.totalNet ?? 0, settings?.currency)}
                     </div>
                   </div>
                 </Card>
