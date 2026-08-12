@@ -197,6 +197,73 @@ func TestUpdateStockTransferStatus_ChangesToCompleted(t *testing.T) {
 	t.Fatalf("updated stock transfer id=%d not found", id)
 }
 
+func TestReceivedStockTransfer_CannotBeReopenedOrMovedAgain(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateStockTransfer(ctx, testutil.OwnerID, domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Items: []domain.StockTransferItemInput{
+			{ProductID: 5201, Quantity: 1.0},
+		},
+	})
+	if err != nil {
+		t.Fatalf("stock_transfers.CreateStockTransfer: %v", err)
+	}
+
+	if err := repo.UpdateStockTransferStatus(ctx, testutil.OwnerID, id, domain.StockTransferStatusReceived); err != nil {
+		t.Fatalf("first receive: %v", err)
+	}
+
+	var initialLedgerCount int
+	if err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*)
+		FROM stock_ledger
+		WHERE owner_id = ? AND reference_type = 'stock_transfer' AND reference_id = ?`,
+		testutil.OwnerID, id).Scan(&initialLedgerCount); err != nil {
+		t.Fatalf("count initial stock-transfer ledger entries: %v", err)
+	}
+	if initialLedgerCount != 2 {
+		t.Fatalf("expected two ledger entries after first receive, got %d", initialLedgerCount)
+	}
+
+	for _, status := range []domain.StockTransferStatus{
+		domain.StockTransferStatusDraft,
+		domain.StockTransferStatusInTransit,
+		domain.StockTransferStatusCancelled,
+	} {
+		if err := repo.UpdateStockTransferStatus(ctx, testutil.OwnerID, id, status); err != nil {
+			t.Fatalf("reopen received transfer as %q: %v", status, err)
+		}
+
+		transfer, err := repo.GetByID(ctx, testutil.OwnerID, id)
+		if err != nil {
+			t.Fatalf("get transfer after attempted %q reopen: %v", status, err)
+		}
+		if transfer.Status != domain.StockTransferStatusReceived {
+			t.Fatalf("received transfer changed to %q after attempted %q reopen", transfer.Status, status)
+		}
+	}
+
+	if err := repo.UpdateStockTransferStatus(ctx, testutil.OwnerID, id, domain.StockTransferStatusReceived); err != nil {
+		t.Fatalf("second receive: %v", err)
+	}
+
+	var finalLedgerCount int
+	if err := db.QueryRowContext(ctx, `
+		SELECT COUNT(*)
+		FROM stock_ledger
+		WHERE owner_id = ? AND reference_type = 'stock_transfer' AND reference_id = ?`,
+		testutil.OwnerID, id).Scan(&finalLedgerCount); err != nil {
+		t.Fatalf("count final stock-transfer ledger entries: %v", err)
+	}
+	if finalLedgerCount != initialLedgerCount {
+		t.Fatalf("expected receive to remain idempotent with %d ledger entries, got %d", initialLedgerCount, finalLedgerCount)
+	}
+}
+
 func TestCreateStockTransfer_ItemsLoaded(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

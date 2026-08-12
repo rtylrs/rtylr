@@ -34,7 +34,8 @@ VALUES (?, ?, ?);
 -- name: UpdateStockTransferStatus :exec
 UPDATE erp_stock_transfers
 SET status = ?
-WHERE business_id = ? AND id = ?;
+WHERE business_id = ? AND id = ?
+  AND (status IS NULL OR status <> 'received');
 
 -- name: GetStockTransferByID :one
 SELECT id, owner_id, business_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
