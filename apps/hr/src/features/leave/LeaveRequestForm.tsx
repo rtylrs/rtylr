@@ -84,9 +84,10 @@ const LeaveRequestForm = (): React.JSX.Element => {
     }
 
     const requestedDays = daysBetween(startDate, endDate);
-    if (selectedBalance && requestedDays > selectedBalance.remainingDays) {
+    const remainingDays = selectedBalance?.remainingDays;
+    if (remainingDays !== undefined && requestedDays > remainingDays) {
       toast.error(
-        `Requested ${requestedDays} day(s) exceeds remaining balance of ${selectedBalance.remainingDays} day(s)`
+        `Requested ${requestedDays} day(s) exceeds remaining balance of ${remainingDays} day(s)`
       );
       return;
     }
