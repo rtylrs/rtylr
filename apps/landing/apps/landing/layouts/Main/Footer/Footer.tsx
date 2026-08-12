@@ -44,6 +44,11 @@ const Footer: React.FC = () => {
           label: 'Documentation',
           external: true,
         },
+        {
+          to: 'https://docs.rtylr.com/self-hosting',
+          label: 'Self Host rtylr',
+          external: true,
+        },
         { to: '/integrations', label: 'Integrations' },
         { to: '/support', label: 'Help Center' },
       ],
