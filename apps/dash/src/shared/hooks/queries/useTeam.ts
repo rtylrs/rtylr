@@ -148,15 +148,11 @@ export const useUpdateMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<TeamMember> }) => {
-      const nameUpdate = patch.fullName ?? patch.name;
-      if (nameUpdate) {
-        await membersClient.updateMember({
-          userId: id,
-          fullName: nameUpdate,
-        });
-      }
       return permissionsClient.updatePermissions({
         userId: id,
+        ...(patch.fullName || patch.name
+          ? { fullName: patch.fullName ?? patch.name }
+          : {}),
         apps: patch.apps ?? [],
         role: patch.role ?? 'staff',
       });

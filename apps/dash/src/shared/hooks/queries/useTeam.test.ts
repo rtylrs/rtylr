@@ -6,7 +6,6 @@ import React from 'react';
 const mockMembersClient = vi.hoisted(() => ({
   listTeam: vi.fn(),
   getMember: vi.fn(),
-  updateMember: vi.fn(),
   removeMember: vi.fn(),
 }));
 const mockPermissionsClient = vi.hoisted(() => ({
@@ -227,6 +226,7 @@ describe('useUpdateMember', () => {
 
     expect(mockPermissionsClient.updatePermissions).toHaveBeenCalledWith({
       userId: '42',
+      fullName: 'Edited User',
       apps: ['pos', 'finance'],
       role: 'admin',
     });
@@ -273,6 +273,13 @@ describe('useUpdateMember', () => {
         id: '42',
         patch: { fullName: 'New Name', role: 'admin', apps: ['erp', 'flow'] },
       });
+    });
+
+    expect(mockPermissionsClient.updatePermissions).toHaveBeenCalledWith({
+      userId: '42',
+      fullName: 'New Name',
+      apps: ['erp', 'flow'],
+      role: 'admin',
     });
 
     await waitFor(() =>
