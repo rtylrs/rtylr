@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createOneKitClient } from '@voxire/api';
 import { X, Clock, Zap } from 'lucide-react';
 import { SubscriptionServiceClient } from '@voxire/voxie/hub/subscription/v1/client';
-import { APP_URLS } from '@voxire/config';
+import { resolveAppUrl } from '@voxire/config';
 
 const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'crm');
 
@@ -52,7 +52,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
         Add a payment method to keep your data.
       </p>
       <a
-        href={`${APP_URLS.dash as string}/settings/billing`}
+        href={`${resolveAppUrl('dash')}/settings/billing`}
         className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold shrink-0"
         style={{ background: '#f59e0b', color: '#fff' }}
       >
