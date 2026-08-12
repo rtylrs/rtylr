@@ -16,9 +16,14 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   completed: { bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
 };
 
+import { useFlowStore } from '../../shared/stores/flowStore';
+
 const Milestones: React.FC = () => {
   const { t } = useTranslation();
-  const { data: milestones = [], isLoading } = useMilestones();
+  const { activeWorkspaceId } = useFlowStore();
+  const { data: milestones = [], isLoading } = useMilestones({
+    workspaceId: activeWorkspaceId || undefined,
+  });
   const createMilestone = useCreateMilestone();
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -135,7 +140,11 @@ const Milestones: React.FC = () => {
                   return;
                 }
                 createMilestone.mutate(
-                  { name: newName, targetDate: newDate || new Date().toISOString().slice(0, 10) },
+                  {
+                    workspaceId: activeWorkspaceId || undefined,
+                    name: newName,
+                    targetDate: newDate || new Date().toISOString().slice(0, 10),
+                  },
                   {
                     onSuccess: () => {
                       toast.success(t('toasts.milestoneCreated'));
