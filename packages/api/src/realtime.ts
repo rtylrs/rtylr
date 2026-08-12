@@ -142,6 +142,7 @@ export class RealtimeClient {
 
     ws.onmessage = (evt: MessageEvent): void => {
       try {
+        if (typeof evt.data !== 'string') return;
         const msg = JSON.parse(evt.data);
         if (msg?.op === 'event' && msg.event) {
           const e = msg.event as RealtimeEvent;

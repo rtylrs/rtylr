@@ -36,17 +36,43 @@ const Icon: React.FC<IconProps> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     setIsLoading(true);
-    fetch(`/icons/${icon}.svg`)
-      .then((response) => response.text())
+    setSvgContent(null);
+
+    // Sanitize icon name to prevent path traversal
+    const safeIcon = icon.replace(/[^a-zA-Z0-9_-]/g, '');
+    if (!safeIcon) {
+      setIsLoading(false);
+      return;
+    }
+
+    fetch(`/icons/${safeIcon}.svg`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        return response.text();
+      })
       .then((content) => {
-        setSvgContent(content);
+        if (!isMounted) return;
+        // Basic check to ensure fetched content is actually an SVG element
+        if (content.trim().toLowerCase().includes('<svg')) {
+          setSvgContent(content);
+        } else {
+          console.error(`Loaded content for icon '${icon}' is not a valid SVG.`);
+        }
         setIsLoading(false);
       })
       .catch((error) => {
+        if (!isMounted) return;
         console.error('Failed to load icon:', error);
         setIsLoading(false);
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, [icon]);
 
   if (isLoading) {
