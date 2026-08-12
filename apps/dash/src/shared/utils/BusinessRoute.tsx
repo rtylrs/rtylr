@@ -1,6 +1,6 @@
 import { Outlet, useRouterState } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { APP_URLS, getAvatarUrl } from '@voxire/config';
+import { APP_URLS, getAvatarUrl, resolveAuthUrl } from '@voxire/config';
 import { signOut } from '@voxire/auth';
 import CreateBusinessOnboarding from '../../features/onboarding/CreateBusinessOnboarding';
 import {
@@ -374,7 +374,7 @@ function BusinessRoute(): React.JSX.Element | null {
 
   useEffect((): void => {
     if (!token) {
-      window.location.href = `${APP_URLS.auth}?redirect=dash`;
+      window.location.href = `${resolveAuthUrl()}?redirect=dash`;
       return;
     }
 
