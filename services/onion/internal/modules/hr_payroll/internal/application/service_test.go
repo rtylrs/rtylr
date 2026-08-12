@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 )
@@ -28,7 +29,6 @@ func TestTriggerPayrollRun_RejectsInvalidDates(t *testing.T) {
 		{"unparseable start", "not-a-date", "2026-04-30"},
 		{"unparseable end", "2026-04-01", "31-04-2026"},
 		{"end before start", "2026-04-30", "2026-04-01"},
-		{"end equal to start", "2026-04-15", "2026-04-15"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -92,11 +92,58 @@ func TestSetFinancePoster_RealOverridesNoop(t *testing.T) {
 	}
 }
 
-func TestTriggerPayrollRun_EqualDatesRejected(t *testing.T) {
-	s := &Service{}
-	_, _, err := s.TriggerPayrollRun(context.Background(), 1, 1, "2026-05-01", "2026-05-01")
-	if !errors.Is(err, domain.ErrInvalidDateRange) {
-		t.Errorf("equal dates should return ErrInvalidDateRange, got %v", err)
+func TestCalculateMonthlyBasePay_UsesInclusiveCalendarDays(t *testing.T) {
+	start := time.Date(2026, time.April, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(2026, time.April, 30, 0, 0, 0, 0, time.UTC)
+
+	if got := calculateMonthlyBasePay(3000, start, end); got != 3000 {
+		t.Errorf("full April salary = %.2f, want 3000.00", got)
+	}
+}
+
+func TestCalculateMonthlyBasePay_HandlesMonthLengths(t *testing.T) {
+	cases := []struct {
+		name  string
+		start time.Time
+		end   time.Time
+		want  float64
+	}{
+		{
+			name:  "February in a non-leap year",
+			start: time.Date(2025, time.February, 1, 0, 0, 0, 0, time.UTC),
+			end:   time.Date(2025, time.February, 28, 0, 0, 0, 0, time.UTC),
+			want:  3000,
+		},
+		{
+			name:  "February in a leap year",
+			start: time.Date(2024, time.February, 1, 0, 0, 0, 0, time.UTC),
+			end:   time.Date(2024, time.February, 29, 0, 0, 0, 0, time.UTC),
+			want:  3000,
+		},
+		{
+			name:  "single inclusive day",
+			start: time.Date(2026, time.May, 15, 0, 0, 0, 0, time.UTC),
+			end:   time.Date(2026, time.May, 15, 0, 0, 0, 0, time.UTC),
+			want:  3000.0 / 31.0,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := calculateMonthlyBasePay(3000, tc.start, tc.end); got != tc.want {
+				t.Errorf("base pay = %.8f, want %.8f", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestCalculateMonthlyBasePay_SplitsCrossMonthPeriods(t *testing.T) {
+	start := time.Date(2026, time.April, 15, 0, 0, 0, 0, time.UTC)
+	end := time.Date(2026, time.May, 14, 0, 0, 0, 0, time.UTC)
+	want := 3000.0*16.0/30.0 + 3000.0*14.0/31.0
+
+	if got := calculateMonthlyBasePay(3000, start, end); got != want {
+		t.Errorf("cross-month base pay = %.8f, want %.8f", got, want)
 	}
 }
 
