@@ -9,12 +9,31 @@ import { test, expect } from './fixtures';
  */
 
 const FINANCE_URL = process.env.FINANCE_URL ?? 'http://localhost:5182';
+const API_URL = 'https://api.voxire.com';
 
 // ── Shared auth + fallback stub ───────────────────────────────────────────
 
 async function seedAuth(page: import('@playwright/test').Page): Promise<void> {
+  // The finance app now uses generated OneKit clients against the API host,
+  // rather than the old localhost:9999 REST stub.
+  await page.route(`${API_URL}/finance/**`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: '{}',
+    })
+  );
+
+  await page.route(`${API_URL}/runtime-config`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ deployment_mode: 'hosted' }),
+    })
+  );
+
   // AppGuard reads /hub/user/v1/users/me on mount.
-  await page.route('**/hub/user/v1/users/me', (route) =>
+  await page.route(`${API_URL}/hub/user/v1/users/me`, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -28,8 +47,27 @@ async function seedAuth(page: import('@playwright/test').Page): Promise<void> {
     })
   );
 
+  // The current layout fetches the subscription before rendering the page.
+  await page.route(`${API_URL}/hub/subscription/v1/my`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ subscription: null }),
+    })
+  );
+
+  // LicenseBanner is mounted for the owner fixture; return the hosted state so
+  // it remains a no-op without making a real API request.
+  await page.route(`${API_URL}/license/state`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ mode: 'hosted', valid: true, status: 'hosted' }),
+    })
+  );
+
   // Silence the dashboard prefetch that most screens trigger.
-  await page.route('**/finance/dashboard', (route) =>
+  await page.route(`${API_URL}/finance/dashboard`, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -48,29 +86,19 @@ async function seedAuth(page: import('@playwright/test').Page): Promise<void> {
       }),
     })
   );
-
-  // Catch-all for any un-stubbed finance sub-routes so rogue prefetches
-  // never cause a 401 redirect.
-  await page.route(/localhost:9999/, (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: '{}',
-    })
-  );
 }
 
 // ── beforeEach helper: place auth cookie ─────────────────────────────────
 
-test.describe.skip('Finance - Expenses list', () => {
+test.describe('Finance - Expenses list', () => {
   test.beforeEach(async ({ context, page }) => {
     await context.addCookies([{ name: 'token', value: 'e2e-stub-token', url: FINANCE_URL }]);
     await seedAuth(page);
   });
 
   test('renders two expense rows from stub data', async ({ page }) => {
-    // Stub GET /finance/expenses - envelope format used by the Go backend.
-    await page.route('**/finance/expenses', async (route) => {
+    // Stub the generated finance.expenses.v1 list method.
+    await page.route(`${API_URL}/finance/expenses/v1/expenses`, async (route) => {
       if (route.request().method() !== 'GET') {
         await route.continue();
         return;
@@ -82,21 +110,23 @@ test.describe.skip('Finance - Expenses list', () => {
           expenses: [
             {
               id: 'exp-1001',
-              date: '2026-04-10',
+              expense_date: '2026-04-10',
               description: 'Office Supplies Purchase',
-              category: 'Other',
+              category_id: '1',
               amount: 250,
-              receipt: false,
-              approval: 'pending',
+              currency: 'USD',
+              receipt_url: '',
+              status: 'pending',
             },
             {
               id: 'exp-1002',
-              date: '2026-04-15',
+              expense_date: '2026-04-15',
               description: 'Cloud Hosting Invoice',
-              category: 'Utilities',
+              category_id: '2',
               amount: 1200,
-              receipt: true,
-              approval: 'approved',
+              currency: 'USD',
+              receipt_url: 'https://example.com/receipts/exp-1002',
+              status: 'approved',
             },
           ],
         }),
@@ -115,7 +145,7 @@ test.describe.skip('Finance - Expenses list', () => {
   });
 
   test('shows expense descriptions even when receipt flag differs', async ({ page }) => {
-    await page.route('**/finance/expenses', async (route) => {
+    await page.route(`${API_URL}/finance/expenses/v1/expenses`, async (route) => {
       if (route.request().method() !== 'GET') {
         await route.continue();
         return;
@@ -127,12 +157,13 @@ test.describe.skip('Finance - Expenses list', () => {
           expenses: [
             {
               id: 'exp-2001',
-              date: '2026-03-01',
+              expense_date: '2026-03-01',
               description: 'Staff Lunch',
-              category: 'Staff',
+              category_id: '3',
               amount: 80,
-              receipt: true,
-              approval: 'approved',
+              currency: 'USD',
+              receipt_url: 'https://example.com/receipts/exp-2001',
+              status: 'approved',
             },
           ],
         }),
@@ -148,14 +179,14 @@ test.describe.skip('Finance - Expenses list', () => {
 
 // ── Bills list ────────────────────────────────────────────────────────────
 
-test.describe.skip('Finance - Bills list', () => {
+test.describe('Finance - Bills list', () => {
   test.beforeEach(async ({ context, page }) => {
     await context.addCookies([{ name: 'token', value: 'e2e-stub-token', url: FINANCE_URL }]);
     await seedAuth(page);
   });
 
   test('renders a draft bill with vendor name', async ({ page }) => {
-    await page.route('**/finance/bills', async (route) => {
+    await page.route(`${API_URL}/finance/bill/v1/bills`, async (route) => {
       if (route.request().method() !== 'GET') {
         await route.continue();
         return;
@@ -167,13 +198,12 @@ test.describe.skip('Finance - Bills list', () => {
           bills: [
             {
               id: 'BILL-3001',
-              vendor: 'Acme Suppliers',
-              supplier: 'Acme Suppliers',
-              category: 'Inventory',
+              supplier_id: 'supplier-1',
               amount: 4500,
+              currency: 'USD',
               status: 'unpaid',
               due_date: '2026-05-20',
-              issued_date: '2026-04-20',
+              description: 'Acme Suppliers',
             },
           ],
         }),
@@ -187,7 +217,7 @@ test.describe.skip('Finance - Bills list', () => {
   });
 
   test('shows empty state when no bills exist', async ({ page }) => {
-    await page.route('**/finance/bills', async (route) => {
+    await page.route(`${API_URL}/finance/bill/v1/bills`, async (route) => {
       if (route.request().method() !== 'GET') {
         await route.continue();
         return;
@@ -206,7 +236,7 @@ test.describe.skip('Finance - Bills list', () => {
 
 // ── Profit & Loss ─────────────────────────────────────────────────────────
 
-test.describe.skip('Finance - Profit & Loss report', () => {
+test.describe('Finance - Profit & Loss report', () => {
   test.beforeEach(async ({ context, page }) => {
     await context.addCookies([{ name: 'token', value: 'e2e-stub-token', url: FINANCE_URL }]);
     await seedAuth(page);
@@ -214,7 +244,7 @@ test.describe.skip('Finance - Profit & Loss report', () => {
 
   test('renders revenue and net profit from stub data', async ({ page }) => {
     // The PL screen calls GET /finance/report/v1/pl?period=month by default.
-    await page.route('**/finance/report/v1/pl*', async (route) => {
+    await page.route(`${API_URL}/finance/report/v1/pl**`, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -244,7 +274,7 @@ test.describe.skip('Finance - Profit & Loss report', () => {
   });
 
   test('period selector buttons render', async ({ page }) => {
-    await page.route('**/finance/report/v1/pl*', async (route) => {
+    await page.route(`${API_URL}/finance/report/v1/pl**`, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -270,14 +300,18 @@ test.describe.skip('Finance - Profit & Loss report', () => {
 
 // ── Tax rates screen ──────────────────────────────────────────────────────
 
-test.describe.skip('Finance - Tax rates screen', () => {
+test.describe('Finance - Tax rates screen', () => {
   test.beforeEach(async ({ context, page }) => {
     await context.addCookies([{ name: 'token', value: 'e2e-stub-token', url: FINANCE_URL }]);
     await seedAuth(page);
   });
 
-  test('renders Standard VAT rate name and 15% after opening config panel', async ({ page }) => {
-    await page.route('**/finance/tax/config', async (route) => {
+  // The config-panel flow still targets an unsupported legacy response shape;
+  // keep that one case documented and skipped while reviving the page smoke test.
+  test.skip('renders Standard VAT rate name and 15% after opening config panel', async ({
+    page,
+  }) => {
+    await page.route(`${API_URL}/finance/report/v1/tax-config`, async (route) => {
       if (route.request().method() !== 'GET') {
         await route.continue();
         return;
@@ -285,20 +319,18 @@ test.describe.skip('Finance - Tax rates screen', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([{ id: 1, name: 'Standard VAT', rate: 15 }]),
+        body: JSON.stringify({
+          configs: [{ id: '1', name: 'Standard VAT', rate: 15, type: 'sales' }],
+        }),
       });
     });
 
     // Stub the tax report so the page mounts cleanly.
-    await page.route('**/finance/tax/report', async (route) => {
+    await page.route(`${API_URL}/finance/report/v1/tax`, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          vat_summary: { collected: 0, owed: 0, paid: 0 },
-          periods: [],
-          configs: [{ id: 1, name: 'Standard VAT', rate: 15 }],
-        }),
+        body: JSON.stringify({ period: 'month', tax_collected: 0, tax_owed: 0 }),
       });
     });
 
@@ -314,7 +346,7 @@ test.describe.skip('Finance - Tax rates screen', () => {
   });
 
   test('Tax page heading is visible without config panel', async ({ page }) => {
-    await page.route('**/finance/tax/config', async (route) => {
+    await page.route(`${API_URL}/finance/report/v1/tax-config`, async (route) => {
       if (route.request().method() !== 'GET') {
         await route.continue();
         return;
@@ -322,19 +354,15 @@ test.describe.skip('Finance - Tax rates screen', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([{ id: 1, name: 'Standard VAT', rate: 15 }]),
+        body: JSON.stringify({ configs: [] }),
       });
     });
 
-    await page.route('**/finance/tax/report', async (route) => {
+    await page.route(`${API_URL}/finance/report/v1/tax`, async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          vat_summary: { collected: 0, owed: 0, paid: 0 },
-          periods: [],
-          configs: [],
-        }),
+        body: JSON.stringify({ period: 'month', tax_collected: 0, tax_owed: 0 }),
       });
     });
 
