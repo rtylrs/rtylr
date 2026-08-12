@@ -33,7 +33,7 @@ interface StatCardProps {
   value: string;
   change: string;
   up: boolean | null;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   color: string;
 }
 const StatCard: React.FC<StatCardProps> = ({ label, value, change, up, icon: Icon, color }) => (

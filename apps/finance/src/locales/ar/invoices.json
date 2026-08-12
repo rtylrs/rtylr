@@ -1,9 +1,9 @@
 {
-  "created": "Invoice created",
-  "updated": "Invoice updated",
-  "deleted": "Invoice deleted",
-  "paymentRecorded": "Payment recorded",
-  "statusUpdated": "Invoice status updated",
-  "markedPaid": "Marked {{id}} paid",
-  "markPaidFailed": "Failed to mark {{id}} paid"
+  "created": "تم إنشاء الفاتورة",
+  "updated": "تم تحديث الفاتورة",
+  "deleted": "تم حذف الفاتورة",
+  "paymentRecorded": "تم تسجيل الدفعة",
+  "statusUpdated": "تم تحديث حالة الفاتورة",
+  "markedPaid": "تم تسجيل {{id}} كمدفوعة",
+  "markPaidFailed": "تعذّر تسجيل {{id}} كمدفوعة"
 }
