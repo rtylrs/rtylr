@@ -23,7 +23,7 @@ func (f fakeStaffPermissionProvider) GetEmployeeIDByUserID(context.Context, int6
 	return f.employeeID, nil
 }
 
-func (f fakeStaffPermissionProvider) HasPermission(_ context.Context, _ int64, _ int64, key string) (bool, error) {
+func (f fakeStaffPermissionProvider) HasPermission(_ context.Context, _, _ int64, key string) (bool, error) {
 	if f.permissionErr != nil {
 		return false, f.permissionErr
 	}

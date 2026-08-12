@@ -17,7 +17,7 @@ func (f fakePayrollPermissionProvider) GetEmployeeIDByUserID(context.Context, in
 	return f.employeeID, nil
 }
 
-func (f fakePayrollPermissionProvider) HasPermission(_ context.Context, _ int64, _ int64, key string) (bool, error) {
+func (f fakePayrollPermissionProvider) HasPermission(_ context.Context, _, _ int64, key string) (bool, error) {
 	return f.permissions[key], nil
 }
 
