@@ -423,18 +423,21 @@ return violations;
 
 export interface CreateShiftAssignmentResponse {
 assignment?: ShiftAssignmentPayload;
+warnings?: (string)[];
 }
 
 export function decodeCreateShiftAssignmentResponse(v: any): CreateShiftAssignmentResponse {
 if (v === null || v === undefined) return v;
 return {
 assignment: (v.assignment !== undefined ? decodeShiftAssignmentPayload(v.assignment) : v.assignment),
+warnings: v.warnings,
 };
 }
 
 export function encodeCreateShiftAssignmentResponse(v: CreateShiftAssignmentResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.assignment !== undefined) { out.assignment = encodeShiftAssignmentPayload(v.assignment); }
+if (v.warnings !== undefined) { out.warnings = v.warnings; }
 return out;
 }
 

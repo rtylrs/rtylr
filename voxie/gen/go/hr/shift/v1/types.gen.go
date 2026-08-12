@@ -1020,6 +1020,7 @@ func (x *CreateShiftAssignmentRequest) GetDate() string {
 
 type CreateShiftAssignmentResponse struct {
 	Assignment *ShiftAssignmentPayload `json:"assignment,omitempty"`
+	Warnings   []string                `json:"warnings,omitempty"`
 }
 
 func (x *CreateShiftAssignmentResponse) GetAssignment() *ShiftAssignmentPayload {
@@ -1028,6 +1029,14 @@ func (x *CreateShiftAssignmentResponse) GetAssignment() *ShiftAssignmentPayload 
 		return zero
 	}
 	return x.Assignment
+}
+
+func (x *CreateShiftAssignmentResponse) GetWarnings() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Warnings
 }
 
 type GetRosterRequest struct {
