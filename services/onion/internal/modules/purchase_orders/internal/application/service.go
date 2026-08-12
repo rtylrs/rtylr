@@ -56,6 +56,10 @@ func paginate(page, pageSize int64) (int, int) {
 }
 
 func (s *Service) CreatePurchaseOrder(ctx context.Context, businessID int64, input domain.PurchaseOrderInput, createdBy int64) (int64, error) {
+	if err := input.Validate(); err != nil {
+		return 0, fmt.Errorf("%w: %w", domain.ErrInvalidPurchaseOrder, err)
+	}
+
 	id, err := s.repo.CreatePurchaseOrder(ctx, businessID, input, createdBy)
 	if err != nil {
 		return 0, err

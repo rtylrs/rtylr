@@ -87,6 +87,9 @@ func (a *PurchaseOrderAPI) CreatePurchaseOrder(ctx context.Context, req *erppurc
 		Items:            items,
 	}, authUser.UserID)
 	if createErr != nil {
+		if errors.Is(createErr, domain.ErrInvalidPurchaseOrder) {
+			return nil, purchaseOrderStatusError(http.StatusBadRequest, createErr.Error())
+		}
 		return nil, purchaseOrderStatusError(http.StatusInternalServerError, "Failed to create purchase order")
 	}
 	return &erppurchaseorderv1.CreatePurchaseOrderResponse{PurchaseOrderId: id, Message: "Purchase order created successfully"}, nil

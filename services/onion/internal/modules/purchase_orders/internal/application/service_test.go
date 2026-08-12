@@ -1,7 +1,11 @@
 package application
 
 import (
+	"context"
+	"errors"
 	"testing"
+
+	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 )
 
 func TestPaginate_Defaults(t *testing.T) {
@@ -92,5 +96,19 @@ func TestPaginate_LargePageNumber(t *testing.T) {
 	}
 	if offset != 495 {
 		t.Errorf("offset = %d, want 495", offset)
+	}
+}
+
+func TestCreatePurchaseOrder_ValidatesNestedItemsBeforeRepository(t *testing.T) {
+	s := &Service{}
+	_, err := s.CreatePurchaseOrder(context.Background(), 1, domain.PurchaseOrderInput{
+		SupplierID: 1,
+		PONumber:   "PO-INVALID-ITEM",
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 1, QuantityOrdered: 0, UnitCost: -1},
+		},
+	}, 1)
+	if !errors.Is(err, domain.ErrInvalidPurchaseOrder) {
+		t.Fatalf("expected ErrInvalidPurchaseOrder, got %v", err)
 	}
 }
