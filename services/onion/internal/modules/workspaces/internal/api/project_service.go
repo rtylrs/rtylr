@@ -172,6 +172,9 @@ func (a *ProjectAPI) UpdateProject(ctx context.Context, req *flowprojectv1.Updat
 	if err != nil {
 		return nil, err
 	}
+	if err := a.Service.RequireProjectRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
 	body := req.GetBody()
 	startDate, err := parseProjectDate(body.GetStartDate())
@@ -221,6 +224,9 @@ func (a *ProjectAPI) DeleteProject(ctx context.Context, req *flowprojectv1.Delet
 	}
 
 	workspaceID := a.Service.GetProjectWorkspace(ctx, req.GetId())
+	if err := a.Service.RequireProjectRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
 	if err := a.Service.DeleteProject(ctx, req.GetId(), businessID); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete project")

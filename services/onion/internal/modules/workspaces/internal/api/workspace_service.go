@@ -93,7 +93,6 @@ func (a *WorkspaceAPI) CreateWorkspace(ctx context.Context, req *flowworkspacev1
 	if err != nil {
 		return nil, err
 	}
-
 	input := domain.WorkspaceInput{
 		BusinessID:  businessID,
 		OwnerID:     authUser.UserID,
@@ -121,6 +120,9 @@ func (a *WorkspaceAPI) UpdateWorkspace(ctx context.Context, req *flowworkspacev1
 	if err != nil {
 		return nil, err
 	}
+	if err := a.Service.RequireWorkspaceRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
 	body := req.GetBody()
 	input := domain.UpdateWorkspaceInput{
@@ -141,9 +143,16 @@ func (a *WorkspaceAPI) UpdateWorkspace(ctx context.Context, req *flowworkspacev1
 }
 
 func (a *WorkspaceAPI) DeleteWorkspace(ctx context.Context, req *flowworkspacev1.DeleteWorkspaceRequest) (*flowworkspacev1.DeleteWorkspaceResponse, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	businessID, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if err := a.Service.RequireWorkspaceRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	if err := a.Service.DeleteWorkspace(ctx, req.GetId(), businessID); err != nil {

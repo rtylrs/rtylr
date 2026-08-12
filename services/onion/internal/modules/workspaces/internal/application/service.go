@@ -276,6 +276,15 @@ func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID int6
 	return domain.ErrUnauthorized
 }
 
+// RequireWorkspaceRole reports whether userID holds at least minRole on a
+// workspace, including the workspace owner who has no membership row.
+func (s *Service) RequireWorkspaceRole(ctx context.Context, workspaceID, userID int64, minRole string) error {
+	if domain.RoleAllows(s.workspaceRoleFor(ctx, workspaceID, userID), minRole) {
+		return nil
+	}
+	return domain.ErrUnauthorized
+}
+
 // RequireTaskRole is RequireProjectRole addressed by task rather than project.
 // A task need not belong to a project, so the fallback order mirrors
 // IsTaskMember: project, then workspace, then sole ownership.
