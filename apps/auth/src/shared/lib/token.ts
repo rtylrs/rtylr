@@ -17,7 +17,13 @@ export function decodeJwtPayload(token: string): JwtPayload | null {
   if (parts.length !== 3) return null;
   try {
     const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const json = atob(base64);
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
+    const binary = atob(padded);
+    const bytes = Array.from(
+      binary,
+      (char) => '%' + ('00' + char.charCodeAt(0).toString(16)).slice(-2)
+    ).join('');
+    const json = decodeURIComponent(bytes);
     return JSON.parse(json) as JwtPayload;
   } catch {
     return null;

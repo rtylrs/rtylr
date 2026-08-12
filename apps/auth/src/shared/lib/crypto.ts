@@ -4,7 +4,13 @@
  * Encodes a string to base64.
  */
 export function toBase64(value: string): string {
-  if (typeof btoa !== 'undefined') return btoa(value);
+  if (typeof btoa !== 'undefined') {
+    return btoa(
+      encodeURIComponent(value).replace(/%([0-9A-F]{2})/g, (_, p1) =>
+        String.fromCharCode(parseInt(p1, 16))
+      )
+    );
+  }
   return Buffer.from(value, 'utf8').toString('base64');
 }
 
@@ -12,7 +18,14 @@ export function toBase64(value: string): string {
  * Decodes a base64 string.
  */
 export function fromBase64(value: string): string {
-  if (typeof atob !== 'undefined') return atob(value);
+  if (typeof atob !== 'undefined') {
+    const binary = atob(value);
+    const bytes = Array.from(
+      binary,
+      (char) => '%' + ('00' + char.charCodeAt(0).toString(16)).slice(-2)
+    ).join('');
+    return decodeURIComponent(bytes);
+  }
   return Buffer.from(value, 'base64').toString('utf8');
 }
 
