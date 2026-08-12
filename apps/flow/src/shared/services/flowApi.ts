@@ -587,7 +587,12 @@ export const flowApi = {
         description: data.description,
         status: data.status,
         priority: data.priority,
-        assignee_id: data.assigneeId ? Number(data.assigneeId) : undefined,
+        assignee_id:
+          data.assigneeId !== undefined
+            ? data.assigneeId
+              ? Number(data.assigneeId)
+              : null
+            : undefined,
         due_date: data.dueDate,
         start_date: data.startDate,
         labels: data.labels?.map((l) => Number(l)),
