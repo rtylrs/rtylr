@@ -20,6 +20,21 @@ type mockRepo struct {
 	updated     domain.ShiftRecord
 	deletedID   int64
 	deleteCalls int
+
+	availability      []domain.AvailabilityRecord
+	availabilityTotal int64
+	availabilityOne   *domain.AvailabilityRecord
+	forDate           []domain.AvailabilityRecord
+	availabilityErr   error
+
+	lastAvailParams  domain.ListAvailabilityParams
+	upserted         domain.AvailabilityRecord
+	deletedAvailID   int64
+	availDeleteCalls int
+	forDateStaffID   int64
+	forDateDayOfWeek int32
+	forDateOnDate    string
+	forDateCalls     int
 }
 
 func (m *mockRepo) ListShifts(_ context.Context, _ int64, params domain.ListShiftsParams) ([]domain.ShiftRecord, int64, error) {
@@ -64,6 +79,74 @@ func (m *mockRepo) PublishRosterAssignments(_ context.Context, _ int64, _, _ str
 
 func (m *mockRepo) ListEmployeeAssignmentsForDate(_ context.Context, _, _ int64, _ string) ([]domain.ShiftAssignmentRecord, error) {
 	return m.dateAssigns, m.err
+}
+
+func (m *mockRepo) ListAvailability(_ context.Context, _ int64, params domain.ListAvailabilityParams) ([]domain.AvailabilityRecord, int64, error) {
+	m.lastAvailParams = params
+	return m.availability, m.availabilityTotal, m.availabilityErr
+}
+
+func (m *mockRepo) GetAvailability(_ context.Context, _, _ int64) (*domain.AvailabilityRecord, error) {
+	if m.availabilityOne == nil && m.availabilityErr == nil {
+		return nil, domain.ErrAvailabilityNotFound
+	}
+	return m.availabilityOne, m.availabilityErr
+}
+
+func (m *mockRepo) UpsertAvailability(_ context.Context, _ int64, entry domain.AvailabilityRecord) (*domain.AvailabilityRecord, error) {
+	m.upserted = entry
+	if m.availabilityErr != nil {
+		return nil, m.availabilityErr
+	}
+	saved := entry
+	return &saved, nil
+}
+
+func (m *mockRepo) DeleteAvailability(_ context.Context, _, id int64) error {
+	m.deletedAvailID = id
+	m.availDeleteCalls++
+	return m.availabilityErr
+}
+
+func (m *mockRepo) ListAvailabilityForStaffDate(_ context.Context, _, staffID int64, date string, dayOfWeek int32) ([]domain.AvailabilityRecord, error) {
+	m.forDateCalls++
+	m.forDateStaffID = staffID
+	m.forDateOnDate = date
+	m.forDateDayOfWeek = dayOfWeek
+	return m.forDate, m.availabilityErr
+}
+
+// mockStaffResolver stands in for the hr_staff lookups. staffByUser and
+// staffByEmployee are separate because those are genuinely different identities.
+type mockStaffResolver struct {
+	staffByUser     int64
+	staffByEmployee int64
+	userErr         error
+	employeeErr     error
+}
+
+func (m *mockStaffResolver) StaffIDByUserID(_ context.Context, _, _ int64) (int64, error) {
+	return m.staffByUser, m.userErr
+}
+
+func (m *mockStaffResolver) StaffIDByEmployeeID(_ context.Context, _, _ int64) (int64, error) {
+	return m.staffByEmployee, m.employeeErr
+}
+
+// mockPermissions mirrors the provider hr_payroll gates on.
+type mockPermissions struct {
+	employeeID  int64
+	allowed     bool
+	employeeErr error
+	permErr     error
+}
+
+func (m *mockPermissions) GetEmployeeIDByUserID(_ context.Context, _, _ int64) (int64, error) {
+	return m.employeeID, m.employeeErr
+}
+
+func (m *mockPermissions) HasPermission(_ context.Context, _, _ int64, _ string) (bool, error) {
+	return m.allowed, m.permErr
 }
 
 type mockLeaveChecker struct {
@@ -343,7 +426,7 @@ func TestShiftKind_StaffIDDiscriminates(t *testing.T) {
 func TestCreateShiftAssignment_PropagatesGetShiftError(t *testing.T) {
 	want := domain.ErrShiftNotFound
 	s := &Service{repo: &mockRepo{err: want}}
-	_, err := s.CreateShiftAssignment(context.Background(), 1, domain.ShiftAssignmentRecord{ShiftID: 99})
+	_, _, err := s.CreateShiftAssignment(context.Background(), 1, domain.ShiftAssignmentRecord{ShiftID: 99})
 	if !errors.Is(err, want) {
 		t.Errorf("expected ErrShiftNotFound, got %v", err)
 	}
@@ -354,7 +437,7 @@ func TestCreateShiftAssignment_LeaveConflictReturnsError(t *testing.T) {
 		repo:                 &mockRepo{shift: &domain.ShiftRecord{ID: 1}},
 		leaveConflictChecker: &mockLeaveChecker{hasLeave: true},
 	}
-	_, err := s.CreateShiftAssignment(context.Background(), 1, domain.ShiftAssignmentRecord{ShiftID: 1, EmployeeID: 5, Date: "2024-06-01"})
+	_, _, err := s.CreateShiftAssignment(context.Background(), 1, domain.ShiftAssignmentRecord{ShiftID: 1, EmployeeID: 5, Date: "2024-06-01"})
 	if !errors.Is(err, domain.ErrRosterConflict) {
 		t.Errorf("expected ErrRosterConflict, got %v", err)
 	}
@@ -365,7 +448,7 @@ func TestCreateShiftAssignment_HappyPathNoConflicts(t *testing.T) {
 		repo:                 &mockRepo{shift: &domain.ShiftRecord{ID: 1}},
 		leaveConflictChecker: &mockLeaveChecker{hasLeave: false},
 	}
-	got, err := s.CreateShiftAssignment(context.Background(), 1, domain.ShiftAssignmentRecord{ShiftID: 1, EmployeeID: 5, Date: "2024-06-01"})
+	got, _, err := s.CreateShiftAssignment(context.Background(), 1, domain.ShiftAssignmentRecord{ShiftID: 1, EmployeeID: 5, Date: "2024-06-01"})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
