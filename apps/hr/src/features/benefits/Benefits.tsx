@@ -5,11 +5,9 @@ import { Shield } from 'lucide-react';
 import {
   useBenefits,
   useBenefitEnrollments,
-  useBenefitPlans,
-  useEnrollments,
   useEnrollBenefit,
 } from '../../shared/hooks/useHrExtras';
-import { useUserStore } from '../../shared/stores/userStore';
+import { useUserStore } from '@voxire/auth';
 import { Card, SectionHeader, EmptyState, Skeleton } from '../../shared/components/ui';
 import BenefitPlanCard from '../../shared/components/BenefitPlanCard';
 
@@ -17,8 +15,8 @@ const Benefits: React.FC = () => {
   const user = useUserStore((s) => s.user);
   const currentStaffId = Number(user?.id) || 1;
   const currentStaffName = user?.name || user?.email || 'Team member';
-  const { data: plans = [], isLoading: plansLoading } = useBenefitPlans();
-  const { data: enrollments = [], isLoading: enrollLoading } = useEnrollments();
+  const { data: plans = [], isLoading: plansLoading } = useBenefits();
+  const { data: enrollments = [], isLoading: enrollLoading } = useBenefitEnrollments();
   const enroll = useEnrollBenefit();
 
   const loading = plansLoading || enrollLoading;
