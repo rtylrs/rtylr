@@ -9,7 +9,8 @@ WORKDIR /app
 RUN apk add --no-cache ca-certificates curl bash
 # sqlc: the worker imports the email package, whose generated query code is
 # produced by scripts/generate_sqlc.sh (gitignored, regenerated per build).
-RUN curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
+RUN curl --fail --location --retry 5 --retry-all-errors --retry-delay 2 \
+    https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
     | tar -xz -C /usr/local/bin sqlc
 # voxie is a local `replace` target, so its module file must be present.
 COPY go.mod go.sum ./

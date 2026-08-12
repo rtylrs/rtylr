@@ -5,7 +5,8 @@
 FROM golang:1.26-alpine AS builder
 WORKDIR /app
 RUN apk add --no-cache ca-certificates curl bash
-RUN curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
+RUN curl --fail --location --retry 5 --retry-all-errors --retry-delay 2 \
+    https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
     | tar -xz -C /usr/local/bin sqlc
 COPY go.mod go.sum ./
 COPY voxie/go.mod voxie/go.sum* ./voxie/
