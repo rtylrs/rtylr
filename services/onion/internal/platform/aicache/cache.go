@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	CacheVersion = "exact-v3"
+	CacheVersion = "exact-v5"
 
 	OutcomeHit   = "hit"
 	OutcomeMiss  = "miss"
@@ -41,6 +41,8 @@ const (
 	analyticsNamespace = "ai_response_analytics"
 	analyticsEventsID  = "events"
 	defaultExactTTL    = 30 * time.Minute
+	minExactTTL        = time.Minute
+	maxExactTTL        = 24 * time.Hour
 	analyticsEventTTL  = 30 * 24 * time.Hour
 	maxAnalyticsEvents = 5000
 	maxRecentEvents    = 100
@@ -164,6 +166,8 @@ type collectorState struct {
 var (
 	collector                  = newCollector()
 	persistentAnalyticsEnabled = newPersistentAnalyticsFlag()
+	analyticsPersistQueue      = make(chan analyticsEventRecord, 512)
+	analyticsPersistOnce       sync.Once
 )
 
 func newPersistentAnalyticsFlag() *atomic.Bool {
@@ -228,7 +232,7 @@ func ExactTTL() time.Duration {
 		return defaultExactTTL
 	}
 	ttl, err := time.ParseDuration(raw)
-	if err != nil || ttl <= 0 {
+	if err != nil || ttl < minExactTTL || ttl > maxExactTTL {
 		return defaultExactTTL
 	}
 	return ttl
@@ -287,6 +291,12 @@ func GetExact(ctx context.Context, key string) (ExactResponse, bool) {
 }
 
 func PutExact(ctx context.Context, key string, entry ExactResponse, ttl time.Duration) {
+	if strings.TrimSpace(key) == "" {
+		return
+	}
+	if ttl < minExactTTL || ttl > maxExactTTL {
+		ttl = defaultExactTTL
+	}
 	if entry.CreatedAt.IsZero() {
 		entry.CreatedAt = time.Now().UTC()
 	}
@@ -359,6 +369,21 @@ func normalizeEvent(event Event) Event {
 	if event.Outcome == "" {
 		event.Outcome = OutcomeError
 	}
+	if event.PromptChars < 0 {
+		event.PromptChars = 0
+	}
+	if event.ResponseChars < 0 {
+		event.ResponseChars = 0
+	}
+	if event.ProviderTokens < 0 {
+		event.ProviderTokens = 0
+	}
+	if event.EstimatedSavings < 0 {
+		event.EstimatedSavings = 0
+	}
+	if event.LatencyMs < 0 {
+		event.LatencyMs = 0
+	}
 	return event
 }
 
@@ -407,8 +432,23 @@ func persistAnalyticsEvent(event Event) {
 		ID:    analyticsEventID(event),
 		Event: event,
 	}
-	persistAnalyticsEventToDB(record)
-	persistAnalyticsEventToSharedCache(record)
+	analyticsPersistOnce.Do(func() {
+		go analyticsPersistenceWorker()
+	})
+	select {
+	case analyticsPersistQueue <- record:
+	default:
+		// The in-process collector is authoritative for the request. A full
+		// durable queue must never add latency to an AI response.
+		logger.Global().Warn("AI cache analytics persistence queue is full; event retained in process only")
+	}
+}
+
+func analyticsPersistenceWorker() {
+	for record := range analyticsPersistQueue {
+		persistAnalyticsEventToDB(record)
+		persistAnalyticsEventToSharedCache(record)
+	}
 }
 
 func persistAnalyticsEventToSharedCache(record analyticsEventRecord) {
@@ -566,6 +606,15 @@ func nullSQLInt64(value int64) sql.NullInt64 {
 }
 
 func snapshotFromEvents(events []Event) AnalyticsSnapshot {
+	if len(events) == 0 {
+		return AnalyticsSnapshot{
+			GeneratedAt:       time.Now().UTC(),
+			CacheVersion:      CacheVersion,
+			ExactCacheEnabled: ExactCacheEnabled(),
+			AnalyticsSource:   analyticsSourceMem,
+			Policies:          PolicySnapshot(),
+		}
+	}
 	sort.Slice(events, func(i, j int) bool {
 		return events[i].At.After(events[j].At)
 	})

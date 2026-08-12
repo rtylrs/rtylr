@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -89,6 +90,29 @@ func (s *Service) ListUserSessions(ctx context.Context, userID, limit, offset in
 }
 
 func (s *Service) StoreMessage(ctx context.Context, sessionID string, userID int, role, content string, tokensUsed int) (*domain.ConversationMessage, error) {
+	if s == nil || s.repository == nil {
+		return nil, errors.New("memory repository not available")
+	}
+	if strings.TrimSpace(sessionID) == "" {
+		return nil, errors.New("session id is required")
+	}
+	if userID <= 0 {
+		return nil, errors.New("user id is required")
+	}
+	role = strings.ToLower(strings.TrimSpace(role))
+	if role != "user" && role != "assistant" && role != "system" {
+		return nil, errors.New("invalid message role")
+	}
+	content = strings.TrimSpace(content)
+	if content == "" {
+		return nil, errors.New("message content is required")
+	}
+	if tokensUsed < 0 {
+		tokensUsed = 0
+	}
+	if _, err := s.repository.GetChatSession(ctx, sessionID, userID); err != nil {
+		return nil, err
+	}
 	defer invalidateMemoryScope(ctx, userID)
 	message := &domain.ConversationMessage{
 		SessionID:  sessionID,
@@ -100,6 +124,20 @@ func (s *Service) StoreMessage(ctx context.Context, sessionID string, userID int
 	}
 
 	return s.repository.CreateMessage(ctx, message)
+}
+
+// EnsureSessionOwnership verifies the session before any caller can append a
+// message or request context for it. The query is user-scoped, so an unknown or
+// cross-user session has the same result and does not disclose ownership.
+func (s *Service) EnsureSessionOwnership(ctx context.Context, sessionID string, userID int) error {
+	if s == nil || s.repository == nil {
+		return errors.New("memory repository not available")
+	}
+	if strings.TrimSpace(sessionID) == "" || userID <= 0 {
+		return errors.New("valid session and user are required")
+	}
+	_, err := s.repository.GetChatSession(ctx, sessionID, userID)
+	return err
 }
 
 func (s *Service) GetConversationContext(ctx context.Context, sessionID string, userID int) (*domain.ConversationContext, error) {
@@ -207,7 +245,10 @@ func (s *Service) SummarizeSession(ctx context.Context, sessionID string, userID
 		return fmt.Errorf("failed to store conversation summary: %w", err)
 	}
 
-	s.extractAndStoreMemories(ctx, userID, sessionID, messages, summaryData)
+	// Topics help the next response understand this conversation, but they are
+	// not durable user preferences. Durable memory is written only through the
+	// explicit, approval-backed memory.remember tool; otherwise a model's topic
+	// guess could silently become a future business fact.
 
 	return nil
 }
@@ -245,6 +286,7 @@ Return exactly these three lines:
 Summary: <summary>
 Key topics: <3-5 comma-separated topics>
 Sentiment: <positive|negative|neutral>
+Importance: <0.0-1.0>
 
 Conversation:
 %s`, conversation.String())
@@ -321,14 +363,47 @@ func (s *Service) parseSummaryResponse(response string) *SummaryData {
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "Summary:") {
-			summaryData.Summary = strings.TrimPrefix(line, "Summary:")
-		} else if strings.HasPrefix(line, "Key topics:") {
-			topics := strings.TrimPrefix(line, "Key topics:")
-			summaryData.KeyTopics = strings.Split(topics, ",")
-		} else if strings.HasPrefix(line, "Sentiment:") {
-			sentiment := strings.TrimPrefix(line, "Sentiment:")
-			summaryData.Sentiment = strings.TrimSpace(sentiment)
+		line = strings.Trim(line, "`*_ ")
+		key, value, ok := strings.Cut(line, ":")
+		if !ok {
+			continue
+		}
+		key = strings.ToLower(strings.TrimSpace(key))
+		value = strings.TrimSpace(value)
+		switch key {
+		case "summary":
+			summaryData.Summary = truncateSummaryRunes(value, maxSummaryInputRunes/2)
+		case "key topics", "key_topics":
+			topics := value
+			seen := make(map[string]struct{})
+			for _, topic := range strings.Split(topics, ",") {
+				topic = strings.TrimSpace(topic)
+				if topic == "" || len(summaryData.KeyTopics) >= 5 {
+					continue
+				}
+				key := strings.ToLower(topic)
+				if _, ok := seen[key]; ok {
+					continue
+				}
+				seen[key] = struct{}{}
+				summaryData.KeyTopics = append(summaryData.KeyTopics, truncateSummaryRunes(topic, 80))
+			}
+		case "sentiment":
+			sentiment := strings.ToLower(value)
+			switch sentiment {
+			case "positive", "negative", "neutral":
+				summaryData.Sentiment = sentiment
+			}
+		case "importance", "importance score", "importance_score":
+			if score, err := strconv.ParseFloat(value, 64); err == nil {
+				if score < 0 {
+					score = 0
+				}
+				if score > 1 {
+					score = 1
+				}
+				summaryData.ImportanceScore = score
+			}
 		}
 	}
 
