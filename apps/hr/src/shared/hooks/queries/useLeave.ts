@@ -15,6 +15,15 @@ import { useTranslation } from 'react-i18next';
 
 const leaveClient = createOneKitClient(LeaveServiceClient, 'hr');
 
+// Onion PR #144 is the authoritative boundary for leave visibility: it
+// scopes ordinary users to their employee and authorizes approvers server-side.
+// Keep the client on this OneKit request shape so the backend receives the
+// optional employee/status filters without falling back to the legacy list API.
+const DEFAULT_LIST_LEAVE_REQUEST: ListLeaveRequestsRequest = {
+  employeeId: undefined,
+  status: undefined,
+};
+
 interface LeaveCalendarParams {
   month: number;
   year: number;
@@ -40,9 +49,7 @@ export const useListLeaveRequests = (params?: ListLeaveRequestsRequest) => {
   return useQuery<LeaveRequestPayload[]>({
     queryKey: ['leave-requests', params],
     queryFn: async (): Promise<LeaveRequestPayload[]> => {
-      const res = await leaveClient.listLeaveRequests(
-        params ?? { employeeId: undefined, status: undefined }
-      );
+      const res = await leaveClient.listLeaveRequests(params ?? DEFAULT_LIST_LEAVE_REQUEST);
       return res.requests ?? [];
     },
   });
