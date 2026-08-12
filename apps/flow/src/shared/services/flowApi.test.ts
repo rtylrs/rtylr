@@ -291,6 +291,13 @@ describe('flowApi', () => {
     });
   });
 
+  it('getMilestones supports workspace filters', () => {
+    flowApi.getMilestones({ projectId: 'p-1', workspaceId: 'w-1' });
+    expect(safe.get).toHaveBeenCalledWith('/flow/milestone/v1/milestones', {
+      params: { project_id: 'p-1', workspace_id: 'w-1' },
+    });
+  });
+
   it('updateMilestone calls PUT /flow/milestone/v1/milestones/:id', () => {
     flowApi.updateMilestone('m-1', { name: 'Updated' });
     expect(safe.put).toHaveBeenCalledWith('/flow/milestone/v1/milestones/m-1', {

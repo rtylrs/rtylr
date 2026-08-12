@@ -702,10 +702,23 @@ export const flowApi = {
 
   // -- Milestones ---------------------------------------------------------
 
-  getMilestones: (projectId?: string) =>
-    safe.get<{ milestones: ApiMilestone[] }>('/flow/milestone/v1/milestones', {
-      params: projectId ? { project_id: projectId } : undefined,
-    }),
+  getMilestones: (query?: string | { projectId?: string; workspaceId?: string }) => {
+    const params =
+      typeof query === 'string'
+        ? query
+          ? { project_id: query }
+          : undefined
+        : query
+          ? {
+              ...(query.projectId ? { project_id: query.projectId } : {}),
+              ...(query.workspaceId ? { workspace_id: query.workspaceId } : {}),
+            }
+          : undefined;
+
+    return safe.get<{ milestones: ApiMilestone[] }>('/flow/milestone/v1/milestones', {
+      params,
+    });
+  },
 
   createMilestone: (data: Partial<ApiMilestone>) =>
     safe.post<{ milestone: ApiMilestone }>(
