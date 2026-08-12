@@ -65,6 +65,10 @@ function isCategory(item: Category | Banner | MenuItem): item is Category {
   return (item as Category).type === 'category';
 }
 
+function isMenuItem(item: Category | Banner | MenuItem): item is MenuItem {
+  return !isCategory(item) && !('bannerImage' in item);
+}
+
 const initialState: MenuState = {
   id: null,
   items: [],
