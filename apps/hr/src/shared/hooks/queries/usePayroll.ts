@@ -69,17 +69,28 @@ export const useGetPayrollConfig = () => {
   return useQuery<PayrollConfigData>({
     queryKey: ['payroll-config'],
     queryFn: async (): Promise<PayrollConfigData> => {
-      const res = await unwrap(safe.get<{ config: PayrollConfigData }>('/hr/payroll/config'));
-      const config = (
-        res as { config: Partial<PayrollConfigData> & { periodType?: PayrollConfigData['period'] } }
-      ).config;
-      return {
-        grossModel: config.grossModel ?? 'both',
-        period: config.period ?? config.periodType ?? 'monthly',
-        overtimeEnabled: config.overtimeEnabled ?? false,
-        deductionsEnabled: config.deductionsEnabled ?? false,
-        bonusesEnabled: config.bonusesEnabled ?? false,
-      };
+      try {
+        const res = await unwrap(safe.get<Record<string, unknown>>('/hr/payroll/config'));
+        const raw = ((res as any)?.config || res || {}) as Record<string, unknown>;
+        return {
+          grossModel:
+            ((raw.grossModel ?? raw.gross_model) as PayrollConfigData['grossModel']) ?? 'both',
+          period:
+            ((raw.period ?? raw.periodType ?? raw.period_type) as PayrollConfigData['period']) ??
+            'monthly',
+          overtimeEnabled: Boolean(raw.overtimeEnabled ?? raw.overtime_enabled ?? false),
+          deductionsEnabled: Boolean(raw.deductionsEnabled ?? raw.deductions_enabled ?? false),
+          bonusesEnabled: Boolean(raw.bonusesEnabled ?? raw.bonuses_enabled ?? false),
+        };
+      } catch {
+        return {
+          grossModel: 'both',
+          period: 'monthly',
+          overtimeEnabled: false,
+          deductionsEnabled: false,
+          bonusesEnabled: false,
+        };
+      }
     },
   });
 };
