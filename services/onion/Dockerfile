@@ -9,7 +9,8 @@ WORKDIR /app
 RUN apk add --no-cache curl bash
 
 # Layer 2: sqlc pre-built binary — cached until version changes (~3s vs 5min from source)
-RUN curl -sSL https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
+RUN curl --fail --location --retry 5 --retry-all-errors --retry-delay 2 \
+    https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.tar.gz \
     | tar -xz -C /usr/local/bin sqlc
 
 # Layer 3: deps — only reruns when go.mod / go.sum change
