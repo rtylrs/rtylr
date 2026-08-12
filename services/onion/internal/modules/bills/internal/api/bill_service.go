@@ -17,7 +17,7 @@ import (
 // listBillsPageSize bounds ListBills server-side. The voxie
 // finance.bill.v1.ListBillsRequest contract has no pagination fields yet, so
 // the endpoint returns at most one maximum-size page instead of every row.
-const listBillsPageSize int32 = 100
+const listBillsPageSize int32 = 500
 
 type BillAPI struct {
 	Service *application.Service
