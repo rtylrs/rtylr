@@ -128,7 +128,7 @@ func buildGroundingCacheFreshness(grounding *analystGroundingResult) string {
 	}
 
 	parts := []string{
-		"tool=" + grounding.toolName(),
+		"tool=" + groundingToolName(grounding),
 		"rows=" + shortCacheHash(grounding.RowsJSON),
 		"spec=" + shortCacheHash(grounding.SpecJSON),
 		"count=" + strconv.Itoa(grounding.RowCount),
@@ -141,7 +141,7 @@ func buildGroundingCacheFreshness(grounding *analystGroundingResult) string {
 	return strings.Join(parts, ";")
 }
 
-func (grounding *analystGroundingResult) toolName() string {
+func groundingToolName(grounding *analystGroundingResult) string {
 	if grounding == nil {
 		return "analytics.query"
 	}

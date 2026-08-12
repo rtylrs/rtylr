@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"context"
@@ -27,21 +27,13 @@ func shouldUseBusinessSnapshot(question string) bool {
 	return plan.Kind == IntentSnapshot || plan.IsBroad
 }
 
-const businessSnapshotToolName = "business.snapshot"
+const BusinessSnapshotToolName = "business.snapshot"
 
-func (h *GenerateTextStreamHandler) businessSnapshotGrounding(ctx context.Context, question string, businessID, userID int64) (*analystGroundingResult, bool) {
-	return h.businessSnapshotGroundingWithContext(ctx, question, businessID, userID, "")
+func BuildBusinessSnapshotGrounding(ctx context.Context, analystService AnalystService, question string, businessID, userID int64, now time.Time) (*AnalystGroundingResult, bool) {
+	return BuildBusinessSnapshotGroundingWithContext(ctx, analystService, question, businessID, userID, now, "")
 }
 
-func (h *GenerateTextStreamHandler) businessSnapshotGroundingWithContext(ctx context.Context, question string, businessID, userID int64, systemContext string) (*analystGroundingResult, bool) {
-	return buildBusinessSnapshotGroundingWithContext(ctx, h.AnalystService, question, businessID, userID, time.Now().UTC(), systemContext)
-}
-
-func buildBusinessSnapshotGrounding(ctx context.Context, analystService AnalystService, question string, businessID, userID int64, now time.Time) (*analystGroundingResult, bool) {
-	return buildBusinessSnapshotGroundingWithContext(ctx, analystService, question, businessID, userID, now, "")
-}
-
-func buildBusinessSnapshotGroundingWithContext(ctx context.Context, analystService AnalystService, question string, businessID, userID int64, now time.Time, systemContext string) (*analystGroundingResult, bool) {
+func BuildBusinessSnapshotGroundingWithContext(ctx context.Context, analystService AnalystService, question string, businessID, userID int64, now time.Time, systemContext string) (*AnalystGroundingResult, bool) {
 	if analystService == nil {
 		return nil, false
 	}
@@ -80,8 +72,8 @@ func buildBusinessSnapshotGroundingWithContext(ctx context.Context, analystServi
 
 	rowsJSON, truncated := marshalGroundingRows(sections, maxGroundingChars)
 	specJSON := buildBusinessSnapshotSpecJSON(now.Format("2006-01-02"), specItems)
-	return &analystGroundingResult{
-		ToolName:       businessSnapshotToolName,
+	return &AnalystGroundingResult{
+		ToolName:       BusinessSnapshotToolName,
 		Prompt:         buildBusinessSnapshotGroundingPromptFromJSON(rowsJSON, len(sections), truncated, specJSON, systemContext, ClassifyCaretRequest(question, systemContext)),
 		Question:       question,
 		SpecJSON:       specJSON,

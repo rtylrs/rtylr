@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"encoding/json"
@@ -8,92 +8,14 @@ import (
 
 const deferredAnalyticsToolName = "analytics.deferred"
 
-var heavyDataActionTerms = []string{
-	"download",
-	"dump",
-	"every",
-	"export",
-	"raw",
-}
-
-var heavyDataCollectionTerms = []string{
-	"appointment",
-	"appointments",
-	"attendance",
-	"bill",
-	"bills",
-	"customer",
-	"customers",
-	"employee",
-	"employees",
-	"expense",
-	"expenses",
-	"invoice",
-	"invoices",
-	"order",
-	"orders",
-	"payment",
-	"payments",
-	"product",
-	"products",
-	"receipt",
-	"receipts",
-	"refund",
-	"refunds",
-	"sales",
-	"session",
-	"sessions",
-	"shift",
-	"shifts",
-	"stock movement",
-	"stock movements",
-	"transaction",
-	"transactions",
-}
-
-var heavyDataRangeTerms = []string{
-	"all time",
-	"all-time",
-	"entire history",
-	"full history",
-	"last year",
-	"past year",
-	"since we opened",
-}
-
-func heavyDataRequestReason(question string) (string, bool) {
-	normalized := normalizeCachePolicyText(question)
-	if strings.TrimSpace(normalized) == "" {
-		return "", false
-	}
-
-	if containsAnyTerm(normalized, []string{"csv", "spreadsheet"}) && containsAnyTerm(normalized, heavyDataCollectionTerms) {
-		return "export requested for a large business collection", true
-	}
-
-	if containsAnyTerm(normalized, heavyDataActionTerms) && containsAnyTerm(normalized, heavyDataCollectionTerms) {
-		return "raw or complete business records requested", true
-	}
-
-	if containsAnyTerm(normalized, []string{"list all", "show all", "give me all"}) && containsAnyTerm(normalized, heavyDataCollectionTerms) {
-		return "complete row listing requested", true
-	}
-
-	if containsAnyTerm(normalized, heavyDataRangeTerms) && containsAnyTerm(normalized, heavyDataCollectionTerms) && containsAnyTerm(normalized, []string{"list", "show", "export", "download"}) {
-		return "wide historical row request", true
-	}
-
-	return "", false
-}
-
-func buildDeferredAnalyticsGrounding(question string) (*analystGroundingResult, bool) {
-	reason, ok := heavyDataRequestReason(question)
+func buildDeferredAnalyticsGrounding(question string) (*AnalystGroundingResult, bool) {
+	reason, ok := HeavyDataRequestReason(question)
 	if !ok {
 		return nil, false
 	}
 
 	specJSON := deferredAnalyticsSpecJSON(reason)
-	return &analystGroundingResult{
+	return &AnalystGroundingResult{
 		ToolName:       deferredAnalyticsToolName,
 		Prompt:         buildDeferredAnalyticsPrompt(reason),
 		Question:       question,

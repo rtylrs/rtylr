@@ -26,7 +26,7 @@ type Module struct {
 }
 
 func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaService handlers.QuotaService, analystService handlers.AnalystService, toolExecutors ...handlers.ToolExecutor) *Module {
-	if err := handlers.ValidateToolRegistry(); err != nil {
+	if err := application.ValidateToolRegistry(); err != nil {
 		panic(fmt.Errorf("invalid Caret tool registry: %w", err))
 	}
 	snipsService, err := application.NewService(ctx)
@@ -34,7 +34,7 @@ func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaS
 		snipsService = nil
 	}
 	if analystService != nil {
-		toolExecutors = append([]handlers.ToolExecutor{handlers.NewBusinessSnapshotToolExecutor(analystService)}, toolExecutors...)
+		toolExecutors = append([]handlers.ToolExecutor{application.NewBusinessSnapshotToolExecutor(analystService)}, toolExecutors...)
 	}
 
 	return &Module{

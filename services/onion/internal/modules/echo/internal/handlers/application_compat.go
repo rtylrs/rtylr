@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"time"
 
 	echoapp "github.com/voxire/onion/internal/modules/echo/internal/application"
@@ -12,6 +13,9 @@ type CaretRequestPlan = echoapp.CaretRequestPlan
 type CaretResponsePolicy = echoapp.CaretResponsePolicy
 type CaretGroundingMode = echoapp.CaretGroundingMode
 type ToolDef = echoapp.ToolDef
+type AnalystService = echoapp.AnalystService
+type AnalystGroundingResult = echoapp.AnalystGroundingResult
+type TextCompletionService = echoapp.TextCompletionService
 
 const (
 	ModeAsk            = echoapp.ModeAsk
@@ -48,6 +52,14 @@ func toolAllowedForMode(mode CaretMode, tool ToolDef) bool {
 }
 func BuildCaretResponsePolicy(mode CaretMode, request, systemContext string, pageContext map[string]any) CaretResponsePolicy {
 	return echoapp.BuildCaretResponsePolicy(mode, request, systemContext, pageContext)
+}
+
+const deferredAnalyticsToolName = "analytics.deferred"
+
+func (h *GenerateTextStreamHandler) analystGroundingWithContext(ctx context.Context, question string, businessID, userID int64, systemContext string) (*AnalystGroundingResult, bool) {
+	return echoapp.GroundAnalytics(ctx, h.AiService, h.AnalystService, question, businessID, userID, systemContext, func(tokens int) {
+		h.recordUsage(ctx, businessID, userID, tokens)
+	})
 }
 
 const (

@@ -1083,7 +1083,7 @@ func (h *GenerateTextStreamHandler) writeAnalystToolEvents(w http.ResponseWriter
 		return nil
 	}
 
-	toolName := grounding.toolName()
+	toolName := groundingToolName(grounding)
 	blockID := fmt.Sprintf("tool-%s-%d", strings.ReplaceAll(toolName, ".", "-"), time.Now().UnixNano())
 	input := map[string]any{
 		"question": grounding.Question,
