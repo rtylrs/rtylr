@@ -86,7 +86,11 @@ const InvoiceDetail: React.FC = () => {
             </button>
             {invoice.status !== 'Paid' && (
               <button
-                style={{ ...ghostBtn, color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}
+                style={{
+                  ...ghostBtn,
+                  color: 'var(--finance-danger)',
+                  borderColor: 'var(--finance-danger-border)',
+                }}
                 onClick={() => setShowVoid(true)}
               >
                 <XCircle size={13} /> Void

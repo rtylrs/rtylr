@@ -57,7 +57,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
               fontWeight: 500,
               cursor: 'pointer',
               background: period === p ? ACCENT : 'transparent',
-              color: period === p ? '#fff' : 'var(--hub-text-muted)',
+              color: period === p ? 'var(--finance-white)' : 'var(--hub-text-muted)',
               textTransform: 'capitalize',
             }}
           >

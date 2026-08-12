@@ -1,8 +1,8 @@
 // Common style tokens used across the finance app.
 import type { CSSProperties } from 'react';
 
-export const ACCENT = '#10b981';
-export const ACCENT_SOFT = 'rgba(16,185,129,0.12)';
+export const ACCENT = 'var(--finance-accent)';
+export const ACCENT_SOFT = 'var(--finance-accent-soft)';
 
 export const cardStyle: CSSProperties = {
   background: 'var(--hub-card)',
@@ -29,7 +29,7 @@ export const primaryBtn: CSSProperties = {
   padding: '8px 16px',
   borderRadius: 8,
   background: ACCENT,
-  color: '#fff',
+  color: 'var(--finance-white)',
   border: 'none',
   fontSize: 13,
   fontWeight: 600,

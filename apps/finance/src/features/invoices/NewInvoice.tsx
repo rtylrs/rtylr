@@ -154,7 +154,8 @@ const NewInvoice: React.FC = () => {
                 border: 'none',
                 cursor: 'pointer',
                 background: step === i ? ACCENT : 'transparent',
-                color: step === i ? '#fff' : step > i ? ACCENT : 'var(--hub-text-muted)',
+                color:
+                  step === i ? 'var(--finance-white)' : step > i ? ACCENT : 'var(--hub-text-muted)',
                 fontSize: 12,
                 fontWeight: 600,
               }}
@@ -167,7 +168,7 @@ const NewInvoice: React.FC = () => {
                   width: 18,
                   height: 18,
                   borderRadius: 9,
-                  background: step === i ? 'rgba(255,255,255,0.25)' : 'var(--hub-hover)',
+                  background: step === i ? 'var(--finance-white-overlay)' : 'var(--hub-hover)',
                   fontSize: 10,
                 }}
               >

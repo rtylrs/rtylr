@@ -101,7 +101,7 @@ const ChartOfAccounts: React.FC = () => {
                 fontWeight: 500,
                 cursor: 'pointer',
                 background: filter === t ? ACCENT : 'transparent',
-                color: filter === t ? 'var(--hub-bg, #fff)' : 'var(--hub-text-muted)',
+                color: filter === t ? 'var(--hub-bg)' : 'var(--hub-text-muted)',
                 textTransform: 'capitalize',
               }}
             >
@@ -191,7 +191,7 @@ const ChartOfAccounts: React.FC = () => {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.5)',
+            background: 'var(--finance-overlay)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

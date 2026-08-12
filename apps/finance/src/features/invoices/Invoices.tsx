@@ -22,10 +22,10 @@ import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens
 type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
 
 const statusStyle: Record<InvoiceStatus, React.CSSProperties> = {
-  Draft: { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
-  Sent: { background: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
-  Paid: { background: 'rgba(16,185,129,0.12)', color: '#10b981' },
-  Overdue: { background: 'rgba(239,68,68,0.12)', color: '#ef4444' },
+  Draft: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
+  Sent: { background: 'var(--finance-info-soft)', color: 'var(--finance-info)' },
+  Paid: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
+  Overdue: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
 };
 
 const Invoices: React.FC = () => {
@@ -224,7 +224,10 @@ const Invoices: React.FC = () => {
                     style={{
                       padding: '12px 16px',
                       fontSize: 12,
-                      color: inv.status === 'Overdue' ? '#ef4444' : 'var(--hub-text-muted)',
+                      color:
+                        inv.status === 'Overdue'
+                          ? 'var(--finance-danger)'
+                          : 'var(--hub-text-muted)',
                     }}
                   >
                     {inv.dueDate}
@@ -244,8 +247,8 @@ const Invoices: React.FC = () => {
                           style={{
                             ...ghostBtn,
                             padding: '4px 10px',
-                            color: '#3b82f6',
-                            borderColor: 'rgba(59,130,246,0.3)',
+                            color: 'var(--finance-info)',
+                            borderColor: 'var(--finance-info-border)',
                           }}
                           onClick={() => setSendTarget(inv)}
                           aria-label={`Send invoice ${inv.id}`}
@@ -258,8 +261,8 @@ const Invoices: React.FC = () => {
                           style={{
                             ...ghostBtn,
                             padding: '4px 10px',
-                            color: '#10b981',
-                            borderColor: 'rgba(16,185,129,0.3)',
+                            color: 'var(--finance-accent)',
+                            borderColor: 'var(--finance-accent-border)',
                             opacity: updateStatus.isPending ? 0.6 : 1,
                           }}
                           onClick={() => markPaid(inv)}

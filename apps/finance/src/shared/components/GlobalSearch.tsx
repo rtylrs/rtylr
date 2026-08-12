@@ -192,7 +192,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
                 padding: '10px 12px',
                 borderRadius: 8,
                 border: 'none',
-                background: active ? 'rgba(16,185,129,0.1)' : 'transparent',
+                background: active ? 'var(--finance-accent-faint)' : 'transparent',
                 color: 'var(--hub-text)',
                 cursor: 'pointer',
                 textAlign: 'left',

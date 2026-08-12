@@ -8,11 +8,62 @@
  * auto content scanner in monorepo setups. */
 @source '../../../packages/**/*.{ts,tsx}';
 
-/* ── Brand accent (Finance - emerald green) ──────────────────── */
+/* ── Brand and semantic Finance colors ───────────────────────── */
 :root {
-  --accent: #10b981;
-  --accent-muted: rgba(16, 185, 129, 0.12);
-  --accent-border: rgba(16, 185, 129, 0.3);
+  --finance-accent: #10b981;
+  --finance-success: var(--finance-accent);
+  --finance-danger: #ef4444;
+  --finance-error: var(--finance-danger);
+  --finance-warning: #f59e0b;
+  --finance-info: #3b82f6;
+  --finance-accent-blue: var(--finance-info);
+  --finance-purple: #8b5cf6;
+  --finance-rose: #f43f5e;
+  --finance-neutral: #71717a;
+  --finance-gray: #6b7280;
+  --finance-text-dim: #a1a1aa;
+  --finance-warning-text: #92400e;
+  --finance-white: #fff;
+
+  --finance-accent-soft: rgba(16, 185, 129, 0.12);
+  --finance-accent-subtle: rgba(16, 185, 129, 0.08);
+  --finance-accent-faint: rgba(16, 185, 129, 0.1);
+  --finance-accent-border: rgba(16, 185, 129, 0.3);
+  --finance-accent-strong-border: rgba(16, 185, 129, 0.25);
+  --finance-danger-soft: rgba(239, 68, 68, 0.12);
+  --finance-danger-subtle: rgba(239, 68, 68, 0.08);
+  --finance-danger-border: rgba(239, 68, 68, 0.3);
+  --finance-danger-strong-border: rgba(239, 68, 68, 0.25);
+  --finance-warning-soft: rgba(245, 158, 11, 0.12);
+  --finance-warning-border: rgba(245, 158, 11, 0.25);
+  --finance-info-soft: rgba(59, 130, 246, 0.12);
+  --finance-info-border: rgba(59, 130, 246, 0.3);
+  --finance-neutral-soft: rgba(113, 113, 122, 0.15);
+  --finance-purple-soft: rgba(139, 92, 246, 0.12);
+  --finance-white-overlay: rgba(255, 255, 255, 0.25);
+  --finance-overlay: rgba(0, 0, 0, 0.5);
+  --finance-overlay-strong: rgba(0, 0, 0, 0.6);
+  --finance-overlay-medium: rgba(0, 0, 0, 0.4);
+  --finance-overlay-light: rgba(0, 0, 0, 0.3);
+  --finance-overlay-subtle: rgba(0, 0, 0, 0.15);
+
+  --finance-receivable: var(--finance-accent);
+  --finance-expenses: var(--finance-danger);
+  --finance-profit: var(--finance-info);
+  --finance-overdue: var(--finance-warning);
+
+  --finance-invoice-surface: #fff;
+  --finance-invoice-text: #111;
+  --finance-invoice-muted: #666;
+  --finance-invoice-label: #888;
+  --finance-invoice-border: #eee;
+  --finance-invoice-tax: #a85;
+  --finance-invoice-footer: #f7f7f7;
+  --finance-invoice-footer-text: #555;
+
+  --accent: var(--finance-accent);
+  --accent-muted: var(--finance-accent-soft);
+  --accent-border: var(--finance-accent-border);
   --accent-focus: rgba(16, 185, 129, 0.5);
 }
 

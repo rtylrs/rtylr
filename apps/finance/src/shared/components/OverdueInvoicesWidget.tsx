@@ -19,7 +19,7 @@ const OverdueInvoicesWidget: React.FC<OverdueInvoicesWidgetProps> = ({ items }) 
   <div style={cardStyle}>
     <div style={{ padding: 20 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-        <AlertTriangle size={14} style={{ color: '#ef4444' }} />
+        <AlertTriangle size={14} style={{ color: 'var(--finance-danger)' }} />
         <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
           Overdue Invoices
         </h3>
@@ -28,8 +28,8 @@ const OverdueInvoicesWidget: React.FC<OverdueInvoicesWidgetProps> = ({ items }) 
             fontSize: 10,
             padding: '2px 8px',
             borderRadius: 10,
-            background: 'rgba(239,68,68,0.12)',
-            color: '#ef4444',
+            background: 'var(--finance-danger-soft)',
+            color: 'var(--finance-danger)',
             marginLeft: 'auto',
             fontWeight: 600,
           }}
@@ -65,7 +65,9 @@ const OverdueInvoicesWidget: React.FC<OverdueInvoicesWidgetProps> = ({ items }) 
                 <div style={{ fontSize: 12, fontWeight: 600 }}>
                   {item.id} <>&middot;</> {item.client}
                 </div>
-                <div style={{ fontSize: 10, color: '#ef4444' }}>{item.daysOverdue}d overdue</div>
+                <div style={{ fontSize: 10, color: 'var(--finance-danger)' }}>
+                  {item.daysOverdue}d overdue
+                </div>
               </div>
               <span style={{ fontSize: 13, fontWeight: 700, color: ACCENT }}>
                 {typeof item.amount === 'number' ? (

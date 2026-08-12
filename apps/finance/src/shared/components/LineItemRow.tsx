@@ -87,7 +87,7 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            color: '#ef4444',
+            color: 'var(--finance-danger)',
             padding: 4,
           }}
           title="Remove line"

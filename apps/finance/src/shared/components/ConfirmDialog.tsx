@@ -33,7 +33,10 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           Cancel
         </button>
         <button
-          style={{ ...primaryBtn, background: destructive ? '#ef4444' : primaryBtn.background }}
+          style={{
+            ...primaryBtn,
+            background: destructive ? 'var(--finance-danger)' : primaryBtn.background,
+          }}
           onClick={() => {
             onConfirm();
             onClose();
@@ -53,8 +56,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           width: 36,
           height: 36,
           borderRadius: 10,
-          background: destructive ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
-          color: destructive ? '#ef4444' : '#f59e0b',
+          background: destructive ? 'var(--finance-danger-soft)' : 'var(--finance-warning-soft)',
+          color: destructive ? 'var(--finance-danger)' : 'var(--finance-warning)',
           flexShrink: 0,
         }}
       >

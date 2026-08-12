@@ -50,7 +50,7 @@ const PaymentReminderPanel: React.FC = () => {
               fontSize: 11,
               border: 'none',
               cursor: 'pointer',
-              background: r.enabled ? 'rgba(16,185,129,0.12)' : 'var(--hub-hover)',
+              background: r.enabled ? 'var(--finance-accent-soft)' : 'var(--hub-hover)',
               color: r.enabled ? ACCENT : 'var(--hub-text-muted)',
               fontWeight: 600,
             }}

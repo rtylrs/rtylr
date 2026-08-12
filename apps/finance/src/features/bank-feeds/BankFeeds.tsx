@@ -90,7 +90,7 @@ const BankFeeds: React.FC = () => {
                         width: 36,
                         height: 36,
                         borderRadius: 10,
-                        background: 'rgba(16,185,129,0.12)',
+                        background: 'var(--finance-accent-soft)',
                         color: ACCENT,
                       }}
                     >
@@ -116,7 +116,7 @@ const BankFeeds: React.FC = () => {
                     style={{
                       fontSize: 20,
                       fontWeight: 700,
-                      color: (a.balance ?? 0) < 0 ? '#ef4444' : 'var(--hub-text)',
+                      color: (a.balance ?? 0) < 0 ? 'var(--finance-danger)' : 'var(--hub-text)',
                       marginTop: 6,
                     }}
                   >
@@ -191,8 +191,10 @@ const BankFeeds: React.FC = () => {
                         style={{
                           padding: '2px 8px',
                           borderRadius: 20,
-                          background: t.matched ? 'rgba(16,185,129,0.12)' : 'rgba(245,158,11,0.12)',
-                          color: t.matched ? ACCENT : '#f59e0b',
+                          background: t.matched
+                            ? 'var(--finance-accent-soft)'
+                            : 'var(--finance-warning-soft)',
+                          color: t.matched ? ACCENT : 'var(--finance-warning)',
                           fontWeight: 600,
                         }}
                       >

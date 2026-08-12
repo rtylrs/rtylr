@@ -39,7 +39,7 @@ const InvoiceStatusFilter: React.FC<InvoiceStatusFilterProps> = ({ value, onChan
           fontWeight: 500,
           cursor: 'pointer',
           background: value === tab ? ACCENT : 'transparent',
-          color: value === tab ? '#fff' : 'var(--hub-text-muted)',
+          color: value === tab ? 'var(--finance-white)' : 'var(--hub-text-muted)',
           transition: 'all 0.15s',
         }}
       >
@@ -50,7 +50,7 @@ const InvoiceStatusFilter: React.FC<InvoiceStatusFilterProps> = ({ value, onChan
               fontSize: 10,
               padding: '1px 6px',
               borderRadius: 10,
-              background: value === tab ? 'rgba(255,255,255,0.25)' : 'var(--hub-hover)',
+              background: value === tab ? 'var(--finance-white-overlay)' : 'var(--hub-hover)',
             }}
           >
             {counts[tab]}

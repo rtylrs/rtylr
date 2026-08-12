@@ -18,15 +18,15 @@ const BootLoader = (): React.JSX.Element => (
       height: '100vh',
       alignItems: 'center',
       justifyContent: 'center',
-      background: '#0a0a0a',
+      background: 'var(--hub-bg)',
     }}
   >
     <div
       style={{
         width: 32,
         height: 32,
-        border: '2px solid rgba(16,185,129,0.3)',
-        borderTopColor: '#10b981',
+        border: '2px solid var(--finance-accent-border)',
+        borderTopColor: 'var(--finance-accent)',
         borderRadius: '50%',
         animation: 'spin 0.7s linear infinite',
       }}

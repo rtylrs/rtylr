@@ -31,12 +31,12 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
   return (
     <div
       style={{
-        background: '#fff',
-        color: '#111',
+        background: 'var(--finance-invoice-surface)',
+        color: 'var(--finance-invoice-text)',
         borderRadius: 12,
         padding: 32,
         fontFamily: 'system-ui, sans-serif',
-        boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+        boxShadow: '0 8px 30px var(--finance-overlay-subtle)',
       }}
     >
       <div
@@ -51,13 +51,24 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           <div style={{ fontSize: 20, fontWeight: 800, color: settings.brandColor }}>
             {settings.companyName}
           </div>
-          <div style={{ fontSize: 11, color: '#666' }}>{settings.companyEmail}</div>
+          <div style={{ fontSize: 11, color: 'var(--finance-invoice-muted)' }}>
+            {settings.companyEmail}
+          </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: '0.04em', color: '#111' }}>
+          <div
+            style={{
+              fontSize: 24,
+              fontWeight: 800,
+              letterSpacing: '0.04em',
+              color: 'var(--finance-invoice-text)',
+            }}
+          >
             INVOICE
           </div>
-          <div style={{ fontSize: 12, color: '#666' }}>#{invoiceNumber}</div>
+          <div style={{ fontSize: 12, color: 'var(--finance-invoice-muted)' }}>
+            #{invoiceNumber}
+          </div>
         </div>
       </div>
 
@@ -67,7 +78,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             style={{
               fontSize: 10,
               textTransform: 'uppercase',
-              color: '#888',
+              color: 'var(--finance-invoice-label)',
               fontWeight: 600,
               marginBottom: 4,
             }}
@@ -77,13 +88,13 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           <div style={{ fontSize: 13, fontWeight: 600 }}>
             {client?.name ?? 'No client selected'}
           </div>
-          <div style={{ fontSize: 11, color: '#666' }}>{client?.email}</div>
+          <div style={{ fontSize: 11, color: 'var(--finance-invoice-muted)' }}>{client?.email}</div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 11, color: '#666' }}>
+          <div style={{ fontSize: 11, color: 'var(--finance-invoice-muted)' }}>
             Issued: <strong>{issuedDate || '-'}</strong>
           </div>
-          <div style={{ fontSize: 11, color: '#666' }}>
+          <div style={{ fontSize: 11, color: 'var(--finance-invoice-muted)' }}>
             Due: <strong>{dueDate || '-'}</strong>
           </div>
         </div>
@@ -98,7 +109,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 padding: '8px 4px',
                 fontSize: 10,
                 textTransform: 'uppercase',
-                color: '#666',
+                color: 'var(--finance-invoice-muted)',
               }}
             >
               Description
@@ -109,7 +120,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 padding: '8px 4px',
                 fontSize: 10,
                 textTransform: 'uppercase',
-                color: '#666',
+                color: 'var(--finance-invoice-muted)',
               }}
             >
               Qty
@@ -120,7 +131,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 padding: '8px 4px',
                 fontSize: 10,
                 textTransform: 'uppercase',
-                color: '#666',
+                color: 'var(--finance-invoice-muted)',
               }}
             >
               Price
@@ -131,7 +142,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 padding: '8px 4px',
                 fontSize: 10,
                 textTransform: 'uppercase',
-                color: '#666',
+                color: 'var(--finance-invoice-muted)',
               }}
             >
               Total
@@ -140,7 +151,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
         </thead>
         <tbody>
           {items.map((it) => (
-            <tr key={it.id} style={{ borderBottom: '1px solid #eee' }}>
+            <tr key={it.id} style={{ borderBottom: '1px solid var(--finance-invoice-border)' }}>
               <td style={{ padding: '10px 4px', fontSize: 12 }}>{it.description || 'Item'}</td>
               <td style={{ padding: '10px 4px', fontSize: 12, textAlign: 'right' }}>
                 {it.quantity}
@@ -168,7 +179,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               fontSize: 12,
             }}
           >
-            <span style={{ color: '#666' }}>Subtotal</span>
+            <span style={{ color: 'var(--finance-invoice-muted)' }}>Subtotal</span>
             <MoneyDisplay amount={subtotal} />
           </div>
           <div
@@ -179,7 +190,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
               fontSize: 12,
             }}
           >
-            <span style={{ color: '#666' }}>Tax</span>
+            <span style={{ color: 'var(--finance-invoice-muted)' }}>Tax</span>
             <MoneyDisplay amount={tax} />
           </div>
           {discount > 0 && (
@@ -189,7 +200,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
                 justifyContent: 'space-between',
                 padding: '4px 0',
                 fontSize: 12,
-                color: '#a85',
+                color: 'var(--finance-invoice-tax)',
               }}
             >
               <span>Discount</span>
@@ -220,10 +231,10 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           style={{
             marginTop: 24,
             padding: 12,
-            background: '#f7f7f7',
+            background: 'var(--finance-invoice-footer)',
             borderRadius: 8,
             fontSize: 11,
-            color: '#555',
+            color: 'var(--finance-invoice-footer-text)',
           }}
         >
           <strong>Notes:</strong> {notes}

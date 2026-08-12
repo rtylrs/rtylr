@@ -19,7 +19,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
         position: 'fixed',
         inset: 0,
         zIndex: 50,
-        background: 'rgba(0,0,0,0.6)',
+        background: 'var(--finance-overlay-strong)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -41,7 +41,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
           maxWidth: '90vw',
           maxHeight: '90vh',
           overflow: 'auto',
-          boxShadow: '0 40px 80px rgba(0,0,0,0.4)',
+          boxShadow: '0 40px 80px var(--finance-overlay-medium)',
         }}
       >
         <div

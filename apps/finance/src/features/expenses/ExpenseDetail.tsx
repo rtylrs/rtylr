@@ -14,16 +14,16 @@ import { cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
 
 const statusStyle: Record<string, React.CSSProperties> = {
   pending: {
-    background: 'color-mix(in srgb, var(--finance-warning, #f59e0b) 12%, transparent)',
-    color: 'var(--finance-warning, #f59e0b)',
+    background: 'color-mix(in srgb, var(--finance-warning) 12%, transparent)',
+    color: 'var(--finance-warning)',
   },
   approved: {
-    background: 'color-mix(in srgb, var(--finance-success, #10b981) 12%, transparent)',
-    color: 'var(--finance-success, #10b981)',
+    background: 'color-mix(in srgb, var(--finance-success) 12%, transparent)',
+    color: 'var(--finance-success)',
   },
   rejected: {
-    background: 'color-mix(in srgb, var(--finance-error, #ef4444) 12%, transparent)',
-    color: 'var(--finance-error, #ef4444)',
+    background: 'color-mix(in srgb, var(--finance-error) 12%, transparent)',
+    color: 'var(--finance-error)',
   },
 };
 
@@ -90,8 +90,8 @@ const ExpenseDetail: React.FC = () => {
             <button
               style={{
                 ...ghostBtn,
-                color: 'var(--finance-error, #ef4444)',
-                borderColor: 'color-mix(in srgb, var(--finance-error, #ef4444) 30%, transparent)',
+                color: 'var(--finance-error)',
+                borderColor: 'color-mix(in srgb, var(--finance-error) 30%, transparent)',
               }}
               disabled={rejectMut.isPending}
               onClick={() => rejectMut.mutate(expense.id)}

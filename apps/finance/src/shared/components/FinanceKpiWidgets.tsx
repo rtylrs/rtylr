@@ -10,7 +10,6 @@ interface Kpi {
   hint?: string;
   icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
   colorVar: string;
-  colorFallback: string;
 }
 
 const FinanceKpiWidgets: React.FC = () => {
@@ -37,7 +36,6 @@ const FinanceKpiWidgets: React.FC = () => {
       hint: 'outstanding',
       icon: DollarSign,
       colorVar: '--finance-receivable',
-      colorFallback: '#10b981',
     },
     {
       label: 'Expenses MTD',
@@ -50,7 +48,6 @@ const FinanceKpiWidgets: React.FC = () => {
       hint: 'month to date',
       icon: TrendingDown,
       colorVar: '--finance-expenses',
-      colorFallback: '#ef4444',
     },
     {
       label: 'Net Profit MTD',
@@ -59,7 +56,6 @@ const FinanceKpiWidgets: React.FC = () => {
       hint: 'month to date',
       icon: TrendingUp,
       colorVar: '--finance-profit',
-      colorFallback: '#3b82f6',
     },
     {
       label: 'Overdue',
@@ -68,7 +64,6 @@ const FinanceKpiWidgets: React.FC = () => {
       hint: 'past due date',
       icon: Clock,
       colorVar: '--finance-overdue',
-      colorFallback: '#f59e0b',
     },
   ];
 
@@ -76,7 +71,7 @@ const FinanceKpiWidgets: React.FC = () => {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
       {kpis.map((k) => {
         const Icon = k.icon;
-        const color = `var(${k.colorVar}, ${k.colorFallback})`;
+        const color = `var(${k.colorVar})`;
         return (
           <div key={k.label} style={{ ...cardStyle, padding: 18 }}>
             <div
@@ -106,7 +101,7 @@ const FinanceKpiWidgets: React.FC = () => {
                   width: 28,
                   height: 28,
                   borderRadius: 8,
-                  background: `color-mix(in srgb, var(${k.colorVar}, ${k.colorFallback}) 12%, transparent)`,
+                  background: `color-mix(in srgb, var(${k.colorVar}) 12%, transparent)`,
                   color,
                 }}
               >
