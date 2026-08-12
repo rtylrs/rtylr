@@ -55,6 +55,14 @@ func toProjectMember(m domain.ProjectMember) *flowprojectv1.ProjectMember {
 }
 
 func (a *ProjectAPI) ListProjectColumns(ctx context.Context, req *flowprojectv1.ListProjectColumnsRequest) (*flowprojectv1.ListProjectColumnsResponse, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleViewer); err != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	cols, total, err := a.Service.GetColumnsByProject(ctx, req.GetProjectId(), int64(limit), offset)
 	if err != nil {
@@ -75,6 +83,13 @@ func (a *ProjectAPI) CreateProjectColumn(ctx context.Context, req *flowprojectv1
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleMember); err != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	workspaceID := a.Service.GetProjectWorkspace(ctx, req.GetProjectId())
+	if workspaceID == 0 || req.GetWorkspaceId() != workspaceID {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
+	}
 
 	color := req.GetColor()
 	if color == "" {
@@ -83,7 +98,7 @@ func (a *ProjectAPI) CreateProjectColumn(ctx context.Context, req *flowprojectv1
 
 	col, err := a.Service.CreateColumn(ctx, domain.ProjectColumnInput{
 		ProjectID:   req.GetProjectId(),
-		WorkspaceID: req.GetWorkspaceId(),
+		WorkspaceID: workspaceID,
 		Name:        req.GetName(),
 		Color:       color,
 		SortOrder:   int(req.GetSortOrder()),
