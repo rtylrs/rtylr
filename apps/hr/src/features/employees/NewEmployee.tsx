@@ -87,7 +87,7 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
     border: '1px solid var(--hr-border)',
     background: 'var(--hr-input-bg)',
     color: 'var(--hr-text)',
-    fontSize: '14px',
+    fontSize: '16px',
     outline: 'none',
   };
 

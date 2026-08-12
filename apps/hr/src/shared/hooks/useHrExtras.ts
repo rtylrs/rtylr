@@ -53,7 +53,10 @@ export function useSubmitTimeOff() {
   return useMutation({
     mutationFn: (data: Parameters<typeof hrExtras.submitTimeOff>[0]) =>
       unwrap(hrExtras.submitTimeOff(data)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['time-off'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['time-off-extras'] });
+      qc.invalidateQueries({ queryKey: ['time-off'] });
+    },
     onError: () => toast.error('Failed to submit time off request'),
   });
 }
@@ -63,7 +66,10 @@ export function useApproveTimeOff() {
   return useMutation({
     mutationFn: ({ id, approved, note }: { id: number; approved: boolean; note?: string }) =>
       unwrap(hrExtras.approveTimeOff(id, approved, note)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['time-off'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['time-off-extras'] });
+      qc.invalidateQueries({ queryKey: ['time-off'] });
+    },
     onError: () => toast.error('Failed to update time off request'),
   });
 }
