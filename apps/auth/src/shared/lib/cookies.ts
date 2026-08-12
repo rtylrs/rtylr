@@ -29,7 +29,8 @@ export function setCookie(name: string, value: string, options: SetCookieOptions
     days,
     path = '/',
     domain,
-    secure = process.env.NODE_ENV === 'production',
+    secure = options.secure ??
+      (typeof window !== 'undefined' ? window.location.protocol === 'https:' : false),
     sameSite = 'lax',
   } = options;
 
