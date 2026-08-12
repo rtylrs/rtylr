@@ -7,9 +7,10 @@ import (
 )
 
 type UpdatePermissionsRequest struct {
-	UserId int64    `json:"user_id,omitempty"`
-	Apps   []string `json:"apps,omitempty"`
-	Role   string   `json:"role,omitempty"`
+	UserId   int64    `json:"user_id,omitempty"`
+	Apps     []string `json:"apps,omitempty"`
+	Role     string   `json:"role,omitempty"`
+	FullName *string  `json:"full_name,omitempty"`
 }
 
 func (m *UpdatePermissionsRequest) MarshalJSON() ([]byte, error) {
@@ -63,6 +64,18 @@ func (x *UpdatePermissionsRequest) GetRole() string {
 		return zero
 	}
 	return x.Role
+}
+
+func (x *UpdatePermissionsRequest) GetFullName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.FullName == nil {
+		var zero string
+		return zero
+	}
+	return *x.FullName
 }
 
 type UpdatePermissionsResponse struct {

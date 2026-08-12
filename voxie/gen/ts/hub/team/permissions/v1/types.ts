@@ -4,6 +4,7 @@ export interface UpdatePermissionsRequest {
 userId: string;
 apps?: (string)[];
 role: string;
+fullName?: string;
 }
 
 export function decodeUpdatePermissionsRequest(v: any): UpdatePermissionsRequest {
@@ -12,6 +13,7 @@ return {
 userId: v.user_id,
 apps: v.apps,
 role: v.role,
+fullName: v.full_name,
 };
 }
 
@@ -20,6 +22,7 @@ const out: Record<string, unknown> = {};
 if (v.userId !== undefined) { out.user_id = v.userId; }
 if (v.apps !== undefined) { out.apps = v.apps; }
 if (v.role !== undefined) { out.role = v.role; }
+if (v.fullName !== undefined) { out.full_name = v.fullName; }
 return out;
 }
 
