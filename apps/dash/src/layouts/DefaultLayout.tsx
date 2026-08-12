@@ -94,8 +94,6 @@ const routeLabels: Record<string, string> = {
   '/security': 'Security',
   '/theme': 'Theme',
   '/help': 'Help center',
-  '/export': 'Export data',
-  '/import': 'Import data',
   '/settings': 'Manage account',
   '/settings/account': 'Account',
   '/settings/general': 'General',

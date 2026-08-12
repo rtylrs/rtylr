@@ -3,7 +3,7 @@ import { DollarSign, ShoppingBag, Users, TrendingUp } from 'lucide-react';
 import { useKpis } from '../../../../shared/hooks/queries/useKpis';
 
 function fmt(n: number | undefined | null) {
-  if (n == null) return '$0';
+  if (n == null) return '—';
   return `$${n.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 

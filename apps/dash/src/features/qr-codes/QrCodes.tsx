@@ -20,14 +20,10 @@ const useQrTables = () =>
   useQuery<QrTable[]>({
     queryKey: ['qr-tables'],
     queryFn: async () => {
-      try {
-        const res = await unwrap(
-          safe.get<{ tables?: QrTable[] } | QrTable[]>('/pos/table/v1/tables')
-        );
-        return Array.isArray(res) ? res : (res.tables ?? []);
-      } catch {
-        return [];
-      }
+      const res = await unwrap(
+        safe.get<{ tables?: QrTable[] } | QrTable[]>('/pos/table/v1/tables')
+      );
+      return Array.isArray(res) ? res : (res.tables ?? []);
     },
   });
 

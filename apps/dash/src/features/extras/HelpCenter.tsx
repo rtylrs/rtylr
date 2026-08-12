@@ -17,56 +17,56 @@ const ARTICLES: Article[] = [
     id: '1',
     title: 'Getting started with rtylr Hub',
     category: 'Getting started',
-    href: '#',
+    href: 'https://docs.rtylr.com/getting-started',
     excerpt: 'Everything you need to know about the Hub.',
   },
   {
     id: '2',
     title: 'Inviting your first team member',
     category: 'Team',
-    href: '#',
+    href: 'https://docs.rtylr.com/team',
     excerpt: 'Send invitations and assign apps and permissions.',
   },
   {
     id: '3',
     title: 'Connecting Stripe for payments',
     category: 'Billing',
-    href: '#',
+    href: 'https://docs.rtylr.com/billing',
     excerpt: 'Accept online payments with Stripe.',
   },
   {
     id: '4',
     title: 'Configuring permissions per role',
     category: 'Security',
-    href: '#',
+    href: 'https://docs.rtylr.com/security',
     excerpt: 'Give the right people the right access.',
   },
   {
     id: '5',
     title: 'Building a menu in the Menus app',
     category: 'POS',
-    href: '#',
+    href: 'https://docs.rtylr.com/pos',
     excerpt: 'Create menus and categories.',
   },
   {
     id: '6',
     title: 'Reading the analytics dashboard',
     category: 'Analytics',
-    href: '#',
+    href: 'https://docs.rtylr.com/analytics',
     excerpt: 'Understand revenue, orders, and trends.',
   },
   {
     id: '7',
     title: 'Setting up API keys and webhooks',
     category: 'Developer',
-    href: '#',
+    href: 'https://docs.rtylr.com/developer',
     excerpt: 'Integrate rtylr into your systems.',
   },
   {
     id: '8',
     title: 'Enabling two-factor authentication',
     category: 'Security',
-    href: '#',
+    href: 'https://docs.rtylr.com/security/2fa',
     excerpt: 'Add an extra layer to your account.',
   },
 ];
@@ -126,8 +126,9 @@ const HelpCenter: React.FC = () => {
             <a
               key={a.id}
               href={a.href}
-              onClick={(e) => e.preventDefault()}
-              className="flex items-start gap-3 px-4 py-3 no-underline transition-colors hover:bg-[var(--dash-hover)] cursor-not-allowed opacity-60"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-3 px-4 py-3 no-underline transition-colors hover:bg-[var(--dash-hover)]"
               style={{ borderBottom: '1px solid var(--dash-border)' }}
             >
               <div className="flex-1 min-w-0">
