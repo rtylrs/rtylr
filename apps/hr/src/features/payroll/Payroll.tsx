@@ -79,8 +79,11 @@ const Payroll = (): React.JSX.Element => {
 
   const handleTriggerRun = (): void => {
     const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+    const y = now.getFullYear();
+    const m = now.getMonth();
+    const start = `${y}-${String(m + 1).padStart(2, '0')}-01`;
+    const lastDay = new Date(y, m + 1, 0).getDate();
+    const end = `${y}-${String(m + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
     triggerRun.mutate({ periodStart: start, periodEnd: end });
   };
 
