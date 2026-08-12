@@ -6,6 +6,8 @@ import { useStockTakes, useCreateStockTake, useUpdateStockTake } from './useStoc
 import { stockTakeStatusLabel, stockTakeProgress, stockTakeVariance } from './stockTakeSchema';
 import type { UpdateStockTakeItemBody } from '@voxire/voxie/erp/stock_take/v1/types';
 import { useWarehouses } from '../warehouses/useWarehouses';
+import { useInventoryReport } from '../inventory/useInventory';
+import { buildStockTakeItems } from './stockTakeUtils';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
@@ -34,11 +36,17 @@ const StockTakes: React.FC = () => {
   const stockTakes = stockTakeResult?.stockTakes ?? [];
   const hasMore = stockTakeResult?.hasMore ?? false;
   const { data: warehouses = [] } = useWarehouses();
+  const {
+    data: inventoryItems = [],
+    isLoading: inventoryLoading,
+    isError: inventoryError,
+  } = useInventoryReport();
   const createMut = useCreateStockTake();
   const updateMut = useUpdateStockTake();
   const [showCreate, setShowCreate] = useState(false);
   const [newWarehouseId, setNewWarehouseId] = useState('');
   const [newNotes, setNewNotes] = useState('');
+  const itemsToCount = buildStockTakeItems(inventoryItems);
 
   const warehouseName = (id: string): string =>
     warehouses.find((w) => w.id === id)?.name ?? `Warehouse #${id}`;
@@ -48,11 +56,23 @@ const StockTakes: React.FC = () => {
       toast.error('Warehouse is required');
       return;
     }
+    if (inventoryLoading) {
+      toast.error('Inventory is still loading');
+      return;
+    }
+    if (itemsToCount.length === 0) {
+      toast.error(
+        inventoryError
+          ? 'Unable to load inventory for this stock take'
+          : 'No inventory items to count'
+      );
+      return;
+    }
     try {
       await createMut.mutateAsync({
         warehouseId: newWarehouseId,
         notes: newNotes.trim(),
-        items: [],
+        items: itemsToCount,
       });
       toast.success('Stock take created');
       setShowCreate(false);
@@ -263,6 +283,13 @@ const StockTakes: React.FC = () => {
               placeholder="Notes (optional)"
               style={inputStyle}
             />
+            <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }} aria-live="polite">
+              {inventoryLoading
+                ? 'Loading current inventory…'
+                : inventoryError
+                  ? 'Inventory could not be loaded.'
+                  : `${itemsToCount.length} inventory item${itemsToCount.length === 1 ? '' : 's'} will be included with current stock as the expected quantity.`}
+            </p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowCreate(false)}
@@ -273,7 +300,12 @@ const StockTakes: React.FC = () => {
               </button>
               <button
                 onClick={handleCreate}
-                disabled={createMut.isPending || !newWarehouseId}
+                disabled={
+                  createMut.isPending ||
+                  !newWarehouseId ||
+                  inventoryLoading ||
+                  itemsToCount.length === 0
+                }
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
