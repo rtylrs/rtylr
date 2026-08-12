@@ -25,7 +25,6 @@ export function DocsPage({ doc }: DocsPageProps) {
 
   return (
     <>
-      <div className="announcement"><span>NEW</span> Self-hosting documentation for rtylr is now available <b>↗</b></div>
       <div className="docs-frame">
         <aside className="docs-sidebar" aria-label="Docs sidebar">
           {sidebarGroups.map((group) => (

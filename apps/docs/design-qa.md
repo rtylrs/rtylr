@@ -4,7 +4,8 @@
 
 - Current desktop render: `output/playwright/qa-home-desktop.png` at 1440 × 900 CSS px.
 - Current mobile render: `output/playwright/qa-home-mobile-viewport.png` at 390 × 844 CSS px.
-- State: dark theme, redesigned home page; existing `/self-hosting/` content page remains covered by the earlier docs-page pass.
+- Current content renders: `output/playwright/qa-self-hosting-desktop-v2.png` and `output/playwright/qa-self-hosting-mobile-v2.png`.
+- State: dark theme, redesigned home page and content page; `/self-hosting/` is the representative article route.
 
 ## Findings
 
@@ -15,8 +16,8 @@ The implementation intentionally adapts the reference instead of copying it 1:1:
 ## Focused checks
 
 - Typography and hierarchy: Plus Jakarta Sans is loaded from `public/fonts/`; the home page now uses a clear hero, two primary actions, a start-here path, and an app index.
-- Spacing and layout: desktop content uses a consistent 24px outer gutter at 1440px, the hero occupies y=152–632, the start-here section begins at y=744, and the mobile content uses a 16px gutter without horizontal overflow.
-- Colors and tokens: implementation body background measured as `rgb(16, 16, 16)` (`#101010`); borders, muted text, blue CTA, and green announcement accent are stable across routes.
+- Spacing and layout: desktop content uses a consistent 24px outer gutter at 1440px, the hero occupies y=152–632, the start-here section begins at y=744, article content begins at y=144 after the header, and mobile content uses a 16px gutter without horizontal overflow.
+- Colors and tokens: implementation body background measured as `rgb(16, 16, 16)` (`#101010`); borders, muted text, blue CTA, and green accent are stable across routes.
 - Asset fidelity: existing rtylr logo is served from the Next root `public/` path and loaded with a non-zero natural width in the static build.
 - Copy and content: self-hosting content is rtylr-specific, with `Self Host rtylr` present in both docs and landing footers.
 
@@ -28,6 +29,7 @@ The implementation intentionally adapts the reference instead of copying it 1:1:
 - Self-hosting page in-page navigation emits working heading anchors.
 - Mobile menu opens as a full-height drawer at 390 × 844.
 - Home page no longer contains “What’s new” or the old release timeline.
+- Article pages no longer show the floating self-hosting announcement strip.
 - Static build console/error check: no errors or warnings reported by the final browser tab; computed body background is `rgb(16, 16, 16)`.
 
 ## Comparison history

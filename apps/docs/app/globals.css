@@ -103,20 +103,6 @@ button { color: inherit; }
 .search-button kbd, .mobile-search-button kbd { border: 1px solid #575a56; border-radius: 3px; padding: 1px 4px; color: var(--text); font-size: 11px; }
 .mobile-menu-button, .mobile-search-button { display: none; }
 
-.announcement {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 5px;
-  max-width: 1280px;
-  margin: 32px auto 0;
-  padding: 0 16px;
-  color: var(--text-muted);
-  font-size: 12px;
-}
-.announcement span { border: 1px solid var(--green); border-radius: 5px; padding: 1px 5px; color: var(--green); font-size: 10px; }
-.announcement b { border: 1px solid #656862; border-radius: 50%; width: 17px; height: 17px; display: inline-grid; place-items: center; font-size: 10px; font-weight: 400; }
-
 .home-page { max-width: 1280px; margin: 0 auto; padding: 72px 16px 160px; }
 .home-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(420px, 1fr); gap: 52px; align-items: center; min-height: 500px; }
 .eyebrow { margin: 0 0 32px; color: var(--text); font-size: 13px; letter-spacing: .04em; }
@@ -198,8 +184,7 @@ button { color: inherit; }
 /* Home page rhythm */
 .site-header__inner,
 .home-page,
-.site-footer,
-.announcement {
+.site-footer {
   width: min(100% - 48px, 1440px);
   margin-left: auto;
   margin-right: auto;
@@ -459,7 +444,6 @@ button { color: inherit; }
   .mobile-menu-button { width: 32px; padding: 0; color: var(--text-muted); font-size: 25px; line-height: 1; }
   .mobile-search-button { font-size: 9px; }
   .site-logo img { width: 88px; }
-  .announcement { justify-content: flex-start; margin-top: 20px; overflow: hidden; white-space: nowrap; font-size: 11px; }
   .home-page { padding-top: 52px; }
   .home-hero { display: block; min-height: 0; }
   .eyebrow { margin-bottom: 26px; }
@@ -493,8 +477,7 @@ button { color: inherit; }
 @media (max-width: 760px) {
   .site-header__inner,
   .home-page,
-  .site-footer,
-  .announcement { width: calc(100% - 32px); }
+  .site-footer { width: calc(100% - 32px); }
   .site-header__inner { padding: 8px 0; }
   .home-page { padding-top: 64px; }
   .home-hero h1 { max-width: 540px; font-size: clamp(50px, 14vw, 72px); }
