@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -211,6 +212,12 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	}
 
 	if err := h.Service.Update(ctx, businessID, req.ID, input); err != nil {
+		if errors.Is(err, domain.ErrQuoteNotFound) {
+			return UpdateResponse{}, onekiterrors.New(http.StatusNotFound, "Quote not found")
+		}
+		if errors.Is(err, domain.ErrQuoteNotEditable) {
+			return UpdateResponse{}, onekiterrors.New(http.StatusConflict, "Quote is not editable")
+		}
 		return UpdateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update quote")
 	}
 
@@ -251,6 +258,12 @@ func (h *DeleteHandler) Serve(ctx context.Context, req *DeleteRequest) (DeleteRe
 	}
 
 	if err := h.Service.Delete(ctx, businessID, req.ID); err != nil {
+		if errors.Is(err, domain.ErrQuoteNotFound) {
+			return DeleteResponse{}, onekiterrors.New(http.StatusNotFound, "Quote not found")
+		}
+		if errors.Is(err, domain.ErrQuoteNotEditable) {
+			return DeleteResponse{}, onekiterrors.New(http.StatusConflict, "Quote is not editable")
+		}
 		return DeleteResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete quote")
 	}
 

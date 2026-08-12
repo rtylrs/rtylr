@@ -8,6 +8,7 @@ import (
 
 var (
 	ErrQuoteNotFound         = errors.New("quote not found")
+	ErrQuoteNotEditable      = errors.New("quote is not editable")
 	ErrQuoteAlreadyConverted = errors.New("quote already converted")
 )
 
