@@ -181,17 +181,17 @@ const Email: React.FC = () => {
   const updateBusiness = useUpdateBusiness();
 
   const handleSaveSender = (): void => {
-    if (!sender.senderEmail) {
+    if (!sender.fromEmail) {
       toast.error('Sender email is required');
       return;
     }
     updateBusiness.mutate({
-      data: { senderEmail: sender.senderEmail },
+      data: { senderEmail: sender.fromEmail },
     });
   };
 
   const handleTestSmtp = (): void => {
-    if (!smtp.host || !smtp.user) {
+    if (!smtp.host || !smtp.username) {
       toast.error('SMTP host and user are required');
       return;
     }
@@ -207,8 +207,8 @@ const Email: React.FC = () => {
       data: {
         smtpHost: smtp.host,
         smtpPort: smtp.port,
-        smtpUser: smtp.user,
-        smtpFrom: smtp.fromEmail,
+        smtpUser: smtp.username,
+        smtpFrom: sender.fromEmail,
       },
     });
   };
