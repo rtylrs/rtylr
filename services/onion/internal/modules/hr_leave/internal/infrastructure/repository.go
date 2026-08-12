@@ -201,7 +201,64 @@ func (r *Repository) CreateLeaveRequest(ctx context.Context, ownerID int64, req 
 }
 
 func (r *Repository) ApproveLeaveRequest(ctx context.Context, ownerID, requestID int64) error {
-	return r.queries.ApproveLeaveRequest(ctx, sqlc.ApproveLeaveRequestParams{ID: requestID, BusinessID: ownerID})
+	result, err := r.queries.ApproveLeaveRequest(ctx, sqlc.ApproveLeaveRequestParams{ID: requestID, BusinessID: ownerID})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrLeaveRequestNotPending
+	}
+	return nil
+}
+
+func (r *Repository) ApproveLeaveRequestWithBalance(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, year int32, days float64) (err error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+	result, err := qtx.ApproveLeaveRequest(ctx, sqlc.ApproveLeaveRequestParams{ID: requestID, BusinessID: ownerID})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrLeaveRequestNotPending
+	}
+
+	result, err = qtx.AddToUsedDays(ctx, sqlc.AddToUsedDaysParams{
+		UsedDays:    fmt.Sprintf("%.2f", days),
+		PendingDays: fmt.Sprintf("%.2f", days),
+		BusinessID:  ownerID,
+		EmployeeID:  employeeID,
+		LeaveTypeID: leaveTypeID,
+		Year:        year,
+	})
+	if err != nil {
+		return err
+	}
+	affected, err = result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrLeaveBalanceNotFound
+	}
+
+	return tx.Commit()
 }
 
 func (r *Repository) AdvanceLeaveApprovalLevel(ctx context.Context, ownerID, requestID int64) error {
@@ -328,7 +385,7 @@ func (r *Repository) UpsertLeaveBalance(ctx context.Context, ownerID int64, bal 
 }
 
 func (r *Repository) AddToUsedDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64) error {
-	return r.queries.AddToUsedDays(ctx, sqlc.AddToUsedDaysParams{
+	result, err := r.queries.AddToUsedDays(ctx, sqlc.AddToUsedDaysParams{
 		UsedDays:    fmt.Sprintf("%.2f", days),
 		PendingDays: fmt.Sprintf("%.2f", days),
 		BusinessID:  ownerID,
@@ -336,6 +393,17 @@ func (r *Repository) AddToUsedDays(ctx context.Context, ownerID, employeeID, lea
 		LeaveTypeID: leaveTypeID,
 		Year:        year,
 	})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrLeaveBalanceNotFound
+	}
+	return nil
 }
 
 func (r *Repository) AddToPendingDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64) error {

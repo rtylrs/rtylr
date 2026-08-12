@@ -215,21 +215,16 @@ func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID int64) er
 		}
 	}
 
-	// Final approval — move pending to used
-	if err := s.repo.ApproveLeaveRequest(ctx, ownerID, requestID); err != nil {
-		return err
-	}
-
 	startDate, parseErr := time.Parse("2006-01-02", req.StartDate)
 	if parseErr != nil {
 		return parseErr
 	}
 	year := int32(startDate.Year())
 
-	addErr := s.repo.AddToUsedDays(ctx, ownerID, req.EmployeeID, req.LeaveTypeID, year, req.TotalDays)
-	if addErr != nil {
-		logger.Ctx(ctx).Error("failed to update balance after leave approval",
-			logger.Any("owner_id", ownerID), logger.Any("request_id", requestID), logger.Error(addErr))
+	// Final approval atomically moves the request from pending to approved and
+	// moves its days from the balance's pending bucket to the used bucket.
+	if err := s.repo.ApproveLeaveRequestWithBalance(ctx, ownerID, requestID, req.EmployeeID, req.LeaveTypeID, year, req.TotalDays); err != nil {
+		return err
 	}
 
 	invalidateHRLeaveScope(ctx, ownerID)

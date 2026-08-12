@@ -7,6 +7,8 @@ var (
 	ErrInsufficientLeaveBalance   = errors.New("insufficient leave balance")
 	ErrLeaveNotConfigured         = errors.New("leave types not configured for this company")
 	ErrLeaveRequestNotFound       = errors.New("leave request not found")
+	ErrLeaveRequestNotPending     = errors.New("leave request is no longer pending")
+	ErrLeaveBalanceNotFound       = errors.New("leave balance not found")
 	ErrLeaveConflict              = errors.New("leave request overlaps with existing approved or pending leave")
 	ErrApprovalChainNotConfigured = errors.New("approval chain not configured for leave requests")
 	ErrInvalidDateRange           = errors.New("start date must be before or equal to end date")
