@@ -13,7 +13,7 @@ import EmptyState from '../../shared/components/EmptyState';
 const Archive: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: apiTasks = [] } = useTasks({});
+  const { data: apiTasks = [] } = useTasks({ activeOnly: false });
   const restoreTask = useUpdateTask();
 
   const archived = useMemo(() => archivedTasks(apiTasks as ApiTask[]), [apiTasks]);
