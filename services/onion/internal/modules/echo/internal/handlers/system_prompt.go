@@ -1,0 +1,9 @@
+package handlers
+
+import _ "embed"
+
+// caretSystemPromptTemplate is the single source of truth for Caret's durable
+// behavior. Request-specific values are inserted by buildCaretPrompt.
+//
+//go:embed system_prompt.txt
+var caretSystemPromptTemplate string

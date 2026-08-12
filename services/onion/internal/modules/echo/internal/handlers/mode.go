@@ -1,5 +1,7 @@
 package handlers
 
+import "strings"
+
 // CaretMode is the conversation persona requested by the client. The list
 // mirrors the dash app's `CARET_MODES` enum so the wire stays stable.
 type CaretMode string
@@ -37,7 +39,7 @@ func (m CaretMode) AllowsTools() bool {
 
 // ParseMode coerces an unknown string to a CaretMode, defaulting to Ask.
 func ParseMode(s string) CaretMode {
-	switch CaretMode(s) {
+	switch CaretMode(strings.ToLower(strings.TrimSpace(s))) {
 	case ModeAgent:
 		return ModeAgent
 	case ModeAnalyst:

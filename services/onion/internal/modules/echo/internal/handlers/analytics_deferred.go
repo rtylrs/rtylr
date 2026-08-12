@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"strings"
+	"time"
 )
 
 const deferredAnalyticsToolName = "analytics.deferred"
@@ -93,13 +94,15 @@ func buildDeferredAnalyticsGrounding(question string) (*analystGroundingResult, 
 
 	specJSON := deferredAnalyticsSpecJSON(reason)
 	return &analystGroundingResult{
-		ToolName: deferredAnalyticsToolName,
-		Prompt:   buildDeferredAnalyticsPrompt(reason),
-		Question: question,
-		SpecJSON: specJSON,
-		RowsJSON: "[]",
-		Rows:     nil,
-		RowCount: 0,
+		ToolName:       deferredAnalyticsToolName,
+		Prompt:         buildDeferredAnalyticsPrompt(reason),
+		Question:       question,
+		SpecJSON:       specJSON,
+		RowsJSON:       "[]",
+		Rows:           nil,
+		RowCount:       0,
+		EvidenceSource: "deferred heavy-data guard",
+		GeneratedAt:    time.Now().UTC(),
 	}, true
 }
 

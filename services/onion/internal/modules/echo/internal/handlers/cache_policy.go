@@ -78,29 +78,7 @@ var liveBusinessIntentTerms = []string{
 }
 
 func shouldGroundBeforeExactCache(mode CaretMode, prompt string, pageContext map[string]any) bool {
-	if mode == ModeSupport {
-		return false
-	}
-
-	normalized := normalizeCachePolicyText(prompt)
-	if normalized == "  " {
-		return false
-	}
-
-	hasBusinessTerm := containsAnyTerm(normalized, liveBusinessDataTerms)
-	if !hasBusinessTerm {
-		return false
-	}
-
-	if containsAnyTerm(normalized, liveBusinessIntentTerms) {
-		return true
-	}
-
-	if hasDynamicPageContext(pageContext) {
-		return true
-	}
-
-	return false
+	return BuildCaretResponsePolicy(mode, prompt, renderPageContext(pageContext), pageContext).GroundBeforeCache
 }
 
 func hasDynamicPageContext(pageContext map[string]any) bool {
@@ -154,6 +132,8 @@ func buildGroundingCacheFreshness(grounding *analystGroundingResult) string {
 		"rows=" + shortCacheHash(grounding.RowsJSON),
 		"spec=" + shortCacheHash(grounding.SpecJSON),
 		"count=" + strconv.Itoa(grounding.RowCount),
+		"source=" + shortCacheHash(grounding.EvidenceSource),
+		"plan=" + shortCacheHash(grounding.RequestPlan),
 	}
 	if grounding.Truncated {
 		parts = append(parts, "truncated=true")

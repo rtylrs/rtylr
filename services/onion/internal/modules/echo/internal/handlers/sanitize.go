@@ -1,6 +1,9 @@
 package handlers
 
-import "strings"
+import (
+	"strings"
+	"unicode/utf8"
+)
 
 const (
 	// maxUserPromptLen bounds a single user turn (~4k tokens). Anything longer is
@@ -16,6 +19,7 @@ const (
 // reasoning blocks or tool calls. We neutralize the markers (insert a space so the
 // exact-match regexes no longer fire) and bound the length.
 func sanitizeUserInput(s string, maxLen int) string {
+	s = strings.ToValidUTF8(s, "�")
 	replacer := strings.NewReplacer(
 		"<thinking>", "<thinking >",
 		"</thinking>", "</thinking >",
@@ -24,8 +28,23 @@ func sanitizeUserInput(s string, maxLen int) string {
 	)
 	s = replacer.Replace(s)
 	s = strings.TrimSpace(s)
-	if len(s) > maxLen {
-		s = s[:maxLen]
+	return truncateUTF8ToBytes(s, maxLen)
+}
+
+// truncateUTF8ToBytes applies a byte budget without splitting a UTF-8 rune.
+// Prompt and continuation budgets are byte-based because provider request
+// limits are measured over encoded payloads, not Go rune counts.
+func truncateUTF8ToBytes(s string, maxLen int) string {
+	if maxLen <= 0 {
+		return ""
+	}
+	if len(s) <= maxLen {
+		return s
+	}
+
+	s = s[:maxLen]
+	for len(s) > 0 && !utf8.ValidString(s) {
+		s = s[:len(s)-1]
 	}
 	return s
 }
