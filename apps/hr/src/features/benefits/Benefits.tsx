@@ -5,29 +5,35 @@ import { Shield } from 'lucide-react';
 import {
   useBenefits,
   useBenefitEnrollments,
+  useBenefitPlans,
+  useEnrollments,
   useEnrollBenefit,
 } from '../../shared/hooks/useHrExtras';
+import { useUserStore } from '../../shared/stores/userStore';
 import { Card, SectionHeader, EmptyState, Skeleton } from '../../shared/components/ui';
 import BenefitPlanCard from '../../shared/components/BenefitPlanCard';
 
 const Benefits: React.FC = () => {
-  const { data: plans, isLoading } = useBenefits();
-  const { data: enrollments = [] } = useBenefitEnrollments();
+  const user = useUserStore((s) => s.user);
+  const currentStaffId = Number(user?.id) || 1;
+  const currentStaffName = user?.name || user?.email || 'Team member';
+  const { data: plans = [], isLoading: plansLoading } = useBenefitPlans();
+  const { data: enrollments = [], isLoading: enrollLoading } = useEnrollments();
   const enroll = useEnrollBenefit();
+
+  const loading = plansLoading || enrollLoading;
 
   return (
     <>
       <HelmetContainer title="Benefits · rtylr" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <SectionHeader title="Benefits" subtitle="Health, dental, vision, 401k and more" />
-        {isLoading ? (
+        <SectionHeader
+          title="Benefits & Perks"
+          subtitle="Health, dental, wellness and extra perks"
+        />
+
+        {loading ? (
           <Skeleton height={200} />
-        ) : !plans || plans.length === 0 ? (
-          <EmptyState
-            icon={<Shield size={20} />}
-            title="No benefit plans"
-            description="Create plans to allow enrollment."
-          />
         ) : (
           <div
             style={{
@@ -37,7 +43,9 @@ const Benefits: React.FC = () => {
             }}
           >
             {plans.map((p) => {
-              const enrolled = enrollments.some((e) => e.planId === p.id && e.staffId === 1);
+              const enrolled = enrollments.some(
+                (e) => e.planId === p.id && Number(e.staffId) === currentStaffId
+              );
               return (
                 <BenefitPlanCard
                   key={p.id}
@@ -45,7 +53,12 @@ const Benefits: React.FC = () => {
                   enrolled={enrolled}
                   onEnroll={() =>
                     enroll.mutate(
-                      { staffId: 1, staffName: 'Alex Chen', planId: p.id, planName: p.name },
+                      {
+                        staffId: currentStaffId,
+                        staffName: currentStaffName,
+                        planId: p.id,
+                        planName: p.name,
+                      },
                       { onSuccess: () => toast.success('Enrolled') }
                     )
                   }

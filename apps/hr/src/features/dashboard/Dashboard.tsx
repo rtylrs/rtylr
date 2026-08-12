@@ -789,11 +789,7 @@ const Dashboard: React.FC = () => {
           />
           <StatCard
             label={t('dashboard.metrics.avgTenure')}
-            value={
-              staff.length > 0
-                ? `${(Math.round(staff.length * 0.8) / staff.length).toFixed(1)} ${t('dashboard.metrics.years')}`
-                : '-'
-            }
+            value={avgTenure !== '-' ? `${avgTenure} ${t('dashboard.metrics.years')}` : '-'}
             sub={t('dashboard.metrics.allStaff')}
             icon={<Clock size={14} />}
             color="var(--hr-status-approved)"

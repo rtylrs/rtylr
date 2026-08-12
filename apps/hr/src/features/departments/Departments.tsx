@@ -77,6 +77,7 @@ const Departments: React.FC = () => {
             </p>
           </div>
           <button
+            onClick={() => setCreateModalOpen(true)}
             style={{
               display: 'flex',
               alignItems: 'center',

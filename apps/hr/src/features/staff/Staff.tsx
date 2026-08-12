@@ -87,6 +87,7 @@ const Staff: React.FC = () => {
             </p>
           </div>
           <button
+            onClick={() => navigate({ to: '/employees/new' })}
             style={{
               display: 'flex',
               alignItems: 'center',

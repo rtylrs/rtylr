@@ -21,7 +21,7 @@ function dayStr(date: Date) {
 
 const CalendarScreen: React.FC = () => {
   const isMobile = useIsMobile(900);
-  const [view, setView] = useState(new Date(2026, 3, 1));
+  const [view, setView] = useState(new Date());
   const { data: timeOff = [] } = useTimeOff();
 
   const cells = useMemo(() => {
