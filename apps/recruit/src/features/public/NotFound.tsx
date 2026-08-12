@@ -1,5 +1,5 @@
 import React from 'react';
-import { APP_URLS } from '@voxire/config';
+import { resolveAppUrl } from '@voxire/config';
 import { HelmetContainer } from '@voxire/components';
 
 /**
@@ -19,7 +19,7 @@ const NotFound: React.FC = (): React.JSX.Element => (
         Double-check the link, or head back to the main site.
       </p>
       <a
-        href={APP_URLS.landing}
+        href={resolveAppUrl('landing')}
         className="mt-8 inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium"
         style={{ borderColor: 'var(--recruit-border)' }}
       >

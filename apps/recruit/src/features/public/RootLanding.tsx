@@ -1,5 +1,5 @@
 import React from 'react';
-import { APP_URLS } from '@voxire/config';
+import { resolveAppUrl, resolveAuthUrl } from '@voxire/config';
 import { ArrowRight } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 
@@ -28,7 +28,7 @@ const RootLanding: React.FC = (): React.JSX.Element => (
       </p>
       <div className="mt-10 flex items-center gap-3">
         <a
-          href={`${APP_URLS.landing}/pricing`}
+          href={`${resolveAppUrl('landing')}/pricing`}
           className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
           style={{ background: 'var(--recruit-accent)' }}
         >
@@ -36,7 +36,7 @@ const RootLanding: React.FC = (): React.JSX.Element => (
           <ArrowRight className="h-4 w-4" />
         </a>
         <a
-          href={`${APP_URLS.auth}/register?redirect=recruit`}
+          href={`${resolveAuthUrl()}?redirect=recruit`}
           className="inline-flex items-center gap-2 rounded-lg border px-6 py-3 text-sm font-semibold"
           style={{ borderColor: 'var(--recruit-border)' }}
         >
