@@ -61,6 +61,9 @@ func (h *ApprovePayrollRunHandler) Serve(ctx context.Context, _ *ApprovePayrollR
 		if errors.Is(err, domain.ErrApprovalChainNotConfigured) {
 			return ApprovePayrollRunResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, "Approval chain not configured for payroll")
 		}
+		if errors.Is(err, domain.ErrPayrollSelfApproval) || errors.Is(err, domain.ErrPayrollApproverNotAllowed) {
+			return ApprovePayrollRunResponse{}, onekiterrors.New(http.StatusForbidden, err.Error())
+		}
 		logger.Ctx(ctx).Error("failed to approve payroll run", logger.Any("owner_id", device.User.UserID), logger.Any("run_id", runID), logger.Error(err))
 		return ApprovePayrollRunResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to approve payroll run")
 	}

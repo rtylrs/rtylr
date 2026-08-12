@@ -43,6 +43,7 @@ type ApprovalChainProvider interface {
 type PermissionProvider interface {
 	GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error)
 	HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error)
+	HasRole(ctx context.Context, ownerID, employeeID, roleID int64) (bool, error)
 }
 
 // FinanceJournalPoster lets the payroll service hand a completed run off to the
