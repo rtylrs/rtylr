@@ -182,6 +182,20 @@ message CreateShiftAssignmentRequest {
 message CreateShiftAssignmentResponse {
   /// The newly created assignment.
   assignment: ShiftAssignmentPayload
+  /// Human-readable availability warnings raised against the assignee for this
+  /// date (e.g. "Jane Doe is unavailable 09:00-12:00 on 2026-08-20"), read off
+  /// the AvailabilityPayload rows in this package.
+  ///
+  /// Advisory only. The assignment is still created, because a scheduler
+  /// legitimately needs to staff someone against a stated preference: cover for
+  /// a no-show, a swap the pair agreed offline, a rush the roster did not
+  /// anticipate. A hard block would make those ordinary cases impossible
+  /// without first editing the availability record, so the check informs rather
+  /// than refuses. Empty when no conflict was found.
+  ///
+  /// Mirrors GetRosterResponse.conflicts, which already reports this class of
+  /// problem the same non-blocking way.
+  warnings: string[]
 }
 
 message GetRosterRequest {
