@@ -123,30 +123,79 @@ describe('scheduleShiftSchema', () => {
 });
 
 describe('availabilitySchema', () => {
-  it('parses a full availability row', () => {
+  it('parses a recurring weekly pattern', () => {
     const result = availabilitySchema.parse({
       id: '1',
       staffId: 10,
       staffName: 'Carol',
-      day: 'Monday',
-      canWork: true,
+      dayOfWeek: 0,
+      isAvailable: true,
       startTime: '09:00',
       endTime: '17:00',
     });
     expect(result.id).toBe(1);
-    expect(result.canWork).toBe(true);
+    expect(result.dayOfWeek).toBe(0);
+    expect(result.specificDate).toBeUndefined();
+    expect(result.isAvailable).toBe(true);
   });
 
-  it('allows startTime and endTime to be absent', () => {
+  it('parses a single-date override', () => {
     const result = availabilitySchema.parse({
       id: 3,
       staffId: 4,
       staffName: 'Dave',
-      day: 'Friday',
-      canWork: false,
+      specificDate: '2026-08-17',
+      isAvailable: false,
+      startTime: '09:00',
+      endTime: '12:00',
     });
-    expect(result.startTime).toBeUndefined();
-    expect(result.endTime).toBeUndefined();
+    expect(result.specificDate).toBe('2026-08-17');
+    expect(result.dayOfWeek).toBeUndefined();
+  });
+
+  // The generated Go server tags every scalar omitempty, so a false
+  // is_available never reaches the client. An absent key means false, and
+  // reading it as undefined would render a blocked window as available.
+  it('reads an absent isAvailable as false', () => {
+    const result = availabilitySchema.parse({
+      id: 5,
+      staffId: 6,
+      staffName: 'Erin',
+      dayOfWeek: 2,
+      startTime: '09:00',
+      endTime: '17:00',
+    });
+    expect(result.isAvailable).toBe(false);
+  });
+
+  // dayOfWeek is Monday-first (0 = Monday through 6 = Sunday). Date.getDay()
+  // would supply 0 for Sunday, so the bound is what catches that mix-up.
+  it('rejects a dayOfWeek outside the Monday-first range', () => {
+    expect(() =>
+      availabilitySchema.parse({
+        id: 7,
+        staffId: 8,
+        staffName: 'Frank',
+        dayOfWeek: 7,
+        isAvailable: true,
+        startTime: '09:00',
+        endTime: '17:00',
+      })
+    ).toThrow();
+  });
+
+  it('keeps a window that crosses midnight as given', () => {
+    const result = availabilitySchema.parse({
+      id: 9,
+      staffId: 10,
+      staffName: 'Grace',
+      dayOfWeek: 4,
+      isAvailable: true,
+      startTime: '22:00',
+      endTime: '06:00',
+    });
+    expect(result.startTime).toBe('22:00');
+    expect(result.endTime).toBe('06:00');
   });
 });
 
