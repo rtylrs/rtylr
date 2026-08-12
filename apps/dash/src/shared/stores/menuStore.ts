@@ -141,7 +141,9 @@ export const useMenuStore = create<MenuState & MenuActions>()(
 
       deleteMenuItem: (id) =>
         set((state) => ({
-          items: state.items.filter((item) => item._id !== id && item.itemId !== id),
+          items: state.items.filter(
+            (item) => item._id !== id && (!isMenuItem(item) || item.itemId !== id)
+          ),
         })),
     }),
     {
