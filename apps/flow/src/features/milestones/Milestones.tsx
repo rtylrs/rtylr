@@ -34,13 +34,45 @@ const Milestones: React.FC = () => {
     );
   }
 
-  if (milestones.length === 0) {
+  if (milestones.length === 0 && !showCreate) {
     return (
-      <EmptyState
-        icon={MilestoneIcon}
-        title="No milestones yet"
-        description="Track major delivery targets across your projects."
-      />
+      <div className="flex flex-col h-full">
+        <HelmetContainer title="Milestones · rtylr" />
+        <div
+          className="flex items-center justify-between px-6 py-4 shrink-0"
+          style={{ borderBottom: '1px solid var(--flow-border)' }}
+        >
+          <div>
+            <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+              Milestones
+            </h1>
+            <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+              0 tracked
+            </p>
+          </div>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
+            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+          >
+            <Plus size={11} /> New milestone
+          </button>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-6">
+          <EmptyState
+            icon={MilestoneIcon}
+            title="No milestones yet"
+            description="Track major delivery targets across your projects."
+          />
+          <button
+            onClick={() => setShowCreate(true)}
+            className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-semibold"
+            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+          >
+            <Plus size={13} /> Create first milestone
+          </button>
+        </div>
+      </div>
     );
   }
 
