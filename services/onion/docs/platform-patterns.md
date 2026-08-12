@@ -138,6 +138,10 @@ return nil, onekiterrors.New(http.StatusBadRequest, "Name is required")
 Do not reintroduce the removed protobuf-era `WithErrorHandler` or per-route
 adapter setup. The generated server owns its JSON error envelope.
 
+Legacy chi handlers use the same `internal/platform/onekiterrors` constructors.
+The former `internal/platform/errors` server-error contract was removed during
+the oneKit migration and must not be reintroduced for new legacy handlers.
+
 Contract generation is owned by the `voxie` repo, not `onion`. `gen/go` ships
 pre-committed in the `voxie` submodule — bump the submodule pointer to pick up
 new or changed contracts, there is nothing to run locally in `onion`.
