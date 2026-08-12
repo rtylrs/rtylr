@@ -13,7 +13,9 @@ import { AppGuard } from '@voxire/auth';
 import FlowLayout from './layouts/FlowLayout';
 import { PERSONAL_WORKSPACE_ID } from './shared/lib/personalWorkspace';
 import { safe } from './shared/lib/api';
-// Eager (not lazy): it's a redirect rendered without a Suspense boundary.
+import PreviewRouteUnavailable from './shared/components/PreviewRouteUnavailable';
+// The preview-route fallback is eager so a disabled deep link can explain its state
+// without waiting for a lazy route component to load.
 
 const WorkspaceDashboard = React.lazy(
   () => import('./features/workspace-dashboard/WorkspaceDashboard')
@@ -71,9 +73,7 @@ function previewRoute(element: React.ReactNode): React.ReactNode {
   return (
     <AppFlagGuard
       flag={FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES}
-      fallback={
-        <Navigate to="/w/$workspaceId" params={{ workspaceId: PERSONAL_WORKSPACE_ID }} replace />
-      }
+      fallback={withLayout(<PreviewRouteUnavailable />)}
     >
       {withLayout(element)}
     </AppFlagGuard>
