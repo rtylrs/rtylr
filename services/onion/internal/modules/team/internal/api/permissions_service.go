@@ -29,9 +29,10 @@ func (a *PermissionsAPI) UpdatePermissions(ctx context.Context, req *hubteamperm
 	appsSlice := req.GetApps()
 
 	if err := a.Service.UpdatePermissions(ctx, device.User.UserID, device.User.BusinessID, domain.UpdatePermissionsInput{
-		UserID: req.GetUserId(),
-		Apps:   &appsSlice,
-		Role:   domain.Role(req.GetRole()),
+		UserID:   req.GetUserId(),
+		FullName: req.FullName,
+		Apps:     &appsSlice,
+		Role:     domain.Role(req.GetRole()),
 	}); err != nil {
 		switch {
 		case errors.Is(err, domain.ErrForbidden):
