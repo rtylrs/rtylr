@@ -69,7 +69,7 @@ describe('buildCanonicalUrl', () => {
 
 describe('buildOgImageUrl', () => {
   it('returns default OG image URL when no path provided', () => {
-    expect(buildOgImageUrl()).toBe('https://rtylr.com/og/default.png');
+    expect(buildOgImageUrl()).toBe('https://rtylr.com/og-default.png');
   });
 
   it('builds absolute URL from relative path', () => {

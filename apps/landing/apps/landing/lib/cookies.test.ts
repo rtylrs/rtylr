@@ -1,13 +1,14 @@
 /**
- * Cookies tests use the pure-logic paths of getCookie, setCookie, removeCookie,
- * and getDefaultCookieDomain without relying on vi.spyOn(document, 'cookie')
- * since happy-dom marks that property non-configurable.
+ * Cookies tests use pure-logic paths of getCookie, setCookie, removeCookie,
+ * and getDefaultCookieDomain with stubbed window/document objects.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getCookie, getDefaultCookieDomain, removeCookie, setCookie } from './cookies';
 
 beforeEach(() => {
+  vi.stubGlobal('window', { location: { hostname: 'rtylr.com' } });
+  vi.stubGlobal('document', { cookie: '' });
   vi.stubGlobal('location', { hostname: 'rtylr.com' });
 });
 
@@ -71,27 +72,27 @@ describe('removeCookie', () => {
 
 describe('getDefaultCookieDomain', () => {
   it('returns undefined for localhost', () => {
-    vi.stubGlobal('location', { hostname: 'localhost' });
+    vi.stubGlobal('window', { location: { hostname: 'localhost' } });
     expect(getDefaultCookieDomain()).toBeUndefined();
   });
 
   it('returns .rtylr.com for rtylr.com hostname', () => {
-    vi.stubGlobal('location', { hostname: 'rtylr.com' });
+    vi.stubGlobal('window', { location: { hostname: 'rtylr.com' } });
     expect(getDefaultCookieDomain()).toBe('.rtylr.com');
   });
 
   it('returns .rtylr.com for subdomain of rtylr.com', () => {
-    vi.stubGlobal('location', { hostname: 'app.rtylr.com' });
+    vi.stubGlobal('window', { location: { hostname: 'app.rtylr.com' } });
     expect(getDefaultCookieDomain()).toBe('.rtylr.com');
   });
 
   it('returns undefined for an IP address', () => {
-    vi.stubGlobal('location', { hostname: '127.0.0.1' });
+    vi.stubGlobal('window', { location: { hostname: '127.0.0.1' } });
     expect(getDefaultCookieDomain()).toBeUndefined();
   });
 
   it('returns undefined for an unrecognized domain', () => {
-    vi.stubGlobal('location', { hostname: 'example.com' });
+    vi.stubGlobal('window', { location: { hostname: 'example.com' } });
     expect(getDefaultCookieDomain()).toBeUndefined();
   });
 });
