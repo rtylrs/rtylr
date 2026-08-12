@@ -62,10 +62,11 @@ function formatTime(iso: string): string {
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-const OrdersTable: React.FC<{ orders: HubOrder[]; emptyLabel: string }> = ({
-  orders,
-  emptyLabel,
-}) => (
+const OrdersTable: React.FC<{
+  orders: HubOrder[];
+  emptyLabel: string;
+  onSelectOrder: (order: HubOrder) => void;
+}> = ({ orders, emptyLabel, onSelectOrder }) => (
   <Table>
     <TableHeader>
       <TableRow>
@@ -93,7 +94,7 @@ const OrdersTable: React.FC<{ orders: HubOrder[]; emptyLabel: string }> = ({
             </TableCell>
             <TableCell className="text-gray-400 text-xs">{formatTime(order.createdAt)}</TableCell>
             <TableCell className="text-right">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={() => onSelectOrder(order)}>
                 View
               </Button>
             </TableCell>
@@ -106,6 +107,7 @@ const OrdersTable: React.FC<{ orders: HubOrder[]; emptyLabel: string }> = ({
 
 const Orders: React.FC = () => {
   const [tab, setTab] = useState<OrderStatus>('all');
+  const [selectedOrder, setSelectedOrder] = useState<HubOrder | null>(null);
   const { data: allOrders = [], isLoading, isError } = useOrders();
 
   const pendingOrders = useMemo(() => allOrders.filter((o) => o.status === 'pending'), [allOrders]);
@@ -266,10 +268,70 @@ const Orders: React.FC = () => {
             <OrdersTable
               orders={ordersForTab[tab]}
               emptyLabel={tab === 'all' ? '' : tab.replace('_', ' ')}
+              onSelectOrder={setSelectedOrder}
             />
           </CardContent>
         </Card>
       </div>
+
+      {/* Order Detail Modal */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div
+            className="w-full max-w-md rounded-xl p-6 space-y-4 shadow-xl"
+            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold" style={{ color: 'var(--dash-text)' }}>
+                Order #{selectedOrder.id}
+              </h3>
+              <Badge variant={statusBadgeVariant[selectedOrder.status]}>
+                {statusLabel[selectedOrder.status]}
+              </Badge>
+            </div>
+
+            <div className="space-y-2 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+              <div
+                className="flex justify-between border-b pb-2"
+                style={{ borderColor: 'var(--dash-border)' }}
+              >
+                <span>Customer</span>
+                <span className="font-medium" style={{ color: 'var(--dash-text)' }}>
+                  {selectedOrder.customerName || selectedOrder.customerEmail || 'Guest'}
+                </span>
+              </div>
+              <div
+                className="flex justify-between border-b pb-2"
+                style={{ borderColor: 'var(--dash-border)' }}
+              >
+                <span>Subtotal</span>
+                <span className="font-medium" style={{ color: 'var(--dash-text)' }}>
+                  ${selectedOrder.subtotal.toFixed(2)}
+                </span>
+              </div>
+              <div
+                className="flex justify-between border-b pb-2"
+                style={{ borderColor: 'var(--dash-border)' }}
+              >
+                <span>Total</span>
+                <span className="font-bold text-base" style={{ color: 'var(--dash-text)' }}>
+                  ${selectedOrder.total.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between pt-1 text-xs">
+                <span>Placed At</span>
+                <span>{new Date(selectedOrder.createdAt).toLocaleString()}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Button variant="outline" onClick={() => setSelectedOrder(null)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

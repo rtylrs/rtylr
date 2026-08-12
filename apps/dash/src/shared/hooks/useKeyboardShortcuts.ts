@@ -73,7 +73,7 @@ export const useKeyboardShortcuts = () => {
           i: '/integrations',
           p: '/permissions',
           k: '/api-keys',
-          h: '/activity',
+          h: '/audit',
           u: '/audit',
           r: '/roles',
         };
