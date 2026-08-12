@@ -13,7 +13,7 @@ const Detail: React.FC<{
 }> = ({ label, value, icon: Icon }) => (
   <div className="min-w-0">
     <div className="mb-1 flex items-center gap-1.5">
-      <Icon size={12} style={{ color: '#f59e0b' }} />
+      <Icon size={12} style={{ color: 'var(--erp-accent)' }} />
       <p className="text-[10px]" style={{ color: 'var(--hub-text-dim)' }}>
         {label}
       </p>
@@ -39,8 +39,10 @@ const SupplierScorecard: React.FC<SupplierScorecardProps> = ({ supplier }) => {
         <span
           className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
           style={{
-            background: supplier.isActive ? 'rgba(16,185,129,0.12)' : 'var(--hub-hover)',
-            color: supplier.isActive ? '#10b981' : 'var(--hub-text-muted)',
+            background: supplier.isActive
+              ? 'color-mix(in srgb, var(--erp-success) 12%, transparent)'
+              : 'var(--hub-hover)',
+            color: supplier.isActive ? 'var(--erp-success)' : 'var(--hub-text-muted)',
           }}
         >
           {supplier.isActive ? 'Active' : 'Inactive'}

@@ -8,7 +8,7 @@ import { Skeleton } from '../../shared/components/Skeleton';
 import BarcodeSvg from '../../shared/components/BarcodeSvg';
 import { toast } from 'sonner';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const Barcodes: React.FC = () => {
   const { data: productResult, isLoading } = useProducts();
@@ -65,7 +65,7 @@ const Barcodes: React.FC = () => {
             <button
               onClick={handlePrint}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: AMBER, color: '#000' }}
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
             >
               <Printer size={14} /> Print {selected.size > 0 ? `(${selected.size * copies})` : ''}
             </button>
@@ -99,7 +99,9 @@ const Barcodes: React.FC = () => {
                       border: '1px solid var(--hub-border)',
                     }}
                   >
-                    {selected.has(p.id ?? '') && <Check size={10} style={{ color: '#000' }} />}
+                    {selected.has(p.id ?? '') && (
+                      <Check size={10} style={{ color: 'var(--erp-accent-foreground)' }} />
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p

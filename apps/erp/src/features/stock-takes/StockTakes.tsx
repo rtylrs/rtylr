@@ -13,7 +13,7 @@ import { formatDate } from '../../shared/lib/format';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -98,7 +98,7 @@ const StockTakes: React.FC = () => {
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} /> New Stock Take
           </button>
@@ -124,7 +124,7 @@ const StockTakes: React.FC = () => {
             );
             const statusColor =
               st.status === 'completed'
-                ? '#10b981'
+                ? 'var(--erp-success)'
                 : st.status === 'in_progress'
                   ? AMBER
                   : 'var(--hub-text-dim)';
@@ -138,7 +138,9 @@ const StockTakes: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <div
                       className="h-10 w-10 rounded-lg flex items-center justify-center"
-                      style={{ background: 'rgba(245,158,11,0.1)' }}
+                      style={{
+                        background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
+                      }}
                     >
                       <ClipboardList size={16} style={{ color: AMBER }} />
                     </div>
@@ -167,14 +169,20 @@ const StockTakes: React.FC = () => {
                         }
                         disabled={updateMut.isPending}
                         className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg disabled:opacity-40"
-                        style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}
+                        style={{
+                          background: 'color-mix(in srgb, var(--erp-success) 12%, transparent)',
+                          color: 'var(--erp-success)',
+                        }}
                       >
                         <CheckCircle2 size={12} /> Complete
                       </button>
                     )}
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                      style={{ background: `${statusColor}20`, color: statusColor }}
+                      style={{
+                        background: `color-mix(in srgb, ${statusColor} 13%, transparent)`,
+                        color: statusColor,
+                      }}
                     >
                       {stockTakeStatusLabel(st.status ?? '')}
                     </span>
@@ -201,7 +209,9 @@ const StockTakes: React.FC = () => {
                     </p>
                     <p
                       className="text-sm font-bold"
-                      style={{ color: variance !== 0 ? '#f87171' : '#10b981' }}
+                      style={{
+                        color: variance !== 0 ? 'var(--erp-danger)' : 'var(--erp-success)',
+                      }}
                     >
                       {variance !== 0 ? `${variance} items` : 'None'}
                     </p>
@@ -223,7 +233,7 @@ const StockTakes: React.FC = () => {
       {showCreate && (
         <div
           className="fixed inset-0 flex items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          style={{ background: 'var(--hub-overlay)', zIndex: 9999 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowCreate(false);
           }}
@@ -265,7 +275,7 @@ const StockTakes: React.FC = () => {
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newWarehouseId}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: '#000' }}
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>

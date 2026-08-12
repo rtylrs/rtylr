@@ -21,7 +21,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import { useDashboardStats } from '../../shared/hooks/queries/useDashboardStats';
 
-const AMBER = 'var(--erp-accent, #f59e0b)';
+const AMBER = 'var(--erp-accent)';
 const CARD_STYLE: React.CSSProperties = {
   background: 'var(--hub-card)',
   border: '1px solid var(--hub-border)',
@@ -38,19 +38,20 @@ const today = new Date().toLocaleDateString('en-US', {
 
 function getStatusColor(status: string): string {
   const normalized = status.toLowerCase();
-  if (normalized === 'received') return 'var(--erp-success, #10b981)';
+  if (normalized === 'received') return 'var(--erp-success)';
   if (normalized === 'sent' || normalized === 'approved' || normalized === 'partial') return AMBER;
-  if (normalized === 'pending_approval') return 'var(--erp-purple, #a78bfa)';
+  if (normalized === 'pending_approval') return 'var(--erp-purple)';
   return 'var(--hub-text-dim)';
 }
 
 function getStatusBg(status: string): string {
   const normalized = status.toLowerCase();
-  if (normalized === 'received') return 'rgba(16,185,129,0.09)';
+  if (normalized === 'received') return 'color-mix(in srgb, var(--erp-success) 9%, transparent)';
   if (normalized === 'sent' || normalized === 'approved' || normalized === 'partial')
-    return 'rgba(245,158,11,0.09)';
-  if (normalized === 'pending_approval') return 'rgba(167,139,250,0.09)';
-  return 'rgba(0,0,0,0.06)';
+    return 'color-mix(in srgb, var(--erp-accent) 9%, transparent)';
+  if (normalized === 'pending_approval')
+    return 'color-mix(in srgb, var(--erp-purple) 9%, transparent)';
+  return 'color-mix(in srgb, var(--hub-text) 6%, transparent)';
 }
 
 function formatStatus(status: string): string {
@@ -158,7 +159,11 @@ const Dashboard: React.FC = () => {
           type="button"
           onClick={() => setQuickAddOpen(true)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-          style={{ background: AMBER, color: '#000', textDecoration: 'none' }}
+          style={{
+            background: AMBER,
+            color: 'var(--erp-accent-foreground)',
+            textDecoration: 'none',
+          }}
         >
           <PackagePlus size={14} />
           New Product
@@ -179,7 +184,8 @@ const Dashboard: React.FC = () => {
                 className={`${CARD_CLASS} justify-between transition-all`}
                 style={{ ...CARD_STYLE, textDecoration: 'none' }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.3)';
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    'color-mix(in srgb, var(--erp-accent) 30%, transparent)';
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
@@ -191,7 +197,7 @@ const Dashboard: React.FC = () => {
                   </span>
                   <span
                     className="flex items-center justify-center h-7 w-7 rounded-lg"
-                    style={{ background: 'rgba(245,158,11,0.1)' }}
+                    style={{ background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)' }}
                   >
                     <Icon size={14} style={{ color: AMBER }} />
                   </span>
@@ -204,9 +210,7 @@ const Dashboard: React.FC = () => {
                     <p
                       className="text-xs mt-1"
                       style={{
-                        color: stat.changePositive
-                          ? 'var(--erp-success, #10b981)'
-                          : 'var(--erp-danger, #f87171)',
+                        color: stat.changePositive ? 'var(--erp-success)' : 'var(--erp-danger)',
                       }}
                     >
                       {stat.change}
@@ -220,7 +224,7 @@ const Dashboard: React.FC = () => {
 
         <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2">
-            <TrendingUp size={14} style={{ color: 'var(--erp-success, #10b981)' }} />
+            <TrendingUp size={14} style={{ color: 'var(--erp-success)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Inventory Value
             </h3>
@@ -298,7 +302,7 @@ const Dashboard: React.FC = () => {
 
         <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
-            <Activity size={14} style={{ color: 'var(--erp-info, #60a5fa)' }} />
+            <Activity size={14} style={{ color: 'var(--erp-info)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Recent Activity
             </h3>
@@ -337,13 +341,16 @@ const Dashboard: React.FC = () => {
 
         <motion.div variants={itemVariants as any} className={CARD_CLASS} style={CARD_STYLE}>
           <div className="flex items-center gap-2 mb-3">
-            <TrendingDown size={15} style={{ color: 'var(--erp-danger, #f87171)' }} />
+            <TrendingDown size={15} style={{ color: 'var(--erp-danger)' }} />
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Low Stock Alert
             </h3>
             <span
               className="ml-auto text-xs px-2 py-0.5 rounded-full font-medium"
-              style={{ background: 'rgba(248,113,113,0.1)', color: 'var(--erp-danger, #f87171)' }}
+              style={{
+                background: 'color-mix(in srgb, var(--erp-danger) 10%, transparent)',
+                color: 'var(--erp-danger)',
+              }}
             >
               {isLoading ? '…' : `${dashboardStats?.lowStockCount ?? 0} items`}
             </span>
@@ -368,7 +375,7 @@ const Dashboard: React.FC = () => {
                     <p
                       className="text-sm font-bold text-center"
                       style={{
-                        color: (item.currentStock ?? 0) <= 5 ? 'var(--erp-danger, #f87171)' : AMBER,
+                        color: (item.currentStock ?? 0) <= 5 ? 'var(--erp-danger)' : AMBER,
                       }}
                     >
                       {item.currentStock}

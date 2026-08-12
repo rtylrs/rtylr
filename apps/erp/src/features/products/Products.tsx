@@ -28,7 +28,7 @@ import { formatCurrency } from '../../shared/lib/format';
 import { toast } from 'sonner';
 import { Link } from '@tanstack/react-router';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const Products: React.FC = () => {
   const { t } = useTranslation();
@@ -152,7 +152,7 @@ const Products: React.FC = () => {
               data-testid="products-new-button"
               onClick={() => setShowAdd(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: AMBER, color: '#000' }}
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
             >
               <Plus size={14} />
               {t('erp.products.new')}
@@ -261,7 +261,7 @@ const Products: React.FC = () => {
               data-testid="products-empty-create-button"
               onClick={() => setShowAdd(true)}
               className="px-3 py-2 rounded-lg text-xs font-semibold"
-              style={{ background: AMBER, color: '#000' }}
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
             >
               {t('erp.products.create')}
             </button>
@@ -363,7 +363,7 @@ const Products: React.FC = () => {
                     style={{
                       color:
                         p.stockQuantity === 0
-                          ? '#f87171'
+                          ? 'var(--erp-danger)'
                           : (p.stockQuantity ?? 0) < (p.lowStockThreshold ?? 0)
                             ? AMBER
                             : 'var(--hub-text)',

@@ -50,7 +50,7 @@ const Section: React.FC<{
     style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
   >
     <div className="flex items-center gap-2">
-      <Icon size={14} style={{ color: 'var(--erp-accent, #f59e0b)' }} />
+      <Icon size={14} style={{ color: 'var(--erp-accent)' }} />
       <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
         {title}
       </h3>
@@ -87,7 +87,7 @@ const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({
     type="button"
     onClick={() => onChange(!value)}
     className="relative h-5 w-9 rounded-full transition-colors"
-    style={{ background: value ? 'var(--erp-accent, #f59e0b)' : 'var(--hub-hover)' }}
+    style={{ background: value ? 'var(--erp-accent)' : 'var(--hub-hover)' }}
   >
     <span
       className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all"
@@ -209,8 +209,7 @@ const GeneralTab: React.FC = () => {
                 className="px-2 py-1 rounded-md text-[11px] font-medium"
                 style={{
                   background: settings.theme === t ? 'var(--hub-active)' : 'var(--hub-hover)',
-                  color:
-                    settings.theme === t ? 'var(--erp-accent, #f59e0b)' : 'var(--hub-text-muted)',
+                  color: settings.theme === t ? 'var(--erp-accent)' : 'var(--hub-text-muted)',
                 }}
               >
                 {t}
@@ -340,7 +339,7 @@ const TeamTab: React.FC = () => {
               disabled={!email.trim() || !fullName.trim() || invite.isPending}
               onClick={handleInvite}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
-              style={{ background: 'var(--erp-accent, #f59e0b)', color: '#000' }}
+              style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
             >
               <UserPlus size={12} />
               {invite.isPending ? 'Sending…' : 'Send invite'}
@@ -360,7 +359,7 @@ const TeamTab: React.FC = () => {
           type="button"
           onClick={() => setShowInvite(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
-          style={{ background: 'var(--erp-accent, #f59e0b)', color: '#000' }}
+          style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
         >
           <UserPlus size={12} />
           Invite member
@@ -389,8 +388,8 @@ const TeamTab: React.FC = () => {
               <div
                 className="h-8 w-8 rounded-full flex items-center justify-center text-[12px] font-semibold shrink-0"
                 style={{
-                  background: 'color-mix(in srgb, var(--erp-accent, #f59e0b) 20%, transparent)',
-                  color: 'var(--erp-accent, #f59e0b)',
+                  background: 'color-mix(in srgb, var(--erp-accent) 20%, transparent)',
+                  color: 'var(--erp-accent)',
                 }}
               >
                 {m.name.charAt(0).toUpperCase()}
@@ -462,12 +461,10 @@ const Settings: React.FC = () => {
               className="flex items-center gap-1.5 px-4 py-2.5 text-[13px] transition-colors"
               style={{
                 fontWeight: isActive ? 600 : 500,
-                color: isActive ? 'var(--erp-accent, #f59e0b)' : 'var(--hub-text-muted)',
+                color: isActive ? 'var(--erp-accent)' : 'var(--hub-text-muted)',
                 background: 'transparent',
                 border: 'none',
-                borderBottom: isActive
-                  ? '2px solid var(--erp-accent, #f59e0b)'
-                  : '2px solid transparent',
+                borderBottom: isActive ? '2px solid var(--erp-accent)' : '2px solid transparent',
                 marginBottom: -1,
                 cursor: 'pointer',
               }}

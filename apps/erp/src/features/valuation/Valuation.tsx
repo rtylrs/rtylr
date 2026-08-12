@@ -8,7 +8,7 @@ import { Skeleton } from '../../shared/components/Skeleton';
 import { formatCurrency, formatNumber } from '../../shared/lib/format';
 import { safeRatio, toFiniteNumber } from '@voxire/api';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const Valuation: React.FC = () => {
   const { data, isLoading } = useValuation();
@@ -63,12 +63,12 @@ const Valuation: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <DollarSign size={14} style={{ color: '#10b981' }} />
+              <DollarSign size={14} style={{ color: 'var(--erp-success)' }} />
               <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
                 Cost Basis
               </span>
             </div>
-            <p className="text-3xl font-bold" style={{ color: '#10b981' }}>
+            <p className="text-3xl font-bold" style={{ color: 'var(--erp-success)' }}>
               {formatCurrency(totalCost)}
             </p>
           </div>
@@ -77,7 +77,7 @@ const Valuation: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <BarChart3 size={14} style={{ color: '#60a5fa' }} />
+              <BarChart3 size={14} style={{ color: 'var(--erp-info)' }} />
               <span className="text-xs font-medium" style={{ color: 'var(--hub-text-muted)' }}>
                 Total Items
               </span>

@@ -29,7 +29,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
             exit={{ opacity: 0 }}
             onClick={onClose}
             className="fixed inset-0 z-40"
-            style={{ background: 'rgba(0,0,0,0.4)' }}
+            style={{ background: 'var(--hub-overlay-light)' }}
           />
           <motion.aside
             initial={{ x: 320 }}
@@ -44,7 +44,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
               style={{ borderBottom: '1px solid var(--hub-border)' }}
             >
               <div className="flex items-center gap-2">
-                <Filter size={14} style={{ color: '#f59e0b' }} />
+                <Filter size={14} style={{ color: 'var(--erp-accent)' }} />
                 <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
                   {title}
                 </h3>
@@ -70,7 +70,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
                   onClose();
                 }}
                 className="flex-1 px-3 py-2 rounded-lg text-xs font-semibold"
-                style={{ background: '#f59e0b', color: '#000' }}
+                style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
               >
                 Apply
               </button>

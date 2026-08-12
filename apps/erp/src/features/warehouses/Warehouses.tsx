@@ -10,7 +10,7 @@ import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatNumber } from '../../shared/lib/format';
 import { toast } from 'sonner';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -76,7 +76,7 @@ const Warehouses: React.FC = () => {
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} /> New Warehouse
           </button>
@@ -108,7 +108,9 @@ const Warehouses: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <div
                       className="h-10 w-10 rounded-lg flex items-center justify-center"
-                      style={{ background: 'rgba(245,158,11,0.1)' }}
+                      style={{
+                        background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
+                      }}
                     >
                       <WarehouseIcon size={16} style={{ color: AMBER }} />
                     </div>
@@ -119,7 +121,10 @@ const Warehouses: React.FC = () => {
                       {w.isDefault && (
                         <span
                           className="text-[10px] font-medium px-1.5 py-0.5 rounded"
-                          style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}
+                          style={{
+                            background: 'color-mix(in srgb, var(--erp-success) 10%, transparent)',
+                            color: 'var(--erp-success)',
+                          }}
                         >
                           Default
                         </span>
@@ -127,7 +132,10 @@ const Warehouses: React.FC = () => {
                       {!w.isActive && (
                         <span
                           className="text-[10px] font-medium px-1.5 py-0.5 rounded"
-                          style={{ background: 'rgba(248,113,113,0.1)', color: '#f87171' }}
+                          style={{
+                            background: 'color-mix(in srgb, var(--erp-danger) 10%, transparent)',
+                            color: 'var(--erp-danger)',
+                          }}
                         >
                           Inactive
                         </span>
@@ -138,9 +146,10 @@ const Warehouses: React.FC = () => {
                     aria-label="Delete warehouse"
                     onClick={() => setConfirmDeleteId(w.id ?? null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center"
-                    style={{ color: '#f87171' }}
+                    style={{ color: 'var(--erp-danger)' }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)';
+                      (e.currentTarget as HTMLElement).style.background =
+                        'color-mix(in srgb, var(--erp-danger) 10%, transparent)';
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.background = 'transparent';
@@ -207,7 +216,7 @@ const Warehouses: React.FC = () => {
       {showCreate && (
         <div
           className="fixed inset-0 flex items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          style={{ background: 'var(--hub-overlay)', zIndex: 9999 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowCreate(false);
           }}
@@ -257,7 +266,7 @@ const Warehouses: React.FC = () => {
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: '#000' }}
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>

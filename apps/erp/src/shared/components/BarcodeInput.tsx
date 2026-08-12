@@ -34,7 +34,7 @@ const BarcodeInput: React.FC<BarcodeInputProps> = ({
         border: '1px solid var(--hub-border)',
       }}
     >
-      <ScanLine size={14} style={{ color: '#f59e0b' }} />
+      <ScanLine size={14} style={{ color: 'var(--erp-accent)' }} />
       <input
         ref={ref}
         type="text"
@@ -50,7 +50,10 @@ const BarcodeInput: React.FC<BarcodeInputProps> = ({
       <button
         onClick={submit}
         className="text-xs font-semibold px-2 py-1 rounded-md"
-        style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}
+        style={{
+          background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)',
+          color: 'var(--erp-accent)',
+        }}
       >
         Scan
       </button>

@@ -70,7 +70,7 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
       {preview && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-6"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
+          style={{ background: 'var(--hub-overlay-heavy)' }}
         >
           <div
             className="w-full max-w-3xl rounded-xl p-5"
@@ -134,7 +134,7 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
               <button
                 onClick={confirm}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                style={{ background: '#f59e0b', color: '#000' }}
+                style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
               >
                 Import {preview.length} rows
               </button>

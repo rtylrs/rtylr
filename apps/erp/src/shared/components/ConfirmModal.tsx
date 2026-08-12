@@ -29,7 +29,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
       aria-modal="true"
       data-testid="confirm-modal"
       className="fixed inset-0 z-50 flex items-center justify-center p-6"
-      style={{ background: 'rgba(0,0,0,0.6)' }}
+      style={{ background: 'var(--hub-overlay-heavy)' }}
       onClick={onCancel}
     >
       <div
@@ -41,10 +41,15 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           <div
             className="flex items-center justify-center h-10 w-10 rounded-full shrink-0"
             style={{
-              background: danger ? 'rgba(248,113,113,0.1)' : 'rgba(245,158,11,0.1)',
+              background: danger
+                ? 'color-mix(in srgb, var(--erp-danger) 10%, transparent)'
+                : 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
             }}
           >
-            <AlertTriangle size={16} style={{ color: danger ? '#f87171' : '#f59e0b' }} />
+            <AlertTriangle
+              size={16}
+              style={{ color: danger ? 'var(--erp-danger)' : 'var(--erp-accent)' }}
+            />
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between">
@@ -75,8 +80,8 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
             onClick={onConfirm}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold"
             style={{
-              background: danger ? '#f87171' : '#f59e0b',
-              color: '#000',
+              background: danger ? 'var(--erp-danger)' : 'var(--erp-accent)',
+              color: 'var(--erp-accent-foreground)',
             }}
           >
             {confirmLabel}
