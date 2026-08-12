@@ -53,6 +53,13 @@ export function usePurchaseOrders(params: UsePurchaseOrdersParams = {}) {
   });
 }
 
+export function useAllPurchaseOrders() {
+  return useQuery<PurchaseOrder[]>({
+    queryKey: ['purchase-orders', 'all'],
+    queryFn: () => fetchAllPurchaseOrders(),
+  });
+}
+
 export function useCreatePurchaseOrder() {
   const qc = useQueryClient();
   return useMutation<CreatePurchaseOrderResponse, Error, CreatePurchaseOrderRequest>({
