@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -338,6 +339,79 @@ func TestApproveLeaveRequest_ChangesStatus(t *testing.T) {
 	}
 	if got.Status != "approved" {
 		t.Errorf("expected status='approved', got %q", got.Status)
+	}
+
+	if err := repo.ApproveLeaveRequest(ctx, testutil.OwnerID, req.ID); !errors.Is(err, domain.ErrLeaveRequestNotPending) {
+		t.Fatalf("second approval error = %v, want %v", err, domain.ErrLeaveRequestNotPending)
+	}
+}
+
+func TestApproveLeaveRequestWithBalance_IsAtomicAndIdempotent(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const employeeID int64 = 4103
+	const year int32 = 2027
+
+	lt, err := repo.CreateLeaveType(ctx, testutil.OwnerID, domain.LeaveTypeRecord{
+		Name:     "Atomic Approve Test Leave",
+		IsActive: true,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveType: %v", err)
+	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_requests WHERE owner_id = ? AND employee_id = ?", testutil.OwnerID, employeeID)
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_balances WHERE owner_id = ? AND employee_id = ?", testutil.OwnerID, employeeID)
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Atomic Approve Test Leave")
+	})
+
+	if err := repo.UpsertLeaveBalance(ctx, testutil.OwnerID, domain.LeaveBalanceRecord{
+		EmployeeID:   employeeID,
+		LeaveTypeID:  lt.ID,
+		Year:         year,
+		EntitledDays: 10,
+		PendingDays:  2,
+		UsedDays:     1,
+	}); err != nil {
+		t.Fatalf("UpsertLeaveBalance: %v", err)
+	}
+
+	req, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
+		EmployeeID:           employeeID,
+		LeaveTypeID:          lt.ID,
+		StartDate:            "2027-01-10",
+		EndDate:              "2027-01-11",
+		TotalDays:            2,
+		Status:               "pending",
+		CurrentApprovalLevel: 1,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveRequest: %v", err)
+	}
+
+	if err := repo.ApproveLeaveRequestWithBalance(ctx, testutil.OwnerID, req.ID, employeeID, lt.ID, year, 2); err != nil {
+		t.Fatalf("ApproveLeaveRequestWithBalance: %v", err)
+	}
+
+	got, err := repo.GetLeaveBalance(ctx, testutil.OwnerID, employeeID, lt.ID, year)
+	if err != nil {
+		t.Fatalf("GetLeaveBalance after approve: %v", err)
+	}
+	if got.UsedDays != 3 || got.PendingDays != 0 {
+		t.Fatalf("balance after approve = used %.2f pending %.2f, want used 3 pending 0", got.UsedDays, got.PendingDays)
+	}
+
+	if err := repo.ApproveLeaveRequestWithBalance(ctx, testutil.OwnerID, req.ID, employeeID, lt.ID, year, 2); !errors.Is(err, domain.ErrLeaveRequestNotPending) {
+		t.Fatalf("second approval error = %v, want %v", err, domain.ErrLeaveRequestNotPending)
+	}
+
+	got, err = repo.GetLeaveBalance(ctx, testutil.OwnerID, employeeID, lt.ID, year)
+	if err != nil {
+		t.Fatalf("GetLeaveBalance after duplicate approve: %v", err)
+	}
+	if got.UsedDays != 3 || got.PendingDays != 0 {
+		t.Fatalf("balance after duplicate approve = used %.2f pending %.2f, want unchanged 3/0", got.UsedDays, got.PendingDays)
 	}
 }
 

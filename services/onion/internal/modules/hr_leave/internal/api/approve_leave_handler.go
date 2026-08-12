@@ -54,6 +54,9 @@ func (h *ApproveLeaveHandler) Serve(ctx context.Context, req *ApproveLeaveReques
 		if errors.Is(err, domain.ErrLeaveRequestNotFound) {
 			return ApproveLeaveResponse{}, onekiterrors.New(http.StatusNotFound, "Leave request not found")
 		}
+		if errors.Is(err, domain.ErrLeaveRequestNotPending) {
+			return ApproveLeaveResponse{}, onekiterrors.New(http.StatusConflict, "Leave request has already been processed")
+		}
 		if errors.Is(err, domain.ErrApprovalChainNotConfigured) {
 			return ApproveLeaveResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, "Approval chain not configured for leave requests")
 		}

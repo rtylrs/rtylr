@@ -27,10 +27,10 @@ INSERT INTO hr_leave_requests (
     notes, status, current_approval_level
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: ApproveLeaveRequest :exec
+-- name: ApproveLeaveRequest :execresult
 UPDATE hr_leave_requests
 SET status = 'approved', updated_at = NOW()
-WHERE id = ? AND business_id = ?;
+WHERE id = ? AND business_id = ? AND status = 'pending';
 
 -- name: AdvanceLeaveApprovalLevel :exec
 UPDATE hr_leave_requests
