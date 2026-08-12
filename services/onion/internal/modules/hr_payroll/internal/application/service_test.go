@@ -147,6 +147,10 @@ func (f fakePermissionProvider) HasPermission(_ context.Context, _, _ int64, _ s
 	return f.allowed, f.permErr
 }
 
+func (f fakePermissionProvider) HasRole(_ context.Context, _, _, _ int64) (bool, error) {
+	return f.allowed, f.permErr
+}
+
 func TestService_GetEmployeeIDByUserID_DelegatesToPermissionProvider(t *testing.T) {
 	s := &Service{permissions: fakePermissionProvider{employeeID: 4101}}
 	id, err := s.GetEmployeeIDByUserID(context.Background(), 1001, 5555)
@@ -177,6 +181,52 @@ func TestService_HasPermission_FalseWhenNotGranted(t *testing.T) {
 	}
 	if allowed {
 		t.Error("expected allowed=false")
+	}
+}
+
+func TestValidatePayrollApprover_RejectsRunCreator(t *testing.T) {
+	err := validatePayrollApprover(&domain.PayrollRunRecord{CreatedBy: 4101}, 4101)
+	if !errors.Is(err, domain.ErrPayrollSelfApproval) {
+		t.Fatalf("expected ErrPayrollSelfApproval, got %v", err)
+	}
+}
+
+func TestValidatePayrollApprover_AllowsDifferentApprover(t *testing.T) {
+	if err := validatePayrollApprover(&domain.PayrollRunRecord{CreatedBy: 4101}, 4102); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestApproverMatchesChain_ExplicitEmployee(t *testing.T) {
+	s := &Service{permissions: fakePermissionProvider{}}
+	allowed, err := s.approverMatchesChain(context.Background(), 1001, 4101, []domain.ApprovalLevelInfo{
+		{ApproverEmployeeID: 4101},
+	})
+	if err != nil || !allowed {
+		t.Fatalf("expected explicit employee approver to match, allowed=%v err=%v", allowed, err)
+	}
+}
+
+func TestApproverMatchesChain_Role(t *testing.T) {
+	s := &Service{permissions: fakePermissionProvider{allowed: true}}
+	allowed, err := s.approverMatchesChain(context.Background(), 1001, 4101, []domain.ApprovalLevelInfo{
+		{ApproverRoleID: 7},
+	})
+	if err != nil || !allowed {
+		t.Fatalf("expected role approver to match, allowed=%v err=%v", allowed, err)
+	}
+}
+
+func TestApproverMatchesChain_RejectsUnmatchedApprover(t *testing.T) {
+	s := &Service{permissions: fakePermissionProvider{}}
+	allowed, err := s.approverMatchesChain(context.Background(), 1001, 4101, []domain.ApprovalLevelInfo{
+		{ApproverEmployeeID: 4102},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if allowed {
+		t.Fatal("expected unmatched approver to be rejected")
 	}
 }
 

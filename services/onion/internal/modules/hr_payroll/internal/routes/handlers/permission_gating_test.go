@@ -30,6 +30,10 @@ func (f fakePermissionProvider) HasPermission(context.Context, int64, int64, str
 	return f.allowed, nil
 }
 
+func (f fakePermissionProvider) HasRole(context.Context, int64, int64, int64) (bool, error) {
+	return f.allowed, nil
+}
+
 type fakeApprovalChainProvider struct{}
 
 func (fakeApprovalChainProvider) GetApprovalChain(context.Context, int64, string) (*domain.ApprovalChainInfo, error) {
