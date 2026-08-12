@@ -2,17 +2,19 @@ import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { Calculator, RefreshCw, Clock, Coffee, AlertTriangle, MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   useSwaps,
   useCreateSwap,
   useResolveSwap,
-  useAvailability,
   useBreaks,
   useStartBreak,
   useEndBreak,
   useOvertimeAlerts,
   useHrSettings,
 } from '../../shared/hooks/useHrExtras';
+import { useAvailability } from '../../shared/hooks/queries/useAvailability';
+import type { Availability } from '../../shared/schemas/shifts';
 import { usePayroll } from '../payroll/usePayroll';
 import { useStaff } from '../staff/useStaff';
 import {
@@ -32,7 +34,23 @@ import ApprovalButtons from '../../shared/components/ApprovalButtons';
 
 const TABS = ['Labor Cost', 'Swap Shifts', 'Availability', 'Breaks', 'Overtime'] as const;
 
+/**
+ * Indexed by `AvailabilityPayload.day_of_week`, which is 0 = Monday through
+ * 6 = Sunday so the value indexes the same Monday-first week the roster uses.
+ * Deliberately not `Date.getDay()` order, where 0 is Sunday.
+ */
+const WEEKDAY_KEYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+] as const;
+
 const Operations: React.FC = () => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile(900);
   const [tab, setTab] = useState<(typeof TABS)[number]>('Labor Cost');
   const { data: staff = [] } = useStaff();
@@ -41,6 +59,19 @@ const Operations: React.FC = () => {
   const createSwap = useCreateSwap();
   const resolveSwap = useResolveSwap();
   const { data: availability = [] } = useAvailability();
+
+  /**
+   * A row is either a recurring weekly pattern or a single-date override. The
+   * fallback covers a row carrying neither, which the handler is meant to reject
+   * but which must not blank the table if one ever arrives.
+   */
+  const formatAvailabilityDay = (row: Availability): string => {
+    if (row.specificDate) return row.specificDate;
+    if (row.dayOfWeek !== undefined) {
+      return t(`operations.availability.weekdays.${WEEKDAY_KEYS[row.dayOfWeek]}`);
+    }
+    return '-';
+  };
   const { data: breaks = [] } = useBreaks();
   const startBreak = useStartBreak();
   const endBreak = useEndBreak();
@@ -381,8 +412,8 @@ const Operations: React.FC = () => {
             {availability.length === 0 ? (
               <EmptyState
                 icon={<Clock size={20} />}
-                title="No availability set"
-                description="Ask team to mark their weekly availability."
+                title={t('operations.availability.emptyTitle')}
+                description={t('operations.availability.emptyDescription')}
               />
             ) : (
               <div style={{ overflowX: 'auto' }}>
@@ -398,7 +429,7 @@ const Operations: React.FC = () => {
                           textTransform: 'uppercase',
                         }}
                       >
-                        Employee
+                        {t('operations.availability.columns.employee')}
                       </th>
                       <th
                         style={{
@@ -409,7 +440,7 @@ const Operations: React.FC = () => {
                           textTransform: 'uppercase',
                         }}
                       >
-                        Day
+                        {t('operations.availability.columns.day')}
                       </th>
                       <th
                         style={{
@@ -420,7 +451,7 @@ const Operations: React.FC = () => {
                           textTransform: 'uppercase',
                         }}
                       >
-                        Can work
+                        {t('operations.availability.columns.available')}
                       </th>
                       <th
                         style={{
@@ -431,31 +462,51 @@ const Operations: React.FC = () => {
                           textTransform: 'uppercase',
                         }}
                       >
-                        Hours
+                        {t('operations.availability.columns.hours')}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {availability.map((a) => (
-                      <tr key={a.id} style={{ borderTop: '1px solid var(--hr-border)' }}>
-                        <td
-                          style={{ padding: '10px 12px', color: 'var(--hr-text)', fontWeight: 600 }}
-                        >
-                          {a.staffName}
-                        </td>
-                        <td style={{ padding: '10px 12px', color: 'var(--hr-text-muted)' }}>
-                          {a.day}
-                        </td>
-                        <td style={{ padding: '10px 12px' }}>
-                          <Pill color={a.canWork ? '#10b981' : '#ef4444'}>
-                            {a.canWork ? 'Yes' : 'No'}
-                          </Pill>
-                        </td>
-                        <td style={{ padding: '10px 12px', color: 'var(--hr-text-muted)' }}>
-                          {a.canWork ? `${a.startTime} - ${a.endTime}` : '-'}
-                        </td>
-                      </tr>
-                    ))}
+                    {availability.map((a) => {
+                      const statusColor = a.isAvailable
+                        ? 'var(--hr-status-active)'
+                        : 'var(--hr-status-inactive)';
+                      return (
+                        <tr key={a.id} style={{ borderTop: '1px solid var(--hr-border)' }}>
+                          <td
+                            style={{
+                              padding: '10px 12px',
+                              color: 'var(--hr-text)',
+                              fontWeight: 600,
+                            }}
+                          >
+                            {a.staffName}
+                          </td>
+                          <td style={{ padding: '10px 12px', color: 'var(--hr-text-muted)' }}>
+                            {formatAvailabilityDay(a)}
+                          </td>
+                          <td style={{ padding: '10px 12px' }}>
+                            {/* Pill builds its background as `${color}22`, which a
+                                var() cannot be concatenated into, so the tinted
+                                background and border come through color-mix here. */}
+                            <Pill
+                              color={statusColor}
+                              style={{
+                                background: `color-mix(in srgb, ${statusColor} 13%, transparent)`,
+                                border: `1px solid color-mix(in srgb, ${statusColor} 20%, transparent)`,
+                              }}
+                            >
+                              {a.isAvailable
+                                ? t('operations.availability.available')
+                                : t('operations.availability.blocked')}
+                            </Pill>
+                          </td>
+                          <td style={{ padding: '10px 12px', color: 'var(--hr-text-muted)' }}>
+                            {a.startTime && a.endTime ? `${a.startTime} - ${a.endTime}` : '-'}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
