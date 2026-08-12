@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import "github.com/voxire/onion/internal/platform/aicache"
 
@@ -34,12 +34,12 @@ func BuildCaretResponsePolicy(mode CaretMode, request, systemContext string, pag
 		Grounding:          GroundingNone,
 		ExactCacheEligible: policy.Enabled,
 		CacheReason:        policy.Reason,
-		ToolBudget:         maxToolCallsPerTurn,
-		ContinuationBudget: maxToolResultContinuations,
+		ToolBudget:         DefaultToolCallBudget,
+		ContinuationBudget: DefaultContinuationBudget,
 		AskClarification:   plan.NeedsClarification || ClarificationHintForRequest(request, systemContext) != "",
 		AnswerShape:        answerShapeForPlan(plan),
 	}
-	heavyReason, heavyData := heavyDataRequestReason(request)
+	heavyReason, heavyData := HeavyDataRequestReason(request)
 
 	switch {
 	case mode == ModeSupport || plan.IsSmokeCheck || plan.IsConversational:
@@ -50,7 +50,7 @@ func BuildCaretResponsePolicy(mode CaretMode, request, systemContext string, pag
 		result.Grounding = GroundingSnapshot
 	case plan.NeedsLiveData:
 		result.Grounding = GroundingAnalytics
-	case hasDynamicPageContext(pageContext):
+	case HasDynamicPageContext(pageContext):
 		result.Grounding = GroundingAnalytics
 	}
 

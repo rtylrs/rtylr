@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import "testing"
 
@@ -13,7 +13,7 @@ func TestToolRegistryIsInternallyConsistent(t *testing.T) {
 
 func TestToolLookupNormalizesWhitespace(t *testing.T) {
 	tool, ok := ToolByName("  business.snapshot ")
-	if !ok || tool.Name != businessSnapshotToolName {
+	if !ok || tool.Name != "business.snapshot" {
 		t.Fatalf("normalized lookup = %#v, %v", tool, ok)
 	}
 }

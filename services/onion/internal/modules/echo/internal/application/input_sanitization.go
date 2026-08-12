@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"strings"
@@ -8,9 +8,9 @@ import (
 const (
 	// maxUserPromptLen bounds a single user turn (~4k tokens). Anything longer is
 	// truncated before it reaches the model / context builder.
-	maxUserPromptLen = 16000
+	MaxUserPromptLen = 16000
 	// maxSystemContextLen bounds the per-app context the client injects.
-	maxSystemContextLen = 8000
+	MaxSystemContextLen = 8000
 )
 
 // sanitizeUserInput defends the prompt boundary. The streaming layer parses
@@ -18,7 +18,7 @@ const (
 // on them, so if a user puts those exact tokens in their prompt they could forge
 // reasoning blocks or tool calls. We neutralize the markers (insert a space so the
 // exact-match regexes no longer fire) and bound the length.
-func sanitizeUserInput(s string, maxLen int) string {
+func SanitizeUserInput(s string, maxLen int) string {
 	s = strings.ToValidUTF8(s, "�")
 	replacer := strings.NewReplacer(
 		"<thinking>", "<thinking >",
@@ -28,13 +28,13 @@ func sanitizeUserInput(s string, maxLen int) string {
 	)
 	s = replacer.Replace(s)
 	s = strings.TrimSpace(s)
-	return truncateUTF8ToBytes(s, maxLen)
+	return TruncateUTF8ToBytes(s, maxLen)
 }
 
 // truncateUTF8ToBytes applies a byte budget without splitting a UTF-8 rune.
 // Prompt and continuation budgets are byte-based because provider request
 // limits are measured over encoded payloads, not Go rune counts.
-func truncateUTF8ToBytes(s string, maxLen int) string {
+func TruncateUTF8ToBytes(s string, maxLen int) string {
 	if maxLen <= 0 {
 		return ""
 	}

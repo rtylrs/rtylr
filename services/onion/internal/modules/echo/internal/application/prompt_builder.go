@@ -1,7 +1,6 @@
-package handlers
+package application
 
 import (
-	"fmt"
 	"strings"
 	"time"
 )
@@ -13,7 +12,7 @@ const (
 	maxCaretRequestBytes            = 16000
 )
 
-type caretPromptInput struct {
+type PromptInput struct {
 	Mode               CaretMode
 	ConversationPrompt string
 	CurrentRequest     string
@@ -24,7 +23,7 @@ type caretPromptInput struct {
 // buildCaretPrompt renders the embedded system prompt with request-specific
 // state. The durable behavior lives in system_prompt.txt so it can be reviewed
 // and updated as one complete artifact instead of being scattered across code.
-func buildCaretPrompt(in caretPromptInput) string {
+func BuildCaretPrompt(in PromptInput) string {
 	mode := in.Mode
 	if mode == "" {
 		mode = ModeAsk
@@ -67,8 +66,8 @@ func buildCaretPrompt(in caretPromptInput) string {
 	if conversation == "" {
 		conversation = "Current request: "
 	}
-	conversation = truncateUTF8ToBytes(conversation, maxCaretConversationPromptBytes)
-	currentRequest := truncateUTF8ToBytes(in.CurrentRequest, maxCaretRequestBytes)
+	conversation = TruncateUTF8ToBytes(conversation, maxCaretConversationPromptBytes)
+	currentRequest := TruncateUTF8ToBytes(in.CurrentRequest, maxCaretRequestBytes)
 
 	return strings.TrimSpace(strings.NewReplacer(
 		"{{PROMPT_CONTRACT_VERSION}}", promptContractVersion,
@@ -81,8 +80,4 @@ func buildCaretPrompt(in caretPromptInput) string {
 		"{{CURRENT_CONTEXT}}", currentContext,
 		"{{CONVERSATION}}", conversation,
 	).Replace(caretSystemPromptTemplate))
-}
-
-func newAssistantMessageID() string {
-	return fmt.Sprintf("assistant-%d-%d", time.Now().UnixNano(), caretIDCounter.Add(1))
 }

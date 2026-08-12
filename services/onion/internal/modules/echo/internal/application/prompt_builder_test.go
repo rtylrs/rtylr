@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"regexp"
@@ -8,7 +8,7 @@ import (
 )
 
 func TestBuildCaretPromptIncludesBusinessContractModeAndContext(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:               ModeAnalyst,
 		ConversationPrompt: "Current request: revenue today",
 		CurrentRequest:     "revenue today",
@@ -50,7 +50,7 @@ func TestBuildCaretPromptIncludesBusinessContractModeAndContext(t *testing.T) {
 }
 
 func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:               ModeAgent,
 		ConversationPrompt: "Current request: create a customer",
 		CurrentRequest:     "create a customer",
@@ -87,7 +87,7 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 }
 
 func TestBuildCaretPromptUsesTheCompleteEmbeddedAntiFabricationContract(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:               ModeAsk,
 		ConversationPrompt: "Current request: test",
 		CurrentRequest:     "test",
@@ -180,7 +180,7 @@ func TestPromptToolsForModeSeparatesReadAndWriteModes(t *testing.T) {
 }
 
 func TestBuildCaretPromptClarifiesAmbiguousEntityBeforeTools(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:               ModeAgent,
 		ConversationPrompt: "Current request: update this product",
 		CurrentRequest:     "update this product",
@@ -203,7 +203,7 @@ func TestBuildCaretPromptClarifiesAmbiguousEntityBeforeTools(t *testing.T) {
 }
 
 func TestBuildCaretPromptAllowsToolsWithSelectedEntityContext(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:               ModeAgent,
 		ConversationPrompt: "Current request: update this product",
 		CurrentRequest:     "update this product",
@@ -220,7 +220,7 @@ func TestBuildCaretPromptAllowsToolsWithSelectedEntityContext(t *testing.T) {
 }
 
 func TestBuildCaretPromptSupportModeOmitsToolCatalog(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:               ModeSupport,
 		ConversationPrompt: "Current request: where do I find invoices?",
 		Now:                time.Date(2026, 6, 18, 12, 0, 0, 0, time.UTC),

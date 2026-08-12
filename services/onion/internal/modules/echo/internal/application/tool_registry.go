@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"fmt"
@@ -388,7 +388,7 @@ func ToolByName(name string) (ToolDef, bool) {
 func ToolsForMode(m CaretMode) []ToolDef {
 	out := make([]ToolDef, 0, len(CoreTools))
 	for _, t := range CoreTools {
-		if toolAllowedForMode(m, t) {
+		if ToolAllowedForMode(m, t) {
 			out = append(out, enrichToolDefinition(t))
 		}
 	}
@@ -401,14 +401,14 @@ func ToolsForMode(m CaretMode) []ToolDef {
 func PromptToolsForMode(m CaretMode) []ToolDef {
 	out := make([]ToolDef, 0, len(CoreTools))
 	for _, t := range CoreTools {
-		if toolAllowedForMode(m, t) && promptToolCanExecute(t.Name) {
+		if ToolAllowedForMode(m, t) && promptToolCanExecute(t.Name) {
 			out = append(out, enrichToolDefinition(t))
 		}
 	}
 	return out
 }
 
-func toolAllowedForMode(m CaretMode, tool ToolDef) bool {
+func ToolAllowedForMode(m CaretMode, tool ToolDef) bool {
 	if !m.AllowsTools() {
 		return false
 	}

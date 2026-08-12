@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"regexp"
@@ -33,7 +33,7 @@ func TestEmbeddedSystemPromptContainsAtLeast200UniqueNumberedRules(t *testing.T)
 }
 
 func TestRenderedSystemPromptHasNoUnresolvedControlsOrSampleBusinessFacts(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:           ModeAsk,
 		CurrentRequest: "test",
 	})
