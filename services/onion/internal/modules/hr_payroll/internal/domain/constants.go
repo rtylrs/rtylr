@@ -5,6 +5,7 @@ const (
 	PayrollStatusDraft           = "draft"
 	PayrollStatusPendingApproval = "pending_approval"
 	PayrollStatusApproved        = "approved"
+	PayrollStatusExporting       = "exporting"
 	PayrollStatusExported        = "exported"
 )
 

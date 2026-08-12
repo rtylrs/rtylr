@@ -15,6 +15,8 @@ type Repository interface {
 	UpdatePayrollRunStatus(ctx context.Context, ownerID, runID int64, status string) error
 	SetPayrollRunApproved(ctx context.Context, ownerID, runID, approverID int64) error
 	SetPayrollRunExported(ctx context.Context, ownerID, runID int64) error
+	ClaimPayrollRunForExport(ctx context.Context, ownerID, runID int64) error
+	ReleasePayrollRunExportClaim(ctx context.Context, ownerID, runID int64) error
 
 	// Payroll Entries
 	ListPayrollEntries(ctx context.Context, ownerID, runID int64) ([]PayrollEntryRecord, error)
