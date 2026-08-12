@@ -76,6 +76,9 @@ func (s *Service) ApprovePurchaseOrder(ctx context.Context, businessID, poID int
 	if status == string(domain.POStatusApproved) {
 		return domain.ErrPurchaseOrderAlreadyApproved
 	}
+	if status == string(domain.POStatusReceived) {
+		return domain.ErrPurchaseOrderAlreadyReceived
+	}
 
 	if err := s.repo.ApprovePurchaseOrder(ctx, businessID, poID); err != nil {
 		return err
