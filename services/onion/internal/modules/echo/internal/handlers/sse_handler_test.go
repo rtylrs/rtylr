@@ -50,6 +50,27 @@ func TestGenerateTextStreamParseAcceptsCamelCaseAliases(t *testing.T) {
 	}
 }
 
+func TestCaretSmokeCheckPromptsAreHandledWithoutBusinessGeneration(t *testing.T) {
+	for _, prompt := range []string{"test", " TEST! ", "ping", "hello", "is this working?"} {
+		if !isCaretSmokeCheck(prompt) {
+			t.Fatalf("expected %q to be recognized as a smoke check", prompt)
+		}
+	}
+
+	for _, prompt := range []string{"test today's revenue", "hello, show my orders", "is this customer active?"} {
+		if isCaretSmokeCheck(prompt) {
+			t.Fatalf("expected business request %q to reach normal handling", prompt)
+		}
+	}
+}
+
+func TestValidateRejectsWhitespaceOnlyPrompts(t *testing.T) {
+	handler := &GenerateTextStreamHandler{}
+	if err := handler.Validate(context.Background(), &GenerateTextStreamRequest{Prompt: " \n\t ", UserID: 1}); err == nil {
+		t.Fatal("expected whitespace-only prompt to be rejected")
+	}
+}
+
 func TestStreamPreludeAndTokensUseStructuredSSEEvents(t *testing.T) {
 	handler := &GenerateTextStreamHandler{}
 	rec := httptest.NewRecorder()
@@ -402,6 +423,29 @@ func TestBuildToolResultContinuationPromptCarriesResultsAndPriorAnswer(t *testin
 		if !strings.Contains(got, want) {
 			t.Fatalf("continuation prompt missing %q\nprompt:\n%s", want, got)
 		}
+	}
+}
+
+func TestBoundedToolResultsKeepContinuationJSONValidWhenOutputIsHuge(t *testing.T) {
+	results := []streamToolExecution{{
+		Name:   "crm.list_customers",
+		Status: "success",
+		Output: map[string]any{"rows": strings.Repeat("customer-data ", maxToolResultPromptBytes)},
+	}}
+
+	got := boundedToolResultsJSON(results)
+	if len(got) > maxToolResultPromptBytes {
+		t.Fatalf("bounded tool results length = %d, want <= %d", len(got), maxToolResultPromptBytes)
+	}
+	var decoded boundedToolResults
+	if err := json.Unmarshal(got, &decoded); err != nil {
+		t.Fatalf("bounded tool results are invalid JSON: %v; payload prefix=%q", err, got[:min(len(got), 200)])
+	}
+	if !decoded.Truncated {
+		t.Fatalf("bounded tool results should disclose truncation: %s", got)
+	}
+	if !strings.Contains(string(got), "Do not infer omitted values") {
+		t.Fatalf("bounded tool results missing anti-fabrication notice: %s", got)
 	}
 }
 

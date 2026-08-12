@@ -1,5 +1,10 @@
 package handlers
 
+import (
+	"fmt"
+	"strings"
+)
+
 // ToolDef describes a callable tool exposed to Caret. The registry is used in
 // prompts and stream events; execution starts with server-owned read-only tools
 // and can grow toward approval-backed write tools.
@@ -9,6 +14,11 @@ type ToolDef struct {
 	Module           string `json:"module"`
 	Scope            string `json:"scope"` // "read" or "write"
 	RequiresApproval bool   `json:"requiresApproval"`
+	InputHint        string `json:"inputHint,omitempty"`
+	OutputHint       string `json:"outputHint,omitempty"`
+	Freshness        string `json:"freshness,omitempty"`
+	SideEffect       string `json:"sideEffect,omitempty"`
+	ApprovalReason   string `json:"approvalReason,omitempty"`
 }
 
 // CoreTools is the seed registry — the long-term plan is to source this
@@ -320,14 +330,58 @@ var promptExecutableTools = map[string]struct{}{
 	"booking.list_reminders":              {},
 }
 
-// ToolByName returns a registered tool definition by stable tool name.
-func ToolByName(name string) (ToolDef, bool) {
+var coreToolIndex = buildCoreToolIndex()
+
+func buildCoreToolIndex() map[string]ToolDef {
+	index := make(map[string]ToolDef, len(CoreTools))
 	for _, tool := range CoreTools {
-		if tool.Name == name {
-			return tool, true
+		if strings.TrimSpace(tool.Name) == "" {
+			continue
+		}
+		index[tool.Name] = tool
+	}
+	return index
+}
+
+// ValidateToolRegistry is called by startup checks and tests. A tool catalog
+// is executable policy, not documentation: duplicate names, invalid scopes,
+// and prompt entries without definitions make model behavior nondeterministic.
+func ValidateToolRegistry() error {
+	seen := make(map[string]struct{}, len(CoreTools))
+	for _, tool := range CoreTools {
+		name := strings.TrimSpace(tool.Name)
+		if name == "" {
+			return fmt.Errorf("tool name is empty")
+		}
+		if _, exists := seen[name]; exists {
+			return fmt.Errorf("tool %q is registered more than once", name)
+		}
+		seen[name] = struct{}{}
+		if tool.Scope != "read" && tool.Scope != "write" {
+			return fmt.Errorf("tool %q has invalid scope %q", name, tool.Scope)
+		}
+		if strings.TrimSpace(tool.Module) == "" {
+			return fmt.Errorf("tool %q has no module", name)
+		}
+		if tool.Scope == "write" && !tool.RequiresApproval {
+			return fmt.Errorf("write tool %q must require approval", name)
 		}
 	}
-	return ToolDef{}, false
+	for name := range promptExecutableTools {
+		if _, ok := seen[name]; !ok {
+			return fmt.Errorf("prompt executable %q is not registered", name)
+		}
+	}
+	return nil
+}
+
+// ToolByName returns a registered tool definition by stable tool name.
+func ToolByName(name string) (ToolDef, bool) {
+	tool, ok := coreToolIndex[strings.TrimSpace(name)]
+	if !ok {
+		return ToolDef{}, false
+	}
+	return enrichToolDefinition(tool), true
 }
 
 // ToolsForMode filters CoreTools by mode capability.
@@ -335,7 +389,7 @@ func ToolsForMode(m CaretMode) []ToolDef {
 	out := make([]ToolDef, 0, len(CoreTools))
 	for _, t := range CoreTools {
 		if toolAllowedForMode(m, t) {
-			out = append(out, t)
+			out = append(out, enrichToolDefinition(t))
 		}
 	}
 	return out
@@ -348,7 +402,7 @@ func PromptToolsForMode(m CaretMode) []ToolDef {
 	out := make([]ToolDef, 0, len(CoreTools))
 	for _, t := range CoreTools {
 		if toolAllowedForMode(m, t) && promptToolCanExecute(t.Name) {
-			out = append(out, t)
+			out = append(out, enrichToolDefinition(t))
 		}
 	}
 	return out

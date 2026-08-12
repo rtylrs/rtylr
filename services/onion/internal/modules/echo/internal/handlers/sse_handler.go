@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 
@@ -27,6 +28,10 @@ type MemoryService interface {
 	BuildEnhancedPrompt(ctx context.Context, sessionID string, userID int, currentRequest string) string
 }
 
+type MemorySessionAuthorizer interface {
+	EnsureSessionOwnership(ctx context.Context, sessionID string, userID int) error
+}
+
 // QuotaService gates AI requests against the tenant's monthly token allowance
 // and records consumption. Implemented by the aiquota module; kept as a local
 // interface (primitive signatures) so echo doesn't depend on its internals.
@@ -37,7 +42,7 @@ type QuotaService interface {
 }
 
 const (
-	caretSystemPreamble  = "You are Caret, an AI business assistant for rtylr."
+	caretSmokeCheckReply = "Caret is working. What would you like help with?"
 	maxSessionTitleRunes = 80
 )
 
@@ -52,19 +57,22 @@ const (
 	cachedReplayTargetDuration    = 8500 * time.Millisecond
 	maxToolResultContinuations    = 2
 	maxToolResultPromptBytes      = 12000
+	maxContinuationAnswerBytes    = 8000
 	unexpectedStreamClosureError  = "Response stream ended before completion"
 )
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
 
 type cacheWritePlan struct {
-	Enabled     bool
-	Key         string
-	Mode        string
-	Provider    string
-	Policy      aicache.ExactPolicy
-	StartedAt   time.Time
-	PromptChars int
+	Enabled            bool
+	Key                string
+	Mode               string
+	Provider           string
+	Policy             aicache.ExactPolicy
+	StartedAt          time.Time
+	PromptChars        int
+	ToolBudget         int
+	ContinuationBudget int
 }
 
 func GenerateTextStreamRoutes() []string {
@@ -79,6 +87,8 @@ type GenerateTextStreamHandler struct {
 	QuotaService   QuotaService
 	AnalystService AnalystService
 	ToolExecutors  []ToolExecutor
+	summaryMu      sync.Mutex
+	summaryRunning map[string]struct{}
 }
 
 type GenerateTextStreamRequest struct {
@@ -104,7 +114,10 @@ type GenerateTextStreamResponse struct {
 }
 
 func (h *GenerateTextStreamHandler) Validate(_ context.Context, req *GenerateTextStreamRequest) error {
-	if req.Prompt == "" {
+	if req == nil {
+		return onekiterrors.New(http.StatusBadRequest, "Request is required")
+	}
+	if strings.TrimSpace(req.Prompt) == "" {
 		return onekiterrors.New(http.StatusBadRequest, "Prompt is required")
 	}
 
@@ -116,7 +129,7 @@ func (h *GenerateTextStreamHandler) Validate(_ context.Context, req *GenerateTex
 }
 
 func (h *GenerateTextStreamHandler) Serve(_ context.Context, _ *GenerateTextStreamRequest) (GenerateTextStreamResponse, error) {
-	if !h.AiService.IsAvailable() {
+	if h.AiService == nil || !h.AiService.IsAvailable() {
 		return GenerateTextStreamResponse{}, onekiterrors.New(http.StatusServiceUnavailable, "AI service not available")
 	}
 
@@ -151,7 +164,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	req.Prompt = sanitizeUserInput(req.Prompt, maxUserPromptLen)
 	req.SystemContext = buildRequestSystemContext(req.SystemContext, req.PageContext)
 
-	if !h.AiService.IsAvailable() {
+	if h.AiService == nil || !h.AiService.IsAvailable() {
 		log.Warn("AI service not available")
 		http.Error(w, "AI service not available", http.StatusServiceUnavailable)
 
@@ -172,6 +185,17 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	if device.User != nil {
 		businessID = device.User.BusinessID
 		authUserID = device.User.UserID
+	}
+	if authUserID <= 0 {
+		if authUser, ok := authPkg.GetAuthUser(ctx); ok && authUser != nil {
+			businessID = authUser.BusinessID
+			authUserID = authUser.UserID
+		}
+	}
+	if businessID <= 0 || authUserID <= 0 {
+		log.Warn("AI request rejected without an authenticated business identity")
+		http.Error(w, "Authentication is required", http.StatusUnauthorized)
+		return
 	}
 	// Trust the authenticated identity over the client-supplied user_id for the
 	// session/memory owner too — prevents one user reading another's history.
@@ -195,6 +219,15 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	// Do not spend a model call on connectivity checks. A content-free prompt
+	// gives a generative model room to invent a plausible business report even
+	// though no business evidence was requested.
+	if isCaretSmokeCheck(req.Prompt) {
+		h.setupSSEHeaders(w)
+		h.streamDirectResponse(ctx, w, req, caretSmokeCheckReply)
+		return
+	}
+
 	mode := ParseMode(req.Mode)
 	requestNow := time.Now()
 
@@ -207,9 +240,10 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	}
 
 	var liveGrounding *analystGroundingResult
-	groundBeforeCache := shouldGroundBeforeExactCache(mode, req.Prompt, req.PageContext)
+	requestPolicy := BuildCaretResponsePolicy(mode, req.Prompt, req.SystemContext, req.PageContext)
+	groundBeforeCache := requestPolicy.GroundBeforeCache
 	if groundBeforeCache {
-		if grounding, ok := h.analystGrounding(ctx, req.Prompt, businessID, authUserID); ok {
+		if grounding, ok := h.analystGroundingWithContext(ctx, req.Prompt, businessID, authUserID, req.SystemContext); ok {
 			enhancedPrompt = grounding.Prompt + "\n\n---\n\n" + enhancedPrompt
 			liveGrounding = grounding
 		}
@@ -259,8 +293,8 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	// the key includes a fingerprint of the rows. If a question only resolves
 	// as live data after the lookup, keep the answer uncached rather than risk a
 	// stale replay on the next request.
-	if !groundBeforeCache && mode != ModeSupport {
-		if grounding, ok := h.analystGrounding(ctx, req.Prompt, businessID, authUserID); ok {
+	if !groundBeforeCache && requestPolicy.Grounding != GroundingNone && mode != ModeSupport {
+		if grounding, ok := h.analystGroundingWithContext(ctx, req.Prompt, businessID, authUserID, req.SystemContext); ok {
 			enhancedPrompt = grounding.Prompt + "\n\n---\n\n" + enhancedPrompt
 			liveGrounding = grounding
 			cachePlan = disableExactCachePlan(cachePlan, "live business grounding resolved after exact cache lookup")
@@ -291,6 +325,28 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	}
 
 	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req, businessID, authUserID, cachePlan, liveGrounding, enhancedPrompt)
+}
+
+func isCaretSmokeCheck(prompt string) bool {
+	return ClassifyCaretRequest(prompt, "").IsSmokeCheck
+}
+
+func (h *GenerateTextStreamHandler) streamDirectResponse(ctx context.Context, w http.ResponseWriter, req *GenerateTextStreamRequest, response string) {
+	messageID := newAssistantMessageID()
+	if err := h.writeStreamPrelude(w, req.SessionID, messageID); err != nil {
+		return
+	}
+
+	var fullResponse strings.Builder
+	renderer := newStreamEventRenderer(w, flushResponse(w), messageID, &fullResponse, withStreamMode(ParseMode(req.Mode)))
+	if err := renderer.AppendText(response); err != nil {
+		return
+	}
+	if err := renderer.Finish(); err != nil {
+		return
+	}
+
+	go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String())
 }
 
 // writeQuotaExceeded reports that the tenant has spent its monthly AI allowance.
@@ -393,6 +449,11 @@ func (h *GenerateTextStreamHandler) setupSessionAndStoreMessage(ctx context.Cont
 		log.Info("Session created successfully", logger.String("session_id", req.SessionID))
 	} else {
 		log.Info("Using existing session", logger.String("session_id", req.SessionID))
+		if authorizer, ok := h.MemoryService.(MemorySessionAuthorizer); ok {
+			if err := authorizer.EnsureSessionOwnership(ctx, req.SessionID, int(req.UserID)); err != nil {
+				return fmt.Errorf("session is not available to this user: %w", err)
+			}
+		}
 	}
 
 	log.Info("Storing user message",
@@ -482,6 +543,7 @@ func (h *GenerateTextStreamHandler) writeErrorResponse(w http.ResponseWriter, er
 
 func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode CaretMode, req *GenerateTextStreamRequest, enhancedPrompt string, businessID, userID int64, now time.Time, groundings ...*analystGroundingResult) cacheWritePlan {
 	policy := aicache.ExactPolicyForMode(string(mode))
+	requestPolicy := BuildCaretResponsePolicy(mode, req.Prompt, req.SystemContext, req.PageContext)
 	provider := ""
 	if h.AiService != nil {
 		provider = h.AiService.GetPrimaryProvider()
@@ -491,12 +553,14 @@ func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode 
 		dataFreshness = combineCacheFreshness(dataFreshness, buildGroundingCacheFreshness(groundings[0]))
 	}
 	plan := cacheWritePlan{
-		Enabled:     policy.Enabled,
-		Mode:        string(mode),
-		Provider:    provider,
-		Policy:      policy,
-		StartedAt:   time.Now(),
-		PromptChars: len(enhancedPrompt),
+		Enabled:            policy.Enabled,
+		Mode:               string(mode),
+		Provider:           provider,
+		Policy:             policy,
+		StartedAt:          time.Now(),
+		PromptChars:        len(enhancedPrompt),
+		ToolBudget:         requestPolicy.ToolBudget,
+		ContinuationBudget: requestPolicy.ContinuationBudget,
 	}
 	if policy.Enabled {
 		plan.Key = aicache.ExactKey(aicache.ExactKeyParts{
@@ -509,6 +573,12 @@ func (h *GenerateTextStreamHandler) buildCacheWritePlan(_ context.Context, mode 
 			DataFreshness: dataFreshness,
 			Prompt:        req.Prompt,
 		})
+	}
+	// Live grounding is decided around the cache lookup by the request handler;
+	// keep the provisional key available for that phase. Clarifications and
+	// mutating intent, however, must never replay an older answer.
+	if requestPolicy.AskClarification || requestPolicy.Plan.Kind == IntentAction || requestPolicy.Plan.Kind == IntentMemory {
+		plan = disableExactCachePlan(plan, requestPolicy.CacheReason)
 	}
 	return plan
 }
@@ -725,6 +795,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		&fullResponse,
 		withStreamMode(ParseMode(cachePlan.Mode)),
 		withStreamToolExecution(ctx, h.ToolExecutors),
+		withStreamToolBudget(cachePlan.ToolBudget),
 	)
 	if grounding != nil {
 		if err := h.writeAnalystToolEvents(w, messageID, grounding); err != nil {
@@ -759,7 +830,18 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 			// never replay an answer that was informed by a tool result.
 			cachePlan = disableExactCachePlan(cachePlan, "live tool result informed the response")
 		}
-		if len(newToolResults) == 0 || round >= maxToolResultContinuations {
+		continuationBudget := cachePlan.ContinuationBudget
+		if continuationBudget <= 0 {
+			continuationBudget = maxToolResultContinuations
+		}
+		if len(newToolResults) == 0 || round >= continuationBudget {
+			if strings.TrimSpace(fullResponse.String()) == "" {
+				if fallback := fallbackCaretResponse(grounding, renderer.toolResults); fallback != "" {
+					if err := renderer.AppendText(fallback); err != nil {
+						return
+					}
+				}
+			}
 			if err := renderer.Finish(); err != nil {
 				return
 			}
@@ -787,6 +869,25 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		}
 		tokenChan = nextTokenChan
 	}
+}
+
+func fallbackCaretResponse(grounding *analystGroundingResult, results []streamToolExecution) string {
+	summaries := make([]string, 0, len(results))
+	for _, result := range results {
+		if summary := strings.TrimSpace(result.Summary); summary != "" && result.Status == "success" {
+			summaries = append(summaries, summary)
+		}
+	}
+	if len(summaries) > 0 {
+		return "I checked your business data.\n\n" + strings.Join(summaries, "\n")
+	}
+	if grounding != nil && grounding.ToolName == deferredAnalyticsToolName {
+		return "That request is too large to run as a live chat check. I can narrow it to a date range, summary, or specific records."
+	}
+	if grounding != nil {
+		return "I checked the available business data, but it did not contain enough visible evidence for a reliable answer."
+	}
+	return "I could not produce a reliable answer from the available business context."
 }
 
 func (h *GenerateTextStreamHandler) drainProviderStream(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, renderer *streamEventRenderer, cachePlan cacheWritePlan, businessID, userID int64, promptChars int) (snips.StreamToken, bool) {
@@ -858,13 +959,7 @@ func streamUsageTokens(token snips.StreamToken, promptChars, responseChars int) 
 }
 
 func buildToolResultContinuationPrompt(basePrompt, assistantSoFar string, results []streamToolExecution) string {
-	resultsJSON, err := json.Marshal(results)
-	if err != nil {
-		resultsJSON = []byte("[]")
-	}
-	if len(resultsJSON) > maxToolResultPromptBytes {
-		resultsJSON = append(resultsJSON[:maxToolResultPromptBytes], []byte(`...truncated`)...)
-	}
+	resultsJSON := boundedToolResultsJSON(results)
 
 	var b strings.Builder
 	b.WriteString(basePrompt)
@@ -872,7 +967,7 @@ func buildToolResultContinuationPrompt(basePrompt, assistantSoFar string, result
 	b.WriteString("Continue the same assistant answer using these results as evidence. Prefer each result summary for business language, then use raw output only for exact values. Do not repeat text already sent. Do not mention JSON, tool internals, rows, tenant, or implementation details unless the user asks.\n")
 	if trimmed := strings.TrimSpace(assistantSoFar); trimmed != "" {
 		b.WriteString("\nAssistant text already sent:\n")
-		b.WriteString(trimmed)
+		b.WriteString(truncateUTF8ToBytes(trimmed, maxContinuationAnswerBytes))
 		b.WriteString("\n")
 	}
 	b.WriteString("\nTool results:\n")
@@ -881,8 +976,65 @@ func buildToolResultContinuationPrompt(basePrompt, assistantSoFar string, result
 	return b.String()
 }
 
+type continuationToolResult struct {
+	Name    string `json:"name"`
+	Status  string `json:"status"`
+	Summary string `json:"summary,omitempty"`
+	Error   string `json:"error,omitempty"`
+}
+
+type boundedToolResults struct {
+	Truncated bool                     `json:"truncated"`
+	Notice    string                   `json:"notice,omitempty"`
+	Results   []continuationToolResult `json:"results,omitempty"`
+}
+
+// boundedToolResultsJSON keeps the continuation prompt valid JSON. Slicing a
+// marshalled result at an arbitrary byte offset can create malformed JSON and
+// encourage the model to fill the missing tail with guesses. When raw outputs
+// do not fit, retain only bounded metadata and state the limitation explicitly.
+func boundedToolResultsJSON(results []streamToolExecution) []byte {
+	encoded, err := json.Marshal(results)
+	if err == nil && len(encoded) <= maxToolResultPromptBytes {
+		return encoded
+	}
+
+	metadata := boundedToolResults{
+		Truncated: true,
+		Notice:    "Tool output was too large for this continuation; only result metadata is available. Do not infer omitted values.",
+		Results:   make([]continuationToolResult, 0, len(results)),
+	}
+	for _, result := range results {
+		metadata.Results = append(metadata.Results, continuationToolResult{
+			Name:    truncateUTF8ToBytes(result.Name, 256),
+			Status:  truncateUTF8ToBytes(result.Status, 64),
+			Summary: truncateUTF8ToBytes(result.Summary, 512),
+			Error:   truncateUTF8ToBytes(result.Error, 512),
+		})
+	}
+
+	encoded, err = json.Marshal(metadata)
+	if err == nil && len(encoded) <= maxToolResultPromptBytes {
+		return encoded
+	}
+
+	fallback, _ := json.Marshal(boundedToolResults{
+		Truncated: true,
+		Notice:    "Tool output was omitted because it exceeded the continuation context budget. Do not infer omitted values.",
+	})
+	return fallback
+}
+
 func (h *GenerateTextStreamHandler) writeExactCacheEntry(ctx context.Context, token snips.StreamToken, response string, tokens int, plan cacheWritePlan, businessID, userID int64) {
 	if !plan.Enabled || plan.Key == "" || response == "" {
+		return
+	}
+	quality := assessCaretAnswer(response)
+	if !quality.Cacheable {
+		logger.Ctx(ctx).Warn("skipping exact cache write after answer quality gate",
+			logger.Any("quality_score", quality.Score),
+			logger.Any("findings", quality.Findings),
+		)
 		return
 	}
 
@@ -938,10 +1090,12 @@ func (h *GenerateTextStreamHandler) writeAnalystToolEvents(w http.ResponseWriter
 		"spec":     json.RawMessage(grounding.SpecJSON),
 	}
 	output := map[string]any{
-		"row_count":   grounding.RowCount,
-		"truncated":   grounding.Truncated,
-		"rows":        grounding.Rows,
-		"duration_ms": grounding.DurationMs,
+		"row_count":       grounding.RowCount,
+		"truncated":       grounding.Truncated,
+		"rows":            grounding.Rows,
+		"duration_ms":     grounding.DurationMs,
+		"evidence_source": grounding.EvidenceSource,
+		"generated_at":    grounding.GeneratedAt,
 	}
 	summary := summarizeToolResult(toolName, input, output, "success", "")
 	if err := WriteEvent(w, flushResponse(w), StreamEvent{
@@ -995,25 +1149,43 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, session
 			logger.String("session_id", sessionID),
 			logger.Int("user_id", userID))
 	}
+	if !h.claimSessionSummary(sessionID) {
+		return
+	}
+	defer h.releaseSessionSummary(sessionID)
 
 	// Decouple from the request context — when the SSE handler returns,
 	// the request context is canceled and the summarize call would
 	// abort before it ever starts. We still keep the parent's logger
 	// scope so trace ids survive.
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				logger.Global().Error("panic in summarize goroutine", logger.Any("panic", r))
-			}
-		}()
-		bg, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
-		defer cancel()
+	bg, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+	defer cancel()
+	if summarizeErr := h.MemoryService.SummarizeSession(bg, sessionID, userID); summarizeErr != nil {
+		logger.Ctx(bg).Warn("Failed to summarize session",
+			logger.Error(summarizeErr),
+			logger.String("session_id", sessionID),
+			logger.Int("user_id", userID))
+	}
+}
 
-		if summarizeErr := h.MemoryService.SummarizeSession(bg, sessionID, userID); summarizeErr != nil {
-			logger.Ctx(bg).Warn("Failed to summarize session",
-				logger.Error(summarizeErr),
-				logger.String("session_id", sessionID),
-				logger.Int("user_id", userID))
-		}
-	}()
+func (h *GenerateTextStreamHandler) claimSessionSummary(sessionID string) bool {
+	if h == nil || strings.TrimSpace(sessionID) == "" {
+		return false
+	}
+	h.summaryMu.Lock()
+	defer h.summaryMu.Unlock()
+	if h.summaryRunning == nil {
+		h.summaryRunning = make(map[string]struct{})
+	}
+	if _, exists := h.summaryRunning[sessionID]; exists {
+		return false
+	}
+	h.summaryRunning[sessionID] = struct{}{}
+	return true
+}
+
+func (h *GenerateTextStreamHandler) releaseSessionSummary(sessionID string) {
+	h.summaryMu.Lock()
+	defer h.summaryMu.Unlock()
+	delete(h.summaryRunning, sessionID)
 }

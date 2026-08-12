@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -35,6 +36,7 @@ type streamEventRenderer struct {
 	executors    []ToolExecutor
 	toolResults  []streamToolExecution
 	mode         CaretMode
+	toolState    *toolCallExecutionState
 }
 
 type streamRendererOption func(*streamEventRenderer)
@@ -61,6 +63,14 @@ func withStreamMode(mode CaretMode) streamRendererOption {
 	}
 }
 
+func withStreamToolBudget(limit int) streamRendererOption {
+	return func(r *streamEventRenderer) {
+		if limit > 0 && r.toolState != nil {
+			r.toolState.limit = minInt(limit, maxToolCallsPerTurn)
+		}
+	}
+}
+
 func newStreamEventRenderer(w io.Writer, flush func(), messageID string, fullResponse *strings.Builder, opts ...streamRendererOption) *streamEventRenderer {
 	r := &streamEventRenderer{
 		w:            w,
@@ -68,6 +78,7 @@ func newStreamEventRenderer(w io.Writer, flush func(), messageID string, fullRes
 		messageID:    messageID,
 		fullResponse: fullResponse,
 		mode:         ModeAsk,
+		toolState:    newToolCallExecutionState(),
 	}
 	for _, opt := range opts {
 		opt(r)
@@ -185,7 +196,7 @@ func (r *streamEventRenderer) drainThinking(final bool) (bool, error) {
 	}
 
 	content := strings.TrimSpace(r.pending[len(thinkingOpenTag):end])
-	blockID := fmt.Sprintf("thinking-%d", time.Now().UnixNano())
+	blockID := newCaretBlockID("thinking")
 	if err := WriteEvent(r.w, r.flush, StreamEvent{Type: EventThinkingStart, MessageID: r.messageID, BlockID: blockID}); err != nil {
 		return false, err
 	}
@@ -254,6 +265,10 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	if !toolAllowedForMode(r.mode, def) {
 		return nil
 	}
+	call.Input = normalizeToolInput(call.Name, call.Input)
+	if err := validateToolInvocation(r.mode, def, call.Input); err != nil {
+		return r.emitToolExecutionNotice(call, "error", "I could not run that business check because the requested inputs were invalid.", err.Error())
+	}
 
 	requiresApproval := def.RequiresApproval || def.Scope == "write"
 	if !requiresApproval && len(r.executors) == 0 {
@@ -261,9 +276,12 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	}
 	preview := buildToolActionPreview(def, call.Input)
 
-	blockID := fmt.Sprintf("tool-%d", time.Now().UnixNano())
+	blockID := newCaretBlockID("tool")
 	if !requiresApproval {
 		return r.emitReadToolMarker(blockID, call, preview)
+	}
+	if err := registerPendingToolApproval(r.ctx, blockID, def, call.Input, r.mode); err != nil {
+		return r.emitToolExecutionNotice(call, "error", "I could not create a safe approval request for that action. No changes were made.", "approval request registry is full")
 	}
 
 	return WriteEvent(r.w, r.flush, StreamEvent{
@@ -283,75 +301,53 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	for _, executor := range r.executors {
-		if executor == nil {
-			continue
+	if err := r.toolState.admit(call.Name, call.Input); err != nil {
+		if errors.Is(err, ErrDuplicateToolCall) {
+			return r.emitToolExecutionNotice(call, "skipped", "I already checked that exact request; use the existing result.", "")
 		}
-		output, executed, err := executor.ExecuteCaretTool(ctx, call.Name, call.Input)
-		if err != nil {
-			userError := userFacingToolError(err)
-			summary := summarizeToolResult(call.Name, call.Input, nil, "error", userError)
-			if err := WriteEvent(r.w, r.flush, StreamEvent{
-				Type:             EventToolCall,
-				MessageID:        r.messageID,
-				BlockID:          blockID,
-				Name:             call.Name,
-				Mode:             string(r.mode),
-				Input:            call.Input,
-				Preview:          preview,
-				RequiresApproval: false,
-			}); err != nil {
-				return err
-			}
-			r.toolResults = append(r.toolResults, streamToolExecution{
-				Name:    call.Name,
-				Input:   call.Input,
-				Status:  "error",
-				Summary: summary,
-				Error:   userError,
-			})
-			return WriteEvent(r.w, r.flush, StreamEvent{
-				Type:      EventToolResult,
-				MessageID: r.messageID,
-				BlockID:   blockID,
-				Status:    "error",
-				Summary:   summary,
-				Error:     userError,
-			})
-		}
-		if executed {
-			summary := summarizeToolResult(call.Name, call.Input, output, "success", "")
-			if err := WriteEvent(r.w, r.flush, StreamEvent{
-				Type:             EventToolCall,
-				MessageID:        r.messageID,
-				BlockID:          blockID,
-				Name:             call.Name,
-				Mode:             string(r.mode),
-				Input:            call.Input,
-				Preview:          preview,
-				RequiresApproval: false,
-			}); err != nil {
-				return err
-			}
-			r.toolResults = append(r.toolResults, streamToolExecution{
-				Name:    call.Name,
-				Input:   call.Input,
-				Status:  "success",
-				Summary: summary,
-				Output:  output,
-			})
-			return WriteEvent(r.w, r.flush, StreamEvent{
-				Type:      EventToolResult,
-				MessageID: r.messageID,
-				BlockID:   blockID,
-				Status:    "success",
-				Summary:   summary,
-				Output:    output,
-			})
-		}
+		return r.emitToolExecutionNotice(call, "blocked", "I stopped additional checks for this response so the answer stays focused.", "")
 	}
 
-	return nil
+	output, executed, execErr, duration := executeToolWithTimeout(ctx, r.executors, call.Name, call.Input)
+	if execErr == nil && !executed {
+		// No executor claimed the tool; keep unsupported markers invisible rather
+		// than suggesting that an action ran.
+		return nil
+	}
+	if err := WriteEvent(r.w, r.flush, StreamEvent{
+		Type:             EventToolCall,
+		MessageID:        r.messageID,
+		BlockID:          blockID,
+		Name:             call.Name,
+		Mode:             string(r.mode),
+		Input:            call.Input,
+		Preview:          preview,
+		RequiresApproval: false,
+	}); err != nil {
+		return err
+	}
+	if execErr != nil {
+		userError := userFacingToolError(execErr)
+		summary := summarizeToolResult(call.Name, call.Input, nil, "error", userError)
+		r.toolResults = append(r.toolResults, streamToolExecution{Name: call.Name, Input: call.Input, Status: "error", Summary: summary, Error: userError})
+		return WriteEvent(r.w, r.flush, StreamEvent{Type: EventToolResult, MessageID: r.messageID, BlockID: blockID, Status: "error", Summary: summary, Error: userError, DurationMs: duration.Milliseconds()})
+	}
+	if !executed {
+		// Keep unsupported read markers invisible to the user and out of the
+		// continuation loop. The model only sees capabilities that the prompt
+		// builder shortlisted as executable.
+		return nil
+	}
+
+	summary := summarizeToolResult(call.Name, call.Input, output, "success", "")
+	r.toolResults = append(r.toolResults, streamToolExecution{Name: call.Name, Input: call.Input, Status: "success", Summary: summary, Output: output})
+	return WriteEvent(r.w, r.flush, StreamEvent{Type: EventToolResult, MessageID: r.messageID, BlockID: blockID, Status: "success", Summary: summary, Output: output, DurationMs: duration.Milliseconds()})
+}
+
+func (r *streamEventRenderer) emitToolExecutionNotice(call ToolCallMarker, status, summary, errorMessage string) error {
+	blockID := newCaretBlockID("tool")
+	r.toolResults = append(r.toolResults, streamToolExecution{Name: call.Name, Input: call.Input, Status: status, Summary: summary, Error: errorMessage})
+	return WriteEvent(r.w, r.flush, StreamEvent{Type: EventToolResult, MessageID: r.messageID, BlockID: blockID, Name: call.Name, Status: status, Summary: summary, Error: errorMessage})
 }
 
 func firstMarker(s string) (int, markerKind) {
@@ -365,4 +361,8 @@ func firstMarker(s string) (int, markerKind) {
 	default:
 		return tool, markerTool
 	}
+}
+
+func newCaretBlockID(prefix string) string {
+	return fmt.Sprintf("%s-%d-%d", prefix, time.Now().UnixNano(), caretIDCounter.Add(1))
 }

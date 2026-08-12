@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	onekithttp "github.com/corezio/onekit/http"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 )
 
 func oneKitStatus(err error) int {
@@ -16,6 +17,41 @@ func oneKitStatus(err error) int {
 		return int(oneKitErr.GetStatusCode())
 	}
 	return 0
+}
+
+func TestToolDecisionRequiresAuthenticatedPendingApprovalInProductionMode(t *testing.T) {
+	got, err := (&ToolDecisionHandler{RequirePendingApproval: true}).Serve(context.Background(), &ToolDecisionRequest{
+		ToolCallID: "tool-auth-required",
+		Name:       "flow.create_task",
+		Input:      map[string]any{"title": "Follow up"},
+		Decision:   "approve",
+		Mode:       string(ModeAgent),
+	})
+	if err != nil {
+		t.Fatalf("Serve returned error: %v", err)
+	}
+	if got.Status != "error" || !strings.Contains(got.Message, "Authentication") {
+		t.Fatalf("response = %#v", got)
+	}
+}
+
+func TestPendingApprovalCannotBeReplayed(t *testing.T) {
+	ctx := context.WithValue(context.Background(), authPkg.AuthUserKey, &authPkg.AuthUser{UserID: 7, BusinessID: 9})
+	input := map[string]any{"title": "Follow up"}
+	tool, _ := ToolByName("flow.create_task")
+	if err := registerPendingToolApproval(ctx, "tool-replay", tool, input, ModeAgent); err != nil {
+		t.Fatalf("registerPendingToolApproval: %v", err)
+	}
+	handler := &ToolDecisionHandler{RequirePendingApproval: true, Executor: fakeToolExecutor{output: map[string]any{"task": map[string]any{"id": 1}}}}
+	req := &ToolDecisionRequest{ToolCallID: "tool-replay", Name: "flow.create_task", Input: input, Decision: "approve", Mode: string(ModeAgent)}
+	first, err := handler.Serve(ctx, req)
+	if err != nil || first.Status != "success" {
+		t.Fatalf("first approval = %#v, err=%v", first, err)
+	}
+	second, err := handler.Serve(ctx, req)
+	if err != nil || second.Status != "error" || second.Executed {
+		t.Fatalf("replayed approval = %#v, err=%v", second, err)
+	}
 }
 
 func TestListToolsHandlerHonorsModeCapability(t *testing.T) {

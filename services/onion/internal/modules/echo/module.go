@@ -26,6 +26,9 @@ type Module struct {
 }
 
 func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaService handlers.QuotaService, analystService handlers.AnalystService, toolExecutors ...handlers.ToolExecutor) *Module {
+	if err := handlers.ValidateToolRegistry(); err != nil {
+		panic(fmt.Errorf("invalid Caret tool registry: %w", err))
+	}
 	snipsService, err := application.NewService(ctx)
 	if err != nil {
 		snipsService = nil
@@ -57,6 +60,13 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, r *chi.Mux, _ ...interface{}) {
+	serverHttp.RegisterGET[handlers.ListToolsRequest, handlers.ListToolsResponse](
+		ctx,
+		r,
+		handlers.ListToolsRoutes(),
+		&handlers.ListToolsHandler{},
+	)
+
 	serverHttp.RegisterGET[handlers.GetProviderStatusRequest, handlers.GetProviderStatusResponse](
 		ctx,
 		r,
@@ -68,7 +78,7 @@ func (m *Module) RegisterRoutes(ctx context.Context, r *chi.Mux, _ ...interface{
 		ctx,
 		r,
 		handlers.ToolDecisionRoutes(),
-		&handlers.ToolDecisionHandler{Executors: m.toolExecutors},
+		&handlers.ToolDecisionHandler{Executors: m.toolExecutors, RequirePendingApproval: true},
 	)
 
 	for _, path := range handlers.GenerateTextStreamRoutes() {
