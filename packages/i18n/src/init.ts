@@ -83,13 +83,17 @@ export function initI18n(config: I18nConfig): typeof i18next {
 
   // Keep <html dir> in sync when the language changes
   i18next.on('languageChanged', (lang: string) => {
-    document.documentElement.setAttribute('dir', isRTL(lang) ? 'rtl' : 'ltr');
-    document.documentElement.setAttribute('lang', lang);
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('dir', isRTL(lang) ? 'rtl' : 'ltr');
+      document.documentElement.setAttribute('lang', lang);
+    }
   });
 
   // Apply dir immediately on init
-  document.documentElement.setAttribute('dir', isRTL(savedLang) ? 'rtl' : 'ltr');
-  document.documentElement.setAttribute('lang', savedLang);
+  if (typeof document !== 'undefined') {
+    document.documentElement.setAttribute('dir', isRTL(savedLang) ? 'rtl' : 'ltr');
+    document.documentElement.setAttribute('lang', savedLang);
+  }
 
   return i18next;
 }
