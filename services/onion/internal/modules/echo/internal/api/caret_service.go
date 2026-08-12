@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	echohandlers "github.com/voxire/onion/internal/modules/echo/internal/handlers"
+	echoapp "github.com/voxire/onion/internal/modules/echo/internal/application"
 	hubcaretv1 "github.com/voxire/voxie/gen/go/hub/caret/v1"
 )
 
@@ -14,8 +14,8 @@ func NewCaretAPI() *CaretAPI {
 }
 
 func (a *CaretAPI) ListCaretTools(_ context.Context, req *hubcaretv1.ListCaretToolsRequest) (*hubcaretv1.ListCaretToolsResponse, error) {
-	mode := echohandlers.ParseMode(req.GetMode())
-	defs := echohandlers.ToolsForMode(mode)
+	mode := echoapp.ParseMode(req.GetMode())
+	defs := echoapp.ToolsForMode(mode)
 	tools := make([]*hubcaretv1.CaretTool, 0, len(defs))
 	for _, def := range defs {
 		tools = append(tools, &hubcaretv1.CaretTool{

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	onekithttp "github.com/corezio/onekit/http"
+	echoapp "github.com/voxire/onion/internal/modules/echo/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 )
 
@@ -38,8 +39,8 @@ func TestToolDecisionRequiresAuthenticatedPendingApprovalInProductionMode(t *tes
 func TestPendingApprovalCannotBeReplayed(t *testing.T) {
 	ctx := context.WithValue(context.Background(), authPkg.AuthUserKey, &authPkg.AuthUser{UserID: 7, BusinessID: 9})
 	input := map[string]any{"title": "Follow up"}
-	tool, _ := ToolByName("flow.create_task")
-	if err := registerPendingToolApproval(ctx, "tool-replay", tool, input, ModeAgent); err != nil {
+	tool, _ := echoapp.ToolByName("flow.create_task")
+	if err := echoapp.RegisterPendingToolApproval(ctx, "tool-replay", tool, input, echoapp.ModeAgent); err != nil {
 		t.Fatalf("registerPendingToolApproval: %v", err)
 	}
 	handler := &ToolDecisionHandler{RequirePendingApproval: true, Executor: fakeToolExecutor{output: map[string]any{"task": map[string]any{"id": 1}}}}

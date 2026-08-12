@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	echoapp "github.com/voxire/onion/internal/modules/echo/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
@@ -60,8 +61,8 @@ func (h *ListToolsHandler) Serve(_ context.Context, req *ListToolsRequest) (List
 	if req == nil {
 		req = &ListToolsRequest{}
 	}
-	mode := ParseMode(req.Mode)
-	return ListToolsResponse{Tools: ToolsForMode(mode)}, nil
+	mode := echoapp.ParseMode(req.Mode)
+	return ListToolsResponse{Tools: echoapp.ToolsForMode(mode)}, nil
 }
 
 func (h *ToolDecisionHandler) Validate(_ context.Context, req *ToolDecisionRequest) error {
@@ -88,7 +89,7 @@ func (h *ToolDecisionHandler) Validate(_ context.Context, req *ToolDecisionReque
 func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionRequest) (ToolDecisionResponse, error) {
 	decision := strings.TrimSpace(strings.ToLower(req.Decision))
 	name := strings.TrimSpace(req.Name)
-	tool, ok := ToolByName(name)
+	tool, ok := echoapp.ToolByName(name)
 	if !ok {
 		logger.Ctx(ctx).Warn("caret tool decision rejected for unknown tool",
 			logger.String("tool_call_id", req.ToolCallID),
@@ -104,7 +105,7 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		}, nil
 	}
 	if h.RequirePendingApproval {
-		businessID, userID := authenticatedIdentity(ctx)
+		businessID, userID := echoapp.AuthenticatedIdentity(ctx)
 		if businessID <= 0 || userID <= 0 {
 			return ToolDecisionResponse{ToolCallID: req.ToolCallID, Status: "error", Message: "Authentication is required to approve or deny this action.", Tool: tool}, nil
 		}
@@ -112,7 +113,7 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 
 	if decision == "deny" {
 		if h.RequirePendingApproval {
-			if err := consumePendingToolApproval(ctx, req.ToolCallID, tool, req.Input, ""); err != nil {
+			if err := echoapp.ConsumePendingToolApproval(ctx, req.ToolCallID, tool, req.Input, ""); err != nil {
 				return ToolDecisionResponse{ToolCallID: req.ToolCallID, Status: "error", Message: "This tool proposal is no longer valid. No changes were made.", Tool: tool}, nil
 			}
 		}
@@ -128,9 +129,9 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		}, nil
 	}
 
-	mode := ParseMode(req.Mode)
-	req.Input = normalizeToolInput(tool.Name, req.Input)
-	if !toolAllowedForMode(mode, tool) {
+	mode := echoapp.ParseMode(req.Mode)
+	req.Input = echoapp.NormalizeToolInput(tool.Name, req.Input)
+	if !echoapp.ToolAllowedForMode(mode, tool) {
 		h.logDecision(ctx, req, tool, "mode_rejected", false)
 		return ToolDecisionResponse{
 			ToolCallID: req.ToolCallID,
@@ -141,7 +142,7 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 			Preview:    buildToolActionPreview(tool, req.Input),
 		}, nil
 	}
-	if err := validateToolInvocation(mode, tool, req.Input); err != nil {
+	if err := echoapp.ValidateToolInvocation(mode, tool, req.Input); err != nil {
 		h.logDecision(ctx, req, tool, "invalid_input", false)
 		return ToolDecisionResponse{
 			ToolCallID: req.ToolCallID,
@@ -153,7 +154,7 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		}, nil
 	}
 	if h.RequirePendingApproval {
-		if err := consumePendingToolApproval(ctx, req.ToolCallID, tool, req.Input, mode); err != nil {
+		if err := echoapp.ConsumePendingToolApproval(ctx, req.ToolCallID, tool, req.Input, mode); err != nil {
 			h.logDecision(ctx, req, tool, "approval_rejected", false)
 			return ToolDecisionResponse{
 				ToolCallID: req.ToolCallID,
@@ -166,7 +167,7 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		}
 	}
 
-	output, executed, err, duration := executeToolWithTimeout(ctx, h.executorChain(), tool.Name, req.Input)
+	output, executed, err, duration := echoapp.ExecuteToolWithTimeout(ctx, h.executorChain(), tool.Name, req.Input)
 	if err != nil {
 		h.logDecision(ctx, req, tool, "execution_failed", false)
 		return ToolDecisionResponse{

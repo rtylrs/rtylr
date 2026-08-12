@@ -8,6 +8,8 @@ import (
 	"io"
 	"strings"
 	"time"
+
+	echoapp "github.com/voxire/onion/internal/modules/echo/internal/application"
 )
 
 const (
@@ -66,7 +68,10 @@ func withStreamMode(mode CaretMode) streamRendererOption {
 func withStreamToolBudget(limit int) streamRendererOption {
 	return func(r *streamEventRenderer) {
 		if limit > 0 && r.toolState != nil {
-			r.toolState.SetLimit(minInt(limit, maxToolCallsPerTurn))
+			if limit > echoapp.MaxToolCallsPerTurn {
+				limit = echoapp.MaxToolCallsPerTurn
+			}
+			r.toolState.SetLimit(limit)
 		}
 	}
 }
@@ -78,7 +83,7 @@ func newStreamEventRenderer(w io.Writer, flush func(), messageID string, fullRes
 		messageID:    messageID,
 		fullResponse: fullResponse,
 		mode:         ModeAsk,
-		toolState:    newToolCallExecutionState(),
+		toolState:    echoapp.NewToolCallExecutionState(),
 	}
 	for _, opt := range opts {
 		opt(r)
@@ -258,15 +263,15 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 		return nil
 	}
 
-	def, ok := ToolByName(call.Name)
+	def, ok := echoapp.ToolByName(call.Name)
 	if !ok {
 		return nil
 	}
-	if !toolAllowedForMode(r.mode, def) {
+	if !echoapp.ToolAllowedForMode(r.mode, def) {
 		return nil
 	}
-	call.Input = normalizeToolInput(call.Name, call.Input)
-	if err := validateToolInvocation(r.mode, def, call.Input); err != nil {
+	call.Input = echoapp.NormalizeToolInput(call.Name, call.Input)
+	if err := echoapp.ValidateToolInvocation(r.mode, def, call.Input); err != nil {
 		return r.emitToolExecutionNotice(call, "error", "I could not run that business check because the requested inputs were invalid.", err.Error())
 	}
 
@@ -280,7 +285,7 @@ func (r *streamEventRenderer) emitToolMarker(raw string) error {
 	if !requiresApproval {
 		return r.emitReadToolMarker(blockID, call, preview)
 	}
-	if err := registerPendingToolApproval(r.ctx, blockID, def, call.Input, r.mode); err != nil {
+	if err := echoapp.RegisterPendingToolApproval(r.ctx, blockID, def, call.Input, r.mode); err != nil {
 		return r.emitToolExecutionNotice(call, "error", "I could not create a safe approval request for that action. No changes were made.", "approval request registry is full")
 	}
 
@@ -302,13 +307,13 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 		ctx = context.Background()
 	}
 	if err := r.toolState.Admit(call.Name, call.Input); err != nil {
-		if errors.Is(err, ErrDuplicateToolCall) {
+		if errors.Is(err, echoapp.ErrDuplicateToolCall) {
 			return r.emitToolExecutionNotice(call, "skipped", "I already checked that exact request; use the existing result.", "")
 		}
 		return r.emitToolExecutionNotice(call, "blocked", "I stopped additional checks for this response so the answer stays focused.", "")
 	}
 
-	output, executed, execErr, duration := executeToolWithTimeout(ctx, r.executors, call.Name, call.Input)
+	output, executed, execErr, duration := echoapp.ExecuteToolWithTimeout(ctx, r.executors, call.Name, call.Input)
 	if execErr == nil && !executed {
 		// No executor claimed the tool; keep unsupported markers invisible rather
 		// than suggesting that an action ran.
