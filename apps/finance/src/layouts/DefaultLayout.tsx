@@ -34,6 +34,8 @@ import {
   Settings as SettingsIcon,
   Tag,
   FileCheck,
+  Menu,
+  X,
 } from 'lucide-react';
 import GlobalSearch from '../shared/components/GlobalSearch';
 
@@ -205,6 +207,7 @@ const DefaultLayout: React.FC = () => {
   );
   const [searchOpen, setSearchOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const financeUser = useUserStore((s) => s.user);
   const setAuthUser = useUserStore((s) => s.setUser);
@@ -271,22 +274,60 @@ const DefaultLayout: React.FC = () => {
         navigate({ to: '/expenses/new' });
       } else if (e.key === 'Escape') {
         setSearchOpen(false);
+        setSidebarOpen(false);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [navigate]);
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
   return (
     <>
       <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
-        <aside
+        <div
+          className="fixed inset-x-0 top-0 z-40 flex h-11 items-center justify-between px-4 md:hidden"
           style={{
-            width: 224,
-            display: 'flex',
-            flexDirection: 'column',
-            flexShrink: 0,
-            overflow: 'hidden',
+            background: 'var(--hub-surface)',
+            borderBottom: '1px solid var(--hub-border)',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open navigation menu"
+            aria-expanded={sidebarOpen}
+            aria-controls="finance-sidebar"
+            className="flex h-11 w-11 items-center justify-center rounded-lg"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
+            <Menu size={18} />
+          </button>
+          <h1 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
+            {pageTitle}
+          </h1>
+          <div className="h-11 w-11" aria-hidden="true" />
+        </div>
+
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
+        <aside
+          id="finance-sidebar"
+          aria-label="Primary navigation"
+          className={[
+            sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden',
+            'md:flex w-56 flex-col shrink-0 overflow-hidden',
+          ].join(' ')}
+          style={{
             background: 'var(--hub-surface)',
             borderRight: '1px solid var(--hub-border)',
           }}
@@ -298,9 +339,19 @@ const DefaultLayout: React.FC = () => {
               gap: 10,
               padding: 16,
               borderBottom: '1px solid var(--hub-border)',
+              justifyContent: 'space-between',
             }}
           >
             <img src="/logo.png?v=2" alt="rtylr" className="rtylr-logo h-6 w-auto" />
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Close navigation menu"
+              className="flex h-11 w-11 items-center justify-center rounded-lg md:hidden"
+              style={{ color: 'var(--hub-text-muted)' }}
+            >
+              <X size={18} />
+            </button>
           </div>
 
           <div style={{ padding: '6px 8px' }}>
@@ -498,16 +549,11 @@ const DefaultLayout: React.FC = () => {
         </aside>
 
         {/* Main content + Caret AI inline column */}
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+        <div className="flex flex-1 overflow-hidden">
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden pt-11 md:pt-0">
             <header
+              className="hidden h-11 shrink-0 items-center justify-between px-6 md:flex"
               style={{
-                height: 44,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 24px',
-                flexShrink: 0,
                 background: 'var(--hub-surface)',
                 borderBottom: '1px solid var(--hub-border)',
               }}
