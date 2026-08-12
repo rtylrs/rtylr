@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import {
   Plus,
@@ -16,6 +16,7 @@ import {
   useApprovePurchaseOrder,
   useUpdatePurchaseOrderStatus,
   useCreatePurchaseOrder,
+  fetchAllPurchaseOrders,
 } from './usePurchaseOrders';
 import { useSuppliers } from '../suppliers/useSuppliers';
 import { useProducts } from '../products/useProducts';
@@ -133,12 +134,39 @@ const Purchasing: React.FC = () => {
     Array<{ productId: string; quantityOrdered: string; unitCost: string }>
   >([{ productId: '', quantityOrdered: '', unitCost: '' }]);
 
-  const supplierNameById = new Map(suppliers.map((supplier) => [supplier.id, supplier.name]));
+  const supplierNameById = useMemo(
+    () =>
+      new Map((supplierResult?.suppliers ?? []).map((supplier) => [supplier.id, supplier.name])),
+    [supplierResult?.suppliers]
+  );
 
   const filteredOrders =
     filter === 'All'
       ? orders
       : orders.filter((order) => displayStatus(order.status ?? '') === filter);
+
+  const toExportRows = useCallback(
+    (purchaseOrders: PurchaseOrder[]) =>
+      purchaseOrders.map((o) => ({
+        id: o.id,
+        supplier: supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`,
+        createdAt: o.createdAt,
+        expectedDelivery: o.expectedDelivery ?? '',
+        items: (o.items ?? []).length,
+        total: o.total,
+        status: displayStatus(o.status ?? ''),
+      })),
+    [supplierNameById]
+  );
+  const exportable = useMemo(() => toExportRows(filteredOrders), [filteredOrders, toExportRows]);
+  const getAllExportable = useCallback(async () => {
+    const allOrders = await fetchAllPurchaseOrders();
+    const filtered =
+      filter === 'All'
+        ? allOrders
+        : allOrders.filter((order) => displayStatus(order.status ?? '') === filter);
+    return toExportRows(filtered);
+  }, [filter, toExportRows]);
 
   const statusCounts: Record<string, number> = {
     Draft: orders.filter((o) => displayStatus(o.status ?? '') === 'Draft').length,
@@ -213,15 +241,8 @@ const Purchasing: React.FC = () => {
         </h2>
         <div className="flex items-center gap-2">
           <ExportButton
-            data={orders.map((o) => ({
-              id: o.id,
-              supplier: supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`,
-              createdAt: o.createdAt,
-              expectedDelivery: o.expectedDelivery ?? '',
-              items: (o.items ?? []).length,
-              total: o.total,
-              status: displayStatus(o.status ?? ''),
-            }))}
+            data={exportable}
+            getData={getAllExportable}
             filename="purchase-orders.csv"
           />
           <button

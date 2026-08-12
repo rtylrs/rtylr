@@ -32,6 +32,34 @@ export interface ProductFilters {
   pageSize?: number;
 }
 
+const EXPORT_PAGE_SIZE = 100;
+
+export async function fetchAllProducts(
+  filters: Pick<ProductFilters, 'search' | 'categoryId'> = {}
+): Promise<Product[]> {
+  const products: Product[] = [];
+  let offset = 0;
+
+  while (true) {
+    const response = await productClient.listProducts({
+      search: filters.search?.trim() ?? '',
+      categoryId: filters.categoryId ?? '0',
+      limit: EXPORT_PAGE_SIZE,
+      offset,
+    });
+    const page = response.products ?? [];
+    products.push(...page);
+
+    const hasMore =
+      response.hasMore ??
+      (response.total !== undefined
+        ? products.length < response.total
+        : page.length === EXPORT_PAGE_SIZE);
+    if (!hasMore || page.length === 0) return products;
+    offset += page.length;
+  }
+}
+
 export function getProductStockStatus(
   product: Pick<Product, 'stockQuantity' | 'lowStockThreshold'>
 ): ProductStockStatus {
