@@ -47,6 +47,8 @@ export {
   ErrorBoundary,
   DefaultErrorFallback,
   WidgetErrorFallback,
+  isDynamicImportError,
+  recoverFromDynamicImportError,
 } from './components/ErrorBoundary';
 
 export { cn } from './lib/cn';
