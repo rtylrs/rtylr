@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Filter } from 'lucide-react';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 
 interface FilterDrawerProps {
   open: boolean;
@@ -19,6 +20,9 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
   title = 'Filters',
   children,
 }) => {
+  const titleId = useId();
+  const dialogRef = useDialogFocus<HTMLElement>({ open, onClose });
+
   return (
     <AnimatePresence>
       {open && (
@@ -30,12 +34,18 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
             onClick={onClose}
             className="fixed inset-0 z-40"
             style={{ background: 'var(--hub-overlay-light)' }}
+            aria-hidden="true"
           />
           <motion.aside
             initial={{ x: 320 }}
             animate={{ x: 0 }}
             exit={{ x: 320 }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            tabIndex={-1}
             className="fixed right-0 top-0 bottom-0 w-80 z-50 flex flex-col"
             style={{ background: 'var(--hub-card)', borderLeft: '1px solid var(--hub-border)' }}
           >
@@ -45,11 +55,15 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
             >
               <div className="flex items-center gap-2">
                 <Filter size={14} style={{ color: 'var(--erp-accent)' }} />
-                <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+                <h3
+                  id={titleId}
+                  className="text-sm font-semibold"
+                  style={{ color: 'var(--hub-text)' }}
+                >
                   {title}
                 </h3>
               </div>
-              <button onClick={onClose}>
+              <button onClick={onClose} aria-label="Close filters">
                 <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
               </button>
             </div>

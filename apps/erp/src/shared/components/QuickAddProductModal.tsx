@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { X, PackagePlus, Plus, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { uploadAsset } from '@voxire/api';
@@ -13,6 +13,7 @@ import {
   type Product,
 } from '../../features/products/useProducts';
 import UnitSelector from './UnitSelector';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 import { useCategories } from '../../features/categories/useCategories';
 import { useSuppliers } from '../../features/suppliers/useSuppliers';
 import { useBrands } from '../../features/brands/useBrands';
@@ -136,6 +137,8 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const { data: brands = [] } = useBrands();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
+  const titleId = useId();
+  const dialogRef = useDialogFocus<HTMLDivElement>({ open, onClose });
 
   // Re-seed local state when a different product is loaded for editing.
   useEffect(() => {
@@ -285,12 +288,14 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
-      aria-label={t('erp.products.new')}
+      aria-labelledby={titleId}
       data-testid="quick-add-product-modal"
       className="fixed inset-0 z-50 flex items-center justify-center p-6"
       style={{ background: 'var(--hub-overlay-heavy)' }}
+      tabIndex={-1}
       onClick={onClose}
     >
       <div
@@ -300,6 +305,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       >
         <div className="flex items-center justify-between mb-4">
           <h3
+            id={titleId}
             className="text-sm font-semibold flex items-center gap-2"
             style={{ color: 'var(--hub-text)' }}
           >

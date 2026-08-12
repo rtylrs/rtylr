@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { AlertTriangle, X } from 'lucide-react';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 
 interface ConfirmModalProps {
   open: boolean;
@@ -22,14 +23,22 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
+  const titleId = useId();
+  const descriptionId = useId();
+  const dialogRef = useDialogFocus<HTMLDivElement>({ open, onClose: onCancel });
+
   if (!open) return null;
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
+      aria-labelledby={titleId}
+      aria-describedby={description ? descriptionId : undefined}
       data-testid="confirm-modal"
       className="fixed inset-0 z-50 flex items-center justify-center p-6"
       style={{ background: 'var(--hub-overlay-heavy)' }}
+      tabIndex={-1}
       onClick={onCancel}
     >
       <div
@@ -53,15 +62,23 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+              <h3
+                id={titleId}
+                className="text-sm font-semibold"
+                style={{ color: 'var(--hub-text)' }}
+              >
                 {title}
               </h3>
-              <button onClick={onCancel}>
+              <button onClick={onCancel} aria-label="Close dialog">
                 <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
               </button>
             </div>
             {description && (
-              <p className="text-xs mt-1" style={{ color: 'var(--hub-text-muted)' }}>
+              <p
+                id={descriptionId}
+                className="text-xs mt-1"
+                style={{ color: 'var(--hub-text-muted)' }}
+              >
                 {description}
               </p>
             )}

@@ -97,7 +97,7 @@ const Receiving: React.FC = () => {
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Receive items for PO-{selectedId}
             </h3>
-            <button onClick={() => setSelectedId(null)}>
+            <button onClick={() => setSelectedId(null)} aria-label="Close receiving details">
               <XIcon size={14} style={{ color: 'var(--hub-text-muted)' }} />
             </button>
           </div>
@@ -121,6 +121,7 @@ const Receiving: React.FC = () => {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => adjust(line.sku, -1)}
+                      aria-label={`Decrease received quantity for ${line.name}`}
                       className="h-6 w-6 rounded flex items-center justify-center"
                       style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
                     >
@@ -134,6 +135,7 @@ const Receiving: React.FC = () => {
                     </span>
                     <button
                       onClick={() => adjust(line.sku, 1)}
+                      aria-label={`Increase received quantity for ${line.name}`}
                       className="h-6 w-6 rounded flex items-center justify-center"
                       style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
                     >
