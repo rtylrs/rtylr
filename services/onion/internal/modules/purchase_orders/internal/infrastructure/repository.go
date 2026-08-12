@@ -213,7 +213,7 @@ func (r *Repository) GetPurchaseOrderStatus(ctx context.Context, businessID, id 
 }
 
 func (r *Repository) ApprovePurchaseOrder(ctx context.Context, businessID, id int64) error {
-	err := r.queries.ApprovePurchaseOrder(ctx, sqlc.ApprovePurchaseOrderParams{
+	result, err := r.queries.ApprovePurchaseOrder(ctx, sqlc.ApprovePurchaseOrderParams{
 		BusinessID: businessID,
 		ID:         id,
 	})
@@ -225,6 +225,17 @@ func (r *Repository) ApprovePurchaseOrder(ctx context.Context, businessID, id in
 		)
 
 		return err
+	}
+	if affected, resultErr := result.RowsAffected(); resultErr != nil {
+		return resultErr
+	} else if affected == 0 {
+		status, statusErr := r.GetPurchaseOrderStatus(ctx, businessID, id)
+		if statusErr != nil {
+			return statusErr
+		}
+		if status == string(domain.POStatusReceived) {
+			return domain.ErrPurchaseOrderAlreadyReceived
+		}
 	}
 
 	return nil
@@ -245,11 +256,24 @@ func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, businessID, 
 			ID:         id,
 		})
 	} else {
-		err = r.queries.UpdatePurchaseOrderStatus(ctx, sqlc.UpdatePurchaseOrderStatusParams{
+		result, resultErr := r.queries.UpdatePurchaseOrderStatus(ctx, sqlc.UpdatePurchaseOrderStatusParams{
 			Status:     statusVal,
 			BusinessID: businessID,
 			ID:         id,
 		})
+		if resultErr == nil {
+			if affected, affectedErr := result.RowsAffected(); affectedErr != nil {
+				resultErr = affectedErr
+			} else if affected == 0 {
+				currentStatus, statusErr := r.GetPurchaseOrderStatus(ctx, businessID, id)
+				if statusErr != nil {
+					resultErr = statusErr
+				} else if currentStatus == string(domain.POStatusReceived) {
+					resultErr = domain.ErrPurchaseOrderAlreadyReceived
+				}
+			}
+		}
+		err = resultErr
 	}
 
 	if err != nil {
