@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Clock, Zap } from 'lucide-react';
-import { APP_URLS } from '@voxire/config';
+import { resolveAppUrl } from '@voxire/config';
 import { useFlowSubscription } from '../hooks/queries/useFlowSubscription';
 
 function daysLeft(trialEndsAt: string | null): number {
@@ -42,7 +42,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
         Add a payment method to keep your data.
       </p>
       <a
-        href={`${APP_URLS.dash as string}/settings/billing`}
+        href={`${resolveAppUrl('dash')}/settings/billing`}
         className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold shrink-0"
         style={{ background: 'var(--flow-warning, #f59e0b)', color: '#fff' }}
       >
