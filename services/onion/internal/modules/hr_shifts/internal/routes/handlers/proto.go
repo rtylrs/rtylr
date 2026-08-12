@@ -57,6 +57,30 @@ func shiftToProto(s domain.ShiftRecord) *hrshiftv1.ShiftPayload {
 	return payload
 }
 
+// availabilityToProto maps an availability row to its contract payload. Exactly
+// one of DayOfWeek and SpecificDate is populated, matching the row's kind.
+func availabilityToProto(a domain.AvailabilityRecord) *hrshiftv1.AvailabilityPayload {
+	payload := &hrshiftv1.AvailabilityPayload{
+		Id:          a.ID,
+		StaffId:     a.StaffID,
+		OwnerId:     a.OwnerID,
+		StartTime:   a.StartTime,
+		EndTime:     a.EndTime,
+		IsAvailable: a.IsAvailable,
+		CreatedAt:   a.CreatedAt.Unix(),
+		UpdatedAt:   a.UpdatedAt.Unix(),
+	}
+	if a.DayOfWeek != domain.NoDayOfWeek {
+		day := a.DayOfWeek
+		payload.DayOfWeek = &day
+	}
+	if a.SpecificDate != "" {
+		date := a.SpecificDate
+		payload.SpecificDate = &date
+	}
+	return payload
+}
+
 func assignmentToProto(a domain.ShiftAssignmentRecord) *hrshiftv1.ShiftAssignmentPayload {
 	return &hrshiftv1.ShiftAssignmentPayload{
 		Id:         a.ID,
