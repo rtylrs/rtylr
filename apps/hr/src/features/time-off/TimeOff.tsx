@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
@@ -14,12 +15,15 @@ import {
 } from '../../shared/components/ui';
 import TimeOffBadge from '../../shared/components/TimeOffBadge';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
+import { canHrPermission } from '../../shared/lib/hrPermissions';
 
 const STATUSES = ['All', 'Pending', 'Approved', 'Rejected'] as const;
 
 const TimeOff: React.FC = () => {
   const { data, isLoading } = useTimeOff();
   const approve = useApproveTimeOff();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canApprove = canHrPermission(role, 'hr:time_off:approve');
   const [tab, setTab] = useState<(typeof STATUSES)[number]>('All');
 
   const filtered = (data ?? []).filter((t) => (tab === 'All' ? true : t.status === tab));
@@ -83,7 +87,7 @@ const TimeOff: React.FC = () => {
                     </div>
                   )}
                 </div>
-                {req.status === 'Pending' && (
+                {canApprove && req.status === 'Pending' && (
                   <ApprovalButtons
                     onApprove={() =>
                       approve.mutate(

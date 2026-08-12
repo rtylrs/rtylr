@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { Calculator, RefreshCw, Clock, Coffee, AlertTriangle, MapPin } from 'lucide-react';
@@ -29,6 +30,7 @@ import {
   useIsMobile,
 } from '../../shared/components/ui';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
+import { canHrPermission } from '../../shared/lib/hrPermissions';
 
 const TABS = ['Labor Cost', 'Swap Shifts', 'Availability', 'Breaks', 'Overtime'] as const;
 
@@ -40,6 +42,8 @@ const Operations: React.FC = () => {
   const { data: swaps = [] } = useSwaps();
   const createSwap = useCreateSwap();
   const resolveSwap = useResolveSwap();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManageShifts = canHrPermission(role, 'hr:shifts:manage');
   const { data: availability = [] } = useAvailability();
   const { data: breaks = [] } = useBreaks();
   const startBreak = useStartBreak();
@@ -353,7 +357,7 @@ const Operations: React.FC = () => {
                     >
                       {s.status}
                     </Pill>
-                    {s.status === 'Pending' && (
+                    {canManageShifts && s.status === 'Pending' && (
                       <ApprovalButtons
                         onApprove={() =>
                           resolveSwap.mutate(

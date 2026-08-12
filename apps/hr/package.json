@@ -19,6 +19,7 @@
     "@voxire/config": "workspace:*",
     "@voxire/voxie": "workspace:*",
     "@voxire/i18n": "workspace:*",
+    "@voxire/permissions": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "@voxire/ui": "workspace:*",
     "axios": "^1.15.2",
