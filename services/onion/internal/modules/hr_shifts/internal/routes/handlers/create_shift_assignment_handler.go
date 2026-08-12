@@ -27,6 +27,9 @@ type CreateShiftAssignmentRequest struct {
 
 type CreateShiftAssignmentResponse struct {
 	Assignment *hrshiftv1.ShiftAssignmentPayload `json:"assignment"`
+	// Warnings carries advisory availability conflicts. The assignment was still
+	// created; see Service.CreateShiftAssignment for why these do not block.
+	Warnings []string `json:"warnings,omitempty"`
 }
 
 func (h *CreateShiftAssignmentHandler) Validate(_ context.Context, req *CreateShiftAssignmentRequest) error {
@@ -56,7 +59,7 @@ func (h *CreateShiftAssignmentHandler) Serve(ctx context.Context, req *CreateShi
 		return CreateShiftAssignmentResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	created, err := h.Service.CreateShiftAssignment(ctx, businessID, domain.ShiftAssignmentRecord{
+	created, warnings, err := h.Service.CreateShiftAssignment(ctx, businessID, domain.ShiftAssignmentRecord{
 		EmployeeID: req.EmployeeID,
 		ShiftID:    req.ShiftID,
 		Date:       req.Date,
@@ -72,5 +75,5 @@ func (h *CreateShiftAssignmentHandler) Serve(ctx context.Context, req *CreateShi
 		return CreateShiftAssignmentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create shift assignment")
 	}
 
-	return CreateShiftAssignmentResponse{Assignment: assignmentToProto(*created)}, nil
+	return CreateShiftAssignmentResponse{Assignment: assignmentToProto(*created), Warnings: warnings}, nil
 }

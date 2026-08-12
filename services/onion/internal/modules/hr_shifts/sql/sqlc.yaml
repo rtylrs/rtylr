@@ -21,3 +21,7 @@ sql:
             go_type: "string"
           - column: "hr_shifts.end_time"
             go_type: "string"
+          - column: "hr_staff_availability.start_time"
+            go_type: "string"
+          - column: "hr_staff_availability.end_time"
+            go_type: "string"

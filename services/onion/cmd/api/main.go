@@ -559,7 +559,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		HRPerformance:         hrperformance.NewModule(ctx, dbclient.Pool()),
 		HRReports:             hrreports.NewModule(ctx, dbclient.Pool()),
 		HRSetup:               hrsetup.NewModule(ctx, dbclient.Pool()),
-		HRShifts:              hrshifts.NewModule(ctx, dbclient.Pool()),
+		HRShifts:              hrshifts.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		HRTime:                hrTimeModule,
 		Insights:              insightsModule,
 		Integrations:          integrations.NewModule(ctx, dbclient.Pool()),

@@ -32,4 +32,13 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPOSTWithValidation[handlers.PublishRosterRequest, handlers.PublishRosterResponse](
 		ctx, router, handlers.PublishRosterRoutes(), &handlers.PublishRosterHandler{Service: service},
 	)
+	serverHttp.RegisterGET[handlers.ListAvailabilityRequest, handlers.ListAvailabilityResponse](
+		ctx, router, handlers.ListAvailabilityRoutes(), &handlers.ListAvailabilityHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[handlers.SetAvailabilityRequest, handlers.SetAvailabilityResponse](
+		ctx, router, handlers.SetAvailabilityRoutes(), &handlers.SetAvailabilityHandler{Service: service},
+	)
+	serverHttp.RegisterDELETEWithValidation[handlers.DeleteAvailabilityRequest, handlers.DeleteAvailabilityResponse](
+		ctx, router, handlers.DeleteAvailabilityRoutes(), &handlers.DeleteAvailabilityHandler{Service: service},
+	)
 }
