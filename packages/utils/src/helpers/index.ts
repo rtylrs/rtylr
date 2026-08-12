@@ -41,11 +41,18 @@ export const helpers = {
   deepClone: <T>(obj: T): T => {
     if (obj === null || typeof obj !== 'object') return obj;
     if (obj instanceof Date) return new Date(obj.getTime()) as T;
+    if (obj instanceof RegExp) return new RegExp(obj.source, obj.flags) as T;
+    if (obj instanceof Set)
+      return new Set(Array.from(obj).map((item) => helpers.deepClone(item))) as T;
+    if (obj instanceof Map)
+      return new Map(
+        Array.from(obj.entries()).map(([k, v]) => [helpers.deepClone(k), helpers.deepClone(v)])
+      ) as T;
     if (obj instanceof Array) return obj.map((item) => helpers.deepClone(item)) as T;
     if (typeof obj === 'object') {
       const clonedObj = {} as T;
       for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
           clonedObj[key] = helpers.deepClone(obj[key]);
         }
       }
@@ -81,12 +88,16 @@ export const helpers = {
     return new Promise((resolve) => setTimeout(resolve, ms));
   },
 
-  // Get nested object property safely
+  // Get nested object property safely (guarded against prototype pollution)
   get: (obj: any, path: string, defaultValue?: any): any => {
+    if (obj == null) return defaultValue;
     const keys = path.split('.');
     let result = obj;
 
     for (const key of keys) {
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        return defaultValue;
+      }
       if (result == null || typeof result !== 'object') {
         return defaultValue;
       }
@@ -96,20 +107,28 @@ export const helpers = {
     return result !== undefined ? result : defaultValue;
   },
 
-  // Set nested object property safely
+  // Set nested object property safely (guarded against prototype pollution)
   set: (obj: any, path: string, value: any): void => {
+    if (obj == null || typeof obj !== 'object') return;
     const keys = path.split('.');
     let current = obj;
 
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i];
-      if (!(key in current) || typeof current[key] !== 'object') {
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        return;
+      }
+      if (!(key in current) || current[key] == null || typeof current[key] !== 'object') {
         current[key] = {};
       }
       current = current[key];
     }
 
-    current[keys[keys.length - 1]] = value;
+    const lastKey = keys[keys.length - 1];
+    if (lastKey === '__proto__' || lastKey === 'constructor' || lastKey === 'prototype') {
+      return;
+    }
+    current[lastKey] = value;
   },
 };
 

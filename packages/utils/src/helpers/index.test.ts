@@ -238,10 +238,23 @@ describe('helpers', () => {
       expect(obj.a.b).toBe(2);
     });
 
+    it('prevents prototype pollution in get', () => {
+      const obj = {};
+      expect(helpers.get(obj, '__proto__.polluted', 'default')).toBe('default');
+      expect(helpers.get(obj, 'constructor.prototype.polluted', 'default')).toBe('default');
+    });
+
     it('creates intermediate objects', () => {
       const obj: any = {};
       helpers.set(obj, 'deep.nested.value', true);
       expect(obj.deep.nested.value).toBe(true);
+    });
+
+    it('prevents prototype pollution in set', () => {
+      const obj: any = {};
+      helpers.set(obj, '__proto__.polluted', true);
+      helpers.set(obj, 'constructor.prototype.polluted', true);
+      expect(({} as any).polluted).toBeUndefined();
     });
   });
 
