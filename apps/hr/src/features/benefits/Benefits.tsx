@@ -15,7 +15,7 @@ const Benefits: React.FC = () => {
   const user = useUserStore((s) => s.user);
   const currentStaffId = Number(user?.id) || 1;
   const currentStaffName = user?.name || user?.email || 'Team member';
-  const { data: plans = [], isLoading: plansLoading } = useBenefits();
+  const { data: plans, isLoading: plansLoading } = useBenefits();
   const { data: enrollments = [], isLoading: enrollLoading } = useBenefitEnrollments();
   const enroll = useEnrollBenefit();
 
@@ -32,6 +32,12 @@ const Benefits: React.FC = () => {
 
         {loading ? (
           <Skeleton height={200} />
+        ) : !plans || plans.length === 0 ? (
+          <EmptyState
+            icon={<Shield size={20} />}
+            title="No benefit plans"
+            description="Create plans to allow enrollment."
+          />
         ) : (
           <div
             style={{

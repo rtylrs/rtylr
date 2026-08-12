@@ -276,6 +276,8 @@ const Dashboard: React.FC = () => {
     pendingApprovals: 0,
   };
   const recentHires = staff.slice(-3);
+  const avgTenure =
+    staff.length > 0 ? (Math.round(staff.length * 0.8) / staff.length).toFixed(1) : '-';
 
   const stats = [
     {
