@@ -46,7 +46,8 @@ const ROLE_COLORS = ['#8b5cf6', '#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
 const Schedule: React.FC = () => {
   const isMobile = useIsMobile(900);
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date()));
-  const { data: shifts = [] } = useShiftSchedule();
+  const weekStartStr = formatDate(weekStart);
+  const { data: shifts = [] } = useShiftSchedule(weekStartStr);
   const { data: staff = [] } = useStaff();
   const publish = usePublishWeek();
   const upsert = useUpsertShift();
