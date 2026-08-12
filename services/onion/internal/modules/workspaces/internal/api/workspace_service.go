@@ -167,14 +167,21 @@ func (a *WorkspaceAPI) AddWorkspaceMember(ctx context.Context, req *flowworkspac
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, req.GetWorkspaceId()) {
+	if err := a.Service.RequireWorkspaceRole(ctx, req.GetWorkspaceId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
+	}
+	role := req.GetRole()
+	if role == "" {
+		role = domain.FlowRoleMember
+	}
+	if !validFlowMemberRole(role) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
 	}
 
 	input := domain.AddWorkspaceMemberInput{
 		WorkspaceID: req.GetWorkspaceId(),
 		UserID:      req.GetUserId(),
-		Role:        req.GetRole(),
+		Role:        role,
 	}
 
 	if err := a.Service.AddWorkspaceMember(ctx, input); err != nil {
@@ -195,7 +202,7 @@ func (a *WorkspaceAPI) RemoveWorkspaceMember(ctx context.Context, req *flowworks
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, req.GetWorkspaceId()) {
+	if err := a.Service.RequireWorkspaceRole(ctx, req.GetWorkspaceId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -293,7 +300,7 @@ func (a *WorkspaceAPI) UpdateWorkspaceMemberRole(ctx context.Context, req *floww
 	if !validFlowMemberRole(req.GetRole()) {
 		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
 	}
-	if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, req.GetWorkspaceId()) {
+	if err := a.Service.RequireWorkspaceRole(ctx, req.GetWorkspaceId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

@@ -187,13 +187,16 @@ func (a *ProjectAPI) AddProjectMember(ctx context.Context, req *flowprojectv1.Ad
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if !a.Service.IsProjectMember(ctx, authUser.UserID, req.GetProjectId()) {
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
 	role := req.GetRole()
 	if role == "" {
 		role = "member"
+	}
+	if !validFlowMemberRole(role) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
 	}
 	if err := a.Service.AddProjectMember(ctx, domain.AddProjectMemberInput{
 		ProjectID: req.GetProjectId(),
@@ -211,7 +214,7 @@ func (a *ProjectAPI) RemoveProjectMember(ctx context.Context, req *flowprojectv1
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if !a.Service.IsProjectMember(ctx, authUser.UserID, req.GetProjectId()) {
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -232,7 +235,7 @@ func (a *ProjectAPI) UpdateProjectMemberRole(ctx context.Context, req *flowproje
 	if !validFlowMemberRole(req.GetRole()) {
 		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
 	}
-	if !a.Service.IsProjectMember(ctx, authUser.UserID, req.GetProjectId()) {
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -251,13 +254,16 @@ func (a *ProjectAPI) InviteProjectMember(ctx context.Context, req *flowprojectv1
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if !a.Service.IsProjectMember(ctx, authUser.UserID, req.GetProjectId()) {
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
 	role := req.GetRole()
 	if role == "" {
 		role = "member"
+	}
+	if !validFlowMemberRole(role) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
 	}
 	found, err := a.Service.InviteProjectMemberByEmail(ctx, req.GetProjectId(), req.GetEmail(), role, authUser.UserID)
 	if err != nil {
