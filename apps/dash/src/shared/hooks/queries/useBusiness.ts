@@ -78,3 +78,23 @@ export const useUpdateBusiness = () => {
     },
   });
 };
+
+export const useUpdateBusinessConfig = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      return unwrap<{ config?: Record<string, unknown> }>(
+        safe.put('/hub/config/v1/config', payload)
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business'] });
+      queryClient.invalidateQueries({ queryKey: ['config'] });
+      toast.success('Design configuration saved');
+    },
+    onError: (error: unknown) => {
+      const err = error as { message?: string };
+      toast.error(err.message || 'Failed to save configuration');
+    },
+  });
+};

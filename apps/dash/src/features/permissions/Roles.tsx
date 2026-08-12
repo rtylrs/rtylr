@@ -3,10 +3,18 @@ import { HelmetContainer } from '@voxire/components';
 import { Plus } from 'lucide-react';
 import { Button } from '../../shared/components/ui';
 import { Breadcrumbs, SkeletonGrid } from '../../shared/components/dash';
-import { useCustomRoles } from '../../shared/hooks/queries/usePermissions';
+import { useCustomRoles, useCreateCustomRole } from '../../shared/hooks/queries/usePermissions';
 
 const Roles: React.FC = () => {
   const { data = [], isLoading } = useCustomRoles();
+  const createRole = useCreateCustomRole();
+
+  const handleCreateRole = () => {
+    const name = window.prompt('Enter new role name:');
+    if (name && name.trim()) {
+      createRole.mutate({ name: name.trim() });
+    }
+  };
 
   return (
     <>
@@ -21,7 +29,7 @@ const Roles: React.FC = () => {
               Build purpose-built roles for your business. Assign them to members in Team.
             </p>
           </div>
-          <Button disabled title="Custom role builder coming in a future update">
+          <Button onClick={handleCreateRole}>
             <Plus size={14} />
             New role
           </Button>

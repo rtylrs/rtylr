@@ -2,10 +2,11 @@ import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { Shield } from 'lucide-react';
 import { PermissionCheckbox, RoleBadge, SkeletonList } from '../../shared/components/dash';
-import { usePermissions } from '../../shared/hooks/queries/usePermissions';
+import { usePermissions, useUpdatePermissions } from '../../shared/hooks/queries/usePermissions';
 
 const Permissions: React.FC = () => {
   const { data, isLoading } = usePermissions();
+  const updatePermissions = useUpdatePermissions();
 
   if (isLoading || !data) {
     return (
@@ -106,7 +107,15 @@ const Permissions: React.FC = () => {
                     const isOwner = role === 'owner';
                     return (
                       <div key={role} className="flex justify-center">
-                        <PermissionCheckbox checked={isOwner ? true : value} disabled />
+                        <PermissionCheckbox
+                          checked={isOwner ? true : value}
+                          disabled={isOwner}
+                          onChange={(checked) => {
+                            if (!isOwner) {
+                              updatePermissions.mutate({ role, key: p.key, enabled: checked });
+                            }
+                          }}
+                        />
                       </div>
                     );
                   })}
