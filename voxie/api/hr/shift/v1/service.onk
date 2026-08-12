@@ -22,4 +22,13 @@ service ShiftService {
 
   /// Publishes the roster for a week.
   publishRoster(PublishRosterRequest) -> PublishRosterResponse @post("/roster/publish")
+
+  /// Returns staff availability windows with optional filters.
+  listAvailability(ListAvailabilityRequest) -> ListAvailabilityResponse @get("/availability")
+
+  /// Creates or updates one staff availability window.
+  setAvailability(SetAvailabilityRequest) -> SetAvailabilityResponse @post("/availability")
+
+  /// Deletes a staff availability window.
+  deleteAvailability(DeleteAvailabilityRequest) -> DeleteAvailabilityResponse @delete("/availability/{id}")
 }
