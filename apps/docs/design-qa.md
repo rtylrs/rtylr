@@ -2,26 +2,20 @@
 
 ## Evidence
 
-- Source visual truth: `qa-source-desktop.png` from `https://docs.retool.com/`.
-- Combined comparison input: `qa-comparison-desktop.png` (source left, rtylr implementation right).
-- Implementation desktop: `qa-implementation-desktop.png`.
-- Implementation docs page: `qa-implementation-docs-desktop.png`.
-- Implementation mobile: `qa-implementation-mobile.png`.
-- Implementation mobile navigation: `qa-implementation-mobile-menu.png`.
-- Desktop comparison viewport: 1022 × 719 CSS px; source and implementation screenshots are both 1022 × 719 pixels, 1× density.
-- Mobile verification viewport: 390 × 844 CSS px; implementation screenshot is 390 × 844 pixels, 1× density.
-- State: dark theme, home page for the full-view comparison; `/self-hosting/` for content-page verification.
+- Current desktop render: `output/playwright/qa-home-desktop.png` at 1440 × 900 CSS px.
+- Current mobile render: `output/playwright/qa-home-mobile-viewport.png` at 390 × 844 CSS px.
+- State: dark theme, redesigned home page; existing `/self-hosting/` content page remains covered by the earlier docs-page pass.
 
 ## Findings
 
-No actionable P0, P1, or P2 findings remain.
+No actionable P0, P1, or P2 findings remain in the current home-page pass.
 
-The implementation intentionally adapts the reference instead of copying it 1:1: rtylr branding and content replace Retool content, the rtylr grid illustration replaces the Retool artwork, the footer is rtylr-specific, and the reference hosting/version bottom bar is omitted per product direction.
+The implementation intentionally adapts the reference instead of copying it 1:1: rtylr branding and content replace Retool content, the rtylr grid illustration replaces the Retool artwork, the footer is rtylr-specific, and the reference hosting/version bottom bar is omitted per product direction. The low-value “What’s new” timeline has been removed from the home page and the navigation label is now “Resources”.
 
 ## Focused checks
 
-- Typography and hierarchy: dark display heading, compact uppercase navigation, muted body copy, and docs-page h1/h2 rhythm match the reference direction while using the workspace’s available font stack.
-- Spacing and layout: desktop two-column hero, three-column docs layout, left navigation, right in-page navigation, mobile single-column layout, and full-height mobile drawer verified visually.
+- Typography and hierarchy: Plus Jakarta Sans is loaded from `public/fonts/`; the home page now uses a clear hero, two primary actions, a start-here path, and an app index.
+- Spacing and layout: desktop content uses a consistent 24px outer gutter at 1440px, the hero occupies y=152–632, the start-here section begins at y=744, and the mobile content uses a 16px gutter without horizontal overflow.
 - Colors and tokens: implementation body background measured as `rgb(16, 16, 16)` (`#101010`); borders, muted text, blue CTA, and green announcement accent are stable across routes.
 - Asset fidelity: existing rtylr logo is served from the Next root `public/` path and loaded with a non-zero natural width in the static build.
 - Copy and content: self-hosting content is rtylr-specific, with `Self Host rtylr` present in both docs and landing footers.
@@ -33,7 +27,8 @@ The implementation intentionally adapts the reference instead of copying it 1:1:
 - Footer `Self Host rtylr` navigates to `/self-hosting/`.
 - Self-hosting page in-page navigation emits working heading anchors.
 - Mobile menu opens as a full-height drawer at 390 × 844.
-- Static build console/error check: no errors or warnings reported by the final browser tab.
+- Home page no longer contains “What’s new” or the old release timeline.
+- Static build console/error check: no errors or warnings reported by the final browser tab; computed body background is `rgb(16, 16, 16)`.
 
 ## Comparison history
 
@@ -41,6 +36,7 @@ The implementation intentionally adapts the reference instead of copying it 1:1:
 2. Broken logos after the VitePress-to-Next move: copied existing rtylr public assets to Next’s root `public/` path.
 3. Mobile drawer constrained to the header: removed the header blur containing block so the drawer fills the viewport.
 4. Retool-style bottom bar: removed intentionally after product direction; it is not part of the final rtylr UI.
+5. Home-page spacing revision: removed the release timeline, replaced it with direct entry points and an app index, tightened the desktop rhythm, and verified the responsive layout at 1440px and 390px.
 
 ## Implementation checklist
 

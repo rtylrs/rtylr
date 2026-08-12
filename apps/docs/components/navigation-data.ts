@@ -45,9 +45,10 @@ export const navGroups: NavGroup[] = [
     ],
   },
   {
-    label: "What's new",
+    label: 'Resources',
     items: [
-      { label: 'Release notes', href: '/self-hosting/upgrade', detail: 'Follow upgrade and version guidance.' },
+      { label: 'Documentation map', href: '/', detail: 'Find the right rtylr guide.' },
+      { label: 'FAQ', href: '/faq', detail: 'Find answers to common questions.' },
       { label: 'Architecture', href: '/self-hosting/architecture', detail: 'See how the self-hosted stack fits together.' },
     ],
   },
