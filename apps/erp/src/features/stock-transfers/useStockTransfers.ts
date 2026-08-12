@@ -10,6 +10,7 @@ import type {
   UpdateStockTransferStatusRequest,
   UpdateStockTransferStatusResponse,
 } from '@voxire/voxie/erp/stock_transfer/v1/types';
+import { invalidateStockDerivedQueries } from '../../shared/lib/stockInvalidation';
 
 const stockTransferClient = createOneKitClient(StockTransferServiceClient, 'erp');
 
@@ -46,7 +47,10 @@ export function useUpdateStockTransferStatus() {
   const qc = useQueryClient();
   return useMutation<UpdateStockTransferStatusResponse, Error, UpdateStockTransferStatusRequest>({
     mutationFn: (data) => stockTransferClient.updateStockTransferStatus(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['stock-transfers'] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['stock-transfers'] });
+      invalidateStockDerivedQueries(qc);
+    },
     onError: () => toast.error('Failed to update stock transfer'),
   });
 }
