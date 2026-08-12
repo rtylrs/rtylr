@@ -6,3 +6,5 @@ docs/.vitepress/cache
 *.tsbuildinfo
 qa-*.png
 *.log
+claude.md
+CLAUDE.md

@@ -34,7 +34,7 @@ The implementation intentionally adapts the reference instead of copying it 1:1:
 
 ## Comparison history
 
-1. Missing heading IDs in Markdown output: added explicit `marked` heading IDs so the right-hand table of contents anchors work.
+1. Missing heading IDs in rendered content: added explicit `marked` heading IDs so the right-hand table of contents anchors work.
 2. Broken logos after the VitePress-to-Next move: copied existing rtylr public assets to Next’s root `public/` path.
 3. Mobile drawer constrained to the header: removed the header blur containing block so the drawer fills the viewport.
 4. Retool-style bottom bar: removed intentionally after product direction; it is not part of the final rtylr UI.

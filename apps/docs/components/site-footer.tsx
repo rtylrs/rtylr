@@ -68,7 +68,7 @@ export function SiteFooter() {
         <div>
           <Link href="/faq">Help</Link>
           <Link href="/self-hosting">Self Host rtylr</Link>
-          <a href="https://github.com/voxire" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/tryrtylr" target="_blank" rel="noreferrer">GitHub</a>
         </div>
         <span>© {new Date().getFullYear()} rtylr</span>
       </div>

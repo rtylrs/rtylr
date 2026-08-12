@@ -11,7 +11,7 @@ function isActive(route: string, currentRoute: string) {
   return route === currentRoute;
 }
 
-function markdownHtml(body: string) {
+function contentHtml(body: string) {
   const renderer = new marked.Renderer();
   renderer.heading = ({ tokens, depth }) => {
     const text = renderer.parser.parseInline(tokens);
@@ -45,7 +45,7 @@ export function DocsPage({ doc }: DocsPageProps) {
           <nav className="breadcrumbs" aria-label="Breadcrumbs">
             <Link href="/">HOME</Link><span>›</span><span>{doc.slug[0]?.replace(/-/g, ' ').toUpperCase() ?? 'DOCS'}</span><span>›</span><strong>{doc.title.toUpperCase()}</strong>
           </nav>
-          <article className="prose" dangerouslySetInnerHTML={{ __html: markdownHtml(doc.body) }} />
+          <article className="prose" dangerouslySetInnerHTML={{ __html: contentHtml(doc.body) }} />
           <div className="need-help">
             <span>Need more help?</span>
             <Link href="/faq">Read the rtylr FAQ →</Link>

@@ -18,7 +18,7 @@ Projects organize related work. Each project has three views:
 
 Tasks are the core unit of work in Flow. Each task includes:
 
-- Title and description (Markdown supported)
+- Title and description (formatted content supported)
 - Assignee and reviewer
 - Status, priority (Urgent, High, Medium, Low, None), and labels
 - Due date and estimated effort

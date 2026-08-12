@@ -21,12 +21,12 @@ function stripFrontmatter(value: string) {
   return value.replace(/^---[\s\S]*?---\s*/, '').trim();
 }
 
-function titleFromMarkdown(value: string, fallback: string) {
+function titleFromContent(value: string, fallback: string) {
   const heading = stripFrontmatter(value).match(/^#\s+(.+)$/m)?.[1];
   return heading?.trim() ?? fallback;
 }
 
-function descriptionFromMarkdown(value: string) {
+function descriptionFromContent(value: string) {
   const paragraphs = stripFrontmatter(value)
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
@@ -36,16 +36,16 @@ function descriptionFromMarkdown(value: string) {
   return paragraphs[0]?.slice(0, 160) ?? 'rtylr documentation.';
 }
 
-function collectMarkdownFiles(directory: string): string[] {
+function collectContentFiles(directory: string): string[] {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const absolutePath = path.join(directory, entry.name);
-    if (entry.isDirectory()) return collectMarkdownFiles(absolutePath);
-    return entry.name.endsWith('.md') ? [absolutePath] : [];
+    if (entry.isDirectory()) return collectContentFiles(absolutePath);
+    return entry.name.endsWith('.txt') ? [absolutePath] : [];
   });
 }
 
 function routeForFile(absolutePath: string) {
-  const relativePath = path.relative(docsRoot, absolutePath).replace(/\.md$/, '');
+  const relativePath = path.relative(docsRoot, absolutePath).replace(/\.txt$/, '');
   const segments = relativePath.split(path.sep);
   if (segments.at(-1) === 'index') segments.pop();
   return `/${segments.join('/')}`.replace(/\/$/, '') || '/';
@@ -56,7 +56,7 @@ function slugForRoute(route: string) {
 }
 
 function loadDocs(): Doc[] {
-  return collectMarkdownFiles(docsRoot)
+  return collectContentFiles(docsRoot)
     .filter((file) => !file.includes(`${path.sep}public${path.sep}`))
     .map((file) => {
       const raw = fs.readFileSync(file, 'utf8');
@@ -64,8 +64,8 @@ function loadDocs(): Doc[] {
       return {
         slug: slugForRoute(route),
         route,
-        title: titleFromMarkdown(raw, path.basename(file, '.md')),
-        description: descriptionFromMarkdown(raw),
+        title: titleFromContent(raw, path.basename(file, '.txt')),
+        description: descriptionFromContent(raw),
         body: stripFrontmatter(raw),
       };
     })
