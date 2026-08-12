@@ -114,7 +114,9 @@ const Leave = (): React.JSX.Element => {
                           {t('leave.employee')} #{req.employeeId}
                         </span>
                         <Pill color={STATUS_COLORS[req.status ?? '']}>
-                          {t(`leave.statuses.${(req.status ?? '').toLowerCase()}`)}
+                          {t(`leave.statuses.${(req.status ?? '').toLowerCase()}`, {
+                            defaultValue: req.status || '—',
+                          })}
                         </Pill>
                         <span style={{ fontSize: 10, color: 'var(--hr-text-dim)' }}>
                           #{req.leaveTypeId}

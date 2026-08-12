@@ -234,6 +234,7 @@
       "lastName": "Last name",
       "email": "Email",
       "userId": "User ID",
+      "duplicateUserId": "User ID already exists",
       "departmentId": "Department",
       "locationId": "Location",
       "managerId": "Manager",
@@ -525,7 +526,8 @@
       "all": "All",
       "pending": "Pending",
       "approved": "Approved",
-      "rejected": "Rejected"
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
     },
     "balances": {
       "emptyTitle": "No leave balances",
@@ -576,7 +578,8 @@
       "all": "All",
       "pending": "Pending",
       "approved": "Approved",
-      "rejected": "Rejected"
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
     },
     "form": {
       "title": "New Overtime Request",

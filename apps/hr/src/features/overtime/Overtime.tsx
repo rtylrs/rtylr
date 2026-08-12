@@ -106,7 +106,9 @@ const Overtime = (): React.JSX.Element => {
                       {t('overtime.employee')} #{req.employeeId}
                     </span>
                     <Pill color={STATUS_COLORS[req.status ?? '']}>
-                      {t(`overtime.statuses.${(req.status ?? '').toLowerCase()}`)}
+                      {t(`overtime.statuses.${(req.status ?? '').toLowerCase()}`, {
+                        defaultValue: req.status || '—',
+                      })}
                     </Pill>
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>

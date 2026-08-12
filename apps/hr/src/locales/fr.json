@@ -234,6 +234,7 @@
       "lastName": "Nom",
       "email": "E-mail",
       "userId": "ID utilisateur",
+      "duplicateUserId": "ID utilisateur déjà existant",
       "departmentId": "Département",
       "locationId": "Emplacement",
       "managerId": "Responsable",
@@ -525,7 +526,8 @@
       "all": "Tous",
       "pending": "En attente",
       "approved": "Approuvé",
-      "rejected": "Rejeté"
+      "rejected": "Rejeté",
+      "cancelled": "Annulé"
     },
     "balances": {
       "emptyTitle": "Aucun solde de congé",

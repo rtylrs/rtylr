@@ -217,7 +217,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
           background: 'var(--hr-card)',
           border: '1px solid var(--hr-border)',
           borderRadius: 12,
-          overflow: 'hidden',
+          overflowX: 'auto',
         }}
       >
         {/* Table header */}

@@ -79,7 +79,7 @@ const Attendance = (): React.JSX.Element => {
             description={t('attendance.emptyDescription')}
           />
         ) : (
-          <Card style={{ padding: 0, overflow: 'hidden' }}>
+          <Card style={{ padding: 0, overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
                 <tr style={{ background: 'var(--hr-hover)' }}>
