@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	onekithttp "github.com/corezio/onekit/http"
+
 	echoapp "github.com/voxire/onion/internal/modules/echo/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 )

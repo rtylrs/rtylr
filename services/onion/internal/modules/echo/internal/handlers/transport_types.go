@@ -4,18 +4,20 @@ import echoapp "github.com/voxire/onion/internal/modules/echo/internal/applicati
 
 // These aliases are deliberately limited to transport DTOs and renderer
 // state. Business decisions and their implementations live in application.
-type CaretMode = echoapp.CaretMode
-type CaretIntentKind = echoapp.CaretIntentKind
-type CaretRequestPlan = echoapp.CaretRequestPlan
-type CaretResponsePolicy = echoapp.CaretResponsePolicy
-type CaretGroundingMode = echoapp.CaretGroundingMode
-type ToolDef = echoapp.ToolDef
-type AnalystService = echoapp.AnalystService
-type AnalystGroundingResult = echoapp.AnalystGroundingResult
-type TextCompletionService = echoapp.TextCompletionService
-type ToolExecutor = echoapp.ToolExecutor
-type toolCallExecutionState = echoapp.ToolCallExecutionState
-type cacheWritePlan = echoapp.CacheWritePlan
+type (
+	CaretMode              = echoapp.CaretMode
+	CaretIntentKind        = echoapp.CaretIntentKind
+	CaretRequestPlan       = echoapp.CaretRequestPlan
+	CaretResponsePolicy    = echoapp.CaretResponsePolicy
+	CaretGroundingMode     = echoapp.CaretGroundingMode
+	ToolDef                = echoapp.ToolDef
+	AnalystService         = echoapp.AnalystService
+	AnalystGroundingResult = echoapp.AnalystGroundingResult
+	TextCompletionService  = echoapp.TextCompletionService
+	ToolExecutor           = echoapp.ToolExecutor
+	toolCallExecutionState = echoapp.ToolCallExecutionState
+	cacheWritePlan         = echoapp.CacheWritePlan
+)
 
 const (
 	ModeAsk            = echoapp.ModeAsk

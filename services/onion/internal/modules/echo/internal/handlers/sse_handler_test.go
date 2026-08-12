@@ -282,7 +282,6 @@ func TestBuildCacheWritePlanIncludesDataFreshness(t *testing.T) {
 	req := &GenerateTextStreamRequest{
 		Prompt:        "Which products are low?",
 		SystemContext: "User is in inventory.",
-		Mode:          string(ModeAsk),
 		PageContext: map[string]any{
 			"module":        "erp",
 			"dataFreshness": "products:1",
@@ -306,7 +305,6 @@ func TestBuildCacheWritePlanIncludesGroundingFreshness(t *testing.T) {
 	req := &GenerateTextStreamRequest{
 		Prompt:        "How much revenue today?",
 		SystemContext: "User is in dashboard.",
-		Mode:          string(ModeAsk),
 	}
 
 	firstGrounding := &analystGroundingResult{

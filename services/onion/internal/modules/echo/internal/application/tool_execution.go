@@ -35,6 +35,7 @@ func NewToolCallExecutionState() *ToolCallExecutionState { return newToolCallExe
 func (s *toolCallExecutionState) Admit(name string, input map[string]any) error {
 	return s.admit(name, input)
 }
+
 func (s *toolCallExecutionState) SetLimit(limit int) {
 	if s != nil && limit > 0 {
 		s.limit = limit
@@ -143,7 +144,7 @@ func validateToolValue(value any, depth int) error {
 	return nil
 }
 
-func ExecuteToolWithTimeout(ctx context.Context, executors []ToolExecutor, name string, input map[string]any) (output map[string]any, executed bool, err error, duration time.Duration) {
+func ExecuteToolWithTimeout(ctx context.Context, executors []ToolExecutor, name string, input map[string]any) (output map[string]any, executed bool, duration time.Duration, err error) {
 	started := time.Now()
 	defer func() {
 		duration = time.Since(started)
@@ -163,13 +164,13 @@ func ExecuteToolWithTimeout(ctx context.Context, executors []ToolExecutor, name 
 		output, executed, err = executor.ExecuteCaretTool(callCtx, name, input)
 		output = SanitizeToolOutput(output)
 		if err != nil || executed {
-			return output, executed, err, 0
+			return output, executed, 0, err
 		}
 		select {
 		case <-callCtx.Done():
-			return nil, false, callCtx.Err(), 0
+			return nil, false, 0, callCtx.Err()
 		default:
 		}
 	}
-	return nil, false, nil, 0
+	return nil, false, 0, nil
 }

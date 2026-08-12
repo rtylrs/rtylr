@@ -21,17 +21,17 @@ type ToolCallMarker struct {
 // remainder string contains the original input with each block removed so
 // the visible text doesn't include the raw JSON markers.
 func ExtractToolCalls(s string) (calls []ToolCallMarker, remainder string) {
-	const open, close = "<tool>", "</tool>"
+	const openTag, closeTag = "<tool>", "</tool>"
 	var out strings.Builder
 	for {
-		start := strings.Index(s, open)
+		start := strings.Index(s, openTag)
 		if start < 0 {
 			out.WriteString(s)
 			break
 		}
 		out.WriteString(s[:start])
-		rest := s[start+len(open):]
-		end := strings.Index(rest, close)
+		rest := s[start+len(openTag):]
+		end := strings.Index(rest, closeTag)
 		if end < 0 {
 			out.WriteString(s[start:])
 			break
@@ -41,9 +41,9 @@ func ExtractToolCalls(s string) (calls []ToolCallMarker, remainder string) {
 		if err := json.Unmarshal([]byte(raw), &call); err == nil && strings.TrimSpace(call.Name) != "" {
 			calls = append(calls, call)
 		} else {
-			out.WriteString(s[start : start+len(open)+end+len(close)])
+			out.WriteString(s[start : start+len(openTag)+end+len(closeTag)])
 		}
-		s = rest[end+len(close):]
+		s = rest[end+len(closeTag):]
 	}
 	return calls, out.String()
 }

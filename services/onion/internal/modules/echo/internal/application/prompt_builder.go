@@ -34,10 +34,9 @@ func BuildCaretPrompt(in PromptInput) string {
 	}
 
 	clarificationHint := ClarificationHintForRequest(in.CurrentRequest, in.SystemContext)
-	clarification := "No clarification is needed. Continue with the current request."
 	clarificationSection := ""
 	if clarificationHint != "" {
-		clarification = "- " + clarificationHint + "\n- Ask exactly one short clarifying question now. Do not emit tool markers until the user answers."
+		clarification := "- " + clarificationHint + "\n- Ask exactly one short clarifying question now. Do not emit tool markers until the user answers."
 		clarificationSection = "Clarification guard:\n\n" + clarification
 	}
 

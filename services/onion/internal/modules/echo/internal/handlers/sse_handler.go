@@ -873,10 +873,13 @@ func boundedToolResultsJSON(results []streamToolExecution) []byte {
 		return encoded
 	}
 
-	fallback, _ := json.Marshal(boundedToolResults{
+	fallback, marshalErr := json.Marshal(boundedToolResults{
 		Truncated: true,
 		Notice:    "Tool output was omitted because it exceeded the continuation context budget. Do not infer omitted values.",
 	})
+	if marshalErr != nil {
+		return []byte(`{"truncated":true}`)
+	}
 	return fallback
 }
 

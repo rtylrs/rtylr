@@ -46,29 +46,29 @@ func contractForTool(tool ToolDef) toolContract {
 		}
 	}
 
-	switch {
-	case tool.Name == "business.snapshot":
+	switch tool.Name {
+	case "business.snapshot":
 		return toolContract{
 			Input:      `{"question":"what the owner wants to understand"}`,
 			Output:     "A tenant-scoped evidence bundle with metric labels, rows, query specs, and freshness metadata.",
 			Freshness:  "live at request time",
 			SideEffect: "read-only; no business data is changed",
 		}
-	case tool.Name == "business.get_kpis":
+	case "business.get_kpis":
 		return toolContract{
 			Input:      `{"period":"today|week|month"}`,
 			Output:     "Headline tenant-scoped KPI values with the period used for each value.",
 			Freshness:  "live at request time",
 			SideEffect: "read-only; no business data is changed",
 		}
-	case tool.Name == "analytics.query":
+	case "analytics.query":
 		return toolContract{
 			Input:      `{"view":"allowlisted view","columns":["field"],"where":[...],"limit":number}`,
 			Output:     "Rows and a count from the authenticated tenant's allowlisted analytics view.",
 			Freshness:  "live at request time",
 			SideEffect: "read-only; no business data is changed",
 		}
-	case tool.Name == "memory.remember":
+	case "memory.remember":
 		return toolContract{
 			Input:          `{"key":"stable preference name","value":"fact or preference to remember"}`,
 			Output:         "A confirmation of the saved memory and its normalized key.",

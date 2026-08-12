@@ -313,7 +313,7 @@ func (r *streamEventRenderer) emitReadToolMarker(blockID string, call ToolCallMa
 		return r.emitToolExecutionNotice(call, "blocked", "I stopped additional checks for this response so the answer stays focused.", "")
 	}
 
-	output, executed, execErr, duration := echoapp.ExecuteToolWithTimeout(ctx, r.executors, call.Name, call.Input)
+	output, executed, duration, execErr := echoapp.ExecuteToolWithTimeout(ctx, r.executors, call.Name, call.Input)
 	if execErr == nil && !executed {
 		// No executor claimed the tool; keep unsupported markers invisible rather
 		// than suggesting that an action ran.

@@ -44,7 +44,7 @@ func TestValidateToolInvocationBoundsInputsAndMode(t *testing.T) {
 func TestExecuteToolWithTimeoutStopsAtFirstMatchingExecutor(t *testing.T) {
 	first := recordingToolExecutor{output: map[string]any{"total": 3}, executed: true}
 	second := recordingToolExecutor{output: map[string]any{"total": 9}, executed: true}
-	output, executed, err, duration := ExecuteToolWithTimeout(context.Background(), []ToolExecutor{first, second}, "crm.list_customers", nil)
+	output, executed, duration, err := ExecuteToolWithTimeout(context.Background(), []ToolExecutor{first, second}, "crm.list_customers", nil)
 	if err != nil || !executed {
 		t.Fatalf("executeToolWithTimeout = output=%#v executed=%v err=%v", output, executed, err)
 	}
@@ -57,7 +57,7 @@ func TestExecuteToolWithTimeoutStopsAtFirstMatchingExecutor(t *testing.T) {
 }
 
 func TestExecuteToolWithTimeoutRecoversExecutorPanic(t *testing.T) {
-	output, executed, err, _ := ExecuteToolWithTimeout(context.Background(), []ToolExecutor{panicToolExecutor{}}, "crm.list_customers", nil)
+	output, executed, _, err := ExecuteToolWithTimeout(context.Background(), []ToolExecutor{panicToolExecutor{}}, "crm.list_customers", nil)
 	if err == nil || executed || output != nil {
 		t.Fatalf("panic should become an error: output=%#v executed=%v err=%v", output, executed, err)
 	}
@@ -81,7 +81,7 @@ func (panicToolExecutor) ExecuteCaretTool(context.Context, string, map[string]an
 func TestExecuteToolWithTimeoutHonorsCanceledParentContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	_, _, err, _ := ExecuteToolWithTimeout(ctx, []ToolExecutor{recordingToolExecutor{}}, "crm.list_customers", nil)
+	_, _, _, err := ExecuteToolWithTimeout(ctx, []ToolExecutor{recordingToolExecutor{}}, "crm.list_customers", nil)
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected canceled context, got %v", err)
 	}

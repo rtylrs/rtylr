@@ -153,7 +153,7 @@ func (c *Client) CompleteTextWithOptions(ctx context.Context, prompt string, opt
 	}
 
 	if lastErr != nil {
-		return "", fmt.Errorf("%w: %v", ErrAllProvidersFailed, lastErr)
+		return "", fmt.Errorf("%w: %w", ErrAllProvidersFailed, lastErr)
 	}
 	return "", ErrAllProvidersFailed
 }
@@ -178,7 +178,7 @@ func (c *Client) CompleteTextStream(ctx context.Context, prompt string) (<-chan 
 	}
 
 	if lastErr != nil {
-		return nil, fmt.Errorf("%w: %v", ErrAllProvidersFailed, lastErr)
+		return nil, fmt.Errorf("%w: %w", ErrAllProvidersFailed, lastErr)
 	}
 	return nil, ErrAllProvidersFailed
 }

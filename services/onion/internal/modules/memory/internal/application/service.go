@@ -313,29 +313,6 @@ func truncateSummaryRunes(value string, maxRunes int) string {
 	return string(runes[:maxRunes]) + "..."
 }
 
-func (s *Service) extractAndStoreMemories(ctx context.Context, userID int, sessionID string, messages []domain.ConversationMessage, summaryData *SummaryData) {
-	memories := s.identifyMemories(messages, summaryData)
-
-	for _, memory := range memories {
-		userMemory := &domain.UserMemory{
-			UserID:        userID,
-			MemoryType:    memory.Type,
-			Key:           memory.Key,
-			Value:         memory.Value,
-			Confidence:    memory.Confidence,
-			SourceSession: sessionID,
-			CreatedAt:     time.Now(),
-		}
-
-		_, err := s.repository.StoreUserMemory(ctx, userMemory)
-		if err != nil {
-			logger.Ctx(ctx).Warn("Failed to store user memory",
-				logger.Error(err),
-				logger.String("memory_key", memory.Key))
-		}
-	}
-}
-
 func (s *Service) identifyMemories(_ []domain.ConversationMessage, summaryData *SummaryData) []MemoryItem {
 	memories := make([]MemoryItem, 0, len(summaryData.KeyTopics))
 

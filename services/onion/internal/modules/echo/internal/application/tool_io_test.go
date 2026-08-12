@@ -19,7 +19,8 @@ func TestSanitizeToolOutputRedactsSecretsAndBoundsLargePayloads(t *testing.T) {
 	got := SanitizeToolOutput(map[string]any{
 		"customer": map[string]any{"name": "Ada", "access_token": "secret"},
 	})
-	if got["customer"].(map[string]any)["access_token"] != "[redacted]" {
+	customer, ok := got["customer"].(map[string]any)
+	if !ok || customer["access_token"] != "[redacted]" {
 		t.Fatalf("secret was not redacted: %#v", got)
 	}
 	large := SanitizeToolOutput(map[string]any{"rows": strings.Repeat("x", MaxToolOutputBytes+100)})
