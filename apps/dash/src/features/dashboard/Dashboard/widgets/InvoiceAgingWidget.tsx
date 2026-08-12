@@ -43,19 +43,15 @@ function formatMoney(minor: number): string {
 }
 
 const InvoiceAgingWidget: React.FC = (): React.JSX.Element => {
-  const { data: raw } = useQuery({
+  const { data: raw, isError } = useQuery({
     queryKey: ['insights-invoice-aging'],
     queryFn: async (): Promise<Bucket[]> => {
-      try {
-        const res = await unwrap(safe.get<ApiResponse>('/insights/financial/v1/invoice-aging'));
-        return (res.buckets ?? []).map((b) => ({
-          label: b.label,
-          amountMinorUnits: toFiniteNumber(b.amountMinorUnits ?? b.amount_minor_units),
-          count: toFiniteNumber(b.count),
-        }));
-      } catch {
-        return [];
-      }
+      const res = await unwrap(safe.get<ApiResponse>('/insights/financial/v1/invoice-aging'));
+      return (res.buckets ?? []).map((b) => ({
+        label: b.label,
+        amountMinorUnits: toFiniteNumber(b.amountMinorUnits ?? b.amount_minor_units),
+        count: toFiniteNumber(b.count),
+      }));
     },
     staleTime: 60_000,
   });
@@ -74,7 +70,11 @@ const InvoiceAgingWidget: React.FC = (): React.JSX.Element => {
           Invoice aging
         </p>
       </div>
-      {buckets.length === 0 || allEmpty ? (
+      {isError ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
+          <p className="text-xs text-red-500">Failed to load invoice aging data.</p>
+        </div>
+      ) : buckets.length === 0 || allEmpty ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
           <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
             All outstanding invoices current.
