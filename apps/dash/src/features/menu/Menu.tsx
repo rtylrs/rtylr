@@ -36,7 +36,14 @@ interface GroupedCategory {
 const Menu: React.FC<{}> = () => {
   const navigate = useNavigate();
   const { userId } = useUserStore();
-  const { items, status, id: menuId } = useMenuStore();
+  const {
+    items,
+    status,
+    id: menuId,
+    deleteCategory,
+    deleteBanner,
+    deleteMenuItem,
+  } = useMenuStore();
   useGetMenu(userId as string);
 
   useEffect(() => {
@@ -75,6 +82,12 @@ const Menu: React.FC<{}> = () => {
               ${(toFiniteNumber(item.details.price) / 100).toFixed(2)}
             </span>
           )}
+          <button
+            className="text-xs text-red-500 hover:underline px-2 py-1"
+            onClick={() => deleteMenuItem(item._id as string)}
+          >
+            Delete
+          </button>
         </div>
       );
     });
@@ -102,6 +115,12 @@ const Menu: React.FC<{}> = () => {
         >
           {item.details?.isActive === false ? 'Inactive' : 'Active'}
         </span>
+        <button
+          className="text-xs text-red-500 hover:underline px-2 py-1"
+          onClick={() => deleteMenuItem(item._id as string)}
+        >
+          Delete
+        </button>
       </div>
     </div>
   );
@@ -131,7 +150,7 @@ const Menu: React.FC<{}> = () => {
             </button>
             <button
               className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-              disabled
+              onClick={() => deleteCategory((category.itemId || category._id) as string)}
             >
               Delete
             </button>
@@ -159,7 +178,9 @@ const Menu: React.FC<{}> = () => {
           <div className="flex gap-2">
             <button
               className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-              disabled
+              onClick={() =>
+                deleteCategory((parentCategory.itemId || parentCategory._id) as string)
+              }
             >
               Delete
             </button>
@@ -201,7 +222,7 @@ const Menu: React.FC<{}> = () => {
               <div>
                 <button
                   className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-                  disabled
+                  onClick={() => deleteBanner(item._id as string)}
                 >
                   Delete
                 </button>

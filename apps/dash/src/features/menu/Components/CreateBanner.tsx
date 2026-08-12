@@ -4,6 +4,8 @@ import { useMenuStore } from '../../../shared/stores/menuStore';
 import { useUserStore } from '../../../shared/stores/userStore';
 import Dropzone from '../../../shared/components/Dropzone';
 
+import { toast } from 'sonner';
+
 const CreateBanner = (): React.JSX.Element => {
   const { addBanner } = useMenuStore();
   const { userId: restaurantId } = useUserStore();
@@ -30,17 +32,23 @@ const CreateBanner = (): React.JSX.Element => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!restaurantId) {
-      return;
-    }
-    const bannerData = new FormData();
-    bannerData.append('title', formData.title);
-    bannerData.append('restaurantId', restaurantId);
-    if (formData.image) {
-      bannerData.append('bannerImage', formData.image);
-    }
+    const bannerObj = {
+      _id: String(Date.now()),
+      title: formData.title,
+      bannerImage: formData.image ? URL.createObjectURL(formData.image) : '',
+      menuId: restaurantId ?? '',
+      type: 'banner' as const,
+      details: {
+        banner: {
+          title: formData.title,
+          bannerImage: formData.image ? URL.createObjectURL(formData.image) : '',
+        },
+      },
+    };
 
-    addBanner(bannerData as any);
+    addBanner(bannerObj as any);
+    toast.success('Banner created');
+    window.history.back();
   };
 
   return (
