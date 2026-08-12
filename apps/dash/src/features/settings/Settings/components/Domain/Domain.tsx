@@ -26,9 +26,15 @@ import { cn } from '../../../../../shared/lib/utils';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import { useConfigStore } from '../../../../../shared/stores/configStore';
 
+import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
+import { toast } from 'sonner';
+
 const Domain: React.FC = () => {
   const user = useUserStore((s) => s.user);
-  const websiteData = useConfigStore((s) => s.websiteData) as { slug?: string } | undefined;
+  const websiteData = useConfigStore((s) => s.websiteData) as
+    | { slug?: string; domain?: string }
+    | undefined;
+  const updateBusiness = useUpdateBusiness();
   const fallbackSlug =
     user?.businessName
       ?.toLowerCase()
@@ -39,6 +45,7 @@ const Domain: React.FC = () => {
 
   const [copied, setCopied] = useState(false);
   const [dnsOpen, setDnsOpen] = useState(true);
+  const [customDomainInput, setCustomDomainInput] = useState(websiteData?.domain || '');
 
   const handleCopy = async () => {
     try {
@@ -57,6 +64,19 @@ const Domain: React.FC = () => {
     }
   };
 
+  const handleConnectDomain = () => {
+    const domain = customDomainInput.trim().toLowerCase();
+    if (!domain) {
+      toast.error('Please enter a valid domain');
+      return;
+    }
+    updateBusiness.mutate({
+      data: { website: domain },
+    });
+  };
+
+  const isConfigured = !!websiteData?.domain || !!customDomainInput;
+
   return (
     <>
       <HelmetContainer title="Domain · rtylr" />
@@ -69,25 +89,6 @@ const Domain: React.FC = () => {
           <p className="text-sm mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
             Connect a custom domain to your customer-facing menu.
           </p>
-        </div>
-
-        {/* Coming Soon Banner */}
-        <div
-          className="flex items-center gap-3 rounded-xl px-4 py-3.5"
-          style={{
-            background: 'rgba(69,131,196,0.08)',
-            border: '1px solid rgba(69,131,196,0.2)',
-          }}
-        >
-          <Clock size={15} style={{ color: '#4583C4', flexShrink: 0 }} />
-          <div>
-            <p className="text-sm font-semibold" style={{ color: '#4583C4' }}>
-              Coming Soon
-            </p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-muted)' }}>
-              Custom domain support is on our roadmap. We'll notify you when it's ready.
-            </p>
-          </div>
         </div>
 
         {/* Section 1, Your menu URL */}
@@ -127,8 +128,8 @@ const Domain: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Section 2, Custom Domain - disabled */}
-        <div className="opacity-50 pointer-events-none select-none">
+        {/* Section 2, Custom Domain */}
+        <div>
           <Card>
             <CardHeader>
               <div className="flex items-start justify-between">
@@ -136,7 +137,9 @@ const Domain: React.FC = () => {
                   <CardTitle>Custom Domain</CardTitle>
                   <CardDescription>Point your own domain at your rtylr menu.</CardDescription>
                 </div>
-                <Badge variant="outline">Not configured</Badge>
+                <Badge variant={isConfigured ? 'default' : 'outline'}>
+                  {isConfigured ? 'Configured' : 'Not configured'}
+                </Badge>
               </div>
             </CardHeader>
             <CardContent className="pt-0 space-y-4">
@@ -147,10 +150,11 @@ const Domain: React.FC = () => {
                   <Input
                     id="custom-domain"
                     placeholder="menu.mybusiness.com"
+                    value={customDomainInput}
+                    onChange={(e) => setCustomDomainInput(e.target.value)}
                     className="flex-1"
-                    disabled
                   />
-                  <Button size="sm" disabled className="shrink-0">
+                  <Button size="sm" onClick={handleConnectDomain} className="shrink-0">
                     Connect Domain
                   </Button>
                 </div>

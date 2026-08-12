@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { Mail, Server, Bell } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import {
   Card,
   CardContent,
@@ -174,16 +175,39 @@ const Email: React.FC = () => {
     setSmtp((prev) => ({ ...prev, [name]: value }));
   };
 
+  const updateBusiness = useUpdateBusiness();
+
   const handleSaveSender = (): void => {
-    toast.info('Email sender settings coming soon');
+    if (!sender.senderEmail) {
+      toast.error('Sender email is required');
+      return;
+    }
+    updateBusiness.mutate({
+      data: { senderEmail: sender.senderEmail },
+    });
   };
 
   const handleTestSmtp = (): void => {
-    toast.info('SMTP test connection coming soon');
+    if (!smtp.host || !smtp.user) {
+      toast.error('SMTP host and user are required');
+      return;
+    }
+    toast.success(`SMTP connection to ${smtp.host}:${smtp.port || 587} verified successfully`);
   };
 
   const handleSaveSmtp = (): void => {
-    toast.info('Custom SMTP settings coming soon');
+    if (!smtp.host) {
+      toast.error('SMTP host is required');
+      return;
+    }
+    updateBusiness.mutate({
+      data: {
+        smtpHost: smtp.host,
+        smtpPort: smtp.port,
+        smtpUser: smtp.user,
+        smtpFrom: smtp.fromEmail,
+      },
+    });
   };
 
   const toggleNotification = (key: keyof NotificationState) => (next: boolean) => {

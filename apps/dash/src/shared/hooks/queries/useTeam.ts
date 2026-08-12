@@ -150,9 +150,7 @@ export const useUpdateMember = () => {
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<TeamMember> }) => {
       return permissionsClient.updatePermissions({
         userId: id,
-        ...(patch.fullName || patch.name
-          ? { fullName: patch.fullName ?? patch.name }
-          : {}),
+        ...(patch.fullName || patch.name ? { fullName: patch.fullName ?? patch.name } : {}),
         apps: patch.apps ?? [],
         role: patch.role ?? 'staff',
       });
