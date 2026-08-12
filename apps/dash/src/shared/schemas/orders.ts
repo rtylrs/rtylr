@@ -16,7 +16,7 @@ export const dashOrderSchema = z
     customer_name: z.string().optional(),
     customerPhone: z.string().optional(),
     customer_phone: z.string().optional(),
-    status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']).catch('pending'),
+    status: z.string().catch('pending'),
     subtotal: finiteNumber,
     tax: finiteNumber,
     shippingCost: finiteNumber.optional(),
