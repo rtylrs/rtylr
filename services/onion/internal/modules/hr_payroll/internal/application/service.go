@@ -124,7 +124,7 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 	if err != nil {
 		return nil, nil, domain.ErrInvalidDateRange
 	}
-	if !endDate.After(startDate) {
+	if endDate.Before(startDate) {
 		return nil, nil, domain.ErrInvalidDateRange
 	}
 
@@ -187,8 +187,6 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 		otMap[ot.EmployeeID] = ot
 	}
 
-	periodDays := endDate.Sub(startDate).Hours() / 24
-
 	entries := make([]domain.PayrollEntryRecord, 0, len(employees))
 	var totalGross, totalNet float64
 
@@ -210,10 +208,9 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 		case "hourly":
 			basePay = hoursWorked * emp.HourlyRate
 		case "monthly":
-			daysInMonth := 30.0
-			basePay = emp.MonthlySalary * (periodDays / daysInMonth)
+			basePay = calculateMonthlyBasePay(emp.MonthlySalary, startDate, endDate)
 		default:
-			basePay = emp.MonthlySalary * (periodDays / 30.0)
+			basePay = calculateMonthlyBasePay(emp.MonthlySalary, startDate, endDate)
 		}
 
 		overtimePay := 0.0
@@ -257,6 +254,32 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 	}
 
 	return createdRun, createdEntries, nil
+}
+
+// calculateMonthlyBasePay prorates a monthly salary over an inclusive calendar
+// date range. Each calendar month contributes its salary fraction using that
+// month's actual number of days, so a complete calendar month always pays the
+// configured monthly salary regardless of whether it has 28, 29, 30, or 31
+// days.
+func calculateMonthlyBasePay(monthlySalary float64, startDate, endDate time.Time) float64 {
+	if endDate.Before(startDate) {
+		return 0
+	}
+
+	var basePay float64
+	for current := startDate; !current.After(endDate); {
+		monthEnd := time.Date(current.Year(), current.Month()+1, 0, 0, 0, 0, 0, time.UTC)
+		segmentEnd := monthEnd
+		if endDate.Before(segmentEnd) {
+			segmentEnd = endDate
+		}
+
+		inclusiveDays := float64(int(segmentEnd.Sub(current)/(24*time.Hour)) + 1)
+		basePay += monthlySalary * inclusiveDays / float64(monthEnd.Day())
+		current = segmentEnd.AddDate(0, 0, 1)
+	}
+
+	return basePay
 }
 
 func (s *Service) ApprovePayrollRun(ctx context.Context, ownerID, runID, approverID int64) error {
