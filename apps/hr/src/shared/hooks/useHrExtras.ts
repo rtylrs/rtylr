@@ -8,7 +8,6 @@ import { staffMemberSchema } from '../schemas/staff';
 import { timeOffEntrySchema } from '../schemas/timeOff';
 import {
   scheduleShiftSchema,
-  availabilitySchema,
   swapRequestSchema,
   breakLogSchema,
   overtimeAlertSchema,
@@ -331,17 +330,6 @@ export function useAnniversaries() {
       const res = await unwrap(hrExtras.listAnniversaries());
       const raw = res ?? [];
       return z.array(anniversarySchema).parse(Array.isArray(raw) ? raw : []);
-    },
-  });
-}
-
-export function useAvailability() {
-  return useQuery({
-    queryKey: ['availability'],
-    queryFn: async () => {
-      const res = await unwrap(hrExtras.listAvailability());
-      const raw = res ?? [];
-      return z.array(availabilitySchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
 }
