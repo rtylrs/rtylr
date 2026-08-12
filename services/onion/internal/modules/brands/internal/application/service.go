@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/brands/internal/domain"
 	"github.com/voxire/onion/internal/modules/brands/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
@@ -28,6 +29,7 @@ type repository interface {
 
 type Service struct {
 	repo repository
+	db   *sql.DB
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
@@ -35,6 +37,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 	return &Service{
 		repo: repo,
+		db:   db,
 	}
 }
 
@@ -68,6 +71,9 @@ func (s *Service) CreateBrand(ctx context.Context, businessID int64, input domai
 	if err != nil {
 		return 0, err
 	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "brand", EntityID: id, Action: "created", NewValues: input}); err != nil {
+		return 0, err
+	}
 
 	s.invalidateCache(ctx, businessID)
 
@@ -79,6 +85,9 @@ func (s *Service) UpdateBrand(ctx context.Context, businessID, id int64, input d
 	if err != nil {
 		return err
 	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "brand", EntityID: id, Action: "updated", NewValues: input}); err != nil {
+		return err
+	}
 
 	s.invalidateCache(ctx, businessID)
 
@@ -88,6 +97,9 @@ func (s *Service) UpdateBrand(ctx context.Context, businessID, id int64, input d
 func (s *Service) DeleteBrand(ctx context.Context, businessID, id int64) error {
 	err := s.repo.DeleteBrand(ctx, businessID, id)
 	if err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "brand", EntityID: id, Action: "deleted"}); err != nil {
 		return err
 	}
 

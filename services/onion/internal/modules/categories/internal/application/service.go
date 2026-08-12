@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/categories/internal/domain"
 	"github.com/voxire/onion/internal/modules/categories/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
@@ -28,6 +29,7 @@ type repository interface {
 
 type Service struct {
 	repo repository
+	db   *sql.DB
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
@@ -35,6 +37,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 	return &Service{
 		repo: repo,
+		db:   db,
 	}
 }
 
@@ -68,6 +71,9 @@ func (s *Service) CreateCategory(ctx context.Context, businessID int64, input do
 	if err != nil {
 		return 0, err
 	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "category", EntityID: id, Action: "created", NewValues: input}); err != nil {
+		return 0, err
+	}
 
 	s.invalidateCache(ctx, businessID)
 
@@ -79,6 +85,9 @@ func (s *Service) UpdateCategory(ctx context.Context, businessID, id int64, inpu
 	if err != nil {
 		return err
 	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "category", EntityID: id, Action: "updated", NewValues: input}); err != nil {
+		return err
+	}
 
 	s.invalidateCache(ctx, businessID)
 
@@ -88,6 +97,9 @@ func (s *Service) UpdateCategory(ctx context.Context, businessID, id int64, inpu
 func (s *Service) DeleteCategory(ctx context.Context, businessID, id int64) error {
 	err := s.repo.DeleteCategory(ctx, businessID, id)
 	if err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "category", EntityID: id, Action: "deleted"}); err != nil {
 		return err
 	}
 
