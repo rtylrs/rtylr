@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
@@ -15,6 +16,7 @@ import {
 } from '../../shared/components/ui';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import LeaveBalances from './LeaveBalances';
+import { canHrPermission } from '../../shared/lib/hrPermissions';
 
 const STATUS_COLORS: Record<string, string> = {
   Pending: 'var(--hr-status-submitted)',
@@ -35,6 +37,8 @@ const Leave = (): React.JSX.Element => {
   const [statusFilter, setStatusFilter] = useState<(typeof FILTER_STATUSES)[number]>('All');
   const { data: requests, isLoading } = useListLeaveRequests();
   const approveLeave = useApproveLeave();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canApprove = canHrPermission(role, 'hr:time_off:approve');
 
   const filteredRequests = (requests ?? []).filter((r) =>
     statusFilter === 'All' ? true : r.status === statusFilter
@@ -131,7 +135,7 @@ const Leave = (): React.JSX.Element => {
                         </div>
                       )}
                     </div>
-                    {req.status === 'Pending' && (
+                    {canApprove && req.status === 'Pending' && (
                       <ApprovalButtons
                         onApprove={() =>
                           approveLeave.mutate({

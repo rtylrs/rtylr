@@ -1,4 +1,5 @@
 import React, { useRef, useCallback } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { getRouteApi, Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -15,6 +16,7 @@ import {
   Breadcrumbs,
   EmptyState,
 } from '../../shared/components/ui';
+import { canHrPermission } from '../../shared/lib/hrPermissions';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'var(--hr-text-muted)',
@@ -43,6 +45,8 @@ const routeApi = getRouteApi('/hr-config/payroll/$id');
 const PayrollRunDetailContent = (): React.JSX.Element => {
   const { id: runId } = routeApi.useParams();
   const { t } = useTranslation();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
   const { data: run, isLoading } = useGetPayrollRun(runId);
   const approveRun = useApprovePayrollRun();
   const parentRef = useRef<HTMLDivElement>(null);
@@ -142,7 +146,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
             <Pill color={STATUS_COLORS[run.status ?? '']}>
               {t(`payroll.statuses.${run.status}`)}
             </Pill>
-            {run.status === 'in_review' && (
+            {canRunPayroll && run.status === 'in_review' && (
               <Button
                 variant="primary"
                 icon={<CheckCircle size={13} />}
@@ -152,9 +156,11 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                 {t('payroll.runDetail.approve')}
               </Button>
             )}
-            <Button variant="secondary" icon={<Download size={13} />} onClick={handleExport}>
-              {t('payroll.runDetail.exportCsv')}
-            </Button>
+            {canRunPayroll && (
+              <Button variant="secondary" icon={<Download size={13} />} onClick={handleExport}>
+                {t('payroll.runDetail.exportCsv')}
+              </Button>
+            )}
           </div>
         }
       />

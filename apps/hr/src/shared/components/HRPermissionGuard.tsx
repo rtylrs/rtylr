@@ -1,0 +1,28 @@
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { ShieldX } from 'lucide-react';
+import { useUserStore } from '@voxire/auth';
+import { EmptyState } from './ui';
+import { canHrPermission, type HRPermission } from '../lib/hrPermissions';
+
+interface HRPermissionGuardProps {
+  permission: HRPermission;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+const HRPermissionGuard = ({
+  permission,
+  children,
+  fallback,
+}: HRPermissionGuardProps): React.JSX.Element => {
+  const { t } = useTranslation();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+
+  if (canHrPermission(role, permission)) return <>{children}</>;
+  if (fallback) return <>{fallback}</>;
+
+  return <EmptyState icon={<ShieldX size={20} />} title={t('errors.unauthorized')} />;
+};
+
+export default HRPermissionGuard;

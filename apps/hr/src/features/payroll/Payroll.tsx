@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +20,7 @@ import {
   Tabs,
   Pill,
 } from '../../shared/components/ui';
+import { canHrPermission } from '../../shared/lib/hrPermissions';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'var(--hr-text-muted)',
@@ -41,6 +43,8 @@ function fmt(n: number): string {
 const Payroll = (): React.JSX.Element => {
   const { t } = useTranslation();
   const config = useHRConfigStore((s) => s.config);
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [params] = useState<ListPayrollRunsParams>({ limit: 50, offset: 0 });
 
@@ -95,14 +99,16 @@ const Payroll = (): React.JSX.Element => {
           title={t('payroll.title')}
           subtitle={t('payroll.subtitle')}
           right={
-            <Button
-              variant="primary"
-              icon={<Play size={13} />}
-              onClick={handleTriggerRun}
-              disabled={triggerRun.isPending}
-            >
-              {t('payroll.triggerRun')}
-            </Button>
+            canRunPayroll ? (
+              <Button
+                variant="primary"
+                icon={<Play size={13} />}
+                onClick={handleTriggerRun}
+                disabled={triggerRun.isPending}
+              >
+                {t('payroll.triggerRun')}
+              </Button>
+            ) : undefined
           }
         />
 

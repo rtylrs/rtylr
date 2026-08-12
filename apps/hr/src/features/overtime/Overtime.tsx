@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Plus, Clock } from 'lucide-react';
@@ -16,6 +17,7 @@ import {
   Pill,
 } from '../../shared/components/ui';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
+import { canHrPermission } from '../../shared/lib/hrPermissions';
 import OvertimeRequestForm from './OvertimeRequestForm';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -32,6 +34,8 @@ const Overtime = (): React.JSX.Element => {
   const [formOpen, setFormOpen] = useState(false);
   const { data: requests, isLoading } = useListOvertimeRequests();
   const approveOvertime = useApproveOvertime();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canApprove = canHrPermission(role, 'hr:time_off:approve');
 
   const filteredRequests = (requests ?? []).filter((r) =>
     statusFilter === 'All' ? true : r.status === statusFilter
@@ -121,7 +125,7 @@ const Overtime = (): React.JSX.Element => {
                     </div>
                   )}
                 </div>
-                {req.status === 'Pending' && (
+                {canApprove && req.status === 'Pending' && (
                   <ApprovalButtons
                     onApprove={() =>
                       approveOvertime.mutate({

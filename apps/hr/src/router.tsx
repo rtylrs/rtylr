@@ -14,6 +14,8 @@ import { paySlipSearchSchema, payrollRunParamsSchema } from './shared/schemas';
 import HRConfigRoute from './features/setup-wizard/HRConfigRoute';
 import DefaultLayout from './layouts/DefaultLayout';
 import WizardLayout from './layouts/WizardLayout';
+import HRPermissionGuard from './shared/components/HRPermissionGuard';
+import type { HRPermission } from './shared/lib/hrPermissions';
 
 function PageLoader(): React.JSX.Element {
   return (
@@ -80,8 +82,10 @@ const MyReview = React.lazy(() => import('./features/performance/MyReview'));
 const GoalsList = React.lazy(() => import('./features/performance/GoalsList'));
 const Reports = React.lazy(() => import('./features/reports/Reports'));
 
-const wrap = (screen: React.ReactNode): React.JSX.Element => (
-  <DefaultLayout>{screen}</DefaultLayout>
+const wrap = (screen: React.ReactNode, permission?: HRPermission): React.JSX.Element => (
+  <DefaultLayout>
+    {permission ? <HRPermissionGuard permission={permission}>{screen}</HRPermissionGuard> : screen}
+  </DefaultLayout>
 );
 
 const rootRoute = createRootRoute({
@@ -105,11 +109,13 @@ const setupRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/setup',
   component: () => (
-    <WizardLayout>
-      <Suspense fallback={<PageLoader />}>
-        <SetupWizard />
-      </Suspense>
-    </WizardLayout>
+    <HRPermissionGuard permission="hub:settings">
+      <WizardLayout>
+        <Suspense fallback={<PageLoader />}>
+          <SetupWizard />
+        </Suspense>
+      </WizardLayout>
+    </HRPermissionGuard>
   ),
 });
 
@@ -137,7 +143,8 @@ const employeesRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Employees />
-      </Suspense>
+      </Suspense>,
+      'hr:staff'
     ),
 });
 
@@ -148,7 +155,8 @@ const newEmployeeRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <NewEmployee />
-      </Suspense>
+      </Suspense>,
+      'hr:staff:manage'
     ),
 });
 
@@ -159,7 +167,8 @@ const employeeDetailRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <EmployeeDetail />
-      </Suspense>
+      </Suspense>,
+      'hr:staff'
     ),
 });
 
@@ -170,7 +179,8 @@ const staffRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Staff />
-      </Suspense>
+      </Suspense>,
+      'hr:staff'
     ),
 });
 
@@ -181,7 +191,8 @@ const staffProfileRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <EmployeeProfile />
-      </Suspense>
+      </Suspense>,
+      'hr:staff'
     ),
 });
 
@@ -192,7 +203,8 @@ const shiftsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Shifts />
-      </Suspense>
+      </Suspense>,
+      'hr:shifts'
     ),
 });
 
@@ -203,7 +215,8 @@ const scheduleRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Schedule />
-      </Suspense>
+      </Suspense>,
+      'hr:shifts'
     ),
 });
 
@@ -214,7 +227,8 @@ const timeRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <TimeLogging />
-      </Suspense>
+      </Suspense>,
+      'hr:shifts'
     ),
 });
 
@@ -225,7 +239,8 @@ const timesheetsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <TimesheetsList />
-      </Suspense>
+      </Suspense>,
+      'hr:shifts'
     ),
 });
 
@@ -236,7 +251,8 @@ const timesheetApprovalsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <TimesheetApprovals />
-      </Suspense>
+      </Suspense>,
+      'hr:time_off:approve'
     ),
 });
 
@@ -247,7 +263,8 @@ const timesheetDetailRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <TimesheetDetail />
-      </Suspense>
+      </Suspense>,
+      'hr:shifts'
     ),
 });
 
@@ -258,7 +275,8 @@ const attendanceRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <AttendanceScreen />
-      </Suspense>
+      </Suspense>,
+      'hr:shifts'
     ),
 });
 
@@ -269,7 +287,8 @@ const timeOffRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <TimeOff />
-      </Suspense>
+      </Suspense>,
+      'hr:time_off'
     ),
 });
 
@@ -291,7 +310,8 @@ const calendarRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <CalendarScreen />
-      </Suspense>
+      </Suspense>,
+      'hr:time_off'
     ),
 });
 
@@ -302,7 +322,8 @@ const payrollRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Payroll />
-      </Suspense>
+      </Suspense>,
+      'hr:payroll'
     ),
 });
 
@@ -313,7 +334,8 @@ const myPaySlipsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <MyPaySlips />
-      </Suspense>
+      </Suspense>,
+      'hr:payroll'
     ),
 });
 
@@ -325,7 +347,8 @@ const paySlipViewRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <PaySlip />
-      </Suspense>
+      </Suspense>,
+      'hr:payroll'
     ),
 });
 
@@ -340,7 +363,8 @@ const payrollRunDetailRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <PayrollRunDetail />
-      </Suspense>
+      </Suspense>,
+      'hr:payroll'
     ),
 });
 
@@ -351,7 +375,8 @@ const payrollConfigRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <PayrollConfigSettings />
-      </Suspense>
+      </Suspense>,
+      'hr:payroll'
     ),
 });
 
@@ -362,7 +387,8 @@ const departmentsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Departments />
-      </Suspense>
+      </Suspense>,
+      'hr:departments'
     ),
 });
 
@@ -373,7 +399,8 @@ const reviewsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Reviews />
-      </Suspense>
+      </Suspense>,
+      'hr:reviews'
     ),
 });
 
@@ -384,7 +411,8 @@ const reviewsNewRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <ReviewForm />
-      </Suspense>
+      </Suspense>,
+      'hr:reviews'
     ),
 });
 
@@ -406,7 +434,8 @@ const onboardingRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <OnboardingManagement />
-      </Suspense>
+      </Suspense>,
+      'hr:staff:manage'
     ),
 });
 
@@ -417,7 +446,8 @@ const onboardingTemplatesRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <ChecklistTemplates />
-      </Suspense>
+      </Suspense>,
+      'hr:staff:manage'
     ),
 });
 
@@ -428,7 +458,8 @@ const offboardingRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Offboarding />
-      </Suspense>
+      </Suspense>,
+      'hr:staff:manage'
     ),
 });
 
@@ -483,7 +514,8 @@ const trainingRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Training />
-      </Suspense>
+      </Suspense>,
+      'hr:staff:manage'
     ),
 });
 
@@ -494,7 +526,8 @@ const orgChartRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <OrgChart />
-      </Suspense>
+      </Suspense>,
+      'hr:departments'
     ),
 });
 
@@ -505,7 +538,8 @@ const leaveRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <LeaveScreen />
-      </Suspense>
+      </Suspense>,
+      'hr:time_off'
     ),
 });
 
@@ -516,7 +550,8 @@ const leaveNewRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <LeaveRequestFormScreen />
-      </Suspense>
+      </Suspense>,
+      'hr:time_off'
     ),
 });
 
@@ -527,7 +562,8 @@ const overtimeRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <OvertimeScreen />
-      </Suspense>
+      </Suspense>,
+      'hr:time_off'
     ),
 });
 
@@ -538,7 +574,8 @@ const rosterRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <RosterBuilder />
-      </Suspense>
+      </Suspense>,
+      'hr:shifts:manage'
     ),
 });
 
@@ -549,7 +586,8 @@ const performanceRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Performance />
-      </Suspense>
+      </Suspense>,
+      'hr:reviews'
     ),
 });
 
@@ -560,7 +598,8 @@ const reviewCycleDetailRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <ReviewCycleDetail />
-      </Suspense>
+      </Suspense>,
+      'hr:reviews'
     ),
 });
 
@@ -593,7 +632,8 @@ const reportsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Reports />
-      </Suspense>
+      </Suspense>,
+      'insights:reports'
     ),
 });
 
@@ -604,7 +644,8 @@ const operationsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Operations />
-      </Suspense>
+      </Suspense>,
+      'hr:shifts:manage'
     ),
 });
 
@@ -615,7 +656,8 @@ const settingsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <SettingsScreen />
-      </Suspense>
+      </Suspense>,
+      'hub:settings'
     ),
 });
 
