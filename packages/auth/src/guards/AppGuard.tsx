@@ -172,7 +172,7 @@ export function AppGuard({
         const role: string = (data.role as string) ?? '';
 
         const allowed =
-          role === 'owner' || role === 'admin' || apps.length === 0 || apps.includes(appId);
+          role === 'owner' || role === 'admin' || (apps.length > 0 && apps.includes(appId));
         setStatus(allowed ? 'allowed' : 'denied');
       })
       .catch((): void => {
