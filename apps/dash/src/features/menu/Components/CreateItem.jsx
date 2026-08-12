@@ -7,10 +7,11 @@ function CreateItem() {
   const navigate = useNavigate();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const { addMenuItem } = useMenuStore();
-  const categoryId = new URLSearchParams(searchStr).get('categoryId');
+  const categoryId = new URLSearchParams(searchStr).get('categoryId') || 'uncategorized';
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [salePrice, setSalePrice] = useState('');
   const [coverImage, setCoverImage] = useState(null);
   const [images, setImages] = useState([]);
   const [ingredients, setIngredients] = useState([]);
@@ -20,12 +21,6 @@ function CreateItem() {
   const [tags, setTags] = useState([]);
   const [isVeg, setIsVeg] = useState(false);
   const [isHalal, setIsHalal] = useState(false);
-
-  useEffect(() => {
-    if (!categoryId) {
-      window.history.back();
-    }
-  }, [categoryId]);
 
   const handleInputChange = (e, setState) => {
     setState(e.target.value.split(',').map((item) => item.trim()));
@@ -41,7 +36,8 @@ function CreateItem() {
     const item = {
       name,
       description,
-      price,
+      price: price ? Number(price) * 100 : 0,
+      salePrice: salePrice ? Number(salePrice) * 100 : 0,
       coverImage,
       images,
       ingredients,
@@ -96,8 +92,8 @@ function CreateItem() {
             <input
               type="number"
               placeholder="0.00"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              value={salePrice}
+              onChange={(e) => setSalePrice(e.target.value)}
             />
           </div>
           <div className="form-group">
