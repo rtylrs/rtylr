@@ -30,6 +30,7 @@ const CreateBusinessOnboarding: React.FC = (): React.JSX.Element => {
     if (!canSubmit) return;
     onboard.mutate(name.trim(), {
       onSuccess: ({ token }) => {
+        removeCookie('token', { domain: getDefaultCookieDomain() });
         removeCookie('token');
         setCookie('token', token, {
           days: 30,
