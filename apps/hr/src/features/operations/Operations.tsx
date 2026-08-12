@@ -31,20 +31,25 @@ import {
 } from '../../shared/components/ui';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import { formatCurrency } from '../../shared/lib/hrNumberUtils';
-import { canHrPermission } from '../../shared/lib/hrPermissions';
+import { canHrPermission, canViewCompensation } from '../../shared/lib/hrPermissions';
 
 const TABS = ['Labor Cost', 'Swap Shifts', 'Availability', 'Breaks', 'Overtime'] as const;
 
 const Operations: React.FC = () => {
   const isMobile = useIsMobile(900);
-  const [tab, setTab] = useState<(typeof TABS)[number]>('Labor Cost');
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const showCompensation = canViewCompensation(role);
+  const [tab, setTab] = useState<(typeof TABS)[number]>(
+    showCompensation ? 'Labor Cost' : 'Swap Shifts'
+  );
   const { data: staff = [] } = useStaff();
-  const { data: payroll = [] } = usePayroll();
+  const { data: payroll = [] } = usePayroll({ enabled: showCompensation });
   const { data: swaps = [] } = useSwaps();
   const createSwap = useCreateSwap();
   const resolveSwap = useResolveSwap();
-  const role = useUserStore((state) => state.user?.role ?? state.role);
   const canManageShifts = canHrPermission(role, 'hr:shifts:manage');
+  const visibleTabs = showCompensation ? TABS : TABS.filter((name) => name !== 'Labor Cost');
+  const activeTab = !showCompensation && tab === 'Labor Cost' ? 'Swap Shifts' : tab;
   const { data: availability = [] } = useAvailability();
   const { data: breaks = [] } = useBreaks();
   const startBreak = useStartBreak();
@@ -107,9 +112,13 @@ const Operations: React.FC = () => {
           title="Operations"
           subtitle="Labor cost, shift swaps, availability, breaks, overtime"
         />
-        <Tabs tabs={[...TABS]} active={tab} onChange={(t) => setTab(t as typeof tab)} />
+        <Tabs
+          tabs={[...visibleTabs]}
+          active={activeTab}
+          onChange={(t) => setTab(t as typeof tab)}
+        />
 
-        {tab === 'Labor Cost' && (
+        {activeTab === 'Labor Cost' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div
               style={{
@@ -236,7 +245,7 @@ const Operations: React.FC = () => {
           </div>
         )}
 
-        {tab === 'Swap Shifts' && (
+        {activeTab === 'Swap Shifts' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <Card>
               <SectionHeader title="Request a swap" />
@@ -381,7 +390,7 @@ const Operations: React.FC = () => {
           </div>
         )}
 
-        {tab === 'Availability' && (
+        {activeTab === 'Availability' && (
           <Card style={{ padding: 0, overflow: 'hidden' }}>
             {availability.length === 0 ? (
               <EmptyState
@@ -468,7 +477,7 @@ const Operations: React.FC = () => {
           </Card>
         )}
 
-        {tab === 'Breaks' && (
+        {activeTab === 'Breaks' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <Card>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -592,7 +601,7 @@ const Operations: React.FC = () => {
           </div>
         )}
 
-        {tab === 'Overtime' && (
+        {activeTab === 'Overtime' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {overtimeAlerts.length === 0 ? (
               <EmptyState
