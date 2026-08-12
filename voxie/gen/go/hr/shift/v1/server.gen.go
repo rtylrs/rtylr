@@ -206,6 +206,9 @@ type ShiftServiceServer interface {
 	CreateShiftAssignment(ctx context.Context, req *CreateShiftAssignmentRequest) (*CreateShiftAssignmentResponse, error)
 	GetRoster(ctx context.Context, req *GetRosterRequest) (*GetRosterResponse, error)
 	PublishRoster(ctx context.Context, req *PublishRosterRequest) (*PublishRosterResponse, error)
+	ListAvailability(ctx context.Context, req *ListAvailabilityRequest) (*ListAvailabilityResponse, error)
+	SetAvailability(ctx context.Context, req *SetAvailabilityRequest) (*SetAvailabilityResponse, error)
+	DeleteAvailability(ctx context.Context, req *DeleteAvailabilityRequest) (*DeleteAvailabilityResponse, error)
 }
 
 func RegisterShiftServiceServer(first any, rest ...any) error {
@@ -425,5 +428,105 @@ func RegisterShiftServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "ShiftService", Method: "publishRoster", HTTPMethod: "POST", Route: "/hr/shift/v1/roster/publish", AuthSchemes: nil}))
+	mux.Handle("GET /hr/shift/v1/availability", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(ListAvailabilityRequest)
+		if r.URL.Query().Get("staff_id") != "" {
+			parsedStaffId, err := parseInt64(r.URL.Query().Get("staff_id"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter staff_id: "+err.Error())
+				return
+			}
+			req.StaffId = &parsedStaffId
+		}
+		if r.URL.Query().Get("day_of_week") != "" {
+			parsedDayOfWeek, err := parseInt32(r.URL.Query().Get("day_of_week"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter day_of_week: "+err.Error())
+				return
+			}
+			req.DayOfWeek = &parsedDayOfWeek
+		}
+		if r.URL.Query().Get("date_from") != "" {
+			dateFromVal := r.URL.Query().Get("date_from")
+			req.DateFrom = &dateFromVal
+		}
+		if r.URL.Query().Get("date_to") != "" {
+			dateToVal := r.URL.Query().Get("date_to")
+			req.DateTo = &dateToVal
+		}
+		if r.URL.Query().Get("limit") != "" {
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = &parsedLimit
+		}
+		if r.URL.Query().Get("offset") != "" {
+			parsedOffset, err := parseInt32(r.URL.Query().Get("offset"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
+				return
+			}
+			req.Offset = &parsedOffset
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.ListAvailability(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "ShiftService", Method: "listAvailability", HTTPMethod: "GET", Route: "/hr/shift/v1/availability", AuthSchemes: nil}))
+	mux.Handle("POST /hr/shift/v1/availability", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(SetAvailabilityRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.SetAvailability(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "ShiftService", Method: "setAvailability", HTTPMethod: "POST", Route: "/hr/shift/v1/availability", AuthSchemes: nil}))
+	mux.Handle("DELETE /hr/shift/v1/availability/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(DeleteAvailabilityRequest)
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.DeleteAvailability(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "ShiftService", Method: "deleteAvailability", HTTPMethod: "DELETE", Route: "/hr/shift/v1/availability/{id}", AuthSchemes: nil}))
 	return nil
 }

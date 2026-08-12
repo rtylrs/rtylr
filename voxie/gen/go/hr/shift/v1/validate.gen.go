@@ -250,3 +250,112 @@ func (m *PublishRosterResponse) Validate() error {
 	}
 	return nil
 }
+
+func (m *AvailabilityPayload) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAvailabilityRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListAvailabilityResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Entries {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "entries: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *SetAvailabilityRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.StaffId <= 0 {
+		violations = append(violations, "staff_id must be greater than 0")
+	}
+	if m.DayOfWeek != nil {
+		if *m.DayOfWeek < 0 {
+			violations = append(violations, "day_of_week must be greater than or equal to 0")
+		}
+	}
+	if m.DayOfWeek != nil {
+		if *m.DayOfWeek > 6 {
+			violations = append(violations, "day_of_week must be less than or equal to 6")
+		}
+	}
+	if m.StartTime == "" {
+		violations = append(violations, "start_time is required")
+	}
+	if m.EndTime == "" {
+		violations = append(violations, "end_time is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *SetAvailabilityResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Entry != nil {
+		if err := m.Entry.Validate(); err != nil {
+			violations = append(violations, "entry: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteAvailabilityRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteAvailabilityResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}

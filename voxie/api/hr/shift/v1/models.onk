@@ -211,3 +211,129 @@ message PublishRosterResponse {
   /// Whether the roster was successfully published.
   success: bool
 }
+
+/// AvailabilityPayload is one window in which a staff member can, or explicitly
+/// cannot, be scheduled for a shift. A row is either a recurring weekly pattern
+/// (day_of_week set, specific_date absent) or a single-date override
+/// (specific_date set, day_of_week absent); an override takes precedence over the
+/// recurring pattern for the date it names.
+///
+/// Exactly one of day_of_week and specific_date is set on every stored row. .onk
+/// has no cross-field decorator for that constraint (the same gap documented on
+/// flow.task.v1.ListTasksRequest), so it is enforced in the onion handler rather
+/// than in this schema.
+message AvailabilityPayload {
+  /// Unique identifier for the availability entry.
+  id: int64
+  /// Staff member whose availability this is. Matches ShiftPayload.staff_id, not
+  /// the older ShiftAssignmentPayload.employee_id in this same package.
+  staff_id: int64
+  /// Tenant owner this entry belongs to.
+  owner_id: int64
+  /// Weekday of a recurring pattern: 0 = Monday through 6 = Sunday. Absent on a
+  /// single-date override. Numbered Monday-first so the value indexes the same
+  /// week the roster already uses (GetRosterRequest.week_start is a Monday).
+  /// This is deliberately not JavaScript's Date.getDay(), where 0 = Sunday.
+  day_of_week: int32?
+  /// Calendar date a single-date override applies to (ISO-8601, e.g.
+  /// "2026-08-17"). Absent on a recurring pattern.
+  specific_date: string?
+  /// Start of the window (HH:MM 24-hour format).
+  start_time: string
+  /// End of the window (HH:MM 24-hour format). An end_time earlier than
+  /// start_time means the window crosses midnight and ends the following day,
+  /// which is how availability for a night shift is expressed.
+  end_time: string
+  /// Whether the staff member can be scheduled in this window. False marks a
+  /// deliberate block, which is how a single-date override withdraws
+  /// availability that the recurring pattern would otherwise grant.
+  /// Wire note: the generated Go server tags every scalar `omitempty`, so a
+  /// false value is dropped from the response body. Read an absent key as false.
+  is_available: bool
+  /// Unix timestamp when this entry was created.
+  created_at: int64
+  /// Unix timestamp when this entry was last updated.
+  updated_at: int64
+}
+
+/// ListAvailabilityRequest filters availability entries. Recurring patterns carry
+/// no date, so date_from and date_to constrain single-date overrides only and
+/// leave recurring rows in the result; narrow those with day_of_week.
+message ListAvailabilityRequest {
+  /// Filter to one staff member; absent returns entries for every staff member
+  /// in the tenant, which is what the weekly roster grid loads in one call.
+  staff_id: int64? @query("staff_id") @nullable
+  /// Filter recurring patterns to one weekday, 0 = Monday through 6 = Sunday;
+  /// absent includes every weekday.
+  day_of_week: int32? @query("day_of_week") @nullable
+  /// Inclusive start of a date range matched against specific_date (ISO-8601);
+  /// absent leaves the range open at the start.
+  date_from: string? @query("date_from") @nullable
+  /// Inclusive end of a date range matched against specific_date (ISO-8601);
+  /// absent leaves the range open at the end.
+  date_to: string? @query("date_to") @nullable
+  /// Page size; absent applies the server default.
+  limit: int32? @query("limit") @nullable
+  /// Offset for pagination; absent starts at the first page.
+  offset: int32? @query("offset") @nullable
+}
+
+message ListAvailabilityResponse {
+  /// Availability entries matching the filters, recurring patterns and
+  /// single-date overrides alike.
+  entries: AvailabilityPayload[]
+  /// Total number of matching entries across all pages.
+  total: int64 @encode(number)
+  /// Page size used for this request.
+  limit: int32
+  /// Offset used for this request.
+  offset: int32
+}
+
+/// SetAvailabilityRequest creates or updates one availability window. With id
+/// present the identified entry is replaced. With id absent the write upserts on
+/// owner_id, staff_id, start_time and whichever of day_of_week or specific_date
+/// is set, so re-submitting an unchanged window is idempotent instead of
+/// producing a duplicate. start_time belongs to that key so one staff member can
+/// hold several windows on the same day, for example a split shift of 09:00 to
+/// 12:00 and 14:00 to 18:00.
+///
+/// Supply exactly one of day_of_week and specific_date. As on
+/// AvailabilityPayload, no decorator can express that, so the handler rejects a
+/// request carrying both or neither.
+message SetAvailabilityRequest {
+  /// Entry to replace; absent creates the entry or upserts it by natural key.
+  id: int64?
+  /// Staff member this availability is for.
+  staff_id: int64 @required @gt(0)
+  /// Weekday for a recurring pattern: 0 = Monday through 6 = Sunday.
+  day_of_week: int32? @gte(0) @lte(6)
+  /// Calendar date for a single-date override (ISO-8601).
+  specific_date: string?
+  /// Start of the window (HH:MM 24-hour format).
+  start_time: string @required
+  /// End of the window (HH:MM 24-hour format). Earlier than start_time means the
+  /// window crosses midnight into the following day.
+  end_time: string @required
+  /// Whether the staff member can be scheduled in this window. Optional so that
+  /// an explicit false arrives as a set value rather than as a decoded zero:
+  /// absent means true, the ordinary case of declaring availability, and false
+  /// marks a deliberate block. Without that distinction, omitting the field
+  /// would silently block the window.
+  is_available: bool?
+}
+
+message SetAvailabilityResponse {
+  /// The availability entry as stored after the write.
+  entry: AvailabilityPayload
+}
+
+message DeleteAvailabilityRequest {
+  /// Identifier of the availability entry to delete.
+  id: int64 @required @gt(0)
+}
+
+message DeleteAvailabilityResponse {
+  /// Whether the availability entry was deleted.
+  success: bool
+}

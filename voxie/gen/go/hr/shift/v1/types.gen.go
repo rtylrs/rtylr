@@ -1137,3 +1137,469 @@ func (x *PublishRosterResponse) GetSuccess() bool {
 	}
 	return x.Success
 }
+
+type AvailabilityPayload struct {
+	Id           int64   `json:"id,omitempty"`
+	StaffId      int64   `json:"staff_id,omitempty"`
+	OwnerId      int64   `json:"owner_id,omitempty"`
+	DayOfWeek    *int32  `json:"day_of_week,omitempty"`
+	SpecificDate *string `json:"specific_date,omitempty"`
+	StartTime    string  `json:"start_time,omitempty"`
+	EndTime      string  `json:"end_time,omitempty"`
+	IsAvailable  bool    `json:"is_available,omitempty"`
+	CreatedAt    int64   `json:"created_at,omitempty"`
+	UpdatedAt    int64   `json:"updated_at,omitempty"`
+}
+
+func (m *AvailabilityPayload) MarshalJSON() ([]byte, error) {
+	type alias AvailabilityPayload
+	aux := struct {
+		*alias
+		Id        string `json:"id,omitempty"`
+		StaffId   string `json:"staff_id,omitempty"`
+		OwnerId   string `json:"owner_id,omitempty"`
+		CreatedAt string `json:"created_at,omitempty"`
+		UpdatedAt string `json:"updated_at,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
+	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
+	aux.CreatedAt = strconv.FormatInt(m.CreatedAt, 10)
+	aux.UpdatedAt = strconv.FormatInt(m.UpdatedAt, 10)
+	return json.Marshal(aux)
+}
+
+func (m *AvailabilityPayload) UnmarshalJSON(data []byte) error {
+	type alias AvailabilityPayload
+	aux := struct {
+		*alias
+		Id        string `json:"id,omitempty"`
+		StaffId   string `json:"staff_id,omitempty"`
+		OwnerId   string `json:"owner_id,omitempty"`
+		CreatedAt string `json:"created_at,omitempty"`
+		UpdatedAt string `json:"updated_at,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	if aux.StaffId != "" {
+		v, err := strconv.ParseInt(aux.StaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.StaffId = v
+	}
+	if aux.OwnerId != "" {
+		v, err := strconv.ParseInt(aux.OwnerId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.OwnerId = v
+	}
+	if aux.CreatedAt != "" {
+		v, err := strconv.ParseInt(aux.CreatedAt, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CreatedAt = v
+	}
+	if aux.UpdatedAt != "" {
+		v, err := strconv.ParseInt(aux.UpdatedAt, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.UpdatedAt = v
+	}
+	return nil
+}
+
+func (x *AvailabilityPayload) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *AvailabilityPayload) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *AvailabilityPayload) GetOwnerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OwnerId
+}
+
+func (x *AvailabilityPayload) GetDayOfWeek() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.DayOfWeek == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DayOfWeek
+}
+
+func (x *AvailabilityPayload) GetSpecificDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SpecificDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.SpecificDate
+}
+
+func (x *AvailabilityPayload) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartTime
+}
+
+func (x *AvailabilityPayload) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndTime
+}
+
+func (x *AvailabilityPayload) GetIsAvailable() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsAvailable
+}
+
+func (x *AvailabilityPayload) GetCreatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *AvailabilityPayload) GetUpdatedAt() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+type ListAvailabilityRequest struct {
+	StaffId   *int64  `json:"staff_id,omitempty"`
+	DayOfWeek *int32  `json:"day_of_week,omitempty"`
+	DateFrom  *string `json:"date_from,omitempty"`
+	DateTo    *string `json:"date_to,omitempty"`
+	Limit     *int32  `json:"limit,omitempty"`
+	Offset    *int32  `json:"offset,omitempty"`
+}
+
+func (x *ListAvailabilityRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.StaffId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StaffId
+}
+
+func (x *ListAvailabilityRequest) GetDayOfWeek() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.DayOfWeek == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DayOfWeek
+}
+
+func (x *ListAvailabilityRequest) GetDateFrom() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DateFrom == nil {
+		var zero string
+		return zero
+	}
+	return *x.DateFrom
+}
+
+func (x *ListAvailabilityRequest) GetDateTo() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DateTo == nil {
+		var zero string
+		return zero
+	}
+	return *x.DateTo
+}
+
+func (x *ListAvailabilityRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Limit == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Limit
+}
+
+func (x *ListAvailabilityRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Offset == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Offset
+}
+
+type ListAvailabilityResponse struct {
+	Entries []*AvailabilityPayload `json:"entries,omitempty"`
+	Total   int64                  `json:"total,omitempty"`
+	Limit   int32                  `json:"limit,omitempty"`
+	Offset  int32                  `json:"offset,omitempty"`
+}
+
+func (x *ListAvailabilityResponse) GetEntries() []*AvailabilityPayload {
+	if x == nil {
+		var zero []*AvailabilityPayload
+		return zero
+	}
+	return x.Entries
+}
+
+func (x *ListAvailabilityResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListAvailabilityResponse) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListAvailabilityResponse) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
+}
+
+type SetAvailabilityRequest struct {
+	Id           *int64  `json:"id,omitempty"`
+	StaffId      int64   `json:"staff_id,omitempty"`
+	DayOfWeek    *int32  `json:"day_of_week,omitempty"`
+	SpecificDate *string `json:"specific_date,omitempty"`
+	StartTime    string  `json:"start_time,omitempty"`
+	EndTime      string  `json:"end_time,omitempty"`
+	IsAvailable  *bool   `json:"is_available,omitempty"`
+}
+
+func (m *SetAvailabilityRequest) MarshalJSON() ([]byte, error) {
+	type alias SetAvailabilityRequest
+	aux := struct {
+		*alias
+		StaffId string `json:"staff_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *SetAvailabilityRequest) UnmarshalJSON(data []byte) error {
+	type alias SetAvailabilityRequest
+	aux := struct {
+		*alias
+		StaffId string `json:"staff_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.StaffId != "" {
+		v, err := strconv.ParseInt(aux.StaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.StaffId = v
+	}
+	return nil
+}
+
+func (x *SetAvailabilityRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.Id == nil {
+		var zero int64
+		return zero
+	}
+	return *x.Id
+}
+
+func (x *SetAvailabilityRequest) GetStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.StaffId
+}
+
+func (x *SetAvailabilityRequest) GetDayOfWeek() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.DayOfWeek == nil {
+		var zero int32
+		return zero
+	}
+	return *x.DayOfWeek
+}
+
+func (x *SetAvailabilityRequest) GetSpecificDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SpecificDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.SpecificDate
+}
+
+func (x *SetAvailabilityRequest) GetStartTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StartTime
+}
+
+func (x *SetAvailabilityRequest) GetEndTime() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EndTime
+}
+
+func (x *SetAvailabilityRequest) GetIsAvailable() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.IsAvailable == nil {
+		var zero bool
+		return zero
+	}
+	return *x.IsAvailable
+}
+
+type SetAvailabilityResponse struct {
+	Entry *AvailabilityPayload `json:"entry,omitempty"`
+}
+
+func (x *SetAvailabilityResponse) GetEntry() *AvailabilityPayload {
+	if x == nil {
+		var zero *AvailabilityPayload
+		return zero
+	}
+	return x.Entry
+}
+
+type DeleteAvailabilityRequest struct {
+	Id int64 `json:"id,omitempty"`
+}
+
+func (m *DeleteAvailabilityRequest) MarshalJSON() ([]byte, error) {
+	type alias DeleteAvailabilityRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	return json.Marshal(aux)
+}
+
+func (m *DeleteAvailabilityRequest) UnmarshalJSON(data []byte) error {
+	type alias DeleteAvailabilityRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	return nil
+}
+
+func (x *DeleteAvailabilityRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+type DeleteAvailabilityResponse struct {
+	Success bool `json:"success,omitempty"`
+}
+
+func (x *DeleteAvailabilityResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
+}

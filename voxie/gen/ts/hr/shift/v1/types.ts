@@ -546,3 +546,236 @@ const violations: string[] = [];
 return violations;
 }
 
+export interface AvailabilityPayload {
+id?: string;
+staffId?: string;
+ownerId?: string;
+dayOfWeek?: number;
+specificDate?: string;
+startTime?: string;
+endTime?: string;
+isAvailable?: boolean;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeAvailabilityPayload(v: any): AvailabilityPayload {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+staffId: v.staff_id,
+ownerId: v.owner_id,
+dayOfWeek: v.day_of_week,
+specificDate: v.specific_date,
+startTime: v.start_time,
+endTime: v.end_time,
+isAvailable: v.is_available,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeAvailabilityPayload(v: AvailabilityPayload): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.dayOfWeek !== undefined) { out.day_of_week = v.dayOfWeek; }
+if (v.specificDate !== undefined) { out.specific_date = v.specificDate; }
+if (v.startTime !== undefined) { out.start_time = v.startTime; }
+if (v.endTime !== undefined) { out.end_time = v.endTime; }
+if (v.isAvailable !== undefined) { out.is_available = v.isAvailable; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
+}
+
+export function validateAvailabilityPayload(v: AvailabilityPayload): string[] {
+const violations: string[] = [];
+return violations;
+}
+
+export interface ListAvailabilityRequest {
+staffId?: string;
+dayOfWeek?: number;
+dateFrom?: string;
+dateTo?: string;
+limit?: number;
+offset?: number;
+}
+
+export function decodeListAvailabilityRequest(v: any): ListAvailabilityRequest {
+if (v === null || v === undefined) return v;
+return {
+staffId: v.staff_id,
+dayOfWeek: v.day_of_week,
+dateFrom: v.date_from,
+dateTo: v.date_to,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListAvailabilityRequest(v: ListAvailabilityRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+if (v.dayOfWeek !== undefined) { out.day_of_week = v.dayOfWeek; }
+if (v.dateFrom !== undefined) { out.date_from = v.dateFrom; }
+if (v.dateTo !== undefined) { out.date_to = v.dateTo; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
+export function validateListAvailabilityRequest(v: ListAvailabilityRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
+export interface ListAvailabilityResponse {
+entries?: (AvailabilityPayload)[];
+total?: number;
+limit?: number;
+offset?: number;
+}
+
+export function decodeListAvailabilityResponse(v: any): ListAvailabilityResponse {
+if (v === null || v === undefined) return v;
+return {
+entries: (v.entries !== undefined ? (v.entries as any[]).map(decodeAvailabilityPayload) : v.entries),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListAvailabilityResponse(v: ListAvailabilityResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.entries !== undefined) { out.entries = (v.entries as any[]).map(encodeAvailabilityPayload); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
+export function validateListAvailabilityResponse(v: ListAvailabilityResponse): string[] {
+const violations: string[] = [];
+if (v.entries !== undefined && v.entries !== null) for (const item of v.entries) violations.push(...validateAvailabilityPayload(item).map((message) => "entries: " + message));
+return violations;
+}
+
+export interface SetAvailabilityRequest {
+id?: string;
+staffId: string;
+dayOfWeek?: number;
+specificDate?: string;
+startTime: string;
+endTime: string;
+isAvailable?: boolean;
+}
+
+export function decodeSetAvailabilityRequest(v: any): SetAvailabilityRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+staffId: v.staff_id,
+dayOfWeek: v.day_of_week,
+specificDate: v.specific_date,
+startTime: v.start_time,
+endTime: v.end_time,
+isAvailable: v.is_available,
+};
+}
+
+export function encodeSetAvailabilityRequest(v: SetAvailabilityRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.staffId !== undefined) { out.staff_id = v.staffId; }
+if (v.dayOfWeek !== undefined) { out.day_of_week = v.dayOfWeek; }
+if (v.specificDate !== undefined) { out.specific_date = v.specificDate; }
+if (v.startTime !== undefined) { out.start_time = v.startTime; }
+if (v.endTime !== undefined) { out.end_time = v.endTime; }
+if (v.isAvailable !== undefined) { out.is_available = v.isAvailable; }
+return out;
+}
+
+export function validateSetAvailabilityRequest(v: SetAvailabilityRequest): string[] {
+const violations: string[] = [];
+if (!(v.staffId !== undefined && v.staffId !== null)) violations.push("staff_id is required");
+if (v.staffId !== undefined && v.staffId !== null && !(Number(v.staffId) > 0)) violations.push("staff_id violates @gt");
+if (v.dayOfWeek !== undefined && v.dayOfWeek !== null && !(Number(v.dayOfWeek) >= 0)) violations.push("day_of_week violates @gte");
+if (v.dayOfWeek !== undefined && v.dayOfWeek !== null && !(Number(v.dayOfWeek) <= 6)) violations.push("day_of_week violates @lte");
+if (!(v.startTime !== undefined && v.startTime !== null) || v.startTime === "") violations.push("start_time is required");
+if (!(v.endTime !== undefined && v.endTime !== null) || v.endTime === "") violations.push("end_time is required");
+return violations;
+}
+
+export interface SetAvailabilityResponse {
+entry?: AvailabilityPayload;
+}
+
+export function decodeSetAvailabilityResponse(v: any): SetAvailabilityResponse {
+if (v === null || v === undefined) return v;
+return {
+entry: (v.entry !== undefined ? decodeAvailabilityPayload(v.entry) : v.entry),
+};
+}
+
+export function encodeSetAvailabilityResponse(v: SetAvailabilityResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.entry !== undefined) { out.entry = encodeAvailabilityPayload(v.entry); }
+return out;
+}
+
+export function validateSetAvailabilityResponse(v: SetAvailabilityResponse): string[] {
+const violations: string[] = [];
+if (v.entry !== undefined && v.entry !== null) violations.push(...validateAvailabilityPayload(v.entry).map((message) => "entry: " + message));
+return violations;
+}
+
+export interface DeleteAvailabilityRequest {
+id: string;
+}
+
+export function decodeDeleteAvailabilityRequest(v: any): DeleteAvailabilityRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteAvailabilityRequest(v: DeleteAvailabilityRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
+export function validateDeleteAvailabilityRequest(v: DeleteAvailabilityRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
+export interface DeleteAvailabilityResponse {
+success?: boolean;
+}
+
+export function decodeDeleteAvailabilityResponse(v: any): DeleteAvailabilityResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeDeleteAvailabilityResponse(v: DeleteAvailabilityResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
+export function validateDeleteAvailabilityResponse(v: DeleteAvailabilityResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
