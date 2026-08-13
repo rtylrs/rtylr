@@ -23,6 +23,13 @@ type Repository struct {
 	pool    *sql.DB
 }
 
+// CreateInvoice retains the legacy header-only repository operation used by
+// integration fixtures. Application writes use CreateInvoiceWithItems so the
+// header and items share one transaction.
+func (r *Repository) CreateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) (int64, error) {
+	return r.CreateInvoiceWithItems(ctx, businessID, inv, nil)
+}
+
 func NewRepository(db *sql.DB) *Repository {
 	pool := db
 
@@ -118,7 +125,7 @@ func (r *Repository) GetInvoiceByID(ctx context.Context, businessID, invoiceID i
 	return &inv, nil
 }
 
-func (r *Repository) CreateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) (int64, error) {
+func (r *Repository) CreateInvoiceWithItems(ctx context.Context, businessID int64, inv domain.Invoice, items []domain.InvoiceItem) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin invoice transaction", logger.Error(err))
@@ -174,6 +181,10 @@ func (r *Repository) CreateInvoice(ctx context.Context, businessID int64, inv do
 
 		return 0, err
 	}
+	if err = createInvoiceItems(ctx, tx, id, items); err != nil {
+		logger.Ctx(ctx).Error("Failed to create invoice items", logger.Error(err))
+		return 0, err
+	}
 
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit invoice transaction", logger.Error(err))
@@ -184,7 +195,7 @@ func (r *Repository) CreateInvoice(ctx context.Context, businessID int64, inv do
 }
 
 // dynamic-query: squirrel
-func (r *Repository) CreateInvoiceItems(ctx context.Context, invoiceID int64, items []domain.InvoiceItem) error {
+func createInvoiceItems(ctx context.Context, db squirrel.BaseRunner, invoiceID int64, items []domain.InvoiceItem) error {
 	if len(items) == 0 {
 		return nil
 	}
@@ -205,12 +216,8 @@ func (r *Repository) CreateInvoiceItems(ctx context.Context, invoiceID int64, it
 		)
 	}
 
-	if _, err := ib.PlaceholderFormat(squirrel.Question).RunWith(r.pool).ExecContext(ctx); err != nil {
-		logger.Ctx(ctx).Error("Failed to create invoice items", logger.Error(err))
-		return err
-	}
-
-	return nil
+	_, err := ib.PlaceholderFormat(squirrel.Question).RunWith(db).ExecContext(ctx)
+	return err
 }
 
 func (r *Repository) GetInvoiceItems(ctx context.Context, invoiceID int64) ([]domain.InvoiceItem, error) {
@@ -240,6 +247,12 @@ func (r *Repository) GetInvoiceItems(ctx context.Context, invoiceID int64) ([]do
 	return items, nil
 }
 
+// CreateInvoiceItems is retained for legacy callers; application writes use
+// CreateInvoiceWithItems to avoid a split transaction.
+func (r *Repository) CreateInvoiceItems(ctx context.Context, invoiceID int64, items []domain.InvoiceItem) error {
+	return createInvoiceItems(ctx, r.pool, invoiceID, items)
+}
+
 func (r *Repository) DeleteInvoiceItems(ctx context.Context, invoiceID int64) error {
 	err := r.queries.DeleteInvoiceItems(ctx, invoiceID)
 	if err != nil {
@@ -249,7 +262,7 @@ func (r *Repository) DeleteInvoiceItems(ctx context.Context, invoiceID int64) er
 	return err
 }
 
-func (r *Repository) UpdateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) error {
+func (r *Repository) UpdateInvoiceWithItems(ctx context.Context, businessID int64, inv domain.Invoice, items []domain.InvoiceItem) (err error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin invoice update transaction", logger.Error(err))
@@ -310,12 +323,26 @@ func (r *Repository) UpdateInvoice(ctx context.Context, businessID int64, inv do
 		return err
 	}
 
+	if items != nil {
+		if err = qtx.DeleteInvoiceItems(ctx, inv.ID); err != nil {
+			return err
+		}
+		if err = createInvoiceItems(ctx, tx, inv.ID, items); err != nil {
+			return err
+		}
+	}
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit invoice update transaction", logger.Error(err))
 		return err
 	}
 
 	return nil
+}
+
+// UpdateInvoice retains the legacy header-only repository operation. The
+// application uses UpdateInvoiceWithItems for atomic header/item updates.
+func (r *Repository) UpdateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) error {
+	return r.UpdateInvoiceWithItems(ctx, businessID, inv, nil)
 }
 
 func (r *Repository) UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID int64, status string) error {
@@ -420,15 +447,18 @@ func (r *Repository) CreatePayment(ctx context.Context, businessID int64, p doma
 	return id, nil
 }
 
+// RecordPayment atomically locks the invoice, returns an existing referenced
+// payment when present, or inserts the payment and updates invoice totals on
+// the same transaction.
 func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input domain.PaymentInput) (*domain.Payment, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 	defer tx.Rollback()
-	queries := r.queries.WithTx(tx)
 
-	row, err := queries.GetInvoiceByIDForUpdate(ctx, sqlc.GetInvoiceByIDForUpdateParams{
+	qtx := r.queries.WithTx(tx)
+	row, err := qtx.GetInvoiceByIDForUpdate(ctx, sqlc.GetInvoiceByIDForUpdateParams{
 		ID: input.InvoiceID, BusinessID: businessID,
 	})
 	if errors.Is(err, sql.ErrNoRows) {
@@ -440,7 +470,7 @@ func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input 
 	inv := invoiceFromSqlc(row)
 
 	if strings.TrimSpace(input.Reference) != "" {
-		existing, lookupErr := queries.GetPaymentByReference(ctx, sqlc.GetPaymentByReferenceParams{
+		existing, lookupErr := qtx.GetPaymentByReference(ctx, sqlc.GetPaymentByReferenceParams{
 			BusinessID: businessID,
 			InvoiceID:  input.InvoiceID,
 			Reference:  sqlNullString(input.Reference),
@@ -466,10 +496,10 @@ func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input 
 		Amount: input.Amount, Currency: currency, PaymentDate: mustParsePaymentDate(input.PaymentDate),
 		Method: input.Method, Reference: input.Reference, Notes: input.Notes,
 	}
-	result, err := queries.CreatePayment(ctx, sqlc.CreatePaymentParams{
-		OwnerID: businessID, BusinessID: businessID, InvoiceID: p.InvoiceID,
-		Amount: fmtFloat(p.Amount), Currency: sqlNullString(p.Currency), PaymentDate: p.PaymentDate,
-		Method: sqlc.FinancePaymentsMethod(p.Method), Reference: sqlNullString(p.Reference), Notes: sqlNullString(p.Notes),
+	result, err := qtx.CreatePayment(ctx, sqlc.CreatePaymentParams{
+		OwnerID: businessID, BusinessID: businessID, InvoiceID: p.InvoiceID, Amount: fmtFloat(p.Amount),
+		Currency: sqlNullString(p.Currency), PaymentDate: p.PaymentDate, Method: sqlc.FinancePaymentsMethod(p.Method),
+		Reference: sqlNullString(p.Reference), Notes: sqlNullString(p.Notes),
 	})
 	if err != nil {
 		return nil, err
@@ -493,16 +523,15 @@ func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input 
 		paidDate = &paidDateValue
 	}
 	if paidDate != nil {
-		err = queries.UpdateInvoicePaymentTotalsWithPaidDate(ctx, sqlc.UpdateInvoicePaymentTotalsWithPaidDateParams{
+		err = qtx.UpdateInvoicePaymentTotalsWithPaidDate(ctx, sqlc.UpdateInvoicePaymentTotalsWithPaidDateParams{
 			AmountPaid: sqlNullString(fmtFloat(newAmountPaid)), AmountDue: sqlNullString(fmtFloat(newAmountDue)),
 			Status:   sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(newStatus), Valid: true},
 			PaidDate: sql.NullTime{Time: *paidDate, Valid: true}, ID: input.InvoiceID, BusinessID: businessID,
 		})
 	} else {
-		err = queries.UpdateInvoicePaymentTotals(ctx, sqlc.UpdateInvoicePaymentTotalsParams{
+		err = qtx.UpdateInvoicePaymentTotals(ctx, sqlc.UpdateInvoicePaymentTotalsParams{
 			AmountPaid: sqlNullString(fmtFloat(newAmountPaid)), AmountDue: sqlNullString(fmtFloat(newAmountDue)),
-			Status: sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(newStatus), Valid: true},
-			ID:     input.InvoiceID, BusinessID: businessID,
+			Status: sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(newStatus), Valid: true}, ID: input.InvoiceID, BusinessID: businessID,
 		})
 	}
 	if err != nil {
