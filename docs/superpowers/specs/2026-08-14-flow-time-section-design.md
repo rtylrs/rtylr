@@ -4,6 +4,17 @@ Date: 2026-08-14
 Status: **proposal, awaiting approval**
 Supersedes: the first draft of this file, which proposed a parallel Flow schema.
 
+## Status: step 1 is built
+
+Work days, lines and work types ship across four repos, verified end to end
+against a locally running API. Steps 2 to 8 are unstarted.
+
+**The chain is four repos, not three.** `internal/platform/database/schemas` in
+onion is itself a git submodule (`tryrtylr/schemas`), so the order runs
+`schemas` then `voxie` then `onion` then `rtylr`, with `packages` alongside for
+shared frontend code. An earlier draft of this document said three, and a
+migration written into that path in a fresh worktree is silently untracked.
+
 ## What this corrects, twice
 
 **First**, time tracking was built as configuration: a settings pane and two panels
