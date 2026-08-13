@@ -312,7 +312,7 @@ func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, businessID, 
 // and flips the PO to 'received'. The whole thing is one transaction, so a
 // failure on any item rolls back every stock change — and the
 // already-received guard makes a repeated call a safe no-op (no double-add).
-func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID, createdBy int64) error {
+func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID, createdBy int64, submitted []domain.PurchaseOrderItem) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin receive transaction", logger.Error(err))
@@ -360,11 +360,45 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		return err
 	}
 
+	receivedByID := make(map[int64]float64, len(submitted))
+	for _, item := range submitted {
+		if item.QuantityReceived < 0 || item.QuantityReceived > item.QuantityOrdered {
+			return fmt.Errorf("received quantity for item %d must be between zero and ordered quantity", item.ID)
+		}
+		receivedByID[item.ID] = item.QuantityReceived
+	}
+	fullyReceived := true
 	for _, it := range items {
-		qty, perr := strconv.ParseFloat(it.QuantityOrdered, 64)
+		ordered, perr := strconv.ParseFloat(it.QuantityOrdered, 64)
 		if perr != nil {
 			err = perr
 			return err
+		}
+		previous, perr := strconv.ParseFloat(it.QuantityReceived.String, 64)
+		if !it.QuantityReceived.Valid {
+			previous = 0
+		}
+		qty := ordered
+		if len(submitted) > 0 {
+			var ok bool
+			qty, ok = receivedByID[it.ID]
+			if !ok {
+				return fmt.Errorf("missing received quantity for item %d", it.ID)
+			}
+		}
+		if qty < ordered {
+			fullyReceived = false
+		}
+		delta := qty - previous
+		if delta < 0 {
+			return fmt.Errorf("received quantity for item %d cannot decrease from %v", it.ID, previous)
+		}
+
+		if err = qtx.UpdatePurchaseOrderItemReceived(ctx, sqlc.UpdatePurchaseOrderItemReceivedParams{QuantityReceived: strconv.FormatFloat(qty, 'f', -1, 64), PurchaseOrderID: poID, ID: it.ID}); err != nil {
+			return err
+		}
+		if delta == 0 {
+			continue
 		}
 
 		before, after, merr := stock_core.ApplyMovementTx(ctx, tx, stock_core.Movement{
@@ -372,7 +406,7 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			LocationID:    locID,
 			ProductID:     it.ProductID,
 			EntryType:     stock_core.EntryPurchase,
-			Change:        qty,
+			Change:        delta,
 			ReferenceID:   &poID,
 			ReferenceType: "purchase_order",
 			Channel:       "erp",
@@ -390,7 +424,7 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			BusinessID:     businessID,
 			ProductID:      it.ProductID,
 			Type:           sqlc.ErpInventoryTransactionsType(domain.InventoryTypePurchase),
-			QuantityChange: strconv.FormatFloat(qty, 'f', -1, 64),
+			QuantityChange: strconv.FormatFloat(delta, 'f', -1, 64),
 			QuantityBefore: strconv.FormatFloat(before, 'f', -1, 64),
 			QuantityAfter:  strconv.FormatFloat(after, 'f', -1, 64),
 			ReferenceID:    nullInt64(poID),
@@ -405,22 +439,19 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			INSERT INTO inventory_cost_layers
 			(owner_id, business_id, product_id, location_id, quantity_remaining, unit_cost, reference_id, reference_type)
 			VALUES (?, ?, ?, ?, ?, ?, ?, 'purchase_order')`,
-			businessID, businessID, it.ProductID, locID, qty, it.UnitCost, poID); err != nil {
+			businessID, businessID, it.ProductID, locID, delta, it.UnitCost, poID); err != nil {
 			return err
 		}
 	}
 
-	if err = qtx.MarkPurchaseOrderItemsReceived(ctx, poID); err != nil {
-		return err
+	status := domain.POStatusPartial
+	if fullyReceived { status = domain.POStatusReceived }
+	if status == domain.POStatusReceived {
+		err = qtx.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{Status: sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status), Valid: true}, BusinessID: businessID, ID: poID})
+	} else {
+		err = qtx.UpdatePurchaseOrderStatusPartial(ctx, sqlc.UpdatePurchaseOrderStatusPartialParams{Status: sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status), Valid: true}, BusinessID: businessID, ID: poID})
 	}
-
-	if err = qtx.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{
-		Status:     sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(domain.POStatusReceived), Valid: true},
-		BusinessID: businessID,
-		ID:         poID,
-	}); err != nil {
-		return err
-	}
+	if err != nil { return err }
 
 	return tx.Commit()
 }
