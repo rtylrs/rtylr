@@ -46,6 +46,9 @@ func (h *ExportCustomerHandler) Serve(ctx context.Context, req *ExportCustomerRe
 	if device.User == nil {
 		return ExportCustomerResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMManager(ctx); err != nil {
+		return ExportCustomerResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

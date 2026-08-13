@@ -158,6 +158,9 @@ func (h *UpsertRewardHandler) Serve(ctx context.Context, req *UpsertRewardReques
 	if device.User == nil {
 		return UpsertRewardResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireLoyaltyManager(ctx); err != nil {
+		return UpsertRewardResponse{}, err
+	}
 	active := true
 	if req.Active != nil {
 		active = *req.Active

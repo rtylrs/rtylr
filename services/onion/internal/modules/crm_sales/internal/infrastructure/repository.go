@@ -9,6 +9,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/infrastructure/persistence/sqlc"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
 	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -62,6 +63,8 @@ func (r *Repository) GetLead(ctx context.Context, id, businessID int64) (domain.
 }
 
 func (r *Repository) CreateLead(ctx context.Context, ownerID int64, req domain.CreateLeadRequest) (domain.Lead, error) {
+	businessID := ownerID
+	ownerID = ownerIDFromContext(ctx, ownerID)
 	source := req.Source
 	if source == "" {
 		source = "cold_email"
@@ -73,7 +76,7 @@ func (r *Repository) CreateLead(ctx context.Context, ownerID int64, req domain.C
 
 	result, err := r.queries.CreateLead(ctx, sqlc.CreateLeadParams{
 		OwnerID:      ownerID,
-		BusinessID:   ownerID,
+		BusinessID:   businessID,
 		CompanyName:  req.CompanyName,
 		Industry:     nullableString(req.Industry),
 		Size:         nullableString(req.Size),
@@ -90,7 +93,7 @@ func (r *Repository) CreateLead(ctx context.Context, ownerID int64, req domain.C
 	if err != nil {
 		return domain.Lead{}, err
 	}
-	return r.GetLead(ctx, id, ownerID)
+	return r.GetLead(ctx, id, businessID)
 }
 
 func (r *Repository) UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error) {
@@ -369,6 +372,8 @@ func (r *Repository) GetTouchpoint(ctx context.Context, id, businessID int64) (d
 }
 
 func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy int64, req domain.CreateTouchpointRequest) (domain.Touchpoint, error) {
+	businessID := ownerID
+	ownerID = ownerIDFromContext(ctx, ownerID)
 	tp := req.Type
 	if tp == "" {
 		tp = "call"
@@ -387,18 +392,18 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 			logger.Ctx(ctx).Error("failed to rollback create touchpoint tx", logger.Error(rollbackErr))
 		}
 	}()
-	if err := ensureLeadInBusiness(ctx, tx, ownerID, req.LeadID); err != nil {
+	if err := ensureLeadInBusiness(ctx, tx, businessID, req.LeadID); err != nil {
 		return domain.Touchpoint{}, err
 	}
 	if req.ContactID != nil {
-		if err := ensureContactForLead(ctx, tx, ownerID, req.LeadID, *req.ContactID); err != nil {
+		if err := ensureContactForLead(ctx, tx, businessID, req.LeadID, *req.ContactID); err != nil {
 			return domain.Touchpoint{}, err
 		}
 	}
 
 	result, err := r.queries.WithTx(tx).CreateTouchpoint(ctx, sqlc.CreateTouchpointParams{
 		OwnerID:      ownerID,
-		BusinessID:   ownerID,
+		BusinessID:   businessID,
 		LeadID:       req.LeadID,
 		ContactID:    nullableInt64(req.ContactID),
 		Type:         tp,
@@ -417,7 +422,7 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 	if err := tx.Commit(); err != nil {
 		return domain.Touchpoint{}, err
 	}
-	return r.GetTouchpoint(ctx, id, ownerID)
+	return r.GetTouchpoint(ctx, id, businessID)
 }
 
 func (r *Repository) DeleteTouchpoint(ctx context.Context, id, businessID int64) error {
@@ -472,6 +477,8 @@ func (r *Repository) GetContract(ctx context.Context, id, businessID int64) (dom
 }
 
 func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req domain.CreateContractRequest) (domain.Contract, error) {
+	businessID := ownerID
+	ownerID = ownerIDFromContext(ctx, ownerID)
 	plan := req.Plan
 	if plan == "" {
 		plan = "pro"
@@ -490,13 +497,13 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 			logger.Ctx(ctx).Error("failed to rollback create contract tx", logger.Error(rollbackErr))
 		}
 	}()
-	if err := ensureLeadInBusiness(ctx, tx, ownerID, req.LeadID); err != nil {
+	if err := ensureLeadInBusiness(ctx, tx, businessID, req.LeadID); err != nil {
 		return domain.Contract{}, err
 	}
 
 	result, err := r.queries.WithTx(tx).CreateContract(ctx, sqlc.CreateContractParams{
 		OwnerID:      ownerID,
-		BusinessID:   ownerID,
+		BusinessID:   businessID,
 		LeadID:       req.LeadID,
 		Plan:         plan,
 		Mrr:          strconv.FormatFloat(req.MRR, 'g', -1, 64),
@@ -516,7 +523,14 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 	if err := tx.Commit(); err != nil {
 		return domain.Contract{}, err
 	}
-	return r.GetContract(ctx, id, ownerID)
+	return r.GetContract(ctx, id, businessID)
+}
+
+func ownerIDFromContext(ctx context.Context, fallback int64) int64 {
+	if device := authPkg.DeviceCtx(ctx); device.User != nil && device.User.UserID > 0 {
+		return device.User.UserID
+	}
+	return fallback
 }
 
 // ensureLeadInBusiness prevents callers from attaching sales records to a

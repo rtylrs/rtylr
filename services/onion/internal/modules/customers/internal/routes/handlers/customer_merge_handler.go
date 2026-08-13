@@ -49,6 +49,9 @@ func (h *MergeCustomersHandler) Serve(ctx context.Context, req *MergeCustomersRe
 	if device.User == nil {
 		return MergeCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMManager(ctx); err != nil {
+		return MergeCustomersResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

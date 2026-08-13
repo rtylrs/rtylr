@@ -123,6 +123,9 @@ func (h *CreateLoyaltyTierHandler) Serve(ctx context.Context, req *CreateLoyalty
 	if device.User == nil {
 		return CreateLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMManager(ctx); err != nil {
+		return CreateLoyaltyTierResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -194,6 +197,9 @@ func (h *UpdateLoyaltyTierHandler) Serve(ctx context.Context, req *UpdateLoyalty
 	if device.User == nil {
 		return UpdateLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMManager(ctx); err != nil {
+		return UpdateLoyaltyTierResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -241,6 +247,9 @@ func (h *DeleteLoyaltyTierHandler) Serve(ctx context.Context, _ *DeleteLoyaltyTi
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return DeleteLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMManager(ctx); err != nil {
+		return DeleteLoyaltyTierResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)

@@ -114,6 +114,9 @@ func (h *UpdateLoyaltyConfigHandler) Serve(ctx context.Context, req *UpdateLoyal
 	if device.User == nil {
 		return UpdateLoyaltyConfigResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMManager(ctx); err != nil {
+		return UpdateLoyaltyConfigResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

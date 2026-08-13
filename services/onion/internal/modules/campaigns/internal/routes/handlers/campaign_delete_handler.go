@@ -30,6 +30,9 @@ func (h *DeleteCampaignHandler) Serve(ctx context.Context, _ *DeleteCampaignRequ
 	if device.User == nil {
 		return DeleteCampaignResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCampaignManager(ctx); err != nil {
+		return DeleteCampaignResponse{}, err
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
