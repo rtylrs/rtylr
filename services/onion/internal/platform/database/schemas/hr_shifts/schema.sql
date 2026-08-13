@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS hr_shifts (
     color VARCHAR(10) DEFAULT '#4CAF50',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_shifts_owner (owner_id)
+    INDEX idx_shifts_owner (owner_id),
+    INDEX idx_shifts_business_status_date (business_id, status, date)
 );
 
 CREATE TABLE IF NOT EXISTS hr_shift_assignments (
