@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS voxire_career_applications (
     status             VARCHAR(32) NOT NULL DEFAULT 'new',
     created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_career_apps_job (job_id),
-    INDEX idx_career_apps_status (status)
+    INDEX idx_career_apps_status (status),
+    INDEX idx_career_apps_job_status (job_id, status)
 );
 
 -- VoxHire admin accounts — self-contained login for the
