@@ -70,6 +70,13 @@ interface NavItem {
   permission?: HRPermission;
 }
 
+type EquipmentConfig = HRCompanyConfigPayload & { equipmentEnabled?: boolean | string };
+
+const isEquipmentEnabled = (config: HRCompanyConfigPayload | null): boolean => {
+  const value = (config as EquipmentConfig | null)?.equipmentEnabled;
+  return value === true || value === 'true';
+};
+
 /* -- Nav config -- */
 const ACCENT = '#8b5cf6';
 
@@ -190,13 +197,13 @@ const navSections: NavSection[] = [
         i18nKey: 'nav.equipment',
         path: '/equipment',
         icon: Package,
-        configGuard: (_m, cfg) => !!cfg,
+        configGuard: (_m, cfg) => isEquipmentEnabled(cfg),
       },
       {
         i18nKey: 'nav.assets',
         path: '/equipment/assets',
         icon: HardDrive,
-        configGuard: (_m, cfg) => !!cfg,
+        configGuard: (_m, cfg) => isEquipmentEnabled(cfg),
       },
       { i18nKey: 'nav.documents', path: '/documents', icon: FileText },
       {
