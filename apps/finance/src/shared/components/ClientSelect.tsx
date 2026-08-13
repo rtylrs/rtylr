@@ -7,8 +7,8 @@ import { parseClientsResponse } from '../schemas/clients';
 export interface Client {
   id: string;
   name: string;
-  email?: string;
-  company?: string;
+  email?: string | null;
+  company?: string | null;
 }
 
 interface ClientSelectProps {

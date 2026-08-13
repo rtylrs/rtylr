@@ -52,17 +52,23 @@ const NewInvoice: React.FC = () => {
 
   useEffect(() => {
     if (sourceInvoice) {
-      setClient({ id: sourceInvoice.id, name: sourceInvoice.client, email: sourceInvoice.clientEmail });
+      setClient({
+        id: sourceInvoice.id,
+        name: sourceInvoice.client,
+        email: sourceInvoice.clientEmail,
+      });
       setIssuedDate(sourceInvoice.issuedDate ?? today);
       setDueDate(sourceInvoice.dueDate ?? due);
       setInvoiceNumber(sourceInvoice.number ?? sourceInvoice.id);
-      setItems((sourceInvoice.items ?? []).map((item, index) => ({
-        id: `clone-${index}`,
-        description: item.description,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        taxRate: settings.defaultTaxRate,
-      })));
+      setItems(
+        (sourceInvoice.items ?? []).map((item, index) => ({
+          id: `clone-${index}`,
+          description: item.description ?? '',
+          quantity: item.quantity ?? 1,
+          unitPrice: item.unitPrice ?? 0,
+          taxRate: settings.defaultTaxRate,
+        }))
+      );
       setNotes(sourceInvoice.notes ?? settings.invoiceNotes);
       setDiscount(sourceInvoice.discount ?? 0);
     }
@@ -148,7 +154,12 @@ const NewInvoice: React.FC = () => {
                 navigate({ to: '/invoices' });
               },
               onError: (error) => {
-                toast.error(getOneKitErrorMessage(error, `Invoice ${invoiceNumber} saved as draft — couldn't mark it sent`));
+                toast.error(
+                  getOneKitErrorMessage(
+                    error,
+                    `Invoice ${invoiceNumber} saved as draft — couldn't mark it sent`
+                  )
+                );
                 navigate({ to: '/invoices' });
               },
             }

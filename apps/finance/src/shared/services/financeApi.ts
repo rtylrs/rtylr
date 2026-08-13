@@ -28,6 +28,7 @@ export interface DashboardStats {
   // Returned by the deployed backend DashboardResponse.
   totalReceivable: number;
   overdueAmount: number;
+  totalRevenueMtd: number;
   totalExpensesMtd: number;
   netProfitMtd: number;
   // Not yet returned by the backend; safe defaults applied by the schema.

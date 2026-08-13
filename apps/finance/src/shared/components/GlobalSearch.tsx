@@ -106,7 +106,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
       .map((c) => ({
         id: `client-${c.id}`,
         label: c.name,
-        sub: c.email,
+        sub: c.email ?? undefined,
         to: `/invoices/new?client=${c.id}`,
         icon: Users,
         group: 'Clients',
