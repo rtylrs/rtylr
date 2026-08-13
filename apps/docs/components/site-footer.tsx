@@ -44,7 +44,7 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer__grid">
         <div className="site-footer__brand">
-          <img src="/logo.png" alt="rtylr" />
+          <img src="/logo-light.png" alt="rtylr" />
           <p>One platform for the work that keeps your business moving.</p>
         </div>
         {footerGroups.map((group) => (

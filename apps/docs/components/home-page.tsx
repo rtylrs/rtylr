@@ -32,7 +32,7 @@ export function HomePage() {
         </div>
         <div className="hero-visual" aria-label="The rtylr platform and its apps">
           <div className="hero-visual__header"><span>RTYLR / PLATFORM</span><span>08 APPS</span></div>
-          <div className="hero-visual__logo"><img src="/logo.png" alt="rtylr" /></div>
+          <div className="hero-visual__logo"><img src="/logo-light.png" alt="rtylr" /></div>
           <div className="hero-visual__apps">
             {appCards.slice(0, 6).map(([code, title]) => (
               <span key={code}><b>{code}</b>{title}</span>

@@ -58,7 +58,7 @@ button { color: inherit; }
   padding: 8px 16px;
 }
 .site-logo { display: inline-flex; align-items: center; flex: 0 0 auto; }
-.site-logo img { width: 96px; height: auto; display: block; }
+.site-logo img { width: auto; height: 42px; display: block; }
 .desktop-nav { display: flex; align-items: center; gap: 22px; }
 .nav-group { position: relative; }
 .nav-group__button, .get-started-link, .theme-button, .search-button, .mobile-menu-button, .mobile-search-button {
@@ -154,7 +154,7 @@ button { color: inherit; }
 
 .site-footer { max-width: 1280px; margin: 0 auto; padding: 96px 16px 110px; }
 .site-footer__grid { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 36px; padding-bottom: 56px; border-bottom: 1px solid var(--border); }
-.site-footer__brand img { width: 112px; }
+.site-footer__brand img { width: auto; height: 52px; }
 .site-footer__brand p { max-width: 180px; margin-top: 20px; color: var(--text-dim); font-size: 13px; }
 .site-footer__group h2 { margin: 0 0 16px; color: var(--text); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; }
 .site-footer__group ul { list-style: none; padding: 0; margin: 0; }
@@ -195,7 +195,7 @@ button { color: inherit; }
   gap: 40px;
 }
 
-.site-logo img { width: 112px; }
+.site-logo img { width: auto; height: 46px; }
 .desktop-nav { gap: 28px; }
 
 .home-page {
@@ -313,7 +313,7 @@ button { color: inherit; }
   transform: rotate(45deg);
 }
 
-.hero-visual__logo img { position: relative; z-index: 1; width: min(170px, 42%); opacity: .9; }
+.hero-visual__logo img { position: relative; z-index: 1; width: auto; height: 72px; max-width: 42%; opacity: .9; }
 
 .hero-visual__apps {
   position: absolute;
@@ -443,7 +443,7 @@ button { color: inherit; }
   .mobile-menu-button, .mobile-search-button { display: inline-flex; align-items: center; }
   .mobile-menu-button { width: 32px; padding: 0; color: var(--text-muted); font-size: 25px; line-height: 1; }
   .mobile-search-button { font-size: 9px; }
-  .site-logo img { width: 88px; }
+  .site-logo img { width: auto; height: 38px; }
   .home-page { padding-top: 52px; }
   .home-hero { display: block; min-height: 0; }
   .eyebrow { margin-bottom: 26px; }

@@ -64,7 +64,7 @@ export function SiteHeader({ searchEntries }: SiteHeaderProps) {
           </button>
 
           <Link href="/" className="site-logo" aria-label="rtylr Docs home">
-            <img src="/logo.png" alt="rtylr" />
+            <img src="/logo-light.png" alt="rtylr" />
           </Link>
 
           <nav className="desktop-nav" aria-label="Main navigation">
@@ -119,7 +119,7 @@ export function SiteHeader({ searchEntries }: SiteHeaderProps) {
           <div className="mobile-drawer" role="dialog" aria-label="Mobile navigation">
             <div className="mobile-drawer__top">
               <Link href="/" className="site-logo" aria-label="rtylr Docs home">
-                <img src="/logo.png" alt="rtylr" />
+                <img src="/logo-light.png" alt="rtylr" />
               </Link>
               <div className="mobile-drawer__actions">
                 <button className="theme-button" aria-label="Toggle dark mode">◔</button>
