@@ -39,7 +39,7 @@ const Receiving: React.FC = () => {
         sku: item.productId ?? '',
         name: `Product #${item.productId ?? ''}`,
         expected: item.quantityOrdered ?? 0,
-        received: (item.quantityReceived || item.quantityOrdered) ?? 0,
+        received: item.quantityReceived ?? item.quantityOrdered ?? 0,
       }))
     );
   };
@@ -69,7 +69,7 @@ const Receiving: React.FC = () => {
     if (selectedId !== null) {
       // Backend expects the lowercase status enum (draft|sent|approved|partial|received|cancelled).
       updateStatus.mutate(
-        { id: selectedId, body: { status: 'received' } },
+        { id: selectedId, body: { status: variance === 0 ? 'received' : 'partial', items: lines.map((line) => ({ productId: Number(line.sku), quantityReceived: line.received })) } },
         { onError: () => toast.error(t('receiving.toast.updateFailed')) }
       );
     }
