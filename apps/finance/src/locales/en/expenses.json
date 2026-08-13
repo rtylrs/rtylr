@@ -1,5 +1,7 @@
 {
   "created": "Expense created",
   "updated": "Expense updated",
-  "deleted": "Expense deleted"
+  "deleted": "Expense deleted",
+  "approved": "Expense approved",
+  "rejected": "Expense rejected"
 }

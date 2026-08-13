@@ -1,5 +1,7 @@
 {
   "created": "Dépense créée",
   "updated": "Dépense mise à jour",
-  "deleted": "Dépense supprimée"
+  "deleted": "Dépense supprimée",
+  "approved": "Dépense approuvée",
+  "rejected": "Dépense rejetée"
 }
