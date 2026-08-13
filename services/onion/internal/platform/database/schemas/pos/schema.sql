@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS pos_orders (
     INDEX idx_pos_orders_business_created (business_id, created_at),
     INDEX idx_pos_orders_business_order_number (business_id, order_number),
     INDEX idx_pos_orders_business_paid_at (business_id, payment_status, paid_at),
+    INDEX idx_pos_orders_business_customer_payment (business_id, customer_id, payment_status),
     INDEX idx_pos_orders_session_payment (session_id, payment_status),
     FULLTEXT INDEX idx_pos_orders_search (order_number, customer_name, customer_phone),
     INDEX idx_pos_orders_paddle_transaction (paddle_transaction_id),
