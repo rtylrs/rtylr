@@ -55,7 +55,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             {settings.companyEmail}
           </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: 'end' }}>
           <div
             style={{
               fontSize: 24,
@@ -90,7 +90,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           </div>
           <div style={{ fontSize: 11, color: 'var(--finance-invoice-muted)' }}>{client?.email}</div>
         </div>
-        <div style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: 'end' }}>
           <div style={{ fontSize: 11, color: 'var(--finance-invoice-muted)' }}>
             Issued: <strong>{issuedDate || '-'}</strong>
           </div>
@@ -105,7 +105,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           <tr style={{ borderBottom: `2px solid ${settings.brandColor}` }}>
             <th
               style={{
-                textAlign: 'left',
+                textAlign: 'start',
                 padding: '8px 4px',
                 fontSize: 10,
                 textTransform: 'uppercase',
@@ -116,7 +116,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             </th>
             <th
               style={{
-                textAlign: 'right',
+                textAlign: 'end',
                 padding: '8px 4px',
                 fontSize: 10,
                 textTransform: 'uppercase',
@@ -127,7 +127,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             </th>
             <th
               style={{
-                textAlign: 'right',
+                textAlign: 'end',
                 padding: '8px 4px',
                 fontSize: 10,
                 textTransform: 'uppercase',
@@ -138,7 +138,7 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
             </th>
             <th
               style={{
-                textAlign: 'right',
+                textAlign: 'end',
                 padding: '8px 4px',
                 fontSize: 10,
                 textTransform: 'uppercase',
@@ -153,14 +153,14 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           {items.map((it) => (
             <tr key={it.id} style={{ borderBottom: '1px solid var(--finance-invoice-border)' }}>
               <td style={{ padding: '10px 4px', fontSize: 12 }}>{it.description || 'Item'}</td>
-              <td style={{ padding: '10px 4px', fontSize: 12, textAlign: 'right' }}>
+              <td style={{ padding: '10px 4px', fontSize: 12, textAlign: 'end' }}>
                 {it.quantity}
               </td>
-              <td style={{ padding: '10px 4px', fontSize: 12, textAlign: 'right' }}>
+              <td style={{ padding: '10px 4px', fontSize: 12, textAlign: 'end' }}>
                 <MoneyDisplay amount={it.unitPrice} />
               </td>
               <td
-                style={{ padding: '10px 4px', fontSize: 12, textAlign: 'right', fontWeight: 600 }}
+                style={{ padding: '10px 4px', fontSize: 12, textAlign: 'end', fontWeight: 600 }}
               >
                 <MoneyDisplay amount={it.quantity * it.unitPrice} />
               </td>

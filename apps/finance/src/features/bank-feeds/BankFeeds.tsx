@@ -69,7 +69,7 @@ const BankFeeds: React.FC = () => {
                   style={{
                     ...cardStyle,
                     padding: 16,
-                    textAlign: 'left',
+                    textAlign: 'start',
                     cursor: 'pointer',
                     borderColor: selected === a.id ? ACCENT : 'var(--hub-border)',
                   }}
@@ -146,7 +146,7 @@ const BankFeeds: React.FC = () => {
                       key={h}
                       style={{
                         padding: '10px 16px',
-                        textAlign: h === 'Amount' ? 'right' : 'left',
+                        textAlign: h === 'Amount' ? 'end' : 'start',
                         fontSize: 11,
                         fontWeight: 600,
                         textTransform: 'uppercase',
@@ -180,7 +180,7 @@ const BankFeeds: React.FC = () => {
                         padding: '10px 16px',
                         fontSize: 13,
                         fontWeight: 600,
-                        textAlign: 'right',
+                        textAlign: 'end',
                         color: (t.amount ?? 0) >= 0 ? ACCENT : 'var(--hub-text)',
                       }}
                     >

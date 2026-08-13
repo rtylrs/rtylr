@@ -30,7 +30,7 @@ const OverdueInvoicesWidget: React.FC<OverdueInvoicesWidgetProps> = ({ items }) 
             borderRadius: 10,
             background: 'var(--finance-danger-soft)',
             color: 'var(--finance-danger)',
-            marginLeft: 'auto',
+            marginInlineStart: 'auto',
             fontWeight: 600,
           }}
         >

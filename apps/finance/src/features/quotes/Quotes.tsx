@@ -215,7 +215,7 @@ const Quotes: React.FC = () => {
                       key={h}
                       style={{
                         padding: '10px 16px',
-                        textAlign: 'left',
+                        textAlign: 'start',
                         fontSize: 11,
                         fontWeight: 600,
                         textTransform: 'uppercase',

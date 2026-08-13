@@ -237,7 +237,7 @@ const NewInvoice: React.FC = () => {
                         style={{
                           padding: '8px',
                           textAlign:
-                            h === 'Total' || h === 'Qty' || h === 'Tax %' ? 'right' : 'left',
+                            h === 'Total' || h === 'Qty' || h === 'Tax %' ? 'end' : 'start',
                           fontSize: 10,
                           textTransform: 'uppercase',
                           letterSpacing: '0.06em',

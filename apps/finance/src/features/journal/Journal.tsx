@@ -132,7 +132,7 @@ const Journal: React.FC = () => {
                     <tr>
                       <th
                         style={{
-                          textAlign: 'left',
+                          textAlign: 'start',
                           fontSize: 10,
                           textTransform: 'uppercase',
                           color: 'var(--hub-text-dim)',
@@ -143,7 +143,7 @@ const Journal: React.FC = () => {
                       </th>
                       <th
                         style={{
-                          textAlign: 'right',
+                          textAlign: 'end',
                           fontSize: 10,
                           textTransform: 'uppercase',
                           color: 'var(--hub-text-dim)',
@@ -154,7 +154,7 @@ const Journal: React.FC = () => {
                       </th>
                       <th
                         style={{
-                          textAlign: 'right',
+                          textAlign: 'end',
                           fontSize: 10,
                           textTransform: 'uppercase',
                           color: 'var(--hub-text-dim)',
@@ -175,7 +175,7 @@ const Journal: React.FC = () => {
                           style={{
                             padding: '8px 4px',
                             fontSize: 13,
-                            textAlign: 'right',
+                            textAlign: 'end',
                             color: l.debit ? 'var(--hub-text)' : 'var(--hub-text-dim)',
                           }}
                         >
@@ -185,7 +185,7 @@ const Journal: React.FC = () => {
                           style={{
                             padding: '8px 4px',
                             fontSize: 13,
-                            textAlign: 'right',
+                            textAlign: 'end',
                             color: l.credit ? 'var(--hub-text)' : 'var(--hub-text-dim)',
                           }}
                         >

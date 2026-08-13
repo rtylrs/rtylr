@@ -87,7 +87,7 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
             style={{
               position: 'absolute',
               top: -8,
-              right: -8,
+              insetInlineEnd: -8,
               background: 'var(--finance-danger)',
               color: 'var(--finance-white)',
               border: 'none',
