@@ -75,7 +75,10 @@ UPDATE finance_invoices SET amount_paid = ?, amount_due = ?, status = ? WHERE id
 DELETE FROM finance_invoices WHERE id = ? AND business_id = ? AND status = 'draft';
 
 -- name: CountInvoiceSequence :one
-SELECT COUNT(*) FROM finance_invoices WHERE business_id = ? AND YEAR(created_at) = ?;
+SELECT COUNT(*) FROM finance_invoices
+WHERE business_id = ?
+  AND created_at >= sqlc.arg(created_at_start)
+  AND created_at < sqlc.arg(created_at_end);
 
 -- name: CountInvoicesByStatus :many
 SELECT status, COUNT(*) AS cnt
