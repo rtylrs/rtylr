@@ -201,6 +201,10 @@ func (w *statusResponseWriter) Flush() {
 type MenuServiceServer interface {
 	ListMenu(ctx context.Context, req *ListMenuRequest) (*ListMenuResponse, error)
 	UpdateMenu(ctx context.Context, req *UpdateMenuRequest) (*UpdateMenuResponse, error)
+	ListMenuBanners(ctx context.Context, req *ListMenuBannersRequest) (*ListMenuBannersResponse, error)
+	CreateMenuBanner(ctx context.Context, req *CreateMenuBannerRequest) (*CreateMenuBannerResponse, error)
+	UpdateMenuBanner(ctx context.Context, req *UpdateMenuBannerRequest) (*UpdateMenuBannerResponse, error)
+	DeleteMenuBanner(ctx context.Context, req *DeleteMenuBannerRequest) (*DeleteMenuBannerResponse, error)
 }
 
 func RegisterMenuServiceServer(first any, rest ...any) error {
@@ -273,5 +277,93 @@ func RegisterMenuServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "MenuService", Method: "updateMenu", HTTPMethod: "PUT", Route: "/hub/menu/v1/menu", AuthSchemes: nil}))
+	mux.Handle("GET /hub/menu/v1/menu/banners", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(ListMenuBannersRequest)
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.ListMenuBanners(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "MenuService", Method: "listMenuBanners", HTTPMethod: "GET", Route: "/hub/menu/v1/menu/banners", AuthSchemes: nil}))
+	mux.Handle("POST /hub/menu/v1/menu/banners", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(CreateMenuBannerRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.CreateMenuBanner(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "MenuService", Method: "createMenuBanner", HTTPMethod: "POST", Route: "/hub/menu/v1/menu/banners", AuthSchemes: nil}))
+	mux.Handle("PUT /hub/menu/v1/menu/banners/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(UpdateMenuBannerRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.UpdateMenuBanner(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "MenuService", Method: "updateMenuBanner", HTTPMethod: "PUT", Route: "/hub/menu/v1/menu/banners/{id}", AuthSchemes: nil}))
+	mux.Handle("DELETE /hub/menu/v1/menu/banners/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(DeleteMenuBannerRequest)
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.DeleteMenuBanner(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "MenuService", Method: "deleteMenuBanner", HTTPMethod: "DELETE", Route: "/hub/menu/v1/menu/banners/{id}", AuthSchemes: nil}))
 	return nil
 }
