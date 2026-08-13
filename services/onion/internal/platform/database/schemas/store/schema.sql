@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS store_products (
     is_published BOOLEAN DEFAULT FALSE,
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_store_products_business_sort (business_id, sort_order, id)
 );
 
 CREATE TABLE IF NOT EXISTS store_categories (

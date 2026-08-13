@@ -129,7 +129,8 @@ CREATE TABLE IF NOT EXISTS pos_order_items (
     status ENUM('pending','preparing','ready','served','cancelled') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_pos_order_items_order (order_id),
-    INDEX idx_pos_order_items_order_status (order_id, status)
+    INDEX idx_pos_order_items_order_status (order_id, status),
+    INDEX idx_pos_order_items_menu_item_order (menu_item_id, order_id)
 );
 
 CREATE TABLE IF NOT EXISTS pos_refunds (
@@ -142,7 +143,8 @@ CREATE TABLE IF NOT EXISTS pos_refunds (
     refunded_by BIGINT,
     refunded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_pos_refunds_owner (owner_id),
-    INDEX idx_pos_refunds_order (order_id)
+    INDEX idx_pos_refunds_order (order_id),
+    INDEX idx_pos_refunds_business_refunded_at (business_id, refunded_at)
 );
 
 CREATE TABLE IF NOT EXISTS pos_modifiers (

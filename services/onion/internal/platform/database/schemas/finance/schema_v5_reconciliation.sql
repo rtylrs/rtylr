@@ -25,5 +25,7 @@ CREATE TABLE IF NOT EXISTS finance_reconciliation_matches (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     KEY idx_finance_reconciliation_owner (owner_id),
     KEY idx_finance_reconciliation_bank (bank_feed_id),
-    KEY idx_finance_reconciliation_target (target_type, target_id)
+    KEY idx_finance_reconciliation_target (target_type, target_id),
+    KEY idx_finance_reconciliation_business_bank (business_id, bank_feed_id),
+    KEY idx_finance_reconciliation_business_target (business_id, target_type, target_id)
 );
