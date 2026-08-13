@@ -77,7 +77,7 @@ beforeEach(() => {
   useTimeSettingsStore.setState({ ...DEFAULT_TIME_SETTINGS });
 });
 
-describe('TimePanel — loading', () => {
+describe('TimePanel: loading', () => {
   it('holds the panel height with shimmer rows rather than a spinner that collapses it', () => {
     timeLogsState.value = { data: undefined, isLoading: true, isError: false, refetch };
 
@@ -88,7 +88,7 @@ describe('TimePanel — loading', () => {
   });
 });
 
-describe('TimePanel — empty', () => {
+describe('TimePanel: empty', () => {
   it('states there is nothing logged and offers the first entry', () => {
     timeLogsState.value = { data: { timeLogs: [] }, isLoading: false, isError: false, refetch };
 
@@ -107,7 +107,7 @@ describe('TimePanel — empty', () => {
   });
 });
 
-describe('TimePanel — read error', () => {
+describe('TimePanel: read error', () => {
   it('says the read failed and offers a retry', () => {
     timeLogsState.value = { data: undefined, isLoading: false, isError: true, refetch };
 
@@ -128,7 +128,7 @@ describe('TimePanel — read error', () => {
   });
 });
 
-describe('TimePanel — entries', () => {
+describe('TimePanel: entries', () => {
   it('totals logged minutes against the estimate in a padded clock figure', () => {
     timeLogsState.value = {
       data: {
@@ -219,7 +219,7 @@ describe('TimePanel — entries', () => {
   });
 });
 
-describe('TimePanel — optimistic save', () => {
+describe('TimePanel: optimistic save', () => {
   it('shows the in-flight entry before the server confirms it', () => {
     timeLogsState.value = { data: { timeLogs: [] }, isLoading: false, isError: false, refetch };
     logTimeState.value = {
@@ -239,7 +239,7 @@ describe('TimePanel — optimistic save', () => {
   });
 });
 
-describe('TimePanel — the log form', () => {
+describe('TimePanel: the log form', () => {
   beforeEach(() => {
     timeLogsState.value = { data: { timeLogs: [] }, isLoading: false, isError: false, refetch };
   });
@@ -307,7 +307,7 @@ describe('TimePanel — the log form', () => {
   });
 });
 
-describe('TimePanel — workspace rounding', () => {
+describe('TimePanel: workspace rounding', () => {
   beforeEach(() => {
     timeLogsState.value = { data: { timeLogs: [] }, isLoading: false, isError: false, refetch };
     useTimeSettingsStore.setState({ roundingMinutes: 15 });
@@ -356,7 +356,7 @@ describe('TimePanel — workspace rounding', () => {
   });
 });
 
-describe('TimePanel — over estimate', () => {
+describe('TimePanel: over estimate', () => {
   it('flags the overrun as one pill and caps the bar at full width', () => {
     timeLogsState.value = {
       data: { timeLogs: [makeLog({ durationMinutes: 1440 })] },
