@@ -30,13 +30,12 @@ func invalidateInvoicesScope(ctx context.Context, businessID int64) {
 type repository interface {
 	ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
 	GetInvoiceByID(ctx context.Context, businessID, invoiceID int64) (*domain.Invoice, error)
-	CreateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) (int64, error)
-	CreateInvoiceItems(ctx context.Context, invoiceID int64, items []domain.InvoiceItem) error
+	CreateInvoiceWithItems(ctx context.Context, businessID int64, inv domain.Invoice, items []domain.InvoiceItem) (int64, error)
 	GetInvoiceItems(ctx context.Context, invoiceID int64) ([]domain.InvoiceItem, error)
 	DeleteInvoiceItems(ctx context.Context, invoiceID int64) error
-	UpdateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) error
+	UpdateInvoiceWithItems(ctx context.Context, businessID int64, inv domain.Invoice, items []domain.InvoiceItem) error
 	UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID int64, status string) error
-	UpdateInvoicePaymentTotals(ctx context.Context, businessID, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error
+	RecordPayment(ctx context.Context, businessID int64, p domain.Payment) (int64, error)
 	DeleteInvoice(ctx context.Context, businessID, invoiceID int64) error
 	CountInvoiceSequence(ctx context.Context, businessID int64, year int) (int64, error)
 	CreatePayment(ctx context.Context, businessID int64, p domain.Payment) (int64, error)
@@ -235,17 +234,13 @@ func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input dom
 		Terms:          input.Terms,
 	}
 
-	invID, err := s.repo.CreateInvoice(ctx, businessID, inv)
+	invID, err := s.repo.CreateInvoiceWithItems(ctx, businessID, inv, items)
 	if err != nil {
 		return nil, err
 	}
 
 	inv.ID = invID
 	inv.Items = items
-
-	if err := s.repo.CreateInvoiceItems(ctx, invID, items); err != nil {
-		return nil, err
-	}
 
 	return &inv, nil
 }
@@ -341,15 +336,7 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 	existing.Notes = input.Notes
 	existing.Terms = input.Terms
 
-	if err := s.repo.UpdateInvoice(ctx, businessID, *existing); err != nil {
-		return nil, err
-	}
-
-	if err := s.repo.DeleteInvoiceItems(ctx, invoiceID); err != nil {
-		return nil, err
-	}
-
-	if err := s.repo.CreateInvoiceItems(ctx, invoiceID, items); err != nil {
+	if err := s.repo.UpdateInvoiceWithItems(ctx, businessID, *existing, items); err != nil {
 		return nil, err
 	}
 
@@ -444,38 +431,11 @@ func (s *Service) RecordPayment(ctx context.Context, businessID int64, input dom
 		Notes:       input.Notes,
 	}
 
-	paymentID, err := s.repo.CreatePayment(ctx, businessID, p)
+	paymentID, err := s.repo.RecordPayment(ctx, businessID, p)
 	if err != nil {
 		return nil, err
 	}
-
 	p.ID = paymentID
-
-	// Update invoice payment totals and status
-	newAmountPaid := inv.AmountPaid + input.Amount
-	newAmountDue := inv.Total - newAmountPaid
-
-	if newAmountDue < 0 {
-		newAmountDue = 0
-	}
-
-	var newStatus string
-	var paidDate *time.Time
-
-	switch {
-	case newAmountDue <= 0:
-		newStatus = "paid"
-		now := paymentDate
-		paidDate = &now
-	case newAmountPaid > 0:
-		newStatus = "partial"
-	default:
-		newStatus = inv.Status
-	}
-
-	if err := s.repo.UpdateInvoicePaymentTotals(ctx, businessID, input.InvoiceID, newAmountPaid, newAmountDue, newStatus, paidDate); err != nil {
-		return nil, err
-	}
 
 	return &p, nil
 }
