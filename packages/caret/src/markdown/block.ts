@@ -172,6 +172,9 @@ export function renderTable(raw: string): string {
 
   const headers = rows[0];
   const bodyRows = rows.slice(2);
+  if (bodyRows.length === 0) {
+    return '<p class="caret-table-empty">No matching records.</p>';
+  }
   const columnCount = Math.max(headers.length, ...bodyRows.map((row) => row.length), 0);
   const normalizedHeaders = normalizeRow(headers, columnCount);
   const thead = normalizedHeaders.map((cell) => `<th>${renderInlineMarkdown(cell)}</th>`).join('');

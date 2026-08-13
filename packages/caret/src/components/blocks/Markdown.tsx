@@ -15,6 +15,14 @@ function sanitizeMarkdownUrl(url: string): string {
 
 const safeUrlTransform: UrlTransform = (url) => sanitizeMarkdownUrl(url);
 
+function tableHasBodyRows(children: React.ReactNode): boolean {
+  return React.Children.toArray(children).some((section) => {
+    if (!React.isValidElement<{ children?: React.ReactNode }>(section)) return false;
+    if (section.type !== 'tbody') return false;
+    return React.Children.toArray(section.props.children).some((row) => React.isValidElement(row));
+  });
+}
+
 const markdownComponents: Components = {
   h1: ({ node: _node, ...props }) => <h1 className="caret-h" {...props} />,
   h2: ({ node: _node, ...props }) => <h2 className="caret-h" {...props} />,
@@ -31,11 +39,16 @@ const markdownComponents: Components = {
     <code className={['caret-inline-code', className].filter(Boolean).join(' ')} {...props} />
   ),
   pre: ({ node: _node, ...props }) => <pre className="caret-codeblock" {...props} />,
-  table: ({ node: _node, ...props }) => (
-    <div className="caret-table-wrap">
-      <table className="caret-table" {...props} />
-    </div>
-  ),
+  table: ({ node: _node, children, ...props }) =>
+    tableHasBodyRows(children) ? (
+      <div className="caret-table-wrap">
+        <table className="caret-table" {...props}>
+          {children}
+        </table>
+      </div>
+    ) : (
+      <p className="caret-table-empty">No matching records.</p>
+    ),
   a: ({ node: _node, href, ...props }) => {
     const safeHref = href ? sanitizeMarkdownUrl(href) : '';
     if (!safeHref) return <span>{props.children}</span>;

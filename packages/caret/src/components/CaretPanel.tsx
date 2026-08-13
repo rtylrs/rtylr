@@ -17,6 +17,7 @@ import { ApiError } from '@voxire/voxie/hub/memory/v1/client';
 import { buildCaretFollowUps } from '../lib/followUps';
 import { inferCaretModeForPrompt } from '../lib/modeIntent';
 import { buildCaretEmptyState, type CaretStarter } from '../lib/suggestions';
+import { getCaretSlashCommand } from '../lib/slashCommands';
 import type { CaretChatSummary } from '../types/chat';
 import type { CaretPageContext } from '../types/context';
 import type { CaretMessage, ToolCallBlock } from '../types/message';
@@ -341,7 +342,8 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
 
   const sendPromptWithIntent = useCallback(
     (prompt: string, explicitMode?: CaretStarter['mode']): void => {
-      const nextMode = explicitMode ?? inferCaretModeForPrompt(prompt, mode);
+      const nextMode =
+        explicitMode ?? getCaretSlashCommand(prompt)?.mode ?? inferCaretModeForPrompt(prompt, mode);
       if (nextMode !== mode) setMode(nextMode);
       void sendMessage(prompt, nextMode);
     },

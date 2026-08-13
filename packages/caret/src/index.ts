@@ -60,3 +60,10 @@ export { renderMarkdown, renderInlineMarkdown } from './markdown';
 // Context helpers
 export { buildCaretRouteContext } from './lib/routeContext';
 export type { BuildCaretRouteContextInput } from './lib/routeContext';
+export {
+  CARET_SLASH_COMMANDS,
+  filterCaretSlashCommands,
+  getCaretSlashCommand,
+  getCaretSlashCommandQuery,
+} from './lib/slashCommands';
+export type { CaretSlashCommand } from './lib/slashCommands';

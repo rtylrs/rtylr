@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { caretTokens, caretRadius } from '../../ui/tokens';
 import ModePicker from './ModePicker';
@@ -8,6 +8,7 @@ import SendButton from './SendButton';
 import StopButton from './StopButton';
 import { useAutosize } from '../../hooks/useAutosize';
 import { CARET_FOCUS_COMPOSER_EVENT } from '../../lib/focusComposer';
+import { filterCaretSlashCommands, type CaretSlashCommand } from '../../lib/slashCommands';
 import { useCaretSettingsStore } from '../../stores/settingsStore';
 
 export interface ComposerProps {
@@ -44,11 +45,19 @@ export const Composer: React.FC<ComposerProps> = ({
   autoFocus = true,
 }) => {
   const [value, setValue] = useState('');
+  const [slashCommandIndex, setSlashCommandIndex] = useState(0);
   const [voiceStatus, setVoiceStatus] = useState<VoiceInputStatus | null>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const voiceFeedbackId = useId();
   const voiceEnabled = useCaretSettingsStore((s) => s.voiceEnabled);
   useAutosize(taRef, value);
+  const slashCommands = useMemo(() => filterCaretSlashCommands(value), [value]);
+
+  useEffect(() => {
+    setSlashCommandIndex((current) =>
+      slashCommands.length === 0 ? 0 : Math.min(current, slashCommands.length - 1)
+    );
+  }, [slashCommands.length]);
 
   const focusComposer = useCallback((): void => {
     const el = taRef.current;
@@ -80,11 +89,37 @@ export const Composer: React.FC<ComposerProps> = ({
     setValue((prev) => (prev.length && !prev.endsWith(' ') ? `${prev} ` : prev) + normalized);
   }, []);
 
+  const selectSlashCommand = useCallback(
+    (command: CaretSlashCommand): void => {
+      setValue(`/${command.name} `);
+      setSlashCommandIndex(0);
+      requestAnimationFrame(() => focusComposer());
+    },
+    [focusComposer]
+  );
+
   const updateVoiceStatus = useCallback((status: VoiceInputStatus): void => {
     setVoiceStatus(status);
   }, []);
 
   const handleKey = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
+    if (slashCommands.length > 0 && e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSlashCommandIndex((current) => (current + 1) % slashCommands.length);
+      return;
+    }
+    if (slashCommands.length > 0 && e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSlashCommandIndex(
+        (current) => (current - 1 + slashCommands.length) % slashCommands.length
+      );
+      return;
+    }
+    if (slashCommands.length > 0 && e.key === 'Tab') {
+      e.preventDefault();
+      selectSlashCommand(slashCommands[slashCommandIndex]);
+      return;
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       send();
@@ -106,6 +141,61 @@ export const Composer: React.FC<ComposerProps> = ({
         boxShadow: 'none',
       }}
     >
+      {slashCommands.length > 0 && (
+        <div
+          role="listbox"
+          aria-label="Caret commands"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            margin: '0 0 2px',
+            padding: 4,
+            border: `1px solid ${caretTokens.border}`,
+            borderRadius: caretRadius.lg,
+            background: caretTokens.surfaceHigh,
+          }}
+        >
+          {slashCommands.map((command, index) => (
+            <button
+              key={command.name}
+              type="button"
+              role="option"
+              aria-selected={index === slashCommandIndex}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => selectSlashCommand(command)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 9,
+                width: '100%',
+                minWidth: 0,
+                padding: '7px 8px',
+                border: 'none',
+                borderRadius: caretRadius.md,
+                background: index === slashCommandIndex ? caretTokens.hover : 'transparent',
+                color: caretTokens.text,
+                textAlign: 'left',
+                cursor: 'pointer',
+              }}
+            >
+              <code style={{ color: caretTokens.accentStrong, fontSize: 12 }}>/{command.name}</code>
+              <span
+                style={{
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  color: caretTokens.textMuted,
+                  fontSize: 12,
+                }}
+              >
+                {command.description}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
       {(voiceStatus?.listening || voiceStatus?.error) && (
         <div
           id={voiceFeedbackId}
