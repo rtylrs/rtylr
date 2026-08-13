@@ -50,10 +50,10 @@ Three RPCs: create, list by task, delete by id.
 
 | Designed                                                                          | Contract reality                                | What shipped instead                                                                       |
 | --------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Status pills (approved / pending / locked) and the per-status split in the header | no `status` field                               | absent; a pill the server never sends is invented data                                    |
+| Status pills (approved / pending / locked) and the per-status split in the header | no `status` field                               | absent; a pill the server never sends is invented data                                     |
 | `Billable` toggle on the form, `Billable` pill on rows                            | no `billable` field                             | absent                                                                                     |
 | Category chips, and `· Development ·` on each row                                 | no `category` field                             | absent from the log form; the settings list carries a `GateNotice` saying nothing reads it |
-| Category "Logged" column, delete-with-reassign dialog                             | no per-category hours exist                     | absent; there is nothing to reassign                                                      |
+| Category "Logged" column, delete-with-reassign dialog                             | no per-category hours exist                     | absent; there is nothing to reassign                                                       |
 | Date picker on the log form                                                       | `CreateTimeLogRequest` has no date              | present, fixed to today, disabled, with the reason stated                                  |
 | Editing an entry                                                                  | no PATCH                                        | not offered; delete and re-log is the correction path                                      |
 | `description` optional                                                            | `@required` in the contract                     | `flowApi` already substitutes `'-'`; `TimePanel` treats `'-'` as empty on read             |
@@ -72,10 +72,6 @@ would teach the user something untrue.
 
 ## Deviations from the design, deliberate
 
-- **No socket-down indicator.** `RealtimeClient` in `@voxire/api` exposes only
-  `subscribe`; there is no connection state to read and its `onerror` handler is
-  empty. A connection indicator is a change to that shared package, which nine
-  apps consume.
 - **Reorder is buttons plus `Alt`+arrow, not drag.** The board's existing drag
   handling is raw HTML5 events with no touch support. Up/down buttons serve
   pointer, touch and keyboard from one implementation, and the design already
@@ -85,14 +81,6 @@ would teach the user something untrue.
   lets `en-US` render `Tue, Aug 11`. Digits are pinned to Latin with the
   `nu-latn` extension, because a duration read into a payroll import must not
   arrive in Eastern Arabic numerals.
-- **No `Time` sidebar section.** `SIDEBAR_SECTION_IDS` drives hardcoded per-id
-  blocks in `FlowLayout.tsx`, and every Time destination (Timesheet, Review,
-  Reports, Workload) is blocked. Adding the id now ships a section header with
-  nothing under it.
-- **The mobile task-detail rail is above the description, not below it.** The
-  design has it stacking underneath. `TaskDetail`'s own layout puts the rail first
-  at narrow widths, and reordering it would move all twelve rail fields, not just
-  Time. Left alone deliberately; worth fixing as its own change.
 
 ## Token changes
 
@@ -139,43 +127,107 @@ light `.18`/`.42`.
 cannot be themed from a stylesheet. Check for an inline writer before adding a
 per-mode value to `globals.css`.
 
-### No app defines a Tailwind `@theme` block, so `bg-accent` is transparent
+### The shared preset never reached any app, so `bg-accent` was transparent
 
-Every `globals.css` in this repo opens with a comment saying the
-`@voxire/tailwind-config` extensions are "ported below into v4's native `@theme`
-block". **No app actually has one.** Measured in the running app, `bg-accent` and
-`bg-warning` both compute to `rgba(0,0,0,0)`.
+Every `globals.css` in this repo opened with a comment saying the
+`@voxire/tailwind-config` extensions were "ported below into v4's native `@theme`
+block". **None had been.** The cause was not a forgotten paste: the preset is a
+**v3-style JS config, which Tailwind v4 does not read**, and the apps
+deliberately avoid `@config` because it breaks v4's content scanner here. So the
+whole preset was inert. Measured on real rendered elements, `bg-accent` and
+`bg-warning` computed to `rgba(0,0,0,0)`.
 
-Every `@voxire/ui` component that colours itself through those utilities is
-therefore untinted app-wide:
+It was never only colours. Also dead: `animate-spin-slow` (so `Button`'s loading
+spinner did not spin), `shadow-modal` (so `Dialog` had no shadow), and the radius
+scale.
 
-| Component | Class                                          | Effect                                      |
-| --------- | ---------------------------------------------- | ------------------------------------------- |
-| `Switch`  | `data-[state=checked]:bg-accent`               | checked is indistinguishable from unchecked |
-| `Alert`   | `bg-warning/10 border-warning/30 text-warning` | plain bordered box, no tone                 |
-| `Avatar`  | `bg-accent/20 text-accent`                     | untinted circle                             |
-| `Badge`   | `bg-{tone}/10 text-{tone}`                     | invisible tint                              |
-| `Button`  | `accent: bg-accent text-white`                 | no fill                                     |
+Fixed by porting the preset to `packages/tailwind-config/theme.css` and importing
+it from each app after `@import 'tailwindcss'`. One definition, ten one-line
+imports. Each app re-points individual tokens at its own runtime custom
+properties from its own `:root`, which is how Flow's `bg-accent` follows the
+per-workspace teal instead of the preset's cyan:
 
-This is pre-existing and much larger than this feature. `FlowSwitch`
-(`shared/components/FlowSwitch.tsx`) is a **local workaround, not the fix**: it
-passes arbitrary-value utilities pointing at Flow's own custom properties, which
-resolve without a theme block. The real fix is a theme mapping in the consuming
-apps, and it would change the appearance of every existing use of these utilities
-across ten apps - which is a sign-off, not a patch.
+```css
+:root {
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--flow-on-accent);
+  --color-warning: var(--flow-warn-fg);
+}
+```
 
-## Outstanding requests to `@voxire/ui`
+Flow re-points warn and danger too, so a shared `Alert` renders in Flow's palette
+with no per-instance override. `text-warning` measures `#8f5f14` in light mode.
 
-Written down rather than forked locally. Each affects every app using the
-component:
+Measured blast radius before applying: 45 direct utility usages across all ten
+apps, 42 of them in dash, and 13 `@voxire/ui` components rendered in total, of
+which **zero** were `Button` or `Badge`.
 
-- **`Button` accent foreground.** The variant is `bg-accent text-white`, which
-  measures 2.05:1 and fails AA at every size. `--flow-on-accent` (`#0a0a0a`,
-  9.6:1) is what Flow uses at its own call sites; the component still ships
-  white.
-- **`Badge` `sm` at 10px.** `text-xs` badges force a 36px table row taller.
+**A caution on verifying this.** Tailwind v4 compiles only what it finds by
+scanning source. A probe that injects a class at runtime measures a class that
+was never generated, and reports every token as broken even when it works: that
+first probe had even `rounded-lg` reading `0px`. Measure real rendered elements.
+
+## Changes made to `@voxire/ui`
+
+All four landed in the packages submodule rather than being forked locally:
+
+- **`Button` accent foreground** is now `text-accent-foreground`, near-black.
+  `bg-accent text-white` measured 1.9:1 and failed AA at every size. This one is
+  coupled to the theme block above: while `bg-accent` was transparent the white
+  text was legible only by accident, so landing the theme block on its own would
+  have _introduced_ the failure. They ship together, or the fix goes first.
+- **`Badge` `sm` at 10px**, so a pill beside 11px body text does not force a 36px
+  row taller.
 - **`Button` `xs` at 30px**, for toolbar and dense-row actions.
 - **`Avatar` `xs` at 24px/10px**, for the 32–44px rows on the later screens.
+
+The last three are additive and every default is unchanged, so nothing existing
+moved. Worth knowing when reviewing: across all ten apps there are currently
+**zero** `Button` and `Badge` instances rendered from `@voxire/ui`, so the
+contrast fix changes no button on screen today. It is correctness for the next
+one.
+
+`RealtimeClient` in `@voxire/api` also gained `getStatus` and `subscribeStatus`
+over four states, since it previously exposed only `subscribe` and had an empty
+`onerror`. `reconnecting` is deliberately distinct from `disconnected`: the first
+retries with backoff and writes still work, the second needs a reload. Flow's
+`useRealtimeStatus` wraps it and `TimePanel` renders the warning.
+
+### The mobile task detail hid its own title, and ordering was not why
+
+At 390px the task title and description were not on screen. The obvious reading
+was that the metadata rail stacked above them, and the obvious fix was to reorder.
+Both were wrong: the rail is **already last in the DOM**, so `order-last` was a
+no-op that changed nothing.
+
+The real cause is that the main column carried `flex-1`, whose `flex-basis` is
+`0%`. Inside a fixed-height scrolling flex column the taller rail claimed every
+pixel, and the main column collapsed to nothing. It now takes its natural height
+below `lg` and shares the row only from `lg` up.
+
+It also needs `min-w-0`: the title is an `<input>`, and once the column's basis
+was `auto` the input's intrinsic width pushed the column past the viewport.
+Verified at 390px that `scrollWidth === clientWidth` on task detail, settings and
+board, so nothing overflows sideways.
+
+**The lesson worth keeping:** a symptom that looks like source order can be a
+`flex-basis` collapse. Check computed geometry before rearranging markup, or you
+ship a no-op and believe it worked.
+
+### Settings sections are linkable
+
+The `Time` sidebar group needed a destination, and settings sections lived in
+`useState`. `/settings` now takes a validated `?section=` search param, so any
+section can be linked. Zod enum, **no `z.coerce`** (the router already JSON-parses
+query values, and coerce's `unknown` input type would let a wrong-typed `<Link>`
+compile), and `.catch(undefined)` so a stale URL does not replace the screen with
+the router error boundary. `SidebarLink` gained an optional `search` prop.
+
+`Time` is a fourth id in `SIDEBAR_SECTION_IDS` and inherits collapse, reorder and
+persistence. No storage migration was needed: `normalize()` drops unknown ids and
+appends known ids missing from a stored order, so an older stored order simply
+gains the group at the end. Settings → Time is its only entry until the blocked
+screens land.
 
 ## Build order for what remains
 

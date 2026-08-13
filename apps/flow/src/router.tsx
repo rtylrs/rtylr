@@ -171,7 +171,7 @@ const taskDetailRoute = createRoute({
 });
 
 // "My tasks" shows every task assigned to the user across all workspaces and
-// projects (it is not workspace-scoped) — a single cross-project board.
+// projects (it is not workspace-scoped): a single cross-project board.
 const myIssuesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my-issues',
