@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
@@ -388,10 +388,29 @@ function CampaignCard({
 
 const Campaigns: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetchedCampaigns } = useListCampaigns();
+  const pageSize = 100;
+  const [offset, setOffset] = useState(0);
+  const [loadedCampaigns, setLoadedCampaigns] = useState<CampaignPayload[]>([]);
+  const {
+    data: fetchedCampaigns,
+    isLoading,
+    isFetching,
+    isError,
+  } = useListCampaigns(pageSize, offset);
   const { data: fetchedSegments } = useListSegments();
   const updateStatus = useUpdateCampaignStatus();
   const removeCampaign = useDeleteCampaign();
+  useEffect(() => {
+    if (!fetchedCampaigns) return;
+    setLoadedCampaigns((previous) => {
+      if (offset === 0) return fetchedCampaigns;
+      const byId = new Map(previous.map((campaign) => [campaign.id, campaign]));
+      fetchedCampaigns.forEach((campaign) => byId.set(campaign.id, campaign));
+      return Array.from(byId.values());
+    });
+  }, [fetchedCampaigns, offset]);
+
+  const hasMore = fetchedCampaigns?.length === pageSize;
   const audienceBySegment = useMemo(
     () =>
       new Map(
@@ -400,9 +419,8 @@ const Campaigns: React.FC = () => {
     [fetchedSegments]
   );
   const campaigns: Campaign[] = useMemo(
-    () =>
-      (fetchedCampaigns ?? []).map((campaign) => toDisplayCampaign(campaign, audienceBySegment)),
-    [audienceBySegment, fetchedCampaigns]
+    () => loadedCampaigns.map((campaign) => toDisplayCampaign(campaign, audienceBySegment)),
+    [audienceBySegment, loadedCampaigns]
   );
   const [statusFilter, setStatusFilter] = useState<'All' | CampaignStatus>('All');
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
@@ -560,6 +578,16 @@ const Campaigns: React.FC = () => {
 
         {/* Campaign cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {isError && campaigns.length === 0 && (
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--hub-text-muted)' }}>
+              Unable to load campaigns. Please refresh and try again.
+            </div>
+          )}
+          {isLoading && campaigns.length === 0 && (
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--hub-text-muted)' }}>
+              Loading campaigns…
+            </div>
+          )}
           <AnimatePresence mode="popLayout">
             {filtered.map((c, i) => (
               <CampaignCard
@@ -576,7 +604,7 @@ const Campaigns: React.FC = () => {
               />
             ))}
           </AnimatePresence>
-          {filtered.length === 0 && (
+          {filtered.length === 0 && !isLoading && !isError && (
             <div
               style={{
                 padding: '60px',
@@ -585,7 +613,29 @@ const Campaigns: React.FC = () => {
                 fontSize: '13px',
               }}
             >
-              No campaigns in this status.
+              {hasMore
+                ? 'Load more campaigns to continue searching.'
+                : 'No campaigns in this status.'}
+            </div>
+          )}
+          {hasMore && (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 8px' }}>
+              <button
+                type="button"
+                onClick={() => setOffset((current) => current + pageSize)}
+                disabled={isFetching}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--hub-border)',
+                  background: 'var(--hub-card)',
+                  color: 'var(--hub-text)',
+                  cursor: isFetching ? 'not-allowed' : 'pointer',
+                  opacity: isFetching ? 0.6 : 1,
+                }}
+              >
+                {isFetching ? 'Loading…' : 'Load more campaigns'}
+              </button>
             </div>
           )}
         </div>
