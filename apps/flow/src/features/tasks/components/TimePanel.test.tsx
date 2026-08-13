@@ -39,6 +39,10 @@ vi.mock('../../../shared/hooks/queries/useFlowTeam', () => ({
 }));
 
 import TimePanel from './TimePanel';
+import {
+  DEFAULT_TIME_SETTINGS,
+  useTimeSettingsStore,
+} from '../../../shared/stores/timeSettingsStore';
 
 function makeLog(over: Partial<ApiTimeLog> = {}): ApiTimeLog {
   return {
@@ -70,6 +74,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   timeLogsState.value = { data: undefined, isLoading: false, isError: false, refetch };
   logTimeState.value = { mutate: logTimeMutate, isPending: false, variables: undefined };
+  useTimeSettingsStore.setState({ ...DEFAULT_TIME_SETTINGS });
 });
 
 describe('TimePanel — loading', () => {
@@ -284,6 +289,55 @@ describe('TimePanel — the log form', () => {
     renderPanel({ canLog: false });
 
     expect(screen.queryByRole('button', { name: 'flow.time.logFirst' })).not.toBeInTheDocument();
+  });
+});
+
+describe('TimePanel — workspace rounding', () => {
+  beforeEach(() => {
+    timeLogsState.value = { data: { timeLogs: [] }, isLoading: false, isError: false, refetch };
+    useTimeSettingsStore.setState({ roundingMinutes: 15 });
+  });
+
+  it('applies the workspace rounding increment to what it posts', () => {
+    renderPanel();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.time.logFirst' }));
+    fireEvent.change(screen.getByLabelText('flow.time.duration'), { target: { value: '52m' } });
+    fireEvent.keyDown(screen.getByLabelText('flow.time.duration'), { key: 'Enter' });
+
+    expect(logTimeMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ duration_minutes: 45 }),
+      expect.anything()
+    );
+  });
+
+  it('shows the rounded figure on the submit button rather than rounding silently', () => {
+    renderPanel();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.time.logFirst' }));
+    fireEvent.change(screen.getByLabelText('flow.time.duration'), { target: { value: '52m' } });
+
+    expect(screen.getByRole('button', { name: /flow\.time\.logAmount/ })).toBeInTheDocument();
+    expect(screen.getByText('flow.time.roundedNotice')).toBeInTheDocument();
+  });
+
+  it('says nothing about rounding when the value is already an exact increment', () => {
+    renderPanel();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.time.logFirst' }));
+    fireEvent.change(screen.getByLabelText('flow.time.duration'), { target: { value: '45m' } });
+
+    expect(screen.queryByText('flow.time.roundedNotice')).not.toBeInTheDocument();
+  });
+
+  it('posts the exact duration when rounding is switched off', () => {
+    useTimeSettingsStore.setState({ roundingMinutes: 0 });
+    renderPanel();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.time.logFirst' }));
+    fireEvent.change(screen.getByLabelText('flow.time.duration'), { target: { value: '52m' } });
+    fireEvent.keyDown(screen.getByLabelText('flow.time.duration'), { key: 'Enter' });
+
+    expect(logTimeMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ duration_minutes: 52 }),
+      expect.anything()
+    );
   });
 });
 

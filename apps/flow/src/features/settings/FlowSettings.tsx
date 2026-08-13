@@ -12,6 +12,7 @@ import {
   UserPlus,
   LayoutDashboard,
   Plus,
+  Clock,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -37,6 +38,7 @@ import { getCookie } from '@voxire/auth';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useLabels, useCreateLabel, useDeleteLabel } from '../../features/tasks/useLabels';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import TimeSection from './sections/TimeSection';
 import {
   useWorkspaces,
   useCreateWorkspace,
@@ -55,6 +57,11 @@ function buildSections(
   const sections: SettingsSection[] = [
     { id: 'team', label: t('common.settings.team'), icon: Users },
     { id: 'notifications', label: t('common.settings.notifications'), icon: Bell },
+    // Admin/owner only: rates and the approval lock change what the whole
+    // workspace can edit. Gated on the same role check as Workspaces.
+    ...(canManageWorkspaces
+      ? [{ id: 'time', label: t('flow.settings.time.section'), icon: Clock }]
+      : []),
     { id: 'appearance', label: t('common.settings.appearance'), icon: Palette },
     { id: 'labels', label: t('common.settings.labels'), icon: Tag },
     { id: 'life', label: t('common.settings.life'), icon: Sparkles },
@@ -976,6 +983,7 @@ const SECTION_CONTENT: Record<string, React.FC> = {
   notifications: NotificationsSection,
   appearance: AppearanceSection,
   labels: LabelsSection,
+  time: TimeSection,
   life: LifeRhythmSection,
   shortcuts: ShortcutsSection,
 };

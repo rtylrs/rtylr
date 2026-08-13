@@ -1,0 +1,162 @@
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Interpolates params, unlike the bare key-returning mock used elsewhere: the
+// labels under test are only distinguishable once their values are substituted.
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, params?: Record<string, unknown>) =>
+      params ? `${key}:${Object.values(params).join(',')}` : key,
+    i18n: { language: 'en-US' },
+  }),
+}));
+
+vi.mock('../../../shared/hooks/queries/useFlowTeam', () => ({
+  useFlowTeam: () => ({
+    data: [
+      { id: '7', name: 'Maya Krishnan' },
+      { id: '9', name: 'Sam Okafor' },
+    ],
+    isLoading: false,
+  }),
+}));
+
+import TimeSection from './TimeSection';
+import {
+  DEFAULT_TIME_SETTINGS,
+  useTimeSettingsStore,
+} from '../../../shared/stores/timeSettingsStore';
+
+beforeEach(() => {
+  localStorage.clear();
+  useTimeSettingsStore.setState({ ...DEFAULT_TIME_SETTINGS });
+});
+
+describe('TimeSection — week and targets', () => {
+  it('writes the week start through to the store', () => {
+    render(<TimeSection />);
+
+    fireEvent.change(screen.getByLabelText('flow.settings.time.weekStart'), {
+      target: { value: 'sunday' },
+    });
+
+    expect(useTimeSettingsStore.getState().weekStart).toBe('sunday');
+  });
+
+  it('writes the rounding increment through as a number, not a string', () => {
+    render(<TimeSection />);
+
+    fireEvent.change(screen.getByLabelText('flow.settings.time.rounding'), {
+      target: { value: '30' },
+    });
+
+    expect(useTimeSettingsStore.getState().roundingMinutes).toBe(30);
+  });
+
+  it('stores the weekly target in minutes while accepting hours', () => {
+    render(<TimeSection />);
+
+    fireEvent.change(screen.getByLabelText('flow.settings.time.weeklyTarget'), {
+      target: { value: '35' },
+    });
+
+    expect(useTimeSettingsStore.getState().weeklyTargetMinutes).toBe(35 * 60);
+  });
+
+  it('refuses an overtime threshold below the weekly target', () => {
+    render(<TimeSection />);
+
+    fireEvent.change(screen.getByLabelText('flow.settings.time.overtimeThreshold'), {
+      target: { value: '20' },
+    });
+
+    expect(useTimeSettingsStore.getState().overtimeThresholdMinutes).toBe(45 * 60);
+    expect(screen.getByText('flow.settings.time.overtimeBelowTarget')).toBeInTheDocument();
+  });
+});
+
+describe('TimeSection — the approval lock', () => {
+  it('states both irreversible consequences before the switch is touched', () => {
+    render(<TimeSection />);
+
+    expect(screen.getByText('flow.settings.time.lockConsequence')).toBeInTheDocument();
+  });
+
+  it('offers an undo after flipping it, because it changes what everyone else can edit', () => {
+    render(<TimeSection />);
+
+    fireEvent.click(screen.getByRole('switch', { name: 'flow.settings.time.approvalLocks' }));
+
+    expect(useTimeSettingsStore.getState().approvalLocksEntry).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'flow.settings.time.undo' }));
+    expect(useTimeSettingsStore.getState().approvalLocksEntry).toBe(true);
+  });
+});
+
+describe('TimeSection — categories', () => {
+  it('adds a category', () => {
+    render(<TimeSection />);
+
+    fireEvent.change(screen.getByLabelText('flow.settings.time.newCategoryName'), {
+      target: { value: 'Travel' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'flow.settings.time.addCategory' }));
+
+    expect(useTimeSettingsStore.getState().categories.map((c) => c.name)).toContain('Travel');
+  });
+
+  it('labels each remove control by the category it removes, not by the verb', () => {
+    render(<TimeSection />);
+
+    expect(
+      screen.getByRole('button', { name: 'flow.settings.time.removeCategoryLabel:Development' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'flow.settings.time.removeCategoryLabel:Admin' })
+    ).toBeInTheDocument();
+  });
+
+  it('says a category configures nothing yet, because TimeLog has no category field', () => {
+    render(<TimeSection />);
+
+    expect(screen.getByText('flow.settings.time.categoriesNotWired')).toBeInTheDocument();
+  });
+});
+
+describe('TimeSection — rates', () => {
+  it('reads "not set" rather than zero for a person with no rate', () => {
+    render(<TimeSection />);
+
+    expect(screen.getAllByText('flow.settings.time.rateNotSet')).toHaveLength(2);
+  });
+
+  it('stores a typed rate against the person', () => {
+    render(<TimeSection />);
+
+    fireEvent.change(screen.getByLabelText('flow.settings.time.rateFor:Maya Krishnan'), {
+      target: { value: '95' },
+    });
+
+    expect(useTimeSettingsStore.getState().ratesByUserId['7']).toBe(95);
+  });
+
+  it('clears an emptied rate back to unset rather than to zero', () => {
+    useTimeSettingsStore.getState().setRate('7', 95);
+    render(<TimeSection />);
+
+    fireEvent.change(screen.getByLabelText('flow.settings.time.rateFor:Maya Krishnan'), {
+      target: { value: '' },
+    });
+
+    expect(useTimeSettingsStore.getState().ratesByUserId['7']).toBeNull();
+  });
+});
+
+describe('TimeSection — the missing endpoint', () => {
+  it('says plainly that these values are per-browser until the endpoint lands', () => {
+    render(<TimeSection />);
+
+    expect(screen.getByText('flow.settings.time.localOnlyWarning')).toBeInTheDocument();
+  });
+});
