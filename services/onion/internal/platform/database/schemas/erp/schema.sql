@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS erp_products (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_erp_products_business_name (business_id, name),
     INDEX idx_erp_products_business_category_name (business_id, category_id, name),
+    INDEX idx_erp_products_business_brand (business_id, brand_id),
     INDEX idx_erp_products_business_active (business_id, is_active, track_inventory),
     INDEX idx_erp_products_business_sku (business_id, sku),
     INDEX idx_erp_products_business_barcode (business_id, barcode),
