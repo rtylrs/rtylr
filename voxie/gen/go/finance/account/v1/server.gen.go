@@ -241,10 +241,20 @@ func RegisterAccountServiceServer(first any, rest ...any) error {
 	mux.Handle("GET /finance/account/v1/accounts", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListAccountsRequest)
 		if r.URL.Query().Get("page") != "" {
-			req.Page = parseInt64(r.URL.Query().Get("page"))
+			parsedPage, err := parseInt64(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
 		}
 		if r.URL.Query().Get("page_size") != "" {
-			req.PageSize = parseInt64(r.URL.Query().Get("page_size"))
+			parsedPageSize, err := parseInt64(r.URL.Query().Get("page_size"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page_size: "+err.Error())
+				return
+			}
+			req.PageSize = parsedPageSize
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
