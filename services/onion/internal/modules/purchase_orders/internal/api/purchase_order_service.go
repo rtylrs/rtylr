@@ -176,11 +176,15 @@ func (a *PurchaseOrderAPI) UpdatePurchaseOrderStatus(ctx context.Context, req *e
 }
 
 func (a *PurchaseOrderAPI) ApprovePurchaseOrder(ctx context.Context, req *erppurchaseorderv1.ApprovePurchaseOrderRequest) (*erppurchaseorderv1.ApprovePurchaseOrderResponse, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, purchaseOrderStatusError(http.StatusUnauthorized, "unauthorized")
+	}
 	ownerID, err := purchaseOrderOwnerID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if approveErr := a.Service.ApprovePurchaseOrder(ctx, ownerID, req.GetId()); approveErr != nil {
+	if approveErr := a.Service.ApprovePurchaseOrder(ctx, ownerID, req.GetId(), authUser.UserID, authUser.Role); approveErr != nil {
 		if errors.Is(approveErr, domain.ErrPurchaseOrderNotFound) {
 			return nil, purchaseOrderStatusError(http.StatusNotFound, "Purchase order not found")
 		}
@@ -189,6 +193,15 @@ func (a *PurchaseOrderAPI) ApprovePurchaseOrder(ctx context.Context, req *erppur
 		}
 		if errors.Is(approveErr, domain.ErrPurchaseOrderAlreadyReceived) {
 			return nil, purchaseOrderStatusError(http.StatusConflict, "Received purchase orders cannot be reopened")
+		}
+		if errors.Is(approveErr, domain.ErrPurchaseOrderSelfApproval) {
+			return nil, purchaseOrderStatusError(http.StatusForbidden, "Purchase order creators cannot approve their own orders")
+		}
+		if errors.Is(approveErr, domain.ErrPurchaseOrderApprovalForbidden) {
+			return nil, onekiterrors.PermissionDenied()
+		}
+		if errors.Is(approveErr, domain.ErrPurchaseOrderInvalidTransition) {
+			return nil, purchaseOrderStatusError(http.StatusConflict, "Purchase order cannot be approved from its current status")
 		}
 		return nil, purchaseOrderStatusError(http.StatusInternalServerError, "Failed to approve purchase order")
 	}

@@ -257,6 +257,10 @@ func (r *Repository) ApprovePurchaseOrder(ctx context.Context, businessID, id in
 		if status == string(domain.POStatusReceived) {
 			return domain.ErrPurchaseOrderAlreadyReceived
 		}
+		if status == string(domain.POStatusApproved) {
+			return domain.ErrPurchaseOrderAlreadyApproved
+		}
+		return domain.ErrPurchaseOrderInvalidTransition
 	}
 
 	return nil
@@ -374,9 +378,13 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			err = perr
 			return err
 		}
-		previous, perr := strconv.ParseFloat(it.QuantityReceived.String, 64)
-		if !it.QuantityReceived.Valid {
-			previous = 0
+		previous := 0.0
+		if it.QuantityReceived.Valid {
+			parsed, parseErr := strconv.ParseFloat(it.QuantityReceived.String, 64)
+			if parseErr != nil {
+				return parseErr
+			}
+			previous = parsed
 		}
 		qty := ordered
 		if len(submitted) > 0 {
