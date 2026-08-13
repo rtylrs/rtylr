@@ -24,10 +24,7 @@ func NewRepository(db *sql.DB) *Repository {
 
 func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.StoreProduct, error) {
 	// cross-schema read from erp_products + erp_product_images — catalog enrichment
-	rows, err := r.queries.ListStoreProductsWithCatalog(ctx, sqlc.ListStoreProductsWithCatalogParams{
-		BusinessID:   businessID,
-		BusinessID_2: businessID,
-	})
+	rows, err := r.queries.ListStoreProductsWithCatalog(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list store products", logger.Error(err))
 		return nil, err
