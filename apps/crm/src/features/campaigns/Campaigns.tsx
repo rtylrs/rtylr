@@ -28,7 +28,14 @@ import { ConfirmModal } from '../../shared/components/ui';
 
 const ACCENT = '#3b82f6';
 
-type CampaignStatus = 'Draft' | 'Active' | 'Paused' | 'Completed';
+type CampaignStatus =
+  | 'Draft'
+  | 'Scheduled'
+  | 'Active'
+  | 'Paused'
+  | 'Completed'
+  | 'Sent'
+  | 'Cancelled';
 type Channel = 'Email' | 'SMS' | 'Push';
 
 interface Campaign {
@@ -57,7 +64,9 @@ const STATUS_TO_DISPLAY: Record<string, CampaignStatus> = {
   active: 'Active',
   paused: 'Paused',
   completed: 'Completed',
-  scheduled: 'Draft',
+  scheduled: 'Scheduled',
+  sent: 'Sent',
+  cancelled: 'Cancelled',
 };
 
 /** Projects a backend campaign payload onto the local display shape. */
@@ -84,9 +93,12 @@ function toDisplayCampaign(c: CampaignPayload, audienceBySegment: Map<number, nu
 
 const statusColor: Record<CampaignStatus, { bg: string; text: string; dot: string }> = {
   Draft: { bg: 'rgba(148,163,184,0.12)', text: '#94a3b8', dot: '#94a3b8' },
+  Scheduled: { bg: 'rgba(139,92,246,0.12)', text: '#8b5cf6', dot: '#8b5cf6' },
   Active: { bg: 'rgba(16,185,129,0.12)', text: '#10b981', dot: '#10b981' },
   Paused: { bg: 'rgba(245,158,11,0.12)', text: '#f59e0b', dot: '#f59e0b' },
   Completed: { bg: 'rgba(59,130,246,0.12)', text: ACCENT, dot: ACCENT },
+  Sent: { bg: 'rgba(16,185,129,0.12)', text: '#10b981', dot: '#10b981' },
+  Cancelled: { bg: 'rgba(239,68,68,0.12)', text: '#ef4444', dot: '#ef4444' },
 };
 
 const channelIcon: Record<Channel, React.ComponentType<{ size?: number }>> = {
@@ -105,8 +117,11 @@ const statusFilters: Array<'All' | CampaignStatus> = [
   'All',
   'Active',
   'Draft',
+  'Scheduled',
   'Paused',
   'Completed',
+  'Sent',
+  'Cancelled',
 ];
 
 function StatusBadge({ status }: { status: CampaignStatus }) {
@@ -420,7 +435,7 @@ const Campaigns: React.FC = () => {
   };
 
   const handleEdit = (c: Campaign): void => {
-    if (c.status === 'Completed') {
+    if (c.status === 'Completed' || c.status === 'Sent' || c.status === 'Cancelled') {
       navigate({ to: `/campaigns/${c.id}` });
       return;
     }

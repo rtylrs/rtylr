@@ -385,7 +385,7 @@ const Leads: React.FC = () => {
           title="Delete lead"
           description={
             deleteTarget
-              ? `Delete "${deleteTarget.company}"? This will also remove all associated touchpoints and contacts.`
+              ? `Delete "${deleteTarget.companyName ?? deleteTarget.company ?? 'this lead'}"? This will also remove all associated touchpoints and contacts.`
               : 'Are you sure?'
           }
           confirmLabel="Delete"

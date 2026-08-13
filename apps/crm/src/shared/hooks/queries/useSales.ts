@@ -285,7 +285,8 @@ export const useContract = (id: number | undefined): UseQueryResult<Contract> =>
     queryKey: ['crm-sales-contract', id],
     queryFn: async (): Promise<Contract> => {
       const res = await unwrap(safe.get<Contract>(`/crm/sales/contracts/${id}`));
-      return res as Contract;
+      const envelope = (res ?? {}) as { contract?: Contract };
+      return (envelope.contract ?? res) as Contract;
     },
     enabled: !!id,
   });

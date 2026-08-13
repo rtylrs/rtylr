@@ -34,7 +34,7 @@ export const campaignSchema = z.object({
   updatedAt: z.string().optional(),
 });
 
-export const campaignStatsSchema = z.object({
+const legacyCampaignStatsSchema = z.object({
   id: finiteNumber,
   sent: finiteNumber,
   delivered: finiteNumber,
@@ -54,6 +54,37 @@ export const campaignStatsSchema = z.object({
     .default([]),
 });
 
+const backendCampaignStatsSchema = z.object({
+  campaignId: finiteNumber,
+  audienceCount: finiteNumber.catch(0),
+  sentCount: finiteNumber.catch(0),
+  deliveredCount: finiteNumber.catch(0),
+  openedCount: finiteNumber.catch(0),
+  clickedCount: finiteNumber.catch(0),
+  bouncedCount: finiteNumber.catch(0),
+  failedCount: finiteNumber.catch(0),
+});
+
+/** Normalize both the old UI shape and the CRM stats handler's canonical shape. */
+export const campaignStatsSchema = z
+  .union([legacyCampaignStatsSchema, backendCampaignStatsSchema])
+  .transform((stats) => {
+    if ('campaignId' in stats) {
+      return {
+        id: stats.campaignId,
+        sent: stats.sentCount,
+        delivered: stats.deliveredCount,
+        opened: stats.openedCount,
+        clicked: stats.clickedCount,
+        unsubscribed: 0,
+        bounced: stats.bouncedCount,
+        revenue: 0,
+        timeline: [],
+      };
+    }
+    return stats;
+  });
+
 export type Campaign = z.infer<typeof campaignSchema>;
 export type CampaignStats = z.infer<typeof campaignStatsSchema>;
 
@@ -67,7 +98,15 @@ export function calculateOpenRate(campaign: Campaign): number {
 
 // -- Domain constants ---------------------------------------------------------
 
-export const CAMPAIGN_STATUSES = ['draft', 'scheduled', 'active', 'paused', 'completed'] as const;
+export const CAMPAIGN_STATUSES = [
+  'draft',
+  'scheduled',
+  'active',
+  'paused',
+  'completed',
+  'sent',
+  'cancelled',
+] as const;
 export type CampaignStatus = (typeof CAMPAIGN_STATUSES)[number];
 
 export const CAMPAIGN_TYPES = ['email', 'sms', 'push'] as const;
@@ -105,6 +144,8 @@ export const CAMPAIGN_STATUS_LABELS: Record<CampaignStatus, string> = {
   active: 'Active',
   paused: 'Paused',
   completed: 'Completed',
+  sent: 'Sent',
+  cancelled: 'Cancelled',
 };
 
 export const CAMPAIGN_TYPE_LABELS: Record<CampaignType, string> = {

@@ -7,6 +7,7 @@ import {
   useCreateCampaign,
   useGetCampaign,
   useUpdateCampaign,
+  useUpdateCampaignStatus,
 } from '../../shared/hooks/queries/useCampaigns';
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import { useTemplates } from '../../shared/hooks/queries/useTemplates';
@@ -22,6 +23,7 @@ const EmailCampaign: React.FC = () => {
 
   const create = useCreateCampaign();
   const update = useUpdateCampaign();
+  const updateStatus = useUpdateCampaignStatus();
   const { data: existingCampaign } = useGetCampaign(campaignId);
   const { data: fetchedSegments } = useListSegments();
   const { data: fetchedTemplates } = useTemplates();
@@ -33,7 +35,7 @@ const EmailCampaign: React.FC = () => {
   const [subject, setSubject] = useState(searchParams.get('subject') || '');
   const [body, setBody] = useState(searchParams.get('body') || '');
   const [previewOpen, setPreviewOpen] = useState(false);
-  const pending = create.isPending || update.isPending;
+  const pending = create.isPending || update.isPending || updateStatus.isPending;
 
   useEffect(() => {
     if (existingCampaign) {
@@ -62,18 +64,34 @@ const EmailCampaign: React.FC = () => {
     const payload = {
       name,
       type: 'email',
-      status: send ? 'active' : 'draft',
       subject,
       body,
       audienceSegmentId: segmentId ? Number(segmentId) : null,
     };
     const callbacks = {
-      onSuccess: () => {
-        toast.success(send ? 'Campaign sent' : 'Draft saved');
-        navigate({ to: '/campaigns' });
+      onSuccess: (result: { campaignId?: number }) => {
+        if (!send) {
+          toast.success('Draft saved');
+          navigate({ to: '/campaigns' });
+          return;
+        }
+        if (!result.campaignId && !campaignId) {
+          toast.error('Campaign was saved but could not be activated');
+          return;
+        }
+        updateStatus.mutate(
+          { id: campaignId ?? result.campaignId!, status: 'active' },
+          {
+            onSuccess: () => {
+              toast.success('Campaign activated');
+              navigate({ to: '/campaigns' });
+            },
+            onError: () => toast.error('Campaign was saved but could not be activated'),
+          }
+        );
       },
       onError: () => {
-        toast.error(send ? 'Failed to send campaign' : 'Failed to save draft');
+        toast.error(send ? 'Failed to save or activate campaign' : 'Failed to save draft');
       },
     };
 
@@ -121,7 +139,7 @@ const EmailCampaign: React.FC = () => {
                 disabled={pending || !name.trim() || !subject.trim()}
               >
                 <Send size={13} />
-                {pending ? 'Sending…' : 'Send now'}
+                {pending ? 'Activating…' : 'Save & activate'}
               </Button>
             </>
           }
