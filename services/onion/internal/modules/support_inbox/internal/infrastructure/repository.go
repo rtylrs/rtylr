@@ -35,9 +35,12 @@ func (r *Repository) ListInbox(ctx context.Context, businessID int64, page, page
 	}
 
 	rows, err := r.queries.ListInbox(ctx, sqlc.ListInboxParams{
-		BusinessID: businessID,
-		Limit:      int32(pageSize),
-		Offset:     int32(offset),
+		BusinessID:   businessID,
+		Limit:        int32(pageSize),
+		Offset:       int32(offset),
+		BusinessID_2: businessID,
+		Limit_2:      int32(pageSize),
+		Offset_2:     int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list inbox", logger.Error(err))
@@ -51,8 +54,10 @@ func (r *Repository) ListInbox(ctx context.Context, businessID int64, page, page
 			CustomerName:  row.CustomerName,
 			CustomerEmail: row.CustomerEmail,
 			Subject:       row.Subject,
-			LastMessage:   row.LastMessage,
 			MessageCount:  int(row.MessageCount),
+		}
+		if row.LastMessage.Valid {
+			item.LastMessage = row.LastMessage.String
 		}
 		if row.Status.Valid {
 			item.Status = string(row.Status.SupportTicketsStatus)
