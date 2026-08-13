@@ -9,6 +9,7 @@ import {
   toPastel,
   paletteColor,
   PROJECT_COLORS,
+  accentTints,
 } from './colorUtils';
 
 describe('isValidHex', () => {
@@ -93,5 +94,42 @@ describe('paletteColor', () => {
 
   it('wraps around the palette', () => {
     expect(paletteColor(0)).toBe(paletteColor(PROJECT_COLORS.length));
+  });
+});
+
+describe('accentTints', () => {
+  it('keeps the accent fill itself untouched', () => {
+    expect(accentTints('#64c5b9', 'dark')['--accent']).toBe('#64c5b9');
+    expect(accentTints('#64c5b9', 'light')['--accent']).toBe('#64c5b9');
+  });
+
+  it('washes the muted tint heavier in light mode, where .12 reads lighter', () => {
+    expect(accentTints('#64c5b9', 'dark')['--accent-muted']).toBe('rgba(100, 197, 185, 0.12)');
+    expect(accentTints('#64c5b9', 'light')['--accent-muted']).toBe('rgba(100, 197, 185, 0.18)');
+  });
+
+  it('strengthens the border and focus ring in light mode too', () => {
+    const dark = accentTints('#64c5b9', 'dark');
+    const light = accentTints('#64c5b9', 'light');
+
+    expect(dark['--accent-border']).toBe('rgba(100, 197, 185, 0.3)');
+    expect(light['--accent-border']).toBe('rgba(100, 197, 185, 0.42)');
+    expect(dark['--accent-focus']).toBe('rgba(100, 197, 185, 0.5)');
+    expect(light['--accent-focus']).toBe('rgba(100, 197, 185, 0.5)');
+  });
+
+  it('accepts the uppercase hex the workspace colour picker emits', () => {
+    // FlowSettings' WORKSPACE_COLORS are uppercase, e.g. '#64C5B9'.
+    expect(accentTints('#3B82F6', 'dark')['--accent-muted']).toBe('rgba(59, 130, 246, 0.12)');
+    expect(accentTints('#3B82F6', 'dark')['--accent']).toBe('#3b82f6');
+  });
+
+  it('treats a three-digit hex as invalid, matching isValidHex', () => {
+    expect(accentTints('#0f8', 'dark')['--accent']).toBe('#64c5b9');
+  });
+
+  it('falls back to the brand teal rather than emitting rgba(NaN)', () => {
+    expect(accentTints('not-a-colour', 'dark')['--accent-muted']).toBe('rgba(100, 197, 185, 0.12)');
+    expect(accentTints('', 'light')['--accent']).toBe('#64c5b9');
   });
 });

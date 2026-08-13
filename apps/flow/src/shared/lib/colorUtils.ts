@@ -64,3 +64,36 @@ export type ProjectColor = (typeof PROJECT_COLORS)[number];
 export function paletteColor(index: number): ProjectColor {
   return PROJECT_COLORS[index % PROJECT_COLORS.length];
 }
+
+/** Resolved theme, after 'system' has been collapsed to one or the other. */
+export type ResolvedTheme = 'dark' | 'light';
+
+const ACCENT_FALLBACK = '#64c5b9';
+
+/**
+ * The four accent custom properties, derived from the active workspace colour.
+ *
+ * These have to be computed at runtime because the accent is per-workspace, and
+ * they are applied as inline styles on documentElement - which beats any
+ * stylesheet rule. That is why the per-mode alpha lives here rather than in
+ * globals.css: a light-mode value declared there would be silently overridden.
+ *
+ * A .12 wash reads lighter on white than on black, so light mode runs the tint
+ * and border heavier to carry the same weight. The focus alpha is unchanged: it
+ * is already strong enough in both modes.
+ */
+export function accentTints(color: string, theme: ResolvedTheme): Record<string, string> {
+  const hex = isValidHex(color) ? normalizeHex(color) : ACCENT_FALLBACK;
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const rgba = (alpha: number): string => `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  const light = theme === 'light';
+  return {
+    '--accent': hex,
+    '--accent-muted': rgba(light ? 0.18 : 0.12),
+    '--accent-border': rgba(light ? 0.42 : 0.3),
+    '--accent-focus': rgba(0.5),
+  };
+}
