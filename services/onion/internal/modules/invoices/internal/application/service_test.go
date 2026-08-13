@@ -40,29 +40,35 @@ func (m *mockRepo) GetInvoiceByID(_ context.Context, _, _ int64) (*domain.Invoic
 	return m.invoice, m.err
 }
 
-func (m *mockRepo) CreateInvoiceWithItems(_ context.Context, _ int64, _ domain.Invoice, _ []domain.InvoiceItem) (int64, error) {
+func (m *mockRepo) CreateInvoice(_ context.Context, _ int64, _ domain.Invoice) (int64, error) {
 	return m.generatedID, m.err
+}
+
+func (m *mockRepo) CreateInvoiceItems(_ context.Context, _ int64, _ []domain.InvoiceItem) error {
+	return m.err
 }
 
 func (m *mockRepo) GetInvoiceItems(_ context.Context, _ int64) ([]domain.InvoiceItem, error) {
 	return m.items, m.err
 }
 func (m *mockRepo) DeleteInvoiceItems(_ context.Context, _ int64) error { return m.err }
-func (m *mockRepo) UpdateInvoiceWithItems(_ context.Context, _ int64, _ domain.Invoice, _ []domain.InvoiceItem) error {
+func (m *mockRepo) UpdateInvoice(_ context.Context, _ int64, _ domain.Invoice) error {
 	return m.err
 }
 func (m *mockRepo) UpdateInvoiceStatus(_ context.Context, _, _ int64, _ string) error { return m.err }
-func (m *mockRepo) DeleteInvoice(_ context.Context, _, _ int64) error                 { return m.err }
+func (m *mockRepo) UpdateInvoicePaymentTotals(_ context.Context, _, _ int64, _, _ float64, _ string, _ *time.Time) error {
+	return m.err
+}
+func (m *mockRepo) DeleteInvoice(_ context.Context, _, _ int64) error { return m.err }
 func (m *mockRepo) CountInvoiceSequence(_ context.Context, _ int64, _ int) (int64, error) {
 	return m.seqCount, m.err
 }
 
-func (m *mockRepo) RecordPayment(_ context.Context, _ int64, _ domain.Payment) (int64, error) {
-	return m.generatedID, m.err
-}
-
-func (m *mockRepo) CreatePayment(_ context.Context, _ int64, _ domain.Payment) (int64, error) {
-	return m.generatedID, m.err
+func (m *mockRepo) RecordPayment(_ context.Context, _ int64, _ domain.PaymentInput) (*domain.Payment, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return &domain.Payment{ID: m.generatedID}, nil
 }
 
 func (m *mockRepo) GetPaymentsByInvoice(_ context.Context, _ int64) ([]domain.Payment, error) {

@@ -30,15 +30,16 @@ func invalidateInvoicesScope(ctx context.Context, businessID int64) {
 type repository interface {
 	ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
 	GetInvoiceByID(ctx context.Context, businessID, invoiceID int64) (*domain.Invoice, error)
-	CreateInvoiceWithItems(ctx context.Context, businessID int64, inv domain.Invoice, items []domain.InvoiceItem) (int64, error)
+	CreateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) (int64, error)
+	CreateInvoiceItems(ctx context.Context, invoiceID int64, items []domain.InvoiceItem) error
 	GetInvoiceItems(ctx context.Context, invoiceID int64) ([]domain.InvoiceItem, error)
 	DeleteInvoiceItems(ctx context.Context, invoiceID int64) error
-	UpdateInvoiceWithItems(ctx context.Context, businessID int64, inv domain.Invoice, items []domain.InvoiceItem) error
+	UpdateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) error
 	UpdateInvoiceStatus(ctx context.Context, businessID, invoiceID int64, status string) error
-	RecordPayment(ctx context.Context, businessID int64, p domain.Payment) (int64, error)
+	UpdateInvoicePaymentTotals(ctx context.Context, businessID, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error
 	DeleteInvoice(ctx context.Context, businessID, invoiceID int64) error
 	CountInvoiceSequence(ctx context.Context, businessID int64, year int) (int64, error)
-	CreatePayment(ctx context.Context, businessID int64, p domain.Payment) (int64, error)
+	RecordPayment(ctx context.Context, businessID int64, input domain.PaymentInput) (*domain.Payment, error)
 	GetPaymentsByInvoice(ctx context.Context, invoiceID int64) ([]domain.Payment, error)
 	ListExpenses(ctx context.Context, businessID, categoryID int64, search, dateFrom, dateTo string, limit, offset int) ([]domain.Expense, error)
 	GetExpenseByID(ctx context.Context, businessID, expenseID int64) (*domain.Expense, error)
@@ -234,13 +235,17 @@ func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input dom
 		Terms:          input.Terms,
 	}
 
-	invID, err := s.repo.CreateInvoiceWithItems(ctx, businessID, inv, items)
+	invID, err := s.repo.CreateInvoice(ctx, businessID, inv)
 	if err != nil {
 		return nil, err
 	}
 
 	inv.ID = invID
 	inv.Items = items
+
+	if err := s.repo.CreateInvoiceItems(ctx, invID, items); err != nil {
+		return nil, err
+	}
 
 	return &inv, nil
 }
@@ -336,7 +341,15 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 	existing.Notes = input.Notes
 	existing.Terms = input.Terms
 
-	if err := s.repo.UpdateInvoiceWithItems(ctx, businessID, *existing, items); err != nil {
+	if err := s.repo.UpdateInvoice(ctx, businessID, *existing); err != nil {
+		return nil, err
+	}
+
+	if err := s.repo.DeleteInvoiceItems(ctx, invoiceID); err != nil {
+		return nil, err
+	}
+
+	if err := s.repo.CreateInvoiceItems(ctx, invoiceID, items); err != nil {
 		return nil, err
 	}
 
@@ -400,44 +413,12 @@ func (s *Service) RecordPayment(ctx context.Context, businessID int64, input dom
 		return nil, domain.ErrInvalidPaymentAmount
 	}
 
-	inv, err := s.repo.GetInvoiceByID(ctx, businessID, input.InvoiceID)
-	if err != nil {
-		return nil, err
-	}
-	if domain.IsTerminal(inv.Status) {
-		return nil, domain.ErrInvoiceNotDraft
-	}
-
-	paymentDate, err := time.Parse("2006-01-02", input.PaymentDate)
-	if err != nil {
+	if _, err := time.Parse("2006-01-02", input.PaymentDate); err != nil {
 		logger.Ctx(ctx).Error("Failed to parse payment date", logger.Error(err))
 
 		return nil, err
 	}
-
-	currency := input.Currency
-	if currency == "" {
-		currency = inv.Currency
-	}
-
-	p := domain.Payment{
-		OwnerID:     businessID,
-		InvoiceID:   input.InvoiceID,
-		Amount:      input.Amount,
-		Currency:    currency,
-		PaymentDate: paymentDate,
-		Method:      input.Method,
-		Reference:   input.Reference,
-		Notes:       input.Notes,
-	}
-
-	paymentID, err := s.repo.RecordPayment(ctx, businessID, p)
-	if err != nil {
-		return nil, err
-	}
-	p.ID = paymentID
-
-	return &p, nil
+	return s.repo.RecordPayment(ctx, businessID, input)
 }
 
 // ---------------------------------------------------------------------------

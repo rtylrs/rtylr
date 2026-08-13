@@ -127,6 +127,11 @@ FROM finance_payments
 WHERE invoice_id = ?
 ORDER BY payment_date ASC;
 
+-- name: GetPaymentByReference :one
+SELECT id, owner_id, business_id, invoice_id, amount, currency, payment_date, method, reference, notes, created_at
+FROM finance_payments
+WHERE business_id = ? AND invoice_id = ? AND reference = ?;
+
 -- name: ListExpensesByOwner :many
 SELECT id, owner_id, business_id, category_id, description, amount, currency, expense_date, vendor,
        payment_method, receipt_url, is_tax_deductible, tax_amount, notes, status, created_at, updated_at
