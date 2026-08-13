@@ -31,16 +31,16 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
         {current ? (
           <>
             <Circle size={8} className="fill-current" style={{ color: current.color }} />
-            <span className="flex-1 text-left truncate">{current.name}</span>
+            <span className="flex-1 text-start truncate">{current.name}</span>
           </>
         ) : (
-          <span className="flex-1 text-left">{placeholder}</span>
+          <span className="flex-1 text-start">{placeholder}</span>
         )}
         <ChevronDown size={11} />
       </button>
       {open && (
         <div
-          className="absolute top-full left-0 mt-1 rounded-lg py-1 z-50 min-w-full max-h-60 overflow-y-auto"
+          className="absolute top-full start-0 mt-1 rounded-lg py-1 z-50 min-w-full max-h-60 overflow-y-auto"
           style={{
             background: 'var(--flow-card)',
             border: '1px solid var(--flow-border)',
@@ -54,7 +54,7 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
                 onChange(p.id);
                 setOpen(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-[12px] hover:bg-[var(--flow-hover)] text-left"
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-[12px] hover:bg-[var(--flow-hover)] text-start"
               style={{ color: 'var(--flow-text)' }}
             >
               <Circle size={8} className="fill-current" style={{ color: p.color }} />
