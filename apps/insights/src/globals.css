@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '../../../packages/tailwind-config/theme.css';
 
 /* v4 auto-detects content relative to this CSS file. We add an
  * explicit @source for the cross-workspace packages we pull classes
@@ -54,6 +55,14 @@
   --hub-input-bg: #ffffff;
   --hub-scrollbar: rgba(0, 0, 0, 0.15);
   --hub-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Tailwind colour tokens re-pointed at this app's runtime theme ──────────
+ * This app sets --accent itself, so bg-accent / ring-accent follow its own
+ * brand rather than the shared preset's cyan. */
+:root {
+  --color-accent: var(--accent);
+  --color-ring: var(--accent);
 }
 
 @layer base {

@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '../../../packages/tailwind-config/theme.css';
 
 /* v4 auto-detects content relative to this CSS file. We add an
  * explicit @source for the cross-workspace packages we pull classes
@@ -108,6 +109,14 @@
 
 :root[data-theme='light'] .rtylr-logo {
   filter: brightness(0);
+}
+
+/* ── Tailwind colour tokens re-pointed at this app's runtime theme ──────────
+ * This app sets --accent itself, so bg-accent / ring-accent follow its own
+ * brand rather than the shared preset's cyan. */
+:root {
+  --color-accent: var(--accent);
+  --color-ring: var(--accent);
 }
 
 @layer base {
