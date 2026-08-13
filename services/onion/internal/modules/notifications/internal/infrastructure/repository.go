@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/notifications/internal/domain"
 	"github.com/voxire/onion/internal/modules/notifications/internal/infrastructure/persistence/sqlc"
@@ -20,9 +21,16 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) List(ctx context.Context, businessID, userID int64) ([]domain.Notification, error) {
+	return r.ListPage(ctx, businessID, userID, 100, nil, nil)
+}
+
+func (r *Repository) ListPage(ctx context.Context, businessID, userID int64, limit int32, cursorCreatedAt *time.Time, cursorID *int64) ([]domain.Notification, error) {
 	rows, err := r.queries.ListNotifications(ctx, sqlc.ListNotificationsParams{
-		BusinessID: businessID,
-		UserID:     userID,
+		BusinessID:      businessID,
+		UserID:          userID,
+		Limit:           limit,
+		CursorCreatedAt: nullTime(cursorCreatedAt),
+		CursorID:        nullInt64(cursorID),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list notifications", logger.Error(err))
@@ -48,6 +56,22 @@ func (r *Repository) List(ctx context.Context, businessID, userID int64) ([]doma
 	}
 
 	return notifications, nil
+}
+
+func nullTime(value *time.Time) sql.NullTime {
+	if value == nil {
+		return sql.NullTime{}
+	}
+
+	return sql.NullTime{Time: *value, Valid: true}
+}
+
+func nullInt64(value *int64) sql.NullInt64 {
+	if value == nil {
+		return sql.NullInt64{}
+	}
+
+	return sql.NullInt64{Int64: *value, Valid: true}
 }
 
 func (r *Repository) MarkRead(ctx context.Context, userID, notificationID int64) error {

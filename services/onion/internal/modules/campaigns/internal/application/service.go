@@ -31,6 +31,34 @@ type repository interface {
 	Delete(ctx context.Context, businessID, id int64) error
 }
 
+type statusRepository interface {
+	ListByStatus(ctx context.Context, businessID int64, status string) ([]domain.Campaign, error)
+}
+
+func (s *Service) ListByStatus(ctx context.Context, businessID int64, status string) ([]domain.Campaign, error) {
+	if status == "" {
+		return s.List(ctx, businessID)
+	}
+
+	if repo, ok := s.repo.(statusRepository); ok {
+		return repo.ListByStatus(ctx, businessID, status)
+	}
+
+	all, err := s.List(ctx, businessID)
+	if err != nil {
+		return nil, err
+	}
+
+	filtered := make([]domain.Campaign, 0, len(all))
+	for _, campaign := range all {
+		if campaign.Status == status {
+			filtered = append(filtered, campaign)
+		}
+	}
+
+	return filtered, nil
+}
+
 type Service struct {
 	repo repository
 }

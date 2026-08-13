@@ -10,6 +10,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/api"
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/application"
+	internaljobs "github.com/voxire/onion/internal/modules/recurring_invoices/internal/jobs"
+	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 	financerecurringinvoicev1 "github.com/voxire/voxie/gen/go/finance/recurring_invoice/v1"
 )
 
@@ -24,6 +26,10 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
 	_ = ctx
 	_ = router
+}
+
+func (m *Module) RegisterJobs(ctx context.Context, registry *platformjobs.Registry) {
+	internaljobs.Register(ctx, registry, m.service)
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

@@ -9,6 +9,17 @@ import (
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/domain"
 )
 
+func TestTruncatePreviewSignalsOverflow(t *testing.T) {
+	items := make([]int, reconciliationPreviewLimit+1)
+	preview, truncated := truncatePreview(items)
+	if !truncated {
+		t.Fatal("truncated = false, want true")
+	}
+	if len(preview) != reconciliationPreviewLimit {
+		t.Fatalf("preview length = %d, want %d", len(preview), reconciliationPreviewLimit)
+	}
+}
+
 type mockRepo struct {
 	bank         []domain.UnmatchedBankTransaction
 	invoices     []domain.UnmatchedInvoice
