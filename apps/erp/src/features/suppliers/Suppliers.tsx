@@ -220,9 +220,8 @@ const Suppliers: React.FC = () => {
                 <motion.div
                   key={supplier.id}
                   variants={itemVariants}
-                  className="rounded-xl p-5 flex flex-col gap-4 transition-colors cursor-pointer"
+                  className="rounded-xl p-5 flex flex-col gap-4 transition-colors"
                   style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-                  whileHover={{ scale: 1.015, transition: { duration: 0.15 } }}
                 >
                   {/* Header row */}
                   <div className="flex items-start gap-3">
