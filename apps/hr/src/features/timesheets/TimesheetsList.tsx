@@ -12,6 +12,7 @@ import {
   Pill,
   EmptyState,
   Skeleton,
+  QueryError,
   Tabs,
   ACCENT,
 } from '../../shared/components/ui';
@@ -38,7 +39,7 @@ const TimesheetsList = (): React.JSX.Element => {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  const { data, isLoading } = useListTimesheets(
+  const { data, isLoading, isError, isFetching, refetch } = useListTimesheets(
     statusFilter === 'all' ? {} : { status: statusFilter }
   );
 
@@ -72,7 +73,7 @@ const TimesheetsList = (): React.JSX.Element => {
           }}
         />
 
-        {isLoading ? (
+        {isError ? <QueryError onRetry={() => refetch()} isRetrying={isFetching} /> : isLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <Skeleton height={72} />
             <Skeleton height={72} />

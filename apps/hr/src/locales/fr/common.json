@@ -24,6 +24,7 @@
   "confirm": "Confirmer",
   "close": "Fermer",
   "retry": "Réessayer",
+  "loadError": "Une erreur s’est produite lors du chargement. Veuillez réessayer.",
   "approve": "Approuver",
   "reject": "Refuser",
   "optionalNote": "Note optionnelle"
