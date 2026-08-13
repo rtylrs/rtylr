@@ -19,19 +19,22 @@ var aiStreamRateLimit = serverHttp.AIUserRateLimit(5, time.Minute)
 
 type Module struct {
 	snipsService   *application.Service
-	memoryService  handlers.MemoryService
+	memoryService  application.MemoryService
 	quotaService   handlers.QuotaService
-	analystService handlers.AnalystService
-	toolExecutors  []handlers.ToolExecutor
+	analystService application.AnalystService
+	toolExecutors  []application.ToolExecutor
 }
 
-func NewModule(ctx context.Context, memoryService handlers.MemoryService, quotaService handlers.QuotaService, analystService handlers.AnalystService, toolExecutors ...handlers.ToolExecutor) *Module {
+func NewModule(ctx context.Context, memoryService application.MemoryService, quotaService handlers.QuotaService, analystService application.AnalystService, toolExecutors ...application.ToolExecutor) *Module {
+	if err := application.ValidateToolRegistry(); err != nil {
+		panic(fmt.Errorf("invalid Caret tool registry: %w", err))
+	}
 	snipsService, err := application.NewService(ctx)
 	if err != nil {
 		snipsService = nil
 	}
 	if analystService != nil {
-		toolExecutors = append([]handlers.ToolExecutor{handlers.NewBusinessSnapshotToolExecutor(analystService)}, toolExecutors...)
+		toolExecutors = append([]application.ToolExecutor{application.NewBusinessSnapshotToolExecutor(analystService)}, toolExecutors...)
 	}
 
 	return &Module{
@@ -57,6 +60,13 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, r *chi.Mux, _ ...interface{}) {
+	serverHttp.RegisterGET[handlers.ListToolsRequest, handlers.ListToolsResponse](
+		ctx,
+		r,
+		handlers.ListToolsRoutes(),
+		&handlers.ListToolsHandler{},
+	)
+
 	serverHttp.RegisterGET[handlers.GetProviderStatusRequest, handlers.GetProviderStatusResponse](
 		ctx,
 		r,
@@ -68,7 +78,7 @@ func (m *Module) RegisterRoutes(ctx context.Context, r *chi.Mux, _ ...interface{
 		ctx,
 		r,
 		handlers.ToolDecisionRoutes(),
-		&handlers.ToolDecisionHandler{Executors: m.toolExecutors},
+		&handlers.ToolDecisionHandler{Executors: m.toolExecutors, RequirePendingApproval: true},
 	)
 
 	for _, path := range handlers.GenerateTextStreamRoutes() {

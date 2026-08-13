@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	echoapp "github.com/voxire/onion/internal/modules/echo/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
@@ -23,13 +24,10 @@ func ToolDecisionRoutes() []string { return []string{"/caret/tools/decision"} }
 // gate tools by the caller's role + active plan.
 type ListToolsHandler struct{}
 
-type ToolExecutor interface {
-	ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (output map[string]any, executed bool, err error)
-}
-
 type ToolDecisionHandler struct {
-	Executor  ToolExecutor
-	Executors []ToolExecutor
+	Executor               ToolExecutor
+	Executors              []ToolExecutor
+	RequirePendingApproval bool
 }
 
 type ListToolsRequest struct {
@@ -56,16 +54,26 @@ type ToolDecisionResponse struct {
 	Tool       ToolDef        `json:"tool"`
 	Preview    string         `json:"preview,omitempty"`
 	Output     map[string]any `json:"output,omitempty"`
+	DurationMs int64          `json:"duration_ms,omitempty"`
 }
 
 func (h *ListToolsHandler) Serve(_ context.Context, req *ListToolsRequest) (ListToolsResponse, error) {
-	mode := ParseMode(req.Mode)
-	return ListToolsResponse{Tools: ToolsForMode(mode)}, nil
+	if req == nil {
+		req = &ListToolsRequest{}
+	}
+	mode := echoapp.ParseMode(req.Mode)
+	return ListToolsResponse{Tools: echoapp.ToolsForMode(mode)}, nil
 }
 
 func (h *ToolDecisionHandler) Validate(_ context.Context, req *ToolDecisionRequest) error {
+	if req == nil {
+		return toolDecisionValidationError("request is required")
+	}
 	if strings.TrimSpace(req.ToolCallID) == "" {
 		return toolDecisionValidationError("tool_call_id is required")
+	}
+	if len(strings.TrimSpace(req.ToolCallID)) > 128 {
+		return toolDecisionValidationError("tool_call_id is too long")
 	}
 	if strings.TrimSpace(req.Name) == "" {
 		return toolDecisionValidationError("name is required")
@@ -81,7 +89,7 @@ func (h *ToolDecisionHandler) Validate(_ context.Context, req *ToolDecisionReque
 func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionRequest) (ToolDecisionResponse, error) {
 	decision := strings.TrimSpace(strings.ToLower(req.Decision))
 	name := strings.TrimSpace(req.Name)
-	tool, ok := ToolByName(name)
+	tool, ok := echoapp.ToolByName(name)
 	if !ok {
 		logger.Ctx(ctx).Warn("caret tool decision rejected for unknown tool",
 			logger.String("tool_call_id", req.ToolCallID),
@@ -96,8 +104,19 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 			Executed:   false,
 		}, nil
 	}
+	if h.RequirePendingApproval {
+		businessID, userID := echoapp.AuthenticatedIdentity(ctx)
+		if businessID <= 0 || userID <= 0 {
+			return ToolDecisionResponse{ToolCallID: req.ToolCallID, Status: "error", Message: "Authentication is required to approve or deny this action.", Tool: tool}, nil
+		}
+	}
 
 	if decision == "deny" {
+		if h.RequirePendingApproval {
+			if err := echoapp.ConsumePendingToolApproval(ctx, req.ToolCallID, tool, req.Input, ""); err != nil {
+				return ToolDecisionResponse{ToolCallID: req.ToolCallID, Status: "error", Message: "This tool proposal is no longer valid. No changes were made.", Tool: tool}, nil
+			}
+		}
 		h.logDecision(ctx, req, tool, "denied", false)
 
 		return ToolDecisionResponse{
@@ -110,8 +129,9 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		}, nil
 	}
 
-	mode := ParseMode(req.Mode)
-	if !toolAllowedForMode(mode, tool) {
+	mode := echoapp.ParseMode(req.Mode)
+	req.Input = echoapp.NormalizeToolInput(tool.Name, req.Input)
+	if !echoapp.ToolAllowedForMode(mode, tool) {
 		h.logDecision(ctx, req, tool, "mode_rejected", false)
 		return ToolDecisionResponse{
 			ToolCallID: req.ToolCallID,
@@ -122,58 +142,74 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 			Preview:    buildToolActionPreview(tool, req.Input),
 		}, nil
 	}
-
-	if tool.Scope == "read" {
-		h.logDecision(ctx, req, tool, "approved_read_unexecuted", false)
+	if err := echoapp.ValidateToolInvocation(mode, tool, req.Input); err != nil {
+		h.logDecision(ctx, req, tool, "invalid_input", false)
 		return ToolDecisionResponse{
 			ToolCallID: req.ToolCallID,
 			Status:     "error",
-			Message:    "Approved, but read-only tool execution from approval decisions is not available yet. Ask Caret to rerun the question so the server can ground it safely.",
+			Message:    "The requested tool inputs were invalid. No changes were made.",
 			Executed:   false,
 			Tool:       tool,
 			Preview:    buildToolActionPreview(tool, req.Input),
 		}, nil
 	}
-
-	for _, executor := range h.executorChain() {
-		output, executed, err := executor.ExecuteCaretTool(ctx, tool.Name, req.Input)
-		if err != nil {
-			h.logDecision(ctx, req, tool, "execution_failed", false)
+	if h.RequirePendingApproval {
+		if err := echoapp.ConsumePendingToolApproval(ctx, req.ToolCallID, tool, req.Input, mode); err != nil {
+			h.logDecision(ctx, req, tool, "approval_rejected", false)
 			return ToolDecisionResponse{
 				ToolCallID: req.ToolCallID,
 				Status:     "error",
-				Message:    "Tool execution failed. No confirmed changes were made.",
+				Message:    "This tool proposal is no longer valid or was already used. No changes were made.",
 				Executed:   false,
 				Tool:       tool,
 				Preview:    buildToolActionPreview(tool, req.Input),
-				Output: map[string]any{
-					"error": userFacingToolError(err),
-				},
-			}, nil
-		}
-		if executed {
-			h.logDecision(ctx, req, tool, "executed", true)
-			message := "Tool executed successfully."
-			if outputMessage, ok := stringValue(output["message"]); ok && outputMessage != "" {
-				message = outputMessage
-			}
-			return ToolDecisionResponse{
-				ToolCallID: req.ToolCallID,
-				Status:     "success",
-				Message:    message,
-				Executed:   true,
-				Tool:       tool,
-				Preview:    buildToolActionPreview(tool, req.Input),
-				Output:     output,
 			}, nil
 		}
 	}
 
+	output, executed, duration, err := echoapp.ExecuteToolWithTimeout(ctx, h.executorChain(), tool.Name, req.Input)
+	if err != nil {
+		h.logDecision(ctx, req, tool, "execution_failed", false)
+		return ToolDecisionResponse{
+			ToolCallID: req.ToolCallID,
+			Status:     "error",
+			Message:    "Tool execution failed. No confirmed changes were made.",
+			Executed:   false,
+			Tool:       tool,
+			Preview:    buildToolActionPreview(tool, req.Input),
+			DurationMs: duration.Milliseconds(),
+			Output: map[string]any{
+				"error": userFacingToolError(err),
+			},
+		}, nil
+	}
+	if executed {
+		h.logDecision(ctx, req, tool, "executed", true)
+		message := "Tool executed successfully."
+		if outputMessage, ok := stringValue(output["message"]); ok && outputMessage != "" {
+			message = outputMessage
+		}
+		return ToolDecisionResponse{
+			ToolCallID: req.ToolCallID,
+			Status:     "success",
+			Message:    message,
+			Executed:   true,
+			Tool:       tool,
+			Preview:    buildToolActionPreview(tool, req.Input),
+			Output:     output,
+			DurationMs: duration.Milliseconds(),
+		}, nil
+	}
+
 	h.logDecision(ctx, req, tool, "approved_unexecuted", false)
+	message := "Approved, but this capability is not available in the current server configuration. No changes were made."
+	if tool.Scope == "write" {
+		message = "Approved, but this write capability has no server executor yet. No changes were made."
+	}
 	return ToolDecisionResponse{
 		ToolCallID: req.ToolCallID,
 		Status:     "error",
-		Message:    "Approved, but this write tool does not have a server executor yet. No changes were made.",
+		Message:    message,
 		Executed:   false,
 		Tool:       tool,
 		Preview:    buildToolActionPreview(tool, req.Input),

@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"sort"
@@ -63,9 +63,10 @@ func PromptToolsForRequest(mode CaretMode, request, systemContext string) []Tool
 	}
 
 	text := normalizePromptToolText(request + " " + systemContext)
+	plan := ClassifyCaretRequest(request, systemContext)
 	scored := make([]promptToolScore, 0, len(tools))
 	for i, tool := range tools {
-		score := promptToolScoreForText(tool, text)
+		score := promptToolScoreForText(tool, text) + promptToolScoreForPlan(tool, plan)
 		if score > 0 {
 			scored = append(scored, promptToolScore{tool: tool, score: score, index: i})
 		}
@@ -95,6 +96,31 @@ func PromptToolsForRequest(mode CaretMode, request, systemContext string) []Tool
 		out = append(out, item.tool)
 	}
 	return out
+}
+
+func promptToolScoreForPlan(tool ToolDef, plan CaretRequestPlan) int {
+	score := 0
+	if plan.Kind == IntentSnapshot {
+		if _, ok := promptToolGlobalNames[tool.Name]; ok {
+			score += 700
+		}
+	}
+	module := map[string]string{
+		"booking": "booking", "customer": "crm", "finance": "finance", "flow": "flow", "hr": "hr", "inventory": "erp", "loyalty": "loyalty", "pos": "pos", "store": "store", "support": "support",
+	}[plan.Domain]
+	if module != "" && strings.EqualFold(module, tool.Module) {
+		score += 280
+	}
+	if plan.Action == "create" && tool.Scope == "write" {
+		score += 180
+	}
+	if (plan.Action == "read" || plan.Action == "compare" || plan.Action == "summarize" || plan.Action == "recommend") && tool.Scope == "read" {
+		score += 80
+	}
+	if plan.Action == "remember" && tool.Name == "memory.remember" {
+		score += 300
+	}
+	return score
 }
 
 func promptToolScoreForText(tool ToolDef, text string) int {

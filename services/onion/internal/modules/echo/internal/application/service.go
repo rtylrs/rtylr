@@ -28,7 +28,7 @@ func NewService(ctx context.Context) (*Service, error) {
 }
 
 func (s *Service) GenerateTextStream(ctx context.Context, prompt string) (<-chan snips.StreamToken, error) {
-	if s.aiClient == nil {
+	if s == nil || s.aiClient == nil {
 		return nil, ErrClientNotInitialized
 	}
 
@@ -38,7 +38,7 @@ func (s *Service) GenerateTextStream(ctx context.Context, prompt string) (<-chan
 // CompleteText is the non-streaming completion used for internal steps like
 // generating a structured query spec in Analyst mode.
 func (s *Service) CompleteText(ctx context.Context, prompt string) (string, error) {
-	if s.aiClient == nil {
+	if s == nil || s.aiClient == nil {
 		return "", ErrClientNotInitialized
 	}
 
@@ -46,7 +46,7 @@ func (s *Service) CompleteText(ctx context.Context, prompt string) (string, erro
 }
 
 func (s *Service) CompleteTextWithOptions(ctx context.Context, prompt string, opts snips.CompletionOptions) (string, error) {
-	if s.aiClient == nil {
+	if s == nil || s.aiClient == nil {
 		return "", ErrClientNotInitialized
 	}
 
@@ -54,11 +54,11 @@ func (s *Service) CompleteTextWithOptions(ctx context.Context, prompt string, op
 }
 
 func (s *Service) IsAvailable() bool {
-	return s.aiClient != nil
+	return s != nil && s.aiClient != nil
 }
 
 func (s *Service) GetProviderStatus() map[string]bool {
-	if s.aiClient == nil {
+	if s == nil || s.aiClient == nil {
 		return map[string]bool{}
 	}
 
@@ -66,7 +66,7 @@ func (s *Service) GetProviderStatus() map[string]bool {
 }
 
 func (s *Service) GetPrimaryProvider() string {
-	if s.aiClient == nil {
+	if s == nil || s.aiClient == nil {
 		return ""
 	}
 
@@ -74,7 +74,7 @@ func (s *Service) GetPrimaryProvider() string {
 }
 
 func (s *Service) GetProviderDetails(_ context.Context) domain.ProviderStatus {
-	if s.aiClient == nil {
+	if s == nil || s.aiClient == nil {
 		return domain.ProviderStatus{
 			Available:       false,
 			PrimaryProvider: "",

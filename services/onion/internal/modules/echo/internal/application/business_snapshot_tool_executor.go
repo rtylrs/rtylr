@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"context"
@@ -20,7 +20,7 @@ func NewBusinessSnapshotToolExecutor(analystService AnalystService) *BusinessSna
 }
 
 func (e *BusinessSnapshotToolExecutor) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
-	if name != businessSnapshotToolName {
+	if name != BusinessSnapshotToolName {
 		return nil, false, nil
 	}
 
@@ -34,7 +34,7 @@ func (e *BusinessSnapshotToolExecutor) ExecuteCaretTool(ctx context.Context, nam
 		question = "business snapshot"
 	}
 
-	grounding, ok := buildBusinessSnapshotGrounding(ctx, e.AnalystService, question, businessID, userID, time.Now().UTC())
+	grounding, ok := BuildBusinessSnapshotGrounding(ctx, e.AnalystService, question, businessID, userID, time.Now().UTC())
 	if !ok {
 		return nil, true, errors.New("business snapshot is unavailable")
 	}

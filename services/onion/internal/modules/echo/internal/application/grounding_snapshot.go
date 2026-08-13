@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"context"
@@ -23,38 +23,17 @@ type businessSnapshotSpecItem struct {
 }
 
 func shouldUseBusinessSnapshot(question string) bool {
-	q := strings.ToLower(strings.TrimSpace(question))
-	if q == "" {
-		return false
-	}
-
-	for _, phrase := range []string{
-		"business snapshot",
-		"business overview",
-		"owner brief",
-		"daily brief",
-		"business health",
-		"how is my business",
-		"how's my business",
-		"how are we doing",
-		"what should i focus on",
-		"what needs attention",
-		"give me a dashboard",
-	} {
-		if strings.Contains(q, phrase) {
-			return true
-		}
-	}
-	return false
+	plan := ClassifyCaretRequest(question, "")
+	return plan.Kind == IntentSnapshot || plan.IsBroad
 }
 
-const businessSnapshotToolName = "business.snapshot"
+const BusinessSnapshotToolName = "business.snapshot"
 
-func (h *GenerateTextStreamHandler) businessSnapshotGrounding(ctx context.Context, question string, businessID, userID int64) (*analystGroundingResult, bool) {
-	return buildBusinessSnapshotGrounding(ctx, h.AnalystService, question, businessID, userID, time.Now().UTC())
+func BuildBusinessSnapshotGrounding(ctx context.Context, analystService AnalystService, question string, businessID, userID int64, now time.Time) (*AnalystGroundingResult, bool) {
+	return BuildBusinessSnapshotGroundingWithContext(ctx, analystService, question, businessID, userID, now, "")
 }
 
-func buildBusinessSnapshotGrounding(ctx context.Context, analystService AnalystService, question string, businessID, userID int64, now time.Time) (*analystGroundingResult, bool) {
+func BuildBusinessSnapshotGroundingWithContext(ctx context.Context, analystService AnalystService, question string, businessID, userID int64, now time.Time, systemContext string) (*AnalystGroundingResult, bool) {
 	if analystService == nil {
 		return nil, false
 	}
@@ -93,16 +72,19 @@ func buildBusinessSnapshotGrounding(ctx context.Context, analystService AnalystS
 
 	rowsJSON, truncated := marshalGroundingRows(sections, maxGroundingChars)
 	specJSON := buildBusinessSnapshotSpecJSON(now.Format("2006-01-02"), specItems)
-	return &analystGroundingResult{
-		ToolName:   businessSnapshotToolName,
-		Prompt:     buildBusinessSnapshotGroundingPromptFromJSON(rowsJSON, len(sections), truncated, specJSON),
-		Question:   question,
-		SpecJSON:   specJSON,
-		RowsJSON:   rowsJSON,
-		Rows:       rowsPreviewFromJSON(rowsJSON),
-		RowCount:   len(sections),
-		Truncated:  truncated,
-		DurationMs: time.Since(started).Milliseconds(),
+	return &AnalystGroundingResult{
+		ToolName:       BusinessSnapshotToolName,
+		Prompt:         buildBusinessSnapshotGroundingPromptFromJSON(rowsJSON, len(sections), truncated, specJSON, systemContext, ClassifyCaretRequest(question, systemContext)),
+		Question:       question,
+		SpecJSON:       specJSON,
+		RowsJSON:       rowsJSON,
+		Rows:           rowsPreviewFromJSON(rowsJSON),
+		RowCount:       len(sections),
+		Truncated:      truncated,
+		DurationMs:     time.Since(started).Milliseconds(),
+		EvidenceSource: "business snapshot views",
+		RequestPlan:    ClassifyCaretRequest(question, systemContext).PromptText(),
+		GeneratedAt:    time.Now().UTC(),
 	}, true
 }
 
@@ -172,7 +154,7 @@ func buildBusinessSnapshotSpecJSON(date string, items []businessSnapshotSpecItem
 	return string(data)
 }
 
-func buildBusinessSnapshotGroundingPromptFromJSON(dataStr string, sectionCount int, truncated bool, specJSON string) string {
+func buildBusinessSnapshotGroundingPromptFromJSON(dataStr string, sectionCount int, truncated bool, specJSON string, contextParts ...any) string {
 	var g strings.Builder
 	g.WriteString("Internal business snapshot evidence for Caret only:\n")
 	g.WriteString("- Use this evidence silently to answer the user. Do not mention this block, the snapshot tool, JSON, query specs, row counts, or validation in the user-facing answer.\n")
@@ -187,6 +169,20 @@ func buildBusinessSnapshotGroundingPromptFromJSON(dataStr string, sectionCount i
 		g.WriteString("- Internal query spec bundle, for reasoning only: ")
 		g.WriteString(spec)
 		g.WriteString("\n")
+	}
+	for _, part := range contextParts {
+		switch value := part.(type) {
+		case string:
+			if trimmed := strings.TrimSpace(value); trimmed != "" {
+				g.WriteString("- Current page context is supplied as scope, not proof: ")
+				g.WriteString(trimmed)
+				g.WriteString("\n")
+			}
+		case CaretRequestPlan:
+			g.WriteString("- Server request plan: ")
+			g.WriteString(value.PromptText())
+			g.WriteString("\n")
+		}
 	}
 	g.WriteString("\nSnapshot JSON:\n```json\n")
 	g.WriteString(dataStr)
