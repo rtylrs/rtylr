@@ -4,6 +4,12 @@ SELECT id, owner_id, business_id, name, description, channel, status, segment_id
        opened_count, clicked_count, created_at, updated_at
 FROM crm_campaigns WHERE business_id = ? ORDER BY created_at DESC;
 
+-- name: ListCampaignsByStatus :many
+SELECT id, owner_id, business_id, name, description, channel, status, segment_id, subject,
+       content, scheduled_at, sent_at, audience_count, sent_count, delivered_count,
+       opened_count, clicked_count, created_at, updated_at
+FROM crm_campaigns WHERE business_id = ? AND status = ? ORDER BY created_at DESC;
+
 -- name: GetCampaignByID :one
 SELECT id, owner_id, business_id, name, description, channel, status, segment_id, subject,
        content, scheduled_at, sent_at, audience_count, sent_count, delivered_count,

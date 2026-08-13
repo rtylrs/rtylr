@@ -32,6 +32,28 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 SELECT COUNT(*) FROM flow_projects WHERE workspace_id = ? AND business_id = ?;
 
 -- name: GetProjectsByWorkspace :many
+WITH project_page AS (
+    SELECT p.id, p.workspace_id, p.owner_id, p.business_id, p.name, p.description, p.icon, p.color, p.status,
+           p.start_date, p.due_date, p.created_by, p.created_at, p.updated_at
+    FROM flow_projects p
+    WHERE p.workspace_id = ? AND p.business_id = ?
+    ORDER BY p.created_at DESC, p.id DESC
+    LIMIT ? OFFSET ?
+),
+task_counts AS (
+    SELECT t.project_id,
+           COUNT(*) AS task_count,
+           SUM(t.status = 'done') AS completed_count
+    FROM flow_tasks t
+    JOIN project_page p ON p.id = t.project_id
+    GROUP BY t.project_id
+),
+member_counts AS (
+    SELECT pm.project_id, COUNT(*) AS member_count
+    FROM flow_project_members pm
+    JOIN project_page p ON p.id = pm.project_id
+    GROUP BY pm.project_id
+)
 SELECT
     p.id, p.workspace_id, p.owner_id, p.business_id, p.name,
     COALESCE(p.description, '') AS description,
@@ -40,13 +62,13 @@ SELECT
     COALESCE(p.status, 'active') AS status,
     p.start_date, p.due_date,
     p.created_by, p.created_at, p.updated_at,
-    COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id), 0) AS task_count,
-    COALESCE((SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id AND t.status = 'done'), 0) AS completed_count,
-    COALESCE((SELECT COUNT(*) FROM flow_project_members pm WHERE pm.project_id = p.id), 0) AS member_count
-FROM flow_projects p
-WHERE p.workspace_id = ? AND p.business_id = ?
-ORDER BY p.created_at DESC
-LIMIT ? OFFSET ?;
+    COALESCE(tc.task_count, 0) AS task_count,
+    COALESCE(tc.completed_count, 0) AS completed_count,
+    COALESCE(mc.member_count, 0) AS member_count
+FROM project_page p
+LEFT JOIN task_counts tc ON tc.project_id = p.id
+LEFT JOIN member_counts mc ON mc.project_id = p.id
+ORDER BY p.created_at DESC, p.id DESC;
 
 -- name: UpdateProject :exec
 UPDATE flow_projects SET name = ?, description = ?, icon = ?, color = ?, status = ?, start_date = ?, due_date = ?

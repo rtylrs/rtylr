@@ -21,6 +21,7 @@ type repository interface {
 	Create(ctx context.Context, businessID int64, input domain.RecurringInvoiceInput) (int64, error)
 	Update(ctx context.Context, businessID, id int64, input domain.RecurringInvoiceInput) error
 	SetActive(ctx context.Context, businessID, id int64, active bool) error
+	ProcessDue(ctx context.Context, now time.Time) ([]int64, error)
 }
 
 type Service struct {
@@ -77,5 +78,20 @@ func (s *Service) Resume(ctx context.Context, businessID, id int64) error {
 		return err
 	}
 	invalidateRecurringInvoicesScope(ctx, businessID)
+	return nil
+}
+
+// ProcessDue generates one invoice for every recurring schedule that is due.
+// Each repository operation atomically creates the invoice and advances the
+// schedule, so retries cannot leave a generated invoice paired with an old
+// next_invoice_date.
+func (s *Service) ProcessDue(ctx context.Context) error {
+	businessIDs, err := s.repo.ProcessDue(ctx, time.Now().UTC())
+	if err != nil {
+		return err
+	}
+	for _, businessID := range businessIDs {
+		invalidateRecurringInvoicesScope(ctx, businessID)
+	}
 	return nil
 }

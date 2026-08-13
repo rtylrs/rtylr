@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-var ErrRecurringInvoiceNotFound = errors.New("recurring invoice not found")
+var (
+	ErrRecurringInvoiceNotFound        = errors.New("recurring invoice not found")
+	ErrRecurringInvoiceTemplateMissing = errors.New("recurring invoice template not found")
+)
 
 type RecurringInvoice struct {
 	ID                int64     `json:"id"`
