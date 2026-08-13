@@ -11,6 +11,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useQuotes, useCreateQuote, useConvertQuote, useUpdateQuoteStatus } from './useQuotes';
+import { formatDate } from '../../shared/lib/date';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
@@ -263,7 +264,7 @@ const Quotes: React.FC = () => {
                   <td
                     style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
                   >
-                    {q.issuedDate}
+                    {formatDate(q.issuedDate ?? '')}
                   </td>
                   <td
                     style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
