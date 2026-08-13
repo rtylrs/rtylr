@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/domain"
 )
@@ -37,6 +38,10 @@ func (m *mockRepo) SetActive(_ context.Context, owner, id int64, active bool) er
 	m.setGot.id = id
 	m.setGot.active = active
 	return m.setErr
+}
+
+func (m *mockRepo) ProcessDue(_ context.Context, _ time.Time) ([]int64, error) {
+	return nil, nil
 }
 
 func TestList_Delegates(t *testing.T) {
@@ -77,5 +82,12 @@ func TestResume_SetsActiveTrue(t *testing.T) {
 	}
 	if m.setGot.active != true {
 		t.Errorf("expected active=true, got %+v", m.setGot)
+	}
+}
+
+func TestProcessDue_Delegates(t *testing.T) {
+	s := &Service{repo: &mockRepo{}}
+	if err := s.ProcessDue(context.Background()); err != nil {
+		t.Fatalf("unexpected: %v", err)
 	}
 }

@@ -38,6 +38,25 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Campa
 	return campaigns, nil
 }
 
+func (r *Repository) ListByStatus(ctx context.Context, businessID int64, status string) ([]domain.Campaign, error) {
+	rows, err := r.queries.ListCampaignsByStatus(ctx, sqlc.ListCampaignsByStatusParams{
+		BusinessID: businessID,
+		Status:     sqlc.NullCrmCampaignsStatus{CrmCampaignsStatus: sqlc.CrmCampaignsStatus(status), Valid: true},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list campaigns by status", logger.Error(err))
+
+		return nil, err
+	}
+
+	campaigns := make([]domain.Campaign, 0, len(rows))
+	for _, row := range rows {
+		campaigns = append(campaigns, campaignFromRow(row))
+	}
+
+	return campaigns, nil
+}
+
 // ListPaginated returns a single page of campaigns for the business, ordered
 // by creation date. Limit and offset are applied as-is; callers clamp them.
 func (r *Repository) ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Campaign, error) {
@@ -99,7 +118,7 @@ func (r *Repository) Create(ctx context.Context, input domain.CampaignInput) (in
 		OwnerID:     input.OwnerID,
 		BusinessID:  input.BusinessID,
 		Name:        input.Name,
-		Description: sql.NullString{},
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Channel:     sqlc.CrmCampaignsChannel(input.Type),
 		SegmentID:   segmentID,
 		Subject:     sql.NullString{String: input.Subject, Valid: input.Subject != ""},
@@ -123,7 +142,7 @@ func (r *Repository) Update(ctx context.Context, input domain.CampaignUpdateInpu
 
 	result, err := r.queries.UpdateCampaign(ctx, sqlc.UpdateCampaignParams{
 		Name:        input.Name,
-		Description: sql.NullString{},
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Channel:     sqlc.CrmCampaignsChannel(input.Type),
 		SegmentID:   segmentID,
 		Subject:     sql.NullString{String: input.Subject, Valid: input.Subject != ""},
@@ -176,18 +195,22 @@ func (r *Repository) UpdateStatus(ctx context.Context, businessID, id int64, sta
 
 func campaignFromRow(row sqlc.CrmCampaign) domain.Campaign {
 	c := domain.Campaign{
-		ID:         row.ID,
-		OwnerID:    row.OwnerID,
-		BusinessID: row.BusinessID,
-		Name:       row.Name,
-		Type:       string(row.Channel),
-		Status:     string(row.Status.CrmCampaignsStatus),
-		Subject:    row.Subject.String,
-		Body:       row.Content,
-		SentCount:  int(row.SentCount.Int32),
-		OpenCount:  int(row.OpenedCount.Int32),
-		CreatedAt:  row.CreatedAt.Time,
-		UpdatedAt:  row.UpdatedAt.Time,
+		ID:             row.ID,
+		OwnerID:        row.OwnerID,
+		BusinessID:     row.BusinessID,
+		Name:           row.Name,
+		Description:    row.Description.String,
+		Type:           string(row.Channel),
+		Status:         string(row.Status.CrmCampaignsStatus),
+		Subject:        row.Subject.String,
+		Body:           row.Content,
+		AudienceCount:  int(row.AudienceCount.Int32),
+		SentCount:      int(row.SentCount.Int32),
+		DeliveredCount: int(row.DeliveredCount.Int32),
+		OpenCount:      int(row.OpenedCount.Int32),
+		ClickedCount:   int(row.ClickedCount.Int32),
+		CreatedAt:      row.CreatedAt.Time,
+		UpdatedAt:      row.UpdatedAt.Time,
 	}
 
 	if row.SegmentID.Valid {

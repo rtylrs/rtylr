@@ -49,7 +49,26 @@ func (m *mockRepo) ListCompanyLeads(_ context.Context) ([]domain.Lead, error) { 
 
 func (m *mockRepo) ListOpenings(_ context.Context) ([]domain.Opening, error) { return nil, nil }
 
+func (m *mockRepo) ListOpeningsPage(_ context.Context, limit, offset int32) (domain.OpeningPage, error) {
+	return domain.OpeningPage{Limit: limit, Offset: offset}, nil
+}
+
+func (m *mockRepo) GetOpening(_ context.Context, _ int64) (*domain.Opening, error) {
+	return m.career, m.careerErr
+}
+
 func (m *mockRepo) GetAnalytics(_ context.Context) (*domain.Analytics, error) { return nil, nil }
+
+func TestListOpeningsPageClampsBounds(t *testing.T) {
+	svc := &Service{repo: &mockRepo{}}
+	page, err := svc.ListOpeningsPage(context.Background(), 500, -10)
+	if err != nil {
+		t.Fatalf("ListOpeningsPage: %v", err)
+	}
+	if page.Limit != 100 || page.Offset != 0 {
+		t.Fatalf("page bounds = limit %d offset %d, want 100 and 0", page.Limit, page.Offset)
+	}
+}
 
 func (m *mockRepo) CreateCareer(_ context.Context, _ domain.CareerInput) (*domain.Opening, error) {
 	return m.career, m.careerErr

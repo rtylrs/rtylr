@@ -180,6 +180,10 @@ func (r *streamEventRenderer) emitPlainRemainder(final bool) error {
 		return nil
 	}
 	emitLen := len(r.pending) - markerHoldBytes
+	emitLen = safePublicAnswerPrefix(r.pending, emitLen)
+	if emitLen <= 0 {
+		return nil
+	}
 	if err := r.emitText(r.pending[:emitLen]); err != nil {
 		return err
 	}

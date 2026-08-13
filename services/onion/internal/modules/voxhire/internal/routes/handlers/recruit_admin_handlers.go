@@ -198,13 +198,14 @@ func CreateAdminHandler(svc *application.Service) http.HandlerFunc {
 
 func ListOpeningsHandler(svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		openings, err := svc.ListOpenings(r.Context())
+		q := r.URL.Query()
+		page, err := svc.ListOpeningsPage(r.Context(), parseInt32(q.Get("limit")), parseInt32(q.Get("offset")))
 		if err != nil {
 			logger.Ctx(r.Context()).Error("voxhire list openings failed", logger.Error(err))
 			writeApplyError(w, http.StatusInternalServerError, "Failed to list openings")
 			return
 		}
-		writeJSON(w, http.StatusOK, map[string]any{"openings": openings})
+		writeJSON(w, http.StatusOK, page)
 	}
 }
 
