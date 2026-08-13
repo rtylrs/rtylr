@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
-import { Link as LinkIcon, Building2, CreditCard, PiggyBank } from 'lucide-react';
-import { toast } from 'sonner';
+import { CheckCircle, Link as LinkIcon, Building2, CreditCard, PiggyBank } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
+import Modal from '../../shared/components/Modal';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import { useBankAccounts, useBankTransactions } from '../../shared/hooks/useBankAccounts';
-import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
+import {
+  useBankAccounts,
+  useBankTransactions,
+  useCreateBankAccount,
+} from '../../shared/hooks/useBankAccounts';
+import {
+  cardStyle,
+  ghostBtn,
+  inputStyle,
+  labelStyle,
+  primaryBtn,
+  ACCENT,
+} from '../../shared/lib/tokens';
 
 const iconFor: Record<
   string,
@@ -20,10 +31,48 @@ const iconFor: Record<
 
 const BankFeeds: React.FC = () => {
   const { data: accounts = [], isLoading } = useBankAccounts();
+  const createAccount = useCreateBankAccount();
   const [selected, setSelected] = useState<string | undefined>();
+  const [showConnect, setShowConnect] = useState(false);
+  const [form, setForm] = useState({
+    name: '',
+    bankName: '',
+    accountType: 'checking',
+    lastFour: '',
+    balance: '0',
+    currency: 'USD',
+  });
   const { data: transactions = [] } = useBankTransactions(selected);
 
   const total = accounts.reduce((s: number, a) => s + (a.balance ?? 0), 0);
+
+  const handleCreateAccount = (): void => {
+    if (!form.name.trim() || !form.bankName.trim() || form.lastFour.length !== 4) return;
+
+    createAccount.mutate(
+      {
+        name: form.name.trim(),
+        bankName: form.bankName.trim(),
+        accountType: form.accountType,
+        lastFour: form.lastFour,
+        balance: Number(form.balance) || 0,
+        currency: form.currency.trim().toUpperCase() || 'USD',
+      },
+      {
+        onSuccess: () => {
+          setShowConnect(false);
+          setForm({
+            name: '',
+            bankName: '',
+            accountType: 'checking',
+            lastFour: '',
+            balance: '0',
+            currency: 'USD',
+          });
+        },
+      }
+    );
+  };
 
   return (
     <motion.div
@@ -41,7 +90,7 @@ const BankFeeds: React.FC = () => {
           </>
         }
         actions={
-          <button style={primaryBtn} onClick={() => toast.info('Bank connection coming soon')}>
+          <button style={primaryBtn} onClick={() => setShowConnect(true)}>
             <LinkIcon size={13} /> Connect Account
           </button>
         }
@@ -208,6 +257,140 @@ const BankFeeds: React.FC = () => {
           </div>
         </>
       )}
+
+      <Modal
+        open={showConnect}
+        onClose={() => setShowConnect(false)}
+        title="Add Bank Account"
+        footer={
+          <>
+            <button
+              style={ghostBtn}
+              onClick={() => setShowConnect(false)}
+              disabled={createAccount.isPending}
+            >
+              Cancel
+            </button>
+            <button
+              style={{ ...primaryBtn, opacity: createAccount.isPending ? 0.6 : 1 }}
+              onClick={handleCreateAccount}
+              disabled={
+                createAccount.isPending ||
+                !form.name.trim() ||
+                !form.bankName.trim() ||
+                form.lastFour.length !== 4
+              }
+            >
+              <CheckCircle size={13} />
+              {createAccount.isPending ? 'Adding…' : 'Add account'}
+            </button>
+          </>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={labelStyle} htmlFor="bank-account-name">
+              Account name
+            </label>
+            <input
+              id="bank-account-name"
+              autoFocus
+              value={form.name}
+              onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+              placeholder="e.g. Operating account"
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={labelStyle} htmlFor="bank-account-bank">
+              Bank
+            </label>
+            <input
+              id="bank-account-bank"
+              value={form.bankName}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, bankName: event.target.value }))
+              }
+              placeholder="e.g. Acme Bank"
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={labelStyle} htmlFor="bank-account-type">
+                Type
+              </label>
+              <select
+                id="bank-account-type"
+                value={form.accountType}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, accountType: event.target.value }))
+                }
+                style={inputStyle}
+              >
+                <option value="checking">Checking</option>
+                <option value="savings">Savings</option>
+                <option value="credit">Credit</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={labelStyle} htmlFor="bank-account-last-four">
+                Last 4 digits
+              </label>
+              <input
+                id="bank-account-last-four"
+                inputMode="numeric"
+                maxLength={4}
+                value={form.lastFour}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    lastFour: event.target.value.replace(/\D/g, '').slice(0, 4),
+                  }))
+                }
+                placeholder="1234"
+                style={inputStyle}
+              />
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={labelStyle} htmlFor="bank-account-balance">
+                Opening balance
+              </label>
+              <input
+                id="bank-account-balance"
+                type="number"
+                min="0"
+                step="0.01"
+                value={form.balance}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, balance: event.target.value }))
+                }
+                style={inputStyle}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={labelStyle} htmlFor="bank-account-currency">
+                Currency
+              </label>
+              <input
+                id="bank-account-currency"
+                maxLength={3}
+                value={form.currency}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, currency: event.target.value }))
+                }
+                style={inputStyle}
+              />
+            </div>
+          </div>
+          <p style={{ margin: 0, fontSize: 12, color: 'var(--hub-text-dim)' }}>
+            This adds the account for tracking. Automatic bank synchronization is not configured
+            yet.
+          </p>
+        </div>
+      </Modal>
     </motion.div>
   );
 };
