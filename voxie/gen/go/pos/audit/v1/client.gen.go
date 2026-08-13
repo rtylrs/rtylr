@@ -35,6 +35,8 @@ func (c *AuditServiceClient) ListAudit(ctx context.Context, req *ListAuditReques
 	query.Set("employee_id", strconv.FormatInt(int64(req.EmployeeId), 10))
 	query.Set("start_date", req.StartDate)
 	query.Set("end_date", req.EndDate)
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("cursor", req.Cursor)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

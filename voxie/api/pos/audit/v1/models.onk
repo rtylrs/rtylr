@@ -38,8 +38,13 @@ message ListAuditRequest {
   employee_id: int64 @query("employee_id")
   start_date: string @required @query("start_date")
   end_date: string @required @query("end_date")
+  /// Maximum records to return. Defaults to 50 and is capped by the server.
+  limit: int32 @query("limit")
+  /// Opaque continuation token from a previous response.
+  cursor: string @query("cursor")
 }
 
 message ListAuditResponse {
   logs: AuditLog[]
+  next_cursor: string
 }

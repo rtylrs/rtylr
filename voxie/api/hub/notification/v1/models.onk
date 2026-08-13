@@ -13,10 +13,16 @@ message Notification {
   link: string
 }
 
-message ListNotificationsRequest {}
+message ListNotificationsRequest {
+  /// Maximum records to return. Defaults to 50 and is capped by the server.
+  limit: int32 @query("limit")
+  /// Opaque continuation token from a previous response.
+  cursor: string @query("cursor")
+}
 
 message ListNotificationsResponse {
   notifications: Notification[]
+  next_cursor: string
 }
 
 message MarkAllReadRequest {}

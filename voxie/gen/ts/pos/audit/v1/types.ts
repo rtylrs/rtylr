@@ -138,6 +138,8 @@ entityType?: string;
 employeeId?: string;
 startDate: string;
 endDate: string;
+limit?: number;
+cursor?: string;
 }
 
 export function decodeListAuditRequest(v: any): ListAuditRequest {
@@ -148,6 +150,8 @@ entityType: v.entity_type,
 employeeId: v.employee_id,
 startDate: v.start_date,
 endDate: v.end_date,
+limit: v.limit,
+cursor: v.cursor,
 };
 }
 
@@ -158,6 +162,8 @@ if (v.entityType !== undefined) { out.entity_type = v.entityType; }
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.startDate !== undefined) { out.start_date = v.startDate; }
 if (v.endDate !== undefined) { out.end_date = v.endDate; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.cursor !== undefined) { out.cursor = v.cursor; }
 return out;
 }
 
@@ -170,18 +176,21 @@ return violations;
 
 export interface ListAuditResponse {
 logs?: (AuditLog)[];
+nextCursor?: string;
 }
 
 export function decodeListAuditResponse(v: any): ListAuditResponse {
 if (v === null || v === undefined) return v;
 return {
 logs: (v.logs !== undefined ? (v.logs as any[]).map(decodeAuditLog) : v.logs),
+nextCursor: v.next_cursor,
 };
 }
 
 export function encodeListAuditResponse(v: ListAuditResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.logs !== undefined) { out.logs = (v.logs as any[]).map(encodeAuditLog); }
+if (v.nextCursor !== undefined) { out.next_cursor = v.nextCursor; }
 return out;
 }
 

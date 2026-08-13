@@ -373,6 +373,8 @@ type ListAuditRequest struct {
 	EmployeeId int64  `json:"employee_id,omitempty"`
 	StartDate  string `json:"start_date,omitempty"`
 	EndDate    string `json:"end_date,omitempty"`
+	Limit      int32  `json:"limit,omitempty"`
+	Cursor     string `json:"cursor,omitempty"`
 }
 
 func (m *ListAuditRequest) MarshalJSON() ([]byte, error) {
@@ -444,8 +446,25 @@ func (x *ListAuditRequest) GetEndDate() string {
 	return x.EndDate
 }
 
+func (x *ListAuditRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListAuditRequest) GetCursor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Cursor
+}
+
 type ListAuditResponse struct {
-	Logs []*AuditLog `json:"logs,omitempty"`
+	Logs       []*AuditLog `json:"logs,omitempty"`
+	NextCursor string      `json:"next_cursor,omitempty"`
 }
 
 func (x *ListAuditResponse) GetLogs() []*AuditLog {
@@ -454,4 +473,12 @@ func (x *ListAuditResponse) GetLogs() []*AuditLog {
 		return zero
 	}
 	return x.Logs
+}
+
+func (x *ListAuditResponse) GetNextCursor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NextCursor
 }

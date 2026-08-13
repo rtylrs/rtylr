@@ -102,10 +102,29 @@ func (x *Notification) GetLink() string {
 }
 
 type ListNotificationsRequest struct {
+	Limit  int32  `json:"limit,omitempty"`
+	Cursor string `json:"cursor,omitempty"`
+}
+
+func (x *ListNotificationsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListNotificationsRequest) GetCursor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Cursor
 }
 
 type ListNotificationsResponse struct {
 	Notifications []*Notification `json:"notifications,omitempty"`
+	NextCursor    string          `json:"next_cursor,omitempty"`
 }
 
 func (x *ListNotificationsResponse) GetNotifications() []*Notification {
@@ -114,6 +133,14 @@ func (x *ListNotificationsResponse) GetNotifications() []*Notification {
 		return zero
 	}
 	return x.Notifications
+}
+
+func (x *ListNotificationsResponse) GetNextCursor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.NextCursor
 }
 
 type MarkAllReadRequest struct {

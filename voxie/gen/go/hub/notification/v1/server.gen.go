@@ -238,6 +238,17 @@ func RegisterNotificationServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /hub/notification/v1/notifications", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListNotificationsRequest)
+		if r.URL.Query().Get("limit") != "" {
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
+		}
+		if r.URL.Query().Get("cursor") != "" {
+			req.Cursor = r.URL.Query().Get("cursor")
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

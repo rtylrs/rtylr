@@ -53,6 +53,12 @@ query.set("start_date", String(req.startDate));
 if (req.endDate !== undefined) {
 query.set("end_date", String(req.endDate));
 }
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.cursor !== undefined) {
+query.set("cursor", String(req.cursor));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
