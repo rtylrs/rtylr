@@ -44,7 +44,7 @@ export function useCreateAccount() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['chart-of-accounts'] });
-      toast.success('Account created');
+      toast.success(t('accounts.created'));
     },
     onError: (error) => {
       toast.error(getOneKitErrorMessage(error, t('errors.generic')));

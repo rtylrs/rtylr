@@ -15,5 +15,7 @@
   "date": "Date",
   "amount": "Montant",
   "total": "Total",
-  "currency": "Devise"
+  "currency": "Devise",
+  "saving": "Enregistrement…",
+  "creating": "Création…"
 }
