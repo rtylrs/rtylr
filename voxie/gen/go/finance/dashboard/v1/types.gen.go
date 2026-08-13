@@ -5,10 +5,19 @@ type GetFinanceDashboardRequest struct {
 }
 
 type GetFinanceDashboardResponse struct {
+	TotalRevenueMtd  float64 `json:"total_revenue_mtd,omitempty"`
 	TotalReceivable  float64 `json:"total_receivable,omitempty"`
 	OverdueAmount    float64 `json:"overdue_amount,omitempty"`
 	TotalExpensesMtd float64 `json:"total_expenses_mtd,omitempty"`
 	NetProfitMtd     float64 `json:"net_profit_mtd,omitempty"`
+}
+
+func (x *GetFinanceDashboardResponse) GetTotalRevenueMtd() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TotalRevenueMtd
 }
 
 func (x *GetFinanceDashboardResponse) GetTotalReceivable() float64 {

@@ -20,6 +20,7 @@ return violations;
 }
 
 export interface GetFinanceDashboardResponse {
+totalRevenueMtd?: number;
 totalReceivable?: number;
 overdueAmount?: number;
 totalExpensesMtd?: number;
@@ -29,6 +30,7 @@ netProfitMtd?: number;
 export function decodeGetFinanceDashboardResponse(v: any): GetFinanceDashboardResponse {
 if (v === null || v === undefined) return v;
 return {
+totalRevenueMtd: v.total_revenue_mtd,
 totalReceivable: v.total_receivable,
 overdueAmount: v.overdue_amount,
 totalExpensesMtd: v.total_expenses_mtd,
@@ -38,6 +40,7 @@ netProfitMtd: v.net_profit_mtd,
 
 export function encodeGetFinanceDashboardResponse(v: GetFinanceDashboardResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.totalRevenueMtd !== undefined) { out.total_revenue_mtd = v.totalRevenueMtd; }
 if (v.totalReceivable !== undefined) { out.total_receivable = v.totalReceivable; }
 if (v.overdueAmount !== undefined) { out.overdue_amount = v.overdueAmount; }
 if (v.totalExpensesMtd !== undefined) { out.total_expenses_mtd = v.totalExpensesMtd; }
