@@ -10,6 +10,7 @@ import type {
   UpdateVariantResponse,
   Variant,
 } from '@voxire/voxie/erp/variant/v1/types';
+import { withErpListBounds } from '../../shared/lib/erpListBounds';
 
 const variantClient = createOneKitClient(VariantServiceClient, 'erp');
 
@@ -32,7 +33,9 @@ export function useVariants(productId?: string) {
   return useQuery<Variant[]>({
     queryKey: ['variants', productId],
     queryFn: async () => {
-      const response = await variantClient.listVariants({ productId: productId ?? '0' });
+      const response = await variantClient.listVariants(
+        withErpListBounds({ productId: productId ?? '0' })
+      );
       return response.variants ?? [];
     },
   });

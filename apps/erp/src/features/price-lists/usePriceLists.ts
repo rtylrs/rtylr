@@ -7,6 +7,7 @@ import type {
   CreatePriceListResponse,
   PriceList,
 } from '@voxire/voxie/erp/price_list/v1/types';
+import { withErpListBounds } from '../../shared/lib/erpListBounds';
 
 const priceListClient = createOneKitClient(PriceListServiceClient, 'erp');
 
@@ -17,7 +18,7 @@ export function usePriceLists() {
   return useQuery<PriceList[]>({
     queryKey: ['price-lists'],
     queryFn: async () => {
-      const response = await priceListClient.listPriceLists({});
+      const response = await priceListClient.listPriceLists(withErpListBounds({}));
       return response.priceLists ?? [];
     },
   });
