@@ -50,7 +50,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
       >
         <span className={styles.announcePill}>BETA</span>
         <span className={styles.announceText}>
-          rtylr AI is in beta. Describe your business, watch it build
+          Caret AI is in beta. Describe your business, watch it build
           <span className={styles.announceArrow} aria-hidden="true">
             ↗
           </span>
@@ -79,7 +79,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
         <textarea
           id="hero-prompt"
           className={styles.aiCardTextarea}
-          placeholder="Describe your business. rtylr AI drafts your POS, inventory, staff, and invoices"
+          placeholder="Describe your business. Caret AI drafts your POS, inventory, staff, and invoices"
           rows={5}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -92,8 +92,8 @@ const MainHero: React.FC = (): React.JSX.Element => {
               type="button"
               onClick={goToRegister}
               className={cn(styles.aiCardIcon, styles.aiCardIconActive)}
-              aria-label="rtylr AI"
-              title="rtylr AI"
+              aria-label="Caret AI"
+              title="Caret AI"
             >
               <Sparkles size={14} strokeWidth={2} />
             </button>
