@@ -44,6 +44,14 @@ SET @sql := IF(
 );
 PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+-- Supports customer lifetime-value aggregation by tenant, customer, and paid status.
+SET @sql := IF(
+  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pos_orders' AND INDEX_NAME = 'idx_pos_orders_business_customer_payment') = 0,
+  'ALTER TABLE pos_orders ADD INDEX idx_pos_orders_business_customer_payment (business_id, customer_id, payment_status)',
+  'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 SET @sql := IF(
   (SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pos_orders' AND INDEX_NAME = 'idx_pos_orders_session_payment') = 0,
   'ALTER TABLE pos_orders ADD INDEX idx_pos_orders_session_payment (session_id, payment_status)',
