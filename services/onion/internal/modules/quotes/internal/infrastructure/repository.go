@@ -262,7 +262,6 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, businessID, quoteID i
 		return 0, domain.ErrQuoteAlreadyConverted
 	}
 
-	invoiceNumber := fmt.Sprintf("Q%d-%d", quoteID, time.Now().UTC().UnixNano())
 	issueDate := time.Now().UTC()
 	// Fallback: quotes don't track an explicit due date, so default to
 	// issue_date + 30 days. If the quote had a valid_until we use that.
@@ -270,6 +269,18 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, businessID, quoteID i
 	if quoteRow.ValidUntil.Valid {
 		dueDate = quoteRow.ValidUntil.Time
 	}
+	if dueDate.Before(issueDate) {
+		dueDate = issueDate
+	}
+	sequence, err := qtx.CountInvoiceSequenceForQuote(ctx, sqlc.CountInvoiceSequenceForQuoteParams{
+		BusinessID: businessID,
+		CreatedAt:  sql.NullTime{Time: issueDate, Valid: true},
+	})
+	if err != nil {
+		_ = tx.Rollback()
+		return 0, err
+	}
+	invoiceNumber := fmt.Sprintf("INV-%d-%04d", issueDate.Year(), sequence+1)
 
 	customerEmail := ""
 	if quoteRow.CustomerEmail.Valid {
