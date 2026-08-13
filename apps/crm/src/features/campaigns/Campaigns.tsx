@@ -314,7 +314,7 @@ function CampaignCard({
                 opacity: statusPending ? 0.6 : 1,
               }}
             >
-              {statusPending ? 'Launching…' : 'Launch'}
+              {statusPending ? 'Activating…' : 'Activate'}
             </button>
           )}
           {campaign.status === 'Active' && (
@@ -418,8 +418,8 @@ const Campaigns: React.FC = () => {
     updateStatus.mutate(
       { id, status: 'active' },
       {
-        onSuccess: () => toast.success('Campaign launched'),
-        onError: () => toast.error('Failed to launch campaign'),
+        onSuccess: () => toast.success('Campaign activated'),
+        onError: () => toast.error('Failed to activate campaign'),
       }
     );
   };

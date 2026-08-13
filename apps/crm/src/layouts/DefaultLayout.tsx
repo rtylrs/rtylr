@@ -36,6 +36,7 @@ import { LicenseBanner } from '@voxire/components';
 import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
 import type { Addon } from '@voxire/voxie/hub/app/v1/types';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
+import { toast } from 'sonner';
 
 const ACCENT = '#3b82f6';
 
@@ -610,7 +611,7 @@ const DefaultLayout: React.FC = () => {
                 </button>
                 <button
                   aria-label="Notifications"
-                  onClick={undefined}
+                  onClick={() => toast.info('No new notifications')}
                   style={{
                     height: '28px',
                     width: '28px',
