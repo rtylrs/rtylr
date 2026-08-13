@@ -22,6 +22,11 @@ const (
 // when both sides have hundreds of rows.
 const maxSuggestions = 50
 
+// reconciliationPreviewLimit keeps the overview and its suggestion matrix
+// bounded. Truncation is explicit in the response so callers never mistake a
+// preview for a complete unmatched-record list.
+const reconciliationPreviewLimit = 200
+
 // suggestionScoreCutoff discards pairings whose combined amount + date
 // distance is too large to be worth showing. The score below is "amount
 // difference in minor units + (days_apart * dayWeightMinorUnits)", so this
@@ -75,13 +80,29 @@ func (s *Service) computeOverview(ctx context.Context, businessID int64) (domain
 		return domain.ReconciliationOverview{}, err
 	}
 
+	bankTxns, bankTxnsTruncated := truncatePreview(bankTxns)
+	invoices, invoicesTruncated := truncatePreview(invoices)
+	expenses, expensesTruncated := truncatePreview(expenses)
+
 	suggestions := computeSuggestions(bankTxns, invoices, expenses)
 
 	return domain.ReconciliationOverview{
 		UnmatchedBankTxns: bankTxns,
 		UnmatchedInvoices: invoices,
 		Suggestions:       suggestions,
+		BankTxnsTruncated: bankTxnsTruncated,
+		InvoicesTruncated: invoicesTruncated,
+		ExpensesTruncated: expensesTruncated,
+		PreviewLimit:      reconciliationPreviewLimit,
 	}, nil
+}
+
+func truncatePreview[T any](items []T) ([]T, bool) {
+	if len(items) <= reconciliationPreviewLimit {
+		return items, false
+	}
+
+	return items[:reconciliationPreviewLimit], true
 }
 
 func (s *Service) Match(ctx context.Context, businessID int64, input domain.MatchInput) (int64, error) {

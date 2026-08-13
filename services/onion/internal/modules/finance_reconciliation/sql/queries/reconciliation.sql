@@ -11,7 +11,7 @@ WHERE bf.business_id = ?
         AND m.bank_feed_id = bf.id
   )
 ORDER BY bf.occurred_at DESC, bf.id DESC
-LIMIT 200;
+LIMIT 201;
 
 -- name: CreateReconciliationMatch :execresult
 INSERT INTO finance_reconciliation_matches (
@@ -52,7 +52,7 @@ WHERE i.business_id = ?
         AND m.target_id = i.id
   )
 ORDER BY i.due_date ASC, i.id ASC
-LIMIT 200;
+LIMIT 201;
 
 -- name: ListUnmatchedExpenses :many
 SELECT e.id, e.description, COALESCE(e.vendor, '') AS vendor, e.amount, e.currency, e.expense_date
@@ -65,7 +65,7 @@ WHERE e.business_id = ?
         AND m.target_id = e.id
   )
 ORDER BY e.expense_date ASC, e.id ASC
-LIMIT 200;
+LIMIT 201;
 
 -- name: CountMatches :one
 SELECT COUNT(*)

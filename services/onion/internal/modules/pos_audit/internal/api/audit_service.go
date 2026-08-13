@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/cursor"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	posauditv1 "github.com/voxire/voxie/gen/go/pos/audit/v1"
 )
@@ -73,23 +74,34 @@ func (a *AuditAPI) ListAudit(ctx context.Context, req *posauditv1.ListAuditReque
 		businessID = user.UserID
 	}
 
-	logs, listErr := a.Service.List(ctx, domain.AuditLogFilter{
+	filter := domain.AuditLogFilter{
 		BusinessID: businessID,
 		Action:     action,
 		EntityType: entityType,
 		EmployeeID: employeeID,
 		StartDate:  startDate,
 		EndDate:    endDate,
-	})
+		Limit:      req.GetLimit(),
+	}
+	if token := strings.TrimSpace(req.GetCursor()); token != "" {
+		boundary, decodeErr := cursor.DecodeCreatedAtID(token)
+		if decodeErr != nil {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid cursor")
+		}
+		filter.CursorCreatedAt = &boundary.CreatedAt
+		filter.CursorID = &boundary.ID
+	}
+
+	page, listErr := a.Service.ListPage(ctx, filter)
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list audit logs")
 	}
 
-	payloads := make([]*posauditv1.AuditLog, len(logs))
-	for i, l := range logs {
+	payloads := make([]*posauditv1.AuditLog, len(page.Logs))
+	for i, l := range page.Logs {
 		payloads[i] = toProtoAuditLog(l)
 	}
-	return &posauditv1.ListAuditResponse{Logs: payloads}, nil
+	return &posauditv1.ListAuditResponse{Logs: payloads, NextCursor: page.NextCursor}, nil
 }
 
 func (a *AuditAPI) CreateAudit(ctx context.Context, req *posauditv1.CreateAuditRequest) (*posauditv1.CreateAuditResponse, error) {
