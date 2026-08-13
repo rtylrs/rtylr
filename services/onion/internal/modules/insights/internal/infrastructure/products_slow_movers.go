@@ -25,8 +25,9 @@ func (r *Repository) GetSlowMovers(ctx context.Context, businessID int64, days i
 	cutoff := nowFn().AddDate(0, 0, -int(days))
 	// cross-schema read from erp_products + pos_order_items + pos_orders — slow-mover detection
 	rows, err := r.queries.GetSlowMovers(ctx, sqlc.GetSlowMoversParams{
-		CreatedAt:  sql.NullTime{Time: cutoff, Valid: true},
-		BusinessID: businessID,
+		BusinessID:   businessID,
+		CreatedAt:    sql.NullTime{Time: cutoff, Valid: true},
+		BusinessID_2: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: slow movers query failed", logger.Error(err))

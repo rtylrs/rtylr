@@ -34,9 +34,11 @@ func (r *Repository) GetDaySummary(ctx context.Context, businessID int64, date s
 			logger.Ctx(ctx).Error("Failed to parse date for GetDaySummary", logger.Error(parseErr))
 			return summary, parseErr
 		}
+		end := t.AddDate(0, 0, 1)
 		row, err := r.queries.GetDaySummaryByDate(ctx, sqlc.GetDaySummaryByDateParams{
 			BusinessID: businessID,
 			PaidAt:     sql.NullTime{Time: t, Valid: true},
+			PaidAtEnd:  sql.NullTime{Time: end, Valid: true},
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to get day summary", logger.Error(err))
@@ -47,8 +49,9 @@ func (r *Repository) GetDaySummary(ctx context.Context, businessID int64, date s
 		summary.TotalOrders = int(row.TotalOrders)
 
 		refundTotal, err := r.queries.GetRefundTotalByDate(ctx, sqlc.GetRefundTotalByDateParams{
-			BusinessID: businessID,
-			RefundedAt: sql.NullTime{Time: t, Valid: true},
+			BusinessID:    businessID,
+			RefundedAt:    sql.NullTime{Time: t, Valid: true},
+			RefundedAtEnd: sql.NullTime{Time: end, Valid: true},
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to get refund total", logger.Error(err))
@@ -59,6 +62,7 @@ func (r *Repository) GetDaySummary(ctx context.Context, businessID int64, date s
 		breakdown, err := r.queries.GetPaymentBreakdownByDate(ctx, sqlc.GetPaymentBreakdownByDateParams{
 			BusinessID: businessID,
 			PaidAt:     sql.NullTime{Time: t, Valid: true},
+			PaidAtEnd:  sql.NullTime{Time: end, Valid: true},
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to get payment breakdown", logger.Error(err))

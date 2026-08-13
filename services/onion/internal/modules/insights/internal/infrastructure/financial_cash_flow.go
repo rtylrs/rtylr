@@ -37,9 +37,9 @@ func (r *Repository) GetCashFlowSeries(ctx context.Context, businessID int64, fr
 func (r *Repository) dailyPaidInvoices(ctx context.Context, businessID int64, from, to time.Time) (map[string]int64, error) {
 	// cross-schema read from finance_invoices — daily inflow for cash-flow chart
 	rows, err := r.queries.GetDailyPaidInvoices(ctx, sqlc.GetDailyPaidInvoicesParams{
-		BusinessID: businessID,
-		PaidDate:   sql.NullTime{Time: from, Valid: true},
-		PaidDate_2: sql.NullTime{Time: to, Valid: true},
+		BusinessID:      businessID,
+		ReportingDate:   sql.NullTime{Time: from, Valid: true},
+		ReportingDate_2: sql.NullTime{Time: to, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: daily paid invoices failed", logger.Error(err))
@@ -47,7 +47,9 @@ func (r *Repository) dailyPaidInvoices(ctx context.Context, businessID int64, fr
 	}
 	out := make(map[string]int64)
 	for _, row := range rows {
-		out[row.Day.Format("2006-01-02")] = decimalToMinorUnits(row.Amount)
+		if row.Day.Valid {
+			out[row.Day.Time.Format("2006-01-02")] = decimalToMinorUnits(row.Amount)
+		}
 	}
 	return out, nil
 }

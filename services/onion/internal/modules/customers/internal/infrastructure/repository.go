@@ -747,7 +747,12 @@ func (r *Repository) GetDashboardStats(ctx context.Context, businessID int64) (d
 	})
 	group.Go(func() error {
 		var err error
-		newThisMonth, err = r.queries.CountNewCustomersThisMonth(groupCtx, businessID)
+		monthStart, monthEnd := customerMonthBounds(time.Now().UTC())
+		newThisMonth, err = r.queries.CountNewCustomersThisMonth(groupCtx, sqlc.CountNewCustomersThisMonthParams{
+			BusinessID:     businessID,
+			CreatedAtStart: sql.NullTime{Time: monthStart, Valid: true},
+			CreatedAtEnd:   sql.NullTime{Time: monthEnd, Valid: true},
+		})
 		if err != nil {
 			logger.Ctx(groupCtx).Error("Failed to get new customers this month", logger.Error(err))
 		}
@@ -793,6 +798,12 @@ func (r *Repository) GetDashboardStats(ctx context.Context, businessID int64) (d
 	}
 
 	return stats, nil
+}
+
+func customerMonthBounds(now time.Time) (time.Time, time.Time) {
+	utc := now.UTC()
+	start := time.Date(utc.Year(), utc.Month(), 1, 0, 0, 0, 0, time.UTC)
+	return start, start.AddDate(0, 1, 0)
 }
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────

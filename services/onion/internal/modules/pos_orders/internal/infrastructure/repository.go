@@ -76,9 +76,11 @@ func (r *Repository) CreateLocation(ctx context.Context, ownerID int64, input do
 // ─── Tables ──────────────────────────────────────────────────────────────────
 
 func (r *Repository) ListTables(ctx context.Context, businessID, locationID int64, status string) ([]domain.Table, error) {
-	// ListTablesByOwner returns all tables; we filter in-memory for locationID/status
-	// since the sqlc query doesn't support optional filters.
-	rows, err := r.queries.ListTablesByOwner(ctx, businessID)
+	rows, err := r.queries.ListTablesByOwner(ctx, sqlc.ListTablesByOwnerParams{
+		BusinessID: businessID,
+		LocationID: sql.NullInt64{Int64: locationID, Valid: true},
+		Status:     sqlc.NullPosTablesStatus{PosTablesStatus: sqlc.PosTablesStatus(status), Valid: status != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list pos tables", logger.Error(err))
 		return nil, err
@@ -86,12 +88,6 @@ func (r *Repository) ListTables(ctx context.Context, businessID, locationID int6
 
 	tables := make([]domain.Table, 0, len(rows))
 	for _, row := range rows {
-		if locationID > 0 && row.LocationID.Int64 != locationID {
-			continue
-		}
-		if status != "" && string(row.Status.PosTablesStatus) != status {
-			continue
-		}
 		tables = append(tables, domain.Table{
 			ID:                    row.ID,
 			OwnerID:               row.OwnerID,
@@ -1019,7 +1015,19 @@ func (r *Repository) VoidOrderItem(ctx context.Context, businessID, orderID, ite
 		return err
 	}
 
-	if err := qtx.RecalcOrderTotal(ctx, sqlc.RecalcOrderTotalParams{
+	itemsTotal, err := qtx.GetActiveOrderItemsTotal(ctx, orderID)
+	if err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback void-order-item total lookup", logger.Error(rollbackErr))
+		}
+		logger.Ctx(ctx).Error("Failed to calculate order total after item void", logger.Error(err))
+		return err
+	}
+
+	itemsTotalDecimal := nullableDecimal(itemsTotal)
+	if err := qtx.UpdateOrderTotal(ctx, sqlc.UpdateOrderTotalParams{
+		Subtotal:   itemsTotalDecimal,
+		Total:      itemsTotalDecimal,
 		ID:         orderID,
 		BusinessID: businessID,
 	}); err != nil {
@@ -1202,7 +1210,18 @@ func (r *Repository) SplitOrder(ctx context.Context, businessID, orderID int64, 
 			}
 		}
 
-		recalcErr := qtx.RecalcOrderTotals(ctx, newID)
+		itemsTotal, totalErr := qtx.GetOrderItemsTotal(ctx, newID)
+		if totalErr != nil {
+			txErr = totalErr
+			return nil, totalErr
+		}
+
+		itemsTotalDecimal := nullableDecimal(itemsTotal)
+		recalcErr := qtx.UpdateOrderTotals(ctx, sqlc.UpdateOrderTotalsParams{
+			Subtotal: itemsTotalDecimal,
+			Total:    itemsTotalDecimal,
+			ID:       newID,
+		})
 		if recalcErr != nil {
 			txErr = recalcErr
 			return nil, recalcErr
@@ -1381,6 +1400,19 @@ func interfaceToFloat(v any) float64 {
 		return 0
 	}
 	return f
+}
+
+func nullableDecimal(v any) sql.NullString {
+	switch value := v.(type) {
+	case nil:
+		return sql.NullString{String: "0", Valid: true}
+	case []byte:
+		return sql.NullString{String: string(value), Valid: true}
+	case string:
+		return sql.NullString{String: value, Valid: true}
+	default:
+		return sql.NullString{String: fmt.Sprint(value), Valid: true}
+	}
 }
 
 func scanOrderRow(rows *sql.Rows) (domain.Order, error) {

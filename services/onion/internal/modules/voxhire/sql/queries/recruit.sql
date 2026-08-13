@@ -386,5 +386,5 @@ FROM (
            created_at
       FROM voxhire_company_leads
 ) recent
-ORDER BY created_at DESC
+ORDER BY created_at DESC, id DESC
 LIMIT 10;
