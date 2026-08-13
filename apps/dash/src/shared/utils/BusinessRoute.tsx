@@ -124,7 +124,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
           background: 'var(--dash-bg, #fff)',
         }}
       >
-        <img src="/logo.png" alt="rtylr" style={{ height: 24, filter: 'brightness(0)' }} />
+        <img src="/logo-dark.png" alt="rtylr" style={{ height: 36, width: 'auto' }} />
         <div style={{ position: 'relative' }}>
           <button
             type="button"
