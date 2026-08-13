@@ -1,25 +1,16 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { AlertTriangle, RefreshCw, ShoppingCart } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useLowStock } from '../inventory/useInventory';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
-import { toast } from 'sonner';
 
 const AMBER = 'var(--erp-accent)';
 
 const LowStockAlerts: React.FC = () => {
   const { data: items = [], isLoading } = useLowStock();
-
-  const handleReorder = (name: string) => {
-    toast.info(`Reorder for ${name} coming soon`);
-  };
-
-  const handleReorderAll = () => {
-    toast.info('Bulk reorder coming soon');
-  };
 
   return (
     <motion.div
@@ -31,20 +22,6 @@ const LowStockAlerts: React.FC = () => {
       <PageHeader
         title="Low Stock Alerts"
         description={`${items.length} items below minimum stock levels`}
-        actions={
-          <button
-            onClick={handleReorderAll}
-            disabled={items.length === 0}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{
-              background: AMBER,
-              color: 'var(--erp-accent-foreground)',
-              opacity: items.length === 0 ? 0.5 : 1,
-            }}
-          >
-            <RefreshCw size={14} /> Reorder All
-          </button>
-        }
       />
 
       {isLoading ? (
@@ -106,16 +83,6 @@ const LowStockAlerts: React.FC = () => {
                     Min: {item.lowStockThreshold}
                   </p>
                 </div>
-                <button
-                  onClick={() => handleReorder(item.productName ?? '')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
-                  style={{
-                    background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)',
-                    color: AMBER,
-                  }}
-                >
-                  <ShoppingCart size={12} /> Reorder
-                </button>
               </div>
             );
           })}
