@@ -193,7 +193,7 @@ const settingsRoute = createRoute({
 
 const catchAllRoute = createRoute({
   getParentRoute: () => layoutRoute,
-  path: '*',
+  path: '$',
   component: () => <Navigate to="/" replace />,
 });
 
