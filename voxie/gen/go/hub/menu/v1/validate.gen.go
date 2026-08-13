@@ -76,3 +76,129 @@ func (m *UpdateMenuResponse) Validate() error {
 	}
 	return nil
 }
+
+func (m *MenuBanner) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListMenuBannersRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListMenuBannersResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Banners {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "banners: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateMenuBannerRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Title == "" {
+		violations = append(violations, "title is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CreateMenuBannerResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Banner != nil {
+		if err := m.Banner.Validate(); err != nil {
+			violations = append(violations, "banner: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateMenuBannerRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if m.Title == "" {
+		violations = append(violations, "title is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *UpdateMenuBannerResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Banner != nil {
+		if err := m.Banner.Validate(); err != nil {
+			violations = append(violations, "banner: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteMenuBannerRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Id <= 0 {
+		violations = append(violations, "id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *DeleteMenuBannerResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}

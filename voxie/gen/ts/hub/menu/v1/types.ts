@@ -89,3 +89,282 @@ const violations: string[] = [];
 return violations;
 }
 
+export interface MenuBanner {
+id?: string;
+title?: string;
+body?: string;
+imageUrl?: string;
+linkUrl?: string;
+position?: number;
+isActive?: boolean;
+startsAt?: string;
+endsAt?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeMenuBanner(v: any): MenuBanner {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+title: v.title,
+body: v.body,
+imageUrl: v.image_url,
+linkUrl: v.link_url,
+position: v.position,
+isActive: v.is_active,
+startsAt: v.starts_at,
+endsAt: v.ends_at,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeMenuBanner(v: MenuBanner): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.title !== undefined) { out.title = v.title; }
+if (v.body !== undefined) { out.body = v.body; }
+if (v.imageUrl !== undefined) { out.image_url = v.imageUrl; }
+if (v.linkUrl !== undefined) { out.link_url = v.linkUrl; }
+if (v.position !== undefined) { out.position = v.position; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.startsAt !== undefined) { out.starts_at = v.startsAt; }
+if (v.endsAt !== undefined) { out.ends_at = v.endsAt; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
+}
+
+export function validateMenuBanner(v: MenuBanner): string[] {
+const violations: string[] = [];
+return violations;
+}
+
+export interface ListMenuBannersRequest {
+}
+
+export function decodeListMenuBannersRequest(v: any): ListMenuBannersRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeListMenuBannersRequest(v: ListMenuBannersRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
+export function validateListMenuBannersRequest(v: ListMenuBannersRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
+export interface ListMenuBannersResponse {
+banners?: (MenuBanner)[];
+}
+
+export function decodeListMenuBannersResponse(v: any): ListMenuBannersResponse {
+if (v === null || v === undefined) return v;
+return {
+banners: (v.banners !== undefined ? (v.banners as any[]).map(decodeMenuBanner) : v.banners),
+};
+}
+
+export function encodeListMenuBannersResponse(v: ListMenuBannersResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.banners !== undefined) { out.banners = (v.banners as any[]).map(encodeMenuBanner); }
+return out;
+}
+
+export function validateListMenuBannersResponse(v: ListMenuBannersResponse): string[] {
+const violations: string[] = [];
+if (v.banners !== undefined && v.banners !== null) for (const item of v.banners) violations.push(...validateMenuBanner(item).map((message) => "banners: " + message));
+return violations;
+}
+
+export interface CreateMenuBannerRequest {
+title: string;
+body?: string;
+imageUrl?: string;
+linkUrl?: string;
+position?: number;
+isActive?: boolean;
+startsAt?: string;
+endsAt?: string;
+}
+
+export function decodeCreateMenuBannerRequest(v: any): CreateMenuBannerRequest {
+if (v === null || v === undefined) return v;
+return {
+title: v.title,
+body: v.body,
+imageUrl: v.image_url,
+linkUrl: v.link_url,
+position: v.position,
+isActive: v.is_active,
+startsAt: v.starts_at,
+endsAt: v.ends_at,
+};
+}
+
+export function encodeCreateMenuBannerRequest(v: CreateMenuBannerRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.title !== undefined) { out.title = v.title; }
+if (v.body !== undefined) { out.body = v.body; }
+if (v.imageUrl !== undefined) { out.image_url = v.imageUrl; }
+if (v.linkUrl !== undefined) { out.link_url = v.linkUrl; }
+if (v.position !== undefined) { out.position = v.position; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.startsAt !== undefined) { out.starts_at = v.startsAt; }
+if (v.endsAt !== undefined) { out.ends_at = v.endsAt; }
+return out;
+}
+
+export function validateCreateMenuBannerRequest(v: CreateMenuBannerRequest): string[] {
+const violations: string[] = [];
+if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+return violations;
+}
+
+export interface CreateMenuBannerResponse {
+banner?: MenuBanner;
+}
+
+export function decodeCreateMenuBannerResponse(v: any): CreateMenuBannerResponse {
+if (v === null || v === undefined) return v;
+return {
+banner: (v.banner !== undefined ? decodeMenuBanner(v.banner) : v.banner),
+};
+}
+
+export function encodeCreateMenuBannerResponse(v: CreateMenuBannerResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.banner !== undefined) { out.banner = encodeMenuBanner(v.banner); }
+return out;
+}
+
+export function validateCreateMenuBannerResponse(v: CreateMenuBannerResponse): string[] {
+const violations: string[] = [];
+if (v.banner !== undefined && v.banner !== null) violations.push(...validateMenuBanner(v.banner).map((message) => "banner: " + message));
+return violations;
+}
+
+export interface UpdateMenuBannerRequest {
+id: string;
+title: string;
+body?: string;
+imageUrl?: string;
+linkUrl?: string;
+position?: number;
+isActive?: boolean;
+startsAt?: string;
+endsAt?: string;
+}
+
+export function decodeUpdateMenuBannerRequest(v: any): UpdateMenuBannerRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+title: v.title,
+body: v.body,
+imageUrl: v.image_url,
+linkUrl: v.link_url,
+position: v.position,
+isActive: v.is_active,
+startsAt: v.starts_at,
+endsAt: v.ends_at,
+};
+}
+
+export function encodeUpdateMenuBannerRequest(v: UpdateMenuBannerRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.title !== undefined) { out.title = v.title; }
+if (v.body !== undefined) { out.body = v.body; }
+if (v.imageUrl !== undefined) { out.image_url = v.imageUrl; }
+if (v.linkUrl !== undefined) { out.link_url = v.linkUrl; }
+if (v.position !== undefined) { out.position = v.position; }
+if (v.isActive !== undefined) { out.is_active = v.isActive; }
+if (v.startsAt !== undefined) { out.starts_at = v.startsAt; }
+if (v.endsAt !== undefined) { out.ends_at = v.endsAt; }
+return out;
+}
+
+export function validateUpdateMenuBannerRequest(v: UpdateMenuBannerRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+return violations;
+}
+
+export interface UpdateMenuBannerResponse {
+banner?: MenuBanner;
+}
+
+export function decodeUpdateMenuBannerResponse(v: any): UpdateMenuBannerResponse {
+if (v === null || v === undefined) return v;
+return {
+banner: (v.banner !== undefined ? decodeMenuBanner(v.banner) : v.banner),
+};
+}
+
+export function encodeUpdateMenuBannerResponse(v: UpdateMenuBannerResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.banner !== undefined) { out.banner = encodeMenuBanner(v.banner); }
+return out;
+}
+
+export function validateUpdateMenuBannerResponse(v: UpdateMenuBannerResponse): string[] {
+const violations: string[] = [];
+if (v.banner !== undefined && v.banner !== null) violations.push(...validateMenuBanner(v.banner).map((message) => "banner: " + message));
+return violations;
+}
+
+export interface DeleteMenuBannerRequest {
+id: string;
+}
+
+export function decodeDeleteMenuBannerRequest(v: any): DeleteMenuBannerRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeDeleteMenuBannerRequest(v: DeleteMenuBannerRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
+export function validateDeleteMenuBannerRequest(v: DeleteMenuBannerRequest): string[] {
+const violations: string[] = [];
+if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+return violations;
+}
+
+export interface DeleteMenuBannerResponse {
+success?: boolean;
+}
+
+export function decodeDeleteMenuBannerResponse(v: any): DeleteMenuBannerResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeDeleteMenuBannerResponse(v: DeleteMenuBannerResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
+export function validateDeleteMenuBannerResponse(v: DeleteMenuBannerResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
