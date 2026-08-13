@@ -24,10 +24,7 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListBrands(ctx context.Context, businessID int64) ([]domain.Brand, error) {
-	rows, err := r.queries.ListBrands(ctx, sqlc.ListBrandsParams{
-		BusinessID:   businessID,
-		BusinessID_2: businessID,
-	})
+	rows, err := r.queries.ListBrands(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list brands", logger.Error(err))
 
@@ -47,10 +44,9 @@ func (r *Repository) ListBrands(ctx context.Context, businessID int64) ([]domain
 // ordered by name. Limit and offset are applied as-is; callers clamp them.
 func (r *Repository) ListBrandsPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Brand, error) {
 	rows, err := r.queries.ListBrandsPaginated(ctx, sqlc.ListBrandsPaginatedParams{
-		BusinessID:   businessID,
-		BusinessID_2: businessID,
-		Limit:        limit,
-		Offset:       offset,
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list brands page", logger.Error(err))
@@ -61,7 +57,7 @@ func (r *Repository) ListBrandsPaginated(ctx context.Context, businessID int64, 
 	brands := make([]domain.Brand, 0, len(rows))
 
 	for _, row := range rows {
-		brands = append(brands, brandFromRow(sqlc.ListBrandsRow(row)))
+		brands = append(brands, brandFromPaginatedRow(row))
 	}
 
 	return brands, nil
@@ -71,27 +67,65 @@ func (r *Repository) ListBrandsPaginated(ctx context.Context, businessID int64, 
 // to the domain model, collapsing nullable columns to their zero value when
 // NULL.
 func brandFromRow(row sqlc.ListBrandsRow) domain.Brand {
+	return brandFromFields(
+		row.ID,
+		row.OwnerID,
+		row.BusinessID,
+		row.Name,
+		row.LogoUrl,
+		row.Description,
+		row.ProductCount,
+		row.CreatedAt,
+		row.UpdatedAt,
+	)
+}
+
+func brandFromPaginatedRow(row sqlc.ListBrandsPaginatedRow) domain.Brand {
+	return brandFromFields(
+		row.ID,
+		row.OwnerID,
+		row.BusinessID,
+		row.Name,
+		row.LogoUrl,
+		row.Description,
+		row.ProductCount,
+		row.CreatedAt,
+		row.UpdatedAt,
+	)
+}
+
+func brandFromFields(
+	id int64,
+	ownerID int64,
+	businessID int64,
+	name string,
+	logoURL sql.NullString,
+	description sql.NullString,
+	productCount int64,
+	createdAt sql.NullTime,
+	updatedAt sql.NullTime,
+) domain.Brand {
 	var b domain.Brand
-	b.ID = row.ID
-	b.OwnerID = row.OwnerID
-	b.BusinessID = row.BusinessID
-	b.Name = row.Name
-	b.ProductCount = row.ProductCount
+	b.ID = id
+	b.OwnerID = ownerID
+	b.BusinessID = businessID
+	b.Name = name
+	b.ProductCount = productCount
 
-	if row.LogoUrl.Valid {
-		b.LogoURL = row.LogoUrl.String
+	if logoURL.Valid {
+		b.LogoURL = logoURL.String
 	}
 
-	if row.Description.Valid {
-		b.Description = row.Description.String
+	if description.Valid {
+		b.Description = description.String
 	}
 
-	if row.CreatedAt.Valid {
-		b.CreatedAt = row.CreatedAt.Time
+	if createdAt.Valid {
+		b.CreatedAt = createdAt.Time
 	}
 
-	if row.UpdatedAt.Valid {
-		b.UpdatedAt = row.UpdatedAt.Time
+	if updatedAt.Valid {
+		b.UpdatedAt = updatedAt.Time
 	}
 
 	return b
