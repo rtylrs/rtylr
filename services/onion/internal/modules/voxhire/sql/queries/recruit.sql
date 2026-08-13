@@ -369,22 +369,30 @@ LIMIT 6;
 -- name: AnalyticsRecentActivity :many
 SELECT kind, id, primary_text, secondary_text, meta, created_at
 FROM (
-    SELECT 'application' AS kind,
-           a.id AS id,
-           c.title AS primary_text,
-           a.name AS secondary_text,
-           COALESCE(a.status, 'new') AS meta,
-           a.created_at AS created_at
-      FROM voxire_career_applications a
-      JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+    (
+        SELECT 'application' AS kind,
+               a.id AS id,
+               c.title AS primary_text,
+               a.name AS secondary_text,
+               COALESCE(a.status, 'new') AS meta,
+               a.created_at AS created_at
+          FROM voxire_career_applications a
+          JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+         ORDER BY a.created_at DESC, a.id DESC
+         LIMIT 10
+    )
     UNION ALL
-    SELECT 'lead' AS kind,
-           id,
-           company_name AS primary_text,
-           COALESCE(role, '') AS secondary_text,
-           COALESCE(timeline, '') AS meta,
-           created_at
-      FROM voxhire_company_leads
+    (
+        SELECT 'lead' AS kind,
+               id,
+               company_name AS primary_text,
+               COALESCE(role, '') AS secondary_text,
+               COALESCE(timeline, '') AS meta,
+               created_at
+          FROM voxhire_company_leads
+         ORDER BY created_at DESC, id DESC
+         LIMIT 10
+    )
 ) recent
-ORDER BY created_at DESC
+ORDER BY created_at DESC, id DESC
 LIMIT 10;

@@ -24,7 +24,10 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) ListBrands(ctx context.Context, businessID int64) ([]domain.Brand, error) {
-	rows, err := r.queries.ListBrands(ctx, businessID)
+	rows, err := r.queries.ListBrands(ctx, sqlc.ListBrandsParams{
+		BusinessID:   businessID,
+		BusinessID_2: businessID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list brands", logger.Error(err))
 
@@ -44,9 +47,10 @@ func (r *Repository) ListBrands(ctx context.Context, businessID int64) ([]domain
 // ordered by name. Limit and offset are applied as-is; callers clamp them.
 func (r *Repository) ListBrandsPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Brand, error) {
 	rows, err := r.queries.ListBrandsPaginated(ctx, sqlc.ListBrandsPaginatedParams{
-		BusinessID: businessID,
-		Limit:      limit,
-		Offset:     offset,
+		BusinessID:   businessID,
+		BusinessID_2: businessID,
+		Limit:        limit,
+		Offset:       offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list brands page", logger.Error(err))

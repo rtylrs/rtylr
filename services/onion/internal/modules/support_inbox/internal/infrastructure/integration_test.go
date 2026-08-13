@@ -2,13 +2,91 @@ package infrastructure_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/support_inbox/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
 
 const testInboxBusinessID int64 = 1
+
+func TestSupportInbox_ListInbox_MessageSummaryHandlesTiesEmptyHistoriesAndPagination(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+	businessID := time.Now().UnixNano()
+	baseTime := time.Now().UTC().Truncate(time.Second)
+
+	t.Cleanup(func() {
+		if _, err := db.ExecContext(ctx, "DELETE FROM support_tickets WHERE business_id = ?", businessID); err != nil {
+			t.Errorf("clean up support tickets: %v", err)
+		}
+	})
+
+	insertTicket := func(subject string, updatedAt time.Time) int64 {
+		t.Helper()
+		result, err := db.ExecContext(ctx, `
+			INSERT INTO support_tickets
+				(business_id, customer_name, customer_email, subject, status, priority, channel, updated_at)
+			VALUES (?, ?, ?, ?, 'open', 'medium', 'email', ?)`,
+			businessID, "Inbox test", fmt.Sprintf("%s@example.test", subject), subject, updatedAt)
+		if err != nil {
+			t.Fatalf("insert ticket %q: %v", subject, err)
+		}
+		id, err := result.LastInsertId()
+		if err != nil {
+			t.Fatalf("ticket ID for %q: %v", subject, err)
+		}
+		return id
+	}
+
+	insertMessage := func(ticketID int64, body string, createdAt time.Time) {
+		t.Helper()
+		if _, err := db.ExecContext(ctx, `
+			INSERT INTO support_messages (ticket_id, sender_type, sender_name, body, created_at)
+			VALUES (?, 'customer', 'Inbox test', ?, ?)`, ticketID, body, createdAt); err != nil {
+			t.Fatalf("insert message for ticket %d: %v", ticketID, err)
+		}
+	}
+
+	newestTicketID := insertTicket("newest", baseTime.Add(3*time.Minute))
+	tiedTicketID := insertTicket("tied", baseTime.Add(2*time.Minute))
+	emptyTicketID := insertTicket("empty", baseTime.Add(time.Minute))
+	insertMessage(newestTicketID, "older", baseTime)
+	insertMessage(newestTicketID, "newest", baseTime.Add(time.Minute))
+	insertMessage(tiedTicketID, "first at tie", baseTime)
+	insertMessage(tiedTicketID, "second at tie", baseTime)
+
+	repo := infrastructure.NewRepository(db)
+	pageOne, total, err := repo.ListInbox(ctx, businessID, 1, 2)
+	if err != nil {
+		t.Fatalf("ListInbox page 1: %v", err)
+	}
+	if total != 3 {
+		t.Fatalf("total = %d, want 3", total)
+	}
+	if len(pageOne) != 2 {
+		t.Fatalf("page 1 items = %d, want 2", len(pageOne))
+	}
+	if pageOne[0].TicketID != newestTicketID || pageOne[0].LastMessage != "newest" || pageOne[0].MessageCount != 2 {
+		t.Fatalf("newest ticket summary = %#v", pageOne[0])
+	}
+	if pageOne[1].TicketID != tiedTicketID || pageOne[1].LastMessage != "second at tie" || pageOne[1].MessageCount != 2 {
+		t.Fatalf("tied ticket summary = %#v", pageOne[1])
+	}
+
+	pageTwo, total, err := repo.ListInbox(ctx, businessID, 2, 2)
+	if err != nil {
+		t.Fatalf("ListInbox page 2: %v", err)
+	}
+	if total != 3 || len(pageTwo) != 1 {
+		t.Fatalf("page 2 = %#v, total = %d", pageTwo, total)
+	}
+	if pageTwo[0].TicketID != emptyTicketID || pageTwo[0].LastMessage != "" || !pageTwo[0].LastMessageAt.IsZero() || pageTwo[0].MessageCount != 0 {
+		t.Fatalf("empty ticket summary = %#v", pageTwo[0])
+	}
+}
 
 func TestSupportInbox_ListInbox_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)

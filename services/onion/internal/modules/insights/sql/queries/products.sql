@@ -56,14 +56,16 @@ WHERE business_id = ?
 
 -- name: GetSlowMovers :many
 SELECT p.id, p.name, p.stock_quantity,
-       EXISTS (
-         SELECT 1 FROM pos_order_items oi
-         JOIN pos_orders o ON o.id = oi.order_id AND o.business_id = p.business_id
-         WHERE oi.menu_item_id = p.id AND o.created_at >= ?
-       ) AS recent_sale
+       FALSE AS recent_sale
 FROM erp_products p
+LEFT JOIN (
+    SELECT DISTINCT oi.menu_item_id
+    FROM pos_order_items oi
+    JOIN pos_orders o ON o.id = oi.order_id
+    WHERE o.business_id = ? AND o.created_at >= ?
+) AS recent_sales ON recent_sales.menu_item_id = p.id
 WHERE p.business_id = ?
   AND p.is_active = TRUE
-HAVING recent_sale = 0
+  AND recent_sales.menu_item_id IS NULL
 ORDER BY p.name ASC
 LIMIT 500;

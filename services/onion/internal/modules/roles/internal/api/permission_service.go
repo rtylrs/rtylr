@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/roles/internal/application"
@@ -163,6 +164,9 @@ func (a *PermissionAPI) UpdatePermissionMatrix(ctx context.Context, req *hubperm
 		Name:        target.Name,
 		Permissions: perms,
 	}); err != nil {
+		if errors.Is(err, domain.ErrRoleNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Role not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update permission matrix")
 	}
 
@@ -203,6 +207,9 @@ func (a *PermissionAPI) UpdateRole(ctx context.Context, req *hubpermissionv1.Upd
 		Name:        name,
 		Permissions: perms,
 	}); err != nil {
+		if errors.Is(err, domain.ErrRoleNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Role not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update role")
 	}
 
@@ -226,6 +233,9 @@ func (a *PermissionAPI) DeleteRole(ctx context.Context, req *hubpermissionv1.Del
 	}
 
 	if err := a.Service.DeleteRole(ctx, businessID, id); err != nil {
+		if errors.Is(err, domain.ErrRoleNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Role not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete role")
 	}
 
