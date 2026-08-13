@@ -277,6 +277,17 @@ func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64) 
 		err = nil
 		return nil // idempotent: already received
 	}
+	for _, warehouseID := range []int64{fromWH, toWH} {
+		if _, lookupErr := qtx.GetWarehouseReference(ctx, sqlc.GetWarehouseReferenceParams{
+			BusinessID: businessID,
+			ID:         warehouseID,
+		}); lookupErr != nil {
+			if errors.Is(lookupErr, sql.ErrNoRows) {
+				return domain.ErrStockTransferReferenceNotFound
+			}
+			return lookupErr
+		}
+	}
 
 	items, err := qtx.GetTransferItems(ctx, id)
 	if err != nil {
