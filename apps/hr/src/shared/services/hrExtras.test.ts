@@ -91,4 +91,20 @@ describe('hrExtras schedule calls', () => {
     hrExtras.deleteScheduleShift(19);
     expect(safe.delete).toHaveBeenCalledWith('/hr/shifts', { data: { id: 19 } });
   });
+
+  it('sends every edited HR settings field instead of an empty payload', () => {
+    const settings = {
+      workWeekStart: 'Sunday' as const,
+      overtimeAfterHours: 45,
+      ptoPolicyDays: 18,
+      currency: 'EUR' as const,
+      weeklyHours: 37.5,
+      industry: 'retail',
+    };
+
+    hrExtras.updateSettings(settings);
+
+    expect(safe.put).toHaveBeenCalledWith('/hr/config', settings);
+    expect(safe.put).not.toHaveBeenCalledWith('/hr/config', {});
+  });
 });
