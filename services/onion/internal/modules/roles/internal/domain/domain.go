@@ -1,6 +1,11 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var ErrRoleNotFound = errors.New("role not found")
 
 type Role struct {
 	ID          int64     `json:"id"`
