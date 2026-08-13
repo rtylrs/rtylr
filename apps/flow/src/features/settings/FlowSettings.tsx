@@ -35,6 +35,8 @@ import { useLifePreferences } from '../../shared/lib/lifePreferences';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiUserSettings } from '../../shared/services/flowApi';
 import { getCookie } from '@voxire/auth';
+import { getRouteApi } from '@tanstack/react-router';
+import type { SettingsSectionId } from '../../shared/schemas/settings';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useLabels, useCreateLabel, useDeleteLabel } from '../../features/tasks/useLabels';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
@@ -1015,12 +1017,22 @@ function getRoleFromToken(token: string | null): string {
 
 const MANAGE_WORKSPACE_ROLES = new Set(['owner', 'admin', 'manager']);
 
+// getRouteApi takes a route id, which for a top-level route is its path.
+const settingsRouteApi = getRouteApi('/settings');
+
 const FlowSettings: React.FC = () => {
   const { t } = useTranslation();
   const token = getCookie('token');
   const role = useMemo(() => getRoleFromToken(token), [token]);
   const canManageWorkspaces = MANAGE_WORKSPACE_ROLES.has(role);
-  const [activeSection, setActiveSection] = useState(canManageWorkspaces ? 'workspaces' : 'team');
+  // ?section=time makes a section linkable, so the sidebar can point at one.
+  const { section } = settingsRouteApi.useSearch();
+  const [activeSection, setActiveSection] = useState<SettingsSectionId | string>(
+    section ?? (canManageWorkspaces ? 'workspaces' : 'team')
+  );
+  useEffect(() => {
+    if (section) setActiveSection(section);
+  }, [section]);
   const sections = buildSections(t, canManageWorkspaces);
 
   const ActiveComponent =
