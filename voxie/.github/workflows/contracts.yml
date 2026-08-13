@@ -1,8 +1,6 @@
 name: Contracts
 
 on:
-  pull_request:
-    branches: [main]
   push:
     branches: [main]
     paths-ignore:
@@ -10,6 +8,7 @@ on:
       - "go.mod"
       - "go.sum"
       - "pnpm-lock.yaml"
+  workflow_dispatch:
 
 concurrency:
   group: contracts-${{ github.event.pull_request.number || github.ref }}
