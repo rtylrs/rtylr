@@ -250,15 +250,82 @@ are payroll and job-cost evidence, and a job's cost has to be defensible after t
 job closes. The retention period itself is still to be set, and it is a legal
 question per jurisdiction rather than a product one.
 
-## Open questions
+## Decisions on the four items left open
 
-1. **Does a hired item's usage reconcile against its supplier invoice?** The
-   supplier and hire rate are recorded, so the data is there. Whether Flow shows
-   the variance, or Finance does, is unsettled.
-2. **Fuel and consumables.** Real plant cost includes them and nothing here
-   captures them. Out of scope for a first pass, worth naming now.
-3. **Who maintains the plant register?** Rates are money, so the same dual gate
-   probably applies, but that makes routine fleet admin an admin-only job.
-4. **Tenancy.** `business_id` defaults to `0` on the existing tables. Every new
-   table here must not repeat that, and the existing default needs settling before
-   more data lands on it.
+### 1. Finance shows the hire variance. Flow supplies the evidence.
+
+There is already a precedent and this follows it: Finance pulls approved time, and
+Flow renders no invoice and has no send button. Hired plant works the same way.
+Flow exposes usage per hired item per period through the same aggregation endpoint
+as everything else; Finance's bill screen pulls it and shows expected against
+invoiced at the moment someone decides to pay or query.
+
+The variance belongs where the decision is made, and that is the bill screen, not a
+plant report. Flow never learns what an invoice says.
+
+What Flow does owe is the thing only a site manager can answer: whether the item
+was really on site for that long. That is the usage record, and it has to be
+correctable after the fact, because an invoice query usually starts with someone
+saying the days are wrong.
+
+### 2. Fuel is out of scope, and will arrive as an expense, not a plant column.
+
+Fuel is real cost and leaving it out understates every job. It is still the wrong
+thing to build here, because fuel is a purchase: it arrives on a receipt, against a
+site or a vehicle, and `expenses` already models that. Adding a fuel field to plant
+usage would create a second, worse place to record spending that Finance already
+captures.
+
+The insurance is cheap and taken now: **project cost is an additive set of typed
+components**, not a single computed figure.
+
+```
+project cost = sum(component)   where component is one of
+               labour · plant-operating · plant-standby · [consumables] · [expenses]
+```
+
+Adding fuel later is then a new component type reading project-tagged expenses, not
+a rewrite of the cost model. Every cost surface is built to render an open set of
+components from the start.
+
+### 3. Split the register by field, not by screen.
+
+Rates are money and fleet admin is not, so gating the whole register on the money
+permission makes a fitter and an accountant the same person. Two capabilities:
+
+- **`manage plant`** adds and edits items, serial numbers, status, availability and
+  who logs each one. Fleet and site managers hold it.
+- **`manage plant rates`** sets operating, standby and hire rates, dual-gated
+  exactly like the labour cost surfaces.
+
+A manager can put a new excavator on the register and mark it available this
+morning; what it costs is set by someone who is allowed to see money. This is the
+same line the design already draws between time and cost.
+
+### 4. New tables carry no `business_id` default. The existing one gets its own fix.
+
+`business_id BIGINT NOT NULL DEFAULT 0` on the existing tables is a tenancy hazard:
+a forgotten value is not an error, it is row zero, silently shared. Three rules
+here:
+
+1. **New tables declare `business_id BIGINT NOT NULL` with no default**, so an
+   insert that forgets it fails loudly instead of landing in a shared bucket.
+2. **Every write sets it explicitly**, including writes into `hr_time_entries`,
+   whose default this work must not rely on.
+3. **Every read filters on it.** Scoping by `owner_id` alone is what turns a
+   default into a cross-tenant leak, and indexes lead with
+   `(owner_id, business_id, ...)` accordingly.
+
+Correcting the existing default is **not** folded into this work. It needs a data
+audit first, because deciding which business owns today's row-zero data is a
+question about the data, not the schema, and doing it blind would move real rows to
+the wrong tenant. It gets its own change, and this spec deliberately stops adding
+to the problem in the meantime.
+
+## Still genuinely open
+
+1. **The retention period.** Retention is settled; the number is a jurisdictional
+   question and needs an answer per market rather than a default invented here.
+2. **Direction of dependency.** Flow taking a dependency on the HR module, and now
+   possibly on ERP for supplier links, is an architectural call that wants an
+   explicit yes before migrations are written.
