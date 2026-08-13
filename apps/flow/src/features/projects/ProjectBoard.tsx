@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { useParams } from '@tanstack/react-router';
-import { ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { ChevronDown, Plus, Settings2, Trash2 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import {
@@ -19,7 +20,8 @@ import TaskCard from '../../shared/components/TaskCard';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
-import { useCanEditTask } from '../../shared/lib/currentUser';
+import { useCanEditTask, useCanDeleteResource } from '../../shared/lib/currentUser';
+import BoardSettingsPanel from './components/BoardSettingsPanel';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 
@@ -151,12 +153,16 @@ function saveGroupBy(projectId: string, key: GroupKey): void {
 }
 
 const ProjectBoard: React.FC = () => {
+  const { t } = useTranslation();
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
   const { selectedTaskIds, toggleSelectTask, activeWorkspaceId } = useFlowStore();
   const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
   const moveTask = useMoveTaskToColumn();
   const canEdit = useCanEditTask(projectId);
+  // "Manage project" for board setup. A viewer still opens the panel and sees
+  // why it is read-only, rather than the board's behaviour being unexplainable.
+  const canManageBoard = useCanDeleteResource(projectId);
 
   useProjectRealtime(projectId);
 
@@ -171,6 +177,7 @@ const ProjectBoard: React.FC = () => {
   const [newColumnName, setNewColumnName] = useState('');
   const [groupBy, setGroupByState] = useState<GroupKey>('none');
   const [pendingDeleteColumn, setPendingDeleteColumn] = useState<ApiProjectColumn | null>(null);
+  const [boardSettingsOpen, setBoardSettingsOpen] = useState(false);
 
   // Hydrate group-by from localStorage once the project id is known.
   useEffect(() => {
@@ -287,7 +294,31 @@ const ProjectBoard: React.FC = () => {
         projectId={projectId}
         taskCount={tasks.length}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
-        rightSlot={<GroupByPicker groupBy={groupBy} onChange={setGroupBy} />}
+        rightSlot={
+          <div className="flex items-center gap-1.5">
+            <GroupByPicker groupBy={groupBy} onChange={setGroupBy} />
+            <button
+              type="button"
+              onClick={() => setBoardSettingsOpen(true)}
+              aria-label={t('flow.board.openSettings')}
+              className="flow-focus flex h-11 w-11 items-center justify-center rounded-md md:h-8 md:w-8"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              <Settings2 size={14} aria-hidden="true" />
+            </button>
+          </div>
+        }
+      />
+
+      <BoardSettingsPanel
+        open={boardSettingsOpen}
+        onClose={() => setBoardSettingsOpen(false)}
+        projectId={projectId}
+        workspaceId={activeWorkspaceId || project.workspaceId}
+        columns={columns}
+        canManage={canManageBoard}
+        groupBy={groupBy}
+        onGroupByChange={setGroupBy}
       />
 
       {/* Tightened kanban canvas - the previous p-6 / gap-4 combo wasted
