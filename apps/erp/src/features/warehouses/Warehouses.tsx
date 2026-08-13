@@ -9,6 +9,7 @@ import { Skeleton } from '../../shared/components/Skeleton';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatNumber } from '../../shared/lib/format';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -28,6 +29,7 @@ const Warehouses: React.FC = () => {
   const { data: warehouses = [], isLoading } = useWarehouses();
   const createMut = useCreateWarehouse();
   const deleteMut = useDeleteWarehouse();
+  const { t } = useTranslation('erp');
   const [showCreate, setShowCreate] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
@@ -37,7 +39,7 @@ const Warehouses: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim()) {
-      toast.error('Warehouse name is required');
+      toast.error(t('warehouses.validation.nameRequired'));
       return;
     }
     try {
@@ -51,14 +53,14 @@ const Warehouses: React.FC = () => {
         isDefault: false,
         isActive: true,
       });
-      toast.success('Warehouse created');
+      toast.success(t('warehouses.toast.created'));
       setShowCreate(false);
       setNewName('');
       setNewAddress('');
       setNewManagerName('');
       setNewCapacity('');
     } catch {
-      toast.error('Failed to create warehouse');
+      toast.error(t('warehouses.toast.createFailed'));
     }
   };
 
@@ -68,17 +70,17 @@ const Warehouses: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Warehouses · rtylr" />
+      <HelmetContainer title={`${t('warehouses.title')} · rtylr`} />
       <PageHeader
-        title="Warehouses"
-        description={`${warehouses.length} active storage locations`}
+        title={t('warehouses.title')}
+        description={t('warehouses.count', { count: warehouses.length })}
         actions={
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
-            <Plus size={14} /> New Warehouse
+            <Plus size={14} /> {t('warehouses.new')}
           </button>
         }
       />
@@ -91,8 +93,8 @@ const Warehouses: React.FC = () => {
         </div>
       ) : warehouses.length === 0 ? (
         <EmptyState
-          title="No warehouses"
-          description="Create your first warehouse to track stock locations"
+          title={t('warehouses.empty.title')}
+          description={t('warehouses.empty.description')}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -126,7 +128,7 @@ const Warehouses: React.FC = () => {
                             color: 'var(--erp-success)',
                           }}
                         >
-                          Default
+                          {t('warehouses.status.default')}
                         </span>
                       )}
                       {!w.isActive && (
@@ -137,13 +139,13 @@ const Warehouses: React.FC = () => {
                             color: 'var(--erp-danger)',
                           }}
                         >
-                          Inactive
+                          {t('warehouses.status.inactive')}
                         </span>
                       )}
                     </div>
                   </div>
                   <button
-                    aria-label="Delete warehouse"
+                    aria-label={t('warehouses.delete')}
                     onClick={() => setConfirmDeleteId(w.id ?? null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center"
                     style={{ color: 'var(--erp-danger)' }}
@@ -172,7 +174,7 @@ const Warehouses: React.FC = () => {
                       className="flex items-center gap-2 text-xs"
                       style={{ color: 'var(--hub-text-muted)' }}
                     >
-                      <User size={11} /> Managed by {w.managerName}
+                      <User size={11} /> {t('warehouses.managedBy', { name: w.managerName })}
                     </div>
                   )}
                   {Number(w.capacity) > 0 && (
@@ -180,7 +182,7 @@ const Warehouses: React.FC = () => {
                       className="flex items-center justify-between text-xs"
                       style={{ color: 'var(--hub-text-muted)' }}
                     >
-                      <span>Capacity</span>
+                      <span>{t('warehouses.capacity')}</span>
                       <span style={{ color: 'var(--hub-text)' }}>
                         {formatNumber(Number(w.capacity))}
                       </span>
@@ -195,15 +197,15 @@ const Warehouses: React.FC = () => {
 
       <ConfirmModal
         open={confirmDeleteId !== null}
-        title="Delete warehouse?"
-        description="Products assigned to this warehouse will become unassigned."
+        title={t('warehouses.deleteConfirm.title')}
+        description={t('warehouses.deleteConfirm.description')}
         danger
-        confirmLabel="Delete"
+        confirmLabel={t('common.delete')}
         onConfirm={async () => {
           if (confirmDeleteId !== null) {
             try {
               await deleteMut.mutateAsync(confirmDeleteId);
-              toast.success('Warehouse deleted');
+              toast.success(t('warehouses.toast.deleted'));
             } catch {
               // onError in hook handles toast
             }
@@ -226,30 +228,30 @@ const Warehouses: React.FC = () => {
             style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
           >
             <h3 className="text-sm font-bold" style={{ color: 'var(--hub-text)' }}>
-              New Warehouse
+              {t('warehouses.new')}
             </h3>
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="Warehouse name"
+              placeholder={t('warehouses.fields.name')}
               style={inputStyle}
             />
             <input
               value={newAddress}
               onChange={(e) => setNewAddress(e.target.value)}
-              placeholder="Address (optional)"
+              placeholder={t('warehouses.fields.address')}
               style={inputStyle}
             />
             <input
               value={newManagerName}
               onChange={(e) => setNewManagerName(e.target.value)}
-              placeholder="Manager name (optional)"
+              placeholder={t('warehouses.fields.manager')}
               style={inputStyle}
             />
             <input
               value={newCapacity}
               onChange={(e) => setNewCapacity(e.target.value)}
-              placeholder="Capacity (optional)"
+              placeholder={t('warehouses.fields.capacity')}
               type="number"
               min={0}
               style={inputStyle}
@@ -260,7 +262,7 @@ const Warehouses: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleCreate}
@@ -268,7 +270,7 @@ const Warehouses: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
-                {createMut.isPending ? 'Creating…' : 'Create'}
+                {createMut.isPending ? t('common.creating') : t('common.create')}
               </button>
             </div>
           </div>

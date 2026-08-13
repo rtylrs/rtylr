@@ -127,6 +127,26 @@
   },
   "common": {
     "cancel": "Cancel",
+    "create": "إنشاء",
+    "creating": "جارٍ الإنشاء…",
+    "delete": "حذف",
     "comingSoon": "This action is not available yet."
+  },
+  "warehouses": {
+    "title": "المستودعات", "new": "مستودع جديد", "count": "{{count}} موقع تخزين نشط",
+    "empty": { "title": "لا توجد مستودعات", "description": "أنشئ مستودعك الأول لتتبع مواقع المخزون" },
+    "status": { "default": "افتراضي", "inactive": "غير نشط" }, "delete": "حذف المستودع",
+    "managedBy": "يديره {{name}}", "capacity": "السعة",
+    "deleteConfirm": { "title": "حذف المستودع؟", "description": "ستصبح المنتجات المعيّنة لهذا المستودع غير معيّنة." },
+    "fields": { "name": "اسم المستودع", "address": "العنوان (اختياري)", "manager": "اسم المدير (اختياري)", "capacity": "السعة (اختياري)" },
+    "validation": { "nameRequired": "اسم المستودع مطلوب" },
+    "toast": { "created": "تم إنشاء المستودع", "createFailed": "فشل إنشاء المستودع", "deleted": "تم حذف المستودع" }
+  },
+  "receiving": {
+    "title": "استلام البضائع", "description": "استلم العناصر من أوامر الشراء المفتوحة", "receiveFor": "استلام عناصر أمر الشراء {{id}}",
+    "closeDetails": "إغلاق تفاصيل الاستلام", "expected": "المتوقع {{count}}", "ok": "موافق", "markReceived": "تحديد كمستلم",
+    "empty": { "title": "لا توجد أوامر مفتوحة للاستلام", "description": "تم استلام جميع الطلبات" },
+    "orderSummary": "{{count}} عناصر / الموعد {{date}}", "validation": { "overReceived": "لا يمكن استلام وحدات أكثر من الكمية المطلوبة" },
+    "toast": { "completed": "اكتمل الاستلام، تم استلام جميع العناصر", "completedVariance": "اكتمل الاستلام مع فرق {{count}} وحدة", "updateFailed": "فشل تحديث حالة الاستلام" }
   }
 }
