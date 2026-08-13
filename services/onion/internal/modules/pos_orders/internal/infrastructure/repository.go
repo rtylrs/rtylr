@@ -1019,7 +1019,19 @@ func (r *Repository) VoidOrderItem(ctx context.Context, businessID, orderID, ite
 		return err
 	}
 
-	if err := qtx.RecalcOrderTotal(ctx, sqlc.RecalcOrderTotalParams{
+	itemsTotal, err := qtx.GetActiveOrderItemsTotal(ctx, orderID)
+	if err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			logger.Ctx(ctx).Error("failed to rollback void-order-item total lookup", logger.Error(rollbackErr))
+		}
+		logger.Ctx(ctx).Error("Failed to calculate order total after item void", logger.Error(err))
+		return err
+	}
+
+	itemsTotalDecimal := nullableDecimal(itemsTotal)
+	if err := qtx.UpdateOrderTotal(ctx, sqlc.UpdateOrderTotalParams{
+		Subtotal:   itemsTotalDecimal,
+		Total:      itemsTotalDecimal,
 		ID:         orderID,
 		BusinessID: businessID,
 	}); err != nil {
@@ -1202,7 +1214,18 @@ func (r *Repository) SplitOrder(ctx context.Context, businessID, orderID int64, 
 			}
 		}
 
-		recalcErr := qtx.RecalcOrderTotals(ctx, newID)
+		itemsTotal, totalErr := qtx.GetOrderItemsTotal(ctx, newID)
+		if totalErr != nil {
+			txErr = totalErr
+			return nil, totalErr
+		}
+
+		itemsTotalDecimal := nullableDecimal(itemsTotal)
+		recalcErr := qtx.UpdateOrderTotals(ctx, sqlc.UpdateOrderTotalsParams{
+			Subtotal: itemsTotalDecimal,
+			Total:    itemsTotalDecimal,
+			ID:       newID,
+		})
 		if recalcErr != nil {
 			txErr = recalcErr
 			return nil, recalcErr
@@ -1381,6 +1404,19 @@ func interfaceToFloat(v any) float64 {
 		return 0
 	}
 	return f
+}
+
+func nullableDecimal(v any) sql.NullString {
+	switch value := v.(type) {
+	case nil:
+		return sql.NullString{String: "0", Valid: true}
+	case []byte:
+		return sql.NullString{String: string(value), Valid: true}
+	case string:
+		return sql.NullString{String: value, Valid: true}
+	default:
+		return sql.NullString{String: fmt.Sprint(value), Valid: true}
+	}
 }
 
 func scanOrderRow(rows *sql.Rows) (domain.Order, error) {
