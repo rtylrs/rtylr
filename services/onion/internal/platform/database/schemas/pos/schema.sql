@@ -143,7 +143,8 @@ CREATE TABLE IF NOT EXISTS pos_refunds (
     refunded_by BIGINT,
     refunded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_pos_refunds_owner (owner_id),
-    INDEX idx_pos_refunds_order (order_id)
+    INDEX idx_pos_refunds_order (order_id),
+    INDEX idx_pos_refunds_business_refunded_at (business_id, refunded_at)
 );
 
 CREATE TABLE IF NOT EXISTS pos_modifiers (
