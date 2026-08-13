@@ -27,8 +27,12 @@ type EventHandler = (e: RealtimeEvent) => void;
 interface ClientOptions {
   /** Full ws URL, e.g. `wss://api.voxire.com/flow/ws`. */
   url: string;
-  /** Function returning the current auth token. Called on every (re)connect. */
-  getToken: () => string | null | undefined;
+  /**
+   * Exchanges the authenticated REST session for a short-lived, one-time
+   * WebSocket ticket. Called before every (re)connect so a failed handshake
+   * never reuses a ticket that may already have been consumed.
+   */
+  getTicket: () => Promise<string | null | undefined>;
 }
 
 interface TopicSub {
@@ -41,17 +45,18 @@ const MAX_BACKOFF_MS = 30_000;
 
 export class RealtimeClient {
   private url: string;
-  private getToken: () => string | null | undefined;
+  private getTicket: () => Promise<string | null | undefined>;
   private ws: WebSocket | null = null;
   private subs = new Map<string, TopicSub>();
   private reconnectAttempts = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private closed = false;
   private pingInterval: ReturnType<typeof setInterval> | null = null;
+  private connectionPromise: Promise<void> | null = null;
 
   constructor(opts: ClientOptions) {
     this.url = opts.url;
-    this.getToken = opts.getToken;
+    this.getTicket = opts.getTicket;
   }
 
   /** Subscribe a handler to `topic`. Returns an unsubscribe function. */
@@ -110,17 +115,43 @@ export class RealtimeClient {
       return;
     }
 
-    const token = this.getToken();
-    if (!token) {
-      // No auth yet; retry shortly - the user is probably still loading.
+    if (this.connectionPromise) return;
+
+    this.connectionPromise = this.connect().finally(() => {
+      this.connectionPromise = null;
+    });
+  }
+
+  private async connect(): Promise<void> {
+    let ticket: string | null | undefined;
+    try {
+      ticket = await this.getTicket();
+    } catch {
+      ticket = null;
+    }
+
+    if (this.closed) return;
+    if (!ticket) {
+      // No authenticated session yet, or the ticket exchange failed.
       this.scheduleReconnect();
       return;
     }
 
-    const url = `${this.url}?token=${encodeURIComponent(token)}`;
+    let url: URL;
+    try {
+      url = new URL(this.url);
+      // Never carry forward the legacy reusable-JWT query parameter, even if
+      // a caller supplies a URL that still contains one.
+      url.searchParams.delete('token');
+      url.searchParams.set('ticket', ticket);
+    } catch {
+      this.scheduleReconnect();
+      return;
+    }
+
     let ws: WebSocket;
     try {
-      ws = new WebSocket(url);
+      ws = new WebSocket(url.toString());
     } catch {
       this.scheduleReconnect();
       return;
