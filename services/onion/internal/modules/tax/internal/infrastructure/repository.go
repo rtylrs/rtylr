@@ -97,17 +97,6 @@ func (r *Repository) GetPLReport(ctx context.Context, businessID int64) (domain.
 // Conversion helpers
 // ---------------------------------------------------------------------------
 
-func nullableString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
-
-func nullStr(s sql.NullString) string {
-	if s.Valid {
-		return s.String
-	}
-	return ""
-}
-
 func nullBool(b sql.NullBool) bool {
 	if b.Valid {
 		return b.Bool
@@ -124,13 +113,6 @@ func nullTime(t sql.NullTime) time.Time {
 
 func fmtFloat(f float64) string {
 	return strconv.FormatFloat(f, 'f', 2, 64)
-}
-
-func parseFloatNull(s sql.NullString) float64 {
-	if !s.Valid {
-		return 0
-	}
-	return parseTaxDecimal(s.String)
 }
 
 func parseStringFloat(value string) float64 {
