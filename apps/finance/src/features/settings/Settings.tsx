@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { uploadAsset } from '@voxire/api';
+import { getOneKitErrorMessage, uploadAsset } from '@voxire/api';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -63,7 +63,7 @@ const GeneralTab: React.FC = () => {
       const uploaded = await uploadAsset(file);
       settings.setSetting('logoUrl', uploaded.url);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Upload failed');
+      toast.error(getOneKitErrorMessage(err, 'Upload failed'));
     } finally {
       setUploadingLogo(false);
       if (logoInputRef.current) logoInputRef.current.value = '';

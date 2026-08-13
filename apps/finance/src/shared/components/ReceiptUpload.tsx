@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { uploadAsset } from '@voxire/api';
+import { getOneKitErrorMessage, uploadAsset } from '@voxire/api';
 import { cdnImageUrl } from '@voxire/config';
 import { Upload, FileImage, X } from 'lucide-react';
 
@@ -22,7 +22,7 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
       const uploaded = await uploadAsset(file);
       onChange(uploaded.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      setError(getOneKitErrorMessage(err, 'Upload failed'));
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = '';
