@@ -55,6 +55,12 @@ func RegisterExpensesServiceServer(srv ExpensesServiceServer, opts ...ServerOpti
 	mux := o.mux
 	mux.HandleFunc("GET /finance/expenses/v1/expenses", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListExpensesRequest)
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt64(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("page_size") != "" {
+			req.PageSize = parseInt64(r.URL.Query().Get("page_size"))
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

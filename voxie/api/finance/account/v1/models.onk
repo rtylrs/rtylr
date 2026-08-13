@@ -67,11 +67,17 @@ message GetChartOfAccountsResponse {
   tree: ChartOfAccountsNode[]
 }
 
-message ListAccountsRequest {}
+message ListAccountsRequest {
+  page: int64 @query("page") @encode(number)
+  page_size: int64 @query("page_size") @encode(number)
+}
 
 message ListAccountsResponse {
   /// accounts is the accounts value for this contract.
   accounts: Account[]
+  page: int64 @encode(number)
+  page_size: int64 @encode(number)
+  has_more: bool
 }
 
 message UpdateAccountBody {

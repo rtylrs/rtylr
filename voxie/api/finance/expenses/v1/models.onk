@@ -93,11 +93,17 @@ message ListExpenseCategoriesResponse {
   categories: ExpenseCategory[]
 }
 
-message ListExpensesRequest {}
+message ListExpensesRequest {
+  page: int64 @query("page") @encode(number)
+  page_size: int64 @query("page_size") @encode(number)
+}
 
 message ListExpensesResponse {
   /// expenses is the expenses value for this contract.
   expenses: Expense[]
+  page: int64 @encode(number)
+  page_size: int64 @encode(number)
+  has_more: bool
 }
 
 message UpdateExpenseBody {

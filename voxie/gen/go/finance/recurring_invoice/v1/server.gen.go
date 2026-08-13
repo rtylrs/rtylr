@@ -54,6 +54,12 @@ func RegisterRecurringInvoiceServiceServer(srv RecurringInvoiceServiceServer, op
 	mux := o.mux
 	mux.HandleFunc("GET /finance/recurring-invoice/v1/recurring-invoices", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListRecurringInvoicesRequest)
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt64(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("page_size") != "" {
+			req.PageSize = parseInt64(r.URL.Query().Get("page_size"))
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

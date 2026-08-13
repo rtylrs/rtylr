@@ -47,11 +47,17 @@ message GetRecurringInvoiceResponse {
   invoice: RecurringInvoice
 }
 
-message ListRecurringInvoicesRequest {}
+message ListRecurringInvoicesRequest {
+  page: int64 @query("page") @encode(number)
+  page_size: int64 @query("page_size") @encode(number)
+}
 
 message ListRecurringInvoicesResponse {
   /// The full set of recurring invoices for the owner.
   recurring_invoices: RecurringInvoice[]
+  page: int64 @encode(number)
+  page_size: int64 @encode(number)
+  has_more: bool
 }
 
 message PauseRecurringInvoiceRequest {

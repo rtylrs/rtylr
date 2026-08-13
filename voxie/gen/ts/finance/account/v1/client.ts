@@ -36,6 +36,12 @@ return doFetch(input, init);
 async listAccounts(req: ListAccountsRequest): Promise<ListAccountsResponse> {
 let path = "/finance/account/v1/accounts";
 const query = new URLSearchParams();
+if (req.page !== undefined) {
+query.set("page", String(req.page));
+}
+if (req.pageSize !== undefined) {
+query.set("page_size", String(req.pageSize));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {

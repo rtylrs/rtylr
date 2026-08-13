@@ -36,6 +36,12 @@ return doFetch(input, init);
 async listRecurringInvoices(req: ListRecurringInvoicesRequest): Promise<ListRecurringInvoicesResponse> {
 let path = "/finance/recurring-invoice/v1/recurring-invoices";
 const query = new URLSearchParams();
+if (req.page !== undefined) {
+query.set("page", String(req.page));
+}
+if (req.pageSize !== undefined) {
+query.set("page_size", String(req.pageSize));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {

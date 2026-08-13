@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -25,6 +26,8 @@ func NewRecurringInvoiceServiceClient(baseURL string) *RecurringInvoiceServiceCl
 func (c *RecurringInvoiceServiceClient) ListRecurringInvoices(ctx context.Context, req *ListRecurringInvoicesRequest) (*ListRecurringInvoicesResponse, error) {
 	path := "/finance/recurring-invoice/v1/recurring-invoices"
 	query := url.Values{}
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("page_size", strconv.FormatInt(int64(req.PageSize), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

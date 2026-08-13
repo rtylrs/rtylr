@@ -53,6 +53,12 @@ func RegisterAccountServiceServer(srv AccountServiceServer, opts ...ServerOption
 	mux := o.mux
 	mux.HandleFunc("GET /finance/account/v1/accounts", func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListAccountsRequest)
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt64(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("page_size") != "" {
+			req.PageSize = parseInt64(r.URL.Query().Get("page_size"))
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

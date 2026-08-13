@@ -165,33 +165,48 @@ return out;
 }
 
 export interface ListBillsRequest {
+page?: number;
+pageSize?: number;
 }
 
 export function decodeListBillsRequest(v: any): ListBillsRequest {
 if (v === null || v === undefined) return v;
 return {
+page: v.page,
+pageSize: v.page_size,
 };
 }
 
 export function encodeListBillsRequest(v: ListBillsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
 export interface ListBillsResponse {
 bills?: (Bill)[];
+page?: number;
+pageSize?: number;
+hasMore?: boolean;
 }
 
 export function decodeListBillsResponse(v: any): ListBillsResponse {
 if (v === null || v === undefined) return v;
 return {
 bills: (v.bills !== undefined ? (v.bills as any[]).map(decodeBill) : v.bills),
+page: v.page,
+pageSize: v.page_size,
+hasMore: v.has_more,
 };
 }
 
 export function encodeListBillsResponse(v: ListBillsResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.bills !== undefined) { out.bills = (v.bills as any[]).map(encodeBill); }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
 return out;
 }
 

@@ -391,10 +391,31 @@ func (x *GetBillResponse) GetBill() *Bill {
 }
 
 type ListBillsRequest struct {
+	Page     int64 `json:"page,omitempty"`
+	PageSize int64 `json:"page_size,omitempty"`
+}
+
+func (x *ListBillsRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListBillsRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
 }
 
 type ListBillsResponse struct {
-	Bills []*Bill `json:"bills,omitempty"`
+	Bills    []*Bill `json:"bills,omitempty"`
+	Page     int64   `json:"page,omitempty"`
+	PageSize int64   `json:"page_size,omitempty"`
+	HasMore  bool    `json:"has_more,omitempty"`
 }
 
 func (x *ListBillsResponse) GetBills() []*Bill {
@@ -403,6 +424,30 @@ func (x *ListBillsResponse) GetBills() []*Bill {
 		return zero
 	}
 	return x.Bills
+}
+
+func (x *ListBillsResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListBillsResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
+func (x *ListBillsResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
 }
 
 type UpdateBillBody struct {
