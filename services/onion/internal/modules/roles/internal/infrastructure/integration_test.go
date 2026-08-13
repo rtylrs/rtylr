@@ -2,8 +2,10 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
+	"github.com/voxire/onion/internal/modules/roles/internal/domain"
 	"github.com/voxire/onion/internal/modules/roles/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
@@ -293,15 +295,15 @@ func TestUpdateRole_PermissionsChange(t *testing.T) {
 	}
 }
 
-func TestDeleteRole_WrongOwner_NoError(t *testing.T) {
+func TestDeleteRole_WrongOwner_NotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// Delete with wrong owner and non-existent ID; should not error (no matching row).
+	// Delete with wrong owner and non-existent ID must report that nothing matched.
 	err := repo.Delete(ctx, 9999999, 9999999)
-	if err != nil {
-		t.Fatalf("roles.Delete(wrong owner, non-existent): %v", err)
+	if !errors.Is(err, domain.ErrRoleNotFound) {
+		t.Fatalf("roles.Delete(wrong owner, non-existent): expected ErrRoleNotFound, got %v", err)
 	}
 }
 
@@ -335,15 +337,15 @@ func TestCreateRole_Multiple_AllInList(t *testing.T) {
 	}
 }
 
-func TestUpdateRole_NotFound_NoError(t *testing.T) {
+func TestUpdateRole_NotFound_ReturnsError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// Update on a non-existent role should succeed silently (0 rows updated).
+	// Update on a non-existent role must report that nothing matched.
 	err := repo.Update(ctx, testutil.OwnerID, 9999999, "Ghost Role", []string{"read"})
-	if err != nil {
-		t.Fatalf("roles.Update non-existent: %v", err)
+	if !errors.Is(err, domain.ErrRoleNotFound) {
+		t.Fatalf("roles.Update non-existent: expected ErrRoleNotFound, got %v", err)
 	}
 }
 

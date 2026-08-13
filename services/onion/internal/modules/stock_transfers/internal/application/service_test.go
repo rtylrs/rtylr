@@ -9,9 +9,10 @@ import (
 )
 
 type mockRepo struct {
-	createID  int64
-	createErr error
-	updErr    error
+	createID    int64
+	createErr   error
+	createCalls int
+	updErr      error
 }
 
 func (m *mockRepo) ListStockTransfers(_ context.Context, _ int64, _, _ int) ([]domain.StockTransfer, bool, error) {
@@ -23,6 +24,7 @@ func (m *mockRepo) GetByID(_ context.Context, _, _ int64) (domain.StockTransfer,
 }
 
 func (m *mockRepo) CreateStockTransfer(_ context.Context, _ int64, _ domain.StockTransferInput) (int64, error) {
+	m.createCalls++
 	return m.createID, m.createErr
 }
 
@@ -33,8 +35,36 @@ func (m *mockRepo) UpdateStockTransferStatus(_ context.Context, _, _ int64, _ do
 func TestCreateStockTransfer_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	if _, err := s.CreateStockTransfer(context.Background(), 1, domain.StockTransferInput{}); !errors.Is(err, want) {
+	if _, err := s.CreateStockTransfer(context.Background(), 1, validStockTransferInput()); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestCreateStockTransfer_RejectsNonPositiveQuantityBeforeRepository(t *testing.T) {
+	repo := &mockRepo{}
+	s := &Service{repo: repo}
+	_, err := s.CreateStockTransfer(context.Background(), 1, domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Items: []domain.StockTransferItemInput{
+			{ProductID: 10, Quantity: 0},
+		},
+	})
+	if !errors.Is(err, domain.ErrInvalidStockTransfer) {
+		t.Fatalf("expected ErrInvalidStockTransfer, got %v", err)
+	}
+	if repo.createCalls != 0 {
+		t.Fatalf("repository CreateStockTransfer called %d times, want 0", repo.createCalls)
+	}
+}
+
+func validStockTransferInput() domain.StockTransferInput {
+	return domain.StockTransferInput{
+		FromWarehouseID: 1,
+		ToWarehouseID:   2,
+		Items: []domain.StockTransferItemInput{
+			{ProductID: 10, Quantity: 1},
+		},
 	}
 }
 

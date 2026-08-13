@@ -196,7 +196,7 @@ func (m *Module) executeReceivePurchaseOrderTool(ctx context.Context, input map[
 	if bizErr != nil {
 		return nil, bizErr
 	}
-	if err := m.service.ReceivePurchaseOrder(ctx, businessID, poID, authUser.UserID); err != nil {
+	if err := m.service.ReceivePurchaseOrder(ctx, businessID, poID, authUser.UserID, nil); err != nil {
 		return nil, err
 	}
 

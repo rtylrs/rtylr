@@ -63,6 +63,13 @@ type Opening struct {
 	TotalCount     int64   `json:"total_count"`
 }
 
+type OpeningPage struct {
+	Openings []Opening `json:"openings"`
+	Total    int64     `json:"total"`
+	Limit    int32     `json:"limit"`
+	Offset   int32     `json:"offset"`
+}
+
 // CareerInput is the editable shape for the VoxHire admin jobs panel.
 // It writes to the shared careers table that powers GET /careers.
 type CareerInput struct {

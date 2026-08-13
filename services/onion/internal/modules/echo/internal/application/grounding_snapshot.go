@@ -189,6 +189,6 @@ func buildBusinessSnapshotGroundingPromptFromJSON(dataStr string, sectionCount i
 	g.WriteString("\n```\n")
 	g.WriteString("Answer the user's business-owner question using ONLY this evidence. ")
 	g.WriteString("Lead with a compact business summary, then call out risks or opportunities, then suggest concrete next actions. ")
-	g.WriteString("If a metric is empty or missing, say it is unavailable or has no visible rows; do not invent missing values.")
+	g.WriteString("If a metric is empty or missing, say it is unavailable or has no visible rows; do not invent missing values and never output a header-only table for an empty metric.")
 	return g.String()
 }
