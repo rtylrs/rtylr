@@ -2,6 +2,7 @@
   "created": "Facture créée",
   "updated": "Facture mise à jour",
   "deleted": "Facture supprimée",
+  "sent": "Facture envoyée à {{to}}",
   "paymentRecorded": "Paiement enregistré",
   "statusUpdated": "Statut de la facture mis à jour",
   "markedPaid": "{{id}} marquée comme payée",

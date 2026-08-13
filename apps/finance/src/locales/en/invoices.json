@@ -2,6 +2,7 @@
   "created": "Invoice created",
   "updated": "Invoice updated",
   "deleted": "Invoice deleted",
+  "sent": "Invoice sent to {{to}}",
   "paymentRecorded": "Payment recorded",
   "statusUpdated": "Invoice status updated",
   "markedPaid": "Marked {{id}} paid",
