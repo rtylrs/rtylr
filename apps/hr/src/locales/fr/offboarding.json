@@ -1,0 +1,8 @@
+{
+  "title": "Départ",
+  "subtitle": "Liste de contrôle pour les employés partants",
+  "emptyTitle": "Aucun départ en cours",
+  "emptyDescription": "Les listes des employés partants apparaîtront ici.",
+  "tasksComplete": "{{done}} sur {{total}} terminés",
+  "updated": "Mis à jour"
+}

@@ -1,0 +1,10 @@
+{
+  "title": "التعيين",
+  "subtitle": "قائمة مراجعة التعيين الجديد",
+  "emptyTitle": "لا يوجد تعيين جارٍ",
+  "emptyDescription": "عندما يبدأ موظف جديد، ستظهر مهامه هنا.",
+  "tasksDone": "{{done}} من {{total}} مهمة مكتملة",
+  "markedComplete": "تم التحديد كمكتمل",
+  "markedIncomplete": "تم التحديد كغير مكتمل",
+  "due": "الاستحقاق {{date}}"
+}

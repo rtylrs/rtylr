@@ -1,0 +1,70 @@
+{
+  "title": "Attendance",
+  "subtitle": "Track your clock-in and clock-out times.",
+  "history": "Attendance History",
+  "clockedIn": "Clocked in successfully",
+  "clockedOut": "Clocked out successfully",
+  "emptyTitle": "No attendance records",
+  "emptyDescription": "Your attendance records will appear here after you clock in.",
+  "qrComingSoon": "QR scanning is coming soon!",
+  "late": "{{minutes}}m late",
+  "methods": {
+    "app": "App",
+    "qr": "QR Code",
+    "gps": "GPS",
+    "pin": "PIN",
+    "facial": "Face"
+  },
+  "statuses": {
+    "present": "Present",
+    "absent": "Absent",
+    "partial": "Partial"
+  },
+  "table": {
+    "date": "Date",
+    "clockIn": "Clock In",
+    "clockOut": "Clock Out",
+    "duration": "Duration",
+    "method": "Method",
+    "status": "Status"
+  },
+  "clockWidget": {
+    "title": "Clock Status",
+    "clockedIn": "Clocked In",
+    "clockedOut": "Not Clocked In",
+    "since": "Since {{time}}",
+    "clockOutBtn": "Clock Out",
+    "clockInApp": "Clock In (App)",
+    "clockInQR": "Scan QR Code",
+    "clockInPin": "Clock In (PIN)",
+    "clockInGps": "Clock In (GPS)"
+  },
+  "pinModal": {
+    "title": "PIN Clock-In",
+    "subtitle": "Enter your PIN to clock in",
+    "setTitle": "Set Your PIN",
+    "setSubtitle": "Create a 4–6 digit PIN for clock-in",
+    "confirmTitle": "Confirm PIN",
+    "confirmSubtitle": "Re-enter your PIN to confirm",
+    "submit": "Clock In",
+    "savePin": "Save PIN",
+    "pinRequired": "Please enter your PIN",
+    "pinLength": "PIN must be 4–6 digits",
+    "pinMismatch": "PINs do not match",
+    "pinSaved": "PIN saved successfully",
+    "setPin": "Set My PIN",
+    "changePin": "Change PIN"
+  },
+  "gps": {
+    "acquiring": "Acquiring location…",
+    "permissionDenied": "Location permission denied. Please enable location access in your browser settings or use another clock-in method.",
+    "locationUnavailable": "Unable to determine your location. Please try again.",
+    "locationTimeout": "Location request timed out. Please try again."
+  },
+  "qrScanner": {
+    "title": "QR Code Scanner",
+    "description": "Scan a QR code at your workplace terminal to clock in or out.",
+    "scanButton": "Scan QR Code",
+    "cameraPlaceholder": "Camera permission required. This feature is coming in Phase 2."
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "title": "المعدات",
+  "subtitle": "طلب المعدات وإدارة الموافقات",
+  "newRequest": "طلب جديد",
+  "requestCreated": "تم تقديم طلب المعدات",
+  "requestUpdated": "تم تحديث طلب المعدات",
+  "neededBy": "مطلوب بحلول {{date}}",
+  "approve": "موافقة",
+  "reject": "رفض",
+  "emptyTitle": "لا توجد طلبات معدات",
+  "emptyDescription": "ستظهر طلبات المعدات هنا.",
+  "tabs": {
+    "myRequests": "طلباتي",
+    "pendingApprovals": "الموافقات المعلقة"
+  },
+  "urgencies": {
+    "low": "منخفض",
+    "medium": "متوسط",
+    "high": "مرتفع"
+  },
+  "statuses": {
+    "pending": "قيد الانتظار",
+    "approved": "موافق عليه",
+    "ordered": "تم الطلب",
+    "delivered": "تم التسليم",
+    "rejected": "مرفوض"
+  },
+  "form": {
+    "title": "طلب معدات جديد",
+    "type": "نوع المعدات",
+    "typePlaceholder": "مثال: حاسوب محمول، شاشة، مكتب",
+    "description": "الوصف",
+    "descriptionPlaceholder": "صف ما تحتاجه ولماذا",
+    "urgency": "الأولوية",
+    "neededBy": "مطلوب بحلول",
+    "submit": "تقديم الطلب"
+  },
+  "assets": {
+    "title": "سجل الأصول",
+    "subtitle": "جرد المعدات والأصول على مستوى الشركة",
+    "emptyTitle": "لا توجد أصول مسجلة",
+    "emptyDescription": "ستظهر الأصول هنا بعد تخصيص المعدات.",
+    "table": {
+      "name": "اسم الأصل",
+      "serialNumber": "الرقم التسلسلي",
+      "assignedDate": "تاريخ التخصيص",
+      "condition": "الحالة",
+      "returnedDate": "تاريخ الإرجاع"
+    },
+    "conditions": {
+      "new": "جديد",
+      "good": "جيد",
+      "fair": "مقبول",
+      "damaged": "تالف"
+    }
+  }
+}

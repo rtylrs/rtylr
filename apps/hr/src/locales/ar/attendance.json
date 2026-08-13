@@ -1,0 +1,70 @@
+{
+  "title": "الحضور",
+  "subtitle": "تتبع أوقات الحضور والانصراف.",
+  "history": "سجل الحضور",
+  "clockedIn": "تم تسجيل الحضور بنجاح",
+  "clockedOut": "تم تسجيل الانصراف بنجاح",
+  "emptyTitle": "لا توجد سجلات حضور",
+  "emptyDescription": "ستظهر سجلات حضورك هنا بعد تسجيل الحضور.",
+  "qrComingSoon": "مسح رمز QR قريباً!",
+  "late": "{{minutes}}د متأخر",
+  "methods": {
+    "app": "تطبيق",
+    "qr": "رمز QR",
+    "gps": "GPS",
+    "pin": "رمز PIN",
+    "facial": "الوجه"
+  },
+  "statuses": {
+    "present": "حاضر",
+    "absent": "غائب",
+    "partial": "جزئي"
+  },
+  "table": {
+    "date": "التاريخ",
+    "clockIn": "الحضور",
+    "clockOut": "الانصراف",
+    "duration": "المدة",
+    "method": "الطريقة",
+    "status": "الحالة"
+  },
+  "clockWidget": {
+    "title": "حالة الحضور",
+    "clockedIn": "مسجّل الحضور",
+    "clockedOut": "غير مسجّل",
+    "since": "منذ {{time}}",
+    "clockOutBtn": "تسجيل الانصراف",
+    "clockInApp": "تسجيل الحضور (التطبيق)",
+    "clockInQR": "مسح رمز QR",
+    "clockInPin": "تسجيل الحضور (PIN)",
+    "clockInGps": "تسجيل الحضور (GPS)"
+  },
+  "pinModal": {
+    "title": "تسجيل حضور برمز PIN",
+    "subtitle": "أدخل رمز PIN لتسجيل الحضور",
+    "setTitle": "تعيين رمز PIN",
+    "setSubtitle": "أنشئ رمز PIN من 4–6 أرقام لتسجيل الحضور",
+    "confirmTitle": "تأكيد رمز PIN",
+    "confirmSubtitle": "أعد إدخال رمز PIN للتأكيد",
+    "submit": "تسجيل الحضور",
+    "savePin": "حفظ رمز PIN",
+    "pinRequired": "يرجى إدخال رمز PIN",
+    "pinLength": "يجب أن يكون رمز PIN من 4–6 أرقام",
+    "pinMismatch": "رموز PIN غير متطابقة",
+    "pinSaved": "تم حفظ رمز PIN بنجاح",
+    "setPin": "تعيين رمز PIN",
+    "changePin": "تغيير رمز PIN"
+  },
+  "gps": {
+    "acquiring": "جاري تحديد الموقع…",
+    "permissionDenied": "تم رفض إذن الموقع. يرجى تمكين الوصول إلى الموقع في إعدادات المتصفح أو استخدام طريقة أخرى لتسجيل الحضور.",
+    "locationUnavailable": "تعذر تحديد موقعك. يرجى المحاولة مرة أخرى.",
+    "locationTimeout": "انتهت مهلة طلب الموقع. يرجى المحاولة مرة أخرى."
+  },
+  "qrScanner": {
+    "title": "ماسح رمز QR",
+    "description": "امسح رمز QR في محطة عملك لتسجيل الحضور أو الانصراف.",
+    "scanButton": "مسح رمز QR",
+    "cameraPlaceholder": "يتطلب إذن الكاميرا. هذه الميزة قادمة في المرحلة الثانية."
+  }
+}

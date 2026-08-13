@@ -1,0 +1,53 @@
+{
+  "title": "Documents",
+  "subtitle": "Coffre-fort des documents employés",
+  "uploaded": "Document téléchargé avec succès",
+  "deleted": "Document supprimé",
+  "selectEmployeeFirst": "Sélectionnez d'abord un employé",
+  "expiringSoon": "{{count}} document(s) bientôt expirés",
+  "filterEmployee": "Employé",
+  "filterSelect": "Sélectionner",
+  "filterType": "Type",
+  "emptyTitle": "Aucun document",
+  "emptyDescription": "Téléchargez I-9, W4, contrats et autres fichiers.",
+  "table": {
+    "document": "Document",
+    "employee": "Employé",
+    "type": "Type",
+    "uploaded": "Téléchargé"
+  },
+  "deleteTitle": "Supprimer le document ?",
+  "deleteConfirm": "Cette action est irréversible.",
+  "deleteButton": "Supprimer",
+  "vault": {
+    "title": "Documents",
+    "upload": "Télécharger",
+    "uploadTitle": "Télécharger un document",
+    "expiryWarning": "{{count}} document(s) expiré(s) ou en cours d'expiration",
+    "emptyTitle": "Aucun document",
+    "emptyDescription": "Téléchargez des documents pour les organiser.",
+    "table": {
+      "name": "Document",
+      "type": "Type",
+      "storageMode": "Stockage",
+      "expiryDate": "Date d'expiration"
+    },
+    "types": {
+      "id_card": "Carte d'identité",
+      "contract": "Contrat",
+      "certificate": "Certificat",
+      "visa": "Visa",
+      "other": "Autre"
+    },
+    "storageModes": {
+      "stored": "Stocké",
+      "linked": "Lié"
+    },
+    "form": {
+      "name": "Nom du document",
+      "namePlaceholder": "ex. Passeport, Contrat de travail",
+      "type": "Type de document",
+      "expiryDate": "Date d'expiration"
+    }
+  }
+}

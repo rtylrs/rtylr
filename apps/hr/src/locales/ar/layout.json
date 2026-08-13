@@ -1,0 +1,30 @@
+{
+  "sections": {
+    "workspace": "مساحة العمل",
+    "time": "الوقت",
+    "people": "الأشخاص",
+    "hr": "الموارد البشرية"
+  },
+  "appearance": "المظهر",
+  "theme": {
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام"
+  },
+  "signOut": "تسجيل الخروج",
+  "hr": "الموارد البشرية",
+  "routes": {
+    "requestTimeOff": "طلب إجازة",
+    "timeOffCalendar": "تقويم الإجازات",
+    "shiftSchedule": "جدول المناوبات",
+    "performanceReviews": "تقييمات الأداء",
+    "newReview": "تقييم جديد",
+    "employeeProfile": "ملف الموظف",
+    "timesheetDetail": "تفاصيل سجل الحضور",
+    "newLeaveRequest": "طلب إجازة جديد",
+    "payrollConfig": "تهيئة الرواتب",
+    "payrollRunDetail": "دورة الرواتب",
+    "checklistTemplates": "قوالب قوائم المراجعة",
+    "reviewCycleDetail": "دورة التقييم"
+  }
+}

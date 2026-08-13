@@ -1,17 +1,26 @@
 import { initI18n } from '@voxire/i18n';
 
-import en from '../../locales/en.json';
-import fr from '../../locales/fr.json';
-import ar from '../../locales/ar.json';
+// Each file under locales/{lang}/*.json is auto-discovered.
+// The filename (without .json) becomes the i18next namespace key.
+const modules = import.meta.glob<{ default: Record<string, unknown> }>('../../locales/**/*.json', {
+  eager: true,
+});
 
-const flat: Record<string, Record<string, unknown>> = {
-  en: en as Record<string, unknown>,
-  fr: fr as Record<string, unknown>,
-  ar: ar as Record<string, unknown>,
-};
+function buildLocale(lang: string): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [path, mod] of Object.entries(modules)) {
+    const parts = path.split('/');
+    const langDir = parts[parts.length - 2];
+    const ns = parts[parts.length - 1].replace('.json', '');
+    if (langDir === lang) {
+      result[ns] = mod.default;
+    }
+  }
+  return result;
+}
 
 const i18n = initI18n({
-  loadResource: (lang) => Promise.resolve(flat[lang] ?? flat['en']),
+  loadResource: (lang) => Promise.resolve(buildLocale(lang)),
 });
 
 export { selectLanguage } from '@voxire/i18n';

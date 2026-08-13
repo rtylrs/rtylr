@@ -1,0 +1,83 @@
+{
+  "title": "الرواتب",
+  "subtitle": "إدارة دورات الرواتب وتعويضات الموظفين",
+  "triggerRun": "بدء دورة جديدة",
+  "configRequired": "قم بتهيئة الرواتب أولاً",
+  "configRequiredDescription": "قم بإعداد تهيئة الرواتب قبل تشغيل دورة الرواتب.",
+  "goToConfig": "الذهاب إلى تهيئة الرواتب",
+  "configSaved": "تم حفظ تهيئة الرواتب",
+  "runTriggered": "تم بدء دورة الرواتب",
+  "runApproved": "تمت الموافقة على دورة الرواتب",
+  "exported": "تم تصدير الرواتب بنجاح",
+  "backToRuns": "العودة إلى دورات الرواتب",
+  "emptyTitle": "لا توجد دورات رواتب",
+  "emptyDescription": "ابدأ دورة رواتب جديدة للبدء.",
+  "employeeCount": "{{count}} موظفين",
+  "netTotal": "صافي الإجمالي",
+  "statuses": {
+    "all": "الكل",
+    "draft": "مسودة",
+    "in_review": "قيد المراجعة",
+    "approved": "موافق عليه",
+    "exported": "تم التصدير"
+  },
+  "stats": {
+    "totalGross": "إجمالي الراتب",
+    "totalDeductions": "إجمالي الخصومات",
+    "totalNet": "صافي الرواتب",
+    "pendingRuns": "الدورات المعلقة"
+  },
+  "table": {
+    "employee": "الموظف",
+    "employeeId": "الموظف #{{id}}",
+    "hours": "الساعات",
+    "basePay": "الراتب الأساسي",
+    "overtimePay": "العمل الإضافي",
+    "deductions": "الخصومات",
+    "bonuses": "المكافآت",
+    "netPay": "صافي الراتب",
+    "deductionsExceedGross": "الخصومات تتجاوز إجمالي الراتب"
+  },
+  "runDetail": {
+    "subtitle": "{{count}} إدخالات في هذه الدورة",
+    "approve": "الموافقة على الدورة",
+    "exportCsv": "تصدير CSV",
+    "notFound": "دورة الرواتب غير موجودة",
+    "notFoundDescription": "تعذر تحميل دورة الرواتب هذه."
+  },
+  "paySlip": {
+    "title": "كشف الراتب",
+    "myPaySlips": "كشوف رواتبي",
+    "myPaySlipsSubtitle": "عرض كشوف الرواتب المكتملة",
+    "period": "فترة الدفع",
+    "earnings": "الأرباح",
+    "grossPay": "الراتب الإجمالي",
+    "deductionsSection": "الخصومات",
+    "notFound": "كشف الراتب غير موجود",
+    "notFoundDescription": "تعذر تحميل كشف الراتب هذا.",
+    "backToSlips": "العودة إلى كشوف الرواتب",
+    "emptyTitle": "لا توجد كشوف رواتب بعد",
+    "emptyDescription": "ستظهر كشوف رواتبك هنا بعد معالجة الرواتب."
+  },
+  "config": {
+    "title": "تهيئة الرواتب",
+    "subtitle": "حدد كيفية عمل الرواتب في مؤسستك",
+    "grossModel": "نموذج الراتب الإجمالي",
+    "grossModels": {
+      "hourly": "بالساعة",
+      "salary": "راتب ثابت",
+      "both": "كلاهما"
+    },
+    "period": "فترة الدفع",
+    "periods": {
+      "weekly": "أسبوعي",
+      "biweekly": "نصف شهري",
+      "monthly": "شهري"
+    },
+    "enableOvertime": "تفعيل تتبع العمل الإضافي",
+    "enableDeductions": "تفعيل الخصومات",
+    "enableBonuses": "تفعيل المكافآت",
+    "saved": "تم حفظ تهيئة الرواتب",
+    "notConfiguredNotice": "لم يتم تكوين الرواتب بعد - أكمل النموذج للبدء"
+  }
+}

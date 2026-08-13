@@ -1,0 +1,52 @@
+{
+  "title": "Feuilles de temps",
+  "subtitle": "Visualisez et soumettez vos périodes de feuilles de temps.",
+  "entries": "entrées",
+  "total": "Total",
+  "submit": "Soumettre la feuille",
+  "submitted": "Feuille de temps soumise pour approbation",
+  "approved": "Feuille de temps approuvée",
+  "rejected": "Feuille de temps rejetée",
+  "rejectionReason": "Motif du rejet",
+  "noReasonProvided": "Aucun motif fourni",
+  "entriesTitle": "Entrées de temps",
+  "noEntries": "Aucune entrée de temps pour cette période.",
+  "emptyTitle": "Pas encore de feuilles de temps",
+  "emptyDescription": "Vos périodes de feuilles de temps apparaîtront ici.",
+  "filters": {
+    "all": "Toutes",
+    "draft": "Brouillon",
+    "submitted": "Soumises",
+    "approved": "Approuvées",
+    "rejected": "Rejetées"
+  },
+  "statuses": {
+    "draft": "Brouillon",
+    "submitted": "Soumis",
+    "approved": "Approuvé",
+    "rejected": "Rejeté",
+    "locked": "Verrouillé"
+  },
+  "days": {
+    "mon": "Lun",
+    "tue": "Mar",
+    "wed": "Mer",
+    "thu": "Jeu",
+    "fri": "Ven",
+    "sat": "Sam",
+    "sun": "Dim"
+  },
+  "approvals": {
+    "title": "Approbations des feuilles de temps",
+    "subtitle": "{{count}} feuilles de temps en attente",
+    "emptyTitle": "Tout est à jour",
+    "emptyDescription": "Aucune feuille de temps en attente d'approbation.",
+    "employeeId": "Employé #{{id}}",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "rejectTitle": "Rejeter la feuille de temps",
+    "reasonLabel": "Motif du rejet",
+    "reasonPlaceholder": "Expliquez pourquoi cette feuille est rejetée…",
+    "confirmReject": "Rejeter la feuille"
+  }
+}
