@@ -6,8 +6,7 @@ import { Switch } from '@voxire/ui';
 import { useCreateColumn, useUpdateColumn, useDeleteColumn } from '../useColumns';
 import GateNotice from '../../../shared/components/GateNotice';
 import type { ApiProjectColumn } from '../../../shared/services/flowApi';
-
-export type BoardGroupKey = 'none' | 'assignee' | 'priority' | 'due';
+import type { BoardGroupKey } from '../../../shared/lib/boardUtils';
 
 const GROUP_KEYS: BoardGroupKey[] = ['none', 'assignee', 'priority', 'due'];
 
@@ -287,7 +286,7 @@ const BoardSettingsPanel = ({
                 role="radio"
                 aria-checked={groupBy === key}
                 onClick={() => onGroupByChange(key)}
-                className="flow-focus flex min-h-[44px] w-full items-center gap-2 rounded px-2 text-left text-[13px] md:min-h-0 md:py-1.5"
+                className="flow-focus flex min-h-[44px] w-full items-center gap-2 rounded px-2 text-start text-[13px] md:min-h-0 md:py-1.5"
                 style={{
                   background: groupBy === key ? 'var(--flow-active)' : 'transparent',
                   color: groupBy === key ? 'var(--flow-text)' : 'var(--flow-text-muted)',

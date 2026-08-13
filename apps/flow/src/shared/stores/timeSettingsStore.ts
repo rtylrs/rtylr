@@ -21,7 +21,7 @@ export type WeekStart = 'monday' | 'sunday';
 /** 0 means no rounding. */
 export type RoundingMinutes = 0 | 5 | 10 | 15 | 30;
 
-export interface TimeCategory {
+interface TimeCategory {
   id: string;
   name: string;
   billable: boolean;

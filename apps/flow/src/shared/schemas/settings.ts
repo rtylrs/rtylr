@@ -9,7 +9,7 @@ import { z } from 'zod';
  * schema that throws replaces the settings screen with the router error boundary
  * on any stale or hand-edited URL. See docs/routing-search-params.md.
  */
-export const SETTINGS_SECTION_IDS = [
+const SETTINGS_SECTION_IDS = [
   'workspaces',
   'team',
   'notifications',
