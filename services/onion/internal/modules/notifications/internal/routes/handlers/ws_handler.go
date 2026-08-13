@@ -12,8 +12,9 @@ import (
 // DashWSRoutes returns the /dash/ws endpoint.
 //
 // Anonymous at the middleware level because browsers cannot set an
-// Authorization header on WebSocket handshakes. The JWT is passed via
-// ?token= and validated here before upgrading.
+// Authorization header on WebSocket handshakes. Existing browser clients
+// pass a JWT via ?token= and it is validated here before upgrading. Flow's
+// WebSocket path uses the newer one-time ticket flow.
 func DashWSRoutes() []string { return []string{"/dash/ws"} }
 
 // ServeDashWS upgrades the HTTP request to a WebSocket and hands it off

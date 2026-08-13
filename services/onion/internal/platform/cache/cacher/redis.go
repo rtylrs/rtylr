@@ -19,6 +19,9 @@ import (
 type RedisCache interface {
 	Put(ctx context.Context, key string, val []byte, ttl time.Duration)
 	Get(ctx context.Context, key string) []byte
+	// GetDel atomically gets and deletes a key. It is used for one-time
+	// credentials where a separate Get followed by Delete would allow replay.
+	GetDel(ctx context.Context, key string) []byte
 	PutMulti(ctx context.Context, keyVals map[string][]byte, ttl time.Duration)
 	GetMulti(ctx context.Context, keys []string) (results map[string][]byte, notFound []string)
 	Delete(ctx context.Context, keys []string)
@@ -212,6 +215,20 @@ func (r *redisCache) Get(ctx context.Context, key string) []byte {
 
 	if err != nil && !errors.Is(err, redis.Nil) {
 		logRedisError(ctx, "redis error in Get retrieving data", key, "", err)
+	}
+
+	return result
+}
+
+// GetDel atomically retrieves and removes a key from Redis.
+func (r *redisCache) GetDel(ctx context.Context, key string) []byte {
+	ctx, cancel := getTimeoutContext(ctx)
+	defer cancel()
+
+	command := r.redisCacheCluster.GetDel(ctx, key)
+	result, err := command.Bytes()
+	if err != nil && !errors.Is(err, redis.Nil) {
+		logRedisError(ctx, "redis error in GetDel retrieving data", key, "", err)
 	}
 
 	return result
