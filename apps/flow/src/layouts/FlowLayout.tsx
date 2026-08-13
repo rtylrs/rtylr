@@ -875,10 +875,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             {/* The only Time destination that exists. Timesheet,
                               * Review, Reports and Workload join it here as their
                               * backends land. */}
+                            <SidebarLink to="/time" icon={Clock} label={t('flow.time.myDay')} />
                             <SidebarLink
                               to="/settings"
                               search={{ section: 'time' }}
-                              icon={Clock}
+                              icon={Settings}
                               label={t('flow.settings.time.section')}
                             />
                           </nav>
