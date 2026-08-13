@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Switch } from '@voxire/ui';
 
 import { useCreateColumn, useUpdateColumn, useDeleteColumn } from '../useColumns';
 import GateNotice from '../../../shared/components/GateNotice';
-import FlowSwitch from '../../../shared/components/FlowSwitch';
 import type { ApiProjectColumn } from '../../../shared/services/flowApi';
 
 export type BoardGroupKey = 'none' | 'assignee' | 'priority' | 'due';
@@ -230,7 +230,7 @@ const BoardSettingsPanel = ({
                 <span className="truncate text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
                   {col.name}
                 </span>
-                <FlowSwitch
+                <Switch
                   checked={false}
                   disabled
                   aria-label={t('flow.board.promptsForHoursFor', { name: col.name })}
@@ -255,7 +255,7 @@ const BoardSettingsPanel = ({
                 <span className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
                   {t(`flow.board.cardField.${field}`)}
                 </span>
-                <FlowSwitch
+                <Switch
                   checked={false}
                   disabled
                   aria-label={t(`flow.board.cardField.${field}`)}
