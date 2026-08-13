@@ -48,3 +48,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 INSERT INTO finance_invoice_items
 (invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: CountInvoiceSequenceForQuote :one
+SELECT COUNT(*)
+FROM finance_invoices
+WHERE business_id = ? AND YEAR(created_at) = ?;
