@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/config/internal/application"
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
+	custom_domains "github.com/voxire/onion/internal/modules/custom_domains"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -16,10 +17,24 @@ import (
 
 type ConfigAPI struct {
 	ConfigService *application.Service
+	CustomDomains *custom_domains.API
 }
 
-func NewConfigAPI(configService *application.Service) *ConfigAPI {
-	return &ConfigAPI{ConfigService: configService}
+func NewConfigAPI(configService *application.Service, customDomains *custom_domains.API) *ConfigAPI {
+	return &ConfigAPI{ConfigService: configService, CustomDomains: customDomains}
+}
+
+func (a *ConfigAPI) GetCustomDomain(ctx context.Context, req *hubconfigv1.GetCustomDomainRequest) (*hubconfigv1.GetCustomDomainResponse, error) {
+	return a.CustomDomains.GetCustomDomain(ctx, req)
+}
+func (a *ConfigAPI) RegisterCustomDomain(ctx context.Context, req *hubconfigv1.RegisterCustomDomainRequest) (*hubconfigv1.RegisterCustomDomainResponse, error) {
+	return a.CustomDomains.RegisterCustomDomain(ctx, req)
+}
+func (a *ConfigAPI) VerifyCustomDomain(ctx context.Context, req *hubconfigv1.VerifyCustomDomainRequest) (*hubconfigv1.VerifyCustomDomainResponse, error) {
+	return a.CustomDomains.VerifyCustomDomain(ctx, req)
+}
+func (a *ConfigAPI) RemoveCustomDomain(ctx context.Context, req *hubconfigv1.RemoveCustomDomainRequest) (*hubconfigv1.RemoveCustomDomainResponse, error) {
+	return a.CustomDomains.RemoveCustomDomain(ctx, req)
 }
 
 func (a *ConfigAPI) GetConfig(ctx context.Context, _ *hubconfigv1.GetConfigRequest) (*hubconfigv1.GetConfigResponse, error) {
