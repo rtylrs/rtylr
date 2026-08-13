@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 const AMBER = 'var(--erp-accent)';
 
 interface ReceiveLine {
+  id?: string;
   sku: string;
   name: string;
   expected: number;
@@ -28,7 +29,9 @@ const Receiving: React.FC = () => {
   const supplierNameById = new Map((supplierResult?.suppliers ?? []).map((s) => [s.id, s.name]));
   const updateStatus = useUpdatePurchaseOrderStatus();
   const { t } = useTranslation('erp');
-  const open = orders.filter((o) => o.status === 'sent' || o.status === 'approved');
+  const open = orders.filter(
+    (o) => o.status === 'sent' || o.status === 'approved' || o.status === 'partial'
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lines, setLines] = useState<ReceiveLine[]>([]);
 
@@ -36,6 +39,7 @@ const Receiving: React.FC = () => {
     setSelectedId(order.id ?? null);
     setLines(
       (order.items ?? []).map((item) => ({
+        id: item.id,
         sku: item.productId ?? '',
         name: `Product #${item.productId ?? ''}`,
         expected: item.quantityOrdered ?? 0,
@@ -60,6 +64,9 @@ const Receiving: React.FC = () => {
       toast.error(t('receiving.validation.overReceived'));
       return;
     }
+    const hasReceivedItems = lines.some((line) => line.received > 0);
+    const isFullyReceived = lines.every((line) => line.received === line.expected);
+    const status = isFullyReceived ? 'received' : hasReceivedItems ? 'partial' : 'approved';
     const variance = lines.reduce((sum, l) => sum + (l.expected - l.received), 0);
     toast.success(
       variance === 0
@@ -67,9 +74,17 @@ const Receiving: React.FC = () => {
         : t('receiving.toast.completedVariance', { count: variance })
     );
     if (selectedId !== null) {
-      // Backend expects the lowercase status enum (draft|sent|approved|partial|received|cancelled).
       updateStatus.mutate(
-        { id: selectedId, body: { status: variance === 0 ? 'received' : 'partial', items: lines.map((line) => ({ productId: Number(line.sku), quantityReceived: line.received })) } },
+        {
+          id: selectedId,
+          body: {
+            status,
+            items: lines.map((line) => ({
+              id: line.id,
+              quantityReceived: line.received,
+            })),
+          },
+        },
         { onError: () => toast.error(t('receiving.toast.updateFailed')) }
       );
     }
