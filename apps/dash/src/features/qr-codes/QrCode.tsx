@@ -10,9 +10,9 @@ import { useUserStore } from '../../shared/stores/userStore';
 import { QrCodeTemplate, QrCodeTemplates, QrOptions } from './templates';
 
 function QrCode() {
-  const { userId, user } = useUserStore();
+  const { user } = useUserStore();
   const [qrOptions, setQrOptions] = useState<QrOptions>({
-    url: 'https://rtylr.voxire.com/restaurant/' + userId,
+    url: user?.id ? `https://rtylr.voxire.com/restaurant/${user.id}` : '',
     size: 150,
     fgColor: '#000000',
     bgColor: '#ffffff',
@@ -25,6 +25,15 @@ function QrCode() {
   const [isLogoLoaded, setIsLogoLoaded] = useState(false);
 
   const qrRef = useRef(null);
+
+  useEffect(() => {
+    if (user?.id) {
+      setQrOptions((current) => ({
+        ...current,
+        url: `https://rtylr.voxire.com/restaurant/${user.id}`,
+      }));
+    }
+  }, [user?.id]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement;
