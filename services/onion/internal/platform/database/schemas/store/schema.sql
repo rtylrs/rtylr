@@ -57,7 +57,8 @@ CREATE TABLE IF NOT EXISTS store_orders (
     shipping_address JSON DEFAULT (JSON_OBJECT()),
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_store_orders_business_created (business_id, created_at, id)
 );
 
 CREATE TABLE IF NOT EXISTS store_order_items (

@@ -165,7 +165,9 @@ CREATE TABLE IF NOT EXISTS finance_bills (
     status ENUM('pending','paid','overdue') DEFAULT 'pending',
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_finance_bills_business_due (business_id, due_date, id),
+    INDEX idx_finance_bills_business_status (business_id, status)
 );
 
 CREATE TABLE IF NOT EXISTS finance_bank_accounts (
@@ -179,7 +181,8 @@ CREATE TABLE IF NOT EXISTS finance_bank_accounts (
     currency VARCHAR(10) DEFAULT 'USD',
     is_connected BOOLEAN DEFAULT FALSE,
     last_synced_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_finance_bank_accounts_business (business_id)
 );
 
 CREATE TABLE IF NOT EXISTS finance_journal_entries (
@@ -190,7 +193,9 @@ CREATE TABLE IF NOT EXISTS finance_journal_entries (
     description TEXT,
     status VARCHAR(20) NOT NULL DEFAULT 'draft',
     posted_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_finance_journal_entries_business_date (business_id, date, id),
+    INDEX idx_finance_journal_entries_business_status (business_id, status)
 );
 
 CREATE TABLE IF NOT EXISTS finance_journal_lines (

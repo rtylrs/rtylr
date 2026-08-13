@@ -27,7 +27,9 @@ CREATE TABLE IF NOT EXISTS booking_appointments (
     status ENUM('pending','confirmed','in_progress','completed','cancelled','no_show') DEFAULT 'pending',
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_booking_appts_business_start (business_id, start_time, id),
+    INDEX idx_booking_appts_business_status_start (business_id, status, start_time)
 );
 
 CREATE TABLE IF NOT EXISTS booking_resources (
