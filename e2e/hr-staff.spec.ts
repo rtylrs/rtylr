@@ -129,6 +129,27 @@ async function installHrStubs(
     });
   });
 
+  // HRConfigRoute gates feature routes on setup completion. Keep that guard in
+  // the test so a redirect cannot hide a broken staff screen.
+  await page.route(`${apiHost}/hr/config`, (route: Route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        config: {
+          id: 1,
+          setup_completed_at: '2026-01-01T00:00:00Z',
+          work_week_start: 'Monday',
+          currency: 'USD',
+          weekly_hours: 40,
+          industry: 'restaurant',
+          payroll_enabled: true,
+          payroll_configured: true,
+        },
+      }),
+    })
+  );
+
   // (5) Staff list - GET /hr/staff.
   await page.route(`${apiHost}/hr/staff`, async (route: Route) => {
     const req = route.request();
@@ -185,11 +206,60 @@ async function installHrStubs(
       body: JSON.stringify(member),
     });
   });
+
+  // The staff list and profile now use the generated hr.staff.v1 client. Keep
+  // the legacy handlers above because other parts of the HR shell still use
+  // those endpoints, but make the restored suites exercise the current path.
+  const departmentNames = [...new Set(state.staff.map((member) => member.department))];
+  const toApiStaff = (member: StubStaff): Record<string, unknown> => {
+    const [firstName, ...lastNameParts] = member.name.split(' ');
+    return {
+      id: String(member.id),
+      department_id: String(departmentNames.indexOf(member.department) + 1),
+      first_name: firstName,
+      last_name: lastNameParts.join(' '),
+      email: member.email,
+      role: member.role,
+      employment_type: member.employment_type,
+      status: member.status,
+    };
+  };
+
+  await page.route(/localhost:9999\/hr\/staff\/v1\/staff(\?.*)?$/, async (route: Route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ staff: state.staff.map(toApiStaff) }),
+    });
+  });
+
+  await page.route(/localhost:9999\/hr\/staff\/v1\/staff\/([^/?]+)$/, async (route: Route) => {
+    const id = Number(route.request().url().split('/').pop());
+    const member = state.staff.find((item) => item.id === id);
+    await route.fulfill({
+      status: member ? 200 : 404,
+      contentType: 'application/json',
+      body: JSON.stringify(member ? { staff: toApiStaff(member) } : { message: 'not found' }),
+    });
+  });
+
+  await page.route(
+    /localhost:9999\/hr\/departments\/v1\/departments(\?.*)?$/,
+    async (route: Route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          departments: departmentNames.map((name, index) => ({ id: String(index + 1), name })),
+        }),
+      });
+    }
+  );
 }
 
 // ─── Test suites ──────────────────────────────────────────────────────────────
 
-test.describe.skip('HR staff list', () => {
+test.describe('HR staff list', () => {
   // AppGuard redirects to auth when there is no token cookie. A dummy value is
   // enough because we stub /hub/user/v1/users/me - the guard only checks presence.
   test.beforeEach(async ({ context }) => {
@@ -253,7 +323,7 @@ test.describe.skip('HR staff list', () => {
   });
 });
 
-test.describe.skip('HR staff detail', () => {
+test.describe('HR staff detail', () => {
   test.beforeEach(async ({ context }) => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: HR_URL }]);
   });
@@ -299,7 +369,7 @@ test.describe.skip('HR staff detail', () => {
   });
 });
 
-test.describe.skip('HR shifts list', () => {
+test.describe('HR shifts list', () => {
   test.beforeEach(async ({ context }) => {
     await context.addCookies([{ name: 'token', value: 'test-token', url: HR_URL }]);
   });
