@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/domain"
+	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
 )
 
 type mockBannerRepo struct {
@@ -61,6 +62,15 @@ func (m *mockBannerRepo) GetBanner(_ context.Context, businessID, id int64) (dom
 func (m *mockBannerRepo) BusinessOwnerID(_ context.Context, businessID int64) (int64, error) {
 	m.businessID = businessID
 	return m.ownerID, m.bizOwnerIDErr
+}
+
+func (m *mockBannerRepo) List(_ context.Context, businessID int64) ([]*posmenuitemv1.MenuItem, error) {
+	m.businessID = businessID
+	return nil, nil
+}
+
+func (m *mockBannerRepo) Update(_ context.Context, _, _ int64, _ []*posmenuitemv1.MenuItem) error {
+	return nil
 }
 
 func TestCreateBannerNormalizesAndReturnsSavedBanner(t *testing.T) {

@@ -394,7 +394,7 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			return fmt.Errorf("received quantity for item %d cannot decrease from %v", it.ID, previous)
 		}
 
-		if err = qtx.UpdatePurchaseOrderItemReceived(ctx, sqlc.UpdatePurchaseOrderItemReceivedParams{QuantityReceived: strconv.FormatFloat(qty, 'f', -1, 64), PurchaseOrderID: poID, ID: it.ID}); err != nil {
+		if err = qtx.UpdatePurchaseOrderItemReceived(ctx, sqlc.UpdatePurchaseOrderItemReceivedParams{QuantityReceived: nullString(strconv.FormatFloat(qty, 'f', -1, 64)), PurchaseOrderID: poID, ID: it.ID}); err != nil {
 			return err
 		}
 		if delta == 0 {
@@ -444,14 +444,18 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		}
 	}
 
-	status := domain.POStatusPartial
-	if fullyReceived { status = domain.POStatusReceived }
-	if status == domain.POStatusReceived {
-		err = qtx.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{Status: sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status), Valid: true}, BusinessID: businessID, ID: poID})
-	} else {
-		err = qtx.UpdatePurchaseOrderStatusPartial(ctx, sqlc.UpdatePurchaseOrderStatusPartialParams{Status: sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(status), Valid: true}, BusinessID: businessID, ID: poID})
+	nextStatus := domain.POStatusPartial
+	if fullyReceived {
+		nextStatus = domain.POStatusReceived
 	}
-	if err != nil { return err }
+	if nextStatus == domain.POStatusReceived {
+		err = qtx.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{Status: sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(nextStatus), Valid: true}, BusinessID: businessID, ID: poID})
+	} else {
+		err = qtx.UpdatePurchaseOrderStatusPartial(ctx, sqlc.UpdatePurchaseOrderStatusPartialParams{Status: sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(nextStatus), Valid: true}, BusinessID: businessID, ID: poID})
+	}
+	if err != nil {
+		return err
+	}
 
 	return tx.Commit()
 }
