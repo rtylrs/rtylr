@@ -1,0 +1,43 @@
+{
+  "title": "تسجيل الوقت",
+  "subtitle": "أسبوع {{start}} – {{end}} · {{total}} مسجّل",
+  "addEntry": "إضافة إدخال",
+  "created": "تم إنشاء إدخال الوقت",
+  "updated": "تم تحديث إدخال الوقت",
+  "deleted": "تم حذف إدخال الوقت",
+  "noDescription": "بدون وصف",
+  "billable": "قابل للفوترة",
+  "emptyTitle": "لا توجد إدخالات وقت هذا الأسبوع",
+  "emptyDescription": "سجّل أول إدخال وقت للبدء.",
+  "startTimer": "بدء",
+  "stopTimer": "إيقاف",
+  "timerDescription": "ما الذي تعمل عليه؟",
+  "importFromFlow": "استيراد من Flow",
+  "flowImport": {
+    "importing": "جاري الاستيراد من Flow…",
+    "success": "تم استيراد {{imported}} إدخالات",
+    "successWithSkipped": "تم استيراد {{imported}} إدخالات ({{skipped}} تم تخطيها - مستوردة مسبقاً)",
+    "noEntries": "لا توجد إدخالات جديدة للاستيراد من Flow",
+    "error": "فشل الاستيراد من Flow"
+  },
+  "statuses": {
+    "draft": "مسودة",
+    "submitted": "مُرسَل",
+    "approved": "موافق عليه",
+    "rejected": "مرفوض"
+  },
+  "form": {
+    "title": "إدخال وقت جديد",
+    "date": "التاريخ",
+    "hours": "الساعات",
+    "minutes": "الدقائق",
+    "startTime": "وقت البدء",
+    "endTime": "وقت الانتهاء",
+    "useStartEnd": "استخدام وقت البدء/الانتهاء بدلاً من ذلك",
+    "description": "الوصف",
+    "descriptionPlaceholder": "ما الذي عملت عليه؟",
+    "billable": "قابل للفوترة",
+    "durationRequired": "يجب أن تكون المدة دقيقة واحدة على الأقل",
+    "invalidTimeRange": "يجب أن يكون وقت الانتهاء بعد وقت البدء"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "sections": {
+    "workspace": "Workspace",
+    "time": "Time",
+    "people": "People",
+    "hr": "HR"
+  },
+  "appearance": "Appearance",
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "signOut": "Sign out",
+  "hr": "HR",
+  "routes": {
+    "requestTimeOff": "Request Time Off",
+    "timeOffCalendar": "Time Off Calendar",
+    "shiftSchedule": "Shift Schedule",
+    "performanceReviews": "Performance Reviews",
+    "newReview": "New Review",
+    "employeeProfile": "Employee Profile",
+    "timesheetDetail": "Timesheet Detail",
+    "newLeaveRequest": "New Leave Request",
+    "payrollConfig": "Payroll Configuration",
+    "payrollRunDetail": "Payroll Run",
+    "checklistTemplates": "Checklist Templates",
+    "reviewCycleDetail": "Review Cycle"
+  }
+}

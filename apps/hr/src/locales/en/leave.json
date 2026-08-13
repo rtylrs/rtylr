@@ -1,0 +1,57 @@
+{
+  "title": "Leave",
+  "subtitle": "Manage leave requests and balances",
+  "newRequest": "New Request",
+  "requestCreated": "Leave request submitted",
+  "requestUpdated": "Leave request updated",
+  "employee": "Employee",
+  "days": "days",
+  "emptyTitle": "No leave requests",
+  "emptyDescription": "Leave requests will appear here once submitted.",
+  "noLeaveTypes": "No leave types configured",
+  "configureLeaveTypes": "Set up leave policies before submitting requests.",
+  "goToSettings": "Go to Settings",
+  "tabs": {
+    "myLeave": "My Leave",
+    "teamCalendar": "Team Calendar"
+  },
+  "statuses": {
+    "all": "All",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "cancelled": "Cancelled"
+  },
+  "balances": {
+    "emptyTitle": "No leave balances",
+    "emptyDescription": "Your leave balances will appear once leave types are configured.",
+    "daysLeft": "days left",
+    "entitled": "Entitled",
+    "used": "Used",
+    "pending": "Pending"
+  },
+  "form": {
+    "title": "New Leave Request",
+    "subtitle": "Submit a leave request for approval",
+    "leaveType": "Leave Type",
+    "selectType": "Select a leave type",
+    "remainingBalance": "Remaining balance",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "reason": "Reason",
+    "reasonPlaceholder": "Why are you requesting leave?",
+    "notes": "Notes",
+    "notesPlaceholder": "Additional notes (optional)",
+    "submit": "Submit Request",
+    "errorPastDate": "Leave dates cannot be in the past",
+    "errorOverlap": "This date range overlaps with an existing approved leave request"
+  },
+  "calendar": {
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "department": "Department",
+    "location": "Location",
+    "emptyTitle": "No leave scheduled",
+    "emptyDescription": "Approved leave will appear on the calendar."
+  }
+}

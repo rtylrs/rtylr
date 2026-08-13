@@ -1,0 +1,52 @@
+{
+  "title": "سجلات الدوام",
+  "subtitle": "عرض وتقديم فترات سجل الدوام.",
+  "entries": "إدخالات",
+  "total": "الإجمالي",
+  "submit": "تقديم سجل الدوام",
+  "submitted": "تم تقديم سجل الدوام للموافقة",
+  "approved": "تمت الموافقة على سجل الدوام",
+  "rejected": "تم رفض سجل الدوام",
+  "rejectionReason": "سبب الرفض",
+  "noReasonProvided": "لم يُقدَّم سبب",
+  "entriesTitle": "إدخالات الوقت",
+  "noEntries": "لا توجد إدخالات وقت في هذه الفترة.",
+  "emptyTitle": "لا توجد سجلات دوام بعد",
+  "emptyDescription": "ستظهر فترات سجل الدوام هنا.",
+  "filters": {
+    "all": "الكل",
+    "draft": "مسودة",
+    "submitted": "مُرسَل",
+    "approved": "موافق عليه",
+    "rejected": "مرفوض"
+  },
+  "statuses": {
+    "draft": "مسودة",
+    "submitted": "مُرسَل",
+    "approved": "موافق عليه",
+    "rejected": "مرفوض",
+    "locked": "مقفل"
+  },
+  "days": {
+    "mon": "إثن",
+    "tue": "ثلا",
+    "wed": "أرب",
+    "thu": "خمي",
+    "fri": "جمع",
+    "sat": "سبت",
+    "sun": "أحد"
+  },
+  "approvals": {
+    "title": "موافقات سجلات الدوام",
+    "subtitle": "{{count}} سجلات دوام في انتظار مراجعتك",
+    "emptyTitle": "لا شيء معلق",
+    "emptyDescription": "لا توجد سجلات دوام في انتظار الموافقة.",
+    "employeeId": "الموظف #{{id}}",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "rejectTitle": "رفض سجل الدوام",
+    "reasonLabel": "سبب الرفض",
+    "reasonPlaceholder": "اشرح سبب رفض سجل الدوام…",
+    "confirmReject": "رفض سجل الدوام"
+  }
+}

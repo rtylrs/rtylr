@@ -1,0 +1,7 @@
+{
+  "expired": "Your rtylr license has expired — contact your administrator.",
+  "expiring": "Your rtylr license expires on {{date}}.",
+  "unreachable": "Could not reach the rtylr license service.",
+  "unlicensed": "This rtylr installation is not licensed.",
+  "dismiss": "Dismiss"
+}

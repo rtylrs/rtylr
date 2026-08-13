@@ -1,0 +1,31 @@
+{
+  "title": "Quarts",
+  "weekOf": "Semaine du {{start}} – {{end}}",
+  "prevWeek": "Semaine précédente",
+  "nextWeek": "Semaine suivante",
+  "today": "aujourd'hui",
+  "shiftsCount": "quart",
+  "shiftCreated": "Quart créé",
+  "assignmentCreated": "Quart attribué",
+  "rosterPublished": "Planning publié",
+  "emptyDay": "Aucun quart planifié",
+  "emptyDayDescription": "Aucun quart n'est planifié pour ce jour.",
+  "statuses": {
+    "scheduled": "Planifié",
+    "inProgress": "En cours",
+    "completed": "Terminé"
+  },
+  "roster": {
+    "title": "Planificateur de planning",
+    "publish": "Publier le planning",
+    "employee": "Employé",
+    "assignShift": "Attribuer un quart",
+    "selectShift": "Modèle de quart",
+    "choosePlaceholder": "Choisir un quart…",
+    "assign": "Attribuer",
+    "conflictsWarning": "Certaines attributions ont des conflits d'horaire.",
+    "cannotPublishConflicts": "Résolvez tous les conflits d'horaire avant de publier le planning.",
+    "emptyTitle": "Aucune donnée de planning",
+    "emptyDescription": "Ajoutez des employés à cet emplacement pour construire le planning."
+  }
+}

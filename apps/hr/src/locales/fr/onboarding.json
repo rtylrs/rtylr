@@ -1,0 +1,10 @@
+{
+  "title": "Intégration",
+  "subtitle": "Liste de contrôle pour les nouvelles recrues",
+  "emptyTitle": "Aucune intégration en cours",
+  "emptyDescription": "Quand un nouvel employé commence, ses tâches apparaîtront ici.",
+  "tasksDone": "{{done}} sur {{total}} tâches terminées",
+  "markedComplete": "Marqué comme terminé",
+  "markedIncomplete": "Marqué comme non terminé",
+  "due": "Échéance {{date}}"
+}

@@ -1,0 +1,10 @@
+{
+  "title": "Onboarding",
+  "subtitle": "New hire workflow checklist",
+  "emptyTitle": "No onboarding in progress",
+  "emptyDescription": "When a new hire starts, their tasks will show up here.",
+  "tasksDone": "{{done}} of {{total}} tasks done",
+  "markedComplete": "Marked complete",
+  "markedIncomplete": "Marked incomplete",
+  "due": "Due {{date}}"
+}

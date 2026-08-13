@@ -1,0 +1,6 @@
+{
+  "generic": "Une erreur est survenue. Veuillez réessayer.",
+  "notFound": "Non trouvé",
+  "unauthorized": "Vous n'avez pas accès à cette ressource.",
+  "calendarFailed": "Le calendrier n'a pas pu se charger. Veuillez rafraîchir."
+}

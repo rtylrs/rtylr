@@ -1,0 +1,53 @@
+{
+  "title": "المستندات",
+  "subtitle": "خزنة مستندات الموظفين",
+  "uploaded": "تم رفع المستند بنجاح",
+  "deleted": "تم حذف المستند",
+  "selectEmployeeFirst": "اختر موظفاً أولاً",
+  "expiringSoon": "{{count}} مستند(ات) على وشك الانتهاء",
+  "filterEmployee": "الموظف",
+  "filterSelect": "اختر",
+  "filterType": "النوع",
+  "emptyTitle": "لا توجد مستندات بعد",
+  "emptyDescription": "ارفع مستندات I-9 و W4 والعقود وغيرها.",
+  "table": {
+    "document": "المستند",
+    "employee": "الموظف",
+    "type": "النوع",
+    "uploaded": "تاريخ الرفع"
+  },
+  "deleteTitle": "حذف المستند؟",
+  "deleteConfirm": "لا يمكن التراجع عن هذا الإجراء.",
+  "deleteButton": "حذف",
+  "vault": {
+    "title": "المستندات",
+    "upload": "رفع",
+    "uploadTitle": "رفع مستند",
+    "expiryWarning": "{{count}} مستند(ات) منتهية أو قاربت على الانتهاء",
+    "emptyTitle": "لا توجد مستندات بعد",
+    "emptyDescription": "ارفع مستندات الموظف لتنظيمها.",
+    "table": {
+      "name": "المستند",
+      "type": "النوع",
+      "storageMode": "التخزين",
+      "expiryDate": "تاريخ الانتهاء"
+    },
+    "types": {
+      "id_card": "بطاقة هوية",
+      "contract": "عقد",
+      "certificate": "شهادة",
+      "visa": "تأشيرة",
+      "other": "أخرى"
+    },
+    "storageModes": {
+      "stored": "مخزّن",
+      "linked": "مرتبط"
+    },
+    "form": {
+      "name": "اسم المستند",
+      "namePlaceholder": "مثال: جواز السفر، عقد العمل",
+      "type": "نوع المستند",
+      "expiryDate": "تاريخ الانتهاء"
+    }
+  }
+}

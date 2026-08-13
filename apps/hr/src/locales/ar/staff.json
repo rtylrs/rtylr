@@ -1,0 +1,10 @@
+{
+  "directory": "دليل الموظفين",
+  "memberCount": "{{count}} أعضاء الفريق",
+  "inviteStaff": "دعوة موظف",
+  "searchPlaceholder": "البحث عن الموظفين… (اضغط /)",
+  "emptyState": {
+    "title": "لا يوجد موظفون",
+    "description": "عدّل الفلاتر أو ادعُ شخصاً إلى فريقك."
+  }
+}

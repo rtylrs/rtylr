@@ -1,0 +1,83 @@
+{
+  "title": "Payroll",
+  "subtitle": "Manage payroll runs and employee compensation",
+  "triggerRun": "Trigger New Run",
+  "configRequired": "Configure payroll first",
+  "configRequiredDescription": "Set up your payroll configuration before running payroll.",
+  "goToConfig": "Go to Payroll Configuration",
+  "configSaved": "Payroll configuration saved",
+  "runTriggered": "Payroll run triggered",
+  "runApproved": "Payroll run approved",
+  "exported": "Payroll exported successfully",
+  "backToRuns": "Back to payroll runs",
+  "emptyTitle": "No payroll runs",
+  "emptyDescription": "Trigger a new payroll run to get started.",
+  "employeeCount": "{{count}} employees",
+  "netTotal": "Net total",
+  "statuses": {
+    "all": "All",
+    "draft": "Draft",
+    "in_review": "In Review",
+    "approved": "Approved",
+    "exported": "Exported"
+  },
+  "stats": {
+    "totalGross": "Total Gross",
+    "totalDeductions": "Total Deductions",
+    "totalNet": "Net Payroll",
+    "pendingRuns": "Pending Runs"
+  },
+  "table": {
+    "employee": "Employee",
+    "employeeId": "Employee #{{id}}",
+    "hours": "Hours",
+    "basePay": "Base Pay",
+    "overtimePay": "Overtime Pay",
+    "deductions": "Deductions",
+    "bonuses": "Bonuses",
+    "netPay": "Net Pay",
+    "deductionsExceedGross": "Deductions exceed gross pay"
+  },
+  "runDetail": {
+    "subtitle": "{{count}} entries in this run",
+    "approve": "Approve Run",
+    "exportCsv": "Export CSV",
+    "notFound": "Payroll run not found",
+    "notFoundDescription": "This payroll run could not be loaded."
+  },
+  "paySlip": {
+    "title": "Pay Slip",
+    "myPaySlips": "My Pay Slips",
+    "myPaySlipsSubtitle": "View your completed pay slips",
+    "period": "Pay period",
+    "earnings": "Earnings",
+    "grossPay": "Gross Pay",
+    "deductionsSection": "Deductions",
+    "notFound": "Pay slip not found",
+    "notFoundDescription": "This pay slip could not be loaded.",
+    "backToSlips": "Back to pay slips",
+    "emptyTitle": "No pay slips yet",
+    "emptyDescription": "Your pay slips will appear here after payroll is processed."
+  },
+  "config": {
+    "title": "Payroll Configuration",
+    "subtitle": "Configure how payroll works for your organization",
+    "grossModel": "Gross pay model",
+    "grossModels": {
+      "hourly": "Hourly",
+      "salary": "Salary",
+      "both": "Both"
+    },
+    "period": "Pay period",
+    "periods": {
+      "weekly": "Weekly",
+      "biweekly": "Bi-weekly",
+      "monthly": "Monthly"
+    },
+    "enableOvertime": "Enable overtime tracking",
+    "enableDeductions": "Enable deductions",
+    "enableBonuses": "Enable bonuses",
+    "saved": "Payroll configuration saved",
+    "notConfiguredNotice": "Payroll is not yet configured - fill in the form to get started"
+  }
+}

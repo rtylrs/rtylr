@@ -1,0 +1,31 @@
+{
+  "title": "Shifts",
+  "weekOf": "Week of {{start}} – {{end}}",
+  "prevWeek": "Previous week",
+  "nextWeek": "Next week",
+  "today": "today",
+  "shiftsCount": "shift",
+  "shiftCreated": "Shift created",
+  "assignmentCreated": "Shift assigned",
+  "rosterPublished": "Roster published",
+  "emptyDay": "No shifts scheduled",
+  "emptyDayDescription": "No shifts are scheduled for this day.",
+  "statuses": {
+    "scheduled": "Scheduled",
+    "inProgress": "In Progress",
+    "completed": "Completed"
+  },
+  "roster": {
+    "title": "Roster Builder",
+    "publish": "Publish Roster",
+    "employee": "Employee",
+    "assignShift": "Assign Shift",
+    "selectShift": "Shift Template",
+    "choosePlaceholder": "Choose a shift…",
+    "assign": "Assign",
+    "conflictsWarning": "Some assignments have scheduling conflicts.",
+    "cannotPublishConflicts": "Resolve all scheduling conflicts before publishing the roster.",
+    "emptyTitle": "No roster data",
+    "emptyDescription": "Add employees to this location to build the roster."
+  }
+}

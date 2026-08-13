@@ -1,0 +1,70 @@
+{
+  "title": "Présence",
+  "subtitle": "Suivez vos heures d'arrivée et de départ.",
+  "history": "Historique de présence",
+  "clockedIn": "Pointage d'entrée effectué",
+  "clockedOut": "Pointage de sortie effectué",
+  "emptyTitle": "Aucun enregistrement de présence",
+  "emptyDescription": "Vos enregistrements de présence apparaîtront ici après le pointage.",
+  "qrComingSoon": "Le scan QR arrive bientôt !",
+  "late": "{{minutes}}m de retard",
+  "methods": {
+    "app": "App",
+    "qr": "Code QR",
+    "gps": "GPS",
+    "pin": "Code PIN",
+    "facial": "Visage"
+  },
+  "statuses": {
+    "present": "Présent",
+    "absent": "Absent",
+    "partial": "Partiel"
+  },
+  "table": {
+    "date": "Date",
+    "clockIn": "Entrée",
+    "clockOut": "Sortie",
+    "duration": "Durée",
+    "method": "Méthode",
+    "status": "Statut"
+  },
+  "clockWidget": {
+    "title": "Statut de présence",
+    "clockedIn": "Pointé",
+    "clockedOut": "Non pointé",
+    "since": "Depuis {{time}}",
+    "clockOutBtn": "Pointer la sortie",
+    "clockInApp": "Pointer (App)",
+    "clockInQR": "Scanner QR Code",
+    "clockInPin": "Pointer (PIN)",
+    "clockInGps": "Pointer (GPS)"
+  },
+  "pinModal": {
+    "title": "Pointage par PIN",
+    "subtitle": "Entrez votre PIN pour pointer",
+    "setTitle": "Définir votre PIN",
+    "setSubtitle": "Créez un PIN de 4–6 chiffres pour le pointage",
+    "confirmTitle": "Confirmer le PIN",
+    "confirmSubtitle": "Saisissez à nouveau votre PIN pour confirmer",
+    "submit": "Pointer",
+    "savePin": "Enregistrer le PIN",
+    "pinRequired": "Veuillez saisir votre PIN",
+    "pinLength": "Le PIN doit comporter 4–6 chiffres",
+    "pinMismatch": "Les PIN ne correspondent pas",
+    "pinSaved": "PIN enregistré avec succès",
+    "setPin": "Définir mon PIN",
+    "changePin": "Modifier le PIN"
+  },
+  "gps": {
+    "acquiring": "Acquisition de la position…",
+    "permissionDenied": "Autorisation de localisation refusée. Activez l'accès à la localisation dans les paramètres de votre navigateur ou utilisez une autre méthode de pointage.",
+    "locationUnavailable": "Impossible de déterminer votre position. Veuillez réessayer.",
+    "locationTimeout": "Délai de localisation expiré. Veuillez réessayer."
+  },
+  "qrScanner": {
+    "title": "Scanner QR Code",
+    "description": "Scannez un QR code à votre terminal pour pointer l'entrée ou la sortie.",
+    "scanButton": "Scanner QR Code",
+    "cameraPlaceholder": "Permission caméra requise. Cette fonctionnalité arrive en Phase 2."
+  }
+}
