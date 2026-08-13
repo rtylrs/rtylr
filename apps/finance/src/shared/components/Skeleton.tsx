@@ -25,7 +25,13 @@ const Skeleton: React.FC<SkeletonProps> = ({ width = '100%', height = 14, radius
 export default Skeleton;
 
 export const SkeletonRow: React.FC<{ count?: number }> = ({ count = 5 }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+  <div
+    role="status"
+    aria-live="polite"
+    aria-busy="true"
+    aria-label="Loading"
+    style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
+  >
     {Array.from({ length: count }).map((_, i) => (
       <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
         <Skeleton width={32} height={32} radius={8} />
