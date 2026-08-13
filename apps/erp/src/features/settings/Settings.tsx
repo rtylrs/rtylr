@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
 import { useSettings } from '../../shared/lib/settingsStore';
+import type { ErpBusinessSettings } from '../../shared/lib/settingsStore';
+import { useErpSettings, useUpdateErpSettings } from '../../shared/hooks/queries/useErpSettings';
 import { useWarehouses } from '../warehouses/useWarehouses';
 import {
   useErpTeam,
@@ -100,7 +102,62 @@ const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({
 
 const GeneralTab: React.FC = () => {
   const settings = useSettings();
+  const { data: serverSettings, isError, isFetching, isLoading, refetch } = useErpSettings();
+  const update = useUpdateErpSettings();
   const { data: warehouses = [] } = useWarehouses();
+  const [form, setForm] = useState<ErpBusinessSettings>(() => ({
+    currency: settings.currency,
+    taxRate: settings.taxRate,
+    lowStockThreshold: settings.lowStockThreshold,
+    defaultWarehouseId: settings.defaultWarehouseId,
+    notifyOnLowStock: settings.notifyOnLowStock,
+    notifyOnExpiry: settings.notifyOnExpiry,
+  }));
+
+  useEffect(() => {
+    if (serverSettings) setForm(serverSettings);
+  }, [serverSettings]);
+
+  if (isError && !serverSettings) {
+    return (
+      <div
+        role="alert"
+        className="rounded-xl p-5 space-y-3"
+        style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
+      >
+        <p className="text-sm font-medium" style={{ color: 'var(--hub-text)' }}>
+          Unable to load ERP settings
+        </p>
+        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+          Business settings could not be loaded from the tenant API.
+        </p>
+        <button
+          type="button"
+          onClick={() => void refetch()}
+          disabled={isFetching}
+          className="rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40"
+          style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
+        >
+          {isFetching ? 'Retrying…' : 'Retry'}
+        </button>
+      </div>
+    );
+  }
+
+  if (isLoading || !serverSettings) {
+    return (
+      <div className="rounded-xl p-5 text-sm" style={{ color: 'var(--hub-text-muted)' }}>
+        Loading ERP settings…
+      </div>
+    );
+  }
+
+  const updateField = <K extends keyof ErpBusinessSettings>(
+    field: K,
+    value: ErpBusinessSettings[K]
+  ): void => {
+    setForm((current) => ({ ...current, [field]: value }));
+  };
 
   return (
     <motion.div
@@ -111,8 +168,8 @@ const GeneralTab: React.FC = () => {
       <Section title="General" icon={SettingsIcon}>
         <ConfigField label="Currency" description="Default currency for pricing and reports">
           <select
-            value={settings.currency}
-            onChange={(e) => settings.setCurrency(e.target.value)}
+            value={form.currency}
+            onChange={(e) => updateField('currency', e.target.value)}
             className="px-2 py-1.5 rounded-lg text-xs outline-none"
             style={{
               background: 'var(--hub-input-bg)',
@@ -131,10 +188,10 @@ const GeneralTab: React.FC = () => {
           <input
             type="number"
             step="0.01"
-            value={settings.taxRate}
+            value={form.taxRate}
             onChange={(e) => {
               const v = parseFloat(e.target.value);
-              if (!isNaN(v) && v >= 0) settings.setTaxRate(v);
+              if (!isNaN(v) && v >= 0) updateField('taxRate', v);
             }}
             className="w-20 px-2 py-1.5 rounded-lg text-xs outline-none"
             style={{
@@ -146,8 +203,8 @@ const GeneralTab: React.FC = () => {
         </ConfigField>
         <ConfigField label="Default Warehouse" description="Used for new products and transfers">
           <select
-            value={settings.defaultWarehouseId}
-            onChange={(e) => settings.setDefaultWarehouseId(parseInt(e.target.value))}
+            value={form.defaultWarehouseId}
+            onChange={(e) => updateField('defaultWarehouseId', parseInt(e.target.value, 10))}
             className="px-2 py-1.5 rounded-lg text-xs outline-none"
             style={{
               background: 'var(--hub-input-bg)',
@@ -171,10 +228,10 @@ const GeneralTab: React.FC = () => {
         >
           <input
             type="number"
-            value={settings.lowStockThreshold}
+            value={form.lowStockThreshold}
             onChange={(e) => {
               const v = parseInt(e.target.value, 10);
-              if (!isNaN(v) && v >= 0) settings.setLowStockThreshold(v);
+              if (!isNaN(v) && v >= 0) updateField('lowStockThreshold', v);
             }}
             className="w-20 px-2 py-1.5 rounded-lg text-xs outline-none"
             style={{
@@ -191,10 +248,16 @@ const GeneralTab: React.FC = () => {
           label="Low Stock Alerts"
           description="Get notified when products fall below threshold"
         >
-          <Toggle value={settings.notifyOnLowStock} onChange={settings.setNotifyOnLowStock} />
+          <Toggle
+            value={form.notifyOnLowStock}
+            onChange={(value) => updateField('notifyOnLowStock', value)}
+          />
         </ConfigField>
         <ConfigField label="Expiry Alerts" description="Get notified when items approach expiry">
-          <Toggle value={settings.notifyOnExpiry} onChange={settings.setNotifyOnExpiry} />
+          <Toggle
+            value={form.notifyOnExpiry}
+            onChange={(value) => updateField('notifyOnExpiry', value)}
+          />
         </ConfigField>
       </Section>
 
@@ -218,6 +281,18 @@ const GeneralTab: React.FC = () => {
           </div>
         </ConfigField>
       </Section>
+
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => update.mutate(form)}
+          disabled={update.isPending}
+          className="rounded-lg px-4 py-2 text-xs font-semibold disabled:opacity-40"
+          style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
+        >
+          {update.isPending ? 'Saving…' : 'Save settings'}
+        </button>
+      </div>
     </motion.div>
   );
 };
