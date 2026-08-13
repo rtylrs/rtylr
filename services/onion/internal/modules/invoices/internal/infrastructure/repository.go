@@ -438,9 +438,6 @@ func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input 
 		return nil, err
 	}
 	inv := invoiceFromSqlc(row)
-	if domain.IsTerminal(inv.Status) {
-		return nil, domain.ErrInvoiceNotDraft
-	}
 
 	if strings.TrimSpace(input.Reference) != "" {
 		existing, lookupErr := queries.GetPaymentByReference(ctx, sqlc.GetPaymentByReferenceParams{
@@ -455,6 +452,9 @@ func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input 
 		if !errors.Is(lookupErr, sql.ErrNoRows) {
 			return nil, lookupErr
 		}
+	}
+	if domain.IsTerminal(inv.Status) {
+		return nil, domain.ErrInvoiceNotDraft
 	}
 
 	currency := input.Currency
