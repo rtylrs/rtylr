@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -69,8 +70,8 @@ const Journal: React.FC = () => {
       setDebitAccId(0);
       setCreditAcc('');
       setCreditAccId(0);
-    } catch {
-      toast.error('Failed to create journal entry');
+    } catch (error) {
+      toast.error(getOneKitErrorMessage(error, 'Failed to create journal entry'));
     }
   };
 

@@ -3,7 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Link2, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
-import { unwrap } from '@voxire/api';
+import { getOneKitErrorMessage, unwrap } from '@voxire/api';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { useBankTransactions } from '../../shared/hooks/useBankAccounts';
@@ -36,8 +36,8 @@ const Reconcile: React.FC = () => {
       await unwrap(financeApi.matchTransaction(txId, 'invoice', candidateId));
       setMatches((prev) => ({ ...prev, [txId]: candidateId }));
       toast.success(`Matched transaction to ${candidateId}`);
-    } catch {
-      toast.error('Failed to match transaction');
+    } catch (error) {
+      toast.error(getOneKitErrorMessage(error, 'Failed to match transaction'));
     }
   };
 
@@ -59,8 +59,8 @@ const Reconcile: React.FC = () => {
         return next;
       });
       toast.success('Auto-match completed');
-    } catch {
-      toast.error('Auto-match failed');
+    } catch (error) {
+      toast.error(getOneKitErrorMessage(error, 'Auto-match failed'));
     } finally {
       setAutoMatching(false);
     }

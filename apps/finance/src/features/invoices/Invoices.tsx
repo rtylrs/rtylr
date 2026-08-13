@@ -4,6 +4,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Plus, Send, CheckCircle, Eye, FileText, Download, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
 import { Invoice } from '../../shared/services/financeApi';
 import { useInvoices, useUpdateInvoiceStatus } from './useInvoices';
@@ -46,7 +47,7 @@ const Invoices: React.FC = () => {
       { id: inv.id, status: 'Paid' },
       {
         onSuccess: () => toast.success(t('invoices.markedPaid', { id: inv.id })),
-        onError: () => toast.error(t('invoices.markPaidFailed', { id: inv.id })),
+        onError: (error) => toast.error(getOneKitErrorMessage(error, t('invoices.markPaidFailed', { id: inv.id }))),
       }
     );
   };

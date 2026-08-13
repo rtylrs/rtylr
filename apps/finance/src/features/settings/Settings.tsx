@@ -80,8 +80,8 @@ const GeneralTab: React.FC = () => {
       // Settings are persisted locally via Zustand persist middleware on every setSetting call.
       // This button confirms the current state is intentionally saved.
       toast.success('Settings saved');
-    } catch {
-      toast.error('Failed to save settings');
+    } catch (error) {
+      toast.error(getOneKitErrorMessage(error, 'Failed to save settings'));
     }
   };
 
@@ -286,8 +286,8 @@ const TeamTab: React.FC = () => {
           setShowInvite(false);
           toast.success('Invitation sent');
         },
-        onError: () => {
-          toast.error('Failed to send invitation');
+        onError: (error) => {
+          toast.error(getOneKitErrorMessage(error, 'Failed to send invitation'));
         },
       }
     );
@@ -475,7 +475,7 @@ const TeamTab: React.FC = () => {
                 onClick={() => {
                   deactivate.mutate(m.id, {
                     onSuccess: () => toast.success(`${m.name} removed`),
-                    onError: () => toast.error(`Failed to remove ${m.name}`),
+                    onError: (error) => toast.error(getOneKitErrorMessage(error, `Failed to remove ${m.name}`)),
                   });
                 }}
                 style={{

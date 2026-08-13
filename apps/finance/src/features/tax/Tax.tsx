@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Download, Settings, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { TaxPeriod } from '../../shared/services/financeApi';
 import { useTaxReport, useTaxConfig, useCreateTaxConfig } from '../../shared/hooks/useTax';
 import { exportTaxSummaryCsv } from '../../shared/lib/exports';
@@ -332,8 +333,8 @@ const Tax: React.FC = () => {
                       setShowConfig(false);
                     }
                   },
-                  onError: () => {
-                    toast.error(`Failed to save rate: ${r.name}`);
+                  onError: (error) => {
+                    toast.error(getOneKitErrorMessage(error, `Failed to save rate: ${r.name}`));
                   },
                 });
               });
