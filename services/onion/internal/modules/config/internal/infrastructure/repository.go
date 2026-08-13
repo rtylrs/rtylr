@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/config/internal/domain"
 	"github.com/voxire/onion/internal/modules/config/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/securekey"
 	"github.com/voxire/onion/internal/platform/utils/convert"
 )
 
@@ -134,35 +135,52 @@ func (r *Repository) UpdateConfig(ctx context.Context, input domain.ConfigInput)
 		logger.Ctx(ctx).Error("Failed to marshal meta tags", logger.Error(marshalErr))
 		return marshalErr
 	}
+	emailProvider := input.EmailProvider
+	if emailProvider == "" {
+		emailProvider = "resend"
+	}
 
 	execErr := r.queries.UpdateConfig(ctx, sqlc.UpdateConfigParams{
-		SiteName:               sql.NullString{String: input.SiteName, Valid: input.SiteName != ""},
-		LogoUrl:                sql.NullString{String: input.LogoUrl, Valid: input.LogoUrl != ""},
-		FaviconUrl:             sql.NullString{String: input.FaviconUrl, Valid: input.FaviconUrl != ""},
-		MetaTags:               metaTagsJSON,
-		ContactEmail:           input.ContactEmail,
-		ContactNumber:          input.ContactNumber,
-		SenderEmail:            sql.NullString{String: input.SenderEmail, Valid: input.SenderEmail != ""},
-		Website:                sql.NullString{String: input.Website, Valid: input.Website != ""},
-		MapsUrl:                sql.NullString{String: input.MapsURL, Valid: input.MapsURL != ""},
-		Address:                sql.NullString{String: input.Address, Valid: input.Address != ""},
-		City:                   sql.NullString{String: input.City, Valid: input.City != ""},
-		Zipcode:                sql.NullString{String: input.Zipcode, Valid: input.Zipcode != ""},
-		Country:                sql.NullString{String: input.Country, Valid: input.Country != ""},
-		Instagram:              sql.NullString{String: input.Instagram, Valid: input.Instagram != ""},
-		MaintenanceMode:        sql.NullBool{Bool: input.MaintenanceMode, Valid: true},
-		MaintenanceNotice:      sql.NullString{String: input.MaintenanceNotice, Valid: input.MaintenanceNotice != ""},
-		AddonsEnabled:          sql.NullBool{Bool: input.AddonsEnabled, Valid: true},
-		EnableReviews:          sql.NullBool{Bool: input.EnableReviews, Valid: true},
-		EnableWishlist:         sql.NullBool{Bool: input.EnableWishlist, Valid: true},
-		EnableNewsletterSignup: sql.NullBool{Bool: input.EnableNewsletterSignup, Valid: true},
-		AboutContent:           input.AboutContent,
-		FooterSubText:          sql.NullString{String: input.FooterSubText, Valid: input.FooterSubText != ""},
-		BusinessID:             businessIDInt,
+		SiteName:                  sql.NullString{String: input.SiteName, Valid: input.SiteName != ""},
+		LogoUrl:                   sql.NullString{String: input.LogoUrl, Valid: input.LogoUrl != ""},
+		FaviconUrl:                sql.NullString{String: input.FaviconUrl, Valid: input.FaviconUrl != ""},
+		MetaTags:                  metaTagsJSON,
+		ContactEmail:              input.ContactEmail,
+		ContactNumber:             input.ContactNumber,
+		SenderEmail:               sql.NullString{String: input.SenderEmail, Valid: input.SenderEmail != ""},
+		EmailProvider:             emailProvider,
+		SenderName:                sql.NullString{String: input.SenderName, Valid: input.SenderName != ""},
+		ReplyToEmail:              sql.NullString{String: input.ReplyToEmail, Valid: input.ReplyToEmail != ""},
+		EmailNotificationsEnabled: input.EmailNotificationsEnabled,
+		SmtpHost:                  sql.NullString{String: input.SMTPHost, Valid: input.SMTPHost != ""},
+		SmtpPort:                  sql.NullInt32{Int32: input.SMTPPort, Valid: input.SMTPPort > 0},
+		SmtpUsername:              sql.NullString{String: input.SMTPUsername, Valid: input.SMTPUsername != ""},
+		Website:                   sql.NullString{String: input.Website, Valid: input.Website != ""},
+		MapsUrl:                   sql.NullString{String: input.MapsURL, Valid: input.MapsURL != ""},
+		Address:                   sql.NullString{String: input.Address, Valid: input.Address != ""},
+		City:                      sql.NullString{String: input.City, Valid: input.City != ""},
+		Zipcode:                   sql.NullString{String: input.Zipcode, Valid: input.Zipcode != ""},
+		Country:                   sql.NullString{String: input.Country, Valid: input.Country != ""},
+		Instagram:                 sql.NullString{String: input.Instagram, Valid: input.Instagram != ""},
+		MaintenanceMode:           sql.NullBool{Bool: input.MaintenanceMode, Valid: true},
+		MaintenanceNotice:         sql.NullString{String: input.MaintenanceNotice, Valid: input.MaintenanceNotice != ""},
+		AddonsEnabled:             sql.NullBool{Bool: input.AddonsEnabled, Valid: true},
+		EnableReviews:             sql.NullBool{Bool: input.EnableReviews, Valid: true},
+		EnableWishlist:            sql.NullBool{Bool: input.EnableWishlist, Valid: true},
+		EnableNewsletterSignup:    sql.NullBool{Bool: input.EnableNewsletterSignup, Valid: true},
+		AboutContent:              input.AboutContent,
+		FooterSubText:             sql.NullString{String: input.FooterSubText, Valid: input.FooterSubText != ""},
+		BusinessID:                businessIDInt,
 	})
 	if execErr != nil {
 		logger.Ctx(ctx).Error("Failed to update config", logger.Error(execErr))
 		return execErr
+	}
+	if input.SMTPPassword != "" {
+		if err := r.queries.UpdateSMTPPassword(ctx, sqlc.UpdateSMTPPasswordParams{SmtpPasswordHash: sql.NullString{String: securekey.Hash(input.SMTPPassword), Valid: true}, BusinessID: businessIDInt}); err != nil {
+			logger.Ctx(ctx).Error("Failed to update SMTP password", logger.Error(err))
+			return err
+		}
 	}
 
 	return nil
@@ -182,32 +200,43 @@ func (r *Repository) CreateConfig(ctx context.Context, input domain.ConfigInput)
 
 		return marshalErr
 	}
+	emailProvider := input.EmailProvider
+	if emailProvider == "" {
+		emailProvider = "resend"
+	}
 
 	err = r.queries.CreateConfig(ctx, sqlc.CreateConfigParams{
-		OwnerID:                int32(businessIDInt),
-		BusinessID:             businessIDInt,
-		SiteName:               sql.NullString{String: input.SiteName, Valid: input.SiteName != ""},
-		LogoUrl:                sql.NullString{String: input.LogoUrl, Valid: input.LogoUrl != ""},
-		FaviconUrl:             sql.NullString{String: input.FaviconUrl, Valid: input.FaviconUrl != ""},
-		MetaTags:               metaTagsJSON,
-		ContactEmail:           input.ContactEmail,
-		ContactNumber:          input.ContactNumber,
-		SenderEmail:            sql.NullString{String: input.SenderEmail, Valid: input.SenderEmail != ""},
-		Website:                sql.NullString{String: input.Website, Valid: input.Website != ""},
-		MapsUrl:                sql.NullString{String: input.MapsURL, Valid: input.MapsURL != ""},
-		Address:                sql.NullString{String: input.Address, Valid: input.Address != ""},
-		City:                   sql.NullString{String: input.City, Valid: input.City != ""},
-		Zipcode:                sql.NullString{String: input.Zipcode, Valid: input.Zipcode != ""},
-		Country:                sql.NullString{String: input.Country, Valid: input.Country != ""},
-		Instagram:              sql.NullString{String: input.Instagram, Valid: input.Instagram != ""},
-		MaintenanceMode:        sql.NullBool{Bool: input.MaintenanceMode, Valid: true},
-		MaintenanceNotice:      sql.NullString{String: input.MaintenanceNotice, Valid: input.MaintenanceNotice != ""},
-		AddonsEnabled:          sql.NullBool{Bool: input.AddonsEnabled, Valid: true},
-		EnableReviews:          sql.NullBool{Bool: input.EnableReviews, Valid: true},
-		EnableWishlist:         sql.NullBool{Bool: input.EnableWishlist, Valid: true},
-		EnableNewsletterSignup: sql.NullBool{Bool: input.EnableNewsletterSignup, Valid: true},
-		AboutContent:           input.AboutContent,
-		FooterSubText:          sql.NullString{String: input.FooterSubText, Valid: input.FooterSubText != ""},
+		OwnerID:                   int32(businessIDInt),
+		BusinessID:                businessIDInt,
+		SiteName:                  sql.NullString{String: input.SiteName, Valid: input.SiteName != ""},
+		LogoUrl:                   sql.NullString{String: input.LogoUrl, Valid: input.LogoUrl != ""},
+		FaviconUrl:                sql.NullString{String: input.FaviconUrl, Valid: input.FaviconUrl != ""},
+		MetaTags:                  metaTagsJSON,
+		ContactEmail:              input.ContactEmail,
+		ContactNumber:             input.ContactNumber,
+		SenderEmail:               sql.NullString{String: input.SenderEmail, Valid: input.SenderEmail != ""},
+		EmailProvider:             emailProvider,
+		SenderName:                sql.NullString{String: input.SenderName, Valid: input.SenderName != ""},
+		ReplyToEmail:              sql.NullString{String: input.ReplyToEmail, Valid: input.ReplyToEmail != ""},
+		EmailNotificationsEnabled: input.EmailNotificationsEnabled,
+		SmtpHost:                  sql.NullString{String: input.SMTPHost, Valid: input.SMTPHost != ""},
+		SmtpPort:                  sql.NullInt32{Int32: input.SMTPPort, Valid: input.SMTPPort > 0},
+		SmtpUsername:              sql.NullString{String: input.SMTPUsername, Valid: input.SMTPUsername != ""},
+		Website:                   sql.NullString{String: input.Website, Valid: input.Website != ""},
+		MapsUrl:                   sql.NullString{String: input.MapsURL, Valid: input.MapsURL != ""},
+		Address:                   sql.NullString{String: input.Address, Valid: input.Address != ""},
+		City:                      sql.NullString{String: input.City, Valid: input.City != ""},
+		Zipcode:                   sql.NullString{String: input.Zipcode, Valid: input.Zipcode != ""},
+		Country:                   sql.NullString{String: input.Country, Valid: input.Country != ""},
+		Instagram:                 sql.NullString{String: input.Instagram, Valid: input.Instagram != ""},
+		MaintenanceMode:           sql.NullBool{Bool: input.MaintenanceMode, Valid: true},
+		MaintenanceNotice:         sql.NullString{String: input.MaintenanceNotice, Valid: input.MaintenanceNotice != ""},
+		AddonsEnabled:             sql.NullBool{Bool: input.AddonsEnabled, Valid: true},
+		EnableReviews:             sql.NullBool{Bool: input.EnableReviews, Valid: true},
+		EnableWishlist:            sql.NullBool{Bool: input.EnableWishlist, Valid: true},
+		EnableNewsletterSignup:    sql.NullBool{Bool: input.EnableNewsletterSignup, Valid: true},
+		AboutContent:              input.AboutContent,
+		FooterSubText:             sql.NullString{String: input.FooterSubText, Valid: input.FooterSubText != ""},
 	})
 	if err != nil {
 		var mysqlErr *mysql.MySQLError
