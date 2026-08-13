@@ -19,6 +19,10 @@ import {
 import { canHrPermission } from '../../shared/lib/hrPermissions';
 import { useHrSettings } from '../../shared/hooks/useHrExtras';
 import { formatCurrency } from '../../shared/lib/hrNumberUtils';
+import {
+  PayrollConfigRequired,
+  usePayrollConfigured,
+} from '../../shared/components/PayrollConfigGuard';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'var(--hr-text-muted)',
@@ -40,10 +44,11 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
   const { id: runId } = routeApi.useParams();
   const { t } = useTranslation();
   const { data: settings } = useHrSettings();
+  const payrollConfigured = usePayrollConfigured();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
-  const { data: run, isLoading } = useGetPayrollRun(runId);
-  const approveRun = useApprovePayrollRun();
+  const { data: run, isLoading } = useGetPayrollRun(runId, { enabled: payrollConfigured });
+  const approveRun = useApprovePayrollRun(payrollConfigured);
   const parentRef = useRef<HTMLDivElement>(null);
 
   const entries = run?.entries ?? [];
@@ -88,6 +93,8 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
     a.click();
     URL.revokeObjectURL(url);
   }, [run]);
+
+  if (!payrollConfigured) return <PayrollConfigRequired />;
 
   if (isLoading) {
     return (
