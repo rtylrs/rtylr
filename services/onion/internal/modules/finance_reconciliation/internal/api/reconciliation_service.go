@@ -72,6 +72,10 @@ func (a *ReconciliationAPI) Match(ctx context.Context, req *financereconciliatio
 		switch {
 		case errors.Is(err, domain.ErrBankFeedNotFound):
 			return nil, onekiterrors.New(http.StatusNotFound, "Bank feed transaction not found")
+		case errors.Is(err, domain.ErrTargetNotFound):
+			return nil, onekiterrors.New(http.StatusNotFound, "Reconciliation target not found")
+		case errors.Is(err, domain.ErrAlreadyMatched):
+			return nil, onekiterrors.New(http.StatusConflict, "Bank feed transaction is already matched")
 		case errors.Is(err, domain.ErrInvalidTarget):
 			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid match target")
 		default:

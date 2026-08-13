@@ -37,6 +37,7 @@ type repository interface {
 	ListUnmatchedInvoices(ctx context.Context, businessID int64) ([]domain.UnmatchedInvoice, error)
 	ListUnmatchedExpenses(ctx context.Context, businessID int64) ([]domain.UnmatchedInvoice, error)
 	BankFeedExists(ctx context.Context, businessID, id int64) (bool, error)
+	TargetExists(ctx context.Context, businessID int64, input domain.MatchInput) (bool, error)
 	CreateMatch(ctx context.Context, businessID int64, input domain.MatchInput) (int64, error)
 }
 
@@ -97,6 +98,13 @@ func (s *Service) Match(ctx context.Context, businessID int64, input domain.Matc
 	}
 	if !exists {
 		return 0, domain.ErrBankFeedNotFound
+	}
+	targetExists, err := s.repo.TargetExists(ctx, businessID, input)
+	if err != nil {
+		return 0, err
+	}
+	if !targetExists {
+		return 0, domain.ErrTargetNotFound
 	}
 
 	id, err := s.repo.CreateMatch(ctx, businessID, input)

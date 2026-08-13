@@ -22,6 +22,24 @@ INSERT INTO finance_reconciliation_matches (
 SELECT id FROM finance_bank_feeds
 WHERE id = ? AND business_id = ?;
 
+-- name: LockBankFeedForBusiness :one
+SELECT id FROM finance_bank_feeds
+WHERE id = ? AND business_id = ?
+FOR UPDATE;
+
+-- name: GetMatchForBankFeed :one
+SELECT id FROM finance_reconciliation_matches
+WHERE business_id = ? AND bank_feed_id = ?
+LIMIT 1;
+
+-- name: GetInvoiceForBusiness :one
+SELECT id FROM finance_invoices
+WHERE id = ? AND business_id = ?;
+
+-- name: GetExpenseForBusiness :one
+SELECT id FROM finance_expenses
+WHERE id = ? AND business_id = ?;
+
 -- name: ListUnmatchedInvoices :many
 SELECT i.id, i.invoice_number, i.client_name, i.total, i.currency, i.issue_date, i.due_date
 FROM finance_invoices i
