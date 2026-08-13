@@ -2,12 +2,63 @@ package infrastructure_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/brands/internal/domain"
 	"github.com/voxire/onion/internal/modules/brands/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
+
+func TestListBrands_AggregatesProductCountsForPage(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	suffix := time.Now().UnixNano()
+	makeBrand := func(name string) int64 {
+		id, err := repo.CreateBrand(ctx, testutil.BusinessID, domain.BrandInput{Name: name})
+		if err != nil {
+			t.Fatalf("CreateBrand %q: %v", name, err)
+		}
+		return id
+	}
+	firstBrandID := makeBrand(fmt.Sprintf("Count A %d", suffix))
+	secondBrandID := makeBrand(fmt.Sprintf("Count B %d", suffix))
+	emptyBrandID := makeBrand(fmt.Sprintf("Count C %d", suffix))
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM erp_products WHERE business_id = ? AND brand_id IN (?, ?, ?)", testutil.BusinessID, firstBrandID, secondBrandID, emptyBrandID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM erp_brands WHERE business_id = ? AND id IN (?, ?, ?)", testutil.BusinessID, firstBrandID, secondBrandID, emptyBrandID)
+	})
+
+	for i, brandID := range []int64{firstBrandID, firstBrandID, secondBrandID} {
+		if _, err := db.ExecContext(ctx,
+			"INSERT INTO erp_products (owner_id, business_id, brand_id, name) VALUES (?, ?, ?, ?)",
+			testutil.OwnerID, testutil.BusinessID, brandID, fmt.Sprintf("Brand count product %d-%d", suffix, i),
+		); err != nil {
+			t.Fatalf("insert product %d: %v", i, err)
+		}
+	}
+
+	brands, err := repo.ListBrandsPaginated(ctx, testutil.BusinessID, 100, 0)
+	if err != nil {
+		t.Fatalf("ListBrandsPaginated: %v", err)
+	}
+	counts := make(map[int64]int64, len(brands))
+	for _, brand := range brands {
+		counts[brand.ID] = brand.ProductCount
+	}
+	if got := counts[firstBrandID]; got != 2 {
+		t.Fatalf("first product count = %d, want 2", got)
+	}
+	if got := counts[secondBrandID]; got != 1 {
+		t.Fatalf("second product count = %d, want 1", got)
+	}
+	if got := counts[emptyBrandID]; got != 0 {
+		t.Fatalf("empty product count = %d, want 0", got)
+	}
+}
 
 func TestListBrands_ReturnsNonNilSlice(t *testing.T) {
 	db := testutil.OpenDB(t)
