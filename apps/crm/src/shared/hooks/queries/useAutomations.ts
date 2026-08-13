@@ -27,12 +27,13 @@ interface BackendAutomationRequest {
   isActive: boolean;
 }
 
-function triggerTypeFor(value?: string): string {
+export function triggerTypeFor(value?: string): string {
   const map: Record<string, string> = {
     'New customer': 'customer_signup',
     Birthday: 'date_birthday',
     'Inactive 60 days': 'inactivity',
     'Inactive customer': 'inactivity',
+    'Order created': 'order_created',
     'Post visit': 'order_created',
     'Tier upgrade': 'loyalty_tier_up',
     'Tier downgrade': 'loyalty_tier_down',
@@ -40,7 +41,7 @@ function triggerTypeFor(value?: string): string {
   return map[value ?? ''] ?? value ?? 'customer_signup';
 }
 
-function actionTypeFor(value: unknown): unknown {
+export function actionTypeFor(value: unknown): unknown {
   if (typeof value !== 'string') return value;
   const map: Record<string, string> = {
     'Send email': 'send_email',
@@ -52,14 +53,18 @@ function actionTypeFor(value: unknown): unknown {
 }
 
 function toBackendRequest(data: Partial<Automation>): BackendAutomationRequest {
-  const actions = (Array.isArray(data.actions)
-    ? data.actions
-    : (data.nodes ?? []).slice(1).map((node) => ({ type: node.label })))
-    .map((action) =>
-      typeof action === 'object' && action !== null
-        ? { ...(action as Record<string, unknown>), type: actionTypeFor((action as Record<string, unknown>).type) }
-        : actionTypeFor(action)
-    );
+  const actions = (
+    Array.isArray(data.actions)
+      ? data.actions
+      : (data.nodes ?? []).slice(1).map((node) => ({ type: node.label }))
+  ).map((action) =>
+    typeof action === 'object' && action !== null
+      ? {
+          ...(action as Record<string, unknown>),
+          type: actionTypeFor((action as Record<string, unknown>).type),
+        }
+      : actionTypeFor(action)
+  );
   const triggerType = data.triggerType ?? triggerTypeFor(data.trigger);
   const triggerConfig =
     data.triggerConfig && typeof data.triggerConfig === 'object'
@@ -125,9 +130,14 @@ export const useUpdateAutomation = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<Automation, unknown, UpdateAutomationPayload>({
     mutationFn: async (payload: UpdateAutomationPayload): Promise<Automation> => {
-      const cached = qc.getQueryData<Automation[]>(['crm-automations'])?.find((item) => item.id === payload.id);
+      const cached = qc
+        .getQueryData<Automation[]>(['crm-automations'])
+        ?.find((item) => item.id === payload.id);
       const res = await unwrap(
-        safe.put<Automation>(`/crm/automations/${payload.id}`, toBackendRequest({ ...cached, ...payload.data }))
+        safe.put<Automation>(
+          `/crm/automations/${payload.id}`,
+          toBackendRequest({ ...cached, ...payload.data })
+        )
       );
       return res as Automation;
     },
