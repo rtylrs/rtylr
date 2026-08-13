@@ -1,6 +1,8 @@
-import { createOneKitClient, unwrap } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
 import { z } from 'zod';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { safe } from '../lib/api';
 import { BankAccountServiceClient } from '@voxire/voxie/finance/bank_account/v1/client';
 import { bankAccountSchema, bankTransactionSchema } from '../schemas/accounts';
@@ -29,6 +31,37 @@ export function useBankAccounts() {
           mask: a.lastFour,
         }))
       );
+    },
+  });
+}
+
+export function useCreateBankAccount() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: (data: {
+      name: string;
+      bankName: string;
+      accountType: string;
+      lastFour: string;
+      balance: number;
+      currency: string;
+    }) =>
+      bankAccountClient.createBankAccount({
+        name: data.name,
+        bankName: data.bankName,
+        accountType: data.accountType,
+        lastFour: data.lastFour,
+        balance: data.balance,
+        currency: data.currency,
+        isPrimary: false,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+    },
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 }
