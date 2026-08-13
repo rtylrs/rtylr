@@ -82,8 +82,6 @@ export function useJournal(params: UseJournalParams = {}) {
           id: e.id,
           date: e.date,
           description: e.description,
-          debit: e.debit,
-          credit: e.credit,
           lines: (e.lines ?? []).map((l) => ({
             account: l.accountName,
             debit: l.debit,
