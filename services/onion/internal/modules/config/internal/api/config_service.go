@@ -76,7 +76,7 @@ func (a *ConfigAPI) GetConfig(ctx context.Context, _ *hubconfigv1.GetConfigReque
 
 func (a *ConfigAPI) CreateConfig(ctx context.Context, req *hubconfigv1.CreateConfigRequest) (*hubconfigv1.CreateConfigResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -106,7 +106,7 @@ func (a *ConfigAPI) CreateConfig(ctx context.Context, req *hubconfigv1.CreateCon
 
 func (a *ConfigAPI) UpdateConfig(ctx context.Context, req *hubconfigv1.UpdateConfigRequest) (*hubconfigv1.UpdateConfigResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -299,7 +299,7 @@ func (a *ConfigAPI) UpdateConfig(ctx context.Context, req *hubconfigv1.UpdateCon
 
 func (a *ConfigAPI) SendTestEmail(ctx context.Context, req *hubconfigv1.SendTestEmailRequest) (*hubconfigv1.SendTestEmailResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	if strings.TrimSpace(req.GetTo()) == "" {

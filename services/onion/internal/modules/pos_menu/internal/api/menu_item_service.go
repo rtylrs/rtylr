@@ -58,7 +58,7 @@ func (a *MenuItemAPI) ListPublicMenuItems(ctx context.Context, req *posmenuitemv
 
 func (a *MenuItemAPI) CreateMenuItem(ctx context.Context, req *posmenuitemv1.CreateMenuItemRequest) (*posmenuitemv1.CreateMenuItemResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || authUser == nil {
+	if !ok || !authPkg.HasAnyRole(authUser, "owner", "admin", "console_admin", "menu_manager") {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -87,6 +87,10 @@ func (a *MenuItemAPI) CreateMenuItem(ctx context.Context, req *posmenuitemv1.Cre
 }
 
 func (a *MenuItemAPI) UpdateMenuItem(ctx context.Context, req *posmenuitemv1.UpdateMenuItemRequest) (*posmenuitemv1.UpdateMenuItemResponse, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || !authPkg.HasAnyRole(authUser, "owner", "admin", "console_admin", "menu_manager") {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	businessID, err := authenticatedMenuBusinessID(ctx)
 	if err != nil {
 		return nil, err
