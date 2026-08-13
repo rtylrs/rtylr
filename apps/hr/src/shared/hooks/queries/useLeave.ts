@@ -8,6 +8,7 @@ import type {
   LeaveRequestPayload,
   LeaveTypePayload,
   LeaveBalancePayload,
+  CreateLeaveTypeRequest,
 } from '@voxire/voxie/hr/leave/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
@@ -32,6 +33,23 @@ export const useListLeaveTypes = () => {
     queryFn: async (): Promise<LeaveTypePayload[]> => {
       const res = await leaveClient.listLeaveTypes({});
       return res.leaveTypes ?? [];
+    },
+  });
+};
+
+export const useCreateLeaveType = () => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: (data: CreateLeaveTypeRequest) => leaveClient.createLeaveType(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leave-types'] });
+      queryClient.invalidateQueries({ queryKey: ['leave-balances'] });
+      toast.success('Leave policy created');
+    },
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };

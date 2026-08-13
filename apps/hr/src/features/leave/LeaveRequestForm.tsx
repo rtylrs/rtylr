@@ -40,7 +40,12 @@ const LeaveRequestForm = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const userId = useUserStore((s) => s.userId);
-  const { data: leaveTypes, isLoading: typesLoading } = useListLeaveTypes();
+  const {
+    data: leaveTypes,
+    isLoading: typesLoading,
+    isError: typesError,
+    refetch: refetchLeaveTypes,
+  } = useListLeaveTypes();
   const { data: balances } = useListLeaveBalances();
   const { data: existingRequests } = useListLeaveRequests({
     employeeId: userId ?? undefined,
@@ -137,6 +142,22 @@ const LeaveRequestForm = (): React.JSX.Element => {
     );
   }
 
+  if (typesError) {
+    return (
+      <Card style={{ textAlign: 'center', padding: 32 }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hr-error)', margin: '0 0 8px' }}>
+          Unable to load leave policies
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--hr-text-muted)', margin: '0 0 16px' }}>
+          The leave policy service could not be reached. Try again.
+        </p>
+        <Button variant="secondary" onClick={() => refetchLeaveTypes()}>
+          Retry
+        </Button>
+      </Card>
+    );
+  }
+
   if (!leaveTypes || leaveTypes.length === 0) {
     return (
       <Card style={{ textAlign: 'center', padding: 32 }}>
@@ -146,8 +167,8 @@ const LeaveRequestForm = (): React.JSX.Element => {
         <p style={{ fontSize: 12, color: 'var(--hr-text-muted)', margin: '0 0 16px' }}>
           {t('leave.configureLeaveTypes')}
         </p>
-        <Button variant="primary" onClick={() => navigate({ to: '/settings' })}>
-          {t('leave.goToSettings')}
+        <Button variant="primary" onClick={() => navigate({ to: '/settings/leave-policy' })}>
+          Configure leave policies
         </Button>
       </Card>
     );
