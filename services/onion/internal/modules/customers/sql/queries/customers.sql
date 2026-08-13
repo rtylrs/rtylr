@@ -175,6 +175,19 @@ WHERE business_id = ? AND customer_id = ?
 ORDER BY created_at DESC
 LIMIT 100;
 
+-- name: ListCustomerTimelinePage :many
+SELECT id, owner_id, business_id, customer_id, type, description, metadata, created_at
+FROM crm_customer_timeline
+WHERE business_id = sqlc.arg(business_id)
+  AND customer_id = sqlc.arg(customer_id)
+  AND (
+    sqlc.narg(cursor_created_at) IS NULL
+    OR created_at < sqlc.narg(cursor_created_at)
+    OR (created_at = sqlc.narg(cursor_created_at) AND id < sqlc.arg(cursor_id))
+  )
+ORDER BY created_at DESC, id DESC
+LIMIT ?;
+
 -- name: InsertTimelineEntry :exec
 INSERT INTO crm_customer_timeline (owner_id, business_id, customer_id, type, description, metadata)
 VALUES (?, ?, ?, ?, ?, ?);
