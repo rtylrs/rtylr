@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '../../../packages/tailwind-config/theme.css';
 
 /* v4 auto-detects content relative to this CSS file. We add an
  * explicit @source for the cross-workspace packages we pull classes
@@ -95,6 +96,19 @@
   --dash-input-bg: #ffffff;
   --dash-scrollbar: rgba(0, 0, 0, 0.15);
   --dash-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Tailwind colour tokens re-pointed at this app's runtime theme ──────────
+ * Ports the overrides from tailwind.config.ts, which v4 does not read.
+ * text-primary / bg-primary follow the theme text colour, and the admin
+ * surfaces follow the theme, exactly as that config intended. */
+:root {
+  --color-primary: var(--hub-text);
+  --color-primary-foreground: var(--hub-text);
+  --color-admin-bg: var(--hub-bg);
+  --color-admin-border: var(--hub-border);
+  --color-accent: var(--accent);
+  --color-ring: var(--accent);
 }
 
 @layer base {

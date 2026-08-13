@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '../../../packages/tailwind-config/theme.css';
 
 /* v4 auto-detects content relative to this CSS file. We add an
  * explicit @source for the cross-workspace packages we pull classes
@@ -166,6 +167,31 @@
   --flow-capacity-at: var(--accent-fg);
   --flow-capacity-over: var(--flow-warn-fg);
   --flow-capacity-critical: var(--flow-danger-fg);
+}
+
+/* ── Tailwind colour tokens re-pointed at this app's runtime theme ──────────
+ * --accent is set per workspace by FlowLayout, so bg-accent has to follow it
+ * rather than the preset's cyan. --flow-on-accent is the near-black foreground.
+ * The flow-* colours come from this app's own tailwind.config.ts. */
+:root {
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--flow-on-accent);
+  --color-ring: var(--accent);
+  /* Flow's warn and danger tones were chosen to sit with the teal at equal
+   * lightness and chroma. Re-pointing them here means a shared Alert or Input
+   * renders in Flow's palette without a per-instance override. */
+  --color-warning: var(--flow-warn-fg);
+  --color-destructive: var(--flow-danger-fg);
+  --color-muted: var(--flow-text-muted);
+  --color-flow-bg: var(--flow-bg);
+  --color-flow-surface: var(--flow-surface);
+  --color-flow-card: var(--flow-card);
+  --color-flow-border: var(--flow-border);
+  --color-flow-text: var(--flow-text);
+  --color-flow-text-muted: var(--flow-text-muted);
+  --color-flow-text-dim: var(--flow-text-dim);
+  --color-flow-hover: var(--flow-hover);
+  --color-flow-active: var(--flow-active);
 }
 
 @layer base {
