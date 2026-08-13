@@ -79,7 +79,7 @@ func (r *Repository) Update(ctx context.Context, ownerID, roleID int64, name str
 		return err
 	}
 
-	err = r.queries.UpdateRole(ctx, sqlc.UpdateRoleParams{
+	result, err := r.queries.UpdateRole(ctx, sqlc.UpdateRoleParams{
 		Name:        name,
 		Permissions: permsJSON,
 		ID:          roleID,
@@ -89,19 +89,33 @@ func (r *Repository) Update(ctx context.Context, ownerID, roleID int64, name str
 		logger.Ctx(ctx).Error("Failed to update role", logger.Error(err))
 		return err
 	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrRoleNotFound
+	}
 
 	return nil
 }
 
 func (r *Repository) Delete(ctx context.Context, ownerID, roleID int64) error {
 	businessID := ownerID
-	err := r.queries.DeleteRole(ctx, sqlc.DeleteRoleParams{
+	result, err := r.queries.DeleteRole(ctx, sqlc.DeleteRoleParams{
 		ID:         roleID,
 		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete role", logger.Error(err))
 		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrRoleNotFound
 	}
 
 	return nil
