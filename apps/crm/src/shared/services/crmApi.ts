@@ -60,7 +60,18 @@ export interface CustomersParams {
 
 export interface TimelineEntry {
   id: number;
-  type: 'visit' | 'purchase' | 'email' | 'sms' | 'note' | 'points' | 'reward';
+  type:
+    | 'visit'
+    | 'purchase'
+    | 'email'
+    | 'sms'
+    | 'note'
+    | 'points'
+    | 'reward'
+    | 'adjust'
+    | 'expire'
+    | 'award'
+    | 'upgrade';
   title: string;
   description?: string;
   at: string;

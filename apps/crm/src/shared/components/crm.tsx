@@ -66,6 +66,10 @@ export const TimelineEntryRow: React.FC<{ entry: TimelineEntry }> = ({ entry }) 
     note: StickyNote,
     points: TrendingUp,
     reward: Gift,
+    adjust: TrendingUp,
+    expire: Clock,
+    award: Award,
+    upgrade: Award,
   };
   const colors: Record<string, string> = {
     visit: '#3b82f6',
@@ -75,6 +79,10 @@ export const TimelineEntryRow: React.FC<{ entry: TimelineEntry }> = ({ entry }) 
     note: '#94a3b8',
     points: '#22c55e',
     reward: '#e879f9',
+    adjust: '#22c55e',
+    expire: '#f97316',
+    award: '#e879f9',
+    upgrade: '#e879f9',
   };
   const Icon = icons[entry.type] || Clock;
   const color = colors[entry.type] || ACCENT;
