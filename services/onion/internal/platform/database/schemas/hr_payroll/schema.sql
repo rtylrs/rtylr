@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS hr_payroll_runs (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_payroll_runs_owner (owner_id),
     INDEX idx_payroll_runs_period (owner_id, period_start, period_end),
-    INDEX idx_payroll_runs_status (owner_id, status)
+    INDEX idx_payroll_runs_status (owner_id, status),
+    UNIQUE KEY uk_payroll_runs_business_period (business_id, period_start, period_end)
 );
 
 CREATE TABLE IF NOT EXISTS hr_payroll_entries (
