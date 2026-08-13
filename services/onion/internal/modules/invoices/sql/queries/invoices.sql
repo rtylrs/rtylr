@@ -12,6 +12,15 @@ FROM finance_invoices
 WHERE id = ? AND business_id = ?
 FOR UPDATE;
 
+-- name: GetInvoiceByIDForUpdate :one
+SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
+       status, issue_date, due_date, paid_date, currency, subtotal, discount_type,
+       discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
+       notes, terms, created_at, updated_at
+FROM finance_invoices
+WHERE id = ? AND business_id = ?
+FOR UPDATE;
+
 -- name: ListInvoicesByOwner :many
 SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
        status, issue_date, due_date, paid_date, currency, subtotal, discount_type,
