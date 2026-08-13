@@ -95,6 +95,26 @@ describe('apiProjectToProject', () => {
     const out = apiProjectToProject(baseProject({ color: '#ff0000' }));
     expect(out.color).toBe('#ff0000');
   });
+
+  it('preserves fields required to make a safe full project update', () => {
+    const out = apiProjectToProject(
+      baseProject({
+        description: 'Keep this description',
+        icon: 'briefcase',
+        status: 'archived',
+        startDate: '2026-01-01',
+        dueDate: '2026-06-01',
+      })
+    );
+
+    expect(out).toMatchObject({
+      description: 'Keep this description',
+      icon: 'briefcase',
+      status: 'archived',
+      startDate: '2026-01-01',
+      targetDate: '2026-06-01',
+    });
+  });
 });
 
 describe('apiWorkspaceToWorkspace', () => {

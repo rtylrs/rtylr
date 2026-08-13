@@ -48,10 +48,25 @@ export interface ApiProject {
   workspaceId: string;
   name: string;
   color: string;
+  description?: string;
+  icon?: string;
+  status?: string;
+  startDate?: string;
+  dueDate?: string;
   taskCount: number;
   completedCount: number;
   memberAvatars: string[];
 }
+
+export type ProjectUpdate = Partial<{
+  name: string;
+  color: string;
+  description: string;
+  icon: string;
+  status: string;
+  startDate: string;
+  dueDate: string;
+}>;
 
 export interface ApiTask {
   id: string;
@@ -464,6 +479,8 @@ export const flowApi = {
     name: string;
     color?: string;
     description?: string;
+    startDate?: string;
+    dueDate?: string;
   }) =>
     safe.post<{ project: ApiProject }>('/flow/project/v1/projects', {
       workspace_id: Number(data.workspaceId) || 0,
@@ -471,24 +488,25 @@ export const flowApi = {
       description: data.description ?? '-',
       icon: 'folder',
       color: data.color ?? '#6366f1',
-      start_date: '1970-01-01',
-      due_date: '1970-01-01',
+      // An omitted date is an unset date. Never manufacture the Unix epoch,
+      // which becomes a real project date once the backend persists it.
+      start_date: data.startDate,
+      due_date: data.dueDate,
     }),
 
-  updateProject: (
-    id: string,
-    data: Partial<{ name: string; color: string; description: string; status: string }>
-  ) =>
+  updateProject: (id: string, data: ProjectUpdate) =>
+    // Project settings sends the current project snapshot together with the
+    // edited fields because the backend PUT is a replacement update. Keeping
+    // omitted values omitted here prevents a partial caller from inventing
+    // placeholders or sentinel dates.
     safe.put<{ message: string }>(`/flow/project/v1/projects/${id}`, {
-      body: {
-        name: data.name ?? '-',
-        description: data.description ?? '-',
-        icon: 'folder',
-        color: data.color ?? '#6366f1',
-        status: data.status ?? 'active',
-        start_date: '1970-01-01',
-        due_date: '1970-01-01',
-      },
+      name: data.name,
+      description: data.description,
+      icon: data.icon,
+      color: data.color,
+      status: data.status,
+      start_date: data.startDate,
+      due_date: data.dueDate,
     }),
 
   deleteProject: (id: string) =>

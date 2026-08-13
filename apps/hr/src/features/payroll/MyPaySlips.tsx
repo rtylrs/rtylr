@@ -8,12 +8,22 @@ import type { PayrollRunPayload } from '../../shared/hooks/queries/usePayroll';
 import { SectionHeader, Card, Pill, Skeleton, EmptyState } from '../../shared/components/ui';
 import { useHrSettings } from '../../shared/hooks/useHrExtras';
 import { formatCurrency } from '../../shared/lib/hrNumberUtils';
+import {
+  PayrollConfigRequired,
+  usePayrollConfigured,
+} from '../../shared/components/PayrollConfigGuard';
 
 const MyPaySlips = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: settings } = useHrSettings();
-  const { data, isLoading } = useListMyPayrollRuns({ limit: 50, offset: 0 });
+  const payrollConfigured = usePayrollConfigured();
+  const { data, isLoading } = useListMyPayrollRuns(
+    { limit: 50, offset: 0 },
+    { enabled: payrollConfigured }
+  );
   const runs = data?.runs ?? [];
+
+  if (!payrollConfigured) return <PayrollConfigRequired />;
 
   return (
     <>

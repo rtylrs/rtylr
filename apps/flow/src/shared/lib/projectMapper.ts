@@ -19,15 +19,17 @@ export function apiProjectToProject(p: ApiProject): Project {
     workspaceId: String(p.workspaceId),
     name: p.name,
     color: p.color || '#64C5B9',
+    description: p.description,
+    status: p.status,
     taskCount,
     completedCount,
     memberAvatars: p.memberAvatars ?? [],
     health: 'on_track',
     progress: taskCount ? Math.round((completedCount / taskCount) * 100) : 0,
-    startDate: '',
-    targetDate: '',
+    startDate: p.startDate ?? '',
+    targetDate: p.dueDate ?? '',
     lead: '',
-    icon: undefined,
+    icon: p.icon,
   };
 }
 

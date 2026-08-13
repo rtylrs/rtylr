@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { safe } from '../lib/api';
 import { BankAccountServiceClient } from '@voxire/voxie/finance/bank_account/v1/client';
-import { bankAccountSchema } from '../schemas/accounts';
+import { bankAccountSchema, bankTransactionSchema } from '../schemas/accounts';
 import { unwrapList } from '../lib/unwrapList';
 
 const bankAccountClient = createOneKitClient(BankAccountServiceClient, 'finance');
@@ -41,7 +41,7 @@ export function useBankTransactions(accountId?: string) {
     queryFn: async () => {
       const params = accountId ? { account_id: accountId } : undefined;
       const res = await unwrap(safe.get<unknown>('/finance/bank-feeds', { params }));
-      return z.array(bankAccountSchema).parse(unwrapList(res, 'transactions'));
+      return z.array(bankTransactionSchema).parse(unwrapList(res, 'transactions'));
     },
   });
 }

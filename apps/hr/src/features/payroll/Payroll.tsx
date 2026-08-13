@@ -3,14 +3,13 @@ import { useUserStore } from '@voxire/auth';
 import { Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
-import { Play, DollarSign, TrendingUp, Users, Clock, Settings } from 'lucide-react';
+import { Play, DollarSign, TrendingUp, Users, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useListPayrollRuns, useTriggerPayrollRun } from '../../shared/hooks/queries/usePayroll';
 import type {
   PayrollRunPayload,
   ListPayrollRunsParams,
 } from '../../shared/hooks/queries/usePayroll';
-import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import {
   Card,
   SectionHeader,
@@ -23,6 +22,10 @@ import {
 import { useHrSettings } from '../../shared/hooks/useHrExtras';
 import { formatCurrency } from '../../shared/lib/hrNumberUtils';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
+import {
+  PayrollConfigRequired,
+  usePayrollConfigured,
+} from '../../shared/components/PayrollConfigGuard';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'var(--hr-text-muted)',
@@ -36,36 +39,17 @@ type StatusFilter = (typeof FILTER_STATUSES)[number];
 
 const Payroll = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const config = useHRConfigStore((s) => s.config);
   const { data: settings } = useHrSettings();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
+  const payrollConfigured = usePayrollConfigured();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [params] = useState<ListPayrollRunsParams>({ limit: 50, offset: 0 });
 
-  const { data, isLoading } = useListPayrollRuns(params);
-  const triggerRun = useTriggerPayrollRun();
+  const { data, isLoading } = useListPayrollRuns(params, { enabled: payrollConfigured });
+  const triggerRun = useTriggerPayrollRun(payrollConfigured);
 
-  if (!config?.payrollPeriod) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <SectionHeader title={t('payroll.title')} subtitle={t('payroll.subtitle')} />
-        <EmptyState
-          icon={<Settings size={20} />}
-          title={t('payroll.configRequired')}
-          description={t('payroll.configRequiredDescription')}
-          action={
-            <Link
-              to="/settings/payroll-config"
-              style={{ color: 'var(--hr-accent)', textDecoration: 'none', fontSize: 12 }}
-            >
-              {t('payroll.goToConfig')}
-            </Link>
-          }
-        />
-      </div>
-    );
-  }
+  if (!payrollConfigured) return <PayrollConfigRequired />;
 
   const runs = data?.runs ?? [];
   const filteredRuns = runs.filter((r: PayrollRunPayload) =>

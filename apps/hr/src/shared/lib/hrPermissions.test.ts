@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canHrPermission } from './hrPermissions';
+import { canHrPermission, canViewCompensation } from './hrPermissions';
 
 describe('canHrPermission', () => {
   it('allows owners to use every HR action', () => {
@@ -22,5 +22,13 @@ describe('canHrPermission', () => {
   it('denies a missing role', () => {
     expect(canHrPermission(null, 'hr:staff')).toBe(false);
     expect(canHrPermission(undefined, 'hr:payroll')).toBe(false);
+  });
+
+  it('limits compensation visibility to staff or payroll managers', () => {
+    expect(canViewCompensation('admin')).toBe(true);
+    expect(canViewCompensation('owner')).toBe(true);
+    expect(canViewCompensation('operator')).toBe(false);
+    expect(canViewCompensation('staff')).toBe(false);
+    expect(canViewCompensation(null)).toBe(false);
   });
 });

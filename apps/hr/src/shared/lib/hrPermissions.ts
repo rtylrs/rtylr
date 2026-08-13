@@ -10,3 +10,8 @@ export function canHrPermission(
 ): boolean {
   return role ? can({ platformRole: role }, permission) : false;
 }
+
+/** Compensation is an HR-management concern, not a general staff capability. */
+export function canViewCompensation(role: UserRole | null | undefined): boolean {
+  return canHrPermission(role, 'hr:staff:manage') || canHrPermission(role, 'hr:payroll');
+}

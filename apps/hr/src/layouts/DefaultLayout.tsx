@@ -57,6 +57,7 @@ import CommandPalette from '../shared/components/CommandPalette';
 import GlobalShortcuts from '../shared/components/GlobalShortcuts';
 import { useMediaQuery } from '../shared/components/ui';
 import { canHrPermission, type HRPermission } from '../shared/lib/hrPermissions';
+import { isPayrollConfigured } from '../shared/lib/payrollConfig';
 
 /* -- Types -- */
 interface NavItem {
@@ -167,21 +168,20 @@ const navSections: NavSection[] = [
         i18nKey: 'nav.payroll',
         path: '/payroll',
         icon: DollarSign,
-        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
+        configGuard: (_m, cfg) => isPayrollConfigured(cfg),
         permission: 'hr:payroll',
       },
       {
         i18nKey: 'nav.myPaySlips',
         path: '/payroll/my-payslips',
         icon: Receipt,
-        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
+        configGuard: (_m, cfg) => isPayrollConfigured(cfg),
         permission: 'hr:payroll',
       },
       {
         i18nKey: 'nav.payrollConfig',
         path: '/settings/payroll-config',
         icon: Settings,
-        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
         permission: 'hr:payroll',
       },
       { i18nKey: 'nav.benefits', path: '/benefits', icon: Shield },

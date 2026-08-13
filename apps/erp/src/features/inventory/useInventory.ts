@@ -7,6 +7,7 @@ import type {
   AdjustInventoryResponse,
   InventoryReportItem,
 } from '@voxire/voxie/erp/inventory/v1/types';
+import { withErpListBounds } from '../../shared/lib/erpListBounds';
 import { invalidateStockDerivedQueries } from '../../shared/lib/stockInvalidation';
 
 const inventoryClient = createOneKitClient(InventoryServiceClient, 'erp');
@@ -19,7 +20,7 @@ export function useInventoryReport() {
   return useQuery<InventoryReportItem[]>({
     queryKey: ['inventory-report'],
     queryFn: async () => {
-      const response = await inventoryClient.getInventoryReport({});
+      const response = await inventoryClient.getInventoryReport(withErpListBounds({}));
       return response.items ?? [];
     },
   });
@@ -29,7 +30,7 @@ export function useLowStock() {
   return useQuery<InventoryReportItem[]>({
     queryKey: ['low-stock'],
     queryFn: async () => {
-      const response = await inventoryClient.getLowStock({});
+      const response = await inventoryClient.getLowStock(withErpListBounds({}));
       return response.items ?? [];
     },
   });

@@ -58,6 +58,7 @@ export interface Project {
   completedCount: number;
   memberAvatars: string[];
   description?: string;
+  status?: string;
   health: 'on_track' | 'at_risk' | 'off_track';
   progress: number; // 0-100
   startDate: string;
