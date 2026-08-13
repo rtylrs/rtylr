@@ -455,7 +455,7 @@ export function useHrSettings() {
     queryKey: ['settings'],
     queryFn: async () => {
       const res = await unwrap(hrExtras.getSettings());
-      return hrSettingsSchema.parse(res);
+      return hrSettingsSchema.parse(res.config);
     },
   });
 }
