@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { useGetHRConfig } from '../../shared/hooks/queries/useSetup';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 
@@ -17,8 +18,35 @@ function PageLoader(): React.JSX.Element {
   );
 }
 
+function ConfigLoadError({
+  onRetry,
+  isRetrying,
+}: {
+  onRetry: () => void;
+  isRetrying: boolean;
+}): React.JSX.Element {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 py-20" role="alert">
+      <p className="text-sm" style={{ color: 'var(--hr-text)' }}>
+        {t('setup.statusError')}
+      </p>
+      <button
+        type="button"
+        className="min-h-[44px] rounded-lg px-4 py-2 text-sm font-medium"
+        style={{ backgroundColor: 'var(--accent)', color: 'var(--hr-card-bg)' }}
+        disabled={isRetrying}
+        onClick={onRetry}
+      >
+        {t('common.retry')}
+      </button>
+    </div>
+  );
+}
+
 const HRConfigRoute = (): React.JSX.Element => {
-  const { data: config, isLoading, isError } = useGetHRConfig();
+  const { data: config, isLoading, isError, isFetching, refetch } = useGetHRConfig();
   const setConfig = useHRConfigStore((s) => s.setConfig);
 
   React.useEffect(() => {
@@ -31,7 +59,11 @@ const HRConfigRoute = (): React.JSX.Element => {
     return <PageLoader />;
   }
 
-  if (isError || !config) {
+  if (isError) {
+    return <ConfigLoadError onRetry={() => refetch()} isRetrying={isFetching} />;
+  }
+
+  if (!config) {
     return <Navigate to="/setup" replace />;
   }
 
