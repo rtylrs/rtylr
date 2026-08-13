@@ -10,6 +10,27 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 )
 
+func TestCreatePayrollRun_RejectsDuplicateBusinessPeriod(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const businessID int64 = 9100103
+	const periodStart = "2026-11-01"
+	const periodEnd = "2026-11-30"
+
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM hr_payroll_runs WHERE business_id = ? AND period_start = ? AND period_end = ?", businessID, periodStart, periodEnd)
+	})
+
+	input := domain.PayrollRunRecord{PeriodStart: periodStart, PeriodEnd: periodEnd, Status: domain.PayrollStatusDraft}
+	if _, _, err := repo.CreatePayrollRunWithEntries(ctx, businessID, input, nil); err != nil {
+		t.Fatalf("first CreatePayrollRunWithEntries: %v", err)
+	}
+	if _, _, err := repo.CreatePayrollRunWithEntries(ctx, businessID, input, nil); !errors.Is(err, domain.ErrPayrollRunAlreadyExists) {
+		t.Fatalf("duplicate CreatePayrollRunWithEntries error = %v, want ErrPayrollRunAlreadyExists", err)
+	}
+}
+
 func TestListPayrollRuns_ReturnsMarch2026Approved(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

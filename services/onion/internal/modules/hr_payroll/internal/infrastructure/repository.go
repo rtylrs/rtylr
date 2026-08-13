@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
+
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -17,6 +19,8 @@ type Repository struct {
 	queries *sqlc.Queries
 	pool    *sql.DB
 }
+
+const mysqlErrDuplicateEntry = 1062
 
 func NewRepository(db *sql.DB) *Repository {
 	pool := db
@@ -156,6 +160,10 @@ func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, businessID
 	})
 	if err != nil {
 		_ = tx.Rollback()
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == mysqlErrDuplicateEntry {
+			return nil, nil, domain.ErrPayrollRunAlreadyExists
+		}
 		logger.Ctx(ctx).Error("failed to create payroll run", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, nil, err
 	}
