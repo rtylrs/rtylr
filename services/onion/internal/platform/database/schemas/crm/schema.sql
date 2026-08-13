@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS crm_customers (
     loyalty_tier ENUM('bronze','silver','gold','platinum') DEFAULT 'bronze',
     tags JSON DEFAULT (JSON_ARRAY()),
     notes TEXT,
+    consent JSON,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
