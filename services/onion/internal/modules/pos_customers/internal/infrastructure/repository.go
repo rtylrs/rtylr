@@ -6,22 +6,16 @@ import (
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_customers/internal/domain"
-	"github.com/voxire/onion/internal/modules/pos_customers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
 type Repository struct {
-	queries *sqlc.Queries
-	pool    *sql.DB
+	pool *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
-	pool := db
-	return &Repository{
-		queries: sqlc.New(pool),
-		pool:    pool,
-	}
+	return &Repository{pool: db}
 }
 
 // dynamic-query: squirrel

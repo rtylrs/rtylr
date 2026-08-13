@@ -1,193 +1,65 @@
-name: Build and Deploy
+name: Version
 
+# A push to main creates a backend release/tag only. Image builds and ECS
+# deployments happen when an onion service version is promoted in
+# tryrtylr/deploy.
 on:
   push:
     branches: [main, master]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - "README.md"
   workflow_dispatch:
 
-# Cancel any in-flight run for the same branch so a rapid push doesn't
-# queue three full Docker builds behind each other. Never cancel main
-# (its runs deploy — let them finish).
 concurrency:
-  group: build-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  group: version-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
 
-env:
-  AWS_REGION: eu-west-1
-  ECR_REGISTRY: 101533649486.dkr.ecr.eu-west-1.amazonaws.com
-
 jobs:
   version:
-    name: Compute Version
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    name: Compute version
+    runs-on: ubuntu-latest
     outputs:
-      new_version: ${{ steps.bump.outputs.new_version }}
+      version: ${{ steps.bump.outputs.version }}
     steps:
-      - uses: 	actions/checkout@v7
+      - name: Checkout tags
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.PAT_TOKEN }}
-
-      - name: Setup Git
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
 
       - name: Bump version
         id: bump
         run: |
-          LATEST=$(git tag --list | sed -n 's/^v\?\([0-9]\+\.[0-9]\+\.[0-9]\+\)$/\1/p' | sort -V | tail -1)
-
-          if [ -z "$LATEST" ]; then
-            NEW_VERSION="0.1.1"
-          else
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST"
-            if [ "$PATCH" -ge 99 ]; then
-              PATCH=0
-              if [ "$MINOR" -ge 99 ]; then MINOR=0; MAJOR=$((MAJOR + 1)); else MINOR=$((MINOR + 1)); fi
-            else
-              PATCH=$((PATCH + 1))
-            fi
-            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-          fi
-
-          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $NEW_VERSION"
-
-  build-push-deploy:
-    name: Build, Push, Deploy (${{ matrix.name }})
-    needs: version
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: api
-            dockerfile: Dockerfile
-            repository: voxire/onion
-            cluster: voxire-prod
-            service: api
-            desired_count: 1
-          - name: worker
-            dockerfile: Dockerfile.worker
-            repository: voxire/onion-worker
-            cluster: voxire-prod
-            service: worker
-            desired_count: 1
-          - name: upload
-            dockerfile: Dockerfile.upload
-            repository: voxire/onion-upload
-            cluster: voxire-prod
-            service: upload
-            desired_count: 1
-          - name: license
-            dockerfile: Dockerfile.license
-            repository: voxire/onion-license
-            cluster: voxire-prod
-            service: license
-            desired_count: 1
-    steps:
-      - uses: 	actions/checkout@v7
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-
-      - name: Verify Voxie contract ref
-        run: ./scripts/check-voxie-ref.sh
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password --region $AWS_REGION \
-            | docker login --username AWS --password-stdin $ECR_REGISTRY
-
-      - name: Build and push Docker image
-        run: |
-          VERSION=${{ needs.version.outputs.new_version }}
-          IMAGE_URI=$ECR_REGISTRY/${{ matrix.repository }}
-
-          docker buildx build \
-            --cache-from type=gha,scope=${{ matrix.name }} \
-            --cache-to   type=gha,scope=${{ matrix.name }},mode=max \
-            -f ${{ matrix.dockerfile }} \
-            --build-arg VERSION=$VERSION \
-            --build-arg COMMIT=${GITHUB_SHA::7} \
-            --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
-            -t $IMAGE_URI:$VERSION \
-            -t $IMAGE_URI:latest \
-            --push \
-            .
-
-          echo "Pushed $IMAGE_URI:$VERSION"
-
-      - name: Deploy to ECS
-        timeout-minutes: 30
-        run: |
           set -euo pipefail
+          latest="$(git tag --list | sed -n 's/^v\?\([0-9]\+\.[0-9]\+\.[0-9]\+\)$/\1/p' | sort -V | tail -1)"
 
-          echo "Service before deploy"
-          aws ecs describe-services \
-            --cluster ${{ matrix.cluster }} \
-            --services ${{ matrix.service }} \
-            --region $AWS_REGION \
-            --query 'services[0].{desired:desiredCount,running:runningCount,pending:pendingCount,taskDefinition:taskDefinition,deployments:deployments[].{status:status,desired:desiredCount,running:runningCount,pending:pendingCount,rolloutState:rolloutState,reason:rolloutStateReason}}' \
-            --output table
-
-          aws ecs update-service \
-            --cluster ${{ matrix.cluster }} \
-            --service ${{ matrix.service }} \
-            --desired-count ${{ matrix.desired_count }} \
-            --force-new-deployment \
-            --deployment-configuration "deploymentCircuitBreaker={enable=true,rollback=true},maximumPercent=200,minimumHealthyPercent=100" \
-            --region $AWS_REGION \
-            --query 'service.{desired:desiredCount,running:runningCount,pending:pendingCount,deployments:deployments[].{status:status,desired:desiredCount,running:runningCount,pending:pendingCount,rolloutState:rolloutState,reason:rolloutStateReason}}' \
-            --output table
-
-          aws ecs wait services-stable \
-            --cluster ${{ matrix.cluster }} \
-            --services ${{ matrix.service }} \
-            --region $AWS_REGION
-
-          if [ "${{ matrix.name }}" = "api" ]; then
-            HEALTH_ATTEMPTS=180
-
-            for attempt in $(seq 1 "$HEALTH_ATTEMPTS"); do
-              HEALTH_BODY="$(mktemp)"
-              HTTP_CODE="$(curl -sS --max-time 8 -o "$HEALTH_BODY" -w "%{http_code}" https://api.voxire.com/health || true)"
-              BODY="$(cat "$HEALTH_BODY" || true)"
-              rm -f "$HEALTH_BODY"
-
-              if [ "$HTTP_CODE" = "200" ] && printf '%s' "$BODY" | grep -q '"status":"ok"'; then
-                echo "Public API health check passed"
-                exit 0
+          if [ -z "$latest" ]; then
+            version='0.1.1'
+          else
+            IFS='.' read -r major minor patch <<< "$latest"
+            if [ "$patch" -ge 99 ]; then
+              patch=0
+              if [ "$minor" -ge 99 ]; then
+                minor=0
+                major=$((major + 1))
+              else
+                minor=$((minor + 1))
               fi
-
-              echo "Public API health check failed (http=$HTTP_CODE body=$BODY), retrying ($attempt/$HEALTH_ATTEMPTS)"
-              sleep 5
-            done
-
-            echo "Public API health check failed after ECS became stable and the public grace window elapsed"
-            aws ecs describe-services \
-              --cluster ${{ matrix.cluster }} \
-              --services ${{ matrix.service }} \
-              --region $AWS_REGION \
-              --query 'services[0].{desired:desiredCount,running:runningCount,pending:pendingCount,events:events[0:5].message,deployments:deployments[].{status:status,desired:desiredCount,running:runningCount,pending:pendingCount,rolloutState:rolloutState,reason:rolloutStateReason}}' \
-              --output table
-            exit 1
+            else
+              patch=$((patch + 1))
+            fi
+            version="$major.$minor.$patch"
           fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Creating source version $version"
+
+  release:
+    name: Create backend release
+    needs: version
+    uses: tryrtylr/pipelines/.github/workflows/create-release.yml@main
+    with:
+      release_tag: ${{ needs.version.outputs.version }}
+      release_name: onion ${{ needs.version.outputs.version }}
+      version: ${{ needs.version.outputs.version }}
+      notes: "Source version for onion at ${{ github.sha }}. Build and deployment are controlled by tryrtylr/deploy."
