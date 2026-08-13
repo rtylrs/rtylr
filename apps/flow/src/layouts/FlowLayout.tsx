@@ -38,6 +38,7 @@ import { useForesightLinks } from '@voxire/utils';
 import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
+import { accentTints, type ResolvedTheme } from '../shared/lib/colorUtils';
 import { useFlowStore } from '../shared/stores/flowStore';
 import { cn } from '../shared/lib/utils';
 import CommandBar from '../shared/components/CommandBar';
@@ -67,14 +68,6 @@ import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../shared/lib/memberUtils';
 
 const ACCENT_DEFAULT = '#64C5B9';
-
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
 
 /** Horizontal inset for sidebar content (single column). */
 const sx = 'px-3';
@@ -396,14 +389,21 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   // Sync --accent CSS vars to the active workspace color so every component
   // in the tree can reference var(--accent) without prop-drilling.
+  //
+  // These land as inline styles on documentElement, which beats every stylesheet
+  // rule - so the per-mode alphas have to be applied here. A light-mode value for
+  // --accent-muted written in globals.css is silently overridden the moment this
+  // layout mounts, which is on every authenticated screen.
   useEffect(() => {
-    const color = activeWorkspace.color || ACCENT_DEFAULT;
+    const resolved: ResolvedTheme =
+      document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
     const root = document.documentElement;
-    root.style.setProperty('--accent', color);
-    root.style.setProperty('--accent-muted', hexToRgba(color, 0.12));
-    root.style.setProperty('--accent-border', hexToRgba(color, 0.3));
-    root.style.setProperty('--accent-focus', hexToRgba(color, 0.5));
-  }, [activeWorkspace.color]);
+    for (const [name, value] of Object.entries(
+      accentTints(activeWorkspace.color || ACCENT_DEFAULT, resolved)
+    )) {
+      root.style.setProperty(name, value);
+    }
+  }, [activeWorkspace.color, theme]);
   // Hide the auto-provisioned personal project - it's the backend's bucket for
   // the dedicated "My Tasks" page (top nav) and, like Asana, must not surface in
   // the Projects list. The authoritative match is the id returned by
