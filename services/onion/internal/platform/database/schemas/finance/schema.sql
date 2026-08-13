@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS finance_invoices (
     issue_date DATE NOT NULL,
     due_date DATE NOT NULL,
     paid_date DATE,
+    reporting_date DATE GENERATED ALWAYS AS (COALESCE(paid_date, issue_date)) STORED,
     currency VARCHAR(10) DEFAULT 'USD',
     subtotal DECIMAL(10,2) DEFAULT 0,
     discount_type ENUM('fixed','percentage') DEFAULT 'fixed',
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS finance_invoices (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_finance_invoices_business_created (business_id, created_at),
     INDEX idx_finance_invoices_business_status_created (business_id, status, created_at),
+    INDEX idx_finance_invoices_business_status_reporting_date (business_id, status, reporting_date),
     FULLTEXT INDEX idx_finance_invoices_search (invoice_number, client_name, client_email)
 );
 
