@@ -18,7 +18,7 @@ permissions:
 jobs:
   version:
     name: Compute version
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     outputs:
       version: ${{ steps.bump.outputs.version }}
     steps:
