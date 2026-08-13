@@ -356,6 +356,38 @@ func TestUpdatePayrollRunStatus_Changes(t *testing.T) {
 	}
 }
 
+func TestClaimPayrollRunForExport_AllowsOnlyOneClaim(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	run, _, err := repo.CreatePayrollRunWithEntries(ctx, testutil.OwnerID, domain.PayrollRunRecord{
+		PeriodStart: "2026-10-01",
+		PeriodEnd:   "2026-10-31",
+		Status:      domain.PayrollStatusApproved,
+	}, []domain.PayrollEntryRecord{})
+	if err != nil {
+		t.Fatalf("CreatePayrollRunWithEntries: %v", err)
+	}
+	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_payroll_runs WHERE id = ? AND business_id = ?", run.ID, testutil.OwnerID)
+	})
+
+	if err := repo.ClaimPayrollRunForExport(ctx, testutil.OwnerID, run.ID); err != nil {
+		t.Fatalf("first ClaimPayrollRunForExport: %v", err)
+	}
+	if err := repo.ClaimPayrollRunForExport(ctx, testutil.OwnerID, run.ID); !errors.Is(err, domain.ErrPayrollExportInProgress) {
+		t.Fatalf("second ClaimPayrollRunForExport error = %v, want %v", err, domain.ErrPayrollExportInProgress)
+	}
+
+	if err := repo.ReleasePayrollRunExportClaim(ctx, testutil.OwnerID, run.ID); err != nil {
+		t.Fatalf("ReleasePayrollRunExportClaim: %v", err)
+	}
+	if err := repo.ClaimPayrollRunForExport(ctx, testutil.OwnerID, run.ID); err != nil {
+		t.Fatalf("claim after release: %v", err)
+	}
+}
+
 func TestListEmployeePayInfo_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

@@ -9,17 +9,23 @@ import (
 )
 
 type mockRepo struct {
-	list   []domain.BankFeedTransaction
-	total  int64
-	err    error
-	gotLim int32
-	gotOff int32
+	list    []domain.BankFeedTransaction
+	total   int64
+	err     error
+	gotLim  int32
+	gotOff  int32
+	sync    int
+	syncErr error
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64, limit, offset int32) ([]domain.BankFeedTransaction, int64, error) {
 	m.gotLim = limit
 	m.gotOff = offset
 	return m.list, m.total, m.err
+}
+
+func (m *mockRepo) Sync(_ context.Context, _ int64) (int, error) {
+	return m.sync, m.syncErr
 }
 
 func TestList_AppliesPaginationDefaults(t *testing.T) {
@@ -53,11 +59,19 @@ func TestList_PropagatesError(t *testing.T) {
 	}
 }
 
-func TestSync_StubReturnsZero(t *testing.T) {
-	s := &Service{}
+func TestSync_Delegates(t *testing.T) {
+	s := &Service{repo: &mockRepo{sync: 3}}
 	n, err := s.Sync(context.Background(), 1)
-	if err != nil || n != 0 {
-		t.Errorf("expected (0, nil), got (%d, %v)", n, err)
+	if err != nil || n != 3 {
+		t.Errorf("expected (3, nil), got (%d, %v)", n, err)
+	}
+}
+
+func TestSync_PropagatesError(t *testing.T) {
+	want := errors.New("sync failed")
+	s := &Service{repo: &mockRepo{syncErr: want}}
+	if _, err := s.Sync(context.Background(), 1); !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
 	}
 }
 

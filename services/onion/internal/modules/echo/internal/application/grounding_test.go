@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"context"
@@ -80,9 +80,7 @@ func TestBuildSpecGenPromptRoutesDailyRevenueToPaidPOSOrders(t *testing.T) {
 
 func TestAnalystGroundingUsesBusinessSnapshotForOwnerOverview(t *testing.T) {
 	service := &snapshotAnalystService{}
-	handler := &GenerateTextStreamHandler{AnalystService: service}
-
-	got, ok := handler.analystGrounding(context.Background(), "How are we doing today?", 11, 22)
+	got, ok := GroundAnalytics(context.Background(), nil, service, "How are we doing today?", 11, 22, "", nil)
 	if !ok {
 		t.Fatal("expected business snapshot grounding")
 	}
@@ -113,9 +111,7 @@ func TestAnalystGroundingUsesBusinessSnapshotForOwnerOverview(t *testing.T) {
 
 func TestAnalystGroundingDefersHeavyRawExports(t *testing.T) {
 	service := &snapshotAnalystService{}
-	handler := &GenerateTextStreamHandler{AnalystService: service}
-
-	got, ok := handler.analystGrounding(context.Background(), "Export every order from the last year as CSV", 11, 22)
+	got, ok := GroundAnalytics(context.Background(), nil, service, "Export every order from the last year as CSV", 11, 22, "", nil)
 	if !ok {
 		t.Fatal("expected deferred analytics grounding")
 	}
@@ -142,13 +138,13 @@ func TestAnalystGroundingDefersHeavyRawExports(t *testing.T) {
 }
 
 func TestHeavyDataRequestReasonIgnoresSummaries(t *testing.T) {
-	if _, ok := heavyDataRequestReason("Summarize sales from last year by month"); ok {
+	if _, ok := HeavyDataRequestReason("Summarize sales from last year by month"); ok {
 		t.Fatal("summaries should stay eligible for live summarized analytics")
 	}
-	if _, ok := heavyDataRequestReason("Show my top 5 customers"); ok {
+	if _, ok := HeavyDataRequestReason("Show my top 5 customers"); ok {
 		t.Fatal("bounded top-list requests should stay eligible for live analytics")
 	}
-	if _, ok := heavyDataRequestReason("Show the full customer profile for this customer"); ok {
+	if _, ok := HeavyDataRequestReason("Show the full customer profile for this customer"); ok {
 		t.Fatal("selected-record detail requests should stay eligible for live analytics")
 	}
 }
@@ -161,7 +157,7 @@ func TestBusinessSnapshotToolExecutorRunsSnapshot(t *testing.T) {
 		UserID:     22,
 	})
 
-	output, executed, err := executor.ExecuteCaretTool(ctx, businessSnapshotToolName, map[string]any{
+	output, executed, err := executor.ExecuteCaretTool(ctx, BusinessSnapshotToolName, map[string]any{
 		"question": "How are we doing today?",
 	})
 	if err != nil {

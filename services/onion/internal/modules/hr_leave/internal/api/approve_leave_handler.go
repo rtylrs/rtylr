@@ -45,17 +45,23 @@ func (h *ApproveLeaveHandler) Serve(ctx context.Context, req *ApproveLeaveReques
 
 	var err error
 	if req.Approved {
-		err = h.Service.ApproveLeave(ctx, device.User.UserID, req.RequestID)
+		err = h.Service.ApproveLeave(ctx, device.User.UserID, req.RequestID, device.User.UserID)
 	} else {
-		err = h.Service.RejectLeave(ctx, device.User.UserID, req.RequestID, req.RejectionReason)
+		err = h.Service.RejectLeave(ctx, device.User.UserID, req.RequestID, device.User.UserID, req.RejectionReason)
 	}
 
 	if err != nil {
 		if errors.Is(err, domain.ErrLeaveRequestNotFound) {
 			return ApproveLeaveResponse{}, onekiterrors.New(http.StatusNotFound, "Leave request not found")
 		}
+		if errors.Is(err, domain.ErrLeaveRequestNotPending) {
+			return ApproveLeaveResponse{}, onekiterrors.New(http.StatusConflict, "Leave request has already been processed")
+		}
 		if errors.Is(err, domain.ErrApprovalChainNotConfigured) {
 			return ApproveLeaveResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, "Approval chain not configured for leave requests")
+		}
+		if errors.Is(err, domain.ErrLeaveAccessDenied) || errors.Is(err, domain.ErrLeaveApproverNotAllowed) {
+			return ApproveLeaveResponse{}, onekiterrors.PermissionDenied()
 		}
 		logger.Ctx(ctx).Error("failed to process leave approval", logger.Any("owner_id", device.User.UserID), logger.Any("request_id", req.RequestID), logger.Error(err))
 		return ApproveLeaveResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to process leave approval")

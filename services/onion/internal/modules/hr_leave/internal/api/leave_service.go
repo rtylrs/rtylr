@@ -15,8 +15,14 @@ func NewLeaveService(service *application.Service) *LeaveService {
 	return &LeaveService{service: service}
 }
 
-func (s *LeaveService) ListLeaveRequests(ctx context.Context, _ *hrleavev1.ListLeaveRequestsRequest) (*hrleavev1.ListLeaveRequestsResponse, error) {
-	res, err := (&ListLeaveRequestsHandler{Service: s.service}).Serve(ctx, &ListLeaveRequestsRequest{})
+func (s *LeaveService) ListLeaveRequests(ctx context.Context, req *hrleavev1.ListLeaveRequestsRequest) (*hrleavev1.ListLeaveRequestsResponse, error) {
+	if req == nil {
+		req = &hrleavev1.ListLeaveRequestsRequest{}
+	}
+	res, err := (&ListLeaveRequestsHandler{Service: s.service}).Serve(ctx, &ListLeaveRequestsRequest{
+		EmployeeID: req.GetEmployeeId(),
+		Status:     req.GetStatus(),
+	})
 	if err != nil {
 		return nil, err
 	}

@@ -15,11 +15,12 @@ import (
 )
 
 type StaffAPI struct {
-	Service *application.Service
+	Service     *application.Service
+	permissions PermissionProvider
 }
 
-func NewStaffAPI(service *application.Service) *StaffAPI {
-	return &StaffAPI{Service: service}
+func NewStaffAPI(service *application.Service, permissions PermissionProvider) *StaffAPI {
+	return &StaffAPI{Service: service, permissions: permissions}
 }
 
 func (a *StaffAPI) ListStaff(ctx context.Context, req *hrstaffv1.ListStaffRequest) (*hrstaffv1.ListStaffResponse, error) {
@@ -27,15 +28,17 @@ func (a *StaffAPI) ListStaff(ctx context.Context, req *hrstaffv1.ListStaffReques
 	if err != nil {
 		return nil, err
 	}
+	device := authPkg.DeviceCtx(ctx)
 
 	staffList, listErr := a.Service.ListStaff(ctx, businessID, req.GetSearch(), req.GetDepartmentId(), req.GetStatus())
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list staff")
 	}
 
+	compensationVisible := canViewCompensation(ctx, a.permissions, businessID, device.User.UserID)
 	payloads := make([]*hrstaffv1.Staff, 0, len(staffList))
 	for _, staff := range staffList {
-		payloads = append(payloads, newStaffPayload(staff))
+		payloads = append(payloads, newStaffPayload(staff, compensationVisible))
 	}
 
 	return &hrstaffv1.ListStaffResponse{Staff: payloads}, nil
@@ -87,6 +90,7 @@ func (a *StaffAPI) GetStaff(ctx context.Context, req *hrstaffv1.GetStaffRequest)
 	if err != nil {
 		return nil, err
 	}
+	device := authPkg.DeviceCtx(ctx)
 
 	staff, getErr := a.Service.GetStaffByID(ctx, businessID, req.GetId())
 	if getErr != nil {
@@ -96,7 +100,8 @@ func (a *StaffAPI) GetStaff(ctx context.Context, req *hrstaffv1.GetStaffRequest)
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get staff member")
 	}
 
-	return &hrstaffv1.GetStaffResponse{Staff: newStaffPayload(*staff)}, nil
+	compensationVisible := canViewCompensation(ctx, a.permissions, businessID, device.User.UserID)
+	return &hrstaffv1.GetStaffResponse{Staff: newStaffPayload(*staff, compensationVisible)}, nil
 }
 
 func (a *StaffAPI) UpdateStaff(ctx context.Context, req *hrstaffv1.UpdateStaffRequest) (*hrstaffv1.UpdateStaffResponse, error) {
@@ -188,7 +193,13 @@ func resolveBusinessID(ctx context.Context) (int64, error) {
 	return businessID, nil
 }
 
-func newStaffPayload(staff domain.Staff) *hrstaffv1.Staff {
+func newStaffPayload(staff domain.Staff, compensationVisible bool) *hrstaffv1.Staff {
+	if !compensationVisible {
+		staff.Salary = 0
+		staff.HourlyRate = 0
+		staff.OvertimeRate = 0
+	}
+
 	return &hrstaffv1.Staff{
 		Id:                    staff.ID,
 		OwnerId:               staff.OwnerID,

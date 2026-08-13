@@ -9,9 +9,10 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 )
 
-func TestNoopFinancePoster_DoesNotError(t *testing.T) {
-	if err := (noopFinancePoster{}).PostPayrollJournal(context.Background(), domain.PayrollJournalEntry{}); err != nil {
-		t.Fatalf("noop finance poster returned error: %v", err)
+func TestNoopFinancePoster_ReportsUnavailable(t *testing.T) {
+	err := (noopFinancePoster{}).PostPayrollJournal(context.Background(), domain.PayrollJournalEntry{})
+	if !errors.Is(err, domain.ErrFinanceIntegrationUnavailable) {
+		t.Fatalf("noop finance poster error = %v, want %v", err, domain.ErrFinanceIntegrationUnavailable)
 	}
 }
 

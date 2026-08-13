@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/domain"
@@ -165,6 +166,53 @@ func TestUpdateQuote_ChangesFields(t *testing.T) {
 	}
 	if q.Status != "sent" {
 		t.Errorf("Status not updated: got %q", q.Status)
+	}
+}
+
+func TestUpdateQuote_ConvertedIsNotEditable(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.QuoteInput{
+		CustomerName: "Converted Quote",
+		Status:       "converted",
+	})
+	if err != nil {
+		t.Fatalf("quotes.Create: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM finance_quotes WHERE id = ? AND business_id = ?", id, testutil.OwnerID)
+	})
+
+	err = repo.Update(ctx, testutil.OwnerID, id, domain.QuoteInput{
+		CustomerName: "Should Not Change",
+		Status:       "converted",
+	})
+	if !errors.Is(err, domain.ErrQuoteNotEditable) {
+		t.Fatalf("quotes.Update converted: expected ErrQuoteNotEditable, got %v", err)
+	}
+}
+
+func TestDeleteQuote_ConvertedIsNotEditable(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.Create(ctx, testutil.OwnerID, domain.QuoteInput{
+		CustomerName: "Converted Quote",
+		Status:       "converted",
+	})
+	if err != nil {
+		t.Fatalf("quotes.Create: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM finance_quotes WHERE id = ? AND business_id = ?", id, testutil.OwnerID)
+	})
+
+	err = repo.Delete(ctx, testutil.OwnerID, id)
+	if !errors.Is(err, domain.ErrQuoteNotEditable) {
+		t.Fatalf("quotes.Delete converted: expected ErrQuoteNotEditable, got %v", err)
 	}
 }
 
@@ -433,15 +481,16 @@ func TestDeleteQuote_RemovesRow(t *testing.T) {
 	}
 }
 
-func TestDeleteQuote_NonExistentIsNoop(t *testing.T) {
+func TestDeleteQuote_NonExistentReturnsNotFound(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// Deleting a non-existent quote should not error
+	// Deleting a non-existent quote should report the same result as other
+	// quote-by-id operations rather than silently claiming success.
 	err := repo.Delete(ctx, testutil.OwnerID, 9999999)
-	if err != nil {
-		t.Fatalf("quotes.Delete(non-existent): expected no error, got %v", err)
+	if !errors.Is(err, domain.ErrQuoteNotFound) {
+		t.Fatalf("quotes.Delete(non-existent): expected ErrQuoteNotFound, got %v", err)
 	}
 }
 

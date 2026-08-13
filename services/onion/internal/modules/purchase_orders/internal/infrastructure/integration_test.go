@@ -63,6 +63,22 @@ func TestCreatePurchaseOrder_ReturnsInsertedID(t *testing.T) {
 	}
 }
 
+func TestCreatePurchaseOrder_RejectsUnscopedReferences(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	_, err := repo.CreatePurchaseOrder(context.Background(), testutil.OwnerID, domain.PurchaseOrderInput{
+		SupplierID: 999999999,
+		PONumber:   "PO-CROSS-BUSINESS-001",
+		Items: []domain.PurchaseOrderItemInput{
+			{ProductID: 5201, QuantityOrdered: 1, UnitCost: 5},
+		},
+	}, testutil.OwnerID)
+	if !errors.Is(err, domain.ErrPurchaseOrderReferenceNotFound) {
+		t.Fatalf("CreatePurchaseOrder cross-business supplier error = %v, want ErrPurchaseOrderReferenceNotFound", err)
+	}
+}
+
 func TestCreatePurchaseOrder_AppearsInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"regexp"
+	"strings"
 )
 
 // ToolCallMarker is the wire shape we expect inside model output when it
@@ -17,29 +17,33 @@ type ToolCallMarker struct {
 	Input map[string]any `json:"input"`
 }
 
-var toolBlockRe = regexp.MustCompile(`(?s)<tool>\s*(\{.*?\})\s*</tool>`)
-
 // ExtractToolCalls finds and parses every <tool>…</tool> block in s. The
 // remainder string contains the original input with each block removed so
 // the visible text doesn't include the raw JSON markers.
 func ExtractToolCalls(s string) (calls []ToolCallMarker, remainder string) {
-	matches := toolBlockRe.FindAllStringSubmatchIndex(s, -1)
-	if len(matches) == 0 {
-		return nil, s
-	}
-	calls = make([]ToolCallMarker, 0, len(matches))
-	out := make([]byte, 0, len(s))
-	last := 0
-	for _, m := range matches {
-		out = append(out, s[last:m[0]]...)
-		last = m[1]
-		raw := s[m[2]:m[3]]
-		var call ToolCallMarker
-		if err := json.Unmarshal([]byte(raw), &call); err == nil {
-			calls = append(calls, call)
+	const openTag, closeTag = "<tool>", "</tool>"
+	var out strings.Builder
+	for {
+		start := strings.Index(s, openTag)
+		if start < 0 {
+			out.WriteString(s)
+			break
 		}
+		out.WriteString(s[:start])
+		rest := s[start+len(openTag):]
+		end := strings.Index(rest, closeTag)
+		if end < 0 {
+			out.WriteString(s[start:])
+			break
+		}
+		var call ToolCallMarker
+		raw := strings.TrimSpace(rest[:end])
+		if err := json.Unmarshal([]byte(raw), &call); err == nil && strings.TrimSpace(call.Name) != "" {
+			calls = append(calls, call)
+		} else {
+			out.WriteString(s[start : start+len(openTag)+end+len(closeTag)])
+		}
+		s = rest[end+len(closeTag):]
 	}
-	out = append(out, s[last:]...)
-	remainder = string(out)
-	return calls, remainder
+	return calls, out.String()
 }

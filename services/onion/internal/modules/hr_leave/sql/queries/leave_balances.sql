@@ -22,7 +22,7 @@ UPDATE hr_leave_balances
 SET entitled_days = entitled_days + ?, last_accrual_month = ?, updated_at = NOW()
 WHERE business_id = ? AND employee_id = ? AND leave_type_id = ? AND year = ?;
 
--- name: AddToUsedDays :exec
+-- name: AddToUsedDays :execresult
 UPDATE hr_leave_balances
 SET used_days = used_days + ?, pending_days = GREATEST(pending_days - ?, 0), updated_at = NOW()
 WHERE business_id = ? AND employee_id = ? AND leave_type_id = ? AND year = ?;

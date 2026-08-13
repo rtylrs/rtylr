@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/application"
@@ -68,6 +69,9 @@ func (a *StockTransferAPI) CreateStockTransfer(ctx context.Context, req *erpstoc
 		Items:           items,
 	})
 	if createErr != nil {
+		if errors.Is(createErr, domain.ErrStockTransferReferenceNotFound) {
+			return nil, stockTransferStatusError(http.StatusNotFound, createErr.Error())
+		}
 		return nil, stockTransferStatusError(http.StatusInternalServerError, "Failed to create stock transfer")
 	}
 	return &erpstocktransferv1.CreateStockTransferResponse{

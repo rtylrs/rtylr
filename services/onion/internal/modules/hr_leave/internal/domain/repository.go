@@ -14,6 +14,7 @@ type Repository interface {
 	GetLeaveRequest(ctx context.Context, ownerID, requestID int64) (*LeaveRequestRecord, error)
 	CreateLeaveRequest(ctx context.Context, ownerID int64, req LeaveRequestRecord) (*LeaveRequestRecord, error)
 	ApproveLeaveRequest(ctx context.Context, ownerID, requestID int64) error
+	ApproveLeaveRequestWithBalance(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, year int32, days float64) error
 	AdvanceLeaveApprovalLevel(ctx context.Context, ownerID, requestID int64) error
 	RejectLeaveRequest(ctx context.Context, ownerID, requestID int64, reason string) error
 	ListOverlappingLeaveRequests(ctx context.Context, ownerID, employeeID int64, startDate, endDate string) ([]LeaveRequestRecord, error)
@@ -36,4 +37,13 @@ type Repository interface {
 
 type ApprovalChainProvider interface {
 	GetApprovalChain(ctx context.Context, ownerID int64, requestType string) (*ApprovalChainInfo, error)
+}
+
+// PermissionProvider resolves the HR employee behind the authenticated
+// platform user and checks the role/approval-chain permissions used by leave
+// self-service and approval actions.
+type PermissionProvider interface {
+	GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error)
+	HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error)
+	HasRole(ctx context.Context, ownerID, employeeID, roleID int64) (bool, error)
 }
