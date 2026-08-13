@@ -3,11 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
-# Cancel superseded runs on PRs. Never cancel main (its runs deploy).
+# Cancel superseded branch runs. Main and manual runs are allowed to finish.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
@@ -15,7 +13,7 @@ concurrency:
 jobs:
   # ── Typecheck + Build ───────────────────────────────────────────────
   # Uploads dist/ as an artifact so the deploy job reuses it instead
-  # of rebuilding. Runs in parallel with e2e.
+  # of rebuilding. Runs in parallel with the optional manual E2E job.
   verify:
     name: Typecheck & Build
     runs-on: blacksmith-2vcpu-ubuntu-2404
@@ -51,9 +49,11 @@ jobs:
         run: aws s3 sync dist/landing s3://voxire-ci-artifacts/${{ github.sha }}/landing/ --delete --no-progress
 
   # ── Playwright E2E ──────────────────────────────────────────────────
-  # Runs in parallel with verify — doesn't need the build output.
+  # Manual-only: browser E2E is useful on demand but too expensive for every
+  # main push while private Actions minutes are constrained.
   e2e:
     name: Playwright E2E
+    if: github.event_name == 'workflow_dispatch'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
@@ -86,7 +86,7 @@ jobs:
   # Only runs on main pushes and manual dispatches.
   deploy:
     name: Deploy to Cloudflare Pages
-    needs: [verify, e2e]
+    needs: verify
     if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
     runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
