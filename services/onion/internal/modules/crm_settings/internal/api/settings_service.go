@@ -44,6 +44,9 @@ func (a *SettingsAPI) UpdateSettings(ctx context.Context, req *crmsettingsv1.Upd
 	if device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	if !authPkg.IsBusinessAdmin(device.User) {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
 	timezone := req.GetTimezone()
 	if timezone == "" {
