@@ -17,7 +17,7 @@ jobs:
   # ── Build & upload ─────────────────────────────────────────────────
   check:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
 
     steps:
       - name: Checkout
@@ -68,7 +68,7 @@ jobs:
     name: Comment CI result on PR
     needs: check
     if: ${{ always() && github.event_name == 'pull_request' }}
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     permissions:
       contents: read
       issues: write
@@ -137,7 +137,7 @@ jobs:
 
   changes:
     name: Detect changed apps
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     outputs:
       auth: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.auth }}
@@ -204,7 +204,7 @@ jobs:
       dist_dir: dist/auth
       project_name: rtylr-auth
       artifact_name: dist-${{ github.sha }}
-      runs_on: ubuntu-latest
+      runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
 
   deploy-dash:
@@ -216,7 +216,7 @@ jobs:
       dist_dir: dist/dash
       project_name: rtylr-hub
       artifact_name: dist-${{ github.sha }}
-      runs_on: ubuntu-latest
+      runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
 
   deploy-erp:
@@ -228,7 +228,7 @@ jobs:
       dist_dir: dist/erp
       project_name: rtylr-erp
       artifact_name: dist-${{ github.sha }}
-      runs_on: ubuntu-latest
+      runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
 
   deploy-crm:
@@ -240,7 +240,7 @@ jobs:
       dist_dir: dist/crm
       project_name: rtylr-crm
       artifact_name: dist-${{ github.sha }}
-      runs_on: ubuntu-latest
+      runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
 
   deploy-hr:
@@ -252,7 +252,7 @@ jobs:
       dist_dir: dist/hr
       project_name: rtylr-hr
       artifact_name: dist-${{ github.sha }}
-      runs_on: ubuntu-latest
+      runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
 
   deploy-finance:
@@ -264,7 +264,7 @@ jobs:
       dist_dir: dist/finance
       project_name: rtylr-finance
       artifact_name: dist-${{ github.sha }}
-      runs_on: ubuntu-latest
+      runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
 
   deploy-flow:
@@ -276,7 +276,7 @@ jobs:
       dist_dir: dist/flow
       project_name: rtylr-flow
       artifact_name: dist-${{ github.sha }}
-      runs_on: ubuntu-latest
+      runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
 
   deploy-insights:
@@ -288,7 +288,7 @@ jobs:
       dist_dir: dist/insights
       project_name: rtylr-insights
       artifact_name: dist-${{ github.sha }}
-      runs_on: ubuntu-latest
+      runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
 
   deploy-menu:
@@ -300,7 +300,7 @@ jobs:
       dist_dir: dist/menu
       project_name: rtylr-menu
       artifact_name: dist-${{ github.sha }}
-      runs_on: ubuntu-latest
+      runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
 
   deploy-recruit:
@@ -312,7 +312,7 @@ jobs:
       dist_dir: dist/recruit
       project_name: rtylr-recruit
       artifact_name: dist-${{ github.sha }}
-      runs_on: ubuntu-latest
+      runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
 
   # ── Slack notification ─────────────────────────────────────────────
