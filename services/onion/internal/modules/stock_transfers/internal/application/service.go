@@ -73,6 +73,9 @@ func (s *Service) GetByID(ctx context.Context, businessID, id int64) (domain.Sto
 }
 
 func (s *Service) CreateStockTransfer(ctx context.Context, businessID int64, input domain.StockTransferInput) (int64, error) {
+	if err := domain.ValidateStockTransferInput(input); err != nil {
+		return 0, fmt.Errorf("%w: %w", domain.ErrInvalidStockTransfer, err)
+	}
 	id, err := s.repo.CreateStockTransfer(ctx, businessID, input)
 	if err != nil {
 		return 0, err

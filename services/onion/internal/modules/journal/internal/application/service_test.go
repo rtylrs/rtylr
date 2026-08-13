@@ -9,12 +9,13 @@ import (
 )
 
 type mockRepo struct {
-	list      []domain.JournalEntry
-	get       domain.JournalEntry
-	getErr    error
-	createID  int64
-	createErr error
-	postErr   error
+	list        []domain.JournalEntry
+	get         domain.JournalEntry
+	getErr      error
+	createID    int64
+	createErr   error
+	createCalls int
+	postErr     error
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64, _, _ int32) ([]domain.JournalEntry, error) {
@@ -26,6 +27,7 @@ func (m *mockRepo) Get(_ context.Context, _, _ int64) (domain.JournalEntry, erro
 }
 
 func (m *mockRepo) Create(_ context.Context, _, _ int64, _ domain.JournalEntryInput) (int64, error) {
+	m.createCalls++
 	return m.createID, m.createErr
 }
 
@@ -64,7 +66,7 @@ func TestGet_PropagatesError(t *testing.T) {
 func TestCreate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	if _, err := s.Create(context.Background(), 1, 1, domain.JournalEntryInput{}); !errors.Is(err, want) {
+	if _, err := s.Create(context.Background(), 1, 1, validJournalEntryInput()); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
@@ -79,12 +81,40 @@ func TestPost_PropagatesError(t *testing.T) {
 
 func TestCreate_ReturnsID(t *testing.T) {
 	s := &Service{repo: &mockRepo{createID: 42}}
-	id, err := s.Create(context.Background(), 1, 1, domain.JournalEntryInput{})
+	id, err := s.Create(context.Background(), 1, 1, validJournalEntryInput())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if id != 42 {
 		t.Errorf("expected id=42, got %d", id)
+	}
+}
+
+func TestCreate_RejectsInvalidJournalEntryBeforeRepository(t *testing.T) {
+	repo := &mockRepo{createID: 42}
+	s := &Service{repo: repo}
+	_, err := s.Create(context.Background(), 1, 1, domain.JournalEntryInput{
+		Date: "2026-08-13",
+		Lines: []domain.JournalLineInput{
+			{AccountID: 1, Debit: 100},
+			{AccountID: 2, Credit: 90},
+		},
+	})
+	if !errors.Is(err, domain.ErrInvalidJournalEntry) {
+		t.Fatalf("expected ErrInvalidJournalEntry, got %v", err)
+	}
+	if repo.createCalls != 0 {
+		t.Fatalf("repository Create called %d times for invalid input, want 0", repo.createCalls)
+	}
+}
+
+func validJournalEntryInput() domain.JournalEntryInput {
+	return domain.JournalEntryInput{
+		Date: "2026-08-13",
+		Lines: []domain.JournalLineInput{
+			{AccountID: 1, Debit: 100},
+			{AccountID: 2, Credit: 100},
+		},
 	}
 }
 

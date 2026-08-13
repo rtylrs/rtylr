@@ -13,7 +13,7 @@ func TestListAccounts_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 
-	accounts, err := repo.List(context.Background(), testutil.OwnerID)
+	accounts, err := repo.List(context.Background(), testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("List accounts error: %v", err)
 	}
@@ -37,7 +37,7 @@ func TestListAccounts_ZeroOwner_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	accounts, err := repo.List(ctx, 0)
+	accounts, err := repo.List(ctx, 0, 100, 0)
 	if err != nil {
 		t.Fatalf("List(ownerID=0): %v", err)
 	}
@@ -51,7 +51,7 @@ func TestListAccounts_IsNotNil(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	accounts, err := repo.List(ctx, testutil.OwnerID)
+	accounts, err := repo.List(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -120,7 +120,7 @@ func TestCreateAccount_NameIsStored(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	accounts, err := repo.List(ctx, testutil.OwnerID)
+	accounts, err := repo.List(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -149,7 +149,7 @@ func TestCreateAccount_TypeIsStored(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	accounts, err := repo.List(ctx, testutil.OwnerID)
+	accounts, err := repo.List(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -179,7 +179,7 @@ func TestCreateAccount_CodeIsStored(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	accounts, err := repo.List(ctx, testutil.OwnerID)
+	accounts, err := repo.List(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -217,7 +217,7 @@ func TestUpdateAccount_ChangesName(t *testing.T) {
 		t.Fatalf("Update: %v", err)
 	}
 
-	accounts, err := repo.List(ctx, testutil.OwnerID)
+	accounts, err := repo.List(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("List after update: %v", err)
 	}
@@ -250,7 +250,7 @@ func TestDeleteAccount_RemovesRow(t *testing.T) {
 		t.Fatalf("Delete: %v", err)
 	}
 
-	accounts, err := repo.List(ctx, testutil.OwnerID)
+	accounts, err := repo.List(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("List after delete: %v", err)
 	}
@@ -275,7 +275,7 @@ func TestCreate_ThenList_FindsAccount(t *testing.T) {
 		t.Fatalf("Create: %v", err)
 	}
 
-	accounts, err := repo.List(ctx, testutil.OwnerID)
+	accounts, err := repo.List(ctx, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}

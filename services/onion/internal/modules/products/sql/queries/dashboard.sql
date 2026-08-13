@@ -41,8 +41,8 @@ FROM erp_products
 WHERE business_id = ? AND is_active = TRUE AND track_inventory = TRUE
   AND low_stock_threshold IS NOT NULL
   AND stock_quantity <= low_stock_threshold
-ORDER BY (stock_quantity - low_stock_threshold) ASC
-LIMIT 100;
+ORDER BY (stock_quantity - low_stock_threshold) ASC, id ASC
+LIMIT 101;
 
 -- name: CountProductsByCategory :one
 SELECT COUNT(*) FROM erp_products WHERE business_id = ? AND category_id = ?;

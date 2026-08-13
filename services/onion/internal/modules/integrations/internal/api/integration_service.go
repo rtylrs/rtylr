@@ -56,7 +56,7 @@ func (a *IntegrationAPI) ListIntegrations(ctx context.Context, _ *hubintegration
 
 func (a *IntegrationAPI) ConnectIntegration(ctx context.Context, req *hubintegrationv1.ConnectIntegrationRequest) (*hubintegrationv1.ConnectIntegrationResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -80,7 +80,7 @@ func (a *IntegrationAPI) ConnectIntegration(ctx context.Context, req *hubintegra
 
 func (a *IntegrationAPI) DisconnectIntegration(ctx context.Context, req *hubintegrationv1.DisconnectIntegrationRequest) (*hubintegrationv1.DisconnectIntegrationResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

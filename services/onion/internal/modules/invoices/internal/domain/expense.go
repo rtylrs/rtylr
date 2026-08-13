@@ -23,6 +23,7 @@ type Expense struct {
 	IsTaxDeductible bool      `json:"is_tax_deductible"`
 	TaxAmount       float64   `json:"tax_amount"`
 	Notes           string    `json:"notes"`
+	Status          string    `json:"status"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
@@ -35,6 +36,7 @@ func (e *Expense) FromRow(row *sql.Rows) error {
 		paymentMethod sql.NullString
 		receiptURL    sql.NullString
 		notes         sql.NullString
+		status        sql.NullString
 	)
 
 	err := row.Scan(
@@ -52,6 +54,7 @@ func (e *Expense) FromRow(row *sql.Rows) error {
 		&e.IsTaxDeductible,
 		&e.TaxAmount,
 		&notes,
+		&status,
 		&e.CreatedAt,
 		&e.UpdatedAt,
 	)
@@ -85,6 +88,9 @@ func (e *Expense) FromRow(row *sql.Rows) error {
 
 	if notes.Valid {
 		e.Notes = notes.String
+	}
+	if status.Valid {
+		e.Status = status.String
 	}
 
 	return nil

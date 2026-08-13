@@ -50,6 +50,9 @@ WHERE business_id = ? AND id = ? AND (status IS NULL OR status <> 'received');
 -- name: UpdatePurchaseOrderStatusReceived :exec
 UPDATE erp_purchase_orders SET status = ?, received_at = NOW() WHERE business_id = ? AND id = ?;
 
+-- name: UpdatePurchaseOrderStatusPartial :exec
+UPDATE erp_purchase_orders SET status = ? WHERE business_id = ? AND id = ?;
+
 -- name: GetPurchaseOrderStatus :one
 SELECT status FROM erp_purchase_orders WHERE business_id = ? AND id = ?;
 
@@ -64,6 +67,10 @@ SELECT status FROM erp_purchase_orders WHERE business_id = ? AND id = ? FOR UPDA
 -- name: MarkPurchaseOrderItemsReceived :exec
 UPDATE erp_purchase_order_items SET quantity_received = quantity_ordered
 WHERE purchase_order_id = ?;
+
+-- name: UpdatePurchaseOrderItemReceived :exec
+UPDATE erp_purchase_order_items SET quantity_received = ?
+WHERE purchase_order_id = ? AND id = ?;
 
 -- name: InsertInventoryTransactionWithRef :execresult
 INSERT INTO erp_inventory_transactions

@@ -1,5 +1,38 @@
 -- cross-schema read from erp_products + erp_product_images — catalog enrichment for storefront list
 -- name: ListStoreProductsWithCatalog :many
+WITH store_product_page AS (
+    SELECT
+        id,
+        owner_id,
+        business_id,
+        product_id,
+        title,
+        slug,
+        description,
+        images,
+        price,
+        compare_at_price,
+        is_published,
+        sort_order,
+        created_at,
+        updated_at
+    FROM store_products store_product
+    WHERE store_product.business_id = ?
+    ORDER BY store_product.sort_order ASC, store_product.id ASC
+    LIMIT 200
+),
+catalog_product_page AS (
+    SELECT DISTINCT page.business_id, page.product_id
+    FROM store_product_page page
+    WHERE page.product_id IS NOT NULL
+),
+catalog_images AS (
+    SELECT images.business_id, images.product_id, JSON_ARRAYAGG(images.url) AS images
+    FROM erp_product_images images
+    INNER JOIN catalog_product_page page
+      ON page.business_id = images.business_id AND page.product_id = images.product_id
+    GROUP BY images.business_id, images.product_id
+)
 SELECT
     sp.id,
     sp.owner_id,
@@ -15,17 +48,12 @@ SELECT
     sp.sort_order,
     sp.created_at,
     sp.updated_at
-FROM store_products sp
+FROM store_product_page sp
 LEFT JOIN erp_products ep
   ON ep.business_id = sp.business_id AND ep.id = sp.product_id
-LEFT JOIN (
-    SELECT business_id, product_id, JSON_ARRAYAGG(url) AS images
-    FROM erp_product_images
-    GROUP BY business_id, product_id
-) epi
+LEFT JOIN catalog_images epi
   ON epi.business_id = sp.business_id AND epi.product_id = sp.product_id
-WHERE sp.business_id = ?
-ORDER BY sp.sort_order ASC;
+ORDER BY sp.sort_order ASC, sp.id ASC;
 
 -- cross-schema read from erp_products — catalog product lookup for storefront sync
 -- name: GetCatalogProductByID :one

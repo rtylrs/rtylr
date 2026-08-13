@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/roles/internal/application"
@@ -67,7 +68,7 @@ func (a *PermissionAPI) ListRoles(ctx context.Context, _ *hubpermissionv1.ListRo
 
 func (a *PermissionAPI) CreateRole(ctx context.Context, req *hubpermissionv1.CreateRoleRequest) (*hubpermissionv1.CreateRoleResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -106,7 +107,7 @@ func (a *PermissionAPI) CreateRole(ctx context.Context, req *hubpermissionv1.Cre
 
 func (a *PermissionAPI) UpdatePermissionMatrix(ctx context.Context, req *hubpermissionv1.UpdatePermissionMatrixRequest) (*hubpermissionv1.UpdatePermissionMatrixResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -163,6 +164,9 @@ func (a *PermissionAPI) UpdatePermissionMatrix(ctx context.Context, req *hubperm
 		Name:        target.Name,
 		Permissions: perms,
 	}); err != nil {
+		if errors.Is(err, domain.ErrRoleNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Role not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update permission matrix")
 	}
 
@@ -171,7 +175,7 @@ func (a *PermissionAPI) UpdatePermissionMatrix(ctx context.Context, req *hubperm
 
 func (a *PermissionAPI) UpdateRole(ctx context.Context, req *hubpermissionv1.UpdateRoleRequest) (*hubpermissionv1.UpdateRoleResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -203,6 +207,9 @@ func (a *PermissionAPI) UpdateRole(ctx context.Context, req *hubpermissionv1.Upd
 		Name:        name,
 		Permissions: perms,
 	}); err != nil {
+		if errors.Is(err, domain.ErrRoleNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Role not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update role")
 	}
 
@@ -211,7 +218,7 @@ func (a *PermissionAPI) UpdateRole(ctx context.Context, req *hubpermissionv1.Upd
 
 func (a *PermissionAPI) DeleteRole(ctx context.Context, req *hubpermissionv1.DeleteRoleRequest) (*hubpermissionv1.DeleteRoleResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -226,6 +233,9 @@ func (a *PermissionAPI) DeleteRole(ctx context.Context, req *hubpermissionv1.Del
 	}
 
 	if err := a.Service.DeleteRole(ctx, businessID, id); err != nil {
+		if errors.Is(err, domain.ErrRoleNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Role not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete role")
 	}
 

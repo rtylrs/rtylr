@@ -242,6 +242,37 @@ func (r *Repository) ListOpenings(ctx context.Context) ([]domain.Opening, error)
 	return openings, nil
 }
 
+func (r *Repository) ListOpeningsPage(ctx context.Context, limit, offset int32) (domain.OpeningPage, error) {
+	rows, err := r.queries.ListOpeningsPage(ctx, sqlc.ListOpeningsPageParams{
+		OwnerID: voxhireCareerOwnerID,
+		Limit:   limit,
+		Offset:  offset,
+	})
+	if err != nil {
+		return domain.OpeningPage{}, err
+	}
+	total, err := r.queries.CountOpenings(ctx, voxhireCareerOwnerID)
+	if err != nil {
+		return domain.OpeningPage{}, err
+	}
+	openings := make([]domain.Opening, 0, len(rows))
+	for _, row := range rows {
+		openings = append(openings, domain.Opening{
+			ID: row.ID, Slug: row.Slug, Title: row.Title, Department: row.Department,
+			Location: row.Location, EmploymentType: row.EmploymentType, WorkMode: row.WorkMode,
+			Seniority: row.Seniority, Details: row.Details,
+			SalaryMin: parseDecimalString(row.SalaryMin), SalaryMax: parseDecimalString(row.SalaryMax),
+			SalaryCurrency: row.SalaryCurrency, IsActive: row.IsActive,
+			NewCount: ifaceToInt64(row.NewCount), TotalCount: ifaceToInt64(row.TotalCount),
+		})
+	}
+	return domain.OpeningPage{Openings: openings, Total: total, Limit: limit, Offset: offset}, nil
+}
+
+func (r *Repository) GetOpening(ctx context.Context, id int64) (*domain.Opening, error) {
+	return r.getCareerOpeningByID(ctx, id)
+}
+
 // GetAnalytics returns aggregate counts and activity for the recruiter overview.
 func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error) {
 	analytics := &domain.Analytics{}
