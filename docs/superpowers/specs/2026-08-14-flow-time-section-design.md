@@ -1,160 +1,184 @@
-# Flow Time: a first-class section, backed for real
+# Flow Time: daily logging on one shared store
 
 Date: 2026-08-14
 Status: **proposal, awaiting approval**
+Supersedes: the first draft of this file, which proposed a parallel Flow schema.
 
-## What this corrects
+## What this corrects, twice
 
-The first pass treated time tracking as configuration: a settings pane, a panel in
-the task rail, and a panel behind the board's gear icon. Logging hours is a primary
-Flow capability, so it needs a section of its own with real destinations and real
-depth. Three of fifteen designed screens exist, the rest were reported as blocked,
-and the parts that shipped save to a browser rather than a database.
+**First**, time tracking was built as configuration: a settings pane and two panels
+tucked inside other screens. Logging hours is a primary Flow capability and needs
+its own section with real depth.
 
-This proposal builds it properly: the contract fields and endpoints in `voxie` and
-`onion`, and the screens in `rtylr`. Nothing stubbed, nothing client-only.
+**Second**, and larger: the first draft proposed adding status, billable, category,
+approval and timesheet tables to Flow. **Nearly all of that already exists in
+`hr_time_entries`.** Building it again would have created a second source of truth
+for hours in a product that already struggles with one.
 
-## Where the code lives, verified
+What `hr_time_entries` already has: `project_id`, `task_id` (nullable, so
+project-level logging works today), `category_id`, `date`, `duration_minutes`,
+`start_time`, `end_time`, `description`, `is_billable`, `status`,
+`rejection_reason`, `approved_by`, `source`, `billable_invoice_id`.
+`hr_timesheets` + `hr_timesheet_approval_actions` already do **multi-level**
+approval, which the design doc claimed was not expressible.
 
-| Layer        | Repo    | Path                                                                                                                                                             |
-| ------------ | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Contracts    | `voxie` | `api/flow/<capability>/v1/{models,service}.onk`, with committed `gen/go` + `gen/ts`                                                                              |
-| Flow backend | `onion` | `internal/modules/workspaces/` — `internal/api/task_service.go`, `internal/application/service.go`, `internal/infrastructure/repository.go`, `sql/queries/*.sql` |
-| Schema       | `onion` | `internal/platform/database/schemas/flow/`, MySQL, versioned files (`v6_status_backlog.sql`, `v7_…`), so this adds `v8_time_tracking.sql`                        |
-| sqlc codegen | `onion` | `make generate` → `scripts/generate_sqlc.sh`                                                                                                                     |
-| Gates        | `onion` | `make lint`, `make test`, `make test-db` (needs `make local-env-up`)                                                                                             |
-| Frontend     | `rtylr` | `apps/flow/src/`                                                                                                                                                 |
+`hr_time/internal/infrastructure/flow_adapter.go` already reads `flow_time_logs`,
+so today there are two stores and an adapter between them. This proposal ends
+that: **Flow writes `hr_time_entries`.** That is HANDOFF's open "D1, the shared
+time service", decided.
 
-Today's table is the whole problem in nine lines:
+## The shape of a day
 
-```sql
-CREATE TABLE flow_time_logs (
-  id, owner_id, business_id, task_id, user_id,
-  duration_minutes, description, logged_at, created_at
-);
+Two levels, because a person has one working day containing several pieces of work.
+
+```
+Work day        date · work mode · start · end · breaks · timezone · status
+  └── lines     project · task · work type → subtype · description · hours · billable
 ```
 
-No date distinct from `logged_at`, no category, no billable flag, no status, no
-approval, no lock. `TimeLog` in `voxie` mirrors it, and only three RPCs exist:
-create, list-by-task, delete.
+The day is new and Flow-owned. The lines are `hr_time_entries`.
 
-## Information architecture
+### Why the day is not `hr_attendance_records`
 
-The sidebar `Time` group gets real destinations. Settings keeps configuration only.
+That table models live clocking against a shift: `is_late`, `late_minutes`,
+`clock_in_method`, `clock_in_lat/lng`, and it feeds HR's lateness policy. People
+entering yesterday retrospectively would generate meaningless lateness data and
+could trip attendance rules they were never subject to. A work day is a work log,
+not a punch clock, and says so.
 
-| Route               | Screen                                                                                  | Who             |
-| ------------------- | --------------------------------------------------------------------------------------- | --------------- |
-| `/time`             | **My week.** The timesheet grid: days across, tasks down, running totals, submit.       | everyone        |
-| `/time/review`      | **Review.** Flat queue of submitted weeks and entries to approve or return.             | managers        |
-| `/time/reports`     | **Reports.** Saved list plus a pivot; value resolved per row from the entry's own rate. | gated           |
-| `/time/workload`    | **Workload.** Capacity six weeks out. Replaces the `/team` stub and removes its flag.   | managers        |
-| `/timeline`         | **Timeline.** Replaces the existing stub and removes its flag.                          | everyone        |
-| `/w/:ws/p/:id/time` | **Project Time.** A fifth project tab.                                                  | project members |
-| task detail         | The panel stays. Logging in context is correct; it gains category, billable and status. | everyone        |
-| `/settings` → Time  | Week, rounding, targets, approval lock, categories, rates. Configuration only.          | admin/owner     |
+## Schema
 
-Rationale for `/time` rather than `/time/timesheet`: the week grid is the thing
-people open daily, so it earns the bare route. Review, Reports and Workload are
-periodic and sit below it.
+**New: `flow_work_days`**
 
-## Data model, the whole shape
+| Column                                                     | Note                                                                     |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `employee_id`                                              | Everyone has an HR person record, including non-employees (below)        |
+| `date`, `timezone`                                         | The person's own zone, stored per record, so a day means their local day |
+| `work_mode`                                                | `onsite` / `remote` / `hybrid`, the day's default                        |
+| `start_time`, `end_time`                                   | Optional; a day can be lines-only                                        |
+| `break_minutes`                                            | Unpaid, so paid hours are correct                                        |
+| `status`                                                   | `draft` / `submitted` / `approved` / `rejected` / `reopened`             |
+| `approved_by`, `approved_at`, `reopened_by`, `reopened_at` |                                                                          |
 
-Additions to `flow_time_logs`:
+Unique on `(owner_id, employee_id, date)`.
 
-| Column                                                  | Why                                                                                                                                                                                                  |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `entry_date DATE`                                       | The day the work happened, distinct from `logged_at` (when it was recorded). Without it a timesheet cannot exist, and today's form is stuck on "today".                                              |
-| `category_id BIGINT NULL`                               | FK to `flow_time_categories`. Nullable, because existing rows have none.                                                                                                                             |
-| `billable BOOLEAN NOT NULL DEFAULT 0`                   | Per entry, defaulted from the category.                                                                                                                                                              |
-| `status ENUM('draft','pending','approved','rejected')`  | Default `draft`.                                                                                                                                                                                     |
-| `approved_by BIGINT NULL`, `approved_at TIMESTAMP NULL` | Who cleared it and when.                                                                                                                                                                             |
-| `locked_at TIMESTAMP NULL`                              | Set by approval-lock or the auto-lock job. A locked row is read-only.                                                                                                                                |
-| `rate_snapshot DECIMAL NULL`                            | The rate **at the time of logging**. This is what makes Reports resolve value per row instead of multiplying a rate table client-side, and it is the one constraint the design calls non-negotiable. |
+**New: `flow_work_day_actions`**. Approve, reject, reopen, with actor and
+comment. Mirrors `hr_timesheet_approval_actions` rather than reusing it, whose
+`timesheet_id` means something else.
 
-New tables:
+**New: `flow_work_types`**. Workspace-scoped, `parent_id` self-reference for
+exactly two levels, `hr_category_id` mapping to HR's payroll category, plus
+archived and sort order. Admin or manager maintains the tree.
 
-- `flow_time_categories` — workspace-scoped: name, `billable_default`, archived flag. Deleting one with hours reassigns first.
-- `flow_time_rates` — person-scoped hourly rate, with the per-project override column the design reserves.
-- `flow_workspace_time_settings` — week start, rounding, weekly target, overtime threshold, `approval_locks_entry`, `auto_lock_days`. Replaces the browser-only store.
-- `flow_timesheets` — user, `week_start`, status, `submitted_at`, `approved_by`, `approved_at`. The unit Review acts on.
+**Altered: `hr_time_entries`** (all nullable or defaulted; the table has live rows)
 
-New RPCs, per capability:
+| Column         | Why                                                                                    |
+| -------------- | -------------------------------------------------------------------------------------- |
+| `work_day_id`  | Parent day. Null for legacy rows.                                                      |
+| `work_type_id` | Flow's two-level type. `category_id` stays as the HR payroll mapping.                  |
+| `work_mode`    | Null means inherit the day; set means this line differed.                              |
+| `timezone`     | As above.                                                                              |
+| `client_key`   | Client-generated, unique per owner. The idempotency key that makes offline retry safe. |
 
-- `flow/time/v1` — `updateTimeLog` (the missing PATCH), `listTimeLogs` (by user and date range, paginated), `getTimeSummary`.
-- `flow/timesheet/v1` — `getWeek`, `submitWeek`, `withdrawWeek`, `listForReview`, `approve`, `reject`. Bulk approve is **not** a transaction: partial failure names the entry that refused and keeps the successes.
-- `flow/timereport/v1` — one grouped aggregation RPC (group by person, project, task, category, week), paginated, which Reports, Portfolios, the project Time tab and Workload's logged half all read.
-- `flow/timesetting/v1` — read/write the workspace settings, categories and rates.
+**Altered: projects and tasks**. `default_work_type_id`, so the common case
+pre-fills and a phone entry is two taps.
 
-Every list RPC paginates. `paginationUtils.ts` exists in `rtylr` with zero call
-sites; these are its first.
+## Rules
 
-## Decomposition
+**The gap warns, never blocks.** Clocked hours minus breaks, against the sum of the
+lines. The unaccounted figure is shown prominently and is reportable, and
+submission proceeds regardless. Blocking is how timesheets get padded with invented
+lines, which is worse than an honest gap.
 
-Too large for one spec. Six sub-projects, each its own spec → plan → three PRs
-(voxie, then onion, then rtylr, in that order because the generated clients are
-committed).
+**Approval is per day, after the day has ended.** A day cannot be approved while it
+is still running. A manager can reopen an approved day; any edit to a reopened day
+returns it to the queue, and every transition lands in `flow_work_day_actions`.
+`hr_timesheets` stays as the weekly rollup payroll consumes, derived once its days
+are approved: the day is the decision, the week is the total.
 
-**1. Entry richness.** The columns above, categories, rates and workspace settings,
-`updateTimeLog`, and a paginated `listTimeLogs`. Frontend: the task panel gains
-category, billable and status; Settings → Time drops the browser store for real
-endpoints. _Unblocks everything else, and finishes the three screens already built._
+**Overtime raises a real request.** A day past the threshold creates an
+`hr_overtime_request` rather than a warning nobody records. Open question 2 below
+covers what happens when one is refused after the work is done.
 
-**2. My week.** `/time` and the timesheet grid: `role="grid"`, arrow-key movement,
-the ten-state cell, submit. Nothing in Flow has grid keyboard navigation to copy.
+**Offline merges per line.** Each line syncs independently on its `client_key`, so
+two devices adding different lines both succeed. Only genuine edits to the same
+line conflict, and those surface for the person to resolve. Nothing is silently
+discarded, because for logged work that means losing someone's afternoon.
 
-**3. Review.** `/time/review`, the flat queue, approve/return, the lock semantics,
-and named partial failure on bulk actions.
+**One end-of-day reminder**, at a configurable time, then a manager-visible
+missing-days list once someone passes a threshold. Within the six-a-week
+notification budget the design sets.
 
-**4. Reports.** The aggregation RPC, the pivot with both header axes scoped and a
-sticky first column, saved reports reusing the Views pattern, and the project Time
-tab.
+## Non-employees
 
-**5. Workload and Timeline.** `/time/workload` and `/timeline`, both replacing
-flag-gated stubs and removing `APP_FLOW_PREVIEW_ROUTES` from each.
+Contractors get a lightweight HR person record flagged non-employee, so they key
+into `hr_time_entries` like everyone else and appear in the same reports, while
+payroll excludes them by type. One store holds everyone; the type is what differs.
 
-**6. Cost, rates and billing surfaces.** Dual-gated on Flow admin **and** HR
-payroll permission. Last, because it is the most sensitive and the Finance pull
-contract is still open.
+## Screens
 
-## What already-shipped work changes
+The sidebar Time group gets real destinations. Settings keeps configuration only.
 
-Sub-project 1 revisits it, deliberately:
+| Route               | Screen                                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------------------ |
+| `/time`             | **My day.** Today first: work mode, start/end/breaks, the lines, the gap. The week is a tab beside it. |
+| `/time/review`      | **Review.** Days awaiting approval, oldest first, with reopen.                                         |
+| `/time/reports`     | **Reports.** Grouped by person, project, work type, mode, week.                                        |
+| `/time/workload`    | **Workload.** Replaces the `/team` stub; removes its flag.                                             |
+| `/timeline`         | Replaces the existing stub; removes its flag.                                                          |
+| `/w/:ws/p/:id/time` | Project Time, a fifth tab.                                                                             |
+| task detail         | The existing panel, gaining work type and billable.                                                    |
+| `/settings` → Time  | Week, rounding, targets, work-type tree, rates, reminder time.                                         |
 
-- `timeSettingsStore` loses its `persist` and becomes a query cache over the real
-  endpoints. The seam did its job; it should not survive the endpoint.
-- The task panel reinstates status pills, the Billable switch and category chips —
-  now backed by columns, so they persist.
-- The `GateNotice` reasons naming missing fields come out as the fields land.
-- The board panel's WIP limit and prompts-for-hours need a column-level decision:
-  they are still not in `flow_project_columns`. Either sub-project 1 adds them or
-  they stay gated; flagged as an open question below.
+`/time` leads with the day rather than the week because the requirement is daily
+logging. The week grid remains, one tab across.
 
-Two fixes need none of this and are being done immediately: entry durations move to
-clock notation (`3:15`, matching the mock and aligning the column), and dark
-becomes the actual default, since `themeStore` boots `light` while every mock and
-`HANDOFF.md` say dark is production.
+## Build order
+
+Each step is contracts → onion → rtylr, in that order, because the generated
+clients are committed.
+
+1. **Work day + lines.** `flow_work_days`, `flow_work_types`, the `hr_time_entries`
+   columns, and the RPCs to read and write a day. Frontend: `/time` for today, and
+   the task panel gains work type. _Delivers daily logging end to end._
+2. **Approval.** Day submit, approve, reject, reopen, and `/time/review`.
+3. **Offline and mobile.** `client_key` sync, the queue, conflict resolution, and
+   the phone entry form as a first-class surface.
+4. **Reminders and missing days.** End-of-day nudge, escalation list.
+5. **Reports.** The grouped aggregation RPC, the pivot, the project Time tab.
+6. **Workload and Timeline.** Both replace flag-gated stubs; both flags come out.
+7. **Rates, cost and billing.** Dual-gated, last, and still blocked on the Finance
+   pull contract.
+
+## What this unwinds
+
+Deliberately, in step 1: `timeSettingsStore` loses its `persist` and becomes a
+query cache over real endpoints; the task panel's `GateNotice` reasons come out as
+the fields land; and `flow_time_logs` is migrated into `hr_time_entries` and
+retired, along with the `flow_adapter` join that exists to bridge them.
 
 ## Risks
 
-- **Three repos per sub-project.** A frontend change cannot merge before the
-  generated client it imports. Order is contracts → backend → frontend, every time.
-- **`flow_time_logs` has live rows.** Every added column is nullable or defaulted,
-  and `entry_date` backfills from `DATE(logged_at)`.
-- **HR already reads this table.** `internal/modules/hr_time/internal/infrastructure/flow_adapter.go`
-  reads `flow_time_logs` today. Any column change has to be checked against it, and
-  the reconciliation the handoff describes runs through it.
-- **`status` plus `locked_at` plus the lock setting is a state machine.** It wants
-  defining once, server-side, not re-derived per screen.
-- **Scope.** Six sub-projects is months, not days. Sequencing by what unblocks the
-  most is what keeps it shippable.
+- **`flow_time_logs` has live rows and an external reader.** Migration has to
+  preserve them and cut over `flow_adapter.go` in the same change.
+- **Flow gaining a dependency on the HR module.** Direction of dependency in a
+  modular monolith is a real architectural call, not a detail.
+- **`business_id` defaults to `0`** on both `flow_time_logs` and `hr_time_entries`,
+  the same defect already recorded for the HR fixtures. Tenancy scoping needs
+  settling before more data lands on it.
+- **Two-level approval semantics.** Day-level approval plus a weekly payroll
+  rollup means two states that can disagree; the rollup must be derived, never
+  independently editable.
+- **Scope.** Seven steps across three repos. Step 1 alone is a genuine feature.
 
 ## Open questions
 
-1. **WIP limit and prompts-for-hours** — add to `flow_project_columns` in
-   sub-project 1, or leave the board panel's rows gated?
-2. **Timer.** Still no start/stop schema. Ship the degraded quick-log the design
-   settles on, or add `started_at`/`ended_at` and build it properly?
-3. **Approval chain depth.** Single-level is baked in. Confirm that, or model a
-   chain now while the tables are new?
-4. **Business scoping.** `flow_time_logs.business_id` defaults to `0`, the same
-   defect already recorded for the HR fixtures. Worth fixing here or out of scope?
+1. **Who may log for someone else?** A manager filling in for an absent field
+   worker is common, and nothing above covers it.
+2. **A refused overtime request after the hours are worked.** The hours happened;
+   refusing the request cannot delete them. Does the day stay unapproved, or does
+   the time move to an unpaid category?
+3. **Weekends and non-working days.** Does every calendar day need a record, or
+   only days worked? Affects the missing-days list and how the week reads.
+4. **Retention.** How long do work days and their action history survive, given
+   they become payroll evidence?
