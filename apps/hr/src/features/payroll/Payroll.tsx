@@ -16,6 +16,7 @@ import {
   Button,
   EmptyState,
   Skeleton,
+  QueryError,
   Tabs,
   Pill,
 } from '../../shared/components/ui';
@@ -46,7 +47,7 @@ const Payroll = (): React.JSX.Element => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [params] = useState<ListPayrollRunsParams>({ limit: 50, offset: 0 });
 
-  const { data, isLoading } = useListPayrollRuns(params, { enabled: payrollConfigured });
+  const { data, isLoading, isError, isFetching, refetch } = useListPayrollRuns(params, { enabled: payrollConfigured });
   const triggerRun = useTriggerPayrollRun(payrollConfigured);
 
   if (!payrollConfigured) return <PayrollConfigRequired />;
@@ -163,7 +164,7 @@ const Payroll = (): React.JSX.Element => {
         />
 
         {/* Runs list */}
-        {isLoading ? (
+        {isError ? <QueryError onRetry={() => refetch()} isRetrying={isFetching} /> : isLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[1, 2, 3].map((i) => (
               <Skeleton key={i} height={72} />

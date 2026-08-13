@@ -24,6 +24,7 @@
   "confirm": "Confirm",
   "close": "Close",
   "retry": "Retry",
+  "loadError": "Something went wrong while loading. Please try again.",
   "approve": "Approve",
   "reject": "Reject",
   "optionalNote": "Optional note"

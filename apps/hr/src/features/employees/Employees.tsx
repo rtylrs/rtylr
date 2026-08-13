@@ -4,6 +4,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Plus, Search } from 'lucide-react';
+import { QueryError } from '../../shared/components/ui';
 import { useListEmployees } from '../../shared/hooks/queries/useEmployees';
 import type { EmployeePayload } from '@voxire/voxie/hr/employee/v1/types';
 
@@ -17,7 +18,7 @@ const Employees = (): React.JSX.Element => {
   const [departmentFilter, setDepartmentFilter] = useState<number | undefined>();
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
 
-  const { data, isLoading } = useListEmployees({
+  const { data, isLoading, isError, isFetching, refetch } = useListEmployees({
     limit: PAGE_SIZE,
     offset,
     departmentId: departmentFilter,
@@ -77,6 +78,7 @@ const Employees = (): React.JSX.Element => {
           </button>
         </div>
 
+        {isError ? <QueryError onRetry={() => refetch()} isRetrying={isFetching} /> : <>
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative flex-1" style={{ minWidth: 200 }}>
@@ -110,7 +112,7 @@ const Employees = (): React.JSX.Element => {
         {/* Virtualised table */}
         {isLoading ? (
           <div className="flex justify-center py-12">
-            <div
+        <div
               className="h-6 w-6 rounded-full border-2 animate-spin"
               style={{ borderColor: 'var(--hr-border)', borderTopColor: 'var(--accent)' }}
             />
@@ -124,7 +126,7 @@ const Employees = (): React.JSX.Element => {
             <div
               className="rounded-lg overflow-hidden"
               style={{ border: '1px solid var(--hr-border)' }}
-            >
+        >
               {/* Header */}
               <div
                 className="grid grid-cols-4 gap-4 px-4 py-2 text-xs font-medium"
@@ -230,6 +232,7 @@ const Employees = (): React.JSX.Element => {
             )}
           </>
         )}
+        </>}
       </div>
     </>
   );
