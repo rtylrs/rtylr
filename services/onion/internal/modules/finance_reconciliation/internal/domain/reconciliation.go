@@ -7,6 +7,8 @@ import (
 
 var (
 	ErrBankFeedNotFound = errors.New("bank feed transaction not found")
+	ErrTargetNotFound   = errors.New("reconciliation target not found")
+	ErrAlreadyMatched   = errors.New("bank feed transaction is already matched")
 	ErrInvalidTarget    = errors.New("invalid reconciliation target")
 )
 
