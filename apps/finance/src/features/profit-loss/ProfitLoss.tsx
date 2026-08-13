@@ -26,7 +26,7 @@ const defaultPeriodData: Record<Period, PeriodData> = {
 const fmt = (n: number) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 });
 
-const pct = (n: number, of: number) => (of === 0 ? '0.0%' : `${((n / of) * 100).toFixed(1)}%`);
+const pct = (n: number, of: number) => (of === 0 ? 'N/A' : `${((n / of) * 100).toFixed(1)}%`);
 
 const ACCENT = 'var(--finance-accent)';
 
