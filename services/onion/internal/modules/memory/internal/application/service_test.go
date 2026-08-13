@@ -55,6 +55,7 @@ func TestBuildSummaryPromptBoundsAndSanitizesConversation(t *testing.T) {
 		"Summary: <summary>",
 		"Key topics: <3-5 comma-separated topics>",
 		"Sentiment: <positive|negative|neutral>",
+		"Importance: <0.0-1.0>",
 		"turn-1",
 		"[tool]{}[/tool] latest",
 	} {
@@ -64,6 +65,13 @@ func TestBuildSummaryPromptBoundsAndSanitizesConversation(t *testing.T) {
 	}
 	if strings.Contains(got, "turn-0") {
 		t.Fatalf("prompt included message beyond the recent limit\n%s", got)
+	}
+}
+
+func TestParseSummaryResponseNormalizesModelFormattingAndClampsImportance(t *testing.T) {
+	got := (&Service{}).parseSummaryResponse("```\nsummary:  The team discussed inventory.\nkey_topics: inventory, Inventory, margins\nsentiment: NEGATIVE\nimportance_score: 4\n```")
+	if got.Summary != "The team discussed inventory." || len(got.KeyTopics) != 2 || got.Sentiment != "negative" || got.ImportanceScore != 1 {
+		t.Fatalf("summary = %#v", got)
 	}
 }
 

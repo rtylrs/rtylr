@@ -342,5 +342,8 @@ func productMutationError(err error) error {
 	if errors.Is(err, domain.ErrProductNotFound) {
 		return onekiterrors.New(http.StatusNotFound, err.Error())
 	}
+	if errors.Is(err, domain.ErrProductReferenceNotFound) {
+		return onekiterrors.New(http.StatusNotFound, err.Error())
+	}
 	return onekiterrors.New(http.StatusInternalServerError, "Failed to update product")
 }

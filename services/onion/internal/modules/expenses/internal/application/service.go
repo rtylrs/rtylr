@@ -16,8 +16,8 @@ const (
 	expensesScope = "expenses"
 	expensesTTL   = 5 * time.Minute
 
-	defaultListLimit int32 = 20
-	maxListLimit     int32 = 100
+	defaultListLimit int32 = 50
+	maxListLimit     int32 = 500
 )
 
 type repository interface {
@@ -56,7 +56,7 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Expense,
 }
 
 // ListPaginated returns a single page of expenses. A non-positive limit
-// defaults to 20 and limit is capped at 100; a negative offset is clamped to
+// defaults to 50 and limit is capped at 500; a negative offset is clamped to
 // zero.
 func (s *Service) ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Expense, error) {
 	if limit <= 0 {

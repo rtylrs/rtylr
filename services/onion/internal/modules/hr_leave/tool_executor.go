@@ -84,7 +84,7 @@ func (m *Module) executeListLeaveRequestsTool(ctx context.Context, input map[str
 		return nil, err
 	}
 
-	requests, total, err := m.service.ListLeaveRequests(ctx, ownerID, domain.ListLeaveRequestsParams{
+	requests, total, err := m.service.ListLeaveRequests(ctx, ownerID, ownerID, domain.ListLeaveRequestsParams{
 		Limit:  limit,
 		Offset: offset,
 	})

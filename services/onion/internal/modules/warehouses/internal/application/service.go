@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
 	"github.com/voxire/onion/internal/modules/warehouses/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
@@ -23,6 +24,7 @@ type repository interface {
 
 type Service struct {
 	repo repository
+	db   *sql.DB
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
@@ -30,6 +32,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 	return &Service{
 		repo: repo,
+		db:   db,
 	}
 }
 
@@ -50,6 +53,9 @@ func (s *Service) CreateWarehouse(ctx context.Context, businessID int64, input d
 	if err != nil {
 		return 0, err
 	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "warehouse", EntityID: id, Action: "created", NewValues: input}); err != nil {
+		return 0, err
+	}
 
 	s.invalidateCache(ctx, businessID)
 
@@ -57,8 +63,15 @@ func (s *Service) CreateWarehouse(ctx context.Context, businessID int64, input d
 }
 
 func (s *Service) UpdateWarehouse(ctx context.Context, businessID, id int64, input domain.WarehouseInput) error {
-	err := s.repo.UpdateWarehouse(ctx, businessID, id, input)
+	old, err := s.repo.GetWarehouseByID(ctx, businessID, id)
 	if err != nil {
+		return err
+	}
+	err = s.repo.UpdateWarehouse(ctx, businessID, id, input)
+	if err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "warehouse", EntityID: id, Action: "updated", OldValues: old, NewValues: input}); err != nil {
 		return err
 	}
 
@@ -68,8 +81,15 @@ func (s *Service) UpdateWarehouse(ctx context.Context, businessID, id int64, inp
 }
 
 func (s *Service) DeleteWarehouse(ctx context.Context, businessID, id int64) error {
-	err := s.repo.DeleteWarehouse(ctx, businessID, id)
+	old, err := s.repo.GetWarehouseByID(ctx, businessID, id)
 	if err != nil {
+		return err
+	}
+	err = s.repo.DeleteWarehouse(ctx, businessID, id)
+	if err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "warehouse", EntityID: id, Action: "deleted", OldValues: old}); err != nil {
 		return err
 	}
 

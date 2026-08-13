@@ -10,16 +10,17 @@ import (
 )
 
 type mockRepo struct {
-	bank      []domain.UnmatchedBankTransaction
-	invoices  []domain.UnmatchedInvoice
-	expenses  []domain.UnmatchedInvoice
-	bankErr   error
-	invErr    error
-	expErr    error
-	exists    bool
-	existsErr error
-	matchID   int64
-	matchErr  error
+	bank         []domain.UnmatchedBankTransaction
+	invoices     []domain.UnmatchedInvoice
+	expenses     []domain.UnmatchedInvoice
+	bankErr      error
+	invErr       error
+	expErr       error
+	exists       bool
+	existsErr    error
+	targetExists bool
+	matchID      int64
+	matchErr     error
 }
 
 func (m *mockRepo) ListUnmatchedBankFeeds(_ context.Context, _ int64) ([]domain.UnmatchedBankTransaction, error) {
@@ -36,6 +37,10 @@ func (m *mockRepo) ListUnmatchedExpenses(_ context.Context, _ int64) ([]domain.U
 
 func (m *mockRepo) BankFeedExists(_ context.Context, _, _ int64) (bool, error) {
 	return m.exists, m.existsErr
+}
+
+func (m *mockRepo) TargetExists(_ context.Context, _ int64, _ domain.MatchInput) (bool, error) {
+	return m.targetExists, nil
 }
 
 func (m *mockRepo) CreateMatch(_ context.Context, _ int64, _ domain.MatchInput) (int64, error) {
@@ -98,10 +103,18 @@ func TestMatch_RejectsMissingBankFeed(t *testing.T) {
 }
 
 func TestMatch_HappyPath(t *testing.T) {
-	s := &Service{repo: &mockRepo{exists: true, matchID: 99}}
+	s := &Service{repo: &mockRepo{exists: true, targetExists: true, matchID: 99}}
 	id, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7})
 	if err != nil || id != 99 {
 		t.Errorf("id=%d err=%v", id, err)
+	}
+}
+
+func TestMatch_RejectsMissingTarget(t *testing.T) {
+	s := &Service{repo: &mockRepo{exists: true}}
+	_, err := s.Match(context.Background(), 1, domain.MatchInput{TargetType: domain.TargetTypeInvoice, BankFeedID: 5, TargetID: 7})
+	if !errors.Is(err, domain.ErrTargetNotFound) {
+		t.Errorf("expected ErrTargetNotFound, got %v", err)
 	}
 }
 

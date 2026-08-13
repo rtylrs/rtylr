@@ -7,6 +7,8 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/go-sql-driver/mysql"
+
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/domain"
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -118,12 +120,68 @@ func (r *Repository) BankFeedExists(ctx context.Context, businessID, id int64) (
 	return true, nil
 }
 
+func (r *Repository) TargetExists(ctx context.Context, businessID int64, input domain.MatchInput) (bool, error) {
+	return targetExists(ctx, r.queries, businessID, input)
+}
+
+func targetExists(ctx context.Context, queries *sqlc.Queries, businessID int64, input domain.MatchInput) (bool, error) {
+	var err error
+	switch input.TargetType {
+	case domain.TargetTypeInvoice:
+		_, err = queries.GetInvoiceForBusiness(ctx, sqlc.GetInvoiceForBusinessParams{
+			ID: input.TargetID, BusinessID: businessID,
+		})
+	case domain.TargetTypeExpense:
+		_, err = queries.GetExpenseForBusiness(ctx, sqlc.GetExpenseForBusinessParams{
+			ID: input.TargetID, BusinessID: businessID,
+		})
+	default:
+		return false, domain.ErrInvalidTarget
+	}
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	return err == nil, err
+}
+
 func (r *Repository) CreateMatch(ctx context.Context, businessID int64, input domain.MatchInput) (int64, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+	queries := r.queries.WithTx(tx)
+
+	if _, err := queries.LockBankFeedForBusiness(ctx, sqlc.LockBankFeedForBusinessParams{
+		ID: input.BankFeedID, BusinessID: businessID,
+	}); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, domain.ErrBankFeedNotFound
+		}
+		return 0, err
+	}
+
+	if _, err := queries.GetMatchForBankFeed(ctx, sqlc.GetMatchForBankFeedParams{
+		BusinessID: businessID, BankFeedID: input.BankFeedID,
+	}); err == nil {
+		return 0, domain.ErrAlreadyMatched
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return 0, err
+	}
+
+	targetExists, err := targetExists(ctx, queries, businessID, input)
+	if err != nil {
+		return 0, err
+	}
+	if !targetExists {
+		return 0, domain.ErrTargetNotFound
+	}
+
 	matchedBy := sql.NullInt64{}
 	if input.MatchedBy > 0 {
 		matchedBy = sql.NullInt64{Int64: input.MatchedBy, Valid: true}
 	}
-	res, err := r.queries.CreateReconciliationMatch(ctx, sqlc.CreateReconciliationMatchParams{
+	res, err := queries.CreateReconciliationMatch(ctx, sqlc.CreateReconciliationMatchParams{
 		OwnerID:    businessID,
 		BusinessID: businessID,
 		BankFeedID: input.BankFeedID,
@@ -132,6 +190,10 @@ func (r *Repository) CreateMatch(ctx context.Context, businessID int64, input do
 		MatchedBy:  matchedBy,
 	})
 	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			return 0, domain.ErrAlreadyMatched
+		}
 		logger.Ctx(ctx).Error("Failed to create reconciliation match",
 			logger.Error(err),
 			logger.Any("business_id", businessID),
@@ -141,7 +203,14 @@ func (r *Repository) CreateMatch(ctx context.Context, businessID int64, input do
 		)
 		return 0, err
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 // CountMatches returns the total number of reconciliation matches created for

@@ -14,15 +14,16 @@ import (
 )
 
 type PayrollAPI struct {
-	service *application.Service
+	service     *application.Service
+	permissions PermissionProvider
 }
 
-func NewPayrollAPI(service *application.Service) *PayrollAPI {
-	return &PayrollAPI{service: service}
+func NewPayrollAPI(service *application.Service, permissions PermissionProvider) *PayrollAPI {
+	return &PayrollAPI{service: service, permissions: permissions}
 }
 
 func (a *PayrollAPI) ListPayroll(ctx context.Context, req *hrpayrollv1.ListPayrollRequest) (*hrpayrollv1.ListPayrollResponse, error) {
-	businessID, _, errModel := resolveIdentity(ctx)
+	businessID, viewerUserID, errModel := resolveIdentity(ctx)
 	if errModel != nil {
 		return nil, errModel
 	}
@@ -32,7 +33,9 @@ func (a *PayrollAPI) ListPayroll(ctx context.Context, req *hrpayrollv1.ListPayro
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list payroll records")
 	}
 
-	return &hrpayrollv1.ListPayrollResponse{Records: newPayrollRecords(records)}, nil
+	return &hrpayrollv1.ListPayrollResponse{
+		Records: newPayrollRecords(records, canViewCompensation(ctx, a.permissions, businessID, viewerUserID)),
+	}, nil
 }
 
 func (a *PayrollAPI) RunPayroll(ctx context.Context, req *hrpayrollv1.RunPayrollRequest) (*hrpayrollv1.RunPayrollResponse, error) {
@@ -94,9 +97,18 @@ func resolveIdentity(ctx context.Context) (businessID, ownerID int64, errModel e
 	return businessID, device.User.UserID, nil
 }
 
-func newPayrollRecords(records []domain.PayrollRecord) []*hrpayrollv1.PayrollRecord {
+func newPayrollRecords(records []domain.PayrollRecord, compensationVisible bool) []*hrpayrollv1.PayrollRecord {
 	out := make([]*hrpayrollv1.PayrollRecord, 0, len(records))
 	for _, record := range records {
+		if !compensationVisible {
+			record.BasePay = 0
+			record.OvertimePay = 0
+			record.Bonuses = 0
+			record.Deductions = 0
+			record.TaxWithheld = 0
+			record.NetPay = 0
+		}
+
 		out = append(out, &hrpayrollv1.PayrollRecord{
 			Id:            record.ID,
 			OwnerId:       record.OwnerID,

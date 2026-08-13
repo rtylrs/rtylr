@@ -10,6 +10,7 @@ type noopRedisCache struct{}
 
 func (n *noopRedisCache) Put(_ context.Context, _ string, _ []byte, _ time.Duration) {}
 func (n *noopRedisCache) Get(_ context.Context, _ string) []byte                     { return nil }
+func (n *noopRedisCache) GetDel(_ context.Context, _ string) []byte                  { return nil }
 func (n *noopRedisCache) PutMulti(_ context.Context, _ map[string][]byte, _ time.Duration) {
 }
 

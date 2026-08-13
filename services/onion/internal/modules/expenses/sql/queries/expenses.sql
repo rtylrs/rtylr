@@ -2,7 +2,8 @@
 SELECT id, owner_id, business_id, category_id, amount, currency, description, vendor, receipt_url, expense_date, status, created_at, updated_at
 FROM finance_expenses
 WHERE business_id = ?
-ORDER BY expense_date DESC;
+ORDER BY expense_date DESC
+LIMIT 500;
 
 -- name: GetExpenseByID :one
 SELECT id, owner_id, business_id, category_id, amount, currency, description, vendor, receipt_url, expense_date, status, created_at, updated_at
