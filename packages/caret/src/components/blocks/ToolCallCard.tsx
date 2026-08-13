@@ -34,19 +34,6 @@ const detailLabelStyle: React.CSSProperties = {
   marginBottom: 4,
 };
 
-const detailPreStyle: React.CSSProperties = {
-  margin: 0,
-  padding: '8px 9px',
-  background: caretTokens.surfaceHigh,
-  border: `1px solid ${caretTokens.border}`,
-  borderRadius: caretRadius.sm,
-  overflowX: 'auto',
-  whiteSpace: 'pre-wrap',
-  wordBreak: 'break-word',
-  color: caretTokens.textMuted,
-  fontFamily: 'SFMono-Regular, Menlo, Consolas, monospace',
-};
-
 const summaryStyle: React.CSSProperties = {
   padding: '7px 9px',
   background: caretTokens.surfaceHigh,
@@ -81,16 +68,6 @@ function statusText(status: ToolCallBlock['status'], target: string): string {
       return `Skipped checking ${target}`;
     case 'error':
       return `Could not check ${target}`;
-  }
-}
-
-function formatValue(value: unknown): string {
-  if (typeof value === 'string') return value;
-
-  try {
-    return JSON.stringify(value ?? {}, null, 2);
-  } catch {
-    return String(value);
   }
 }
 
@@ -151,16 +128,6 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
             opacity: quiet ? 0.88 : 1,
           }}
         >
-          <div style={{ marginBottom: 8 }}>
-            <div style={detailLabelStyle}>technical name</div>
-            <pre style={detailPreStyle}>{call.name}</pre>
-          </div>
-
-          <div style={{ marginBottom: 8 }}>
-            <div style={detailLabelStyle}>request details</div>
-            <pre style={detailPreStyle}>{formatValue(call.input ?? {})}</pre>
-          </div>
-
           {call.preview && (
             <div style={{ marginBottom: 8 }}>
               <div style={detailLabelStyle}>preview</div>
@@ -172,13 +139,6 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
             <div style={{ marginBottom: 8 }}>
               <div style={detailLabelStyle}>summary</div>
               <div style={summaryStyle}>{call.summary}</div>
-            </div>
-          )}
-
-          {call.output !== undefined && (
-            <div style={{ marginBottom: 8 }}>
-              <div style={detailLabelStyle}>result</div>
-              <pre style={detailPreStyle}>{formatValue(call.output)}</pre>
             </div>
           )}
 
