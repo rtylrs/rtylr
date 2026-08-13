@@ -278,8 +278,8 @@ func (a *ProductAPI) ListReorderSuggestions(ctx context.Context, _ *erpproductv1
 	if listErr != nil {
 		return nil, productStatusError(http.StatusInternalServerError, "Failed to load reorder suggestions")
 	}
-	out := make([]*erpproductv1.ReorderSuggestion, 0, len(list))
-	for _, s := range list {
+	out := make([]*erpproductv1.ReorderSuggestion, 0, len(list.Suggestions))
+	for _, s := range list.Suggestions {
 		out = append(out, &erpproductv1.ReorderSuggestion{
 			ProductId:         s.ProductID,
 			Name:              s.Name,
@@ -292,7 +292,7 @@ func (a *ProductAPI) ListReorderSuggestions(ctx context.Context, _ *erpproductv1
 			Confidence:        s.Confidence,
 		})
 	}
-	return &erpproductv1.ListReorderSuggestionsResponse{Suggestions: out}, nil
+	return &erpproductv1.ListReorderSuggestionsResponse{Suggestions: out, Truncated: list.Truncated}, nil
 }
 
 func (a *ProductAPI) ListExpiringItems(ctx context.Context, req *erpproductv1.ListExpiringItemsRequest) (*erpproductv1.ListExpiringItemsResponse, error) {

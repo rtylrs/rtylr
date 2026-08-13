@@ -550,7 +550,7 @@ func initializeModules(ctx context.Context) *apiModules {
 		HRCore:                hrCoreModule,
 		HRDashboard:           hrdashboard.NewModule(ctx, dbclient.Pool()),
 		HRDocuments:           hrdocuments.NewModule(ctx, dbclient.Pool()),
-		HubMenu:               hubmenu.NewModule(),
+		HubMenu:               hubmenu.NewModule(ctx, dbclient.Pool()),
 		HREquipment:           hrequipment.NewModule(ctx, dbclient.Pool(), hrCoreModule),
 		HRLeave:               hrLeaveModule,
 		HROnboarding:          hronboarding.NewModule(ctx, dbclient.Pool()),

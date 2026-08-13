@@ -15,9 +15,13 @@ WHERE business_id = ? AND is_active = TRUE AND track_inventory = TRUE
 -- cross-schema read from pos_orders — orders created today for the KPI summary
 -- name: CountOrdersToday :one
 SELECT COUNT(*) FROM pos_orders
-WHERE business_id = ? AND DATE(created_at) = CURDATE();
+WHERE business_id = ?
+  AND created_at >= CURDATE()
+  AND created_at < CURDATE() + INTERVAL 1 DAY;
 
 -- cross-schema read from pos_orders — total revenue from orders created today
 -- name: SumRevenueToday :one
 SELECT COALESCE(SUM(total), 0) FROM pos_orders
-WHERE business_id = ? AND DATE(created_at) = CURDATE();
+WHERE business_id = ?
+  AND created_at >= CURDATE()
+  AND created_at < CURDATE() + INTERVAL 1 DAY;

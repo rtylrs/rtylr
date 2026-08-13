@@ -8,7 +8,11 @@ INSERT INTO pos_locations (owner_id, business_id, name, address, phone) VALUES (
 -- name: ListTablesByOwner :many
 SELECT id, owner_id, business_id, location_id, name, capacity, status,
        current_session_order_id, qr_code_url, created_at, updated_at
-FROM pos_tables WHERE business_id = ? ORDER BY name ASC LIMIT 1000;
+FROM pos_tables
+WHERE business_id = sqlc.arg(business_id)
+  AND (sqlc.arg(location_id) = 0 OR location_id = sqlc.arg(location_id))
+  AND (sqlc.arg(status) = '' OR status = sqlc.arg(status))
+ORDER BY name ASC, id ASC;
 
 -- name: CreatePosTable :execresult
 INSERT INTO pos_tables (owner_id, business_id, location_id, name, capacity, qr_code_url)
@@ -158,11 +162,15 @@ WHERE business_id = ?
 -- name: MoveOrderItems :exec
 UPDATE pos_order_items SET order_id = ? WHERE id = ? AND order_id = ?;
 
--- name: RecalcOrderTotals :exec
-UPDATE pos_orders SET
-    subtotal = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id),
-    total = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id)
-WHERE pos_orders.id = ?;
+-- name: GetOrderItemsTotal :one
+SELECT COALESCE(SUM(total), 0) AS subtotal
+FROM pos_order_items
+WHERE order_id = ?;
+
+-- name: UpdateOrderTotals :exec
+UPDATE pos_orders
+SET subtotal = sqlc.arg(subtotal), total = sqlc.arg(total)
+WHERE id = ?;
 
 -- name: CancelOrder :exec
 UPDATE pos_orders SET status = 'cancelled' WHERE id = ? AND business_id = ?;
@@ -203,11 +211,16 @@ SELECT COUNT(*) FROM pos_paddle_events_processed WHERE transaction_id = ?;
 -- name: VoidOrderItem :execresult
 UPDATE pos_order_items SET status = 'cancelled' WHERE id = ? AND order_id = ? AND status IN ('pending','preparing');
 
--- name: RecalcOrderTotal :exec
+-- name: GetActiveOrderItemsTotal :one
+SELECT COALESCE(SUM(total), 0) AS subtotal
+FROM pos_order_items
+WHERE order_id = ?
+  AND status != 'cancelled';
+
+-- name: UpdateOrderTotal :exec
 UPDATE pos_orders
-SET subtotal = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id AND oi.status != 'cancelled'),
-    total = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id AND oi.status != 'cancelled') + pos_orders.tax_amount - pos_orders.discount_amount
-WHERE pos_orders.id = ? AND pos_orders.business_id = ?;
+SET subtotal = sqlc.arg(subtotal), total = sqlc.arg(total) + tax_amount - discount_amount
+WHERE id = ? AND business_id = ?;
 
 -- name: IsOnlineOrderingEnabled :one
 SELECT COUNT(*) FROM business_addons WHERE business_id = ? AND addon_id = 'online_ordering' AND is_enabled = TRUE;

@@ -9,6 +9,7 @@ import (
 var (
 	ErrJournalEntryNotFound      = errors.New("journal entry not found")
 	ErrJournalEntryAlreadyPosted = errors.New("journal entry already posted")
+	ErrInvalidJournalEntry       = errors.New("invalid journal entry")
 )
 
 type JournalEntry struct {

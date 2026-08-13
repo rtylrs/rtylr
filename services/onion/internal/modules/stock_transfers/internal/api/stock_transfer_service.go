@@ -69,6 +69,9 @@ func (a *StockTransferAPI) CreateStockTransfer(ctx context.Context, req *erpstoc
 		Items:           items,
 	})
 	if createErr != nil {
+		if errors.Is(createErr, domain.ErrInvalidStockTransfer) {
+			return nil, stockTransferStatusError(http.StatusBadRequest, createErr.Error())
+		}
 		if errors.Is(createErr, domain.ErrStockTransferReferenceNotFound) {
 			return nil, stockTransferStatusError(http.StatusNotFound, createErr.Error())
 		}

@@ -47,23 +47,34 @@ WHERE o.business_id = ?
 GROUP BY c.id, c.name
 ORDER BY revenue DESC;
 
--- name: GetProductMargins :many
-SELECT (sale_price - cost_price) / sale_price * 100 AS margin_pct
-FROM erp_products
-WHERE business_id = ?
-  AND is_active = TRUE
-  AND sale_price > 0;
+-- name: GetProductMarginDistribution :one
+SELECT
+  CAST(COALESCE(SUM(margin_pct >= -1000 AND margin_pct < 0), 0) AS SIGNED) AS below_zero_count,
+  CAST(COALESCE(SUM(margin_pct >= 0 AND margin_pct < 10), 0) AS SIGNED) AS zero_to_ten_count,
+  CAST(COALESCE(SUM(margin_pct >= 10 AND margin_pct < 25), 0) AS SIGNED) AS ten_to_twenty_five_count,
+  CAST(COALESCE(SUM(margin_pct >= 25 AND margin_pct < 50), 0) AS SIGNED) AS twenty_five_to_fifty_count,
+  CAST(COALESCE(SUM(margin_pct >= 50 AND margin_pct < 75), 0) AS SIGNED) AS fifty_to_seventy_five_count,
+  CAST(COALESCE(SUM(margin_pct >= 75 AND margin_pct < 1000), 0) AS SIGNED) AS seventy_five_plus_count
+FROM (
+  SELECT (sale_price - cost_price) / sale_price * 100 AS margin_pct
+  FROM erp_products
+  WHERE business_id = ?
+    AND is_active = TRUE
+    AND sale_price > 0
+) AS active_product_margins;
 
 -- name: GetSlowMovers :many
 SELECT p.id, p.name, p.stock_quantity,
-       EXISTS (
-         SELECT 1 FROM pos_order_items oi
-         JOIN pos_orders o ON o.id = oi.order_id AND o.business_id = p.business_id
-         WHERE oi.menu_item_id = p.id AND o.created_at >= ?
-       ) AS recent_sale
+       FALSE AS recent_sale
 FROM erp_products p
+LEFT JOIN (
+    SELECT DISTINCT oi.menu_item_id
+    FROM pos_order_items oi
+    JOIN pos_orders o ON o.id = oi.order_id
+    WHERE o.business_id = ? AND o.created_at >= ?
+) AS recent_sales ON recent_sales.menu_item_id = p.id
 WHERE p.business_id = ?
   AND p.is_active = TRUE
-HAVING recent_sale = 0
+  AND recent_sales.menu_item_id IS NULL
 ORDER BY p.name ASC
 LIMIT 500;

@@ -241,8 +241,8 @@ func buildAnalystGroundingPromptFromJSONWithContext(dataStr string, rowCount int
 	g.WriteString("\n```\n")
 	g.WriteString("Answer the user's analytics question using ONLY this evidence. ")
 	g.WriteString("Lead with the result in business language; do not open with process phrases like \"Based on the provided analytics query\". ")
-	g.WriteString("If the rows are empty or insufficient, say so plainly and do not invent missing values. ")
-	g.WriteString("Use a compact table for row-level comparisons and short bullets only when they add useful interpretation.")
+	g.WriteString("If the rows are empty or insufficient, say so plainly, do not invent missing values, and do not output a table with headers but no records. ")
+	g.WriteString("Use a compact table only when at least one row-level record is present; otherwise use one plain empty-state sentence and short bullets only when they add useful interpretation.")
 	return g.String()
 }
 

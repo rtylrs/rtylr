@@ -3,12 +3,15 @@ package domain
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"math"
 	"time"
 )
 
 var (
 	ErrStockTransferNotFound          = errors.New("stock transfer not found")
 	ErrStockTransferReferenceNotFound = errors.New("stock transfer reference not found in business")
+	ErrInvalidStockTransfer           = errors.New("invalid stock transfer")
 )
 
 type StockTransferStatus string
@@ -91,4 +94,25 @@ type StockTransferItemInput struct {
 type StockTransferStatusInput struct {
 	ID     int64               `json:"id"`
 	Status StockTransferStatus `json:"status"`
+}
+
+func ValidateStockTransferInput(input StockTransferInput) error {
+	if input.FromWarehouseID <= 0 {
+		return fmt.Errorf("from_warehouse_id must be positive")
+	}
+	if input.ToWarehouseID <= 0 {
+		return fmt.Errorf("to_warehouse_id must be positive")
+	}
+	if len(input.Items) == 0 {
+		return fmt.Errorf("at least one transfer item is required")
+	}
+	for i, item := range input.Items {
+		if item.ProductID <= 0 {
+			return fmt.Errorf("item[%d]: product_id must be positive", i)
+		}
+		if item.Quantity <= 0 || math.IsNaN(item.Quantity) || math.IsInf(item.Quantity, 0) {
+			return fmt.Errorf("item[%d]: quantity must be a finite value greater than zero", i)
+		}
+	}
+	return nil
 }

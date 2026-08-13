@@ -184,13 +184,17 @@ func (r *Repository) topCategories(ctx context.Context, ownerID int64, limit int
 // their reorder threshold, with a suggested order quantity. Without
 // sales-history integration the suggested qty is just the recorded
 // reorder_quantity; confidence is "low" to flag this to the UI.
-func (r *Repository) ListReorderSuggestions(ctx context.Context, ownerID int64) ([]domain.ReorderSuggestion, error) {
+func (r *Repository) ListReorderSuggestions(ctx context.Context, ownerID int64) (domain.ReorderSuggestionsResult, error) {
 	rows, err := r.queries.ListReorderSuggestions(ctx, ownerID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list reorder suggestions", logger.Error(err))
-		return nil, err
+		return domain.ReorderSuggestionsResult{}, err
 	}
 
+	truncated := len(rows) > 100
+	if truncated {
+		rows = rows[:100]
+	}
 	out := make([]domain.ReorderSuggestion, 0, len(rows))
 	for _, row := range rows {
 		s := domain.ReorderSuggestion{
@@ -207,7 +211,7 @@ func (r *Repository) ListReorderSuggestions(ctx context.Context, ownerID int64) 
 		s.Confidence = "low"
 		out = append(out, s)
 	}
-	return out, nil
+	return domain.ReorderSuggestionsResult{Suggestions: out, Truncated: truncated}, nil
 }
 
 // ListExpiringItems is stubbed to return an empty slice. Batch-level
