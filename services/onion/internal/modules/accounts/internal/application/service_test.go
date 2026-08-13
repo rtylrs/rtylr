@@ -18,7 +18,7 @@ type mockRepo struct {
 	treeErr    error
 }
 
-func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Account, error) {
+func (m *mockRepo) List(_ context.Context, _ int64, _, _ int) ([]domain.Account, error) {
 	return m.listResult, nil
 }
 
