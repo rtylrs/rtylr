@@ -14,6 +14,7 @@ import {
 import GateNotice from '../../../shared/components/GateNotice';
 import DurationField from './DurationField';
 import { roundLoggedMinutes, useTimeSettingsStore } from '../../../shared/stores/timeSettingsStore';
+import { useRealtimeStatus } from '../../../shared/lib/realtime';
 
 interface TimePanelProps {
   taskId: string;
@@ -50,6 +51,7 @@ const TimePanel = ({
   const deleteTimeLog = useDeleteTimeLog();
   const { data: team } = useFlowTeam();
   const roundingMinutes = useTimeSettingsStore((s) => s.roundingMinutes);
+  const realtimeStatus = useRealtimeStatus();
 
   const [formOpen, setFormOpen] = useState(false);
   const [duration, setDuration] = useState('');
@@ -159,6 +161,27 @@ const TimePanel = ({
           overLabel={t('flow.time.overEstimate')}
           percentLabel={(percent) => t('flow.time.percentOfEstimate', { percent })}
         />
+      )}
+
+      {/* The one place in this feature where silence risks losing work: a stale
+       * list looks identical to an empty one. Writes are unaffected, and the copy
+       * says so rather than implying the panel is broken. */}
+      {(realtimeStatus === 'reconnecting' || realtimeStatus === 'disconnected') && (
+        <p
+          role="status"
+          className="mt-2 rounded px-2 py-1 text-[10px] leading-snug"
+          style={{
+            background: 'var(--flow-status-pending-bg)',
+            border: '1px solid var(--flow-status-pending-border)',
+            color: 'var(--flow-status-pending)',
+          }}
+        >
+          {t(
+            realtimeStatus === 'reconnecting'
+              ? 'flow.time.socketReconnecting'
+              : 'flow.time.socketDisconnected'
+          )}
+        </p>
       )}
 
       {isLoading && (
