@@ -32,7 +32,7 @@ mysql_cmd() {
 
 echo "Running migrations against $DB_USER@$DB_HOST:$DB_PORT/$DB_NAME"
 
-for dir in shared cdn rtylr voxire erp hr hr_core hr_attendance hr_documents hr_equipment hr_leave hr_onboarding hr_overtime hr_payroll hr_performance hr_setup hr_shifts hr_time crm finance flow pos hub store support book hr_dashboard recruit insights oauth; do
+for dir in shared cdn rtylr voxire erp hr hr_core hr_attendance hr_documents hr_equipment hr_leave hr_onboarding hr_overtime hr_payroll hr_performance hr_setup hr_shifts hr_time crm finance flow pos hub store support book hr_dashboard recruit insights oauth migrations; do
     schema_dir="$SCHEMAS_DIR/$dir"
     if [ ! -d "$schema_dir" ]; then
         continue

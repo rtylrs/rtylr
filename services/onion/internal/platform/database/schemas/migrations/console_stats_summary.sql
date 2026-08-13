@@ -1,3 +1,4 @@
+-- This migration lives outside SQLC schema inputs because it installs triggers.
 -- Backfill the singleton once for existing installations. Subsequent writes are
 -- tracked by the triggers below, so console stats are O(1) to read.
 CREATE TABLE IF NOT EXISTS console_stats (
