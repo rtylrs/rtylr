@@ -68,7 +68,7 @@ function periodToAnchor(period: string): { period: string; date: string } {
 export function usePLByPeriod(period: string) {
   const anchor = periodToAnchor(period);
   return useQuery({
-    queryKey: ['pl', period],
+    queryKey: ['pl', 'filter', { period }],
     queryFn: async () => {
       const res = await reportClient.getPLReport(anchor);
       return plReportSchema.parse(res) as PLReport;

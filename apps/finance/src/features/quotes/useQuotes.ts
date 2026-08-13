@@ -46,7 +46,7 @@ export interface QuoteListResult {
 export function useQuotes(params: UseQuotesParams = {}) {
   const { page = 1, pageSize = 50 } = params;
   return useQuery<QuoteListResult>({
-    queryKey: ['quotes', { page, pageSize }],
+    queryKey: ['quotes', 'filter', { page, pageSize }],
     queryFn: async (): Promise<QuoteListResult> => {
       const res = await quoteClient.listQuotes({ page, pageSize });
       return {

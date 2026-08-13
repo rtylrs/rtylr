@@ -12,6 +12,7 @@ import type {
 import { InvoicePaymentServiceClient } from '@voxire/voxie/finance/invoices/payments/v1/client';
 import type { Invoice } from '../../shared/services/financeApi';
 import { invoiceSchema } from '../../shared/schemas/invoices';
+import { useListInvoices } from '../../shared/hooks/queries/useInvoices';
 
 const invoicesClient = createOneKitClient(InvoicesServiceClient, 'finance');
 const paymentsClient = createOneKitClient(InvoicePaymentServiceClient, 'finance');
@@ -83,27 +84,18 @@ export interface InvoiceListResult {
 
 export function useInvoices(params: UseInvoicesParams = {}) {
   const { page = 1, pageSize = 50 } = params;
-  return useQuery<InvoiceListResult>({
-    queryKey: ['invoices', { page, pageSize }],
-    queryFn: async (): Promise<InvoiceListResult> => {
-      const res = await invoicesClient.listInvoices({
-        status: '',
-        search: '',
-        dateFrom: '',
-        dateTo: '',
-        page,
-        pageSize,
-      });
-      return {
-        invoices: z
-          .array(invoiceSchema)
-          .parse((res.invoices ?? []).map(fromApiSummary)) as Invoice[],
-        hasMore: res.hasMore ?? false,
-        page: res.page ?? page,
-        pageSize: res.pageSize ?? pageSize,
-      };
-    },
-  });
+  const query = useListInvoices({ page, pageSize });
+  return {
+    ...query,
+    data: query.data
+      ? {
+          invoices: z.array(invoiceSchema).parse((query.data.invoices ?? []).map(fromApiSummary)) as Invoice[],
+          hasMore: query.data.hasMore ?? false,
+          page: query.data.page ?? page,
+          pageSize: query.data.pageSize ?? pageSize,
+        }
+      : undefined,
+  };
 }
 
 export function useInvoiceDetail(id: string | undefined) {
