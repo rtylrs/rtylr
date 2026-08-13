@@ -1213,26 +1213,22 @@ type StatsDTO struct {
 }
 
 func (s *Service) GetStats(ctx context.Context) (*StatsDTO, error) {
-	return cacher.Of[*StatsDTO]().GetOrComputeSingle(ctx, consoleKey("stats"),
-		func(ctx context.Context) (*StatsDTO, error) {
-			row, err := s.repo.GetStats(ctx)
-			if err != nil {
-				return nil, err
-			}
-			return &StatsDTO{
-				TotalUsers:          row.TotalUsers,
-				BannedUsers:         row.BannedUsers,
-				TotalBusinesses:     row.TotalBusinesses,
-				ActiveSubs:          row.ActiveSubs,
-				ActiveSubscriptions: row.ActiveSubs,
-				TrialSubs:           row.TrialSubs,
-				ManualGrants:        row.ManualGrants,
-				ManualAddonGrants:   row.ManualAddonGrants,
-				TotalGrants:         row.ManualGrants,
-				ConsoleAdmins:       row.ConsoleAdmins,
-			}, nil
-		},
-		cacher.RemoteOnly(),
-		cacher.WithExpiry(ctx, consoleTTL),
-	)
+	// console_stats is maintained transactionally by the database. Reading its
+	// single row is cheaper and fresher than caching a set of global counts.
+	row, err := s.repo.GetStats(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &StatsDTO{
+		TotalUsers:          row.TotalUsers,
+		BannedUsers:         row.BannedUsers,
+		TotalBusinesses:     row.TotalBusinesses,
+		ActiveSubs:          row.ActiveSubs,
+		ActiveSubscriptions: row.ActiveSubs,
+		TrialSubs:           row.TrialSubs,
+		ManualGrants:        row.ManualGrants,
+		ManualAddonGrants:   row.ManualAddonGrants,
+		TotalGrants:         row.ManualGrants,
+		ConsoleAdmins:       row.ConsoleAdmins,
+	}, nil
 }

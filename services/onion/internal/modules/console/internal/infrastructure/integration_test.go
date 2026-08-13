@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/console/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
@@ -229,6 +230,86 @@ func TestGetStats_ReturnsNonNegativeCounts(t *testing.T) {
 	}
 	if stats.TotalBusinesses < 1 {
 		t.Errorf("expected at least 1 business in stats, got %d", stats.TotalBusinesses)
+	}
+}
+
+func TestGetStats_TracksGlobalCounterTransitions(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.GetStats(ctx)
+	if err != nil {
+		t.Fatalf("GetStats before writes: %v", err)
+	}
+
+	suffix := time.Now().UnixNano()
+	var userID, businessID int64
+	if result, err := db.ExecContext(ctx,
+		"INSERT INTO users (email, password_hash, full_name) VALUES (?, ?, ?)",
+		fmt.Sprintf("console-stats-%d@example.com", suffix), "hash", "Console Stats Counter",
+	); err != nil {
+		t.Fatalf("insert user: %v", err)
+	} else if userID, err = result.LastInsertId(); err != nil {
+		t.Fatalf("user id: %v", err)
+	}
+	if result, err := db.ExecContext(ctx,
+		"INSERT INTO businesses (name, owner_id) VALUES (?, ?)",
+		fmt.Sprintf("Console Stats Business %d", suffix), userID,
+	); err != nil {
+		t.Fatalf("insert business: %v", err)
+	} else if businessID, err = result.LastInsertId(); err != nil {
+		t.Fatalf("business id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM manual_addon_grants WHERE user_id = ?", userID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM manual_access_grants WHERE user_id = ?", userID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM subscriptions WHERE owner_id = ?", userID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM businesses WHERE id = ?", businessID)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM users WHERE id = ?", userID)
+	})
+	if _, err := db.ExecContext(ctx, "INSERT INTO subscriptions (owner_id, plan_id, status) VALUES (?, ?, 'trial')", userID, 0); err != nil {
+		t.Fatalf("insert subscription: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, "INSERT INTO manual_access_grants (user_id, plan_id, granted_by) VALUES (?, ?, ?)", userID, 0, userID); err != nil {
+		t.Fatalf("insert access grant: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, "INSERT INTO manual_addon_grants (user_id, business_id, addon_id, granted_by) VALUES (?, ?, ?, ?)", userID, businessID, "counter-test", userID); err != nil {
+		t.Fatalf("insert addon grant: %v", err)
+	}
+
+	afterInsert, err := repo.GetStats(ctx)
+	if err != nil {
+		t.Fatalf("GetStats after inserts: %v", err)
+	}
+	if afterInsert.TotalUsers != before.TotalUsers+1 || afterInsert.TotalBusinesses != before.TotalBusinesses+1 ||
+		afterInsert.TrialSubs != before.TrialSubs+1 || afterInsert.ManualGrants != before.ManualGrants+1 ||
+		afterInsert.ManualAddonGrants != before.ManualAddonGrants+1 {
+		t.Fatalf("summary after inserts = %+v, before = %+v", afterInsert, before)
+	}
+
+	if _, err := db.ExecContext(ctx, "UPDATE users SET is_banned = TRUE, is_console_admin = TRUE WHERE id = ?", userID); err != nil {
+		t.Fatalf("update user flags: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, "UPDATE subscriptions SET status = 'active' WHERE owner_id = ?", userID); err != nil {
+		t.Fatalf("activate subscription: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, "UPDATE manual_access_grants SET revoked_at = NOW() WHERE user_id = ?", userID); err != nil {
+		t.Fatalf("revoke access grant: %v", err)
+	}
+	if _, err := db.ExecContext(ctx, "UPDATE manual_addon_grants SET revoked_at = NOW() WHERE user_id = ?", userID); err != nil {
+		t.Fatalf("revoke addon grant: %v", err)
+	}
+
+	afterTransitions, err := repo.GetStats(ctx)
+	if err != nil {
+		t.Fatalf("GetStats after transitions: %v", err)
+	}
+	if afterTransitions.TotalUsers != before.TotalUsers+1 || afterTransitions.TotalBusinesses != before.TotalBusinesses+1 ||
+		afterTransitions.BannedUsers != before.BannedUsers+1 || afterTransitions.ConsoleAdmins != before.ConsoleAdmins+1 ||
+		afterTransitions.ActiveSubs != before.ActiveSubs+1 || afterTransitions.TrialSubs != before.TrialSubs ||
+		afterTransitions.ManualGrants != before.ManualGrants || afterTransitions.ManualAddonGrants != before.ManualAddonGrants {
+		t.Fatalf("summary after transitions = %+v, before = %+v", afterTransitions, before)
 	}
 }
 
