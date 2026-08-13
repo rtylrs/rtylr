@@ -191,12 +191,3 @@ jobs:
               --output table
             exit 1
           fi
-
-  notify:
-    name: Notify Slack
-    needs: [version, build-push-deploy]
-    if: ${{ always() && needs.build-push-deploy.result == 'success' }}
-    uses: tryrtylr/pipelines/.github/workflows/notify-slack.yml@main
-    with:
-      message: ':rocket: *onion (API)* — deployed to production'
-    secrets: inherit
