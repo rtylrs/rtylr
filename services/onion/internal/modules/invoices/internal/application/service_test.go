@@ -64,8 +64,11 @@ func (m *mockRepo) CountInvoiceSequence(_ context.Context, _ int64, _ int) (int6
 	return m.seqCount, m.err
 }
 
-func (m *mockRepo) CreatePayment(_ context.Context, _ int64, _ domain.Payment) (int64, error) {
-	return m.generatedID, m.err
+func (m *mockRepo) RecordPayment(_ context.Context, _ int64, _ domain.PaymentInput) (*domain.Payment, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return &domain.Payment{ID: m.generatedID}, nil
 }
 
 func (m *mockRepo) GetPaymentsByInvoice(_ context.Context, _ int64) ([]domain.Payment, error) {

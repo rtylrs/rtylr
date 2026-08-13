@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	echoapp "github.com/voxire/onion/internal/modules/echo/internal/application"
 )
 
 const maxToolPreviewDetails = 5
@@ -130,11 +132,11 @@ func humanizePreviewKey(key string) string {
 func previewValue(value any) string {
 	switch v := value.(type) {
 	case string:
-		return quotePreviewValue(sanitizeUserInput(v, 80))
+		return quotePreviewValue(echoapp.SanitizeUserInput(v, 80))
 	case fmt.Stringer:
-		return quotePreviewValue(sanitizeUserInput(v.String(), 80))
+		return quotePreviewValue(echoapp.SanitizeUserInput(v.String(), 80))
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64, float32, float64, bool:
-		return sanitizeUserInput(fmt.Sprint(v), 80)
+		return echoapp.SanitizeUserInput(fmt.Sprint(v), 80)
 	case []any:
 		return fmt.Sprintf("%d items", len(v))
 	case map[string]any:
@@ -143,7 +145,7 @@ func previewValue(value any) string {
 		}
 		return fmt.Sprintf("%d fields", len(v))
 	default:
-		return quotePreviewValue(sanitizeUserInput(fmt.Sprint(v), 80))
+		return quotePreviewValue(echoapp.SanitizeUserInput(fmt.Sprint(v), 80))
 	}
 }
 

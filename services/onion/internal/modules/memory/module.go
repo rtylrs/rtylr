@@ -90,6 +90,13 @@ func (m *Module) StoreMessage(ctx context.Context, sessionID string, userID int,
 	return m.memoryService.StoreMessage(ctx, sessionID, userID, role, content, tokens)
 }
 
+// EnsureSessionOwnership is used by backend integrations that accept a
+// client-provided session ID. It keeps ownership verification in the memory
+// module instead of making every caller duplicate repository rules.
+func (m *Module) EnsureSessionOwnership(ctx context.Context, sessionID string, userID int) error {
+	return m.memoryService.EnsureSessionOwnership(ctx, sessionID, userID)
+}
+
 func (m *Module) SummarizeSession(ctx context.Context, sessionID string, userID int) error {
 	return m.memoryService.SummarizeSession(ctx, sessionID, userID)
 }

@@ -26,6 +26,16 @@ UPDATE hr_payroll_runs SET status = 'approved', approved_by = ? WHERE business_i
 -- name: SetPayrollRunExported :exec
 UPDATE hr_payroll_runs SET status = 'exported', exported_at = CURRENT_TIMESTAMP WHERE business_id = ? AND id = ?;
 
+-- name: ClaimPayrollRunForExport :execresult
+UPDATE hr_payroll_runs
+SET status = 'exporting'
+WHERE business_id = ? AND id = ? AND status = 'approved' AND exported_at IS NULL;
+
+-- name: ReleasePayrollRunExportClaim :exec
+UPDATE hr_payroll_runs
+SET status = 'approved'
+WHERE business_id = ? AND id = ? AND status = 'exporting' AND exported_at IS NULL;
+
 -- name: GetPayrollRunByPeriod :one
 SELECT id, owner_id, business_id, period_start, period_end, status, created_by, approved_by, exported_at, total_gross, total_net, created_at, updated_at
 FROM hr_payroll_runs

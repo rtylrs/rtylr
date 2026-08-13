@@ -156,6 +156,9 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, businessID int64, 
 	}()
 
 	qtx := r.queries.WithTx(tx)
+	if err := validateStockTransferReferences(ctx, qtx, businessID, input); err != nil {
+		return 0, err
+	}
 
 	res, err := qtx.InsertStockTransfer(ctx, sqlc.InsertStockTransferParams{
 		OwnerID:         businessID,
@@ -195,6 +198,26 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, businessID int64, 
 	}
 
 	return transferID, nil
+}
+
+func validateStockTransferReferences(ctx context.Context, qtx *sqlc.Queries, businessID int64, input domain.StockTransferInput) error {
+	for _, warehouseID := range []int64{input.FromWarehouseID, input.ToWarehouseID} {
+		if _, err := qtx.GetWarehouseReference(ctx, sqlc.GetWarehouseReferenceParams{BusinessID: businessID, ID: warehouseID}); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrStockTransferReferenceNotFound
+			}
+			return err
+		}
+	}
+	for _, item := range input.Items {
+		if _, err := qtx.GetProductReference(ctx, sqlc.GetProductReferenceParams{BusinessID: businessID, ID: item.ProductID}); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrStockTransferReferenceNotFound
+			}
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *Repository) UpdateStockTransferStatus(ctx context.Context, businessID, id int64, status domain.StockTransferStatus) error {

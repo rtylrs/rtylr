@@ -10,6 +10,8 @@ import (
 
 type mockRepo struct {
 	list      []domain.JournalEntry
+	get       domain.JournalEntry
+	getErr    error
 	createID  int64
 	createErr error
 	postErr   error
@@ -17,6 +19,10 @@ type mockRepo struct {
 
 func (m *mockRepo) List(_ context.Context, _ int64, _, _ int32) ([]domain.JournalEntry, error) {
 	return m.list, nil
+}
+
+func (m *mockRepo) Get(_ context.Context, _, _ int64) (domain.JournalEntry, error) {
+	return m.get, m.getErr
 }
 
 func (m *mockRepo) Create(_ context.Context, _, _ int64, _ domain.JournalEntryInput) (int64, error) {
@@ -32,6 +38,26 @@ func TestList_Delegates(t *testing.T) {
 	got, _, _ := s.List(context.Background(), 1, 1, 20)
 	if len(got) != 1 {
 		t.Errorf("got %d", len(got))
+	}
+}
+
+func TestGet_Delegates(t *testing.T) {
+	want := domain.JournalEntry{ID: 42}
+	s := &Service{repo: &mockRepo{get: want}}
+	got, err := s.Get(context.Background(), 1, want.ID)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.ID != want.ID {
+		t.Fatalf("expected id=%d, got %d", want.ID, got.ID)
+	}
+}
+
+func TestGet_PropagatesError(t *testing.T) {
+	want := errors.New("boom")
+	s := &Service{repo: &mockRepo{getErr: want}}
+	if _, err := s.Get(context.Background(), 1, 42); !errors.Is(err, want) {
+		t.Fatalf("expected sentinel, got %v", err)
 	}
 }
 

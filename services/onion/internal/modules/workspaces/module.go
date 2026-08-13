@@ -117,13 +117,14 @@ func (m *Module) RegisterRoutes(_ context.Context, router *chi.Mux, _ ...interfa
 	// standard RegisterGET wrapper would try to decode the request body
 	// and serialize a JSON response, both of which break the WS upgrade.
 	router.Get("/flow/ws", realtime.ServeRealtime)
+	router.Post("/flow/ws-ticket", realtime.IssueRealtimeTicket)
 }
 
 // GetAnonymousRoutes tells the global auth middleware to skip bearer-token
-// validation for these paths. /flow/ws is "anonymous" at the middleware
-// layer because browsers can't set the Authorization header on a
-// WebSocket handshake; the handler itself validates the token carried in
-// the `?token=` query param before upgrading.
+// validation for the browser WebSocket path. Browsers cannot set the
+// Authorization header on a WebSocket handshake, so /flow/ws authenticates
+// its short-lived ticket inside the handler. /flow/ws-ticket remains protected
+// by the normal Bearer middleware.
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{"/flow/ws"}
 }

@@ -173,6 +173,45 @@ func TestCompleteTextStreamFallsBackWithoutRetryingPrimary(t *testing.T) {
 	}
 }
 
+func TestCompleteTextStreamFailsOverBeforeVisibleText(t *testing.T) {
+	primary := &streamingTestProvider{tokens: []StreamToken{{Error: "primary stream failed"}}}
+	fallback := &streamingTestProvider{tokens: []StreamToken{{Text: "fallback"}, {Done: true}}}
+	client := &Client{providers: []Provider{primary, fallback}, primaryProvider: primary}
+
+	stream, err := client.CompleteTextStream(context.Background(), "prompt")
+	if err != nil {
+		t.Fatalf("CompleteTextStream: %v", err)
+	}
+	var text string
+	for token := range stream {
+		if token.Error != "" {
+			t.Fatalf("failover surfaced an error: %#v", token)
+		}
+		text += token.Text
+	}
+	if text != "fallback" || fallback.streamCalls != 1 {
+		t.Fatalf("text=%q fallback calls=%d", text, fallback.streamCalls)
+	}
+}
+
+func TestCompleteTextStreamDoesNotSpliceAfterVisibleProviderFailure(t *testing.T) {
+	primary := &streamingTestProvider{tokens: []StreamToken{{Text: "partial"}, {Error: "primary stream failed"}}}
+	fallback := &streamingTestProvider{tokens: []StreamToken{{Text: "fallback"}, {Done: true}}}
+	client := &Client{providers: []Provider{primary, fallback}, primaryProvider: primary}
+
+	stream, err := client.CompleteTextStream(context.Background(), "prompt")
+	if err != nil {
+		t.Fatalf("CompleteTextStream: %v", err)
+	}
+	var tokens []StreamToken
+	for token := range stream {
+		tokens = append(tokens, token)
+	}
+	if fallback.streamCalls != 0 || len(tokens) != 2 || tokens[0].Text != "partial" || tokens[1].Error == "" {
+		t.Fatalf("tokens=%#v fallback calls=%d", tokens, fallback.streamCalls)
+	}
+}
+
 type plainCompletionProvider struct {
 	result     string
 	err        error

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -108,16 +109,14 @@ func (a *JournalAPI) GetJournalEntry(ctx context.Context, req *financejournalv1.
 	if err != nil {
 		return nil, err
 	}
-	entries, _, listErr := a.Service.List(ctx, businessID, 1, 500)
-	if listErr != nil {
+	entry, getErr := a.Service.Get(ctx, businessID, req.GetId())
+	if errors.Is(getErr, domain.ErrJournalEntryNotFound) {
+		return nil, journalStatusError(http.StatusNotFound, "Journal entry not found")
+	}
+	if getErr != nil {
 		return nil, journalStatusError(http.StatusInternalServerError, "Failed to get journal entry")
 	}
-	for _, entry := range entries {
-		if entry.ID == req.GetId() {
-			return &financejournalv1.GetJournalEntryResponse{Entry: newJournalEntryPayload(entry)}, nil
-		}
-	}
-	return nil, journalStatusError(http.StatusNotFound, "Journal entry not found")
+	return &financejournalv1.GetJournalEntryResponse{Entry: newJournalEntryPayload(entry)}, nil
 }
 
 func newJournalEntryPayload(entry domain.JournalEntry) *financejournalv1.JournalEntry {

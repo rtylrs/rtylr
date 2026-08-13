@@ -31,6 +31,12 @@ INSERT INTO erp_purchase_orders
  expected_delivery, notes, created_by)
 VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?);
 
+-- name: GetSupplierReference :one
+SELECT id FROM erp_suppliers WHERE business_id = ? AND id = ?;
+
+-- name: GetProductReference :one
+SELECT id FROM erp_products WHERE business_id = ? AND id = ?;
+
 -- name: InsertPurchaseOrderItem :execresult
 INSERT INTO erp_purchase_order_items
 (purchase_order_id, product_id, quantity_ordered, quantity_received, unit_cost, total_cost)

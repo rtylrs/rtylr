@@ -45,19 +45,33 @@ func WithAuthUser(ctx context.Context, user *AuthUser) context.Context {
 }
 
 func WebSocketToken(r *http.Request) string {
-	if token := r.URL.Query().Get("token"); token != "" {
-		return token
+	// Flow browser handshakes must use a one-time ticket. Keep the legacy
+	// query-token fallback for the existing dash and POS browser clients until
+	// their independent ticket exchanges are migrated.
+	if r.URL.Path != "/flow/ws" {
+		if token := r.URL.Query().Get("token"); token != "" {
+			return token
+		}
 	}
 
 	authHeader := r.Header.Get("Authorization")
 	if strings.HasPrefix(authHeader, "Bearer ") {
-		return strings.TrimPrefix(authHeader, "Bearer ")
+		return strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
 	}
 	return ""
 }
 
 //nolint:revive // The exported name is explicit at call sites that authenticate WS upgrades.
 func AuthUserFromWebSocketRequest(r *http.Request) (*AuthUser, error) {
+	if ticket := r.URL.Query().Get("ticket"); ticket != "" {
+		user, ok := ConsumeWebSocketTicket(r.Context(), ticket)
+		if !ok {
+			return nil, ErrWebSocketTicketInvalid
+		}
+		user.IP = r.RemoteAddr
+		return user, nil
+	}
+
 	token := WebSocketToken(r)
 	if token == "" {
 		return nil, ErrWebSocketTokenMissing

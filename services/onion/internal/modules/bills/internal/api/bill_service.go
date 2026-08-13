@@ -17,7 +17,7 @@ import (
 // listBillsPageSize bounds ListBills server-side. The voxie
 // finance.bill.v1.ListBillsRequest contract has no pagination fields yet, so
 // the endpoint returns at most one maximum-size page instead of every row.
-const listBillsPageSize int32 = 100
+const listBillsPageSize int32 = 500
 
 type BillAPI struct {
 	Service *application.Service
@@ -48,14 +48,18 @@ func (a *BillAPI) CreateBill(ctx context.Context, req *financebillv1.CreateBillR
 	if err != nil {
 		return nil, err
 	}
-	id, createErr := a.Service.Create(ctx, businessID, domain.BillInput{
+	input := domain.BillInput{
 		SupplierID:  req.GetSupplierId(),
 		Amount:      req.GetAmount(),
 		Currency:    req.GetCurrency(),
 		DueDate:     req.GetDueDate(),
 		Status:      req.GetStatus(),
 		Description: req.GetDescription(),
-	})
+	}
+	if validationErr := domain.ValidateBillInput(input); validationErr != nil {
+		return nil, billStatusError(http.StatusBadRequest, validationErr.Error())
+	}
+	id, createErr := a.Service.Create(ctx, businessID, input)
 	if createErr != nil {
 		return nil, billStatusError(http.StatusInternalServerError, "Failed to create bill")
 	}
@@ -71,14 +75,18 @@ func (a *BillAPI) UpdateBill(ctx context.Context, req *financebillv1.UpdateBillR
 	if body == nil {
 		return nil, billStatusError(http.StatusBadRequest, "Bill body is required")
 	}
-	updateErr := a.Service.Update(ctx, businessID, req.GetId(), domain.BillInput{
+	input := domain.BillInput{
 		SupplierID:  body.GetSupplierId(),
 		Amount:      body.GetAmount(),
 		Currency:    body.GetCurrency(),
 		DueDate:     body.GetDueDate(),
 		Status:      body.GetStatus(),
 		Description: body.GetDescription(),
-	})
+	}
+	if validationErr := domain.ValidateBillInput(input); validationErr != nil {
+		return nil, billStatusError(http.StatusBadRequest, validationErr.Error())
+	}
+	updateErr := a.Service.Update(ctx, businessID, req.GetId(), input)
 	if updateErr != nil {
 		if errors.Is(updateErr, domain.ErrBillNotFound) {
 			return nil, billStatusError(http.StatusNotFound, "Bill not found")

@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
@@ -251,6 +252,21 @@ func TestCreateProduct_PersistsAndReturnsID(t *testing.T) {
 		t.Fatalf("expected positive ID, got %d", id)
 	}
 	t.Cleanup(func() { _ = repo.DeleteProduct(ctx, testutil.OwnerID, id) })
+}
+
+func TestCreateProduct_RejectsCrossBusinessCategoryReference(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	_, err := repo.CreateProduct(context.Background(), testutil.OwnerID, domain.ProductInput{
+		CategoryID: 999999999,
+		Name:       "Cross Business Category Product",
+		SKU:        "CROSS-BUSINESS-CATEGORY-001",
+		IsActive:   true,
+	})
+	if !errors.Is(err, domain.ErrProductReferenceNotFound) {
+		t.Fatalf("CreateProduct cross-business category error = %v, want ErrProductReferenceNotFound", err)
+	}
 }
 
 func TestCreateProduct_NameIsStored(t *testing.T) {

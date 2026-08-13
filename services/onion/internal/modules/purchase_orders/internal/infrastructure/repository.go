@@ -124,6 +124,9 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, businessID int64, 
 	}()
 
 	qtx := r.queries.WithTx(tx)
+	if err := validatePurchaseOrderReferences(ctx, qtx, businessID, input); err != nil {
+		return 0, err
+	}
 
 	var subtotal float64
 	for _, item := range input.Items {
@@ -184,6 +187,24 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, businessID int64, 
 	}
 
 	return poID, nil
+}
+
+func validatePurchaseOrderReferences(ctx context.Context, qtx *sqlc.Queries, businessID int64, input domain.PurchaseOrderInput) error {
+	if _, err := qtx.GetSupplierReference(ctx, sqlc.GetSupplierReferenceParams{BusinessID: businessID, ID: input.SupplierID}); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrPurchaseOrderReferenceNotFound
+		}
+		return err
+	}
+	for _, item := range input.Items {
+		if _, err := qtx.GetProductReference(ctx, sqlc.GetProductReferenceParams{BusinessID: businessID, ID: item.ProductID}); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrPurchaseOrderReferenceNotFound
+			}
+			return err
+		}
+	}
+	return nil
 }
 
 func (r *Repository) GetPurchaseOrderStatus(ctx context.Context, businessID, id int64) (string, error) {
@@ -377,6 +398,14 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			CreatedBy:      nullInt64(createdBy),
 			Notes:          nullString(fmt.Sprintf("received from purchase order %d", poID)),
 		}); err != nil {
+			return err
+		}
+
+		if _, err = tx.ExecContext(ctx, `
+			INSERT INTO inventory_cost_layers
+			(owner_id, business_id, product_id, location_id, quantity_remaining, unit_cost, reference_id, reference_type)
+			VALUES (?, ?, ?, ?, ?, ?, ?, 'purchase_order')`,
+			businessID, businessID, it.ProductID, locID, qty, it.UnitCost, poID); err != nil {
 			return err
 		}
 	}

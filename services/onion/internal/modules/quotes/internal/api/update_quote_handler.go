@@ -85,6 +85,9 @@ func (h *UpdateQuoteByIDHandler) Serve(ctx context.Context, req *UpdateQuoteByID
 		if errors.Is(err, domain.ErrQuoteNotFound) {
 			return UpdateQuoteByIDResponse{}, onekiterrors.New(http.StatusNotFound, "Quote not found")
 		}
+		if errors.Is(err, domain.ErrQuoteNotEditable) {
+			return UpdateQuoteByIDResponse{}, onekiterrors.New(http.StatusConflict, "Quote is not editable")
+		}
 		logger.Ctx(ctx).Error("failed to update quote", logger.Any("owner_id", device.User.UserID), logger.Any("quote_id", id), logger.Error(err))
 		return UpdateQuoteByIDResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update quote")
 	}

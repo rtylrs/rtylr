@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 	"time"
 
@@ -26,8 +27,8 @@ func wsRequest(path string) *http.Request {
 	return httptest.NewRequestWithContext(ctx, http.MethodGet, path, http.NoBody)
 }
 
-func TestAuthUserFromWebSocketRequest_QueryToken(t *testing.T) {
-	token := signedWebSocketToken(t, &webSocketClaims{
+func TestAuthUserFromWebSocketRequest_Ticket(t *testing.T) {
+	ticket, err := IssueWebSocketTicket(context.Background(), &AuthUser{
 		UserID:         7,
 		BusinessID:     3,
 		Role:           "staff",
@@ -35,8 +36,11 @@ func TestAuthUserFromWebSocketRequest_QueryToken(t *testing.T) {
 		PlatformUserID: 42,
 		PlanID:         9,
 	})
+	if err != nil {
+		t.Fatalf("IssueWebSocketTicket: %v", err)
+	}
 
-	req := wsRequest("/flow/ws?token=" + token)
+	req := wsRequest("/flow/ws?ticket=" + url.QueryEscape(ticket))
 	req.RemoteAddr = "1.2.3.4:12345"
 
 	user, err := AuthUserFromWebSocketRequest(req)
@@ -49,8 +53,35 @@ func TestAuthUserFromWebSocketRequest_QueryToken(t *testing.T) {
 	if user.Platform != "rtylr" || user.PlatformUserID != 42 || user.PlanID != 9 {
 		t.Fatalf("platform claims were not preserved: %+v", user)
 	}
-	if user.Token != token || user.IP != "1.2.3.4:12345" {
-		t.Fatalf("token/IP not preserved: %+v", user)
+	if user.Token != "" || user.IP != "1.2.3.4:12345" {
+		t.Fatalf("ticket auth should not retain a bearer token: %+v", user)
+	}
+}
+
+func TestAuthUserFromWebSocketRequest_LegacyQueryTokenRejected(t *testing.T) {
+	token := signedWebSocketToken(t, &webSocketClaims{UserID: 7})
+	req := wsRequest("/flow/ws?token=" + token)
+
+	_, err := AuthUserFromWebSocketRequest(req)
+	if !errors.Is(err, ErrWebSocketTokenMissing) {
+		t.Fatalf("expected legacy query token to be rejected, got %v", err)
+	}
+}
+
+func TestAuthUserFromWebSocketRequest_NonFlowLegacyQueryTokensRemainSupported(t *testing.T) {
+	for _, path := range []string{"/dash/ws", "/pos/ws"} {
+		t.Run(path, func(t *testing.T) {
+			token := signedWebSocketToken(t, &webSocketClaims{UserID: 17, BusinessID: 4})
+			req := wsRequest(path + "?token=" + token)
+
+			user, err := AuthUserFromWebSocketRequest(req)
+			if err != nil {
+				t.Fatalf("AuthUserFromWebSocketRequest: %v", err)
+			}
+			if user.UserID != 17 || user.BusinessID != 4 || user.Token != token {
+				t.Fatalf("legacy non-Flow query auth was not preserved: %+v", user)
+			}
+		})
 	}
 }
 
@@ -77,7 +108,8 @@ func TestAuthUserFromWebSocketRequest_MissingToken(t *testing.T) {
 
 func TestAuthUserFromWebSocketRequest_MissingSecret(t *testing.T) {
 	token := signedWebSocketToken(t, &webSocketClaims{UserID: 1})
-	req := httptest.NewRequest(http.MethodGet, "/pos/ws?token="+token, http.NoBody)
+	req := httptest.NewRequest(http.MethodGet, "/pos/ws", http.NoBody)
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	_, err := AuthUserFromWebSocketRequest(req)
 	if !errors.Is(err, ErrJWTSecretMissing) {
@@ -87,10 +119,51 @@ func TestAuthUserFromWebSocketRequest_MissingSecret(t *testing.T) {
 
 func TestAuthUserFromWebSocketRequest_MissingUser(t *testing.T) {
 	token := signedWebSocketToken(t, &webSocketClaims{})
-	req := wsRequest("/pos/ws?token=" + token)
+	req := wsRequest("/pos/ws")
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	_, err := AuthUserFromWebSocketRequest(req)
 	if !errors.Is(err, ErrWebSocketUserMissing) {
 		t.Fatalf("expected ErrWebSocketUserMissing, got %v", err)
+	}
+}
+
+func TestWebSocketTicketIsOneUseAndStoresOnlyHash(t *testing.T) {
+	const rawJWT = "eyJhbGciOiJIUzI1NiJ9.secret.signature"
+	ticket, err := IssueWebSocketTicket(context.Background(), &AuthUser{UserID: 11, Token: rawJWT})
+	if err != nil {
+		t.Fatalf("IssueWebSocketTicket: %v", err)
+	}
+
+	hash := hashWebSocketTicket(ticket)
+	websocketTickets.Lock()
+	_, hashStored := websocketTickets.entries[hash]
+	_, rawStored := websocketTickets.entries[ticket]
+	websocketTickets.Unlock()
+	if !hashStored || rawStored {
+		t.Fatalf("ticket store key must be the SHA-256 hash only: hash=%t raw=%t", hashStored, rawStored)
+	}
+
+	user, ok := ConsumeWebSocketTicket(context.Background(), ticket)
+	if !ok || user.UserID != 11 {
+		t.Fatalf("first ticket consume failed: user=%+v ok=%t", user, ok)
+	}
+	if _, ok := ConsumeWebSocketTicket(context.Background(), ticket); ok {
+		t.Fatal("ticket was accepted more than once")
+	}
+}
+
+func TestWebSocketTicketExpires(t *testing.T) {
+	ticket, err := issueWebSocketTicketAt(
+		context.Background(),
+		&AuthUser{UserID: 12},
+		time.Now().Add(-webSocketTicketLifetime-time.Second),
+	)
+	if err != nil {
+		t.Fatalf("issueWebSocketTicketAt: %v", err)
+	}
+
+	if _, ok := ConsumeWebSocketTicket(context.Background(), ticket); ok {
+		t.Fatal("expired ticket was accepted")
 	}
 }

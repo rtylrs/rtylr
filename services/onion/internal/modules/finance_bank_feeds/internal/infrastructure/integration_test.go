@@ -2,11 +2,75 @@ package infrastructure_test
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/finance_bank_feeds/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
+
+func TestSyncBankFeeds_UpdatesBalancesIdempotently(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	externalID := fmt.Sprintf("codex-sync-%d", time.Now().UTC().UnixNano())
+
+	accountResult, err := db.ExecContext(ctx, `
+		INSERT INTO finance_bank_accounts
+		(owner_id, business_id, name, balance, currency, is_connected)
+		VALUES (?, ?, ?, ?, ?, TRUE)
+	`, testutil.OwnerID, testutil.OwnerID, "sync-idempotency", "10.00", "USD")
+	if err != nil {
+		t.Fatalf("create test bank account: %v", err)
+	}
+	accountID, err := accountResult.LastInsertId()
+	if err != nil {
+		t.Fatalf("get test bank account id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM finance_bank_feeds WHERE external_id = ? AND owner_id = ?", externalID, testutil.OwnerID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM finance_bank_accounts WHERE id = ? AND business_id = ?", accountID, testutil.OwnerID)
+	})
+
+	_, err = db.ExecContext(ctx, `
+		INSERT INTO finance_bank_feeds
+		(owner_id, business_id, bank_account_id, amount_minor_units, currency, occurred_at, description, external_id)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+	`, testutil.OwnerID, testutil.OwnerID, accountID, 250, "USD", time.Now().UTC(), "sync test", externalID)
+	if err != nil {
+		t.Fatalf("create test bank feed: %v", err)
+	}
+
+	imported, err := repo.Sync(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("first Sync: %v", err)
+	}
+	if imported != 1 {
+		t.Fatalf("first Sync imported %d rows, want 1", imported)
+	}
+
+	var balanceValue string
+	if err := db.QueryRowContext(ctx, "SELECT balance FROM finance_bank_accounts WHERE id = ?", accountID).Scan(&balanceValue); err != nil {
+		t.Fatalf("read synced balance: %v", err)
+	}
+	balance, err := strconv.ParseFloat(balanceValue, 64)
+	if err != nil {
+		t.Fatalf("parse synced balance %q: %v", balanceValue, err)
+	}
+	if balance != 12.5 {
+		t.Fatalf("synced balance = %.2f, want 12.50", balance)
+	}
+
+	imported, err = repo.Sync(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("retry Sync: %v", err)
+	}
+	if imported != 0 {
+		t.Fatalf("retry Sync imported %d rows, want 0", imported)
+	}
+}
 
 func TestListBankFeedTransactions_ReturnsSlice(t *testing.T) {
 	db := testutil.OpenDB(t)
