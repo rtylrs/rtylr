@@ -3,6 +3,13 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
+const mockPayrollClient = vi.hoisted(() => ({
+  listPayroll: vi.fn(),
+}));
+const mockStaffClient = vi.hoisted(() => ({
+  listStaff: vi.fn(),
+}));
+
 vi.mock('../../shared/lib/api', () => ({
   safe: {
     get: vi.fn(),
@@ -13,7 +20,8 @@ vi.mock('../../shared/lib/api', () => ({
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((val: unknown) => val),
-  createOneKitClient: () => ({ listPayroll: vi.fn(), listStaff: vi.fn() }),
+  createOneKitClient: (Client: { name: string }) =>
+    Client.name === 'PayrollServiceClient' ? mockPayrollClient : mockStaffClient,
   getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
 }));
 
@@ -25,7 +33,12 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-import { useListPayrollRuns, useGetPayrollRun, useTriggerPayrollRun } from './usePayroll';
+import {
+  usePayroll,
+  useListPayrollRuns,
+  useGetPayrollRun,
+  useTriggerPayrollRun,
+} from './usePayroll';
 import { useListMyPayrollRuns, useGetMyPayrollRun } from '../../shared/hooks/queries/usePayroll';
 import { safe } from '../../shared/lib/api';
 
@@ -60,6 +73,22 @@ describe('useListPayrollRuns', () => {
       wrapper: createWrapper(),
     });
     expect(result.current.isLoading).toBe(true);
+  });
+});
+
+describe('usePayroll compensation gate', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('does not request payroll or staff compensation data when disabled', () => {
+    const { result } = renderHook(() => usePayroll({ enabled: false }), {
+      wrapper: createWrapper(),
+    });
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(mockPayrollClient.listPayroll).not.toHaveBeenCalled();
+    expect(mockStaffClient.listStaff).not.toHaveBeenCalled();
   });
 });
 

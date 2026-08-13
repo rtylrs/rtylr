@@ -9,9 +9,9 @@ import { hrApi, CreateDepartmentInput, UpdateDepartmentInput } from '../../share
 const departmentClient = createOneKitClient(DepartmentServiceClient, 'hr');
 const staffClient = createOneKitClient(StaffServiceClient, 'hr');
 
-export function useDepartments() {
+export function useDepartments(includeCompensation = false) {
   return useQuery({
-    queryKey: ['departments'],
+    queryKey: ['departments', includeCompensation],
     queryFn: async (): Promise<Department[]> => {
       const [departmentsRes, staffRes] = await Promise.all([
         departmentClient.listDepartments({}),
@@ -23,7 +23,9 @@ export function useDepartments() {
       return (departmentsRes.departments ?? []).map((d) => {
         const members = staffList.filter((s) => s.departmentId === d.id);
         const manager = staffById.get(d.managerStaffId);
-        const salaries = members.map((s) => s.salary ?? 0).filter((s) => s > 0);
+        const salaries = includeCompensation
+          ? members.map((s) => s.salary ?? 0).filter((s) => s > 0)
+          : [];
         const avgSalary = salaries.length
           ? salaries.reduce((sum, s) => sum + s, 0) / salaries.length
           : 0;
@@ -34,7 +36,7 @@ export function useDepartments() {
           description: d.description,
           staffCount: members.length,
           head: manager ? `${manager.firstName} ${manager.lastName}`.trim() : '',
-          avgSalary,
+          avgSalary: includeCompensation ? avgSalary : undefined,
         });
       });
     },

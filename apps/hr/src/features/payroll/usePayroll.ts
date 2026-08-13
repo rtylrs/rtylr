@@ -17,9 +17,11 @@ function normalizeStatus(status: string): 'Pending' | 'Paid' | undefined {
 /** Legacy hook used by Operations screen, reads from hr.payroll.v1.ListPayroll */
 export function usePayroll(params?: {
   period?: string;
+  enabled?: boolean;
 }): ReturnType<typeof useQuery<PayrollRow[]>> {
+  const enabled = params?.enabled ?? true;
   return useQuery<PayrollRow[]>({
-    queryKey: ['payroll-legacy', params],
+    queryKey: ['payroll-legacy', params?.period ?? '', enabled],
     queryFn: async (): Promise<PayrollRow[]> => {
       const [payrollRes, staffRes] = await Promise.all([
         payrollClient.listPayroll({ periodLabel: params?.period ?? '' }),
@@ -41,6 +43,7 @@ export function usePayroll(params?: {
         };
       });
     },
+    enabled,
   });
 }
 

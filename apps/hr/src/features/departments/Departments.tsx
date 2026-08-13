@@ -14,6 +14,8 @@ import {
 import { Department } from '../../shared/services/hrApi';
 import { useDepartments } from './useDepartments';
 import { useIsMobile } from '../../shared/components/ui';
+import { useUserStore } from '@voxire/auth';
+import { canViewCompensation } from '../../shared/lib/hrPermissions';
 
 const ACCENT = '#8b5cf6';
 
@@ -46,7 +48,9 @@ const cardAnim: Record<string, any> = {
 
 const Departments: React.FC = () => {
   const isMobile = useIsMobile(900);
-  const { data: fetchedDepartments, isLoading: loading } = useDepartments();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const showCompensation = canViewCompensation(role);
+  const { data: fetchedDepartments, isLoading: loading } = useDepartments(showCompensation);
   const departments: Department[] = fetchedDepartments || [];
 
   return (
@@ -238,17 +242,21 @@ const Departments: React.FC = () => {
                         {dept.staffCount}
                       </span>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <DollarSign size={13} style={{ color: 'var(--hr-text-dim)' }} />
-                        <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>
-                          Avg Salary
+                    {showCompensation && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <DollarSign size={13} style={{ color: 'var(--hr-text-dim)' }} />
+                          <span style={{ fontSize: '11px', color: 'var(--hr-text-dim)' }}>
+                            Avg Salary
+                          </span>
+                        </div>
+                        <span
+                          style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hr-text)' }}
+                        >
+                          {fmt(dept.avgSalary ?? 0)}
                         </span>
                       </div>
-                      <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hr-text)' }}>
-                        {fmt(dept.avgSalary ?? 0)}
-                      </span>
-                    </div>
+                    )}
                   </div>
 
                   {/* Headcount bar */}
