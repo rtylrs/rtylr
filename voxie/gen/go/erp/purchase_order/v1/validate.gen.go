@@ -174,6 +174,11 @@ func (m *UpdatePurchaseOrderStatusBody) Validate() error {
 	if m.Status == "" {
 		violations = append(violations, "status is required")
 	}
+	for _, value := range m.Items {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "items: "+err.Error())
+		}
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

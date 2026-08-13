@@ -82,6 +82,8 @@ message GetPurchaseOrderResponse {
 message UpdatePurchaseOrderStatusBody {
   /// Current lifecycle state.
   status: string @required
+  /// Per-line quantities submitted by the receiving operator.
+  items: PurchaseOrderItem[]
 }
 
 message UpdatePurchaseOrderStatusRequest {
