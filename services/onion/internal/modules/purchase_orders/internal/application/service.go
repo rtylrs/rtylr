@@ -102,12 +102,12 @@ func (s *Service) ApprovePurchaseOrder(ctx context.Context, businessID, poID int
 	return nil
 }
 
-func (s *Service) ReceivePurchaseOrder(ctx context.Context, businessID, poID, receivedBy int64) error {
+func (s *Service) ReceivePurchaseOrder(ctx context.Context, businessID, poID, receivedBy int64, submitted []domain.PurchaseOrderItem) error {
 	old, err := s.repo.GetByID(ctx, businessID, poID)
 	if err != nil {
 		return err
 	}
-	if err := s.repo.ReceivePurchaseOrder(ctx, businessID, poID, receivedBy); err != nil {
+	if err := s.repo.ReceivePurchaseOrder(ctx, businessID, poID, receivedBy, submitted); err != nil {
 		return err
 	}
 	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: receivedBy, EntityType: "purchase_order", EntityID: poID, Action: "received", OldValues: old, NewValues: map[string]string{"status": "received"}}); err != nil {
@@ -126,7 +126,7 @@ func (s *Service) UpdatePurchaseOrderStatus(ctx context.Context, businessID, id 
 	// line item, and ledger the movement — all atomically and idempotently.
 	// ReceivePurchaseOrder owns that whole transaction.
 	if status == string(domain.POStatusReceived) {
-		return s.ReceivePurchaseOrder(ctx, businessID, id, businessID)
+		return s.ReceivePurchaseOrder(ctx, businessID, id, businessID, nil)
 	}
 
 	if err := s.repo.UpdatePurchaseOrderStatus(ctx, businessID, id, status); err != nil {

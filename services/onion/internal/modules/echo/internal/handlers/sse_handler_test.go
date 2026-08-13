@@ -505,6 +505,44 @@ func TestStreamRendererDropsWriteToolProposalOutsideAgentMode(t *testing.T) {
 	}
 }
 
+func TestStreamRendererDoesNotExposeSplitInternalCapabilityName(t *testing.T) {
+	rec := httptest.NewRecorder()
+	full := &strings.Builder{}
+	renderer := newStreamEventRenderer(rec, nil, "assistant-1", full)
+
+	text := "I used insights.get_customer_kpis to check the customer data." + strings.Repeat(" ", markerHoldBytes+20)
+	if err := renderer.AppendText(text); err != nil {
+		t.Fatalf("append split internal detail: %v", err)
+	}
+	if err := renderer.Finish(); err != nil {
+		t.Fatalf("finish stream: %v", err)
+	}
+
+	if strings.Contains(full.String(), "insights.get_customer_kpis") {
+		t.Fatalf("public response exposed an internal capability name: %q", full.String())
+	}
+}
+
+func TestStreamRendererRedactsScreenshotLeakPattern(t *testing.T) {
+	rec := httptest.NewRecorder()
+	full := &strings.Builder{}
+	renderer := newStreamEventRenderer(rec, nil, "assistant-1", full)
+
+	text := "I obtained this information using the insights.get_customer_kpis and insights.get_product_kpis tools, which are part of the shortlisted capability catalog for the current request.\nNext Move: Run the insights.get_customer_kpis and insights.get_product_kpis tools to obtain the latest data."
+	if err := renderer.AppendText(text); err != nil {
+		t.Fatalf("append screenshot leak pattern: %v", err)
+	}
+	if err := renderer.Finish(); err != nil {
+		t.Fatalf("finish stream: %v", err)
+	}
+
+	for _, banned := range []string{"insights.get_customer_kpis", "insights.get_product_kpis", "shortlisted capability catalog", "Next Move: Run"} {
+		if strings.Contains(strings.ToLower(full.String()), strings.ToLower(banned)) {
+			t.Fatalf("public response exposed %q: %q", banned, full.String())
+		}
+	}
+}
+
 func TestStreamRendererSilentlyDropsInvalidToolMarker(t *testing.T) {
 	rec := httptest.NewRecorder()
 	full := &strings.Builder{}

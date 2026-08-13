@@ -8,15 +8,16 @@ import (
 var ErrSegmentNotFound = errors.New("segment not found")
 
 type Segment struct {
-	ID            int64     `json:"id"`
-	OwnerID       int64     `json:"owner_id"`
-	BusinessID    int64     `json:"business_id"`
-	Name          string    `json:"name"`
-	Description   string    `json:"description"`
-	Filters       []byte    `json:"filters"`
-	CustomerCount int       `json:"customer_count"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID               int64      `json:"id"`
+	OwnerID          int64      `json:"owner_id"`
+	BusinessID       int64      `json:"business_id"`
+	Name             string     `json:"name"`
+	Description      string     `json:"description"`
+	Filters          []byte     `json:"filters"`
+	CustomerCount    int        `json:"customer_count"`
+	LastCalculatedAt *time.Time `json:"last_calculated_at"`
+	CreatedAt        time.Time  `json:"created_at"`
+	UpdatedAt        time.Time  `json:"updated_at"`
 }
 
 type SegmentInput struct {

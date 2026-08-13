@@ -3,7 +3,11 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -20,7 +24,9 @@ type GetTimelineHandler struct {
 }
 
 type GetTimelineRequest struct {
-	CustomerID int64 `json:"customer_id"`
+	CustomerID int64  `json:"customer_id"`
+	Cursor     string `json:"cursor"`
+	Limit      int    `json:"limit"`
 }
 
 type TimelineEntryPayload struct {
@@ -33,7 +39,8 @@ type TimelineEntryPayload struct {
 }
 
 type GetTimelineResponse struct {
-	Entries []TimelineEntryPayload `json:"entries"`
+	Entries    []TimelineEntryPayload `json:"entries"`
+	NextCursor string                 `json:"next_cursor,omitempty"`
 }
 
 func (h *GetTimelineHandler) Validate(_ context.Context, req *GetTimelineRequest) error {
@@ -55,13 +62,17 @@ func (h *GetTimelineHandler) Serve(ctx context.Context, req *GetTimelineRequest)
 		return GetTimelineResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	entries, err := h.CRMService.GetCustomerTimeline(ctx, businessID, req.CustomerID)
+	cursorCreatedAt, cursorID, err := parseTimelineCursor(req.Cursor)
+	if err != nil {
+		return GetTimelineResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid timeline cursor")
+	}
+	page, err := h.CRMService.ListCustomerTimelinePage(ctx, businessID, req.CustomerID, cursorCreatedAt, cursorID, req.Limit)
 	if err != nil {
 		return GetTimelineResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get customer timeline")
 	}
 
-	payloads := make([]TimelineEntryPayload, len(entries))
-	for i, e := range entries {
+	payloads := make([]TimelineEntryPayload, len(page.Entries))
+	for i, e := range page.Entries {
 		payloads[i] = TimelineEntryPayload{
 			ID:          e.ID,
 			CustomerID:  e.CustomerID,
@@ -72,5 +83,25 @@ func (h *GetTimelineHandler) Serve(ctx context.Context, req *GetTimelineRequest)
 		}
 	}
 
-	return GetTimelineResponse{Entries: payloads}, nil
+	return GetTimelineResponse{Entries: payloads, NextCursor: page.NextCursor}, nil
+}
+
+func parseTimelineCursor(cursor string) (*time.Time, int64, error) {
+	if cursor == "" {
+		return nil, 0, nil
+	}
+	parts := strings.Split(cursor, ":")
+	if len(parts) != 2 {
+		return nil, 0, fmt.Errorf("invalid cursor")
+	}
+	nanos, err := strconv.ParseInt(parts[0], 10, 64)
+	if err != nil {
+		return nil, 0, err
+	}
+	id, err := strconv.ParseInt(parts[1], 10, 64)
+	if err != nil || id <= 0 {
+		return nil, 0, fmt.Errorf("invalid cursor id")
+	}
+	createdAt := time.Unix(0, nanos).UTC()
+	return &createdAt, id, nil
 }
