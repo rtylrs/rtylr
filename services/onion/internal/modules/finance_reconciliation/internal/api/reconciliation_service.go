@@ -129,6 +129,10 @@ func newOverviewResponse(overview domain.ReconciliationOverview) *financereconci
 		UnmatchedBankTxns: bankTxns,
 		UnmatchedInvoices: invoices,
 		Suggestions:       suggestions,
+		BankTxnsTruncated: overview.BankTxnsTruncated,
+		InvoicesTruncated: overview.InvoicesTruncated,
+		ExpensesTruncated: overview.ExpensesTruncated,
+		PreviewLimit:      int32(overview.PreviewLimit),
 	}
 }
 

@@ -625,9 +625,10 @@ func findEmployeeIDByUser(ctx context.Context, qtx *sqlc.Queries, businessID, us
 }
 
 func findEmployeeIDByEmail(ctx context.Context, qtx *sqlc.Queries, businessID int64, email string) (sql.NullInt64, error) {
+	email = strings.ToLower(strings.TrimSpace(email))
 	id, err := qtx.FindEmployeeIDByEmail(ctx, sqlc.FindEmployeeIDByEmailParams{
 		BusinessID: businessID,
-		LOWER:      email,
+		Email:      email,
 	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return sql.NullInt64{}, nil

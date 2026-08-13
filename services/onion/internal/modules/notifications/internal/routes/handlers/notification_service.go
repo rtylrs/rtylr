@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/notifications/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/cursor"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	hubnotificationv1 "github.com/voxire/voxie/gen/go/hub/notification/v1"
@@ -19,7 +21,7 @@ func NewNotificationAPI(service *application.Service) *NotificationAPI {
 	return &NotificationAPI{Service: service}
 }
 
-func (a *NotificationAPI) ListNotifications(ctx context.Context, _ *hubnotificationv1.ListNotificationsRequest) (*hubnotificationv1.ListNotificationsResponse, error) {
+func (a *NotificationAPI) ListNotifications(ctx context.Context, req *hubnotificationv1.ListNotificationsRequest) (*hubnotificationv1.ListNotificationsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
@@ -30,13 +32,16 @@ func (a *NotificationAPI) ListNotifications(ctx context.Context, _ *hubnotificat
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	notifications, err := a.Service.List(ctx, businessID, device.User.UserID)
+	page, err := a.Service.ListPage(ctx, businessID, device.User.UserID, req.GetLimit(), req.GetCursor())
 	if err != nil {
+		if errors.Is(err, cursor.ErrInvalid) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid cursor")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list notifications")
 	}
 
-	payloads := make([]*hubnotificationv1.Notification, 0, len(notifications))
-	for _, n := range notifications {
+	payloads := make([]*hubnotificationv1.Notification, 0, len(page.Notifications))
+	for _, n := range page.Notifications {
 		payloads = append(payloads, &hubnotificationv1.Notification{
 			Id:        n.ID,
 			Title:     n.Title,
@@ -48,7 +53,7 @@ func (a *NotificationAPI) ListNotifications(ctx context.Context, _ *hubnotificat
 		})
 	}
 
-	return &hubnotificationv1.ListNotificationsResponse{Notifications: payloads}, nil
+	return &hubnotificationv1.ListNotificationsResponse{Notifications: payloads, NextCursor: page.NextCursor}, nil
 }
 
 func (a *NotificationAPI) MarkAllRead(ctx context.Context, _ *hubnotificationv1.MarkAllReadRequest) (*hubnotificationv1.MarkAllReadResponse, error) {

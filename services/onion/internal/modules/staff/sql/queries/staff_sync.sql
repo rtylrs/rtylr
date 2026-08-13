@@ -15,7 +15,7 @@ LIMIT 1;
 -- cross-schema read from hr_core — find linked employee by email
 -- name: FindEmployeeIDByEmail :one
 SELECT id FROM hr_employees
-WHERE business_id = ? AND LOWER(email) = LOWER(?)
+WHERE business_id = ? AND email = ?
 ORDER BY id ASC
 LIMIT 1;
 

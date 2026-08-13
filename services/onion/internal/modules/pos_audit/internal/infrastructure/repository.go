@@ -26,12 +26,15 @@ func NewRepository(db *sql.DB) *Repository {
 
 func (r *Repository) List(ctx context.Context, filter domain.AuditLogFilter) ([]domain.AuditLog, error) {
 	rows, err := r.queries.ListAuditLogs(ctx, sqlc.ListAuditLogsParams{
-		BusinessID: filter.BusinessID,
-		Action:     nullStringPtr(filter.Action),
-		EntityType: nullStringPtr(filter.EntityType),
-		EmployeeID: nullInt64Ptr(filter.EmployeeID),
-		StartDate:  nullTimePtr(filter.StartDate),
-		EndDate:    nullTimePtr(filter.EndDate),
+		BusinessID:      filter.BusinessID,
+		Action:          nullStringPtr(filter.Action),
+		EntityType:      nullStringPtr(filter.EntityType),
+		EmployeeID:      nullInt64Ptr(filter.EmployeeID),
+		StartDate:       nullTimePtr(filter.StartDate),
+		EndDate:         nullTimePtr(filter.EndDate),
+		CursorCreatedAt: nullTime(filter.CursorCreatedAt),
+		CursorID:        nullInt64Ptr(filter.CursorID),
+		Limit:           filter.Limit,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list audit logs", logger.Error(err))
@@ -117,4 +120,12 @@ func nullTimePtr(v *string) sql.NullTime {
 		}
 	}
 	return sql.NullTime{Time: t, Valid: true}
+}
+
+func nullTime(v *time.Time) sql.NullTime {
+	if v == nil {
+		return sql.NullTime{}
+	}
+
+	return sql.NullTime{Time: *v, Valid: true}
 }
