@@ -3,11 +3,6 @@ SELECT id, business_id, user_id, location_id, can_manage_pos_users,
        can_manage_terminals, can_view_reports, created_at
 FROM pos_member_locations WHERE business_id = ? AND user_id = ?;
 
--- name: ListLocationMembers :many
-SELECT id, business_id, user_id, location_id, can_manage_pos_users,
-       can_manage_terminals, can_view_reports, created_at
-FROM pos_member_locations WHERE business_id = ? AND location_id = ?;
-
 -- name: AssignMemberToLocation :execresult
 -- Idempotent on (user_id, location_id) so re-assigning a member (e.g. role
 -- change in dash) updates their management flags instead of erroring.

@@ -82,17 +82,6 @@ WHERE business_id = ? AND id = ?;
 -- name: UpdateSessionRefundTotals :exec
 UPDATE pos_sessions SET total_refunds = total_refunds + ? WHERE id = ?;
 
--- name: ListOrdersByOwner :many
-SELECT id, owner_id, business_id, session_id, table_id, location_id,
-       order_number, type, status, customer_id, customer_name,
-       staff_id, subtotal, discount_amount, tax_amount, total,
-       payment_method, payment_status, amount_paid, change_due,
-       notes, kitchen_notes, created_at, updated_at, paid_at,
-       terminal_id, branch_id, tip_amount, void_reason, voided_by, voided_at, exchange_order_id
-FROM pos_orders
-WHERE business_id = ?
-ORDER BY created_at DESC LIMIT 500;
-
 -- name: GetOrder :one
 SELECT id, owner_id, business_id, session_id, table_id, location_id,
        order_number, type, status, customer_id, customer_name,
@@ -219,12 +208,6 @@ VALUES (?, ?, ?);
 -- name: IsPaddleEventProcessed :one
 SELECT COUNT(*) FROM pos_paddle_events_processed WHERE transaction_id = ?;
 
--- name: TransferOrderTable :execresult
-UPDATE pos_orders SET table_id = ? WHERE id = ? AND business_id = ? AND status NOT IN ('paid','voided','cancelled');
-
--- name: SetTableStatus :exec
-UPDATE pos_tables SET status = ? WHERE id = ? AND business_id = ?;
-
 -- name: VoidOrderItem :execresult
 UPDATE pos_order_items SET status = 'cancelled' WHERE id = ? AND order_id = ? AND status IN ('pending','preparing');
 
@@ -239,16 +222,8 @@ UPDATE pos_orders
 SET subtotal = sqlc.arg(subtotal), total = sqlc.arg(total) + tax_amount - discount_amount
 WHERE id = ? AND business_id = ?;
 
--- name: UpdateOrderStatusToPreparingFromPending :execresult
-UPDATE pos_orders SET status = 'preparing' WHERE id = ? AND business_id = ? AND status = 'pending';
-
 -- name: IsOnlineOrderingEnabled :one
 SELECT COUNT(*) FROM business_addons WHERE business_id = ? AND addon_id = 'online_ordering' AND is_enabled = TRUE;
-
--- name: CreateOnlineOrder :execresult
-INSERT INTO pos_orders
-(owner_id, business_id, order_number, type, status, customer_name, customer_phone, subtotal, total, payment_status, notes, kitchen_notes)
-VALUES (?, ?, ?, 'online', 'pending', ?, ?, ?, ?, 'unpaid', ?, ?);
 
 -- name: GetPublicOrderNumberStatus :one
 SELECT order_number, status FROM pos_orders WHERE business_id = ? AND id = ? LIMIT 1;

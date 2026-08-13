@@ -15,9 +15,6 @@ WHERE business_id = ?
 ORDER BY type ASC, code ASC, name ASC
 LIMIT 1000;
 
--- name: CountAccounts :one
-SELECT COUNT(*) FROM finance_accounts WHERE business_id = ?;
-
 -- name: CreateAccount :execresult
 INSERT INTO finance_accounts (owner_id, business_id, name, code, type, currency, balance, is_active)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);

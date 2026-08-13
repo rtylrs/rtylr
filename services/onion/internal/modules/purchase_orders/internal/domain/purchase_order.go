@@ -11,6 +11,9 @@ var (
 	ErrPurchaseOrderNotFound          = errors.New("purchase order not found")
 	ErrPurchaseOrderAlreadyApproved   = errors.New("purchase order already approved")
 	ErrPurchaseOrderAlreadyReceived   = errors.New("purchase order already received")
+	ErrPurchaseOrderSelfApproval      = errors.New("purchase order creator cannot approve the purchase order")
+	ErrPurchaseOrderApprovalForbidden = errors.New("user is not authorized to approve purchase orders")
+	ErrPurchaseOrderInvalidTransition = errors.New("purchase order cannot be approved from its current status")
 	ErrPurchaseOrderReferenceNotFound = errors.New("purchase order reference not found in business")
 )
 

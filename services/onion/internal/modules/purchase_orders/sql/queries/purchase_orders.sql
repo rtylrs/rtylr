@@ -59,7 +59,7 @@ SELECT status FROM erp_purchase_orders WHERE business_id = ? AND id = ?;
 -- name: ApprovePurchaseOrder :execresult
 UPDATE erp_purchase_orders
 SET status = 'approved'
-WHERE business_id = ? AND id = ? AND (status IS NULL OR status <> 'received');
+WHERE business_id = ? AND id = ? AND status IN ('draft', 'sent', 'partial');
 
 -- name: GetPurchaseOrderForUpdate :one
 SELECT status FROM erp_purchase_orders WHERE business_id = ? AND id = ? FOR UPDATE;

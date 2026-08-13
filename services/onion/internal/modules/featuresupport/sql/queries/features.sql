@@ -21,11 +21,6 @@ ON DUPLICATE KEY UPDATE
 -- name: DeleteFeatureFlag :exec
 DELETE FROM feature_flags WHERE feature_key = ?;
 
--- name: GetFeatureTarget :one
-SELECT id, feature_key, owner_id, enabled, variant, created_at, updated_at
-FROM feature_targets
-WHERE feature_key = ? AND owner_id = ?;
-
 -- name: ListFeatureTargetsByOwner :many
 SELECT id, feature_key, owner_id, enabled, variant, created_at, updated_at
 FROM feature_targets
@@ -63,12 +58,6 @@ FROM feature_rules
 WHERE feature_key = ?
 ORDER BY priority ASC, id ASC;
 
--- name: ListConditionsByRule :many
-SELECT id, rule_id, attribute, operator, value, created_at
-FROM feature_rule_conditions
-WHERE rule_id = ?
-ORDER BY id ASC;
-
 -- name: CreateRule :execresult
 INSERT INTO feature_rules (feature_key, priority, description, variant, rollout_percentage, enabled)
 VALUES (?, ?, ?, ?, ?, ?);
@@ -81,15 +70,9 @@ WHERE id = ?;
 -- name: DeleteRule :exec
 DELETE FROM feature_rules WHERE id = ?;
 
--- name: DeleteRulesByKey :exec
-DELETE FROM feature_rules WHERE feature_key = ?;
-
 -- name: CreateRuleCondition :execresult
 INSERT INTO feature_rule_conditions (rule_id, attribute, operator, value)
 VALUES (?, ?, ?, ?);
-
--- name: DeleteRuleCondition :exec
-DELETE FROM feature_rule_conditions WHERE id = ?;
 
 -- name: DeleteConditionsByRule :exec
 DELETE FROM feature_rule_conditions WHERE rule_id = ?;

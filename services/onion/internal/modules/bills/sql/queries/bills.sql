@@ -40,6 +40,3 @@ FROM finance_bills
 WHERE business_id = ?
 ORDER BY due_date ASC
 LIMIT ? OFFSET ?;
-
--- name: CountBills :one
-SELECT COUNT(*) FROM finance_bills WHERE business_id = ?;

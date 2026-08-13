@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
@@ -74,13 +75,22 @@ func (s *Service) CreatePurchaseOrder(ctx context.Context, businessID int64, inp
 }
 
 // ApprovePurchaseOrder transitions a purchase order to the `approved` status.
-// Returns domain.ErrPurchaseOrderNotFound when the PO doesn't exist for the caller,
-// or domain.ErrPurchaseOrderAlreadyApproved when the PO is already approved.
-func (s *Service) ApprovePurchaseOrder(ctx context.Context, businessID, poID int64) error {
-	status, err := s.repo.GetPurchaseOrderStatus(ctx, businessID, poID)
+// Approval requires an owner, admin, or operator role and cannot be performed
+// by the user who created the order. The actor is passed explicitly so every
+// entry point (API and tools) applies the same segregation-of-duties policy.
+func (s *Service) ApprovePurchaseOrder(ctx context.Context, businessID, poID, actorID int64, actorRole string) error {
+	if !canApprovePurchaseOrder(actorRole) {
+		return domain.ErrPurchaseOrderApprovalForbidden
+	}
+
+	po, err := s.repo.GetByID(ctx, businessID, poID)
 	if err != nil {
 		return err
 	}
+	if po.CreatedBy == actorID {
+		return domain.ErrPurchaseOrderSelfApproval
+	}
+	status := string(po.Status)
 
 	if status == string(domain.POStatusApproved) {
 		return domain.ErrPurchaseOrderAlreadyApproved
@@ -93,13 +103,22 @@ func (s *Service) ApprovePurchaseOrder(ctx context.Context, businessID, poID int
 	if err := s.repo.ApprovePurchaseOrder(ctx, businessID, poID); err != nil {
 		return err
 	}
-	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "purchase_order", EntityID: poID, Action: "approved", OldValues: old, NewValues: map[string]string{"status": "approved"}}); err != nil {
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: actorID, EntityType: "purchase_order", EntityID: poID, Action: "approved", OldValues: old, NewValues: map[string]string{"status": "approved"}}); err != nil {
 		return err
 	}
 
 	s.invalidateCache(ctx, businessID)
 
 	return nil
+}
+
+func canApprovePurchaseOrder(role string) bool {
+	switch strings.ToLower(strings.TrimSpace(role)) {
+	case "owner", "admin", "operator":
+		return true
+	default:
+		return false
+	}
 }
 
 func (s *Service) ReceivePurchaseOrder(ctx context.Context, businessID, poID, receivedBy int64, submitted []domain.PurchaseOrderItem) error {
