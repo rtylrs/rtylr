@@ -24,6 +24,7 @@ type DashboardResponse struct {
 	TotalReceivable  float64 `json:"total_receivable"`
 	OverdueAmount    float64 `json:"overdue_amount"`
 	TotalExpensesMTD float64 `json:"total_expenses_mtd"`
+	TotalRevenueMTD  float64 `json:"total_revenue_mtd"`
 	NetProfitMTD     float64 `json:"net_profit_mtd"`
 }
 
@@ -48,6 +49,7 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 		TotalReceivable:  dashboard.TotalReceivable,
 		OverdueAmount:    dashboard.OverdueAmount,
 		TotalExpensesMTD: dashboard.TotalExpensesMTD,
+		TotalRevenueMTD: dashboard.TotalRevenueMTD,
 		NetProfitMTD:     dashboard.NetProfitMTD,
 	}, nil
 }
