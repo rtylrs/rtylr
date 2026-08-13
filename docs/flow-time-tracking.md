@@ -1,4 +1,4 @@
-# Flow time tracking — what shipped, and what the contract cannot hold
+# Flow time tracking: what shipped, and what the contract cannot hold
 
 Batch 1 of the Flow time-tracking design: task-detail hours, workspace time
 settings, and board customization. Three of fifteen designed screens. This
@@ -50,10 +50,10 @@ Three RPCs: create, list by task, delete by id.
 
 | Designed                                                                          | Contract reality                                | What shipped instead                                                                       |
 | --------------------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Status pills (approved / pending / locked) and the per-status split in the header | no `status` field                               | absent — a pill the server never sends is invented data                                    |
+| Status pills (approved / pending / locked) and the per-status split in the header | no `status` field                               | absent; a pill the server never sends is invented data                                    |
 | `Billable` toggle on the form, `Billable` pill on rows                            | no `billable` field                             | absent                                                                                     |
 | Category chips, and `· Development ·` on each row                                 | no `category` field                             | absent from the log form; the settings list carries a `GateNotice` saying nothing reads it |
-| Category "Logged" column, delete-with-reassign dialog                             | no per-category hours exist                     | absent — there is nothing to reassign                                                      |
+| Category "Logged" column, delete-with-reassign dialog                             | no per-category hours exist                     | absent; there is nothing to reassign                                                      |
 | Date picker on the log form                                                       | `CreateTimeLogRequest` has no date              | present, fixed to today, disabled, with the reason stated                                  |
 | Editing an entry                                                                  | no PATCH                                        | not offered; delete and re-log is the correction path                                      |
 | `description` optional                                                            | `@required` in the contract                     | `flowApi` already substitutes `'-'`; `TimePanel` treats `'-'` as empty on read             |
@@ -108,7 +108,7 @@ existing values app-wide and were signed off separately:
   lighter on white than on black.
 
 `--flow-text-dim` keeps its value and narrows its use: rules, dividers, and icon
-strokes that repeat an adjacent label. It never carries text — 2.24:1 cannot be
+strokes that repeat an adjacent label. It never carries text: 2.24:1 cannot be
 fixed by nudging alpha without becoming muted. `DetailField` in `TaskDetail.tsx`
 moved its label off it.
 

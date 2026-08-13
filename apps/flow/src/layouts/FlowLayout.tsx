@@ -38,7 +38,7 @@ import { useForesightLinks } from '@voxire/utils';
 import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
 import { useThemeStore } from '../shared/stores/themeStore';
-import { accentTints, type ResolvedTheme } from '../shared/lib/colorUtils';
+import { accentTints, ACCENT_DEFAULT, type ResolvedTheme } from '../shared/lib/colorUtils';
 import { useFlowStore } from '../shared/stores/flowStore';
 import { cn } from '../shared/lib/utils';
 import CommandBar from '../shared/components/CommandBar';
@@ -66,8 +66,6 @@ import { safe } from '../shared/lib/api';
 import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../shared/lib/memberUtils';
-
-const ACCENT_DEFAULT = '#64C5B9';
 
 /** Horizontal inset for sidebar content (single column). */
 const sx = 'px-3';
@@ -314,7 +312,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   }, [apiProjects, setProjects]);
 
   // Seed the store's members from the business team so the assignee picker (and
-  // any other member-driven UI) has people to choose from — nothing else calls
+  // any other member-driven UI) has people to choose from. Nothing else calls
   // setMembers, so without this the store stays empty and assignment is impossible.
   const { data: teamMembers } = useFlowTeam();
   useEffect(() => {

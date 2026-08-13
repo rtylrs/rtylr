@@ -33,7 +33,7 @@ beforeEach(() => {
   useTimeSettingsStore.setState({ ...DEFAULT_TIME_SETTINGS });
 });
 
-describe('TimeSection — week and targets', () => {
+describe('TimeSection: week and targets', () => {
   it('writes the week start through to the store', () => {
     render(<TimeSection />);
 
@@ -76,7 +76,7 @@ describe('TimeSection — week and targets', () => {
   });
 });
 
-describe('TimeSection — the approval lock', () => {
+describe('TimeSection: the approval lock', () => {
   it('states both irreversible consequences before the switch is touched', () => {
     render(<TimeSection />);
 
@@ -94,7 +94,7 @@ describe('TimeSection — the approval lock', () => {
   });
 });
 
-describe('TimeSection — categories', () => {
+describe('TimeSection: categories', () => {
   it('adds a category', () => {
     render(<TimeSection />);
 
@@ -124,7 +124,7 @@ describe('TimeSection — categories', () => {
   });
 });
 
-describe('TimeSection — rates', () => {
+describe('TimeSection: rates', () => {
   it('reads "not set" rather than zero for a person with no rate', () => {
     render(<TimeSection />);
 
@@ -153,7 +153,7 @@ describe('TimeSection — rates', () => {
   });
 });
 
-describe('TimeSection — the missing endpoint', () => {
+describe('TimeSection: the missing endpoint', () => {
   it('says plainly that these values are per-browser until the endpoint lands', () => {
     render(<TimeSection />);
 

@@ -68,7 +68,8 @@ export function paletteColor(index: number): ProjectColor {
 /** Resolved theme, after 'system' has been collapsed to one or the other. */
 export type ResolvedTheme = 'dark' | 'light';
 
-const ACCENT_FALLBACK = '#64c5b9';
+/** Flow's brand teal. The single definition; FlowLayout imports it. */
+export const ACCENT_DEFAULT = '#64c5b9';
 
 /**
  * The four accent custom properties, derived from the active workspace colour.
@@ -83,7 +84,7 @@ const ACCENT_FALLBACK = '#64c5b9';
  * is already strong enough in both modes.
  */
 export function accentTints(color: string, theme: ResolvedTheme): Record<string, string> {
-  const hex = isValidHex(color) ? normalizeHex(color) : ACCENT_FALLBACK;
+  const hex = isValidHex(color) ? normalizeHex(color) : ACCENT_DEFAULT;
   const h = hex.replace('#', '');
   const r = parseInt(h.slice(0, 2), 16);
   const g = parseInt(h.slice(2, 4), 16);

@@ -63,7 +63,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('BoardSettingsPanel — columns', () => {
+describe('BoardSettingsPanel: columns', () => {
   it('lists every column in sort order', () => {
     renderPanel();
 
@@ -145,7 +145,7 @@ describe('BoardSettingsPanel — columns', () => {
   });
 });
 
-describe('BoardSettingsPanel — reordering', () => {
+describe('BoardSettingsPanel: reordering', () => {
   it('swaps sort order with the neighbour above', () => {
     renderPanel();
 
@@ -184,7 +184,7 @@ describe('BoardSettingsPanel — reordering', () => {
   });
 });
 
-describe('BoardSettingsPanel — what has no field to persist', () => {
+describe('BoardSettingsPanel: what has no field to persist', () => {
   it('disables the WIP limit and names the missing field', () => {
     renderPanel();
 
@@ -210,7 +210,7 @@ describe('BoardSettingsPanel — what has no field to persist', () => {
   });
 });
 
-describe('BoardSettingsPanel — group by', () => {
+describe('BoardSettingsPanel: group by', () => {
   it('changes the grouping', () => {
     const onGroupByChange = vi.fn();
     renderPanel({ onGroupByChange });
@@ -227,7 +227,7 @@ describe('BoardSettingsPanel — group by', () => {
   });
 });
 
-describe('BoardSettingsPanel — a viewer', () => {
+describe('BoardSettingsPanel: a viewer', () => {
   it('shows the panel read-only with the reason rather than hiding it', () => {
     renderPanel({ canManage: false });
 

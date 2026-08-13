@@ -406,13 +406,10 @@ const TimeSection = (): React.JSX.Element => {
                 </div>
                 {/* The per-project override column ships empty on purpose: rates
                  * arrive per project as a value in this cell, not a rewrite. */}
-                <span
-                  className="hidden text-[11px] sm:block sm:w-28"
-                  style={{ color: 'var(--flow-text-dim)' }}
-                  aria-hidden="true"
-                >
-                  &mdash;
-                </span>
+                {/* Reserves the per-project override column without drawing a
+                  * value in it. Nothing is there yet, and a placeholder glyph
+                  * would read as a value of "none" rather than "not built". */}
+                <span className="hidden sm:block sm:w-28" aria-hidden="true" />
               </li>
             );
           })}
