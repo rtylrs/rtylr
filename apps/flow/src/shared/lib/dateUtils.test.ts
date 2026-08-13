@@ -9,6 +9,7 @@ import {
   relativeDayLabel,
   isWithinDays,
   formatDateShort,
+  formatEntryTimestamp,
   addDays,
   startOfWeek,
   endOfWeek,
@@ -132,5 +133,27 @@ describe('startOfWeek', () => {
 describe('endOfWeek', () => {
   it('returns Sunday six days after Monday', () => {
     expect(endOfWeek('2026-06-15')).toBe('2026-06-21');
+  });
+});
+
+describe('formatEntryTimestamp', () => {
+  it('renders a weekday, day and month for a full ISO timestamp', () => {
+    expect(formatEntryTimestamp('2026-08-11T09:00:00Z', 'en-US')).toBe('Tue, Aug 11');
+  });
+
+  it('follows each locale’s own day/month order rather than pinning one', () => {
+    expect(formatEntryTimestamp('2026-08-11T09:00:00Z', 'en-GB')).toBe('Tue 11 Aug');
+  });
+
+  it('localises the month name but keeps Latin numerals in Arabic', () => {
+    const formatted = formatEntryTimestamp('2026-08-11T09:00:00Z', 'ar');
+
+    expect(formatted).toMatch(/11/);
+    expect(formatted).not.toMatch(/[٠-٩]/);
+  });
+
+  it('returns an empty string for an unparseable value rather than "Invalid Date"', () => {
+    expect(formatEntryTimestamp('', 'en-US')).toBe('');
+    expect(formatEntryTimestamp('not a date', 'en-US')).toBe('');
   });
 });

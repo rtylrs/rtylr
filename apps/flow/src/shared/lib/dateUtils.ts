@@ -76,3 +76,25 @@ export function startOfWeek(date: string): string {
 export function endOfWeek(date: string): string {
   return addDays(startOfWeek(date), 6);
 }
+
+/**
+ * Formats a full ISO timestamp as `Tue 11 Aug`, for the provenance line under a
+ * time entry.
+ *
+ * Distinct from `formatDateShort`, which takes a date-only string and appends
+ * `T00:00:00` - handing it a timestamp produces an invalid date.
+ *
+ * Month and weekday names follow the active language; the digits do not. The
+ * `nu-latn` extension pins Latin numerals, because a duration or a date read
+ * back to a payroll import must not arrive in Eastern Arabic digits.
+ */
+export function formatEntryTimestamp(iso: string, locale = 'en-US'): string {
+  const dt = new Date(iso);
+  if (Number.isNaN(dt.getTime())) return '';
+  return new Intl.DateTimeFormat(`${locale}-u-nu-latn`, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(dt);
+}
