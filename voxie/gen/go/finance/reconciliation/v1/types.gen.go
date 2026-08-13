@@ -339,6 +339,10 @@ type GetOverviewResponse struct {
 	UnmatchedBankTxns []*UnmatchedBankTransaction `json:"unmatched_bank_txns,omitempty"`
 	UnmatchedInvoices []*UnmatchedInvoice         `json:"unmatched_invoices,omitempty"`
 	Suggestions       []*MatchSuggestion          `json:"suggestions,omitempty"`
+	BankTxnsTruncated bool                        `json:"bank_txns_truncated,omitempty"`
+	InvoicesTruncated bool                        `json:"invoices_truncated,omitempty"`
+	ExpensesTruncated bool                        `json:"expenses_truncated,omitempty"`
+	PreviewLimit      int32                       `json:"preview_limit,omitempty"`
 }
 
 func (x *GetOverviewResponse) GetUnmatchedBankTxns() []*UnmatchedBankTransaction {
@@ -363,6 +367,38 @@ func (x *GetOverviewResponse) GetSuggestions() []*MatchSuggestion {
 		return zero
 	}
 	return x.Suggestions
+}
+
+func (x *GetOverviewResponse) GetBankTxnsTruncated() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.BankTxnsTruncated
+}
+
+func (x *GetOverviewResponse) GetInvoicesTruncated() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.InvoicesTruncated
+}
+
+func (x *GetOverviewResponse) GetExpensesTruncated() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.ExpensesTruncated
+}
+
+func (x *GetOverviewResponse) GetPreviewLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PreviewLimit
 }
 
 type MatchRequest struct {

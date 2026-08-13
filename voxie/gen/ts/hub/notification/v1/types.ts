@@ -41,16 +41,22 @@ return violations;
 }
 
 export interface ListNotificationsRequest {
+limit?: number;
+cursor?: string;
 }
 
 export function decodeListNotificationsRequest(v: any): ListNotificationsRequest {
 if (v === null || v === undefined) return v;
 return {
+limit: v.limit,
+cursor: v.cursor,
 };
 }
 
 export function encodeListNotificationsRequest(v: ListNotificationsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.cursor !== undefined) { out.cursor = v.cursor; }
 return out;
 }
 
@@ -61,18 +67,21 @@ return violations;
 
 export interface ListNotificationsResponse {
 notifications?: (Notification)[];
+nextCursor?: string;
 }
 
 export function decodeListNotificationsResponse(v: any): ListNotificationsResponse {
 if (v === null || v === undefined) return v;
 return {
 notifications: (v.notifications !== undefined ? (v.notifications as any[]).map(decodeNotification) : v.notifications),
+nextCursor: v.next_cursor,
 };
 }
 
 export function encodeListNotificationsResponse(v: ListNotificationsResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.notifications !== undefined) { out.notifications = (v.notifications as any[]).map(encodeNotification); }
+if (v.nextCursor !== undefined) { out.next_cursor = v.nextCursor; }
 return out;
 }
 

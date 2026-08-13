@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -30,6 +31,8 @@ func (c *NotificationServiceClient) ListNotifications(ctx context.Context, req *
 	}
 	path := "/hub/notification/v1/notifications"
 	query := url.Values{}
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("cursor", req.Cursor)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

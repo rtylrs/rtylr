@@ -35,6 +35,11 @@ message GetOverviewResponse {
   unmatched_bank_txns: UnmatchedBankTransaction[]
   unmatched_invoices: UnmatchedInvoice[]
   suggestions: MatchSuggestion[]
+  /// Overview lists are bounded previews; true means more matching records exist.
+  bank_txns_truncated: bool
+  invoices_truncated: bool
+  expenses_truncated: bool
+  preview_limit: int32
 }
 
 message MatchRequest {

@@ -38,6 +38,12 @@ const violations = validateListNotificationsRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
 let path = "/hub/notification/v1/notifications";
 const query = new URLSearchParams();
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.cursor !== undefined) {
+query.set("cursor", String(req.cursor));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {

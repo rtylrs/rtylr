@@ -140,6 +140,10 @@ export interface GetOverviewResponse {
 unmatchedBankTxns?: (UnmatchedBankTransaction)[];
 unmatchedInvoices?: (UnmatchedInvoice)[];
 suggestions?: (MatchSuggestion)[];
+bankTxnsTruncated?: boolean;
+invoicesTruncated?: boolean;
+expensesTruncated?: boolean;
+previewLimit?: number;
 }
 
 export function decodeGetOverviewResponse(v: any): GetOverviewResponse {
@@ -148,6 +152,10 @@ return {
 unmatchedBankTxns: (v.unmatched_bank_txns !== undefined ? (v.unmatched_bank_txns as any[]).map(decodeUnmatchedBankTransaction) : v.unmatched_bank_txns),
 unmatchedInvoices: (v.unmatched_invoices !== undefined ? (v.unmatched_invoices as any[]).map(decodeUnmatchedInvoice) : v.unmatched_invoices),
 suggestions: (v.suggestions !== undefined ? (v.suggestions as any[]).map(decodeMatchSuggestion) : v.suggestions),
+bankTxnsTruncated: v.bank_txns_truncated,
+invoicesTruncated: v.invoices_truncated,
+expensesTruncated: v.expenses_truncated,
+previewLimit: v.preview_limit,
 };
 }
 
@@ -156,6 +164,10 @@ const out: Record<string, unknown> = {};
 if (v.unmatchedBankTxns !== undefined) { out.unmatched_bank_txns = (v.unmatchedBankTxns as any[]).map(encodeUnmatchedBankTransaction); }
 if (v.unmatchedInvoices !== undefined) { out.unmatched_invoices = (v.unmatchedInvoices as any[]).map(encodeUnmatchedInvoice); }
 if (v.suggestions !== undefined) { out.suggestions = (v.suggestions as any[]).map(encodeMatchSuggestion); }
+if (v.bankTxnsTruncated !== undefined) { out.bank_txns_truncated = v.bankTxnsTruncated; }
+if (v.invoicesTruncated !== undefined) { out.invoices_truncated = v.invoicesTruncated; }
+if (v.expensesTruncated !== undefined) { out.expenses_truncated = v.expensesTruncated; }
+if (v.previewLimit !== undefined) { out.preview_limit = v.previewLimit; }
 return out;
 }
 

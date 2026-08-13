@@ -257,6 +257,17 @@ func RegisterAuditServiceServer(first any, rest ...any) error {
 		if r.URL.Query().Get("end_date") != "" {
 			req.EndDate = r.URL.Query().Get("end_date")
 		}
+		if r.URL.Query().Get("limit") != "" {
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
+		}
+		if r.URL.Query().Get("cursor") != "" {
+			req.Cursor = r.URL.Query().Get("cursor")
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
