@@ -64,15 +64,19 @@ func (a *ExpensesAPI) CreateExpense(ctx context.Context, req *financeexpensesv1.
 		return nil, expenseStatusError(http.StatusBadRequest, validationErr.Error())
 	}
 	id, createErr := a.Service.Create(ctx, domain.ExpenseInput{
-		OwnerID:     device.User.UserID,
-		BusinessID:  businessID,
-		CategoryID:  req.CategoryId,
-		Amount:      req.GetAmount(),
-		Currency:    req.GetCurrency(),
-		Description: req.GetDescription(),
-		Vendor:      req.GetVendor(),
-		ReceiptURL:  req.GetReceiptUrl(),
-		ExpenseDate: expenseDate,
+		OwnerID:         device.User.UserID,
+		BusinessID:      businessID,
+		CategoryID:      req.CategoryId,
+		Amount:          req.GetAmount(),
+		Currency:        req.GetCurrency(),
+		Description:     req.GetDescription(),
+		Vendor:          req.GetVendor(),
+		PaymentMethod:   req.GetPaymentMethod(),
+		ReceiptURL:      req.GetReceiptUrl(),
+		IsTaxDeductible: req.GetIsTaxDeductible(),
+		TaxAmount:       req.GetTaxAmount(),
+		Notes:           req.GetNotes(),
+		ExpenseDate:     expenseDate,
 	})
 	if createErr != nil {
 		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to create expense")
@@ -104,16 +108,20 @@ func (a *ExpensesAPI) UpdateExpense(ctx context.Context, req *financeexpensesv1.
 		return nil, expenseStatusError(http.StatusBadRequest, validationErr.Error())
 	}
 	if updateErr := a.Service.Update(ctx, domain.ExpenseUpdateInput{
-		ID:          req.GetId(),
-		OwnerID:     device.User.UserID,
-		BusinessID:  businessID,
-		CategoryID:  body.CategoryId,
-		Amount:      body.GetAmount(),
-		Currency:    body.GetCurrency(),
-		Description: body.GetDescription(),
-		Vendor:      body.GetVendor(),
-		ReceiptURL:  body.GetReceiptUrl(),
-		ExpenseDate: expenseDate,
+		ID:              req.GetId(),
+		OwnerID:         device.User.UserID,
+		BusinessID:      businessID,
+		CategoryID:      body.CategoryId,
+		Amount:          body.GetAmount(),
+		Currency:        body.GetCurrency(),
+		Description:     body.GetDescription(),
+		Vendor:          body.GetVendor(),
+		PaymentMethod:   body.GetPaymentMethod(),
+		ReceiptURL:      body.GetReceiptUrl(),
+		IsTaxDeductible: body.GetIsTaxDeductible(),
+		TaxAmount:       body.GetTaxAmount(),
+		Notes:           body.GetNotes(),
+		ExpenseDate:     expenseDate,
 	}); updateErr != nil {
 		if errors.Is(updateErr, domain.ErrExpenseNotFound) {
 			return nil, expenseStatusError(http.StatusNotFound, "Expense not found")
@@ -197,18 +205,22 @@ func (a *ExpensesAPI) ListExpenseCategories(ctx context.Context, _ *financeexpen
 
 func newExpensePayload(expense domain.Expense) *financeexpensesv1.Expense {
 	return &financeexpensesv1.Expense{
-		Id:          expense.ID,
-		OwnerId:     expense.OwnerID,
-		CategoryId:  expense.CategoryID,
-		Amount:      expense.Amount,
-		Currency:    expense.Currency,
-		Description: expense.Description,
-		Vendor:      expense.Vendor,
-		ReceiptUrl:  expense.ReceiptURL,
-		ExpenseDate: expense.ExpenseDate.Format("2006-01-02"),
-		Status:      expense.Status,
-		CreatedAt:   expense.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt:   expense.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		Id:              expense.ID,
+		OwnerId:         expense.OwnerID,
+		CategoryId:      expense.CategoryID,
+		Amount:          expense.Amount,
+		Currency:        expense.Currency,
+		Description:     expense.Description,
+		Vendor:          expense.Vendor,
+		PaymentMethod:   expense.PaymentMethod,
+		ReceiptUrl:      expense.ReceiptURL,
+		IsTaxDeductible: expense.IsTaxDeductible,
+		TaxAmount:       expense.TaxAmount,
+		Notes:           expense.Notes,
+		ExpenseDate:     expense.ExpenseDate.Format("2006-01-02"),
+		Status:          expense.Status,
+		CreatedAt:       expense.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:       expense.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 

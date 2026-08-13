@@ -41,15 +41,15 @@ func (r *Repository) GetSecuritySettings(ctx context.Context, userID int64) (dom
 }
 
 func (r *Repository) SetTwoFactor(ctx context.Context, userID int64, enabled bool) error {
-	// cross-schema write to users — two_factor_enabled column may not exist yet, silently fail
+	// cross-schema write to users — two_factor_enabled is owned by the user/auth module.
 	err := r.queries.SetTwoFactor(ctx, sqlc.SetTwoFactorParams{
 		TwoFactorEnabled: enabled,
 		ID:               userID,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Warn("Failed to set 2FA (column may not exist)", logger.Error(err))
+		logger.Ctx(ctx).Error("Failed to set 2FA", logger.Error(err))
 	}
-	return nil
+	return err
 }
 
 func (r *Repository) GetLoginHistory(ctx context.Context, userID int64, limit, offset int) ([]domain.LoginEntry, int64, error) {

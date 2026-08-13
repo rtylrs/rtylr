@@ -1093,6 +1093,7 @@ func expenseFromSqlc(row sqlc.FinanceExpense) domain.Expense {
 		IsTaxDeductible: nullBool(row.IsTaxDeductible),
 		TaxAmount:       parseFloatNull(row.TaxAmount),
 		Notes:           nullStr(row.Notes, ""),
+		Status:          nullStr(row.Status, "pending"),
 		CreatedAt:       nullTime(row.CreatedAt),
 		UpdatedAt:       nullTime(row.UpdatedAt),
 	}
