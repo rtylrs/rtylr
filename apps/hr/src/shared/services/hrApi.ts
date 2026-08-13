@@ -77,16 +77,6 @@ export interface PayrollRow {
   status?: 'Pending' | 'Paid';
 }
 
-export interface TimeOffRequest {
-  id: number;
-  staffId: number;
-  staffName: string;
-  startDate: string;
-  endDate: string;
-  reason: string;
-  status: 'Pending' | 'Approved' | 'Rejected';
-}
-
 export interface HRDashboardStats {
   totalStaff: number;
   onShiftToday: number;
@@ -159,7 +149,6 @@ const toShiftUpdatePayload = (data: UpdateShiftInput) => ({
 
 export const hrApi = {
   // Staff
-  listStaff: () => safe.get<StaffMember[]>('/hr/staff'),
   createStaff: (data: CreateStaffInput) =>
     safe.post<StaffMember>('/hr/staff', toStaffPayload(data)),
   updateStaff: (data: UpdateStaffInput) =>
@@ -171,7 +160,6 @@ export const hrApi = {
     safe.post<{ success: boolean; time: string }>('/hr/staff/clock-out', { staffId }),
 
   // Departments
-  listDepartments: () => safe.get<Department[]>('/hr/departments'),
   createDepartment: (data: CreateDepartmentInput) =>
     safe.post<Department>('/hr/departments', toDepartmentCreatePayload(data)),
   updateDepartment: (data: UpdateDepartmentInput) =>
@@ -191,24 +179,6 @@ export const hrApi = {
     safe.put<Shift>('/hr/shifts', toShiftUpdatePayload(data)),
 
   // Payroll
-  listPayroll: (params?: { period?: string }) => safe.get<PayrollRow[]>('/hr/payroll', { params }),
-  runPayroll: (period: string) =>
-    safe.post<{ success: boolean }>('/hr/payroll/run', {
-      periodStart: period,
-      periodEnd: period,
-      periodLabel: period,
-    }),
-  markPayrollPaid: (id: number) => safe.post<{ success: boolean }>('/hr/payroll/mark-paid', { id }),
-
-  // Time Off
-  listTimeOff: () => safe.get<TimeOffRequest[]>('/hr/time-off'),
-  submitTimeOff: (data: { staffId: number; startDate: string; endDate: string; reason: string }) =>
-    safe.post<TimeOffRequest>('/hr/time-off', data),
-  approveTimeOff: (id: number, approved: boolean) =>
-    safe.post<{ success: boolean }>('/hr/time-off/approve', {
-      id,
-      status: approved ? 'approved' : 'rejected',
-    }),
 
   // Dashboard
   getDashboard: () => safe.get<HRDashboardStats>('/hr/dashboard/v1/dashboard'),
