@@ -39,24 +39,32 @@ func (r *Repository) GetConfig(ctx context.Context, businessID int64) (domain.Ta
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
 		BusinessID:  row.BusinessID,
-		TaxName:     nullStr(row.TaxName),
-		TaxRate:     parseFloatNull(row.TaxRate),
+		TaxName:     row.Name,
+		TaxRate:     parseStringFloat(row.Rate),
 		IsInclusive: nullBool(row.IsInclusive),
 		IsActive:    nullBool(row.IsActive),
 		CreatedAt:   nullTime(row.CreatedAt),
-		UpdatedAt:   nullTime(row.UpdatedAt),
 	}, nil
 }
 
 func (r *Repository) UpsertConfig(ctx context.Context, input domain.TaxConfigInput) error {
-	err := r.queries.UpsertTaxConfig(ctx, sqlc.UpsertTaxConfigParams{
-		OwnerID:     input.OwnerID,
-		BusinessID:  input.BusinessID,
-		TaxName:     nullableString(input.TaxName),
-		TaxRate:     nullableString(fmtFloat(input.TaxRate)),
-		IsInclusive: sql.NullBool{Bool: input.IsInclusive, Valid: true},
-		IsActive:    sql.NullBool{Bool: input.IsActive, Valid: true},
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	queries := r.queries.WithTx(tx)
+	if err = queries.ClearDefaultTaxConfig(ctx, input.BusinessID); err != nil {
+		return err
+	}
+	err = queries.UpsertTaxConfig(ctx, sqlc.UpsertTaxConfigParams{
+		OwnerID: input.OwnerID, BusinessID: input.BusinessID, Name: input.TaxName,
+		Rate: fmtFloat(input.TaxRate), Type: sqlc.NullFinanceTaxConfigType{FinanceTaxConfigType: sqlc.FinanceTaxConfigType("vat"), Valid: true},
+		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true}, IsInclusive: sql.NullBool{Bool: input.IsInclusive, Valid: true},
 	})
+	if err == nil {
+		err = tx.Commit()
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to upsert tax config", logger.Error(err))
 	}
@@ -89,17 +97,6 @@ func (r *Repository) GetPLReport(ctx context.Context, businessID int64) (domain.
 // Conversion helpers
 // ---------------------------------------------------------------------------
 
-func nullableString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
-
-func nullStr(s sql.NullString) string {
-	if s.Valid {
-		return s.String
-	}
-	return ""
-}
-
 func nullBool(b sql.NullBool) bool {
 	if b.Valid {
 		return b.Bool
@@ -118,11 +115,12 @@ func fmtFloat(f float64) string {
 	return strconv.FormatFloat(f, 'f', 2, 64)
 }
 
-func parseFloatNull(s sql.NullString) float64 {
-	if !s.Valid {
+func parseStringFloat(value string) float64 {
+	v, err := strconv.ParseFloat(value, 64)
+	if err != nil {
 		return 0
 	}
-	return parseTaxDecimal(s.String)
+	return v
 }
 
 func parseTaxDecimal(s string) float64 {

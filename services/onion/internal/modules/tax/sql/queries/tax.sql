@@ -1,16 +1,19 @@
 -- name: GetTaxConfig :one
-SELECT id, owner_id, business_id, tax_name, tax_rate, is_inclusive, is_active, created_at, updated_at
+SELECT id, owner_id, business_id, name, rate, type, is_default, is_active, is_inclusive, created_at
 FROM finance_tax_config
-WHERE business_id = ?;
+WHERE business_id = ? AND is_default = TRUE
+ORDER BY id ASC
+LIMIT 1;
+
+-- name: ClearDefaultTaxConfig :exec
+UPDATE finance_tax_config SET is_default = FALSE WHERE business_id = ?;
 
 -- name: UpsertTaxConfig :exec
-INSERT INTO finance_tax_config (owner_id, business_id, tax_name, tax_rate, is_inclusive, is_active)
-VALUES (?, ?, ?, ?, ?, ?)
+INSERT INTO finance_tax_config (owner_id, business_id, name, rate, type, is_default, is_active, is_inclusive)
+VALUES (?, ?, ?, ?, ?, TRUE, ?, ?)
 ON DUPLICATE KEY UPDATE
-  business_id = VALUES(business_id),
-  tax_name = VALUES(tax_name),
-  tax_rate = VALUES(tax_rate),
-  is_inclusive = VALUES(is_inclusive),
+  rate = VALUES(rate),
+  is_default = TRUE,
   is_active = VALUES(is_active);
 
 -- name: SumPaidInvoicesTotal :one
