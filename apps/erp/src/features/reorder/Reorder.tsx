@@ -10,7 +10,8 @@ import EmptyState from '../../shared/components/EmptyState';
 const AMBER = 'var(--erp-accent)';
 
 const Reorder: React.FC = () => {
-  const { data: suggestions = [], isLoading } = useReorderSuggestions();
+  const { data, isLoading } = useReorderSuggestions();
+  const suggestions = data?.suggestions ?? [];
 
   return (
     <motion.div
@@ -36,6 +37,13 @@ const Reorder: React.FC = () => {
           Suggestions use: current stock / avg daily sales / supplier lead time
         </p>
       </div>
+
+      {data?.truncated && (
+        <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
+          Showing the 100 most urgent suggestions. Refine inventory thresholds to reduce this
+          preview.
+        </p>
+      )}
 
       <div
         className="rounded-xl overflow-hidden"

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -43,7 +43,11 @@ const CustomerProfile: React.FC = () => {
   const navigate = useNavigate();
   const customerId = Number(id);
   const { data: fetched, isLoading } = useGetCustomerFull(customerId);
-  const { data: fetchedTimeline } = useCustomerTimeline(customerId);
+  const [timelineCursor, setTimelineCursor] = useState<string>();
+  const { data: fetchedTimeline } = useCustomerTimeline(customerId, timelineCursor);
+  const [timelineEntries, setTimelineEntries] = useState<
+    NonNullable<typeof fetchedTimeline>['entries']
+  >([]);
   const update = useUpdateCustomer();
   const remove = useDeleteCustomer();
   const award = useAwardPoints();
@@ -54,7 +58,17 @@ const CustomerProfile: React.FC = () => {
   const [newTag, setNewTag] = useState('');
 
   const customer = fetched;
-  const timeline = fetchedTimeline ?? [];
+  useEffect(() => {
+    if (!fetchedTimeline) return;
+    setTimelineEntries((entries) =>
+      timelineCursor ? [...entries, ...fetchedTimeline.entries] : fetchedTimeline.entries
+    );
+  }, [fetchedTimeline, timelineCursor]);
+  useEffect(() => {
+    setTimelineCursor(undefined);
+    setTimelineEntries([]);
+  }, [customerId]);
+  const timeline = timelineEntries;
 
   if (isLoading) {
     return (
@@ -382,6 +396,15 @@ const CustomerProfile: React.FC = () => {
                   <TimelineEntryRow key={t.id} entry={t} />
                 ))}
               </div>
+              {fetchedTimeline?.nextCursor && (
+                <Button
+                  variant="outline"
+                  onClick={() => setTimelineCursor(fetchedTimeline.nextCursor)}
+                  style={{ marginTop: '14px' }}
+                >
+                  Load more
+                </Button>
+              )}
             </Card>
           </div>
 

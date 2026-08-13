@@ -42,6 +42,11 @@ export interface CustomerFullPayload extends Customer {
   tier?: string | null;
 }
 
+export interface CustomerTimelinePage {
+  entries: TimelineEntry[];
+  nextCursor?: string;
+}
+
 // ── Queries ──────────────────────────────────────────────────────────────────
 
 export const useListCustomers = (params: ListCustomersParams): UseQueryResult<Customer[]> =>
@@ -75,12 +80,20 @@ export const useGetCustomerFull = (id: number | undefined): UseQueryResult<Custo
     enabled: !!id,
   });
 
-export const useCustomerTimeline = (id: number | undefined): UseQueryResult<TimelineEntry[]> =>
-  useQuery<TimelineEntry[]>({
-    queryKey: ['crm-customer', id, 'timeline'],
-    queryFn: async (): Promise<TimelineEntry[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/customers/timeline', { params: { id } }));
-      return z.array(timelineEntrySchema).parse(unwrapList(res, 'entries', 'timeline'));
+export const useCustomerTimeline = (
+  id: number | undefined,
+  cursor?: string
+): UseQueryResult<CustomerTimelinePage> =>
+  useQuery<CustomerTimelinePage>({
+    queryKey: ['crm-customer', id, 'timeline', cursor],
+    queryFn: async (): Promise<CustomerTimelinePage> => {
+      const res = (await unwrap(
+        safe.get<unknown>('/crm/customers/timeline', { params: { id, cursor } })
+      )) as { entries?: unknown; nextCursor?: string };
+      return {
+        entries: z.array(timelineEntrySchema).parse(unwrapList(res, 'entries', 'timeline')),
+        nextCursor: res.nextCursor,
+      };
     },
     enabled: !!id,
   });
