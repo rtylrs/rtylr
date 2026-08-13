@@ -168,7 +168,7 @@ func (m *Module) executeApprovePurchaseOrderTool(ctx context.Context, input map[
 	if bizErr != nil {
 		return nil, bizErr
 	}
-	if err := m.service.ApprovePurchaseOrder(ctx, businessID, poID); err != nil {
+	if err := m.service.ApprovePurchaseOrder(ctx, businessID, poID, authUser.UserID, authUser.Role); err != nil {
 		return nil, err
 	}
 
