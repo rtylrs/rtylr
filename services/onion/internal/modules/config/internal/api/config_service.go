@@ -179,6 +179,9 @@ func (a *ConfigAPI) UpdateConfig(ctx context.Context, req *hubconfigv1.UpdateCon
 		input.SMTPHost = strings.TrimSpace(*req.SmtpHost)
 	}
 	if req.SmtpPort != nil {
+		if *req.SmtpPort <= 0 || *req.SmtpPort > 65535 {
+			return nil, onekiterrors.New(http.StatusBadRequest, "smtp_port must be between 1 and 65535")
+		}
 		input.SMTPPort = *req.SmtpPort
 	}
 	if req.SmtpUsername != nil {

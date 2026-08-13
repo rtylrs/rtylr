@@ -142,6 +142,9 @@ func (h *UpdateConfigHandler) Serve(ctx context.Context, req *UpdateConfigReques
 		input.SMTPHost = *req.SMTPHost
 	}
 	if req.SMTPPort != nil {
+		if *req.SMTPPort <= 0 || *req.SMTPPort > 65535 {
+			return UpdateConfigResponse{}, onekiterrors.New(http.StatusBadRequest, "smtp_port must be between 1 and 65535")
+		}
 		input.SMTPPort = *req.SMTPPort
 	}
 	if req.SMTPUsername != nil {

@@ -135,6 +135,10 @@ func (r *Repository) UpdateConfig(ctx context.Context, input domain.ConfigInput)
 		logger.Ctx(ctx).Error("Failed to marshal meta tags", logger.Error(marshalErr))
 		return marshalErr
 	}
+	emailProvider := input.EmailProvider
+	if emailProvider == "" {
+		emailProvider = "resend"
+	}
 
 	execErr := r.queries.UpdateConfig(ctx, sqlc.UpdateConfigParams{
 		SiteName:                  sql.NullString{String: input.SiteName, Valid: input.SiteName != ""},
@@ -144,7 +148,7 @@ func (r *Repository) UpdateConfig(ctx context.Context, input domain.ConfigInput)
 		ContactEmail:              input.ContactEmail,
 		ContactNumber:             input.ContactNumber,
 		SenderEmail:               sql.NullString{String: input.SenderEmail, Valid: input.SenderEmail != ""},
-		EmailProvider:             input.EmailProvider,
+		EmailProvider:             emailProvider,
 		SenderName:                sql.NullString{String: input.SenderName, Valid: input.SenderName != ""},
 		ReplyToEmail:              sql.NullString{String: input.ReplyToEmail, Valid: input.ReplyToEmail != ""},
 		EmailNotificationsEnabled: input.EmailNotificationsEnabled,
@@ -196,6 +200,10 @@ func (r *Repository) CreateConfig(ctx context.Context, input domain.ConfigInput)
 
 		return marshalErr
 	}
+	emailProvider := input.EmailProvider
+	if emailProvider == "" {
+		emailProvider = "resend"
+	}
 
 	err = r.queries.CreateConfig(ctx, sqlc.CreateConfigParams{
 		OwnerID:                   int32(businessIDInt),
@@ -207,7 +215,7 @@ func (r *Repository) CreateConfig(ctx context.Context, input domain.ConfigInput)
 		ContactEmail:              input.ContactEmail,
 		ContactNumber:             input.ContactNumber,
 		SenderEmail:               sql.NullString{String: input.SenderEmail, Valid: input.SenderEmail != ""},
-		EmailProvider:             input.EmailProvider,
+		EmailProvider:             emailProvider,
 		SenderName:                sql.NullString{String: input.SenderName, Valid: input.SenderName != ""},
 		ReplyToEmail:              sql.NullString{String: input.ReplyToEmail, Valid: input.ReplyToEmail != ""},
 		EmailNotificationsEnabled: input.EmailNotificationsEnabled,
