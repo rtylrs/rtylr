@@ -54,12 +54,18 @@ func (r *Repository) List(ctx context.Context, businessID int64, page, pageSize 
 }
 
 func (r *Repository) Get(ctx context.Context, businessID, articleID int64, slug, title string) (domain.Article, error) {
-	row, err := r.queries.GetArticle(ctx, sqlc.GetArticleParams{
-		BusinessID: businessID,
-		ArticleID:  articleID,
-		Slug:       strings.TrimSpace(slug),
-		Title:      strings.TrimSpace(title),
-	})
+	var (
+		row sqlc.SupportArticle
+		err error
+	)
+	switch {
+	case articleID > 0:
+		row, err = r.queries.GetArticleByID(ctx, sqlc.GetArticleByIDParams{BusinessID: businessID, ID: articleID})
+	case strings.TrimSpace(slug) != "":
+		row, err = r.queries.GetArticleBySlug(ctx, sqlc.GetArticleBySlugParams{BusinessID: businessID, Slug: strings.TrimSpace(slug)})
+	default:
+		row, err = r.queries.GetArticleByTitle(ctx, sqlc.GetArticleByTitleParams{BusinessID: businessID, Title: strings.TrimSpace(title)})
+	}
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Article{}, domain.ErrArticleNotFound
