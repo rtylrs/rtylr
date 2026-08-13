@@ -326,7 +326,7 @@ const DefaultLayout: React.FC = () => {
             aria-label="Open navigation menu"
             aria-expanded={sidebarOpen}
             aria-controls="erp-sidebar"
-            className="h-8 w-8 rounded-lg flex items-center justify-center"
+            className="h-11 w-11 rounded-lg flex items-center justify-center"
             style={{ color: 'var(--hub-text-muted)' }}
           >
             <Menu size={18} />
@@ -367,7 +367,7 @@ const DefaultLayout: React.FC = () => {
             <button
               onClick={() => setSidebarOpen(false)}
               aria-label="Close navigation menu"
-              className="h-7 w-7 rounded-lg flex md:hidden items-center justify-center"
+              className="h-11 w-11 rounded-lg flex md:hidden items-center justify-center"
               style={{ color: 'var(--hub-text-muted)' }}
             >
               <X size={16} />
@@ -545,7 +545,7 @@ const DefaultLayout: React.FC = () => {
                 <button
                   onClick={() => setPaletteOpen(true)}
                   aria-label="Open search"
-                  className="flex items-center gap-2 h-7 px-3 rounded-lg text-xs"
+                  className="flex items-center gap-2 h-11 px-3 rounded-lg text-xs"
                   style={{
                     background: 'var(--hub-hover)',
                     color: 'var(--hub-text-muted)',
@@ -564,7 +564,7 @@ const DefaultLayout: React.FC = () => {
                 <button
                   onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
                   aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
-                  className="h-7 w-7 rounded-lg flex items-center justify-center"
+                  className="h-11 w-11 rounded-lg flex items-center justify-center"
                   style={{ color: 'var(--hub-text-muted)' }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
@@ -578,7 +578,7 @@ const DefaultLayout: React.FC = () => {
                 <button
                   onClick={() => setShortcutsOpen(true)}
                   aria-label="Open keyboard shortcuts"
-                  className="h-7 w-7 rounded-lg flex items-center justify-center"
+                  className="h-11 w-11 rounded-lg flex items-center justify-center"
                   style={{ color: 'var(--hub-text-muted)' }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
@@ -591,7 +591,7 @@ const DefaultLayout: React.FC = () => {
                 </button>
                 <button
                   aria-label="Open notifications"
-                  className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150"
+                  className="h-11 w-11 rounded-lg flex items-center justify-center transition-colors duration-150"
                   style={{ color: 'var(--hub-text-muted)' }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';

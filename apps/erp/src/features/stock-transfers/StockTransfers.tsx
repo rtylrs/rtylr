@@ -20,7 +20,7 @@ const inputStyle: React.CSSProperties = {
   border: '1px solid var(--hub-border)',
   background: 'var(--hub-input-bg)',
   color: 'var(--hub-text)',
-  fontSize: '13px',
+  fontSize: '16px',
   outline: 'none',
   width: '100%',
   boxSizing: 'border-box',
