@@ -19,13 +19,14 @@ FROM store_products sp
 LEFT JOIN erp_products ep
   ON ep.business_id = sp.business_id AND ep.id = sp.product_id
 LEFT JOIN (
-    SELECT business_id, product_id, JSON_ARRAYAGG(url) AS images
-    FROM erp_product_images
-    GROUP BY business_id, product_id
+    SELECT images.business_id, images.product_id, JSON_ARRAYAGG(images.url) AS images
+    FROM erp_product_images images
+    WHERE images.business_id = ?
+    GROUP BY images.business_id, images.product_id
 ) epi
   ON epi.business_id = sp.business_id AND epi.product_id = sp.product_id
 WHERE sp.business_id = ?
-ORDER BY sp.sort_order ASC;
+ORDER BY sp.sort_order ASC, sp.id ASC;
 
 -- cross-schema read from erp_products — catalog product lookup for storefront sync
 -- name: GetCatalogProductByID :one
