@@ -190,9 +190,7 @@ const Dashboard: React.FC = () => {
 
   const expensesMtd = dashData?.totalExpensesMtd ?? 0;
   const netProfitMtd = dashData?.netProfitMtd ?? 0;
-  // The backend does not send revenue directly; derive it from the identity
-  // revenue = net profit + expenses for the month-to-date figure.
-  const revenueMtd = netProfitMtd + expensesMtd;
+  const revenueMtd = dashData?.totalRevenueMtd ?? 0;
 
   const statsItems: StatCardProps[] = [
     {
