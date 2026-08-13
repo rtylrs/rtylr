@@ -149,16 +149,23 @@ describe('TimePanel: entries', () => {
   });
 
   it('announces the running total, so a screen reader hears the new figure', () => {
+    // Two entries, so the total differs from either row. With rows now in the
+    // same clock notation, a single entry makes the total ambiguous.
     timeLogsState.value = {
-      data: { timeLogs: [makeLog()] },
+      data: {
+        timeLogs: [
+          makeLog({ id: 1, durationMinutes: 195 }),
+          makeLog({ id: 2, durationMinutes: 60 }),
+        ],
+      },
       isLoading: false,
       isError: false,
       refetch,
     };
 
-    renderPanel();
+    const { container } = renderPanel();
 
-    expect(screen.getByText('3:15').closest('[aria-live]')).toHaveAttribute('aria-live', 'polite');
+    expect(container.querySelector('[aria-live="polite"]')).toHaveTextContent('4:15');
   });
 
   it('names the author from the team rather than showing a raw user id', () => {
@@ -172,6 +179,26 @@ describe('TimePanel: entries', () => {
     renderPanel();
 
     expect(screen.getByText('Sam Okafor')).toBeInTheDocument();
+  });
+
+  it('renders entry durations in clock notation, so the column aligns', () => {
+    timeLogsState.value = {
+      data: {
+        timeLogs: [
+          makeLog({ id: 1, durationMinutes: 195 }),
+          makeLog({ id: 2, durationMinutes: 60 }),
+        ],
+      },
+      isLoading: false,
+      isError: false,
+      refetch,
+    };
+
+    renderPanel();
+
+    expect(screen.getByText('3:15')).toBeInTheDocument();
+    expect(screen.getByText('1:00')).toBeInTheDocument();
+    expect(screen.queryByText('3h 15m')).not.toBeInTheDocument();
   });
 
   it('offers delete on your own entry, labelled by what it removes', () => {
@@ -234,7 +261,7 @@ describe('TimePanel: optimistic save', () => {
 
     renderPanel();
 
-    expect(screen.getByText('1h 45m')).toBeInTheDocument();
+    expect(screen.getByText('1:45')).toBeInTheDocument();
     expect(screen.getByText('flow.time.saving')).toBeInTheDocument();
   });
 });

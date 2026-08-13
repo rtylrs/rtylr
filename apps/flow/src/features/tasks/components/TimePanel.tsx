@@ -6,11 +6,7 @@ import { useTimeLogs, useLogTime, useDeleteTimeLog } from '../useTimeLogs';
 import { useFlowTeam } from '../../../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../../../shared/lib/memberUtils';
 import { formatEntryTimestamp, todayIso } from '../../../shared/lib/dateUtils';
-import {
-  formatDuration,
-  formatDurationClock,
-  parseDurationInput,
-} from '../../../shared/lib/durationUtils';
+import { formatDurationClock, parseDurationInput } from '../../../shared/lib/durationUtils';
 import GateNotice from '../../../shared/components/GateNotice';
 import DurationField from './DurationField';
 import { roundLoggedMinutes, useTimeSettingsStore } from '../../../shared/stores/timeSettingsStore';
@@ -241,7 +237,7 @@ const TimePanel = ({
                 <Avatar size="sm" initials={initialsFromName(authorName)} aria-hidden="true" />
                 <div className="min-w-0 flex-1">
                   <span className="text-[11px] font-semibold" style={{ color: 'var(--accent-fg)' }}>
-                    {formatDuration(log.durationMinutes)}
+                    {formatDurationClock(log.durationMinutes)}
                   </span>
                   {body && (
                     <p
@@ -262,7 +258,7 @@ const TimePanel = ({
                     type="button"
                     onClick={() => deleteTimeLog.mutate({ id: log.id, taskId })}
                     aria-label={t('flow.time.deleteEntryLabel', {
-                      duration: formatDuration(log.durationMinutes),
+                      duration: formatDurationClock(log.durationMinutes),
                     })}
                     className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded md:h-6 md:w-6"
                     style={{ color: 'var(--flow-text-muted)' }}
@@ -281,7 +277,7 @@ const TimePanel = ({
             >
               <div className="min-w-0 flex-1">
                 <span className="text-[11px] font-semibold" style={{ color: 'var(--accent-fg)' }}>
-                  {formatDuration(pendingMinutes)}
+                  {formatDurationClock(pendingMinutes)}
                 </span>
                 {pendingDescription && pendingDescription !== '-' && (
                   <p
