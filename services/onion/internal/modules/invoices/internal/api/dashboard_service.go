@@ -32,6 +32,7 @@ func (a *DashboardAPI) GetFinanceDashboard(ctx context.Context, _ *financedashbo
 		TotalReceivable:  dashboard.TotalReceivable,
 		OverdueAmount:    dashboard.OverdueAmount,
 		TotalExpensesMtd: dashboard.TotalExpensesMTD,
+		TotalRevenueMtd:  dashboard.TotalRevenueMTD,
 		NetProfitMtd:     dashboard.NetProfitMTD,
 	}, nil
 }
