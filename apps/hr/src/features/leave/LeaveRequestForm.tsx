@@ -46,7 +46,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
     isError: typesError,
     refetch: refetchLeaveTypes,
   } = useListLeaveTypes();
-  const { data: balances } = useListLeaveBalances();
+  const { data: balances } = useListLeaveBalances(userId ?? undefined);
   const { data: existingRequests } = useListLeaveRequests({
     employeeId: userId ?? undefined,
     status: undefined,
@@ -63,8 +63,12 @@ const LeaveRequestForm = (): React.JSX.Element => {
 
   const selectedBalance = useMemo(() => {
     if (!balances || form.leaveTypeId === '') return null;
-    return balances.find((b) => b.leaveTypeId === form.leaveTypeId) ?? null;
-  }, [balances, form.leaveTypeId]);
+    return (
+      balances.find(
+        (b) => b.employeeId === userId && b.leaveTypeId === form.leaveTypeId
+      ) ?? null
+    );
+  }, [balances, form.leaveTypeId, userId]);
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
