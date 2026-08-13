@@ -169,11 +169,15 @@ WHERE business_id = ?
 -- name: MoveOrderItems :exec
 UPDATE pos_order_items SET order_id = ? WHERE id = ? AND order_id = ?;
 
--- name: RecalcOrderTotals :exec
-UPDATE pos_orders SET
-    subtotal = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id),
-    total = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id)
-WHERE pos_orders.id = ?;
+-- name: GetOrderItemsTotal :one
+SELECT COALESCE(SUM(total), 0) AS subtotal
+FROM pos_order_items
+WHERE order_id = ?;
+
+-- name: UpdateOrderTotals :exec
+UPDATE pos_orders
+SET subtotal = sqlc.arg(subtotal), total = sqlc.arg(total)
+WHERE id = ?;
 
 -- name: CancelOrder :exec
 UPDATE pos_orders SET status = 'cancelled' WHERE id = ? AND business_id = ?;
@@ -220,11 +224,16 @@ UPDATE pos_tables SET status = ? WHERE id = ? AND business_id = ?;
 -- name: VoidOrderItem :execresult
 UPDATE pos_order_items SET status = 'cancelled' WHERE id = ? AND order_id = ? AND status IN ('pending','preparing');
 
--- name: RecalcOrderTotal :exec
+-- name: GetActiveOrderItemsTotal :one
+SELECT COALESCE(SUM(total), 0) AS subtotal
+FROM pos_order_items
+WHERE order_id = ?
+  AND status != 'cancelled';
+
+-- name: UpdateOrderTotal :exec
 UPDATE pos_orders
-SET subtotal = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id AND oi.status != 'cancelled'),
-    total = (SELECT COALESCE(SUM(oi.total),0) FROM pos_order_items oi WHERE oi.order_id = pos_orders.id AND oi.status != 'cancelled') + pos_orders.tax_amount - pos_orders.discount_amount
-WHERE pos_orders.id = ? AND pos_orders.business_id = ?;
+SET subtotal = sqlc.arg(subtotal), total = sqlc.arg(total) + tax_amount - discount_amount
+WHERE id = ? AND business_id = ?;
 
 -- name: UpdateOrderStatusToPreparingFromPending :execresult
 UPDATE pos_orders SET status = 'preparing' WHERE id = ? AND business_id = ? AND status = 'pending';
