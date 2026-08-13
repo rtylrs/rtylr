@@ -15,5 +15,7 @@
   "date": "Date",
   "amount": "Amount",
   "total": "Total",
-  "currency": "Currency"
+  "currency": "Currency",
+  "saving": "Saving…",
+  "creating": "Creating…"
 }
