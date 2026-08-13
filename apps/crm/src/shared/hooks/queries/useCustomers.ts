@@ -70,7 +70,10 @@ function splitName(input: CustomerInput): { firstName: string; lastName: string 
   const firstName = String(input.firstName ?? '').trim();
   const lastName = String(input.lastName ?? '').trim();
   if (firstName) return { firstName, lastName };
-  const parts = String(input.name ?? '').trim().split(/\s+/).filter(Boolean);
+  const parts = String(input.name ?? '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   return { firstName: parts.shift() ?? '', lastName: lastName || parts.join(' ') };
 }
 
@@ -225,8 +228,17 @@ export const useUpdateCustomer = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<CustomerMutationResponse, unknown, UpdateCustomerPayload>({
     mutationFn: async (payload: UpdateCustomerPayload): Promise<CustomerMutationResponse> => {
-      const cached = qc.getQueryData<Customer>(['crm-customer', payload.id, 'full']) ??
+      const cachedFromDetails =
+        qc.getQueryData<Customer>(['crm-customer', payload.id, 'full']) ??
         qc.getQueryData<Customer>(['crm-customer', payload.id]);
+      // List-page edits (for example bulk tag updates) do not have a detail
+      // query cached. Reuse the canonical row from any loaded customer page so
+      // the backend's required first/last-name fields are preserved.
+      const cachedFromLists = qc
+        .getQueriesData<Customer[]>({ queryKey: ['crm-customers'] })
+        .flatMap(([, rows]) => rows ?? [])
+        .find((customer) => customer.id === payload.id);
+      const cached = cachedFromDetails ?? cachedFromLists;
       const merged = toCustomerWireInput({ ...cached, ...payload.data });
       const res = await unwrap(
         safe.put<CustomerMutationResponse>('/crm/customers', { id: payload.id, ...merged })
@@ -311,7 +323,9 @@ export const useExportCustomers = (): UseMutationResult<CustomerExportPayload, u
   const { t } = useTranslation();
   return useMutation<CustomerExportPayload, unknown, number>({
     mutationFn: (id: number): Promise<CustomerExportPayload> =>
-      unwrap(safe.get<CustomerExportPayload>('/crm/customers/export', { params: { customer_id: id } })) as Promise<CustomerExportPayload>,
+      unwrap(
+        safe.get<CustomerExportPayload>('/crm/customers/export', { params: { customer_id: id } })
+      ) as Promise<CustomerExportPayload>,
     onSuccess: (): void => {
       toast.success(t('crm.customers.exported'));
     },
