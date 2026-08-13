@@ -60,23 +60,6 @@ export function formatCompact(n: number, currency: Currency = 'USD'): string {
   return `${getCurrencySymbol(currency)}${safeNumber.toFixed(0)}`;
 }
 
-// Static FX rate table used for display-only currency conversion.
-export const FX_RATES: Record<Currency, number> = {
-  USD: 1,
-  EUR: 0.93,
-  GBP: 0.79,
-  JPY: 156.0,
-  CAD: 1.37,
-  AUD: 1.52,
-  CHF: 0.89,
-  CNY: 7.23,
-};
-
-export function convert(amount: number, from: Currency, to: Currency): number {
-  const usd = amount / (FX_RATES[from] ?? 1);
-  return usd * (FX_RATES[to] ?? 1);
-}
-
 export function parseMoney(input: string): number {
   const cleaned = input.replace(/[^0-9.\-]/g, '');
   const n = parseFloat(cleaned);
