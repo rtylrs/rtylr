@@ -16,18 +16,36 @@ export interface ErpSettings {
   setTheme: (theme: 'dark' | 'light' | 'system') => void;
   setNotifyOnLowStock: (v: boolean) => void;
   setNotifyOnExpiry: (v: boolean) => void;
+  setBusinessSettings: (settings: ErpBusinessSettings) => void;
 }
+
+export type ErpBusinessSettings = Omit<
+  ErpSettings,
+  | 'theme'
+  | 'setCurrency'
+  | 'setTaxRate'
+  | 'setLowStockThreshold'
+  | 'setDefaultWarehouseId'
+  | 'setTheme'
+  | 'setNotifyOnLowStock'
+  | 'setNotifyOnExpiry'
+  | 'setBusinessSettings'
+>;
+
+const DEFAULT_BUSINESS_SETTINGS: ErpBusinessSettings = {
+  currency: 'USD',
+  taxRate: 8.25,
+  lowStockThreshold: 10,
+  defaultWarehouseId: 1,
+  notifyOnLowStock: true,
+  notifyOnExpiry: true,
+};
 
 export const useSettings = create<ErpSettings>()(
   persist(
     (set) => ({
-      currency: 'USD',
-      taxRate: 8.25,
-      lowStockThreshold: 10,
-      defaultWarehouseId: 1,
+      ...DEFAULT_BUSINESS_SETTINGS,
       theme: 'dark',
-      notifyOnLowStock: true,
-      notifyOnExpiry: true,
       setCurrency: (currency) => set({ currency }),
       setTaxRate: (taxRate) => set({ taxRate }),
       setLowStockThreshold: (lowStockThreshold) => set({ lowStockThreshold }),
@@ -35,7 +53,15 @@ export const useSettings = create<ErpSettings>()(
       setTheme: (theme) => set({ theme }),
       setNotifyOnLowStock: (notifyOnLowStock) => set({ notifyOnLowStock }),
       setNotifyOnExpiry: (notifyOnExpiry) => set({ notifyOnExpiry }),
+      setBusinessSettings: (settings) => set(settings),
     }),
-    { name: 'rtylr-erp-settings' }
+    {
+      name: 'rtylr-erp-settings',
+      partialize: (state) => ({ theme: state.theme }),
+      merge: (persisted, current) => {
+        const theme = (persisted as { theme?: ErpSettings['theme'] } | undefined)?.theme;
+        return { ...current, ...(theme ? { theme } : {}) };
+      },
+    }
   )
 );
