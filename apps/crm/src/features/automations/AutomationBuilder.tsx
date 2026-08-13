@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { Save, Plus, Zap, Mail, Clock, GitBranch, MessageSquare, Gift } from 'lucide-react';
+import { Save, Plus, Zap, Mail, MessageSquare, Gift } from 'lucide-react';
 import {
   useCreateAutomation,
   useGetAutomation,
@@ -29,13 +29,6 @@ const actions = [
   { label: 'Send email', description: 'Sends an email template', icon: Mail },
   { label: 'Send SMS', description: 'Sends an SMS message', icon: MessageSquare },
   { label: 'Award points', description: 'Adds loyalty points', icon: Gift },
-  { label: 'Wait 3 days', description: 'Delays next step', icon: Clock, type: 'delay' as const },
-  {
-    label: 'If opted in',
-    description: 'Branch on condition',
-    icon: GitBranch,
-    type: 'condition' as const,
-  },
 ];
 
 const AutomationBuilder: React.FC = () => {
@@ -55,11 +48,13 @@ const AutomationBuilder: React.FC = () => {
     if (!existing) return;
     setName(existing.name);
     if (existing.nodes?.length) {
-      setNodes(existing.nodes.map((node) => ({
-        id: node.id,
-        type: node.type as Node['type'],
-        label: node.label,
-      })));
+      setNodes(
+        existing.nodes.map((node) => ({
+          id: node.id,
+          type: node.type as Node['type'],
+          label: node.label,
+        }))
+      );
     }
   }, [existing]);
 
@@ -93,14 +88,14 @@ const AutomationBuilder: React.FC = () => {
       status: 'paused' as const,
     };
     const callbacks = {
-        onSuccess: () => {
-          toast.success('Automation saved');
-          navigate({ to: '/automations' });
-        },
-        onError: () => {
-          toast.error('Failed to save automation');
-        },
-      };
+      onSuccess: () => {
+        toast.success('Automation saved');
+        navigate({ to: '/automations' });
+      },
+      onError: () => {
+        toast.error('Failed to save automation');
+      },
+    };
     if (isEditing) {
       update.mutate({ id: automationId!, data: payload }, callbacks);
     } else {
@@ -112,12 +107,21 @@ const AutomationBuilder: React.FC = () => {
     <>
       <HelmetContainer title={`${isEditing ? 'Edit' : 'New'} automation · rtylr`} />
       <div style={{ maxWidth: '1200px' }}>
-        <Breadcrumbs items={[{ label: 'Automations', to: '/automations' }, { label: isEditing ? 'Edit' : 'New' }]} />
+        <Breadcrumbs
+          items={[
+            { label: 'Automations', to: '/automations' },
+            { label: isEditing ? 'Edit' : 'New' },
+          ]}
+        />
         <PageHeader
           title={isEditing ? 'Edit automation' : 'New automation'}
           subtitle="Drag triggers and actions to build a workflow"
           actions={
-            <Button variant="primary" onClick={handleSave} disabled={!name || create.isPending || update.isPending}>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              disabled={!name || create.isPending || update.isPending}
+            >
               <Save size={13} />
               {create.isPending || update.isPending ? 'Saving…' : 'Save'}
             </Button>
