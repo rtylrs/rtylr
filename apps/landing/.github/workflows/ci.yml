@@ -1,81 +1,25 @@
-name: CI
+name: Version
 
+# Main pushes create release metadata only. Builds and production deployment
+# happen later, after tryrtylr/deploy promotes one exact landing release.
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-# Cancel superseded branch runs. Main and manual runs are allowed to finish.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  group: version-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
-  # ── Build ───────────────────────────────────────────────────────────
-  # Uploads dist/ as an artifact so the deploy job reuses it instead of rebuilding.
-  verify:
-    name: Build
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-
-      - uses: pnpm/action-setup@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
-      - run: pnpm build
-
-      - name: Configure AWS credentials
-        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
-
-      - name: Sync dist to S3
-        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-        run: aws s3 sync dist/landing s3://voxire-ci-artifacts/${{ github.sha }}/landing/ --delete --no-progress
-
-  # ── Deploy ──────────────────────────────────────────────────────────
-  # Downloads the pre-built artifact from verify — no rebuild.
-  # Only runs on main pushes and manual dispatches.
-  deploy:
-    name: Deploy to Cloudflare Pages
-    needs: verify
-    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch'
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-    steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
-
-      - name: Download dist from S3
-        run: aws s3 sync s3://voxire-ci-artifacts/${{ github.sha }}/landing/ dist/landing/ --no-progress
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Ensure Cloudflare Pages project exists
-        run: npx wrangler pages project create rtylr-landing --production-branch=main || true
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy dist/landing --project-name=rtylr-landing --branch=main
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  release:
+    name: Create landing version
+    uses: tryrtylr/pipelines/.github/workflows/create-release.yml@main
+    with:
+      release_tag: rtylr-landing-v0.0.${{ github.run_number }}
+      release_name: rtylr landing v0.0.${{ github.run_number }}
+      version: 0.0.${{ github.run_number }}
+      notes: "Source version at ${{ github.sha }}. Build and deployment are controlled by tryrtylr/deploy."
