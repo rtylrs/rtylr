@@ -243,37 +243,3 @@ jobs:
       artifact_name: dist-${{ github.sha }}
       runs_on: blacksmith-2vcpu-ubuntu-2404
     secrets: inherit
-
-  # ── Slack notification ─────────────────────────────────────────────
-  # Fires once after all deploys settle, only when at least one app
-  # actually shipped (a CI-config-only commit deploys nothing → no ping).
-  notify:
-    needs:
-      - changes
-      - deploy-auth
-      - deploy-dash
-      - deploy-erp
-      - deploy-crm
-      - deploy-hr
-      - deploy-finance
-      - deploy-flow
-      - deploy-insights
-      - deploy-menu
-      - deploy-recruit
-    # Gate on the changes job's outputs (a normal job → reliable results).
-    # Skipped reusable-workflow deploy jobs can falsely report success to
-    # needs.*.result, so we don't key off that. Fire only when ≥1 app
-    # actually changed and no deploy failed.
-    if: >-
-      ${{ always()
-      && !contains(needs.*.result, 'failure')
-      && ( needs.changes.outputs.auth == 'true'
-        || needs.changes.outputs.dash == 'true'
-        || needs.changes.outputs.erp == 'true'
-        || needs.changes.outputs.crm == 'true'
-        || needs.changes.outputs.hr == 'true'
-        || needs.changes.outputs.finance == 'true'
-        || needs.changes.outputs.flow == 'true'
-        || needs.changes.outputs.insights == 'true'
-        || needs.changes.outputs.menu == 'true'
-        || needs.changes.outputs.recruit == 'true' ) }}
