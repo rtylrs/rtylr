@@ -19,6 +19,61 @@ interface UpdateAutomationPayload {
   data: Partial<Automation>;
 }
 
+interface BackendAutomationRequest {
+  name: string;
+  triggerType: string;
+  triggerConfig: Record<string, unknown>;
+  actions: unknown[];
+  isActive: boolean;
+}
+
+function triggerTypeFor(value?: string): string {
+  const map: Record<string, string> = {
+    'New customer': 'customer_signup',
+    Birthday: 'date_birthday',
+    'Inactive 60 days': 'inactivity',
+    'Inactive customer': 'inactivity',
+    'Post visit': 'order_created',
+    'Tier upgrade': 'loyalty_tier_up',
+    'Tier downgrade': 'loyalty_tier_down',
+  };
+  return map[value ?? ''] ?? value ?? 'customer_signup';
+}
+
+function actionTypeFor(value: unknown): unknown {
+  if (typeof value !== 'string') return value;
+  const map: Record<string, string> = {
+    'Send email': 'send_email',
+    'Send SMS': 'send_sms',
+    'Award points': 'award_points',
+    'Add tag': 'tag_add',
+  };
+  return map[value] ?? value;
+}
+
+function toBackendRequest(data: Partial<Automation>): BackendAutomationRequest {
+  const actions = (Array.isArray(data.actions)
+    ? data.actions
+    : (data.nodes ?? []).slice(1).map((node) => ({ type: node.label })))
+    .map((action) =>
+      typeof action === 'object' && action !== null
+        ? { ...(action as Record<string, unknown>), type: actionTypeFor((action as Record<string, unknown>).type) }
+        : actionTypeFor(action)
+    );
+  const triggerType = data.triggerType ?? triggerTypeFor(data.trigger);
+  const triggerConfig =
+    data.triggerConfig && typeof data.triggerConfig === 'object'
+      ? (data.triggerConfig as Record<string, unknown>)
+      : {};
+  return {
+    name: data.name ?? '',
+    triggerType,
+    triggerConfig,
+    actions,
+    isActive: data.isActive ?? data.status === 'active',
+  };
+}
+
 export const useListAutomations = (): UseQueryResult<Automation[]> =>
   useQuery<Automation[]>({
     queryKey: ['crm-automations'],
@@ -26,6 +81,17 @@ export const useListAutomations = (): UseQueryResult<Automation[]> =>
       const res = await unwrap(safe.get<unknown>('/crm/automations'));
       return z.array(automationSchema).parse(unwrapList(res, 'automations'));
     },
+  });
+
+export const useGetAutomation = (id: number | undefined): UseQueryResult<Automation> =>
+  useQuery<Automation>({
+    queryKey: ['crm-automation', id],
+    queryFn: async (): Promise<Automation> => {
+      const res = await unwrap(safe.get<unknown>(`/crm/automations/${id}`));
+      const envelope = (res ?? {}) as { automation?: unknown };
+      return automationSchema.parse(envelope.automation ?? res);
+    },
+    enabled: !!id,
   });
 
 export const useCreateAutomation = (): UseMutationResult<
@@ -37,7 +103,7 @@ export const useCreateAutomation = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<Automation, unknown, Partial<Automation>>({
     mutationFn: async (data: Partial<Automation>): Promise<Automation> => {
-      const res = await unwrap(safe.post<Automation>('/crm/automations', data));
+      const res = await unwrap(safe.post<Automation>('/crm/automations', toBackendRequest(data)));
       return res as Automation;
     },
     onSuccess: (): void => {
@@ -59,8 +125,9 @@ export const useUpdateAutomation = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<Automation, unknown, UpdateAutomationPayload>({
     mutationFn: async (payload: UpdateAutomationPayload): Promise<Automation> => {
+      const cached = qc.getQueryData<Automation[]>(['crm-automations'])?.find((item) => item.id === payload.id);
       const res = await unwrap(
-        safe.put<Automation>(`/crm/automations/${payload.id}`, payload.data)
+        safe.put<Automation>(`/crm/automations/${payload.id}`, toBackendRequest({ ...cached, ...payload.data }))
       );
       return res as Automation;
     },
