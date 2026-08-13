@@ -10,11 +10,14 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/cursor"
 )
 
 const (
-	posAuditScope = "pos_audit"
-	posAuditTTL   = 30 * time.Second
+	posAuditScope         = "pos_audit"
+	posAuditTTL           = 30 * time.Second
+	defaultPageSize int32 = 100
+	maxPageSize     int32 = 100
 )
 
 type repository interface {
@@ -37,12 +40,38 @@ func invalidatePosAuditScope(ctx context.Context, businessID int64) {
 }
 
 func (s *Service) List(ctx context.Context, filter domain.AuditLogFilter) ([]domain.AuditLog, error) {
-	detail := fmt.Sprintf("list|a=%v|e=%v|et=%v|s=%v",
-		strOrEmpty(filter.Action), filter.EmployeeID, strOrEmpty(filter.EntityType), strOrEmpty(filter.StartDate))
+	page, err := s.ListPage(ctx, filter)
+	return page.Logs, err
+}
+
+func (s *Service) ListPage(ctx context.Context, filter domain.AuditLogFilter) (domain.AuditLogPage, error) {
+	if filter.Limit <= 0 {
+		filter.Limit = defaultPageSize
+	}
+	if filter.Limit > maxPageSize {
+		filter.Limit = maxPageSize
+	}
+	pageSize := filter.Limit
+
+	detail := fmt.Sprintf("list|a=%v|e=%v|et=%v|s=%v|end=%v|limit=%d|cursor=%v",
+		strOrEmpty(filter.Action), filter.EmployeeID, strOrEmpty(filter.EntityType), strOrEmpty(filter.StartDate), strOrEmpty(filter.EndDate), filter.Limit, filter.CursorID)
 	key := cacheKeys.Scoped(posAuditScope, filter.BusinessID, detail)
-	return cacher.Of[[]domain.AuditLog]().GetOrComputeSingle(ctx, key,
-		func(ctx context.Context) ([]domain.AuditLog, error) {
-			return s.repo.List(ctx, filter)
+	return cacher.Of[domain.AuditLogPage]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.AuditLogPage, error) {
+			filter.Limit = pageSize + 1
+			logs, err := s.repo.List(ctx, filter)
+			if err != nil {
+				return domain.AuditLogPage{}, err
+			}
+
+			page := domain.AuditLogPage{Logs: logs}
+			if int32(len(logs)) > pageSize {
+				last := logs[pageSize-1]
+				page.Logs = logs[:pageSize]
+				page.NextCursor = cursor.EncodeCreatedAtID(cursor.CreatedAtID{CreatedAt: last.CreatedAt, ID: last.ID})
+			}
+
+			return page, nil
 		},
 		cacher.WithExpiry(ctx, posAuditTTL),
 	)

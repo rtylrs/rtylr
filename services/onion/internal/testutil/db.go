@@ -14,12 +14,12 @@ import (
 // Database integration tests are opt-in: when DB_HOST is not set (CI and local
 // dev without a database) the test is skipped. Set DB_HOST to run them against
 // a real MySQL. When DB_HOST is set, a connection failure is fatal.
-func OpenDB(t *testing.T) *sql.DB {
-	t.Helper()
+func OpenDB(tb testing.TB) *sql.DB {
+	tb.Helper()
 
 	host := os.Getenv("DB_HOST")
 	if host == "" {
-		t.Skip("DB_HOST not set; skipping database integration test")
+		tb.Skip("DB_HOST not set; skipping database integration test")
 	}
 
 	port := envOr("DB_PORT", "3306")
@@ -34,14 +34,14 @@ func OpenDB(t *testing.T) *sql.DB {
 
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		t.Fatalf("sql.Open: %v", err)
+		tb.Fatalf("sql.Open: %v", err)
 	}
 
 	if err := db.PingContext(context.Background()); err != nil {
-		t.Fatalf("db.PingContext: %v", err)
+		tb.Fatalf("db.PingContext: %v", err)
 	}
 
-	t.Cleanup(func() { _ = db.Close() })
+	tb.Cleanup(func() { _ = db.Close() })
 	return db
 }
 

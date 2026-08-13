@@ -136,6 +136,72 @@ func TestWorkspaces_GetProjectsByWorkspace_PaginationAndTotal(t *testing.T) {
 	}
 }
 
+func TestWorkspaces_GetProjectsByWorkspace_AggregatesCountsForPageOnly(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	workspaceID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
+		OwnerID: paginationBusinessID, BusinessID: paginationBusinessID, Name: "Project aggregate page", CreatedBy: paginationBusinessID,
+	}, false)
+	if err != nil {
+		t.Fatalf("CreateWorkspace: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, workspaceID, paginationBusinessID) })
+
+	populatedID, err := repo.CreateProject(ctx, domain.ProjectInput{
+		WorkspaceID: workspaceID, OwnerID: paginationBusinessID, BusinessID: paginationBusinessID, Name: "Populated", CreatedBy: paginationBusinessID,
+	})
+	if err != nil {
+		t.Fatalf("CreateProject populated: %v", err)
+	}
+	emptyID, err := repo.CreateProject(ctx, domain.ProjectInput{
+		WorkspaceID: workspaceID, OwnerID: paginationBusinessID, BusinessID: paginationBusinessID, Name: "Empty", CreatedBy: paginationBusinessID,
+	})
+	if err != nil {
+		t.Fatalf("CreateProject empty: %v", err)
+	}
+
+	var firstTaskID int64
+	for i := 0; i < 3; i++ {
+		taskID, err := repo.CreateTask(ctx, domain.TaskInput{
+			ProjectID: populatedID, WorkspaceID: workspaceID, OwnerID: paginationBusinessID, BusinessID: paginationBusinessID,
+			Title: fmt.Sprintf("Aggregate task %d", i), ReporterID: paginationBusinessID,
+		})
+		if err != nil {
+			t.Fatalf("CreateTask %d: %v", i, err)
+		}
+		if i == 0 {
+			firstTaskID = taskID
+		}
+	}
+	if err := repo.UpdateTaskStatus(ctx, domain.UpdateTaskStatusInput{ID: firstTaskID, OwnerID: paginationBusinessID, BusinessID: paginationBusinessID, Status: "done"}); err != nil {
+		t.Fatalf("UpdateTaskStatus: %v", err)
+	}
+	if err := repo.AddProjectMember(ctx, domain.AddProjectMemberInput{ProjectID: populatedID, UserID: paginationBusinessID + 1, Role: "member", AddedBy: paginationBusinessID}); err != nil {
+		t.Fatalf("AddProjectMember: %v", err)
+	}
+
+	projects, total, err := repo.GetProjectsByWorkspace(ctx, workspaceID, paginationBusinessID, 10, 0)
+	if err != nil {
+		t.Fatalf("GetProjectsByWorkspace: %v", err)
+	}
+	if total != 2 {
+		t.Fatalf("total = %d, want 2", total)
+	}
+
+	counts := make(map[int64]domain.Project, len(projects))
+	for _, project := range projects {
+		counts[project.ID] = project
+	}
+	if got := counts[populatedID]; got.TaskCount != 3 || got.CompletedCount != 1 || got.MemberCount != 1 {
+		t.Fatalf("populated counts = tasks:%d completed:%d members:%d, want tasks:3 completed:1 members:1", got.TaskCount, got.CompletedCount, got.MemberCount)
+	}
+	if got := counts[emptyID]; got.TaskCount != 0 || got.CompletedCount != 0 || got.MemberCount != 0 {
+		t.Fatalf("empty counts = %+v, want zero counts", got)
+	}
+}
+
 func TestWorkspaces_GetColumnsByProject_PaginationAndTotal(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

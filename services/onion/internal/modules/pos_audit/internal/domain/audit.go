@@ -32,10 +32,18 @@ type AuditLogInput struct {
 }
 
 type AuditLogFilter struct {
-	BusinessID int64
-	Action     *string
-	EntityType *string
-	EmployeeID *int64
-	StartDate  *string
-	EndDate    *string
+	BusinessID      int64
+	Action          *string
+	EntityType      *string
+	EmployeeID      *int64
+	StartDate       *string
+	EndDate         *string
+	Limit           int32
+	CursorCreatedAt *time.Time
+	CursorID        *int64
+}
+
+type AuditLogPage struct {
+	Logs       []AuditLog
+	NextCursor string
 }

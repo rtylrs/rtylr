@@ -60,6 +60,10 @@ type ReconciliationOverview struct {
 	UnmatchedBankTxns []UnmatchedBankTransaction `json:"unmatched_bank_txns"`
 	UnmatchedInvoices []UnmatchedInvoice         `json:"unmatched_invoices"`
 	Suggestions       []MatchSuggestion          `json:"suggestions"`
+	BankTxnsTruncated bool                       `json:"bank_txns_truncated"`
+	InvoicesTruncated bool                       `json:"invoices_truncated"`
+	ExpensesTruncated bool                       `json:"expenses_truncated"`
+	PreviewLimit      int                        `json:"preview_limit"`
 }
 
 // MatchInput is the payload accepted by POST /finance/reconciliation/match.

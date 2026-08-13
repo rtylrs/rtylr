@@ -1035,8 +1035,8 @@ func (r *Repository) DeleteLoyaltyTier(ctx context.Context, businessID, tierID i
 
 	// cross-schema read from crm_customers — active members on this tier
 	count, err := r.queries.CountActiveMembersOnTier(ctx, sqlc.CountActiveMembersOnTierParams{
-		BusinessID: businessID,
-		LOWER:      tier.Name,
+		BusinessID:  businessID,
+		LoyaltyTier: sqlc.NullCrmCustomersLoyaltyTier{CrmCustomersLoyaltyTier: sqlc.CrmCustomersLoyaltyTier(strings.ToLower(strings.TrimSpace(tier.Name))), Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count active members on tier", logger.Error(err), logger.Any("business_id", businessID), logger.Any("tier_id", tierID))
