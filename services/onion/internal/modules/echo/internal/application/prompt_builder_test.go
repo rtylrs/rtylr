@@ -1,13 +1,14 @@
-package handlers
+package application
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 	"time"
 )
 
 func TestBuildCaretPromptIncludesBusinessContractModeAndContext(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:               ModeAnalyst,
 		ConversationPrompt: "Current request: revenue today",
 		CurrentRequest:     "revenue today",
@@ -16,8 +17,8 @@ func TestBuildCaretPromptIncludesBusinessContractModeAndContext(t *testing.T) {
 	})
 
 	mustContain := []string{
-		caretSystemPreamble,
-		"Prompt contract: caret-business-v2",
+		"You are Caret, the business operating assistant inside rtylr.",
+		"Prompt contract: caret-business-v5",
 		"Today: 2026-06-18",
 		"Act like a capable business operator",
 		"Write like a calm, sharp business teammate",
@@ -49,7 +50,7 @@ func TestBuildCaretPromptIncludesBusinessContractModeAndContext(t *testing.T) {
 }
 
 func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:               ModeAgent,
 		ConversationPrompt: "Current request: create a customer",
 		CurrentRequest:     "create a customer",
@@ -82,6 +83,34 @@ func TestBuildCaretPromptAgentModeIncludesExecutableToolProposalsOnly(t *testing
 		if strings.Contains(got, forbidden) {
 			t.Fatalf("agent prompt should not advertise non-executable read tool %q\nprompt:\n%s", forbidden, got)
 		}
+	}
+}
+
+func TestBuildCaretPromptUsesTheCompleteEmbeddedAntiFabricationContract(t *testing.T) {
+	got := BuildCaretPrompt(PromptInput{
+		Mode:               ModeAsk,
+		ConversationPrompt: "Current request: test",
+		CurrentRequest:     "test",
+		SystemContext:      "App: Dash business command center.",
+		Now:                time.Date(2026, 8, 12, 12, 0, 0, 0, time.UTC),
+	})
+
+	for _, want := range []string{
+		"001. Act like a capable business operator",
+		"011. Never invent business data",
+		"113. Do not emit analytics.query yourself",
+		"220. Before sending the response, remove internal process narration",
+		"Do not turn it into a business report",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("embedded prompt missing rule %q\nprompt:\n%s", want, got)
+		}
+	}
+	if regexp.MustCompile(`\{\{[A-Z_]+\}\}`).MatchString(got) {
+		t.Fatalf("rendered prompt still contains a template placeholder:\n%s", got)
+	}
+	if strings.Contains(got, "Your top customers are") || strings.Contains(got, "John Smith") {
+		t.Fatalf("prompt must not prime fabricated business data:\n%s", got)
 	}
 }
 
@@ -151,7 +180,7 @@ func TestPromptToolsForModeSeparatesReadAndWriteModes(t *testing.T) {
 }
 
 func TestBuildCaretPromptClarifiesAmbiguousEntityBeforeTools(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:               ModeAgent,
 		ConversationPrompt: "Current request: update this product",
 		CurrentRequest:     "update this product",
@@ -174,7 +203,7 @@ func TestBuildCaretPromptClarifiesAmbiguousEntityBeforeTools(t *testing.T) {
 }
 
 func TestBuildCaretPromptAllowsToolsWithSelectedEntityContext(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:               ModeAgent,
 		ConversationPrompt: "Current request: update this product",
 		CurrentRequest:     "update this product",
@@ -191,7 +220,7 @@ func TestBuildCaretPromptAllowsToolsWithSelectedEntityContext(t *testing.T) {
 }
 
 func TestBuildCaretPromptSupportModeOmitsToolCatalog(t *testing.T) {
-	got := buildCaretPrompt(caretPromptInput{
+	got := BuildCaretPrompt(PromptInput{
 		Mode:               ModeSupport,
 		ConversationPrompt: "Current request: where do I find invoices?",
 		Now:                time.Date(2026, 6, 18, 12, 0, 0, 0, time.UTC),

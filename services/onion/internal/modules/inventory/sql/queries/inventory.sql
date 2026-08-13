@@ -26,12 +26,27 @@ ORDER BY stock_quantity ASC;
 -- name: GetValuation :many
 SELECT
     COALESCE(c.name, 'Uncategorized') AS category_name,
-    '' AS warehouse_name,
-    COUNT(*) AS total_items,
-    SUM(p.stock_quantity * p.sale_price) AS total_value,
-    SUM(p.stock_quantity * p.cost_price) AS total_cost
-FROM erp_products p
+    l.name AS warehouse_name,
+    COUNT(DISTINCT p.id) AS total_items,
+    SUM(COALESCE(cl.total_cost, 0)) AS total_value,
+    SUM(COALESCE(cl.total_cost, 0)) AS total_cost
+FROM stock_levels sl
+JOIN stock_locations l
+  ON l.id = sl.location_id AND l.owner_id = sl.owner_id AND l.is_active = TRUE
+JOIN erp_products p
+  ON p.id = sl.product_id AND p.business_id = sl.business_id
 LEFT JOIN erp_categories c ON c.id = p.category_id AND c.business_id = p.business_id
-WHERE p.business_id = ? AND p.is_active = TRUE AND p.track_inventory = TRUE
-GROUP BY c.name
+LEFT JOIN (
+    SELECT owner_id, business_id, product_id, location_id,
+           SUM(quantity_remaining * unit_cost) AS total_cost
+    FROM inventory_cost_layers
+    WHERE quantity_remaining > 0
+    GROUP BY owner_id, business_id, product_id, location_id
+) cl ON cl.owner_id = sl.owner_id
+    AND cl.business_id = sl.business_id
+    AND cl.product_id = sl.product_id
+    AND cl.location_id = sl.location_id
+WHERE sl.business_id = ? AND p.is_active = TRUE AND p.track_inventory = TRUE
+  AND sl.on_hand > 0
+GROUP BY c.name, l.name
 ORDER BY total_value DESC;

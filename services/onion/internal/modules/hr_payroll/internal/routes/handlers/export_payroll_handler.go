@@ -50,6 +50,12 @@ func (h *ExportPayrollHandler) Serve(ctx context.Context, _ *ExportPayrollReques
 		if errors.Is(err, domain.ErrPayrollAlreadyExported) {
 			return ExportPayrollResponse{}, onekiterrors.New(http.StatusConflict, "Payroll run has already been exported")
 		}
+		if errors.Is(err, domain.ErrPayrollExportInProgress) {
+			return ExportPayrollResponse{}, onekiterrors.New(http.StatusConflict, "Payroll run export is already in progress")
+		}
+		if errors.Is(err, domain.ErrFinanceIntegrationUnavailable) {
+			return ExportPayrollResponse{}, onekiterrors.New(http.StatusServiceUnavailable, "Finance integration is unavailable")
+		}
 		logger.Ctx(ctx).Error("failed to export payroll", logger.Any("owner_id", device.User.UserID), logger.Any("run_id", runID), logger.Error(err))
 		return ExportPayrollResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export payroll")
 	}

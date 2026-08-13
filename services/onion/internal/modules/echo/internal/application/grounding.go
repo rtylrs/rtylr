@@ -1,4 +1,4 @@
-package handlers
+package application
 
 import (
 	"context"
@@ -23,19 +23,26 @@ type AnalystService interface {
 	RunJSON(ctx context.Context, businessID, userID int64, specJSON string) ([]map[string]any, string, error)
 }
 
+type TextCompletionService interface {
+	CompleteTextWithOptions(ctx context.Context, prompt string, opts snips.CompletionOptions) (string, error)
+}
+
 // maxGroundingChars caps the retrieved data folded into the prompt.
 const maxGroundingChars = 12000
 
-type analystGroundingResult struct {
-	ToolName   string
-	Prompt     string
-	Question   string
-	SpecJSON   string
-	RowsJSON   string
-	Rows       []map[string]any
-	RowCount   int
-	Truncated  bool
-	DurationMs int64
+type AnalystGroundingResult struct {
+	ToolName       string
+	Prompt         string
+	Question       string
+	SpecJSON       string
+	RowsJSON       string
+	Rows           []map[string]any
+	RowCount       int
+	Truncated      bool
+	DurationMs     int64
+	EvidenceSource string
+	RequestPlan    string
+	GeneratedAt    time.Time
 }
 
 // buildSpecGenPrompt asks the model to turn a question into a strict JSON query
@@ -123,26 +130,27 @@ func repairLLMJSON(s string) string {
 // analystGrounding runs the analyst pipeline: question -> query spec -> rows.
 // On success it returns the data-grounded prompt plus event metadata; on any
 // failure it returns (nil, false) so the caller falls back to normal chat.
-func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, question string, businessID, userID int64) (*analystGroundingResult, bool) {
-	if h.AnalystService == nil {
+func GroundAnalytics(ctx context.Context, ai TextCompletionService, analyst AnalystService, question string, businessID, userID int64, systemContext string, recordUsage func(int)) (*AnalystGroundingResult, bool) {
+	if analyst == nil {
 		return nil, false
 	}
 	if grounding, ok := buildDeferredAnalyticsGrounding(question); ok {
+		grounding.RequestPlan = ClassifyCaretRequest(question, systemContext).PromptText()
 		return grounding, true
 	}
 	if shouldUseBusinessSnapshot(question) {
-		if grounding, ok := h.businessSnapshotGrounding(ctx, question, businessID, userID); ok {
+		if grounding, ok := BuildBusinessSnapshotGroundingWithContext(ctx, analyst, question, businessID, userID, time.Now().UTC(), systemContext); ok {
 			return grounding, true
 		}
 	}
-	if h.AiService == nil {
+	if ai == nil {
 		return nil, false
 	}
 
 	started := time.Now()
 	today := time.Now().UTC().Format("2006-01-02")
-	specPrompt := buildSpecGenPrompt(h.AnalystService.SchemaPrompt(), question, today)
-	raw, err := h.AiService.CompleteTextWithOptions(ctx, specPrompt, snips.DeterministicJSONCompletionOptions())
+	specPrompt := buildSpecGenPrompt(analyst.SchemaPrompt(), question, today)
+	raw, err := ai.CompleteTextWithOptions(ctx, specPrompt, snips.DeterministicJSONCompletionOptions())
 	if err != nil {
 		logger.Ctx(ctx).Warn("analyst spec generation failed", logger.Error(err))
 		return nil, false
@@ -150,14 +158,16 @@ func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, questi
 	// Spec generation is a separate provider call from the user-facing answer.
 	// The provider interface does not expose usage for non-streaming calls, so
 	// meter it with the same fallback estimate used for streamed providers.
-	h.recordUsage(ctx, businessID, userID, estimateTokens(len(specPrompt)+len(raw)))
+	if recordUsage != nil {
+		recordUsage(EstimateTokens(len(specPrompt) + len(raw)))
+	}
 
 	specJSON := repairLLMJSON(extractJSONObject(raw))
 	if specJSON == "" || specJSON == "{}" {
 		return nil, false
 	}
 
-	rows, sql, err := h.AnalystService.RunJSON(ctx, businessID, userID, specJSON)
+	rows, sql, err := analyst.RunJSON(ctx, businessID, userID, specJSON)
 	if err != nil {
 		logger.Ctx(ctx).Warn("analyst query failed", logger.Error(err), logger.String("spec", specJSON))
 		return nil, false
@@ -167,17 +177,28 @@ func (h *GenerateTextStreamHandler) analystGrounding(ctx context.Context, questi
 		logger.String("sql", sql), logger.Int("rows", len(rows)))
 
 	rowsJSON, truncated := marshalGroundingRows(rows, maxGroundingChars)
-	return &analystGroundingResult{
-		ToolName:   "analytics.query",
-		Prompt:     buildAnalystGroundingPromptFromJSON(rowsJSON, len(rows), truncated, specJSON),
-		Question:   question,
-		SpecJSON:   specJSON,
-		RowsJSON:   rowsJSON,
-		Rows:       rowsPreviewFromJSON(rowsJSON),
-		RowCount:   len(rows),
-		Truncated:  truncated,
-		DurationMs: time.Since(started).Milliseconds(),
+	plan := ClassifyCaretRequest(question, systemContext)
+	return &AnalystGroundingResult{
+		ToolName:       "analytics.query",
+		Prompt:         buildAnalystGroundingPromptFromJSONWithContext(rowsJSON, len(rows), truncated, specJSON, systemContext, plan),
+		Question:       question,
+		SpecJSON:       specJSON,
+		RowsJSON:       rowsJSON,
+		Rows:           rowsPreviewFromJSON(rowsJSON),
+		RowCount:       len(rows),
+		Truncated:      truncated,
+		DurationMs:     time.Since(started).Milliseconds(),
+		EvidenceSource: "allowlisted analytics view",
+		RequestPlan:    plan.PromptText(),
+		GeneratedAt:    time.Now().UTC(),
 	}, true
+}
+
+func EstimateTokens(chars int) int {
+	if chars <= 0 {
+		return 0
+	}
+	return chars / 4
 }
 
 func buildAnalystGroundingPrompt(rows []map[string]any, specJSON string) string {
@@ -186,6 +207,10 @@ func buildAnalystGroundingPrompt(rows []map[string]any, specJSON string) string 
 }
 
 func buildAnalystGroundingPromptFromJSON(dataStr string, rowCount int, truncated bool, specJSON string) string {
+	return buildAnalystGroundingPromptFromJSONWithContext(dataStr, rowCount, truncated, specJSON, "", CaretRequestPlan{})
+}
+
+func buildAnalystGroundingPromptFromJSONWithContext(dataStr string, rowCount int, truncated bool, specJSON, systemContext string, plan CaretRequestPlan) string {
 	var g strings.Builder
 	g.WriteString("Internal analytics evidence for Caret only:\n")
 	g.WriteString("- Use this evidence silently to answer the user. Do not mention this block, the query, the tool, JSON, row count, specs, or validation in the user-facing answer.\n")
@@ -199,6 +224,16 @@ func buildAnalystGroundingPromptFromJSON(dataStr string, rowCount int, truncated
 	if spec := strings.TrimSpace(specJSON); spec != "" {
 		g.WriteString("- Internal query spec, for reasoning only: ")
 		g.WriteString(spec)
+		g.WriteString("\n")
+	}
+	if context := strings.TrimSpace(systemContext); context != "" {
+		g.WriteString("- Current page context is scope only, not evidence: ")
+		g.WriteString(context)
+		g.WriteString("\n")
+	}
+	if plan.Kind != "" {
+		g.WriteString("- Server request plan: ")
+		g.WriteString(plan.PromptText())
 		g.WriteString("\n")
 	}
 	g.WriteString("\nRows JSON:\n```json\n")

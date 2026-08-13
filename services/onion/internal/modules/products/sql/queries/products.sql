@@ -16,6 +16,15 @@ INSERT INTO erp_products
  country_of_origin, hs_code, is_active, track_inventory)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
+-- name: GetCategoryReference :one
+SELECT id FROM erp_categories WHERE business_id = ? AND id = ?;
+
+-- name: GetSupplierReference :one
+SELECT id FROM erp_suppliers WHERE business_id = ? AND id = ?;
+
+-- name: GetBrandReference :one
+SELECT id FROM erp_brands WHERE business_id = ? AND id = ?;
+
 -- name: UpdateProduct :exec
 UPDATE erp_products
 SET category_id = ?, supplier_id = ?, brand_id = ?, name = ?, sku = ?, barcode = ?,

@@ -10,6 +10,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	"github.com/voxire/onion/internal/modules/products/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
@@ -20,6 +21,7 @@ const (
 
 type Service struct {
 	repo *infrastructure.Repository
+	db   *sql.DB
 }
 
 type productListPage struct {
@@ -33,6 +35,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 	return &Service{
 		repo: repo,
+		db:   db,
 	}
 }
 
@@ -104,12 +107,22 @@ func (s *Service) CreateProduct(ctx context.Context, ownerID int64, input domain
 	if err != nil {
 		return 0, err
 	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product", EntityID: id, Action: "created", NewValues: input}); err != nil {
+		return 0, err
+	}
 	invalidateProductScope(ctx, ownerID)
 	return id, nil
 }
 
 func (s *Service) UpdateProduct(ctx context.Context, ownerID, id int64, input domain.ProductInput) error {
+	old, err := s.repo.GetProduct(ctx, ownerID, id)
+	if err != nil {
+		return err
+	}
 	if err := s.repo.UpdateProduct(ctx, ownerID, id, input); err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product", EntityID: id, Action: "updated", OldValues: old, NewValues: input}); err != nil {
 		return err
 	}
 	invalidateProductScope(ctx, ownerID)
@@ -121,7 +134,14 @@ func (s *Service) ListProductAttributes(ctx context.Context, ownerID, productID 
 }
 
 func (s *Service) ReplaceProductAttributes(ctx context.Context, ownerID, productID int64, attrs []domain.ProductAttributeInput) error {
+	old, err := s.repo.ListProductAttributes(ctx, ownerID, productID)
+	if err != nil {
+		return err
+	}
 	if err := s.repo.ReplaceProductAttributes(ctx, ownerID, productID, attrs); err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product_attribute", EntityID: productID, Action: "replaced", OldValues: old, NewValues: attrs}); err != nil {
 		return err
 	}
 	invalidateProductScope(ctx, ownerID)
@@ -129,7 +149,14 @@ func (s *Service) ReplaceProductAttributes(ctx context.Context, ownerID, product
 }
 
 func (s *Service) DeleteProduct(ctx context.Context, ownerID, id int64) error {
+	old, err := s.repo.GetProduct(ctx, ownerID, id)
+	if err != nil {
+		return err
+	}
 	if err := s.repo.DeleteProduct(ctx, ownerID, id); err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: ownerID, ActorID: ownerID, EntityType: "product", EntityID: id, Action: "deleted", OldValues: old}); err != nil {
 		return err
 	}
 	invalidateProductScope(ctx, ownerID)

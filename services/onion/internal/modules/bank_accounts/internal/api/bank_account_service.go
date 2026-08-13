@@ -51,6 +51,9 @@ func (a *BankAccountAPI) CreateBankAccount(ctx context.Context, req *financebank
 		Currency:    req.GetCurrency(),
 		IsConnected: req.GetIsPrimary(),
 	}
+	if validationErr := domain.ValidateBankAccountInput(input); validationErr != nil {
+		return nil, bankAccountStatusError(http.StatusBadRequest, validationErr.Error())
+	}
 	id, createErr := a.Service.Create(ctx, businessID, input)
 	if createErr != nil {
 		return nil, bankAccountStatusError(http.StatusInternalServerError, "Failed to create bank account")

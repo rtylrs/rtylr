@@ -27,6 +27,12 @@ ORDER BY id ASC;
 INSERT INTO erp_stock_transfers (owner_id, business_id, from_warehouse_id, to_warehouse_id, status, notes)
 VALUES (?, ?, ?, ?, 'draft', ?);
 
+-- name: GetWarehouseReference :one
+SELECT id FROM erp_warehouses WHERE business_id = ? AND id = ?;
+
+-- name: GetProductReference :one
+SELECT id FROM erp_products WHERE business_id = ? AND id = ?;
+
 -- name: InsertStockTransferItem :execresult
 INSERT INTO erp_stock_transfer_items (transfer_id, product_id, quantity)
 VALUES (?, ?, ?);

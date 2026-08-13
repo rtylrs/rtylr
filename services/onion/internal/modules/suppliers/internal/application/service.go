@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	"github.com/voxire/onion/internal/modules/suppliers/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/audit"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 )
 
@@ -20,10 +21,11 @@ type repository interface {
 
 type Service struct {
 	repo repository
+	db   *sql.DB
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
-	return &Service{repo: infrastructure.NewRepository(db)}
+	return &Service{repo: infrastructure.NewRepository(db), db: db}
 }
 
 func paginateSuppliers(page, pageSize int64) (int, int) {
@@ -60,13 +62,23 @@ func (s *Service) CreateSupplier(ctx context.Context, businessID int64, input do
 	if err != nil {
 		return 0, err
 	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "supplier", EntityID: id, Action: "created", NewValues: input}); err != nil {
+		return 0, err
+	}
 	s.invalidateCache(ctx, businessID)
 	return id, nil
 }
 
 func (s *Service) UpdateSupplier(ctx context.Context, businessID, id int64, input domain.SupplierInput) error {
-	err := s.repo.UpdateSupplier(ctx, businessID, id, input)
+	old, err := s.repo.GetSupplierByID(ctx, businessID, id)
 	if err != nil {
+		return err
+	}
+	err = s.repo.UpdateSupplier(ctx, businessID, id, input)
+	if err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "supplier", EntityID: id, Action: "updated", OldValues: old, NewValues: input}); err != nil {
 		return err
 	}
 	s.invalidateCache(ctx, businessID)
@@ -74,7 +86,14 @@ func (s *Service) UpdateSupplier(ctx context.Context, businessID, id int64, inpu
 }
 
 func (s *Service) DeleteSupplier(ctx context.Context, businessID, id int64) error {
+	old, err := s.repo.GetSupplierByID(ctx, businessID, id)
+	if err != nil {
+		return err
+	}
 	if err := s.repo.DeleteSupplier(ctx, businessID, id); err != nil {
+		return err
+	}
+	if err := audit.Append(ctx, s.db, audit.Event{BusinessID: businessID, ActorID: businessID, EntityType: "supplier", EntityID: id, Action: "deleted", OldValues: old}); err != nil {
 		return err
 	}
 	s.invalidateCache(ctx, businessID)

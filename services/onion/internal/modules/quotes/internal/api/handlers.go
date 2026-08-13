@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/quotes/internal/application"
@@ -115,13 +115,17 @@ type CreateResponse struct {
 }
 
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) error {
-	if strings.TrimSpace(req.CustomerName) == "" {
-		return onekiterrors.New(http.StatusBadRequest, "customerName is required")
-	}
-	if req.ValidUntil != "" {
-		if _, err := time.Parse("2006-01-02", req.ValidUntil); err != nil {
-			return onekiterrors.New(http.StatusBadRequest, "validUntil must be in YYYY-MM-DD format")
-		}
+	err := domain.ValidateQuoteInput(domain.QuoteInput{
+		CustomerName: req.CustomerName,
+		Status:       req.Status,
+		Subtotal:     req.Subtotal,
+		Tax:          req.Tax,
+		Discount:     req.Discount,
+		Total:        req.Total,
+		ValidUntil:   req.ValidUntil,
+	})
+	if err != nil {
+		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 	return nil
 }
@@ -181,13 +185,17 @@ func (h *UpdateHandler) Validate(_ context.Context, req *UpdateRequest) error {
 	if req.ID == 0 {
 		return onekiterrors.New(http.StatusBadRequest, "id is required")
 	}
-	if strings.TrimSpace(req.CustomerName) == "" {
-		return onekiterrors.New(http.StatusBadRequest, "customerName is required")
-	}
-	if req.ValidUntil != "" {
-		if _, err := time.Parse("2006-01-02", req.ValidUntil); err != nil {
-			return onekiterrors.New(http.StatusBadRequest, "validUntil must be in YYYY-MM-DD format")
-		}
+	err := domain.ValidateQuoteInput(domain.QuoteInput{
+		CustomerName: req.CustomerName,
+		Status:       req.Status,
+		Subtotal:     req.Subtotal,
+		Tax:          req.Tax,
+		Discount:     req.Discount,
+		Total:        req.Total,
+		ValidUntil:   req.ValidUntil,
+	})
+	if err != nil {
+		return onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
 	return nil
 }
@@ -211,6 +219,12 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	}
 
 	if err := h.Service.Update(ctx, businessID, req.ID, input); err != nil {
+		if errors.Is(err, domain.ErrQuoteNotFound) {
+			return UpdateResponse{}, onekiterrors.New(http.StatusNotFound, "Quote not found")
+		}
+		if errors.Is(err, domain.ErrQuoteNotEditable) {
+			return UpdateResponse{}, onekiterrors.New(http.StatusConflict, "Quote is not editable")
+		}
 		return UpdateResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update quote")
 	}
 
@@ -251,6 +265,12 @@ func (h *DeleteHandler) Serve(ctx context.Context, req *DeleteRequest) (DeleteRe
 	}
 
 	if err := h.Service.Delete(ctx, businessID, req.ID); err != nil {
+		if errors.Is(err, domain.ErrQuoteNotFound) {
+			return DeleteResponse{}, onekiterrors.New(http.StatusNotFound, "Quote not found")
+		}
+		if errors.Is(err, domain.ErrQuoteNotEditable) {
+			return DeleteResponse{}, onekiterrors.New(http.StatusConflict, "Quote is not editable")
+		}
 		return DeleteResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete quote")
 	}
 

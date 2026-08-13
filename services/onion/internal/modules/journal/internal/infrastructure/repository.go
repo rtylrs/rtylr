@@ -104,15 +104,23 @@ func (r *Repository) Get(ctx context.Context, businessID, id int64) (domain.Jour
 		return domain.JournalEntry{}, err
 	}
 
-	return domain.JournalEntry{
+	entry := domain.JournalEntry{
 		ID:          row.ID,
 		OwnerID:     row.OwnerID,
+		BusinessID:  row.BusinessID,
 		Date:        row.Date,
 		Description: nullStr(row.Description),
 		Status:      row.Status,
 		PostedAt:    nullTime(row.PostedAt),
 		CreatedAt:   nullTime(row.CreatedAt),
-	}, nil
+	}
+
+	linesByEntry, err := r.getLinesForEntries(ctx, []int64{id})
+	if err != nil {
+		return domain.JournalEntry{}, err
+	}
+	entry.Lines = linesByEntry[id]
+	return entry, nil
 }
 
 func (r *Repository) Post(ctx context.Context, businessID, id int64) error {
