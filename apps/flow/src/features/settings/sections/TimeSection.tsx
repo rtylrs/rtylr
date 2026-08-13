@@ -268,7 +268,7 @@ const TimeSection = (): React.JSX.Element => {
             style={inputStyle()}
           />
           <p className="mt-1 text-[11px] leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
-            {t('flow.settings.time.autoLockExplained')}
+            {t('flow.settings.time.autoLockExplained', { count: settings.autoLockDays })}
           </p>
         </div>
       </section>
