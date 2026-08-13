@@ -332,8 +332,11 @@ const TaskDetail: React.FC = () => {
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
       <HelmetContainer title="Task · rtylr" />
-      {/* Main area */}
-      <div className="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
+      {/* Main area. shrink-0 with an auto basis below lg: as flex-1 its basis is
+          0%, so in this fixed-height scrolling column the taller rail claimed
+          every pixel and the title and description collapsed out of view on a
+          phone. It only shares the row with the rail from lg up. */}
+      <div className="flex min-h-0 w-full min-w-0 shrink-0 flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden">
         <div
           className="flex shrink-0 items-center justify-between gap-2 px-4 py-3 sm:px-6"
           style={{ borderBottom: '1px solid var(--flow-border)' }}
