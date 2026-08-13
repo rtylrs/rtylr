@@ -98,8 +98,9 @@ const Journal: React.FC = () => {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {data.map((e) => {
-            const debits = (e.lines ?? []).reduce((s: number, l) => s + (l.debit ?? 0), 0);
-            const credits = (e.lines ?? []).reduce((s: number, l) => s + (l.credit ?? 0), 0);
+            // The API returns authoritative entry totals; do not recompute accounting
+            // invariants from client-side floating-point line values.
+            const isBalanced = e.debit != null && e.credit != null && e.debit === e.credit;
             return (
               <div key={e.id} style={{ ...cardStyle, padding: 18 }}>
                 <div
@@ -121,10 +122,10 @@ const Journal: React.FC = () => {
                   <div
                     style={{
                       fontSize: 11,
-                      color: debits === credits ? 'var(--hub-text-dim)' : 'var(--finance-danger)',
+                      color: isBalanced ? 'var(--hub-text-dim)' : 'var(--finance-danger)',
                     }}
                   >
-                    {debits === credits ? 'Balanced' : 'Out of balance'}
+                    {isBalanced ? 'Balanced' : 'Out of balance'}
                   </div>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
