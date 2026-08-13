@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS flow_tasks (
     labels JSON COMMENT 'Array of label IDs',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_flow_tasks_project_status (project_id, status),
     INDEX idx_flow_tasks_workspace_updated (workspace_id, archived, updated_at),
     FULLTEXT INDEX idx_flow_tasks_search (title, description)
 );
