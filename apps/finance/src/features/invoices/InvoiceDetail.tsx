@@ -228,7 +228,6 @@ const InvoiceDetail: React.FC = () => {
         open={showSend}
         onClose={() => setShowSend(false)}
         invoiceId={invoice.id}
-        defaultTo={invoice.clientEmail}
       />
       <RecordPaymentModal
         open={showPayment}

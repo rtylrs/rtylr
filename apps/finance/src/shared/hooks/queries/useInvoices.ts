@@ -36,13 +36,6 @@ export const useListInvoices = (params: ListInvoicesParams) => {
 
 export interface SendInvoiceRequest {
   invoiceId: string;
-  // finance.invoices.v1.SendInvoice takes only the invoice id - it doesn't
-  // support custom recipient/subject/body (the legacy REST endpoint it
-  // replaces silently ignored these same fields too).
-  to: string;
-  cc?: string;
-  subject: string;
-  body: string;
 }
 
 export interface SendInvoiceResponse {
@@ -58,9 +51,9 @@ export const useSendInvoice = () => {
       const res = await invoicesClient.sendInvoice({ id: data.invoiceId });
       return { message: res.message ?? '' };
     },
-    onSuccess: (_data: SendInvoiceResponse, variables: SendInvoiceRequest) => {
+    onSuccess: (_data: SendInvoiceResponse) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success(t('invoices.sent', { to: variables.to }));
+      toast.success(t('invoices.sent'));
     },
     onError: (error) => {
       toast.error(getOneKitErrorMessage(error, t('errors.generic')));
