@@ -277,7 +277,3 @@ jobs:
         || needs.changes.outputs.insights == 'true'
         || needs.changes.outputs.menu == 'true'
         || needs.changes.outputs.recruit == 'true' ) }}
-    uses: tryrtylr/pipelines/.github/workflows/notify-slack.yml@main
-    with:
-      message: ':rocket: *rtylr* — new version deployed to production'
-    secrets: inherit
