@@ -26,6 +26,8 @@ import (
 // on-hand below zero and the movement does not permit negative stock.
 var ErrInsufficientStock = errors.New("insufficient stock at location")
 
+var ErrWarehouseNotFound = errors.New("warehouse not found")
+
 // DBTX is satisfied by *sql.DB and *sql.Tx. Stock mutations must be passed a
 // *sql.Tx so they commit atomically with the caller's other writes.
 type DBTX interface {
@@ -164,18 +166,19 @@ func POSBranchLocationID(ctx context.Context, tx DBTX, ownerID, posLocationID in
 
 // WarehouseLocationID resolves (creating on first use) the stock_locations row
 // for an erp_warehouse, scoped to ownerID, with the same fail-closed owner
-// guard as POSBranchLocationID. A zero/unknown warehouseID falls back to the
-// tenant's default warehouse.
+// guard as POSBranchLocationID. Zero or unknown warehouse IDs are rejected;
+// callers must explicitly request DefaultLocationID when default routing is
+// intended.
 func WarehouseLocationID(ctx context.Context, tx DBTX, ownerID, warehouseID int64) (int64, error) {
-	if warehouseID == 0 {
-		return DefaultLocationID(ctx, tx, ownerID)
+	if warehouseID <= 0 {
+		return 0, fmt.Errorf("%w: %d", ErrWarehouseNotFound, warehouseID)
 	}
 
 	q := queries(tx)
 
 	whOwner, err := q.GetWarehouseOwnerID(ctx, warehouseID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return DefaultLocationID(ctx, tx, ownerID)
+		return 0, fmt.Errorf("%w: %d", ErrWarehouseNotFound, warehouseID)
 	}
 	if err != nil {
 		return 0, fmt.Errorf("stock_core: read warehouse owner: %w", err)

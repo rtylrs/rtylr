@@ -100,6 +100,9 @@ func (a *StockTransferAPI) UpdateStockTransferStatus(ctx context.Context, req *e
 		return nil, stockTransferStatusError(http.StatusBadRequest, "Invalid status. Must be one of: draft, in_transit, received, cancelled")
 	}
 	if updateErr := a.Service.UpdateStockTransferStatus(ctx, ownerID, req.GetId(), domain.StockTransferStatus(status)); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrStockTransferReferenceNotFound) {
+			return nil, stockTransferStatusError(http.StatusNotFound, updateErr.Error())
+		}
 		return nil, stockTransferStatusError(http.StatusInternalServerError, "Failed to update stock transfer status")
 	}
 	return &erpstocktransferv1.UpdateStockTransferStatusResponse{Message: "Stock transfer status updated successfully"}, nil
