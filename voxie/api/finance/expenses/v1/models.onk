@@ -18,6 +18,14 @@ message Expense {
   vendor: string
   /// receipt_url is the receipt url value for this contract.
   receipt_url: string
+  /// payment_method is the canonical payment method for accounting.
+  payment_method: string
+  /// is_tax_deductible indicates whether the expense is tax deductible.
+  is_tax_deductible: bool
+  /// tax_amount is the tax amount recorded for the expense.
+  tax_amount: float64
+  /// notes contains accounting notes for the expense.
+  notes: string
   /// expense_date is the expense date value for this contract.
   expense_date: string
   /// status is the current lifecycle state.
@@ -55,6 +63,14 @@ message CreateExpenseRequest {
   vendor: string @required
   /// receipt_url is the receipt url value for this contract.
   receipt_url: string @required
+  /// payment_method is the canonical payment method for accounting.
+  payment_method: string
+  /// is_tax_deductible indicates whether the expense is tax deductible.
+  is_tax_deductible: bool
+  /// tax_amount is the tax amount recorded for the expense.
+  tax_amount: float64
+  /// notes contains accounting notes for the expense.
+  notes: string
   /// expense_date is the expense date value for this contract.
   expense_date: string @required
 }
@@ -113,6 +129,14 @@ message UpdateExpenseBody {
   vendor: string @required
   /// receipt_url is the receipt url value for this contract.
   receipt_url: string @required
+  /// payment_method is the canonical payment method for accounting.
+  payment_method: string
+  /// is_tax_deductible indicates whether the expense is tax deductible.
+  is_tax_deductible: bool
+  /// tax_amount is the tax amount recorded for the expense.
+  tax_amount: float64
+  /// notes contains accounting notes for the expense.
+  notes: string
   /// expense_date is the expense date value for this contract.
   expense_date: string @required
 }

@@ -9,6 +9,10 @@ currency?: string;
 description?: string;
 vendor?: string;
 receiptUrl?: string;
+paymentMethod?: string;
+isTaxDeductible?: boolean;
+taxAmount?: number;
+notes?: string;
 expenseDate?: string;
 status?: string;
 createdAt?: string;
@@ -26,6 +30,10 @@ currency: v.currency,
 description: v.description,
 vendor: v.vendor,
 receiptUrl: v.receipt_url,
+paymentMethod: v.payment_method,
+isTaxDeductible: v.is_tax_deductible,
+taxAmount: v.tax_amount,
+notes: v.notes,
 expenseDate: v.expense_date,
 status: v.status,
 createdAt: v.created_at,
@@ -43,6 +51,10 @@ if (v.currency !== undefined) { out.currency = v.currency; }
 if (v.description !== undefined) { out.description = v.description; }
 if (v.vendor !== undefined) { out.vendor = v.vendor; }
 if (v.receiptUrl !== undefined) { out.receipt_url = v.receiptUrl; }
+if (v.paymentMethod !== undefined) { out.payment_method = v.paymentMethod; }
+if (v.isTaxDeductible !== undefined) { out.is_tax_deductible = v.isTaxDeductible; }
+if (v.taxAmount !== undefined) { out.tax_amount = v.taxAmount; }
+if (v.notes !== undefined) { out.notes = v.notes; }
 if (v.expenseDate !== undefined) { out.expense_date = v.expenseDate; }
 if (v.status !== undefined) { out.status = v.status; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
@@ -96,6 +108,10 @@ currency: string;
 description: string;
 vendor: string;
 receiptUrl: string;
+paymentMethod?: string;
+isTaxDeductible?: boolean;
+taxAmount?: number;
+notes?: string;
 expenseDate: string;
 }
 
@@ -108,6 +124,10 @@ currency: v.currency,
 description: v.description,
 vendor: v.vendor,
 receiptUrl: v.receipt_url,
+paymentMethod: v.payment_method,
+isTaxDeductible: v.is_tax_deductible,
+taxAmount: v.tax_amount,
+notes: v.notes,
 expenseDate: v.expense_date,
 };
 }
@@ -120,6 +140,10 @@ if (v.currency !== undefined) { out.currency = v.currency; }
 if (v.description !== undefined) { out.description = v.description; }
 if (v.vendor !== undefined) { out.vendor = v.vendor; }
 if (v.receiptUrl !== undefined) { out.receipt_url = v.receiptUrl; }
+if (v.paymentMethod !== undefined) { out.payment_method = v.paymentMethod; }
+if (v.isTaxDeductible !== undefined) { out.is_tax_deductible = v.isTaxDeductible; }
+if (v.taxAmount !== undefined) { out.tax_amount = v.taxAmount; }
+if (v.notes !== undefined) { out.notes = v.notes; }
 if (v.expenseDate !== undefined) { out.expense_date = v.expenseDate; }
 return out;
 }
@@ -344,6 +368,10 @@ currency: string;
 description: string;
 vendor: string;
 receiptUrl: string;
+paymentMethod?: string;
+isTaxDeductible?: boolean;
+taxAmount?: number;
+notes?: string;
 expenseDate: string;
 }
 
@@ -356,6 +384,10 @@ currency: v.currency,
 description: v.description,
 vendor: v.vendor,
 receiptUrl: v.receipt_url,
+paymentMethod: v.payment_method,
+isTaxDeductible: v.is_tax_deductible,
+taxAmount: v.tax_amount,
+notes: v.notes,
 expenseDate: v.expense_date,
 };
 }
@@ -368,6 +400,10 @@ if (v.currency !== undefined) { out.currency = v.currency; }
 if (v.description !== undefined) { out.description = v.description; }
 if (v.vendor !== undefined) { out.vendor = v.vendor; }
 if (v.receiptUrl !== undefined) { out.receipt_url = v.receiptUrl; }
+if (v.paymentMethod !== undefined) { out.payment_method = v.paymentMethod; }
+if (v.isTaxDeductible !== undefined) { out.is_tax_deductible = v.isTaxDeductible; }
+if (v.taxAmount !== undefined) { out.tax_amount = v.taxAmount; }
+if (v.notes !== undefined) { out.notes = v.notes; }
 if (v.expenseDate !== undefined) { out.expense_date = v.expenseDate; }
 return out;
 }

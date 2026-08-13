@@ -495,3 +495,224 @@ const violations: string[] = [];
 return violations;
 }
 
+export interface CustomDomain {
+id?: string;
+businessId?: string;
+domain?: string;
+status?: string;
+verificationToken?: string;
+sslStatus?: string;
+verifiedAt?: string;
+createdAt?: string;
+updatedAt?: string;
+}
+
+export function decodeCustomDomain(v: any): CustomDomain {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+businessId: v.business_id,
+domain: v.domain,
+status: v.status,
+verificationToken: v.verification_token,
+sslStatus: v.ssl_status,
+verifiedAt: v.verified_at,
+createdAt: v.created_at,
+updatedAt: v.updated_at,
+};
+}
+
+export function encodeCustomDomain(v: CustomDomain): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.domain !== undefined) { out.domain = v.domain; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.verificationToken !== undefined) { out.verification_token = v.verificationToken; }
+if (v.sslStatus !== undefined) { out.ssl_status = v.sslStatus; }
+if (v.verifiedAt !== undefined) { out.verified_at = v.verifiedAt; }
+if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
+if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
+return out;
+}
+
+export function validateCustomDomain(v: CustomDomain): string[] {
+const violations: string[] = [];
+return violations;
+}
+
+export interface GetCustomDomainRequest {
+}
+
+export function decodeGetCustomDomainRequest(v: any): GetCustomDomainRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeGetCustomDomainRequest(v: GetCustomDomainRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
+export function validateGetCustomDomainRequest(v: GetCustomDomainRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
+export interface GetCustomDomainResponse {
+domain?: CustomDomain;
+}
+
+export function decodeGetCustomDomainResponse(v: any): GetCustomDomainResponse {
+if (v === null || v === undefined) return v;
+return {
+domain: (v.domain !== undefined ? decodeCustomDomain(v.domain) : v.domain),
+};
+}
+
+export function encodeGetCustomDomainResponse(v: GetCustomDomainResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.domain !== undefined) { out.domain = encodeCustomDomain(v.domain); }
+return out;
+}
+
+export function validateGetCustomDomainResponse(v: GetCustomDomainResponse): string[] {
+const violations: string[] = [];
+if (v.domain !== undefined && v.domain !== null) violations.push(...validateCustomDomain(v.domain).map((message) => "domain: " + message));
+return violations;
+}
+
+export interface RegisterCustomDomainRequest {
+domain: string;
+}
+
+export function decodeRegisterCustomDomainRequest(v: any): RegisterCustomDomainRequest {
+if (v === null || v === undefined) return v;
+return {
+domain: v.domain,
+};
+}
+
+export function encodeRegisterCustomDomainRequest(v: RegisterCustomDomainRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.domain !== undefined) { out.domain = v.domain; }
+return out;
+}
+
+export function validateRegisterCustomDomainRequest(v: RegisterCustomDomainRequest): string[] {
+const violations: string[] = [];
+if (!(v.domain !== undefined && v.domain !== null) || v.domain === "") violations.push("domain is required");
+return violations;
+}
+
+export interface RegisterCustomDomainResponse {
+domain?: CustomDomain;
+}
+
+export function decodeRegisterCustomDomainResponse(v: any): RegisterCustomDomainResponse {
+if (v === null || v === undefined) return v;
+return {
+domain: (v.domain !== undefined ? decodeCustomDomain(v.domain) : v.domain),
+};
+}
+
+export function encodeRegisterCustomDomainResponse(v: RegisterCustomDomainResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.domain !== undefined) { out.domain = encodeCustomDomain(v.domain); }
+return out;
+}
+
+export function validateRegisterCustomDomainResponse(v: RegisterCustomDomainResponse): string[] {
+const violations: string[] = [];
+if (v.domain !== undefined && v.domain !== null) violations.push(...validateCustomDomain(v.domain).map((message) => "domain: " + message));
+return violations;
+}
+
+export interface VerifyCustomDomainRequest {
+verificationToken: string;
+}
+
+export function decodeVerifyCustomDomainRequest(v: any): VerifyCustomDomainRequest {
+if (v === null || v === undefined) return v;
+return {
+verificationToken: v.verification_token,
+};
+}
+
+export function encodeVerifyCustomDomainRequest(v: VerifyCustomDomainRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.verificationToken !== undefined) { out.verification_token = v.verificationToken; }
+return out;
+}
+
+export function validateVerifyCustomDomainRequest(v: VerifyCustomDomainRequest): string[] {
+const violations: string[] = [];
+if (!(v.verificationToken !== undefined && v.verificationToken !== null) || v.verificationToken === "") violations.push("verification_token is required");
+return violations;
+}
+
+export interface VerifyCustomDomainResponse {
+domain?: CustomDomain;
+}
+
+export function decodeVerifyCustomDomainResponse(v: any): VerifyCustomDomainResponse {
+if (v === null || v === undefined) return v;
+return {
+domain: (v.domain !== undefined ? decodeCustomDomain(v.domain) : v.domain),
+};
+}
+
+export function encodeVerifyCustomDomainResponse(v: VerifyCustomDomainResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.domain !== undefined) { out.domain = encodeCustomDomain(v.domain); }
+return out;
+}
+
+export function validateVerifyCustomDomainResponse(v: VerifyCustomDomainResponse): string[] {
+const violations: string[] = [];
+if (v.domain !== undefined && v.domain !== null) violations.push(...validateCustomDomain(v.domain).map((message) => "domain: " + message));
+return violations;
+}
+
+export interface RemoveCustomDomainRequest {
+}
+
+export function decodeRemoveCustomDomainRequest(v: any): RemoveCustomDomainRequest {
+if (v === null || v === undefined) return v;
+return {
+};
+}
+
+export function encodeRemoveCustomDomainRequest(v: RemoveCustomDomainRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+return out;
+}
+
+export function validateRemoveCustomDomainRequest(v: RemoveCustomDomainRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
+export interface RemoveCustomDomainResponse {
+message?: string;
+}
+
+export function decodeRemoveCustomDomainResponse(v: any): RemoveCustomDomainResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeRemoveCustomDomainResponse(v: RemoveCustomDomainResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
+export function validateRemoveCustomDomainResponse(v: RemoveCustomDomainResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
