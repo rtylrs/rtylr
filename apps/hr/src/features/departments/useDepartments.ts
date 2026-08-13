@@ -13,15 +13,24 @@ export function useDepartments(includeCompensation = false) {
   return useQuery({
     queryKey: ['departments', includeCompensation],
     queryFn: async (): Promise<Department[]> => {
-      const [departmentsRes, staffRes] = await Promise.all([
-        departmentClient.listDepartments({}),
-        staffClient.listStaff({ search: '', departmentId: '', status: '' }),
-      ]);
-      const staffList = staffRes.staff ?? [];
+      const departmentsRes = await departmentClient.listDepartments({});
+      const departments = departmentsRes.departments ?? [];
+      const staffByDepartment = await Promise.all(
+        departments.map(async (department) => {
+          const response = await staffClient.listStaff({
+            search: '',
+            departmentId: String(department.id),
+            status: '',
+          });
+          return [department.id, response.staff ?? []] as const;
+        })
+      );
+      const staffByDepartmentId = new Map(staffByDepartment);
+      const staffList = staffByDepartment.flatMap(([, staff]) => staff);
       const staffById = new Map(staffList.map((s) => [s.id, s]));
 
-      return (departmentsRes.departments ?? []).map((d) => {
-        const members = staffList.filter((s) => s.departmentId === d.id);
+      return departments.map((d) => {
+        const members = staffByDepartmentId.get(d.id) ?? [];
         const manager = staffById.get(d.managerStaffId);
         const salaries = includeCompensation
           ? members.map((s) => s.salary ?? 0).filter((s) => s > 0)
