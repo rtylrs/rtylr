@@ -91,6 +91,9 @@ func (a *JournalAPI) CreateJournalEntry(ctx context.Context, req *financejournal
 		Lines:       lines,
 	})
 	if createErr != nil {
+		if errors.Is(createErr, domain.ErrInvalidJournalEntry) {
+			return nil, journalStatusError(http.StatusBadRequest, createErr.Error())
+		}
 		return nil, journalStatusError(http.StatusInternalServerError, "Failed to create journal entry")
 	}
 	return &financejournalv1.CreateJournalEntryResponse{
