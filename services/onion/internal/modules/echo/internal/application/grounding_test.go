@@ -55,6 +55,19 @@ func TestBuildAnalystGroundingPromptStatesEvidenceRules(t *testing.T) {
 	}
 }
 
+func TestBuildAnalystGroundingPromptAvoidsHeaderOnlyTablesForEmptyResults(t *testing.T) {
+	got := buildAnalystGroundingPrompt(nil, `{"view":"ai_customers","columns":["name"]}`)
+	for _, want := range []string{
+		"Evidence rows: 0",
+		"do not output a table with headers but no records",
+		"Use a compact table only when at least one row-level record is present",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("empty-result guidance missing %q\n prompt:\n%s", want, got)
+		}
+	}
+}
+
 func TestBuildSpecGenPromptRoutesDailyRevenueToPaidPOSOrders(t *testing.T) {
 	got := buildSpecGenPrompt(
 		"ai_pos_orders(total, payment_status, paid_at)\nai_invoices(total, issue_date, paid_date)\n",
