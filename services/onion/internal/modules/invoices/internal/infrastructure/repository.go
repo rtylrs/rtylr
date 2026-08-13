@@ -402,9 +402,11 @@ func (r *Repository) DeleteInvoice(ctx context.Context, businessID, invoiceID in
 }
 
 func (r *Repository) CountInvoiceSequence(ctx context.Context, businessID int64, year int) (int64, error) {
+	start, end := invoiceSequenceYearBounds(year)
 	count, err := r.queries.CountInvoiceSequence(ctx, sqlc.CountInvoiceSequenceParams{
-		BusinessID: businessID,
-		CreatedAt:  sql.NullTime{Time: time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC), Valid: true},
+		BusinessID:     businessID,
+		CreatedAtStart: sql.NullTime{Time: start, Valid: true},
+		CreatedAtEnd:   sql.NullTime{Time: end, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to count invoice sequence", logger.Error(err))
@@ -413,6 +415,11 @@ func (r *Repository) CountInvoiceSequence(ctx context.Context, businessID int64,
 	}
 
 	return count, nil
+}
+
+func invoiceSequenceYearBounds(year int) (time.Time, time.Time) {
+	start := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
+	return start, start.AddDate(1, 0, 0)
 }
 
 // ---------------------------------------------------------------------------
