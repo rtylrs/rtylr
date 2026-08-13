@@ -72,7 +72,7 @@ export function stockTakeProgress(items: Array<Pick<StockTakeItem, 'countedQty'>
   pct: number;
 } {
   const total = items.length;
-  const counted = items.filter((item) => item.countedQty > 0).length;
+  const counted = items.filter((item) => item.countedQty >= 0).length;
   const pct = total > 0 ? Math.round((counted / total) * 100) : 0;
   return { counted, total, pct };
 }

@@ -85,7 +85,7 @@ const StockTakes: React.FC = () => {
 
   const handleComplete = async (id: string, items: UpdateStockTakeItemBody[]): Promise<void> => {
     const uncounted = items.filter(
-      (item) => (item.expectedQty ?? 0) > 0 && !item.countedQty
+      (item) => (item.expectedQty ?? 0) > 0 && item.countedQty == null
     ).length;
     const doComplete = async (): Promise<void> => {
       try {
