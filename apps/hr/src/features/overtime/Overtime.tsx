@@ -18,12 +18,13 @@ import {
 } from '../../shared/components/ui';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
+import { isHrRequestStatus, normalizeHrRequestStatus } from '../../shared/lib/requestStatus';
 import OvertimeRequestForm from './OvertimeRequestForm';
 
 const STATUS_COLORS: Record<string, string> = {
-  Pending: 'var(--hr-status-submitted)',
-  Approved: 'var(--hr-status-approved)',
-  Rejected: 'var(--hr-status-rejected)',
+  pending: 'var(--hr-status-submitted)',
+  approved: 'var(--hr-status-approved)',
+  rejected: 'var(--hr-status-rejected)',
 };
 
 const FILTER_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'] as const;
@@ -38,7 +39,7 @@ const Overtime = (): React.JSX.Element => {
   const canApprove = canHrPermission(role, 'hr:time_off:approve');
 
   const filteredRequests = (requests ?? []).filter((r) =>
-    statusFilter === 'All' ? true : r.status === statusFilter
+    statusFilter === 'All' ? true : isHrRequestStatus(r.status, statusFilter)
   );
 
   const formatMinutes = (mins: number): string => {
@@ -109,7 +110,7 @@ const Overtime = (): React.JSX.Element => {
                     <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
                       {t('overtime.employee')} #{req.employeeId}
                     </span>
-                    <Pill color={STATUS_COLORS[req.status ?? '']}>
+                    <Pill color={STATUS_COLORS[normalizeHrRequestStatus(req.status)]}>
                       {t(`overtime.statuses.${(req.status ?? '').toLowerCase()}`, {
                         defaultValue: req.status || '—',
                       })}
@@ -125,7 +126,7 @@ const Overtime = (): React.JSX.Element => {
                     </div>
                   )}
                 </div>
-                {canApprove && req.status === 'Pending' && (
+                {canApprove && isHrRequestStatus(req.status, 'pending') && (
                   <ApprovalButtons
                     onApprove={() =>
                       approveOvertime.mutate({

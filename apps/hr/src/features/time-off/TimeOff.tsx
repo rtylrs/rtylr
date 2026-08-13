@@ -16,6 +16,7 @@ import {
 import TimeOffBadge from '../../shared/components/TimeOffBadge';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
+import { isHrRequestStatus } from '../../shared/lib/requestStatus';
 
 const STATUSES = ['All', 'Pending', 'Approved', 'Rejected'] as const;
 
@@ -26,7 +27,9 @@ const TimeOff: React.FC = () => {
   const canApprove = canHrPermission(role, 'hr:time_off:approve');
   const [tab, setTab] = useState<(typeof STATUSES)[number]>('All');
 
-  const filtered = (data ?? []).filter((t) => (tab === 'All' ? true : t.status === tab));
+  const filtered = (data ?? []).filter((t) =>
+    tab === 'All' ? true : isHrRequestStatus(t.status, tab)
+  );
 
   return (
     <>
@@ -87,7 +90,7 @@ const TimeOff: React.FC = () => {
                     </div>
                   )}
                 </div>
-                {canApprove && req.status === 'Pending' && (
+                {canApprove && isHrRequestStatus(req.status, 'pending') && (
                   <ApprovalButtons
                     onApprove={() =>
                       approve.mutate(

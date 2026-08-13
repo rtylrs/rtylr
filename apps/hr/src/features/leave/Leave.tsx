@@ -17,11 +17,12 @@ import {
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import LeaveBalances from './LeaveBalances';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
+import { isHrRequestStatus, normalizeHrRequestStatus } from '../../shared/lib/requestStatus';
 
 const STATUS_COLORS: Record<string, string> = {
-  Pending: 'var(--hr-status-submitted)',
-  Approved: 'var(--hr-status-approved)',
-  Rejected: 'var(--hr-status-rejected)',
+  pending: 'var(--hr-status-submitted)',
+  approved: 'var(--hr-status-approved)',
+  rejected: 'var(--hr-status-rejected)',
 };
 
 const TAB_KEYS = ['myLeave', 'teamCalendar'] as const;
@@ -41,7 +42,7 @@ const Leave = (): React.JSX.Element => {
   const canApprove = canHrPermission(role, 'hr:time_off:approve');
 
   const filteredRequests = (requests ?? []).filter((r) =>
-    statusFilter === 'All' ? true : r.status === statusFilter
+    statusFilter === 'All' ? true : isHrRequestStatus(r.status, statusFilter)
   );
 
   const tabLabels = TAB_KEYS.map((key) => t(`leave.tabs.${key}`));
@@ -117,7 +118,7 @@ const Leave = (): React.JSX.Element => {
                         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
                           {t('leave.employee')} #{req.employeeId}
                         </span>
-                        <Pill color={STATUS_COLORS[req.status ?? '']}>
+                        <Pill color={STATUS_COLORS[normalizeHrRequestStatus(req.status)]}>
                           {t(`leave.statuses.${(req.status ?? '').toLowerCase()}`, {
                             defaultValue: req.status || '—',
                           })}
@@ -135,7 +136,7 @@ const Leave = (): React.JSX.Element => {
                         </div>
                       )}
                     </div>
-                    {canApprove && req.status === 'Pending' && (
+                    {canApprove && isHrRequestStatus(req.status, 'pending') && (
                       <ApprovalButtons
                         onApprove={() =>
                           approveLeave.mutate({
