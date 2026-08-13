@@ -17,6 +17,26 @@ import WizardLayout from './layouts/WizardLayout';
 import HRPermissionGuard from './shared/components/HRPermissionGuard';
 import { PayrollConfigGuard } from './shared/components/PayrollConfigGuard';
 import type { HRPermission } from './shared/lib/hrPermissions';
+import { useHRConfigStore } from './shared/stores/hrConfigStore';
+
+type FeatureConfig = {
+  timeTrackingModel?: string;
+  equipmentEnabled?: boolean | string;
+};
+
+const isEnabled = (value: boolean | string | undefined): boolean =>
+  value === true || value === 'true';
+
+function HRFeatureConfigGuard({
+  enabled,
+  children,
+}: {
+  enabled: (config: FeatureConfig) => boolean;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  const config = useHRConfigStore((state) => state.config) as FeatureConfig | null;
+  return config && enabled(config) ? <>{children}</> : <Navigate to="/" replace />;
+}
 
 function PageLoader(): React.JSX.Element {
   return (
@@ -92,6 +112,13 @@ const wrap = (screen: React.ReactNode, permission?: HRPermission): React.JSX.Ele
 
 const payrollWrap = (screen: React.ReactNode): React.JSX.Element =>
   wrap(<PayrollConfigGuard>{screen}</PayrollConfigGuard>, 'hr:payroll');
+
+const configWrap = (
+  screen: React.ReactNode,
+  enabled: (config: FeatureConfig) => boolean,
+  permission?: HRPermission
+): React.JSX.Element =>
+  wrap(<HRFeatureConfigGuard enabled={enabled}>{screen}</HRFeatureConfigGuard>, permission);
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -229,10 +256,11 @@ const timeRoute = createRoute({
   getParentRoute: () => hrConfigRoute,
   path: '/time',
   component: () =>
-    wrap(
+    configWrap(
       <Suspense fallback={<PageLoader />}>
         <TimeLogging />
       </Suspense>,
+      (config) => config.timeTrackingModel === 'time_logging' || config.timeTrackingModel === 'both',
       'hr:shifts'
     ),
 });
@@ -479,10 +507,11 @@ const equipmentRoute = createRoute({
   getParentRoute: () => hrConfigRoute,
   path: '/equipment',
   component: () =>
-    wrap(
+    configWrap(
       <Suspense fallback={<PageLoader />}>
         <EquipmentScreen />
-      </Suspense>
+      </Suspense>,
+      (config) => isEnabled(config.equipmentEnabled)
     ),
 });
 
@@ -490,10 +519,11 @@ const assetRegisterRoute = createRoute({
   getParentRoute: () => hrConfigRoute,
   path: '/equipment/assets',
   component: () =>
-    wrap(
+    configWrap(
       <Suspense fallback={<PageLoader />}>
         <AssetRegister />
-      </Suspense>
+      </Suspense>,
+      (config) => isEnabled(config.equipmentEnabled)
     ),
 });
 
