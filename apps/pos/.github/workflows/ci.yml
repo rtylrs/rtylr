@@ -1,49 +1,25 @@
-name: CI
+name: Version
 
+# Main pushes create release metadata only. The deploy control plane decides
+# when a promoted POS release is built and deployed.
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  group: version-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
-  check:
-    name: Build
-    runs-on: blacksmith-2vcpu-ubuntu-2404
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PAT_TOKEN }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build (web)
-        run: pnpm build
-
-  deploy:
-    name: Deploy to Cloudflare Pages
-    needs: check
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
-    uses: tryrtylr/pipelines/.github/workflows/deploy-pages.yml@main
+  release:
+    name: Create POS version
+    uses: tryrtylr/pipelines/.github/workflows/create-release.yml@main
     with:
-      app_filter: 'rtylr-pos'
-      dist_dir: 'dist'
-      project_name: 'rtylr-pos'
-      runs_on: 'blacksmith-2vcpu-ubuntu-2404'
-    secrets: inherit
+      release_tag: pos-v0.0.${{ github.run_number }}
+      release_name: rtylr POS v0.0.${{ github.run_number }}
+      version: 0.0.${{ github.run_number }}
+      notes: "Source version at ${{ github.sha }}. Build and deployment are controlled by tryrtylr/deploy."
