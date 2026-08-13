@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate } from '@tanstack/react-router';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { ChevronRight, Plus, ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -11,7 +11,7 @@ import ClientSelect, { Client } from '../../shared/components/ClientSelect';
 import LineItemRow, { LineItem } from '../../shared/components/LineItemRow';
 import TaxBreakdown from '../../shared/components/TaxBreakdown';
 import InvoicePreview from '../../shared/components/InvoicePreview';
-import { useCreateInvoice, useUpdateInvoiceStatus } from './useInvoices';
+import { useCreateInvoice, useInvoiceDetail, useUpdateInvoiceStatus } from './useInvoices';
 import {
   cardStyle,
   ghostBtn,
@@ -21,11 +21,16 @@ import {
   ACCENT,
 } from '../../shared/lib/tokens';
 import { useSettings } from '../../shared/lib/settings';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
+
+const newInvoiceRoute = getRouteApi('/layout/invoices/new');
 
 const STEPS = ['Client', 'Items', 'Tax & Notes', 'Preview'] as const;
 
 const NewInvoice: React.FC = () => {
   const navigate = useNavigate();
+  const { clone, client: clientId } = newInvoiceRoute.useSearch();
   const settings = useSettings();
   const [step, setStep] = useState(0);
   const [client, setClient] = useState<Client | null>(null);
@@ -43,6 +48,35 @@ const NewInvoice: React.FC = () => {
   const [discount, setDiscount] = useState(0);
   const createInvoice = useCreateInvoice();
   const updateInvoiceStatus = useUpdateInvoiceStatus();
+  const { data: sourceInvoice } = useInvoiceDetail(clone);
+
+  useEffect(() => {
+    if (sourceInvoice) {
+      setClient({ id: sourceInvoice.id, name: sourceInvoice.client, email: sourceInvoice.clientEmail });
+      setIssuedDate(sourceInvoice.issuedDate ?? today);
+      setDueDate(sourceInvoice.dueDate ?? due);
+      setInvoiceNumber(sourceInvoice.number ?? sourceInvoice.id);
+      setItems((sourceInvoice.items ?? []).map((item, index) => ({
+        id: `clone-${index}`,
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        taxRate: settings.defaultTaxRate,
+      })));
+      setNotes(sourceInvoice.notes ?? settings.invoiceNotes);
+      setDiscount(sourceInvoice.discount ?? 0);
+    }
+  }, [sourceInvoice]);
+
+  useEffect(() => {
+    if (!clientId || clone) return;
+    void unwrap(safe.get<Client[]>('/crm/customers'))
+      .then((clients) => {
+        const selected = (clients ?? []).find((entry) => entry.id === clientId);
+        if (selected) setClient(selected);
+      })
+      .catch(() => {});
+  }, [clientId, clone]);
 
   const addItem = () =>
     setItems((prev) => [
