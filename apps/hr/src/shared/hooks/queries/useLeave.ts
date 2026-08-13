@@ -101,11 +101,12 @@ export const useApproveLeave = () => {
   });
 };
 
-export const useListLeaveBalances = () => {
+export const useListLeaveBalances = (employeeId?: string) => {
   return useQuery<LeaveBalancePayload[]>({
-    queryKey: ['leave-balances'],
+    queryKey: ['leave-balances', employeeId],
+    enabled: !!employeeId,
     queryFn: async (): Promise<LeaveBalancePayload[]> => {
-      const res = await leaveClient.listLeaveBalances({ employeeId: undefined, year: undefined });
+      const res = await leaveClient.listLeaveBalances({ employeeId, year: undefined });
       return res.balances ?? [];
     },
   });

@@ -1,12 +1,14 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from 'lucide-react';
+import { useUserStore } from '@voxire/auth';
 import { useListLeaveBalances } from '../../shared/hooks/queries/useLeave';
 import { Card, Skeleton, EmptyState } from '../../shared/components/ui';
 
 const LeaveBalances = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data: balances, isLoading } = useListLeaveBalances();
+  const userId = useUserStore((s) => s.userId);
+  const { data: balances, isLoading } = useListLeaveBalances(userId ?? undefined);
 
   if (isLoading) {
     return (
