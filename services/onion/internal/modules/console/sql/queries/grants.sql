@@ -1,6 +1,3 @@
--- name: CountGrants :one
-SELECT COUNT(*) FROM manual_access_grants;
-
 -- name: ListGrants :many
 SELECT g.id, g.user_id, COALESCE(u.full_name, '') AS user_name, g.plan_id, p.name AS plan_name,
        g.granted_by, adm.full_name AS granter_name, g.note, g.expires_at, g.revoked_at, g.created_at,

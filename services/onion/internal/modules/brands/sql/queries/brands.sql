@@ -26,6 +26,3 @@ FROM erp_brands b
 WHERE b.business_id = ?
 ORDER BY b.name ASC
 LIMIT ? OFFSET ?;
-
--- name: CountBrands :one
-SELECT COUNT(*) FROM erp_brands WHERE business_id = ?;

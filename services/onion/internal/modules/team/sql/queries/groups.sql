@@ -30,9 +30,6 @@ ON DUPLICATE KEY UPDATE permission_level = VALUES(permission_level);
 -- name: DeleteGroupResourcePermissions :exec
 DELETE FROM user_group_resource_permissions WHERE group_id = ?;
 
--- name: DeleteGroupResourcePermission :exec
-DELETE FROM user_group_resource_permissions WHERE group_id = ? AND resource_key = ?;
-
 -- name: ListGroupResourcePermissions :many
 SELECT resource_key, permission_level FROM user_group_resource_permissions WHERE group_id = ?;
 
@@ -62,9 +59,6 @@ SELECT ugm.group_id, ugrp.resource_key, ugrp.permission_level
 FROM user_group_members ugm
 JOIN user_group_resource_permissions ugrp ON ugm.group_id = ugrp.group_id
 WHERE ugm.user_id = ? AND ugm.owner_id = ?;
-
--- name: CountGroupMembers :one
-SELECT COUNT(*) FROM user_group_members WHERE group_id = ?;
 
 -- name: ListUserGroupsForUsers :many
 SELECT m.user_id, g.id, g.name, g.color

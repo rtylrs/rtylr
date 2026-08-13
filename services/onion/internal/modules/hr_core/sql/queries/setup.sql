@@ -14,11 +14,6 @@ SELECT id, owner_id, business_id, step_key, step_label, is_completed, completed_
 FROM hr_setup_steps
 WHERE business_id = ? AND step_key = ?;
 
--- name: SeedSetupStep :exec
-INSERT INTO hr_setup_steps (owner_id, business_id, step_key, step_label)
-VALUES (?, ?, ?, ?)
-ON DUPLICATE KEY UPDATE step_label = VALUES(step_label);
-
 -- name: GetHRConfig :one
 SELECT id, owner_id, business_id, company_name, fiscal_year_start_month, default_currency,
        default_timezone, default_work_schedule_id, overtime_enabled, overtime_multiplier,

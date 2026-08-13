@@ -21,28 +21,6 @@ FROM finance_invoices
 WHERE id = ? AND business_id = ?
 FOR UPDATE;
 
--- name: ListInvoicesByOwner :many
-SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
-       status, issue_date, due_date, paid_date, currency, subtotal, discount_type,
-       discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
-       notes, terms, created_at, updated_at
-FROM finance_invoices
-WHERE business_id = ?
-ORDER BY created_at DESC
-LIMIT ? OFFSET ?;
-
--- name: CountInvoicesByOwner :one
-SELECT COUNT(*) FROM finance_invoices WHERE business_id = ?;
-
--- name: ListInvoicesByOwnerAndStatus :many
-SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
-       status, issue_date, due_date, paid_date, currency, subtotal, discount_type,
-       discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
-       notes, terms, created_at, updated_at
-FROM finance_invoices
-WHERE business_id = ? AND status = ?
-ORDER BY created_at DESC;
-
 -- name: CreateInvoice :execresult
 INSERT INTO finance_invoices
   (owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
@@ -108,11 +86,6 @@ FROM finance_invoice_items
 WHERE invoice_id = ?
 ORDER BY sort_order ASC, id ASC;
 
--- name: CreateInvoiceItem :exec
-INSERT INTO finance_invoice_items
-  (invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order)
-VALUES (?,?,?,?,?,?,?,?,?);
-
 -- name: DeleteInvoiceItems :exec
 DELETE FROM finance_invoice_items WHERE invoice_id = ?;
 
@@ -131,17 +104,6 @@ ORDER BY payment_date ASC;
 SELECT id, owner_id, business_id, invoice_id, amount, currency, payment_date, method, reference, notes, created_at
 FROM finance_payments
 WHERE business_id = ? AND invoice_id = ? AND reference = ?;
-
--- name: ListExpensesByOwner :many
-SELECT id, owner_id, business_id, category_id, description, amount, currency, expense_date, vendor,
-       payment_method, receipt_url, is_tax_deductible, tax_amount, notes, status, created_at, updated_at
-FROM finance_expenses
-WHERE business_id = ?
-ORDER BY expense_date DESC
-LIMIT ? OFFSET ?;
-
--- name: CountExpensesByOwner :one
-SELECT COUNT(*) FROM finance_expenses WHERE business_id = ?;
 
 -- name: GetExpenseByID :one
 SELECT id, owner_id, business_id, category_id, description, amount, currency, expense_date, vendor,

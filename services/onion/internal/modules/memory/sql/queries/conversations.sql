@@ -42,27 +42,6 @@ FROM conversation_messages
 WHERE session_id = ?
 ORDER BY created_at ASC;
 
--- name: GetRecentMessages :many
-SELECT
-    id, session_id, user_id, role, content,
-    tokens_used, metadata, created_at
-FROM conversation_messages
-WHERE user_id = ?
-ORDER BY created_at DESC
-LIMIT ?;
-
--- name: GetMessagesByTopic :many
-SELECT
-    cm.id, cm.session_id, cm.user_id, cm.role, cm.content,
-    cm.tokens_used, cm.metadata, cm.created_at,
-    cs.title AS session_title
-FROM conversation_messages cm
-JOIN chat_sessions cs ON cm.session_id = cs.session_id
-WHERE cm.user_id = ?
-AND MATCH(cm.content) AGAINST (? IN NATURAL LANGUAGE MODE)
-ORDER BY cm.created_at DESC
-LIMIT ?;
-
 -- name: CreateConversationSummary :execresult
 INSERT INTO conversation_summaries (user_id, session_id, summary, key_topics, sentiment, importance_score)
 VALUES (?, ?, ?, ?, ?, ?);
@@ -73,14 +52,6 @@ SELECT
     sentiment, importance_score, created_at
 FROM conversation_summaries
 WHERE id = ?;
-
--- name: GetUserSummaries :many
-SELECT
-    id, user_id, session_id, summary, key_topics,
-    sentiment, importance_score, created_at
-FROM conversation_summaries
-WHERE user_id = ?
-ORDER BY importance_score DESC, created_at DESC;
 
 -- name: StoreUserMemory :exec
 INSERT INTO user_memory (user_id, memory_type, `key`, value, confidence, source_session)
@@ -97,15 +68,6 @@ SELECT
     source_session, created_at, updated_at
 FROM user_memory
 WHERE user_id = ? AND memory_type = ? AND `key` = ?;
-
--- name: GetUserMemory :many
-SELECT
-    id, user_id, memory_type, `key`, value, confidence,
-    source_session, created_at, updated_at
-FROM user_memory
-WHERE user_id = ?
-AND (memory_type = ? OR ? = '')
-ORDER BY confidence DESC, updated_at DESC;
 
 -- name: SearchUserMemory :many
 SELECT
@@ -195,11 +157,6 @@ FROM (
     FROM user_memories
 ) combined_results
 ORDER BY sort_order, created_at ASC;
-
--- name: DeleteOldSessions :exec
-DELETE FROM chat_sessions 
-WHERE user_id = ?
-AND last_activity < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 30 DAY);
 
 -- name: GetSessionStats :one
 SELECT 

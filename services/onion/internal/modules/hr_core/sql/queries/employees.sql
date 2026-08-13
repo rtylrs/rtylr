@@ -39,14 +39,6 @@ SET department_id = ?, location_id = ?, work_schedule_id = ?,
     notes = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ?;
 
--- name: DeleteEmployee :exec
-UPDATE hr_employees SET status = 'terminated', updated_at = NOW()
-WHERE id = ? AND business_id = ?;
-
--- name: ActivateEmployee :exec
-UPDATE hr_employees SET status = 'active', user_id = ?, updated_at = NOW()
-WHERE id = ? AND business_id = ?;
-
 -- name: CreateLeaveBalance :exec
 INSERT INTO hr_leave_balances (owner_id, business_id, employee_id, leave_type_id, year)
 VALUES (?, ?, ?, ?, ?);
