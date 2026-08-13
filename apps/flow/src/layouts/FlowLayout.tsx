@@ -30,6 +30,7 @@ import {
   Menu,
   X,
   Shield,
+  Clock,
 } from 'lucide-react';
 import { useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
@@ -37,6 +38,7 @@ import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '
 import { useForesightLinks } from '@voxire/utils';
 import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
+import { useTranslation } from 'react-i18next';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { accentTints, ACCENT_DEFAULT, type ResolvedTheme } from '../shared/lib/colorUtils';
 import { useFlowStore } from '../shared/stores/flowStore';
@@ -79,6 +81,8 @@ const sidebarSectionHeaderClass =
 
 interface SidebarLinkProps {
   to: string;
+  /** Search params for links that target a section of a screen, e.g. Settings. */
+  search?: Record<string, string>;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   label: string;
   exact?: boolean;
@@ -162,6 +166,7 @@ const SidebarCollapsible: React.FC<{ open: boolean; children: React.ReactNode }>
 
 const SidebarLink: React.FC<SidebarLinkProps> = ({
   to,
+  search,
   icon: Icon,
   label,
   exact,
@@ -179,6 +184,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
   return (
     <Link
       to={to}
+      search={search}
       className={cn(
         'relative flex min-h-[40px] items-center gap-2.5 px-3 py-2 rounded-md text-[12px] font-medium transition-colors duration-150 lg:min-h-0 lg:py-1.5',
         isActive ? '' : 'hover:bg-[var(--flow-hover)]'
@@ -218,6 +224,7 @@ interface FlowLayoutProps {
 }
 
 const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
@@ -867,6 +874,54 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               <SidebarLink to="/insights" icon={BarChart3} label="Insights" />
                             )}
                             <SidebarLink to="/archive" icon={Archive} label="Archive" />
+                          </nav>
+                        </SidebarCollapsible>
+                      </div>
+                    )}
+
+                    {sectionId === 'time' && (
+                      <div className="flex flex-col gap-0">
+                        <div className="group flex items-center gap-0 min-h-0">
+                          <div className={sidebarReorderWrapClass}>
+                            <SidebarSectionReorder
+                              id="time"
+                              order={sidebarSectionOrder}
+                              moveSection={moveSidebarSection}
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => toggleSidebarSection('time')}
+                            className={cn(sidebarSectionHeaderClass, 'flex-1')}
+                          >
+                            <span
+                              className="text-[12px] font-semibold tracking-wide"
+                              style={{ color: 'var(--flow-text-muted)' }}
+                            >
+                              {t('flow.time.heading')}
+                            </span>
+                            <ChevronDown
+                              size={14}
+                              strokeWidth={2}
+                              className={cn(
+                                'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                                isSidebarSectionCollapsed('time') && '-rotate-90'
+                              )}
+                              style={{ color: 'var(--flow-text-muted)' }}
+                            />
+                          </button>
+                        </div>
+                        <SidebarCollapsible open={!isSidebarSectionCollapsed('time')}>
+                          <nav className="flex flex-col gap-px pt-px">
+                            {/* The only Time destination that exists. Timesheet,
+                              * Review, Reports and Workload join it here as their
+                              * backends land. */}
+                            <SidebarLink
+                              to="/settings"
+                              search={{ section: 'time' }}
+                              icon={Clock}
+                              label={t('flow.settings.time.section')}
+                            />
                           </nav>
                         </SidebarCollapsible>
                       </div>

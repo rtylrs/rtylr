@@ -14,6 +14,7 @@ import FlowLayout from './layouts/FlowLayout';
 import { PERSONAL_WORKSPACE_ID } from './shared/lib/personalWorkspace';
 import { safe } from './shared/lib/api';
 import PreviewRouteUnavailable from './shared/components/PreviewRouteUnavailable';
+import { settingsSearchSchema } from './shared/schemas/settings';
 // The preview-route fallback is eager so a disabled deep link can explain its state
 // without waiting for a lazy route component to load.
 
@@ -252,6 +253,7 @@ const inboxRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
+  validateSearch: settingsSearchSchema,
   component: () => withLayout(<FlowSettings />),
 });
 

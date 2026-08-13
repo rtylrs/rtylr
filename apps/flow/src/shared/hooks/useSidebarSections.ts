@@ -21,7 +21,7 @@ function save(next: Record<string, boolean>) {
   }
 }
 
-/** Collapsible sidebar groups (Plan / Team / Projects); preference persisted in localStorage. */
+/** Collapsible sidebar groups; preference persisted in localStorage. */
 export function useSidebarSections() {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>(load);
 
