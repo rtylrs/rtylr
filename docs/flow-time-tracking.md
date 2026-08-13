@@ -89,6 +89,10 @@ would teach the user something untrue.
   blocks in `FlowLayout.tsx`, and every Time destination (Timesheet, Review,
   Reports, Workload) is blocked. Adding the id now ships a section header with
   nothing under it.
+- **The mobile task-detail rail is above the description, not below it.** The
+  design has it stacking underneath. `TaskDetail`'s own layout puts the rail first
+  at narrow widths, and reordering it would move all twelve rail fields, not just
+  Time. Left alone deliberately; worth fixing as its own change.
 
 ## Token changes
 
@@ -112,6 +116,53 @@ moved its label off it.
 declared, so `--flow-status-pending: var(--flow-warn-fg)` declared only in
 `:root` paints the dark tone in light mode. This is the most common failure mode
 in a themed token set and it is silent.
+
+## Two defects live verification found that the test suite could not
+
+Both were invisible to `typecheck`, `eslint` and 997 passing unit tests. Both were
+found by driving the real app in a browser with the API stubbed.
+
+### `--accent-muted` was overridden by an inline style
+
+`FlowLayout` applies `--accent`, `--accent-muted`, `--accent-border` and
+`--accent-focus` as **inline styles on `documentElement`**, derived from the active
+workspace colour. Inline styles beat every stylesheet rule, so the signed-off
+light-mode `--accent-muted: .18` in `globals.css` was dead on every authenticated
+screen - the layout re-applied `.12` the moment it mounted.
+
+The per-mode alpha now lives in `accentTints` (`shared/lib/colorUtils.ts`), which
+`FlowLayout` calls with the resolved theme, so it follows both the mode and the
+per-workspace accent. Measured through the real theme toggle: dark `.12`/`.3`,
+light `.18`/`.42`.
+
+**The general rule:** a custom property that any code sets via `style.setProperty`
+cannot be themed from a stylesheet. Check for an inline writer before adding a
+per-mode value to `globals.css`.
+
+### No app defines a Tailwind `@theme` block, so `bg-accent` is transparent
+
+Every `globals.css` in this repo opens with a comment saying the
+`@voxire/tailwind-config` extensions are "ported below into v4's native `@theme`
+block". **No app actually has one.** Measured in the running app, `bg-accent` and
+`bg-warning` both compute to `rgba(0,0,0,0)`.
+
+Every `@voxire/ui` component that colours itself through those utilities is
+therefore untinted app-wide:
+
+| Component | Class                                          | Effect                                      |
+| --------- | ---------------------------------------------- | ------------------------------------------- |
+| `Switch`  | `data-[state=checked]:bg-accent`               | checked is indistinguishable from unchecked |
+| `Alert`   | `bg-warning/10 border-warning/30 text-warning` | plain bordered box, no tone                 |
+| `Avatar`  | `bg-accent/20 text-accent`                     | untinted circle                             |
+| `Badge`   | `bg-{tone}/10 text-{tone}`                     | invisible tint                              |
+| `Button`  | `accent: bg-accent text-white`                 | no fill                                     |
+
+This is pre-existing and much larger than this feature. `FlowSwitch`
+(`shared/components/FlowSwitch.tsx`) is a **local workaround, not the fix**: it
+passes arbitrary-value utilities pointing at Flow's own custom properties, which
+resolve without a theme block. The real fix is a theme mapping in the consuming
+apps, and it would change the appearance of every existing use of these utilities
+across ten apps - which is a sign-off, not a patch.
 
 ## Outstanding requests to `@voxire/ui`
 
