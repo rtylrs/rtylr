@@ -105,6 +105,21 @@ two devices adding different lines both succeed. Only genuine edits to the same
 line conflict, and those surface for the person to resolve. Nothing is silently
 discarded, because for logged work that means losing someone's afternoon.
 
+**A manager may log on someone's behalf.** Field workers lose phones and go absent,
+and the hours still happened. The entry records who it was logged for and who
+logged it, and both appear on the day, so a manager's entry is never mistaken for
+the person's own.
+
+**A refused overtime request leaves the day unapproved.** The hours were worked and
+cannot be deleted, so the day stays in the queue with the refusal attached until a
+manager resolves it. This is deliberately uncomfortable: an unapprovable day is a
+conversation, and silently paying or silently discarding the time are both worse.
+
+**Only days worked need a record.** There is no expectation of a row for a day off,
+so the missing-days list has to know a person's working pattern rather than
+assuming Monday to Friday. HR already models this in `hr_shifts` and
+`hr_shift_assignments`, and the list reads from there.
+
 **One end-of-day reminder**, at a configurable time, then a manager-visible
 missing-days list once someone passes a threshold. Within the six-a-week
 notification budget the design sets.
@@ -114,6 +129,61 @@ notification budget the design sets.
 Contractors get a lightweight HR person record flagged non-employee, so they key
 into `hr_time_entries` like everyone else and appear in the same reports, while
 payroll excludes them by type. One store holds everyone; the type is what differs.
+
+## Plant cost
+
+Project cost is labour plus plant. Labour comes from the lines above; plant needs a
+register, rates and usage.
+
+### Register
+
+`hr_assets` stays the single spine for things the business owns: name, category,
+serial, purchase price. It is an IT and personal-kit register today, with no rate,
+no usage and no project allocation, and `assigned_to` points at a person, which
+fits a laptop and not an excavator.
+
+**New: `flow_plant_items`**, referencing `hr_assets` where the item is owned, and
+standing alone where it is hired in. Asset identity is not duplicated; costing
+attributes hang off it.
+
+| Column | Note |
+|---|---|
+`asset_id` | Null for hired plant that the business does not own |
+`ownership` | `owned` / `hired` |
+`supplier_id`, `hire_rate`, `hire_unit` | Hired items only. Sets up invoice reconciliation later without building it now. |
+`operating_rate_hour` | Cost while working |
+`standby_rate_hour` | Cost while on site and available. Lower, and the reason idle plant stops looking free. |
+`logging_mode` | `operator` / `site_manager` / `both`, which decides who is asked to record it |
+
+### Usage
+
+**New: `flow_plant_usage`** with `plant_item_id`, `project_id`, optional `task_id`,
+`date`, `hours`, `mode` (`operating` / `standby`), optional `operator_employee_id`,
+`logged_by`, `work_day_id` where it came in on someone's day, and a `client_key`
+for the same offline sync as labour lines.
+
+Two ways in, by item:
+
+- **Operated plant** appears as a second kind of line on the operator's own work
+  day. One habit, one screen, and it syncs offline like everything else.
+- **Static or shared plant** is recorded by a site manager, per site per day, which
+  is the only way standby hours on unmanned items get captured at all.
+
+### Cost
+
+```
+project cost = labour   sum(hours x cost rate)
+             + plant    sum(operating hours x operating rate)
+             +          sum(standby hours   x standby rate)
+```
+
+Hired items carry their hire rate as real cash out, so a job can show recovered
+cost against actual spend rather than only an internal figure. As with labour
+rates, the rate is snapshotted on the usage row: a rate change must not silently
+restate last quarter's job costs.
+
+Cost is money, so every plant cost surface sits behind the same dual gate as
+labour cost.
 
 ## Screens
 
@@ -145,10 +215,12 @@ clients are committed.
 3. **Offline and mobile.** `client_key` sync, the queue, conflict resolution, and
    the phone entry form as a first-class surface.
 4. **Reminders and missing days.** End-of-day nudge, escalation list.
-5. **Reports.** The grouped aggregation RPC, the pivot, the project Time tab.
-6. **Workload and Timeline.** Both replace flag-gated stubs; both flags come out.
-7. **Rates, cost and billing.** Dual-gated, last, and still blocked on the Finance
-   pull contract.
+5. **Plant.** The register, rates, usage capture on the work day and the site-manager
+   screen. Project cost becomes labour plus plant.
+6. **Reports.** The grouped aggregation RPC, the pivot, the project Time tab, and
+   cost by project across both labour and plant.
+7. **Workload and Timeline.** Both replace flag-gated stubs; both flags come out.
+8. **Billing.** Dual-gated, last, and still blocked on the Finance pull contract.
 
 ## What this unwinds
 
@@ -171,14 +243,22 @@ retired, along with the `flow_adapter` join that exists to bridge them.
   independently editable.
 - **Scope.** Seven steps across three repos. Step 1 alone is a genuine feature.
 
+## Retention
+
+Work days, their action history, labour lines and plant usage are retained: they
+are payroll and job-cost evidence, and a job's cost has to be defensible after the
+job closes. The retention period itself is still to be set, and it is a legal
+question per jurisdiction rather than a product one.
+
 ## Open questions
 
-1. **Who may log for someone else?** A manager filling in for an absent field
-   worker is common, and nothing above covers it.
-2. **A refused overtime request after the hours are worked.** The hours happened;
-   refusing the request cannot delete them. Does the day stay unapproved, or does
-   the time move to an unpaid category?
-3. **Weekends and non-working days.** Does every calendar day need a record, or
-   only days worked? Affects the missing-days list and how the week reads.
-4. **Retention.** How long do work days and their action history survive, given
-   they become payroll evidence?
+1. **Does a hired item's usage reconcile against its supplier invoice?** The
+   supplier and hire rate are recorded, so the data is there. Whether Flow shows
+   the variance, or Finance does, is unsettled.
+2. **Fuel and consumables.** Real plant cost includes them and nothing here
+   captures them. Out of scope for a first pass, worth naming now.
+3. **Who maintains the plant register?** Rates are money, so the same dual gate
+   probably applies, but that makes routine fleet admin an admin-only job.
+4. **Tenancy.** `business_id` defaults to `0` on the existing tables. Every new
+   table here must not repeat that, and the existing default needs settling before
+   more data lands on it.
