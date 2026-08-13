@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Avatar } from '@voxire/ui';
+import { Alert, Avatar, Switch } from '@voxire/ui';
 import {
   type RoundingMinutes,
   type WeekStart,
@@ -11,7 +11,6 @@ import { useFlowTeam } from '../../../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../../../shared/lib/memberUtils';
 import { formatDurationClock } from '../../../shared/lib/durationUtils';
 import GateNotice from '../../../shared/components/GateNotice';
-import FlowSwitch from '../../../shared/components/FlowSwitch';
 
 const ROUNDING_OPTIONS: RoundingMinutes[] = [0, 5, 10, 15, 30];
 const UNDO_WINDOW_MS = 2000;
@@ -80,11 +79,7 @@ const TimeSection = (): React.JSX.Element => {
     <div className="space-y-8">
       {/* The honest header. Without it this pane reads as a workspace setting
        * that quietly is not one. */}
-      <Alert
-        variant="warning"
-        data-c="alert"
-        className="border-[var(--flow-status-pending-border)] bg-[var(--flow-status-pending-bg)] text-[var(--flow-text)]"
-      >
+      <Alert variant="warning" data-c="alert">
         <p className="text-[13px] leading-snug">{t('flow.settings.time.localOnlyWarning')}</p>
       </Alert>
 
@@ -242,7 +237,7 @@ const TimeSection = (): React.JSX.Element => {
               </button>
             )}
           </div>
-          <FlowSwitch
+          <Switch
             checked={settings.approvalLocksEntry}
             onCheckedChange={flipLock}
             aria-label={t('flow.settings.time.approvalLocks')}
@@ -302,7 +297,7 @@ const TimeSection = (): React.JSX.Element => {
                 className="flow-focus min-h-[44px] flex-1 rounded bg-transparent px-2 text-[16px] md:min-h-0 md:py-1 md:text-[13px]"
                 style={{ color: 'var(--flow-text)' }}
               />
-              <FlowSwitch
+              <Switch
                 checked={category.billable}
                 onCheckedChange={(next) => settings.setCategoryBillable(category.id, next)}
                 aria-label={t('flow.settings.time.categoryBillable')}
