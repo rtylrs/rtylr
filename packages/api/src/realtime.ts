@@ -68,7 +68,7 @@ export class RealtimeClient {
       // First subscriber for this topic: tell the server if we're
       // already connected; otherwise the connect path will re-subscribe
       // everything on (re)open.
-      this.send({ op: 'subscribe', topics: [topic] });
+      this.send({ op: "subscribe", topics: [topic] });
     }
     entry.handlers.add(handler);
 
@@ -102,7 +102,7 @@ export class RealtimeClient {
     entry.handlers.delete(handler);
     if (entry.handlers.size === 0) {
       this.subs.delete(topic);
-      this.send({ op: 'unsubscribe', topics: [topic] });
+      this.send({ op: "unsubscribe", topics: [topic] });
     }
   }
 
@@ -110,7 +110,8 @@ export class RealtimeClient {
     if (this.closed) return;
     if (
       this.ws &&
-      (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)
+      (this.ws.readyState === WebSocket.OPEN ||
+        this.ws.readyState === WebSocket.CONNECTING)
     ) {
       return;
     }
@@ -142,8 +143,8 @@ export class RealtimeClient {
       url = new URL(this.url);
       // Never carry forward the legacy reusable-JWT query parameter, even if
       // a caller supplies a URL that still contains one.
-      url.searchParams.delete('token');
-      url.searchParams.set('ticket', ticket);
+      url.searchParams.delete("token");
+      url.searchParams.set("ticket", ticket);
     } catch {
       this.scheduleReconnect();
       return;
@@ -163,19 +164,19 @@ export class RealtimeClient {
       // Re-subscribe to everything that was active before the connect.
       const topics = Array.from(this.subs.keys());
       if (topics.length > 0) {
-        this.send({ op: 'subscribe', topics });
+        this.send({ op: "subscribe", topics });
       }
       // Keep intermediaries from killing idle connections.
       this.pingInterval = setInterval(() => {
-        this.send({ op: 'ping' });
+        this.send({ op: "ping" });
       }, 25_000);
     };
 
     ws.onmessage = (evt: MessageEvent): void => {
       try {
-        if (typeof evt.data !== 'string') return;
+        if (typeof evt.data !== "string") return;
         const msg = JSON.parse(evt.data);
-        if (msg?.op === 'event' && msg.event) {
+        if (msg?.op === "event" && msg.event) {
           const e = msg.event as RealtimeEvent;
           const entry = this.subs.get(e.topic);
           if (entry) {
@@ -205,7 +206,10 @@ export class RealtimeClient {
   private scheduleReconnect(): void {
     if (this.closed || this.reconnectTimer) return;
     const attempt = this.reconnectAttempts++;
-    const backoff = Math.min(MAX_BACKOFF_MS, MIN_BACKOFF_MS * Math.pow(2, attempt));
+    const backoff = Math.min(
+      MAX_BACKOFF_MS,
+      MIN_BACKOFF_MS * Math.pow(2, attempt),
+    );
     // Full jitter - helps when many clients bounce at once.
     const delay = Math.floor(Math.random() * backoff);
     this.reconnectTimer = setTimeout(() => {
