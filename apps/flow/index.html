@@ -18,8 +18,29 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <!--
+      Resolve the theme before first paint. The body used to carry
+      `background: #0a0a0a` inline, which meant light mode rendered a dark body:
+      an inline style cannot follow a theme. Stamping data-theme here instead lets
+      globals.css paint the right palette immediately, with no flash either way.
+      Kept in step with themeStore's DEFAULT_THEME and its persist key.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('flow-theme');
+          var theme = stored ? JSON.parse(stored).state?.theme : 'dark';
+          if (theme === 'system') {
+            theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.setAttribute('data-theme', theme || 'dark');
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
   </head>
-  <body style="margin: 0; padding: 0; background: #0a0a0a">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
