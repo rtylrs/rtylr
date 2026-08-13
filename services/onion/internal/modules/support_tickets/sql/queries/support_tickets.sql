@@ -39,7 +39,7 @@ VALUES (?, ?, ?, ?, ?);
 
 -- name: FindSupportCustomerByEmail :one
 SELECT id FROM support_customers
-WHERE business_id = ? AND LOWER(email) = LOWER(?)
+WHERE business_id = ? AND email = ?
 LIMIT 1;
 
 -- name: InsertSupportCustomer :exec

@@ -81,6 +81,29 @@ func TestSupportKnowledge_Create_AppearsInList(t *testing.T) {
 	}
 }
 
+func TestSupportKnowledge_GetByTitleIsCaseInsensitive(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	id, err := repo.Create(context.Background(), domain.ArticleInput{
+		BusinessID: testKBBusinessID,
+		Title:      "Case Sensitive Title",
+		Slug:       "case-sensitive-title",
+		Body:       "body",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.Delete(context.Background(), testKBBusinessID, id) })
+
+	article, err := repo.Get(context.Background(), testKBBusinessID, 0, "", "cAsE sEnSiTiVe TiTlE")
+	if err != nil {
+		t.Fatalf("Get by mixed-case title: %v", err)
+	}
+	if article.ID != id {
+		t.Fatalf("article id = %d, want %d", article.ID, id)
+	}
+}
+
 func TestSupportKnowledge_Update_ChangesTitle(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
