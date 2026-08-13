@@ -188,6 +188,21 @@ describe('TimePanel — entries', () => {
     expect(deleteTimeLogMutate).toHaveBeenCalledWith({ id: 5, taskId: '42' });
   });
 
+  it('does not offer delete to a viewer, even on their own entry', () => {
+    timeLogsState.value = {
+      data: { timeLogs: [makeLog({ id: 5, userId: 7 })] },
+      isLoading: false,
+      isError: false,
+      refetch,
+    };
+
+    renderPanel({ canLog: false });
+
+    expect(
+      screen.queryByRole('button', { name: 'flow.time.deleteEntryLabel' })
+    ).not.toBeInTheDocument();
+  });
+
   it('does not offer delete on someone else’s entry', () => {
     timeLogsState.value = {
       data: { timeLogs: [makeLog({ id: 5, userId: 9 })] },
