@@ -1,21 +1,21 @@
 -- name: ListExpenses :many
-SELECT id, owner_id, business_id, category_id, amount, currency, description, vendor, receipt_url, expense_date, status, created_at, updated_at
+SELECT id, owner_id, business_id, category_id, description, amount, currency, expense_date, vendor, payment_method, receipt_url, is_tax_deductible, tax_amount, notes, status, created_at, updated_at
 FROM finance_expenses
 WHERE business_id = ?
 ORDER BY expense_date DESC
 LIMIT 500;
 
 -- name: GetExpenseByID :one
-SELECT id, owner_id, business_id, category_id, amount, currency, description, vendor, receipt_url, expense_date, status, created_at, updated_at
+SELECT id, owner_id, business_id, category_id, description, amount, currency, expense_date, vendor, payment_method, receipt_url, is_tax_deductible, tax_amount, notes, status, created_at, updated_at
 FROM finance_expenses
 WHERE id = ? AND business_id = ?;
 
 -- name: CreateExpense :execresult
-INSERT INTO finance_expenses (owner_id, business_id, category_id, amount, currency, description, vendor, receipt_url, expense_date, status)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending');
+INSERT INTO finance_expenses (owner_id, business_id, category_id, description, amount, currency, expense_date, vendor, payment_method, receipt_url, is_tax_deductible, tax_amount, notes, status)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending');
 
 -- name: UpdateExpense :execresult
-UPDATE finance_expenses SET category_id = ?, amount = ?, currency = ?, description = ?, vendor = ?, receipt_url = ?, expense_date = ?
+UPDATE finance_expenses SET category_id = ?, description = ?, amount = ?, currency = ?, expense_date = ?, vendor = ?, payment_method = ?, receipt_url = ?, is_tax_deductible = ?, tax_amount = ?, notes = ?
 WHERE id = ? AND business_id = ?;
 
 -- name: DeleteExpense :execresult
@@ -42,7 +42,7 @@ WHERE business_id = ?
 GROUP BY category_id;
 
 -- name: ListExpensesPaginated :many
-SELECT id, owner_id, business_id, category_id, amount, currency, description, vendor, receipt_url, expense_date, status, created_at, updated_at
+SELECT id, owner_id, business_id, category_id, description, amount, currency, expense_date, vendor, payment_method, receipt_url, is_tax_deductible, tax_amount, notes, status, created_at, updated_at
 FROM finance_expenses
 WHERE business_id = ?
 ORDER BY expense_date DESC
