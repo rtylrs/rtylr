@@ -44,7 +44,9 @@ SELECT COUNT(*) FROM crm_customers WHERE business_id = ? AND is_active = TRUE;
 
 -- name: CountNewCustomersThisMonth :one
 SELECT COUNT(*) FROM crm_customers
-WHERE business_id = ? AND MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW());
+WHERE business_id = ?
+  AND created_at >= sqlc.arg(created_at_start)
+  AND created_at < sqlc.arg(created_at_end);
 
 -- name: CountActiveLoyaltyMembers :one
 SELECT COUNT(*) FROM crm_customers WHERE business_id = ? AND loyalty_points > 0 AND is_active = TRUE;
