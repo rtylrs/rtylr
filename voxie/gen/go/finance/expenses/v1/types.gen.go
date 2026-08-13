@@ -7,18 +7,22 @@ import (
 )
 
 type Expense struct {
-	Id          int64   `json:"id,omitempty"`
-	OwnerId     int64   `json:"owner_id,omitempty"`
-	CategoryId  *int64  `json:"category_id,omitempty"`
-	Amount      float64 `json:"amount,omitempty"`
-	Currency    string  `json:"currency,omitempty"`
-	Description string  `json:"description,omitempty"`
-	Vendor      string  `json:"vendor,omitempty"`
-	ReceiptUrl  string  `json:"receipt_url,omitempty"`
-	ExpenseDate string  `json:"expense_date,omitempty"`
-	Status      string  `json:"status,omitempty"`
-	CreatedAt   string  `json:"created_at,omitempty"`
-	UpdatedAt   string  `json:"updated_at,omitempty"`
+	Id              int64   `json:"id,omitempty"`
+	OwnerId         int64   `json:"owner_id,omitempty"`
+	CategoryId      *int64  `json:"category_id,omitempty"`
+	Amount          float64 `json:"amount,omitempty"`
+	Currency        string  `json:"currency,omitempty"`
+	Description     string  `json:"description,omitempty"`
+	Vendor          string  `json:"vendor,omitempty"`
+	ReceiptUrl      string  `json:"receipt_url,omitempty"`
+	PaymentMethod   string  `json:"payment_method,omitempty"`
+	IsTaxDeductible bool    `json:"is_tax_deductible,omitempty"`
+	TaxAmount       float64 `json:"tax_amount,omitempty"`
+	Notes           string  `json:"notes,omitempty"`
+	ExpenseDate     string  `json:"expense_date,omitempty"`
+	Status          string  `json:"status,omitempty"`
+	CreatedAt       string  `json:"created_at,omitempty"`
+	UpdatedAt       string  `json:"updated_at,omitempty"`
 }
 
 func (m *Expense) MarshalJSON() ([]byte, error) {
@@ -126,6 +130,38 @@ func (x *Expense) GetReceiptUrl() string {
 		return zero
 	}
 	return x.ReceiptUrl
+}
+
+func (x *Expense) GetPaymentMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentMethod
+}
+
+func (x *Expense) GetIsTaxDeductible() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsTaxDeductible
+}
+
+func (x *Expense) GetTaxAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxAmount
+}
+
+func (x *Expense) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
 }
 
 func (x *Expense) GetExpenseDate() string {
@@ -248,13 +284,17 @@ func (x *ExpenseCategory) GetCreatedAt() string {
 }
 
 type CreateExpenseRequest struct {
-	CategoryId  *int64  `json:"category_id,omitempty"`
-	Amount      float64 `json:"amount,omitempty"`
-	Currency    string  `json:"currency,omitempty"`
-	Description string  `json:"description,omitempty"`
-	Vendor      string  `json:"vendor,omitempty"`
-	ReceiptUrl  string  `json:"receipt_url,omitempty"`
-	ExpenseDate string  `json:"expense_date,omitempty"`
+	CategoryId      *int64  `json:"category_id,omitempty"`
+	Amount          float64 `json:"amount,omitempty"`
+	Currency        string  `json:"currency,omitempty"`
+	Description     string  `json:"description,omitempty"`
+	Vendor          string  `json:"vendor,omitempty"`
+	ReceiptUrl      string  `json:"receipt_url,omitempty"`
+	PaymentMethod   string  `json:"payment_method,omitempty"`
+	IsTaxDeductible bool    `json:"is_tax_deductible,omitempty"`
+	TaxAmount       float64 `json:"tax_amount,omitempty"`
+	Notes           string  `json:"notes,omitempty"`
+	ExpenseDate     string  `json:"expense_date,omitempty"`
 }
 
 func (x *CreateExpenseRequest) GetCategoryId() int64 {
@@ -307,6 +347,38 @@ func (x *CreateExpenseRequest) GetReceiptUrl() string {
 		return zero
 	}
 	return x.ReceiptUrl
+}
+
+func (x *CreateExpenseRequest) GetPaymentMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentMethod
+}
+
+func (x *CreateExpenseRequest) GetIsTaxDeductible() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsTaxDeductible
+}
+
+func (x *CreateExpenseRequest) GetTaxAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxAmount
+}
+
+func (x *CreateExpenseRequest) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
 }
 
 func (x *CreateExpenseRequest) GetExpenseDate() string {
@@ -504,13 +576,17 @@ func (x *ListExpensesResponse) GetExpenses() []*Expense {
 }
 
 type UpdateExpenseBody struct {
-	CategoryId  *int64  `json:"category_id,omitempty"`
-	Amount      float64 `json:"amount,omitempty"`
-	Currency    string  `json:"currency,omitempty"`
-	Description string  `json:"description,omitempty"`
-	Vendor      string  `json:"vendor,omitempty"`
-	ReceiptUrl  string  `json:"receipt_url,omitempty"`
-	ExpenseDate string  `json:"expense_date,omitempty"`
+	CategoryId      *int64  `json:"category_id,omitempty"`
+	Amount          float64 `json:"amount,omitempty"`
+	Currency        string  `json:"currency,omitempty"`
+	Description     string  `json:"description,omitempty"`
+	Vendor          string  `json:"vendor,omitempty"`
+	ReceiptUrl      string  `json:"receipt_url,omitempty"`
+	PaymentMethod   string  `json:"payment_method,omitempty"`
+	IsTaxDeductible bool    `json:"is_tax_deductible,omitempty"`
+	TaxAmount       float64 `json:"tax_amount,omitempty"`
+	Notes           string  `json:"notes,omitempty"`
+	ExpenseDate     string  `json:"expense_date,omitempty"`
 }
 
 func (x *UpdateExpenseBody) GetCategoryId() int64 {
@@ -563,6 +639,38 @@ func (x *UpdateExpenseBody) GetReceiptUrl() string {
 		return zero
 	}
 	return x.ReceiptUrl
+}
+
+func (x *UpdateExpenseBody) GetPaymentMethod() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PaymentMethod
+}
+
+func (x *UpdateExpenseBody) GetIsTaxDeductible() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.IsTaxDeductible
+}
+
+func (x *UpdateExpenseBody) GetTaxAmount() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.TaxAmount
+}
+
+func (x *UpdateExpenseBody) GetNotes() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Notes
 }
 
 func (x *UpdateExpenseBody) GetExpenseDate() string {
