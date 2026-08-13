@@ -113,18 +113,34 @@ func (r *Repository) UpdateLead(ctx context.Context, id, businessID int64, req d
 }
 
 func (r *Repository) DeleteLead(ctx context.Context, id, businessID int64) error {
-	result, err := r.queries.DeleteLead(ctx, sqlc.DeleteLeadParams{ID: id, BusinessID: businessID})
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
-	rows, err := result.RowsAffected()
+	defer func() {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+			logger.Ctx(ctx).Error("failed to rollback delete lead tx", logger.Error(rollbackErr))
+		}
+	}()
+
+	// The sales tables intentionally do not use database foreign keys because
+	// they are shared with legacy installations. Delete dependent records in a
+	// transaction so the API's documented cascade is atomic and cannot leave
+	// contacts, touchpoints, or contracts orphaned when a lead is removed.
+	if err := ensureLeadInBusiness(ctx, tx, businessID, id); err != nil {
+		return err
+	}
+	for _, table := range []string{"crm_touchpoints", "crm_contacts", "crm_contracts"} {
+		if _, err := tx.ExecContext(ctx, "DELETE FROM "+table+" WHERE lead_id = ? AND business_id = ?", id, businessID); err != nil {
+			return err
+		}
+	}
+
+	_, err = tx.ExecContext(ctx, "DELETE FROM crm_leads WHERE id = ? AND business_id = ?", id, businessID)
 	if err != nil {
 		return err
 	}
-	if rows == 0 {
-		return domain.ErrLeadNotFound
-	}
-	return nil
+	return tx.Commit()
 }
 
 func (r *Repository) GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error) {
@@ -212,6 +228,9 @@ func (r *Repository) CreateContact(ctx context.Context, businessID int64, req do
 			logger.Ctx(ctx).Error("failed to rollback create contact tx", logger.Error(rollbackErr))
 		}
 	}()
+	if err := ensureLeadInBusiness(ctx, tx, businessID, req.LeadID); err != nil {
+		return domain.Contact{}, err
+	}
 
 	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  req.Name,
@@ -359,7 +378,25 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 		outcome = "other"
 	}
 
-	result, err := r.queries.CreateTouchpoint(ctx, sqlc.CreateTouchpointParams{
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return domain.Touchpoint{}, err
+	}
+	defer func() {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+			logger.Ctx(ctx).Error("failed to rollback create touchpoint tx", logger.Error(rollbackErr))
+		}
+	}()
+	if err := ensureLeadInBusiness(ctx, tx, ownerID, req.LeadID); err != nil {
+		return domain.Touchpoint{}, err
+	}
+	if req.ContactID != nil {
+		if err := ensureContactForLead(ctx, tx, ownerID, req.LeadID, *req.ContactID); err != nil {
+			return domain.Touchpoint{}, err
+		}
+	}
+
+	result, err := r.queries.WithTx(tx).CreateTouchpoint(ctx, sqlc.CreateTouchpointParams{
 		OwnerID:      ownerID,
 		BusinessID:   ownerID,
 		LeadID:       req.LeadID,
@@ -375,6 +412,9 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
+		return domain.Touchpoint{}, err
+	}
+	if err := tx.Commit(); err != nil {
 		return domain.Touchpoint{}, err
 	}
 	return r.GetTouchpoint(ctx, id, ownerID)
@@ -441,7 +481,20 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 		seats = 1
 	}
 
-	result, err := r.queries.CreateContract(ctx, sqlc.CreateContractParams{
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return domain.Contract{}, err
+	}
+	defer func() {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+			logger.Ctx(ctx).Error("failed to rollback create contract tx", logger.Error(rollbackErr))
+		}
+	}()
+	if err := ensureLeadInBusiness(ctx, tx, ownerID, req.LeadID); err != nil {
+		return domain.Contract{}, err
+	}
+
+	result, err := r.queries.WithTx(tx).CreateContract(ctx, sqlc.CreateContractParams{
 		OwnerID:      ownerID,
 		BusinessID:   ownerID,
 		LeadID:       req.LeadID,
@@ -460,7 +513,42 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 	if err != nil {
 		return domain.Contract{}, err
 	}
+	if err := tx.Commit(); err != nil {
+		return domain.Contract{}, err
+	}
 	return r.GetContract(ctx, id, ownerID)
+}
+
+// ensureLeadInBusiness prevents callers from attaching sales records to a
+// lead belonging to another tenant. The API always resolves businessID from
+// the authenticated user, so this check is the final tenant-boundary guard at
+// the persistence layer.
+func ensureLeadInBusiness(ctx context.Context, tx *sql.Tx, businessID, leadID int64) error {
+	var exists bool
+	if err := tx.QueryRowContext(ctx,
+		"SELECT EXISTS(SELECT 1 FROM crm_leads WHERE id = ? AND business_id = ?)",
+		leadID, businessID,
+	).Scan(&exists); err != nil {
+		return err
+	}
+	if !exists {
+		return domain.ErrLeadNotFound
+	}
+	return nil
+}
+
+func ensureContactForLead(ctx context.Context, tx *sql.Tx, businessID, leadID, contactID int64) error {
+	var exists bool
+	if err := tx.QueryRowContext(ctx,
+		"SELECT EXISTS(SELECT 1 FROM crm_contacts WHERE id = ? AND lead_id = ? AND business_id = ?)",
+		contactID, leadID, businessID,
+	).Scan(&exists); err != nil {
+		return err
+	}
+	if !exists {
+		return domain.ErrContactNotFound
+	}
+	return nil
 }
 
 func (r *Repository) UpdateContract(ctx context.Context, id, businessID int64, req domain.UpdateContractRequest) (domain.Contract, error) {

@@ -112,6 +112,9 @@ func (h *CreateContractHandler) Serve(ctx context.Context, req *CreateContractRe
 		Notes:        req.Notes,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrLeadNotFound) {
+			return CreateContractResponse{}, onekiterrors.New(http.StatusNotFound, "Lead not found")
+		}
 		logger.Ctx(ctx).Error("failed to create contract", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return CreateContractResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create contract")
 	}

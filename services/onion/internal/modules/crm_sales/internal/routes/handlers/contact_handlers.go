@@ -153,6 +153,9 @@ func (h *CreateContactHandler) Serve(ctx context.Context, req *CreateContactRequ
 		Notes:     req.Notes,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrLeadNotFound) {
+			return CreateContactResponse{}, onekiterrors.New(http.StatusNotFound, "Lead not found")
+		}
 		logger.Ctx(ctx).Error("failed to create contact", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return CreateContactResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create contact")
 	}

@@ -64,6 +64,12 @@ func (h *CreateTouchpointHandler) Serve(ctx context.Context, req *CreateTouchpoi
 		NextFollowUp: req.NextFollowUp,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrLeadNotFound) {
+			return CreateTouchpointResponse{}, onekiterrors.New(http.StatusNotFound, "Lead not found")
+		}
+		if errors.Is(err, domain.ErrContactNotFound) {
+			return CreateTouchpointResponse{}, onekiterrors.New(http.StatusNotFound, "Contact not found")
+		}
 		logger.Ctx(ctx).Error("failed to create touchpoint", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return CreateTouchpointResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create touchpoint")
 	}
