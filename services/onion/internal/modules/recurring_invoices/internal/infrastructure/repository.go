@@ -3,6 +3,8 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/recurring_invoices/internal/domain"
@@ -118,6 +120,164 @@ func (r *Repository) SetActive(ctx context.Context, businessID, id int64, active
 	return nil
 }
 
+// ProcessDue creates the next invoice for each due recurring schedule. The
+// schedule row, copied invoice, copied line items, and next date are committed
+// together so a retry after a failure cannot duplicate a billing period.
+func (r *Repository) ProcessDue(ctx context.Context, now time.Time) ([]int64, error) {
+	rows, err := r.pool.QueryContext(ctx, `
+		SELECT r.id, r.business_id
+		FROM finance_recurring_invoices r
+		JOIN finance_invoices template ON template.id = r.template_invoice_id
+		  AND template.business_id = r.business_id
+		WHERE r.is_active = TRUE
+		  AND r.next_invoice_date <= ?
+		  AND (r.end_date IS NULL OR r.end_date >= ?)
+		ORDER BY r.next_invoice_date ASC, r.id ASC
+		LIMIT 100`, now, now)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	type dueSchedule struct {
+		id         int64
+		businessID int64
+	}
+	var due []dueSchedule
+	for rows.Next() {
+		var item dueSchedule
+		if err := rows.Scan(&item.id, &item.businessID); err != nil {
+			return nil, err
+		}
+		due = append(due, item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	businessIDs := make([]int64, 0, len(due))
+	for _, item := range due {
+		created, err := r.generateDue(ctx, item.id, item.businessID, now)
+		if errors.Is(err, sql.ErrNoRows) {
+			continue
+		}
+		if err != nil {
+			return nil, err
+		}
+		if created {
+			businessIDs = append(businessIDs, item.businessID)
+		}
+	}
+	return businessIDs, nil
+}
+
+type recurringTemplate struct {
+	clientName                                       string
+	clientEmail, clientAddress, clientTaxID          sql.NullString
+	currency, discountType, notes, terms             sql.NullString
+	issueDate, dueDate                               time.Time
+	subtotal, discountValue, discountAmount, taxRate string
+	taxAmount, total                                 string
+}
+
+func (r *Repository) generateDue(ctx context.Context, id, businessID int64, now time.Time) (bool, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return false, err
+	}
+	committed := false
+	defer func() {
+		if !committed {
+			_ = tx.Rollback()
+		}
+	}()
+
+	var schedule struct {
+		templateID int64
+		frequency  string
+		nextDate   time.Time
+		endDate    sql.NullTime
+	}
+	err = tx.QueryRowContext(ctx, `
+		SELECT template_invoice_id, frequency, next_invoice_date, end_date
+		FROM finance_recurring_invoices
+		WHERE id = ? AND business_id = ? AND is_active = TRUE
+		  AND next_invoice_date <= ?
+		  AND (end_date IS NULL OR end_date >= ?)
+		FOR UPDATE`, id, businessID, now, now).Scan(
+		&schedule.templateID, &schedule.frequency, &schedule.nextDate, &schedule.endDate,
+	)
+	if err != nil {
+		return false, err
+	}
+
+	var template recurringTemplate
+	err = tx.QueryRowContext(ctx, `
+		SELECT client_name, client_email, client_address, client_tax_id,
+		       issue_date, due_date, currency, subtotal, discount_type,
+		       discount_value, discount_amount, tax_rate, tax_amount, total,
+		       notes, terms
+		FROM finance_invoices
+		WHERE id = ? AND business_id = ?`, schedule.templateID, businessID).Scan(
+		&template.clientName, &template.clientEmail, &template.clientAddress, &template.clientTaxID,
+		&template.issueDate, &template.dueDate, &template.currency, &template.subtotal,
+		&template.discountType, &template.discountValue, &template.discountAmount, &template.taxRate,
+		&template.taxAmount, &template.total, &template.notes, &template.terms,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, domain.ErrRecurringInvoiceTemplateMissing
+	}
+	if err != nil {
+		return false, err
+	}
+
+	dueDate := schedule.nextDate.Add(template.dueDate.Sub(template.issueDate))
+	invoiceNumber := fmt.Sprintf("REC-%d-%s", id, schedule.nextDate.Format("20060102"))
+	result, err := tx.ExecContext(ctx, `
+		INSERT INTO finance_invoices
+		(owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
+		 status, issue_date, due_date, currency, subtotal, discount_type, discount_value,
+		 discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due, notes, terms)
+		VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, ?)`,
+		businessID, businessID, invoiceNumber, template.clientName, template.clientEmail, template.clientAddress,
+		template.clientTaxID, schedule.nextDate, dueDate, template.currency, template.subtotal, template.discountType,
+		template.discountValue, template.discountAmount, template.taxRate, template.taxAmount, template.total,
+		template.total, template.notes, template.terms,
+	)
+	if err != nil {
+		return false, err
+	}
+	newInvoiceID, err := result.LastInsertId()
+	if err != nil {
+		return false, err
+	}
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO finance_invoice_items
+		(invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order)
+		SELECT ?, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order
+		FROM finance_invoice_items WHERE invoice_id = ?`, newInvoiceID, schedule.templateID); err != nil {
+		return false, err
+	}
+
+	nextDate, err := advanceDate(schedule.nextDate, schedule.frequency)
+	if err != nil {
+		return false, err
+	}
+	active := !schedule.endDate.Valid || !nextDate.After(schedule.endDate.Time)
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE finance_recurring_invoices
+		SET next_invoice_date = ?, is_active = ?
+		WHERE id = ? AND business_id = ?`, nextDate, active, id, businessID); err != nil {
+		return false, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return false, err
+	}
+	committed = true
+	return true, nil
+}
+
 // ---------------------------------------------------------------------------
 // Conversion helpers
 // ---------------------------------------------------------------------------
@@ -145,4 +305,29 @@ func nullTimeStr(s string) sql.NullTime {
 		return sql.NullTime{}
 	}
 	return sql.NullTime{Time: t, Valid: true}
+}
+
+func advanceDate(date time.Time, frequency string) (time.Time, error) {
+	switch frequency {
+	case "weekly":
+		return date.AddDate(0, 0, 7), nil
+	case "monthly":
+		return advanceMonths(date, 1), nil
+	case "quarterly":
+		return advanceMonths(date, 3), nil
+	case "yearly":
+		return advanceMonths(date, 12), nil
+	default:
+		return time.Time{}, fmt.Errorf("unsupported recurring invoice frequency %q", frequency)
+	}
+}
+
+func advanceMonths(date time.Time, months int) time.Time {
+	target := time.Date(date.Year(), date.Month(), 1, date.Hour(), date.Minute(), date.Second(), date.Nanosecond(), date.Location()).AddDate(0, months, 0)
+	lastDay := time.Date(target.Year(), target.Month()+1, 0, date.Hour(), date.Minute(), date.Second(), date.Nanosecond(), date.Location()).Day()
+	day := date.Day()
+	if day > lastDay {
+		day = lastDay
+	}
+	return time.Date(target.Year(), target.Month(), day, date.Hour(), date.Minute(), date.Second(), date.Nanosecond(), date.Location())
 }

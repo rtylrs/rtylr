@@ -61,12 +61,17 @@ func PrepareTurn(ctx context.Context, memory MemoryService, request TurnRequest,
 	}
 
 	request = NormalizeTurnRequest(request)
+	storedPrompt := request.Prompt
+	if normalizedPrompt, command, ok := NormalizeCaretSlashCommand(request.Prompt); ok {
+		request.Prompt = normalizedPrompt
+		request.Mode = string(command.Mode)
+	}
 	if request.UserID <= 0 {
 		return PreparedTurn{}, fmt.Errorf("user id is required")
 	}
 
 	if strings.TrimSpace(request.SessionID) == "" {
-		sessionID, err := memory.CreateSession(ctx, int(request.UserID), SessionTitleFromPrompt(request.Prompt))
+		sessionID, err := memory.CreateSession(ctx, int(request.UserID), SessionTitleFromPrompt(storedPrompt))
 		if err != nil {
 			return PreparedTurn{}, fmt.Errorf("failed to create session: %w", err)
 		}
@@ -77,7 +82,7 @@ func PrepareTurn(ctx context.Context, memory MemoryService, request TurnRequest,
 		}
 	}
 
-	if _, err := memory.StoreMessage(ctx, request.SessionID, int(request.UserID), "user", request.Prompt, len(request.Prompt)/4); err != nil {
+	if _, err := memory.StoreMessage(ctx, request.SessionID, int(request.UserID), "user", storedPrompt, len(storedPrompt)/4); err != nil {
 		return PreparedTurn{}, fmt.Errorf("failed to store message: %w", err)
 	}
 
