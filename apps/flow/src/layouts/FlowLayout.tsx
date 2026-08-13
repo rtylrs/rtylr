@@ -538,13 +538,13 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform);
   const modKey = isMac ? '⌘' : 'Ctrl';
 
-  const logoFilter =
+  const logoSrc =
     theme === 'dark' ||
     (theme === 'system' &&
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-color-scheme: dark)').matches)
-      ? 'brightness(0) invert(1)'
-      : 'brightness(0)';
+      ? '/logo.png'
+      : '/logo-dark.png';
 
   return (
     <>
@@ -570,12 +570,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           >
             <Menu size={20} strokeWidth={2} />
           </button>
-          <img
-            src="/logo.png"
-            alt=""
-            className="h-5 w-auto shrink-0"
-            style={{ filter: logoFilter }}
-          />
+          <img src={logoSrc} alt="" className="h-7 w-auto shrink-0" />
           <span
             className="min-w-0 flex-1 truncate text-left text-[13px] font-semibold"
             style={{ color: 'var(--flow-text)' }}
@@ -622,17 +617,12 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             paddingTop: 'env(safe-area-inset-top)',
           }}
         >
-          {/* Logo, same markup as Hub `DefaultLayout` (img src + filter + padding) */}
+          {/* Theme-specific rtylr wordmark. */}
           <div
             className={cn('flex items-center gap-2.5 py-2.5', sx)}
             style={{ borderBottom: '1px solid var(--flow-border)' }}
           >
-            <img
-              src="/logo.png"
-              alt="rtylr"
-              className="h-6 w-auto"
-              style={{ filter: logoFilter }}
-            />
+            <img src={logoSrc} alt="rtylr" className="h-9 w-auto" />
             <button
               type="button"
               aria-label="Close menu"

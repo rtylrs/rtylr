@@ -353,16 +353,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             style={{ borderBottom: '1px solid var(--dash-border)' }}
           >
             <img
-              src="/logo.png"
+              src={
+                theme === 'dark' ||
+                (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                  ? '/logo.png'
+                  : '/logo-dark.png'
+              }
               alt="rtylr"
-              className="h-6 w-auto"
-              style={{
-                filter:
-                  theme === 'dark' ||
-                  (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-                    ? 'brightness(0) invert(1)'
-                    : 'brightness(0)',
-              }}
+              className="h-9 w-auto"
             />
           </div>
 

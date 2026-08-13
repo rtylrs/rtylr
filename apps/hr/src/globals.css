@@ -79,14 +79,6 @@
   --hr-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-.rtylr-logo {
-  filter: brightness(0) invert(1);
-}
-
-:root[data-theme='light'] .rtylr-logo {
-  filter: brightness(0);
-}
-
 @layer base {
   *,
   *::before,
