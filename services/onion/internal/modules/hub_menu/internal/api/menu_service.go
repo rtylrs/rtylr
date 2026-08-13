@@ -23,12 +23,30 @@ func NewMenuAPI(service *application.Service) *MenuAPI {
 	return &MenuAPI{Service: service}
 }
 
-func (a *MenuAPI) ListMenu(_ context.Context, _ *hubmenuv1.ListMenuRequest) (*hubmenuv1.ListMenuResponse, error) {
-	return &hubmenuv1.ListMenuResponse{Items: nil}, nil
+func (a *MenuAPI) ListMenu(ctx context.Context, _ *hubmenuv1.ListMenuRequest) (*hubmenuv1.ListMenuResponse, error) {
+	businessID, err := authenticatedBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	items, err := a.Service.List(ctx, businessID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list hub menu")
+	}
+	return &hubmenuv1.ListMenuResponse{Items: items}, nil
 }
 
-func (a *MenuAPI) UpdateMenu(_ context.Context, _ *hubmenuv1.UpdateMenuRequest) (*hubmenuv1.UpdateMenuResponse, error) {
-	return nil, onekiterrors.New(http.StatusNotImplemented, "Hub menu storage is not implemented")
+func (a *MenuAPI) UpdateMenu(ctx context.Context, req *hubmenuv1.UpdateMenuRequest) (*hubmenuv1.UpdateMenuResponse, error) {
+	businessID, err := authenticatedBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := a.Service.Update(ctx, businessID, req.GetItems()); err != nil {
+		if errors.Is(err, application.ErrInvalidMenuItems) {
+			return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update hub menu")
+	}
+	return &hubmenuv1.UpdateMenuResponse{Success: true}, nil
 }
 
 func (a *MenuAPI) ListMenuBanners(ctx context.Context, _ *hubmenuv1.ListMenuBannersRequest) (*hubmenuv1.ListMenuBannersResponse, error) {

@@ -3,12 +3,16 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/domain"
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/infrastructure"
+	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
 )
+
+var ErrInvalidMenuItems = errors.New("invalid hub menu items")
 
 const (
 	maxBannerTitleLength = 255
@@ -23,6 +27,8 @@ type repository interface {
 	DeleteBanner(ctx context.Context, businessID, id int64) error
 	GetBanner(ctx context.Context, businessID, id int64) (domain.Banner, error)
 	BusinessOwnerID(ctx context.Context, businessID int64) (int64, error)
+	List(ctx context.Context, businessID int64) ([]*posmenuitemv1.MenuItem, error)
+	Update(ctx context.Context, ownerID, businessID int64, items []*posmenuitemv1.MenuItem) error
 }
 
 type Service struct {
@@ -35,6 +41,26 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 func (s *Service) ListBanners(ctx context.Context, businessID int64) ([]domain.Banner, error) {
 	return s.repo.ListBanners(ctx, businessID)
+}
+
+func (s *Service) List(ctx context.Context, businessID int64) ([]*posmenuitemv1.MenuItem, error) {
+	return s.repo.List(ctx, businessID)
+}
+
+func (s *Service) Update(ctx context.Context, businessID int64, items []*posmenuitemv1.MenuItem) error {
+	if len(items) == 0 {
+		return fmt.Errorf("%w: at least one menu item is required", ErrInvalidMenuItems)
+	}
+	for i, item := range items {
+		if item == nil {
+			return fmt.Errorf("%w: item[%d] is required", ErrInvalidMenuItems, i)
+		}
+	}
+	ownerID, err := s.repo.BusinessOwnerID(ctx, businessID)
+	if err != nil {
+		return err
+	}
+	return s.repo.Update(ctx, ownerID, businessID, items)
 }
 
 func (s *Service) CreateBanner(ctx context.Context, businessID int64, input domain.BannerInput) (domain.Banner, error) {

@@ -3,12 +3,14 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/domain"
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
 )
 
 type Repository struct {
@@ -17,6 +19,33 @@ type Repository struct {
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{queries: sqlc.New(db)}
+}
+
+func (r *Repository) List(ctx context.Context, businessID int64) ([]*posmenuitemv1.MenuItem, error) {
+	rawItems, err := r.queries.GetHubNavigationMenu(ctx, businessID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return []*posmenuitemv1.MenuItem{}, nil
+	}
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to load hub navigation menu", logger.Error(err))
+		return nil, err
+	}
+	var items []*posmenuitemv1.MenuItem
+	if err := json.Unmarshal(rawItems, &items); err != nil {
+		return nil, err
+	}
+	if items == nil {
+		return []*posmenuitemv1.MenuItem{}, nil
+	}
+	return items, nil
+}
+
+func (r *Repository) Update(ctx context.Context, ownerID, businessID int64, items []*posmenuitemv1.MenuItem) error {
+	rawItems, err := json.Marshal(items)
+	if err != nil {
+		return err
+	}
+	return r.queries.UpsertHubNavigationMenu(ctx, sqlc.UpsertHubNavigationMenuParams{OwnerID: ownerID, BusinessID: businessID, Items: rawItems})
 }
 
 func (r *Repository) ListBanners(ctx context.Context, businessID int64) ([]domain.Banner, error) {
