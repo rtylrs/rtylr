@@ -14,7 +14,7 @@ concurrency:
 jobs:
   check:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
 
     steps:
       - name: Checkout
@@ -47,7 +47,7 @@ jobs:
       app_filter: 'rtylr-pos'
       dist_dir: 'dist'
       project_name: 'rtylr-pos'
-      runs_on: 'ubuntu-latest'
+      runs_on: 'blacksmith-2vcpu-ubuntu-2404'
     secrets: inherit
 
   notify:

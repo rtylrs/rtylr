@@ -19,15 +19,15 @@ jobs:
       matrix:
         include:
           - label: macOS Apple Silicon
-            os: macos-14
+            os: blacksmith-6vcpu-macos-15
             rust_targets: aarch64-apple-darwin
             args: --target aarch64-apple-darwin
           - label: Windows
-            os: windows-latest
+            os: blacksmith-2vcpu-windows-2025
             rust_targets: ''
             args: ''
           - label: Linux
-            os: ubuntu-22.04
+            os: blacksmith-2vcpu-ubuntu-2204
             rust_targets: ''
             args: ''
 
@@ -88,7 +88,7 @@ jobs:
 
   publish-downloads:
     name: Publish Cloudflare downloads
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     needs: build
     steps:
       - name: Checkout
