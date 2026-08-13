@@ -39,7 +39,7 @@ type repository interface {
 	UpdateInvoicePaymentTotals(ctx context.Context, businessID, invoiceID int64, amountPaid, amountDue float64, status string, paidDate *time.Time) error
 	DeleteInvoice(ctx context.Context, businessID, invoiceID int64) error
 	CountInvoiceSequence(ctx context.Context, businessID int64, year int) (int64, error)
-	CreatePayment(ctx context.Context, businessID int64, p domain.Payment) (int64, error)
+	RecordPayment(ctx context.Context, businessID int64, input domain.PaymentInput) (*domain.Payment, error)
 	GetPaymentsByInvoice(ctx context.Context, invoiceID int64) ([]domain.Payment, error)
 	ListExpenses(ctx context.Context, businessID, categoryID int64, search, dateFrom, dateTo string, limit, offset int) ([]domain.Expense, error)
 	GetExpenseByID(ctx context.Context, businessID, expenseID int64) (*domain.Expense, error)
@@ -413,71 +413,12 @@ func (s *Service) RecordPayment(ctx context.Context, businessID int64, input dom
 		return nil, domain.ErrInvalidPaymentAmount
 	}
 
-	inv, err := s.repo.GetInvoiceByID(ctx, businessID, input.InvoiceID)
-	if err != nil {
-		return nil, err
-	}
-	if domain.IsTerminal(inv.Status) {
-		return nil, domain.ErrInvoiceNotDraft
-	}
-
-	paymentDate, err := time.Parse("2006-01-02", input.PaymentDate)
-	if err != nil {
+	if _, err := time.Parse("2006-01-02", input.PaymentDate); err != nil {
 		logger.Ctx(ctx).Error("Failed to parse payment date", logger.Error(err))
 
 		return nil, err
 	}
-
-	currency := input.Currency
-	if currency == "" {
-		currency = inv.Currency
-	}
-
-	p := domain.Payment{
-		OwnerID:     businessID,
-		InvoiceID:   input.InvoiceID,
-		Amount:      input.Amount,
-		Currency:    currency,
-		PaymentDate: paymentDate,
-		Method:      input.Method,
-		Reference:   input.Reference,
-		Notes:       input.Notes,
-	}
-
-	paymentID, err := s.repo.CreatePayment(ctx, businessID, p)
-	if err != nil {
-		return nil, err
-	}
-
-	p.ID = paymentID
-
-	// Update invoice payment totals and status
-	newAmountPaid := inv.AmountPaid + input.Amount
-	newAmountDue := inv.Total - newAmountPaid
-
-	if newAmountDue < 0 {
-		newAmountDue = 0
-	}
-
-	var newStatus string
-	var paidDate *time.Time
-
-	switch {
-	case newAmountDue <= 0:
-		newStatus = "paid"
-		now := paymentDate
-		paidDate = &now
-	case newAmountPaid > 0:
-		newStatus = "partial"
-	default:
-		newStatus = inv.Status
-	}
-
-	if err := s.repo.UpdateInvoicePaymentTotals(ctx, businessID, input.InvoiceID, newAmountPaid, newAmountDue, newStatus, paidDate); err != nil {
-		return nil, err
-	}
-
-	return &p, nil
+	return s.repo.RecordPayment(ctx, businessID, input)
 }
 
 // ---------------------------------------------------------------------------

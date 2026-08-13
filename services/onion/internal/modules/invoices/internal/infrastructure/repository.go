@@ -420,6 +420,114 @@ func (r *Repository) CreatePayment(ctx context.Context, businessID int64, p doma
 	return id, nil
 }
 
+func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input domain.PaymentInput) (*domain.Payment, error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	queries := r.queries.WithTx(tx)
+
+	row, err := queries.GetInvoiceByIDForUpdate(ctx, sqlc.GetInvoiceByIDForUpdateParams{
+		ID: input.InvoiceID, BusinessID: businessID,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, domain.ErrInvoiceNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	inv := invoiceFromSqlc(row)
+	if domain.IsTerminal(inv.Status) {
+		return nil, domain.ErrInvoiceNotDraft
+	}
+
+	if strings.TrimSpace(input.Reference) != "" {
+		existing, lookupErr := queries.GetPaymentByReference(ctx, sqlc.GetPaymentByReferenceParams{
+			BusinessID: businessID,
+			InvoiceID:  input.InvoiceID,
+			Reference:  sqlNullString(input.Reference),
+		})
+		if lookupErr == nil {
+			payment := paymentFromSqlc(existing)
+			return &payment, nil
+		}
+		if !errors.Is(lookupErr, sql.ErrNoRows) {
+			return nil, lookupErr
+		}
+	}
+
+	currency := input.Currency
+	if currency == "" {
+		currency = inv.Currency
+	}
+	p := domain.Payment{
+		OwnerID: businessID, BusinessID: businessID, InvoiceID: input.InvoiceID,
+		Amount: input.Amount, Currency: currency, PaymentDate: mustParsePaymentDate(input.PaymentDate),
+		Method: input.Method, Reference: input.Reference, Notes: input.Notes,
+	}
+	result, err := queries.CreatePayment(ctx, sqlc.CreatePaymentParams{
+		OwnerID: businessID, BusinessID: businessID, InvoiceID: p.InvoiceID,
+		Amount: fmtFloat(p.Amount), Currency: sqlNullString(p.Currency), PaymentDate: p.PaymentDate,
+		Method: sqlc.FinancePaymentsMethod(p.Method), Reference: sqlNullString(p.Reference), Notes: sqlNullString(p.Notes),
+	})
+	if err != nil {
+		return nil, err
+	}
+	paymentID, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+	p.ID = paymentID
+
+	newAmountPaid := inv.AmountPaid + p.Amount
+	newAmountDue := inv.Total - newAmountPaid
+	if newAmountDue < 0 {
+		newAmountDue = 0
+	}
+	newStatus := "partial"
+	var paidDate *time.Time
+	if newAmountDue <= 0 {
+		newStatus = "paid"
+		paidDateValue := p.PaymentDate
+		paidDate = &paidDateValue
+	}
+	if paidDate != nil {
+		err = queries.UpdateInvoicePaymentTotalsWithPaidDate(ctx, sqlc.UpdateInvoicePaymentTotalsWithPaidDateParams{
+			AmountPaid: sqlNullString(fmtFloat(newAmountPaid)), AmountDue: sqlNullString(fmtFloat(newAmountDue)),
+			Status:   sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(newStatus), Valid: true},
+			PaidDate: sql.NullTime{Time: *paidDate, Valid: true}, ID: input.InvoiceID, BusinessID: businessID,
+		})
+	} else {
+		err = queries.UpdateInvoicePaymentTotals(ctx, sqlc.UpdateInvoicePaymentTotalsParams{
+			AmountPaid: sqlNullString(fmtFloat(newAmountPaid)), AmountDue: sqlNullString(fmtFloat(newAmountDue)),
+			Status: sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(newStatus), Valid: true},
+			ID:     input.InvoiceID, BusinessID: businessID,
+		})
+	}
+	if err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
+
+func mustParsePaymentDate(value string) time.Time {
+	parsed, _ := time.Parse("2006-01-02", value)
+	return parsed
+}
+
+func paymentFromSqlc(row sqlc.FinancePayment) domain.Payment {
+	return domain.Payment{
+		ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, InvoiceID: row.InvoiceID,
+		Amount: parseFloat(row.Amount), Currency: nullStr(row.Currency, "USD"), PaymentDate: row.PaymentDate,
+		Method: string(row.Method), Reference: nullStr(row.Reference, ""), Notes: nullStr(row.Notes, ""),
+		CreatedAt: nullTime(row.CreatedAt),
+	}
+}
+
 func (r *Repository) GetPaymentsByInvoice(ctx context.Context, invoiceID int64) ([]domain.Payment, error) {
 	rows, err := r.queries.GetPaymentsByInvoice(ctx, invoiceID)
 	if err != nil {
