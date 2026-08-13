@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Folder, GripVertical, Edit3, Trash2 } from 'lucide-react';
+import { Plus, Folder, Edit3, Trash2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import {
   useCategories,
@@ -98,9 +98,6 @@ const Categories: React.FC = () => {
                 borderBottom: i < categories.length - 1 ? '1px solid var(--hub-border)' : 'none',
               }}
             >
-              <button className="cursor-grab" style={{ color: 'var(--hub-text-dim)' }}>
-                <GripVertical size={14} />
-              </button>
               <div
                 className="flex items-center justify-center h-8 w-8 rounded-lg"
                 style={{ background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)' }}
