@@ -8,7 +8,11 @@ INSERT INTO pos_locations (owner_id, business_id, name, address, phone) VALUES (
 -- name: ListTablesByOwner :many
 SELECT id, owner_id, business_id, location_id, name, capacity, status,
        current_session_order_id, qr_code_url, created_at, updated_at
-FROM pos_tables WHERE business_id = ? ORDER BY name ASC LIMIT 1000;
+FROM pos_tables
+WHERE business_id = sqlc.arg(business_id)
+  AND (sqlc.arg(location_id) = 0 OR location_id = sqlc.arg(location_id))
+  AND (sqlc.arg(status) = '' OR status = sqlc.arg(status))
+ORDER BY name ASC, id ASC;
 
 -- name: CreatePosTable :execresult
 INSERT INTO pos_tables (owner_id, business_id, location_id, name, capacity, qr_code_url)
