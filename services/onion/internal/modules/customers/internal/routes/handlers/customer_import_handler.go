@@ -35,6 +35,7 @@ type ImportCustomerItem struct {
 
 type ImportCustomersRequest struct {
 	Customers []ImportCustomerItem `json:"customers"`
+	Dedupe    bool                 `json:"dedupe"`
 }
 
 type ImportCustomersResponse struct {
@@ -80,7 +81,7 @@ func (h *ImportCustomersHandler) Serve(ctx context.Context, req *ImportCustomers
 		}
 	}
 
-	result, err := h.CRMService.ImportCustomers(ctx, businessID, items)
+	result, err := h.CRMService.ImportCustomers(ctx, businessID, items, req.Dedupe)
 	if err != nil {
 		return ImportCustomersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to import customers")
 	}

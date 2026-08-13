@@ -133,7 +133,7 @@ func (r *Repository) listCustomersFiltered(ctx context.Context, filter domain.Cu
 	listSQL, listArgs, err := sq.Select(
 		"id", "owner_id", "business_id", "first_name", "last_name", "email", "phone", "date_of_birth", "gender",
 		"address", "city", "country", "loyalty_points", "total_spent", "visit_count", "last_visit_at",
-		"loyalty_tier", "tags", "notes", "is_active", "created_at", "updated_at",
+		"loyalty_tier", "tags", "notes", "consent", "is_active", "created_at", "updated_at",
 	).
 		From("crm_customers").
 		Where(conds).
@@ -214,6 +214,7 @@ func (r *Repository) CreateCustomer(ctx context.Context, input domain.CustomerIn
 		Country:     sql.NullString{String: input.Country, Valid: input.Country != ""},
 		Tags:        tagsJSON,
 		Notes:       sql.NullString{String: input.Notes, Valid: input.Notes != ""},
+		Consent:     input.Consent,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create customer", logger.Error(err))
@@ -252,6 +253,7 @@ func (r *Repository) UpdateCustomer(ctx context.Context, input domain.CustomerUp
 		Country:     sql.NullString{String: input.Country, Valid: input.Country != ""},
 		Tags:        tagsJSON,
 		Notes:       sql.NullString{String: input.Notes, Valid: input.Notes != ""},
+		Consent:     input.Consent,
 		IsActive:    sql.NullBool{Bool: isActive, Valid: true},
 		ID:          input.ID,
 		BusinessID:  input.BusinessID,
@@ -348,6 +350,50 @@ func (r *Repository) CreateLoyaltyTransaction(ctx context.Context, tx domain.Loy
 	return err
 }
 
+// ApplyLoyaltyDelta serializes the balance update and audit insert in one
+// transaction. The customer row lock prevents concurrent awards/redeems from
+// calculating from the same stale balance.
+func (r *Repository) ApplyLoyaltyDelta(ctx context.Context, input domain.LoyaltyTransaction, delta int, tierFor func(int) string) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	var balanceBefore int
+	err = tx.QueryRowContext(ctx,
+		"SELECT loyalty_points FROM crm_customers WHERE id = ? AND business_id = ? FOR UPDATE",
+		input.CustomerID, input.BusinessID,
+	).Scan(&balanceBefore)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrCustomerNotFound
+	}
+	if err != nil {
+		return err
+	}
+	balanceAfter := balanceBefore + delta
+	if balanceAfter < 0 {
+		return domain.ErrInsufficientPoints
+	}
+	if _, err = tx.ExecContext(ctx,
+		"UPDATE crm_customers SET loyalty_points = ?, loyalty_tier = ? WHERE id = ? AND business_id = ?",
+		balanceAfter, tierFor(balanceAfter), input.CustomerID, input.BusinessID,
+	); err != nil {
+		return err
+	}
+	if _, err = tx.ExecContext(ctx, `
+		INSERT INTO crm_loyalty_transactions
+		  (owner_id, business_id, customer_id, type, points, balance_before, balance_after,
+		   description, reference_id, reference_type)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		input.OwnerID, input.BusinessID, input.CustomerID, input.Type, input.Points,
+		balanceBefore, balanceAfter, input.Description, input.ReferenceID, input.ReferenceType,
+	); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
 func (r *Repository) ListLoyaltyTransactions(ctx context.Context, businessID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
 	if page < 1 {
 		page = 1
@@ -359,20 +405,35 @@ func (r *Repository) ListLoyaltyTransactions(ctx context.Context, businessID, cu
 
 	offset := (page - 1) * pageSize
 
-	total, err := r.queries.CountLoyaltyTransactions(ctx, sqlc.CountLoyaltyTransactionsParams{
-		BusinessID: businessID,
-		CustomerID: customerID,
-	})
+	var err error
+	var total int64
+	if customerID == 0 {
+		total, err = r.queries.CountAllLoyaltyTransactions(ctx, businessID)
+	} else {
+		total, err = r.queries.CountLoyaltyTransactions(ctx, sqlc.CountLoyaltyTransactionsParams{
+			BusinessID: businessID,
+			CustomerID: customerID,
+		})
+	}
 	if err != nil {
 		return nil, 0, err
 	}
 
-	rows, err := r.queries.ListLoyaltyTransactions(ctx, sqlc.ListLoyaltyTransactionsParams{
-		BusinessID: businessID,
-		CustomerID: customerID,
-		Limit:      int32(pageSize),
-		Offset:     int32(offset),
-	})
+	var rows []sqlc.CrmLoyaltyTransaction
+	if customerID == 0 {
+		rows, err = r.queries.ListAllLoyaltyTransactions(ctx, sqlc.ListAllLoyaltyTransactionsParams{
+			BusinessID: businessID,
+			Limit:      int32(pageSize),
+			Offset:     int32(offset),
+		})
+	} else {
+		rows, err = r.queries.ListLoyaltyTransactions(ctx, sqlc.ListLoyaltyTransactionsParams{
+			BusinessID: businessID,
+			CustomerID: customerID,
+			Limit:      int32(pageSize),
+			Offset:     int32(offset),
+		})
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list loyalty transactions", logger.Error(err))
 
@@ -797,11 +858,24 @@ func (r *Repository) InsertTimelineEntry(ctx context.Context, entry domain.Timel
 
 // ─── Import ──────────────────────────────────────────────────────────────────
 
-func (r *Repository) BulkCreateCustomers(ctx context.Context, businessID int64, items []domain.CustomerImportItem) (int, int, error) {
+func (r *Repository) BulkCreateCustomers(ctx context.Context, businessID int64, items []domain.CustomerImportItem, dedupe bool) (int, int, error) {
 	imported := 0
 	failed := 0
 
 	for _, item := range items {
+		if dedupe && item.Email != "" {
+			var existing int
+			if err := r.pool.QueryRowContext(ctx,
+				"SELECT COUNT(*) FROM crm_customers WHERE business_id = ? AND email = ?",
+				businessID, item.Email,
+			).Scan(&existing); err != nil {
+				failed++
+				continue
+			}
+			if existing > 0 {
+				continue
+			}
+		}
 		var dob *time.Time
 
 		if item.DateOfBirth != "" {
@@ -870,21 +944,29 @@ func (r *Repository) ExportCustomerData(ctx context.Context, businessID, custome
 // ─── Merge ──────────────────────────────────────────────────────────────────
 
 func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCustomersInput) error {
-	secondary, err := r.GetCustomerByID(ctx, input.BusinessID, input.SecondaryID)
+	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
+	defer func() { _ = tx.Rollback() }()
+	queries := r.queries.WithTx(tx)
 
-	primary, err := r.GetCustomerByID(ctx, input.BusinessID, input.PrimaryID)
+	secondaryRow, err := queries.GetCustomerByID(ctx, sqlc.GetCustomerByIDParams{ID: input.SecondaryID, BusinessID: input.BusinessID})
 	if err != nil {
 		return err
 	}
+	primaryRow, err := queries.GetCustomerByID(ctx, sqlc.GetCustomerByIDParams{ID: input.PrimaryID, BusinessID: input.BusinessID})
+	if err != nil {
+		return err
+	}
+	secondary := customerFromRow(secondaryRow)
+	primary := customerFromRow(primaryRow)
 
 	newPoints := primary.LoyaltyPoints + secondary.LoyaltyPoints
 	newSpent := primary.TotalSpent + secondary.TotalSpent
 	newVisits := primary.VisitCount + secondary.VisitCount
 
-	err = r.queries.UpdateCustomerMergeStats(ctx, sqlc.UpdateCustomerMergeStatsParams{
+	err = queries.UpdateCustomerMergeStats(ctx, sqlc.UpdateCustomerMergeStatsParams{
 		LoyaltyPoints: sql.NullInt32{Int32: int32(newPoints), Valid: true},
 		TotalSpent:    sql.NullString{String: strconv.FormatFloat(newSpent, 'f', 2, 64), Valid: true},
 		VisitCount:    sql.NullInt32{Int32: int32(newVisits), Valid: true},
@@ -897,7 +979,7 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 		return err
 	}
 
-	err = r.queries.MigrateLoyaltyTransactions(ctx, sqlc.MigrateLoyaltyTransactionsParams{
+	err = queries.MigrateLoyaltyTransactions(ctx, sqlc.MigrateLoyaltyTransactionsParams{
 		CustomerID:   input.PrimaryID,
 		CustomerID_2: input.SecondaryID,
 		BusinessID:   input.BusinessID,
@@ -908,7 +990,7 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 		return err
 	}
 
-	err = r.queries.MigrateTimeline(ctx, sqlc.MigrateTimelineParams{
+	err = queries.MigrateTimeline(ctx, sqlc.MigrateTimelineParams{
 		CustomerID:   input.PrimaryID,
 		CustomerID_2: input.SecondaryID,
 		BusinessID:   input.BusinessID,
@@ -919,7 +1001,7 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 		return err
 	}
 
-	_, err = r.queries.DeleteCustomer(ctx, sqlc.DeleteCustomerParams{
+	_, err = queries.DeleteCustomer(ctx, sqlc.DeleteCustomerParams{
 		ID:         input.SecondaryID,
 		BusinessID: input.BusinessID,
 	})
@@ -929,7 +1011,7 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 		return err
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 // ─── Loyalty Tiers ──────────────────────────────────────────────────────────
@@ -1166,6 +1248,10 @@ func customerFromRow(row sqlc.CrmCustomer) domain.Customer {
 		IsActive:      row.IsActive.Bool,
 		CreatedAt:     row.CreatedAt.Time,
 		UpdatedAt:     row.UpdatedAt.Time,
+	}
+
+	if row.Consent != nil {
+		c.Consent = append([]byte(nil), row.Consent...)
 	}
 
 	spent := parseDecimal(row.TotalSpent.String)

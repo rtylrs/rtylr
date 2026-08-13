@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -21,17 +22,18 @@ type CreateCustomerHandler struct {
 }
 
 type CreateCustomerRequest struct {
-	FirstName   string   `json:"first_name"`
-	LastName    string   `json:"last_name"`
-	Email       string   `json:"email"`
-	Phone       string   `json:"phone"`
-	DateOfBirth string   `json:"date_of_birth"`
-	Gender      string   `json:"gender"`
-	Address     string   `json:"address"`
-	City        string   `json:"city"`
-	Country     string   `json:"country"`
-	Tags        []string `json:"tags"`
-	Notes       string   `json:"notes"`
+	FirstName   string          `json:"first_name"`
+	LastName    string          `json:"last_name"`
+	Email       string          `json:"email"`
+	Phone       string          `json:"phone"`
+	DateOfBirth string          `json:"date_of_birth"`
+	Gender      string          `json:"gender"`
+	Address     string          `json:"address"`
+	City        string          `json:"city"`
+	Country     string          `json:"country"`
+	Tags        []string        `json:"tags"`
+	Notes       string          `json:"notes"`
+	Consent     map[string]bool `json:"consent"`
 }
 
 type CreateCustomerResponse struct {
@@ -71,6 +73,9 @@ func (h *CreateCustomerHandler) Serve(ctx context.Context, req *CreateCustomerRe
 		Country:    req.Country,
 		Tags:       req.Tags,
 		Notes:      req.Notes,
+	}
+	if req.Consent != nil {
+		input.Consent, _ = json.Marshal(req.Consent)
 	}
 
 	if req.DateOfBirth != "" {

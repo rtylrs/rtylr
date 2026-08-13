@@ -145,79 +145,37 @@ func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput
 // ─── Loyalty ──────────────────────────────────────────────────────────────────
 
 func (s *Service) AwardPoints(ctx context.Context, input domain.AwardPointsInput) error {
-	customer, err := s.repo.GetCustomerByID(ctx, input.BusinessID, input.CustomerID)
-	if err != nil {
-		return err
+	cfg, cfgErr := s.GetLoyaltyConfig(ctx, input.BusinessID)
+	if cfgErr != nil {
+		logger.Ctx(ctx).Error("Failed to get loyalty config, using default tier", logger.Error(cfgErr))
 	}
-
-	balanceBefore := customer.LoyaltyPoints
-	balanceAfter := balanceBefore + input.Points
-
-	tx := domain.LoyaltyTransaction{
+	return s.repo.ApplyLoyaltyDelta(ctx, domain.LoyaltyTransaction{
 		OwnerID:       input.OwnerID,
 		BusinessID:    input.BusinessID,
 		CustomerID:    input.CustomerID,
 		Type:          "earn",
 		Points:        input.Points,
-		BalanceBefore: balanceBefore,
-		BalanceAfter:  balanceAfter,
 		Description:   input.Description,
 		ReferenceID:   input.ReferenceID,
 		ReferenceType: input.ReferenceType,
-	}
+	}, input.Points, func(balance int) string { return RecalculateTier(balance, cfg) })
+}
 
-	if err := s.repo.CreateLoyaltyTransaction(ctx, tx); err != nil {
-		return err
-	}
-
+func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInput) error {
 	cfg, cfgErr := s.GetLoyaltyConfig(ctx, input.BusinessID)
 	if cfgErr != nil {
 		logger.Ctx(ctx).Error("Failed to get loyalty config, using default tier", logger.Error(cfgErr))
 	}
-
-	newTier := RecalculateTier(balanceAfter, cfg)
-
-	return s.repo.UpdateCustomerLoyalty(ctx, input.BusinessID, input.CustomerID, balanceAfter, newTier)
-}
-
-func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInput) error {
-	customer, err := s.repo.GetCustomerByID(ctx, input.BusinessID, input.CustomerID)
-	if err != nil {
-		return err
-	}
-
-	if customer.LoyaltyPoints < input.Points {
-		return domain.ErrInsufficientPoints
-	}
-
-	balanceBefore := customer.LoyaltyPoints
-	balanceAfter := balanceBefore - input.Points
-
-	tx := domain.LoyaltyTransaction{
+	return s.repo.ApplyLoyaltyDelta(ctx, domain.LoyaltyTransaction{
 		OwnerID:       input.OwnerID,
 		BusinessID:    input.BusinessID,
 		CustomerID:    input.CustomerID,
 		Type:          "redeem",
 		Points:        input.Points,
-		BalanceBefore: balanceBefore,
-		BalanceAfter:  balanceAfter,
 		Description:   input.Description,
 		ReferenceID:   input.ReferenceID,
 		ReferenceType: input.ReferenceType,
-	}
-
-	if err := s.repo.CreateLoyaltyTransaction(ctx, tx); err != nil {
-		return err
-	}
-
-	cfg, cfgErr := s.GetLoyaltyConfig(ctx, input.BusinessID)
-	if cfgErr != nil {
-		logger.Ctx(ctx).Error("Failed to get loyalty config, using default tier", logger.Error(cfgErr))
-	}
-
-	newTier := RecalculateTier(balanceAfter, cfg)
-
-	return s.repo.UpdateCustomerLoyalty(ctx, input.BusinessID, input.CustomerID, balanceAfter, newTier)
+	}, -input.Points, func(balance int) string { return RecalculateTier(balance, cfg) })
 }
 
 func (s *Service) ListLoyaltyTransactions(ctx context.Context, businessID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
@@ -385,8 +343,8 @@ func (s *Service) GetCustomerDetail(ctx context.Context, businessID, customerID 
 
 // -- Import ------------------------------------------------------------------
 
-func (s *Service) ImportCustomers(ctx context.Context, businessID int64, items []domain.CustomerImportItem) (domain.CustomerImportResult, error) {
-	imported, failed, err := s.repo.BulkCreateCustomers(ctx, businessID, items)
+func (s *Service) ImportCustomers(ctx context.Context, businessID int64, items []domain.CustomerImportItem, dedupe bool) (domain.CustomerImportResult, error) {
+	imported, failed, err := s.repo.BulkCreateCustomers(ctx, businessID, items, dedupe)
 	if err != nil {
 		return domain.CustomerImportResult{}, err
 	}

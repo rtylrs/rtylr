@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
@@ -56,6 +57,9 @@ func newCustomerPayload(c domain.Customer) *crmcustomerv1.Customer {
 		IsActive:      c.IsActive,
 		CreatedAt:     c.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:     c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+	}
+	if len(c.Consent) > 0 {
+		_ = json.Unmarshal(c.Consent, &p.Consent)
 	}
 
 	if c.DateOfBirth != nil {

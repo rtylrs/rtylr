@@ -1,19 +1,19 @@
 -- name: GetCustomerByID :one
 SELECT id, owner_id, business_id, first_name, last_name, email, phone, date_of_birth, gender,
        address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
-       loyalty_tier, tags, notes, is_active, created_at, updated_at
+	       loyalty_tier, tags, notes, consent, is_active, created_at, updated_at
 FROM crm_customers WHERE id = ? AND business_id = ?;
 
 -- name: CreateCustomer :execresult
 INSERT INTO crm_customers
   (owner_id, business_id, first_name, last_name, email, phone, date_of_birth, gender,
-   address, city, country, tags, notes, loyalty_tier, is_active)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'bronze', TRUE);
+	   address, city, country, tags, notes, consent, loyalty_tier, is_active)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'bronze', TRUE);
 
 -- name: UpdateCustomer :execresult
 UPDATE crm_customers
 SET first_name = ?, last_name = ?, email = ?, phone = ?, date_of_birth = ?,
-    gender = ?, address = ?, city = ?, country = ?, tags = ?, notes = ?, is_active = ?
+	    gender = ?, address = ?, city = ?, country = ?, tags = ?, notes = ?, consent = ?, is_active = ?
 WHERE id = ? AND business_id = ?;
 
 -- name: DeleteCustomer :execresult
@@ -35,7 +35,7 @@ SELECT COUNT(*) FROM crm_customers WHERE business_id = ?;
 -- name: ListCustomers :many
 SELECT id, owner_id, business_id, first_name, last_name, email, phone, date_of_birth, gender,
        address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
-       loyalty_tier, tags, notes, is_active, created_at, updated_at
+	       loyalty_tier, tags, notes, consent, is_active, created_at, updated_at
 FROM crm_customers WHERE business_id = ?
 ORDER BY created_at DESC LIMIT ? OFFSET ?;
 
@@ -59,7 +59,7 @@ ORDER BY total_spent DESC LIMIT 10;
 -- name: ListActiveCustomers :many
 SELECT id, owner_id, business_id, first_name, last_name, email, phone, date_of_birth, gender,
        address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
-       loyalty_tier, tags, notes, is_active, created_at, updated_at
+	       loyalty_tier, tags, notes, consent, is_active, created_at, updated_at
 FROM crm_customers WHERE business_id = ? AND is_active = TRUE
 ORDER BY created_at DESC LIMIT ? OFFSET ?;
 
@@ -82,6 +82,17 @@ SELECT id, owner_id, business_id, customer_id, type, points, balance_before, bal
        description, reference_id, reference_type, created_at
 FROM crm_loyalty_transactions
 WHERE business_id = ? AND customer_id = ?
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountAllLoyaltyTransactions :one
+SELECT COUNT(*) FROM crm_loyalty_transactions WHERE business_id = ?;
+
+-- name: ListAllLoyaltyTransactions :many
+SELECT id, owner_id, business_id, customer_id, type, points, balance_before, balance_after,
+       description, reference_id, reference_type, created_at
+FROM crm_loyalty_transactions
+WHERE business_id = ?
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?;
 

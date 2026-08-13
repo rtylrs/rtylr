@@ -35,6 +35,7 @@ type Customer struct {
 	LoyaltyTier   string     `json:"loyalty_tier"`
 	Tags          []string   `json:"tags"`
 	Notes         string     `json:"notes"`
+	Consent       []byte     `json:"consent"`
 	IsActive      bool       `json:"is_active"`
 	CreatedAt     time.Time  `json:"created_at"`
 	UpdatedAt     time.Time  `json:"updated_at"`
@@ -54,6 +55,7 @@ type CustomerInput struct {
 	Country     string
 	Tags        []string
 	Notes       string
+	Consent     []byte
 }
 
 type CustomerUpdateInput struct {
@@ -72,6 +74,7 @@ type CustomerUpdateInput struct {
 	LoyaltyTier string
 	Tags        []string
 	Notes       string
+	Consent     []byte
 	IsActive    *bool
 }
 

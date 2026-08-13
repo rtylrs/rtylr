@@ -50,10 +50,6 @@ func newLoyaltyTransactionPayload(tx domain.LoyaltyTransaction) *crmloyaltyv1.Lo
 }
 
 func (h *ListLoyaltyTransactionsHandler) Validate(_ context.Context, req *ListLoyaltyTransactionsRequest) error {
-	if req.CustomerID == 0 {
-		return onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
-	}
-
 	return nil
 }
 

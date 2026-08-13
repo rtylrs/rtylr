@@ -11,31 +11,9 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, svc *application.Service) {
-	http.RegisterGET[handlers.ListTransactionsRequest, handlers.ListTransactionsResponse](
-		ctx, router, handlers.LoyaltyTransactionsRoutes(),
-		&handlers.ListTransactionsHandler{Service: svc},
-	)
-
-	http.RegisterPOSTWithValidation[handlers.AwardPointsRequest, handlers.AwardPointsResponse](
-		ctx, router, handlers.LoyaltyAwardRoutes(),
-		&handlers.AwardPointsHandler{Service: svc},
-	)
-
-	http.RegisterPOSTWithValidation[handlers.RedeemPointsRequest, handlers.RedeemPointsResponse](
-		ctx, router, handlers.LoyaltyRedeemRoutes(),
-		&handlers.RedeemPointsHandler{Service: svc},
-	)
-
-	http.RegisterGET[handlers.GetLoyaltyConfigRequest, handlers.GetLoyaltyConfigResponse](
-		ctx, router, handlers.LoyaltyConfigGetRoutes(),
-		&handlers.GetLoyaltyConfigHandler{Service: svc},
-	)
-
-	http.RegisterPUTWithValidation[handlers.UpdateLoyaltyConfigRequest, handlers.UpdateLoyaltyConfigResponse](
-		ctx, router, handlers.LoyaltyConfigUpdateRoutes(),
-		&handlers.UpdateLoyaltyConfigHandler{Service: svc},
-	)
-
+	// Customer loyalty config, tiers, transactions, award, and redeem routes
+	// are owned by the CRM customers module. Keeping one registration avoids
+	// order-dependent handlers with different response contracts.
 	http.RegisterGET[handlers.ListMembersRequest, handlers.ListMembersResponse](
 		ctx, router, handlers.LoyaltyMembersRoutes(),
 		&handlers.ListMembersHandler{Service: svc},

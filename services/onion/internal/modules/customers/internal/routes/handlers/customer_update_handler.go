@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
@@ -22,20 +23,21 @@ type UpdateCustomerHandler struct {
 }
 
 type UpdateCustomerRequest struct {
-	ID          int64    `json:"id"`
-	FirstName   string   `json:"first_name"`
-	LastName    string   `json:"last_name"`
-	Email       string   `json:"email"`
-	Phone       string   `json:"phone"`
-	DateOfBirth string   `json:"date_of_birth"`
-	Gender      string   `json:"gender"`
-	Address     string   `json:"address"`
-	City        string   `json:"city"`
-	Country     string   `json:"country"`
-	LoyaltyTier string   `json:"loyalty_tier"`
-	Tags        []string `json:"tags"`
-	Notes       string   `json:"notes"`
-	IsActive    *bool    `json:"is_active"`
+	ID          int64           `json:"id"`
+	FirstName   string          `json:"first_name"`
+	LastName    string          `json:"last_name"`
+	Email       string          `json:"email"`
+	Phone       string          `json:"phone"`
+	DateOfBirth string          `json:"date_of_birth"`
+	Gender      string          `json:"gender"`
+	Address     string          `json:"address"`
+	City        string          `json:"city"`
+	Country     string          `json:"country"`
+	LoyaltyTier string          `json:"loyalty_tier"`
+	Tags        []string        `json:"tags"`
+	Notes       string          `json:"notes"`
+	Consent     map[string]bool `json:"consent"`
+	IsActive    *bool           `json:"is_active"`
 }
 
 type UpdateCustomerResponse struct {
@@ -81,6 +83,9 @@ func (h *UpdateCustomerHandler) Serve(ctx context.Context, req *UpdateCustomerRe
 		Tags:        req.Tags,
 		Notes:       req.Notes,
 		IsActive:    req.IsActive,
+	}
+	if req.Consent != nil {
+		input.Consent, _ = json.Marshal(req.Consent)
 	}
 
 	if req.DateOfBirth != "" {
