@@ -1176,18 +1176,21 @@ return violations;
 
 export interface ListReorderSuggestionsResponse {
 suggestions?: (ReorderSuggestion)[];
+truncated?: boolean;
 }
 
 export function decodeListReorderSuggestionsResponse(v: any): ListReorderSuggestionsResponse {
 if (v === null || v === undefined) return v;
 return {
 suggestions: (v.suggestions !== undefined ? (v.suggestions as any[]).map(decodeReorderSuggestion) : v.suggestions),
+truncated: v.truncated,
 };
 }
 
 export function encodeListReorderSuggestionsResponse(v: ListReorderSuggestionsResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.suggestions !== undefined) { out.suggestions = (v.suggestions as any[]).map(encodeReorderSuggestion); }
+if (v.truncated !== undefined) { out.truncated = v.truncated; }
 return out;
 }
 

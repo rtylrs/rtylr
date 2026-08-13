@@ -2424,6 +2424,7 @@ type ListReorderSuggestionsRequest struct {
 
 type ListReorderSuggestionsResponse struct {
 	Suggestions []*ReorderSuggestion `json:"suggestions,omitempty"`
+	Truncated   bool                 `json:"truncated,omitempty"`
 }
 
 func (x *ListReorderSuggestionsResponse) GetSuggestions() []*ReorderSuggestion {
@@ -2432,6 +2433,14 @@ func (x *ListReorderSuggestionsResponse) GetSuggestions() []*ReorderSuggestion {
 		return zero
 	}
 	return x.Suggestions
+}
+
+func (x *ListReorderSuggestionsResponse) GetTruncated() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Truncated
 }
 
 type ListExpiringItemsRequest struct {
