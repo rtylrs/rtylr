@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS support_customers (
     phone VARCHAR(50),
     total_tickets INT DEFAULT 0,
     last_ticket_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_support_customers_business_email (business_id, email)
 );
 
 CREATE TABLE IF NOT EXISTS support_articles (
@@ -43,7 +44,9 @@ CREATE TABLE IF NOT EXISTS support_articles (
     is_published BOOLEAN DEFAULT FALSE,
     views INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_support_articles_business_slug (business_id, slug),
+    INDEX idx_support_articles_business_title_updated (business_id, title, updated_at, id)
 );
 
 CREATE TABLE IF NOT EXISTS support_canned_responses (
