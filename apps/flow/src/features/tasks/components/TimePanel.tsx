@@ -366,8 +366,10 @@ const TimePanel = ({
 
           {wasRounded && (
             <p className="text-[10px]" style={{ color: 'var(--flow-status-pending)' }}>
+              {/* `count` rather than a plain number: i18next selects the plural
+                * form from it, and Arabic needs six of them. */}
               {t('flow.time.roundedNotice', {
-                increment: roundingMinutes,
+                count: roundingMinutes,
                 amount: formatDurationClock(roundedPreview as number),
               })}
             </p>
