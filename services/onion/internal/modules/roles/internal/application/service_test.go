@@ -108,6 +108,14 @@ func TestUpdateRole_NilPermsBecomeEmpty(t *testing.T) {
 	}
 }
 
+func TestUpdateRole_PropagatesNotFound(t *testing.T) {
+	m := &mockRepo{updateErr: domain.ErrRoleNotFound}
+	s := &Service{repo: m}
+	if err := s.UpdateRole(context.Background(), 1, domain.UpdateRoleInput{ID: 7, Name: "missing"}); !errors.Is(err, domain.ErrRoleNotFound) {
+		t.Fatalf("expected ErrRoleNotFound, got %v", err)
+	}
+}
+
 func TestDeleteRole_DelegatesIDs(t *testing.T) {
 	m := &mockRepo{}
 	s := &Service{repo: m}
@@ -116,6 +124,14 @@ func TestDeleteRole_DelegatesIDs(t *testing.T) {
 	}
 	if m.deleteGot.ownerID != 7 || m.deleteGot.roleID != 42 {
 		t.Errorf("delete args: %+v", m.deleteGot)
+	}
+}
+
+func TestDeleteRole_PropagatesNotFound(t *testing.T) {
+	m := &mockRepo{deleteErr: domain.ErrRoleNotFound}
+	s := &Service{repo: m}
+	if err := s.DeleteRole(context.Background(), 1, 7); !errors.Is(err, domain.ErrRoleNotFound) {
+		t.Fatalf("expected ErrRoleNotFound, got %v", err)
 	}
 }
 

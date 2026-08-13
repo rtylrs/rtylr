@@ -12,6 +12,7 @@ import (
 	hrovertime "github.com/voxire/onion/internal/modules/hr_overtime"
 	hrpayroll "github.com/voxire/onion/internal/modules/hr_payroll"
 	hrtime "github.com/voxire/onion/internal/modules/hr_time"
+	recurringinvoices "github.com/voxire/onion/internal/modules/recurring_invoices"
 	"github.com/voxire/onion/internal/modules/voxhire"
 	platformcache "github.com/voxire/onion/internal/platform/cache"
 	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
@@ -110,23 +111,25 @@ func main() {
 }
 
 type jobModules struct {
-	HRCore     *hrcore.Module
-	HRLeave    *hrleave.Module
-	HROvertime *hrovertime.Module
-	HRPayroll  *hrpayroll.Module
-	HRTime     *hrtime.Module
-	Voxhire    *voxhire.Module
+	HRCore            *hrcore.Module
+	HRLeave           *hrleave.Module
+	HROvertime        *hrovertime.Module
+	HRPayroll         *hrpayroll.Module
+	HRTime            *hrtime.Module
+	Voxhire           *voxhire.Module
+	RecurringInvoices *recurringinvoices.Module
 }
 
 func initializeJobModules(ctx context.Context) *jobModules {
 	db := dbclient.Pool()
 	hrCoreModule := hrcore.NewModule(ctx, db)
 	return &jobModules{
-		HRCore:     hrCoreModule,
-		HRLeave:    hrleave.NewModule(ctx, db, hrCoreModule),
-		HROvertime: hrovertime.NewModule(ctx, db, hrCoreModule),
-		HRPayroll:  hrpayroll.NewModule(ctx, db, hrCoreModule),
-		HRTime:     hrtime.NewModule(ctx, db, hrCoreModule),
-		Voxhire:    voxhire.NewModule(ctx, db),
+		HRCore:            hrCoreModule,
+		HRLeave:           hrleave.NewModule(ctx, db, hrCoreModule),
+		HROvertime:        hrovertime.NewModule(ctx, db, hrCoreModule),
+		HRPayroll:         hrpayroll.NewModule(ctx, db, hrCoreModule),
+		HRTime:            hrtime.NewModule(ctx, db, hrCoreModule),
+		Voxhire:           voxhire.NewModule(ctx, db),
+		RecurringInvoices: recurringinvoices.NewModule(ctx, db),
 	}
 }

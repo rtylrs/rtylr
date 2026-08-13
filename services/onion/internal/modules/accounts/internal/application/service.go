@@ -17,7 +17,7 @@ const (
 )
 
 type repository interface {
-	List(ctx context.Context, businessID int64) ([]domain.Account, error)
+	List(ctx context.Context, businessID int64, limit, offset int) ([]domain.Account, error)
 	Create(ctx context.Context, businessID int64, input domain.AccountInput) (int64, error)
 	Update(ctx context.Context, businessID, id int64, input domain.AccountInput) error
 	Delete(ctx context.Context, businessID, id int64) error
@@ -38,14 +38,27 @@ func invalidateAccountsScope(ctx context.Context, businessID int64) {
 	}
 }
 
-func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Account, error) {
-	return cacher.Of[[]domain.Account]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(accountsScope, businessID, "list"),
-		func(ctx context.Context) ([]domain.Account, error) {
-			return s.repo.List(ctx, businessID)
-		},
-		cacher.WithExpiry(ctx, accountsTTL),
-	)
+func (s *Service) List(ctx context.Context, businessID, page, pageSize int64) ([]domain.Account, bool, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	limit := int(pageSize) + 1
+	offset := int((page - 1) * pageSize)
+	items, err := s.repo.List(ctx, businessID, limit, offset)
+	if err != nil {
+		return nil, false, err
+	}
+	hasMore := len(items) > int(pageSize)
+	if hasMore {
+		items = items[:pageSize]
+	}
+	return items, hasMore, nil
 }
 
 func (s *Service) Create(ctx context.Context, businessID int64, input domain.AccountInput) (int64, error) {

@@ -28,6 +28,8 @@ type repository interface {
 	CountAdmins(ctx context.Context) (int64, error)
 	ListCompanyLeads(ctx context.Context) ([]domain.Lead, error)
 	ListOpenings(ctx context.Context) ([]domain.Opening, error)
+	ListOpeningsPage(ctx context.Context, limit, offset int32) (domain.OpeningPage, error)
+	GetOpening(ctx context.Context, id int64) (*domain.Opening, error)
 	GetAnalytics(ctx context.Context) (*domain.Analytics, error)
 	CreateCareer(ctx context.Context, in domain.CareerInput) (*domain.Opening, error)
 	UpdateCareer(ctx context.Context, in domain.CareerInput) (*domain.Opening, error)

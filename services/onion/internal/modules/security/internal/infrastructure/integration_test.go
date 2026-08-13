@@ -231,14 +231,14 @@ func TestGetLoginHistory_EachEntryHasEmail(t *testing.T) {
 	}
 }
 
-func TestSetTwoFactor_DoesNotError(t *testing.T) {
+func TestSetTwoFactor_ReturnsDatabaseError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// SetTwoFactor silently ignores missing columns; should not return error
+	// A persistence failure must reach the caller instead of being reported as success.
 	err := repo.SetTwoFactor(ctx, testutil.OwnerID, true)
-	if err != nil {
-		t.Fatalf("SetTwoFactor: unexpected error: %v", err)
+	if err == nil {
+		t.Fatal("SetTwoFactor: expected database error")
 	}
 }

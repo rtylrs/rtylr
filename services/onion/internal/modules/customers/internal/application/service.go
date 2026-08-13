@@ -338,6 +338,24 @@ func (s *Service) GetCustomerTimeline(ctx context.Context, businessID, customerI
 	return s.repo.GetCustomerTimeline(ctx, businessID, customerID)
 }
 
+func (s *Service) ListCustomerTimelinePage(ctx context.Context, businessID, customerID int64, cursorCreatedAt *time.Time, cursorID int64, pageSize int) (domain.TimelinePage, error) {
+	const maxPageSize = 100
+	if pageSize <= 0 || pageSize > maxPageSize {
+		pageSize = maxPageSize
+	}
+	entries, err := s.repo.ListCustomerTimelinePage(ctx, businessID, customerID, cursorCreatedAt, cursorID, pageSize+1)
+	if err != nil {
+		return domain.TimelinePage{}, err
+	}
+	page := domain.TimelinePage{Entries: entries}
+	if len(entries) > pageSize {
+		page.Entries = entries[:pageSize]
+		last := page.Entries[len(page.Entries)-1]
+		page.NextCursor = fmt.Sprintf("%d:%d", last.CreatedAt.UTC().UnixNano(), last.ID)
+	}
+	return page, nil
+}
+
 // -- Customer Detail with Loyalty --------------------------------------------
 
 func (s *Service) GetCustomerDetail(ctx context.Context, businessID, customerID int64) (domain.CustomerDetail, error) {

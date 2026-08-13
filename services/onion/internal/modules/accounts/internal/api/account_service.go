@@ -23,12 +23,22 @@ func NewAccountAPI(service *application.Service) *AccountAPI {
 	return &AccountAPI{Service: service}
 }
 
-func (a *AccountAPI) ListAccounts(ctx context.Context, _ *financeaccountv1.ListAccountsRequest) (*financeaccountv1.ListAccountsResponse, error) {
+func (a *AccountAPI) ListAccounts(ctx context.Context, req *financeaccountv1.ListAccountsRequest) (*financeaccountv1.ListAccountsResponse, error) {
 	businessID, err := accountBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	items, listErr := a.Service.List(ctx, businessID)
+	page, pageSize := req.GetPage(), req.GetPageSize()
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 500 {
+		pageSize = 500
+	}
+	items, hasMore, listErr := a.Service.List(ctx, businessID, page, pageSize)
 	if listErr != nil {
 		return nil, accountStatusError(http.StatusInternalServerError, "Failed to list accounts")
 	}
@@ -36,7 +46,7 @@ func (a *AccountAPI) ListAccounts(ctx context.Context, _ *financeaccountv1.ListA
 	for _, item := range items {
 		accounts = append(accounts, newAccountProto(item))
 	}
-	return &financeaccountv1.ListAccountsResponse{Accounts: accounts}, nil
+	return &financeaccountv1.ListAccountsResponse{Accounts: accounts, Page: page, PageSize: pageSize, HasMore: hasMore}, nil
 }
 
 func (a *AccountAPI) CreateAccount(ctx context.Context, req *financeaccountv1.CreateAccountRequest) (*financeaccountv1.CreateAccountResponse, error) {
