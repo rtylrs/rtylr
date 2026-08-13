@@ -37,3 +37,18 @@ CREATE TABLE IF NOT EXISTS manual_access_grants (
     INDEX idx_mag_user (user_id),
     INDEX idx_mag_plan (plan_id)
 );
+
+-- A single, transactionally maintained row backs the console's global stats.
+-- It avoids re-scanning every global table when an admin opens the dashboard.
+CREATE TABLE IF NOT EXISTS console_stats (
+    id TINYINT NOT NULL PRIMARY KEY,
+    total_users BIGINT NOT NULL DEFAULT 0,
+    banned_users BIGINT NOT NULL DEFAULT 0,
+    total_businesses BIGINT NOT NULL DEFAULT 0,
+    active_subs BIGINT NOT NULL DEFAULT 0,
+    trial_subs BIGINT NOT NULL DEFAULT 0,
+    manual_grants BIGINT NOT NULL DEFAULT 0,
+    manual_addon_grants BIGINT NOT NULL DEFAULT 0,
+    console_admins BIGINT NOT NULL DEFAULT 0,
+    CHECK (id = 1)
+);
