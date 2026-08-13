@@ -1,11 +1,11 @@
 -- name: GetRevenueSeries :many
-SELECT DATE(COALESCE(paid_date, issue_date)) AS day,
+SELECT reporting_date AS day,
        COALESCE(SUM(total), 0)               AS amount
 FROM finance_invoices
 WHERE business_id = ?
   AND status = 'paid'
-  AND COALESCE(paid_date, issue_date) >= ?
-  AND COALESCE(paid_date, issue_date) <= ?
+  AND reporting_date >= ?
+  AND reporting_date <= ?
 GROUP BY day
 ORDER BY day ASC;
 
@@ -22,5 +22,5 @@ SELECT COALESCE(SUM(total), 0) AS total
 FROM finance_invoices
 WHERE business_id = ?
   AND status = 'paid'
-  AND COALESCE(paid_date, issue_date) >= ?
-  AND COALESCE(paid_date, issue_date) <= ?;
+  AND reporting_date >= ?
+  AND reporting_date <= ?;
