@@ -49,7 +49,7 @@ function fromApiCategory(c: ApiExpenseCategory): ExpenseCategory {
 export function useExpenses(params: UseExpensesParams = {}) {
   const { page = 1, pageSize = 50 } = params;
   return useQuery<ExpenseListResult>({
-    queryKey: ['expenses', { page, pageSize }],
+    queryKey: ['expenses', 'filter', { page, pageSize }],
     queryFn: async (): Promise<ExpenseListResult> => {
       const res = await expensesClient.listExpenses({});
       const all = (res.expenses ?? []).map(fromApiExpense);

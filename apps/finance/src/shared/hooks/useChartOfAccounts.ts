@@ -67,7 +67,7 @@ export interface JournalResult {
 export function useJournal(params: UseJournalParams = {}) {
   const { page = 1, pageSize = 50 } = params;
   return useQuery<JournalResult>({
-    queryKey: ['journal', { page, pageSize }],
+    queryKey: ['journal', 'filter', { page, pageSize }],
     queryFn: async (): Promise<JournalResult> => {
       const res = await journalClient.listJournalEntries({
         page,

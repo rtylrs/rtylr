@@ -7,9 +7,9 @@ import type { ListInvoicesResponse } from '@voxire/voxie/finance/invoices/v1/typ
 
 const invoicesClient = createOneKitClient(InvoicesServiceClient, 'finance');
 
-interface ListInvoicesParams {
-  limit: number;
-  offset: number;
+export interface ListInvoicesParams {
+  page?: number;
+  pageSize?: number;
   status?: string;
   search?: string;
   dateFrom?: string;
@@ -17,16 +17,19 @@ interface ListInvoicesParams {
 }
 
 export const useListInvoices = (params: ListInvoicesParams) => {
+  const page = params.page ?? 1;
+  const pageSize = params.pageSize ?? 50;
+
   return useQuery<ListInvoicesResponse>({
-    queryKey: ['invoices', 'filter', params],
+    queryKey: ['invoices', 'filter', { page, pageSize, status: params.status ?? '', search: params.search ?? '', dateFrom: params.dateFrom ?? '', dateTo: params.dateTo ?? '' }],
     queryFn: (): Promise<ListInvoicesResponse> =>
       invoicesClient.listInvoices({
         status: params.status ?? '',
         search: params.search ?? '',
         dateFrom: params.dateFrom ?? '',
         dateTo: params.dateTo ?? '',
-        page: Math.floor(params.offset / Math.max(1, params.limit)) + 1,
-        pageSize: params.limit,
+        page,
+        pageSize,
       }),
   });
 };

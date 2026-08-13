@@ -11,7 +11,7 @@ export function useCashFlow() {
   const from = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().slice(0, 10);
   const to = now.toISOString().slice(0, 10);
   return useQuery({
-    queryKey: ['cash-flow', { from, to }],
+    queryKey: ['cash-flow', 'filter', { from, to }],
     queryFn: async (): Promise<CashFlowPoint[]> => {
       // Backend cash-flow time series lives at /insights/financial/cash-flow and
       // returns { series: [{ date, inflowMinorUnits, outflowMinorUnits }] }.
