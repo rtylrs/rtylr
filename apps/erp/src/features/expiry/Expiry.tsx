@@ -1,14 +1,12 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { CalendarX, TrendingDown } from 'lucide-react';
+import { CalendarX } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useExpiry } from './useExpiry';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
 import { formatDate, daysUntil } from '../../shared/lib/format';
-import { toast } from 'sonner';
-
 const AMBER = 'var(--erp-accent)';
 
 const Expiry: React.FC = () => {
@@ -28,15 +26,6 @@ const Expiry: React.FC = () => {
       <PageHeader
         title="Expiry Tracking"
         description={`${items.length} batches with expiry dates`}
-        actions={
-          <button
-            onClick={() => toast.info('Auto-markdown rules coming soon')}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
-          >
-            <TrendingDown size={14} /> Auto-Markdown
-          </button>
-        }
       />
 
       <div

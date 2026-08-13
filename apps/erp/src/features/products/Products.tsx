@@ -483,9 +483,6 @@ const Products: React.FC = () => {
         count={selected.size}
         onClear={() => setSelected(new Set())}
         onDelete={handleBulkDelete}
-        onArchive={() => {
-          toast.info('Archive coming soon');
-        }}
         onExport={() => {
           const rows = products.filter((p) => selected.has(p.id ?? ''));
           if (rows.length === 0) return;

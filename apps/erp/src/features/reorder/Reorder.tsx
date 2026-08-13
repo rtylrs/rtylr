@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, ShoppingCart, TrendingUp } from 'lucide-react';
+import { Sparkles, TrendingUp } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useReorderSuggestions } from './useReorderSuggestions';
 import PageHeader from '../../shared/components/PageHeader';
@@ -22,20 +22,6 @@ const Reorder: React.FC = () => {
       <PageHeader
         title="Reorder Suggestions"
         description="Smart recommendations based on sales velocity and lead times"
-        actions={
-          <button
-            disabled
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{
-              background: AMBER,
-              color: 'var(--erp-accent-foreground)',
-              opacity: 0.5,
-              cursor: 'not-allowed',
-            }}
-          >
-            <ShoppingCart size={14} /> Coming soon
-          </button>
-        }
       />
 
       <div
@@ -58,7 +44,7 @@ const Reorder: React.FC = () => {
         <div
           className="grid px-4 py-3 text-[10px] font-semibold uppercase tracking-wider"
           style={{
-            gridTemplateColumns: '2fr 0.8fr 1fr 1fr 0.8fr 0.8fr 0.8fr',
+            gridTemplateColumns: '2fr 0.8fr 1fr 1fr 0.8fr 0.8fr',
             color: 'var(--hub-text-dim)',
             borderBottom: '1px solid var(--hub-border)',
           }}
@@ -69,10 +55,9 @@ const Reorder: React.FC = () => {
           <span>Suggested</span>
           <span>Lead</span>
           <span>Confidence</span>
-          <span></span>
         </div>
         {isLoading ? (
-          Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={7} />)
+          Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
         ) : suggestions.length === 0 ? (
           <EmptyState title="No suggestions" description="All stock levels are healthy" />
         ) : (
@@ -88,7 +73,7 @@ const Reorder: React.FC = () => {
                 key={s.productId}
                 className="grid px-4 py-3 items-center"
                 style={{
-                  gridTemplateColumns: '2fr 0.8fr 1fr 1fr 0.8fr 0.8fr 0.8fr',
+                  gridTemplateColumns: '2fr 0.8fr 1fr 1fr 0.8fr 0.8fr',
                   borderTop: '1px solid var(--hub-border)',
                 }}
               >
@@ -131,18 +116,6 @@ const Reorder: React.FC = () => {
                     {s.confidence}
                   </span>
                 </span>
-                <button
-                  disabled
-                  className="text-[10px] font-semibold px-2 py-1 rounded-md"
-                  style={{
-                    background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)',
-                    color: AMBER,
-                    cursor: 'not-allowed',
-                    opacity: 0.65,
-                  }}
-                >
-                  Coming soon
-                </button>
               </div>
             );
           })
