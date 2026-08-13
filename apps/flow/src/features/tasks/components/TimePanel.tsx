@@ -13,6 +13,7 @@ import {
 } from '../../../shared/lib/durationUtils';
 import GateNotice from '../../../shared/components/GateNotice';
 import DurationField from './DurationField';
+import { roundLoggedMinutes, useTimeSettingsStore } from '../../../shared/stores/timeSettingsStore';
 
 interface TimePanelProps {
   taskId: string;
@@ -48,6 +49,7 @@ const TimePanel = ({
   const logTime = useLogTime();
   const deleteTimeLog = useDeleteTimeLog();
   const { data: team } = useFlowTeam();
+  const roundingMinutes = useTimeSettingsStore((s) => s.roundingMinutes);
 
   const [formOpen, setFormOpen] = useState(false);
   const [duration, setDuration] = useState('');
@@ -96,7 +98,7 @@ const TimePanel = ({
     logTime.mutate(
       {
         task_id: Number(taskId),
-        duration_minutes: minutes,
+        duration_minutes: roundLoggedMinutes(minutes, roundingMinutes),
         description: description.trim() || undefined,
       },
       {
@@ -108,7 +110,12 @@ const TimePanel = ({
     );
   };
 
+  // What will actually be stored, previewed on the submit button. Rounding that
+  // the person cannot see before they commit is rounding they will dispute later.
   const parsedPreview = parseDurationInput(duration);
+  const roundedPreview =
+    parsedPreview === null ? null : roundLoggedMinutes(parsedPreview, roundingMinutes);
+  const wasRounded = parsedPreview !== null && roundedPreview !== parsedPreview;
 
   return (
     <section className="mb-5" aria-labelledby={`time-panel-${taskId}`}>
@@ -357,6 +364,15 @@ const TimePanel = ({
             />
           </div>
 
+          {wasRounded && (
+            <p className="text-[10px]" style={{ color: 'var(--flow-status-pending)' }}>
+              {t('flow.time.roundedNotice', {
+                increment: roundingMinutes,
+                amount: formatDurationClock(roundedPreview as number),
+              })}
+            </p>
+          )}
+
           {!canLogForOthers && <GateNotice reason={t('flow.time.logForOthersGate')} />}
 
           <div className="flex gap-1.5">
@@ -367,8 +383,8 @@ const TimePanel = ({
               className="flow-focus min-h-[44px] flex-1 rounded px-3 text-[11px] font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
               style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
-              {parsedPreview !== null
-                ? t('flow.time.logAmount', { amount: formatDurationClock(parsedPreview) })
+              {roundedPreview !== null
+                ? t('flow.time.logAmount', { amount: formatDurationClock(roundedPreview) })
                 : t('flow.time.logAction')}
             </button>
             <button
