@@ -9,16 +9,11 @@ on:
     paths:
       - "media-engine/**"
       - ".github/workflows/media-engine.yml"
-  pull_request:
-    branches: [main, master]
-    paths:
-      - "media-engine/**"
-      - ".github/workflows/media-engine.yml"
 
 jobs:
   build-test:
     name: Build & Test (libvips)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 20
 
     steps:
