@@ -133,6 +133,36 @@ func (a *PurchaseOrderAPI) UpdatePurchaseOrderStatus(ctx context.Context, req *e
 	if _, ok := validStatuses[body.GetStatus()]; !ok {
 		return nil, purchaseOrderStatusError(http.StatusBadRequest, "Invalid status. Must be one of: draft, sent, approved, partial, received, cancelled")
 	}
+	var submitted []domain.PurchaseOrderItem
+	if body.GetStatus() == string(domain.POStatusReceived) && len(body.GetItems()) > 0 {
+		submitted = make([]domain.PurchaseOrderItem, 0, len(body.GetItems()))
+		for _, item := range body.GetItems() {
+			if item == nil {
+				continue
+			}
+			submitted = append(submitted, domain.PurchaseOrderItem{
+				ID:               item.GetId(),
+				PurchaseOrderID:  item.GetPurchaseOrderId(),
+				ProductID:        item.GetProductId(),
+				QuantityOrdered:  item.GetQuantityOrdered(),
+				QuantityReceived: item.GetQuantityReceived(),
+				UnitCost:         item.GetUnitCost(),
+				TotalCost:        item.GetTotalCost(),
+			})
+		}
+	}
+	if body.GetStatus() == string(domain.POStatusReceived) {
+		if receiveErr := a.Service.ReceivePurchaseOrder(ctx, ownerID, req.GetId(), ownerID, submitted); receiveErr != nil {
+			if errors.Is(receiveErr, domain.ErrPurchaseOrderNotFound) {
+				return nil, purchaseOrderStatusError(http.StatusNotFound, "Purchase order not found")
+			}
+			if errors.Is(receiveErr, domain.ErrPurchaseOrderAlreadyReceived) {
+				return nil, purchaseOrderStatusError(http.StatusConflict, "Received purchase orders cannot be reopened")
+			}
+			return nil, purchaseOrderStatusError(http.StatusInternalServerError, "Failed to receive purchase order")
+		}
+		return &erppurchaseorderv1.UpdatePurchaseOrderStatusResponse{Message: "Purchase order status updated successfully"}, nil
+	}
 	if updateErr := a.Service.UpdatePurchaseOrderStatus(ctx, ownerID, req.GetId(), body.GetStatus()); updateErr != nil {
 		if errors.Is(updateErr, domain.ErrPurchaseOrderNotFound) {
 			return nil, purchaseOrderStatusError(http.StatusNotFound, "Purchase order not found")

@@ -27,35 +27,52 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) GetTimesheets(ctx context.Context, businessID int64, weekStart string) ([]domain.TimesheetEntry, error) {
-	params := sqlc.GetTimesheetsParams{BusinessID: businessID}
-	if weekStart != "" {
-		if t, err := time.Parse("2006-01-02", weekStart); err == nil {
-			params.WeekStart = sql.NullTime{Time: t, Valid: true}
+	if weekStart == "" {
+		rows, err := r.queries.GetTimesheets(ctx, businessID)
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to get timesheets", logger.Error(err))
+			return nil, err
 		}
+		entries := make([]domain.TimesheetEntry, 0, len(rows))
+		for _, row := range rows {
+			entries = append(entries, newTimesheetEntry(row.StaffID, row.StaffName, row.WeekStart, row.TotalHours, row.RegularHours, row.OvertimeHours))
+		}
+		return entries, nil
 	}
 
-	rows, err := r.queries.GetTimesheets(ctx, params)
+	start, err := time.Parse("2006-01-02", weekStart)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to get timesheets", logger.Error(err))
+		return r.GetTimesheets(ctx, businessID, "")
+	}
+	rows, err := r.queries.GetTimesheetsForWeek(ctx, sqlc.GetTimesheetsForWeekParams{
+		BusinessID: businessID,
+		Date:       sql.NullTime{Time: start, Valid: true},
+		Date_2:     sql.NullTime{Time: start.AddDate(0, 0, 7), Valid: true},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get timesheets for week", logger.Error(err))
 		return nil, err
 	}
-
 	entries := make([]domain.TimesheetEntry, 0, len(rows))
 	for _, row := range rows {
-		staffID := int64(0)
-		if row.StaffID.Valid {
-			staffID = row.StaffID.Int64
-		}
-		entries = append(entries, domain.TimesheetEntry{
-			StaffID:       staffID,
-			StaffName:     row.StaffName,
-			WeekStart:     formatWeekStart(row.WeekStart),
-			TotalHours:    parseDecimal(row.TotalHours),
-			RegularHours:  parseDecimal(row.RegularHours),
-			OvertimeHours: parseDecimal(row.OvertimeHours),
-		})
+		entries = append(entries, newTimesheetEntry(row.StaffID, row.StaffName, row.WeekStart, row.TotalHours, row.RegularHours, row.OvertimeHours))
 	}
 	return entries, nil
+}
+
+func newTimesheetEntry(staffID sql.NullInt64, staffName string, weekStart time.Time, totalHours, regularHours, overtimeHours any) domain.TimesheetEntry {
+	id := int64(0)
+	if staffID.Valid {
+		id = staffID.Int64
+	}
+	return domain.TimesheetEntry{
+		StaffID:       id,
+		StaffName:     staffName,
+		WeekStart:     formatWeekStart(weekStart),
+		TotalHours:    parseDecimal(totalHours),
+		RegularHours:  parseDecimal(regularHours),
+		OvertimeHours: parseDecimal(overtimeHours),
+	}
 }
 
 func formatWeekStart(t time.Time) string {

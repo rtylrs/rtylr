@@ -72,6 +72,23 @@ func TestPrepareTurnChecksExistingSessionOwnership(t *testing.T) {
 	}
 }
 
+func TestPrepareTurnExpandsSlashCommandButStoresLiteralInput(t *testing.T) {
+	memory := &turnMemoryFake{conversation: "earlier context"}
+	got, err := PrepareTurn(context.Background(), memory, TurnRequest{
+		Prompt: "/goal launch the new store",
+		UserID: 7,
+	}, time.Date(2026, 8, 13, 0, 0, 0, 0, time.UTC))
+	if err != nil {
+		t.Fatalf("PrepareTurn: %v", err)
+	}
+	if got.Mode != ModeAsk || !strings.Contains(got.Request.Prompt, "measurable goal") {
+		t.Fatalf("prepared slash command = mode %s prompt %q", got.Mode, got.Request.Prompt)
+	}
+	if len(memory.stored) != 1 || !strings.Contains(memory.stored[0], "|user|/goal launch the new store") {
+		t.Fatalf("stored message should retain literal command: %#v", memory.stored)
+	}
+}
+
 func TestSessionTitleFromPromptIsBounded(t *testing.T) {
 	title := SessionTitleFromPrompt(strings.Repeat("x", 100))
 	if len([]rune(title)) != 83 || !strings.HasSuffix(title, "...") {
