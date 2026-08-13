@@ -25,7 +25,9 @@
     "roundedNotice_one": "Rounded to {{amount}}, the nearest {{count}} minute.",
     "roundedNotice_other": "Rounded to {{amount}}, the nearest {{count}} minutes.",
     "cancel": "Cancel",
-    "logForOthersGate": "You can log your own time. Logging for someone else needs manage team time."
+    "logForOthersGate": "You can log your own time. Logging for someone else needs manage team time.",
+    "socketReconnecting": "Reconnecting. Your entries still save; other people’s may be out of date.",
+    "socketDisconnected": "Not connected. Your entries still save, but this list will not update until you reload."
   },
   "settings": {
     "time": {

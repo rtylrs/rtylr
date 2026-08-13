@@ -25,7 +25,9 @@
     "roundedNotice_one": "Arrondi à {{amount}}, à la minute la plus proche.",
     "roundedNotice_other": "Arrondi à {{amount}}, aux {{count}} minutes les plus proches.",
     "cancel": "Annuler",
-    "logForOthersGate": "Vous pouvez saisir votre propre temps. Saisir pour quelqu'un d'autre nécessite la gestion du temps de l'équipe."
+    "logForOthersGate": "Vous pouvez saisir votre propre temps. Saisir pour quelqu'un d'autre nécessite la gestion du temps de l'équipe.",
+    "socketReconnecting": "Reconnexion en cours. Vos saisies sont bien enregistrées ; celles des autres peuvent être obsolètes.",
+    "socketDisconnected": "Non connecté. Vos saisies sont enregistrées, mais cette liste ne se mettra pas à jour avant un rechargement."
   },
   "settings": {
     "time": {
