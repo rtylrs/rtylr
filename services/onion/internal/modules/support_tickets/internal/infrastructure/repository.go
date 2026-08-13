@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/domain"
 	"github.com/voxire/onion/internal/modules/support_tickets/internal/infrastructure/persistence/sqlc"
@@ -148,9 +149,10 @@ func (r *Repository) Create(ctx context.Context, input domain.TicketInput) (int6
 }
 
 func upsertSupportCustomer(ctx context.Context, qtx *sqlc.Queries, businessID int64, name, email string) error {
+	email = strings.ToLower(strings.TrimSpace(email))
 	customerID, err := qtx.FindSupportCustomerByEmail(ctx, sqlc.FindSupportCustomerByEmailParams{
 		BusinessID: businessID,
-		LOWER:      email,
+		Email:      sql.NullString{String: email, Valid: email != ""},
 	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return qtx.InsertSupportCustomer(ctx, sqlc.InsertSupportCustomerParams{

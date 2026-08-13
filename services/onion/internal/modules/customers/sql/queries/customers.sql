@@ -167,7 +167,7 @@ FROM crm_loyalty_tiers WHERE id = ? AND business_id = ?;
 
 -- name: CountActiveMembersOnTier :one
 SELECT COUNT(*) FROM crm_customers
-WHERE business_id = ? AND is_active = TRUE AND LOWER(loyalty_tier) = LOWER(?);
+WHERE business_id = ? AND is_active = TRUE AND loyalty_tier = ?;
 
 -- name: DeleteLoyaltyTier :execresult
 DELETE FROM crm_loyalty_tiers WHERE id = ? AND business_id = ?;
