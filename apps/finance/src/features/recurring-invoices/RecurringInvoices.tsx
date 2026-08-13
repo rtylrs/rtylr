@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Play, Pause, RotateCcw, Repeat } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -61,7 +62,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
           onClose();
           setForm(emptyForm());
         },
-        onError: () => toast.error('Failed to create recurring invoice'),
+        onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to create recurring invoice')),
       }
     );
   };
@@ -144,7 +145,7 @@ const RecurringInvoices: React.FC = () => {
           toast.success(
             next === 'paused' ? 'Recurring invoice paused' : 'Recurring invoice resumed'
           ),
-        onError: () => toast.error('Failed to update recurring invoice'),
+        onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to update recurring invoice')),
       }
     );
   };

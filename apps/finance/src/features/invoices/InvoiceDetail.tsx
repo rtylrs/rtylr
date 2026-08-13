@@ -4,6 +4,7 @@ import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Send, Copy, XCircle, CreditCard, Printer } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { useInvoiceDetail, useDeleteInvoice } from './useInvoices';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
@@ -246,7 +247,7 @@ const InvoiceDetail: React.FC = () => {
               setShowVoid(false);
               navigate({ to: '/invoices' });
             },
-            onError: () => toast.error(`Failed to void invoice ${invoice.id}`),
+            onError: (error) => toast.error(getOneKitErrorMessage(error, `Failed to void invoice ${invoice.id}`)),
           })
         }
         title="Void invoice"

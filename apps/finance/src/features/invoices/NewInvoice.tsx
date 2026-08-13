@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { ChevronRight, Plus, ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/types';
 import PageHeader from '../../shared/components/PageHeader';
 import ClientSelect, { Client } from '../../shared/components/ClientSelect';
@@ -112,8 +113,8 @@ const NewInvoice: React.FC = () => {
                 toast.success(`Invoice ${invoiceNumber} sent`);
                 navigate({ to: '/invoices' });
               },
-              onError: () => {
-                toast.error(`Invoice ${invoiceNumber} saved as draft — couldn't mark it sent`);
+              onError: (error) => {
+                toast.error(getOneKitErrorMessage(error, `Invoice ${invoiceNumber} saved as draft — couldn't mark it sent`));
                 navigate({ to: '/invoices' });
               },
             }
@@ -123,7 +124,7 @@ const NewInvoice: React.FC = () => {
         toast.success(`Invoice ${invoiceNumber} saved as Draft`);
         navigate({ to: '/invoices' });
       },
-      onError: () => toast.error('Failed to save invoice'),
+      onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to save invoice')),
     });
   };
 

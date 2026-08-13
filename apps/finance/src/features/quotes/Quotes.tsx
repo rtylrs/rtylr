@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
@@ -161,7 +162,7 @@ const Quotes: React.FC = () => {
   const handleConvert = (id: string): void => {
     convertQuote.mutate(id, {
       onSuccess: () => toast.success('Quote converted to invoice'),
-      onError: () => toast.error('Failed to convert quote'),
+      onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to convert quote')),
     });
   };
 
