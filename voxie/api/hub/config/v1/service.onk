@@ -15,6 +15,9 @@ service ConfigService {
   verifyCustomDomain(VerifyCustomDomainRequest) -> VerifyCustomDomainResponse @post("/config/custom-domain/verify")
   removeCustomDomain(RemoveCustomDomainRequest) -> RemoveCustomDomainResponse @delete("/config/custom-domain")
 
+  /// Queues a test email using the configured tenant sender settings.
+  sendTestEmail(SendTestEmailRequest) -> SendTestEmailResponse @post("/config/test-email")
+
   /// Returns the industry catalog grouped by category.
   getIndustries(GetIndustriesRequest) -> GetIndustriesResponse @get("/industries")
 }

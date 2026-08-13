@@ -10,6 +10,14 @@ metaTags?: (string)[];
 contactEmail?: string;
 contactNumber?: string;
 senderEmail?: string;
+emailProvider?: string;
+senderName?: string;
+replyToEmail?: string;
+emailNotificationsEnabled?: boolean;
+smtpHost?: string;
+smtpPort?: number;
+smtpUsername?: string;
+smtpPasswordConfigured?: boolean;
 website?: string;
 mapsUrl?: string;
 address?: string;
@@ -39,6 +47,14 @@ metaTags: v.meta_tags,
 contactEmail: v.contact_email,
 contactNumber: v.contact_number,
 senderEmail: v.sender_email,
+emailProvider: v.email_provider,
+senderName: v.sender_name,
+replyToEmail: v.reply_to_email,
+emailNotificationsEnabled: v.email_notifications_enabled,
+smtpHost: v.smtp_host,
+smtpPort: v.smtp_port,
+smtpUsername: v.smtp_username,
+smtpPasswordConfigured: v.smtp_password_configured,
 website: v.website,
 mapsUrl: v.maps_url,
 address: v.address,
@@ -68,6 +84,14 @@ if (v.metaTags !== undefined) { out.meta_tags = v.metaTags; }
 if (v.contactEmail !== undefined) { out.contact_email = v.contactEmail; }
 if (v.contactNumber !== undefined) { out.contact_number = v.contactNumber; }
 if (v.senderEmail !== undefined) { out.sender_email = v.senderEmail; }
+if (v.emailProvider !== undefined) { out.email_provider = v.emailProvider; }
+if (v.senderName !== undefined) { out.sender_name = v.senderName; }
+if (v.replyToEmail !== undefined) { out.reply_to_email = v.replyToEmail; }
+if (v.emailNotificationsEnabled !== undefined) { out.email_notifications_enabled = v.emailNotificationsEnabled; }
+if (v.smtpHost !== undefined) { out.smtp_host = v.smtpHost; }
+if (v.smtpPort !== undefined) { out.smtp_port = v.smtpPort; }
+if (v.smtpUsername !== undefined) { out.smtp_username = v.smtpUsername; }
+if (v.smtpPasswordConfigured !== undefined) { out.smtp_password_configured = v.smtpPasswordConfigured; }
 if (v.website !== undefined) { out.website = v.website; }
 if (v.mapsUrl !== undefined) { out.maps_url = v.mapsUrl; }
 if (v.address !== undefined) { out.address = v.address; }
@@ -298,6 +322,14 @@ faviconUrl?: string;
 contactEmail?: string;
 contactNumber?: string;
 senderEmail?: string;
+emailProvider?: string;
+senderName?: string;
+replyToEmail?: string;
+emailNotificationsEnabled?: boolean;
+smtpHost?: string;
+smtpPort?: number;
+smtpUsername?: string;
+smtpPassword?: string;
 website?: string;
 mapsUrl?: string;
 address?: string;
@@ -324,6 +356,14 @@ faviconUrl: v.favicon_url,
 contactEmail: v.contact_email,
 contactNumber: v.contact_number,
 senderEmail: v.sender_email,
+emailProvider: v.email_provider,
+senderName: v.sender_name,
+replyToEmail: v.reply_to_email,
+emailNotificationsEnabled: v.email_notifications_enabled,
+smtpHost: v.smtp_host,
+smtpPort: v.smtp_port,
+smtpUsername: v.smtp_username,
+smtpPassword: v.smtp_password,
 website: v.website,
 mapsUrl: v.maps_url,
 address: v.address,
@@ -350,6 +390,14 @@ if (v.faviconUrl !== undefined) { out.favicon_url = v.faviconUrl; }
 if (v.contactEmail !== undefined) { out.contact_email = v.contactEmail; }
 if (v.contactNumber !== undefined) { out.contact_number = v.contactNumber; }
 if (v.senderEmail !== undefined) { out.sender_email = v.senderEmail; }
+if (v.emailProvider !== undefined) { out.email_provider = v.emailProvider; }
+if (v.senderName !== undefined) { out.sender_name = v.senderName; }
+if (v.replyToEmail !== undefined) { out.reply_to_email = v.replyToEmail; }
+if (v.emailNotificationsEnabled !== undefined) { out.email_notifications_enabled = v.emailNotificationsEnabled; }
+if (v.smtpHost !== undefined) { out.smtp_host = v.smtpHost; }
+if (v.smtpPort !== undefined) { out.smtp_port = v.smtpPort; }
+if (v.smtpUsername !== undefined) { out.smtp_username = v.smtpUsername; }
+if (v.smtpPassword !== undefined) { out.smtp_password = v.smtpPassword; }
 if (v.website !== undefined) { out.website = v.website; }
 if (v.mapsUrl !== undefined) { out.maps_url = v.mapsUrl; }
 if (v.address !== undefined) { out.address = v.address; }
@@ -396,6 +444,54 @@ return out;
 export function validateUpdateConfigResponse(v: UpdateConfigResponse): string[] {
 const violations: string[] = [];
 if (v.config !== undefined && v.config !== null) violations.push(...validateConfigPayload(v.config).map((message) => "config: " + message));
+return violations;
+}
+
+export interface SendTestEmailRequest {
+to: string;
+}
+
+export function decodeSendTestEmailRequest(v: any): SendTestEmailRequest {
+if (v === null || v === undefined) return v;
+return {
+to: v.to,
+};
+}
+
+export function encodeSendTestEmailRequest(v: SendTestEmailRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.to !== undefined) { out.to = v.to; }
+return out;
+}
+
+export function validateSendTestEmailRequest(v: SendTestEmailRequest): string[] {
+const violations: string[] = [];
+if (!(v.to !== undefined && v.to !== null) || v.to === "") violations.push("to is required");
+return violations;
+}
+
+export interface SendTestEmailResponse {
+message?: string;
+queued?: boolean;
+}
+
+export function decodeSendTestEmailResponse(v: any): SendTestEmailResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+queued: v.queued,
+};
+}
+
+export function encodeSendTestEmailResponse(v: SendTestEmailResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+if (v.queued !== undefined) { out.queued = v.queued; }
+return out;
+}
+
+export function validateSendTestEmailResponse(v: SendTestEmailResponse): string[] {
+const violations: string[] = [];
 return violations;
 }
 

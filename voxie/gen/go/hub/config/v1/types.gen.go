@@ -8,30 +8,38 @@ import (
 )
 
 type ConfigPayload struct {
-	OwnerId                string   `json:"owner_id,omitempty"`
-	SiteName               string   `json:"site_name,omitempty"`
-	LogoUrl                string   `json:"logo_url,omitempty"`
-	FaviconUrl             string   `json:"favicon_url,omitempty"`
-	MetaTags               []string `json:"meta_tags,omitempty"`
-	ContactEmail           string   `json:"contact_email,omitempty"`
-	ContactNumber          string   `json:"contact_number,omitempty"`
-	SenderEmail            string   `json:"sender_email,omitempty"`
-	Website                string   `json:"website,omitempty"`
-	MapsUrl                string   `json:"maps_url,omitempty"`
-	Address                string   `json:"address,omitempty"`
-	City                   string   `json:"city,omitempty"`
-	Zipcode                string   `json:"zipcode,omitempty"`
-	Country                string   `json:"country,omitempty"`
-	Instagram              string   `json:"instagram,omitempty"`
-	MaintenanceMode        bool     `json:"maintenance_mode,omitempty"`
-	MaintenanceNotice      string   `json:"maintenance_notice,omitempty"`
-	AddonsEnabled          bool     `json:"addons_enabled,omitempty"`
-	EnableReviews          bool     `json:"enable_reviews,omitempty"`
-	EnableWishlist         bool     `json:"enable_wishlist,omitempty"`
-	EnableNewsletterSignup bool     `json:"enable_newsletter_signup,omitempty"`
-	AboutContent           string   `json:"about_content,omitempty"`
-	FooterSubText          string   `json:"footer_sub_text,omitempty"`
-	Slug                   string   `json:"slug,omitempty"`
+	OwnerId                   string   `json:"owner_id,omitempty"`
+	SiteName                  string   `json:"site_name,omitempty"`
+	LogoUrl                   string   `json:"logo_url,omitempty"`
+	FaviconUrl                string   `json:"favicon_url,omitempty"`
+	MetaTags                  []string `json:"meta_tags,omitempty"`
+	ContactEmail              string   `json:"contact_email,omitempty"`
+	ContactNumber             string   `json:"contact_number,omitempty"`
+	SenderEmail               string   `json:"sender_email,omitempty"`
+	EmailProvider             string   `json:"email_provider,omitempty"`
+	SenderName                string   `json:"sender_name,omitempty"`
+	ReplyToEmail              string   `json:"reply_to_email,omitempty"`
+	EmailNotificationsEnabled bool     `json:"email_notifications_enabled,omitempty"`
+	SmtpHost                  string   `json:"smtp_host,omitempty"`
+	SmtpPort                  int32    `json:"smtp_port,omitempty"`
+	SmtpUsername              string   `json:"smtp_username,omitempty"`
+	SmtpPasswordConfigured    bool     `json:"smtp_password_configured,omitempty"`
+	Website                   string   `json:"website,omitempty"`
+	MapsUrl                   string   `json:"maps_url,omitempty"`
+	Address                   string   `json:"address,omitempty"`
+	City                      string   `json:"city,omitempty"`
+	Zipcode                   string   `json:"zipcode,omitempty"`
+	Country                   string   `json:"country,omitempty"`
+	Instagram                 string   `json:"instagram,omitempty"`
+	MaintenanceMode           bool     `json:"maintenance_mode,omitempty"`
+	MaintenanceNotice         string   `json:"maintenance_notice,omitempty"`
+	AddonsEnabled             bool     `json:"addons_enabled,omitempty"`
+	EnableReviews             bool     `json:"enable_reviews,omitempty"`
+	EnableWishlist            bool     `json:"enable_wishlist,omitempty"`
+	EnableNewsletterSignup    bool     `json:"enable_newsletter_signup,omitempty"`
+	AboutContent              string   `json:"about_content,omitempty"`
+	FooterSubText             string   `json:"footer_sub_text,omitempty"`
+	Slug                      string   `json:"slug,omitempty"`
 }
 
 func (x *ConfigPayload) GetOwnerId() string {
@@ -96,6 +104,70 @@ func (x *ConfigPayload) GetSenderEmail() string {
 		return zero
 	}
 	return x.SenderEmail
+}
+
+func (x *ConfigPayload) GetEmailProvider() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EmailProvider
+}
+
+func (x *ConfigPayload) GetSenderName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SenderName
+}
+
+func (x *ConfigPayload) GetReplyToEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.ReplyToEmail
+}
+
+func (x *ConfigPayload) GetEmailNotificationsEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.EmailNotificationsEnabled
+}
+
+func (x *ConfigPayload) GetSmtpHost() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SmtpHost
+}
+
+func (x *ConfigPayload) GetSmtpPort() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SmtpPort
+}
+
+func (x *ConfigPayload) GetSmtpUsername() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SmtpUsername
+}
+
+func (x *ConfigPayload) GetSmtpPasswordConfigured() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.SmtpPasswordConfigured
 }
 
 func (x *ConfigPayload) GetWebsite() string {
@@ -406,27 +478,35 @@ func (x *GetIndustriesResponse) GetGroups() []*IndustryGroup {
 }
 
 type UpdateConfigRequest struct {
-	SiteName               *string `json:"site_name,omitempty"`
-	LogoUrl                *string `json:"logo_url,omitempty"`
-	FaviconUrl             *string `json:"favicon_url,omitempty"`
-	ContactEmail           *string `json:"contact_email,omitempty"`
-	ContactNumber          *string `json:"contact_number,omitempty"`
-	SenderEmail            *string `json:"sender_email,omitempty"`
-	Website                *string `json:"website,omitempty"`
-	MapsUrl                *string `json:"maps_url,omitempty"`
-	Address                *string `json:"address,omitempty"`
-	City                   *string `json:"city,omitempty"`
-	Zipcode                *string `json:"zipcode,omitempty"`
-	Country                *string `json:"country,omitempty"`
-	Instagram              *string `json:"instagram,omitempty"`
-	MaintenanceMode        *bool   `json:"maintenance_mode,omitempty"`
-	MaintenanceNotice      *string `json:"maintenance_notice,omitempty"`
-	AddonsEnabled          *bool   `json:"addons_enabled,omitempty"`
-	EnableReviews          *bool   `json:"enable_reviews,omitempty"`
-	EnableWishlist         *bool   `json:"enable_wishlist,omitempty"`
-	EnableNewsletterSignup *bool   `json:"enable_newsletter_signup,omitempty"`
-	AboutContent           *string `json:"about_content,omitempty"`
-	FooterSubText          *string `json:"footer_sub_text,omitempty"`
+	SiteName                  *string `json:"site_name,omitempty"`
+	LogoUrl                   *string `json:"logo_url,omitempty"`
+	FaviconUrl                *string `json:"favicon_url,omitempty"`
+	ContactEmail              *string `json:"contact_email,omitempty"`
+	ContactNumber             *string `json:"contact_number,omitempty"`
+	SenderEmail               *string `json:"sender_email,omitempty"`
+	EmailProvider             *string `json:"email_provider,omitempty"`
+	SenderName                *string `json:"sender_name,omitempty"`
+	ReplyToEmail              *string `json:"reply_to_email,omitempty"`
+	EmailNotificationsEnabled *bool   `json:"email_notifications_enabled,omitempty"`
+	SmtpHost                  *string `json:"smtp_host,omitempty"`
+	SmtpPort                  *int32  `json:"smtp_port,omitempty"`
+	SmtpUsername              *string `json:"smtp_username,omitempty"`
+	SmtpPassword              *string `json:"smtp_password,omitempty"`
+	Website                   *string `json:"website,omitempty"`
+	MapsUrl                   *string `json:"maps_url,omitempty"`
+	Address                   *string `json:"address,omitempty"`
+	City                      *string `json:"city,omitempty"`
+	Zipcode                   *string `json:"zipcode,omitempty"`
+	Country                   *string `json:"country,omitempty"`
+	Instagram                 *string `json:"instagram,omitempty"`
+	MaintenanceMode           *bool   `json:"maintenance_mode,omitempty"`
+	MaintenanceNotice         *string `json:"maintenance_notice,omitempty"`
+	AddonsEnabled             *bool   `json:"addons_enabled,omitempty"`
+	EnableReviews             *bool   `json:"enable_reviews,omitempty"`
+	EnableWishlist            *bool   `json:"enable_wishlist,omitempty"`
+	EnableNewsletterSignup    *bool   `json:"enable_newsletter_signup,omitempty"`
+	AboutContent              *string `json:"about_content,omitempty"`
+	FooterSubText             *string `json:"footer_sub_text,omitempty"`
 }
 
 func (x *UpdateConfigRequest) GetSiteName() string {
@@ -499,6 +579,102 @@ func (x *UpdateConfigRequest) GetSenderEmail() string {
 		return zero
 	}
 	return *x.SenderEmail
+}
+
+func (x *UpdateConfigRequest) GetEmailProvider() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.EmailProvider == nil {
+		var zero string
+		return zero
+	}
+	return *x.EmailProvider
+}
+
+func (x *UpdateConfigRequest) GetSenderName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SenderName == nil {
+		var zero string
+		return zero
+	}
+	return *x.SenderName
+}
+
+func (x *UpdateConfigRequest) GetReplyToEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ReplyToEmail == nil {
+		var zero string
+		return zero
+	}
+	return *x.ReplyToEmail
+}
+
+func (x *UpdateConfigRequest) GetEmailNotificationsEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.EmailNotificationsEnabled == nil {
+		var zero bool
+		return zero
+	}
+	return *x.EmailNotificationsEnabled
+}
+
+func (x *UpdateConfigRequest) GetSmtpHost() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SmtpHost == nil {
+		var zero string
+		return zero
+	}
+	return *x.SmtpHost
+}
+
+func (x *UpdateConfigRequest) GetSmtpPort() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.SmtpPort == nil {
+		var zero int32
+		return zero
+	}
+	return *x.SmtpPort
+}
+
+func (x *UpdateConfigRequest) GetSmtpUsername() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SmtpUsername == nil {
+		var zero string
+		return zero
+	}
+	return *x.SmtpUsername
+}
+
+func (x *UpdateConfigRequest) GetSmtpPassword() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.SmtpPassword == nil {
+		var zero string
+		return zero
+	}
+	return *x.SmtpPassword
 }
 
 func (x *UpdateConfigRequest) GetWebsite() string {
@@ -700,6 +876,39 @@ func (x *UpdateConfigResponse) GetConfig() *ConfigPayload {
 		return zero
 	}
 	return x.Config
+}
+
+type SendTestEmailRequest struct {
+	To string `json:"to,omitempty"`
+}
+
+func (x *SendTestEmailRequest) GetTo() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.To
+}
+
+type SendTestEmailResponse struct {
+	Message string `json:"message,omitempty"`
+	Queued  bool   `json:"queued,omitempty"`
+}
+
+func (x *SendTestEmailResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
+func (x *SendTestEmailResponse) GetQueued() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Queued
 }
 
 type CustomDomain struct {

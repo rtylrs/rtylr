@@ -11,6 +11,14 @@ message ConfigPayload {
   contact_email: string
   contact_number: string
   sender_email: string
+  email_provider: string
+  sender_name: string
+  reply_to_email: string
+  email_notifications_enabled: bool
+  smtp_host: string
+  smtp_port: int32
+  smtp_username: string
+  smtp_password_configured: bool
   website: string
   maps_url: string
   address: string
@@ -77,6 +85,14 @@ message UpdateConfigRequest {
   contact_email: string? @nullable
   contact_number: string? @nullable
   sender_email: string? @nullable
+  email_provider: string? @nullable
+  sender_name: string? @nullable
+  reply_to_email: string? @nullable
+  email_notifications_enabled: bool? @nullable
+  smtp_host: string? @nullable
+  smtp_port: int32? @nullable
+  smtp_username: string? @nullable
+  smtp_password: string? @nullable
   website: string? @nullable
   maps_url: string? @nullable
   address: string? @nullable
@@ -97,6 +113,15 @@ message UpdateConfigRequest {
 message UpdateConfigResponse {
   message: string
   config: ConfigPayload
+}
+
+message SendTestEmailRequest {
+  to: string @required
+}
+
+message SendTestEmailResponse {
+  message: string
+  queued: bool
 }
 
 message CustomDomain {

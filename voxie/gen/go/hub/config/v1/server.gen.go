@@ -206,6 +206,7 @@ type ConfigServiceServer interface {
 	RegisterCustomDomain(ctx context.Context, req *RegisterCustomDomainRequest) (*RegisterCustomDomainResponse, error)
 	VerifyCustomDomain(ctx context.Context, req *VerifyCustomDomainRequest) (*VerifyCustomDomainResponse, error)
 	RemoveCustomDomain(ctx context.Context, req *RemoveCustomDomainRequest) (*RemoveCustomDomainResponse, error)
+	SendTestEmail(ctx context.Context, req *SendTestEmailRequest) (*SendTestEmailResponse, error)
 	GetIndustries(ctx context.Context, req *GetIndustriesRequest) (*GetIndustriesResponse, error)
 }
 
@@ -377,6 +378,28 @@ func RegisterConfigServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "ConfigService", Method: "removeCustomDomain", HTTPMethod: "DELETE", Route: "/hub/config/v1/config/custom-domain", AuthSchemes: nil}))
+	mux.Handle("POST /hub/config/v1/config/test-email", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(SendTestEmailRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.SendTestEmail(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "ConfigService", Method: "sendTestEmail", HTTPMethod: "POST", Route: "/hub/config/v1/config/test-email", AuthSchemes: nil}))
 	mux.Handle("GET /hub/config/v1/industries", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetIndustriesRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
