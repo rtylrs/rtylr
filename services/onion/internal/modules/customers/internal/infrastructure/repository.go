@@ -833,6 +833,40 @@ func (r *Repository) GetCustomerTimeline(ctx context.Context, businessID, custom
 	return entries, nil
 }
 
+func (r *Repository) ListCustomerTimelinePage(ctx context.Context, businessID, customerID int64, cursorCreatedAt *time.Time, cursorID int64, pageSize int) ([]domain.TimelineEntry, error) {
+	rows, err := r.queries.ListCustomerTimelinePage(ctx, sqlc.ListCustomerTimelinePageParams{
+		BusinessID:      businessID,
+		CustomerID:      customerID,
+		CursorCreatedAt: nullableTime(cursorCreatedAt),
+		CursorID:        cursorID,
+		Limit:           int32(pageSize),
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list customer timeline page", logger.Error(err))
+		return nil, err
+	}
+
+	entries := make([]domain.TimelineEntry, 0, len(rows))
+	for _, row := range rows {
+		entry := domain.TimelineEntry{
+			ID:          row.ID,
+			OwnerID:     row.OwnerID,
+			BusinessID:  row.BusinessID,
+			CustomerID:  row.CustomerID,
+			Type:        row.Type,
+			Description: row.Description.String,
+			CreatedAt:   row.CreatedAt.Time,
+		}
+		if row.Metadata != nil {
+			entry.Metadata = []byte(row.Metadata)
+		} else {
+			entry.Metadata = []byte("{}")
+		}
+		entries = append(entries, entry)
+	}
+	return entries, nil
+}
+
 func (r *Repository) InsertTimelineEntry(ctx context.Context, entry domain.TimelineEntry) error {
 	err := r.queries.InsertTimelineEntry(ctx, sqlc.InsertTimelineEntryParams{
 		OwnerID:     entry.OwnerID,

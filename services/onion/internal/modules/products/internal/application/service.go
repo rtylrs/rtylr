@@ -200,10 +200,10 @@ func (s *Service) GetDashboard(ctx context.Context, ownerID int64) (domain.Dashb
 	)
 }
 
-func (s *Service) ListReorderSuggestions(ctx context.Context, ownerID int64) ([]domain.ReorderSuggestion, error) {
+func (s *Service) ListReorderSuggestions(ctx context.Context, ownerID int64) (domain.ReorderSuggestionsResult, error) {
 	key := fmt.Sprintf("%s|reorder", cacheKeys.ProductsList(ownerID))
-	return cacher.Of[[]domain.ReorderSuggestion]().GetOrComputeSingle(ctx, key,
-		func(ctx context.Context) ([]domain.ReorderSuggestion, error) {
+	return cacher.Of[domain.ReorderSuggestionsResult]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.ReorderSuggestionsResult, error) {
 			return s.repo.ListReorderSuggestions(ctx, ownerID)
 		},
 		cacher.WithExpiry(ctx, productsCacheTTL),

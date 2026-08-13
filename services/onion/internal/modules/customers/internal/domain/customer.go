@@ -323,6 +323,11 @@ type CustomerExport struct {
 	Timeline     []TimelineEntry      `json:"timeline"`
 }
 
+type TimelinePage struct {
+	Entries    []TimelineEntry `json:"entries"`
+	NextCursor string          `json:"next_cursor,omitempty"`
+}
+
 // Merge
 
 type MergeCustomersInput struct {
