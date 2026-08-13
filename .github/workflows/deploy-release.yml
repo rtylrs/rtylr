@@ -44,7 +44,7 @@ permissions:
 jobs:
   resolve:
     name: Resolve promoted manifest
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     outputs:
       app: ${{ steps.values.outputs.app }}
       version: ${{ steps.values.outputs.version }}

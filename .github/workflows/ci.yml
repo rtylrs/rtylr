@@ -20,7 +20,7 @@ env:
 jobs:
   changes:
     name: Select changed apps
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     outputs:
       apps: ${{ steps.select.outputs.apps }}
       has_apps: ${{ steps.select.outputs.has_apps }}
