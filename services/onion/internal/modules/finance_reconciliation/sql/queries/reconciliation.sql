@@ -6,7 +6,7 @@ WHERE bf.business_id = ?
   AND bf.matched_expense_id IS NULL
   AND bf.matched_invoice_id IS NULL
   AND NOT EXISTS (
-      SELECT 1 FROM finance_reconciliation_matches m
+      SELECT 1 FROM finance_reconciliation_matches m FORCE INDEX (idx_finance_reconciliation_business_bank)
       WHERE m.business_id = bf.business_id
         AND m.bank_feed_id = bf.id
   )
@@ -46,7 +46,7 @@ FROM finance_invoices i
 WHERE i.business_id = ?
   AND i.status IN ('draft','sent','viewed','partial','overdue')
   AND NOT EXISTS (
-      SELECT 1 FROM finance_reconciliation_matches m
+      SELECT 1 FROM finance_reconciliation_matches m FORCE INDEX (idx_finance_reconciliation_business_target)
       WHERE m.business_id = i.business_id
         AND m.target_type = 'invoice'
         AND m.target_id = i.id
@@ -59,7 +59,7 @@ SELECT e.id, e.description, COALESCE(e.vendor, '') AS vendor, e.amount, e.curren
 FROM finance_expenses e
 WHERE e.business_id = ?
   AND NOT EXISTS (
-      SELECT 1 FROM finance_reconciliation_matches m
+      SELECT 1 FROM finance_reconciliation_matches m FORCE INDEX (idx_finance_reconciliation_business_target)
       WHERE m.business_id = e.business_id
         AND m.target_type = 'expense'
         AND m.target_id = e.id
