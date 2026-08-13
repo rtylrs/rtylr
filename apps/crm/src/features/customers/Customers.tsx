@@ -97,13 +97,21 @@ const Customers: React.FC = () => {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [bulkTag, setBulkTag] = useState('');
 
-  const { data: fetchedCustomers, isLoading } = useListCustomers({
+  const { data: fetchedCustomers, isLoading, isError } = useListCustomers({
     limit: 100,
     offset: 0,
     search: search.trim() || undefined,
   });
   const update = useUpdateCustomer();
   const customers = fetchedCustomers ?? [];
+
+  if (isError) {
+    return (
+      <div style={{ maxWidth: '1100px', padding: '40px 0', color: 'var(--hub-text-muted)' }}>
+        Unable to load customers. Please refresh and try again.
+      </div>
+    );
+  }
 
   const filtered = customers.filter((c) => {
     const matchTier = tierFilter === 'All' || getTier(c.loyaltyPoints) === tierFilter;

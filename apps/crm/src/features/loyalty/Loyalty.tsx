@@ -325,7 +325,7 @@ const Loyalty: React.FC = () => {
                     }}
                   >
                     <span style={{ fontSize: '22px', fontWeight: 700, color: tier.color }}>
-                      {tier.multiplier}x
+                      {tier.multiplier}%
                     </span>
                     <span
                       style={{
@@ -334,7 +334,7 @@ const Loyalty: React.FC = () => {
                         marginLeft: '4px',
                       }}
                     >
-                      multiplier
+                      discount
                     </span>
                   </div>
                   <ul

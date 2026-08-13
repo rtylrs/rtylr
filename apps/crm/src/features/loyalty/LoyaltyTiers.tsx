@@ -92,12 +92,13 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
             marginBottom: '4px',
           }}
         >
-          Multiplier
+          Discount (%)
         </label>
         <input
           type="number"
           value={multiplier}
-          min={1}
+          min={0}
+          max={100}
           step={0.1}
           onChange={(e) => setMultiplier(Number(e.target.value))}
           style={{
@@ -271,7 +272,7 @@ const LoyaltyTiers: React.FC = () => {
                     display: 'inline-block',
                   }}
                 >
-                  {t.multiplier}x points multiplier
+                  {t.multiplier}% discount
                 </div>
                 <div
                   style={{

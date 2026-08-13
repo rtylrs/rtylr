@@ -42,7 +42,7 @@ const CustomerProfile: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const customerId = Number(id);
-  const { data: fetched, isLoading } = useGetCustomerFull(customerId);
+  const { data: fetched, isLoading, isError } = useGetCustomerFull(customerId);
   const [timelineCursor, setTimelineCursor] = useState<string>();
   const { data: fetchedTimeline } = useCustomerTimeline(customerId, timelineCursor);
   const [timelineEntries, setTimelineEntries] = useState<
@@ -78,6 +78,16 @@ const CustomerProfile: React.FC = () => {
     );
   }
 
+  if (isError) {
+    return (
+      <div style={{ maxWidth: '1100px', textAlign: 'center', padding: '60px 20px' }}>
+        <p style={{ fontSize: '14px', color: 'var(--hub-text-muted)' }}>
+          Unable to load this customer. Please try again.
+        </p>
+      </div>
+    );
+  }
+
   if (!customer) {
     return (
       <div style={{ maxWidth: '1100px', textAlign: 'center', padding: '60px 20px' }}>
@@ -89,7 +99,8 @@ const CustomerProfile: React.FC = () => {
   const tier = getTier(customer.loyaltyPoints);
   const next = pointsToNextTier(customer.loyaltyPoints);
   const tags = customer.tags || [];
-  const consent = customer.consent || { email: true, sms: false, marketing: true };
+  // Missing consent means unknown, never opt-in. The backend now persists this map for new records.
+  const consent = customer.consent || { email: false, sms: false, marketing: false };
 
   const handleAddTag = () => {
     if (!newTag.trim()) {
@@ -171,7 +182,16 @@ const CustomerProfile: React.FC = () => {
 
   const handleExport = () => {
     exportData.mutate(customer.id, {
-      onSuccess: () => toast.success('Customer data export started'),
+      onSuccess: (data) => {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `customer-${customer.id}-export.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        toast.success('Customer data exported');
+      },
       onError: () => toast.error('Failed to export customer data'),
     });
   };

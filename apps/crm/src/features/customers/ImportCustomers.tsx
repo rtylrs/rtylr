@@ -8,6 +8,45 @@ import { Breadcrumbs, Button, Card, PageHeader, Select } from '../../shared/comp
 
 const REQUIRED = ['name', 'email', 'phone'];
 
+function parseCsv(input: string): string[][] {
+  const records: string[][] = [];
+  let record: string[] = [];
+  let field = '';
+  let quoted = false;
+  for (let i = 0; i < input.length; i += 1) {
+    const char = input[i];
+    const next = input[i + 1];
+    if (char === '"') {
+      if (quoted && next === '"') {
+        field += '"';
+        i += 1;
+      } else {
+        quoted = !quoted;
+      }
+      continue;
+    }
+    if (char === ',' && !quoted) {
+      record.push(field.trim());
+      field = '';
+      continue;
+    }
+    if ((char === '\n' || char === '\r') && !quoted) {
+      if (char === '\r' && next === '\n') i += 1;
+      record.push(field.trim());
+      field = '';
+      if (record.some((value) => value !== '')) records.push(record);
+      record = [];
+      continue;
+    }
+    field += char;
+  }
+  if (field !== '' || record.length > 0) {
+    record.push(field.trim());
+    if (record.some((value) => value !== '')) records.push(record);
+  }
+  return records;
+}
+
 const ImportCustomers: React.FC = () => {
   const navigate = useNavigate();
   const importMut = useImportCustomerRows();
@@ -22,9 +61,8 @@ const ImportCustomers: React.FC = () => {
     const reader = new FileReader();
     reader.onload = () => {
       const text = reader.result as string;
-      const lines = text.split(/\r?\n/).filter((l) => l.trim());
-      if (lines.length === 0) return;
-      const parsed = lines.map((l) => l.split(',').map((c) => c.trim().replace(/^"|"$/g, '')));
+      const parsed = parseCsv(text);
+      if (parsed.length === 0) return;
       const hdr = parsed[0];
       const body = parsed.slice(1);
       setHeaders(hdr);
