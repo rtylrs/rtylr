@@ -1,11 +1,9 @@
-name: PR Tests
+name: Manual Tests
 
+# Run the full Go test suite manually to conserve private-repository Actions
+# minutes. Main-branch deploys still build the production images.
 on:
-  pull_request:
-    branches: [main, master]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
+  workflow_dispatch:
 
 # The `test` job never touches a database. Schema changes are applied to the
 # production DB manually by an operator: CI does not create, migrate, or

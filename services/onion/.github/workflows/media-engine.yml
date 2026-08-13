@@ -9,11 +9,6 @@ on:
     paths:
       - "media-engine/**"
       - ".github/workflows/media-engine.yml"
-  pull_request:
-    branches: [main, master]
-    paths:
-      - "media-engine/**"
-      - ".github/workflows/media-engine.yml"
 
 jobs:
   build-test:
