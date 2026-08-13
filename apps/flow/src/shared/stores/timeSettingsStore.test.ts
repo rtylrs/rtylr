@@ -1,0 +1,134 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import {
+  DEFAULT_TIME_SETTINGS,
+  TIME_SETTINGS_STORAGE_KEY,
+  roundLoggedMinutes,
+  useTimeSettingsStore,
+} from './timeSettingsStore';
+
+beforeEach(() => {
+  localStorage.clear();
+  useTimeSettingsStore.setState({ ...DEFAULT_TIME_SETTINGS });
+});
+
+describe('time settings defaults', () => {
+  it('seeds the shipped defaults, so no screen has to hardcode them', () => {
+    const s = useTimeSettingsStore.getState();
+
+    expect(s.weekStart).toBe('monday');
+    expect(s.roundingMinutes).toBe(15);
+    expect(s.weeklyTargetMinutes).toBe(40 * 60);
+    expect(s.overtimeThresholdMinutes).toBe(45 * 60);
+    expect(s.approvalLocksEntry).toBe(true);
+    expect(s.autoLockDays).toBe(7);
+  });
+
+  it('seeds four categories as a starting point, not a taxonomy', () => {
+    const names = useTimeSettingsStore.getState().categories.map((c) => c.name);
+
+    expect(names).toEqual(['Development', 'Review', 'Meeting', 'Admin']);
+  });
+});
+
+describe('categories', () => {
+  it('adds a category with a billable flag', () => {
+    useTimeSettingsStore.getState().addCategory('Travel', false);
+
+    const added = useTimeSettingsStore.getState().categories.at(-1);
+    expect(added?.name).toBe('Travel');
+    expect(added?.billable).toBe(false);
+  });
+
+  it('refuses a blank name rather than adding an unnameable row', () => {
+    const before = useTimeSettingsStore.getState().categories.length;
+    useTimeSettingsStore.getState().addCategory('   ', true);
+
+    expect(useTimeSettingsStore.getState().categories).toHaveLength(before);
+  });
+
+  it('refuses a duplicate name, case-insensitively', () => {
+    const before = useTimeSettingsStore.getState().categories.length;
+    useTimeSettingsStore.getState().addCategory('development', true);
+
+    expect(useTimeSettingsStore.getState().categories).toHaveLength(before);
+  });
+
+  it('renames a category in place', () => {
+    const id = useTimeSettingsStore.getState().categories[0].id;
+    useTimeSettingsStore.getState().renameCategory(id, 'Engineering');
+
+    expect(useTimeSettingsStore.getState().categories[0].name).toBe('Engineering');
+  });
+
+  it('toggles the billable flag', () => {
+    const first = useTimeSettingsStore.getState().categories[0];
+    useTimeSettingsStore.getState().setCategoryBillable(first.id, !first.billable);
+
+    expect(useTimeSettingsStore.getState().categories[0].billable).toBe(!first.billable);
+  });
+
+  it('deletes a category', () => {
+    const id = useTimeSettingsStore.getState().categories[0].id;
+    useTimeSettingsStore.getState().deleteCategory(id);
+
+    expect(useTimeSettingsStore.getState().categories.map((c) => c.id)).not.toContain(id);
+  });
+
+  it('keeps the last category, because an entry with no category to pick is unloggable', () => {
+    const { categories } = useTimeSettingsStore.getState();
+    categories.slice(1).forEach((c) => useTimeSettingsStore.getState().deleteCategory(c.id));
+    const lastId = useTimeSettingsStore.getState().categories[0].id;
+
+    useTimeSettingsStore.getState().deleteCategory(lastId);
+
+    expect(useTimeSettingsStore.getState().categories).toHaveLength(1);
+  });
+});
+
+describe('billable rates', () => {
+  it('starts unset, so nothing bills at zero by default', () => {
+    expect(useTimeSettingsStore.getState().ratesByUserId['7']).toBeUndefined();
+  });
+
+  it('stores a rate against a user', () => {
+    useTimeSettingsStore.getState().setRate('7', 95);
+
+    expect(useTimeSettingsStore.getState().ratesByUserId['7']).toBe(95);
+  });
+
+  it('clears a rate back to unset rather than to zero', () => {
+    useTimeSettingsStore.getState().setRate('7', 95);
+    useTimeSettingsStore.getState().setRate('7', null);
+
+    expect(useTimeSettingsStore.getState().ratesByUserId['7']).toBeNull();
+  });
+});
+
+describe('persistence', () => {
+  it('writes through to storage under a versioned key', () => {
+    useTimeSettingsStore.getState().setWeekStart('sunday');
+
+    const raw = localStorage.getItem(TIME_SETTINGS_STORAGE_KEY);
+    expect(raw).toContain('sunday');
+  });
+});
+
+describe('roundLoggedMinutes', () => {
+  it('leaves a duration alone when rounding is off', () => {
+    expect(roundLoggedMinutes(7, 0)).toBe(7);
+  });
+
+  it('rounds to the nearest increment', () => {
+    expect(roundLoggedMinutes(100, 15)).toBe(105);
+    expect(roundLoggedMinutes(97, 15)).toBe(90);
+  });
+
+  it('never rounds a real entry down to nothing', () => {
+    expect(roundLoggedMinutes(5, 15)).toBe(15);
+    expect(roundLoggedMinutes(1, 30)).toBe(30);
+  });
+
+  it('leaves an exact multiple untouched', () => {
+    expect(roundLoggedMinutes(105, 15)).toBe(105);
+  });
+});
