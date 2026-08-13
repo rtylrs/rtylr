@@ -73,7 +73,7 @@ const Contracts: React.FC = () => {
 
   const companyName = (contract: Contract): string => {
     const lead = (leads ?? []).find((l) => l.id === contract.leadId);
-    return lead?.company ?? contract.company ?? `Lead #${contract.leadId}`;
+    return lead?.companyName ?? lead?.company ?? contract.company ?? `Lead #${contract.leadId}`;
   };
 
   const handleSubmit = (): void => {
