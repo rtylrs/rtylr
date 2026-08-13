@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -30,6 +31,8 @@ func (c *ExpensesServiceClient) ListExpenses(ctx context.Context, req *ListExpen
 	}
 	path := "/finance/expenses/v1/expenses"
 	query := url.Values{}
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("page_size", strconv.FormatInt(int64(req.PageSize), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

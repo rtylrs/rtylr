@@ -155,16 +155,22 @@ return violations;
 }
 
 export interface ListRecurringInvoicesRequest {
+page?: number;
+pageSize?: number;
 }
 
 export function decodeListRecurringInvoicesRequest(v: any): ListRecurringInvoicesRequest {
 if (v === null || v === undefined) return v;
 return {
+page: v.page,
+pageSize: v.page_size,
 };
 }
 
 export function encodeListRecurringInvoicesRequest(v: ListRecurringInvoicesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
@@ -175,18 +181,27 @@ return violations;
 
 export interface ListRecurringInvoicesResponse {
 recurringInvoices?: (RecurringInvoice)[];
+page?: number;
+pageSize?: number;
+hasMore?: boolean;
 }
 
 export function decodeListRecurringInvoicesResponse(v: any): ListRecurringInvoicesResponse {
 if (v === null || v === undefined) return v;
 return {
 recurringInvoices: (v.recurring_invoices !== undefined ? (v.recurring_invoices as any[]).map(decodeRecurringInvoice) : v.recurring_invoices),
+page: v.page,
+pageSize: v.page_size,
+hasMore: v.has_more,
 };
 }
 
 export function encodeListRecurringInvoicesResponse(v: ListRecurringInvoicesResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.recurringInvoices !== undefined) { out.recurring_invoices = (v.recurringInvoices as any[]).map(encodeRecurringInvoice); }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
 return out;
 }
 

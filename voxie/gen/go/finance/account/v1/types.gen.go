@@ -382,10 +382,31 @@ func (x *GetChartOfAccountsResponse) GetTree() []*ChartOfAccountsNode {
 }
 
 type ListAccountsRequest struct {
+	Page     int64 `json:"page,omitempty"`
+	PageSize int64 `json:"page_size,omitempty"`
+}
+
+func (x *ListAccountsRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListAccountsRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
 }
 
 type ListAccountsResponse struct {
 	Accounts []*Account `json:"accounts,omitempty"`
+	Page     int64      `json:"page,omitempty"`
+	PageSize int64      `json:"page_size,omitempty"`
+	HasMore  bool       `json:"has_more,omitempty"`
 }
 
 func (x *ListAccountsResponse) GetAccounts() []*Account {
@@ -394,6 +415,30 @@ func (x *ListAccountsResponse) GetAccounts() []*Account {
 		return zero
 	}
 	return x.Accounts
+}
+
+func (x *ListAccountsResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListAccountsResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
+func (x *ListAccountsResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
 }
 
 type UpdateAccountBody struct {

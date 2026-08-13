@@ -320,16 +320,22 @@ return violations;
 }
 
 export interface ListExpensesRequest {
+page?: number;
+pageSize?: number;
 }
 
 export function decodeListExpensesRequest(v: any): ListExpensesRequest {
 if (v === null || v === undefined) return v;
 return {
+page: v.page,
+pageSize: v.page_size,
 };
 }
 
 export function encodeListExpensesRequest(v: ListExpensesRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
@@ -340,18 +346,27 @@ return violations;
 
 export interface ListExpensesResponse {
 expenses?: (Expense)[];
+page?: number;
+pageSize?: number;
+hasMore?: boolean;
 }
 
 export function decodeListExpensesResponse(v: any): ListExpensesResponse {
 if (v === null || v === undefined) return v;
 return {
 expenses: (v.expenses !== undefined ? (v.expenses as any[]).map(decodeExpense) : v.expenses),
+page: v.page,
+pageSize: v.page_size,
+hasMore: v.has_more,
 };
 }
 
 export function encodeListExpensesResponse(v: ListExpensesResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.expenses !== undefined) { out.expenses = (v.expenses as any[]).map(encodeExpense); }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
 return out;
 }
 

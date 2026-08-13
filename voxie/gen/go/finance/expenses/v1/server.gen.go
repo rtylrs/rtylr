@@ -242,6 +242,12 @@ func RegisterExpensesServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /finance/expenses/v1/expenses", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListExpensesRequest)
+		if r.URL.Query().Get("page") != "" {
+			req.Page = parseInt64(r.URL.Query().Get("page"))
+		}
+		if r.URL.Query().Get("page_size") != "" {
+			req.PageSize = parseInt64(r.URL.Query().Get("page_size"))
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

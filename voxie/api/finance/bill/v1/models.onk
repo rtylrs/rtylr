@@ -62,11 +62,17 @@ message GetBillResponse {
   bill: Bill
 }
 
-message ListBillsRequest {}
+message ListBillsRequest {
+  page: int64 @query("page") @encode(number)
+  page_size: int64 @query("page_size") @encode(number)
+}
 
 message ListBillsResponse {
   /// bills is the bills value for this contract.
   bills: Bill[]
+  page: int64 @encode(number)
+  page_size: int64 @encode(number)
+  has_more: bool
 }
 
 message UpdateBillBody {

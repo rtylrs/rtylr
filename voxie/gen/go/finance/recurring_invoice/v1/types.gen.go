@@ -323,10 +323,31 @@ func (x *GetRecurringInvoiceResponse) GetInvoice() *RecurringInvoice {
 }
 
 type ListRecurringInvoicesRequest struct {
+	Page     int64 `json:"page,omitempty"`
+	PageSize int64 `json:"page_size,omitempty"`
+}
+
+func (x *ListRecurringInvoicesRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListRecurringInvoicesRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
 }
 
 type ListRecurringInvoicesResponse struct {
 	RecurringInvoices []*RecurringInvoice `json:"recurring_invoices,omitempty"`
+	Page              int64               `json:"page,omitempty"`
+	PageSize          int64               `json:"page_size,omitempty"`
+	HasMore           bool                `json:"has_more,omitempty"`
 }
 
 func (x *ListRecurringInvoicesResponse) GetRecurringInvoices() []*RecurringInvoice {
@@ -335,6 +356,30 @@ func (x *ListRecurringInvoicesResponse) GetRecurringInvoices() []*RecurringInvoi
 		return zero
 	}
 	return x.RecurringInvoices
+}
+
+func (x *ListRecurringInvoicesResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListRecurringInvoicesResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
+func (x *ListRecurringInvoicesResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
 }
 
 type PauseRecurringInvoiceRequest struct {

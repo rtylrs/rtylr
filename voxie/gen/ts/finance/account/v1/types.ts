@@ -237,16 +237,22 @@ return violations;
 }
 
 export interface ListAccountsRequest {
+page?: number;
+pageSize?: number;
 }
 
 export function decodeListAccountsRequest(v: any): ListAccountsRequest {
 if (v === null || v === undefined) return v;
 return {
+page: v.page,
+pageSize: v.page_size,
 };
 }
 
 export function encodeListAccountsRequest(v: ListAccountsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
@@ -257,18 +263,27 @@ return violations;
 
 export interface ListAccountsResponse {
 accounts?: (Account)[];
+page?: number;
+pageSize?: number;
+hasMore?: boolean;
 }
 
 export function decodeListAccountsResponse(v: any): ListAccountsResponse {
 if (v === null || v === undefined) return v;
 return {
 accounts: (v.accounts !== undefined ? (v.accounts as any[]).map(decodeAccount) : v.accounts),
+page: v.page,
+pageSize: v.page_size,
+hasMore: v.has_more,
 };
 }
 
 export function encodeListAccountsResponse(v: ListAccountsResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.accounts !== undefined) { out.accounts = (v.accounts as any[]).map(encodeAccount); }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
 return out;
 }
 

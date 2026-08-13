@@ -561,10 +561,31 @@ func (x *ListExpenseCategoriesResponse) GetCategories() []*ExpenseCategory {
 }
 
 type ListExpensesRequest struct {
+	Page     int64 `json:"page,omitempty"`
+	PageSize int64 `json:"page_size,omitempty"`
+}
+
+func (x *ListExpensesRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListExpensesRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
 }
 
 type ListExpensesResponse struct {
 	Expenses []*Expense `json:"expenses,omitempty"`
+	Page     int64      `json:"page,omitempty"`
+	PageSize int64      `json:"page_size,omitempty"`
+	HasMore  bool       `json:"has_more,omitempty"`
 }
 
 func (x *ListExpensesResponse) GetExpenses() []*Expense {
@@ -573,6 +594,30 @@ func (x *ListExpensesResponse) GetExpenses() []*Expense {
 		return zero
 	}
 	return x.Expenses
+}
+
+func (x *ListExpensesResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListExpensesResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
+func (x *ListExpensesResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
 }
 
 type UpdateExpenseBody struct {
