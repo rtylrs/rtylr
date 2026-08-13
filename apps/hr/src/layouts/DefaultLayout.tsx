@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
-import { signOut, useUserStore } from '@voxire/auth';
+import { useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
 import { LicenseBanner } from '@voxire/components';
 import { buildCaretRouteContext, CaretButton, CaretPanel, useCaretStore } from '@voxire/caret';
@@ -53,6 +53,7 @@ import type { HRCompanyConfigPayload } from '@voxire/voxie/hr/setup/v1/types';
 import { useForesightLinks } from '@voxire/utils';
 import { safe } from '../shared/lib/api';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
+import { signOutFromHR } from '../shared/lib/hrSignOut';
 import CommandPalette from '../shared/components/CommandPalette';
 import GlobalShortcuts from '../shared/components/GlobalShortcuts';
 import { useMediaQuery } from '../shared/components/ui';
@@ -486,7 +487,7 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
             />
             <button
               onClick={() => {
-                signOut('hr');
+                signOutFromHR();
               }}
               style={{
                 display: 'flex',
