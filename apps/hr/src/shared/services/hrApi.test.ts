@@ -19,11 +19,6 @@ describe('hrApi', () => {
   });
 
   // Staff
-  it('listStaff calls GET /hr/staff', () => {
-    hrApi.listStaff();
-    expect(safe.get).toHaveBeenCalledWith('/hr/staff');
-  });
-
   it('createStaff calls POST /hr/staff', () => {
     const data = {
       name: 'Alice',
@@ -58,11 +53,6 @@ describe('hrApi', () => {
   });
 
   // Departments
-  it('listDepartments calls GET /hr/departments', () => {
-    hrApi.listDepartments();
-    expect(safe.get).toHaveBeenCalledWith('/hr/departments');
-  });
-
   it('createDepartment calls POST /hr/departments', () => {
     const data = { name: 'Eng', description: 'Engineering', head: 'Bob' };
     hrApi.createDepartment(data);
@@ -106,44 +96,15 @@ describe('hrApi', () => {
     });
   });
 
-  // Payroll
-  it('listPayroll calls GET /hr/payroll with params', () => {
-    hrApi.listPayroll({ period: '2026-03' });
-    expect(safe.get).toHaveBeenCalledWith('/hr/payroll', { params: { period: '2026-03' } });
-  });
-
-  it('runPayroll calls POST /hr/payroll/run', () => {
-    hrApi.runPayroll('2026-03');
-    expect(safe.post).toHaveBeenCalledWith('/hr/payroll/run', {
-      periodStart: '2026-03',
-      periodEnd: '2026-03',
-      periodLabel: '2026-03',
-    });
-  });
-
-  it('markPayrollPaid calls POST /hr/payroll/mark-paid', () => {
-    hrApi.markPayrollPaid(7);
-    expect(safe.post).toHaveBeenCalledWith('/hr/payroll/mark-paid', { id: 7 });
-  });
-
-  // Time Off
-  it('listTimeOff calls GET /hr/time-off', () => {
-    hrApi.listTimeOff();
-    expect(safe.get).toHaveBeenCalledWith('/hr/time-off');
-  });
-
-  it('submitTimeOff calls POST /hr/time-off', () => {
-    const data = { staffId: 1, startDate: '2026-04-01', endDate: '2026-04-05', reason: 'Vacation' };
-    hrApi.submitTimeOff(data);
-    expect(safe.post).toHaveBeenCalledWith('/hr/time-off', data);
-  });
-
-  it('approveTimeOff calls POST /hr/time-off/approve', () => {
-    hrApi.approveTimeOff(2, true);
-    expect(safe.post).toHaveBeenCalledWith('/hr/time-off/approve', {
-      id: 2,
-      status: 'approved',
-    });
+  it('does not expose retired duplicate operations', () => {
+    expect(hrApi).not.toHaveProperty('listStaff');
+    expect(hrApi).not.toHaveProperty('listDepartments');
+    expect(hrApi).not.toHaveProperty('listPayroll');
+    expect(hrApi).not.toHaveProperty('runPayroll');
+    expect(hrApi).not.toHaveProperty('markPayrollPaid');
+    expect(hrApi).not.toHaveProperty('listTimeOff');
+    expect(hrApi).not.toHaveProperty('submitTimeOff');
+    expect(hrApi).not.toHaveProperty('approveTimeOff');
   });
 
   // Dashboard
