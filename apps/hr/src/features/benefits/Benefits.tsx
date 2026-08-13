@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { Shield } from 'lucide-react';
@@ -12,6 +13,7 @@ import { Card, SectionHeader, EmptyState, Skeleton } from '../../shared/componen
 import BenefitPlanCard from '../../shared/components/BenefitPlanCard';
 
 const Benefits: React.FC = () => {
+  const { t } = useTranslation('benefits');
   const user = useUserStore((s) => s.user);
   const currentStaffId = Number(user?.id) || 1;
   const currentStaffName = user?.name || user?.email || 'Team member';
@@ -25,18 +27,15 @@ const Benefits: React.FC = () => {
     <>
       <HelmetContainer title="Benefits · rtylr" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <SectionHeader
-          title="Benefits & Perks"
-          subtitle="Health, dental, wellness and extra perks"
-        />
+        <SectionHeader title={t('title')} subtitle={t('subtitle')} />
 
         {loading ? (
           <Skeleton height={200} />
         ) : !plans || plans.length === 0 ? (
           <EmptyState
             icon={<Shield size={20} />}
-            title="No benefit plans"
-            description="Create plans to allow enrollment."
+            title={t('emptyTitle')}
+            description={t('emptyDescription')}
           />
         ) : (
           <div
@@ -63,7 +62,7 @@ const Benefits: React.FC = () => {
                         planId: p.id,
                         planName: p.name,
                       },
-                      { onSuccess: () => toast.success('Enrolled') }
+                      { onSuccess: () => toast.success(t('enrolled')) }
                     )
                   }
                 />
@@ -73,10 +72,10 @@ const Benefits: React.FC = () => {
         )}
 
         <Card>
-          <SectionHeader title="Active enrollments" />
+          <SectionHeader title={t('activeEnrollments')} />
           <div style={{ marginTop: 10, fontSize: 12 }}>
             {enrollments.length === 0 && (
-              <p style={{ color: 'var(--hr-text-muted)' }}>No enrollments yet.</p>
+              <p style={{ color: 'var(--hr-text-muted)' }}>{t('noEnrollments')}</p>
             )}
             {enrollments.map((e) => (
               <div
