@@ -201,7 +201,11 @@ const TimePanel = ({
         <ul className="mt-2 space-y-1">
           {logs.map((log) => {
             const authorName = nameFor(log.userId);
-            const isOwn = currentUserId != null && String(log.userId) === currentUserId;
+            // Deleting is gated on the same permission as logging, not on
+            // ownership alone: a view-only user who could delete but not add
+            // would be a strictly stranger permission than either.
+            const canDelete =
+              canLog && currentUserId != null && String(log.userId) === currentUserId;
             // flowApi substitutes '-' when a description is omitted, because
             // the contract marks it @required. Do not render the placeholder.
             const body = log.description === '-' ? '' : log.description;
@@ -230,7 +234,7 @@ const TimePanel = ({
                     {formatEntryTimestamp(log.loggedAt || log.createdAt, i18n.language)}
                   </p>
                 </div>
-                {isOwn && (
+                {canDelete && (
                   <button
                     type="button"
                     onClick={() => deleteTimeLog.mutate({ id: log.id, taskId })}
@@ -367,7 +371,7 @@ const TimePanel = ({
           {wasRounded && (
             <p className="text-[10px]" style={{ color: 'var(--flow-status-pending)' }}>
               {/* `count` rather than a plain number: i18next selects the plural
-                * form from it, and Arabic needs six of them. */}
+               * form from it, and Arabic needs six of them. */}
               {t('flow.time.roundedNotice', {
                 count: roundingMinutes,
                 amount: formatDurationClock(roundedPreview as number),
