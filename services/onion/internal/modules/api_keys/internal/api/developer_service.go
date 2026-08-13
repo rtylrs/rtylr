@@ -50,7 +50,7 @@ func (a *DeveloperAPI) ListApiKeys(ctx context.Context, _ *hubdeveloperv1.ListAp
 
 func (a *DeveloperAPI) CreateApiKey(ctx context.Context, req *hubdeveloperv1.CreateApiKeyRequest) (*hubdeveloperv1.CreateApiKeyResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -74,7 +74,7 @@ func (a *DeveloperAPI) CreateApiKey(ctx context.Context, req *hubdeveloperv1.Cre
 
 func (a *DeveloperAPI) RevokeApiKey(ctx context.Context, req *hubdeveloperv1.RevokeApiKeyRequest) (*hubdeveloperv1.RevokeApiKeyResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -121,7 +121,7 @@ func (a *DeveloperAPI) ListWebhooks(ctx context.Context, _ *hubdeveloperv1.ListW
 
 func (a *DeveloperAPI) CreateWebhook(ctx context.Context, req *hubdeveloperv1.CreateWebhookRequest) (*hubdeveloperv1.CreateWebhookResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -144,7 +144,7 @@ func (a *DeveloperAPI) CreateWebhook(ctx context.Context, req *hubdeveloperv1.Cr
 
 func (a *DeveloperAPI) UpdateWebhook(ctx context.Context, req *hubdeveloperv1.UpdateWebhookRequest) (*hubdeveloperv1.UpdateWebhookResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -172,7 +172,7 @@ func (a *DeveloperAPI) UpdateWebhook(ctx context.Context, req *hubdeveloperv1.Up
 
 func (a *DeveloperAPI) DeleteWebhook(ctx context.Context, req *hubdeveloperv1.DeleteWebhookRequest) (*hubdeveloperv1.DeleteWebhookResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

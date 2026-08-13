@@ -184,6 +184,10 @@ func segmentFromRow(row sqlc.CrmSegment) domain.Segment {
 	if row.Rules != nil {
 		seg.Filters = []byte(row.Rules)
 	}
+	if row.LastCalculatedAt.Valid {
+		t := row.LastCalculatedAt.Time
+		seg.LastCalculatedAt = &t
+	}
 
 	return seg
 }

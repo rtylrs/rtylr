@@ -689,10 +689,6 @@ func (c Cache[M]) Delete(ctx context.Context, ids []string, options ...ClientOpt
 	}
 }
 
-func (c Cache[M]) deleteLocal(ctx context.Context, ids []string) {
-	c.Delete(ctx, ids, MemoryOnly())
-}
-
 func (c Cache[M]) transformListKeys(keys []string) []string {
 	return sliceutils.Map(keys, c.appendIdentifierPrefix)
 }

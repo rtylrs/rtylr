@@ -18,7 +18,7 @@ type mockRepo struct {
 	treeErr    error
 }
 
-func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Account, error) {
+func (m *mockRepo) List(_ context.Context, _ int64, _, _ int) ([]domain.Account, error) {
 	return m.listResult, nil
 }
 
@@ -40,7 +40,10 @@ func (m *mockRepo) ListForTree(_ context.Context, _ int64) ([]domain.Account, er
 
 func TestList_Delegates(t *testing.T) {
 	s := &Service{repo: &mockRepo{listResult: []domain.Account{{ID: 1}}}}
-	got, _ := s.List(context.Background(), 1)
+	got, _, err := s.List(context.Background(), 1, 1, 50)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if len(got) != 1 {
 		t.Errorf("got %d", len(got))
 	}
@@ -104,7 +107,7 @@ func TestChartOfAccounts_PropagatesError(t *testing.T) {
 
 func TestList_Empty(t *testing.T) {
 	s := &Service{repo: &mockRepo{listResult: []domain.Account{}}}
-	got, err := s.List(context.Background(), 1)
+	got, _, err := s.List(context.Background(), 1, 1, 50)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -117,7 +120,7 @@ func TestList_PropagatesError(t *testing.T) {
 	// mockRepo.List ignores listErr intentionally (no error field for it)
 	// Verify nil error is returned when repo succeeds.
 	s := &Service{repo: &mockRepo{listResult: nil}}
-	_, err := s.List(context.Background(), 1)
+	_, _, err := s.List(context.Background(), 1, 1, 50)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}

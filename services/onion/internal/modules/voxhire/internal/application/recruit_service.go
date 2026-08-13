@@ -126,6 +126,17 @@ func (s *Service) ListOpenings(ctx context.Context) ([]domain.Opening, error) {
 	return s.repo.ListOpenings(ctx)
 }
 
+func (s *Service) ListOpeningsPage(ctx context.Context, limit, offset int32) (domain.OpeningPage, error) {
+	const maxOpeningsPageSize int32 = 100
+	if limit <= 0 || limit > maxOpeningsPageSize {
+		limit = maxOpeningsPageSize
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	return s.repo.ListOpeningsPage(ctx, limit, offset)
+}
+
 // GetAnalytics returns aggregate funnel metrics for the admin overview.
 func (s *Service) GetAnalytics(ctx context.Context) (*domain.Analytics, error) {
 	return s.repo.GetAnalytics(ctx)
@@ -203,15 +214,7 @@ func (s *Service) ListApplications(ctx context.Context, f domain.ApplicationFilt
 	if err != nil {
 		return nil, 0, err
 	}
-	var opening *domain.Opening
-	if openings, err := s.repo.ListOpenings(ctx); err == nil {
-		for i := range openings {
-			if openings[i].ID == f.JobID {
-				opening = &openings[i]
-				break
-			}
-		}
-	}
+	opening, _ := s.repo.GetOpening(ctx, f.JobID)
 	return enrichApplicationMatches(apps, opening), total, nil
 }
 

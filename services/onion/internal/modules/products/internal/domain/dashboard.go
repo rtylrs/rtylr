@@ -60,6 +60,11 @@ type ReorderSuggestion struct {
 	Confidence    string  `json:"confidence"` // "high" | "medium" | "low"
 }
 
+type ReorderSuggestionsResult struct {
+	Suggestions []ReorderSuggestion
+	Truncated   bool
+}
+
 // ExpiryItem is a row on the Expiry screen. Until batch tracking is
 // modelled, this endpoint returns an empty list — stubbed so the frontend
 // has a real endpoint to call instead of 404'ing.
