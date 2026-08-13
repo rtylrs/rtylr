@@ -696,6 +696,7 @@ func (s *Service) fetchDashboard(ctx context.Context, businessID int64) (domain.
 		TotalReceivable:  totalReceivable,
 		OverdueAmount:    overdueAmount,
 		TotalExpensesMTD: totalExpensesMTD,
+		TotalRevenueMTD: revenueMTD,
 		NetProfitMTD:     netProfitMTD,
 	}, nil
 }
