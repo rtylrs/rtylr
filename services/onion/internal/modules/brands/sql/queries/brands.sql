@@ -1,8 +1,14 @@
 -- name: ListBrands :many
 SELECT b.id, b.owner_id, b.business_id, b.name, b.logo_url, b.description,
-       (SELECT COUNT(*) FROM erp_products p WHERE p.business_id = b.business_id AND p.brand_id = b.id) AS product_count,
+       COALESCE(products.product_count, 0) AS product_count,
        b.created_at, b.updated_at
 FROM erp_brands b
+LEFT JOIN (
+    SELECT brand_id, COUNT(*) AS product_count
+    FROM erp_products p
+    WHERE p.business_id = ?
+    GROUP BY brand_id
+) AS products ON products.brand_id = b.id
 WHERE b.business_id = ?
 ORDER BY b.name ASC;
 
@@ -20,9 +26,15 @@ DELETE FROM erp_brands WHERE business_id = ? AND id = ?;
 
 -- name: ListBrandsPaginated :many
 SELECT b.id, b.owner_id, b.business_id, b.name, b.logo_url, b.description,
-       (SELECT COUNT(*) FROM erp_products p WHERE p.business_id = b.business_id AND p.brand_id = b.id) AS product_count,
+       COALESCE(products.product_count, 0) AS product_count,
        b.created_at, b.updated_at
 FROM erp_brands b
+LEFT JOIN (
+    SELECT brand_id, COUNT(*) AS product_count
+    FROM erp_products p
+    WHERE p.business_id = ?
+    GROUP BY brand_id
+) AS products ON products.brand_id = b.id
 WHERE b.business_id = ?
 ORDER BY b.name ASC
 LIMIT ? OFFSET ?;
