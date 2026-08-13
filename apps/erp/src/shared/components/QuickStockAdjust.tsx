@@ -44,10 +44,11 @@ const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({
     >
       <button
         onClick={() => bump(-1)}
-        className="h-6 w-6 rounded flex items-center justify-center"
+        aria-label="Decrease stock"
+        className="h-11 w-11 rounded flex items-center justify-center"
         style={{ color: 'var(--hub-text-muted)' }}
       >
-        <Minus size={12} />
+        <Minus size={16} />
       </button>
       <span
         className="text-xs font-semibold min-w-[32px] text-center"
@@ -57,10 +58,11 @@ const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({
       </span>
       <button
         onClick={() => bump(1)}
-        className="h-6 w-6 rounded flex items-center justify-center"
+        aria-label="Increase stock"
+        className="h-11 w-11 rounded flex items-center justify-center"
         style={{ color: 'var(--hub-text-muted)' }}
       >
-        <Plus size={12} />
+        <Plus size={16} />
       </button>
     </div>
   );

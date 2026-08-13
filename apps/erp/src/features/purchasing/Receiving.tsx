@@ -97,7 +97,11 @@ const Receiving: React.FC = () => {
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               Receive items for PO-{selectedId}
             </h3>
-            <button onClick={() => setSelectedId(null)} aria-label="Close receiving details">
+            <button
+              onClick={() => setSelectedId(null)}
+              aria-label="Close receiving details"
+              className="h-11 w-11 rounded-lg flex items-center justify-center"
+            >
               <XIcon size={14} style={{ color: 'var(--hub-text-muted)' }} />
             </button>
           </div>
@@ -122,10 +126,10 @@ const Receiving: React.FC = () => {
                     <button
                       onClick={() => adjust(line.sku, -1)}
                       aria-label={`Decrease received quantity for ${line.name}`}
-                      className="h-6 w-6 rounded flex items-center justify-center"
+                      className="h-11 w-11 rounded flex items-center justify-center"
                       style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
                     >
-                      <Minus size={12} />
+                      <Minus size={16} />
                     </button>
                     <span
                       className="text-sm font-semibold min-w-[40px] text-center"
@@ -136,10 +140,10 @@ const Receiving: React.FC = () => {
                     <button
                       onClick={() => adjust(line.sku, 1)}
                       aria-label={`Increase received quantity for ${line.name}`}
-                      className="h-6 w-6 rounded flex items-center justify-center"
+                      className="h-11 w-11 rounded flex items-center justify-center"
                       style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
                     >
-                      <Plus size={12} />
+                      <Plus size={16} />
                     </button>
                   </div>
                   <span
