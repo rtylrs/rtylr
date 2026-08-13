@@ -31,11 +31,6 @@ INSERT INTO hr_timesheets (
     current_approval_level, total_minutes
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: UpdateTimesheetStatus :exec
-UPDATE hr_timesheets
-SET status = ?, updated_at = NOW()
-WHERE id = ? AND business_id = ?;
-
 -- name: SubmitTimesheet :exec
 UPDATE hr_timesheets
 SET status = 'submitted', submitted_at = NOW(), current_approval_level = 1, updated_at = NOW()
@@ -59,11 +54,6 @@ WHERE id = ? AND business_id = ?;
 -- name: RejectTimesheet :exec
 UPDATE hr_timesheets
 SET status = 'rejected', rejection_reason = ?, updated_at = NOW()
-WHERE id = ? AND business_id = ?;
-
--- name: UpdateTimesheetTotalMinutes :exec
-UPDATE hr_timesheets
-SET total_minutes = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ?;
 
 -- name: CreateApprovalAction :exec

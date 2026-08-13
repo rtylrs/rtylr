@@ -1,9 +1,3 @@
--- name: GetSelfHostLicenseByKey :one
-SELECT status, expires_at, grace_until
-FROM self_host_licenses
-WHERE key_hash = ?
-LIMIT 1;
-
 -- name: GetSelfHostLicenseByID :one
 SELECT id, owner_email, customer_name, plan, features, seat_limit, expires_at, grace_until,
        status, license_key, key_hash, created_by, updated_by, created_at, updated_at,

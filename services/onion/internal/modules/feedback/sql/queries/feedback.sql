@@ -1,9 +1,3 @@
--- name: CountFeedback :one
-SELECT COUNT(*) FROM crm_feedback WHERE business_id = ?;
-
--- name: CountFeedbackByType :one
-SELECT COUNT(*) FROM crm_feedback WHERE business_id = ? AND type = ?;
-
 -- name: ListFeedback :many
 -- cross-schema read from crm_customers — resolves a display name for each feedback row
 SELECT f.id, f.owner_id, f.business_id, f.customer_id,
@@ -11,15 +5,6 @@ SELECT f.id, f.owner_id, f.business_id, f.customer_id,
        f.type, f.score, f.comment, f.source, f.created_at
 FROM crm_feedback f LEFT JOIN crm_customers c ON c.id = f.customer_id
 WHERE f.business_id = ?
-ORDER BY f.created_at DESC LIMIT ? OFFSET ?;
-
--- name: ListFeedbackByType :many
--- cross-schema read from crm_customers — resolves a display name for each feedback row
-SELECT f.id, f.owner_id, f.business_id, f.customer_id,
-       COALESCE(TRIM(CONCAT_WS(' ', c.first_name, c.last_name)), '') AS customer_name,
-       f.type, f.score, f.comment, f.source, f.created_at
-FROM crm_feedback f LEFT JOIN crm_customers c ON c.id = f.customer_id
-WHERE f.business_id = ? AND f.type = ?
 ORDER BY f.created_at DESC LIMIT ? OFFSET ?;
 
 -- name: CreateFeedback :execresult

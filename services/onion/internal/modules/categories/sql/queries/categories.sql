@@ -22,6 +22,3 @@ FROM erp_categories
 WHERE business_id = ?
 ORDER BY name ASC
 LIMIT ? OFFSET ?;
-
--- name: CountCategories :one
-SELECT COUNT(*) FROM erp_categories WHERE business_id = ?;

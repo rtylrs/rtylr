@@ -23,9 +23,3 @@ WHERE business_id = ? AND id = ?;
 
 -- name: DeleteAppointment :exec
 DELETE FROM booking_appointments WHERE business_id = ? AND id = ?;
-
--- name: CountTodayAppointments :one
-SELECT COUNT(*) FROM booking_appointments WHERE business_id = ? AND start_time >= ? AND start_time < ?;
-
--- name: CountCancelledAppointments :one
-SELECT COUNT(*) FROM booking_appointments WHERE business_id = ? AND status = 'cancelled' AND start_time >= ? AND start_time < ?;

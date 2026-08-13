@@ -1,17 +1,3 @@
--- name: ListStaffWithDepartment :many
-SELECT s.id, s.owner_id, s.business_id, s.user_id, s.department_id,
-       COALESCE(d.name, '') AS department_name,
-       s.first_name, s.last_name, s.email, s.phone,
-       s.role, s.employment_type, s.status, s.salary, s.hourly_rate, s.overtime_rate,
-       s.start_date, s.end_date, s.address, s.emergency_contact_name, s.emergency_contact_phone,
-       s.apps, s.notes, s.created_at, s.updated_at
-FROM hr_staff s
-LEFT JOIN hr_departments d ON d.id = s.department_id AND d.business_id = s.business_id
-WHERE s.business_id = ?
-  AND (? = '' OR s.department_id = ?)
-  AND (? = '' OR s.status = ?)
-ORDER BY s.last_name ASC, s.first_name ASC;
-
 -- name: GetStaffEmployeeSyncRow :one
 SELECT owner_id, business_id, id, employee_id, user_id, department_id, first_name, last_name,
        email, phone, employment_type, status, salary, hourly_rate, overtime_rate,

@@ -6,9 +6,6 @@ ORDER BY sort_order ASC, id ASC;
 -- name: AddonExists :one
 SELECT COUNT(*) FROM addons WHERE id = ?;
 
--- name: CountAddonGrants :one
-SELECT COUNT(*) FROM manual_addon_grants;
-
 -- name: ListAddonGrants :many
 SELECT g.id, g.user_id, COALESCE(u.full_name, '') AS user_name, u.email AS user_email,
        g.business_id, COALESCE(b.name, '') AS business_name,
