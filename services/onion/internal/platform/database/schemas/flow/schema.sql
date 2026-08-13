@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS flow_projects (
     due_date DATE,
     created_by BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_flow_projects_business_created (business_id, created_at, id)
 );
 
 CREATE TABLE IF NOT EXISTS flow_project_members (
@@ -82,6 +83,9 @@ CREATE TABLE IF NOT EXISTS flow_tasks (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_flow_tasks_project_status (project_id, status),
     INDEX idx_flow_tasks_workspace_updated (workspace_id, archived, updated_at),
+    INDEX idx_flow_tasks_business_status_completed (business_id, status, completed_at),
+    INDEX idx_flow_tasks_business_assignee (business_id, assignee_id),
+    INDEX idx_flow_tasks_project_parent (project_id, parent_task_id),
     FULLTEXT INDEX idx_flow_tasks_search (title, description)
 );
 
