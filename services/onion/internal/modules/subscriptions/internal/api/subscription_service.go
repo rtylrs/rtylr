@@ -86,9 +86,9 @@ func (a *SubscriptionAPI) GetBillingHistory(ctx context.Context, _ *hubsubscript
 }
 
 func (a *SubscriptionAPI) UpsertSubscription(ctx context.Context, req *hubsubscriptionv1.UpsertSubscriptionRequest) (*hubsubscriptionv1.UpsertSubscriptionResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	authUser, err := billingUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	planSlug := strings.TrimSpace(req.GetPlanSlug())
@@ -96,7 +96,7 @@ func (a *SubscriptionAPI) UpsertSubscription(ctx context.Context, req *hubsubscr
 		return nil, onekiterrors.New(http.StatusBadRequest, "plan_slug is required")
 	}
 
-	err := a.Service.UpsertSubscription(ctx, device.User.UserID, planSlug)
+	err = a.Service.UpsertSubscription(ctx, authUser.UserID, planSlug)
 	if err != nil {
 		if errors.Is(err, domain.ErrPlanNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Plan not found")
@@ -108,9 +108,9 @@ func (a *SubscriptionAPI) UpsertSubscription(ctx context.Context, req *hubsubscr
 }
 
 func (a *SubscriptionAPI) CreateCheckout(ctx context.Context, req *hubsubscriptionv1.CreateCheckoutRequest) (*hubsubscriptionv1.CreateCheckoutResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	authUser, err := billingUser(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	planSlug := strings.TrimSpace(req.GetPlanSlug())
@@ -118,7 +118,7 @@ func (a *SubscriptionAPI) CreateCheckout(ctx context.Context, req *hubsubscripti
 		return nil, onekiterrors.New(http.StatusBadRequest, "plan_slug is required")
 	}
 
-	checkoutURL, err := a.Service.CreateCheckout(ctx, device.User.UserID, planSlug, req.GetEmail())
+	checkoutURL, err := a.Service.CreateCheckout(ctx, authUser.UserID, planSlug, req.GetEmail())
 	if err != nil {
 		if errors.Is(err, domain.ErrPlanNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Plan not found")
@@ -131,6 +131,27 @@ func (a *SubscriptionAPI) CreateCheckout(ctx context.Context, req *hubsubscripti
 	}
 
 	return &hubsubscriptionv1.CreateCheckoutResponse{CheckoutUrl: checkoutURL}, nil
+}
+
+// billingUser gates subscription mutations using the role carried by the
+// authenticated tenant token. Keep this check at the API boundary so both
+// mutation endpoints reject unauthorized requests before touching billing or
+// Paddle state.
+func billingUser(ctx context.Context) (*authPkg.AuthUser, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 || !isBillingCapableRole(authUser.Role) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	return authUser, nil
+}
+
+func isBillingCapableRole(role string) bool {
+	switch strings.ToLower(strings.TrimSpace(role)) {
+	case "owner", "admin", "billing", "console_admin":
+		return true
+	default:
+		return false
+	}
 }
 
 func toProtoSubscription(sub *domain.Subscription) *hubsubscriptionv1.Subscription {
