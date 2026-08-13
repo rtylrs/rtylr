@@ -644,7 +644,8 @@ func (x *GetPurchaseOrderResponse) GetPurchaseOrder() *PurchaseOrder {
 }
 
 type UpdatePurchaseOrderStatusBody struct {
-	Status string `json:"status,omitempty"`
+	Status string               `json:"status,omitempty"`
+	Items  []*PurchaseOrderItem `json:"items,omitempty"`
 }
 
 func (x *UpdatePurchaseOrderStatusBody) GetStatus() string {
@@ -653,6 +654,14 @@ func (x *UpdatePurchaseOrderStatusBody) GetStatus() string {
 		return zero
 	}
 	return x.Status
+}
+
+func (x *UpdatePurchaseOrderStatusBody) GetItems() []*PurchaseOrderItem {
+	if x == nil {
+		var zero []*PurchaseOrderItem
+		return zero
+	}
+	return x.Items
 }
 
 type UpdatePurchaseOrderStatusRequest struct {

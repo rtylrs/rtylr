@@ -315,24 +315,28 @@ return violations;
 
 export interface UpdatePurchaseOrderStatusBody {
 status: string;
+items?: (PurchaseOrderItem)[];
 }
 
 export function decodeUpdatePurchaseOrderStatusBody(v: any): UpdatePurchaseOrderStatusBody {
 if (v === null || v === undefined) return v;
 return {
 status: v.status,
+items: (v.items !== undefined ? (v.items as any[]).map(decodePurchaseOrderItem) : v.items),
 };
 }
 
 export function encodeUpdatePurchaseOrderStatusBody(v: UpdatePurchaseOrderStatusBody): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.status !== undefined) { out.status = v.status; }
+if (v.items !== undefined) { out.items = (v.items as any[]).map(encodePurchaseOrderItem); }
 return out;
 }
 
 export function validateUpdatePurchaseOrderStatusBody(v: UpdatePurchaseOrderStatusBody): string[] {
 const violations: string[] = [];
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validatePurchaseOrderItem(item).map((message) => "items: " + message));
 return violations;
 }
 
