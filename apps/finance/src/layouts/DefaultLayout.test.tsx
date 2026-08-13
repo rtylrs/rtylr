@@ -85,7 +85,7 @@ describe('Finance mobile navigation', () => {
     expect(openButton).toHaveClass('h-11', 'w-11');
     fireEvent.click(openButton);
 
-    expect(sidebar).toHaveClass('fixed', 'inset-y-0', 'left-0', 'z-50', 'flex');
+    expect(sidebar).toHaveClass('fixed', 'inset-y-0', 'start-0', 'z-50', 'flex');
     expect(screen.getByRole('button', { name: 'Close navigation menu' })).toBeInTheDocument();
     expect(openButton).toHaveAttribute('aria-expanded', 'true');
   });

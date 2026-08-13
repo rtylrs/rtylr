@@ -295,7 +295,7 @@ const Tax: React.FC = () => {
                       color: 'var(--hub-text)',
                       fontSize: 13,
                       outline: 'none',
-                      textAlign: 'right',
+                      textAlign: 'end',
                     }}
                   />
                   <span style={{ fontSize: 13, color: 'var(--hub-text-muted)' }}>%</span>
@@ -382,7 +382,7 @@ const Tax: React.FC = () => {
                   key={h}
                   style={{
                     padding: '10px 16px',
-                    textAlign: 'left',
+                    textAlign: 'start',
                     fontSize: 11,
                     fontWeight: 600,
                     textTransform: 'uppercase',

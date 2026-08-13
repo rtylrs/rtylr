@@ -82,14 +82,14 @@ const PLRow: React.FC<RowProps> = ({
             fontSize: large ? 15 : 13,
             fontWeight: bold ? 700 : 400,
             color: separator ? color : 'var(--hub-text)',
-            paddingLeft: indent ? 16 : 0,
+            paddingInlineStart: indent ? 16 : 0,
           }}
         >
           {label}
         </span>
         {sub && (
           <span
-            style={{ fontSize: 11, color: 'var(--hub-text-muted)', paddingLeft: indent ? 16 : 0 }}
+            style={{ fontSize: 11, color: 'var(--hub-text-muted)', paddingInlineStart: indent ? 16 : 0 }}
           >
             {sub}
           </span>

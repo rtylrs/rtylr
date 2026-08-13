@@ -57,8 +57,8 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
           style={{
             position: 'absolute',
             top: '100%',
-            left: 0,
-            right: 0,
+            insetInlineStart: 0,
+            insetInlineEnd: 0,
             marginTop: 4,
             background: 'var(--hub-surface)',
             border: '1px solid var(--hub-border)',
@@ -107,7 +107,7 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
               }}
               style={{
                 width: '100%',
-                textAlign: 'left',
+                textAlign: 'start',
                 background: 'transparent',
                 border: 'none',
                 padding: '8px 10px',

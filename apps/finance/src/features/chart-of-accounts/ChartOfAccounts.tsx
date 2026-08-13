@@ -112,13 +112,13 @@ const ChartOfAccounts: React.FC = () => {
         <div style={{ position: 'relative', flex: 1, maxWidth: 280 }}>
           <Search
             size={13}
-            style={{ position: 'absolute', left: 10, top: 11, color: 'var(--hub-text-dim)' }}
+            style={{ position: 'absolute', insetInlineStart: 10, top: 11, color: 'var(--hub-text-dim)' }}
           />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search accounts"
-            style={{ ...inputStyle, paddingLeft: 30 }}
+            style={{ ...inputStyle, paddingInlineStart: 30 }}
           />
         </div>
       </div>
@@ -137,7 +137,7 @@ const ChartOfAccounts: React.FC = () => {
                     key={h}
                     style={{
                       padding: '10px 16px',
-                      textAlign: h === 'Balance' ? 'right' : 'left',
+                      textAlign: h === 'Balance' ? 'end' : 'start',
                       fontSize: 11,
                       fontWeight: 600,
                       textTransform: 'uppercase',
@@ -175,7 +175,7 @@ const ChartOfAccounts: React.FC = () => {
                       padding: '12px 16px',
                       fontSize: 13,
                       fontWeight: 600,
-                      textAlign: 'right',
+                      textAlign: 'end',
                     }}
                   >
                     <MoneyDisplay amount={a.balance} />

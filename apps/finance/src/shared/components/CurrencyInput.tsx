@@ -35,7 +35,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
       <span
         style={{
           position: 'absolute',
-          left: 12,
+          insetInlineStart: 12,
           top: '50%',
           transform: 'translateY(-50%)',
           fontSize: 13,
@@ -53,7 +53,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
         onChange={handle}
         placeholder={placeholder}
         disabled={disabled}
-        style={{ ...inputStyle, paddingLeft: 28, fontVariantNumeric: 'tabular-nums', ...style }}
+        style={{ ...inputStyle, paddingInlineStart: 28, fontVariantNumeric: 'tabular-nums', ...style }}
       />
     </div>
   );

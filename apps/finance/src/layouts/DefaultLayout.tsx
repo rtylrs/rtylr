@@ -172,7 +172,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
         <span
           style={{
             position: 'relative',
-            marginLeft: 'auto',
+            marginInlineStart: 'auto',
             height: 6,
             width: 6,
             borderRadius: '50%',
@@ -324,12 +324,12 @@ const DefaultLayout: React.FC = () => {
           id="finance-sidebar"
           aria-label="Primary navigation"
           className={[
-            sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden',
+            sidebarOpen ? 'fixed inset-y-0 start-0 z-50 flex' : 'hidden',
             'md:flex w-56 flex-col shrink-0 overflow-hidden',
           ].join(' ')}
           style={{
             background: 'var(--hub-surface)',
-            borderRight: '1px solid var(--hub-border)',
+            borderInlineEnd: '1px solid var(--hub-border)',
           }}
         >
           <div
@@ -373,7 +373,7 @@ const DefaultLayout: React.FC = () => {
             >
               <SearchIcon size={12} />
               <span>Search</span>
-              <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}>
+              <span style={{ marginInlineStart: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}>
                 Cmd K
               </span>
             </button>
@@ -450,14 +450,14 @@ const DefaultLayout: React.FC = () => {
                 />
                 <div className="flex flex-col items-start min-w-0 flex-1">
                   <span
-                    className="text-xs font-medium truncate w-full text-left"
+                    className="text-xs font-medium truncate w-full text-start"
                     style={{ color: 'var(--hub-text)' }}
                   >
                     {userName}
                   </span>
                   {userEmail && (
                     <span
-                      className="text-[10px] truncate w-full text-left"
+                      className="text-[10px] truncate w-full text-start"
                       style={{ color: 'var(--hub-text-muted)' }}
                     >
                       {userEmail}
@@ -478,7 +478,7 @@ const DefaultLayout: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 4 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute bottom-full left-0 right-0 mb-1 rounded-xl p-2 z-50"
+                    className="absolute bottom-full start-0 end-0 mb-1 rounded-xl p-2 z-50"
                     style={{
                       background: 'var(--hub-card)',
                       border: '1px solid var(--hub-border)',

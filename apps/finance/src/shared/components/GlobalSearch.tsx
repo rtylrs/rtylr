@@ -195,7 +195,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
                 background: active ? 'var(--finance-accent-faint)' : 'transparent',
                 color: 'var(--hub-text)',
                 cursor: 'pointer',
-                textAlign: 'left',
+                textAlign: 'start',
                 marginBottom: 2,
               }}
             >
@@ -206,7 +206,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
               </div>
               <span
                 style={{
-                  marginLeft: 'auto',
+                  marginInlineStart: 'auto',
                   fontSize: 10,
                   color: 'var(--hub-text-dim)',
                   textTransform: 'uppercase',
