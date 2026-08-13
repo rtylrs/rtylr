@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useListCustomers, useUpdateCustomer } from '../../shared/hooks/queries/useCustomers';
 import { type Customer } from '../../shared/schemas/customers';
-import { getTier, Tier, tierColor } from '../../shared/lib/tiers';
+import { getCustomerTier, Tier, tierColor } from '../../shared/lib/tiers';
 import { Button, EmptyState, PageHeader, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, TagChip } from '../../shared/components/crm';
 
@@ -25,7 +25,7 @@ const ACCENT = '#3b82f6';
 const tierFilters: Array<Tier | 'All'> = ['All', 'Platinum', 'Gold', 'Silver', 'Bronze'];
 
 function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () => void }) {
-  const tier = getTier(customer.loyaltyPoints);
+  const tier = getCustomerTier(customer.loyaltyPoints, customer.loyaltyTier);
   return (
     <motion.tr
       initial={{ opacity: 0 }}
@@ -114,7 +114,8 @@ const Customers: React.FC = () => {
   }
 
   const filtered = customers.filter((c) => {
-    const matchTier = tierFilter === 'All' || getTier(c.loyaltyPoints) === tierFilter;
+    const matchTier =
+      tierFilter === 'All' || getCustomerTier(c.loyaltyPoints, c.loyaltyTier) === tierFilter;
     return matchTier;
   });
 
@@ -185,7 +186,7 @@ const Customers: React.FC = () => {
         String(c.totalSpent),
         String(c.visits),
         String(c.loyaltyPoints),
-        getTier(c.loyaltyPoints),
+        getCustomerTier(c.loyaltyPoints, c.loyaltyTier),
       ]),
     ];
     const csv = rows
@@ -415,7 +416,7 @@ const Customers: React.FC = () => {
               <tbody>
                 <AnimatePresence>
                   {filtered.map((c) => {
-                    const tier = getTier(c.loyaltyPoints);
+                    const tier = getCustomerTier(c.loyaltyPoints, c.loyaltyTier);
                     const isExpanded = expandedId === c.id;
                     const isSelected = selected.has(c.id);
                     return (

@@ -39,6 +39,8 @@ export interface Customer {
   totalSpent: number;
   visits: number;
   loyaltyPoints: number;
+  /** Canonical persisted tier from the CRM customer API. */
+  loyaltyTier?: string;
   lastVisit: string;
   initials: string;
   tags?: string[];

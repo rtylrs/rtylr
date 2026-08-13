@@ -18,7 +18,7 @@ import {
   Search as SearchIcon,
   User,
 } from 'lucide-react';
-import { Tier, tierColor, getTier, pointsToNextTier } from '../lib/tiers';
+import { Tier, tierColor, getTier, getCustomerTier, pointsToNextTier } from '../lib/tiers';
 import { ACCENT, Input, Select, Button } from './ui';
 import type { TimelineEntry, Customer } from '../services/crmApi';
 
@@ -782,8 +782,8 @@ export const ConsentBanner: React.FC<{
 
 // ── 29. CustomerQuickView ───────────────────────────────────────
 export const CustomerQuickView: React.FC<{ customer: Customer }> = ({ customer }) => {
-  const tier = getTier(customer.loyaltyPoints);
-  const next = pointsToNextTier(customer.loyaltyPoints);
+  const tier = getCustomerTier(customer.loyaltyPoints, customer.loyaltyTier);
+  const next = pointsToNextTier(customer.loyaltyPoints, undefined, customer.loyaltyTier);
   return (
     <div
       style={{

@@ -36,7 +36,7 @@ import {
   ConsentBanner,
   LoyaltyPointsInput,
 } from '../../shared/components/crm';
-import { getTier, pointsToNextTier } from '../../shared/lib/tiers';
+import { getCustomerTier, pointsToNextTier, thresholdsFromConfig } from '../../shared/lib/tiers';
 
 const CustomerProfile: React.FC = () => {
   const { id } = useParams({ strict: false });
@@ -96,8 +96,9 @@ const CustomerProfile: React.FC = () => {
     );
   }
 
-  const tier = getTier(customer.loyaltyPoints);
-  const next = pointsToNextTier(customer.loyaltyPoints);
+  const thresholds = thresholdsFromConfig(loyaltyConfig);
+  const tier = getCustomerTier(customer.loyaltyPoints, customer.loyaltyTier, thresholds);
+  const next = pointsToNextTier(customer.loyaltyPoints, thresholds, customer.loyaltyTier);
   const tags = customer.tags || [];
   // Missing consent means unknown, never opt-in. The backend now persists this map for new records.
   const consent = customer.consent || { email: false, sms: false, marketing: false };
