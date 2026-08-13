@@ -287,6 +287,7 @@ message ListReorderSuggestionsRequest {}
 
 message ListReorderSuggestionsResponse {
   suggestions: ReorderSuggestion[]
+  truncated: bool
 }
 
 message ListExpiringItemsRequest {
