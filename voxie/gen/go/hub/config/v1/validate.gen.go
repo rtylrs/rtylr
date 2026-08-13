@@ -166,3 +166,28 @@ func (m *UpdateConfigResponse) Validate() error {
 	}
 	return nil
 }
+
+func (m *SendTestEmailRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.To == "" {
+		violations = append(violations, "to is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *SendTestEmailResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}

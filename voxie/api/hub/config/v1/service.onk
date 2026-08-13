@@ -11,6 +11,9 @@ service ConfigService {
   /// Updates the business configuration.
   updateConfig(UpdateConfigRequest) -> UpdateConfigResponse @put("/config")
 
+  /// Queues a test email using the configured tenant sender settings.
+  sendTestEmail(SendTestEmailRequest) -> SendTestEmailResponse @post("/config/test-email")
+
   /// Returns the industry catalog grouped by category.
   getIndustries(GetIndustriesRequest) -> GetIndustriesResponse @get("/industries")
 }

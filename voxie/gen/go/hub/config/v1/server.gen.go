@@ -202,6 +202,7 @@ type ConfigServiceServer interface {
 	GetConfig(ctx context.Context, req *GetConfigRequest) (*GetConfigResponse, error)
 	CreateConfig(ctx context.Context, req *CreateConfigRequest) (*CreateConfigResponse, error)
 	UpdateConfig(ctx context.Context, req *UpdateConfigRequest) (*UpdateConfigResponse, error)
+	SendTestEmail(ctx context.Context, req *SendTestEmailRequest) (*SendTestEmailResponse, error)
 	GetIndustries(ctx context.Context, req *GetIndustriesRequest) (*GetIndustriesResponse, error)
 }
 
@@ -297,6 +298,28 @@ func RegisterConfigServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "ConfigService", Method: "updateConfig", HTTPMethod: "PUT", Route: "/hub/config/v1/config", AuthSchemes: nil}))
+	mux.Handle("POST /hub/config/v1/config/test-email", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(SendTestEmailRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.SendTestEmail(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "ConfigService", Method: "sendTestEmail", HTTPMethod: "POST", Route: "/hub/config/v1/config/test-email", AuthSchemes: nil}))
 	mux.Handle("GET /hub/config/v1/industries", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetIndustriesRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
