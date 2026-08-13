@@ -8,12 +8,20 @@ const productClient = createOneKitClient(ProductServiceClient, 'erp');
 
 export type { ReorderSuggestion };
 
+export interface ReorderSuggestionsResult {
+  suggestions: ReorderSuggestion[];
+  truncated: boolean;
+}
+
 export function useReorderSuggestions() {
-  return useQuery<ReorderSuggestion[]>({
+  return useQuery<ReorderSuggestionsResult>({
     queryKey: ['reorder-suggestions'],
     queryFn: async () => {
       const response = await productClient.listReorderSuggestions(withErpListBounds({}));
-      return response.suggestions ?? [];
+      return {
+        suggestions: response.suggestions ?? [],
+        truncated: response.truncated ?? false,
+      };
     },
   });
 }
