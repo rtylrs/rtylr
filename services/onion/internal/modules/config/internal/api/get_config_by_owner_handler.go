@@ -70,6 +70,14 @@ type ConfigPayload struct {
 	ContactEmail           string   `json:"contact_email"`
 	ContactNumber          string   `json:"contact_number"`
 	SenderEmail            string   `json:"sender_email"`
+	EmailProvider          string   `json:"email_provider"`
+	SenderName             string   `json:"sender_name"`
+	ReplyToEmail           string   `json:"reply_to_email"`
+	EmailNotificationsEnabled bool `json:"email_notifications_enabled"`
+	SMTPHost               string   `json:"smtp_host"`
+	SMTPPort               int32    `json:"smtp_port"`
+	SMTPUsername           string   `json:"smtp_username"`
+	SMTPPasswordConfigured bool     `json:"smtp_password_configured"`
 	Website                string   `json:"website"`
 	MapsURL                string   `json:"maps_url"`
 	Address                string   `json:"address"`
@@ -137,6 +145,14 @@ func newConfigPayload(config domain.Config) *ConfigPayload {
 		ContactEmail:           config.ContactEmail,
 		ContactNumber:          config.ContactNumber,
 		SenderEmail:            config.SenderEmail,
+		EmailProvider:          config.EmailProvider,
+		SenderName:             config.SenderName,
+		ReplyToEmail:           config.ReplyToEmail,
+		EmailNotificationsEnabled: config.EmailNotificationsEnabled,
+		SMTPHost:               config.SMTPHost,
+		SMTPPort:               config.SMTPPort,
+		SMTPUsername:           config.SMTPUsername,
+		SMTPPasswordConfigured: config.SMTPPasswordConfigured,
 		Website:                config.Website,
 		MapsURL:                config.MapsURL,
 		Address:                config.Address,

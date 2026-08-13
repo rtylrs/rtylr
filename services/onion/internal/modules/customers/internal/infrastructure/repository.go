@@ -12,23 +12,29 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"golang.org/x/sync/errgroup"
 
+	"github.com/voxire/onion/internal/modules/campaigns"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
 	"github.com/voxire/onion/internal/modules/customers/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/modules/segments"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
 type Repository struct {
-	queries *sqlc.Queries
-	pool    *sql.DB
+	queries   *sqlc.Queries
+	pool      *sql.DB
+	campaigns *campaigns.Module
+	segments  *segments.Module
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	pool := db
 
 	return &Repository{
-		queries: sqlc.New(pool),
-		pool:    pool,
+		queries:   sqlc.New(pool),
+		pool:      pool,
+		campaigns: campaigns.NewModule(context.Background(), pool),
+		segments:  segments.NewModule(context.Background(), pool),
 	}
 }
 
@@ -462,9 +468,13 @@ func (r *Repository) UpsertLoyaltyConfig(ctx context.Context, input domain.Loyal
 }
 
 // ─── Segments ─────────────────────────────────────────────────────────────────
+//
+// Segment persistence belongs to the segments module. These compatibility
+// methods keep the existing customer routes stable while delegating to its
+// public facade rather than maintaining another SQLC query surface.
 
 func (r *Repository) ListSegments(ctx context.Context, businessID int64) ([]domain.Segment, error) {
-	rows, err := r.queries.ListSegments(ctx, businessID)
+	rows, err := r.segments.List(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list segments", logger.Error(err))
 
@@ -474,35 +484,28 @@ func (r *Repository) ListSegments(ctx context.Context, businessID int64) ([]doma
 	segments := make([]domain.Segment, 0, len(rows))
 
 	for _, row := range rows {
-		segments = append(segments, segmentFromRow(row))
+		segments = append(segments, segmentFromCanonical(row))
 	}
 
 	return segments, nil
 }
 
 func (r *Repository) GetSegmentByID(ctx context.Context, businessID, segmentID int64) (domain.Segment, error) {
-	row, err := r.queries.GetSegmentByID(ctx, sqlc.GetSegmentByIDParams{
-		ID:         segmentID,
-		BusinessID: businessID,
-	})
+	row, err := r.segments.Get(ctx, businessID, segmentID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, segments.ErrNotFound) {
 			return domain.Segment{}, domain.ErrSegmentNotFound
 		}
 
 		return domain.Segment{}, err
 	}
 
-	return segmentFromRow(row), nil
+	return segmentFromCanonical(row), nil
 }
 
 func (r *Repository) CreateSegment(ctx context.Context, input domain.SegmentInput) (int64, error) {
-	result, err := r.queries.CreateSegment(ctx, sqlc.CreateSegmentParams{
-		OwnerID:     input.OwnerID,
-		BusinessID:  input.BusinessID,
-		Name:        input.Name,
-		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
-		Rules:       json.RawMessage(input.Rules),
+	id, err := r.segments.Create(ctx, segments.SegmentInput{
+		OwnerID: input.OwnerID, BusinessID: input.BusinessID, Name: input.Name, Description: input.Description, Rules: input.Rules,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create segment", logger.Error(err))
@@ -510,66 +513,47 @@ func (r *Repository) CreateSegment(ctx context.Context, input domain.SegmentInpu
 		return 0, err
 	}
 
-	return result.LastInsertId()
+	return id, nil
 }
 
 func (r *Repository) UpdateSegment(ctx context.Context, input domain.SegmentUpdateInput) error {
-	result, err := r.queries.UpdateSegment(ctx, sqlc.UpdateSegmentParams{
-		Name:        input.Name,
-		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
-		Rules:       json.RawMessage(input.Rules),
-		ID:          input.ID,
-		BusinessID:  input.BusinessID,
+	err := r.segments.Update(ctx, segments.SegmentUpdateInput{
+		ID: input.ID, OwnerID: input.OwnerID, BusinessID: input.BusinessID, Name: input.Name, Description: input.Description, Rules: input.Rules,
 	})
 	if err != nil {
+		if errors.Is(err, segments.ErrNotFound) {
+			return domain.ErrSegmentNotFound
+		}
 		logger.Ctx(ctx).Error("Failed to update segment", logger.Error(err))
 
 		return err
-	}
-
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rows == 0 {
-		return domain.ErrSegmentNotFound
 	}
 
 	return nil
 }
 
 func (r *Repository) DeleteSegment(ctx context.Context, businessID, segmentID int64) error {
-	result, err := r.queries.DeleteSegment(ctx, sqlc.DeleteSegmentParams{
-		ID:         segmentID,
-		BusinessID: businessID,
-	})
+	err := r.segments.Delete(ctx, businessID, segmentID)
 	if err != nil {
+		if errors.Is(err, segments.ErrNotFound) {
+			return domain.ErrSegmentNotFound
+		}
 		logger.Ctx(ctx).Error("Failed to delete segment", logger.Error(err))
 
 		return err
-	}
-
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rows == 0 {
-		return domain.ErrSegmentNotFound
 	}
 
 	return nil
 }
 
 // ─── Campaigns ────────────────────────────────────────────────────────────────
+//
+// Campaign persistence belongs to the campaigns module. These compatibility
+// methods retain the customer API's DTOs while delegating to the canonical
+// campaign facade.
 
 func (r *Repository) ListCampaigns(ctx context.Context, businessID int64, status string) ([]domain.Campaign, error) {
-	if status != "" {
-		return r.listCampaignsFiltered(ctx, businessID, status)
-	}
-
-	rows, err := r.queries.ListCampaigns(ctx, businessID)
+	rows, err := r.campaigns.List(ctx, businessID, status)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list campaigns", logger.Error(err))
 
@@ -579,84 +563,29 @@ func (r *Repository) ListCampaigns(ctx context.Context, businessID int64, status
 	campaigns := make([]domain.Campaign, 0, len(rows))
 
 	for _, row := range rows {
-		campaigns = append(campaigns, campaignFromRow(row))
+		campaigns = append(campaigns, campaignFromCanonical(row))
 	}
 
 	return campaigns, nil
 }
 
-// dynamic-query: squirrel
-func (r *Repository) listCampaignsFiltered(ctx context.Context, businessID int64, status string) ([]domain.Campaign, error) {
-	listSQL, listArgs, err := sq.Select(
-		"id", "owner_id", "business_id", "name", "description", "channel", "status", "segment_id", "subject",
-		"content", "scheduled_at", "sent_at", "audience_count", "sent_count", "delivered_count",
-		"opened_count", "clicked_count", "created_at", "updated_at",
-	).
-		From("crm_campaigns").
-		Where(sq.Eq{"business_id": businessID, "status": status}).
-		OrderBy("created_at DESC").
-		PlaceholderFormat(sq.Question).
-		ToSql()
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to build campaign list query", logger.Error(err))
-
-		return nil, err
-	}
-
-	rows, err := r.pool.QueryContext(ctx, listSQL, listArgs...)
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to list campaigns", logger.Error(err))
-
-		return nil, err
-	}
-	defer rows.Close()
-
-	campaigns := make([]domain.Campaign, 0)
-
-	for rows.Next() {
-		c, scanErr := scanCampaignRaw(rows)
-		if scanErr != nil {
-			return nil, scanErr
-		}
-
-		campaigns = append(campaigns, c)
-	}
-
-	return campaigns, rows.Err()
-}
-
 func (r *Repository) GetCampaignByID(ctx context.Context, businessID, campaignID int64) (domain.Campaign, error) {
-	row, err := r.queries.GetCampaignByID(ctx, sqlc.GetCampaignByIDParams{
-		ID:         campaignID,
-		BusinessID: businessID,
-	})
+	row, err := r.campaigns.Get(ctx, businessID, campaignID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, campaigns.ErrNotFound) {
 			return domain.Campaign{}, domain.ErrCampaignNotFound
 		}
 
 		return domain.Campaign{}, err
 	}
 
-	return campaignFromRow(row), nil
+	return campaignFromCanonical(row), nil
 }
 
 func (r *Repository) CreateCampaign(ctx context.Context, input domain.CampaignInput) (int64, error) {
-	var segmentID sql.NullInt64
-	if input.SegmentID != nil {
-		segmentID = sql.NullInt64{Int64: *input.SegmentID, Valid: true}
-	}
-
-	result, err := r.queries.CreateCampaign(ctx, sqlc.CreateCampaignParams{
-		OwnerID:     input.OwnerID,
-		BusinessID:  input.BusinessID,
-		Name:        input.Name,
-		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
-		Channel:     sqlc.CrmCampaignsChannel(input.Channel),
-		SegmentID:   segmentID,
-		Subject:     sql.NullString{String: input.Subject, Valid: input.Subject != ""},
-		Content:     input.Content,
-		ScheduledAt: nullableTime(input.ScheduledAt),
+	id, err := r.campaigns.Create(ctx, campaigns.CampaignInput{
+		OwnerID: input.OwnerID, BusinessID: input.BusinessID, Name: input.Name, Description: input.Description, Channel: input.Channel,
+		SegmentID: input.SegmentID, Subject: input.Subject, Content: input.Content, ScheduledAt: input.ScheduledAt,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create campaign", logger.Error(err))
@@ -664,63 +593,35 @@ func (r *Repository) CreateCampaign(ctx context.Context, input domain.CampaignIn
 		return 0, err
 	}
 
-	return result.LastInsertId()
+	return id, nil
 }
 
 func (r *Repository) UpdateCampaign(ctx context.Context, input domain.CampaignUpdateInput) error {
-	var segmentID sql.NullInt64
-	if input.SegmentID != nil {
-		segmentID = sql.NullInt64{Int64: *input.SegmentID, Valid: true}
-	}
-
-	result, err := r.queries.UpdateCampaign(ctx, sqlc.UpdateCampaignParams{
-		Name:        input.Name,
-		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
-		Channel:     sqlc.CrmCampaignsChannel(input.Channel),
-		SegmentID:   segmentID,
-		Subject:     sql.NullString{String: input.Subject, Valid: input.Subject != ""},
-		Content:     input.Content,
-		ScheduledAt: nullableTime(input.ScheduledAt),
-		ID:          input.ID,
-		BusinessID:  input.BusinessID,
+	err := r.campaigns.Update(ctx, campaigns.CampaignUpdateInput{
+		ID: input.ID, OwnerID: input.OwnerID, BusinessID: input.BusinessID, Name: input.Name, Description: input.Description,
+		Channel: input.Channel, SegmentID: input.SegmentID, Subject: input.Subject, Content: input.Content, ScheduledAt: input.ScheduledAt,
 	})
 	if err != nil {
+		if errors.Is(err, campaigns.ErrNotFound) {
+			return domain.ErrCampaignNotFound
+		}
 		logger.Ctx(ctx).Error("Failed to update campaign", logger.Error(err))
 
 		return err
-	}
-
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rows == 0 {
-		return domain.ErrCampaignNotFound
 	}
 
 	return nil
 }
 
 func (r *Repository) UpdateCampaignStatus(ctx context.Context, businessID, campaignID int64, status string) error {
-	result, err := r.queries.UpdateCampaignStatus(ctx, sqlc.UpdateCampaignStatusParams{
-		Status:     sqlc.NullCrmCampaignsStatus{CrmCampaignsStatus: sqlc.CrmCampaignsStatus(status), Valid: true},
-		ID:         campaignID,
-		BusinessID: businessID,
-	})
+	err := r.campaigns.UpdateStatus(ctx, businessID, campaignID, status)
 	if err != nil {
+		if errors.Is(err, campaigns.ErrNotFound) {
+			return domain.ErrCampaignNotFound
+		}
 		logger.Ctx(ctx).Error("Failed to update campaign status", logger.Error(err))
 
 		return err
-	}
-
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rows == 0 {
-		return domain.ErrCampaignNotFound
 	}
 
 	return nil
@@ -747,7 +648,12 @@ func (r *Repository) GetDashboardStats(ctx context.Context, businessID int64) (d
 	})
 	group.Go(func() error {
 		var err error
-		newThisMonth, err = r.queries.CountNewCustomersThisMonth(groupCtx, businessID)
+		monthStart, monthEnd := customerMonthBounds(time.Now().UTC())
+		newThisMonth, err = r.queries.CountNewCustomersThisMonth(groupCtx, sqlc.CountNewCustomersThisMonthParams{
+			BusinessID:     businessID,
+			CreatedAtStart: sql.NullTime{Time: monthStart, Valid: true},
+			CreatedAtEnd:   sql.NullTime{Time: monthEnd, Valid: true},
+		})
 		if err != nil {
 			logger.Ctx(groupCtx).Error("Failed to get new customers this month", logger.Error(err))
 		}
@@ -795,6 +701,12 @@ func (r *Repository) GetDashboardStats(ctx context.Context, businessID int64) (d
 	return stats, nil
 }
 
+func customerMonthBounds(now time.Time) (time.Time, time.Time) {
+	utc := now.UTC()
+	start := time.Date(utc.Year(), utc.Month(), 1, 0, 0, 0, 0, time.UTC)
+	return start, start.AddDate(0, 1, 0)
+}
+
 // ─── Timeline ─────────────────────────────────────────────────────────────────
 
 func (r *Repository) GetCustomerTimeline(ctx context.Context, businessID, customerID int64) ([]domain.TimelineEntry, error) {
@@ -830,6 +742,40 @@ func (r *Repository) GetCustomerTimeline(ctx context.Context, businessID, custom
 		entries = append(entries, e)
 	}
 
+	return entries, nil
+}
+
+func (r *Repository) ListCustomerTimelinePage(ctx context.Context, businessID, customerID int64, cursorCreatedAt *time.Time, cursorID int64, pageSize int) ([]domain.TimelineEntry, error) {
+	rows, err := r.queries.ListCustomerTimelinePage(ctx, sqlc.ListCustomerTimelinePageParams{
+		BusinessID:      businessID,
+		CustomerID:      customerID,
+		CursorCreatedAt: nullableTime(cursorCreatedAt),
+		CursorID:        cursorID,
+		Limit:           int32(pageSize),
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list customer timeline page", logger.Error(err))
+		return nil, err
+	}
+
+	entries := make([]domain.TimelineEntry, 0, len(rows))
+	for _, row := range rows {
+		entry := domain.TimelineEntry{
+			ID:          row.ID,
+			OwnerID:     row.OwnerID,
+			BusinessID:  row.BusinessID,
+			CustomerID:  row.CustomerID,
+			Type:        row.Type,
+			Description: row.Description.String,
+			CreatedAt:   row.CreatedAt.Time,
+		}
+		if row.Metadata != nil {
+			entry.Metadata = []byte(row.Metadata)
+		} else {
+			entry.Metadata = []byte("{}")
+		}
+		entries = append(entries, entry)
+	}
 	return entries, nil
 }
 
@@ -1249,66 +1195,22 @@ func customerFromRow(row sqlc.CrmCustomer) domain.Customer {
 	return c
 }
 
-func segmentFromRow(row sqlc.CrmSegment) domain.Segment {
-	seg := domain.Segment{
-		ID:            row.ID,
-		OwnerID:       row.OwnerID,
-		BusinessID:    row.BusinessID,
-		Name:          row.Name,
-		Description:   row.Description.String,
-		CustomerCount: int(row.CustomerCount.Int32),
-		CreatedAt:     row.CreatedAt.Time,
-		UpdatedAt:     row.UpdatedAt.Time,
+func segmentFromCanonical(row segments.Segment) domain.Segment {
+	return domain.Segment{
+		ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, Name: row.Name, Description: row.Description,
+		Rules: row.Rules, CustomerCount: row.CustomerCount, LastCalculatedAt: row.LastCalculatedAt,
+		CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
 	}
-
-	if row.Rules != nil {
-		seg.Rules = []byte(row.Rules)
-	}
-
-	if row.LastCalculatedAt.Valid {
-		t := row.LastCalculatedAt.Time
-		seg.LastCalculatedAt = &t
-	}
-
-	return seg
 }
 
-func campaignFromRow(row sqlc.CrmCampaign) domain.Campaign {
-	c := domain.Campaign{
-		ID:             row.ID,
-		OwnerID:        row.OwnerID,
-		BusinessID:     row.BusinessID,
-		Name:           row.Name,
-		Description:    row.Description.String,
-		Channel:        string(row.Channel),
-		Status:         string(row.Status.CrmCampaignsStatus),
-		Subject:        row.Subject.String,
-		Content:        row.Content,
-		AudienceCount:  int(row.AudienceCount.Int32),
-		SentCount:      int(row.SentCount.Int32),
-		DeliveredCount: int(row.DeliveredCount.Int32),
-		OpenedCount:    int(row.OpenedCount.Int32),
-		ClickedCount:   int(row.ClickedCount.Int32),
-		CreatedAt:      row.CreatedAt.Time,
-		UpdatedAt:      row.UpdatedAt.Time,
+func campaignFromCanonical(row campaigns.Campaign) domain.Campaign {
+	return domain.Campaign{
+		ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, Name: row.Name, Description: row.Description,
+		Channel: row.Channel, Status: row.Status, SegmentID: row.SegmentID, Subject: row.Subject, Content: row.Content,
+		ScheduledAt: row.ScheduledAt, SentAt: row.SentAt, AudienceCount: row.AudienceCount, SentCount: row.SentCount,
+		DeliveredCount: row.DeliveredCount, OpenedCount: row.OpenedCount, ClickedCount: row.ClickedCount,
+		CreatedAt: row.CreatedAt, UpdatedAt: row.UpdatedAt,
 	}
-
-	if row.SegmentID.Valid {
-		id := row.SegmentID.Int64
-		c.SegmentID = &id
-	}
-
-	if row.ScheduledAt.Valid {
-		t := row.ScheduledAt.Time
-		c.ScheduledAt = &t
-	}
-
-	if row.SentAt.Valid {
-		t := row.SentAt.Time
-		c.SentAt = &t
-	}
-
-	return c
 }
 
 func scanCustomerRaw(rows *sql.Rows) (domain.Customer, error) {
@@ -1365,44 +1267,6 @@ func scanCustomerRaw(rows *sql.Rows) (domain.Customer, error) {
 
 	if c.Tags == nil {
 		c.Tags = []string{}
-	}
-
-	return c, nil
-}
-
-func scanCampaignRaw(rows *sql.Rows) (domain.Campaign, error) {
-	var c domain.Campaign
-	var (
-		desc        sql.NullString
-		segmentID   sql.NullInt64
-		subject     sql.NullString
-		scheduledAt sql.NullTime
-		sentAt      sql.NullTime
-	)
-
-	if err := rows.Scan(
-		&c.ID, &c.OwnerID, &c.BusinessID, &c.Name, &desc, &c.Channel, &c.Status, &segmentID, &subject,
-		&c.Content, &scheduledAt, &sentAt, &c.AudienceCount, &c.SentCount, &c.DeliveredCount,
-		&c.OpenedCount, &c.ClickedCount, &c.CreatedAt, &c.UpdatedAt,
-	); err != nil {
-		return domain.Campaign{}, err
-	}
-
-	c.Description = desc.String
-	c.Subject = subject.String
-
-	if segmentID.Valid {
-		c.SegmentID = &segmentID.Int64
-	}
-
-	if scheduledAt.Valid {
-		t := scheduledAt.Time
-		c.ScheduledAt = &t
-	}
-
-	if sentAt.Valid {
-		t := sentAt.Time
-		c.SentAt = &t
 	}
 
 	return c, nil

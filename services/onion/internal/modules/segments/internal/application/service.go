@@ -49,6 +49,10 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Segment,
 	)
 }
 
+func (s *Service) Get(ctx context.Context, businessID, id int64) (domain.Segment, error) {
+	return s.repo.GetByID(ctx, businessID, id)
+}
+
 func (s *Service) Create(ctx context.Context, input domain.SegmentInput) (int64, error) {
 	id, err := s.repo.Create(ctx, input)
 	if err != nil {
@@ -75,7 +79,7 @@ func (s *Service) Delete(ctx context.Context, businessID, id int64) error {
 }
 
 func (s *Service) GetDetail(ctx context.Context, businessID, id int64) (domain.SegmentDetail, error) {
-	segment, err := s.repo.GetByID(ctx, businessID, id)
+	segment, err := s.Get(ctx, businessID, id)
 	if err != nil {
 		return domain.SegmentDetail{}, err
 	}
@@ -89,7 +93,7 @@ func (s *Service) GetDetail(ctx context.Context, businessID, id int64) (domain.S
 }
 
 func (s *Service) GetCustomers(ctx context.Context, businessID, id int64, page, pageSize int) ([]domain.SegmentCustomer, int, error) {
-	if _, err := s.repo.GetByID(ctx, businessID, id); err != nil {
+	if _, err := s.Get(ctx, businessID, id); err != nil {
 		return nil, 0, err
 	}
 

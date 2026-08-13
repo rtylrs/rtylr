@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"math"
 	"sort"
 	"strconv"
 
@@ -142,6 +144,9 @@ func (r *Repository) getTransferItemsBatch(ctx context.Context, transfers []doma
 }
 
 func (r *Repository) CreateStockTransfer(ctx context.Context, businessID int64, input domain.StockTransferInput) (int64, error) {
+	if err := domain.ValidateStockTransferInput(input); err != nil {
+		return 0, fmt.Errorf("%w: %w", domain.ErrInvalidStockTransfer, err)
+	}
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin transaction", logger.Error(err))
@@ -293,10 +298,16 @@ func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64) 
 	}
 	lines := make([]line, 0, len(items))
 	for _, it := range items {
+		if it.ProductID <= 0 {
+			return domain.ErrInvalidStockTransfer
+		}
 		q, perr := strconv.ParseFloat(it.Quantity, 64)
 		if perr != nil {
 			err = perr
 			return err
+		}
+		if q <= 0 || math.IsNaN(q) || math.IsInf(q, 0) {
+			return domain.ErrInvalidStockTransfer
 		}
 		lines = append(lines, line{productID: it.ProductID, qty: q})
 	}

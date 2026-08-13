@@ -75,6 +75,10 @@ func paginate(page, pageSize int64) (int, int) {
 }
 
 func (s *Service) Create(ctx context.Context, ownerID, businessID int64, input domain.JournalEntryInput) (int64, error) {
+	if err := domain.ValidateJournalEntryInput(input); err != nil {
+		return 0, fmt.Errorf("%w: %w", domain.ErrInvalidJournalEntry, err)
+	}
+
 	id, err := s.repo.Create(ctx, ownerID, businessID, input)
 	if err != nil {
 		return 0, err

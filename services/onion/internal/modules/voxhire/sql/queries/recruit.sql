@@ -40,6 +40,46 @@ SELECT c.id,
           c.salary_currency, c.is_active
  ORDER BY c.is_active DESC, c.created_at DESC;
 
+-- name: ListOpeningsPage :many
+WITH opening_page AS (
+    SELECT c.id,
+           COALESCE(c.slug, '') AS slug,
+           c.title,
+           COALESCE(c.department, '') AS department,
+           COALESCE(c.location, '') AS location,
+           COALESCE(c.employment_type, '') AS employment_type,
+           COALESCE(c.work_mode, '') AS work_mode,
+           COALESCE(c.seniority, '') AS seniority,
+           COALESCE(c.details, '') AS details,
+           COALESCE(c.salary_min, 0) AS salary_min,
+           COALESCE(c.salary_max, 0) AS salary_max,
+           COALESCE(c.salary_currency, 'USD') AS salary_currency,
+           c.is_active,
+           c.created_at
+    FROM careers c
+    WHERE c.owner_id = ?
+    ORDER BY c.is_active DESC, c.created_at DESC, c.id DESC
+    LIMIT ? OFFSET ?
+), application_counts AS (
+    SELECT a.job_id,
+           SUM(a.status = 'new') AS new_count,
+           COUNT(*) AS total_count
+    FROM voxire_career_applications a
+    JOIN opening_page p ON p.id = a.job_id
+    GROUP BY a.job_id
+)
+SELECT p.id, p.slug, p.title, p.department, p.location, p.employment_type,
+       p.work_mode, p.seniority, p.details, p.salary_min, p.salary_max,
+       p.salary_currency, p.is_active,
+       COALESCE(ac.new_count, 0) AS new_count,
+       COALESCE(ac.total_count, 0) AS total_count
+FROM opening_page p
+LEFT JOIN application_counts ac ON ac.job_id = p.id
+ORDER BY p.is_active DESC, p.created_at DESC, p.id DESC;
+
+-- name: CountOpenings :one
+SELECT COUNT(*) FROM careers WHERE owner_id = ?;
+
 -- name: GetCareerOpeningByID :one
 SELECT c.id,
        COALESCE(c.slug, '') AS slug,
@@ -386,5 +426,5 @@ FROM (
            created_at
       FROM voxhire_company_leads
 ) recent
-ORDER BY created_at DESC
+ORDER BY created_at DESC, id DESC
 LIMIT 10;
