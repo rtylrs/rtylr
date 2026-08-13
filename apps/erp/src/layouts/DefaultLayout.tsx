@@ -589,7 +589,8 @@ const DefaultLayout: React.FC = () => {
                 >
                   <Keyboard size={14} />
                 </button>
-                <button
+                <Link
+                  to="/alerts"
                   aria-label="Open notifications"
                   className="h-11 w-11 rounded-lg flex items-center justify-center transition-colors duration-150"
                   style={{ color: 'var(--hub-text-muted)' }}
@@ -601,7 +602,7 @@ const DefaultLayout: React.FC = () => {
                   }}
                 >
                   <Bell size={14} />
-                </button>
+                </Link>
                 <CaretButton />
               </div>
             </header>
