@@ -20,6 +20,11 @@ export function minorToMajor(amount: number, currency: Currency): number {
   return amount / divisor;
 }
 
+export function majorToMinor(amount: number, currency: Currency): number {
+  const digits = fractionDigitsForCurrency(currency);
+  return Math.round(amount * Math.pow(10, digits));
+}
+
 export function formatMoney(amount: number, currency: Currency, locale = 'en-US'): string {
   const major = minorToMajor(amount, currency);
   const digits = fractionDigitsForCurrency(currency);

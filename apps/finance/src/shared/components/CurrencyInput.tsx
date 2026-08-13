@@ -1,5 +1,6 @@
 import React from 'react';
 import { getCurrencySymbol, type Currency } from '../lib/money';
+import { majorToMinor, minorToMajor } from '../utils/money';
 import { useSettings } from '../lib/settings';
 import { inputStyle } from '../lib/tokens';
 
@@ -27,7 +28,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
   const handle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/[^0-9.\-]/g, '');
     const n = parseFloat(raw);
-    onChange(isNaN(n) ? 0 : n);
+    onChange(isNaN(n) ? 0 : majorToMinor(n, c));
   };
 
   return (
@@ -49,7 +50,7 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
       <input
         type="text"
         inputMode="decimal"
-        value={value === 0 ? '' : String(value)}
+        value={value === 0 ? '' : String(minorToMajor(Number(value), c))}
         onChange={handle}
         placeholder={placeholder}
         disabled={disabled}
