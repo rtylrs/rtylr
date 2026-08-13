@@ -106,11 +106,11 @@
   --flow-on-accent: #0a0a0a;
   --flow-focus-ring: rgba(100, 197, 185, 0.9);
 
-  --flow-warn: #d9a066;
+  /* Only the -fg variants exist on purpose. A separate fill token would need a
+   * light value too, and nothing consumes one: every surface here uses the
+   * foreground tone. */
   --flow-warn-fg: #d9a066;
-  --flow-danger: #e5776a;
   --flow-danger-fg: #e5776a;
-  --flow-locked: #a8a4c8;
   --flow-locked-fg: #a8a4c8;
 
   --flow-status-draft: var(--flow-text-muted);

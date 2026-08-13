@@ -15,6 +15,7 @@ import {
 } from './useColumns';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
+import type { BoardGroupKey } from '../../shared/lib/boardUtils';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import TaskCard from '../../shared/components/TaskCard';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
@@ -31,7 +32,8 @@ import type { Task } from '../../shared/stores/flowStore';
 // etc.). The choice persists per-project in localStorage so switching
 // projects doesn't reset it.
 
-type GroupKey = 'none' | 'assignee' | 'priority' | 'due';
+/** Re-exported name kept local for readability; the type lives in boardUtils. */
+type GroupKey = BoardGroupKey;
 
 const GROUP_OPTIONS: { key: GroupKey; label: string }[] = [
   { key: 'none', label: 'None' },
