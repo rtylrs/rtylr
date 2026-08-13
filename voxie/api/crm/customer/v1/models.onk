@@ -20,6 +20,8 @@ message Customer {
   loyalty_tier: string
   tags: string[]
   notes: string
+  /// Explicit communication consent captured at customer creation/update.
+  consent: map[string, bool]
   is_active: bool
   created_at: string
   updated_at: string
@@ -37,6 +39,7 @@ message CreateCustomerRequest {
   country: string @required
   tags: string[] @min_items(1)
   notes: string
+  consent: map[string, bool]
 }
 
 message CreateCustomerResponse {
@@ -90,6 +93,7 @@ message UpdateCustomerBody {
   country: string @required
   tags: string[] @min_items(1)
   notes: string
+  consent: map[string, bool]
   is_active: bool? @nullable
 }
 

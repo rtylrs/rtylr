@@ -19,6 +19,7 @@ lastVisitAt?: string;
 loyaltyTier?: string;
 tags?: (string)[];
 notes?: string;
+consent?: Record<string, boolean>;
 isActive?: boolean;
 createdAt?: string;
 updatedAt?: string;
@@ -45,6 +46,7 @@ lastVisitAt: v.last_visit_at,
 loyaltyTier: v.loyalty_tier,
 tags: v.tags,
 notes: v.notes,
+consent: v.consent,
 isActive: v.is_active,
 createdAt: v.created_at,
 updatedAt: v.updated_at,
@@ -71,6 +73,7 @@ if (v.lastVisitAt !== undefined) { out.last_visit_at = v.lastVisitAt; }
 if (v.loyaltyTier !== undefined) { out.loyalty_tier = v.loyaltyTier; }
 if (v.tags !== undefined) { out.tags = v.tags; }
 if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.consent !== undefined) { out.consent = v.consent; }
 if (v.isActive !== undefined) { out.is_active = v.isActive; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
@@ -94,6 +97,7 @@ city: string;
 country: string;
 tags?: (string)[];
 notes?: string;
+consent?: Record<string, boolean>;
 }
 
 export function decodeCreateCustomerRequest(v: any): CreateCustomerRequest {
@@ -110,6 +114,7 @@ city: v.city,
 country: v.country,
 tags: v.tags,
 notes: v.notes,
+consent: v.consent,
 };
 }
 
@@ -126,6 +131,7 @@ if (v.city !== undefined) { out.city = v.city; }
 if (v.country !== undefined) { out.country = v.country; }
 if (v.tags !== undefined) { out.tags = v.tags; }
 if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.consent !== undefined) { out.consent = v.consent; }
 return out;
 }
 
@@ -339,6 +345,7 @@ city: string;
 country: string;
 tags?: (string)[];
 notes?: string;
+consent?: Record<string, boolean>;
 isActive?: boolean;
 }
 
@@ -356,6 +363,7 @@ city: v.city,
 country: v.country,
 tags: v.tags,
 notes: v.notes,
+consent: v.consent,
 isActive: v.is_active,
 };
 }
@@ -373,6 +381,7 @@ if (v.city !== undefined) { out.city = v.city; }
 if (v.country !== undefined) { out.country = v.country; }
 if (v.tags !== undefined) { out.tags = v.tags; }
 if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.consent !== undefined) { out.consent = v.consent; }
 if (v.isActive !== undefined) { out.is_active = v.isActive; }
 return out;
 }

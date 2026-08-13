@@ -7,27 +7,28 @@ import (
 )
 
 type Customer struct {
-	Id            int64    `json:"id,omitempty"`
-	OwnerId       int64    `json:"owner_id,omitempty"`
-	FirstName     string   `json:"first_name,omitempty"`
-	LastName      string   `json:"last_name,omitempty"`
-	Email         string   `json:"email,omitempty"`
-	Phone         string   `json:"phone,omitempty"`
-	DateOfBirth   *string  `json:"date_of_birth,omitempty"`
-	Gender        string   `json:"gender,omitempty"`
-	Address       string   `json:"address,omitempty"`
-	City          string   `json:"city,omitempty"`
-	Country       string   `json:"country,omitempty"`
-	LoyaltyPoints int64    `json:"loyalty_points,omitempty"`
-	TotalSpent    float64  `json:"total_spent,omitempty"`
-	VisitCount    int64    `json:"visit_count,omitempty"`
-	LastVisitAt   *string  `json:"last_visit_at,omitempty"`
-	LoyaltyTier   string   `json:"loyalty_tier,omitempty"`
-	Tags          []string `json:"tags,omitempty"`
-	Notes         string   `json:"notes,omitempty"`
-	IsActive      bool     `json:"is_active,omitempty"`
-	CreatedAt     string   `json:"created_at,omitempty"`
-	UpdatedAt     string   `json:"updated_at,omitempty"`
+	Id            int64           `json:"id,omitempty"`
+	OwnerId       int64           `json:"owner_id,omitempty"`
+	FirstName     string          `json:"first_name,omitempty"`
+	LastName      string          `json:"last_name,omitempty"`
+	Email         string          `json:"email,omitempty"`
+	Phone         string          `json:"phone,omitempty"`
+	DateOfBirth   *string         `json:"date_of_birth,omitempty"`
+	Gender        string          `json:"gender,omitempty"`
+	Address       string          `json:"address,omitempty"`
+	City          string          `json:"city,omitempty"`
+	Country       string          `json:"country,omitempty"`
+	LoyaltyPoints int64           `json:"loyalty_points,omitempty"`
+	TotalSpent    float64         `json:"total_spent,omitempty"`
+	VisitCount    int64           `json:"visit_count,omitempty"`
+	LastVisitAt   *string         `json:"last_visit_at,omitempty"`
+	LoyaltyTier   string          `json:"loyalty_tier,omitempty"`
+	Tags          []string        `json:"tags,omitempty"`
+	Notes         string          `json:"notes,omitempty"`
+	Consent       map[string]bool `json:"consent,omitempty"`
+	IsActive      bool            `json:"is_active,omitempty"`
+	CreatedAt     string          `json:"created_at,omitempty"`
+	UpdatedAt     string          `json:"updated_at,omitempty"`
 }
 
 func (m *Customer) MarshalJSON() ([]byte, error) {
@@ -241,6 +242,14 @@ func (x *Customer) GetNotes() string {
 	return x.Notes
 }
 
+func (x *Customer) GetConsent() map[string]bool {
+	if x == nil {
+		var zero map[string]bool
+		return zero
+	}
+	return x.Consent
+}
+
 func (x *Customer) GetIsActive() bool {
 	if x == nil {
 		var zero bool
@@ -266,17 +275,18 @@ func (x *Customer) GetUpdatedAt() string {
 }
 
 type CreateCustomerRequest struct {
-	FirstName   string   `json:"first_name,omitempty"`
-	LastName    string   `json:"last_name,omitempty"`
-	Email       string   `json:"email,omitempty"`
-	Phone       string   `json:"phone,omitempty"`
-	DateOfBirth string   `json:"date_of_birth,omitempty"`
-	Gender      string   `json:"gender,omitempty"`
-	Address     string   `json:"address,omitempty"`
-	City        string   `json:"city,omitempty"`
-	Country     string   `json:"country,omitempty"`
-	Tags        []string `json:"tags,omitempty"`
-	Notes       string   `json:"notes,omitempty"`
+	FirstName   string          `json:"first_name,omitempty"`
+	LastName    string          `json:"last_name,omitempty"`
+	Email       string          `json:"email,omitempty"`
+	Phone       string          `json:"phone,omitempty"`
+	DateOfBirth string          `json:"date_of_birth,omitempty"`
+	Gender      string          `json:"gender,omitempty"`
+	Address     string          `json:"address,omitempty"`
+	City        string          `json:"city,omitempty"`
+	Country     string          `json:"country,omitempty"`
+	Tags        []string        `json:"tags,omitempty"`
+	Notes       string          `json:"notes,omitempty"`
+	Consent     map[string]bool `json:"consent,omitempty"`
 }
 
 func (x *CreateCustomerRequest) GetFirstName() string {
@@ -365,6 +375,14 @@ func (x *CreateCustomerRequest) GetNotes() string {
 		return zero
 	}
 	return x.Notes
+}
+
+func (x *CreateCustomerRequest) GetConsent() map[string]bool {
+	if x == nil {
+		var zero map[string]bool
+		return zero
+	}
+	return x.Consent
 }
 
 type CreateCustomerResponse struct {
@@ -699,18 +717,19 @@ func (x *ListCustomersResponse) GetPageSize() int64 {
 }
 
 type UpdateCustomerBody struct {
-	FirstName   string   `json:"first_name,omitempty"`
-	LastName    string   `json:"last_name,omitempty"`
-	Email       string   `json:"email,omitempty"`
-	Phone       string   `json:"phone,omitempty"`
-	DateOfBirth string   `json:"date_of_birth,omitempty"`
-	Gender      string   `json:"gender,omitempty"`
-	Address     string   `json:"address,omitempty"`
-	City        string   `json:"city,omitempty"`
-	Country     string   `json:"country,omitempty"`
-	Tags        []string `json:"tags,omitempty"`
-	Notes       string   `json:"notes,omitempty"`
-	IsActive    *bool    `json:"is_active,omitempty"`
+	FirstName   string          `json:"first_name,omitempty"`
+	LastName    string          `json:"last_name,omitempty"`
+	Email       string          `json:"email,omitempty"`
+	Phone       string          `json:"phone,omitempty"`
+	DateOfBirth string          `json:"date_of_birth,omitempty"`
+	Gender      string          `json:"gender,omitempty"`
+	Address     string          `json:"address,omitempty"`
+	City        string          `json:"city,omitempty"`
+	Country     string          `json:"country,omitempty"`
+	Tags        []string        `json:"tags,omitempty"`
+	Notes       string          `json:"notes,omitempty"`
+	Consent     map[string]bool `json:"consent,omitempty"`
+	IsActive    *bool           `json:"is_active,omitempty"`
 }
 
 func (x *UpdateCustomerBody) GetFirstName() string {
@@ -799,6 +818,14 @@ func (x *UpdateCustomerBody) GetNotes() string {
 		return zero
 	}
 	return x.Notes
+}
+
+func (x *UpdateCustomerBody) GetConsent() map[string]bool {
+	if x == nil {
+		var zero map[string]bool
+		return zero
+	}
+	return x.Consent
 }
 
 func (x *UpdateCustomerBody) GetIsActive() bool {
