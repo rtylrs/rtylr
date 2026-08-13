@@ -30,6 +30,7 @@ const ProjectCalendar = React.lazy(() => import('./features/projects/ProjectCale
 const ProjectDashboard = React.lazy(() => import('./features/projects/ProjectDashboard'));
 const Inbox = React.lazy(() => import('./features/inbox/Inbox'));
 const FlowSettings = React.lazy(() => import('./features/settings/FlowSettings'));
+const MyDay = React.lazy(() => import('./features/time/MyDay'));
 const TaskDetail = React.lazy(() => import('./features/tasks/TaskDetail'));
 const Timeline = React.lazy(() => import('./features/timeline/Timeline'));
 const CalendarView = React.lazy(() => import('./features/calendar/Calendar'));
@@ -250,6 +251,12 @@ const inboxRoute = createRoute({
   component: () => withLayout(<Inbox />),
 });
 
+const myDayRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/time',
+  component: () => withLayout(<MyDay />),
+});
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
@@ -291,6 +298,7 @@ const routeTree = rootRoute.addChildren([
   triageRoute,
   archiveRoute,
   inboxRoute,
+  myDayRoute,
   settingsRoute,
   catchAllRoute,
 ]);

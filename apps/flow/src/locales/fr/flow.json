@@ -27,7 +27,32 @@
     "cancel": "Annuler",
     "logForOthersGate": "Vous pouvez saisir votre propre temps. Saisir pour quelqu'un d'autre nécessite la gestion du temps de l'équipe.",
     "socketReconnecting": "Reconnexion en cours. Vos saisies sont bien enregistrées ; celles des autres peuvent être obsolètes.",
-    "socketDisconnected": "Non connecté. Vos saisies sont enregistrées, mais cette liste ne se mettra pas à jour avant un rechargement."
+    "socketDisconnected": "Non connecté. Vos saisies sont enregistrées, mais cette liste ne se mettra pas à jour avant un rechargement.",
+    "myDay": "Ma journée",
+    "theDay": "La journée",
+    "workMode": "Où vous avez travaillé",
+    "startTime": "Début",
+    "endTime": "Fin",
+    "breakMinutes": "Pause non payée, en minutes",
+    "clocked": "Pointé",
+    "logged": "Saisi",
+    "unaccounted": "Non affecté",
+    "whatYouWorkedOn": "Ce sur quoi vous avez travaillé",
+    "noLinesYet": "Rien de saisi pour cette journée.",
+    "addLine": "Ajouter",
+    "setTheDayFirst": "Indiquez où vous avez travaillé pour ouvrir la journée, puis ajoutez vos saisies.",
+    "loadingDay": "Chargement de la journée…",
+    "workType": "Type de travail",
+    "noWorkType": "Aucun type",
+    "deleteLineLabel": "Supprimer l'entrée de {{duration}}",
+    "daySaveFailed": "Impossible d'enregistrer la journée.",
+    "lineSaveFailed": "Impossible d'enregistrer cette saisie.",
+    "lineDeleteFailed": "Impossible de supprimer cette saisie.",
+    "mode": {
+      "onsite": "Sur site",
+      "remote": "À distance",
+      "hybrid": "Hybride"
+    }
   },
   "settings": {
     "time": {

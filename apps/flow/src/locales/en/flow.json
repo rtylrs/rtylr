@@ -27,7 +27,32 @@
     "cancel": "Cancel",
     "logForOthersGate": "You can log your own time. Logging for someone else needs manage team time.",
     "socketReconnecting": "Reconnecting. Your entries still save; other people’s may be out of date.",
-    "socketDisconnected": "Not connected. Your entries still save, but this list will not update until you reload."
+    "socketDisconnected": "Not connected. Your entries still save, but this list will not update until you reload.",
+    "myDay": "My day",
+    "theDay": "The day",
+    "workMode": "Where you worked",
+    "startTime": "Started",
+    "endTime": "Finished",
+    "breakMinutes": "Unpaid break, in minutes",
+    "clocked": "Clocked",
+    "logged": "Logged",
+    "unaccounted": "Unaccounted",
+    "whatYouWorkedOn": "What you worked on",
+    "noLinesYet": "Nothing logged for this day yet.",
+    "addLine": "Add",
+    "setTheDayFirst": "Set where you worked to start the day, then add what you worked on.",
+    "loadingDay": "Loading the day…",
+    "workType": "Type of work",
+    "noWorkType": "No type",
+    "deleteLineLabel": "Delete the {{duration}} entry",
+    "daySaveFailed": "Could not save the day.",
+    "lineSaveFailed": "Could not save that entry.",
+    "lineDeleteFailed": "Could not delete that entry.",
+    "mode": {
+      "onsite": "Onsite",
+      "remote": "Remote",
+      "hybrid": "Hybrid"
+    }
   },
   "settings": {
     "time": {
