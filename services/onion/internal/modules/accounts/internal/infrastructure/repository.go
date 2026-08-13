@@ -23,8 +23,8 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Account, error) {
-	rows, err := r.queries.ListAccounts(ctx, businessID)
+func (r *Repository) List(ctx context.Context, businessID int64, limit, offset int) ([]domain.Account, error) {
+	rows, err := r.queries.ListAccounts(ctx, sqlc.ListAccountsParams{BusinessID: businessID, Limit: int64(limit), Offset: int64(offset)})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list accounts", logger.Error(err))
 		return nil, err

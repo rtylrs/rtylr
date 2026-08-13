@@ -9,6 +9,8 @@ SELECT
     contact_email,
     contact_number,
     sender_email,
+    email_provider, sender_name, reply_to_email, email_notifications_enabled,
+    smtp_host, smtp_port, smtp_username, smtp_password_hash,
     website,
     maps_url,
     address,
@@ -35,6 +37,8 @@ UPDATE config SET
     contact_email = ?,
     contact_number = ?,
     sender_email = ?,
+    email_provider = ?, sender_name = ?, reply_to_email = ?, email_notifications_enabled = ?,
+    smtp_host = ?, smtp_port = ?, smtp_username = ?,
     website = ?,
     maps_url = ?,
     address = ?,
@@ -52,6 +56,9 @@ UPDATE config SET
     footer_sub_text = ?
 WHERE business_id = ?;
 
+-- name: UpdateSMTPPassword :exec
+UPDATE config SET smtp_password_hash = ? WHERE business_id = ?;
+
 -- name: CreateConfig :exec
 INSERT INTO config (
     owner_id,
@@ -63,6 +70,8 @@ INSERT INTO config (
     contact_email,
     contact_number,
     sender_email,
+    email_provider, sender_name, reply_to_email, email_notifications_enabled,
+    smtp_host, smtp_port, smtp_username, smtp_password_hash,
     website,
     maps_url,
     address,
@@ -79,7 +88,7 @@ INSERT INTO config (
     about_content,
     footer_sub_text
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 );
 
 -- name: GetBusinessSlugByID :one

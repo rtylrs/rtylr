@@ -56,7 +56,7 @@ func (r *Repository) ListPaginated(ctx context.Context, businessID int64, limit,
 
 	expenses := make([]domain.Expense, 0, len(rows))
 	for _, row := range rows {
-		expenses = append(expenses, expenseFromRow(sqlc.ListExpensesRow(row)))
+		expenses = append(expenses, expenseFromRow(row))
 	}
 	return expenses, nil
 }
@@ -77,15 +77,19 @@ func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.
 
 func (r *Repository) Create(ctx context.Context, input domain.ExpenseInput) (int64, error) {
 	result, err := r.queries.CreateExpense(ctx, sqlc.CreateExpenseParams{
-		OwnerID:     input.OwnerID,
-		BusinessID:  input.BusinessID,
-		CategoryID:  nullableInt64Ptr(input.CategoryID),
-		Amount:      fmtFloat(input.Amount),
-		Currency:    nullableString(input.Currency),
-		Description: input.Description,
-		Vendor:      nullableString(input.Vendor),
-		ReceiptUrl:  nullableString(input.ReceiptURL),
-		ExpenseDate: input.ExpenseDate,
+		OwnerID:         input.OwnerID,
+		BusinessID:      input.BusinessID,
+		CategoryID:      nullableInt64Ptr(input.CategoryID),
+		Amount:          fmtFloat(input.Amount),
+		Currency:        nullableString(input.Currency),
+		Description:     input.Description,
+		Vendor:          nullableString(input.Vendor),
+		PaymentMethod:   sqlc.NullFinanceExpensesPaymentMethod{FinanceExpensesPaymentMethod: sqlc.FinanceExpensesPaymentMethod(input.PaymentMethod), Valid: input.PaymentMethod != ""},
+		ReceiptUrl:      nullableString(input.ReceiptURL),
+		IsTaxDeductible: sql.NullBool{Bool: input.IsTaxDeductible, Valid: true},
+		TaxAmount:       nullableString(fmtFloat(input.TaxAmount)),
+		Notes:           nullableString(input.Notes),
+		ExpenseDate:     input.ExpenseDate,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create expense", logger.Error(err))
@@ -96,15 +100,19 @@ func (r *Repository) Create(ctx context.Context, input domain.ExpenseInput) (int
 
 func (r *Repository) Update(ctx context.Context, input domain.ExpenseUpdateInput) error {
 	result, err := r.queries.UpdateExpense(ctx, sqlc.UpdateExpenseParams{
-		CategoryID:  nullableInt64Ptr(input.CategoryID),
-		Amount:      fmtFloat(input.Amount),
-		Currency:    nullableString(input.Currency),
-		Description: input.Description,
-		Vendor:      nullableString(input.Vendor),
-		ReceiptUrl:  nullableString(input.ReceiptURL),
-		ExpenseDate: input.ExpenseDate,
-		ID:          input.ID,
-		BusinessID:  input.BusinessID,
+		CategoryID:      nullableInt64Ptr(input.CategoryID),
+		Amount:          fmtFloat(input.Amount),
+		Currency:        nullableString(input.Currency),
+		Description:     input.Description,
+		Vendor:          nullableString(input.Vendor),
+		PaymentMethod:   sqlc.NullFinanceExpensesPaymentMethod{FinanceExpensesPaymentMethod: sqlc.FinanceExpensesPaymentMethod(input.PaymentMethod), Valid: input.PaymentMethod != ""},
+		ReceiptUrl:      nullableString(input.ReceiptURL),
+		IsTaxDeductible: sql.NullBool{Bool: input.IsTaxDeductible, Valid: true},
+		TaxAmount:       nullableString(fmtFloat(input.TaxAmount)),
+		Notes:           nullableString(input.Notes),
+		ExpenseDate:     input.ExpenseDate,
+		ID:              input.ID,
+		BusinessID:      input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update expense", logger.Error(err))
@@ -224,20 +232,24 @@ func (r *Repository) CountByCategory(ctx context.Context, businessID int64) (map
 // Mapping helpers
 // ---------------------------------------------------------------------------
 
-func expenseFromRow(row sqlc.ListExpensesRow) domain.Expense {
+func expenseFromRow(row sqlc.FinanceExpense) domain.Expense {
 	e := domain.Expense{
-		ID:          row.ID,
-		OwnerID:     row.OwnerID,
-		BusinessID:  row.BusinessID,
-		Amount:      parseFloat(row.Amount),
-		Currency:    nullStr(row.Currency),
-		Description: row.Description,
-		Vendor:      nullStr(row.Vendor),
-		ReceiptURL:  nullStr(row.ReceiptUrl),
-		ExpenseDate: row.ExpenseDate,
-		Status:      nullStr(row.Status),
-		CreatedAt:   nullTime(row.CreatedAt),
-		UpdatedAt:   nullTime(row.UpdatedAt),
+		ID:              row.ID,
+		OwnerID:         row.OwnerID,
+		BusinessID:      row.BusinessID,
+		Amount:          parseFloat(row.Amount),
+		Currency:        nullStr(row.Currency),
+		Description:     row.Description,
+		Vendor:          nullStr(row.Vendor),
+		PaymentMethod:   nullEnumStr(row.PaymentMethod.FinanceExpensesPaymentMethod, row.PaymentMethod.Valid, "cash"),
+		ReceiptURL:      nullStr(row.ReceiptUrl),
+		IsTaxDeductible: nullBool(row.IsTaxDeductible),
+		TaxAmount:       parseFloatNull(row.TaxAmount),
+		Notes:           nullStr(row.Notes),
+		ExpenseDate:     row.ExpenseDate,
+		Status:          nullStr(row.Status),
+		CreatedAt:       nullTime(row.CreatedAt),
+		UpdatedAt:       nullTime(row.UpdatedAt),
 	}
 	if row.CategoryID.Valid {
 		e.CategoryID = &row.CategoryID.Int64
@@ -245,20 +257,24 @@ func expenseFromRow(row sqlc.ListExpensesRow) domain.Expense {
 	return e
 }
 
-func expenseFromGetRow(row sqlc.GetExpenseByIDRow) domain.Expense {
+func expenseFromGetRow(row sqlc.FinanceExpense) domain.Expense {
 	e := domain.Expense{
-		ID:          row.ID,
-		OwnerID:     row.OwnerID,
-		BusinessID:  row.BusinessID,
-		Amount:      parseFloat(row.Amount),
-		Currency:    nullStr(row.Currency),
-		Description: row.Description,
-		Vendor:      nullStr(row.Vendor),
-		ReceiptURL:  nullStr(row.ReceiptUrl),
-		ExpenseDate: row.ExpenseDate,
-		Status:      nullStr(row.Status),
-		CreatedAt:   nullTime(row.CreatedAt),
-		UpdatedAt:   nullTime(row.UpdatedAt),
+		ID:              row.ID,
+		OwnerID:         row.OwnerID,
+		BusinessID:      row.BusinessID,
+		Amount:          parseFloat(row.Amount),
+		Currency:        nullStr(row.Currency),
+		Description:     row.Description,
+		Vendor:          nullStr(row.Vendor),
+		PaymentMethod:   nullEnumStr(row.PaymentMethod.FinanceExpensesPaymentMethod, row.PaymentMethod.Valid, "cash"),
+		ReceiptURL:      nullStr(row.ReceiptUrl),
+		IsTaxDeductible: nullBool(row.IsTaxDeductible),
+		TaxAmount:       parseFloatNull(row.TaxAmount),
+		Notes:           nullStr(row.Notes),
+		ExpenseDate:     row.ExpenseDate,
+		Status:          nullStr(row.Status),
+		CreatedAt:       nullTime(row.CreatedAt),
+		UpdatedAt:       nullTime(row.UpdatedAt),
 	}
 	if row.CategoryID.Valid {
 		e.CategoryID = &row.CategoryID.Int64
@@ -297,6 +313,24 @@ func nullTime(t sql.NullTime) time.Time {
 
 func fmtFloat(f float64) string {
 	return strconv.FormatFloat(f, 'f', 2, 64)
+}
+
+func nullBool(b sql.NullBool) bool {
+	return b.Valid && b.Bool
+}
+
+func parseFloatNull(s sql.NullString) float64 {
+	if !s.Valid {
+		return 0
+	}
+	return parseFloat(s.String)
+}
+
+func nullEnumStr[T ~string](value T, valid bool, fallback string) string {
+	if valid {
+		return string(value)
+	}
+	return fallback
 }
 
 func parseFloat(s string) float64 {
