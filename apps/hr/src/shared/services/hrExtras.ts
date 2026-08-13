@@ -299,11 +299,13 @@ const toBenefitPayload = (data: Omit<BenefitEnrollment, 'id' | 'startedAt' | 'st
   isActive: true,
 });
 
-const toSettingsPayload = (patch: Partial<HrSettings>) => ({
-  setupCompletedAt:
-    'setupCompletedAt' in patch
-      ? (patch as { setupCompletedAt?: number }).setupCompletedAt
-      : undefined,
+const toSettingsPayload = (patch: Partial<HrSettings>): Partial<HrSettings> => ({
+  workWeekStart: patch.workWeekStart,
+  overtimeAfterHours: patch.overtimeAfterHours,
+  ptoPolicyDays: patch.ptoPolicyDays,
+  currency: patch.currency,
+  weeklyHours: patch.weeklyHours,
+  industry: patch.industry,
 });
 
 // ─── API service ────────────────────────────────────────────────────────────
