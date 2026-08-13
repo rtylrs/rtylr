@@ -68,7 +68,8 @@ SELECT
     COUNT(ft.id) AS task_count,
     COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS done_count
 FROM flow_milestones fm
-LEFT JOIN flow_tasks ft ON ft.project_id = fm.project_id AND ft.parent_task_id IS NULL
+LEFT JOIN flow_milestone_tasks fmt ON fmt.milestone_id = fm.id
+LEFT JOIN flow_tasks ft ON ft.id = fmt.task_id AND ft.parent_task_id IS NULL
 WHERE fm.project_id = ?
 GROUP BY fm.id, fm.name, fm.target_date
 ORDER BY fm.target_date ASC;
@@ -82,7 +83,8 @@ SELECT
     COUNT(ft.id) AS task_count,
     COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS done_count
 FROM flow_milestones fm
-LEFT JOIN flow_tasks ft ON ft.project_id = fm.project_id AND ft.parent_task_id IS NULL
+LEFT JOIN flow_milestone_tasks fmt ON fmt.milestone_id = fm.id
+LEFT JOIN flow_tasks ft ON ft.id = fmt.task_id AND ft.parent_task_id IS NULL
 WHERE fm.project_id IN (sqlc.slice('project_ids'))
 GROUP BY fm.project_id, fm.id, fm.name, fm.target_date
 ORDER BY fm.target_date ASC;
