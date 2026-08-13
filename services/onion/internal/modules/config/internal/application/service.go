@@ -24,6 +24,7 @@ type repository interface {
 
 type Service struct {
 	repo repository
+	db   *sql.DB
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
@@ -31,8 +32,11 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 
 	return &Service{
 		repo: repo,
+		db:   db,
 	}
 }
+
+func (s *Service) DB() *sql.DB { return s.db }
 
 func (s *Service) GetGlobalConfig(ctx context.Context) (domain.Config, error) {
 	return s.GetConfig(ctx, "1")
