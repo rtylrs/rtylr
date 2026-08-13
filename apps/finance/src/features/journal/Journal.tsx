@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
+import CurrencyInput from '../../shared/components/CurrencyInput';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { useJournal, useCreateJournalEntry } from '../../shared/hooks/useChartOfAccounts';
 import { cardStyle, primaryBtn, ghostBtn, inputStyle } from '../../shared/lib/tokens';
@@ -23,15 +24,14 @@ const Journal: React.FC = () => {
   const [debitAccId, setDebitAccId] = useState(0);
   const [creditAcc, setCreditAcc] = useState('');
   const [creditAccId, setCreditAccId] = useState(0);
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState(0);
 
   const handleCreate = async (): Promise<void> => {
     if (!memo.trim()) {
       toast.error('Memo is required');
       return;
     }
-    const parsedAmount = parseFloat(amount);
-    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
+    if (amount <= 0) {
       toast.error('Amount must be greater than zero');
       return;
     }
@@ -40,7 +40,7 @@ const Journal: React.FC = () => {
       toast.error('Date cannot be in the future');
       return;
     }
-    const amt = parsedAmount;
+    const amt = amount;
     try {
       await createMut.mutateAsync({
         date,
@@ -65,7 +65,7 @@ const Journal: React.FC = () => {
       toast.success('Journal entry created');
       setShowCreate(false);
       setMemo('');
-      setAmount('');
+      setAmount(0);
       setDebitAcc('');
       setDebitAccId(0);
       setCreditAcc('');
@@ -273,15 +273,7 @@ const Journal: React.FC = () => {
               value={creditAccId || ''}
               onChange={(e) => setCreditAccId(parseInt(e.target.value, 10) || 0)}
             />
-            <input
-              style={inputStyle}
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="Amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
+            <CurrencyInput value={amount} onChange={setAmount} />
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button style={ghostBtn} onClick={() => setShowCreate(false)}>
                 Cancel
