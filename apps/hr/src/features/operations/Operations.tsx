@@ -32,6 +32,7 @@ import {
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import { formatCurrency } from '../../shared/lib/hrNumberUtils';
 import { canHrPermission, canViewCompensation } from '../../shared/lib/hrPermissions';
+import { normalizeHrRequestStatus } from '../../shared/lib/requestStatus';
 
 const TABS = ['Labor Cost', 'Swap Shifts', 'Availability', 'Breaks', 'Overtime'] as const;
 
@@ -344,47 +345,50 @@ const Operations: React.FC = () => {
               />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {swaps.map((s) => (
-                  <Card key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
-                        {s.requester}{' '}
-                        <span style={{ color: 'var(--hr-text-muted)' }}>wants to swap with</span>{' '}
-                        {s.target}
+                {swaps.map((s) => {
+                  const status = normalizeHrRequestStatus(s.status);
+                  return (
+                    <Card key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
+                          {s.requester}{' '}
+                          <span style={{ color: 'var(--hr-text-muted)' }}>wants to swap with</span>{' '}
+                          {s.target}
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
+                          {s.shiftDay} • {s.reason}
+                        </div>
                       </div>
-                      <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                        {s.shiftDay} • {s.reason}
-                      </div>
-                    </div>
-                    <Pill
-                      color={
-                        s.status === 'Accepted'
-                          ? '#10b981'
-                          : s.status === 'Rejected'
-                            ? '#ef4444'
-                            : '#f59e0b'
-                      }
-                    >
-                      {s.status}
-                    </Pill>
-                    {canManageShifts && s.status === 'Pending' && (
-                      <ApprovalButtons
-                        onApprove={() =>
-                          resolveSwap.mutate(
-                            { id: s.id, accepted: true },
-                            { onSuccess: () => toast.success('Swap accepted') }
-                          )
+                      <Pill
+                        color={
+                          status === 'accepted'
+                            ? '#10b981'
+                            : status === 'rejected'
+                              ? '#ef4444'
+                              : '#f59e0b'
                         }
-                        onReject={() =>
-                          resolveSwap.mutate(
-                            { id: s.id, accepted: false },
-                            { onSuccess: () => toast.success('Swap rejected') }
-                          )
-                        }
-                      />
-                    )}
-                  </Card>
-                ))}
+                      >
+                        {s.status}
+                      </Pill>
+                      {canManageShifts && status === 'pending' && (
+                        <ApprovalButtons
+                          onApprove={() =>
+                            resolveSwap.mutate(
+                              { id: s.id, accepted: true },
+                              { onSuccess: () => toast.success('Swap accepted') }
+                            )
+                          }
+                          onReject={() =>
+                            resolveSwap.mutate(
+                              { id: s.id, accepted: false },
+                              { onSuccess: () => toast.success('Swap rejected') }
+                            )
+                          }
+                        />
+                      )}
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>
