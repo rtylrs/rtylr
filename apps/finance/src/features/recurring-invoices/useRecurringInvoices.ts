@@ -2,6 +2,7 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { RecurringInvoiceServiceClient } from '@voxire/voxie/finance/recurring_invoice/v1/client';
 import { recurringInvoiceSchema } from '../../shared/schemas/recurringInvoices';
 
@@ -27,6 +28,7 @@ interface CreateRecurringPayload {
 
 export function useCreateRecurringInvoice() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (data: CreateRecurringPayload) =>
       recurringClient.createRecurringInvoice({
@@ -40,12 +42,13 @@ export function useCreateRecurringInvoice() {
       void qc.invalidateQueries({ queryKey: ['recurring-invoices'] });
     },
     onError: (error) =>
-      toast.error(getOneKitErrorMessage(error, 'Failed to create recurring invoice')),
+      toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 
 export function useSetRecurringStatus() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'active' | 'paused' }) =>
       status === 'paused'
@@ -53,6 +56,6 @@ export function useSetRecurringStatus() {
         : recurringClient.resumeRecurringInvoice({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recurring-invoices'] }),
     onError: (error) =>
-      toast.error(getOneKitErrorMessage(error, 'Failed to update recurring invoice status')),
+      toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }

@@ -1,6 +1,7 @@
 import { createOneKitClient, getOneKitErrorMessage, toFiniteNumber } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { ExpensesServiceClient } from '@voxire/voxie/finance/expenses/v1/client';
 import type {
   Expense as ApiExpense,
@@ -76,6 +77,7 @@ export function useExpenseCategories() {
 
 export function useCreateExpense() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: async (data: Partial<Expense>): Promise<{ expenseId: string; message: string }> => {
       const res = await expensesClient.createExpense({
@@ -90,12 +92,13 @@ export function useCreateExpense() {
       return { expenseId: res.expenseId ?? '', message: res.message ?? '' };
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['expenses'] }),
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to create expense')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 
 export function useUpdateExpense() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: async ({
       id,
@@ -119,18 +122,19 @@ export function useUpdateExpense() {
       return { message: res.message ?? '' };
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['expenses'] }),
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to update expense')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 
 export function useDeleteExpense() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: async (id: string): Promise<{ message: string }> => {
       const res = await expensesClient.deleteExpense({ id });
       return { message: res.message ?? '' };
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['expenses'] }),
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to delete expense')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }

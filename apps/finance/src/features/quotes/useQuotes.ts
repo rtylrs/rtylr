@@ -1,6 +1,7 @@
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { QuoteServiceClient } from '@voxire/voxie/finance/quote/v1/client';
 import type { Quote as ApiQuote } from '@voxire/voxie/finance/quote/v1/types';
 import { quoteSchema } from '../../shared/schemas/quotes';
@@ -69,6 +70,7 @@ interface CreateQuotePayload {
 
 export function useCreateQuote() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (data: CreateQuotePayload) =>
       quoteClient.createQuote({
@@ -96,13 +98,14 @@ export function useCreateQuote() {
       toast.success('Quote created');
     },
     onError: (error) => {
-      toast.error(getOneKitErrorMessage(error, 'Failed to create quote'));
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 }
 
 export function useUpdateQuoteStatus() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       quoteClient.updateQuoteStatus({ id, body: { status } }),
@@ -110,13 +113,14 @@ export function useUpdateQuoteStatus() {
       void qc.invalidateQueries({ queryKey: ['quotes'] });
     },
     onError: (error) => {
-      toast.error(getOneKitErrorMessage(error, 'Failed to update quote'));
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 }
 
 export function useConvertQuote() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (id: string) => quoteClient.convertQuote({ id }),
     onSuccess: () => {
@@ -125,7 +129,7 @@ export function useConvertQuote() {
       toast.success('Quote converted to invoice');
     },
     onError: (error) => {
-      toast.error(getOneKitErrorMessage(error, 'Failed to convert quote'));
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 }
