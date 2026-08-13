@@ -47,12 +47,21 @@ WHERE o.business_id = ?
 GROUP BY c.id, c.name
 ORDER BY revenue DESC;
 
--- name: GetProductMargins :many
-SELECT (sale_price - cost_price) / sale_price * 100 AS margin_pct
-FROM erp_products
-WHERE business_id = ?
-  AND is_active = TRUE
-  AND sale_price > 0;
+-- name: GetProductMarginDistribution :one
+SELECT
+  CAST(COALESCE(SUM(margin_pct >= -1000 AND margin_pct < 0), 0) AS SIGNED) AS below_zero_count,
+  CAST(COALESCE(SUM(margin_pct >= 0 AND margin_pct < 10), 0) AS SIGNED) AS zero_to_ten_count,
+  CAST(COALESCE(SUM(margin_pct >= 10 AND margin_pct < 25), 0) AS SIGNED) AS ten_to_twenty_five_count,
+  CAST(COALESCE(SUM(margin_pct >= 25 AND margin_pct < 50), 0) AS SIGNED) AS twenty_five_to_fifty_count,
+  CAST(COALESCE(SUM(margin_pct >= 50 AND margin_pct < 75), 0) AS SIGNED) AS fifty_to_seventy_five_count,
+  CAST(COALESCE(SUM(margin_pct >= 75 AND margin_pct < 1000), 0) AS SIGNED) AS seventy_five_plus_count
+FROM (
+  SELECT (sale_price - cost_price) / sale_price * 100 AS margin_pct
+  FROM erp_products
+  WHERE business_id = ?
+    AND is_active = TRUE
+    AND sale_price > 0
+) AS active_product_margins;
 
 -- name: GetSlowMovers :many
 SELECT p.id, p.name, p.stock_quantity,
