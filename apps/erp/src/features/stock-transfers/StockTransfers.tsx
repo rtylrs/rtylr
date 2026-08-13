@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, ArrowRight } from 'lucide-react';
+import { Plus, ArrowRight, Trash2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useStockTransfers, useCreateStockTransfer } from './useStockTransfers';
-import { stockTransferStatusLabel } from './stockTransferSchema';
+import {
+  stockTransferStatusLabel,
+  toStockTransferItems,
+  type StockTransferDraftItem,
+} from './stockTransferSchema';
 import { useWarehouses } from '../warehouses/useWarehouses';
+import { useProducts } from '../products/useProducts';
 import PageHeader from '../../shared/components/PageHeader';
 import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -25,6 +30,9 @@ const inputStyle: React.CSSProperties = {
   width: '100%',
   boxSizing: 'border-box',
 };
+
+const lineInputStyle: React.CSSProperties = { ...inputStyle, width: 'auto', flex: 1 };
+const quantityInputStyle: React.CSSProperties = { ...inputStyle, width: '5rem' };
 
 function statusConfig(status: string): { color: string; bg: string } {
   if (status === 'received')
@@ -52,11 +60,17 @@ const StockTransfers: React.FC = () => {
   const transfers = transferResult?.stockTransfers ?? [];
   const hasMore = transferResult?.hasMore ?? false;
   const { data: warehouses = [] } = useWarehouses();
+  const { data: productResult, isLoading: productsLoading } = useProducts({ pageSize: 100 });
+  const products = productResult?.products ?? [];
   const createMut = useCreateStockTransfer();
   const [showCreate, setShowCreate] = useState(false);
   const [fromWarehouseId, setFromWarehouseId] = useState('');
   const [toWarehouseId, setToWarehouseId] = useState('');
   const [notes, setNotes] = useState('');
+  const [newItems, setNewItems] = useState<StockTransferDraftItem[]>([
+    { productId: '', quantity: '' },
+  ]);
+  const validItems = toStockTransferItems(newItems);
 
   const warehouseName = (id: string): string =>
     warehouses.find((w) => w.id === id)?.name ?? `Warehouse #${id}`;
@@ -70,18 +84,23 @@ const StockTransfers: React.FC = () => {
       toast.error('Source and destination must differ');
       return;
     }
+    if (validItems.length === 0) {
+      toast.error('At least one item with a product and positive quantity is required');
+      return;
+    }
     try {
       await createMut.mutateAsync({
         fromWarehouseId,
         toWarehouseId,
         notes: notes.trim(),
-        items: [],
+        items: validItems,
       });
       toast.success('Transfer draft created');
       setShowCreate(false);
       setFromWarehouseId('');
       setToWarehouseId('');
       setNotes('');
+      setNewItems([{ productId: '', quantity: '' }]);
     } catch {
       toast.error('Failed to create transfer');
     }
@@ -229,6 +248,73 @@ const StockTransfers: React.FC = () => {
               placeholder="Notes (optional)"
               style={inputStyle}
             />
+            <p
+              className="text-[11px] font-semibold uppercase tracking-wide"
+              style={{ color: 'var(--hub-text-muted)' }}
+            >
+              Items *
+            </p>
+            {newItems.map((item, idx) => (
+              <div key={idx} className="flex gap-1 items-center">
+                <select
+                  value={item.productId}
+                  onChange={(e) =>
+                    setNewItems((prev) =>
+                      prev.map((it, i) => (i === idx ? { ...it, productId: e.target.value } : it))
+                    )
+                  }
+                  aria-label={`Product for transfer item ${idx + 1}`}
+                  disabled={productsLoading || products.length === 0}
+                  style={lineInputStyle}
+                >
+                  <option value="">
+                    {productsLoading
+                      ? 'Loading products…'
+                      : products.length === 0
+                        ? 'No products available'
+                        : 'Select product *'}
+                  </option>
+                  {products.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name ?? `Product #${product.id}`}
+                      {product.sku ? ` (${product.sku})` : ''}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={item.quantity}
+                  onChange={(e) =>
+                    setNewItems((prev) =>
+                      prev.map((it, i) => (i === idx ? { ...it, quantity: e.target.value } : it))
+                    )
+                  }
+                  aria-label={`Quantity for transfer item ${idx + 1}`}
+                  placeholder="Qty"
+                  style={quantityInputStyle}
+                />
+                <button
+                  type="button"
+                  onClick={() => setNewItems((prev) => prev.filter((_, i) => i !== idx))}
+                  disabled={newItems.length === 1}
+                  aria-label={`Remove transfer item ${idx + 1}`}
+                  className="p-2 rounded-lg disabled:opacity-30"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setNewItems((prev) => [...prev, { productId: '', quantity: '' }])}
+              className="text-xs"
+              style={{ color: 'var(--hub-text-muted)' }}
+            >
+              + Add item
+            </button>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowCreate(false)}
@@ -239,7 +325,12 @@ const StockTransfers: React.FC = () => {
               </button>
               <button
                 onClick={handleCreate}
-                disabled={createMut.isPending || !fromWarehouseId || !toWarehouseId}
+                disabled={
+                  createMut.isPending ||
+                  !fromWarehouseId ||
+                  !toWarehouseId ||
+                  validItems.length === 0
+                }
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
