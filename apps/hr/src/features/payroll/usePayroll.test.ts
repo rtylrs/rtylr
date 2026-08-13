@@ -38,6 +38,7 @@ import {
   useListPayrollRuns,
   useGetPayrollRun,
   useTriggerPayrollRun,
+  useApprovePayrollRun,
 } from './usePayroll';
 import { useListMyPayrollRuns, useGetMyPayrollRun } from '../../shared/hooks/queries/usePayroll';
 import { safe } from '../../shared/lib/api';
@@ -109,6 +110,51 @@ describe('useTriggerPayrollRun', () => {
       periodStart: '2026-04-01',
       periodEnd: '2026-04-30',
     });
+  });
+});
+
+describe('payroll configuration query and action gates', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('does not fetch any payroll run when configuration is unavailable', () => {
+    const { result: adminList } = renderHook(
+      () => useListPayrollRuns(undefined, { enabled: false }),
+      { wrapper: createWrapper() }
+    );
+    const { result: adminDetail } = renderHook(() => useGetPayrollRun(7, { enabled: false }), {
+      wrapper: createWrapper(),
+    });
+    const { result: selfList } = renderHook(
+      () => useListMyPayrollRuns(undefined, { enabled: false }),
+      { wrapper: createWrapper() }
+    );
+    const { result: selfDetail } = renderHook(() => useGetMyPayrollRun(7, { enabled: false }), {
+      wrapper: createWrapper(),
+    });
+
+    expect(adminList.current.fetchStatus).toBe('idle');
+    expect(adminDetail.current.fetchStatus).toBe('idle');
+    expect(selfList.current.fetchStatus).toBe('idle');
+    expect(selfDetail.current.fetchStatus).toBe('idle');
+    expect(safe.get).not.toHaveBeenCalled();
+  });
+
+  it('does not post payroll actions when configuration is unavailable', async () => {
+    const { result: trigger } = renderHook(() => useTriggerPayrollRun(false), {
+      wrapper: createWrapper(),
+    });
+    const { result: approve } = renderHook(() => useApprovePayrollRun(false), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      await trigger.current.mutateAsync({ periodStart: '2026-04-01', periodEnd: '2026-04-30' });
+      await approve.current.mutateAsync({ runId: 7 });
+    });
+
+    expect(safe.post).not.toHaveBeenCalled();
   });
 });
 

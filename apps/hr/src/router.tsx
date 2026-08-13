@@ -15,6 +15,7 @@ import HRConfigRoute from './features/setup-wizard/HRConfigRoute';
 import DefaultLayout from './layouts/DefaultLayout';
 import WizardLayout from './layouts/WizardLayout';
 import HRPermissionGuard from './shared/components/HRPermissionGuard';
+import { PayrollConfigGuard } from './shared/components/PayrollConfigGuard';
 import type { HRPermission } from './shared/lib/hrPermissions';
 
 function PageLoader(): React.JSX.Element {
@@ -87,6 +88,9 @@ const wrap = (screen: React.ReactNode, permission?: HRPermission): React.JSX.Ele
     {permission ? <HRPermissionGuard permission={permission}>{screen}</HRPermissionGuard> : screen}
   </DefaultLayout>
 );
+
+const payrollWrap = (screen: React.ReactNode): React.JSX.Element =>
+  wrap(<PayrollConfigGuard>{screen}</PayrollConfigGuard>, 'hr:payroll');
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -319,11 +323,10 @@ const payrollRoute = createRoute({
   getParentRoute: () => hrConfigRoute,
   path: '/payroll',
   component: () =>
-    wrap(
+    payrollWrap(
       <Suspense fallback={<PageLoader />}>
         <Payroll />
-      </Suspense>,
-      'hr:payroll'
+      </Suspense>
     ),
 });
 
@@ -331,11 +334,10 @@ const myPaySlipsRoute = createRoute({
   getParentRoute: () => hrConfigRoute,
   path: '/payroll/my-payslips',
   component: () =>
-    wrap(
+    payrollWrap(
       <Suspense fallback={<PageLoader />}>
         <MyPaySlips />
-      </Suspense>,
-      'hr:payroll'
+      </Suspense>
     ),
 });
 
@@ -344,11 +346,10 @@ const paySlipViewRoute = createRoute({
   path: '/payroll/my-payslips/view',
   validateSearch: paySlipSearchSchema,
   component: () =>
-    wrap(
+    payrollWrap(
       <Suspense fallback={<PageLoader />}>
         <PaySlip />
-      </Suspense>,
-      'hr:payroll'
+      </Suspense>
     ),
 });
 
@@ -360,11 +361,10 @@ const payrollRunDetailRoute = createRoute({
     stringify: ({ id }) => ({ id: String(id) }),
   },
   component: () =>
-    wrap(
+    payrollWrap(
       <Suspense fallback={<PageLoader />}>
         <PayrollRunDetail />
-      </Suspense>,
-      'hr:payroll'
+      </Suspense>
     ),
 });
 

@@ -15,6 +15,10 @@ import {
 } from '../../shared/components/ui';
 import { useHrSettings } from '../../shared/hooks/useHrExtras';
 import { formatCurrency } from '../../shared/lib/hrNumberUtils';
+import {
+  PayrollConfigRequired,
+  usePayrollConfigured,
+} from '../../shared/components/PayrollConfigGuard';
 
 interface BreakdownRowProps {
   label: string;
@@ -63,8 +67,11 @@ const PaySlip = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: settings } = useHrSettings();
   const { runId } = routeApi.useSearch();
+  const payrollConfigured = usePayrollConfigured();
 
-  const { data: run, isLoading } = useGetMyPayrollRun(runId);
+  const { data: run, isLoading } = useGetMyPayrollRun(runId, { enabled: payrollConfigured });
+
+  if (!payrollConfigured) return <PayrollConfigRequired />;
 
   if (isLoading) {
     return (
