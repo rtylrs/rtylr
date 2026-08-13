@@ -10,6 +10,7 @@ import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -26,6 +27,7 @@ const Receiving: React.FC = () => {
   const orders = ordersResult?.purchaseOrders ?? [];
   const supplierNameById = new Map((supplierResult?.suppliers ?? []).map((s) => [s.id, s.name]));
   const updateStatus = useUpdatePurchaseOrderStatus();
+  const { t } = useTranslation('erp');
   const open = orders.filter((o) => o.status === 'sent' || o.status === 'approved');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lines, setLines] = useState<ReceiveLine[]>([]);
@@ -55,20 +57,20 @@ const Receiving: React.FC = () => {
   const completeReceipt = () => {
     const overReceived = lines.filter((l) => l.received > l.expected);
     if (overReceived.length > 0) {
-      toast.error('Cannot receive more units than ordered');
+      toast.error(t('receiving.validation.overReceived'));
       return;
     }
     const variance = lines.reduce((sum, l) => sum + (l.expected - l.received), 0);
     toast.success(
       variance === 0
-        ? 'Receipt completed, all items received'
-        : `Receipt completed with ${variance} unit variance`
+        ? t('receiving.toast.completed')
+        : t('receiving.toast.completedVariance', { count: variance })
     );
     if (selectedId !== null) {
       // Backend expects the lowercase status enum (draft|sent|approved|partial|received|cancelled).
       updateStatus.mutate(
         { id: selectedId, body: { status: 'received' } },
-        { onError: () => toast.error('Failed to update receipt status') }
+        { onError: () => toast.error(t('receiving.toast.updateFailed')) }
       );
     }
     setSelectedId(null);
@@ -80,10 +82,10 @@ const Receiving: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Goods receiving · rtylr" />
+      <HelmetContainer title={`${t('receiving.title')} · rtylr`} />
       <PageHeader
-        title="Goods Receiving"
-        description="Receive items against open purchase orders"
+        title={t('receiving.title')}
+        description={t('receiving.description')}
       />
 
       {isLoading ? (
@@ -95,11 +97,11 @@ const Receiving: React.FC = () => {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Receive items for PO-{selectedId}
+              {t('receiving.receiveFor', { id: selectedId })}
             </h3>
             <button
               onClick={() => setSelectedId(null)}
-              aria-label="Close receiving details"
+              aria-label={t('receiving.closeDetails')}
               className="h-11 w-11 rounded-lg flex items-center justify-center"
             >
               <XIcon size={14} style={{ color: 'var(--hub-text-muted)' }} />
@@ -119,7 +121,7 @@ const Receiving: React.FC = () => {
                       {line.name}
                     </p>
                     <p className="text-[10px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
-                      {line.sku} / Expected {line.expected}
+                      {line.sku} / {t('receiving.expected', { count: line.expected })}
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
@@ -156,7 +158,7 @@ const Receiving: React.FC = () => {
                       color: variance === 0 ? 'var(--erp-success)' : 'var(--erp-danger)',
                     }}
                   >
-                    {variance === 0 ? 'OK' : `${variance > 0 ? '+' : ''}${variance}`}
+                    {variance === 0 ? t('receiving.ok') : `${variance > 0 ? '+' : ''}${variance}`}
                   </span>
                 </div>
               );
@@ -167,14 +169,14 @@ const Receiving: React.FC = () => {
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
-            <Check size={14} /> Mark Received
+            <Check size={14} /> {t('receiving.markReceived')}
           </button>
         </div>
       ) : open.length === 0 ? (
         <EmptyState
           icon={PackageCheck}
-          title="No open orders to receive"
-          description="All orders have been received"
+          title={t('receiving.empty.title')}
+          description={t('receiving.empty.description')}
         />
       ) : (
         <div className="space-y-2">
@@ -206,7 +208,7 @@ const Receiving: React.FC = () => {
                   PO-{o.id} / {supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`}
                 </p>
                 <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-                  {(o.items ?? []).length} items / Expected {formatDate(o.expectedDelivery ?? '')}
+                  {t('receiving.orderSummary', { count: (o.items ?? []).length, date: formatDate(o.expectedDelivery ?? '') })}
                 </p>
               </div>
               <span
