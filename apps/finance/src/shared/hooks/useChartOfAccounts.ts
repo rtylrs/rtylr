@@ -1,6 +1,7 @@
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { AccountServiceClient } from '@voxire/voxie/finance/account/v1/client';
 import { JournalServiceClient } from '@voxire/voxie/finance/journal/v1/client';
 import type { CreateJournalEntryResponse } from '@voxire/voxie/finance/journal/v1/types';
@@ -23,6 +24,7 @@ export function useChartOfAccounts() {
 
 export function useCreateAccount() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (data: {
       name: string;
@@ -45,7 +47,7 @@ export function useCreateAccount() {
       toast.success('Account created');
     },
     onError: (error) => {
-      toast.error(getOneKitErrorMessage(error, 'Failed to create account'));
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 }
@@ -101,6 +103,7 @@ export function useJournal(params: UseJournalParams = {}) {
 
 export function useCreateJournalEntry() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (data: {
       date: string;
@@ -128,7 +131,7 @@ export function useCreateJournalEntry() {
       qc.invalidateQueries({ queryKey: ['journal'] });
     },
     onError: (error) => {
-      toast.error(getOneKitErrorMessage(error, 'Failed to create journal entry'));
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 }
