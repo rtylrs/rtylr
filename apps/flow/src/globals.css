@@ -25,7 +25,11 @@
   --flow-border: rgba(255, 255, 255, 0.07);
   --flow-border-focus: var(--accent-focus);
   --flow-text: rgba(240, 240, 238, 0.92);
-  --flow-text-muted: rgba(240, 240, 238, 0.5);
+  /* .58, not .5: at .5 this measures 4.39:1 on --flow-card and fails AA for
+   * the 10-12px type this app is built from. .58 measures 5.99:1. */
+  --flow-text-muted: rgba(240, 240, 238, 0.58);
+  /* Never carries text - 2.24:1 at any alpha short of becoming muted.
+   * Rules, dividers, and icon strokes that repeat an adjacent label only. */
   --flow-text-dim: rgba(240, 240, 238, 0.28);
   --flow-hover: rgba(255, 255, 255, 0.05);
   --flow-active: rgba(255, 255, 255, 0.08);
@@ -57,8 +61,12 @@
   --flow-border: rgba(0, 0, 0, 0.08);
   --flow-border-focus: var(--accent-focus);
   --flow-text: rgb(9, 9, 11);
-  --flow-text-muted: rgba(9, 9, 11, 0.5);
+  /* .62, not .5: at .5 this measures 3.74:1 on white. .62 measures 5.75:1. */
+  --flow-text-muted: rgba(9, 9, 11, 0.62);
   --flow-text-dim: rgba(9, 9, 11, 0.35);
+  /* A .12 wash reads lighter on white than on black, so light mode needs .18
+   * to carry the same weight. Overrides the mode-agnostic :root value above. */
+  --accent-muted: rgba(100, 197, 185, 0.18);
   --flow-hover: rgba(0, 0, 0, 0.05);
   --flow-active: rgba(0, 0, 0, 0.09);
   --flow-input-bg: #ffffff;
@@ -78,6 +86,86 @@
   --hub-input-bg: var(--flow-input-bg);
   --hub-scrollbar: var(--flow-scrollbar);
   --hub-shadow: var(--flow-shadow);
+}
+
+/* ── Status & capacity tones ──────────────────────────────────────
+ * Naming follows HR's --hr-status-* precedent. Nothing here is a new brand
+ * colour except --flow-locked: warn and danger were picked to sit with the
+ * teal at equal lightness and chroma.
+ *
+ * Every value clears 4.5:1 on its own background. WCAG's large-text
+ * allowance never applies in Flow - the type floor is 10px. */
+:root,
+:root[data-theme='dark'] {
+  /* --accent is a fill. This is the same teal used as text or icon stroke,
+   * which light mode has to darken while the fill stays put. */
+  --accent-fg: #64c5b9;
+  /* Text on any accent fill. Near-black in both modes: white on #64c5b9
+   * measures 2.05:1 and fails AA at every size. */
+  --flow-on-accent: #0a0a0a;
+  --flow-focus-ring: rgba(100, 197, 185, 0.9);
+
+  --flow-warn: #d9a066;
+  --flow-warn-fg: #d9a066;
+  --flow-danger: #e5776a;
+  --flow-danger-fg: #e5776a;
+  --flow-locked: #a8a4c8;
+  --flow-locked-fg: #a8a4c8;
+
+  --flow-status-draft: var(--flow-text-muted);
+  --flow-status-draft-bg: rgba(255, 255, 255, 0.06);
+  --flow-status-draft-border: rgba(255, 255, 255, 0.12);
+  --flow-status-pending: var(--flow-warn-fg);
+  --flow-status-pending-bg: rgba(217, 160, 102, 0.12);
+  --flow-status-pending-border: rgba(217, 160, 102, 0.3);
+  --flow-status-approved: var(--accent-fg);
+  --flow-status-approved-bg: var(--accent-muted);
+  --flow-status-approved-border: var(--accent-border);
+  --flow-status-rejected: var(--flow-danger-fg);
+  --flow-status-rejected-bg: rgba(229, 119, 106, 0.12);
+  --flow-status-rejected-border: rgba(229, 119, 106, 0.3);
+  --flow-status-locked: var(--flow-locked-fg);
+  --flow-status-locked-bg: rgba(168, 164, 200, 0.12);
+  --flow-status-locked-border: rgba(168, 164, 200, 0.3);
+
+  --flow-capacity-under: var(--flow-text-muted);
+  --flow-capacity-at: var(--accent-fg);
+  --flow-capacity-over: var(--flow-warn-fg);
+  --flow-capacity-critical: var(--flow-danger-fg);
+}
+
+/* The aliases above are redeclared rather than inherited. A var() resolves
+ * where it is declared, so a light-mode capacity bar would otherwise paint
+ * the dark tone (#d9a066 instead of #8f5f14). */
+:root[data-theme='light'] {
+  --accent-fg: #1f7d72;
+  --flow-on-accent: #0a0a0a;
+  --flow-focus-ring: rgba(31, 125, 114, 0.9);
+
+  --flow-warn-fg: #8f5f14;
+  --flow-danger-fg: #b4382a;
+  --flow-locked-fg: #5b5591;
+
+  --flow-status-draft: var(--flow-text-muted);
+  --flow-status-draft-bg: rgba(0, 0, 0, 0.05);
+  --flow-status-draft-border: rgba(0, 0, 0, 0.12);
+  --flow-status-pending: var(--flow-warn-fg);
+  --flow-status-pending-bg: rgba(217, 160, 102, 0.18);
+  --flow-status-pending-border: rgba(217, 160, 102, 0.45);
+  --flow-status-approved: var(--accent-fg);
+  --flow-status-approved-bg: var(--accent-muted);
+  --flow-status-approved-border: var(--accent-border);
+  --flow-status-rejected: var(--flow-danger-fg);
+  --flow-status-rejected-bg: rgba(229, 119, 106, 0.18);
+  --flow-status-rejected-border: rgba(229, 119, 106, 0.45);
+  --flow-status-locked: var(--flow-locked-fg);
+  --flow-status-locked-bg: rgba(168, 164, 200, 0.2);
+  --flow-status-locked-border: rgba(168, 164, 200, 0.48);
+
+  --flow-capacity-under: var(--flow-text-muted);
+  --flow-capacity-at: var(--accent-fg);
+  --flow-capacity-over: var(--flow-warn-fg);
+  --flow-capacity-critical: var(--flow-danger-fg);
 }
 
 @layer base {
@@ -128,4 +216,14 @@
 }
 .flow-shimmer {
   animation: flow-shimmer 1.4s infinite;
+}
+
+/* --flow-border is 1.1:1 and cannot serve as a focus indicator. This is the
+ * one focus treatment: 2px at 2px offset, 9.4:1 against --flow-bg. */
+.flow-focus {
+  outline: none;
+}
+.flow-focus:focus-visible {
+  outline: 2px solid var(--flow-focus-ring);
+  outline-offset: 2px;
 }
