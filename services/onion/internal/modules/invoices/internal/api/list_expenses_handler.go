@@ -43,6 +43,7 @@ type ExpensePayload struct {
 	IsTaxDeductible bool      `json:"is_tax_deductible"`
 	TaxAmount       float64   `json:"tax_amount"`
 	Notes           string    `json:"notes"`
+	Status          string    `json:"status"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
@@ -69,6 +70,7 @@ func newExpensePayload(e domain.Expense) ExpensePayload {
 		IsTaxDeductible: e.IsTaxDeductible,
 		TaxAmount:       e.TaxAmount,
 		Notes:           e.Notes,
+		Status:          e.Status,
 		CreatedAt:       e.CreatedAt,
 		UpdatedAt:       e.UpdatedAt,
 	}
