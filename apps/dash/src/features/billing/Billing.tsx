@@ -405,8 +405,9 @@ const SuitePlanCard: React.FC<{
 }) => {
   const price = planPrice(plan, cycle);
   const seatSplit = splitIncludedSeats(seats, includedSeatLimit);
-  const monthlyTotal = price * seatSplit.billable;
+  const cycleTotal = price * seatSplit.billable;
   const discount = cycle === 'yearly' ? discountLabel(plan) : null;
+  const periodLabel = cycle === 'yearly' ? 'yr' : 'mo';
 
   return (
     <div
@@ -455,15 +456,14 @@ const SuitePlanCard: React.FC<{
             {price === 0 ? 'Free' : centsToDisplay(price)}
             {price > 0 ? (
               <span className="text-xs font-medium" style={{ color: 'var(--dash-text-dim)' }}>
-                /seat/mo
+                /seat/{periodLabel}
               </span>
             ) : null}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--dash-text-dim)' }}>
             {price === 0
-              ? 'No monthly subscription cost'
-              : `${centsToDisplay(monthlyTotal)}/mo after ${seatSplit.included} included seat${seatSplit.included !== 1 ? 's' : ''}`}
-            {cycle === 'yearly' && price > 0 ? ' · billed yearly' : ''}
+              ? 'No subscription cost'
+              : `${centsToDisplay(cycleTotal)}/${periodLabel} after ${seatSplit.included} included seat${seatSplit.included !== 1 ? 's' : ''}`}
           </p>
         </div>
         {discount ? (
