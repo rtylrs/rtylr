@@ -92,11 +92,13 @@ export const useLoyaltyTiers = (): UseQueryResult<LoyaltyTier[]> =>
     },
   });
 
-export const useLoyaltyMembers = (): UseQueryResult<LoyaltyMember[]> =>
+export const useLoyaltyMembers = (limit = 100, offset = 0): UseQueryResult<LoyaltyMember[]> =>
   useQuery<LoyaltyMember[]>({
-    queryKey: ['crm-loyalty-members'],
+    queryKey: ['crm-loyalty-members', { limit, offset }],
     queryFn: async (): Promise<LoyaltyMember[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/loyalty/members'));
+      const res = await unwrap(
+        safe.get<unknown>('/crm/loyalty/members', { params: { limit, offset } })
+      );
       return z.array(loyaltyMemberSchema).parse(unwrapList(res, 'members'));
     },
   });
@@ -114,7 +116,9 @@ export const useLoyaltyTransactions = (): UseQueryResult<LoyaltyTransaction[]> =
   useQuery<LoyaltyTransaction[]>({
     queryKey: ['crm-loyalty-transactions'],
     queryFn: async (): Promise<LoyaltyTransaction[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/loyalty/transactions', { params: { page: 1, page_size: 100 } }));
+      const res = await unwrap(
+        safe.get<unknown>('/crm/loyalty/transactions', { params: { page: 1, page_size: 100 } })
+      );
       return z.array(loyaltyTransactionSchema).parse(unwrapList(res, 'transactions'));
     },
   });
@@ -150,7 +154,9 @@ export const useUpsertTier = (): UseMutationResult<unknown, unknown, UpsertTierP
   const { t } = useTranslation();
   return useMutation<unknown, unknown, UpsertTierPayload>({
     mutationFn: (payload: UpsertTierPayload): Promise<unknown> => {
-      const current = qc.getQueryData<LoyaltyTier[]>(['crm-loyalty-tiers'])?.find((tier) => tier.id === payload.id);
+      const current = qc
+        .getQueryData<LoyaltyTier[]>(['crm-loyalty-tiers'])
+        ?.find((tier) => tier.id === payload.id);
       const request = { id: payload.id, ...toLoyaltyTierRequest({ ...current, ...payload.data }) };
       return payload.id
         ? unwrap(safe.put('/crm/loyalty/tiers', request))

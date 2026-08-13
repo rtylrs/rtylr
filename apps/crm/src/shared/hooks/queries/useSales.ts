@@ -52,11 +52,13 @@ export const usePipeline = (): UseQueryResult<PipelineColumn[]> =>
 
 // ── Leads ─────────────────────────────────────────────────────────
 
-export const useLeads = (): UseQueryResult<Lead[]> =>
+export const useLeads = (limit = 100, offset = 0): UseQueryResult<Lead[]> =>
   useQuery<Lead[]>({
-    queryKey: ['crm-sales-leads'],
+    queryKey: ['crm-sales-leads', { limit, offset }],
     queryFn: async (): Promise<Lead[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/sales/leads'));
+      const res = await unwrap(
+        safe.get<unknown>('/crm/sales/leads', { params: { limit, offset } })
+      );
       return unwrapList<Lead>(res, 'leads');
     },
   });
@@ -183,13 +185,17 @@ export const useDeleteTouchpoint = (): UseMutationResult<unknown, unknown, numbe
 
 // ── Contacts ──────────────────────────────────────────────────────
 
-export const useContacts = (leadId?: number): UseQueryResult<SalesContact[]> =>
+export const useContacts = (
+  leadId?: number,
+  limit = 100,
+  offset = 0
+): UseQueryResult<SalesContact[]> =>
   useQuery<SalesContact[]>({
-    queryKey: ['crm-sales-contacts', leadId ?? 'all'],
+    queryKey: ['crm-sales-contacts', { leadId: leadId ?? 'all', limit, offset }],
     queryFn: async (): Promise<SalesContact[]> => {
       const res = await unwrap(
         safe.get<unknown>('/crm/sales/contacts', {
-          params: leadId ? { lead_id: leadId } : {},
+          params: { ...(leadId ? { lead_id: leadId } : {}), limit, offset },
         })
       );
       return unwrapList<SalesContact>(res, 'contacts');
@@ -208,8 +214,7 @@ export const useCreateContact = (): UseMutationResult<
       return res as SalesContact;
     },
     onSuccess: (_data: SalesContact, variables: CreateContactRequest): void => {
-      void qc.invalidateQueries({ queryKey: ['crm-sales-contacts', variables.leadId] });
-      void qc.invalidateQueries({ queryKey: ['crm-sales-contacts', 'all'] });
+      void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
       toast.success('Contact added');
     },
     onError: (): void => {
@@ -238,8 +243,7 @@ export const useUpdateContact = (): UseMutationResult<
       return res as SalesContact;
     },
     onSuccess: (_data: SalesContact, variables: UpdateContactPayload): void => {
-      void qc.invalidateQueries({ queryKey: ['crm-sales-contacts', variables.leadId] });
-      void qc.invalidateQueries({ queryKey: ['crm-sales-contacts', 'all'] });
+      void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
       toast.success('Contact updated');
     },
     onError: (): void => {
@@ -259,8 +263,7 @@ export const useDeleteContact = (): UseMutationResult<unknown, unknown, DeleteCo
     mutationFn: (payload: DeleteContactPayload): Promise<unknown> =>
       unwrap(safe.delete(`/crm/sales/contacts/${payload.id}`)),
     onSuccess: (_data: unknown, variables: DeleteContactPayload): void => {
-      void qc.invalidateQueries({ queryKey: ['crm-sales-contacts', variables.leadId] });
-      void qc.invalidateQueries({ queryKey: ['crm-sales-contacts', 'all'] });
+      void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
       toast.success('Contact removed');
     },
     onError: (): void => {
@@ -271,11 +274,13 @@ export const useDeleteContact = (): UseMutationResult<unknown, unknown, DeleteCo
 
 // ── Contracts ─────────────────────────────────────────────────────
 
-export const useContracts = (): UseQueryResult<Contract[]> =>
+export const useContracts = (limit = 100, offset = 0): UseQueryResult<Contract[]> =>
   useQuery<Contract[]>({
-    queryKey: ['crm-sales-contracts'],
+    queryKey: ['crm-sales-contracts', { limit, offset }],
     queryFn: async (): Promise<Contract[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/sales/contracts'));
+      const res = await unwrap(
+        safe.get<unknown>('/crm/sales/contracts', { params: { limit, offset } })
+      );
       return unwrapList<Contract>(res, 'contracts');
     },
   });

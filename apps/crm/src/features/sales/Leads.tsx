@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -67,10 +67,24 @@ const StageBadge: React.FC<{ stage: LeadStage }> = ({ stage }) => {
 
 const Leads: React.FC = () => {
   const navigate = useNavigate();
-  const { data: allLeads, isLoading } = useLeads();
+  const pageSize = 100;
+  const [offset, setOffset] = useState(0);
+  const [loadedLeads, setLoadedLeads] = useState<Lead[]>([]);
+  const { data: fetchedLeads, isLoading, isFetching, isError } = useLeads(pageSize, offset);
   const deleteLead = useDeleteLead();
 
-  const leads = allLeads ?? [];
+  useEffect(() => {
+    if (!fetchedLeads) return;
+    setLoadedLeads((previous) => {
+      if (offset === 0) return fetchedLeads;
+      const byId = new Map(previous.map((lead) => [lead.id, lead]));
+      fetchedLeads.forEach((lead) => byId.set(lead.id, lead));
+      return Array.from(byId.values());
+    });
+  }, [fetchedLeads, offset]);
+
+  const leads = loadedLeads;
+  const hasMore = fetchedLeads?.length === pageSize;
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<LeadStage | 'all'>('all');
   const [sourceFilter, setSourceFilter] = useState('all');
@@ -210,10 +224,16 @@ const Leads: React.FC = () => {
             overflow: 'hidden',
           }}
         >
-          {isLoading ? (
+          {isLoading && leads.length === 0 ? (
             <div style={{ padding: '16px' }}>
               <SkeletonList count={5} />
             </div>
+          ) : isError && leads.length === 0 ? (
+            <EmptyState
+              icon={Search}
+              title="Unable to load leads"
+              description="Refresh and try again."
+            />
           ) : filtered.length === 0 ? (
             <EmptyState
               icon={Search}
@@ -222,10 +242,20 @@ const Leads: React.FC = () => {
                 search ? `No leads match "${search}"` : 'Create your first lead to get started.'
               }
               action={
-                <Button variant="primary" onClick={() => setCreateOpen(true)}>
-                  <Plus size={13} />
-                  New lead
-                </Button>
+                hasMore ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => setOffset((current) => current + pageSize)}
+                    disabled={isFetching}
+                  >
+                    {isFetching ? 'Loading…' : 'Load more leads'}
+                  </Button>
+                ) : (
+                  <Button variant="primary" onClick={() => setCreateOpen(true)}>
+                    <Plus size={13} />
+                    New lead
+                  </Button>
+                )
               }
             />
           ) : (
@@ -373,6 +403,17 @@ const Leads: React.FC = () => {
                 </AnimatePresence>
               </tbody>
             </table>
+          )}
+          {hasMore && filtered.length > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
+              <Button
+                variant="outline"
+                onClick={() => setOffset((current) => current + pageSize)}
+                disabled={isFetching}
+              >
+                {isFetching ? 'Loading…' : 'Load more leads'}
+              </Button>
+            </div>
           )}
         </motion.div>
 
