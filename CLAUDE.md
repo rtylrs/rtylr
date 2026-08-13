@@ -460,6 +460,43 @@ Dash wraps its route tree in a `<BusinessRoute>` component (`apps/dash/src/share
 
 **Do not remove or bypass `BusinessRoute`.** If you add new dash routes, they must be inside it.
 
+### Settings store as an endpoint seam
+
+When a designed screen needs workspace-owned values that have no endpoint yet,
+hold the shipped defaults in one Zustand `persist` store rather than letting each
+consumer hardcode them. Reference: `apps/flow/src/shared/stores/timeSettingsStore.ts`,
+rationale in `docs/flow-time-tracking.md`.
+
+Two rules make it a seam rather than a lie, and both are required:
+
+1. **The UI states the limitation.** The screen says the values are per-browser
+   until the endpoint lands. A settings screen that silently fails to be a
+   workspace setting is worse than no settings screen.
+2. **Nothing derives a server-side consequence from it.** Shaping a value before
+   it is posted is a client concern and fine. Deciding what an endpoint would have
+   decided (whether a record is locked, who may approve) is not - the server has
+   no state to be consistent with, so the UI would assert something untrue.
+
+Do not use this when the value is already server-owned, or when a wrong local
+value would produce a wrong write.
+
+### A control that cannot store its value
+
+Where a design calls for a control the contract has no field for, the control is
+either **absent** or **disabled with the reason beside it** - never drawn as
+though it works. Use `GateNotice` (`apps/flow/src/shared/components/GateNotice.tsx`)
+so the reason is one component rather than one phrasing per site. This is root
+CLAUDE.md rule 12 applied to missing schema as well as missing permission.
+
+Choose between the two by asking whether the _concept_ is real. A WIP limit is a
+real board concept with nowhere to persist: show it disabled. An entry status the
+system has no notion of: leave it out, because drawing it teaches the user
+something false.
+
+Verify the field exists in `packages/voxie/api/**/*.onk`, not in the app's
+`flowApi.ts`. The endpoint existing does not mean the field does - see the gap
+table in `docs/flow-time-tracking.md`.
+
 ### Contracts / Types Pattern
 
 - Prefer types from `@voxire/voxie` over hand-written interfaces when a proto definition exists.
