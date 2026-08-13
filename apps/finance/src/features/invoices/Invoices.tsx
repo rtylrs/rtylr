@@ -318,7 +318,6 @@ const Invoices: React.FC = () => {
         open={sendTarget !== null}
         onClose={() => setSendTarget(null)}
         invoiceId={sendTarget?.id ?? ''}
-        defaultTo={sendTarget?.clientEmail}
       />
     </motion.div>
   );
