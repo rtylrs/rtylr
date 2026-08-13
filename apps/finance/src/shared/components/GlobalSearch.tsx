@@ -14,6 +14,7 @@ import { inputStyle, ACCENT } from '../lib/tokens';
 import type { Client } from './ClientSelect';
 import { unwrap } from '@voxire/api';
 import { safe } from '../lib/api';
+import { parseClientsResponse } from '../schemas/clients';
 
 interface Result {
   id: string;
@@ -91,8 +92,8 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
     if (open) {
       setQuery('');
       setIndex(0);
-      void unwrap(safe.get<Client[]>('/crm/customers'))
-        .then((data) => setClients(data ?? []))
+      void unwrap(safe.get<unknown>('/crm/customers'))
+        .then((data) => setClients(parseClientsResponse(data)))
         .catch(() => {});
     }
   }, [open]);
