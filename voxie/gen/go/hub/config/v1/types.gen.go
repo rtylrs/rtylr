@@ -701,3 +701,204 @@ func (x *UpdateConfigResponse) GetConfig() *ConfigPayload {
 	}
 	return x.Config
 }
+
+type CustomDomain struct {
+	Id                int64  `json:"id,omitempty"`
+	BusinessId        int64  `json:"business_id,omitempty"`
+	Domain            string `json:"domain,omitempty"`
+	Status            string `json:"status,omitempty"`
+	VerificationToken string `json:"verification_token,omitempty"`
+	SslStatus         string `json:"ssl_status,omitempty"`
+	VerifiedAt        string `json:"verified_at,omitempty"`
+	CreatedAt         string `json:"created_at,omitempty"`
+	UpdatedAt         string `json:"updated_at,omitempty"`
+}
+
+func (m *CustomDomain) MarshalJSON() ([]byte, error) {
+	type alias CustomDomain
+	aux := struct {
+		*alias
+		Id         string `json:"id,omitempty"`
+		BusinessId string `json:"business_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *CustomDomain) UnmarshalJSON(data []byte) error {
+	type alias CustomDomain
+	aux := struct {
+		*alias
+		Id         string `json:"id,omitempty"`
+		BusinessId string `json:"business_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	if aux.BusinessId != "" {
+		v, err := strconv.ParseInt(aux.BusinessId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.BusinessId = v
+	}
+	return nil
+}
+
+func (x *CustomDomain) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *CustomDomain) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *CustomDomain) GetDomain() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Domain
+}
+
+func (x *CustomDomain) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *CustomDomain) GetVerificationToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.VerificationToken
+}
+
+func (x *CustomDomain) GetSslStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.SslStatus
+}
+
+func (x *CustomDomain) GetVerifiedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.VerifiedAt
+}
+
+func (x *CustomDomain) GetCreatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.CreatedAt
+}
+
+func (x *CustomDomain) GetUpdatedAt() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.UpdatedAt
+}
+
+type GetCustomDomainRequest struct {
+}
+
+type GetCustomDomainResponse struct {
+	Domain *CustomDomain `json:"domain,omitempty"`
+}
+
+func (x *GetCustomDomainResponse) GetDomain() *CustomDomain {
+	if x == nil {
+		var zero *CustomDomain
+		return zero
+	}
+	return x.Domain
+}
+
+type RegisterCustomDomainRequest struct {
+	Domain string `json:"domain,omitempty"`
+}
+
+func (x *RegisterCustomDomainRequest) GetDomain() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Domain
+}
+
+type RegisterCustomDomainResponse struct {
+	Domain *CustomDomain `json:"domain,omitempty"`
+}
+
+func (x *RegisterCustomDomainResponse) GetDomain() *CustomDomain {
+	if x == nil {
+		var zero *CustomDomain
+		return zero
+	}
+	return x.Domain
+}
+
+type VerifyCustomDomainRequest struct {
+	VerificationToken string `json:"verification_token,omitempty"`
+}
+
+func (x *VerifyCustomDomainRequest) GetVerificationToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.VerificationToken
+}
+
+type VerifyCustomDomainResponse struct {
+	Domain *CustomDomain `json:"domain,omitempty"`
+}
+
+func (x *VerifyCustomDomainResponse) GetDomain() *CustomDomain {
+	if x == nil {
+		var zero *CustomDomain
+		return zero
+	}
+	return x.Domain
+}
+
+type RemoveCustomDomainRequest struct {
+}
+
+type RemoveCustomDomainResponse struct {
+	Message string `json:"message,omitempty"`
+}
+
+func (x *RemoveCustomDomainResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}

@@ -202,6 +202,10 @@ type ConfigServiceServer interface {
 	GetConfig(ctx context.Context, req *GetConfigRequest) (*GetConfigResponse, error)
 	CreateConfig(ctx context.Context, req *CreateConfigRequest) (*CreateConfigResponse, error)
 	UpdateConfig(ctx context.Context, req *UpdateConfigRequest) (*UpdateConfigResponse, error)
+	GetCustomDomain(ctx context.Context, req *GetCustomDomainRequest) (*GetCustomDomainResponse, error)
+	RegisterCustomDomain(ctx context.Context, req *RegisterCustomDomainRequest) (*RegisterCustomDomainResponse, error)
+	VerifyCustomDomain(ctx context.Context, req *VerifyCustomDomainRequest) (*VerifyCustomDomainResponse, error)
+	RemoveCustomDomain(ctx context.Context, req *RemoveCustomDomainRequest) (*RemoveCustomDomainResponse, error)
 	GetIndustries(ctx context.Context, req *GetIndustriesRequest) (*GetIndustriesResponse, error)
 }
 
@@ -297,6 +301,82 @@ func RegisterConfigServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "ConfigService", Method: "updateConfig", HTTPMethod: "PUT", Route: "/hub/config/v1/config", AuthSchemes: nil}))
+	mux.Handle("GET /hub/config/v1/config/custom-domain", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(GetCustomDomainRequest)
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.GetCustomDomain(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "ConfigService", Method: "getCustomDomain", HTTPMethod: "GET", Route: "/hub/config/v1/config/custom-domain", AuthSchemes: nil}))
+	mux.Handle("POST /hub/config/v1/config/custom-domain", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(RegisterCustomDomainRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.RegisterCustomDomain(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "ConfigService", Method: "registerCustomDomain", HTTPMethod: "POST", Route: "/hub/config/v1/config/custom-domain", AuthSchemes: nil}))
+	mux.Handle("POST /hub/config/v1/config/custom-domain/verify", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(VerifyCustomDomainRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.VerifyCustomDomain(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "ConfigService", Method: "verifyCustomDomain", HTTPMethod: "POST", Route: "/hub/config/v1/config/custom-domain/verify", AuthSchemes: nil}))
+	mux.Handle("DELETE /hub/config/v1/config/custom-domain", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(RemoveCustomDomainRequest)
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.RemoveCustomDomain(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "ConfigService", Method: "removeCustomDomain", HTTPMethod: "DELETE", Route: "/hub/config/v1/config/custom-domain", AuthSchemes: nil}))
 	mux.Handle("GET /hub/config/v1/industries", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetIndustriesRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {

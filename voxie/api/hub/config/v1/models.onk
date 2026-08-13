@@ -98,3 +98,24 @@ message UpdateConfigResponse {
   message: string
   config: ConfigPayload
 }
+
+message CustomDomain {
+  id: int64
+  business_id: int64
+  domain: string
+  status: string
+  verification_token: string
+  ssl_status: string
+  verified_at: string
+  created_at: string
+  updated_at: string
+}
+
+message GetCustomDomainRequest {}
+message GetCustomDomainResponse { domain: CustomDomain }
+message RegisterCustomDomainRequest { domain: string @required }
+message RegisterCustomDomainResponse { domain: CustomDomain }
+message VerifyCustomDomainRequest { verification_token: string @required }
+message VerifyCustomDomainResponse { domain: CustomDomain }
+message RemoveCustomDomainRequest {}
+message RemoveCustomDomainResponse { message: string }

@@ -166,3 +166,123 @@ func (m *UpdateConfigResponse) Validate() error {
 	}
 	return nil
 }
+
+func (m *CustomDomain) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetCustomDomainRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetCustomDomainResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Domain != nil {
+		if err := m.Domain.Validate(); err != nil {
+			violations = append(violations, "domain: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RegisterCustomDomainRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Domain == "" {
+		violations = append(violations, "domain is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RegisterCustomDomainResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Domain != nil {
+		if err := m.Domain.Validate(); err != nil {
+			violations = append(violations, "domain: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *VerifyCustomDomainRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.VerificationToken == "" {
+		violations = append(violations, "verification_token is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *VerifyCustomDomainResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Domain != nil {
+		if err := m.Domain.Validate(); err != nil {
+			violations = append(violations, "domain: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RemoveCustomDomainRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RemoveCustomDomainResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}

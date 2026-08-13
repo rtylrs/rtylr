@@ -10,6 +10,10 @@ service ConfigService {
 
   /// Updates the business configuration.
   updateConfig(UpdateConfigRequest) -> UpdateConfigResponse @put("/config")
+  getCustomDomain(GetCustomDomainRequest) -> GetCustomDomainResponse @get("/config/custom-domain")
+  registerCustomDomain(RegisterCustomDomainRequest) -> RegisterCustomDomainResponse @post("/config/custom-domain")
+  verifyCustomDomain(VerifyCustomDomainRequest) -> VerifyCustomDomainResponse @post("/config/custom-domain/verify")
+  removeCustomDomain(RemoveCustomDomainRequest) -> RemoveCustomDomainResponse @delete("/config/custom-domain")
 
   /// Returns the industry catalog grouped by category.
   getIndustries(GetIndustriesRequest) -> GetIndustriesResponse @get("/industries")
