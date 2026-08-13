@@ -10,8 +10,8 @@ export type { DashboardStatsRaw } from './dashboard';
 export { taxConfigSchema, taxReportSchema, plReportSchema } from './tax';
 export type { TaxConfigRaw, TaxReportRaw, PLReportRaw } from './tax';
 
-export { bankAccountSchema, chartOfAccountSchema } from './accounts';
-export type { BankAccountRaw, ChartOfAccountRaw } from './accounts';
+export { bankAccountSchema, bankTransactionSchema, chartOfAccountSchema } from './accounts';
+export type { BankAccountRaw, BankTransactionRaw, ChartOfAccountRaw } from './accounts';
 
 export { quoteSchema } from './quotes';
 export type { QuoteRaw } from './quotes';
