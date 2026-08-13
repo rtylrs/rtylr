@@ -76,9 +76,11 @@ func (r *Repository) CreateLocation(ctx context.Context, ownerID int64, input do
 // ─── Tables ──────────────────────────────────────────────────────────────────
 
 func (r *Repository) ListTables(ctx context.Context, businessID, locationID int64, status string) ([]domain.Table, error) {
-	// ListTablesByOwner returns all tables; we filter in-memory for locationID/status
-	// since the sqlc query doesn't support optional filters.
-	rows, err := r.queries.ListTablesByOwner(ctx, businessID)
+	rows, err := r.queries.ListTablesByOwner(ctx, sqlc.ListTablesByOwnerParams{
+		BusinessID: businessID,
+		LocationID: sql.NullInt64{Int64: locationID, Valid: true},
+		Status:     sqlc.NullPosTablesStatus{PosTablesStatus: sqlc.PosTablesStatus(status), Valid: status != ""},
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list pos tables", logger.Error(err))
 		return nil, err
@@ -86,12 +88,6 @@ func (r *Repository) ListTables(ctx context.Context, businessID, locationID int6
 
 	tables := make([]domain.Table, 0, len(rows))
 	for _, row := range rows {
-		if locationID > 0 && row.LocationID.Int64 != locationID {
-			continue
-		}
-		if status != "" && string(row.Status.PosTablesStatus) != status {
-			continue
-		}
 		tables = append(tables, domain.Table{
 			ID:                    row.ID,
 			OwnerID:               row.OwnerID,
