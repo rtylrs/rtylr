@@ -47,7 +47,8 @@ const Invoices: React.FC = () => {
       { id: inv.id, status: 'Paid' },
       {
         onSuccess: () => toast.success(t('invoices.markedPaid', { id: inv.id })),
-        onError: (error) => toast.error(getOneKitErrorMessage(error, t('invoices.markPaidFailed', { id: inv.id }))),
+        onError: (error) =>
+          toast.error(getOneKitErrorMessage(error, t('invoices.markPaidFailed', { id: inv.id }))),
       }
     );
   };

@@ -181,7 +181,9 @@ const MergeCustomers: React.FC = () => {
                     <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
                       {secondary.name}
                     </div>
-                    <TierBadge tier={getCustomerTier(secondary.loyaltyPoints, secondary.loyaltyTier)} />
+                    <TierBadge
+                      tier={getCustomerTier(secondary.loyaltyPoints, secondary.loyaltyTier)}
+                    />
                   </div>
                 </div>
               )}

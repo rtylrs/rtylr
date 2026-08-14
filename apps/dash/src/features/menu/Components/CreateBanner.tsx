@@ -64,10 +64,15 @@ const CreateBanner = (): React.JSX.Element => {
           style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
         >
           <div className="space-y-1">
-            <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
+            <label
+              htmlFor="banner-title"
+              className="text-xs font-semibold"
+              style={{ color: 'var(--dash-text-muted)' }}
+            >
               Banner Title *
             </label>
             <input
+              id="banner-title"
               type="text"
               name="title"
               value={formData.title}

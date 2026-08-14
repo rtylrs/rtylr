@@ -172,7 +172,8 @@ const Bills: React.FC = () => {
         title={t('bills.title')}
         subtitle={
           <>
-            {t('bills.outstanding', { count: unpaid.length })} <>&middot;</> <MoneyDisplay amount={totalDue} /> {t('bills.total')}
+            {t('bills.outstanding', { count: unpaid.length })} <>&middot;</>{' '}
+            <MoneyDisplay amount={totalDue} /> {t('bills.total')}
           </>
         }
         actions={
@@ -183,7 +184,7 @@ const Bills: React.FC = () => {
               </button>
             )}
             <button style={ghostBtn} aria-label="New Bill" onClick={() => setShowCreate(true)}>
-                <Plus size={13} /> {t('bills.new')}
+              <Plus size={13} /> {t('bills.new')}
             </button>
           </>
         }
@@ -202,7 +203,16 @@ const Bills: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                {['', t('bills.number'), t('bills.vendor'), t('bills.category'), t('bills.amount'), t('bills.due'), t('bills.status'), ''].map((h, i) => (
+                {[
+                  '',
+                  t('bills.number'),
+                  t('bills.vendor'),
+                  t('bills.category'),
+                  t('bills.amount'),
+                  t('bills.due'),
+                  t('bills.status'),
+                  '',
+                ].map((h, i) => (
                   <th
                     key={i}
                     style={{

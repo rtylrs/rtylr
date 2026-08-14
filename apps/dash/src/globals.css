@@ -50,6 +50,18 @@
   --app-insights: #6366f1;
 }
 
+/* ── Legacy hub/admin variable aliases ──────────────────────── */
+:root {
+  --hub-bg: var(--dash-bg);
+  --hub-surface: var(--dash-surface);
+  --hub-card: var(--dash-card);
+  --hub-border: var(--dash-border);
+  --hub-text: var(--dash-text);
+  --admin-bg: var(--dash-bg);
+  --admin-card: var(--dash-card);
+  --admin-border: var(--dash-border);
+}
+
 /* ── Dark mode (default) ─────────────────────────────────────── */
 :root,
 :root[data-theme='dark'] {
@@ -120,6 +132,15 @@
   ::-webkit-scrollbar-thumb {
     background: var(--dash-scrollbar);
     border-radius: 9999px;
+  }
+}
+
+/* Prevent iOS Safari auto-zoom on input focus */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
   }
 }
 

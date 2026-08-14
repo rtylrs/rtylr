@@ -133,7 +133,8 @@ export const loyaltyTierSchema = z
       if (typeof value.perks === 'string') {
         try {
           const parsed = JSON.parse(value.perks) as unknown;
-          if (Array.isArray(parsed)) perks = parsed.filter((item): item is string => typeof item === 'string');
+          if (Array.isArray(parsed))
+            perks = parsed.filter((item): item is string => typeof item === 'string');
         } catch {
           perks = value.perks ? [value.perks] : [];
         }
@@ -190,7 +191,11 @@ export interface LoyaltyTier {
 // -- Domain constants ---------------------------------------------------------
 
 export const LOYALTY_TRANSACTION_TYPES = ['earn', 'redeem', 'upgrade'] as const;
-export type LoyaltyTransactionType = (typeof LOYALTY_TRANSACTION_TYPES)[number] | 'adjust' | 'expire' | 'award';
+export type LoyaltyTransactionType =
+  | (typeof LOYALTY_TRANSACTION_TYPES)[number]
+  | 'adjust'
+  | 'expire'
+  | 'award';
 
 // -- Helpers ------------------------------------------------------------------
 

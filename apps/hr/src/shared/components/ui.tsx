@@ -13,7 +13,16 @@ export const QueryError: React.FC<{ onRetry: () => void; isRetrying?: boolean }>
 }) => {
   const { t } = useTranslation();
   return (
-    <div role="alert" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: 32 }}>
+    <div
+      role="alert"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 12,
+        padding: 32,
+      }}
+    >
       <p style={{ margin: 0, color: 'var(--hr-text)' }}>{t('common.loadError')}</p>
       <Button variant="primary" onClick={onRetry} disabled={isRetrying}>
         {t('common.retry')}

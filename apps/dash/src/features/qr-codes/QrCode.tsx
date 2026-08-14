@@ -9,10 +9,17 @@ import { saveAs } from 'file-saver';
 import { useUserStore } from '../../shared/stores/userStore';
 import { QrCodeTemplate, QrCodeTemplates, QrOptions } from './templates';
 
+import { APP_URLS } from '@voxire/config';
+
 function QrCode() {
   const { user } = useUserStore();
+  const businessIdentifier =
+    user?.businessSlug || user?.business_slug || user?.businessId || user?.id || '';
+  const menuBaseUrl = (APP_URLS.menu ?? 'https://menu.rtylr.com').replace(/\/$/, '');
+  const initialUrl = businessIdentifier ? `${menuBaseUrl}/${businessIdentifier}` : menuBaseUrl;
+
   const [qrOptions, setQrOptions] = useState<QrOptions>({
-    url: user?.id ? `https://rtylr.voxire.com/restaurant/${user.id}` : '',
+    url: initialUrl,
     size: 150,
     fgColor: '#000000',
     bgColor: '#ffffff',
@@ -27,13 +34,13 @@ function QrCode() {
   const qrRef = useRef(null);
 
   useEffect(() => {
-    if (user?.id) {
+    if (businessIdentifier) {
       setQrOptions((current) => ({
         ...current,
-        url: `https://rtylr.voxire.com/restaurant/${user.id}`,
+        url: `${menuBaseUrl}/${businessIdentifier}`,
       }));
     }
-  }, [user?.id]);
+  }, [businessIdentifier, menuBaseUrl]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement;

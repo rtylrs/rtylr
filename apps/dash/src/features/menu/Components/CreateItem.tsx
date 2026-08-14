@@ -67,10 +67,15 @@ const CreateItem: React.FC = () => {
           style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
         >
           <div className="space-y-1">
-            <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
+            <label
+              htmlFor="item-name"
+              className="text-xs font-semibold"
+              style={{ color: 'var(--dash-text-muted)' }}
+            >
               Name *
             </label>
             <Input
+              id="item-name"
               type="text"
               placeholder="Product name"
               value={name}
@@ -80,10 +85,15 @@ const CreateItem: React.FC = () => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
+            <label
+              htmlFor="item-desc"
+              className="text-xs font-semibold"
+              style={{ color: 'var(--dash-text-muted)' }}
+            >
               Description
             </label>
             <Input
+              id="item-desc"
               type="text"
               placeholder="Add a description"
               value={description}
@@ -93,10 +103,15 @@ const CreateItem: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
+              <label
+                htmlFor="item-price"
+                className="text-xs font-semibold"
+                style={{ color: 'var(--dash-text-muted)' }}
+              >
                 Price *
               </label>
               <Input
+                id="item-price"
                 type="number"
                 step="0.01"
                 placeholder="0.00"
@@ -106,10 +121,15 @@ const CreateItem: React.FC = () => {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
+              <label
+                htmlFor="item-sale-price"
+                className="text-xs font-semibold"
+                style={{ color: 'var(--dash-text-muted)' }}
+              >
                 Sale Price
               </label>
               <Input
+                id="item-sale-price"
                 type="number"
                 step="0.01"
                 placeholder="0.00"

@@ -23,10 +23,12 @@ interface RawAppSlice {
 }
 
 const APP_COLOUR: Record<string, string> = {
-  pos: 'var(--accent)',
-  finance: '#a78bfa',
-  erp: '#34d399',
-  crm: '#f59e0b',
+  pos: 'var(--app-pos)',
+  erp: 'var(--app-erp)',
+  hr: 'var(--app-hr)',
+  crm: 'var(--app-crm)',
+  finance: 'var(--app-finance)',
+  flow: 'var(--app-flow)',
   other: 'var(--dash-text-dim)',
 };
 

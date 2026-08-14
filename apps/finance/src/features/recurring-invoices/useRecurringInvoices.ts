@@ -41,8 +41,7 @@ export function useCreateRecurringInvoice() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['recurring-invoices'] });
     },
-    onError: (error) =>
-      toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 
@@ -55,7 +54,6 @@ export function useSetRecurringStatus() {
         ? recurringClient.pauseRecurringInvoice({ id })
         : recurringClient.resumeRecurringInvoice({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recurring-invoices'] }),
-    onError: (error) =>
-      toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
