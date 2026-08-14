@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { setCookie, removeCookie, getCookie, getDefaultCookieDomain } from '../lib/cookies';
+import { removeCookie, getCookie, getDefaultCookieDomain } from '../lib/cookies';
 
 export interface UserState {
   token: string | null;
@@ -23,7 +23,7 @@ type UserStore = UserState & UserActions;
 
 export const useUserStore = create<UserStore>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       // State
       token: null,
       isAuthenticated: false,

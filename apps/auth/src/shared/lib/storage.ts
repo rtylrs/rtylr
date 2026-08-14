@@ -74,3 +74,38 @@ export function storageSetJson<T>(key: string, value: T): void {
     // ignore serialisation errors
   }
 }
+
+export function hasSessionStorage(): boolean {
+  try {
+    return typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined';
+  } catch {
+    return false;
+  }
+}
+
+export function sessionStorageGet(key: string): string | null {
+  if (!hasSessionStorage()) return null;
+  try {
+    return window.sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+export function sessionStorageSet(key: string, value: string): void {
+  if (!hasSessionStorage()) return;
+  try {
+    window.sessionStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+}
+
+export function sessionStorageRemove(key: string): void {
+  if (!hasSessionStorage()) return;
+  try {
+    window.sessionStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}

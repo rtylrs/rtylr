@@ -24,6 +24,7 @@ const InviteAccept: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -150,7 +151,7 @@ const InviteAccept: React.FC = () => {
       <HelmetContainer title="Accept invite · rtylr" />
       <AuthShell
         title="Set your password"
-        subtitle={`You've been invited to join rtylr${email ? ` as ${email}` : ''}.`}
+        subtitle={`You've been invited to join rtylr${apps.length > 0 ? ` (${apps.join(', ')})` : ''}${email ? ` as ${email}` : ''}.`}
       >
         <form
           onSubmit={(e) => {
@@ -174,12 +175,13 @@ const InviteAccept: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 autoFocus
                 required
-                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-base md:text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium min-h-[36px] px-1 flex items-center"
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -191,16 +193,26 @@ const InviteAccept: React.FC = () => {
             <label htmlFor="invite-confirm" className="text-sm font-medium text-[#111]">
               Confirm password
             </label>
-            <input
-              id="invite-confirm"
-              type={showPassword ? 'text' : 'password'}
-              placeholder="Repeat password"
-              autoComplete="new-password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
-            />
+            <div className="relative">
+              <input
+                id="invite-confirm"
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder="Repeat password"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-base md:text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((v) => !v)}
+                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium min-h-[36px] px-1 flex items-center"
+              >
+                {showConfirmPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
 
           {/* Error */}
