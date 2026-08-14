@@ -49,7 +49,7 @@ import {
   Target,
   FileBarChart,
 } from 'lucide-react';
-import type { HRCompanyConfigPayload } from '@voxire/voxie/hr/setup/v1/types';
+import type { HRConfig } from '../shared/types/hrConfig';
 import { useForesightLinks } from '@voxire/utils';
 import { safe } from '../shared/lib/api';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
@@ -66,7 +66,7 @@ interface NavItem {
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
   /** Optional guard: item is only shown when this returns true for the current config */
-  configGuard?: (timeTrackingModel: string, config: HRCompanyConfigPayload | null) => boolean;
+  configGuard?: (timeTrackingModel: string, config: HRConfig | null) => boolean;
   permission?: HRPermission;
 }
 
@@ -90,7 +90,12 @@ const navSections: NavSection[] = [
         icon: Building2,
         permission: 'hr:departments',
       },
-      { i18nKey: 'nav.orgChart', path: '/org-chart', icon: Network },
+      {
+        i18nKey: 'nav.orgChart',
+        path: '/org-chart',
+        icon: Network,
+        permission: 'hr:departments',
+      },
     ],
   },
   {
@@ -133,15 +138,30 @@ const navSections: NavSection[] = [
     i18nKey: 'layout.sections.people',
     items: [
       { i18nKey: 'nav.reviews', path: '/reviews', icon: ClipboardList, permission: 'hr:reviews' },
-      { i18nKey: 'nav.oneOnOnes', path: '/one-on-ones', icon: MessageSquare },
+      {
+        i18nKey: 'nav.oneOnOnes',
+        path: '/one-on-ones',
+        icon: MessageSquare,
+        permission: 'hr:reviews',
+      },
       {
         i18nKey: 'nav.performance',
         path: '/performance',
         icon: BarChart3,
         permission: 'hr:reviews',
       },
-      { i18nKey: 'nav.myReview', path: '/performance/my-review', icon: Star },
-      { i18nKey: 'nav.goals', path: '/performance/goals', icon: Target },
+      {
+        i18nKey: 'nav.myReview',
+        path: '/performance/my-review',
+        icon: Star,
+        permission: 'hr:reviews',
+      },
+      {
+        i18nKey: 'nav.goals',
+        path: '/performance/goals',
+        icon: Target,
+        permission: 'hr:reviews',
+      },
       {
         i18nKey: 'nav.onboarding',
         path: '/onboarding',
@@ -185,20 +205,22 @@ const navSections: NavSection[] = [
         icon: Settings,
         permission: 'hr:payroll',
       },
-      { i18nKey: 'nav.benefits', path: '/benefits', icon: Shield },
+      { i18nKey: 'nav.benefits', path: '/benefits', icon: Shield, permission: 'hr:staff' },
       {
         i18nKey: 'nav.equipment',
         path: '/equipment',
         icon: Package,
         configGuard: (_m, cfg) => !!cfg,
+        permission: 'hr:staff:manage',
       },
       {
         i18nKey: 'nav.assets',
         path: '/equipment/assets',
         icon: HardDrive,
         configGuard: (_m, cfg) => !!cfg,
+        permission: 'hr:staff:manage',
       },
-      { i18nKey: 'nav.documents', path: '/documents', icon: FileText },
+      { i18nKey: 'nav.documents', path: '/documents', icon: FileText, permission: 'hr:staff' },
       {
         i18nKey: 'nav.reports',
         path: '/reports',
@@ -279,7 +301,17 @@ function useTheme(): [Theme, (t: Theme) => void] {
 const SidebarNavItem: React.FC<NavItem> = ({ i18nKey, path, icon: Icon }) => {
   const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isActive = path === '/' ? pathname === '/' : pathname.startsWith(path);
+  const navPaths = navSections.flatMap((section) => section.items.map((item) => item.path));
+  const hasMoreSpecificMatch = navPaths.some(
+    (candidate) =>
+      candidate !== path &&
+      candidate.startsWith(`${path}/`) &&
+      (pathname === candidate || pathname.startsWith(`${candidate}/`))
+  );
+  const isActive =
+    path === '/'
+      ? pathname === '/'
+      : pathname === path || (pathname.startsWith(`${path}/`) && !hasMoreSpecificMatch);
   const label = t(i18nKey);
 
   return (

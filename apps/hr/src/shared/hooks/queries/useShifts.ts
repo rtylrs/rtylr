@@ -1,37 +1,54 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { ShiftPayload } from '@voxire/voxie/hr/shift/v1/types';
-import type { CreateShiftRequest } from '@voxire/voxie/hr/shift/v1/types';
-import type { ListShiftsResponse } from '@voxire/voxie/hr/shift/v1/types';
-import { safe } from '../../lib/api';
+import { ShiftServiceClient } from '@voxire/voxie/hr/shift/v1/client';
+import type {
+  CreateShiftRequest,
+  GetRosterResponse,
+  ListShiftsRequest,
+  ShiftAssignmentPayload,
+  ShiftPayload,
+} from '@voxire/voxie/hr/shift/v1/types';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { safe } from '../../lib/api';
+
+const shiftClient = createOneKitClient(ShiftServiceClient, 'hr');
 
 interface RosterParams {
   weekStart: string;
   locationId?: number;
 }
 
-interface RosterEntry {
-  staffId: number;
-  staffName: string;
-  assignments: ShiftAssignment[];
-}
-
-interface ShiftAssignment {
-  id: number;
-  shiftId: number;
-  shiftName: string;
+interface RosterConflict {
+  employeeId: number;
   date: string;
-  startTime: string;
-  endTime: string;
-  color: string;
-  conflict: boolean;
+  conflictType: string;
+  description: string;
 }
 
-interface RosterResponse {
-  entries: RosterEntry[];
+interface RosterData {
+  assignments: ShiftAssignmentPayload[];
+  conflicts: RosterConflict[];
 }
+
+const decodeRosterConflicts = (values: string[] | undefined): RosterConflict[] =>
+  (values ?? []).flatMap((value) => {
+    try {
+      const parsed = JSON.parse(value) as Partial<RosterConflict>;
+      const employeeId = Number(parsed.employeeId);
+      if (!Number.isInteger(employeeId) || !parsed.date) return [];
+      return [
+        {
+          employeeId,
+          date: parsed.date,
+          conflictType: parsed.conflictType ?? 'unknown',
+          description: parsed.description ?? '',
+        },
+      ];
+    } catch {
+      return [];
+    }
+  });
 
 interface CreateShiftAssignmentPayload {
   staffId: number;
@@ -43,8 +60,8 @@ export const useListShifts = () => {
   return useQuery<ShiftPayload[]>({
     queryKey: ['shifts'],
     queryFn: async (): Promise<ShiftPayload[]> => {
-      const res = await unwrap(safe.get<ListShiftsResponse>('/hr/shifts'));
-      return (res as ListShiftsResponse).shifts ?? [];
+      const res = await shiftClient.listShifts({} satisfies ListShiftsRequest);
+      return res.shifts ?? [];
     },
   });
 };
@@ -54,33 +71,52 @@ export const useCreateShift = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: CreateShiftRequest): Promise<void> => {
-      await unwrap(
-        safe.post('/hr/shifts', {
-          name: data.name,
-          locationId: data.locationId,
-          startTime: data.startTime,
-          endTime: data.endTime,
-          color: data.color,
-        })
-      );
+    mutationFn: async (data: CreateShiftRequest): Promise<ShiftPayload | undefined> => {
+      const res = await shiftClient.createShift(data);
+      return res.shift;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['shifts'] });
       toast.success(t('shifts.shiftCreated'));
     },
-    onError: () => {
-      toast.error(t('errors.generic'));
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
+    },
+  });
+};
+
+export const useDeleteShiftAssignment = () => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (assignmentId: number): Promise<void> => {
+      await unwrap(safe.delete<{ success: boolean }>(`/hr/shift/v1/assignments/${assignmentId}`));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['roster'] });
+      toast.success(t('shifts.assignmentDeleted', { defaultValue: 'Shift removed' }));
+    },
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };
 
 export const useGetRoster = (params: RosterParams) => {
-  return useQuery<RosterEntry[]>({
+  return useQuery<RosterData>({
     queryKey: ['roster', params],
-    queryFn: async (): Promise<RosterEntry[]> => {
-      const res = await unwrap(safe.get<RosterResponse>('/hr/shifts/roster', { params }));
-      return (res as RosterResponse).entries;
+    enabled: Boolean(params.locationId && params.weekStart),
+    queryFn: async (): Promise<RosterData> => {
+      if (!params.locationId) return { assignments: [], conflicts: [] };
+      const res: GetRosterResponse = await shiftClient.getRoster({
+        locationId: String(params.locationId),
+        weekStart: params.weekStart,
+      });
+      return {
+        assignments: res.assignments ?? [],
+        conflicts: decodeRosterConflicts(res.conflicts),
+      };
     },
   });
 };
@@ -91,20 +127,18 @@ export const useCreateShiftAssignment = () => {
 
   return useMutation({
     mutationFn: async (data: CreateShiftAssignmentPayload): Promise<void> => {
-      await unwrap(
-        safe.post('/hr/shifts/roster/assignments', {
-          employeeId: data.staffId,
-          shiftId: data.shiftId,
-          date: data.date,
-        })
-      );
+      await shiftClient.createShiftAssignment({
+        employeeId: String(data.staffId),
+        shiftId: String(data.shiftId),
+        date: data.date,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roster'] });
       toast.success(t('shifts.assignmentCreated'));
     },
-    onError: () => {
-      toast.error(t('errors.generic'));
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };
@@ -114,17 +148,22 @@ export const usePublishRoster = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (weekStart: string): Promise<void> => {
-      await unwrap(safe.post('/hr/shifts/roster/publish', { weekStart }));
+    mutationFn: async (data: string | { weekStart: string; locationId?: number }): Promise<void> => {
+      const request = typeof data === 'string' ? { weekStart: data } : data;
+      await shiftClient.publishRoster({
+        weekStart: request.weekStart,
+        locationId:
+          request.locationId !== undefined ? String(request.locationId) : undefined,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roster'] });
       toast.success(t('shifts.rosterPublished'));
     },
-    onError: () => {
-      toast.error(t('errors.generic'));
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };
 
-export type { RosterEntry, ShiftAssignment };
+export type { RosterConflict, RosterData };

@@ -80,6 +80,7 @@ const Offboarding: React.FC = () => {
                       >
                         <Checkbox
                           checked={task.completed}
+                          disabled={task.completed || toggle.isPending}
                           onChange={() =>
                             toggle.mutate(task.id, {
                               onSuccess: () => toast.success(t('offboarding.updated')),

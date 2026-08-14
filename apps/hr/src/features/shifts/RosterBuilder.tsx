@@ -10,7 +10,9 @@ import {
   useCreateShiftAssignment,
   usePublishRoster,
 } from '../../shared/hooks/queries/useShifts';
-import type { RosterEntry, ShiftAssignment } from '../../shared/hooks/queries/useShifts';
+import { useListHRLocations } from '../../shared/hooks/queries/useSetup';
+import { useStaff } from '../staff/useStaff';
+import type { ShiftPayload } from '@voxire/voxie/hr/shift/v1/types';
 import {
   SectionHeader,
   Button,
@@ -58,12 +60,32 @@ interface AssignModalState {
   date: string;
 }
 
+interface RosterEntry {
+  staffId: number;
+  staffName: string;
+  assignments: ShiftAssignment[];
+}
+
+interface ShiftAssignment {
+  id: number;
+  shiftId: number;
+  shiftName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  color: string;
+  conflict: boolean;
+}
+
 const RosterBuilderInner = (): React.JSX.Element => {
   const { t } = useTranslation();
   const [weekOffset, setWeekOffset] = useState(0);
   const weekStart = useMemo(() => getWeekStart(weekOffset), [weekOffset]);
-  const { data: roster, isLoading } = useGetRoster({ weekStart });
-  const { data: shifts } = useListShifts();
+  const { data: locations = [], isLoading: locationsLoading } = useListHRLocations();
+  const locationId = locations.find((location) => location.isDefault)?.id ?? locations[0]?.id;
+  const { data: roster, isLoading: rosterLoading } = useGetRoster({ weekStart, locationId });
+  const { data: shifts = [], isLoading: shiftsLoading } = useListShifts();
+  const { data: staff = [], isLoading: staffLoading } = useStaff();
   const assignMutation = useCreateShiftAssignment();
   const publishMutation = usePublishRoster();
 
@@ -76,7 +98,42 @@ const RosterBuilderInner = (): React.JSX.Element => {
 
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const entries: RosterEntry[] = roster ?? [];
+  const entries: RosterEntry[] = useMemo(() => {
+    const assignments = roster?.assignments ?? [];
+    const conflicts = roster?.conflicts ?? [];
+    const shiftsById = new Map<number, ShiftPayload>(
+      shifts.map((shift) => [Number(shift.id), shift])
+    );
+
+    return staff
+      .map((employee) => ({
+        staffId: employee.id,
+        staffName: employee.name,
+        assignments: assignments
+          .filter((assignment) => Number(assignment.employeeId) === employee.id)
+          .map((assignment) => {
+            const shiftId = Number(assignment.shiftId);
+            const shift = shiftsById.get(shiftId);
+            const date = assignment.date ?? '';
+            const conflict = conflicts.some(
+              (item) => item.employeeId === employee.id && item.date === date
+            );
+            return {
+              id: Number(assignment.id),
+              shiftId,
+              shiftName: shift?.name ?? `#${shiftId}`,
+              date,
+              startTime: shift?.startTime ?? '',
+              endTime: shift?.endTime ?? '',
+              color: shift?.color ?? SHIFT_COLORS[shiftId % SHIFT_COLORS.length],
+              conflict,
+            };
+          }),
+      }))
+      .filter((entry) => entry.assignments.length > 0);
+  }, [roster, shifts, staff]);
+
+  const loading = locationsLoading || rosterLoading || shiftsLoading || staffLoading;
 
   const rowVirtualizer = useVirtualizer({
     count: entries.length,
@@ -111,11 +168,15 @@ const RosterBuilderInner = (): React.JSX.Element => {
   };
 
   const handlePublish = (): void => {
+    if (!locationId) {
+      toast.error('Create a work location before publishing a roster');
+      return;
+    }
     if (hasConflicts) {
       toast.error(t('shifts.roster.cannotPublishConflicts'));
       return;
     }
-    publishMutation.mutate(weekStart, {
+    publishMutation.mutate({ weekStart, locationId }, {
       onSuccess: () => toast.success('Roster published'),
       onError: () => toast.error('Failed to publish roster'),
     });
@@ -123,7 +184,7 @@ const RosterBuilderInner = (): React.JSX.Element => {
 
   const hasConflicts = entries.some((e) => e.assignments.some((a) => a.conflict));
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <Skeleton height={32} width={200} />
@@ -157,7 +218,7 @@ const RosterBuilderInner = (): React.JSX.Element => {
               variant="primary"
               icon={<Send size={13} />}
               onClick={handlePublish}
-              disabled={publishMutation.isPending}
+              disabled={publishMutation.isPending || !locationId}
             >
               {publishMutation.isPending ? t('common.loading') : t('shifts.roster.publish')}
             </Button>

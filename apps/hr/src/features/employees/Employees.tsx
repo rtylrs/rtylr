@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Plus, Search } from 'lucide-react';
 import { useListEmployees } from '../../shared/hooks/queries/useEmployees';
-import type { EmployeePayload } from '@voxire/voxie/hr/employee/v1/types';
+import type { EmployeeRecord } from '../../shared/hooks/queries/useEmployees';
 
 const PAGE_SIZE = 50;
 
@@ -20,6 +20,7 @@ const Employees = (): React.JSX.Element => {
   const { data, isLoading } = useListEmployees({
     limit: PAGE_SIZE,
     offset,
+    search: searchTerm,
     departmentId: departmentFilter,
     status: statusFilter,
   });
@@ -29,15 +30,7 @@ const Employees = (): React.JSX.Element => {
 
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const filteredEmployees = searchTerm
-    ? employees.filter((e) =>
-        Object.values(e)
-          .filter((value): value is string => typeof value === 'string')
-          .join(' ')
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      )
-    : employees;
+  const filteredEmployees = employees;
 
   // Count must track the filtered list, otherwise searching leaves the
   // virtualizer generating indices past filteredEmployees.length and the
@@ -89,13 +82,19 @@ const Employees = (): React.JSX.Element => {
               type="text"
               placeholder={t('employees.search')}
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setOffset(0);
+              }}
               style={{ ...inputStyle, paddingLeft: '32px', width: '100%' }}
             />
           </div>
           <select
             value={statusFilter ?? ''}
-            onChange={(e) => setStatusFilter(e.target.value || undefined)}
+            onChange={(e) => {
+              setStatusFilter(e.target.value || undefined);
+              setOffset(0);
+            }}
             style={inputStyle}
             aria-label={t('employees.filterByStatus')}
           >
@@ -150,7 +149,7 @@ const Employees = (): React.JSX.Element => {
                   }}
                 >
                   {virtualizer.getVirtualItems().map((virtualRow) => {
-                    const emp: EmployeePayload | undefined = filteredEmployees[virtualRow.index];
+                    const emp: EmployeeRecord | undefined = filteredEmployees[virtualRow.index];
                     if (!emp) return null;
                     return (
                       <div
@@ -175,13 +174,15 @@ const Employees = (): React.JSX.Element => {
                         }}
                       >
                         <span className="truncate text-sm" style={{ color: 'var(--hr-text)' }}>
-                          {emp.jobTitle}
+                          {emp.jobTitle || `${emp.firstName} ${emp.lastName}`}
                         </span>
                         <span className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
-                          {t(`employees.contractTypes.${emp.contractType}` as const)}
+                          {t(`employees.contractTypes.${emp.employmentType}` as const, {
+                            defaultValue: emp.employmentType,
+                          })}
                         </span>
                         <span className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
-                          {emp.hireDate}
+                          {emp.startDate || '-'}
                         </span>
                         <span>
                           <span

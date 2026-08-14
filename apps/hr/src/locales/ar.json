@@ -193,7 +193,18 @@
       "description": "أضف موظفيك الأوائل للبدء. يمكنك أيضاً الاستيراد من CSV.",
       "addEmployee": "إضافة موظف",
       "importCsv": "استيراد CSV",
-      "csvComingSoon": "استيراد CSV قريباً",
+      "csvModalTitle": "استيراد الموظفين من CSV",
+      "csvDescription": "ارفع ملف CSV يحتوي على user_id وdepartment_id وlocation_id وfirst_name وlast_name وemail. الحقول الاختيارية متاحة في النموذج.",
+      "csvDownloadTemplate": "تنزيل النموذج",
+      "csvNoRows": "لا يحتوي ملف CSV على صفوف بيانات.",
+      "csvReadError": "تعذر قراءة ملف CSV.",
+      "csvRowsReady": "{{count}} صفوف جاهزة للاستيراد",
+      "csvLine": "السطر",
+      "csvReady": "جاهز",
+      "csvInvalidRows": "صحح الصفوف غير الصالحة قبل الاستيراد.",
+      "csvImport": "استيراد الموظفين",
+      "csvImporting": "جارٍ الاستيراد…",
+      "csvImported": "تم استيراد {{count}} موظف.",
       "noEmployees": "لم تتم إضافة موظفين بعد. أضف أول موظف للمتابعة.",
       "noEmployeesHint": "لم يتم إضافة موظفين بعد. يمكنك إضافتهم هنا أو من قسم الموظفين بعد الإعداد."
     }
@@ -446,7 +457,6 @@
     "clockedOut": "تم تسجيل الانصراف بنجاح",
     "emptyTitle": "لا توجد سجلات حضور",
     "emptyDescription": "ستظهر سجلات حضورك هنا بعد تسجيل الحضور.",
-    "qrComingSoon": "مسح رمز QR قريباً!",
     "late": "{{minutes}}د متأخر",
     "methods": {
       "app": "تطبيق",
@@ -456,6 +466,8 @@
       "facial": "الوجه"
     },
     "statuses": {
+      "clocked_in": "تم تسجيل الحضور",
+      "clocked_out": "تم تسجيل الانصراف",
       "present": "حاضر",
       "absent": "غائب",
       "partial": "جزئي"
@@ -505,7 +517,11 @@
       "title": "ماسح رمز QR",
       "description": "امسح رمز QR في محطة عملك لتسجيل الحضور أو الانصراف.",
       "scanButton": "مسح رمز QR",
-      "cameraPlaceholder": "يتطلب إذن الكاميرا. هذه الميزة قادمة في المرحلة الثانية."
+      "cameraPlaceholder": "المسح بالكاميرا غير متاح في هذا المتصفح.",
+      "manualDescription": "أدخل الرمز المؤقت الظاهر على محطة الحضور في مكان العمل.",
+      "tokenLabel": "رمز الحضور",
+      "tokenPlaceholder": "الصق قيمة رمز QR أو اكتبها",
+      "submit": "تسجيل الحضور"
     }
   },
   "leave": {
@@ -675,6 +691,20 @@
       "enableBonuses": "تفعيل المكافآت",
       "saved": "تم حفظ تهيئة الرواتب",
       "notConfiguredNotice": "لم يتم تكوين الرواتب بعد - أكمل النموذج للبدء"
+    },
+    "adjustments": {
+      "title": "تعديلات الرواتب",
+      "subtitle": "أضف المكافآت والخصومات المرتبطة بالفترة قبل إنشاء الدورة.",
+      "employeePlaceholder": "اختر موظفاً",
+      "employeeShort": "الموظف #{{id}}",
+      "bonus": "مكافأة",
+      "deduction": "خصم",
+      "labelPlaceholder": "اسم التعديل",
+      "amountPlaceholder": "المبلغ",
+      "effectiveFrom": "ساري من",
+      "effectiveTo": "ساري حتى (اختياري)",
+      "saving": "جارٍ الحفظ…",
+      "add": "إضافة التعديل"
     }
   },
   "shifts": {

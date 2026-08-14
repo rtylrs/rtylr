@@ -3,11 +3,14 @@ import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { ChevronLeft, ChevronRight, Send } from 'lucide-react';
 import {
-  useShiftSchedule,
-  usePublishWeek,
-  useUpsertShift,
-  useDeleteShift,
-} from '../../shared/hooks/useHrExtras';
+  useCreateShift,
+  useCreateShiftAssignment,
+  useDeleteShiftAssignment,
+  useGetRoster,
+  useListShifts,
+  usePublishRoster,
+} from '../../shared/hooks/queries/useShifts';
+import { useListHRLocations } from '../../shared/hooks/queries/useSetup';
 import { useStaff } from '../staff/useStaff';
 import {
   Card,
@@ -21,6 +24,7 @@ import {
 } from '../../shared/components/ui';
 import ShiftCell from '../../shared/components/ShiftCell';
 import { ScheduleShift } from '../../shared/services/hrExtras';
+import type { ShiftPayload } from '@voxire/voxie/hr/shift/v1/types';
 
 function startOfWeek(date: Date) {
   const d = new Date(date);
@@ -47,11 +51,41 @@ const Schedule: React.FC = () => {
   const isMobile = useIsMobile(900);
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date()));
   const weekStartStr = dayStr(weekStart);
-  const { data: shifts = [] } = useShiftSchedule(weekStartStr);
+  const { data: locations = [] } = useListHRLocations();
+  const locationId = locations.find((location) => location.isDefault)?.id ?? locations[0]?.id;
+  const { data: shiftDefinitions = [] } = useListShifts();
+  const { data: roster } = useGetRoster({ weekStart: weekStartStr, locationId });
   const { data: staff = [] } = useStaff();
-  const publish = usePublishWeek();
-  const upsert = useUpsertShift();
-  const del = useDeleteShift();
+  const createShift = useCreateShift();
+  const assignShift = useCreateShiftAssignment();
+  const publish = usePublishRoster();
+  const del = useDeleteShiftAssignment();
+
+  const shifts = useMemo<ScheduleShift[]>(() => {
+    const definitionsById = new Map<number, ShiftPayload>(
+      shiftDefinitions.map((shift) => [Number(shift.id), shift])
+    );
+    const staffById = new Map(staff.map((member) => [member.id, member]));
+    return (roster?.assignments ?? []).flatMap((assignment) => {
+      const staffId = Number(assignment.employeeId);
+      const shift = definitionsById.get(Number(assignment.shiftId));
+      const employee = staffById.get(staffId);
+      if (!employee || !shift || !assignment.date) return [];
+      return [
+        {
+          id: Number(assignment.id),
+          staffId,
+          staffName: employee.name,
+          role: employee.role,
+          day: assignment.date,
+          start: shift.startTime ?? '',
+          end: shift.endTime ?? '',
+          color: shift.color,
+          published: assignment.status?.toLowerCase() === 'published',
+        },
+      ];
+    });
+  }, [roster, shiftDefinitions, staff]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<ScheduleShift> | null>(null);
@@ -80,25 +114,51 @@ const Schedule: React.FC = () => {
       toast.error('Fill all fields');
       return;
     }
+    if (!locationId) {
+      toast.error('Create a work location before adding a shift');
+      return;
+    }
     const who = staff.find((s) => s.id === editing.staffId);
     if (!who) return;
-    upsert.mutate(
+    const color = editing.color ?? ROLE_COLORS[0];
+    const assign = (shiftId: number) =>
+      assignShift.mutate(
+        { staffId: who.id, shiftId, date: editing.day! },
+        {
+          onSuccess: () => {
+            toast.success('Shift saved');
+            setModalOpen(false);
+            setEditing(null);
+          },
+        }
+      );
+    const existing = shiftDefinitions.find(
+      (shift) =>
+        Number(shift.locationId) === locationId &&
+        shift.startTime === editing.start &&
+        shift.endTime === editing.end &&
+        (shift.color ?? '') === color
+    );
+    if (existing?.id) {
+      assign(Number(existing.id));
+      return;
+    }
+    createShift.mutate(
       {
-        id: editing.id,
-        staffId: who.id,
-        staffName: who.name,
-        role: who.role,
-        day: editing.day!,
-        start: editing.start!,
-        end: editing.end!,
-        color: editing.color ?? ROLE_COLORS[0],
-        published: editing.published ?? false,
+        locationId: String(locationId),
+        name: `${who.role || 'Staff'} shift`,
+        startTime: editing.start!,
+        endTime: editing.end!,
+        color,
       },
       {
-        onSuccess: () => {
-          toast.success('Shift saved');
-          setModalOpen(false);
-          setEditing(null);
+        onSuccess: (created) => {
+          const shiftId = Number(created?.id);
+          if (!Number.isInteger(shiftId) || shiftId <= 0) {
+            toast.error('Shift was created without an id');
+            return;
+          }
+          assign(shiftId);
         },
       }
     );
@@ -130,8 +190,9 @@ const Schedule: React.FC = () => {
               <Button
                 variant="primary"
                 icon={<Send size={13} />}
+                disabled={!locationId || publish.isPending}
                 onClick={() =>
-                  publish.mutate(dayStr(weekStart), {
+                  publish.mutate({ weekStart: dayStr(weekStart), locationId }, {
                     onSuccess: () => toast.success('Week published'),
                   })
                 }

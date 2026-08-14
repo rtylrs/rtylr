@@ -4,12 +4,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   refetch: vi.fn(),
+  refetchSetup: vi.fn(),
   setConfig: vi.fn(),
   useGetHRConfig: vi.fn(),
+  useGetSetupStatus: vi.fn(),
 }));
 
 vi.mock('../../shared/hooks/queries/useSetup', () => ({
   useGetHRConfig: mocks.useGetHRConfig,
+  useGetSetupStatus: mocks.useGetSetupStatus,
 }));
 
 vi.mock('../../shared/stores/hrConfigStore', () => ({
@@ -31,8 +34,15 @@ import HRConfigRoute from './HRConfigRoute';
 describe('HRConfigRoute', () => {
   beforeEach(() => {
     mocks.refetch.mockReset();
+    mocks.refetchSetup.mockReset();
     mocks.setConfig.mockReset();
     mocks.useGetHRConfig.mockReset();
+    mocks.useGetSetupStatus.mockReturnValue({
+      data: { isComplete: true },
+      isError: false,
+      isLoading: false,
+      refetch: mocks.refetchSetup,
+    });
   });
 
   it('keeps config failures on a retryable error instead of entering setup', () => {
@@ -72,6 +82,12 @@ describe('HRConfigRoute', () => {
   });
 
   it('sends a successful response without completion to setup', () => {
+    mocks.useGetSetupStatus.mockReturnValue({
+      data: { isComplete: false },
+      isError: false,
+      isLoading: false,
+      refetch: mocks.refetchSetup,
+    });
     mocks.useGetHRConfig.mockReturnValue({
       data: { setupCompletedAt: undefined },
       isError: false,

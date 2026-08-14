@@ -4,7 +4,8 @@ import { Card, ACCENT } from './ui';
 import { useBirthdays } from '../hooks/useHrExtras';
 
 function daysUntil(monthDay: string) {
-  const [m, d] = monthDay.split('-').map(Number);
+  const parts = monthDay.split('-').map(Number);
+  const [m, d] = parts.length === 3 ? parts.slice(1) : parts;
   const now = new Date();
   let next = new Date(now.getFullYear(), m - 1, d);
   if (next < now) next = new Date(now.getFullYear() + 1, m - 1, d);

@@ -84,7 +84,7 @@ const EmployeeDetail = (): React.JSX.Element => {
           </button>
           <div>
             <h1 className="text-lg font-semibold" style={{ color: 'var(--hr-text)' }}>
-              {employee.jobTitle}
+              {employee.jobTitle || `${employee.firstName} ${employee.lastName}`}
             </h1>
             <span
               className="rounded-full px-2 py-0.5 text-xs font-medium"
@@ -130,7 +130,13 @@ const EmployeeDetail = (): React.JSX.Element => {
           {activeTab === 'personal' && (
             <div className="flex flex-col">
               {infoRow(t('employees.form.userId'), employee.userId)}
-              {infoRow(t('employees.form.jobTitle'), employee.jobTitle)}
+              {infoRow(
+                t('employees.form.jobTitle'),
+                employee.jobTitle || `${employee.firstName} ${employee.lastName}`
+              )}
+              {infoRow(t('employees.form.email'), employee.email)}
+              {infoRow(t('employees.form.phone'), employee.phone)}
+              {infoRow(t('employees.form.dateOfBirth'), employee.dateOfBirth)}
               {infoRow(t('employees.form.currency'), employee.currency)}
             </div>
           )}
@@ -139,15 +145,17 @@ const EmployeeDetail = (): React.JSX.Element => {
             <div className="flex flex-col">
               {infoRow(
                 t('employees.contractType'),
-                t(`employees.contractTypes.${employee.contractType}` as const)
+                t(`employees.contractTypes.${employee.employmentType}` as const, {
+                  defaultValue: employee.employmentType,
+                })
               )}
-              {infoRow(t('employees.hireDate'), employee.hireDate)}
+              {infoRow(t('employees.hireDate'), employee.startDate)}
               {infoRow(t('employees.form.probationEndDate'), employee.probationEndDate)}
               {infoRow(
                 t('employees.salary'),
-                employee.monthlySalary != null && employee.currency
-                  ? `${employee.monthlySalary} ${employee.currency}/mo`
-                  : employee.hourlyRate != null && employee.currency
+                employee.salary > 0 && employee.currency
+                  ? `${employee.salary} ${employee.currency}/mo`
+                  : employee.hourlyRate > 0 && employee.currency
                     ? `${employee.hourlyRate} ${employee.currency}/hr`
                     : '-'
               )}

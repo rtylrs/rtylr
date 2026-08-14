@@ -5,7 +5,14 @@ import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { Play, DollarSign, TrendingUp, Users, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useListPayrollRuns, useTriggerPayrollRun } from '../../shared/hooks/queries/usePayroll';
+import {
+  useCreatePayrollAdjustment,
+  useDeletePayrollAdjustment,
+  useListPayrollAdjustments,
+  useListPayrollRuns,
+  useTriggerPayrollRun,
+} from '../../shared/hooks/queries/usePayroll';
+import { useListEmployees } from '../../shared/hooks/queries/useEmployees';
 import type {
   PayrollRunPayload,
   ListPayrollRunsParams,
@@ -48,6 +55,19 @@ const Payroll = (): React.JSX.Element => {
 
   const { data, isLoading } = useListPayrollRuns(params, { enabled: payrollConfigured });
   const triggerRun = useTriggerPayrollRun(payrollConfigured);
+  const { data: adjustmentsData } = useListPayrollAdjustments(payrollConfigured && canRunPayroll);
+  const { data: employeesData } = useListEmployees(
+    { limit: 1000, offset: 0 },
+    { enabled: payrollConfigured && canRunPayroll }
+  );
+  const createAdjustment = useCreatePayrollAdjustment();
+  const deleteAdjustment = useDeletePayrollAdjustment();
+  const [adjustmentEmployeeId, setAdjustmentEmployeeId] = useState('');
+  const [adjustmentKind, setAdjustmentKind] = useState<'bonus' | 'deduction'>('bonus');
+  const [adjustmentLabel, setAdjustmentLabel] = useState('');
+  const [adjustmentAmount, setAdjustmentAmount] = useState('');
+  const [adjustmentFrom, setAdjustmentFrom] = useState(() => new Date().toISOString().slice(0, 10));
+  const [adjustmentTo, setAdjustmentTo] = useState('');
 
   if (!payrollConfigured) return <PayrollConfigRequired />;
 
@@ -151,6 +171,125 @@ const Payroll = (): React.JSX.Element => {
             </motion.div>
           ))}
         </div>
+
+        {canRunPayroll && (
+          <Card>
+            <SectionHeader
+              title={t('payroll.adjustments.title')}
+              subtitle={t('payroll.adjustments.subtitle')}
+            />
+            <form
+              className="mt-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                const employeeId = Number(adjustmentEmployeeId);
+                const amount = Number(adjustmentAmount);
+                if (!employeeId || !adjustmentLabel.trim() || !amount || !adjustmentFrom) return;
+                createAdjustment.mutate(
+                  {
+                    employeeId,
+                    kind: adjustmentKind,
+                    label: adjustmentLabel.trim(),
+                    amount,
+                    effectiveFrom: adjustmentFrom,
+                    effectiveTo: adjustmentTo || undefined,
+                  },
+                  {
+                    onSuccess: () => {
+                      setAdjustmentEmployeeId('');
+                      setAdjustmentLabel('');
+                      setAdjustmentAmount('');
+                      setAdjustmentTo('');
+                    },
+                  }
+                );
+              }}
+            >
+              <select
+                value={adjustmentEmployeeId}
+                onChange={(event) => setAdjustmentEmployeeId(event.target.value)}
+                required
+                className="rounded-lg border bg-transparent px-3 py-2 text-sm"
+              >
+                <option value="">{t('payroll.adjustments.employeePlaceholder')}</option>
+                {(employeesData?.employees ?? []).map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.firstName} {employee.lastName} · #{employee.id}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={adjustmentKind}
+                onChange={(event) => setAdjustmentKind(event.target.value as 'bonus' | 'deduction')}
+                className="rounded-lg border bg-transparent px-3 py-2 text-sm"
+              >
+                <option value="bonus">{t('payroll.adjustments.bonus')}</option>
+                <option value="deduction">{t('payroll.adjustments.deduction')}</option>
+              </select>
+              <input
+                value={adjustmentLabel}
+                onChange={(event) => setAdjustmentLabel(event.target.value)}
+                placeholder={t('payroll.adjustments.labelPlaceholder')}
+                required
+                className="rounded-lg border bg-transparent px-3 py-2 text-sm"
+              />
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                value={adjustmentAmount}
+                onChange={(event) => setAdjustmentAmount(event.target.value)}
+                placeholder={t('payroll.adjustments.amountPlaceholder')}
+                required
+                className="rounded-lg border bg-transparent px-3 py-2 text-sm"
+              />
+              <label className="text-xs text-[var(--hr-text-muted)]">
+                {t('payroll.adjustments.effectiveFrom')}
+                <input
+                  type="date"
+                  value={adjustmentFrom}
+                  onChange={(event) => setAdjustmentFrom(event.target.value)}
+                  required
+                  className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="text-xs text-[var(--hr-text-muted)]">
+                {t('payroll.adjustments.effectiveTo')}
+                <input
+                  type="date"
+                  value={adjustmentTo}
+                  onChange={(event) => setAdjustmentTo(event.target.value)}
+                  className="mt-1 w-full rounded-lg border bg-transparent px-3 py-2 text-sm"
+                />
+              </label>
+              <Button type="submit" variant="secondary" disabled={createAdjustment.isPending}>
+                {createAdjustment.isPending
+                  ? t('payroll.adjustments.saving')
+                  : t('payroll.adjustments.add')}
+              </Button>
+            </form>
+            {(adjustmentsData?.adjustments ?? []).length > 0 && (
+              <div className="mt-4 divide-y" style={{ borderTop: '1px solid var(--hr-border)' }}>
+                {adjustmentsData?.adjustments.map((adjustment) => (
+                  <div key={adjustment.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-xs">
+                    <span>
+                      <strong>{adjustment.kind === 'bonus' ? '+' : '-'}{adjustment.amount.toFixed(2)}</strong>{' '}
+                      {adjustment.label} · {t('payroll.adjustments.employeeShort', { id: adjustment.employeeId })}
+                    </span>
+                    <button
+                      type="button"
+                      className="text-[var(--hr-error)]"
+                      disabled={deleteAdjustment.isPending}
+                      onClick={() => deleteAdjustment.mutate(adjustment.id)}
+                    >
+                      {t('common.delete')}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        )}
 
         {/* Status filter tabs */}
         <Tabs

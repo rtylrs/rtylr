@@ -49,6 +49,19 @@ interface PayrollQueryOptions {
   enabled?: boolean;
 }
 
+export interface PayrollAdjustment {
+  id: number;
+  employeeId: number;
+  kind: 'bonus' | 'deduction';
+  label: string;
+  amount: number;
+  effectiveFrom: string;
+  effectiveTo: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /**
  * The self-service endpoints take no `status`: onion restricts them to
  * approved/exported server-side and resolves the employee from the session,
@@ -65,6 +78,50 @@ export type {
   PayrollEntryPayload,
   ListPayrollRunsParams,
   ListMyPayrollRunsParams,
+};
+
+interface ListPayrollAdjustmentsResponse {
+  adjustments: PayrollAdjustment[];
+}
+
+export const useListPayrollAdjustments = (enabled = true) => {
+  return useQuery<ListPayrollAdjustmentsResponse>({
+    queryKey: ['payroll-adjustments'],
+    queryFn: async () => unwrap(safe.get<ListPayrollAdjustmentsResponse>('/hr/payroll/adjustments')),
+    enabled,
+  });
+};
+
+export interface PayrollAdjustmentInput {
+  employeeId: number;
+  kind: 'bonus' | 'deduction';
+  label: string;
+  amount: number;
+  effectiveFrom: string;
+  effectiveTo?: string;
+}
+
+export const useCreatePayrollAdjustment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: PayrollAdjustmentInput) =>
+      unwrap(safe.post<{ adjustment: PayrollAdjustment }>('/hr/payroll/adjustments', input)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-adjustments'] });
+      toast.success('Payroll adjustment saved');
+    },
+    onError: () => toast.error('Failed to save payroll adjustment'),
+  });
+};
+
+export const useDeletePayrollAdjustment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) =>
+      unwrap(safe.delete<{ success: boolean }>(`/hr/payroll/adjustments/${id}`)),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['payroll-adjustments'] }),
+    onError: () => toast.error('Failed to remove payroll adjustment'),
+  });
 };
 
 /* ── Config hooks ── */
@@ -86,7 +143,11 @@ export const useGetPayrollConfig = () => {
           deductionsEnabled: Boolean(raw.deductionsEnabled ?? raw.deductions_enabled ?? false),
           bonusesEnabled: Boolean(raw.bonusesEnabled ?? raw.bonuses_enabled ?? false),
         };
-      } catch {
+      } catch (error) {
+        const status =
+          (error as { response?: { status?: number }; status?: number })?.response?.status ??
+          (error as { status?: number })?.status;
+        if (status !== 404) throw error;
         return {
           grossModel: 'both',
           period: 'monthly',
@@ -106,7 +167,7 @@ export const useUpsertPayrollConfig = () => {
   return useMutation({
     mutationFn: async (data: UpsertPayrollConfigRequest): Promise<PayrollConfigData> => {
       const res = await unwrap(
-        safe.put<{ config: PayrollConfigData }>('/hr/payroll/config', {
+        safe.put<{ config?: PayrollConfigData }>('/hr/payroll/config', {
           periodType: data.period,
           overtimeEnabled: data.overtimeEnabled,
           grossModel: data.grossModel,
@@ -114,7 +175,14 @@ export const useUpsertPayrollConfig = () => {
           bonusesEnabled: data.bonusesEnabled,
         })
       );
-      return (res as { config: PayrollConfigData }).config;
+      const raw = ((res as { config?: PayrollConfigData }).config ?? res) as Record<string, unknown>;
+      return {
+        grossModel: ((raw.grossModel ?? raw.gross_model) as PayrollConfigData['grossModel']) ?? 'both',
+        period: ((raw.period ?? raw.periodType ?? raw.period_type) as PayrollConfigData['period']) ?? 'monthly',
+        overtimeEnabled: Boolean(raw.overtimeEnabled ?? raw.overtime_enabled ?? false),
+        deductionsEnabled: Boolean(raw.deductionsEnabled ?? raw.deductions_enabled ?? false),
+        bonusesEnabled: Boolean(raw.bonusesEnabled ?? raw.bonuses_enabled ?? false),
+      };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payroll-config'] });

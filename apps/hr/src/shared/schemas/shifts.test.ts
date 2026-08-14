@@ -227,18 +227,20 @@ describe('overtimeAlertSchema', () => {
       id: '8',
       staffId: 12,
       staffName: 'Jake',
-      hoursThisWeek: 45,
-      threshold: 40,
+      date: '2026-04-28',
+      plannedExtraMinutes: 300,
+      reason: 'Release support',
+      status: 'pending',
       triggeredAt: '2026-04-28T18:00:00',
     });
     expect(result.id).toBe(8);
-    expect(result.hoursThisWeek).toBe(45);
-    expect(result.threshold).toBe(40);
+    expect(result.plannedExtraMinutes).toBe(300);
+    expect(result.status).toBe('pending');
   });
 
   it('rejects missing required fields', () => {
     expect(() =>
-      overtimeAlertSchema.parse({ id: 1, staffId: 2, staffName: 'Joe', hoursThisWeek: 44 })
+      overtimeAlertSchema.parse({ id: 1, staffId: 2, staffName: 'Joe', plannedExtraMinutes: 44 })
     ).toThrow();
   });
 });

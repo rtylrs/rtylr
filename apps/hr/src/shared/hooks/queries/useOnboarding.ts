@@ -65,7 +65,9 @@ export const useGetEmployeeChecklist = (employeeId?: number) => {
       );
       return res as ListEmployeeChecklistsResponse;
     },
-    enabled: !!employeeId,
+    // Without an employee filter the backend returns the management view for
+    // the whole tenant; the employee checklist view passes the filter.
+    enabled: true,
   });
 };
 

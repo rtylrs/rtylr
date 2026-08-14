@@ -107,6 +107,7 @@ const Onboarding: React.FC = () => {
                     >
                       <Checkbox
                         checked={task.completed}
+                        disabled={task.completed || toggle.isPending}
                         onChange={() =>
                           toggle.mutate(task.id, {
                             onSuccess: () =>

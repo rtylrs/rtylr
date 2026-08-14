@@ -148,10 +148,90 @@ export interface Submission {
   email: string;
   phone: string;
   resumeUrl: string;
+  /** The list API exposes presence only; fetchResumeURL signs the file on demand. */
+  hasResume?: boolean;
   coverLetter: string;
   status: string;
   answersJson: string;
   careerTitle: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SubmissionInterview {
+  id: number;
+  submissionId: number;
+  interviewType: string;
+  title: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  timezone: string;
+  meetingUrl: string;
+  interviewerName: string;
+  status: string;
+  feedback: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubmissionNote {
+  id: number;
+  submissionId: number;
+  authorId: number;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubmissionOffer {
+  id: number;
+  submissionId: number;
+  title: string;
+  salary: number;
+  salaryCurrency: string;
+  startDate: string;
+  expiresAt: string;
+  status: string;
+  terms: string;
+  sentAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubmissionTag {
+  id: number;
+  submissionId: number;
+  name: string;
+  createdAt: string;
+}
+
+export interface TalentPool {
+  id: number;
+  name: string;
+  description: string;
+  memberCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TalentPoolMember {
+  id: number;
+  poolId: number;
+  submissionId: number;
+  candidateName: string;
+  email: string;
+  careerTitle: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface SubmissionEvent {
+  id: number;
+  submissionId: number;
+  actorId: number;
+  eventType: string;
+  fromStatus: string;
+  toStatus: string;
+  metadataJson: string;
+  createdAt: string;
 }

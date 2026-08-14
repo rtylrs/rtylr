@@ -1,10 +1,10 @@
-import type { HRCompanyConfigPayload } from '@voxire/voxie/hr/setup/v1/types';
+import type { HRConfig } from '../types/hrConfig';
 
 /**
  * The setup contract predates the payroll capability flags, so deployed API
  * responses can contain either camelCase or wire-format snake_case fields.
  */
-export type PayrollConfigSource = HRCompanyConfigPayload & {
+export type PayrollConfigSource = HRConfig & {
   payrollEnabled?: boolean | string;
   payrollConfigured?: boolean | string;
   payroll_enabled?: boolean | string;
@@ -25,7 +25,7 @@ const readBoolean = (value: boolean | string | undefined): boolean | undefined =
  * older response omits the legacy period field.
  */
 export function isPayrollConfigured(
-  config: HRCompanyConfigPayload | PayrollConfigSource | null | undefined
+  config: HRConfig | PayrollConfigSource | null | undefined
 ): boolean {
   if (!config) return false;
 
@@ -36,5 +36,8 @@ export function isPayrollConfigured(
   if (enabled === false || configured === false) return false;
   if (enabled === true && configured === true) return true;
 
-  return Boolean(source.payrollPeriod ?? source.payroll_period);
+  // The current core config route does not repeat the payroll module's period;
+  // an existing company config is still enough to enter payroll, where the
+  // payroll config screen can show the module's persisted defaults.
+  return Boolean(source.payrollPeriod ?? source.payroll_period ?? source.companyName);
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from '@tanstack/react-router';
-import { Briefcase, Inbox, Palette, LayoutGrid } from 'lucide-react';
+import { Briefcase, Inbox, Palette, LayoutGrid, UsersRound } from 'lucide-react';
 import { signOut } from '@voxire/auth';
 
 /**
@@ -22,6 +22,11 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
             to="/admin/submissions"
             icon={<Inbox className="h-4 w-4" />}
             label="Submissions"
+          />
+          <AdminLink
+            to="/admin/talent-pools"
+            icon={<UsersRound className="h-4 w-4" />}
+            label="Talent pools"
           />
           <AdminLink
             to="/admin/sections"

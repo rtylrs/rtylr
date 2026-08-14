@@ -362,6 +362,12 @@ export const hrExtras = {
     safe.post<{ success: boolean }>('/hr/one-on-ones', { id, ...patch }),
 
   // Onboarding
+  listOnboardingChecklists: (params?: { limit?: number; offset?: number }) =>
+    safe.get<unknown>('/hr/onboarding/checklists', { params }),
+  listOnboardingTemplates: (params?: { limit?: number; offset?: number }) =>
+    safe.get<unknown>('/hr/onboarding/templates', { params }),
+  completeOnboardingItem: (id: number) =>
+    safe.post<{ success: boolean }>(`/hr/onboarding/checklists/items/${id}/complete`, {}),
   listOnboarding: () => safe.get<OnboardingTask[]>('/hr/training'),
   toggleOnboardingTask: (id: number) =>
     safe.get<{ success: boolean }>('/hr/training', { params: { id, action: 'toggle' } }),
@@ -377,18 +383,19 @@ export const hrExtras = {
     }),
 
   // Documents
-  listDocuments: () => safe.get<DocumentItem[]>('/hr/documents'),
+  listDocuments: () => safe.get<unknown>('/hr/documents'),
   addDocument: (doc: Omit<DocumentItem, 'id' | 'uploadedAt'>) =>
-    safe.post<DocumentItem>('/hr/documents', {
-      employeeId: doc.staffId,
-      documentType: doc.type,
+    safe.post<unknown>('/hr/documents', {
+      employee_id: doc.staffId,
+      document_type: doc.type,
       title: doc.name,
-      storageMode: doc.url ? 'linked' : 'stored',
-      fileUrl: doc.url ?? doc.name,
+      storage_mode: doc.url ? 'linked' : 'stored',
+      file_url: doc.url,
+      external_url: doc.url,
     }),
   deleteDocument: (id: number) => safe.delete<{ success: boolean }>(`/hr/documents/${id}`),
   expiringDocuments: (daysAhead = 30) =>
-    safe.get<DocumentItem[]>('/hr/documents/expiring', { params: { days: daysAhead } }),
+    safe.get<unknown>('/hr/documents/expiring', { params: { days: daysAhead } }),
 
   // Benefits
   listBenefitPlans: () => safe.get<BenefitPlan[]>('/hr/benefits'),
@@ -400,49 +407,52 @@ export const hrExtras = {
   // Training
   listCourses: () => safe.get<TrainingCourse[]>('/hr/training', { params: { type: 'courses' } }),
   listTrainingProgress: () =>
-    safe.get<TrainingProgress[]>('/hr/training', { params: { type: 'progress' } }),
+    safe.get<unknown>('/hr/training/progress'),
   updateTrainingProgress: (id: number, progress: number) =>
     safe.get<{ success: boolean }>('/hr/training', {
       params: { id, progress, action: 'update-progress' },
     }),
 
   // Birthdays & anniversaries
-  listBirthdays: () => safe.get<Birthday[]>('/hr/staff', { params: { view: 'birthdays' } }),
+  listBirthdays: () => safe.get<unknown>('/hr/employees', { params: { limit: 100, offset: 0 } }),
   listAnniversaries: () =>
     safe.get<Anniversary[]>('/hr/staff', { params: { view: 'anniversaries' } }),
 
   // Availability
-  listAvailability: () =>
-    safe.get<Availability[]>('/hr/shifts', { params: { view: 'availability' } }),
+  listAvailability: () => safe.get<{ entries: Availability[] }>('/hr/shift/v1/availability'),
   setAvailability: (row: Availability) =>
-    safe.put<Availability>('/hr/shifts', {
+    safe.post<unknown>('/hr/shift/v1/availability', {
       id: row.id,
-      date: row.day,
-      startTime: row.startTime,
-      endTime: row.endTime,
+      staff_id: row.staffId,
+      specific_date: row.day,
+      start_time: row.startTime,
+      end_time: row.endTime,
+      is_available: row.canWork,
     }),
 
   // Swaps
-  listSwaps: () => safe.get<SwapRequest[]>('/hr/shifts', { params: { view: 'swaps' } }),
+  listSwaps: () => safe.get<{ requests: SwapRequest[] }>('/hr/shift/v1/swaps'),
   createSwap: (data: Omit<SwapRequest, 'id' | 'status'>) =>
-    safe.post<SwapRequest>('/hr/shifts', {
-      staffId: data.requesterId,
-      date: data.shiftDay,
-      notes: data.reason,
+    safe.post<{ request: SwapRequest }>('/hr/shift/v1/swaps', {
+      requester_id: data.requesterId,
+      target_id: data.targetId,
+      shift_day: data.shiftDay,
+      reason: data.reason,
     }),
   resolveSwap: (id: number, accepted: boolean) =>
-    safe.put<{ success: boolean }>('/hr/shifts', {
-      id,
+    safe.put<{ success: boolean }>(`/hr/shift/v1/swaps/${id}/resolve`, {
       status: accepted ? 'accepted' : 'rejected',
     }),
 
   // Breaks
-  listBreaks: () => safe.get<BreakLog[]>('/hr/shifts', { params: { view: 'breaks' } }),
+  listBreaks: () => safe.get<{ breaks: BreakLog[] }>('/hr/shift/v1/breaks'),
   startBreak: (staffId: number, staffName: string, type: BreakLog['type']) =>
-    safe.post<BreakLog>('/hr/staff/clock-in', {
-      staffId,
+    safe.post<{ break: BreakLog }>('/hr/shift/v1/breaks', {
+      staff_id: staffId,
+      type: type.toLowerCase(),
     }),
-  endBreak: (id: number) => safe.post<{ success: boolean }>('/hr/staff/clock-out', { staffId: id }),
+  endBreak: (id: number) =>
+    safe.post<{ break: BreakLog }>(`/hr/shift/v1/breaks/${id}/end`, {}),
 
   // Overtime
   listOvertimeAlerts: () =>

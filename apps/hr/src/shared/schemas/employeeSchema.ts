@@ -11,6 +11,7 @@ export const employeeSchema = z.object({
   contractType: z.enum(['full_time', 'part_time', 'freelancer']),
   status: z.enum(['active', 'probation', 'inactive', 'terminated']),
   hireDate: z.string().min(1),
+  dateOfBirth: z.string().optional(),
   probationEndDate: z.string().optional(),
   terminationDate: z.string().optional(),
   hourlyRate: z.number().positive().optional(),

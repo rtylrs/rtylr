@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { useGetHRConfig } from '../../shared/hooks/queries/useSetup';
+import { useGetHRConfig, useGetSetupStatus } from '../../shared/hooks/queries/useSetup';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 
 function PageLoader(): React.JSX.Element {
@@ -47,6 +47,12 @@ function ConfigLoadError({
 
 const HRConfigRoute = (): React.JSX.Element => {
   const { data: config, isLoading, isError, isFetching, refetch } = useGetHRConfig();
+  const {
+    data: setupStatus,
+    isLoading: isSetupLoading,
+    isError: isSetupError,
+    refetch: refetchSetup,
+  } = useGetSetupStatus();
   const setConfig = useHRConfigStore((s) => s.setConfig);
 
   React.useEffect(() => {
@@ -55,19 +61,26 @@ const HRConfigRoute = (): React.JSX.Element => {
     }
   }, [config, setConfig]);
 
-  if (isLoading) {
+  if (isLoading || isSetupLoading) {
     return <PageLoader />;
   }
 
-  if (isError) {
-    return <ConfigLoadError onRetry={() => refetch()} isRetrying={isFetching} />;
+  // A first-run tenant can legitimately have no company config yet. The
+  // setup-status endpoint is the source of truth for that state; do not hide
+  // the redirect behind a 404 from the config endpoint.
+  if (isError && !isSetupError && setupStatus && !setupStatus.isComplete) {
+    return <Navigate to="/setup" replace />;
+  }
+
+  if (isError || isSetupError) {
+    return <ConfigLoadError onRetry={() => { refetch(); refetchSetup(); }} isRetrying={isFetching} />;
   }
 
   if (!config) {
     return <Navigate to="/setup" replace />;
   }
 
-  if (!config.setupCompletedAt) {
+  if (!setupStatus?.isComplete) {
     return <Navigate to="/setup" replace />;
   }
 

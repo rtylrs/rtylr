@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { HRCompanyConfigPayload } from '@voxire/voxie/hr/setup/v1/types';
+import type { HRConfig } from '../types/hrConfig';
 
 interface HRConfigState {
-  config: HRCompanyConfigPayload | null;
+  config: HRConfig | null;
 }
 
 interface HRConfigActions {
-  setConfig: (config: HRCompanyConfigPayload) => void;
+  setConfig: (config: HRConfig) => void;
   clearConfig: () => void;
 }
 
@@ -15,7 +15,7 @@ export const useHRConfigStore = create<HRConfigState & HRConfigActions>()(
   persist(
     (set) => ({
       config: null,
-      setConfig: (config: HRCompanyConfigPayload) => set({ config }),
+      setConfig: (config: HRConfig) => set({ config }),
       clearConfig: () => set({ config: null }),
     }),
     {

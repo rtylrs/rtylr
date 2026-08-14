@@ -193,7 +193,18 @@
       "description": "Add your first employees to get started. You can also import from CSV.",
       "addEmployee": "Add employee",
       "importCsv": "Import CSV",
-      "csvComingSoon": "CSV import coming soon",
+      "csvModalTitle": "Import employees from CSV",
+      "csvDescription": "Upload a CSV with user_id, department_id, location_id, first_name, last_name, and email. Optional fields are supported by the template.",
+      "csvDownloadTemplate": "Download template",
+      "csvNoRows": "The CSV has no data rows.",
+      "csvReadError": "The CSV could not be read.",
+      "csvRowsReady": "{{count}} rows ready to import",
+      "csvLine": "Line",
+      "csvReady": "Ready",
+      "csvInvalidRows": "Fix the invalid rows before importing.",
+      "csvImport": "Import employees",
+      "csvImporting": "Importing…",
+      "csvImported": "Imported {{count}} employees.",
       "noEmployees": "No employees added yet. Add your first employee to continue.",
       "noEmployeesHint": "No employees added yet. You can add them here or from the Staff section after setup."
     }
@@ -446,7 +457,6 @@
     "clockedOut": "Clocked out successfully",
     "emptyTitle": "No attendance records",
     "emptyDescription": "Your attendance records will appear here after you clock in.",
-    "qrComingSoon": "QR scanning is coming soon!",
     "late": "{{minutes}}m late",
     "methods": {
       "app": "App",
@@ -456,6 +466,8 @@
       "facial": "Face"
     },
     "statuses": {
+      "clocked_in": "Clocked in",
+      "clocked_out": "Clocked out",
       "present": "Present",
       "absent": "Absent",
       "partial": "Partial"
@@ -505,7 +517,11 @@
       "title": "QR Code Scanner",
       "description": "Scan a QR code at your workplace terminal to clock in or out.",
       "scanButton": "Scan QR Code",
-      "cameraPlaceholder": "Camera permission required. This feature is coming in Phase 2."
+      "cameraPlaceholder": "Camera scanning is not available in this browser.",
+      "manualDescription": "Enter the temporary code shown on your workplace attendance terminal.",
+      "tokenLabel": "Attendance code",
+      "tokenPlaceholder": "Paste or type the QR code value",
+      "submit": "Clock In"
     }
   },
   "leave": {
@@ -675,6 +691,20 @@
       "enableBonuses": "Enable bonuses",
       "saved": "Payroll configuration saved",
       "notConfiguredNotice": "Payroll is not yet configured - fill in the form to get started"
+    },
+    "adjustments": {
+      "title": "Payroll adjustments",
+      "subtitle": "Add period-bound bonuses and deductions before generating a run.",
+      "employeePlaceholder": "Select employee",
+      "employeeShort": "employee #{{id}}",
+      "bonus": "Bonus",
+      "deduction": "Deduction",
+      "labelPlaceholder": "Adjustment label",
+      "amountPlaceholder": "Amount",
+      "effectiveFrom": "Effective from",
+      "effectiveTo": "Effective to (optional)",
+      "saving": "Saving…",
+      "add": "Add adjustment"
     }
   },
   "shifts": {

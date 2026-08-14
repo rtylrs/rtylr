@@ -423,7 +423,8 @@ const oneOnOnesRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <OneOnOnes />
-      </Suspense>
+      </Suspense>,
+      'hr:reviews'
     ),
 });
 
@@ -470,7 +471,8 @@ const documentsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Documents />
-      </Suspense>
+      </Suspense>,
+      'hr:staff'
     ),
 });
 
@@ -481,7 +483,8 @@ const equipmentRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <EquipmentScreen />
-      </Suspense>
+      </Suspense>,
+      'hr:staff:manage'
     ),
 });
 
@@ -492,7 +495,8 @@ const assetRegisterRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <AssetRegister />
-      </Suspense>
+      </Suspense>,
+      'hr:staff:manage'
     ),
 });
 
@@ -503,7 +507,8 @@ const benefitsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <Benefits />
-      </Suspense>
+      </Suspense>,
+      'hr:staff'
     ),
 });
 
@@ -610,7 +615,8 @@ const myReviewRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <MyReview />
-      </Suspense>
+      </Suspense>,
+      'hr:reviews'
     ),
 });
 
@@ -621,7 +627,8 @@ const goalsRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <GoalsList />
-      </Suspense>
+      </Suspense>,
+      'hr:reviews'
     ),
 });
 

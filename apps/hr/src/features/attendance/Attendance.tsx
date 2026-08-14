@@ -31,7 +31,9 @@ function formatDuration(minutes: number): string {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  present: 'var(--hr-status-approved)',
+  clocked_in: 'var(--hr-status-approved)',
+  clocked_out: 'var(--hr-status-submitted)',
+	present: 'var(--hr-status-approved)',
   absent: 'var(--hr-status-rejected)',
   partial: 'var(--hr-status-submitted)',
 };

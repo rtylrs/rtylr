@@ -4,13 +4,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   refetch: vi.fn(),
-  useHrSettings: vi.fn(),
-  useUpdateHrSettings: vi.fn(),
+  useGetHRConfig: vi.fn(),
+  useUpsertHRConfig: vi.fn(),
 }));
 
-vi.mock('../../shared/hooks/useHrExtras', () => ({
-  useHrSettings: mocks.useHrSettings,
-  useUpdateHrSettings: mocks.useUpdateHrSettings,
+vi.mock('../../shared/hooks/queries/useSetup', () => ({
+  useGetHRConfig: mocks.useGetHRConfig,
+  useUpsertHRConfig: mocks.useUpsertHRConfig,
 }));
 
 vi.mock('@voxire/components', () => ({
@@ -30,12 +30,12 @@ import Settings from './Settings';
 describe('Settings', () => {
   beforeEach(() => {
     mocks.refetch.mockReset();
-    mocks.useHrSettings.mockReset();
-    mocks.useUpdateHrSettings.mockReturnValue({ mutate: vi.fn() });
+    mocks.useGetHRConfig.mockReset();
+    mocks.useUpsertHRConfig.mockReturnValue({ mutate: vi.fn() });
   });
 
   it('shows a retryable error when the settings query cannot parse the response', () => {
-    mocks.useHrSettings.mockReturnValue({
+    mocks.useGetHRConfig.mockReturnValue({
       data: undefined,
       isError: true,
       isFetching: false,

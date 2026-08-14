@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { useTimeOff } from '../../shared/hooks/useHrExtras';
+import { useGetLeaveCalendar } from '../../shared/hooks/queries/useLeave';
 import { Card, SectionHeader, Button, ACCENT, useIsMobile } from '../../shared/components/ui';
 import { isHrRequestStatus } from '../../shared/lib/requestStatus';
 
@@ -23,7 +23,18 @@ function dayStr(date: Date) {
 const CalendarScreen: React.FC = () => {
   const isMobile = useIsMobile(900);
   const [view, setView] = useState(new Date());
-  const { data: timeOff = [] } = useTimeOff();
+  const { data: leaveRequests = [] } = useGetLeaveCalendar({
+    month: view.getMonth() + 1,
+    year: view.getFullYear(),
+  });
+  const timeOff = leaveRequests.map((request) => ({
+    id: Number(request.id),
+    staffName: `#${request.employeeId}`,
+    type: `#${request.leaveTypeId}`,
+    status: request.status,
+    startDate: request.startDate ?? '',
+    endDate: request.endDate ?? '',
+  }));
 
   const cells = useMemo(() => {
     const first = startOfMonth(view);

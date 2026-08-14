@@ -17,12 +17,14 @@ interface OvertimeConfigData {
   dailyOtThresholdMinutes: number;
   weeklyOtThresholdMinutes: number;
   defaultMultiplier: number;
+  autoDetectEnabled: boolean;
 }
 
 interface UpdateOvertimeConfigData {
   dailyOtThresholdMinutes?: number;
   weeklyOtThresholdMinutes?: number;
   defaultMultiplier?: number;
+  autoDetectEnabled?: boolean;
 }
 
 export const useListOvertimeRequests = (params?: ListOvertimeRequestsRequest) => {
@@ -75,8 +77,16 @@ export const useGetOvertimeConfig = () => {
   return useQuery<OvertimeConfigData>({
     queryKey: ['overtime-config'],
     queryFn: async (): Promise<OvertimeConfigData> => {
-      const res = await unwrap(safe.get<{ config: OvertimeConfigData }>('/hr/overtime/config'));
-      return (res as { config: OvertimeConfigData }).config;
+      const res = await unwrap(
+        safe.get<OvertimeConfigData & { config?: OvertimeConfigData }>('/hr/overtime/config')
+      );
+      const raw = (res as { config?: OvertimeConfigData }).config ?? res;
+      return {
+        dailyOtThresholdMinutes: raw.dailyOtThresholdMinutes ?? 480,
+        weeklyOtThresholdMinutes: raw.weeklyOtThresholdMinutes ?? 2400,
+        defaultMultiplier: raw.defaultMultiplier ?? 1.5,
+        autoDetectEnabled: raw.autoDetectEnabled ?? false,
+      };
     },
   });
 };
@@ -90,8 +100,9 @@ export const useUpdateOvertimeConfig = () => {
       await unwrap(
         safe.put('/hr/overtime/config', {
           dailyThresholdMinutes: data.dailyOtThresholdMinutes,
+          weeklyThresholdMinutes: data.weeklyOtThresholdMinutes ?? 2400,
           defaultMultiplier: data.defaultMultiplier,
-          autoDetectEnabled: true,
+          autoDetectEnabled: data.autoDetectEnabled ?? true,
         })
       );
     },

@@ -2,7 +2,20 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { safe } from '../../lib/api';
-import type { Customization, FormField, RecruitCareer, Section, Submission } from '../../lib/types';
+import type {
+  Customization,
+  FormField,
+  RecruitCareer,
+  Section,
+  Submission,
+  SubmissionInterview,
+  SubmissionNote,
+  SubmissionOffer,
+  SubmissionTag,
+  SubmissionEvent,
+  TalentPool,
+  TalentPoolMember,
+} from '../../lib/types';
 
 // Admin hooks - require auth. Every mutation invalidates the matching
 // list query so the HR team sees edits live without a manual refresh.
@@ -143,6 +156,285 @@ export function useUpdateSubmissionStatus() {
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'submissions'], exact: false }),
     onError: () => toast.error('Failed to update submission status'),
+  });
+}
+
+interface ListSubmissionEventsResponse {
+  events: SubmissionEvent[];
+}
+
+export function useSubmissionEvents(submissionId: number | undefined) {
+  return useQuery({
+    queryKey: ['recruit', 'admin', 'submission', submissionId, 'events'],
+    enabled: !!submissionId,
+    queryFn: () =>
+      unwrap(safe.get<ListSubmissionEventsResponse>(`/recruit/submissions/${submissionId}/events`)),
+  });
+}
+
+interface ListSubmissionTagsResponse {
+  tags: SubmissionTag[];
+}
+
+export function useSubmissionTags(submissionId: number | undefined) {
+  return useQuery({
+    queryKey: ['recruit', 'admin', 'submission', submissionId, 'tags'],
+    enabled: !!submissionId,
+    queryFn: () =>
+      unwrap(safe.get<ListSubmissionTagsResponse>(`/recruit/submissions/${submissionId}/tags`)),
+  });
+}
+
+export function useCreateSubmissionTag() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ submissionId, name }: { submissionId: number; name: string }) =>
+      unwrap(
+        safe.post<{ tagId: number }>(`/recruit/submissions/${submissionId}/tags`, { name })
+      ),
+    onSuccess: (_data, variables) =>
+      qc.invalidateQueries({
+        queryKey: ['recruit', 'admin', 'submission', variables.submissionId, 'tags'],
+      }),
+    onError: () => toast.error('Failed to add candidate tag'),
+  });
+}
+
+export function useDeleteSubmissionTag() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ submissionId, tagId }: { submissionId: number; tagId: number }) =>
+      unwrap(
+        safe.delete<{ success: boolean }>(
+          `/recruit/submissions/${submissionId}/tags/${tagId}`
+        )
+      ),
+    onSuccess: (_data, variables) =>
+      qc.invalidateQueries({
+        queryKey: ['recruit', 'admin', 'submission', variables.submissionId, 'tags'],
+      }),
+    onError: () => toast.error('Failed to remove candidate tag'),
+  });
+}
+
+interface ListTalentPoolsResponse {
+  pools: TalentPool[];
+}
+
+interface ListTalentPoolMembersResponse {
+  members: TalentPoolMember[];
+}
+
+export function useTalentPools() {
+  return useQuery({
+    queryKey: ['recruit', 'admin', 'talent-pools'],
+    queryFn: () => unwrap(safe.get<ListTalentPoolsResponse>('/recruit/talent-pools')),
+  });
+}
+
+export function useCreateTalentPool() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { name: string; description?: string }) =>
+      unwrap(safe.post<{ poolId: number }>('/recruit/talent-pools', body)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'talent-pools'] }),
+    onError: () => toast.error('Failed to create talent pool'),
+  });
+}
+
+export function useUpdateTalentPool() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ poolId, name, description }: { poolId: number; name: string; description?: string }) =>
+      unwrap(safe.put<{ message: string }>(`/recruit/talent-pools/${poolId}`, { name, description })),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'talent-pools'] }),
+    onError: () => toast.error('Failed to update talent pool'),
+  });
+}
+
+export function useDeleteTalentPool() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (poolId: number) =>
+      unwrap(safe.delete<{ success: boolean }>(`/recruit/talent-pools/${poolId}`)),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'talent-pools'] }),
+    onError: () => toast.error('Failed to delete talent pool'),
+  });
+}
+
+export function useTalentPoolMembers(poolId: number | undefined) {
+  return useQuery({
+    queryKey: ['recruit', 'admin', 'talent-pool', poolId, 'members'],
+    enabled: !!poolId,
+    queryFn: () =>
+      unwrap(safe.get<ListTalentPoolMembersResponse>(`/recruit/talent-pools/${poolId}/members`)),
+  });
+}
+
+export function useAddTalentPoolMember() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ poolId, submissionId }: { poolId: number; submissionId: number }) =>
+      unwrap(
+        safe.post<{ memberId: number }>(`/recruit/talent-pools/${poolId}/members`, {
+          submissionId,
+        })
+      ),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'talent-pools'] });
+      qc.invalidateQueries({
+        queryKey: ['recruit', 'admin', 'talent-pool', variables.poolId, 'members'],
+      });
+    },
+    onError: () => toast.error('Failed to add candidate to talent pool'),
+  });
+}
+
+export function useRemoveTalentPoolMember() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ poolId, submissionId }: { poolId: number; submissionId: number }) =>
+      unwrap(
+        safe.delete<{ success: boolean }>(
+          `/recruit/talent-pools/${poolId}/members/${submissionId}`
+        )
+      ),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'talent-pools'] });
+      qc.invalidateQueries({
+        queryKey: ['recruit', 'admin', 'talent-pool', variables.poolId, 'members'],
+      });
+    },
+    onError: () => toast.error('Failed to remove candidate from talent pool'),
+  });
+}
+
+interface ListInterviewsResponse {
+  interviews: SubmissionInterview[];
+}
+
+export function useSubmissionInterviews(submissionId: number | undefined) {
+  return useQuery({
+    queryKey: ['recruit', 'admin', 'submission', submissionId, 'interviews'],
+    enabled: !!submissionId,
+    queryFn: () =>
+      unwrap(
+        safe.get<ListInterviewsResponse>(`/recruit/submissions/${submissionId}/interviews`)
+      ),
+  });
+}
+
+export interface SubmissionInterviewBody {
+  interviewType: string;
+  title: string;
+  scheduledAt: string;
+  durationMinutes: number;
+  timezone: string;
+  meetingUrl?: string;
+  interviewerName?: string;
+  status?: string;
+  feedback?: string;
+}
+
+export function useCreateSubmissionInterview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ submissionId, ...body }: SubmissionInterviewBody & { submissionId: number }) =>
+      unwrap(
+        safe.post<{ interviewId: number }>(
+          `/recruit/submissions/${submissionId}/interviews`,
+          body
+        )
+      ),
+    onSuccess: (_data, variables) =>
+      qc.invalidateQueries({
+        queryKey: ['recruit', 'admin', 'submission', variables.submissionId, 'interviews'],
+      }),
+    onError: () => toast.error('Failed to schedule interview'),
+  });
+}
+
+interface ListNotesResponse {
+  notes: SubmissionNote[];
+}
+
+export function useSubmissionNotes(submissionId: number | undefined) {
+  return useQuery({
+    queryKey: ['recruit', 'admin', 'submission', submissionId, 'notes'],
+    enabled: !!submissionId,
+    queryFn: () =>
+      unwrap(safe.get<ListNotesResponse>(`/recruit/submissions/${submissionId}/notes`)),
+  });
+}
+
+export function useCreateSubmissionNote() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ submissionId, body }: { submissionId: number; body: string }) =>
+      unwrap(
+        safe.post<{ noteId: number }>(`/recruit/submissions/${submissionId}/notes`, { body })
+      ),
+    onSuccess: (_data, variables) =>
+      qc.invalidateQueries({
+        queryKey: ['recruit', 'admin', 'submission', variables.submissionId, 'notes'],
+      }),
+    onError: () => toast.error('Failed to save note'),
+  });
+}
+
+interface ListOffersResponse {
+  offers: SubmissionOffer[];
+}
+
+export function useSubmissionOffers(submissionId: number | undefined) {
+  return useQuery({
+    queryKey: ['recruit', 'admin', 'submission', submissionId, 'offers'],
+    enabled: !!submissionId,
+    queryFn: () =>
+      unwrap(safe.get<ListOffersResponse>(`/recruit/submissions/${submissionId}/offers`)),
+  });
+}
+
+export interface SubmissionOfferBody {
+  title: string;
+  salary: number;
+  salaryCurrency: string;
+  startDate?: string;
+  expiresAt?: string;
+  status?: string;
+  terms?: string;
+}
+
+export function useCreateSubmissionOffer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ submissionId, ...body }: SubmissionOfferBody & { submissionId: number }) =>
+      unwrap(
+        safe.post<{ offerId: number }>(`/recruit/submissions/${submissionId}/offers`, body)
+      ),
+    onSuccess: (_data, variables) =>
+      qc.invalidateQueries({
+        queryKey: ['recruit', 'admin', 'submission', variables.submissionId, 'offers'],
+      }),
+    onError: () => toast.error('Failed to create offer'),
+  });
+}
+
+export function useUpdateSubmissionOfferStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ submissionId, offerId, status }: { submissionId: number; offerId: number; status: string }) =>
+      unwrap(
+        safe.put<{ message: string }>(
+          `/recruit/submissions/${submissionId}/offers/${offerId}/status`,
+          { status }
+        )
+      ),
+    onSuccess: (_data, variables) =>
+      qc.invalidateQueries({
+        queryKey: ['recruit', 'admin', 'submission', variables.submissionId, 'offers'],
+      }),
+    onError: () => toast.error('Failed to update offer'),
   });
 }
 

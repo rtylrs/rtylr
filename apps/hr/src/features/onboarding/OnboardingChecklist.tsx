@@ -64,6 +64,14 @@ const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
     );
   };
 
+  const completeWithoutAttachment = (): void => {
+    if (!attachmentItem) return;
+    complete.mutate(
+      { itemId: Number(attachmentItem.id ?? 0) },
+      { onSuccess: () => setAttachmentItem(null) }
+    );
+  };
+
   const grouped = items.reduce<Record<string, EmployeeChecklistItemPayload[]>>((acc, item) => {
     const key = item.status ?? '';
     if (!acc[key]) acc[key] = [];
@@ -192,8 +200,11 @@ const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
                         variant="primary"
                         icon={<CheckCircle size={13} />}
                         onClick={() => {
-                          const templateItem = items.find((i) => i.id === item.id);
-                          if (templateItem) {
+                          const requiresAttachment =
+                            (item as EmployeeChecklistItemPayload & {
+                              requiresAttachment?: boolean;
+                            }).requiresAttachment === true;
+                          if (requiresAttachment) {
                             setAttachmentItem(item);
                           } else {
                             handleComplete(item);
@@ -231,8 +242,7 @@ const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
               variant="primary"
               icon={<Upload size={13} />}
               onClick={() => {
-                if (attachmentItem) handleComplete(attachmentItem);
-                setAttachmentItem(null);
+                completeWithoutAttachment();
               }}
             >
               {t('onboardingMgmt.checklist.completeWithout')}

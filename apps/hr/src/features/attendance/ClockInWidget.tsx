@@ -6,7 +6,7 @@ import { useUserStore } from '@voxire/auth';
 import { useClockIn, useClockOut, useSetPin } from '../../shared/hooks/queries/useAttendance';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import type { AttendanceRecordPayload } from '@voxire/voxie/hr/attendance/v1/types';
-import { Card, Button, Pill, Modal, ACCENT } from '../../shared/components/ui';
+import { Card, Button, Pill, Modal, Input, ACCENT } from '../../shared/components/ui';
 
 interface ClockInWidgetProps {
   activeRecord?: AttendanceRecordPayload;
@@ -222,6 +222,8 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
   const [pinMode, setPinMode] = useState<'clockIn' | 'setPin' | 'confirmPin'>('clockIn');
   const [pinError, setPinError] = useState<string | undefined>();
   const [pendingNewPin, setPendingNewPin] = useState('');
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrToken, setQrToken] = useState('');
   const [gpsLoading, setGpsLoading] = useState(false);
 
   const isClockedIn = activeRecord && !activeRecord.clockOutAt;
@@ -281,7 +283,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
         );
       }
     },
-    [pinMode, pendingNewPin, clockIn, setPin, t]
+    [pinMode, pendingNewPin, clockIn, setPin, t, userId]
   );
 
   /* ── GPS flow ─────────────────────────────────────────────── */
@@ -324,7 +326,21 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
-  }, [clockIn, t]);
+  }, [clockIn, t, userId]);
+
+  const handleQrClockIn = useCallback((): void => {
+    const token = qrToken.trim();
+    if (!token) return;
+    clockIn.mutate(
+      { ownerId: userId, employeeId: userId, method: 'qr', qrToken: token, locationId: 0 },
+      {
+        onSuccess: () => {
+          setQrModalOpen(false);
+          setQrToken('');
+        },
+      }
+    );
+  }, [clockIn, qrToken, userId]);
 
   return (
     <>
@@ -372,21 +388,29 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <Button
-                variant="primary"
-                onClick={handleClockIn}
-                disabled={clockIn.isPending}
-                icon={<LogIn size={14} />}
-              >
-                {t('attendance.clockWidget.clockInApp')}
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => toast.info(t('attendance.qrComingSoon'))}
-                icon={<QrCode size={14} />}
-              >
-                {t('attendance.clockWidget.clockInQR')}
-              </Button>
+              {enabledMethods.includes('app') && (
+                <Button
+                  variant="primary"
+                  onClick={handleClockIn}
+                  disabled={clockIn.isPending}
+                  icon={<LogIn size={14} />}
+                >
+                  {t('attendance.clockWidget.clockInApp')}
+                </Button>
+              )}
+              {enabledMethods.includes('qr') && (
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setQrToken('');
+                    setQrModalOpen(true);
+                  }}
+                  disabled={clockIn.isPending}
+                  icon={<QrCode size={14} />}
+                >
+                  {t('attendance.clockWidget.clockInQR')}
+                </Button>
+              )}
               {isPinEnabled && (
                 <Button
                   variant="secondary"
@@ -442,6 +466,53 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
         isPending={clockIn.isPending || setPin.isPending}
         error={pinError}
       />
+
+      <Modal
+        open={qrModalOpen}
+        onClose={() => {
+          setQrModalOpen(false);
+          setQrToken('');
+        }}
+        title={t('attendance.qrScanner.title')}
+        width={380}
+      >
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleQrClockIn();
+          }}
+          style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+        >
+          <p style={{ margin: 0, fontSize: 12, color: 'var(--hr-text-muted)' }}>
+            {t('attendance.qrScanner.manualDescription')}
+          </p>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12 }}>
+            {t('attendance.qrScanner.tokenLabel')}
+            <Input
+              value={qrToken}
+              onChange={(event) => setQrToken(event.target.value)}
+              placeholder={t('attendance.qrScanner.tokenPlaceholder')}
+              autoComplete="one-time-code"
+              autoFocus
+            />
+          </label>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setQrModalOpen(false);
+                setQrToken('');
+              }}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button type="submit" variant="primary" disabled={!qrToken.trim() || clockIn.isPending}>
+              {t('attendance.qrScanner.submit')}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </>
   );
 };

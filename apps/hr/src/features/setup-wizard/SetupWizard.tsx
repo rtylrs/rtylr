@@ -6,7 +6,10 @@ import {
   useGetSetupStatus,
   useCompleteSetupStep,
   useUpsertHRConfig,
+  usePersistSetupStep,
 } from '../../shared/hooks/queries/useSetup';
+import { useUpsertPayrollConfig } from '../../shared/hooks/queries/usePayroll';
+import { useUpdateOvertimeConfig } from '../../shared/hooks/queries/useOvertime';
 import { useHRSetupStore } from '../../shared/stores/hrSetupStore';
 import WizardProgress, { STEP_KEYS } from './components/WizardProgress';
 import CompanyProfileStep from './steps/CompanyProfileStep';
@@ -43,7 +46,10 @@ const SetupWizard = (): React.JSX.Element => {
   const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useGetSetupStatus();
   const completeStep = useCompleteSetupStep();
+  const persistSetupStep = usePersistSetupStep();
   const upsertConfig = useUpsertHRConfig();
+  const upsertPayrollConfig = useUpsertPayrollConfig();
+  const updateOvertimeConfig = useUpdateOvertimeConfig();
   const { currentStepIndex, setCurrentStepIndex } = useHRSetupStore();
   const [showNewEmployee, setShowNewEmployee] = useState(false);
 
@@ -99,14 +105,7 @@ const SetupWizard = (): React.JSX.Element => {
 
   const advanceAfterComplete = (): void => {
     if (isLast) {
-      upsertConfig.mutate(
-        { setupCompletedAt: String(Math.floor(Date.now() / 1000)) },
-        {
-          onSuccess: () => {
-            navigate({ to: '/', replace: true });
-          },
-        }
-      );
+      navigate({ to: '/', replace: true });
     } else {
       setCurrentStepIndex(currentStepIndex + 1);
     }
@@ -124,38 +123,98 @@ const SetupWizard = (): React.JSX.Element => {
   };
 
   const handleCompanyProfile = (data: CompanyProfileFormData): void => {
-    handleStepComplete('company_profile', data as Record<string, unknown>);
+    upsertConfig.mutate(
+      {
+        companyName: data.name,
+        defaultCurrency: data.currency,
+        defaultTimezone: data.timezone,
+      },
+      {
+        onSuccess: () => {
+          handleStepComplete('company_profile', data as Record<string, unknown>);
+        },
+      }
+    );
   };
 
   const handleWorkSchedule = (data: WorkScheduleFormData): void => {
-    handleStepComplete('work_schedule', data as Record<string, unknown>);
+    persistSetupStep.mutate(
+      { stepKey: 'work_schedule', data },
+      {
+        onSuccess: () => {
+          updateOvertimeConfig.mutate(
+            {
+              dailyOtThresholdMinutes: data.dailyOtThresholdMinutes,
+              weeklyOtThresholdMinutes: data.weeklyOtThresholdMinutes,
+              defaultMultiplier: 1.5,
+              autoDetectEnabled: true,
+            },
+            {
+              onSuccess: () => {
+                handleStepComplete('work_schedule', data as Record<string, unknown>);
+              },
+            }
+          );
+        },
+      }
+    );
   };
 
   const handleOrgStructure = (departments: OrgStructureFormData['departments']): void => {
-    handleStepComplete('org_structure', { departments });
+    persistSetupStep.mutate(
+      { stepKey: 'org_structure', data: departments },
+      { onSuccess: () => handleStepComplete('org_structure', { departments }) }
+    );
   };
 
   const handleLocations = (data: LocationsFormData): void => {
-    handleStepComplete('locations', data as Record<string, unknown>);
+    persistSetupStep.mutate(
+      { stepKey: 'locations', data },
+      { onSuccess: () => handleStepComplete('locations', data as Record<string, unknown>) }
+    );
   };
 
   const handleRolesPermissions = (roles: RolesPermissionsFormData['roles']): void => {
-    handleStepComplete('roles_permissions', { roles });
+    persistSetupStep.mutate(
+      { stepKey: 'roles_permissions', data: roles },
+      { onSuccess: () => handleStepComplete('roles_permissions', { roles }) }
+    );
   };
 
   const handlePayrollConfig = (data: PayrollConfigFormData): void => {
-    handleStepComplete('payroll', data as Record<string, unknown>);
+    upsertPayrollConfig.mutate(
+      {
+        grossModel: data.payrollGrossModel,
+        period: data.payrollPeriod,
+        overtimeEnabled: data.enableOvertime,
+        deductionsEnabled: data.enableDeductions,
+        bonusesEnabled: data.enableBonuses,
+      },
+      {
+        onSuccess: () => {
+          handleStepComplete('payroll', data as Record<string, unknown>);
+        },
+      }
+    );
   };
 
   const handleNotifications = (data: NotificationsFormData): void => {
-    handleStepComplete('notifications', data as Record<string, unknown>);
+    persistSetupStep.mutate(
+      { stepKey: 'notifications', data },
+      { onSuccess: () => handleStepComplete('notifications', data as Record<string, unknown>) }
+    );
   };
 
   const handleEmployees = (): void => {
     handleStepComplete('employees');
   };
 
-  const isSubmitting = completeStep.isPending || upsertConfig.isPending;
+  const isSubmitting =
+    completeStep.isPending ||
+    persistSetupStep.isPending ||
+    upsertConfig.isPending ||
+    upsertPayrollConfig.isPending ||
+    updateOvertimeConfig.isPending;
 
   if (showNewEmployee) {
     const NewEmployee = React.lazy(() => import('../employees/NewEmployee'));

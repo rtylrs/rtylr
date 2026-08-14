@@ -3,6 +3,8 @@
  * Keeps visual consistency with the existing Tailwind + CSS variable design.
  */
 import React from 'react';
+import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 
 export const ACCENT = 'var(--hr-accent)';
 
@@ -322,6 +324,65 @@ export const Modal: React.FC<{
   children?: React.ReactNode;
   width?: number;
 }> = ({ open, onClose, title, children, width = 480 }) => {
+  const dialogRef = React.useRef<HTMLDivElement>(null);
+  const previousFocusRef = React.useRef<HTMLElement | null>(null);
+  const onCloseRef = React.useRef(onClose);
+  const titleId = React.useId();
+
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  React.useEffect(() => {
+    if (!open || typeof document === 'undefined') return undefined;
+
+    previousFocusRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    const dialog = dialogRef.current;
+    const focusableSelector =
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    const focusFirstElement = () => {
+      const firstFocusable = dialog?.querySelector<HTMLElement>(focusableSelector);
+      (firstFocusable ?? dialog)?.focus();
+    };
+    const frame = window.requestAnimationFrame(focusFirstElement);
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+      if (event.key !== 'Tab' || !dialog) return;
+
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelector));
+      if (focusable.length === 0) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.removeEventListener('keydown', onKeyDown);
+      previousFocusRef.current?.focus();
+      previousFocusRef.current = null;
+    };
+  }, [open]);
+
   if (!open) return null;
   return (
     <div
@@ -340,6 +401,12 @@ export const Modal: React.FC<{
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        aria-label={title ? undefined : 'Dialog'}
+        tabIndex={-1}
         style={{
           width: `min(calc(100vw - 24px), ${width}px)`,
           maxHeight: '85vh',
@@ -353,6 +420,7 @@ export const Modal: React.FC<{
       >
         {title && (
           <h3
+            id={titleId}
             style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700, color: 'var(--hr-text)' }}
           >
             {title}
@@ -377,27 +445,31 @@ export const ConfirmDialog: React.FC<{
   open,
   title,
   description,
-  confirmLabel = 'Confirm',
+  confirmLabel,
   variant = 'primary',
   onConfirm,
   onCancel,
-}) => (
-  <Modal open={open} onClose={onCancel} title={title} width={380}>
-    {description && (
-      <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--hr-text-muted)' }}>
-        {description}
-      </p>
-    )}
-    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-      <Button variant="ghost" onClick={onCancel}>
-        Cancel
-      </Button>
-      <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>
-        {confirmLabel}
-      </Button>
-    </div>
-  </Modal>
-);
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <Modal open={open} onClose={onCancel} title={title} width={380}>
+      {description && (
+        <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--hr-text-muted)' }}>
+          {description}
+        </p>
+      )}
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <Button variant="ghost" onClick={onCancel}>
+          {t('common.cancel')}
+        </Button>
+        <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>
+          {confirmLabel ?? t('common.confirm')}
+        </Button>
+      </div>
+    </Modal>
+  );
+};
 
 /* ── Breadcrumbs ── */
 export const Breadcrumbs: React.FC<{ items: Array<{ label: string; href?: string }> }> = ({
@@ -419,9 +491,12 @@ export const Breadcrumbs: React.FC<{ items: Array<{ label: string; href?: string
       return (
         <React.Fragment key={i}>
           {item.href && !last ? (
-            <a href={item.href} style={{ color: 'var(--hr-text-muted)', textDecoration: 'none' }}>
+            <Link
+              to={item.href as any}
+              style={{ color: 'var(--hr-text-muted)', textDecoration: 'none' }}
+            >
               {item.label}
-            </a>
+            </Link>
           ) : (
             <span
               style={{
@@ -534,35 +609,31 @@ export const Checkbox: React.FC<{
   checked: boolean;
   onChange: (v: boolean) => void;
   label?: string;
-}> = ({ checked, onChange, label }) => (
+  disabled?: boolean;
+}> = ({ checked, onChange, label, disabled = false }) => (
   <label
     style={{
       display: 'inline-flex',
       alignItems: 'center',
       gap: 8,
-      cursor: 'pointer',
+      cursor: disabled ? 'not-allowed' : 'pointer',
       fontSize: 12,
       color: 'var(--hr-text)',
+      opacity: disabled ? 0.65 : 1,
     }}
   >
-    <span
-      onClick={() => onChange(!checked)}
+    <input
+      type="checkbox"
+      checked={checked}
+      disabled={disabled}
+      onChange={(event) => onChange(event.target.checked)}
       style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
         width: 16,
         height: 16,
-        borderRadius: 4,
-        border: `1px solid ${checked ? ACCENT : 'var(--hr-border)'}`,
-        background: checked ? ACCENT : 'transparent',
-        color: 'var(--hr-on-accent)',
         fontSize: 11,
         flexShrink: 0,
       }}
-    >
-      {checked ? '\u2713' : ''}
-    </span>
+    />
     {label}
   </label>
 );

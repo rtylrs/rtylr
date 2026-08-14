@@ -22,6 +22,8 @@ import AdminLayout from './features/admin/AdminLayout';
 
 const CareersAdmin = React.lazy(() => import('./features/admin/CareersAdmin'));
 const SubmissionsAdmin = React.lazy(() => import('./features/admin/SubmissionsAdmin'));
+const CandidatePipelineAdmin = React.lazy(() => import('./features/admin/CandidatePipelineAdmin'));
+const TalentPoolsAdmin = React.lazy(() => import('./features/admin/TalentPoolsAdmin'));
 const CustomizationAdmin = React.lazy(() => import('./features/admin/CustomizationAdmin'));
 const SectionsAdmin = React.lazy(() => import('./features/admin/SectionsAdmin'));
 
@@ -114,7 +116,17 @@ const adminSubmissionsRoute = createRoute({
   path: '/submissions',
   component: () => (
     <Suspense fallback={null}>
-      <SubmissionsAdmin />
+      <CandidatePipelineAdmin />
+    </Suspense>
+  ),
+});
+
+const adminTalentPoolsRoute = createRoute({
+  getParentRoute: () => adminLayoutRoute,
+  path: '/talent-pools',
+  component: () => (
+    <Suspense fallback={null}>
+      <TalentPoolsAdmin />
     </Suspense>
   ),
 });
@@ -152,6 +164,7 @@ const routeTree = rootRoute.addChildren([
       adminIndexRoute,
       adminCareersRoute,
       adminSubmissionsRoute,
+      adminTalentPoolsRoute,
       adminSectionsRoute,
       adminCustomizationRoute,
       adminCatchAllRoute,

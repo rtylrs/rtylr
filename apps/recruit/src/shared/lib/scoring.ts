@@ -13,8 +13,9 @@ export interface ScoredSubmission {
  */
 export function completenessScore(submission: Submission): number {
   let filled = 0;
+  const hasResume = submission.hasResume ?? Boolean(submission.resumeUrl);
   const checks = [
-    Boolean(submission.resumeUrl),
+    hasResume,
     Boolean(submission.coverLetter?.trim()),
     Boolean(submission.phone?.trim()),
   ];
@@ -29,7 +30,7 @@ export function completenessScore(submission: Submission): number {
  */
 export function completenessReasons(submission: Submission): string[] {
   const reasons: string[] = [];
-  if (submission.resumeUrl) reasons.push('Resume attached');
+  if (submission.hasResume ?? Boolean(submission.resumeUrl)) reasons.push('Resume attached');
   if (submission.coverLetter?.trim()) reasons.push('Cover letter provided');
   if (submission.phone?.trim()) reasons.push('Phone number provided');
   return reasons;

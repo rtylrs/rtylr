@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
-import { INDUSTRIES } from '@voxire/config';
-import { useHrSettings, useUpdateHrSettings } from '../../shared/hooks/useHrExtras';
+import { useGetHRConfig, useUpsertHRConfig } from '../../shared/hooks/queries/useSetup';
 import {
   Card,
   SectionHeader,
@@ -10,21 +8,41 @@ import {
   Label,
   Input,
   Select,
+  Checkbox,
   Skeleton,
   EmptyState,
   useIsMobile,
 } from '../../shared/components/ui';
-import { HrSettings } from '../../shared/services/hrExtras';
+import type { HRConfig } from '../../shared/types/hrConfig';
+
+type SettingsForm = Pick<
+  HRConfig,
+  | 'companyName'
+  | 'defaultCurrency'
+  | 'defaultTimezone'
+  | 'fiscalYearStartMonth'
+  | 'overtimeEnabled'
+  | 'overtimeMultiplier'
+>;
+
+const toSettingsForm = (config: HRConfig): SettingsForm => ({
+  companyName: config.companyName ?? '',
+  defaultCurrency: config.defaultCurrency ?? 'USD',
+  defaultTimezone: config.defaultTimezone ?? 'UTC',
+  fiscalYearStartMonth: config.fiscalYearStartMonth ?? 1,
+  overtimeEnabled: config.overtimeEnabled ?? false,
+  overtimeMultiplier: config.overtimeMultiplier ?? 1.5,
+});
 
 const Settings: React.FC = () => {
   const isMobile = useIsMobile(900);
-  const { data, isLoading, isError, isFetching, refetch } = useHrSettings();
-  const update = useUpdateHrSettings();
+  const { data, isLoading, isError, isFetching, refetch } = useGetHRConfig();
+  const update = useUpsertHRConfig();
 
-  const [form, setForm] = useState<HrSettings | null>(null);
+  const [form, setForm] = useState<SettingsForm | null>(null);
 
   useEffect(() => {
-    if (data && !form) setForm(data);
+    if (data && !form) setForm(toSettingsForm(data));
   }, [data, form]);
 
   if (isError && !form) {
@@ -54,7 +72,14 @@ const Settings: React.FC = () => {
   }
 
   const save = () => {
-    update.mutate(form, { onSuccess: () => toast.success('Settings saved') });
+    update.mutate({
+      companyName: form.companyName?.trim() ?? '',
+      defaultCurrency: form.defaultCurrency,
+      defaultTimezone: form.defaultTimezone,
+      fiscalYearStartMonth: form.fiscalYearStartMonth,
+      overtimeEnabled: form.overtimeEnabled,
+      overtimeMultiplier: form.overtimeMultiplier,
+    });
   };
 
   return (
@@ -63,55 +88,26 @@ const Settings: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20, maxWidth: 720 }}>
         <SectionHeader
           title="HR Settings"
-          subtitle="Work week, overtime, PTO policy, and currency"
+          subtitle="Company profile, payroll defaults, and overtime policy"
         />
         <Card>
           <div
             style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}
           >
             <div>
-              <Label>Work week starts on</Label>
+              <Label htmlFor="companyName">Company name</Label>
+              <Input
+                id="companyName"
+                value={form.companyName}
+                onChange={(e) => setForm({ ...form, companyName: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="defaultCurrency">Currency</Label>
               <Select
-                value={form.workWeekStart}
-                onChange={(e) =>
-                  setForm({ ...form, workWeekStart: e.target.value as HrSettings['workWeekStart'] })
-                }
-              >
-                <option value="Monday">Monday</option>
-                <option value="Sunday">Sunday</option>
-              </Select>
-            </div>
-            <div>
-              <Label>Weekly hours</Label>
-              <Input
-                type="number"
-                value={form.weeklyHours}
-                onChange={(e) => setForm({ ...form, weeklyHours: Number(e.target.value) })}
-              />
-            </div>
-            <div>
-              <Label>Overtime after (hrs/week)</Label>
-              <Input
-                type="number"
-                value={form.overtimeAfterHours}
-                onChange={(e) => setForm({ ...form, overtimeAfterHours: Number(e.target.value) })}
-              />
-            </div>
-            <div>
-              <Label>PTO policy (days/year)</Label>
-              <Input
-                type="number"
-                value={form.ptoPolicyDays}
-                onChange={(e) => setForm({ ...form, ptoPolicyDays: Number(e.target.value) })}
-              />
-            </div>
-            <div>
-              <Label>Currency</Label>
-              <Select
-                value={form.currency}
-                onChange={(e) =>
-                  setForm({ ...form, currency: e.target.value as HrSettings['currency'] })
-                }
+                id="defaultCurrency"
+                value={form.defaultCurrency}
+                onChange={(e) => setForm({ ...form, defaultCurrency: e.target.value })}
               >
                 <option value="USD">USD - US Dollar</option>
                 <option value="EUR">EUR - Euro</option>
@@ -119,18 +115,46 @@ const Settings: React.FC = () => {
               </Select>
             </div>
             <div>
-              <Label>Industry</Label>
-              <Select
-                value={form.industry ?? ''}
-                onChange={(e) => setForm({ ...form, industry: e.target.value })}
-              >
-                <option value="">-</option>
-                {INDUSTRIES.map((i) => (
-                  <option key={i.value} value={i.value}>
-                    {i.label}
-                  </option>
-                ))}
-              </Select>
+              <Label htmlFor="defaultTimezone">Timezone</Label>
+              <Input
+                id="defaultTimezone"
+                value={form.defaultTimezone}
+                onChange={(e) => setForm({ ...form, defaultTimezone: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="fiscalYearStartMonth">Fiscal year start month</Label>
+              <Input
+                id="fiscalYearStartMonth"
+                type="number"
+                min={1}
+                max={12}
+                value={form.fiscalYearStartMonth}
+                onChange={(e) =>
+                  setForm({ ...form, fiscalYearStartMonth: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="overtimeMultiplier">Overtime multiplier</Label>
+              <Input
+                id="overtimeMultiplier"
+                type="number"
+                min={0}
+                step={0.05}
+                value={form.overtimeMultiplier}
+                onChange={(e) =>
+                  setForm({ ...form, overtimeMultiplier: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div>
+              <Label>Overtime</Label>
+              <Checkbox
+                checked={form.overtimeEnabled ?? false}
+                onChange={(overtimeEnabled) => setForm({ ...form, overtimeEnabled })}
+                label="Enable overtime tracking"
+              />
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>

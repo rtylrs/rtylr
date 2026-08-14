@@ -58,8 +58,10 @@ export const overtimeAlertSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(Number),
   staffId: z.number(),
   staffName: z.string(),
-  hoursThisWeek: z.number(),
-  threshold: z.number(),
+  date: z.string(),
+  plannedExtraMinutes: z.number().nonnegative(),
+  reason: z.string().default(''),
+  status: z.string(),
   triggeredAt: z.string(),
 });
 

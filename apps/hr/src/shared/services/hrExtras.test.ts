@@ -18,6 +18,45 @@ describe('hrExtras schedule calls', () => {
     vi.clearAllMocks();
   });
 
+  it('uses the namespaced availability endpoint', () => {
+    hrExtras.listAvailability();
+    expect(safe.get).toHaveBeenCalledWith('/hr/shift/v1/availability');
+  });
+
+  it('persists a complete shift swap request', () => {
+    hrExtras.createSwap({
+      requesterId: 4101,
+      requester: 'Alice',
+      targetId: 4102,
+      target: 'Bob',
+      shiftDay: '2026-08-18',
+      reason: 'Coverage',
+    });
+    expect(safe.post).toHaveBeenCalledWith('/hr/shift/v1/swaps', {
+      requester_id: 4101,
+      target_id: 4102,
+      shift_day: '2026-08-18',
+      reason: 'Coverage',
+    });
+  });
+
+  it('resolves a swap through its resource endpoint', () => {
+    hrExtras.resolveSwap(17, true);
+    expect(safe.put).toHaveBeenCalledWith('/hr/shift/v1/swaps/17/resolve', {
+      status: 'accepted',
+    });
+  });
+
+  it('starts and ends a persisted break without using clocking routes', () => {
+    hrExtras.startBreak(4101, 'Alice', 'Lunch');
+    hrExtras.endBreak(23);
+    expect(safe.post).toHaveBeenNthCalledWith(1, '/hr/shift/v1/breaks', {
+      staff_id: 4101,
+      type: 'lunch',
+    });
+    expect(safe.post).toHaveBeenNthCalledWith(2, '/hr/shift/v1/breaks/23/end', {});
+  });
+
   // The API binds request fields by their snake_case JSON tag, so camelCase keys
   // arrive as zero values and the write silently does nothing.
   it('creates a schedule shift with snake_case keys', () => {

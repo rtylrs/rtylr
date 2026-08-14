@@ -88,7 +88,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                           {s.phone}
                         </span>
                       )}
-                      {s.resumeUrl && (
+                      {(s.hasResume ?? Boolean(s.resumeUrl)) && (
                         <button
                           onClick={async () => {
                             try {

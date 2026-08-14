@@ -1,6 +1,9 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { EmployeeDocumentPayload } from '@voxire/voxie/hr/document/v1/types';
+import {
+  decodeEmployeeDocumentPayload,
+  type EmployeeDocumentPayload,
+} from '@voxire/voxie/hr/document/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -23,18 +26,37 @@ export interface UploadDocumentPayload {
   storageMode: string;
   fileUrl: string;
   externalUrl?: string;
+  expiryDate?: string;
 }
+
+interface DocumentListWire {
+  documents?: unknown;
+  total?: unknown;
+  limit?: unknown;
+  offset?: unknown;
+}
+
+const decodeDocumentList = (value: unknown): ListEmployeeDocumentsResponse => {
+  const body = (value && typeof value === 'object' ? value : {}) as DocumentListWire;
+  const documents = Array.isArray(body.documents) ? body.documents : [];
+  return {
+    documents: documents.map((document) => decodeEmployeeDocumentPayload(document)),
+    total: Number(body.total ?? documents.length),
+    limit: Number(body.limit ?? 20),
+    offset: Number(body.offset ?? 0),
+  };
+};
 
 export const useListEmployeeDocuments = (employeeId?: number) => {
   return useQuery<ListEmployeeDocumentsResponse>({
     queryKey: ['employee-documents', employeeId],
     queryFn: async (): Promise<ListEmployeeDocumentsResponse> => {
       const res = await unwrap(
-        safe.get<ListEmployeeDocumentsResponse>('/hr/documents', {
-          params: employeeId ? { employeeId } : undefined,
+        safe.get<unknown>('/hr/documents', {
+          params: employeeId ? { employee_id: employeeId } : undefined,
         })
       );
-      return res as ListEmployeeDocumentsResponse;
+      return decodeDocumentList(res);
     },
     enabled: !!employeeId,
   });
@@ -46,8 +68,19 @@ export const useUploadDocument = () => {
 
   return useMutation({
     mutationFn: async (data: UploadDocumentPayload): Promise<UploadDocumentResponse> => {
-      const res = await unwrap(safe.post<UploadDocumentResponse>('/hr/documents', data));
-      return res as UploadDocumentResponse;
+      const res = await unwrap(
+        safe.post<unknown>('/hr/documents', {
+          employee_id: data.employeeId,
+          document_type: data.documentType,
+          title: data.title,
+          storage_mode: data.storageMode,
+          file_url: data.fileUrl,
+          external_url: data.externalUrl,
+          expiry_date: data.expiryDate,
+        })
+      );
+      const body = (res && typeof res === 'object' ? res : {}) as { document?: unknown };
+      return { document: decodeEmployeeDocumentPayload(body.document) };
     },
     onSuccess: (_data: UploadDocumentResponse, variables: UploadDocumentPayload) => {
       queryClient.invalidateQueries({ queryKey: ['employee-documents', variables.employeeId] });

@@ -32,6 +32,7 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
     contractType: 'full_time',
     status: 'active',
     hireDate: new Date().toISOString().slice(0, 10),
+    dateOfBirth: '',
     currency: 'USD',
     accountCreationMode: 'hr_created',
     jobTitle: '',
@@ -54,7 +55,7 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
     }
     setErrors({});
     const userIdExists = existingEmployees?.employees?.some(
-      (e) => e.userId === String(result.data.userId)
+      (e) => e.userId === result.data.userId
     );
     if (userIdExists) {
       toast.error(t('employees.form.duplicateUserId'));
@@ -146,6 +147,7 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
             {field(t('employees.form.departmentId'), 'departmentId', 'number')}
             {field(t('employees.form.locationId'), 'locationId', 'number')}
             {field(t('employees.form.hireDate'), 'hireDate', 'date')}
+            {field(t('employees.form.dateOfBirth'), 'dateOfBirth', 'date')}
             {field(t('employees.form.currency'), 'currency')}
 
             <div>

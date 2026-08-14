@@ -7,14 +7,10 @@ import {
   useBenefitEnrollments,
   useEnrollBenefit,
 } from '../../shared/hooks/useHrExtras';
-import { useUserStore } from '@voxire/auth';
 import { Card, SectionHeader, EmptyState, Skeleton } from '../../shared/components/ui';
 import BenefitPlanCard from '../../shared/components/BenefitPlanCard';
 
 const Benefits: React.FC = () => {
-  const user = useUserStore((s) => s.user);
-  const currentStaffId = Number(user?.id) || 1;
-  const currentStaffName = user?.name || user?.email || 'Team member';
   const { data: plans, isLoading: plansLoading } = useBenefits();
   const { data: enrollments = [], isLoading: enrollLoading } = useBenefitEnrollments();
   const enroll = useEnrollBenefit();
@@ -47,9 +43,8 @@ const Benefits: React.FC = () => {
             }}
           >
             {plans.map((p) => {
-              const enrolled = enrollments.some(
-                (e) => e.planId === p.id && Number(e.staffId) === currentStaffId
-              );
+              // The generated endpoint already scopes this list to the signed-in employee.
+              const enrolled = enrollments.some((e) => e.planId === p.id);
               return (
                 <BenefitPlanCard
                   key={p.id}
@@ -57,12 +52,7 @@ const Benefits: React.FC = () => {
                   enrolled={enrolled}
                   onEnroll={() =>
                     enroll.mutate(
-                      {
-                        staffId: currentStaffId,
-                        staffName: currentStaffName,
-                        planId: p.id,
-                        planName: p.name,
-                      },
+                      { planId: p.id },
                       { onSuccess: () => toast.success('Enrolled') }
                     )
                   }

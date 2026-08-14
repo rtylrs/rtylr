@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useUserStore } from '@voxire/auth';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
@@ -14,6 +14,8 @@ import {
   useOvertimeAlerts,
   useHrSettings,
 } from '../../shared/hooks/useHrExtras';
+import { useGetHRConfig } from '../../shared/hooks/queries/useSetup';
+import { useClockIn as useAttendanceClockIn } from '../../shared/hooks/queries/useAttendance';
 import { usePayroll } from '../payroll/usePayroll';
 import { useStaff } from '../staff/useStaff';
 import {
@@ -57,6 +59,10 @@ const Operations: React.FC = () => {
   const endBreak = useEndBreak();
   const { data: overtimeAlerts = [] } = useOvertimeAlerts();
   const { data: settings } = useHrSettings();
+  const { data: hrConfig } = useGetHRConfig();
+  const attendanceClockIn = useAttendanceClockIn();
+  const userId = Number(useUserStore((state) => state.user?.id)) || 0;
+  const gpsEnabled = hrConfig?.clockInMethods?.includes('gps') ?? false;
 
   /* Labor cost */
   const [deptFilter, setDeptFilter] = useState('All');
@@ -85,9 +91,13 @@ const Operations: React.FC = () => {
     reason: '',
   });
 
-  /* GPS clock-in demo */
+  /* GPS clock-in */
   const [gpsStatus, setGpsStatus] = useState<string>('Not checked');
-  const checkGps = () => {
+  const checkGps = useCallback(() => {
+    if (!gpsEnabled) {
+      toast.error('GPS clock-in is not enabled in HR settings');
+      return;
+    }
     if (!navigator.geolocation) {
       setGpsStatus('Geolocation not supported');
       toast.error('Geolocation unavailable');
@@ -96,14 +106,21 @@ const Operations: React.FC = () => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setGpsStatus(`${pos.coords.latitude.toFixed(3)}, ${pos.coords.longitude.toFixed(3)}`);
-        toast.success('Clocked in with location');
+        attendanceClockIn.mutate({
+          ownerId: userId,
+          employeeId: userId,
+          method: 'gps',
+          locationId: 0,
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
       },
       () => {
         setGpsStatus('Permission denied');
         toast.error('Location permission denied');
       }
     );
-  };
+  }, [attendanceClockIn, gpsEnabled, userId]);
 
   return (
     <>
@@ -233,13 +250,17 @@ const Operations: React.FC = () => {
               <MapPin size={14} style={{ color: ACCENT }} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
-                  GPS clock-in demo
+                  GPS clock-in
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
                   Status: {gpsStatus}
                 </div>
               </div>
-              <Button variant="primary" onClick={checkGps}>
+              <Button
+                variant="primary"
+                onClick={checkGps}
+                disabled={!gpsEnabled || attendanceClockIn.isPending}
+              >
                 Clock in with GPS
               </Button>
             </Card>
@@ -626,11 +647,11 @@ const Operations: React.FC = () => {
                         {a.staffName}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                        {a.hoursThisWeek}h this week (threshold {a.threshold}h) • triggered{' '}
-                        {a.triggeredAt}
+                        {a.date} · {a.plannedExtraMinutes}m planned
+                        {a.reason ? ` · ${a.reason}` : ''} · {a.triggeredAt}
                       </div>
                     </div>
-                    <Pill color="#ef4444">Over {a.hoursThisWeek - a.threshold}h</Pill>
+                    <Pill color="#ef4444">{a.status}</Pill>
                   </div>
                 </Card>
               ))
