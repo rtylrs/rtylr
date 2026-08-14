@@ -1,3 +1,21 @@
 {
-  "created": "Écriture de journal créée"
+  "title": "Journal",
+  "newEntry": "Nouvelle écriture",
+  "memoRequired": "Le libellé est obligatoire",
+  "amountZero": "Le montant doit être supérieur à zéro",
+  "futureDate": "La date ne peut pas être dans le futur",
+  "created": "Écriture de journal créée",
+  "createFailed": "Échec de création de l'écriture",
+  "balanced": "Équilibré",
+  "outOfBalance": "Déséquilibré",
+  "account": "Compte",
+  "debit": "Débit",
+  "credit": "Crédit",
+  "newJournalEntry": "Nouvelle écriture de journal",
+  "memoPlaceholder": "Libellé / description",
+  "debitAccPlaceholder": "Nom du compte débité",
+  "creditAccPlaceholder": "Nom du compte crédité",
+  "cancel": "Annuler",
+  "create": "Créer",
+  "creating": "Création en cours…"
 }
