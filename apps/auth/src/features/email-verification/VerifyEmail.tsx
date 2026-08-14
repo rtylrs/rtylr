@@ -26,7 +26,14 @@ const VerifyEmail: React.FC = () => {
     verifyMutation.mutate(
       { token },
       {
-        onSuccess: () => setStatus('success'),
+        onSuccess: () => {
+          setStatus('success');
+          try {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          } catch {
+            // ignore environment restriction
+          }
+        },
         onError: () => setStatus('error'),
       }
     );

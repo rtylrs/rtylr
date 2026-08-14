@@ -46,6 +46,11 @@ const ResetPasswordConfirm: React.FC = () => {
       const request: ResetPasswordConfirmRequest = { token, password };
       await authClient.resetPasswordConfirm(request);
       setDone(true);
+      try {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch {
+        // ignore environment restriction
+      }
     } catch (err: unknown) {
       setError(getOneKitErrorMessage(err, 'Failed to reset password.'));
     } finally {
