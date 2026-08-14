@@ -112,15 +112,19 @@ export const useLoyaltyRewards = (): UseQueryResult<LoyaltyReward[]> =>
     },
   });
 
-export const useLoyaltyTransactions = (): UseQueryResult<LoyaltyTransaction[]> =>
+export const useLoyaltyTransactions = (customerId?: number): UseQueryResult<LoyaltyTransaction[]> =>
   useQuery<LoyaltyTransaction[]>({
-    queryKey: ['crm-loyalty-transactions'],
+    queryKey: ['crm-loyalty-transactions', customerId],
     queryFn: async (): Promise<LoyaltyTransaction[]> => {
+      if (!customerId) return [];
       const res = await unwrap(
-        safe.get<unknown>('/crm/loyalty/transactions', { params: { page: 1, page_size: 100 } })
+        safe.get<unknown>('/crm/loyalty/transactions', {
+          params: { customer_id: customerId, page: 1, page_size: 100 },
+        })
       );
       return z.array(loyaltyTransactionSchema).parse(unwrapList(res, 'transactions'));
     },
+    enabled: typeof customerId === 'number' && customerId > 0,
   });
 
 // ── Mutations ────────────────────────────────────────────────────────────────
