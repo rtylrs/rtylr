@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { ChevronDown, ChevronUp, Plus, FileText } from 'lucide-react';
@@ -51,11 +51,25 @@ const PlanBadge: React.FC<{ plan: ContractPlan }> = ({ plan }) => {
 };
 
 const Contracts: React.FC = () => {
-  const { data: allContracts, isLoading } = useContracts();
+  const pageSize = 100;
+  const [offset, setOffset] = useState(0);
+  const [loadedContracts, setLoadedContracts] = useState<Contract[]>([]);
+  const { data: fetchedContracts, isLoading, isFetching, isError } = useContracts(pageSize, offset);
   const { data: leads } = useLeads();
   const createContract = useCreateContract();
 
-  const contracts = allContracts ?? [];
+  useEffect(() => {
+    if (!fetchedContracts) return;
+    setLoadedContracts((previous) => {
+      if (offset === 0) return fetchedContracts;
+      const byId = new Map(previous.map((contract) => [contract.id, contract]));
+      fetchedContracts.forEach((contract) => byId.set(contract.id, contract));
+      return Array.from(byId.values());
+    });
+  }, [fetchedContracts, offset]);
+
+  const contracts = loadedContracts;
+  const hasMore = fetchedContracts?.length === pageSize;
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState({
@@ -73,7 +87,7 @@ const Contracts: React.FC = () => {
 
   const companyName = (contract: Contract): string => {
     const lead = (leads ?? []).find((l) => l.id === contract.leadId);
-    return lead?.company ?? contract.company ?? `Lead #${contract.leadId}`;
+    return lead?.companyName ?? lead?.company ?? contract.company ?? `Lead #${contract.leadId}`;
   };
 
   const handleSubmit = (): void => {
@@ -187,10 +201,16 @@ const Contracts: React.FC = () => {
             overflow: 'hidden',
           }}
         >
-          {isLoading ? (
+          {isLoading && contracts.length === 0 ? (
             <div style={{ padding: '16px' }}>
               <SkeletonList count={4} />
             </div>
+          ) : isError && contracts.length === 0 ? (
+            <EmptyState
+              icon={FileText}
+              title="Unable to load contracts"
+              description="Refresh and try again."
+            />
           ) : contracts.length === 0 ? (
             <EmptyState
               icon={FileText}
@@ -346,6 +366,17 @@ const Contracts: React.FC = () => {
                   </React.Fragment>
                 );
               })}
+              {hasMore && (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setOffset((current) => current + pageSize)}
+                    disabled={isFetching}
+                  >
+                    {isFetching ? 'Loading…' : 'Load more contracts'}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>

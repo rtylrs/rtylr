@@ -10,6 +10,7 @@ import {
 } from '../../shared/components/dash';
 import {
   useNotifications,
+  useNotificationPages,
   useMarkNotificationRead,
   useMarkAllNotificationsRead,
 } from '../../shared/hooks/queries/useNotifications';
@@ -18,10 +19,18 @@ const TABS = ['all', 'unread'] as const;
 
 const Notifications: React.FC = () => {
   const [tab, setTab] = useState<(typeof TABS)[number]>('all');
-  const { data = [], isLoading } = useNotifications();
+  const { data: firstPage = [] } = useNotifications();
+  const {
+    data: pages,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useNotificationPages();
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
 
+  const data = pages?.pages.flatMap((page) => page.notifications) ?? firstPage;
   const filtered = tab === 'unread' ? data.filter((n) => !n.read) : data;
   const unreadCount = data.filter((n) => !n.read).length;
 
@@ -102,6 +111,18 @@ const Notifications: React.FC = () => {
                   onRead={(id) => markRead.mutate(id)}
                 />
               ))}
+              {hasNextPage && (
+                <div className="pt-2 flex justify-center">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => void fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? 'Loading…' : 'Load more'}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>

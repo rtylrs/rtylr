@@ -28,7 +28,7 @@ const Automations: React.FC = () => {
   const handleToggleStatus = (id: number, current: string): void => {
     const next = current === 'active' ? 'paused' : 'active';
     updateAutomation.mutate(
-      { id, data: { status: next as 'active' | 'paused' } },
+      { id, data: { status: next as 'active' | 'paused', isActive: next === 'active' } },
       {
         onSuccess: () =>
           toast.success(next === 'active' ? 'Automation resumed' : 'Automation paused'),
@@ -105,7 +105,7 @@ const Automations: React.FC = () => {
               return (
                 <div
                   key={a.id}
-                  onClick={() => navigate({ to: `/automations/${a.id}` })}
+                  onClick={() => navigate({ to: `/automations/new?id=${a.id}` })}
                   style={{
                     background: 'var(--hub-card)',
                     border: '1px solid var(--hub-border)',

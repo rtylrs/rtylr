@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import {
   useNotifications,
+  useNotificationPages,
   useMarkNotificationRead,
   useMarkAllNotificationsRead,
   type Notification,
@@ -104,6 +105,34 @@ describe('useNotifications', () => {
 
     const { result } = renderHook(() => useNotifications(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isError).toBe(true));
+  });
+});
+
+describe('useNotificationPages', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('follows the opaque next cursor when loading another page', async () => {
+    mockGet
+      .mockResolvedValueOnce({
+        notifications: sampleNotifications.slice(0, 1),
+        next_cursor: 'next-page',
+      })
+      .mockResolvedValueOnce({ notifications: sampleNotifications.slice(1), next_cursor: '' });
+
+    const { result } = renderHook(() => useNotificationPages(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockGet).toHaveBeenCalledWith('/hub/notification/v1/notifications?limit=100');
+
+    await waitFor(() => expect(result.current.hasNextPage).toBe(true));
+
+    await act(async () => {
+      await result.current.fetchNextPage();
+    });
+
+    await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
+    expect(mockGet).toHaveBeenLastCalledWith(
+      '/hub/notification/v1/notifications?limit=100&cursor=next-page'
+    );
   });
 });
 

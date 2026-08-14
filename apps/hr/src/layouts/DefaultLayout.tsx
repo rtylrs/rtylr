@@ -688,7 +688,18 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src="/logo.png?v=2" alt="rtylr" className="rtylr-logo h-6 w-auto" />
+            <img
+              src={
+                theme === 'dark' ||
+                (theme === 'system' &&
+                  typeof window !== 'undefined' &&
+                  window.matchMedia('(prefers-color-scheme: dark)').matches)
+                  ? '/logo.png'
+                  : '/logo-dark.png'
+              }
+              alt="rtylr"
+              className="h-9 w-auto"
+            />
           </div>
         </div>
 

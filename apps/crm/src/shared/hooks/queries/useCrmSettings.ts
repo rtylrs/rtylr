@@ -31,8 +31,7 @@ export const useUpdateCrmSettings = (): UseMutationResult<Settings, unknown, Par
       const current = qc.getQueryData<Settings>(['crm-settings']);
       const merged = settingsSchema.parse({ ...current, ...data });
       // UpdateSettingsResponse only returns a confirmation message, not the
-      // updated record - businessName/atRiskDays/currency aren't part of the
-      // backend contract yet either, so we optimistically merge locally.
+      // updated record, so merge the confirmed request into the local cache.
       await settingsClient.updateSettings({
         defaultConsent: merged.defaultConsent,
         fromEmail: merged.fromEmail,

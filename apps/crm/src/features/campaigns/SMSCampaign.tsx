@@ -7,6 +7,7 @@ import {
   useCreateCampaign,
   useGetCampaign,
   useUpdateCampaign,
+  useUpdateCampaignStatus,
 } from '../../shared/hooks/queries/useCampaigns';
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import { useListCustomers } from '../../shared/hooks/queries/useCustomers';
@@ -24,6 +25,7 @@ const SMSCampaign: React.FC = () => {
 
   const create = useCreateCampaign();
   const update = useUpdateCampaign();
+  const updateStatus = useUpdateCampaignStatus();
   const { data: existingCampaign } = useGetCampaign(campaignId);
   const { data: fetchedSegments } = useListSegments();
   const { data: fetchedCustomers } = useListCustomers({ limit: 200, offset: 0 });
@@ -33,7 +35,7 @@ const SMSCampaign: React.FC = () => {
   const [name, setName] = useState('');
   const [segmentId, setSegmentId] = useState<string>('');
   const [body, setBody] = useState(DEFAULT_SMS_BODY);
-  const pending = create.isPending || update.isPending;
+  const pending = create.isPending || update.isPending || updateStatus.isPending;
 
   useEffect(() => {
     if (existingCampaign) {
@@ -53,17 +55,33 @@ const SMSCampaign: React.FC = () => {
     const payload = {
       name,
       type: 'sms',
-      status: send ? 'active' : 'draft',
       body,
       audienceSegmentId: segmentId ? Number(segmentId) : null,
     };
     const callbacks = {
-      onSuccess: () => {
-        toast.success(send ? 'SMS campaign sent' : 'Draft saved');
-        navigate({ to: '/campaigns' });
+      onSuccess: (result: { campaignId?: number }) => {
+        if (!send) {
+          toast.success('Draft saved');
+          navigate({ to: '/campaigns' });
+          return;
+        }
+        if (!result.campaignId && !campaignId) {
+          toast.error('Campaign was saved but could not be activated');
+          return;
+        }
+        updateStatus.mutate(
+          { id: campaignId ?? result.campaignId!, status: 'active' },
+          {
+            onSuccess: () => {
+              toast.success('SMS campaign activated');
+              navigate({ to: '/campaigns' });
+            },
+            onError: () => toast.error('Campaign was saved but could not be activated'),
+          }
+        );
       },
       onError: () => {
-        toast.error(send ? 'Failed to send SMS campaign' : 'Failed to save draft');
+        toast.error(send ? 'Failed to save or activate SMS campaign' : 'Failed to save draft');
       },
     };
 
@@ -108,7 +126,7 @@ const SMSCampaign: React.FC = () => {
                 disabled={pending || !name.trim() || !body.trim()}
               >
                 <Send size={13} />
-                {pending ? 'Sending…' : 'Send now'}
+                {pending ? 'Activating…' : 'Save & activate'}
               </Button>
             </>
           }

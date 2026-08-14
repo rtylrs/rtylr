@@ -1,16 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { Search } from 'lucide-react';
 import { useLoyaltyMembers } from '../../shared/hooks/queries/useLoyalty';
-import { PageHeader, Card, Input, EmptyState, SkeletonList } from '../../shared/components/ui';
+import type { LoyaltyMember } from '../../shared/hooks/queries/useLoyalty';
+import {
+  Button,
+  PageHeader,
+  Card,
+  Input,
+  EmptyState,
+  SkeletonList,
+} from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, PointsBadge } from '../../shared/components/crm';
 import { Users } from 'lucide-react';
 
 const LoyaltyMembers: React.FC = () => {
-  const { data: fetched, isLoading } = useLoyaltyMembers();
+  const pageSize = 100;
+  const [offset, setOffset] = useState(0);
+  const [loadedMembers, setLoadedMembers] = useState<LoyaltyMember[]>([]);
+  const { data: fetched, isLoading, isFetching, isError } = useLoyaltyMembers(pageSize, offset);
   const [search, setSearch] = useState('');
-  const members = (fetched ?? []).sort((a, b) => b.points - a.points);
+  useEffect(() => {
+    if (!fetched) return;
+    setLoadedMembers((previous) => {
+      if (offset === 0) return fetched;
+      const byId = new Map(previous.map((member) => [member.id, member]));
+      fetched.forEach((member) => byId.set(member.id, member));
+      return Array.from(byId.values());
+    });
+  }, [fetched, offset]);
+
+  const members = [...(loadedMembers ?? [])].sort((a, b) => b.points - a.points);
   const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
+  const hasMore = fetched?.length === pageSize;
 
   return (
     <>
@@ -49,15 +71,32 @@ const LoyaltyMembers: React.FC = () => {
         </div>
 
         <Card padded={false}>
-          {isLoading ? (
+          {isLoading && members.length === 0 ? (
             <div style={{ padding: '16px' }}>
               <SkeletonList count={6} />
             </div>
+          ) : isError && members.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              title="Unable to load members"
+              description="Refresh and try again."
+            />
           ) : filtered.length === 0 ? (
             <EmptyState
               icon={Users}
               title="No members found"
               description="Try a different search term."
+              action={
+                hasMore ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => setOffset((current) => current + pageSize)}
+                    disabled={isFetching}
+                  >
+                    {isFetching ? 'Loading…' : 'Load more members'}
+                  </Button>
+                ) : undefined
+              }
             />
           ) : (
             <div>
@@ -96,6 +135,17 @@ const LoyaltyMembers: React.FC = () => {
                   <PointsBadge points={m.points} trend="up" />
                 </div>
               ))}
+              {hasMore && (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setOffset((current) => current + pageSize)}
+                    disabled={isFetching}
+                  >
+                    {isFetching ? 'Loading…' : 'Load more members'}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </Card>

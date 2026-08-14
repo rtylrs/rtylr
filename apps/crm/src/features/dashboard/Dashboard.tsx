@@ -82,20 +82,26 @@ function StatCard({ stat, index }: { stat: StatItem; index: number }): React.JSX
         >
           {stat.value}
         </span>
-        <span
-          style={{
-            fontSize: '12px',
-            fontWeight: 500,
-            color: stat.up ? '#10b981' : '#ef4444',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '2px',
-            paddingBottom: '2px',
-          }}
-        >
-          {stat.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-          {stat.change}
-        </span>
+        {stat.change ? (
+          <span
+            style={{
+              fontSize: '12px',
+              fontWeight: 500,
+              color: stat.up ? '#10b981' : '#ef4444',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '2px',
+              paddingBottom: '2px',
+            }}
+          >
+            {stat.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+            {stat.change}
+          </span>
+        ) : (
+          <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)', paddingBottom: '2px' }}>
+            No trend data
+          </span>
+        )}
       </div>
       <div
         style={{
@@ -166,7 +172,10 @@ const Dashboard: React.FC = () => {
         },
         {
           label: 'Campaign Reach',
-          value: dashboardData.campaignReach.toLocaleString(),
+          value:
+            dashboardData.campaignReach === undefined
+              ? 'Unavailable'
+              : dashboardData.campaignReach.toLocaleString(),
           change: dashboardData.campaignReachChange,
           up: dashboardData.campaignReachChange?.startsWith('+'),
           icon: Megaphone,
@@ -584,7 +593,7 @@ const Dashboard: React.FC = () => {
                       {c.name}
                     </div>
                     <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                      {c.visits} visits
+                      {c.visits === undefined ? 'Visits unavailable' : `${c.visits} visits`}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -680,6 +689,17 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
               ))}
+              {campaigns.length === 0 && (
+                <div
+                  style={{
+                    padding: '24px 20px',
+                    color: 'var(--hub-text-muted)',
+                    fontSize: '12px',
+                  }}
+                >
+                  Campaign performance is unavailable from the CRM dashboard API.
+                </div>
+              )}
             </div>
           </motion.div>
         </div>

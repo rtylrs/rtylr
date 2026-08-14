@@ -1,11 +1,24 @@
 import { unwrap } from '@voxire/api';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { safe } from '../../lib/api';
 import { notificationSchema } from '../../schemas/notifications';
 
 export type { Notification } from '../../schemas/notifications';
 type Notification = z.infer<typeof notificationSchema>;
+
+type NotificationPage = {
+  notifications: Notification[];
+  nextCursor: string;
+};
+
+const parseNotificationPage = (res: unknown): NotificationPage => {
+  const source = res && typeof res === 'object' ? (res as Record<string, unknown>) : {};
+  return {
+    notifications: z.array(notificationSchema).parse(source.notifications ?? []),
+    nextCursor: typeof source.next_cursor === 'string' ? source.next_cursor : '',
+  };
+};
 
 export const useNotifications = () => {
   return useQuery<Notification[]>({
@@ -15,6 +28,22 @@ export const useNotifications = () => {
       const raw = res?.notifications ?? res;
       return z.array(notificationSchema).parse(Array.isArray(raw) ? raw : []);
     },
+    refetchOnWindowFocus: true,
+  });
+};
+
+export const useNotificationPages = () => {
+  return useInfiniteQuery<NotificationPage>({
+    queryKey: ['notifications', 'pages'],
+    initialPageParam: '',
+    queryFn: async ({ pageParam }) => {
+      const params = new URLSearchParams({ limit: '100' });
+      if (typeof pageParam === 'string' && pageParam) params.set('cursor', pageParam);
+      return parseNotificationPage(
+        await unwrap(safe.get(`/hub/notification/v1/notifications?${params.toString()}`))
+      );
+    },
+    getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
     refetchOnWindowFocus: true,
   });
 };

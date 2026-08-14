@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { Save, Plus, Zap, Mail, Clock, GitBranch, MessageSquare, Gift } from 'lucide-react';
-import { useCreateAutomation } from '../../shared/hooks/queries/useAutomations';
+import { Save, Plus, Zap, Mail, MessageSquare, Gift } from 'lucide-react';
+import {
+  useCreateAutomation,
+  useGetAutomation,
+  useUpdateAutomation,
+} from '../../shared/hooks/queries/useAutomations';
 import { Breadcrumbs, Button, Card, Input, PageHeader } from '../../shared/components/ui';
 import { AutomationNode } from '../../shared/components/crm';
 
@@ -17,30 +21,42 @@ interface Node {
 const triggers = [
   { label: 'New customer', description: 'When a customer is created' },
   { label: 'Birthday', description: "On the customer's birthday" },
-  { label: 'Inactive 60 days', description: 'When inactive for 60+ days' },
-  { label: 'Post visit', description: 'After a customer visit' },
+  { label: 'Inactive customer', description: 'When a customer becomes inactive' },
+  { label: 'Order created', description: 'After a qualifying order' },
   { label: 'Tier upgrade', description: 'When tier changes' },
 ];
 const actions = [
   { label: 'Send email', description: 'Sends an email template', icon: Mail },
   { label: 'Send SMS', description: 'Sends an SMS message', icon: MessageSquare },
   { label: 'Award points', description: 'Adds loyalty points', icon: Gift },
-  { label: 'Wait 3 days', description: 'Delays next step', icon: Clock, type: 'delay' as const },
-  {
-    label: 'If opted in',
-    description: 'Branch on condition',
-    icon: GitBranch,
-    type: 'condition' as const,
-  },
 ];
 
 const AutomationBuilder: React.FC = () => {
   const navigate = useNavigate();
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+  const automationId = Number(new URLSearchParams(searchStr).get('id') || 0) || undefined;
+  const isEditing = !!automationId;
   const create = useCreateAutomation();
+  const update = useUpdateAutomation();
+  const { data: existing } = useGetAutomation(automationId);
   const [name, setName] = useState('');
   const [nodes, setNodes] = useState<Node[]>([
     { id: 'n1', type: 'trigger', label: 'New customer', description: 'When a customer is created' },
   ]);
+
+  React.useEffect(() => {
+    if (!existing) return;
+    setName(existing.name);
+    if (existing.nodes?.length) {
+      setNodes(
+        existing.nodes.map((node) => ({
+          id: node.id,
+          type: node.type as Node['type'],
+          label: node.label,
+        }))
+      );
+    }
+  }, [existing]);
 
   const addTrigger = (t: (typeof triggers)[number]) => {
     setNodes([{ id: 'n1', type: 'trigger', label: t.label, description: t.description }]);
@@ -64,39 +80,50 @@ const AutomationBuilder: React.FC = () => {
   };
 
   const handleSave = () => {
-    create.mutate(
-      {
-        name,
-        description: `${nodes[0]?.label} -> ${nodes.length - 1} step(s)`,
-        trigger: nodes[0]?.label,
-        status: 'draft',
-        enrolled: 0,
-        completed: 0,
+    const payload = {
+      name,
+      trigger: nodes[0]?.label,
+      nodes: nodes.map((node) => ({ ...node, x: 0, y: 0 })),
+      isActive: false,
+      status: 'paused' as const,
+    };
+    const callbacks = {
+      onSuccess: () => {
+        toast.success('Automation saved');
+        navigate({ to: '/automations' });
       },
-      {
-        onSuccess: () => {
-          toast.success('Automation saved');
-          navigate({ to: '/automations' });
-        },
-        onError: () => {
-          toast.error('Failed to save automation');
-        },
-      }
-    );
+      onError: () => {
+        toast.error('Failed to save automation');
+      },
+    };
+    if (isEditing) {
+      update.mutate({ id: automationId!, data: payload }, callbacks);
+    } else {
+      create.mutate(payload, callbacks);
+    }
   };
 
   return (
     <>
-      <HelmetContainer title="New automation · rtylr" />
+      <HelmetContainer title={`${isEditing ? 'Edit' : 'New'} automation · rtylr`} />
       <div style={{ maxWidth: '1200px' }}>
-        <Breadcrumbs items={[{ label: 'Automations', to: '/automations' }, { label: 'New' }]} />
+        <Breadcrumbs
+          items={[
+            { label: 'Automations', to: '/automations' },
+            { label: isEditing ? 'Edit' : 'New' },
+          ]}
+        />
         <PageHeader
-          title="New automation"
+          title={isEditing ? 'Edit automation' : 'New automation'}
           subtitle="Drag triggers and actions to build a workflow"
           actions={
-            <Button variant="primary" onClick={handleSave} disabled={!name || create.isPending}>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              disabled={!name || create.isPending || update.isPending}
+            >
               <Save size={13} />
-              {create.isPending ? 'Saving…' : 'Save'}
+              {create.isPending || update.isPending ? 'Saving…' : 'Save'}
             </Button>
           }
         />

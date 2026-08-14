@@ -347,7 +347,7 @@ const TaskDetail: React.FC = () => {
               className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
               style={{ color: 'var(--flow-text-muted)' }}
             >
-              <ArrowLeft size={13} />
+              <ArrowLeft size={13} className="flow-directional-icon" />
             </button>
             <Breadcrumbs
               items={[
@@ -508,7 +508,7 @@ const TaskDetail: React.FC = () => {
                   {t}
                   {t === 'comments' && (
                     <span
-                      className="ml-1.5 text-[10px] px-1 rounded"
+                      className="ms-1.5 text-[10px] px-1 rounded"
                       style={{
                         background: 'var(--flow-hover)',
                         color: 'var(--flow-text-dim)',
@@ -548,7 +548,7 @@ const TaskDetail: React.FC = () => {
 
       {/* Side panel, below main on small screens */}
       <aside
-        className="w-full shrink-0 overflow-y-auto border-t border-[var(--flow-border)] px-4 py-6 sm:px-5 lg:w-64 lg:border-l lg:border-t-0"
+        className="w-full shrink-0 overflow-y-auto border-t border-[var(--flow-border)] px-4 py-6 sm:px-5 lg:w-64 lg:border-s lg:border-t-0"
         style={{
           background: 'var(--flow-surface)',
         }}
@@ -716,7 +716,7 @@ const TaskDetail: React.FC = () => {
             onClick={() => updateTask(task.id, { focusPin: !task.focusPin })}
             disabled={!canEdit}
             title={!canEdit ? t('common.readOnlyAccess') : undefined}
-            className="text-[11px] px-2.5 py-1.5 rounded-md w-full text-left transition-colors disabled:opacity-60"
+            className="text-[11px] px-2.5 py-1.5 rounded-md w-full text-start transition-colors disabled:opacity-60"
             style={{
               background: task.focusPin ? 'var(--accent-muted)' : 'var(--flow-hover)',
               color: 'var(--flow-text)',
@@ -828,7 +828,7 @@ const TaskDetail: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => navigate({ to: `/task/${dt.id}` as string })}
-                  className="text-[11px] text-left truncate flex-1 hover:underline"
+                  className="text-[11px] text-start truncate flex-1 hover:underline"
                   style={{ color: 'var(--accent)' }}
                 >
                   {dt.identifier} · {dt.title}
@@ -914,7 +914,7 @@ const TaskDetail: React.FC = () => {
             )}
             {labelPickerOpen && (
               <div
-                className="absolute top-6 left-0 z-50 rounded-lg shadow-lg p-2 min-w-[160px] space-y-0.5"
+                className="absolute top-6 start-0 z-50 rounded-lg shadow-lg p-2 min-w-[160px] space-y-0.5"
                 style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
               >
                 {allLabels.length === 0 && (
@@ -928,7 +928,7 @@ const TaskDetail: React.FC = () => {
                     <button
                       key={l.id}
                       onClick={() => handleToggleLabel(l.id)}
-                      className="w-full flex items-center gap-2 px-2 py-1 rounded text-left hover:bg-[var(--flow-hover)]"
+                      className="w-full flex items-center gap-2 px-2 py-1 rounded text-start hover:bg-[var(--flow-hover)]"
                     >
                       <span
                         className="h-2 w-2 rounded-full shrink-0"
@@ -984,7 +984,7 @@ const ActivitySection: React.FC<{ entries: ApiTaskActivity[] }> = ({ entries }) 
             </span>
             <div className="flex-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
               {describeActivity(a)}
-              <span className="ml-2" style={{ color: 'var(--flow-text-dim)' }}>
+              <span className="ms-2" style={{ color: 'var(--flow-text-dim)' }}>
                 {formatRelative(a.createdAt)}
               </span>
             </div>

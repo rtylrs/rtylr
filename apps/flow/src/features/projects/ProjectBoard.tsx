@@ -522,7 +522,7 @@ const KanbanColumn: React.FC<{
         ) : (
           <button
             onClick={() => setEditing(true)}
-            className="flex-1 text-left text-[12px] font-semibold truncate hover:opacity-70 transition-opacity"
+            className="flex-1 text-start text-[12px] font-semibold truncate hover:opacity-70 transition-opacity"
             style={{ color: 'var(--flow-text)' }}
           >
             {col.name}
@@ -580,7 +580,7 @@ const KanbanColumn: React.FC<{
                   border: '1px dashed var(--flow-border)',
                 }}
               >
-                <Plus size={12} className="mr-1" /> Add task
+                <Plus size={12} className="me-1" /> Add task
               </button>
             )}
           </>
@@ -668,7 +668,7 @@ const GroupByPicker: React.FC<{
       </button>
       {open && (
         <div
-          className="absolute right-0 top-full mt-1 z-20 min-w-[140px] rounded-md py-1 shadow-md"
+          className="absolute end-0 top-full mt-1 z-20 min-w-[140px] rounded-md py-1 shadow-md"
           style={{
             background: 'var(--flow-card)',
             border: '1px solid var(--flow-border)',
@@ -681,7 +681,7 @@ const GroupByPicker: React.FC<{
                 onChange(o.key);
                 setOpen(false);
               }}
-              className="w-full text-left px-2.5 py-1.5 text-[11px] transition-colors hover:bg-[var(--flow-hover)]"
+              className="w-full text-start px-2.5 py-1.5 text-[11px] transition-colors hover:bg-[var(--flow-hover)]"
               style={{
                 color: o.key === groupBy ? 'var(--flow-text)' : 'var(--flow-text-muted)',
                 fontWeight: o.key === groupBy ? 600 : 400,

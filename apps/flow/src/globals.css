@@ -253,3 +253,9 @@
   outline: 2px solid var(--flow-focus-ring);
   outline-offset: 2px;
 }
+
+/* Directional affordances should follow the language direction without
+ * requiring each control to choose a separate icon. */
+[dir='rtl'] .flow-directional-icon {
+  transform: scaleX(-1);
+}

@@ -51,19 +51,12 @@ const CreateCustomer: React.FC = () => {
     create.mutate(
       {
         name: data.name,
+        firstName: data.name.trim().split(/\s+/)[0] ?? '',
+        lastName: data.name.trim().split(/\s+/).slice(1).join(' '),
         email: data.email,
         phone: data.phone,
-        initials: data.name
-          .split(' ')
-          .map((p) => p[0])
-          .join('')
-          .slice(0, 2)
-          .toUpperCase(),
-        totalSpent: 0,
-        visits: 0,
-        loyaltyPoints: 0,
-        lastVisit: 'Never',
-        birthday: data.birthday,
+        dateOfBirth: data.birthday,
+        address: data.address,
         consent: {
           email: data.consentEmail,
           sms: data.consentSms,

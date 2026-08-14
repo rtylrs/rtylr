@@ -18,7 +18,7 @@ import {
   Search as SearchIcon,
   User,
 } from 'lucide-react';
-import { Tier, tierColor, getTier, pointsToNextTier } from '../lib/tiers';
+import { Tier, tierColor, getTier, getCustomerTier, pointsToNextTier } from '../lib/tiers';
 import { ACCENT, Input, Select, Button } from './ui';
 import type { TimelineEntry, Customer } from '../services/crmApi';
 
@@ -66,6 +66,10 @@ export const TimelineEntryRow: React.FC<{ entry: TimelineEntry }> = ({ entry }) 
     note: StickyNote,
     points: TrendingUp,
     reward: Gift,
+    adjust: TrendingUp,
+    expire: Clock,
+    award: Award,
+    upgrade: Award,
   };
   const colors: Record<string, string> = {
     visit: '#3b82f6',
@@ -75,6 +79,10 @@ export const TimelineEntryRow: React.FC<{ entry: TimelineEntry }> = ({ entry }) 
     note: '#94a3b8',
     points: '#22c55e',
     reward: '#e879f9',
+    adjust: '#22c55e',
+    expire: '#f97316',
+    award: '#e879f9',
+    upgrade: '#e879f9',
   };
   const Icon = icons[entry.type] || Clock;
   const color = colors[entry.type] || ACCENT;
@@ -782,8 +790,8 @@ export const ConsentBanner: React.FC<{
 
 // ── 29. CustomerQuickView ───────────────────────────────────────
 export const CustomerQuickView: React.FC<{ customer: Customer }> = ({ customer }) => {
-  const tier = getTier(customer.loyaltyPoints);
-  const next = pointsToNextTier(customer.loyaltyPoints);
+  const tier = getCustomerTier(customer.loyaltyPoints, customer.loyaltyTier);
+  const next = pointsToNextTier(customer.loyaltyPoints, undefined, customer.loyaltyTier);
   return (
     <div
       style={{

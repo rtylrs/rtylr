@@ -23,7 +23,11 @@ const CampaignDetail: React.FC = () => {
     isLoading: campaignLoading,
     error: campaignError,
   } = useGetCampaign(campaignId);
-  const { data: fetchedStats } = useCampaignStats(campaignId);
+  const {
+    data: fetchedStats,
+    isLoading: statsLoading,
+    isError: statsError,
+  } = useCampaignStats(campaignId);
   const campaign = fetched;
   const stats = fetchedStats;
 
@@ -180,7 +184,7 @@ const CampaignDetail: React.FC = () => {
                 style={{ display: 'flex', alignItems: 'flex-end', gap: '10px', height: '160px' }}
               >
                 {stats.timeline.map((t) => {
-                  const max = Math.max(...stats.timeline.map((x) => x.opens));
+                  const max = Math.max(1, ...stats.timeline.map((x) => x.opens));
                   const openH = (t.opens / max) * 130;
                   const clickH = (t.clicks / max) * 130;
                   return (
@@ -268,6 +272,15 @@ const CampaignDetail: React.FC = () => {
               </div>
             </Card>
           </>
+        )}
+        {!stats && !statsLoading && (
+          <Card>
+            <div style={{ color: 'var(--hub-text-muted)', fontSize: '13px' }}>
+              {statsError
+                ? 'Campaign statistics could not be loaded from the CRM service.'
+                : 'No campaign statistics are available yet.'}
+            </div>
+          </Card>
         )}
       </div>
     </>

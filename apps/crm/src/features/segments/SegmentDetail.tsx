@@ -5,7 +5,7 @@ import { ArrowLeft, Mail, MessageSquare, PieChart } from 'lucide-react';
 import { useGetSegment, useSegmentCustomers } from '../../shared/hooks/queries/useSegments';
 import { Breadcrumbs, Button, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge } from '../../shared/components/crm';
-import { getTier } from '../../shared/lib/tiers';
+import { getCustomerTier } from '../../shared/lib/tiers';
 
 const SegmentDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
@@ -211,7 +211,7 @@ const SegmentDetail: React.FC = () => {
                       {c.email}
                     </div>
                   </div>
-                  <TierBadge tier={getTier(c.loyaltyPoints)} />
+                  <TierBadge tier={getCustomerTier(c.loyaltyPoints, c.loyaltyTier)} />
                   <span
                     style={{
                       fontSize: '12px',

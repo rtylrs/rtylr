@@ -94,6 +94,21 @@ describe('timelineEntrySchema', () => {
     expect(result.meta?.amount).toBe(5.5);
   });
 
+  it('preserves backend loyalty activity types', () => {
+    expect(
+      timelineEntrySchema.parse({ id: 4, type: 'award', title: 'Awarded points', at: '2024-05-10' })
+        .type
+    ).toBe('award');
+    expect(
+      timelineEntrySchema.parse({
+        id: 5,
+        type: 'expire',
+        title: 'Expired points',
+        at: '2024-05-11',
+      }).type
+    ).toBe('expire');
+  });
+
   it('coerces string id to number', () => {
     const entry = { id: '99', type: 'note', title: 'A note', at: '2024-05-10' };
     const result = timelineEntrySchema.parse(entry);

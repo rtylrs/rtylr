@@ -53,7 +53,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
       </div>
       {open && !disabled && (
         <div
-          className="absolute top-full left-0 mt-1 rounded-lg z-50 py-1 min-w-[160px]"
+          className="absolute top-full start-0 mt-1 rounded-lg z-50 py-1 min-w-[160px]"
           style={{
             background: 'var(--flow-card)',
             border: '1px solid var(--flow-border)',
@@ -71,7 +71,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
                   onChange(iso);
                   setOpen(false);
                 }}
-                className="w-full text-left px-3 py-1.5 text-[12px] hover:bg-[var(--flow-hover)]"
+                className="w-full text-start px-3 py-1.5 text-[12px] hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
                 {o.label}

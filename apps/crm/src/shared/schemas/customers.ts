@@ -74,7 +74,21 @@ export const customerSchema = customerWireSchema.transform((c) => {
 
 export const timelineEntrySchema = z.object({
   id: finiteNumber,
-  type: z.enum(['visit', 'purchase', 'email', 'sms', 'note', 'points', 'reward']).catch('visit'),
+  type: z
+    .enum([
+      'visit',
+      'purchase',
+      'email',
+      'sms',
+      'note',
+      'points',
+      'reward',
+      'adjust',
+      'expire',
+      'award',
+      'upgrade',
+    ])
+    .catch('visit'),
   title: z.string(),
   description: z.string().optional(),
   at: z.string(),
