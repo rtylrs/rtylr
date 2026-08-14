@@ -69,18 +69,19 @@ const EmailCampaign: React.FC = () => {
       audienceSegmentId: segmentId ? Number(segmentId) : null,
     };
     const callbacks = {
-      onSuccess: (result: { campaignId?: number }) => {
+      onSuccess: (result: { campaignId?: number; campaign_id?: number }) => {
         if (!send) {
           toast.success('Draft saved');
           navigate({ to: '/campaigns' });
           return;
         }
-        if (!result.campaignId && !campaignId) {
+        const createdId = result.campaignId ?? result.campaign_id;
+        if (!createdId && !campaignId) {
           toast.error('Campaign was saved but could not be activated');
           return;
         }
         updateStatus.mutate(
-          { id: campaignId ?? result.campaignId!, status: 'active' },
+          { id: campaignId ?? createdId!, status: 'active' },
           {
             onSuccess: () => {
               toast.success('Campaign activated');
