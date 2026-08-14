@@ -38,7 +38,7 @@ const Roles: React.FC = () => {
         {isLoading ? (
           <SkeletonGrid cols={3} rows={2} />
         ) : (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {data.map((role) => (
               <div
                 key={role.id}

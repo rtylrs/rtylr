@@ -64,6 +64,12 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
           sameSite: 'lax',
           domain: getDefaultCookieDomain(),
         });
+        try {
+          localStorage.removeItem('dash-config');
+          localStorage.removeItem('rtylr:dash-config');
+        } catch {
+          // ignore storage clearing errors
+        }
         window.location.reload();
       },
       onError: () => {

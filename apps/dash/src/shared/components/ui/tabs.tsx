@@ -46,6 +46,7 @@ const TabsList: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   ...props
 }) => (
   <div
+    role="tablist"
     className={cn('inline-flex items-center rounded-lg p-1 gap-0.5', className)}
     style={{ background: 'var(--dash-hover)', ...style }}
     {...props}
@@ -68,6 +69,9 @@ const TabsTrigger: React.FC<TabsTriggerProps> = ({
 
   return (
     <button
+      type="button"
+      role="tab"
+      aria-selected={isActive}
       className={cn(
         'inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-md transition-all',
         isActive ? 'shadow-sm' : 'text-gray-500 hover:text-primary',
@@ -92,7 +96,7 @@ const TabsContent: React.FC<TabsContentProps> = ({ value, children, className, .
   const { value: activeValue } = useContext(TabsContext);
   if (activeValue !== value) return null;
   return (
-    <div className={cn('mt-4', className)} {...props}>
+    <div role="tabpanel" className={cn('mt-4', className)} {...props}>
       {children}
     </div>
   );

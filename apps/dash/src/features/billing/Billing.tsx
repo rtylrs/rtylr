@@ -101,7 +101,8 @@ function planPrice(plan: PlanPayload, cycle: BillingCycle): number {
 
 function discountLabel(plan: PlanPayload): string | null {
   if (plan.pricePerSeatCents <= 0 || plan.annualPricePerSeatCents <= 0) return null;
-  const discount = Math.round((1 - plan.annualPricePerSeatCents / plan.pricePerSeatCents) * 100);
+  const annualMonthlyEquivalent = plan.annualPricePerSeatCents / 12;
+  const discount = Math.round((1 - annualMonthlyEquivalent / plan.pricePerSeatCents) * 100);
   return discount > 0 ? `Save ${discount}%` : null;
 }
 

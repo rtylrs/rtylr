@@ -43,10 +43,13 @@ const Permissions: React.FC = () => {
         </div>
 
         <div
+          role="table"
+          aria-label="Permission Matrix"
           className="rounded-xl overflow-hidden"
           style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
           <div
+            role="row"
             className="grid items-center px-5 py-3"
             style={{
               gridTemplateColumns: `minmax(0, 1fr) repeat(${data.roles.length}, 88px)`,
@@ -55,74 +58,79 @@ const Permissions: React.FC = () => {
             }}
           >
             <p
+              role="columnheader"
               className="text-[10px] font-semibold uppercase tracking-widest"
               style={{ color: 'var(--dash-text-dim)' }}
             >
               Permission
             </p>
             {data.roles.map((role) => (
-              <div key={role} className="flex justify-center">
+              <div key={role} role="columnheader" className="flex justify-center">
                 <RoleBadge role={role} />
               </div>
             ))}
           </div>
 
-          {Object.entries(groups).map(([group, perms]) => (
-            <div key={group}>
-              <p
-                className="px-5 py-2 text-[10px] font-semibold uppercase tracking-widest"
-                style={{
-                  color: 'var(--dash-text-dim)',
-                  background: 'var(--dash-hover)',
-                  borderBottom: '1px solid var(--dash-border)',
-                }}
-              >
-                {group}
-              </p>
-              {perms.map((p) => (
-                <div
-                  key={p.key}
-                  className="grid items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)]"
+          <div role="rowgroup">
+            {Object.entries(groups).map(([group, perms]) => (
+              <div key={group}>
+                <p
+                  className="px-5 py-2 text-[10px] font-semibold uppercase tracking-widest"
                   style={{
-                    gridTemplateColumns: `minmax(0, 1fr) repeat(${data.roles.length}, 88px)`,
+                    color: 'var(--dash-text-dim)',
+                    background: 'var(--dash-hover)',
                     borderBottom: '1px solid var(--dash-border)',
                   }}
                 >
-                  <div className="min-w-0">
-                    <p
-                      className="text-xs font-semibold truncate"
-                      style={{ color: 'var(--dash-text)' }}
-                    >
-                      {p.label}
-                    </p>
-                    <p
-                      className="text-[10px] font-mono truncate"
-                      style={{ color: 'var(--dash-text-dim)' }}
-                    >
-                      {p.key}
-                    </p>
+                  {group}
+                </p>
+                {perms.map((p) => (
+                  <div
+                    key={p.key}
+                    role="row"
+                    className="grid items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)]"
+                    style={{
+                      gridTemplateColumns: `minmax(0, 1fr) repeat(${data.roles.length}, 88px)`,
+                      borderBottom: '1px solid var(--dash-border)',
+                    }}
+                  >
+                    <div role="cell" className="min-w-0">
+                      <p
+                        className="text-xs font-semibold truncate"
+                        style={{ color: 'var(--dash-text)' }}
+                      >
+                        {p.label}
+                      </p>
+                      <p
+                        className="text-[10px] font-mono truncate"
+                        style={{ color: 'var(--dash-text-dim)' }}
+                      >
+                        {p.key}
+                      </p>
+                    </div>
+                    {data.roles.map((role) => {
+                      const value = data.values[role]?.[p.key] ?? false;
+                      const isOwner = role === 'owner';
+                      return (
+                        <div key={role} role="cell" className="flex justify-center">
+                          <PermissionCheckbox
+                            checked={isOwner ? true : value}
+                            disabled={isOwner}
+                            ariaLabel={`${p.label} for ${role}`}
+                            onChange={(checked) => {
+                              if (!isOwner) {
+                                updatePermissions.mutate({ role, key: p.key, enabled: checked });
+                              }
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
-                  {data.roles.map((role) => {
-                    const value = data.values[role]?.[p.key] ?? false;
-                    const isOwner = role === 'owner';
-                    return (
-                      <div key={role} className="flex justify-center">
-                        <PermissionCheckbox
-                          checked={isOwner ? true : value}
-                          disabled={isOwner}
-                          onChange={(checked) => {
-                            if (!isOwner) {
-                              updatePermissions.mutate({ role, key: p.key, enabled: checked });
-                            }
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          ))}
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </>
