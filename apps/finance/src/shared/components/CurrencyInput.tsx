@@ -54,7 +54,12 @@ const CurrencyInput: React.FC<CurrencyInputProps> = ({
         onChange={handle}
         placeholder={placeholder}
         disabled={disabled}
-        style={{ ...inputStyle, paddingInlineStart: 28, fontVariantNumeric: 'tabular-nums', ...style }}
+        style={{
+          ...inputStyle,
+          paddingInlineStart: 28,
+          fontVariantNumeric: 'tabular-nums',
+          ...style,
+        }}
       />
     </div>
   );

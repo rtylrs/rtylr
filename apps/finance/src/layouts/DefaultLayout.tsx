@@ -384,7 +384,9 @@ const DefaultLayout: React.FC = () => {
             >
               <SearchIcon size={12} />
               <span>Search</span>
-              <span style={{ marginInlineStart: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}>
+              <span
+                style={{ marginInlineStart: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}
+              >
                 Cmd K
               </span>
             </button>

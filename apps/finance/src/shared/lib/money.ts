@@ -60,6 +60,24 @@ export function formatCompact(n: number, currency: Currency = 'USD'): string {
   return `${getCurrencySymbol(currency)}${safeNumber.toFixed(0)}`;
 }
 
+export const FX_RATES: Record<string, number> = {
+  USD: 1,
+  EUR: 0.92,
+  GBP: 0.79,
+  JPY: 155,
+  CAD: 1.36,
+  AUD: 1.52,
+  CHF: 0.9,
+  CNY: 7.23,
+};
+
+export function convert(amount: number, from: Currency | string, to: Currency | string): number {
+  const fromRate = FX_RATES[from] ?? 1;
+  const toRate = FX_RATES[to] ?? 1;
+  const amountInUsd = amount / fromRate;
+  return amountInUsd * toRate;
+}
+
 export function parseMoney(input: string): number {
   const cleaned = input.replace(/[^0-9.\-]/g, '');
   const n = parseFloat(cleaned);

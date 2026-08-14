@@ -21,7 +21,18 @@ export const useListInvoices = (params: ListInvoicesParams) => {
   const pageSize = params.pageSize ?? 50;
 
   return useQuery<ListInvoicesResponse>({
-    queryKey: ['invoices', 'filter', { page, pageSize, status: params.status ?? '', search: params.search ?? '', dateFrom: params.dateFrom ?? '', dateTo: params.dateTo ?? '' }],
+    queryKey: [
+      'invoices',
+      'filter',
+      {
+        page,
+        pageSize,
+        status: params.status ?? '',
+        search: params.search ?? '',
+        dateFrom: params.dateFrom ?? '',
+        dateTo: params.dateTo ?? '',
+      },
+    ],
     queryFn: (): Promise<ListInvoicesResponse> =>
       invoicesClient.listInvoices({
         status: params.status ?? '',

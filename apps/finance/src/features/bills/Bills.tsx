@@ -12,6 +12,7 @@ import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useBills } from './useBills';
 import { useCreateBill } from '../../shared/hooks/queries/useBills';
+import { useSettings } from '../../shared/lib/settings';
 import {
   cardStyle,
   ghostBtn,
@@ -37,6 +38,7 @@ interface NewBillForm {
 
 const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const { t } = useTranslation();
+  const baseCurrency = useSettings((s) => s.currency);
   const createBill = useCreateBill();
   const [form, setForm] = useState<NewBillForm>({
     vendor: '',
@@ -54,11 +56,16 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
       toast.error(t('bills.amountPositive'));
       return;
     }
+    const derivedSupplierId =
+      form.vendor
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-') || '1';
     createBill.mutate(
       {
-        supplierId: '0',
+        supplierId: derivedSupplierId,
         amount: form.amount,
-        currency: 'USD',
+        currency: baseCurrency ?? 'USD',
         dueDate: form.dueDate,
         status: 'unpaid',
         description: form.description || form.vendor,
@@ -172,7 +179,8 @@ const Bills: React.FC = () => {
         title={t('bills.title')}
         subtitle={
           <>
-            {t('bills.outstanding', { count: unpaid.length })} <>&middot;</> <MoneyDisplay amount={totalDue} /> {t('bills.total')}
+            {t('bills.outstanding', { count: unpaid.length })} <>&middot;</>{' '}
+            <MoneyDisplay amount={totalDue} /> {t('bills.total')}
           </>
         }
         actions={
@@ -183,7 +191,7 @@ const Bills: React.FC = () => {
               </button>
             )}
             <button style={ghostBtn} aria-label="New Bill" onClick={() => setShowCreate(true)}>
-                <Plus size={13} /> {t('bills.new')}
+              <Plus size={13} /> {t('bills.new')}
             </button>
           </>
         }
@@ -202,7 +210,16 @@ const Bills: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                {['', t('bills.number'), t('bills.vendor'), t('bills.category'), t('bills.amount'), t('bills.due'), t('bills.status'), ''].map((h, i) => (
+                {[
+                  '',
+                  t('bills.number'),
+                  t('bills.vendor'),
+                  t('bills.category'),
+                  t('bills.amount'),
+                  t('bills.due'),
+                  t('bills.status'),
+                  '',
+                ].map((h, i) => (
                   <th
                     key={i}
                     style={{
