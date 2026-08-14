@@ -57,6 +57,6 @@ describe('ProfitLoss close fiscal year', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close Fiscal Year' }));
     fireEvent.click(screen.getByRole('button', { name: 'Close year' }));
 
-    expect(toastInfo).toHaveBeenCalledWith('Books are now read-only');
+    expect(toastInfo).toHaveBeenCalledWith('Fiscal year period locking is coming soon');
   });
 });

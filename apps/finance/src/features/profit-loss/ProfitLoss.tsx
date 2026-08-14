@@ -89,7 +89,11 @@ const PLRow: React.FC<RowProps> = ({
         </span>
         {sub && (
           <span
-            style={{ fontSize: 11, color: 'var(--hub-text-muted)', paddingInlineStart: indent ? 16 : 0 }}
+            style={{
+              fontSize: 11,
+              color: 'var(--hub-text-muted)',
+              paddingInlineStart: indent ? 16 : 0,
+            }}
           >
             {sub}
           </span>
@@ -460,7 +464,7 @@ const ProfitLoss: React.FC = () => {
       <ConfirmDialog
         open={showClose}
         onClose={() => setShowClose(false)}
-        onConfirm={() => toast.info('Books are now read-only')}
+        onConfirm={() => toast.info('Fiscal year period locking is coming soon')}
         title="Close fiscal year"
         message="This will lock all entries for the current fiscal year. Adjustments will require a new period. Continue?"
         confirmLabel="Close year"
