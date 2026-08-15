@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { tenantStorage } from '../utils/tenantStorage';
 
 interface MenuItem {
   _id: string;
@@ -152,6 +153,7 @@ export const useMenuStore = create<MenuState & MenuActions>()(
     }),
     {
       name: 'menu-store',
+      storage: tenantStorage,
       partialize: (state) => ({
         id: state.id,
         items: state.items,
