@@ -1,8 +1,10 @@
+-- Bounded-result exemption: the legacy Caret tool has no pagination fields.
+-- Keep its preview capped at 500 rows until that contract supports paging.
 -- name: ListBills :many
 SELECT id, owner_id, business_id, supplier_id, amount, currency, due_date, status, description, created_at, updated_at
 FROM finance_bills
 WHERE business_id = ?
-ORDER BY due_date ASC
+ORDER BY due_date ASC, id ASC
 LIMIT 500;
 
 -- name: GetBill :one
@@ -38,5 +40,5 @@ GROUP BY status;
 SELECT id, owner_id, business_id, supplier_id, amount, currency, due_date, status, description, created_at, updated_at
 FROM finance_bills
 WHERE business_id = ?
-ORDER BY due_date ASC
+ORDER BY due_date ASC, id ASC
 LIMIT ? OFFSET ?;

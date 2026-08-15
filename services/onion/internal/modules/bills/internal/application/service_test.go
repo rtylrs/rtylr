@@ -9,21 +9,25 @@ import (
 )
 
 type mockRepo struct {
-	listResult []domain.Bill
-	getResult  domain.Bill
-	createID   int64
-	listErr    error
-	getErr     error
-	delErr     error
-	createErr  error
-	updErr     error
+	listResult          []domain.Bill
+	getResult           domain.Bill
+	createID            int64
+	listErr             error
+	getErr              error
+	delErr              error
+	createErr           error
+	updErr              error
+	listPaginatedLimit  int32
+	listPaginatedOffset int32
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.Bill, error) {
 	return m.listResult, m.listErr
 }
 
-func (m *mockRepo) ListPaginated(_ context.Context, _ int64, _, _ int32) ([]domain.Bill, error) {
+func (m *mockRepo) ListPaginated(_ context.Context, _ int64, limit, offset int32) ([]domain.Bill, error) {
+	m.listPaginatedLimit = limit
+	m.listPaginatedOffset = offset
 	return m.listResult, m.listErr
 }
 
@@ -99,6 +103,50 @@ func TestList_PropagatesError(t *testing.T) {
 	s := &Service{repo: &mockRepo{listErr: want}}
 	if _, err := s.List(context.Background(), 1); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestListPage_UsesRequestedPageAndReportsMoreRows(t *testing.T) {
+	repo := &mockRepo{listResult: make([]domain.Bill, 4)}
+	s := &Service{repo: repo}
+
+	page, err := s.ListPage(context.Background(), 1, 2, 3)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if repo.listPaginatedLimit != 4 {
+		t.Fatalf("query limit = %d, want 4", repo.listPaginatedLimit)
+	}
+	if repo.listPaginatedOffset != 3 {
+		t.Fatalf("query offset = %d, want 3", repo.listPaginatedOffset)
+	}
+	if page.Page != 2 || page.PageSize != 3 {
+		t.Fatalf("page metadata = (%d, %d), want (2, 3)", page.Page, page.PageSize)
+	}
+	if len(page.Bills) != 3 {
+		t.Fatalf("returned bills = %d, want 3", len(page.Bills))
+	}
+	if !page.HasMore {
+		t.Fatal("HasMore = false, want true")
+	}
+}
+
+func TestListPage_UsesDefaultsAndCapsPageSize(t *testing.T) {
+	repo := &mockRepo{listResult: make([]domain.Bill, 1)}
+	s := &Service{repo: repo}
+
+	page, err := s.ListPage(context.Background(), 1, 0, 10000)
+	if err != nil {
+		t.Fatalf("unexpected: %v", err)
+	}
+	if page.Page != 1 || page.PageSize != int64(maxListLimit) {
+		t.Fatalf("page metadata = (%d, %d), want (1, %d)", page.Page, page.PageSize, maxListLimit)
+	}
+	if repo.listPaginatedLimit != maxListLimit+1 {
+		t.Fatalf("query limit = %d, want %d", repo.listPaginatedLimit, maxListLimit+1)
+	}
+	if repo.listPaginatedOffset != 0 {
+		t.Fatalf("query offset = %d, want 0", repo.listPaginatedOffset)
 	}
 }
 

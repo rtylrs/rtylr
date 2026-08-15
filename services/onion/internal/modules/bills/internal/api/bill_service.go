@@ -14,11 +14,6 @@ import (
 	financebillv1 "github.com/voxire/voxie/gen/go/finance/bill/v1"
 )
 
-// listBillsPageSize bounds ListBills server-side. The voxie
-// finance.bill.v1.ListBillsRequest contract has no pagination fields yet, so
-// the endpoint returns at most one maximum-size page instead of every row.
-const listBillsPageSize int32 = 500
-
 type BillAPI struct {
 	Service *application.Service
 }
@@ -27,20 +22,30 @@ func NewBillAPI(service *application.Service) *BillAPI {
 	return &BillAPI{Service: service}
 }
 
-func (a *BillAPI) ListBills(ctx context.Context, _ *financebillv1.ListBillsRequest) (*financebillv1.ListBillsResponse, error) {
+func (a *BillAPI) ListBills(ctx context.Context, req *financebillv1.ListBillsRequest) (*financebillv1.ListBillsResponse, error) {
 	businessID, err := billBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
-	bills, listErr := a.Service.ListPaginated(ctx, businessID, listBillsPageSize, 0)
+	var page, pageSize int64
+	if req != nil {
+		page = req.GetPage()
+		pageSize = req.GetPageSize()
+	}
+	result, listErr := a.Service.ListPage(ctx, businessID, page, pageSize)
 	if listErr != nil {
 		return nil, billStatusError(http.StatusInternalServerError, "Failed to list bills")
 	}
-	out := make([]*financebillv1.Bill, 0, len(bills))
-	for _, bill := range bills {
+	out := make([]*financebillv1.Bill, 0, len(result.Bills))
+	for _, bill := range result.Bills {
 		out = append(out, newBillProto(bill))
 	}
-	return &financebillv1.ListBillsResponse{Bills: out}, nil
+	return &financebillv1.ListBillsResponse{
+		Bills:    out,
+		Page:     result.Page,
+		PageSize: result.PageSize,
+		HasMore:  result.HasMore,
+	}, nil
 }
 
 func (a *BillAPI) CreateBill(ctx context.Context, req *financebillv1.CreateBillRequest) (*financebillv1.CreateBillResponse, error) {

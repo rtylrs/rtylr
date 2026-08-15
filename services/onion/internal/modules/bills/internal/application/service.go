@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/bills/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/pagination"
 )
 
 const (
@@ -19,6 +20,19 @@ const (
 	defaultListLimit int32 = 50
 	maxListLimit     int32 = 500
 )
+
+var billsListPolicy = pagination.Policy{
+	DefaultPageSize: int64(defaultListLimit),
+	MaxPageSize:     int64(maxListLimit),
+	MaxOffset:       1<<31 - 1,
+}
+
+type BillPage struct {
+	Bills    []domain.Bill
+	Page     int64
+	PageSize int64
+	HasMore  bool
+}
 
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.Bill, error)
@@ -66,6 +80,25 @@ func (s *Service) ListPaginated(ctx context.Context, businessID int64, limit, of
 		offset = 0
 	}
 	return s.repo.ListPaginated(ctx, businessID, limit, offset)
+}
+
+func (s *Service) ListPage(ctx context.Context, businessID, page, pageSize int64) (BillPage, error) {
+	page, pageSize, offset := normalizeListPage(page, pageSize)
+	bills, err := s.repo.ListPaginated(ctx, businessID, int32(pageSize+1), offset)
+	if err != nil {
+		return BillPage{}, err
+	}
+
+	hasMore := int64(len(bills)) > pageSize
+	if hasMore {
+		bills = bills[:int(pageSize)]
+	}
+	return BillPage{Bills: bills, Page: page, PageSize: pageSize, HasMore: hasMore}, nil
+}
+
+func normalizeListPage(page, pageSize int64) (int64, int64, int32) {
+	normalized := billsListPolicy.Normalize(page, pageSize)
+	return normalized.Number, normalized.Size, int32(normalized.Offset)
 }
 
 func (s *Service) GetBill(ctx context.Context, businessID, id int64) (domain.Bill, error) {
