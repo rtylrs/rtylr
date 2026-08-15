@@ -58,6 +58,19 @@ export function useWorkTypes() {
 }
 
 /**
+ * The caller's own days across a range, for the week strip. No new endpoint:
+ * ListWorkDays already takes from/to, so this is the same call the single-day
+ * view could have made, just with a wider range.
+ */
+export function useWorkDaysRange(from: string, to: string) {
+  return useQuery({
+    queryKey: ['work-days-range', from, to],
+    queryFn: () => timeClient.listWorkDays({ from, to, limit: 7 }),
+    enabled: !!from && !!to,
+  });
+}
+
+/**
  * Every member's work day for one date, for the team view. Requires at least
  * admin on the workspace - enforced server-side, not just hidden in the UI:
  * a caller without it gets a real 403 from this same call.

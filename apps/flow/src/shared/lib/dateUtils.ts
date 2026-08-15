@@ -62,19 +62,24 @@ export function addDays(date: string, days: number): string {
   return dt.toISOString().slice(0, 10);
 }
 
-/** Returns the ISO start-of-week (Monday) for a given date string. */
-export function startOfWeek(date: string): string {
+/**
+ * Returns the ISO start-of-week for a given date string, Monday by default.
+ * Pass 'sunday' for a caller (the Time week strip) whose workspace has
+ * configured that week start; every other caller keeps the Monday default it
+ * already relied on.
+ */
+export function startOfWeek(date: string, weekStart: 'monday' | 'sunday' = 'monday'): string {
   const [y, m, d] = date.split('-').map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
   const day = dt.getUTCDay(); // 0 = Sunday
-  const diff = day === 0 ? -6 : 1 - day;
+  const diff = weekStart === 'sunday' ? -day : day === 0 ? -6 : 1 - day;
   dt.setUTCDate(dt.getUTCDate() + diff);
   return dt.toISOString().slice(0, 10);
 }
 
-/** Returns the ISO end-of-week (Sunday) for a given date string. */
-export function endOfWeek(date: string): string {
-  return addDays(startOfWeek(date), 6);
+/** Returns the ISO end-of-week for a given date string, six days after startOfWeek. */
+export function endOfWeek(date: string, weekStart: 'monday' | 'sunday' = 'monday'): string {
+  return addDays(startOfWeek(date, weekStart), 6);
 }
 
 /**
@@ -95,6 +100,22 @@ export function formatEntryTimestamp(iso: string, locale = 'en-US'): string {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
+    timeZone: 'UTC',
+  }).format(dt);
+}
+
+/**
+ * Formats an ISO date string as a short weekday and day number, for the week
+ * strip. Digits are pinned to Latin the same way formatEntryTimestamp does -
+ * a week-strip button is still a date a person reads, not a duration, but the
+ * reasoning is identical: nothing here should ever render in a locale's own
+ * numeral system.
+ */
+export function formatWeekDayShort(date: string, locale = 'en-US'): string {
+  const dt = new Date(date + 'T00:00:00Z');
+  return new Intl.DateTimeFormat(`${locale}-u-nu-latn`, {
+    weekday: 'short',
+    day: 'numeric',
     timeZone: 'UTC',
   }).format(dt);
 }

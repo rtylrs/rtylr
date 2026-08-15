@@ -45,6 +45,8 @@
     "addLine": "Add",
     "setTheDayFirst": "Set where you worked to start the day, then add what you worked on.",
     "loadingDay": "Loading the day…",
+    "weekStrip": "Choose a day this week",
+    "weekDayLogged": "Time logged this day",
     "project": "Project",
     "selectProject": "Select a project",
     "workType": "Type of work",
