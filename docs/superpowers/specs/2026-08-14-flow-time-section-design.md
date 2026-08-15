@@ -157,14 +157,14 @@ fits a laptop and not an excavator.
 standing alone where it is hired in. Asset identity is not duplicated; costing
 attributes hang off it.
 
-| Column | Note |
-|---|---|
-`asset_id` | Null for hired plant that the business does not own |
-`ownership` | `owned` / `hired` |
-`supplier_id`, `hire_rate`, `hire_unit` | Hired items only. Sets up invoice reconciliation later without building it now. |
-`operating_rate_hour` | Cost while working |
-`standby_rate_hour` | Cost while on site and available. Lower, and the reason idle plant stops looking free. |
-`logging_mode` | `operator` / `site_manager` / `both`, which decides who is asked to record it |
+| Column                                  | Note                                                                                   |
+| --------------------------------------- | -------------------------------------------------------------------------------------- |
+| `asset_id`                              | Null for hired plant that the business does not own                                    |
+| `ownership`                             | `owned` / `hired`                                                                      |
+| `supplier_id`, `hire_rate`, `hire_unit` | Hired items only. Sets up invoice reconciliation later without building it now.        |
+| `operating_rate_hour`                   | Cost while working                                                                     |
+| `standby_rate_hour`                     | Cost while on site and available. Lower, and the reason idle plant stops looking free. |
+| `logging_mode`                          | `operator` / `site_manager` / `both`, which decides who is asked to record it          |
 
 ### Usage
 
@@ -340,3 +340,157 @@ to the problem in the meantime.
 2. **Direction of dependency.** Flow taking a dependency on the HR module, and now
    possibly on ERP for supplier links, is an architectural call that wants an
    explicit yes before migrations are written.
+
+## Amendment (2026-08-16): step 1 didn't meet the original ask
+
+Step 1 shipped and was verified end to end, but it wasn't what was asked for.
+Three specific gaps, confirmed directly rather than guessed at:
+
+1. **Project was never surfaced**, though the field already exists.
+2. **Time still reads as settings-adjacent**, not a first-class section.
+3. **The screen is thin** for something called a main functionality: no history,
+   no team visibility, no reports.
+
+This section scopes the fix for all three as one build. It does **not**
+renumber steps 2–8 above; it sits alongside them, and mostly ahead of them,
+because two of these three are close to free and the third exposes a real gap
+step 1 left open.
+
+### 1. Project: already there, just not wired
+
+`hr_time_entries.project_id` exists, is nullable, and the entire chain already
+carries it: `WorkDayLine.project_id` is in the voxie contract
+(`api/flow/time/v1/models.onk:84`), onion's domain struct, repository and sqlc
+queries all read and write it
+(`internal/modules/workspaces/internal/infrastructure/worktime_repository.go:107,244,273`).
+`apps/flow/src/features/time/useWorkDay.ts` already accepts and forwards a
+`projectId`. **No schema, contract, or repository change is needed.** The gap
+is exactly one thing: `MyDay.tsx` never rendered a picker and never required
+one.
+
+Fix: add a required project picker to the add-line form, reusing
+`apps/flow/src/features/projects/useProjects.ts` (already used elsewhere in
+Flow) rather than a new query. Required in the UI. The column itself stays
+nullable — `hr_time_entries` has other writers, and narrowing a shared column
+is a separate, larger decision than this screen. What "required" means here is
+enforced where it should be: the Flow work-day-line create/update path in
+onion's `application` layer rejects a missing `project_id`, the same layer
+that already owns `ErrInvalidWorkMode` and friends. A gap in adoption is not
+grounds to leave it in the frontend only, or the constraint stops meaning
+anything the moment a second client exists.
+
+No backfill: there is no production data on this table's Flow-owned columns
+yet, confirmed directly rather than assumed. Nothing to migrate.
+
+### 2. A real security gap, found while scoping the team view
+
+Designing "who can see whose day" surfaced that **nobody can see whose day is
+already unenforced**. `WorkTimeAPI.scope()`
+(`internal/modules/workspaces/internal/api/worktime_service.go:33`) resolves
+tenant scope and then trusts a caller-supplied `employee_id` with no
+capability check at all. Any authenticated user in the business can read or
+write any other employee's work day today, by passing their id — GetWorkDay,
+ListWorkDays and CreateWorkDayLine all take this path. This predates the team
+view; it was already true for the "manager logs on someone's behalf" case in
+step 1, which was built assuming a permission check would arrive with it and
+one never did.
+
+The frontend hid this by hardcoding the gate closed:
+`TaskDetail.tsx:648` passes `canLogForOthers={false}`, a literal, not a
+computed permission — so the one screen in step 1 that could have exercised
+this path never did, and the hole went unnoticed. That is what live
+verification without a second account will miss: the button was correctly
+disabled, for the wrong reason.
+
+Fix: `scope()` must deny any `employeeID` argument that differs from the
+caller unless the caller holds the new permission below. This is a
+correctness fix independent of everything else in this amendment and should
+land first, on its own commit, regardless of what else in this section gets
+built.
+
+### 3. One new permission, in the system that already exists
+
+`@voxire/permissions` (`packages/permissions/src/capabilities.ts`) is a
+business-wide `Resource × Action` matrix, configured through Dash's existing
+`/permissions` and `/roles` screens, and it already lists `flow:projects`,
+`flow:tasks`, `flow:views`, `flow:roadmap`. Flow's project-membership roles
+(`useCurrentProjectRole`, `flow_project_members`) are a separate, narrower
+system for per-project viewer/editor/admin and are the wrong place for this:
+seeing a colleague's logged hours is a business-wide grant, not something that
+varies project to project.
+
+Decision: add `flow:time` to the resource list and `view_team` to the action
+set, alongside the existing `manage` action already used elsewhere in the
+matrix for the "log on someone's behalf" case. Two distinct grants, both
+possible to hold independently:
+
+- `flow:time:manage` — record a day or line for someone else (this is what
+  `canLogForOthers` should have been computed from all along).
+- `flow:time:view_team` — see other people's days in the team view. Does not
+  imply `manage`; a manager who can see the team should not automatically be
+  able to edit someone else's entries.
+
+This is the "configurable per workspace" requirement in practice: Dash's role
+matrix is how every other cross-cutting Flow permission is already
+configured, and a second, Flow-local permission store would duplicate it for
+no reason this feature needs. `scope()` checks
+`flow:time:manage` for a differing `employeeID` on write paths, and the new
+team-view endpoint below checks `flow:time:view_team`.
+
+### 4. Team/manager view: scoped by workspace, not HR reporting lines
+
+Flow's grouping unit is the workspace (`flow_workspace_members`,
+`api/flow/workspace/v1/models.onk`), not an HR org chart — a manager's "team"
+for this view is the set of people in their Flow workspace, which is the
+scope every other Flow screen already uses. `WorkspaceMember.user_id` is an
+auth user id; work days key on HR's `employee_id`. The two are already linked
+by `hr_employees.user_id` (unique), so resolving a workspace's member list to
+the set of employee ids to query is a lookup, not a new concept.
+
+New: `ListWorkDaysForWorkspace(workspace_id, from, to)` in the same
+`TimeService`. Requires `flow:time:view_team`. Resolves workspace members to
+employee ids server-side (not a client-side loop calling `ListWorkDays` once
+per person — that's an N+1 the client has no business making), then returns
+one page of work days across all of them for the range. New screen:
+`/time/team`, a roster with one row per member showing today's status
+(logged / gap / not started) and a date picker for other days, reusing the
+same `WorkDay` shape the My Day screen already renders.
+
+### 5. Week/history view: mostly free
+
+`ListWorkDaysRequest` already takes `from`/`to`. The week view is a date-range
+call to the existing endpoint the caller already has access to for their own
+`employee_id` — no backend change. New: a week-strip control on `/time`
+alongside the existing day view, and the route keeps working for a single day
+when no range is selected, so nothing about today's screen changes for
+someone who never touches it.
+
+### 6. Reports v1: client-aggregated, deliberately
+
+No new aggregation RPC yet. `/time/reports` calls `ListWorkDaysForWorkspace`
+(or `ListWorkDays` for a single person, depending on the viewer's permission)
+over a range and groups by `project_id` / `work_type_id` / `employee_id`
+client-side. This is the same judgment call step 1 made in reverse: step 1
+avoided inventing schema for hypothetical needs, and this avoids inventing a
+grouped-aggregation endpoint (already scoped in step 6 of the build order
+above) before there is enough real report usage to know its actual shape.
+When step 6 lands for real, this screen swaps its data source, not its
+layout — the same seam pattern as `timeSettingsStore`, applied to a query
+instead of a store.
+
+### Build order for this amendment
+
+1. **The `scope()` fix, alone.** It is a real gap regardless of anything else
+   here, and every other item in this section depends on the permission it
+   introduces.
+2. **`flow:time` resource + `manage`/`view_team` actions** in
+   `@voxire/permissions`, and `canLogForOthers` computed for real instead of
+   hardcoded.
+3. **Project picker**, required in the UI, enforced in onion's application
+   layer.
+4. **`ListWorkDaysForWorkspace` + `/time/team`.**
+5. **Week strip on `/time`.**
+6. **`/time/reports`**, client-aggregated.
+
+Each of 3–6 is independently shippable; 1 and 2 are the only hard
+dependency the rest share.

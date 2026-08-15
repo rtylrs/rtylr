@@ -42,6 +42,8 @@
     "addLine": "Ajouter",
     "setTheDayFirst": "Indiquez où vous avez travaillé pour ouvrir la journée, puis ajoutez vos saisies.",
     "loadingDay": "Chargement de la journée…",
+    "project": "Projet",
+    "selectProject": "Sélectionner un projet",
     "workType": "Type de travail",
     "noWorkType": "Aucun type",
     "deleteLineLabel": "Supprimer l'entrée de {{duration}}",

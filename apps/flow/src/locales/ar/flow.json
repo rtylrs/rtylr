@@ -46,6 +46,8 @@
     "addLine": "إضافة",
     "setTheDayFirst": "حدّد أين عملت لبدء اليوم، ثم أضف ما عملت عليه.",
     "loadingDay": "جارٍ تحميل اليوم…",
+    "project": "المشروع",
+    "selectProject": "اختر مشروعاً",
     "workType": "نوع العمل",
     "noWorkType": "بلا نوع",
     "deleteLineLabel": "حذف مدخل {{duration}}",
