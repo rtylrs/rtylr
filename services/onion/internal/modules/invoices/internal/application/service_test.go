@@ -197,6 +197,13 @@ func TestPaginateInvoices_Page2Offset(t *testing.T) {
 	}
 }
 
+func TestPaginateInvoices_ClampsDeepOffset(t *testing.T) {
+	_, got := paginateInvoices(100000, 500)
+	if got != 10000 {
+		t.Errorf("expected deep offset to clamp at 10000, got %d", got)
+	}
+}
+
 // ---- resolvePeriodRange ----
 
 func TestResolvePeriodRange_MonthReturnsFirstAndLastDay(t *testing.T) {

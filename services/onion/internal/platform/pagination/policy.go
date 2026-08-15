@@ -35,7 +35,7 @@ func (p Policy) Normalize(number, size int64) Page {
 	if maxOffset <= 0 {
 		maxOffset = maxInt64
 	}
-	offset := int64(0)
+	var offset int64
 	if number > 1 && number-1 > maxOffset/size {
 		offset = maxOffset
 	} else {

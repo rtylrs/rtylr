@@ -14,12 +14,19 @@ import (
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/pagination"
 )
 
 const (
 	invoicesScope = "invoices"
 	invoicesTTL   = 5 * time.Minute
 )
+
+var invoicePagePolicy = pagination.Policy{
+	DefaultPageSize: 50,
+	MaxPageSize:     500,
+	MaxOffset:       10000,
+}
 
 func invalidateInvoicesScope(ctx context.Context, businessID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
@@ -94,16 +101,8 @@ func (s *Service) ListInvoices(ctx context.Context, businessID int64, status, se
 }
 
 func paginateInvoices(page, pageSize int64) (int, int) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 50
-	}
-	if pageSize > 500 {
-		pageSize = 500
-	}
-	return int(pageSize), int((page - 1) * pageSize)
+	normalized := invoicePagePolicy.Normalize(page, pageSize)
+	return int(normalized.Size), int(normalized.Offset)
 }
 
 func (s *Service) GetInvoice(ctx context.Context, businessID, invoiceID int64) (*domain.Invoice, error) {
@@ -696,7 +695,7 @@ func (s *Service) fetchDashboard(ctx context.Context, businessID int64) (domain.
 		TotalReceivable:  totalReceivable,
 		OverdueAmount:    overdueAmount,
 		TotalExpensesMTD: totalExpensesMTD,
-		TotalRevenueMTD: revenueMTD,
+		TotalRevenueMTD:  revenueMTD,
 		NetProfitMTD:     netProfitMTD,
 	}, nil
 }

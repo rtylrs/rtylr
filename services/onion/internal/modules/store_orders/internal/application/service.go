@@ -16,6 +16,7 @@ const (
 
 	defaultListLimit int32 = 20
 	maxListLimit     int32 = 100
+	maxListOffset    int32 = 10000
 )
 
 type Service struct{ repo *infrastructure.Repository }
@@ -35,15 +36,7 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.StoreOrd
 // count. A non-positive limit defaults to 20 and limit is capped at 100; a
 // negative offset is clamped to zero.
 func (s *Service) ListPaginated(ctx context.Context, businessID int64, limit, offset int32) (domain.StoreOrderPage, error) {
-	if limit <= 0 {
-		limit = defaultListLimit
-	}
-	if limit > maxListLimit {
-		limit = maxListLimit
-	}
-	if offset < 0 {
-		offset = 0
-	}
+	limit, offset = normalizeListPagination(limit, offset)
 
 	orders, err := s.repo.ListPaginated(ctx, businessID, limit, offset)
 	if err != nil {
@@ -61,6 +54,22 @@ func (s *Service) ListPaginated(ctx context.Context, businessID int64, limit, of
 		Limit:  limit,
 		Offset: offset,
 	}, nil
+}
+
+func normalizeListPagination(limit, offset int32) (int32, int32) {
+	if limit <= 0 {
+		limit = defaultListLimit
+	}
+	if limit > maxListLimit {
+		limit = maxListLimit
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	if offset > maxListOffset {
+		offset = maxListOffset
+	}
+	return limit, offset
 }
 
 func (s *Service) GetDetail(ctx context.Context, businessID, orderID int64) (domain.StoreOrderDetail, error) {

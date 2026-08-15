@@ -28,7 +28,7 @@ SELECT id, owner_id, business_id, invoice_number, client_name, client_email, cli
        notes, terms, created_at, updated_at
 FROM finance_invoices
 WHERE business_id = ?
-ORDER BY created_at DESC
+ORDER BY created_at DESC, id DESC
 LIMIT ? OFFSET ?;
 
 -- name: CountInvoicesByOwner :one
@@ -41,7 +41,8 @@ SELECT id, owner_id, business_id, invoice_number, client_name, client_email, cli
        notes, terms, created_at, updated_at
 FROM finance_invoices
 WHERE business_id = ? AND status = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC, id DESC
+LIMIT 500;
 
 -- name: CreateInvoice :execresult
 INSERT INTO finance_invoices
@@ -95,7 +96,7 @@ FROM finance_invoices
 WHERE business_id = ?
   AND status NOT IN ('paid', 'void', 'draft')
   AND due_date < ?
-ORDER BY due_date ASC
+ORDER BY due_date ASC, id ASC
 LIMIT ? OFFSET ?;
 
 -- name: CountOverdueInvoices :one

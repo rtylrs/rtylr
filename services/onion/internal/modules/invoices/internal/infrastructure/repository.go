@@ -80,7 +80,7 @@ func (r *Repository) ListInvoices(ctx context.Context, businessID int64, status,
 		qb = qb.Where(squirrel.LtOrEq{"issue_date": dateTo})
 	}
 
-	qb = qb.OrderBy("created_at DESC").Limit(uint64(limit)).Offset(uint64(offset))
+	qb = qb.OrderBy("created_at DESC, id DESC").Limit(uint64(limit)).Offset(uint64(offset))
 
 	rows, err := qb.PlaceholderFormat(squirrel.Question).RunWith(r.pool).QueryContext(ctx)
 	if err != nil {
