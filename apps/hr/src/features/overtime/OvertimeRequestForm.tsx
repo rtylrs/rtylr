@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { useUserStore } from '@voxire/auth';
 import { useCreateOvertimeRequest } from '../../shared/hooks/queries/useOvertime';
+import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
 import { Button, Label, Input, Textarea, Modal } from '../../shared/components/ui';
 
 const overtimeFormSchema = z.object({
@@ -18,7 +18,8 @@ interface Props {
 
 const OvertimeRequestForm = ({ open, onClose }: Props): React.JSX.Element => {
   const { t } = useTranslation();
-  const userId = useUserStore((s) => s.userId);
+  const { data: myEmployeeId } = useMyEmployeeId();
+  const employeeId = myEmployeeId !== undefined ? String(myEmployeeId) : undefined;
   const createRequest = useCreateOvertimeRequest();
 
   const [form, setForm] = useState({ date: '', plannedExtraMinutes: 0, reason: '' });
@@ -38,7 +39,7 @@ const OvertimeRequestForm = ({ open, onClose }: Props): React.JSX.Element => {
     }
     setErrors({});
     createRequest.mutate(
-      { employeeId: userId ?? '', ...result.data },
+      { employeeId: employeeId ?? '', ...result.data },
       {
         onSuccess: () => {
           setForm({ date: '', plannedExtraMinutes: 0, reason: '' });
@@ -115,7 +116,11 @@ const OvertimeRequestForm = ({ open, onClose }: Props): React.JSX.Element => {
             <Button type="button" variant="ghost" onClick={onClose}>
               {t('common.cancel')}
             </Button>
-            <Button type="submit" variant="primary" disabled={createRequest.isPending}>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={createRequest.isPending || !employeeId}
+            >
               {createRequest.isPending ? t('common.loading') : t('overtime.form.submit')}
             </Button>
           </div>
