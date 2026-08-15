@@ -1,0 +1,14 @@
+{
+  "apply": "Apply Now",
+  "fullName": "Full Name",
+  "email": "Email Address",
+  "phone": "Phone Number",
+  "resume": "Resume",
+  "coverLetter": "Cover Letter",
+  "submit": "Submit Application",
+  "submitting": "Submitting...",
+  "success": "Application submitted successfully!",
+  "error": "Failed to submit application. Please try again.",
+  "retry": "Retry",
+  "back": "Back to Careers"
+}
