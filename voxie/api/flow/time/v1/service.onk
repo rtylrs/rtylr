@@ -1,0 +1,30 @@
+package flow.time.v1
+
+/// TimeService is Flow's daily time logging: a work day per person per date, the
+/// lines of work inside it, and the work-type tree those lines are classified by.
+///
+/// Lines persist as HR time entries, so Flow and payroll read the same rows rather
+/// than reconciling two stores. Approval lives in a separate service.
+service TimeService {
+  getWorkDay(GetWorkDayRequest) -> GetWorkDayResponse @get("/work-days")
+
+  upsertWorkDay(UpsertWorkDayRequest) -> UpsertWorkDayResponse @put("/work-days")
+
+  listWorkDays(ListWorkDaysRequest) -> ListWorkDaysResponse @get("/work-days/range")
+
+  listWorkDaysForWorkspace(ListWorkDaysForWorkspaceRequest) -> ListWorkDaysForWorkspaceResponse @get("/work-days/team")
+
+  createWorkDayLine(CreateWorkDayLineRequest) -> CreateWorkDayLineResponse @post("/work-days/{work_day_id}/lines")
+
+  updateWorkDayLine(UpdateWorkDayLineRequest) -> UpdateWorkDayLineResponse @patch("/work-days/lines/{id}")
+
+  deleteWorkDayLine(DeleteWorkDayLineRequest) -> DeleteWorkDayLineResponse @delete("/work-days/lines/{id}")
+
+  listWorkTypes(ListWorkTypesRequest) -> ListWorkTypesResponse @get("/work-types")
+
+  createWorkType(CreateWorkTypeRequest) -> CreateWorkTypeResponse @post("/work-types")
+
+  updateWorkType(UpdateWorkTypeRequest) -> UpdateWorkTypeResponse @put("/work-types/{id}")
+
+  deleteWorkType(DeleteWorkTypeRequest) -> DeleteWorkTypeResponse @delete("/work-types/{id}")
+}

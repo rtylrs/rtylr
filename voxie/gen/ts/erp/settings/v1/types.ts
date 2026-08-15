@@ -171,3 +171,4 @@ if (!(v.settings !== undefined && v.settings !== null)) violations.push("setting
 if (v.settings !== undefined && v.settings !== null) violations.push(...validateErpBusinessSettings(v.settings).map((message) => "settings: " + message));
 return violations;
 }
+
