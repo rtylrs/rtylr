@@ -53,7 +53,7 @@ export const FLAG_PROD_DEFAULTS: Record<FlagKey, boolean> = {
   [FLAG_KEYS.APP_MENU]: true,
   [FLAG_KEYS.APP_POS]: true,
   [FLAG_KEYS.APP_POS_PAYMENTS]: false, // off until Paddle is wired
-  [FLAG_KEYS.APP_RECRUIT_FILE_UPLOAD]: false, // off until R2 creds
+  [FLAG_KEYS.APP_RECRUIT_FILE_UPLOAD]: true, // storage & presigned R2 upload wired
   [FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES]: false, // off until screens render real data
 };
 
