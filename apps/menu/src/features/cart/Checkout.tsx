@@ -86,7 +86,12 @@ const Checkout = (): React.JSX.Element => {
       const res = await api.post<PlaceOrderResponse>('/pos/orders/v1/orders/public', body);
       const { order_id, order_number } = res.data;
       clearCart();
-      void navigate({ to: `/order-status/${order_id}?number=${encodeURIComponent(order_number)}` });
+      const bId = body.business_id ? `&business_id=${encodeURIComponent(body.business_id)}` : '';
+      const slug = (search as any)?.slug;
+      const slugQuery = slug ? `&slug=${encodeURIComponent(slug)}` : '';
+      void navigate({
+        to: `/order-status/${order_id}?number=${encodeURIComponent(order_number)}${bId}${slugQuery}`,
+      });
     } catch {
       setErrorMessage('Failed to place order. Please try again.');
     } finally {

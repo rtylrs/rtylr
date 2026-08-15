@@ -86,9 +86,21 @@ const OrderStatus = (): React.JSX.Element => {
     };
   }, [fetchStatus]);
 
+  const navigate = useNavigate();
+
   const handleOrderAnother = (): void => {
     clearCart();
-    window.history.back();
+    const returnUrl = new URLSearchParams(searchStr).get('return_url');
+    if (returnUrl) {
+      window.location.href = returnUrl;
+      return;
+    }
+    const slug = new URLSearchParams(searchStr).get('slug');
+    if (slug) {
+      void navigate({ to: `/${slug}` });
+      return;
+    }
+    void navigate({ to: '/' });
   };
 
   const cancelled = isCancelled(status);
