@@ -9,12 +9,17 @@ type PermissionProvider interface {
 	HasPermission(ctx context.Context, businessID, employeeID int64, permissionKey string) (bool, error)
 }
 
-var compensationPermissionKeys = []string{"manage_employees", "manage_payroll"}
+// sensitiveDetailPermissionKeys gates every staff field a casual directory
+// listing should not hand out by default: compensation (salary/hourly/
+// overtime rate) and personal contact detail (home address, emergency
+// contact). Both were previously ungated for compensation and unconditional
+// for the contact fields - see newStaffPayload.
+var sensitiveDetailPermissionKeys = []string{"manage_employees", "manage_payroll"}
 
-// canViewCompensation fails closed when the caller cannot be resolved or the
-// permission store is unavailable. The response builder then emits zero values
-// which the generated contract omits from JSON.
-func canViewCompensation(
+// canViewSensitiveDetails fails closed when the caller cannot be resolved or
+// the permission store is unavailable. The response builder then emits zero
+// values, which the generated contract omits from JSON.
+func canViewSensitiveDetails(
 	ctx context.Context,
 	permissions PermissionProvider,
 	businessID, userID int64,
@@ -28,7 +33,7 @@ func canViewCompensation(
 		return false
 	}
 
-	for _, permissionKey := range compensationPermissionKeys {
+	for _, permissionKey := range sensitiveDetailPermissionKeys {
 		allowed, err := permissions.HasPermission(ctx, businessID, employeeID, permissionKey)
 		if err != nil {
 			return false

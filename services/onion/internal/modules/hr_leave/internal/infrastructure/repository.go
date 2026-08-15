@@ -279,6 +279,25 @@ func (r *Repository) RejectLeaveRequest(ctx context.Context, ownerID, requestID 
 	})
 }
 
+// CancelLeaveRequest reports whether the request was actually still pending
+// at the moment of the write (the query's WHERE clause guards on it) - a
+// zero result means it was approved, rejected, or already canceled between
+// the caller's read and this write, not that the write failed.
+func (r *Repository) CancelLeaveRequest(ctx context.Context, ownerID, requestID int64) (bool, error) {
+	result, err := r.queries.CancelLeaveRequest(ctx, sqlc.CancelLeaveRequestParams{
+		ID:         requestID,
+		BusinessID: ownerID,
+	})
+	if err != nil {
+		return false, err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return rows > 0, nil
+}
+
 func (r *Repository) ListOverlappingLeaveRequests(ctx context.Context, ownerID, employeeID int64, startDate, endDate string) ([]domain.LeaveRequestRecord, error) {
 	sd, err := time.Parse("2006-01-02", startDate)
 	if err != nil {

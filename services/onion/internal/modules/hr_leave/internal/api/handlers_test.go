@@ -139,6 +139,24 @@ func TestCreateLeaveRequestHandler_Validate_ValidRequest(t *testing.T) {
 	}
 }
 
+// --- CancelLeaveRequestHandler ---
+
+func TestCancelLeaveRequestHandler_Validate_MissingRequestID(t *testing.T) {
+	h := &CancelLeaveRequestHandler{}
+	se := h.Validate(context.Background(), &CancelLeaveRequestRequest{})
+	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
+		t.Errorf("expected 400 for missing request_id, got %v", se)
+	}
+}
+
+func TestCancelLeaveRequestHandler_Validate_ValidRequest(t *testing.T) {
+	h := &CancelLeaveRequestHandler{}
+	se := h.Validate(context.Background(), &CancelLeaveRequestRequest{RequestID: 501})
+	if se != nil {
+		t.Errorf("expected no error for a valid request, got %v", se)
+	}
+}
+
 // --- ApproveLeaveHandler ---
 
 func TestApproveLeaveHandler_Validate_MissingRequestID(t *testing.T) {

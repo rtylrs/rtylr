@@ -30,24 +30,24 @@ func (f fakeStaffPermissionProvider) HasPermission(_ context.Context, _, _ int64
 	return f.permissions[key], nil
 }
 
-func TestCanViewCompensationRequiresHRPermission(t *testing.T) {
+func TestCanViewSensitiveDetailsRequiresHRPermission(t *testing.T) {
 	ctx := context.Background()
 
-	if canViewCompensation(ctx, fakeStaffPermissionProvider{
+	if canViewSensitiveDetails(ctx, fakeStaffPermissionProvider{
 		employeeID:  4101,
 		permissions: map[string]bool{"view_own_profile": true},
 	}, 1001, 700) {
-		t.Fatal("ordinary HR user must not receive compensation")
+		t.Fatal("ordinary HR user must not receive sensitive detail")
 	}
 
-	if !canViewCompensation(ctx, fakeStaffPermissionProvider{
+	if !canViewSensitiveDetails(ctx, fakeStaffPermissionProvider{
 		employeeID:  4101,
 		permissions: map[string]bool{"manage_payroll": true},
 	}, 1001, 700) {
-		t.Fatal("payroll manager should receive compensation")
+		t.Fatal("payroll manager should receive sensitive detail")
 	}
 
-	if canViewCompensation(ctx, fakeStaffPermissionProvider{
+	if canViewSensitiveDetails(ctx, fakeStaffPermissionProvider{
 		employeeID:    4101,
 		permissionErr: errors.New("permission store unavailable"),
 	}, 1001, 700) {
@@ -55,17 +55,20 @@ func TestCanViewCompensationRequiresHRPermission(t *testing.T) {
 	}
 }
 
-func TestNewStaffPayloadOmitsCompensationWhenUnauthorized(t *testing.T) {
+func TestNewStaffPayloadOmitsSensitiveDetailWhenUnauthorized(t *testing.T) {
 	staff := domain.Staff{
-		ID:           4102,
-		FirstName:    "Other",
-		LastName:     "Employee",
-		Salary:       5000,
-		HourlyRate:   30,
-		OvertimeRate: 45,
+		ID:                    4102,
+		FirstName:             "Other",
+		LastName:              "Employee",
+		Salary:                5000,
+		HourlyRate:            30,
+		OvertimeRate:          45,
+		Address:               "12 Cedar St",
+		EmergencyContactName:  "Sam Employee",
+		EmergencyContactPhone: "+1-555-0100",
 	}
 
-	payload := newStaffPayload(staff, false)
+	payload := newStaffPayload(staff, false, 700)
 	encoded, err := json.Marshal(payload)
 	if err != nil {
 		t.Fatalf("marshal payload: %v", err)
@@ -75,19 +78,64 @@ func TestNewStaffPayloadOmitsCompensationWhenUnauthorized(t *testing.T) {
 	if err := json.Unmarshal(encoded, &fields); err != nil {
 		t.Fatalf("unmarshal payload: %v", err)
 	}
-	for _, key := range []string{"salary", "hourly_rate", "overtime_rate"} {
+	for _, key := range []string{
+		"salary", "hourly_rate", "overtime_rate",
+		"address", "emergency_contact_name", "emergency_contact_phone",
+	} {
 		if _, present := fields[key]; present {
 			t.Fatalf("unauthorized payload contains %q: %s", key, encoded)
 		}
 	}
 	if fields["first_name"] != "Other" {
-		t.Fatalf("non-compensation fields were lost: %s", encoded)
+		t.Fatalf("non-sensitive fields were lost: %s", encoded)
 	}
 }
 
-func TestNewStaffPayloadIncludesCompensationWhenAuthorized(t *testing.T) {
-	payload := newStaffPayload(domain.Staff{Salary: 5000, HourlyRate: 30, OvertimeRate: 45}, true)
+func TestNewStaffPayloadIncludesSensitiveDetailWhenAuthorized(t *testing.T) {
+	payload := newStaffPayload(domain.Staff{
+		Salary:                5000,
+		HourlyRate:            30,
+		OvertimeRate:          45,
+		Address:               "12 Cedar St",
+		EmergencyContactName:  "Sam Employee",
+		EmergencyContactPhone: "+1-555-0100",
+	}, true, 0)
 	if payload.Salary != 5000 || payload.HourlyRate != 30 || payload.OvertimeRate != 45 {
 		t.Fatalf("authorized payload lost compensation: %+v", payload)
+	}
+	if payload.Address != "12 Cedar St" || payload.EmergencyContactName != "Sam Employee" || payload.EmergencyContactPhone != "+1-555-0100" {
+		t.Fatalf("authorized payload lost contact detail: %+v", payload)
+	}
+}
+
+func TestNewStaffPayloadIncludesSensitiveDetailForOwnRecord(t *testing.T) {
+	staff := domain.Staff{
+		UserID:                700,
+		Salary:                5000,
+		HourlyRate:            30,
+		OvertimeRate:          45,
+		Address:               "12 Cedar St",
+		EmergencyContactName:  "Sam Employee",
+		EmergencyContactPhone: "+1-555-0100",
+	}
+
+	payload := newStaffPayload(staff, false, 700)
+	if payload.Salary != 5000 || payload.HourlyRate != 30 || payload.OvertimeRate != 45 {
+		t.Fatalf("own record should show compensation even without manage_employees/manage_payroll: %+v", payload)
+	}
+	if payload.Address != "12 Cedar St" || payload.EmergencyContactName != "Sam Employee" || payload.EmergencyContactPhone != "+1-555-0100" {
+		t.Fatalf("own record should show contact detail even without manage_employees/manage_payroll: %+v", payload)
+	}
+}
+
+func TestNewStaffPayloadOmitsSensitiveDetailWhenCallerUserIDUnresolved(t *testing.T) {
+	// A staff record that was never linked to a hub user (UserID left at its
+	// zero value) must not be treated as "self" for a caller whose own user
+	// id also failed to resolve to 0 - two absent ids are not a match.
+	staff := domain.Staff{Salary: 5000}
+
+	payload := newStaffPayload(staff, false, 0)
+	if payload.Salary != 0 {
+		t.Fatalf("an unresolved caller id must not coincide with an unset staff.UserID: %+v", payload)
 	}
 }

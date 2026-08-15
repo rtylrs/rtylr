@@ -93,7 +93,11 @@ func (s *Service) UpdateLeaveType(ctx context.Context, ownerID int64, lt domain.
 
 // --- Leave Requests ---
 
-func (s *Service) CreateLeaveRequest(ctx context.Context, ownerID int64, req domain.LeaveRequestRecord) (*domain.LeaveRequestRecord, error) {
+func (s *Service) CreateLeaveRequest(ctx context.Context, ownerID, callerUserID int64, req domain.LeaveRequestRecord) (*domain.LeaveRequestRecord, error) {
+	if err := s.authorizeLeaveSubject(ctx, ownerID, callerUserID, req.EmployeeID); err != nil {
+		return nil, err
+	}
+
 	// Validate leave type exists
 	leaveTypes, _, err := s.repo.ListLeaveTypes(ctx, ownerID, domain.ListLeaveTypesParams{Limit: 1, Offset: 0})
 	if err != nil {
@@ -263,6 +267,58 @@ func (s *Service) RejectLeave(ctx context.Context, ownerID, requestID, approverU
 	return nil
 }
 
+// CancelLeaveRequest withdraws the caller's own pending leave request.
+// Unlike ApproveLeave/RejectLeave, which are an approver's decision over
+// someone else's request, this is self-service: only the request's own
+// subject may cancel it - the leave approval permission grants no override
+// here - and only while it is still pending. Once a request has been
+// decided, undoing it can have payroll or scheduling consequences a bare
+// status flip should not trigger silently; that path is a request to a
+// manager, not a self-service button.
+func (s *Service) CancelLeaveRequest(ctx context.Context, ownerID, callerUserID, requestID int64) error {
+	if s.permissions == nil || callerUserID <= 0 {
+		return domain.ErrLeaveAccessDenied
+	}
+	employeeID, err := s.permissions.GetEmployeeIDByUserID(ctx, ownerID, callerUserID)
+	if err != nil || employeeID <= 0 {
+		return domain.ErrLeaveAccessDenied
+	}
+
+	req, err := s.repo.GetLeaveRequest(ctx, ownerID, requestID)
+	if err != nil {
+		return err
+	}
+	if req.EmployeeID != employeeID {
+		return domain.ErrLeaveAccessDenied
+	}
+	if req.Status != domain.LeaveStatusPending {
+		return domain.ErrLeaveRequestNotPending
+	}
+
+	canceled, err := s.repo.CancelLeaveRequest(ctx, ownerID, requestID)
+	if err != nil {
+		return err
+	}
+	if !canceled {
+		// Approved, rejected, or canceled by something else between the read
+		// above and this write - not a failure, just no longer pending.
+		return domain.ErrLeaveRequestNotPending
+	}
+
+	startDate, parseErr := time.Parse("2006-01-02", req.StartDate)
+	if parseErr != nil {
+		return parseErr
+	}
+	year := int32(startDate.Year())
+	if subErr := s.repo.SubtractPendingDays(ctx, ownerID, req.EmployeeID, req.LeaveTypeID, year, req.TotalDays); subErr != nil {
+		logger.Ctx(ctx).Error("failed to subtract pending days after cancellation",
+			logger.Any("owner_id", ownerID), logger.Any("request_id", requestID), logger.Error(subErr))
+	}
+
+	invalidateHRLeaveScope(ctx, ownerID)
+	return nil
+}
+
 // scopeLeaveRequests resolves the authenticated user's employee row before
 // applying any client-supplied filter. A caller with the leave approval
 // permission may request the team feed; every other caller is forced to their
@@ -282,6 +338,32 @@ func (s *Service) scopeLeaveRequests(ctx context.Context, ownerID, callerUserID,
 		return requestedEmployeeID, nil
 	}
 	return employeeID, nil
+}
+
+// authorizeLeaveSubject verifies the caller may act on employeeID's leave -
+// either it is their own, or they hold the leave approval permission.
+// Unlike scopeLeaveRequests, which narrows an unauthorized list to the
+// caller's own view rather than fail the read, a write silently substituting
+// a different employee than the one requested would file the wrong person's
+// leave without anyone noticing - so this denies outright instead.
+func (s *Service) authorizeLeaveSubject(ctx context.Context, ownerID, callerUserID, requestedEmployeeID int64) error {
+	if s.permissions == nil || callerUserID <= 0 {
+		return domain.ErrLeaveAccessDenied
+	}
+
+	employeeID, err := s.permissions.GetEmployeeIDByUserID(ctx, ownerID, callerUserID)
+	if err != nil || employeeID <= 0 {
+		return domain.ErrLeaveAccessDenied
+	}
+	if employeeID == requestedEmployeeID {
+		return nil
+	}
+
+	canActForOthers, permissionErr := s.permissions.HasPermission(ctx, ownerID, employeeID, permissionApproveTimeOff)
+	if permissionErr == nil && canActForOthers {
+		return nil
+	}
+	return domain.ErrLeaveAccessDenied
 }
 
 // authorizedLeaveDecision performs the permission and approval-chain checks

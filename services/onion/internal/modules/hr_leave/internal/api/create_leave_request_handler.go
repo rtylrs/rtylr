@@ -62,7 +62,7 @@ func (h *CreateLeaveRequestHandler) Serve(ctx context.Context, req *CreateLeaveR
 		return CreateLeaveRequestResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	created, err := h.Service.CreateLeaveRequest(ctx, device.User.UserID, domain.LeaveRequestRecord{
+	created, err := h.Service.CreateLeaveRequest(ctx, device.User.UserID, device.User.UserID, domain.LeaveRequestRecord{
 		EmployeeID:  req.EmployeeID,
 		LeaveTypeID: req.LeaveTypeID,
 		StartDate:   req.StartDate,
@@ -71,6 +71,9 @@ func (h *CreateLeaveRequestHandler) Serve(ctx context.Context, req *CreateLeaveR
 		Notes:       req.Notes,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrLeaveAccessDenied) {
+			return CreateLeaveRequestResponse{}, onekiterrors.PermissionDenied()
+		}
 		if errors.Is(err, domain.ErrLeaveNotConfigured) {
 			return CreateLeaveRequestResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, "Leave types are not configured. Please configure leave types first.")
 		}

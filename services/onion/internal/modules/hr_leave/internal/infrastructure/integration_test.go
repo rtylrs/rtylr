@@ -494,6 +494,73 @@ func TestListLeaveCalendar_NoError(t *testing.T) {
 	_ = records
 }
 
+func TestCancelLeaveRequest_OnlyWhenPending(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	name := fmt.Sprintf("Cancel test %d", time.Now().UnixNano())
+
+	lt, err := repo.CreateLeaveType(ctx, testutil.OwnerID, domain.LeaveTypeRecord{
+		Name:             name,
+		RequiresApproval: false,
+		IsActive:         true,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveType: %v", err)
+	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM hr_leave_types WHERE id = ?", lt.ID) })
+
+	pending, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
+		EmployeeID: 4101, LeaveTypeID: lt.ID, StartDate: "2035-03-01", EndDate: "2035-03-02", TotalDays: 2, Status: domain.LeaveStatusPending,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveRequest (pending): %v", err)
+	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM hr_leave_requests WHERE id = ?", pending.ID) })
+
+	canceled, err := repo.CancelLeaveRequest(ctx, testutil.OwnerID, pending.ID)
+	if err != nil {
+		t.Fatalf("CancelLeaveRequest: %v", err)
+	}
+	if !canceled {
+		t.Fatal("want a pending request to be cancelable")
+	}
+
+	got, err := repo.GetLeaveRequest(ctx, testutil.OwnerID, pending.ID)
+	if err != nil {
+		t.Fatalf("GetLeaveRequest after cancel: %v", err)
+	}
+	if got.Status != domain.LeaveStatusCanceled {
+		t.Fatalf("status after cancel = %q, want %q", got.Status, domain.LeaveStatusCanceled)
+	}
+
+	// Already canceled - a second attempt must report false, not re-cancel
+	// or error, since the row no longer matches the query's pending guard.
+	canceledAgain, err := repo.CancelLeaveRequest(ctx, testutil.OwnerID, pending.ID)
+	if err != nil {
+		t.Fatalf("CancelLeaveRequest (already canceled): %v", err)
+	}
+	if canceledAgain {
+		t.Fatal("want an already-canceled request to report false, not cancel again")
+	}
+
+	approved, err := repo.CreateLeaveRequest(ctx, testutil.OwnerID, domain.LeaveRequestRecord{
+		EmployeeID: 4101, LeaveTypeID: lt.ID, StartDate: "2035-04-01", EndDate: "2035-04-02", TotalDays: 2, Status: domain.LeaveStatusApproved,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveRequest (approved): %v", err)
+	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM hr_leave_requests WHERE id = ?", approved.ID) })
+
+	canceledApproved, err := repo.CancelLeaveRequest(ctx, testutil.OwnerID, approved.ID)
+	if err != nil {
+		t.Fatalf("CancelLeaveRequest (approved): %v", err)
+	}
+	if canceledApproved {
+		t.Fatal("want an approved request to not be cancelable through this path")
+	}
+}
+
 func TestListDistinctOwnerIDs_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

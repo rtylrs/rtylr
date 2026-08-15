@@ -72,6 +72,62 @@ func TestScopeLeaveRequests_FailsClosedWithoutEmployee(t *testing.T) {
 	}
 }
 
+func TestAuthorizeLeaveSubject_AllowsOwnEmployee(t *testing.T) {
+	svc := &Service{permissions: fakeLeavePermissionProvider{employeeID: 4101}}
+
+	if err := svc.authorizeLeaveSubject(context.Background(), 1001, 77, 4101); err != nil {
+		t.Fatalf("authorizeLeaveSubject for own employee: %v", err)
+	}
+}
+
+func TestAuthorizeLeaveSubject_DeniesOtherEmployeeWithoutApprovalPermission(t *testing.T) {
+	svc := &Service{permissions: fakeLeavePermissionProvider{employeeID: 4101}}
+
+	err := svc.authorizeLeaveSubject(context.Background(), 1001, 77, 4102)
+	if !errors.Is(err, domain.ErrLeaveAccessDenied) {
+		t.Fatalf("error = %v, want ErrLeaveAccessDenied", err)
+	}
+}
+
+func TestAuthorizeLeaveSubject_AllowsOtherEmployeeForApprover(t *testing.T) {
+	svc := &Service{permissions: fakeLeavePermissionProvider{employeeID: 4101, canApprove: true}}
+
+	if err := svc.authorizeLeaveSubject(context.Background(), 1001, 77, 4102); err != nil {
+		t.Fatalf("authorizeLeaveSubject for approver acting on someone else: %v", err)
+	}
+}
+
+func TestAuthorizeLeaveSubject_FailsClosedWithoutEmployee(t *testing.T) {
+	svc := &Service{permissions: fakeLeavePermissionProvider{
+		employeeErr: errors.New("employee lookup failed"),
+	}}
+
+	err := svc.authorizeLeaveSubject(context.Background(), 1001, 77, 4102)
+	if !errors.Is(err, domain.ErrLeaveAccessDenied) {
+		t.Fatalf("error = %v, want ErrLeaveAccessDenied", err)
+	}
+}
+
+func TestCancelLeaveRequest_DeniesWithoutResolvableEmployee(t *testing.T) {
+	svc := &Service{permissions: fakeLeavePermissionProvider{
+		employeeErr: errors.New("employee lookup failed"),
+	}}
+
+	err := svc.CancelLeaveRequest(context.Background(), 1001, 77, 501)
+	if !errors.Is(err, domain.ErrLeaveAccessDenied) {
+		t.Fatalf("error = %v, want ErrLeaveAccessDenied", err)
+	}
+}
+
+func TestCancelLeaveRequest_DeniesZeroCallerUserID(t *testing.T) {
+	svc := &Service{permissions: fakeLeavePermissionProvider{employeeID: 4101}}
+
+	err := svc.CancelLeaveRequest(context.Background(), 1001, 0, 501)
+	if !errors.Is(err, domain.ErrLeaveAccessDenied) {
+		t.Fatalf("error = %v, want ErrLeaveAccessDenied", err)
+	}
+}
+
 func TestApproverMatchesChain_UsesCurrentApprovalLevel(t *testing.T) {
 	svc := &Service{permissions: fakeLeavePermissionProvider{roles: map[int64]bool{7: true}}}
 	levels := []domain.ApprovalLevelInfo{

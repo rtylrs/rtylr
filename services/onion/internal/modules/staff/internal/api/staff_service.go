@@ -35,10 +35,10 @@ func (a *StaffAPI) ListStaff(ctx context.Context, req *hrstaffv1.ListStaffReques
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list staff")
 	}
 
-	compensationVisible := canViewCompensation(ctx, a.permissions, businessID, device.User.UserID)
+	hasSensitiveDetailsPermission := canViewSensitiveDetails(ctx, a.permissions, businessID, device.User.UserID)
 	payloads := make([]*hrstaffv1.Staff, 0, len(staffList))
 	for _, staff := range staffList {
-		payloads = append(payloads, newStaffPayload(staff, compensationVisible))
+		payloads = append(payloads, newStaffPayload(staff, hasSensitiveDetailsPermission, device.User.UserID))
 	}
 
 	return &hrstaffv1.ListStaffResponse{Staff: payloads}, nil
@@ -100,8 +100,10 @@ func (a *StaffAPI) GetStaff(ctx context.Context, req *hrstaffv1.GetStaffRequest)
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get staff member")
 	}
 
-	compensationVisible := canViewCompensation(ctx, a.permissions, businessID, device.User.UserID)
-	return &hrstaffv1.GetStaffResponse{Staff: newStaffPayload(*staff, compensationVisible)}, nil
+	hasSensitiveDetailsPermission := canViewSensitiveDetails(ctx, a.permissions, businessID, device.User.UserID)
+	return &hrstaffv1.GetStaffResponse{
+		Staff: newStaffPayload(*staff, hasSensitiveDetailsPermission, device.User.UserID),
+	}, nil
 }
 
 func (a *StaffAPI) UpdateStaff(ctx context.Context, req *hrstaffv1.UpdateStaffRequest) (*hrstaffv1.UpdateStaffResponse, error) {
@@ -193,11 +195,18 @@ func resolveBusinessID(ctx context.Context) (int64, error) {
 	return businessID, nil
 }
 
-func newStaffPayload(staff domain.Staff, compensationVisible bool) *hrstaffv1.Staff {
-	if !compensationVisible {
+func newStaffPayload(staff domain.Staff, hasSensitiveDetailsPermission bool, callerUserID int64) *hrstaffv1.Staff {
+	// A caller always sees their own compensation and contact detail, even
+	// without manage_employees/manage_payroll - that permission gates seeing
+	// someone else's, not your own record back to you.
+	isOwnRecord := callerUserID > 0 && staff.UserID == callerUserID
+	if !hasSensitiveDetailsPermission && !isOwnRecord {
 		staff.Salary = 0
 		staff.HourlyRate = 0
 		staff.OvertimeRate = 0
+		staff.Address = ""
+		staff.EmergencyContactName = ""
+		staff.EmergencyContactPhone = ""
 	}
 
 	return &hrstaffv1.Staff{

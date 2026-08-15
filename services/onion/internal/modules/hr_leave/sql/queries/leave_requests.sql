@@ -42,6 +42,15 @@ UPDATE hr_leave_requests
 SET status = 'rejected', rejection_reason = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ?;
 
+-- The status = 'pending' guard is a second, DB-level check alongside the
+-- service-layer one: RowsAffected = 0 tells the caller the request was no
+-- longer pending (approved/rejected/canceled between the read and this
+-- write) rather than silently succeeding on a request it should not touch.
+-- name: CancelLeaveRequest :execresult
+UPDATE hr_leave_requests
+SET status = 'canceled', updated_at = NOW()
+WHERE id = ? AND business_id = ? AND status = 'pending';
+
 -- name: ListOverlappingLeaveRequests :many
 SELECT id, owner_id, business_id, employee_id, leave_type_id, start_date, end_date, total_days,
        notes, status, current_approval_level, rejection_reason, created_at, updated_at

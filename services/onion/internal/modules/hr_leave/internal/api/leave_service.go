@@ -72,6 +72,19 @@ func (s *LeaveService) ApproveLeave(ctx context.Context, req *hrleavev1.ApproveL
 	return &hrleavev1.ApproveLeaveResponse{Success: res.Success}, nil
 }
 
+func (s *LeaveService) CancelLeaveRequest(ctx context.Context, req *hrleavev1.CancelLeaveRequestRequest) (*hrleavev1.CancelLeaveResponse, error) {
+	in := &CancelLeaveRequestRequest{RequestID: req.GetRequestId()}
+	handler := &CancelLeaveRequestHandler{Service: s.service}
+	if err := handler.Validate(ctx, in); err != nil {
+		return nil, err
+	}
+	res, err := handler.Serve(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+	return &hrleavev1.CancelLeaveResponse{Success: res.Success}, nil
+}
+
 func (s *LeaveService) ListLeaveTypes(ctx context.Context, _ *hrleavev1.ListLeaveTypesRequest) (*hrleavev1.ListLeaveTypesResponse, error) {
 	res, err := (&ListLeaveTypesHandler{Service: s.service}).Serve(ctx, &ListLeaveTypesRequest{})
 	if err != nil {
