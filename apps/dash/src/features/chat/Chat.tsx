@@ -102,9 +102,9 @@ const Chat: React.FC = () => {
               >
                 <div
                   className="h-12 w-12 rounded-2xl flex items-center justify-center mx-auto mb-5"
-                  style={{ background: 'rgba(139,92,246,0.1)' }}
+                  style={{ background: 'rgba(69,131,196,0.1)' }}
                 >
-                  <Sparkles size={24} style={{ color: '#8b5cf6' }} />
+                  <Sparkles size={24} style={{ color: '#4583C4' }} />
                 </div>
                 <h1 className="text-xl font-semibold mb-2" style={{ color: 'var(--dash-text)' }}>
                   Chat with Caret
@@ -131,7 +131,7 @@ const Chat: React.FC = () => {
                         color: 'var(--dash-text)',
                       }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
+                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(69,131,196,0.4)';
                       }}
                       onMouseLeave={(e) => {
                         (e.currentTarget as HTMLElement).style.borderColor = 'var(--dash-border)';
@@ -162,9 +162,9 @@ const Chat: React.FC = () => {
                       {msg.role === 'assistant' && (
                         <div
                           className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0 mr-3 mt-1"
-                          style={{ background: 'rgba(139,92,246,0.1)' }}
+                          style={{ background: 'rgba(69,131,196,0.1)' }}
                         >
-                          <Sparkles size={14} style={{ color: '#8b5cf6' }} />
+                          <Sparkles size={14} style={{ color: '#4583C4' }} />
                         </div>
                       )}
                       <div
@@ -203,9 +203,9 @@ const Chat: React.FC = () => {
                 >
                   <div
                     className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ background: 'rgba(139,92,246,0.1)' }}
+                    style={{ background: 'rgba(69,131,196,0.1)' }}
                   >
-                    <Sparkles size={14} style={{ color: '#8b5cf6' }} />
+                    <Sparkles size={14} style={{ color: '#4583C4' }} />
                   </div>
                   <div
                     className="flex items-center gap-1.5 px-4 py-3 rounded-2xl"
@@ -218,7 +218,7 @@ const Chat: React.FC = () => {
                       <motion.div
                         key={i}
                         className="h-1.5 w-1.5 rounded-full"
-                        style={{ background: '#8b5cf6' }}
+                        style={{ background: '#4583C4' }}
                         animate={{ opacity: [0.2, 1, 0.2] }}
                         transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }}
                       />
@@ -254,7 +254,7 @@ const Chat: React.FC = () => {
                 fontSize: '16px',
               }}
               onFocus={(e) => {
-                (e.target as HTMLElement).style.borderColor = 'rgba(139,92,246,0.4)';
+                (e.target as HTMLElement).style.borderColor = 'rgba(69,131,196,0.4)';
               }}
               onBlur={(e) => {
                 (e.target as HTMLElement).style.borderColor = 'var(--dash-border)';
@@ -266,7 +266,7 @@ const Chat: React.FC = () => {
               aria-label="Send message"
               className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
               style={{
-                background: input.trim() && !isStreaming ? '#8b5cf6' : 'transparent',
+                background: input.trim() && !isStreaming ? '#4583C4' : 'transparent',
                 color: input.trim() && !isStreaming ? '#fff' : 'var(--dash-text-dim)',
               }}
             >
