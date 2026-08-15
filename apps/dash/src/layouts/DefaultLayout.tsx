@@ -339,6 +339,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   return (
     <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-3 focus:bg-[var(--dash-surface)] focus:text-[var(--dash-text)] focus:border focus:border-[var(--dash-border)] focus:rounded-lg focus:shadow-lg focus:top-2 focus:left-2"
+      >
+        Skip to main content
+      </a>
       <div
         className="dash-shell flex h-screen overflow-hidden relative"
         style={{ background: 'var(--dash-bg)' }}
@@ -580,7 +586,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   onClick={() => navigate({ to: '/notifications' })}
                   className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}
-                  aria-label="Notifications"
+                  aria-label={
+                    unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'
+                  }
                 >
                   <Bell size={14} />
                   {unreadCount > 0 && (
@@ -597,6 +605,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             {/* Page content */}
             <AnimatePresence mode="wait">
               <motion.main
+                id="main-content"
                 key={pathname}
                 initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
