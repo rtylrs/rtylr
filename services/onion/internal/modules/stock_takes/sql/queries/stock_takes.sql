@@ -56,7 +56,10 @@ WHERE business_id = ? AND id = ?;
 DELETE FROM erp_stock_take_items WHERE stock_take_id = ?;
 
 -- name: GetStockTakeStatusForUpdate :one
-SELECT status FROM erp_stock_takes WHERE business_id = ? AND id = ? FOR UPDATE;
+SELECT warehouse_id, status
+FROM erp_stock_takes
+WHERE business_id = ? AND id = ?
+FOR UPDATE;
 
 -- name: InsertInventoryTransactionWithRef :execresult
 INSERT INTO erp_inventory_transactions

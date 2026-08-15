@@ -224,8 +224,9 @@ func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, inpu
 	// prior status so a repeated "complete" is a no-op rather than re-applying
 	// (and double-ledgering) the same counts.
 	alreadyCompleted := false
+	var warehouseID sql.NullInt64
 	if input.Status == domain.StockTakeStatusCompleted {
-		var prior sqlc.NullErpStockTakesStatus
+		var prior sqlc.GetStockTakeStatusForUpdateRow
 		prior, err = qtx.GetStockTakeStatusForUpdate(ctx, sqlc.GetStockTakeStatusForUpdateParams{
 			BusinessID: businessID,
 			ID:         input.ID,
@@ -238,7 +239,8 @@ func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, inpu
 			logger.Ctx(ctx).Error("Failed to lock stock take for completion", logger.Error(err))
 			return err
 		}
-		alreadyCompleted = prior.Valid && prior.ErpStockTakesStatus == sqlc.ErpStockTakesStatus(domain.StockTakeStatusCompleted)
+		warehouseID = prior.WarehouseID
+		alreadyCompleted = prior.Status.Valid && prior.Status.ErpStockTakesStatus == sqlc.ErpStockTakesStatus(domain.StockTakeStatusCompleted)
 	}
 
 	statusVal := sqlc.NullErpStockTakesStatus{
@@ -304,7 +306,7 @@ func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, inpu
 	// On the draft/in_progress -> completed transition, reconcile on-hand stock
 	// to the counted quantities and ledger the variance.
 	if input.Status == domain.StockTakeStatusCompleted && !alreadyCompleted {
-		if err = r.reconcileStockTake(ctx, tx, qtx, businessID, input.ID); err != nil {
+		if err = r.reconcileStockTake(ctx, tx, qtx, businessID, input.ID, warehouseID); err != nil {
 			logger.Ctx(ctx).Error("Failed to reconcile stock take", logger.Error(err))
 			return err
 		}
@@ -322,15 +324,20 @@ func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, inpu
 // reconcileStockTake sets each counted product's on-hand stock to the physical
 // count recorded on the stock take and writes an 'adjustment' inventory
 // transaction for the variance. Runs inside the caller's transaction.
-func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, businessID, stockTakeID int64) error {
+func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, businessID, stockTakeID int64, warehouseID sql.NullInt64) error {
 	items, err := qtx.GetStockTakeItems(ctx, stockTakeID)
 	if err != nil {
 		return err
 	}
 
-	// Stock takes reconcile the tenant's default warehouse location (per-warehouse
-	// takes via erp_stock_takes.warehouse_id are a later slice).
-	locID, err := stock_core.DefaultLocationID(ctx, tx, businessID)
+	var locID int64
+	if warehouseID.Valid && warehouseID.Int64 > 0 {
+		locID, err = stock_core.WarehouseLocationID(ctx, tx, businessID, warehouseID.Int64)
+	} else {
+		// Legacy stock takes without a selected warehouse continue to use the
+		// tenant default location.
+		locID, err = stock_core.DefaultLocationID(ctx, tx, businessID)
+	}
 	if err != nil {
 		return err
 	}

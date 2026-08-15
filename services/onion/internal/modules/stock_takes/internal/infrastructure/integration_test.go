@@ -3,7 +3,9 @@ package infrastructure_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/infrastructure"
@@ -373,6 +375,74 @@ func TestUpdateStockTake_StatusToCompleted(t *testing.T) {
 		}
 	}
 	t.Fatalf("stock take id=%d not found after update", id)
+}
+
+func TestUpdateStockTake_CompletedUsesSelectedWarehouse(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	warehouseName := fmt.Sprintf("Stock take warehouse %d", time.Now().UnixNano())
+	result, err := db.ExecContext(ctx, `
+		INSERT INTO erp_warehouses (owner_id, business_id, name, capacity, is_default, is_active)
+		VALUES (?, ?, ?, 0, FALSE, TRUE)
+	`, testutil.OwnerID, testutil.OwnerID, warehouseName)
+	if err != nil {
+		t.Fatalf("create warehouse: %v", err)
+	}
+	warehouseID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("get warehouse id: %v", err)
+	}
+
+	var stockTakeID int64
+	t.Cleanup(func() {
+		if stockTakeID != 0 {
+			_, _ = db.ExecContext(ctx, "DELETE FROM erp_inventory_transactions WHERE reference_type = 'stock_take' AND reference_id = ?", stockTakeID)
+			_, _ = db.ExecContext(ctx, "DELETE FROM stock_ledger WHERE reference_type = 'stock_take' AND reference_id = ?", stockTakeID)
+			_, _ = db.ExecContext(ctx, "DELETE FROM erp_stock_take_items WHERE stock_take_id = ?", stockTakeID)
+			_, _ = db.ExecContext(ctx, "DELETE FROM erp_stock_takes WHERE id = ? AND business_id = ?", stockTakeID, testutil.OwnerID)
+		}
+		_, _ = db.ExecContext(ctx, `
+			DELETE sl FROM stock_levels sl
+			JOIN stock_locations l ON l.id = sl.location_id
+			WHERE l.source_table = 'erp_warehouses' AND l.source_id = ? AND l.owner_id = ?
+		`, warehouseID, testutil.OwnerID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM stock_locations WHERE source_table = 'erp_warehouses' AND source_id = ? AND owner_id = ?", warehouseID, testutil.OwnerID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM erp_warehouses WHERE id = ? AND business_id = ?", warehouseID, testutil.OwnerID)
+	})
+
+	stockTakeID, err = repo.CreateStockTake(ctx, testutil.OwnerID, domain.StockTakeInput{
+		WarehouseID: warehouseID,
+		Items: []domain.StockTakeItemInput{
+			{ProductID: 5201, ExpectedQty: 0, CountedQty: 0},
+		},
+	})
+	if err != nil {
+		t.Fatalf("create warehouse stock take: %v", err)
+	}
+
+	if err := repo.UpdateStockTake(ctx, testutil.OwnerID, domain.StockTakeUpdateInput{
+		ID:     stockTakeID,
+		Status: domain.StockTakeStatusCompleted,
+	}); err != nil {
+		t.Fatalf("complete warehouse stock take: %v", err)
+	}
+
+	var onHand string
+	err = db.QueryRowContext(ctx, `
+		SELECT sl.on_hand
+		FROM stock_levels sl
+		JOIN stock_locations l ON l.id = sl.location_id
+		WHERE sl.owner_id = ? AND sl.product_id = ?
+		  AND l.owner_id = ? AND l.source_table = 'erp_warehouses' AND l.source_id = ?
+	`, testutil.OwnerID, 5201, testutil.OwnerID, warehouseID).Scan(&onHand)
+	if err != nil {
+		t.Fatalf("selected warehouse stock level: %v", err)
+	}
+	if onHand != "0" && onHand != "0.000" {
+		t.Fatalf("selected warehouse on-hand = %q, want zero", onHand)
+	}
 }
 
 func TestUpdateStockTake_NotesPersisted(t *testing.T) {
