@@ -53,30 +53,46 @@ const OrderStatus = (): React.JSX.Element => {
   const { id } = useParams({ strict: false });
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const { clearCart } = useCartStore();
+  const businessId = new URLSearchParams(searchStr).get('business_id');
 
   const orderNumber = new URLSearchParams(searchStr).get('number') ?? '';
 
   const [status, setStatus] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchStatus = useCallback(async (): Promise<void> => {
     if (!id) return;
     try {
-      const res = await api.get<OrderStatusResponse>(`/pos/orders/v1/orders/${id}/public-status`);
+      const params = businessId ? { business_id: businessId } : undefined;
+      const res = await api.get<OrderStatusResponse>(`/pos/orders/v1/orders/${id}/public-status`, {
+        params,
+      });
       setStatus(res.data.status);
       setFetchError(false);
+      setNotFound(false);
 
       // Stop polling once the order reaches a terminal state (done/cancelled).
       if (isTerminal(res.data.status) && intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-    } catch {
-      setFetchError(true);
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 404) {
+        setNotFound(true);
+        setFetchError(false);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      } else {
+        setFetchError(true);
+      }
     }
-  }, [id]);
+  }, [id, businessId]);
 
   useEffect(() => {
     void fetchStatus();
@@ -212,8 +228,20 @@ const OrderStatus = (): React.JSX.Element => {
           </div>
         )}
 
+        {/* Not Found state */}
+        {notFound && (
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ color: '#dc2626', fontSize: '15px', fontWeight: 600, marginBottom: 8 }}>
+              Order not found
+            </p>
+            <p style={{ color: 'rgba(0,0,0,0.5)', fontSize: '13px', marginBottom: 16 }}>
+              We could not find an order matching this ID. Please check your order link.
+            </p>
+          </div>
+        )}
+
         {/* Loading state */}
-        {status == null && !fetchError && (
+        {status == null && !fetchError && !notFound && (
           <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '15px' }}>Loading order status...</p>
         )}
 
