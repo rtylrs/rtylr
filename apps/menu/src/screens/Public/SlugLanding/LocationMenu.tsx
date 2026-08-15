@@ -29,7 +29,12 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     isLoading: menuLoading,
     isError: menuError,
   } = usePublicMenu(businessId, location?.id ?? null);
-  const { clearCart, setBusinessId, addItem, updateQuantity } = useCartStore();
+  const { clearCart, setBusinessId, setLocationId, addItem, updateQuantity } = useCartStore();
+
+  React.useEffect(() => {
+    if (businessId) setBusinessId(businessId);
+    if (location?.id) setLocationId(location.id);
+  }, [businessId, location?.id, setBusinessId, setLocationId]);
 
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!menu) return [];
