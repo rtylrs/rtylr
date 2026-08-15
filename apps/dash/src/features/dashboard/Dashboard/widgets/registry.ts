@@ -1,3 +1,5 @@
+import { getTenantKey } from '../../../../shared/utils/tenantStorage';
+
 export interface WidgetConfig {
   id: string;
   label: string;
@@ -169,7 +171,7 @@ const WIDGETS_KEY = 'rtylr-dashboard-widgets';
 
 export function loadLayout() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getTenantKey(STORAGE_KEY));
     if (!raw) return DEFAULT_LAYOUT;
     const parsed = JSON.parse(raw);
     // If the saved layout references a retired widget, reset to default.
@@ -182,12 +184,12 @@ export function loadLayout() {
 }
 
 export function saveLayout(layout: Record<string, unknown>[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
+  localStorage.setItem(getTenantKey(STORAGE_KEY), JSON.stringify(layout));
 }
 
 export function loadActiveWidgets(): string[] {
   try {
-    const raw = localStorage.getItem(WIDGETS_KEY);
+    const raw = localStorage.getItem(getTenantKey(WIDGETS_KEY));
     if (!raw) return DEFAULT_LAYOUT.map((l) => l.i);
     const parsed = JSON.parse(raw);
     // If the saved widget set references a retired widget, reset to default.
@@ -200,5 +202,5 @@ export function loadActiveWidgets(): string[] {
 }
 
 export function saveActiveWidgets(ids: string[]) {
-  localStorage.setItem(WIDGETS_KEY, JSON.stringify(ids));
+  localStorage.setItem(getTenantKey(WIDGETS_KEY), JSON.stringify(ids));
 }

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { tenantStorage } from '../utils/tenantStorage';
 import type { MenuLayoutConfig } from '@voxire/menu';
 import { DEFAULT_LAYOUT_CONFIG } from '@voxire/menu';
 
@@ -100,6 +101,7 @@ export const useLayoutPresetsStore = create<LayoutPresetsState>()(
     }),
     {
       name: 'layout-presets',
+      storage: tenantStorage,
     }
   )
 );
