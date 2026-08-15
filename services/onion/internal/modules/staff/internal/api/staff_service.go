@@ -30,6 +30,10 @@ func (a *StaffAPI) ListStaff(ctx context.Context, req *hrstaffv1.ListStaffReques
 	}
 	device := authPkg.DeviceCtx(ctx)
 
+	if !canViewDirectory(ctx, a.permissions, businessID, device.User.UserID) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
 	staffList, listErr := a.Service.ListStaff(ctx, businessID, req.GetSearch(), req.GetDepartmentId(), req.GetStatus())
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list staff")

@@ -55,6 +55,41 @@ func TestCanViewSensitiveDetailsRequiresHRPermission(t *testing.T) {
 	}
 }
 
+func TestCanViewDirectoryRequiresPermission(t *testing.T) {
+	ctx := context.Background()
+
+	if canViewDirectory(ctx, fakeStaffPermissionProvider{
+		employeeID:  4101,
+		permissions: map[string]bool{"manage_payroll": true},
+	}, 1001, 700) {
+		t.Fatal("holding an unrelated permission must not grant directory access")
+	}
+
+	if !canViewDirectory(ctx, fakeStaffPermissionProvider{
+		employeeID:  4101,
+		permissions: map[string]bool{"view_directory": true},
+	}, 1001, 700) {
+		t.Fatal("a caller with view_directory should see the directory")
+	}
+
+	if canViewDirectory(ctx, fakeStaffPermissionProvider{
+		employeeID:    4101,
+		permissionErr: errors.New("permission store unavailable"),
+	}, 1001, 700) {
+		t.Fatal("permission lookup errors must fail closed")
+	}
+
+	if canViewDirectory(ctx, fakeStaffPermissionProvider{
+		lookupErr: errors.New("employee lookup failed"),
+	}, 1001, 700) {
+		t.Fatal("an unresolvable caller must fail closed")
+	}
+
+	if canViewDirectory(ctx, fakeStaffPermissionProvider{employeeID: 4101}, 1001, 0) {
+		t.Fatal("a zero caller user id must fail closed")
+	}
+}
+
 func TestNewStaffPayloadOmitsSensitiveDetailWhenUnauthorized(t *testing.T) {
 	staff := domain.Staff{
 		ID:                    4102,
