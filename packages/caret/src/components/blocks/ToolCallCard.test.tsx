@@ -16,7 +16,7 @@ describe('ToolCallCard', () => {
     };
 
     render(<ToolCallCard call={call} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Checked business insights' }));
+    fireEvent.click(screen.getByRole('button', { name: /Completed: check business data/i }));
 
     expect(screen.queryByText('technical name')).toBeNull();
     expect(screen.queryByText('request details')).toBeNull();
