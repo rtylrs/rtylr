@@ -300,6 +300,12 @@ const toSettingsPayload = (patch: Partial<HrSettings>): Partial<HrSettings> => (
 // ─── API service ────────────────────────────────────────────────────────────
 
 export const hrExtras = {
+  // My own employee record
+  // hr.employee.v1 has no self-lookup RPC, and hr_employees.id is a different
+  // id-space from the hub auth user id - this is the only correct way for the
+  // frontend to resolve "my own employee_id" for leave/overtime/equipment forms.
+  getMyEmployee: () => safe.get<{ employee: { id: number | string } }>('/hr/employees/me'),
+
   // Profiles
   getProfile: (id: number) => safe.get<EmployeeProfile>(`/hr/staff/detail`, { params: { id } }),
   upsertProfile: (p: EmployeeProfile) =>
