@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { uploadAsset } from '@voxire/api';
 import { useMenuStore } from '../../../shared/stores/menuStore';
 import { useUserStore } from '../../../shared/stores/userStore';
 import Dropzone from '../../../shared/components/Dropzone';
-
 import { toast } from 'sonner';
 
 const CreateBanner = (): React.JSX.Element => {
   const { addBanner } = useMenuStore();
   const { userId: restaurantId } = useUserStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -30,25 +31,38 @@ const CreateBanner = (): React.JSX.Element => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const bannerObj = {
-      _id: String(Date.now()),
-      title: formData.title,
-      bannerImage: formData.image ? URL.createObjectURL(formData.image) : '',
-      menuId: restaurantId ?? '',
-      type: 'banner' as const,
-      details: {
-        banner: {
-          title: formData.title,
-          bannerImage: formData.image ? URL.createObjectURL(formData.image) : '',
-        },
-      },
-    };
+    setIsSubmitting(true);
+    try {
+      let bannerImageUrl = '';
+      if (formData.image) {
+        const res = await uploadAsset(formData.image);
+        bannerImageUrl = (res as any)?.url || (res as any)?.path || '';
+      }
 
-    addBanner(bannerObj as any);
-    toast.success('Banner created');
-    window.history.back();
+      const bannerObj = {
+        _id: String(Date.now()),
+        title: formData.title,
+        bannerImage: bannerImageUrl,
+        menuId: restaurantId ?? '',
+        type: 'banner' as const,
+        details: {
+          banner: {
+            title: formData.title,
+            bannerImage: bannerImageUrl,
+          },
+        },
+      };
+
+      addBanner(bannerObj as any);
+      toast.success('Banner created');
+      window.history.back();
+    } catch {
+      toast.error('Failed to upload image. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -105,17 +119,19 @@ const CreateBanner = (): React.JSX.Element => {
             <button
               type="button"
               onClick={() => window.history.back()}
-              className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity"
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-50"
               style={{ color: 'var(--dash-text-muted)' }}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity text-white"
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity text-white disabled:opacity-50"
               style={{ background: '#4583C4' }}
             >
-              Create Banner
+              {isSubmitting ? 'Uploading...' : 'Create Banner'}
             </button>
           </div>
         </form>
