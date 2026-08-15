@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { useUserStore } from '@voxire/auth';
 import { useCreateEquipmentRequest } from '../../shared/hooks/queries/useEquipment';
+import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
 import { Modal, Input, Textarea, Select, Label, Button } from '../../shared/components/ui';
 
 const equipmentRequestSchema = z.object({
@@ -18,7 +18,8 @@ interface Props {
 
 const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
   const { t } = useTranslation();
-  const userId = useUserStore((s) => s.userId);
+  const { data: myEmployeeId } = useMyEmployeeId();
+  const employeeId = myEmployeeId !== undefined ? String(myEmployeeId) : undefined;
   const createRequest = useCreateEquipmentRequest();
 
   const [equipmentType, setEquipmentType] = useState('');
@@ -47,7 +48,7 @@ const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
 
     createRequest.mutate(
       {
-        employeeId: userId ?? '',
+        employeeId: employeeId ?? '',
         ...result.data,
         neededByDate: result.data.neededByDate ?? undefined,
       },
@@ -117,7 +118,11 @@ const EquipmentRequestForm = ({ onClose }: Props): React.JSX.Element => {
           <Button variant="ghost" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={createRequest.isPending}>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={createRequest.isPending || !employeeId}
+          >
             {t('equipment.form.submit')}
           </Button>
         </div>
