@@ -235,6 +235,9 @@ func (h *DeleteSegmentHandler) Serve(ctx context.Context, req *DeleteSegmentRequ
 	if device.User == nil {
 		return DeleteSegmentResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMManager(ctx); err != nil {
+		return DeleteSegmentResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
