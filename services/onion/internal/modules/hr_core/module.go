@@ -58,6 +58,44 @@ func (m *Module) HasRole(ctx context.Context, ownerID, employeeID, roleID int64)
 	return m.service.HasRole(ctx, ownerID, employeeID, roleID)
 }
 
+// EmployeeSummary is the minimal shape another module needs to resolve who
+// an employee is - name and which hub user they're linked to - without
+// reaching into hr_core's internal domain package.
+type EmployeeSummary struct {
+	ID        int64
+	UserID    int64
+	FirstName string
+	LastName  string
+}
+
+// ListActiveEmployees returns every active or probationary employee for a
+// business, paginating internally against ListEmployees' own 100-row page
+// cap so a caller (Flow's business-wide "who's in today") gets the whole
+// roster in one call rather than reimplementing paging itself. maxPages is a
+// runaway-loop safety bound, not a real product limit.
+func (m *Module) ListActiveEmployees(ctx context.Context, ownerID int64) ([]EmployeeSummary, error) {
+	const pageSize = 100
+	const maxPages = 50
+
+	var all []EmployeeSummary
+	for page := int32(0); page < maxPages; page++ {
+		employees, total, err := m.service.ListEmployees(ctx, ownerID, pageSize, page*pageSize)
+		if err != nil {
+			return nil, err
+		}
+		for _, e := range employees {
+			if e.Status != "active" && e.Status != "probation" {
+				continue
+			}
+			all = append(all, EmployeeSummary{ID: e.ID, UserID: e.UserID, FirstName: e.FirstName, LastName: e.LastName})
+		}
+		if int64((page+1)*pageSize) >= total || len(employees) == 0 {
+			break
+		}
+	}
+	return all, nil
+}
+
 func (m *Module) GetApprovalChain(ctx context.Context, ownerID int64, requestType string) (*ApprovalChainInfo, error) {
 	chain, err := m.service.GetApprovalChain(ctx, ownerID, requestType)
 	if err != nil {

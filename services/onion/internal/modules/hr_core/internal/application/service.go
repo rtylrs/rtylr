@@ -289,30 +289,41 @@ func (s *Service) HasRole(ctx context.Context, ownerID, employeeID, roleID int64
 	return s.repo.HasRole(ctx, ownerID, employeeID, roleID)
 }
 
+// view_directory is granted to every default role: most businesses want
+// every employee to see the company directory, and a business that wants to
+// restrict it has no working way to do so yet - the Roles/Permissions admin
+// UI collects that choice during setup and silently discards it (see the
+// setup wizard's roles step). Restricting this by role is real, separate
+// follow-up work, not something to fake here.
 func (s *Service) SeedDefaultRoles(ctx context.Context, ownerID int64) error {
 	defaultRoles := []domain.RoleRecord{
 		{Name: "Employee", Description: "Standard employee with basic access", IsSystem: true, Permissions: mustJSON(map[string]bool{
 			"view_own_profile": true, "view_own_schedule": true, "request_time_off": true,
+			"view_directory": true,
 		})},
 		{Name: "Manager", Description: "Team manager with approval rights", IsSystem: true, Permissions: mustJSON(map[string]bool{
 			"view_own_profile": true, "view_own_schedule": true, "request_time_off": true,
 			"view_team": true, "approve_time_off": true, "manage_schedules": true,
+			"view_directory": true,
 		})},
 		{Name: "HR Admin", Description: "Full HR administration access", IsSystem: true, Permissions: mustJSON(map[string]bool{
 			"view_own_profile": true, "view_own_schedule": true, "request_time_off": true,
 			"view_team": true, "approve_time_off": true, "manage_schedules": true,
 			"manage_employees": true, "manage_roles": true, "manage_departments": true,
 			"manage_locations": true, "manage_hr_config": true, "view_reports": true,
+			"view_directory": true,
 		})},
 		{Name: "Finance/Payroll Manager", Description: "Payroll and finance operations", IsSystem: true, Permissions: mustJSON(map[string]bool{
 			"view_own_profile": true, "view_team": true, "manage_payroll": true,
 			"view_reports": true, "manage_benefits": true,
+			"view_directory": true,
 		})},
 		{Name: "Executive", Description: "Executive-level oversight", IsSystem: true, Permissions: mustJSON(map[string]bool{
 			"view_own_profile": true, "view_team": true, "approve_time_off": true,
 			"manage_employees": true, "manage_roles": true, "manage_departments": true,
 			"manage_locations": true, "manage_hr_config": true, "manage_payroll": true,
 			"view_reports": true, "manage_benefits": true, "manage_approval_chains": true,
+			"view_directory": true,
 		})},
 	}
 	return s.repo.SeedDefaultRoles(ctx, ownerID, defaultRoles)
