@@ -459,7 +459,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	reviewsModule := reviews.NewModule(ctx, dbclient.Pool())
 	segmentsModule := segments.NewModule(ctx, dbclient.Pool())
 	insightsModule := insights.NewModule(ctx, dbclient.Pool())
-	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool())
+	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool(), hrCoreModule, hrLeaveModule)
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
 	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
 	posLocationsModule := poslocations.NewModule(ctx, dbclient.Pool())

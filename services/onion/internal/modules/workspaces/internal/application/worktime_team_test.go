@@ -124,3 +124,45 @@ func TestListWorkDaysForWorkspace_OrdinaryMemberDenied(t *testing.T) {
 		t.Fatalf("want ErrUnauthorized for a member-role caller, got %v", err)
 	}
 }
+
+func TestWorkDaysForDate_ResolvesByEmployeeID(t *testing.T) {
+	svc, _, _ := newTeamFixture(t)
+
+	db := testutil.OpenDB(t)
+	var employeeID int64
+	if err := db.QueryRowContext(context.Background(),
+		`SELECT id FROM hr_employees WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
+		teamOwnerID, teamBusinessID, teamWSMemberID,
+	).Scan(&employeeID); err != nil {
+		t.Fatalf("read back hr_employees id: %v", err)
+	}
+
+	byEmployeeID, err := svc.WorkDaysForDate(
+		context.Background(), teamOwnerID, teamBusinessID, []int64{employeeID, 999999999}, "2026-08-16",
+	)
+	if err != nil {
+		t.Fatalf("WorkDaysForDate: %v", err)
+	}
+	day, ok := byEmployeeID[employeeID]
+	if !ok {
+		t.Fatalf("want a work day for employee %d, got none: %+v", employeeID, byEmployeeID)
+	}
+	if day.WorkMode != domain.WorkModeOnsite {
+		t.Fatalf("WorkMode = %q, want %q", day.WorkMode, domain.WorkModeOnsite)
+	}
+	if _, ok := byEmployeeID[999999999]; ok {
+		t.Fatal("an employee id with no row must be absent from the map, not a zero-value entry")
+	}
+}
+
+func TestWorkDaysForDate_EmptyEmployeeIDsReturnsEmptyMap(t *testing.T) {
+	svc, _, _ := newTeamFixture(t)
+
+	byEmployeeID, err := svc.WorkDaysForDate(context.Background(), teamOwnerID, teamBusinessID, nil, "2026-08-16")
+	if err != nil {
+		t.Fatalf("WorkDaysForDate: %v", err)
+	}
+	if len(byEmployeeID) != 0 {
+		t.Fatalf("want an empty map for no employee ids, got %+v", byEmployeeID)
+	}
+}

@@ -192,6 +192,26 @@ const workspaceMemberCap = 500
 // permission that (as of this writing) nothing in the backend actually
 // enforces.
 //
+// WorkDaysForDate resolves one date's WorkDay for an arbitrary set of
+// employee ids, keyed by employee id for O(1) lookup. Used by Flow's
+// business-wide "who's in today" presence view, which resolves its employee
+// list from hr_core rather than workspace membership - an employee with no
+// row for the date simply has no entry, not an error.
+func (s *Service) WorkDaysForDate(ctx context.Context, ownerID, businessID int64, employeeIDs []int64, date string) (map[int64]domain.WorkDay, error) {
+	if len(employeeIDs) == 0 {
+		return map[int64]domain.WorkDay{}, nil
+	}
+	days, _, err := s.repo.ListWorkDaysByEmployeeIDs(ctx, ownerID, businessID, employeeIDs, date, date, int32(len(employeeIDs)), 0)
+	if err != nil {
+		return nil, err
+	}
+	byEmployeeID := make(map[int64]domain.WorkDay, len(days))
+	for _, d := range days {
+		byEmployeeID[d.EmployeeID] = d
+	}
+	return byEmployeeID, nil
+}
+
 // Work days key on HR's employee_id; workspace membership keys on the auth
 // user_id. The two are resolved through hr_employees.user_id, and a member
 // with no matching HR record simply contributes no rows - not an error, the

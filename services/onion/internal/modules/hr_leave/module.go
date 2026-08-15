@@ -67,6 +67,25 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 	}
 }
 
+// ApprovedLeaveEmployeeIDs returns the set of employee ids with an approved
+// leave request covering the given date (YYYY-MM-DD) - used by Flow's
+// business-wide "who's in today" presence view. Passing the same date as
+// both bounds relies on ListLeaveCalendar's own overlap query
+// (start_date <= to AND end_date >= from) to mean "covers this one day."
+func (m *Module) ApprovedLeaveEmployeeIDs(ctx context.Context, ownerID int64, date string) (map[int64]bool, error) {
+	requests, err := m.service.GetLeaveCalendar(ctx, ownerID, domain.LeaveCalendarParams{DateFrom: date, DateTo: date})
+	if err != nil {
+		return nil, err
+	}
+	onLeave := make(map[int64]bool, len(requests))
+	for _, r := range requests {
+		if r.Status == domain.LeaveStatusApproved {
+			onLeave[r.EmployeeID] = true
+		}
+	}
+	return onLeave, nil
+}
+
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
 	serverHttp.RegisterGET[api.GetLeaveCalendarRequest, api.GetLeaveCalendarResponse](
 		ctx, router, api.GetLeaveCalendarRoutes(), &api.GetLeaveCalendarHandler{Service: m.service},
