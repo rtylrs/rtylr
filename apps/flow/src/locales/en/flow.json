@@ -42,6 +42,8 @@
     "addLine": "Add",
     "setTheDayFirst": "Set where you worked to start the day, then add what you worked on.",
     "loadingDay": "Loading the day…",
+    "project": "Project",
+    "selectProject": "Select a project",
     "workType": "Type of work",
     "noWorkType": "No type",
     "deleteLineLabel": "Delete the {{duration}} entry",

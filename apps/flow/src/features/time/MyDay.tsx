@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { formatDurationClock, parseDurationInput } from '../../shared/lib/durationUtils';
 import DurationField from '../tasks/components/DurationField';
+import { useFlowStore } from '../../shared/stores/flowStore';
+import { useProjects } from '../projects/useProjects';
 import {
   newClientKey,
   todayLocalDate,
@@ -37,6 +39,8 @@ const MyDay = (): React.JSX.Element => {
 
   const { data, isLoading } = useWorkDay(date);
   const { data: workTypesData } = useWorkTypes();
+  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
+  const { data: projects } = useProjects(activeWorkspaceId);
   const upsertDay = useUpsertWorkDay();
   const createLine = useCreateWorkDayLine();
   const deleteLine = useDeleteWorkDayLine();
@@ -47,6 +51,7 @@ const MyDay = (): React.JSX.Element => {
 
   const [duration, setDuration] = useState('');
   const [description, setDescription] = useState('');
+  const [projectId, setProjectId] = useState('');
   const [workTypeId, setWorkTypeId] = useState('');
 
   const clocked = day?.clockedMinutes ?? 0;
@@ -65,9 +70,11 @@ const MyDay = (): React.JSX.Element => {
     });
   };
 
+  const canAddLine = parseDurationInput(duration) !== null && projectId !== '';
+
   const addLine = () => {
     const minutes = parseDurationInput(duration);
-    if (minutes === null || !day?.id) return;
+    if (minutes === null || !day?.id || !projectId) return;
     createLine.mutate(
       {
         date,
@@ -77,6 +84,7 @@ const MyDay = (): React.JSX.Element => {
         clientKey: newClientKey(),
         durationMinutes: minutes,
         description: description.trim(),
+        projectId,
         workTypeId: workTypeId || undefined,
         isBillable: true,
       },
@@ -84,6 +92,7 @@ const MyDay = (): React.JSX.Element => {
         onSuccess: () => {
           setDuration('');
           setDescription('');
+          setProjectId('');
         },
       }
     );
@@ -309,6 +318,21 @@ const MyDay = (): React.JSX.Element => {
                       className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
                       style={inputStyle}
                     />
+                    <select
+                      aria-label={t('flow.time.project')}
+                      value={projectId}
+                      onChange={(e) => setProjectId(e.target.value)}
+                      required
+                      className="flow-focus mt-2 min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
+                      style={inputStyle}
+                    >
+                      <option value="">{t('flow.time.selectProject')}</option>
+                      {(projects ?? []).map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                        </option>
+                      ))}
+                    </select>
                     {workTypes.length > 0 && (
                       <select
                         aria-label={t('flow.time.workType')}
@@ -329,7 +353,7 @@ const MyDay = (): React.JSX.Element => {
                   <button
                     type="button"
                     onClick={addLine}
-                    disabled={parseDurationInput(duration) === null || createLine.isPending}
+                    disabled={!canAddLine || createLine.isPending}
                     className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded px-4 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2.5"
                     style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
                   >
