@@ -54,7 +54,8 @@ const ITEMS_PER_PAGE = 10;
 
 const Team: React.FC = (): React.JSX.Element => {
   const navigate = useNavigate();
-  const { data: teamData, isLoading } = useTeam({ pageSize: 50 });
+  const [page, setPage] = useState(0);
+  const { data: teamData, isLoading } = useTeam({ page: page + 1, pageSize: ITEMS_PER_PAGE });
   const members = teamData?.members ?? [];
   const deactivate = useDeactivateMember();
   const [query, setQuery] = useState('');
@@ -65,7 +66,6 @@ const Team: React.FC = (): React.JSX.Element => {
   const menuAddonEnabled = isAddonEnabled(addonsData, 'menu');
 
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
-  const [page, setPage] = useState(0);
 
   // Bulk selection state
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -502,11 +502,10 @@ const Team: React.FC = (): React.JSX.Element => {
               </div>
 
               {/* Pagination */}
-              {totalPages > 1 && (
+              {(page > 0 || (teamData?.hasMore ?? false) || totalPages > 1) && (
                 <div className="flex items-center justify-between px-5 py-3">
                   <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                    Showing {page * ITEMS_PER_PAGE + 1}-
-                    {Math.min((page + 1) * ITEMS_PER_PAGE, filtered.length)} of {filtered.length}
+                    Showing page {page + 1}
                   </p>
                   <div className="flex items-center gap-1">
                     <button
@@ -518,8 +517,8 @@ const Team: React.FC = (): React.JSX.Element => {
                       Prev
                     </button>
                     <button
-                      onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-                      disabled={page >= totalPages - 1}
+                      onClick={() => setPage(page + 1)}
+                      disabled={!teamData?.hasMore && page >= totalPages - 1}
                       className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
                       style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
                     >
