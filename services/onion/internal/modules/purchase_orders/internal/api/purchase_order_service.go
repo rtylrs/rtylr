@@ -153,24 +153,12 @@ func (a *PurchaseOrderAPI) UpdatePurchaseOrderStatus(ctx context.Context, req *e
 	}
 	if body.GetStatus() == string(domain.POStatusReceived) {
 		if receiveErr := a.Service.ReceivePurchaseOrder(ctx, ownerID, req.GetId(), ownerID, submitted); receiveErr != nil {
-			if errors.Is(receiveErr, domain.ErrPurchaseOrderNotFound) {
-				return nil, purchaseOrderStatusError(http.StatusNotFound, "Purchase order not found")
-			}
-			if errors.Is(receiveErr, domain.ErrPurchaseOrderAlreadyReceived) {
-				return nil, purchaseOrderStatusError(http.StatusConflict, "Received purchase orders cannot be reopened")
-			}
-			return nil, purchaseOrderStatusError(http.StatusInternalServerError, "Failed to receive purchase order")
+			return nil, purchaseOrderMutationError(receiveErr, "Failed to receive purchase order")
 		}
 		return &erppurchaseorderv1.UpdatePurchaseOrderStatusResponse{Message: "Purchase order status updated successfully"}, nil
 	}
 	if updateErr := a.Service.UpdatePurchaseOrderStatus(ctx, ownerID, req.GetId(), body.GetStatus()); updateErr != nil {
-		if errors.Is(updateErr, domain.ErrPurchaseOrderNotFound) {
-			return nil, purchaseOrderStatusError(http.StatusNotFound, "Purchase order not found")
-		}
-		if errors.Is(updateErr, domain.ErrPurchaseOrderAlreadyReceived) {
-			return nil, purchaseOrderStatusError(http.StatusConflict, "Received purchase orders cannot be reopened")
-		}
-		return nil, purchaseOrderStatusError(http.StatusInternalServerError, "Failed to update purchase order status")
+		return nil, purchaseOrderMutationError(updateErr, "Failed to update purchase order status")
 	}
 	return &erppurchaseorderv1.UpdatePurchaseOrderStatusResponse{Message: "Purchase order status updated successfully"}, nil
 }

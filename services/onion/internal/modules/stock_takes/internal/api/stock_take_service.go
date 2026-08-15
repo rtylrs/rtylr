@@ -112,7 +112,7 @@ func (a *StockTakeAPI) UpdateStockTake(ctx context.Context, req *erpstocktakev1.
 		Notes:  body.GetNotes(),
 		Items:  items,
 	}); updateErr != nil {
-		return nil, stockTakeStatusError(http.StatusInternalServerError, "Failed to update stock take")
+		return nil, stockTakeMutationError(updateErr)
 	}
 	return &erpstocktakev1.UpdateStockTakeResponse{Message: "Stock take updated successfully"}, nil
 }
