@@ -35,7 +35,7 @@ const CreateCustomer: React.FC = () => {
     address: '',
     consentEmail: true,
     consentSms: false,
-    consentMarketing: true,
+    consentMarketing: false,
   });
 
   const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
