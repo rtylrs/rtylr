@@ -905,10 +905,15 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         </div>
                         <SidebarCollapsible open={!isSidebarSectionCollapsed('time')}>
                           <nav className="flex flex-col gap-px pt-px">
-                            {/* The only Time destination that exists. Timesheet,
-                              * Review, Reports and Workload join it here as their
-                              * backends land. */}
+                            {/* Timesheet, Review, Reports and Workload join
+                             * these here as their backends land. Team has no
+                             * client-side gate: a caller without workspace
+                             * admin still opens it and sees why, the same
+                             * disabled-with-a-reason rule as everywhere else,
+                             * just enforced by a real 403 instead of a
+                             * client-only guess. */}
                             <SidebarLink to="/time" icon={Clock} label={t('flow.time.myDay')} />
+                            <SidebarLink to="/time/team" icon={Users} label={t('flow.time.team')} />
                             <SidebarLink
                               to="/settings"
                               search={{ section: 'time' }}
