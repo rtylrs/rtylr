@@ -14,6 +14,9 @@ const mockClient = vi.hoisted(() => ({
 vi.mock('@voxire/api', () => ({
   createOneKitClient: () => mockClient,
   getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
+  createApiClient: () => ({}),
+  safeFetch: () => ({ post: vi.fn().mockResolvedValue({ ok: true }) }),
+  unwrap: (val: unknown) => Promise.resolve(val),
 }));
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));

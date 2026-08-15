@@ -27,8 +27,8 @@ const STATUS_FROM_API: Record<string, Invoice['status']> = {
   partial: 'Sent',
   paid: 'Paid',
   overdue: 'Overdue',
-  cancelled: 'Draft',
-  void: 'Draft',
+  cancelled: 'Cancelled',
+  void: 'Cancelled',
 };
 
 function fromApiSummary(inv: InvoiceSummary): Invoice {
@@ -89,7 +89,9 @@ export function useInvoices(params: UseInvoicesParams = {}) {
     ...query,
     data: query.data
       ? {
-          invoices: z.array(invoiceSchema).parse((query.data.invoices ?? []).map(fromApiSummary)) as Invoice[],
+          invoices: z
+            .array(invoiceSchema)
+            .parse((query.data.invoices ?? []).map(fromApiSummary)) as Invoice[],
           hasMore: query.data.hasMore ?? false,
           page: query.data.page ?? page,
           pageSize: query.data.pageSize ?? pageSize,
@@ -159,6 +161,7 @@ const STATUS_TO_API: Record<Invoice['status'], string> = {
   Sent: 'sent',
   Paid: 'paid',
   Overdue: 'overdue',
+  Cancelled: 'cancelled',
 };
 
 export function useUpdateInvoiceStatus() {
@@ -168,8 +171,7 @@ export function useUpdateInvoiceStatus() {
     mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }) =>
       invoicesClient.updateInvoiceStatus({ id, body: { status: STATUS_TO_API[status] } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
-    onError: (error) =>
-      toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 

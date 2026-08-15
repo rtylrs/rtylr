@@ -12,6 +12,7 @@ import {
   useRecurringInvoices,
   useSetRecurringStatus,
   useCreateRecurringInvoice,
+  useRunRecurringInvoiceNow,
 } from './useRecurringInvoices';
 import {
   cardStyle,
@@ -62,7 +63,8 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
           onClose();
           setForm(emptyForm());
         },
-        onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to create recurring invoice')),
+        onError: (error) =>
+          toast.error(getOneKitErrorMessage(error, 'Failed to create recurring invoice')),
       }
     );
   };
@@ -134,6 +136,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
 const RecurringInvoices: React.FC = () => {
   const { data = [], isLoading } = useRecurringInvoices();
   const setStatus = useSetRecurringStatus();
+  const runNow = useRunRecurringInvoiceNow();
   const [showCreate, setShowCreate] = useState(false);
 
   const togglePause = (id: string, isActive: boolean): void => {
@@ -145,7 +148,8 @@ const RecurringInvoices: React.FC = () => {
           toast.success(
             next === 'paused' ? 'Recurring invoice paused' : 'Recurring invoice resumed'
           ),
-        onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to update recurring invoice')),
+        onError: (error) =>
+          toast.error(getOneKitErrorMessage(error, 'Failed to update recurring invoice')),
       }
     );
   };
@@ -274,13 +278,16 @@ const RecurringInvoices: React.FC = () => {
                         {r.isActive ? 'Pause' : 'Resume'}
                       </button>
                       <button
-                        style={{ ...ghostBtn, padding: '4px 10px' }}
+                        style={{
+                          ...ghostBtn,
+                          padding: '4px 10px',
+                          opacity: runNow.isPending ? 0.6 : 1,
+                        }}
                         aria-label={`Run invoice now for ${r.id}`}
-                        disabled
-                        title="Manual run not yet supported"
-                        onClick={undefined}
+                        disabled={runNow.isPending}
+                        onClick={() => runNow.mutate({ id: r.id })}
                       >
-                        <RotateCcw size={12} /> Run now
+                        <RotateCcw size={12} /> {runNow.isPending ? 'Running…' : 'Run now'}
                       </button>
                     </div>
                   </td>

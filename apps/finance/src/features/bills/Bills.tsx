@@ -12,6 +12,7 @@ import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useBills } from './useBills';
 import { useCreateBill, useUpdateBill } from '../../shared/hooks/queries/useBills';
+import { useSettings } from '../../shared/lib/settings';
 import {
   cardStyle,
   ghostBtn,
@@ -37,6 +38,7 @@ interface NewBillForm {
 
 const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const { t } = useTranslation();
+  const baseCurrency = useSettings((s) => s.currency);
   const createBill = useCreateBill();
   const [form, setForm] = useState<NewBillForm>({
     vendor: '',
@@ -54,11 +56,16 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
       toast.error(t('bills.amountPositive'));
       return;
     }
+    const derivedSupplierId =
+      form.vendor
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-') || '1';
     createBill.mutate(
       {
-        supplierId: '0',
+        supplierId: derivedSupplierId,
         amount: form.amount,
-        currency: 'USD',
+        currency: baseCurrency ?? 'USD',
         dueDate: form.dueDate,
         status: 'unpaid',
         description: form.description || form.vendor,
