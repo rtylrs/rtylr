@@ -105,6 +105,24 @@
       "rateNotSet": "Not set"
     }
   },
+  "profile": {
+    "heading": "Profile",
+    "noRecordTitle": "No HR record linked yet",
+    "noRecordDescription": "Your account isn't linked to a staff record in HR yet. Ask an admin to link it.",
+    "role": "Role",
+    "department": "Department",
+    "employmentType": "Employment type",
+    "status": "Status",
+    "startDate": "Started",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "emergencyContact": "Emergency contact",
+    "bio": "About",
+    "activity": "Flow activity",
+    "hoursLoggedThisWeek": "{{hours}} logged this week",
+    "viewMyDay": "View My day"
+  },
   "board": {
     "settingsTitle": "Board settings",
     "openSettings": "Open board settings",
