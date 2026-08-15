@@ -22,6 +22,15 @@ const MinimalIndex: React.FC<IndexProps> = ({ careers, customization, sections }
             {customization.aboutBlurb}
           </p>
         )}
+        {customization.heroImageUrl && (
+          <div className="mt-6 overflow-hidden rounded-lg">
+            <img
+              src={customization.heroImageUrl}
+              alt={customization.brandName || 'Careers'}
+              className="h-64 w-full object-cover"
+            />
+          </div>
+        )}
 
         <div className="mt-10 space-y-2">
           {careers.length === 0 ? (

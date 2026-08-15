@@ -32,6 +32,15 @@ const EditorialIndex: React.FC<IndexProps> = ({ careers, customization, sections
               {customization.aboutBlurb}
             </p>
           )}
+          {customization.heroImageUrl && (
+            <div className="mt-10 overflow-hidden rounded-lg">
+              <img
+                src={customization.heroImageUrl}
+                alt={customization.brandName || 'Careers'}
+                className="h-80 w-full object-cover"
+              />
+            </div>
+          )}
         </div>
       </section>
 
