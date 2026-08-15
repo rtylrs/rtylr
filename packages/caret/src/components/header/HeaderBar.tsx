@@ -125,12 +125,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
       {!hideClose && (
         <Tooltip label="Close">
-          <IconButton
-            className="caret-chrome-button"
-            size="md"
-            label="Close Caret"
-            onClick={close}
-          >
+          <IconButton className="caret-chrome-button" size="md" label="Close Caret" onClick={close}>
             <X size={15} />
           </IconButton>
         </Tooltip>

@@ -443,7 +443,13 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
 
   const mainColumn = (
     <div
-      style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        minHeight: 0,
+        overflow: 'hidden',
+      }}
     >
       <HeaderBar
         onNewChat={newChat}
@@ -464,9 +470,21 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               overflow: 'hidden',
             }}
           >
-            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', ...centerColStyle }}>
+            <div
+              style={{
+                flex: 1,
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                ...centerColStyle,
+              }}
+            >
               {isEmpty ? (
-                <WelcomeHero size={isBig ? 'lg' : 'sm'} emptyState={emptyState} onStarter={sendStarter} />
+                <WelcomeHero
+                  size={isBig ? 'lg' : 'sm'}
+                  emptyState={emptyState}
+                  onStarter={sendStarter}
+                />
               ) : isLoading ? (
                 <div style={{ flex: 1, overflowY: 'auto', padding: 18 }}>
                   <MessageSkeleton />

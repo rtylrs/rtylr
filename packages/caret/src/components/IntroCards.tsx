@@ -61,7 +61,13 @@ export const IntroCards: React.FC<IntroCardsProps> = ({ starters, onSelect, size
               {modeDef.label}
             </span>
           )}
-          <div style={{ fontSize: size === 'lg' ? 15 : 12.5, fontWeight: 600, marginBottom: size === 'lg' ? 5 : 3 }}>
+          <div
+            style={{
+              fontSize: size === 'lg' ? 15 : 12.5,
+              fontWeight: 600,
+              marginBottom: size === 'lg' ? 5 : 3,
+            }}
+          >
             {starter.label ?? starter.prompt}
           </div>
           {starter.description && (
