@@ -18,7 +18,7 @@ function resolveTheme(theme: Theme): 'dark' | 'light' {
 export function applyTheme(theme: Theme) {
   const resolved = resolveTheme(theme);
   document.documentElement.setAttribute('data-theme', resolved);
-  document.body.style.background = resolved === 'dark' ? '#151515' : '#f4f4f5';
+  document.body.style.background = '';
 }
 
 export const useThemeStore = create<ThemeStore>()(

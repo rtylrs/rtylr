@@ -580,6 +580,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               {/* Seat cost preview */}
               {sub &&
                 sub.pricePerSeatCents > 0 &&
+                sub.seatCount >= sub.includedSeatLimit &&
                 (() => {
                   const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
                     computeSeatProration(sub.pricePerSeatCents);

@@ -52,6 +52,8 @@ export const useUpdateBusiness = () => {
       setIfPresent('city');
       setIfPresent('zipcode');
       setIfPresent('country');
+      setIfPresent('businessType', 'business_type');
+      setIfPresent('business_type');
       if (data.maintenanceMode !== undefined) payload.maintenance_mode = data.maintenanceMode;
 
       return unwrap<{ config?: Record<string, unknown> }>(

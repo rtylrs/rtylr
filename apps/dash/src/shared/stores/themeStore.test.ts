@@ -35,14 +35,14 @@ describe('themeStore (dash)', () => {
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 
-  it('setTheme sets body background for dark', () => {
+  it('setTheme clears inline body background for dark', () => {
     getState().setTheme('dark');
-    expect(document.body.style.background).toBeTruthy();
+    expect(document.body.style.background).toBe('');
   });
 
-  it('setTheme sets body background for light', () => {
+  it('setTheme clears inline body background for light', () => {
     getState().setTheme('light');
-    expect(document.body.style.background).toBeTruthy();
+    expect(document.body.style.background).toBe('');
   });
 });
 
@@ -50,13 +50,13 @@ describe('applyTheme', () => {
   it('applies dark theme', () => {
     applyTheme('dark');
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-    expect(document.body.style.background).toBeTruthy();
+    expect(document.body.style.background).toBe('');
   });
 
   it('applies light theme', () => {
     applyTheme('light');
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
-    expect(document.body.style.background).toBeTruthy();
+    expect(document.body.style.background).toBe('');
   });
 
   it('applies system theme (resolves to light when matchMedia returns false)', () => {

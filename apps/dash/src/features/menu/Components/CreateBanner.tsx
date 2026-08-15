@@ -54,24 +54,65 @@ const CreateBanner = (): React.JSX.Element => {
   return (
     <>
       <HelmetContainer title="Create banner · rtylr" />
-      <div>
-        <h1>Create Banner</h1>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>
-              Title:
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-              />
+      <div className="max-w-2xl mx-auto space-y-6">
+        <h1 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
+          Create Banner
+        </h1>
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-xl p-6 border space-y-4"
+          style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+        >
+          <div className="space-y-1">
+            <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
+              Banner Title *
             </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Summer Special Banner"
+              required
+              className="w-full px-3 py-2 rounded-lg border text-sm transition-colors focus:outline-none"
+              style={{
+                background: 'var(--dash-hover)',
+                borderColor: 'var(--dash-border)',
+                color: 'var(--dash-text)',
+              }}
+            />
           </div>
-          <Dropzone onFileSelected={handleFileSelected} />
-          {formData.image && <p>Selected file: {formData.image.name}</p>}
-          <button type="submit">Create Banner</button>
+          <div className="space-y-1">
+            <label className="text-xs font-semibold" style={{ color: 'var(--dash-text-muted)' }}>
+              Banner Image
+            </label>
+            <Dropzone onFileSelected={handleFileSelected} />
+            {formData.image && (
+              <p className="text-xs mt-1 font-medium" style={{ color: 'var(--dash-text-muted)' }}>
+                Selected file: {formData.image.name}
+              </p>
+            )}
+          </div>
+          <div
+            className="flex items-center justify-end gap-3 pt-4 border-t"
+            style={{ borderColor: 'var(--dash-border)' }}
+          >
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity"
+              style={{ color: 'var(--dash-text-muted)' }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg text-sm font-semibold transition-opacity text-white"
+              style={{ background: '#4583C4' }}
+            >
+              Create Banner
+            </button>
+          </div>
         </form>
       </div>
     </>

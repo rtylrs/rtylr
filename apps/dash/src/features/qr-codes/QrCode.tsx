@@ -75,7 +75,10 @@ function QrCode() {
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-primary">QR Code Generator</h1>
         <div className="grid grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl p-5 border border-black/5 shadow-card space-y-4">
+          <div
+            className="rounded-xl p-5 border shadow-card space-y-4"
+            style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+          >
             <div className="flex flex-wrap gap-2">
               {QrCodeTemplates.map((template) => (
                 <div
@@ -231,7 +234,10 @@ function QrCode() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border border-black/5 shadow-card flex flex-col items-center gap-4">
+          <div
+            className="rounded-xl p-5 border shadow-card flex flex-col items-center gap-4"
+            style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+          >
             <div
               ref={qrRef}
               className="flex flex-col items-center justify-center rounded-lg overflow-hidden"

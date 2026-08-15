@@ -213,10 +213,14 @@ const ApiKeys: React.FC = () => {
             </div>
             <DialogFooter>
               <Button
-                onClick={() => {
+                onClick={async () => {
                   if (showKey) {
-                    navigator.clipboard.writeText(showKey);
-                    toast.success('Key copied');
+                    try {
+                      await navigator.clipboard.writeText(showKey);
+                      toast.success('Key copied');
+                    } catch {
+                      toast.error('Failed to copy key to clipboard');
+                    }
                   }
                 }}
               >
