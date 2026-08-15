@@ -65,9 +65,9 @@ func (m *Module) executeListReorderSuggestionsTool(ctx context.Context) (map[str
 		return nil, err
 	}
 
-	payloads := make([]map[string]any, 0, len(suggestions))
+	payloads := make([]map[string]any, 0, len(suggestions.Suggestions))
 	totalSuggested := 0.0
-	for _, suggestion := range suggestions {
+	for _, suggestion := range suggestions.Suggestions {
 		payloads = append(payloads, reorderSuggestionToolPayload(suggestion))
 		totalSuggested += suggestion.SuggestedQty
 	}
