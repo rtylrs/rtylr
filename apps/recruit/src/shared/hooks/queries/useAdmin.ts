@@ -123,13 +123,17 @@ interface ListSubmissionsResponse {
   submissions: Submission[];
 }
 
-export function useAdminSubmissions(status?: string) {
+export function useAdminSubmissions(status?: string, limit: number = 20, offset: number = 0) {
   return useQuery({
-    queryKey: ['recruit', 'admin', 'submissions', status ?? ''],
+    queryKey: ['recruit', 'admin', 'submissions', status ?? '', limit, offset],
     queryFn: () =>
       unwrap(
         safe.get<ListSubmissionsResponse>('/recruit/submissions', {
-          params: status ? { status } : undefined,
+          params: {
+            ...(status ? { status } : {}),
+            limit,
+            offset,
+          },
         })
       ),
   });
