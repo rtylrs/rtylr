@@ -6,11 +6,25 @@ import { dashOrderSchema } from '../../schemas/orders';
 
 export type { HubOrder } from '../../schemas/orders';
 
-export const useOrders = () => {
+interface UseOrdersParams {
+  limit?: number;
+  offset?: number;
+  status?: string;
+}
+
+export const useOrders = (params: UseOrdersParams = {}) => {
+  const { limit = 50, offset = 0, status } = params;
   return useQuery({
-    queryKey: ['dash-orders'],
+    queryKey: ['dash-orders', { limit, offset, status }],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/pos/orders/v1/orders'));
+      const searchParams = new URLSearchParams({
+        limit: String(limit),
+        offset: String(offset),
+      });
+      if (status && status !== 'all') {
+        searchParams.set('status', status);
+      }
+      const res = await unwrap(safe.get(`/pos/orders/v1/orders?${searchParams.toString()}`));
       const raw = res?.orders ?? res;
       return z.array(dashOrderSchema).parse(Array.isArray(raw) ? raw : []);
     },
