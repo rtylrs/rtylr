@@ -45,6 +45,8 @@
     "addLine": "Ajouter",
     "setTheDayFirst": "Indiquez où vous avez travaillé pour ouvrir la journée, puis ajoutez vos saisies.",
     "loadingDay": "Chargement de la journée…",
+    "weekStrip": "Choisir un jour de la semaine",
+    "weekDayLogged": "Temps saisi ce jour-là",
     "project": "Projet",
     "selectProject": "Sélectionner un projet",
     "workType": "Type de travail",

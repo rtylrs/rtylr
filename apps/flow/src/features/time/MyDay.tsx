@@ -3,9 +3,11 @@ import { Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { formatDurationClock, parseDurationInput } from '../../shared/lib/durationUtils';
+import { addDays, formatWeekDayShort, startOfWeek } from '../../shared/lib/dateUtils';
 import DurationField from '../tasks/components/DurationField';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useProjects } from '../projects/useProjects';
+import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import {
   newClientKey,
   todayLocalDate,
@@ -13,6 +15,7 @@ import {
   useDeleteWorkDayLine,
   useUpsertWorkDay,
   useWorkDay,
+  useWorkDaysRange,
   useWorkTypes,
 } from './useWorkDay';
 
@@ -34,7 +37,7 @@ const inputStyle: React.CSSProperties = {
  * invented lines rather than honest ones.
  */
 const MyDay = (): React.JSX.Element => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [date, setDate] = useState(todayLocalDate());
 
   const { data, isLoading } = useWorkDay(date);
@@ -44,6 +47,20 @@ const MyDay = (): React.JSX.Element => {
   const upsertDay = useUpsertWorkDay();
   const createLine = useCreateWorkDayLine();
   const deleteLine = useDeleteWorkDayLine();
+
+  const weekStart = useTimeSettingsStore((s) => s.weekStart);
+  const weekDays = useMemo(() => {
+    const start = startOfWeek(date, weekStart);
+    return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  }, [date, weekStart]);
+  const { data: weekData } = useWorkDaysRange(weekDays[0], weekDays[6]);
+  const loggedDates = useMemo(() => {
+    const set = new Set<string>();
+    for (const d of weekData?.workDays ?? []) {
+      if (d.date && (d.loggedMinutes ?? 0) > 0) set.add(d.date);
+    }
+    return set;
+  }, [weekData]);
 
   const day = data?.workDay;
   const lines = useMemo(() => data?.lines ?? [], [data]);
@@ -118,6 +135,36 @@ const MyDay = (): React.JSX.Element => {
             style={inputStyle}
           />
         </header>
+
+        <div role="group" aria-label={t('flow.time.weekStrip')} className="mb-6 flex gap-1.5">
+          {weekDays.map((d) => {
+            const active = d === date;
+            const hasEntries = loggedDates.has(d);
+            return (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setDate(d)}
+                aria-current={active ? 'date' : undefined}
+                className="flow-focus relative flex min-h-[44px] flex-1 flex-col items-center justify-center rounded-md py-1.5 text-[11px] font-medium md:min-h-0"
+                style={{
+                  background: active ? 'var(--accent)' : 'var(--flow-hover)',
+                  color: active ? 'var(--flow-on-accent)' : 'var(--flow-text)',
+                }}
+              >
+                {formatWeekDayShort(d, i18n.language)}
+                {hasEntries && (
+                  <span
+                    title={t('flow.time.weekDayLogged')}
+                    aria-hidden="true"
+                    className="absolute bottom-0.5 h-1 w-1 rounded-full"
+                    style={{ background: active ? 'var(--flow-on-accent)' : 'var(--accent)' }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
 
         {isLoading ? (
           <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>

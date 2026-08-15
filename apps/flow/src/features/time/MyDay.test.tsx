@@ -26,15 +26,25 @@ const workDayState = vi.hoisted(() => ({
   },
 }));
 
+const workDaysRangeState = vi.hoisted(() => ({
+  value: { data: { workDays: [] as Array<{ date: string; loggedMinutes: number }> } },
+}));
+
 vi.mock('./useWorkDay', () => ({
   todayLocalDate: () => '2026-08-16',
   localTimezone: () => 'Asia/Beirut',
   newClientKey: () => 'client-key-1',
   useWorkDay: () => workDayState.value,
   useWorkTypes: () => ({ data: { workTypes: [] } }),
+  useWorkDaysRange: () => workDaysRangeState.value,
   useUpsertWorkDay: () => ({ mutate: upsertDayMutate, isPending: false }),
   useCreateWorkDayLine: () => ({ mutate: createLineMutate, isPending: false }),
   useDeleteWorkDayLine: () => ({ mutate: deleteLineMutate, isPending: false }),
+}));
+
+vi.mock('../../shared/stores/timeSettingsStore', () => ({
+  useTimeSettingsStore: (selector: (s: { weekStart: 'monday' | 'sunday' }) => unknown) =>
+    selector({ weekStart: 'monday' }),
 }));
 
 const projectsState = vi.hoisted(() => ({
@@ -75,6 +85,29 @@ beforeEach(() => {
     isLoading: false,
   };
   projectsState.value = { data: [project(), project({ id: '2', name: 'Warehouse racking' })] };
+  workDaysRangeState.value = { data: { workDays: [] } };
+});
+
+describe('MyDay: week strip', () => {
+  it('renders all seven days of the week containing the selected date', () => {
+    render(<MyDay />);
+    // 2026-08-16 is a Sunday; the Monday-start week runs 08-10 to 08-16.
+    for (const day of ['10', '11', '12', '13', '14', '15', '16']) {
+      expect(screen.getByRole('button', { name: new RegExp(`\\b${day}\\b`) })).toBeInTheDocument();
+    }
+  });
+
+  it('marks a day with recorded time so it is distinguishable from an empty one', () => {
+    workDaysRangeState.value = { data: { workDays: [{ date: '2026-08-11', loggedMinutes: 90 }] } };
+    render(<MyDay />);
+    expect(screen.getByTitle('flow.time.weekDayLogged')).toBeInTheDocument();
+  });
+
+  it('selecting a strip day changes which day is loaded', () => {
+    render(<MyDay />);
+    fireEvent.click(screen.getByRole('button', { name: /\b11\b/ }));
+    expect((screen.getByLabelText('flow.time.date') as HTMLInputElement).value).toBe('2026-08-11');
+  });
 });
 
 describe('MyDay: project on a logged line', () => {
