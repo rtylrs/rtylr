@@ -51,9 +51,10 @@ func TestWorkspaces_CreateWorkspace_AppearsInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.CreateWorkspace(context.Background(), domain.WorkspaceInput{
-		OwnerID:   testutil.OwnerID,
-		Name:      "List Test WS",
-		CreatedBy: testutil.OwnerID,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.OwnerID,
+		Name:       "List Test WS",
+		CreatedBy:  testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
@@ -289,7 +290,7 @@ func TestWorkspaces_CountWorkspacesByOwner_IncreasesOnCreate(t *testing.T) {
 	}
 
 	id, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "Count Increase WS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.OwnerID, Name: "Count Increase WS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
@@ -319,7 +320,7 @@ func TestWorkspaces_CreateProject_AppearsInList(t *testing.T) {
 	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
 
 	projID, err := repo.CreateProject(ctx, domain.ProjectInput{
-		WorkspaceID: wsID, OwnerID: testutil.OwnerID, Name: "Appears Project", CreatedBy: testutil.OwnerID,
+		WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.OwnerID, Name: "Appears Project", CreatedBy: testutil.OwnerID,
 	})
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
@@ -405,7 +406,7 @@ func TestWorkspaces_DeleteTask_RemovesFromProject(t *testing.T) {
 	}
 
 	taskID, err := repo.CreateTask(ctx, domain.TaskInput{
-		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID,
+		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.OwnerID,
 		Title: "Delete Me Task", ReporterID: testutil.OwnerID,
 	})
 	if err != nil {

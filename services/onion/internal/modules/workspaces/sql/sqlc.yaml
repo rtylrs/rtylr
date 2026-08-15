@@ -5,6 +5,16 @@ sql:
     schema:
       - "../../../../internal/platform/database/schemas/shared"
       - "../../../../internal/platform/database/schemas/flow/schema.sql"
+      # hr_time_entries is where Flow's time lines live, and v8 both creates the
+      # work-day tables and adds Flow's columns to that table. Both are needed for
+      # sqlc to type the work-day queries, and hr_time must come first so the
+      # ALTERs in v8 have a table to alter.
+      - "../../../../internal/platform/database/schemas/hr_time/schema.sql"
+      - "../../../../internal/platform/database/schemas/flow/v8_time_tracking.sql"
+      # hr_employees.user_id is the only link between a workspace member (a
+      # user id) and a work day (keyed on employee id). The team view resolves
+      # through it; nothing here writes to hr_employees.
+      - "../../../../internal/platform/database/schemas/hr_core/schema.sql"
     gen:
       go:
         package: "sqlc"

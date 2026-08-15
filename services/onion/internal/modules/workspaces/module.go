@@ -21,6 +21,7 @@ import (
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
+	flowtimev1 "github.com/voxire/voxie/gen/go/flow/time/v1"
 	flowviewv1 "github.com/voxire/voxie/gen/go/flow/view/v1"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
 )
@@ -109,6 +110,12 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 		flowsettingv1.WithMux(mux),
 	); err != nil {
 		panic(fmt.Errorf("register flow setting service: %w", err))
+	}
+	if err := flowtimev1.RegisterTimeServiceServer(
+		api.NewWorkTimeAPI(m.service),
+		flowtimev1.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow time service: %w", err))
 	}
 }
 
