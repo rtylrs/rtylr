@@ -41,6 +41,16 @@ func TestValidateReportParams_Valid(t *testing.T) {
 	}
 }
 
+func TestValidateReportParams_RejectsInteractiveWindowOver366Days(t *testing.T) {
+	from := time.Date(2025, 1, 1, 0, 0, 0, 0, time.UTC)
+	to := from.Add(domain.MaxInteractiveReportWindow + 24*time.Hour)
+
+	err := domain.ValidateReportParams(domain.ReportParams{DateFrom: from, DateTo: to})
+	if !errors.Is(err, domain.ErrDateRangeTooLarge) {
+		t.Fatalf("expected ErrDateRangeTooLarge, got %v", err)
+	}
+}
+
 func TestValidateReportParams_ZeroDateFrom(t *testing.T) {
 	p := domain.ReportParams{
 		OwnerID: 1,

@@ -94,6 +94,10 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 		writeError(w, onekiterrors.New(http.StatusBadRequest, "date_to must not be before date_from"))
 		return
 	}
+	if dateTo.Sub(dateFrom) > domain.MaxInteractiveReportWindow {
+		writeError(w, onekiterrors.New(http.StatusBadRequest, "report date range must not exceed 366 days"))
+		return
+	}
 
 	params := domain.ReportParams{
 		OwnerID:      device.User.UserID,
@@ -118,6 +122,10 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 				logger.Any("report_type", req.ReportType),
 				logger.Error(serviceErr))
 			writeError(w, onekiterrors.New(http.StatusInternalServerError, "Report generation failed"))
+			return
+		}
+		if errors.Is(serviceErr, domain.ErrReportTooLarge) {
+			writeError(w, onekiterrors.New(http.StatusUnprocessableEntity, "Report is too large; narrow the date range or filters"))
 			return
 		}
 		logger.Ctx(ctx).Error("failed to generate report",

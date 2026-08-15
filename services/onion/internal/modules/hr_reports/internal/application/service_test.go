@@ -176,3 +176,13 @@ func TestGenerateReport_CaseSensitive(t *testing.T) {
 		t.Errorf("report type matching should be case-sensitive, got %v", err)
 	}
 }
+
+func TestGenerateReport_RejectsRowsBeyondInteractiveLimit(t *testing.T) {
+	rows := make([]map[string]interface{}, maxReportRows+1)
+	s := &Service{repo: &mockRepo{result: rows}}
+
+	_, err := s.GenerateReport(context.Background(), 1, domain.ReportTypeHecount, domain.ReportParams{})
+	if !errors.Is(err, domain.ErrReportTooLarge) {
+		t.Fatalf("expected ErrReportTooLarge, got %v", err)
+	}
+}

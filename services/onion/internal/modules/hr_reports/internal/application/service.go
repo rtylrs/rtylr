@@ -15,6 +15,7 @@ import (
 const (
 	hrReportsScope = "hr_reports"
 	hrReportsTTL   = 5 * time.Minute
+	maxReportRows  = 5000
 )
 
 type repository interface {
@@ -61,22 +62,33 @@ func (s *Service) GenerateReport(ctx context.Context, businessID int64, reportTy
 	key := cacheKeys.Scoped(hrReportsScope, businessID, fmt.Sprintf("%s|%s", reportType, paramsKey(params)))
 	return cacher.Of[[]map[string]interface{}]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]map[string]interface{}, error) {
+			var (
+				rows []map[string]interface{}
+				err  error
+			)
 			switch reportType {
 			case domain.ReportTypeHecount:
-				return s.repo.GenerateHeadcountReport(ctx, businessID, params)
+				rows, err = s.repo.GenerateHeadcountReport(ctx, businessID, params)
 			case domain.ReportTypeAttendanceSummary:
-				return s.repo.GenerateAttendanceSummaryReport(ctx, businessID, params)
+				rows, err = s.repo.GenerateAttendanceSummaryReport(ctx, businessID, params)
 			case domain.ReportTypeLeaveSummary:
-				return s.repo.GenerateLeaveSummaryReport(ctx, businessID, params)
+				rows, err = s.repo.GenerateLeaveSummaryReport(ctx, businessID, params)
 			case domain.ReportTypePayrollSummary:
-				return s.repo.GeneratePayrollSummaryReport(ctx, businessID, params)
+				rows, err = s.repo.GeneratePayrollSummaryReport(ctx, businessID, params)
 			case domain.ReportTypeOvertimeSummary:
-				return s.repo.GenerateOvertimeSummaryReport(ctx, businessID, params)
+				rows, err = s.repo.GenerateOvertimeSummaryReport(ctx, businessID, params)
 			case domain.ReportTypeTimesheetSummary:
-				return s.repo.GenerateTimesheetSummaryReport(ctx, businessID, params)
+				rows, err = s.repo.GenerateTimesheetSummaryReport(ctx, businessID, params)
 			default:
 				return nil, domain.ErrUnsupportedReportType
 			}
+			if err != nil {
+				return nil, err
+			}
+			if len(rows) > maxReportRows {
+				return nil, domain.ErrReportTooLarge
+			}
+			return rows, nil
 		},
 		cacher.WithExpiry(ctx, hrReportsTTL),
 	)

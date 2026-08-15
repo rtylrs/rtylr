@@ -14,7 +14,8 @@ WHERE e.business_id = ?
   AND (sqlc.narg('department_id') IS NULL OR e.department_id = sqlc.narg('department_id'))
   AND (sqlc.narg('employee_id') IS NULL OR e.id = sqlc.narg('employee_id'))
 GROUP BY d.name, l.name, e.employment_type, e.status
-ORDER BY department, location;
+ORDER BY department, location
+LIMIT 5001;
 
 -- name: AttendanceSummaryReport :many
 SELECT e.id AS employee_id,
@@ -34,7 +35,8 @@ WHERE e.business_id = ?
   AND (sqlc.narg('department_id') IS NULL OR e.department_id = sqlc.narg('department_id'))
   AND (sqlc.narg('employee_id') IS NULL OR e.id = sqlc.narg('employee_id'))
 GROUP BY e.id, e.first_name, e.last_name, d.name
-ORDER BY employee_name;
+ORDER BY employee_name
+LIMIT 5001;
 
 -- name: LeaveSummaryReport :many
 SELECT e.id AS employee_id,
@@ -45,20 +47,28 @@ SELECT e.id AS employee_id,
        COALESCE(lb.used_days, 0) AS used_days,
        COALESCE(lb.pending_days, 0) AS pending_days,
        COALESCE(lb.entitled_days - lb.used_days - lb.pending_days, 0) AS remaining_days,
-       COUNT(lr.id) AS requests_in_period,
-       COALESCE(SUM(CASE WHEN lr.status = 'approved' THEN lr.total_days ELSE 0 END), 0) AS approved_days_in_period
+       COALESCE(lr.requests_in_period, 0) AS requests_in_period,
+       COALESCE(lr.approved_days_in_period, 0) AS approved_days_in_period
 FROM hr_employees e
 LEFT JOIN hr_departments d ON d.id = e.department_id AND d.business_id = e.business_id
 CROSS JOIN hr_leave_types lt ON lt.business_id = e.business_id AND lt.is_active = TRUE
 LEFT JOIN hr_leave_balances lb ON lb.employee_id = e.id AND lb.business_id = e.business_id AND lb.leave_type_id = lt.id AND lb.year = YEAR(?)
-LEFT JOIN hr_leave_requests lr ON lr.employee_id = e.id AND lr.business_id = e.business_id AND lr.leave_type_id = lt.id AND lr.start_date <= ? AND lr.end_date >= ?
+LEFT JOIN (
+    SELECT employee_id, business_id, leave_type_id,
+           COUNT(*) AS requests_in_period,
+           COALESCE(SUM(CASE WHEN status = 'approved' THEN total_days ELSE 0 END), 0) AS approved_days_in_period
+    FROM hr_leave_requests
+    WHERE business_id = ? AND start_date <= ? AND end_date >= ?
+    GROUP BY employee_id, business_id, leave_type_id
+) lr ON lr.employee_id = e.id AND lr.business_id = e.business_id AND lr.leave_type_id = lt.id
 WHERE e.business_id = ?
   AND e.status = 'active'
   AND (sqlc.narg('location_id') IS NULL OR e.location_id = sqlc.narg('location_id'))
   AND (sqlc.narg('department_id') IS NULL OR e.department_id = sqlc.narg('department_id'))
   AND (sqlc.narg('employee_id') IS NULL OR e.id = sqlc.narg('employee_id'))
-GROUP BY e.id, e.first_name, e.last_name, d.name, lt.id, lt.name, lb.entitled_days, lb.used_days, lb.pending_days
-ORDER BY employee_name, leave_type;
+GROUP BY e.id, e.first_name, e.last_name, d.name, lt.id, lt.name, lb.entitled_days, lb.used_days, lb.pending_days, lr.requests_in_period, lr.approved_days_in_period
+ORDER BY employee_name, leave_type
+LIMIT 5001;
 
 -- name: PayrollSummaryReport :many
 SELECT e.id AS employee_id,
@@ -82,7 +92,8 @@ WHERE e.business_id = ?
   AND (sqlc.narg('department_id') IS NULL OR e.department_id = sqlc.narg('department_id'))
   AND (sqlc.narg('employee_id') IS NULL OR e.id = sqlc.narg('employee_id'))
 GROUP BY e.id, e.first_name, e.last_name, d.name
-ORDER BY employee_name;
+ORDER BY employee_name
+LIMIT 5001;
 
 -- name: OvertimeSummaryReport :many
 SELECT e.id AS employee_id,
@@ -103,7 +114,8 @@ WHERE e.business_id = ?
   AND (sqlc.narg('department_id') IS NULL OR e.department_id = sqlc.narg('department_id'))
   AND (sqlc.narg('employee_id') IS NULL OR e.id = sqlc.narg('employee_id'))
 GROUP BY e.id, e.first_name, e.last_name, d.name
-ORDER BY employee_name;
+ORDER BY employee_name
+LIMIT 5001;
 
 -- name: TimesheetSummaryReport :many
 SELECT e.id AS employee_id,
@@ -123,4 +135,5 @@ WHERE e.business_id = ?
   AND (sqlc.narg('department_id') IS NULL OR e.department_id = sqlc.narg('department_id'))
   AND (sqlc.narg('employee_id') IS NULL OR e.id = sqlc.narg('employee_id'))
 GROUP BY e.id, e.first_name, e.last_name, d.name
-ORDER BY employee_name;
+ORDER BY employee_name
+LIMIT 5001;
