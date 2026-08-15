@@ -1,10 +1,6 @@
 import React from 'react';
-<<<<<<< HEAD
-import { DollarSign, ShoppingBag, Users, FileText } from 'lucide-react';
-import { Skeleton } from '../../../../shared/components/ui';
-=======
 import { DollarSign, ShoppingBag, Users, TrendingUp, FileText } from 'lucide-react';
->>>>>>> b115df0c (map openInvoices KPI metric in KpiInvoices dashboard widget)
+import { Skeleton } from '../../../../shared/components/ui';
 import { useKpis } from '../../../../shared/hooks/queries/useKpis';
 
 function fmt(n: number | undefined | null) {
