@@ -67,49 +67,65 @@ separate, configurable permission decided above. Putting all four under one
 permission check - they don't, and the build order below keeps that
 distinction real in code, not just in the sidebar label.
 
-## Two real gaps this surfaced, neither introduced by this work
+## One real gap, one narrower than first thought, one that turned out not to exist
 
-Investigating what Flow's front door would actually call found the same
-class of bug already fixed once today in Flow's own backend - twice, in HR,
-independently.
+Starting the build, actually reading the code before touching it (rather than
+trusting an earlier delegated investigation) found that two of the three
+things reported here were wrong. Corrected below, with the earlier claim left
+visible so the mistake stays legible rather than quietly disappearing.
 
-### 1. `createLeaveRequest` trusts a caller-supplied `employee_id`
+### 1. `createLeaveRequest` trusts a caller-supplied `employee_id` - confirmed real
 
 `CreateLeaveRequestRequest.employee_id` (`packages/voxie/api/hr/leave/v1/models.onk:105-118`)
 travels straight through to the write with no check that it belongs to the
 caller. `create_leave_request_handler.go:59-72` only verifies the caller is
-authenticated, never that `req.EmployeeID` is theirs. Exactly the shape of
-the hole closed in `WorkTimeAPI.scope()` earlier today (`3d754ec7`): any
-authenticated user in the business can submit a leave request as any other
-employee.
+authenticated, never that `req.EmployeeID` is theirs, and
+`Service.CreateLeaveRequest` (`application/service.go:96-169`) never checks it
+either. Exactly the shape of the hole closed in `WorkTimeAPI.scope()` earlier
+today (`3d754ec7`): any authenticated user in the business can submit a leave
+request as any other employee.
 
-### 2. `listLeaveRequests`'s filters are declared but not implemented
+The fix does not need to be invented from scratch: `Service.ListLeaveRequests`
+already has the right pattern next to it (see below) - resolve the caller's
+own employee id, and only let a caller with the approval permission act on
+someone else's.
 
-The contract has optional `employee_id` and `status` query filters
-(`models.onk:87-92`), but `list_leave_requests_handler.go:19-22` and
-`domain.ListLeaveRequestsParams` (`types.go:59-62`) only take `limit`/`offset` -
-there is no filtering code at all. Today, "list my leave requests" is not
-actually expressible: the endpoint returns every request in the tenant,
-unscoped, to whoever calls it.
+### 2. `listLeaveRequests`'s filters - this was wrong, no gap exists
 
-### 3. `listStaff` returns salary and emergency-contact data to any authenticated caller
+The original claim was that `employee_id`/`status` filters were declared in
+the contract but never implemented. Reading `Service.ListLeaveRequests`
+(`application/service.go:171-171` onward) before writing anything found a
+real, already-wired `scopeLeaveRequests` helper
+(`application/service.go:266-285`): it resolves the caller's own employee id
+via `GetEmployeeIDByUserID`, and only lets the client-supplied `employee_id`
+through when the caller holds `permissionApproveTimeOff` - otherwise the
+request is forced to the caller's own employee id regardless of what was
+asked for. This is exactly the authorization this document assumed was
+missing. Nothing to fix here.
 
-`staff_service.go:25-41` resolves only the business id and checks the caller
-isn't anonymous - no role check, no department scoping. The `Staff` message
-(`models.onk:4-31`) carries `salary`, `hourly_rate`, `overtime_rate`, `address`,
-`emergency_contact_name`, `emergency_contact_phone` in the same payload as
-name and email, with no leaner shape for a casual directory. This is
-plausibly fine today because only HR-app users, already trusted with HR data,
-call it. A Directory screen inside Flow would hand the same payload to every
-employee in the business who opens it.
+### 3. `listStaff` - real, but narrower: compensation is already gated, contact details are not
 
-None of these are Flow's bugs to have introduced and none are new - they were
-already true before this document existed. They are listed here because
-building Leave and Directory on top of them, unfixed, would make Flow the
-thing that turns a dormant hole into an actively-exercised one. Proposed
-build order below treats fixing them as a prerequisite, not an afterthought,
-the same way the standalone `scope()` fix shipped ahead of anything that
-needed it.
+The original claim was that salary and emergency-contact data were both
+exposed with no gate at all. `staff_service.go:38` and the dedicated
+`canViewCompensation` helper (`api/permissions.go`) already fail closed on
+`salary`/`hourly_rate`/`overtime_rate`, resolved the same way as the leave
+fix above - via `GetEmployeeIDByUserID` plus a real permission check
+(`manage_employees`/`manage_payroll`). That part already works.
+
+What is still real: `newStaffPayload` (`staff_service.go:196-201`) only zeroes
+the three compensation fields. `address`, `emergency_contact_name`, and
+`emergency_contact_phone` pass through unconditionally to any authenticated
+caller in the business, with no role check at all - `resolveBusinessID`
+(`staff_service.go:183-194`) checks only that the caller is authenticated.
+Narrower than first written, but a home address and an emergency contact are
+still not something every employee should see about every colleague by
+default.
+
+Neither of these two real items is a bug this project introduced, and neither
+is new - both predate this document. They stay listed as build prerequisites,
+not deferred cleanup, because Flow becoming the front door means real traffic
+starts flowing through paths that were previously only reachable from inside
+the HR app.
 
 ## What each screen actually does
 
@@ -149,12 +165,13 @@ Both halves the earlier round asked for:
 
 ### Directory
 
-Blocked on gap 3 above. Once resolved - either a leaner response shape that
-drops salary/rate/emergency-contact fields, or a genuinely separate
-"directory" projection - this is a straightforward business-wide list backed
-by `hr.staff.v1`'s existing `listStaff`, gated by the new configurable
-permission. No new backend concept needed beyond the field-shape fix and the
-permission itself.
+Blocked on gap 3 above (the narrower, corrected version: `address` and the
+two emergency-contact fields, not salary - that part is already safe). Once
+`newStaffPayload` gates those the same way it already gates compensation,
+this is a straightforward business-wide list backed by `hr.staff.v1`'s
+existing `listStaff`, gated by the new configurable permission. No new
+backend concept needed beyond that field-gating fix and the permission
+itself.
 
 ### Who's in today
 
@@ -193,14 +210,15 @@ screen itself:
 
 ## Build order
 
-1. **Fix the two HR gaps**, on their own, the same way `scope()` shipped
-   alone today: deny a cross-employee `employee_id` on
-   `createLeaveRequest`/`listLeaveRequests` until real authorization exists,
-   implement the declared list filters for real, add the cancel RPC, and
-   resolve the `listStaff` over-exposure. This is HR's contract and HR's
-   backend - it lands as its own separate, clearly-labeled change against
-   HR's code, reviewed as the authorization-model change it is, independent
-   of who ends up writing it.
+1. **Fix the two real HR gaps**, on their own, the same way `scope()` shipped
+   alone today: deny a cross-employee `employee_id` on `createLeaveRequest`
+   using the same `GetEmployeeIDByUserID` + approval-permission pattern
+   `listLeaveRequests` already uses, add the cancel RPC, and gate
+   `address`/`emergency_contact_*` in `listStaff` the same way compensation
+   is already gated. This is HR's contract and HR's backend - it lands as
+   its own separate, clearly-labeled change against HR's code, reviewed as
+   the authorization-model change it is, independent of who ends up writing
+   it.
 2. **Log Hours rebuild** - independently shippable, no dependency on step 1.
 3. **Leave** - depends on step 1's fixes to be safe to ship at all.
 4. **Profile** - depends on nothing new; can land any time after step 2.
@@ -240,8 +258,7 @@ be genuinely wanted - not the default to ship with.
 
 Which person at Voxire signs off on a change to HR's authorization surface
 is not something to decide from inside a design doc. What can be decided:
-the fix ships as its own separate, clearly-labeled change against HR's code
-
-- never folded quietly into a Flow PR - because it alters another app's
-  authorization model and deserves review as exactly that, independent of who
-  ends up writing it or when.
+the fix ships as its own separate, clearly-labeled change against HR's code -
+never folded quietly into a Flow PR - because it alters another app's
+authorization model and deserves review as exactly that, independent of who
+ends up writing it or when.
