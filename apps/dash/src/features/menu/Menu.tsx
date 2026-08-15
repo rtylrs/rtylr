@@ -97,8 +97,8 @@ const Menu: React.FC<{}> = () => {
   const renderFlatItem = (item: StoreItem) => (
     <div
       key={item._id}
-      className="flex items-center justify-between p-4 border rounded-xl"
-      style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+      className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-[var(--dash-hover)] transition-colors"
+      style={{ borderBottom: '1px solid var(--dash-border)' }}
     >
       <div className="min-w-0">
         <p className="text-sm font-semibold text-primary truncate">{item.details?.name}</p>
@@ -131,10 +131,10 @@ const Menu: React.FC<{}> = () => {
     return (
       <div
         key={category._id}
-        className="border rounded-xl p-4 mb-3"
-        style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+        className="ps-4 py-2 my-2 border-s-2"
+        style={{ borderColor: 'var(--dash-border)' }}
       >
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-primary">{category?.details?.name}</span>
             {cdnImageUrl(category?.details?.icon) && (
@@ -147,7 +147,7 @@ const Menu: React.FC<{}> = () => {
           </div>
           <div className="flex gap-2">
             <button
-              className="px-3 py-1.5 text-sm bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
+              className="px-3 py-1 text-xs bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
               onClick={() => {
                 navigate({ to: '/create-item', search: { categoryId: category.itemId } });
               }}
@@ -155,14 +155,14 @@ const Menu: React.FC<{}> = () => {
               Add a product
             </button>
             <button
-              className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+              className="px-3 py-1 text-xs text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
               onClick={() => deleteCategory((category.itemId || category._id) as string)}
             >
               Delete
             </button>
           </div>
         </div>
-        <div className="space-y-2">{renderItems(category.details?.menuItems ?? [])}</div>
+        <div className="space-y-1">{renderItems(category.details?.menuItems ?? [])}</div>
       </div>
     );
   };
