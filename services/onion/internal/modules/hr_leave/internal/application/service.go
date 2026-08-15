@@ -455,11 +455,22 @@ func (s *Service) approverMatchesChain(ctx context.Context, ownerID, employeeID 
 	return s.permissions.HasRole(ctx, ownerID, employeeID, level.ApproverRoleID)
 }
 
-func (s *Service) GetLeaveBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
-	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("balances|e=%d|y=%d", employeeID, year))
+// GetLeaveBalances resolves which employee's balances the caller may see the
+// same way ListLeaveRequests does: an ordinary caller is narrowed to their
+// own balances regardless of the requested employeeID, and only a caller
+// holding the approval permission sees another employee's. Balances are
+// financial-adjacent data (days entitled/used/remaining), so this was never
+// safe to leave open the way it was found.
+func (s *Service) GetLeaveBalances(ctx context.Context, ownerID, callerUserID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
+	scopedEmployeeID, err := s.scopeLeaveRequests(ctx, ownerID, callerUserID, employeeID)
+	if err != nil {
+		return nil, err
+	}
+
+	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("balances|e=%d|y=%d", scopedEmployeeID, year))
 	return cacher.Of[[]domain.LeaveBalanceRecord]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.LeaveBalanceRecord, error) {
-			return s.fetchBalances(ctx, ownerID, employeeID, year)
+			return s.fetchBalances(ctx, ownerID, scopedEmployeeID, year)
 		},
 		cacher.WithExpiry(ctx, hrLeaveTTL),
 	)

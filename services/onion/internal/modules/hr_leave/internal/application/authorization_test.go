@@ -128,6 +128,28 @@ func TestCancelLeaveRequest_DeniesZeroCallerUserID(t *testing.T) {
 	}
 }
 
+func TestGetLeaveBalances_DeniesWithoutResolvableEmployee(t *testing.T) {
+	// repo is deliberately left nil: an early deny must return before ever
+	// reaching it, so a nil-pointer panic here would mean the check ran too late.
+	svc := &Service{permissions: fakeLeavePermissionProvider{
+		employeeErr: errors.New("employee lookup failed"),
+	}}
+
+	_, err := svc.GetLeaveBalances(context.Background(), 1001, 77, 4102, 2026)
+	if !errors.Is(err, domain.ErrLeaveAccessDenied) {
+		t.Fatalf("error = %v, want ErrLeaveAccessDenied", err)
+	}
+}
+
+func TestGetLeaveBalances_DeniesZeroCallerUserID(t *testing.T) {
+	svc := &Service{permissions: fakeLeavePermissionProvider{employeeID: 4101}}
+
+	_, err := svc.GetLeaveBalances(context.Background(), 1001, 0, 4102, 2026)
+	if !errors.Is(err, domain.ErrLeaveAccessDenied) {
+		t.Fatalf("error = %v, want ErrLeaveAccessDenied", err)
+	}
+}
+
 func TestApproverMatchesChain_UsesCurrentApprovalLevel(t *testing.T) {
 	svc := &Service{permissions: fakeLeavePermissionProvider{roles: map[int64]bool{7: true}}}
 	levels := []domain.ApprovalLevelInfo{

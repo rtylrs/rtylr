@@ -31,6 +31,11 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterGET[handlers.ListEmployeesRequest, handlers.ListEmployeesResponse](
 		ctx, router, handlers.ListEmployeesRoutes(), &handlers.ListEmployeesHandler{Service: service},
 	)
+	// Registered before GetEmployeeRoutes ({id}) so chi resolves the fixed
+	// "me" segment first rather than parsing it as an employee id.
+	serverHttp.RegisterGET[handlers.GetMyEmployeeRequest, handlers.GetMyEmployeeResponse](
+		ctx, router, handlers.GetMyEmployeeRoutes(), &handlers.GetMyEmployeeHandler{Service: service},
+	)
 	serverHttp.RegisterGET[handlers.GetEmployeeRequest, handlers.GetEmployeeResponse](
 		ctx, router, handlers.GetEmployeeRoutes(), &handlers.GetEmployeeHandler{Service: service},
 	)

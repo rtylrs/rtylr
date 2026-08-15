@@ -121,6 +121,48 @@ func (h *GetEmployeeHandler) Serve(ctx context.Context, _ *GetEmployeeRequest) (
 	return GetEmployeeResponse{Employee: employeeToProto(*emp)}, nil
 }
 
+// --- Get My Employee ---
+
+// GetMyEmployeeRoutes is a fixed path, not a param: without it, chi's router
+// would try to parse "me" as the {id} segment GetEmployeeRoutes expects.
+func GetMyEmployeeRoutes() []string { return []string{"/hr/employees/me"} }
+
+type GetMyEmployeeHandler struct{ Service *application.Service }
+
+type GetMyEmployeeRequest struct{}
+
+type GetMyEmployeeResponse struct {
+	Employee *hrstaffv1.Staff `json:"employee"`
+}
+
+// Serve exists because nothing else lets a caller resolve their own
+// hr_employees.id: ListEmployeesRequest/GetEmployeeRequest have no user_id
+// filter, so every self-service caller (HR's own leave/overtime/equipment
+// forms, Flow's employee-hub front door) would otherwise have to page
+// through the entire roster hoping to find themselves.
+func (h *GetMyEmployeeHandler) Serve(ctx context.Context, _ *GetMyEmployeeRequest) (GetMyEmployeeResponse, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return GetMyEmployeeResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	employeeID, err := h.Service.GetEmployeeIDByUserID(ctx, device.User.UserID, device.User.UserID)
+	if err != nil || employeeID <= 0 {
+		return GetMyEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "No employee record is linked to this account")
+	}
+
+	emp, err := h.Service.GetEmployeeForViewer(ctx, device.User.UserID, device.User.UserID, employeeID)
+	if err != nil {
+		if errors.Is(err, domain.ErrEmployeeNotFound) {
+			return GetMyEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "No employee record is linked to this account")
+		}
+		logger.Ctx(ctx).Error("failed to get own employee record", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		return GetMyEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get employee record")
+	}
+
+	return GetMyEmployeeResponse{Employee: employeeToProto(*emp)}, nil
+}
+
 // --- Create Employee ---
 
 func CreateEmployeeRoutes() []string { return []string{"/hr/employees"} }

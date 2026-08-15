@@ -2,9 +2,11 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/application"
+	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
@@ -30,8 +32,11 @@ func (h *GetLeaveBalancesHandler) Serve(ctx context.Context, req *GetLeaveBalanc
 		return GetLeaveBalancesResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	balances, err := h.Service.GetLeaveBalances(ctx, device.User.UserID, req.EmployeeID, req.Year)
+	balances, err := h.Service.GetLeaveBalances(ctx, device.User.UserID, device.User.UserID, req.EmployeeID, req.Year)
 	if err != nil {
+		if errors.Is(err, domain.ErrLeaveAccessDenied) {
+			return GetLeaveBalancesResponse{}, onekiterrors.PermissionDenied()
+		}
 		logger.Ctx(ctx).Error("failed to get leave balances", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return GetLeaveBalancesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get leave balances")
 	}

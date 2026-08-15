@@ -123,7 +123,7 @@ func (m *Module) executeGetLeaveBalancesTool(ctx context.Context, input map[stri
 		year = int32(time.Now().Year())
 	}
 
-	balances, err := m.service.GetLeaveBalances(ctx, ownerID, employeeID, year)
+	balances, err := m.service.GetLeaveBalances(ctx, ownerID, ownerID, employeeID, year)
 	if err != nil {
 		return nil, err
 	}
