@@ -65,3 +65,20 @@ export function parseMoney(input: string): number {
   const n = parseFloat(cleaned);
   return isFinite(n) ? n : 0;
 }
+
+export const FX_RATES: Record<Currency, number> = {
+  USD: 1,
+  EUR: 0.92,
+  GBP: 0.79,
+  JPY: 155.0,
+  CAD: 1.36,
+  AUD: 1.52,
+  CHF: 0.91,
+  CNY: 7.23,
+};
+
+export function convert(amount: number, from: Currency, to: Currency): number {
+  if (from === to) return amount;
+  const inUsd = amount / (FX_RATES[from] ?? 1);
+  return inUsd * (FX_RATES[to] ?? 1);
+}

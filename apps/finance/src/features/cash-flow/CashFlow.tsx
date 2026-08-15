@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import CashFlowChart from '../../shared/components/CashFlowChart';
@@ -9,6 +10,7 @@ import { useCashFlow } from './useCashFlow';
 import { cardStyle, ACCENT } from '../../shared/lib/tokens';
 
 const CashFlow: React.FC = () => {
+  const { t } = useTranslation('finance');
   const { data = [] } = useCashFlow();
   const [period, setPeriod] = useState<'month' | 'quarter' | 'year'>('month');
   const [date, setDate] = useState(new Date());
@@ -23,10 +25,10 @@ const CashFlow: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Cash flow · rtylr" />
+      <HelmetContainer title={`${t('cashFlow.title')} · rtylr`} />
       <PageHeader
-        title="Cash Flow"
-        breadcrumbs={[{ label: 'Reports' }, { label: 'Cash Flow' }]}
+        title={t('cashFlow.title')}
+        breadcrumbs={[{ label: t('cashFlow.reports') }, { label: t('cashFlow.title') }]}
         actions={
           <PeriodSelector
             period={period}
@@ -39,13 +41,17 @@ const CashFlow: React.FC = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
         <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Total inflow</div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
+            {t('cashFlow.totalInflow')}
+          </div>
           <div style={{ fontSize: 22, fontWeight: 700, color: ACCENT, marginTop: 6 }}>
             <MoneyDisplay amount={totalIn} />
           </div>
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Total outflow</div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
+            {t('cashFlow.totalOutflow')}
+          </div>
           <div
             style={{ fontSize: 22, fontWeight: 700, color: 'var(--finance-danger)', marginTop: 6 }}
           >
@@ -53,7 +59,9 @@ const CashFlow: React.FC = () => {
           </div>
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
-          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Net cash flow</div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>
+            {t('cashFlow.netCashFlow')}
+          </div>
           <div
             style={{
               fontSize: 22,

@@ -20,13 +20,14 @@ import SendInvoiceModal from '../../shared/components/SendInvoiceModal';
 import { exportQuickbooksInvoices, exportXeroInvoices } from '../../shared/lib/exports';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 
-type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
+type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue' | 'Cancelled';
 
 const statusStyle: Record<InvoiceStatus, React.CSSProperties> = {
   Draft: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
   Sent: { background: 'var(--finance-info-soft)', color: 'var(--finance-info)' },
   Paid: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
   Overdue: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
+  Cancelled: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
 };
 
 const Invoices: React.FC = () => {
@@ -47,7 +48,8 @@ const Invoices: React.FC = () => {
       { id: inv.id, status: 'Paid' },
       {
         onSuccess: () => toast.success(t('invoices.markedPaid', { id: inv.id })),
-        onError: (error) => toast.error(getOneKitErrorMessage(error, t('invoices.markPaidFailed', { id: inv.id }))),
+        onError: (error) =>
+          toast.error(getOneKitErrorMessage(error, t('invoices.markPaidFailed', { id: inv.id }))),
       }
     );
   };

@@ -5,14 +5,11 @@ const finiteNumber = z.preprocess((value) => {
   return Number.isFinite(parsed) ? parsed : 0;
 }, z.number());
 
-const optionalFiniteNumber = z.preprocess(
-  (value) => {
-    if (value === undefined || value === null || value === '') return undefined;
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : undefined;
-  },
-  z.number().optional()
-);
+const optionalFiniteNumber = z.preprocess((value) => {
+  if (value === undefined || value === null || value === '') return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}, z.number().optional());
 
 // Accept both the backend proto shape (firstName/lastName/totalSpent/
 // loyaltyTier) and the legacy display shape, and normalize to what

@@ -8,6 +8,9 @@ import PaymentReminderPanel from '../../shared/components/PaymentReminderPanel';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { exportProfitLossCsv } from '../../shared/lib/exports';
 
+import { useSettings } from '../../shared/lib/settings';
+import { formatMoney, type Currency } from '../../shared/lib/money';
+
 type Period = 'This Month' | 'Last Month' | 'This Quarter' | 'This Year';
 
 interface PeriodData {
@@ -23,8 +26,7 @@ const defaultPeriodData: Record<Period, PeriodData> = {
   'This Year': { revenue: 0, cogs: 0, operatingExpenses: 0 },
 };
 
-const fmt = (n: number) =>
-  n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 });
+const fmt = (n: number, currency = 'USD') => formatMoney(n, currency as Currency, 0);
 
 const pct = (n: number, of: number) => (of === 0 ? 'N/A' : `${((n / of) * 100).toFixed(1)}%`);
 
@@ -47,6 +49,7 @@ interface RowProps {
   separator?: boolean;
   sub?: string;
   large?: boolean;
+  currency?: string;
 }
 
 const PLRow: React.FC<RowProps> = ({
@@ -59,6 +62,7 @@ const PLRow: React.FC<RowProps> = ({
   separator,
   sub,
   large,
+  currency = 'USD',
 }) => {
   const color = positive
     ? 'var(--finance-accent)'
@@ -71,25 +75,28 @@ const PLRow: React.FC<RowProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: separator ? '14px 24px' : '10px 24px',
-        borderTop: separator ? '1px solid var(--hub-border)' : undefined,
-        background: separator ? 'var(--hub-hover)' : undefined,
+        padding: large ? '12px 0' : '8px 0',
+        borderTop: separator ? '1px solid var(--hub-border)' : 'none',
+        paddingInlineStart: indent ? 16 : 0,
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         <span
           style={{
             fontSize: large ? 15 : 13,
             fontWeight: bold ? 700 : 400,
-            color: separator ? color : 'var(--hub-text)',
-            paddingInlineStart: indent ? 16 : 0,
+            color: bold ? 'var(--hub-text)' : 'var(--hub-text-muted)',
           }}
         >
           {label}
         </span>
         {sub && (
           <span
-            style={{ fontSize: 11, color: 'var(--hub-text-muted)', paddingInlineStart: indent ? 16 : 0 }}
+            style={{
+              fontSize: 11,
+              color: 'var(--hub-text-muted)',
+              paddingInlineStart: indent ? 16 : 0,
+            }}
           >
             {sub}
           </span>
@@ -103,7 +110,7 @@ const PLRow: React.FC<RowProps> = ({
           fontVariantNumeric: 'tabular-nums',
         }}
       >
-        {fmt(value)}
+        {fmt(value, currency)}
       </span>
     </div>
   );
@@ -119,6 +126,7 @@ const PERIOD_PARAMS: Record<Period, string> = {
 const ProfitLoss: React.FC = () => {
   const [period, setPeriod] = useState<Period>('This Month');
   const [showClose, setShowClose] = useState(false);
+  const currency = useSettings((s) => s.currency);
   const { data: plData } = usePLByPeriod(PERIOD_PARAMS[period]);
 
   const data: PeriodData = plData
@@ -304,7 +312,7 @@ const ProfitLoss: React.FC = () => {
             <div
               style={{ fontSize: 22, fontWeight: 700, color, fontVariantNumeric: 'tabular-nums' }}
             >
-              {isMeta ? display : fmt(value)}
+              {isMeta ? display : fmt(value, currency)}
             </div>
           </div>
         ))}
@@ -351,7 +359,7 @@ const ProfitLoss: React.FC = () => {
           >
             Revenue
           </div>
-          <PLRow label="Gross Revenue" value={data.revenue} positive />
+          <PLRow label="Gross Revenue" value={data.revenue} positive currency={currency} />
         </div>
 
         {/* COGS */}
@@ -368,7 +376,13 @@ const ProfitLoss: React.FC = () => {
           >
             Cost of Goods Sold
           </div>
-          <PLRow label="Direct costs (COGS)" value={data.cogs} indent negative />
+          <PLRow
+            label="Direct costs (COGS)"
+            value={data.cogs}
+            indent
+            negative
+            currency={currency}
+          />
         </div>
 
         {/* Gross Profit */}
@@ -381,6 +395,7 @@ const ProfitLoss: React.FC = () => {
           negative={grossProfit < 0}
           sub={`Gross margin: ${grossMargin}`}
           large
+          currency={currency}
         />
 
         {/* Operating expenses */}
@@ -397,7 +412,13 @@ const ProfitLoss: React.FC = () => {
           >
             Operating Expenses
           </div>
-          <PLRow label="Total Operating Expenses" value={data.operatingExpenses} indent negative />
+          <PLRow
+            label="Total Operating Expenses"
+            value={data.operatingExpenses}
+            indent
+            negative
+            currency={currency}
+          />
           <div
             style={{
               display: 'flex',
@@ -418,7 +439,7 @@ const ProfitLoss: React.FC = () => {
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
-              -{fmt(data.operatingExpenses)}
+              -{fmt(data.operatingExpenses, currency)}
             </span>
           </div>
         </div>
@@ -433,6 +454,7 @@ const ProfitLoss: React.FC = () => {
           negative={netProfit < 0}
           sub={`Net margin: ${netMargin}`}
           large
+          currency={currency}
         />
       </div>
 
@@ -460,7 +482,7 @@ const ProfitLoss: React.FC = () => {
       <ConfirmDialog
         open={showClose}
         onClose={() => setShowClose(false)}
-        onConfirm={() => toast.info('Books are now read-only')}
+        onConfirm={() => toast.info('Fiscal year period locking is coming soon')}
         title="Close fiscal year"
         message="This will lock all entries for the current fiscal year. Adjustments will require a new period. Continue?"
         confirmLabel="Close year"

@@ -9,6 +9,7 @@ import {
   isEarnTransaction,
   isRedeemTransaction,
   getTransactionIcon,
+  getTransactionLabel,
 } from '../loyalty';
 
 describe('loyaltyConfigSchema', () => {
@@ -88,19 +89,31 @@ describe('loyaltyRewardSchema', () => {
     expect(result.active).toBe(true);
   });
 
-  it('allows null icon', () => {
+  it('allows null icon and handles unlimited stock (-1 or null)', () => {
     const reward = {
       id: 2,
       name: 'Discount',
       description: '10% off',
       pointsCost: 100,
       category: 'discount',
-      stock: 100,
+      stock: -1,
       active: true,
       icon: null,
     };
     const result = loyaltyRewardSchema.parse(reward);
     expect(result.icon).toBeNull();
+    expect(result.stock).toBe(-1);
+  });
+});
+
+describe('getTransactionLabel', () => {
+  it('returns correct label for transaction types', () => {
+    expect(getTransactionLabel('earn')).toBe('Points Earned');
+    expect(getTransactionLabel('redeem')).toBe('Points Redeemed');
+    expect(getTransactionLabel('award')).toBe('Points Awarded');
+    expect(getTransactionLabel('adjust')).toBe('Points Adjusted');
+    expect(getTransactionLabel('expire')).toBe('Points Expired');
+    expect(getTransactionLabel('upgrade')).toBe('Tier Upgrade');
   });
 });
 

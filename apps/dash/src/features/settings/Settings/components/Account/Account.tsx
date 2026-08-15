@@ -387,27 +387,40 @@ const Account: React.FC = () => {
                             className="flex items-center gap-2.5 min-w-[190px]"
                             title={item.userAgent || undefined}
                           >
-                            <div className="h-8 w-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                              <DeviceIcon size={15} className="text-gray-500" />
+                            <div className="h-8 w-8 rounded-lg bg-black/5 dark:bg-white/10 flex items-center justify-center shrink-0">
+                              <DeviceIcon size={15} style={{ color: 'var(--dash-text-muted)' }} />
                             </div>
                             <div className="min-w-0">
-                              <p className="font-medium truncate">{item.device.label}</p>
-                              <p className="text-xs text-gray-400">{item.device.description}</p>
+                              <p
+                                className="font-medium truncate"
+                                style={{ color: 'var(--dash-text)' }}
+                              >
+                                {item.device.label}
+                              </p>
+                              <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                                {item.device.description}
+                              </p>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-gray-500 whitespace-nowrap">
+                        <TableCell
+                          className="whitespace-nowrap"
+                          style={{ color: 'var(--dash-text-muted)' }}
+                        >
                           {item.method}
                         </TableCell>
-                        <TableCell className="text-gray-500 whitespace-nowrap">
+                        <TableCell
+                          className="whitespace-nowrap"
+                          style={{ color: 'var(--dash-text-muted)' }}
+                        >
                           {item.ip || '—'}
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
                           <span
                             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
                               item.success
-                                ? 'bg-emerald-50 text-emerald-600'
-                                : 'bg-red-50 text-red-600'
+                                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                                : 'bg-red-500/15 text-red-600 dark:text-red-400'
                             }`}
                           >
                             {item.success ? <CheckCircle2 size={12} /> : <XCircle size={12} />}

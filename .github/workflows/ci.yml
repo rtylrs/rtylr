@@ -44,4 +44,4 @@ jobs:
       release_tag: ${{ needs.version.outputs.release_tag }}
       release_name: rtylr v${{ needs.version.outputs.version }}
       version: ${{ needs.version.outputs.version }}
-      notes: "Source version for tryrtylr/rtylr at ${{ github.sha }}. Build and deployment are controlled by tryrtylr/deploy."
+      notes: 'Source version for tryrtylr/rtylr at ${{ github.sha }}. Build and deployment are controlled by tryrtylr/deploy.'

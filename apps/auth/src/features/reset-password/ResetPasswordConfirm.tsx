@@ -7,6 +7,8 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/client';
 import type { ResetPasswordConfirmRequest } from '@voxire/voxie/common/auth/v1/types';
 
+import { isStrongPassword } from '../../shared/lib/validation';
+
 const authClient = createOneKitClient(AuthServiceClient, 'auth');
 
 const ResetPasswordConfirm: React.FC = () => {
@@ -28,6 +30,12 @@ const ResetPasswordConfirm: React.FC = () => {
       setError('Invalid reset link. Please request a new one.');
       return;
     }
+    if (!isStrongPassword(password)) {
+      setError(
+        'Password must be at least 8 characters and include uppercase, lowercase, and numbers.'
+      );
+      return;
+    }
     if (password !== confirm) {
       setError('Passwords do not match.');
       return;
@@ -38,6 +46,11 @@ const ResetPasswordConfirm: React.FC = () => {
       const request: ResetPasswordConfirmRequest = { token, password };
       await authClient.resetPasswordConfirm(request);
       setDone(true);
+      try {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch {
+        // ignore environment restriction
+      }
     } catch (err: unknown) {
       setError(getOneKitErrorMessage(err, 'Failed to reset password.'));
     } finally {

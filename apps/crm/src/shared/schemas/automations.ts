@@ -60,13 +60,16 @@ const automationSchemaDefinition = z
   .union([legacyAutomationSchema, backendAutomationSchema])
   .transform((value) => {
     if ('triggerType' in value) {
-      const actions = typeof value.actions === 'string' ? (() => {
-        try {
-          return JSON.parse(value.actions) as unknown[];
-        } catch {
-          return [];
-        }
-      })() : (value.actions ?? []);
+      const actions =
+        typeof value.actions === 'string'
+          ? (() => {
+              try {
+                return JSON.parse(value.actions) as unknown[];
+              } catch {
+                return [];
+              }
+            })()
+          : (value.actions ?? []);
       const trigger = automationTriggerLabel(value.triggerType);
       return {
         id: value.id,
@@ -118,7 +121,8 @@ export interface Automation {
   lastRunAt?: string | null;
 }
 
-export const automationSchema: z.ZodType<Automation> = automationSchemaDefinition as z.ZodType<Automation>;
+export const automationSchema: z.ZodType<Automation> =
+  automationSchemaDefinition as z.ZodType<Automation>;
 
 // -- Domain constants ---------------------------------------------------------
 

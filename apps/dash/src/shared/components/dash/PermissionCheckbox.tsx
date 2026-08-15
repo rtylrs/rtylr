@@ -7,6 +7,7 @@ export interface PermissionCheckboxProps {
   disabled?: boolean;
   onChange?: (value: boolean) => void;
   label?: string;
+  ariaLabel?: string;
   className?: string;
 }
 
@@ -15,6 +16,7 @@ export const PermissionCheckbox: React.FC<PermissionCheckboxProps> = ({
   disabled,
   onChange,
   label,
+  ariaLabel,
   className,
 }) => {
   return (
@@ -35,6 +37,7 @@ export const PermissionCheckbox: React.FC<PermissionCheckboxProps> = ({
           border: `1px solid ${checked ? '#4583C4' : 'var(--dash-border)'}`,
         }}
         aria-checked={checked}
+        aria-label={ariaLabel || label || 'Permission toggle'}
         role="checkbox"
       >
         {checked && <Check size={11} color="white" strokeWidth={3} />}

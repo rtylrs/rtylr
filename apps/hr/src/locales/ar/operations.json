@@ -1,0 +1,25 @@
+{
+  "availability": {
+    "emptyTitle": "لم يتم تحديد أي توفر",
+    "emptyDescription": "اطلب من فريقك تحديد الساعات التي يمكنهم العمل فيها.",
+    "available": "متاح",
+    "blocked": "محجوب",
+    "saved": "تم حفظ التوفر",
+    "saveFailed": "تعذر حفظ التوفر",
+    "columns": {
+      "employee": "الموظف",
+      "day": "اليوم",
+      "available": "متاح",
+      "hours": "الساعات"
+    },
+    "weekdays": {
+      "monday": "الاثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة",
+      "saturday": "السبت",
+      "sunday": "الأحد"
+    }
+  }
+}

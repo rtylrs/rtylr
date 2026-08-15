@@ -88,7 +88,9 @@ const Leave = (): React.JSX.Element => {
               }}
             />
 
-            {isError ? <QueryError onRetry={() => refetch()} isRetrying={isFetching} /> : isLoading ? (
+            {isError ? (
+              <QueryError onRetry={() => refetch()} isRetrying={isFetching} />
+            ) : isLoading ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[1, 2, 3].map((i) => (
                   <Skeleton key={i} height={72} />

@@ -12,6 +12,7 @@ import {
   useRecurringInvoices,
   useSetRecurringStatus,
   useCreateRecurringInvoice,
+  useRunRecurringInvoiceNow,
 } from './useRecurringInvoices';
 import {
   cardStyle,
@@ -35,8 +36,13 @@ interface NewRecurringForm {
   nextInvoiceDate: string;
 }
 
+import { useInvoices } from '../invoices/useInvoices';
+
 const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const create = useCreateRecurringInvoice();
+  const { data: invoicesData } = useInvoices({ pageSize: 100 });
+  const invoiceList = invoicesData?.invoices ?? [];
+
   const emptyForm = (): NewRecurringForm => ({
     templateInvoiceId: 0,
     frequency: 'monthly',
@@ -62,7 +68,8 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
           onClose();
           setForm(emptyForm());
         },
-        onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to create recurring invoice')),
+        onError: (error) =>
+          toast.error(getOneKitErrorMessage(error, 'Failed to create recurring invoice')),
       }
     );
   };
@@ -90,17 +97,22 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Template Invoice ID</label>
-          <input
-            type="number"
-            min={1}
+          <label style={labelStyle}>Template Invoice</label>
+          <select
             value={form.templateInvoiceId || ''}
             onChange={(e) =>
               setForm((f) => ({ ...f, templateInvoiceId: Number(e.target.value) || 0 }))
             }
-            placeholder="ID of the invoice to repeat"
             style={inputStyle}
-          />
+          >
+            <option value="">Select template invoice...</option>
+            {invoiceList.map((inv) => (
+              <option key={inv.id} value={inv.id}>
+                {inv.number ? `Invoice #${inv.number}` : `Invoice ${inv.id}`} — {inv.client} ($
+                {(inv.amount ?? 0).toFixed(2)})
+              </option>
+            ))}
+          </select>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -134,6 +146,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
 const RecurringInvoices: React.FC = () => {
   const { data = [], isLoading } = useRecurringInvoices();
   const setStatus = useSetRecurringStatus();
+  const runNow = useRunRecurringInvoiceNow();
   const [showCreate, setShowCreate] = useState(false);
 
   const togglePause = (id: string, isActive: boolean): void => {
@@ -145,7 +158,8 @@ const RecurringInvoices: React.FC = () => {
           toast.success(
             next === 'paused' ? 'Recurring invoice paused' : 'Recurring invoice resumed'
           ),
-        onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to update recurring invoice')),
+        onError: (error) =>
+          toast.error(getOneKitErrorMessage(error, 'Failed to update recurring invoice')),
       }
     );
   };
@@ -274,13 +288,16 @@ const RecurringInvoices: React.FC = () => {
                         {r.isActive ? 'Pause' : 'Resume'}
                       </button>
                       <button
-                        style={{ ...ghostBtn, padding: '4px 10px' }}
+                        style={{
+                          ...ghostBtn,
+                          padding: '4px 10px',
+                          opacity: runNow.isPending ? 0.6 : 1,
+                        }}
                         aria-label={`Run invoice now for ${r.id}`}
-                        disabled
-                        title="Manual run not yet supported"
-                        onClick={undefined}
+                        disabled={runNow.isPending}
+                        onClick={() => runNow.mutate({ id: r.id })}
                       >
-                        <RotateCcw size={12} /> Run now
+                        <RotateCcw size={12} /> {runNow.isPending ? 'Running…' : 'Run now'}
                       </button>
                     </div>
                   </td>

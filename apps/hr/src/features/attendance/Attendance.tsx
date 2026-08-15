@@ -66,7 +66,9 @@ const Attendance = (): React.JSX.Element => {
           {t('attendance.history')}
         </h3>
 
-        {isError ? <QueryError onRetry={() => refetch()} isRetrying={isFetching} /> : isLoading ? (
+        {isError ? (
+          <QueryError onRetry={() => refetch()} isRetrying={isFetching} />
+        ) : isLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <Skeleton height={56} />
             <Skeleton height={56} />

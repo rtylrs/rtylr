@@ -9,8 +9,12 @@ import {
 import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { AppGuard } from '@voxire/auth';
 import { ErrorBoundary } from '@voxire/ui';
-import { unwrap } from '@voxire/api';
+import { unwrap, createOneKitClient } from '@voxire/api';
+import { useQuery } from '@tanstack/react-query';
+import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
+import type { Addon } from '@voxire/voxie/hub/app/v1/types';
 import { FullScreenLoader } from '@voxire/components';
+import { z } from 'zod';
 import { ShortcutsProvider } from './shared/components/ShortcutsProvider';
 import { safe } from './shared/lib/api';
 import DefaultLayout from './layouts/DefaultLayout';
@@ -187,6 +191,9 @@ const automationsRoute = createRoute({
 const automationsNewRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/automations/new',
+  validateSearch: z.object({
+    id: z.number().int().positive().optional().catch(undefined),
+  }),
   component: () => <>{lazy(<AutomationBuilder />)}</>,
 });
 
@@ -209,29 +216,59 @@ const settingsRoute = createRoute({
   component: () => <>{lazy(<SettingsScreen />)}</>,
 });
 
+const appClient = createOneKitClient(AppServiceClient, 'crm');
+
+function SalesAddonGuard({ children }: { children: React.ReactNode }): React.JSX.Element {
+  const { data, isLoading } = useQuery({
+    queryKey: ['crm-addons'],
+    queryFn: async () => {
+      try {
+        const res = await appClient.listAddons({});
+        return res.addons ?? [];
+      } catch {
+        return [];
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (isLoading) return <FullScreenLoader />;
+
+  const isEnabled = (data ?? []).some((a: Addon) => a.id === 'sales_pipeline' && a.isEnabled);
+  if (!isEnabled) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function guardSales(component: React.ReactNode): React.JSX.Element {
+  return <SalesAddonGuard>{lazy(component)}</SalesAddonGuard>;
+}
+
 // Sales Pipeline
 const salesRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/sales',
-  component: () => <>{lazy(<Pipeline />)}</>,
+  component: () => guardSales(<Pipeline />),
 });
 
 const salesLeadsRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/sales/leads',
-  component: () => <>{lazy(<Leads />)}</>,
+  component: () => guardSales(<Leads />),
 });
 
 const salesLeadDetailRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/sales/leads/$id',
-  component: () => <>{lazy(<LeadDetail />)}</>,
+  component: () => guardSales(<LeadDetail />),
 });
 
 const salesContractsRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/sales/contracts',
-  component: () => <>{lazy(<SalesContracts />)}</>,
+  component: () => guardSales(<SalesContracts />),
 });
 
 const catchAllRoute = createRoute({

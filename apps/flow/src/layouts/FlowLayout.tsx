@@ -65,12 +65,9 @@ import { useNotifications } from '../features/inbox/useNotifications';
 import { apiProjectToProject, apiWorkspaceToWorkspace } from '../shared/lib/projectMapper';
 import { LicenseBanner } from '@voxire/components';
 import { safe } from '../shared/lib/api';
-import { useRealtime } from '../shared/lib/realtime';
-import { useQueryClient } from '@tanstack/react-query';
+import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../shared/lib/memberUtils';
-import type { RealtimeEvent } from '@voxire/api';
-import { useCallback } from 'react';
 
 /** Horizontal inset for sidebar content (single column). */
 const sx = 'px-3';
@@ -345,42 +342,12 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   }, [teamMembers, setMembers]);
 
   // ── Realtime wiring ─────────────────────────────────────────────────
-  // Subscribe the layout to the current workspace's topic AND the user's
-  // personal topic. Any project/member change triggers a fresh fetch of
-  // the sidebar data so teammates see new projects instantly. We rely on
-  // react-query invalidation (cheap) rather than patching state by hand.
-  const qc = useQueryClient();
-  const handleRealtime = useCallback(
-    (e: RealtimeEvent): void => {
-      if (e.type.startsWith('project.')) {
-        qc.invalidateQueries({ queryKey: ['projects'] });
-      }
-      if (e.type.startsWith('workspace.')) {
-        qc.invalidateQueries({ queryKey: ['workspaces'] });
-        qc.invalidateQueries({ queryKey: ['workspace-members'] });
-      }
-      if (e.type.startsWith('notification.')) {
-        // Refresh the inbox list + header badge. Pushed on the
-        // user:<id> topic so no project context needed.
-        qc.invalidateQueries({ queryKey: ['notifications'] });
-      }
-    },
-    [qc]
-  );
+  // Topics, invalidation fanout and the self-event skip all live in
+  // useLayoutRealtime, alongside useTaskRealtime and useProjectRealtime.
   const userId = user?.id;
   const caretUserId = Number(userId) || 0;
-  const realtimeTopics = useMemo(() => {
-    const t: string[] = [];
-    // Only subscribe to a numeric workspace id - "personal" is not a
-    // valid server-side topic (it's a client-only sentinel).
-    if (currentWorkspaceId && currentWorkspaceId !== PERSONAL_WORKSPACE_ID) {
-      t.push(`workspace:${currentWorkspaceId}`);
-    }
-    if (userId) t.push(`user:${userId}`);
-    return t;
-  }, [currentWorkspaceId, userId]);
   const shouldUseRealtime = !location.pathname.startsWith('/settings');
-  useRealtime(shouldUseRealtime ? realtimeTopics : [], handleRealtime);
+  useLayoutRealtime(currentWorkspaceId, userId, shouldUseRealtime);
 
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   useForesightLinks(sidebarRef, {
