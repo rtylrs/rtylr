@@ -17,6 +17,7 @@ func TestClassifyCaretRequestSeparatesConversationFromLiveBusinessWork(t *testin
 		{name: "revenue", request: "what was revenue today?", wantKind: IntentAnalytics, wantLive: true, wantAction: "read"},
 		{name: "owner brief", request: "what should I focus on next?", wantKind: IntentSnapshot, wantLive: true, wantAction: "recommend"},
 		{name: "mutation", request: "create a customer", wantKind: IntentAction, wantLive: false, wantAction: "create"},
+		{name: "add product", request: "add a product Protein Bar", wantKind: IntentAction, wantLive: false, wantAction: "create"},
 		{name: "memory", request: "remember that weekends are busiest", wantKind: IntentMemory, wantLive: false, wantAction: "remember"},
 		{name: "navigation", request: "where do I configure payroll?", wantKind: IntentNavigation, wantLive: false, wantAction: "navigate"},
 	}
@@ -25,6 +26,9 @@ func TestClassifyCaretRequestSeparatesConversationFromLiveBusinessWork(t *testin
 			got := ClassifyCaretRequest(test.request, "")
 			if got.Kind != test.wantKind || got.NeedsLiveData != test.wantLive || got.Action != test.wantAction {
 				t.Fatalf("ClassifyCaretRequest(%q) = %#v, want kind=%q live=%v action=%q", test.request, got, test.wantKind, test.wantLive, test.wantAction)
+			}
+			if test.name == "add product" && got.Domain != "inventory" {
+				t.Fatalf("product request domain = %q, want inventory", got.Domain)
 			}
 		})
 	}

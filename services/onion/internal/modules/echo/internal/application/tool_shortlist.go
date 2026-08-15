@@ -39,12 +39,18 @@ var promptToolActionKeywords = map[string][]string{
 		"remember", "save", "keep in mind", "note that", "always", "never", "prefer", "default",
 		"from now on", "next time",
 	},
-	"mutate": {"approve", "receive", "send", "refund", "set", "update", "change", "move", "transfer"},
+	"mutate": {"approve", "receive", "send", "refund", "set", "update", "change", "move", "transfer", "delete", "remove"},
 	"schedule": {
 		"schedule", "scheduled", "recurring", "repeat", "daily", "weekly", "monthly", "every day", "every monday",
 		"alert", "notify", "remind", "watch", "send me",
 	},
 	"summary": {"summary", "summarize", "overview", "status", "how are", "how is"},
+}
+
+var promptToolProductLookupKeywords = map[string][]string{
+	"erp.list_categories": {"category", "categories"},
+	"erp.list_suppliers":  {"supplier", "suppliers"},
+	"erp.list_brands":     {"brand", "brands"},
 }
 
 type promptToolScore struct {
@@ -158,6 +164,16 @@ func promptToolScoreForText(tool ToolDef, text string) int {
 			score += 70
 		}
 	}
+	if strings.Contains(tool.Name, ".update_") {
+		if promptToolTextContainsAny(text, promptToolActionKeywords["mutate"]) {
+			score += 75
+		}
+	}
+	if strings.Contains(tool.Name, ".delete_") {
+		if promptToolTextContainsAny(text, promptToolActionKeywords["mutate"]) {
+			score += 75
+		}
+	}
 	if strings.Contains(tool.Name, ".list_") {
 		if promptToolTextContainsAny(text, promptToolActionKeywords["list"]) {
 			score += 55
@@ -168,6 +184,11 @@ func promptToolScoreForText(tool ToolDef, text string) int {
 	}
 	if tool.Name == "memory.remember" && promptToolTextContainsAny(text, promptToolActionKeywords["remember"]) {
 		score += 180
+	}
+	if lookupKeywords, ok := promptToolProductLookupKeywords[tool.Name]; ok && promptToolTextContainsAny(text, lookupKeywords) {
+		// These reads are preflight dependencies for a product write. Keep them
+		// in the shortlist even when the request also scores many write tools.
+		score += 500
 	}
 	if strings.Contains(tool.Name, "schedule") && promptToolTextContainsAny(text, promptToolActionKeywords["schedule"]) {
 		score += 140

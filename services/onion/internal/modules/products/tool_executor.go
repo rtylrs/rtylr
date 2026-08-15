@@ -15,8 +15,11 @@ import (
 )
 
 const (
-	getProductToolName    = "erp.get_product"
-	createProductToolName = "erp.create_product"
+	getProductToolName             = "erp.get_product"
+	listReorderSuggestionsToolName = "erp.list_reorder_suggestions"
+	createProductToolName          = "erp.create_product"
+	updateProductToolName          = "erp.update_product"
+	deleteProductToolName          = "erp.delete_product"
 )
 const maxProductToolLeadTimeDays = int64(1<<31 - 1)
 
@@ -30,12 +33,51 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	case getProductToolName:
 		output, err := m.executeGetProductTool(ctx, input)
 		return output, true, err
+	case listReorderSuggestionsToolName:
+		output, err := m.executeListReorderSuggestionsTool(ctx)
+		return output, true, err
 	case createProductToolName:
 		output, err := m.executeCreateProductTool(ctx, input)
+		return output, true, err
+	case updateProductToolName:
+		output, err := m.executeUpdateProductTool(ctx, input)
+		return output, true, err
+	case deleteProductToolName:
+		output, err := m.executeDeleteProductTool(ctx, input)
 		return output, true, err
 	default:
 		return nil, false, nil
 	}
+}
+
+func (m *Module) executeListReorderSuggestionsTool(ctx context.Context) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+	suggestions, err := m.service.ListReorderSuggestions(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+
+	payloads := make([]map[string]any, 0, len(suggestions))
+	totalSuggested := 0.0
+	for _, suggestion := range suggestions {
+		payloads = append(payloads, reorderSuggestionToolPayload(suggestion))
+		totalSuggested += suggestion.SuggestedQty
+	}
+
+	return map[string]any{
+		"suggestions":         payloads,
+		"returned":            len(payloads),
+		"total_suggested_qty": totalSuggested,
+		"confidence":          "low",
+	}, nil
 }
 
 func (m *Module) executeGetProductTool(ctx context.Context, input map[string]any) (map[string]any, error) {
@@ -96,10 +138,198 @@ func (m *Module) executeCreateProductTool(ctx context.Context, input map[string]
 	if err != nil {
 		return nil, err
 	}
+	created, err := m.service.GetProduct(ctx, ownerID, id)
+	if err != nil {
+		return nil, err
+	}
+	attrs, err := m.service.ListProductAttributes(ctx, ownerID, id)
+	if err != nil {
+		return nil, err
+	}
 
 	return map[string]any{
-		"product": productInputToolPayload(id, parsed),
+		"message": fmt.Sprintf("Product %q was added to inventory.", created.Name),
+		"product": productToolPayload(created, attrs),
 	}, nil
+}
+
+func (m *Module) executeUpdateProductTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	productID, err := parseProductToolID(input)
+	if err != nil {
+		return nil, err
+	}
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+	existing, err := m.service.GetProduct(ctx, ownerID, productID)
+	if err != nil {
+		return nil, err
+	}
+	parsed, err := mergeProductUpdateToolInput(existing, input)
+	if err != nil {
+		return nil, err
+	}
+	if err := m.service.UpdateProduct(ctx, ownerID, productID, parsed); err != nil {
+		return nil, err
+	}
+
+	updated, err := m.service.GetProduct(ctx, ownerID, productID)
+	if err != nil {
+		return nil, err
+	}
+	attrs, err := m.service.ListProductAttributes(ctx, ownerID, productID)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]any{
+		"product": productToolPayload(updated, attrs),
+		"updated": true,
+	}, nil
+}
+
+func (m *Module) executeDeleteProductTool(ctx context.Context, input map[string]any) (map[string]any, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, errors.New("authentication is required")
+	}
+
+	productID, err := parseProductToolID(input)
+	if err != nil {
+		return nil, err
+	}
+	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, bizErr
+	}
+	product, err := m.service.GetProduct(ctx, ownerID, productID)
+	if err != nil {
+		return nil, err
+	}
+	if err := m.service.DeleteProduct(ctx, ownerID, productID); err != nil {
+		return nil, err
+	}
+
+	return map[string]any{
+		"product": map[string]any{
+			"id":      product.ID,
+			"name":    product.Name,
+			"deleted": true,
+		},
+	}, nil
+}
+
+func parseProductToolID(input map[string]any) (int64, error) {
+	productID, err := productToolNonNegativeInt64(firstProductToolValue(input, "product_id", "id"))
+	if err != nil {
+		return 0, fmt.Errorf("invalid product_id: %w", err)
+	}
+	if productID <= 0 {
+		return 0, errors.New("product_id is required")
+	}
+	return productID, nil
+}
+
+var productUpdateToolKeys = map[string]struct{}{
+	"name": {}, "product_name": {}, "sku": {}, "barcode": {}, "description": {}, "unit": {},
+	"category_id": {}, "supplier_id": {}, "brand_id": {}, "cost_price": {}, "cost": {},
+	"sale_price": {}, "price": {}, "unit_price": {}, "stock_quantity": {}, "quantity": {}, "stock": {},
+	"low_stock_threshold": {}, "low_stock": {}, "minimum_stock": {}, "reorder_quantity": {}, "reorder_qty": {},
+	"is_active": {}, "track_inventory": {}, "allow_backorder": {}, "lead_time_days": {}, "lead_time": {},
+	"compare_at_price": {}, "compare_price": {}, "tax_rate": {}, "currency": {}, "weight": {},
+	"weight_unit": {}, "length": {}, "width": {}, "height": {}, "dimension_unit": {},
+	"country_of_origin": {}, "hs_code": {},
+}
+
+func mergeProductUpdateToolInput(product domain.Product, input map[string]any) (domain.ProductInput, error) {
+	merged := map[string]any{
+		"name":                product.Name,
+		"sku":                 product.SKU,
+		"barcode":             product.Barcode,
+		"description":         product.Description,
+		"unit":                product.Unit,
+		"category_id":         product.CategoryID,
+		"supplier_id":         product.SupplierID,
+		"brand_id":            product.BrandID,
+		"cost_price":          product.CostPrice,
+		"sale_price":          product.SalePrice,
+		"stock_quantity":      product.StockQuantity,
+		"low_stock_threshold": product.LowStockThreshold,
+		"reorder_quantity":    product.ReorderQuantity,
+		"is_active":           product.IsActive,
+		"track_inventory":     product.TrackInventory,
+		"allow_backorder":     product.AllowBackorder,
+		"lead_time_days":      product.LeadTimeDays,
+		"compare_at_price":    product.CompareAtPrice,
+		"tax_rate":            product.TaxRate,
+		"currency":            product.Currency,
+		"weight":              product.Weight,
+		"weight_unit":         product.WeightUnit,
+		"length":              product.Length,
+		"width":               product.Width,
+		"height":              product.Height,
+		"dimension_unit":      product.DimensionUnit,
+		"country_of_origin":   product.CountryOfOrigin,
+		"hs_code":             product.HSCode,
+	}
+	changed := false
+	for key, value := range input {
+		if key == "id" || key == "product_id" {
+			continue
+		}
+		if _, ok := productUpdateToolKeys[key]; !ok {
+			return domain.ProductInput{}, fmt.Errorf("unsupported product field %q", key)
+		}
+		merged[canonicalProductUpdateToolKey(key)] = value
+		changed = true
+	}
+	if !changed {
+		return domain.ProductInput{}, errors.New("at least one product field to update is required")
+	}
+
+	parsed, err := parseCreateProductToolInput(merged)
+	if err != nil {
+		return domain.ProductInput{}, err
+	}
+	parsed.StockQuantitySet = productToolHasAny(input, "stock_quantity", "quantity", "stock")
+	return parsed, nil
+}
+
+func canonicalProductUpdateToolKey(key string) string {
+	switch key {
+	case "product_name":
+		return "name"
+	case "cost":
+		return "cost_price"
+	case "price", "unit_price":
+		return "sale_price"
+	case "quantity", "stock":
+		return "stock_quantity"
+	case "low_stock", "minimum_stock":
+		return "low_stock_threshold"
+	case "reorder_qty":
+		return "reorder_quantity"
+	case "lead_time":
+		return "lead_time_days"
+	case "compare_price":
+		return "compare_at_price"
+	default:
+		return key
+	}
+}
+
+func productToolHasAny(input map[string]any, keys ...string) bool {
+	for _, key := range keys {
+		if value, ok := input[key]; ok && value != nil {
+			return true
+		}
+	}
+	return false
 }
 
 func parseGetProductToolInput(input map[string]any) (getProductToolInput, error) {
@@ -241,6 +471,7 @@ func parseCreateProductToolInput(input map[string]any) (domain.ProductInput, err
 		HSCode:            strings.TrimSpace(productToolString(firstProductToolValue(input, "hs_code"))),
 		AllowBackorder:    allowBackorder,
 		LeadTimeDays:      int(leadTimeDays64),
+		ImageURL:          strings.TrimSpace(productToolString(firstProductToolValue(input, "image_url", "image"))),
 	}
 	if err := parsed.Validate(); err != nil {
 		return domain.ProductInput{}, err
@@ -427,6 +658,21 @@ func productInputToolPayload(id int64, product domain.ProductInput) map[string]a
 		"track_inventory":     product.TrackInventory,
 		"allow_backorder":     product.AllowBackorder,
 		"lead_time_days":      product.LeadTimeDays,
+		"image_url":           product.ImageURL,
+	}
+}
+
+func reorderSuggestionToolPayload(suggestion domain.ReorderSuggestion) map[string]any {
+	return map[string]any{
+		"product_id":         suggestion.ProductID,
+		"name":               suggestion.Name,
+		"sku":                suggestion.SKU,
+		"current_stock":      suggestion.CurrentStock,
+		"reorder_point":      suggestion.ReorderPoint,
+		"suggested_quantity": suggestion.SuggestedQty,
+		"avg_daily_sales":    suggestion.AvgDailySales,
+		"lead_time_days":     suggestion.LeadTimeDays,
+		"confidence":         suggestion.Confidence,
 	}
 }
 

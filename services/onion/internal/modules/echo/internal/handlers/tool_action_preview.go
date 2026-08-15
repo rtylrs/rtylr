@@ -34,7 +34,11 @@ func friendlyToolAction(tool ToolDef) string {
 	case "erp.set_stock":
 		return "set product stock"
 	case "erp.create_product":
-		return "create an inventory product"
+		return "add an inventory product"
+	case "erp.update_product":
+		return "update an inventory product"
+	case "erp.delete_product":
+		return "delete an inventory product"
 	case "erp.create_category":
 		return "create an inventory category"
 	case "erp.create_brand":

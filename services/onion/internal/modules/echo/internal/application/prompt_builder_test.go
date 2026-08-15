@@ -224,6 +224,37 @@ func TestPromptToolsForRequestShortlistsMemoryRemember(t *testing.T) {
 	}
 }
 
+func TestPromptToolsForRequestShortlistsProductAddWorkflow(t *testing.T) {
+	tools := PromptToolsForRequest(ModeAgent, "add a product Protein Bar priced at 3.50 with 20 in stock", "/products")
+	names := make([]string, 0, len(tools))
+	for _, tool := range tools {
+		names = append(names, tool.Name)
+	}
+	joined := strings.Join(names, ",")
+	if !strings.Contains(joined, "erp.create_product") {
+		t.Fatalf("product add request missing create capability: %v", names)
+	}
+	for _, forbidden := range []string{"finance.create_invoice", "support.create_ticket"} {
+		if strings.Contains(joined, forbidden) {
+			t.Fatalf("product add request included unrelated %s: %v", forbidden, names)
+		}
+	}
+}
+
+func TestPromptToolsForRequestShortlistsProductLookupWorkflow(t *testing.T) {
+	tools := PromptToolsForRequest(ModeAgent, "add Protein Bar from Acme supplier in Snacks category under the Voxire brand", "/products")
+	names := make([]string, 0, len(tools))
+	for _, tool := range tools {
+		names = append(names, tool.Name)
+	}
+	joined := strings.Join(names, ",")
+	for _, want := range []string{"erp.create_product", "erp.list_categories", "erp.list_suppliers", "erp.list_brands"} {
+		if !strings.Contains(joined, want) {
+			t.Fatalf("product lookup workflow missing %s: %v", want, names)
+		}
+	}
+}
+
 func TestPromptToolsForModeSeparatesReadAndWriteModes(t *testing.T) {
 	for _, mode := range []CaretMode{ModeAsk, ModeAnalyst} {
 		tools := PromptToolsForRequest(mode, "create a customer and list customers", "/crm")

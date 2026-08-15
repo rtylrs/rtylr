@@ -82,3 +82,16 @@ func TestSafePublicAnswerPrefixDoesNotSplitInternalCapabilityDetails(t *testing.
 		t.Fatalf("safe prefix ended inside an internal name: got %d from %q", got, text[:cut+4])
 	}
 }
+
+func TestSafePublicAnswerPrefixHoldsUnknownInternalCapabilityPrefix(t *testing.T) {
+	text := "I used erp.create_product to add the item."
+	cut := strings.Index(text, "create_product")
+	if cut <= 0 {
+		t.Fatal("test input did not contain the expected internal name")
+	}
+
+	got := safePublicAnswerPrefix(text, cut+5)
+	if got != strings.Index(text, "erp.create_product") {
+		t.Fatalf("safe prefix ended inside an unknown internal name: got %d from %q", got, text[:cut+5])
+	}
+}

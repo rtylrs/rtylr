@@ -68,6 +68,13 @@ func contractForTool(tool ToolDef) toolContract {
 			Freshness:  "live at request time",
 			SideEffect: "read-only; no business data is changed",
 		}
+	case "erp.list_reorder_suggestions":
+		return toolContract{
+			Input:      `{}`,
+			Output:     "Products at or below their configured reorder point, with current stock, reorder point, suggested quantity, and confidence.",
+			Freshness:  "live at request time",
+			SideEffect: "read-only; no business data is changed",
+		}
 	case "memory.remember":
 		return toolContract{
 			Input:          `{"key":"stable preference name","value":"fact or preference to remember"}`,
@@ -111,6 +118,12 @@ func writeInputHint(tool ToolDef) string {
 		return `{"customer_id":"customer id","items":[{"description":"text","quantity":number,"unit_price":number}],"due_date":"YYYY-MM-DD"}`
 	case name == "finance.record_expense":
 		return `{"amount":number,"category_id":"category id","description":"reason","expense_date":"YYYY-MM-DD"}`
+	case name == "erp.create_product":
+		return `{"name":"required","sale_price":number,"cost_price":number,"stock_quantity":number,"sku":"optional","barcode":"optional","description":"optional","image_url":"optional","category_id":"optional id","supplier_id":"optional id","brand_id":"optional id","low_stock_threshold":number,"reorder_quantity":number}`
+	case name == "erp.update_product":
+		return `{"product_id":"required id","name":"optional","sale_price":number,"cost_price":number,"stock_quantity":number,"sku":"optional","barcode":"optional","low_stock_threshold":number,"reorder_quantity":number,"is_active":true}`
+	case name == "erp.delete_product":
+		return `{"product_id":"required id"}`
 	case name == "erp.set_stock":
 		return `{"product_id":"product id","quantity":number,"reason":"inventory adjustment reason"}`
 	case strings.Contains(name, "remember"):

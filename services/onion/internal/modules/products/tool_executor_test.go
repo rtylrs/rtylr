@@ -191,3 +191,88 @@ func TestParseCreateProductToolInputRejectsBadCurrency(t *testing.T) {
 		t.Fatal("expected bad currency error")
 	}
 }
+
+func TestParseCreateProductToolInputPreservesImageURL(t *testing.T) {
+	parsed, err := parseCreateProductToolInput(map[string]any{
+		"name":       "Protein Bar",
+		"sale_price": 3.50,
+		"image_url":  "https://cdn.example.com/protein-bar.png",
+	})
+	if err != nil {
+		t.Fatalf("parseCreateProductToolInput: %v", err)
+	}
+	if parsed.ImageURL != "https://cdn.example.com/protein-bar.png" {
+		t.Fatalf("image URL = %q", parsed.ImageURL)
+	}
+}
+
+func TestMergeProductUpdateToolInputPreservesUnchangedFields(t *testing.T) {
+	parsed, err := mergeProductUpdateToolInput(domain.Product{
+		ID:                42,
+		Name:              "Protein Bar",
+		SKU:               "BAR-001",
+		CostPrice:         1.25,
+		SalePrice:         3.50,
+		StockQuantity:     12,
+		LowStockThreshold: 5,
+		ReorderQuantity:   24,
+		IsActive:          true,
+		TrackInventory:    true,
+		AllowBackorder:    false,
+		Currency:          "USD",
+	}, map[string]any{
+		"product_id": "42",
+		"sale_price": 3.75,
+	})
+	if err != nil {
+		t.Fatalf("mergeProductUpdateToolInput: %v", err)
+	}
+	if parsed.Name != "Protein Bar" || parsed.SKU != "BAR-001" {
+		t.Fatalf("unchanged fields were not preserved: %+v", parsed)
+	}
+	if parsed.SalePrice != 3.75 || parsed.CostPrice != 1.25 {
+		t.Fatalf("price fields = sale %v cost %v", parsed.SalePrice, parsed.CostPrice)
+	}
+	if parsed.StockQuantity != 12 || parsed.StockQuantitySet {
+		t.Fatalf("stock fields = quantity %v set %v", parsed.StockQuantity, parsed.StockQuantitySet)
+	}
+}
+
+func TestMergeProductUpdateToolInputAllowsExplicitStockChange(t *testing.T) {
+	parsed, err := mergeProductUpdateToolInput(domain.Product{
+		Name:          "Protein Bar",
+		SalePrice:     3.50,
+		CostPrice:     1.25,
+		StockQuantity: 12,
+	}, map[string]any{"product_id": 42, "quantity": 20})
+	if err != nil {
+		t.Fatalf("mergeProductUpdateToolInput: %v", err)
+	}
+	if parsed.StockQuantity != 20 || !parsed.StockQuantitySet {
+		t.Fatalf("stock fields = quantity %v set %v", parsed.StockQuantity, parsed.StockQuantitySet)
+	}
+}
+
+func TestMergeProductUpdateToolInputRejectsUnknownField(t *testing.T) {
+	_, err := mergeProductUpdateToolInput(domain.Product{Name: "Protein Bar", SalePrice: 3.50}, map[string]any{
+		"product_id": 42,
+		"drop_table": true,
+	})
+	if err == nil {
+		t.Fatal("expected unknown field error")
+	}
+}
+
+func TestReorderSuggestionToolPayload(t *testing.T) {
+	payload := reorderSuggestionToolPayload(domain.ReorderSuggestion{
+		ProductID:    7,
+		Name:         "Protein Bar",
+		CurrentStock: 2,
+		ReorderPoint: 5,
+		SuggestedQty: 24,
+		Confidence:   "low",
+	})
+	if payload["product_id"] != int64(7) || payload["suggested_quantity"] != float64(24) {
+		t.Fatalf("payload = %#v", payload)
+	}
+}
