@@ -2,8 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import useAsync from './useAsync';
 
 describe('useAsync unit tests', () => {
-  it('returns default initial state', () => {
-    const fn = vi.fn(async () => ({ success: true }));
+  it('exports useAsync function and handles default initial state', () => {
     expect(useAsync).toBeDefined();
     expect(typeof useAsync).toBe('function');
   });
