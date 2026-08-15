@@ -15,9 +15,7 @@ export interface ApprovalDialogProps {
 /** Inline confirmation popover anchored above the composer. */
 export const ApprovalDialog: React.FC<ApprovalDialogProps> = ({
   open,
-  toolName,
   description,
-  input,
   onApprove,
   onDeny,
 }) => {
@@ -31,7 +29,7 @@ export const ApprovalDialog: React.FC<ApprovalDialogProps> = ({
       ref={ref}
       role="dialog"
       aria-modal="true"
-      aria-label={`Approve ${toolName}`}
+      aria-label="Approve Caret action"
       style={{
         margin: '0 12px',
         background: caretTokens.warnSoft,
@@ -58,12 +56,9 @@ export const ApprovalDialog: React.FC<ApprovalDialogProps> = ({
               marginBottom: 2,
             }}
           >
-            Caret wants to run <code style={{ fontFamily: 'inherit' }}>{toolName}</code>
+            Caret is ready to make a change
           </div>
-          {description && (
-            <div style={{ color: caretTokens.textMuted, fontSize: 12 }}>{description}</div>
-          )}
-          <pre
+          <div
             style={{
               margin: '6px 0 0',
               padding: 6,
@@ -71,14 +66,10 @@ export const ApprovalDialog: React.FC<ApprovalDialogProps> = ({
               borderRadius: caretRadius.sm,
               fontSize: 11,
               color: caretTokens.textMuted,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-              maxHeight: 100,
-              overflowY: 'auto',
             }}
           >
-            {JSON.stringify(input, null, 2)}
-          </pre>
+            {description || 'Review the proposed change before allowing it.'}
+          </div>
         </div>
       </div>
       <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>

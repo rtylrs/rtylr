@@ -10,24 +10,6 @@ export interface ToolCallCardProps {
   onDeny?: (id: string) => void;
 }
 
-const TOOL_TARGETS: Array<[RegExp, string]> = [
-  [/^analytics\./, 'analytics'],
-  [/^crm\./, 'customer data'],
-  [/^customers?\./, 'customer data'],
-  [/^inventory\./, 'inventory'],
-  [/^orders?\./, 'orders'],
-  [/^finance\./, 'finance'],
-  [/^booking\./, 'bookings'],
-  [/^(hr|workforce|employees?)\./, 'team data'],
-  [/^loyalty\./, 'loyalty data'],
-  [/^(menu|catalog)\./, 'menu data'],
-  [/^(marketing|growth|insights)\./, 'business insights'],
-  [/^(operator|operations)\./, 'operations'],
-  [/^settings\./, 'settings'],
-  [/^locations?\./, 'locations'],
-  [/^payments?\./, 'payments'],
-];
-
 const detailLabelStyle: React.CSSProperties = {
   color: caretTokens.textDim,
   fontSize: 11,
@@ -57,30 +39,34 @@ const summaryStyle: React.CSSProperties = {
   lineHeight: 1.45,
 };
 
-function targetForTool(name: string): string {
+function actionForTool(name: string): string {
   const normalized = name.trim().toLowerCase();
-  const match = TOOL_TARGETS.find(([pattern]) => pattern.test(normalized));
-
-  if (match) return match[1];
-
-  const [moduleName] = normalized.split('.');
-  const readableModule = moduleName?.replace(/[_-]/g, ' ').trim();
-  return readableModule ? `${readableModule} data` : 'business data';
+  const actions: Array<[RegExp, string]> = [
+    [/^erp\.create_product$/, 'add a product'],
+    [/^erp\.update_product$/, 'update a product'],
+    [/^erp\.delete_product$/, 'delete a product'],
+    [/^erp\.set_stock$/, 'adjust product stock'],
+    [/^erp\.list_reorder_suggestions$/, 'review reorder suggestions'],
+    [/^.*\.create_/, 'create a business record'],
+    [/^.*\.delete_/, 'delete a business record'],
+    [/^.*\.update_/, 'update a business record'],
+  ];
+  return actions.find(([pattern]) => pattern.test(normalized))?.[1] ?? 'check business data';
 }
 
-function statusText(status: ToolCallBlock['status'], target: string): string {
+function statusText(status: ToolCallBlock['status'], action: string): string {
   switch (status) {
     case 'pending':
-      return `Needs confirmation for ${target}`;
+      return `Needs confirmation to ${action}`;
     case 'approved':
     case 'running':
-      return `Checking ${target}`;
+      return `Working to ${action}`;
     case 'success':
-      return `Checked ${target}`;
+      return `Completed: ${action}`;
     case 'denied':
-      return `Skipped checking ${target}`;
+      return `Skipped: ${action}`;
     case 'error':
-      return `Could not check ${target}`;
+      return `Could not ${action}`;
   }
 }
 
@@ -96,8 +82,8 @@ function formatValue(value: unknown): string {
 
 export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onDeny }) => {
   const [open, setOpen] = useState(call.status === 'pending');
-  const target = targetForTool(call.name);
-  const label = statusText(call.status, target);
+  const action = actionForTool(call.name);
+  const label = statusText(call.status, action);
   const isPending = call.status === 'pending';
   const isRunning = call.status === 'running' || call.status === 'approved';
   const quiet = !isPending && call.status !== 'error';
@@ -151,20 +137,16 @@ export const ToolCallCard: React.FC<ToolCallCardProps> = ({ call, onApprove, onD
             opacity: quiet ? 0.88 : 1,
           }}
         >
-          <div style={{ marginBottom: 8 }}>
-            <div style={detailLabelStyle}>technical name</div>
-            <pre style={detailPreStyle}>{call.name}</pre>
-          </div>
-
-          <div style={{ marginBottom: 8 }}>
-            <div style={detailLabelStyle}>request details</div>
-            <pre style={detailPreStyle}>{formatValue(call.input ?? {})}</pre>
-          </div>
-
           {call.preview && (
             <div style={{ marginBottom: 8 }}>
-              <div style={detailLabelStyle}>preview</div>
+              <div style={detailLabelStyle}>what will happen</div>
               <div style={summaryStyle}>{call.preview}</div>
+            </div>
+          )}
+
+          {!call.preview && (
+            <div style={{ ...summaryStyle, marginBottom: 8 }}>
+              Caret will {action}. Review the request and confirm only if that is what you want.
             </div>
           )}
 
