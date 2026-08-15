@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useRouterState } from '@tanstack/react-router';
+import { toast } from 'sonner';
 import { Button, Input } from '../../../shared/components/ui';
 import { useMenuStore } from '../../../shared/stores/menuStore';
 
@@ -33,10 +34,22 @@ const CreateItem: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      toast.error('Please enter an item name');
+      return;
+    }
+
+    const numericPrice = Number(price);
+    if (isNaN(numericPrice) || numericPrice < 0) {
+      toast.error('Please enter a valid non-negative price');
+      return;
+    }
+
     const item = {
-      name,
+      name: trimmedName,
       description,
-      price: price ? Number(price) * 100 : 0,
+      price: numericPrice * 100,
       salePrice: salePrice ? Number(salePrice) * 100 : 0,
       coverImage,
       images,
