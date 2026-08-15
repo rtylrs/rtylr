@@ -110,7 +110,7 @@ INSERT INTO flow_task_comments (task_id, user_id, content) VALUES (?, ?, ?);
 
 -- name: GetCommentsByTask :many
 SELECT id, task_id, user_id, content, is_edited, created_at, updated_at
-FROM flow_task_comments WHERE task_id = ? ORDER BY created_at ASC;
+FROM flow_task_comments WHERE task_id = ? ORDER BY created_at ASC, id ASC LIMIT 500;
 
 -- name: DeleteComment :exec
 DELETE FROM flow_task_comments WHERE id = ? AND user_id = ?;
@@ -128,7 +128,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetAttachmentsByTask :many
 SELECT id, task_id, owner_id, business_id, name, url, size, uploaded_by, created_at
-FROM flow_task_attachments WHERE task_id = ? ORDER BY created_at DESC;
+FROM flow_task_attachments WHERE task_id = ? ORDER BY created_at DESC, id DESC LIMIT 500;
 
 -- name: DeleteAttachment :exec
 DELETE FROM flow_task_attachments WHERE id = ? AND business_id = ?;
@@ -139,7 +139,7 @@ VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: GetTimeLogsByTask :many
 SELECT id, owner_id, business_id, task_id, user_id, duration_minutes, description, logged_at, created_at
-FROM flow_time_logs WHERE task_id = ? ORDER BY logged_at DESC;
+FROM flow_time_logs WHERE task_id = ? ORDER BY logged_at DESC, id DESC LIMIT 500;
 
 -- name: CreateLabel :execresult
 INSERT INTO flow_labels (workspace_id, name, color) VALUES (?, ?, ?);

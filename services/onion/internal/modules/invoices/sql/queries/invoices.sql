@@ -109,7 +109,8 @@ WHERE business_id = ?
 SELECT id, invoice_id, description, quantity, unit, unit_price, tax_rate, discount_pct, total, sort_order
 FROM finance_invoice_items
 WHERE invoice_id = ?
-ORDER BY sort_order ASC, id ASC;
+ORDER BY sort_order ASC, id ASC
+LIMIT 500;
 
 -- name: CreateInvoiceItem :exec
 INSERT INTO finance_invoice_items
@@ -128,7 +129,8 @@ VALUES (?,?,?,?,?,?,?,?,?);
 SELECT id, owner_id, business_id, invoice_id, amount, currency, payment_date, method, reference, notes, created_at
 FROM finance_payments
 WHERE invoice_id = ?
-ORDER BY payment_date ASC;
+ORDER BY payment_date ASC, id ASC
+LIMIT 500;
 
 -- name: GetPaymentByReference :one
 SELECT id, owner_id, business_id, invoice_id, amount, currency, payment_date, method, reference, notes, created_at
