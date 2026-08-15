@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import api from '../../shared/lib/api';
@@ -43,21 +44,23 @@ const Checkout = (): React.JSX.Element => {
   const formatPrice = (price: number): string =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price);
 
+  const { t } = useTranslation('checkout');
+
   const validate = (): boolean => {
     if (!name.trim()) {
-      setErrorMessage('Please enter your name.');
+      setErrorMessage(t('nameRequired'));
       return false;
     }
     if (!phone.trim()) {
-      setErrorMessage('Please enter your phone number.');
+      setErrorMessage(t('phoneRequired'));
       return false;
     }
     if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setErrorMessage('Please enter a valid email address.');
+      setErrorMessage(t('emailInvalid'));
       return false;
     }
     if (items.length === 0) {
-      setErrorMessage('Your cart is empty.');
+      setErrorMessage(t('emptyCart'));
       return false;
     }
     return true;

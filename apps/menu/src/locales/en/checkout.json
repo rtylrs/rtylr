@@ -1,0 +1,18 @@
+{
+  "title": "Checkout",
+  "name": "Name",
+  "namePlaceholder": "Your name",
+  "phone": "Phone Number",
+  "phonePlaceholder": "e.g. +1 555 0199",
+  "email": "Email (optional)",
+  "emailPlaceholder": "you@example.com",
+  "notes": "Order Notes (optional)",
+  "notesPlaceholder": "Any special instructions or dietary requirements...",
+  "placeOrder": "Place Order",
+  "submitting": "Placing Order...",
+  "emptyCart": "Your cart is empty",
+  "nameRequired": "Please enter your name.",
+  "phoneRequired": "Please enter your phone number.",
+  "emailInvalid": "Please enter a valid email address.",
+  "orderFailed": "Failed to place order. Please try again."
+}
