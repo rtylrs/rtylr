@@ -399,6 +399,9 @@ interface SetSubscriptionRequest {
 
 interface CheckoutRequest {
   planSlug: string;
+  billingCycle?: 'monthly' | 'yearly';
+  seatCount?: number;
+  addons?: string[];
   email?: string;
 }
 
@@ -454,6 +457,9 @@ export const useCheckout = () =>
       unwrap(
         safe.post<CheckoutResponse>('/hub/subscription/v1/checkout', {
           plan_slug: data.planSlug,
+          billing_cycle: data.billingCycle ?? 'monthly',
+          seat_count: data.seatCount,
+          addons: data.addons,
           email: data.email,
         })
       ),
