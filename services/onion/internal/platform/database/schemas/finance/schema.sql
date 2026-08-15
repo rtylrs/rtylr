@@ -192,10 +192,13 @@ CREATE TABLE IF NOT EXISTS finance_journal_entries (
     date DATE NOT NULL,
     description TEXT,
     status VARCHAR(20) NOT NULL DEFAULT 'draft',
+    source_type VARCHAR(32) NULL,
+    source_id BIGINT NULL,
     posted_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_finance_journal_entries_business_date (business_id, date, id),
-    INDEX idx_finance_journal_entries_business_status (business_id, status)
+    INDEX idx_finance_journal_entries_business_status (business_id, status),
+    UNIQUE KEY uq_finance_journal_entries_source (business_id, source_type, source_id)
 );
 
 CREATE TABLE IF NOT EXISTS finance_journal_lines (
