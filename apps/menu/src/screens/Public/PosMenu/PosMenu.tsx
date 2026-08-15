@@ -37,18 +37,16 @@ const PosMenu: React.FC = (): React.JSX.Element => {
   // ERP products today, so we bucket everything into one "Menu" group.
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!data) return [];
-    const items = data.items
-      .filter((i) => i.isActive)
-      .map((i) => ({
-        id: String(i.id),
-        name: i.name,
-        price: i.salePrice,
-        currency: data.business.currency,
-        description: undefined,
-        image: i.imageUrl,
-        badges: [],
-        available: i.isActive,
-      }));
+    const items = data.items.map((i) => ({
+      id: String(i.id),
+      name: i.name,
+      price: i.salePrice,
+      currency: data.business.currency,
+      description: undefined,
+      image: i.imageUrl,
+      badges: [],
+      available: i.isActive,
+    }));
     if (items.length === 0) return [];
     return [
       {
