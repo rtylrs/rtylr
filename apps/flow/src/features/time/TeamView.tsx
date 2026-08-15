@@ -23,7 +23,7 @@ const TeamView = (): React.JSX.Element => {
   const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
 
   const { data: members, isLoading: membersLoading } = useWorkspaceMembers(activeWorkspaceId);
-  const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, date);
+  const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, date, date);
 
   const dayByUserId = useMemo(() => {
     const map = new Map<string, WorkDay>();
