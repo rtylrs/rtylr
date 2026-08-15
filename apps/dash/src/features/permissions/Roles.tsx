@@ -49,7 +49,11 @@ const Roles: React.FC = () => {
             </p>
           </div>
           {isAdminOrOwner && (
+<<<<<<< HEAD
             <Button onClick={() => setOpen(true)}>
+=======
+            <Button onClick={handleCreateRole}>
+>>>>>>> 52640160 (gate custom role creation on admin or owner permissions)
               <Plus size={14} />
               New role
             </Button>
