@@ -151,12 +151,17 @@ const Menu: React.FC = () => {
 
   if (!business) return null;
 
+  const handleCheckout = () => {
+    navigate({ to: '/checkout' });
+  };
+
   const layoutProps = {
     business,
     categories,
     enableCart: true,
     enableAiChat: true,
     onAiMessage: handleAiMessage,
+    onCheckout: handleCheckout,
   };
 
   const content =
