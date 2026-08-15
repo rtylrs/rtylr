@@ -189,9 +189,7 @@ export function useCreateSubmissionTag() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ submissionId, name }: { submissionId: number; name: string }) =>
-      unwrap(
-        safe.post<{ tagId: number }>(`/recruit/submissions/${submissionId}/tags`, { name })
-      ),
+      unwrap(safe.post<{ tagId: number }>(`/recruit/submissions/${submissionId}/tags`, { name })),
     onSuccess: (_data, variables) =>
       qc.invalidateQueries({
         queryKey: ['recruit', 'admin', 'submission', variables.submissionId, 'tags'],
@@ -205,9 +203,7 @@ export function useDeleteSubmissionTag() {
   return useMutation({
     mutationFn: ({ submissionId, tagId }: { submissionId: number; tagId: number }) =>
       unwrap(
-        safe.delete<{ success: boolean }>(
-          `/recruit/submissions/${submissionId}/tags/${tagId}`
-        )
+        safe.delete<{ success: boolean }>(`/recruit/submissions/${submissionId}/tags/${tagId}`)
       ),
     onSuccess: (_data, variables) =>
       qc.invalidateQueries({
@@ -245,8 +241,18 @@ export function useCreateTalentPool() {
 export function useUpdateTalentPool() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ poolId, name, description }: { poolId: number; name: string; description?: string }) =>
-      unwrap(safe.put<{ message: string }>(`/recruit/talent-pools/${poolId}`, { name, description })),
+    mutationFn: ({
+      poolId,
+      name,
+      description,
+    }: {
+      poolId: number;
+      name: string;
+      description?: string;
+    }) =>
+      unwrap(
+        safe.put<{ message: string }>(`/recruit/talent-pools/${poolId}`, { name, description })
+      ),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'talent-pools'] }),
     onError: () => toast.error('Failed to update talent pool'),
   });
@@ -295,9 +301,7 @@ export function useRemoveTalentPoolMember() {
   return useMutation({
     mutationFn: ({ poolId, submissionId }: { poolId: number; submissionId: number }) =>
       unwrap(
-        safe.delete<{ success: boolean }>(
-          `/recruit/talent-pools/${poolId}/members/${submissionId}`
-        )
+        safe.delete<{ success: boolean }>(`/recruit/talent-pools/${poolId}/members/${submissionId}`)
       ),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'talent-pools'] });
@@ -318,9 +322,7 @@ export function useSubmissionInterviews(submissionId: number | undefined) {
     queryKey: ['recruit', 'admin', 'submission', submissionId, 'interviews'],
     enabled: !!submissionId,
     queryFn: () =>
-      unwrap(
-        safe.get<ListInterviewsResponse>(`/recruit/submissions/${submissionId}/interviews`)
-      ),
+      unwrap(safe.get<ListInterviewsResponse>(`/recruit/submissions/${submissionId}/interviews`)),
   });
 }
 
@@ -341,10 +343,7 @@ export function useCreateSubmissionInterview() {
   return useMutation({
     mutationFn: ({ submissionId, ...body }: SubmissionInterviewBody & { submissionId: number }) =>
       unwrap(
-        safe.post<{ interviewId: number }>(
-          `/recruit/submissions/${submissionId}/interviews`,
-          body
-        )
+        safe.post<{ interviewId: number }>(`/recruit/submissions/${submissionId}/interviews`, body)
       ),
     onSuccess: (_data, variables) =>
       qc.invalidateQueries({
@@ -371,9 +370,7 @@ export function useCreateSubmissionNote() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ submissionId, body }: { submissionId: number; body: string }) =>
-      unwrap(
-        safe.post<{ noteId: number }>(`/recruit/submissions/${submissionId}/notes`, { body })
-      ),
+      unwrap(safe.post<{ noteId: number }>(`/recruit/submissions/${submissionId}/notes`, { body })),
     onSuccess: (_data, variables) =>
       qc.invalidateQueries({
         queryKey: ['recruit', 'admin', 'submission', variables.submissionId, 'notes'],
@@ -409,9 +406,7 @@ export function useCreateSubmissionOffer() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ submissionId, ...body }: SubmissionOfferBody & { submissionId: number }) =>
-      unwrap(
-        safe.post<{ offerId: number }>(`/recruit/submissions/${submissionId}/offers`, body)
-      ),
+      unwrap(safe.post<{ offerId: number }>(`/recruit/submissions/${submissionId}/offers`, body)),
     onSuccess: (_data, variables) =>
       qc.invalidateQueries({
         queryKey: ['recruit', 'admin', 'submission', variables.submissionId, 'offers'],
@@ -423,7 +418,15 @@ export function useCreateSubmissionOffer() {
 export function useUpdateSubmissionOfferStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ submissionId, offerId, status }: { submissionId: number; offerId: number; status: string }) =>
+    mutationFn: ({
+      submissionId,
+      offerId,
+      status,
+    }: {
+      submissionId: number;
+      offerId: number;
+      status: string;
+    }) =>
       unwrap(
         safe.put<{ message: string }>(
           `/recruit/submissions/${submissionId}/offers/${offerId}/status`,

@@ -12,3 +12,8 @@ voxie
 # submodule. They are gitignored, but the pre-commit hook runs `prettier --check`
 # over the whole tree, so they failed every unrelated commit.
 **/.remember/**
+# Untracked nested worktrees for other in-progress issues (same reason as above -
+# the pre-commit hook scans the whole tree, and these are full app checkouts, at
+# any depth since a stray nested checkout can carry its own worktree dirs too).
+**/.codex-worktrees/**
+**/.worktrees/**

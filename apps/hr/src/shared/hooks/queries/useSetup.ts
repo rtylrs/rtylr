@@ -1,8 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type {
-  GetSetupStatusResponse,
-} from '@voxire/voxie/hr/setup/v1/types';
+import type { GetSetupStatusResponse } from '@voxire/voxie/hr/setup/v1/types';
 import { safe } from '../../lib/api';
 import { useHRConfigStore } from '../../stores/hrConfigStore';
 import { toast } from 'sonner';
@@ -187,7 +185,9 @@ const readHRConfig = async (): Promise<HRConfig | undefined> => {
 
 const persistWorkSchedule = async (data: WorkScheduleFormData): Promise<HRConfig | void> => {
   const listed = await unwrap(safe.get<unknown>('/hr/work-schedules'));
-  const existing = recordsFrom(listed, 'workSchedules').find((item) => sameName(item.name, data.name));
+  const existing = recordsFrom(listed, 'workSchedules').find((item) =>
+    sameName(item.name, data.name)
+  );
   const payload = {
     name: data.name.trim(),
     scheduleData: JSON.stringify({
@@ -242,8 +242,7 @@ const persistDepartments = async (
       name: department.name.trim(),
       locationId: department.locationId ?? existing?.locationId ?? 0,
       parentDepartmentId: department.parentDepartmentId ?? existing?.parentDepartmentId ?? 0,
-      defaultWorkScheduleId:
-        existing?.defaultWorkScheduleId ?? defaultSchedule?.id ?? 0,
+      defaultWorkScheduleId: existing?.defaultWorkScheduleId ?? defaultSchedule?.id ?? 0,
     };
     if (existing?.id) {
       await unwrap(safe.put(`/hr/core/departments/${existing.id}`, payload));
@@ -286,7 +285,9 @@ const persistRoles = async (roles: RolesPermissionsFormData['roles']): Promise<v
       name: role.name.trim(),
       description: existing?.description ?? '',
       permissions: JSON.stringify(
-        role.permissions.filter((permission) => permission.isGranted).map((permission) => permission.key)
+        role.permissions
+          .filter((permission) => permission.isGranted)
+          .map((permission) => permission.key)
       ),
     };
     if (existing?.id) {

@@ -10,8 +10,10 @@ import type { AxiosRequestConfig } from 'axios';
 const api = createApiClient('recruit');
 const rawSafe = safeFetch(api);
 
-const camelKey = (key: string): string => key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
-const snakeKey = (key: string): string => key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+const camelKey = (key: string): string =>
+  key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
+const snakeKey = (key: string): string =>
+  key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 
 export const camelizeRecruitPayload = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(camelizeRecruitPayload);

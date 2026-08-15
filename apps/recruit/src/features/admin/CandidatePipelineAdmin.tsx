@@ -1,5 +1,15 @@
 import React, { useMemo, useState } from 'react';
-import { CalendarDays, FileText, Mail, Phone, Search, StickyNote, Tag, Users, X } from 'lucide-react';
+import {
+  CalendarDays,
+  FileText,
+  Mail,
+  Phone,
+  Search,
+  StickyNote,
+  Tag,
+  Users,
+  X,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import {
@@ -20,7 +30,12 @@ import {
   useUpdateSubmissionOfferStatus,
   useUpdateSubmissionStatus,
 } from '../../shared/hooks/queries/useAdmin';
-import type { Submission, SubmissionEvent, SubmissionTag, TalentPool } from '../../shared/lib/types';
+import type {
+  Submission,
+  SubmissionEvent,
+  SubmissionTag,
+  TalentPool,
+} from '../../shared/lib/types';
 
 const PIPELINE = ['new', 'reviewed', 'interviewing', 'offered', 'hired', 'rejected'] as const;
 type PipelineStatus = (typeof PIPELINE)[number];
@@ -174,9 +189,9 @@ const CandidateCard: React.FC<{
   selected: boolean;
   onSelect: () => void;
 }> = ({ submission, selected, onSelect }) => {
-  const status = (PIPELINE.includes(submission.status as PipelineStatus)
-    ? submission.status
-    : 'new') as PipelineStatus;
+  const status = (
+    PIPELINE.includes(submission.status as PipelineStatus) ? submission.status : 'new'
+  ) as PipelineStatus;
 
   return (
     <div
@@ -190,7 +205,9 @@ const CandidateCard: React.FC<{
       style={{ borderColor: selected ? COLORS[status] : '#252525', background: '#121212' }}
     >
       <div className="truncate text-sm font-semibold text-white">{submission.candidateName}</div>
-      <div className="mt-1 truncate text-xs text-white/55">{submission.careerTitle || 'Open role'}</div>
+      <div className="mt-1 truncate text-xs text-white/55">
+        {submission.careerTitle || 'Open role'}
+      </div>
       <div className="mt-3 truncate text-xs text-white/40">{submission.email}</div>
       <div className="mt-2 text-[11px] text-white/35">
         {new Date(submission.createdAt).toLocaleDateString()}
@@ -256,24 +273,37 @@ const CandidateDetail: React.FC<{
           <h2 className="text-lg font-semibold">{submission.candidateName}</h2>
           <p className="mt-1 text-xs text-white/50">{submission.careerTitle || 'Open role'}</p>
         </div>
-        <button type="button" onClick={onClose} className="text-white/45 hover:text-white" aria-label="Close candidate details">
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-white/45 hover:text-white"
+          aria-label="Close candidate details"
+        >
           <X className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="mt-5 grid grid-cols-4 gap-1 rounded-md border p-1" style={{ borderColor: '#242424' }}>
-        {([
-          ['overview', 'Overview'],
-          ['interviews', 'Interviews'],
-          ['notes', 'Notes'],
-          ['offers', 'Offers'],
-        ] as const).map(([value, label]) => (
+      <div
+        className="mt-5 grid grid-cols-4 gap-1 rounded-md border p-1"
+        style={{ borderColor: '#242424' }}
+      >
+        {(
+          [
+            ['overview', 'Overview'],
+            ['interviews', 'Interviews'],
+            ['notes', 'Notes'],
+            ['offers', 'Offers'],
+          ] as const
+        ).map(([value, label]) => (
           <button
             key={value}
             type="button"
             onClick={() => setTab(value)}
             className="rounded px-1 py-1.5 text-[10px] font-medium"
-            style={{ background: tab === value ? '#242424' : 'transparent', color: tab === value ? '#fff' : '#888' }}
+            style={{
+              background: tab === value ? '#242424' : 'transparent',
+              color: tab === value ? '#fff' : '#888',
+            }}
           >
             {label}
           </button>
@@ -315,18 +345,42 @@ const CandidateDetail: React.FC<{
             <div className="flex items-center gap-2 text-xs font-semibold text-white/65">
               <CalendarDays className="h-3.5 w-3.5" /> Schedule interview
             </div>
-            <input value={interviewTitle} onChange={(event) => setInterviewTitle(event.target.value)} placeholder="Interview title" className="w-full rounded border bg-black/30 px-2 py-1.5 text-xs text-white" />
+            <input
+              value={interviewTitle}
+              onChange={(event) => setInterviewTitle(event.target.value)}
+              placeholder="Interview title"
+              className="w-full rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+            />
             <div className="grid grid-cols-2 gap-2">
-              <select value={interviewType} onChange={(event) => setInterviewType(event.target.value)} className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white">
+              <select
+                value={interviewType}
+                onChange={(event) => setInterviewType(event.target.value)}
+                className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+              >
                 <option value="video">Video</option>
                 <option value="phone">Phone</option>
                 <option value="onsite">On-site</option>
                 <option value="panel">Panel</option>
               </select>
-              <input type="datetime-local" value={interviewAt} onChange={(event) => setInterviewAt(event.target.value)} className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white" />
+              <input
+                type="datetime-local"
+                value={interviewAt}
+                onChange={(event) => setInterviewAt(event.target.value)}
+                className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+              />
             </div>
-            <input value={interviewerName} onChange={(event) => setInterviewerName(event.target.value)} placeholder="Interviewer" className="w-full rounded border bg-black/30 px-2 py-1.5 text-xs text-white" />
-            <input value={meetingUrl} onChange={(event) => setMeetingUrl(event.target.value)} placeholder="Meeting URL (optional)" className="w-full rounded border bg-black/30 px-2 py-1.5 text-xs text-white" />
+            <input
+              value={interviewerName}
+              onChange={(event) => setInterviewerName(event.target.value)}
+              placeholder="Interviewer"
+              className="w-full rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+            />
+            <input
+              value={meetingUrl}
+              onChange={(event) => setMeetingUrl(event.target.value)}
+              placeholder="Meeting URL (optional)"
+              className="w-full rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+            />
             <button
               type="button"
               disabled={createInterview.isPending || !interviewTitle || !interviewAt}
@@ -342,7 +396,13 @@ const CandidateDetail: React.FC<{
                     meetingUrl,
                     interviewerName,
                   },
-                  { onSuccess: () => { setInterviewTitle(''); setInterviewAt(''); setMeetingUrl(''); } }
+                  {
+                    onSuccess: () => {
+                      setInterviewTitle('');
+                      setInterviewAt('');
+                      setMeetingUrl('');
+                    },
+                  }
                 );
               }}
               className="w-full rounded bg-white px-3 py-1.5 text-xs font-semibold text-black disabled:opacity-40"
@@ -352,14 +412,36 @@ const CandidateDetail: React.FC<{
           </div>
           <div className="space-y-2">
             {(interviews.data?.interviews ?? []).map((interview) => (
-              <div key={interview.id} className="rounded-md border p-3 text-xs" style={{ borderColor: '#242424' }}>
-                <div className="flex items-center justify-between gap-2 text-white/80"><span className="font-medium">{interview.title}</span><span className="text-[10px] uppercase text-white/40">{interview.status}</span></div>
-                <div className="mt-1 text-white/50">{new Date(interview.scheduledAt).toLocaleString()} · {interview.interviewType}</div>
-                {interview.interviewerName && <div className="mt-1 text-white/50">With {interview.interviewerName}</div>}
-                {interview.meetingUrl && <a href={interview.meetingUrl} target="_blank" rel="noreferrer" className="mt-1 block truncate text-blue-300">Open meeting</a>}
+              <div
+                key={interview.id}
+                className="rounded-md border p-3 text-xs"
+                style={{ borderColor: '#242424' }}
+              >
+                <div className="flex items-center justify-between gap-2 text-white/80">
+                  <span className="font-medium">{interview.title}</span>
+                  <span className="text-[10px] uppercase text-white/40">{interview.status}</span>
+                </div>
+                <div className="mt-1 text-white/50">
+                  {new Date(interview.scheduledAt).toLocaleString()} · {interview.interviewType}
+                </div>
+                {interview.interviewerName && (
+                  <div className="mt-1 text-white/50">With {interview.interviewerName}</div>
+                )}
+                {interview.meetingUrl && (
+                  <a
+                    href={interview.meetingUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 block truncate text-blue-300"
+                  >
+                    Open meeting
+                  </a>
+                )}
               </div>
             ))}
-            {!interviews.isLoading && (interviews.data?.interviews ?? []).length === 0 && <p className="text-xs text-white/40">No interviews scheduled.</p>}
+            {!interviews.isLoading && (interviews.data?.interviews ?? []).length === 0 && (
+              <p className="text-xs text-white/40">No interviews scheduled.</p>
+            )}
           </div>
         </div>
       )}
@@ -367,18 +449,46 @@ const CandidateDetail: React.FC<{
       {tab === 'notes' && (
         <div className="mt-5 space-y-4">
           <div className="space-y-2 rounded-md border p-3" style={{ borderColor: '#242424' }}>
-            <div className="flex items-center gap-2 text-xs font-semibold text-white/65"><StickyNote className="h-3.5 w-3.5" /> Add recruiter note</div>
-            <textarea value={noteBody} onChange={(event) => setNoteBody(event.target.value)} rows={4} placeholder="Keep hiring context with the candidate record…" className="w-full resize-y rounded border bg-black/30 px-2 py-1.5 text-xs text-white" />
-            <button type="button" disabled={createNote.isPending || !noteBody.trim()} onClick={() => createNote.mutate({ submissionId: submission.id, body: noteBody }, { onSuccess: () => setNoteBody('') })} className="w-full rounded bg-white px-3 py-1.5 text-xs font-semibold text-black disabled:opacity-40">{createNote.isPending ? 'Saving…' : 'Save note'}</button>
+            <div className="flex items-center gap-2 text-xs font-semibold text-white/65">
+              <StickyNote className="h-3.5 w-3.5" /> Add recruiter note
+            </div>
+            <textarea
+              value={noteBody}
+              onChange={(event) => setNoteBody(event.target.value)}
+              rows={4}
+              placeholder="Keep hiring context with the candidate record…"
+              className="w-full resize-y rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+            />
+            <button
+              type="button"
+              disabled={createNote.isPending || !noteBody.trim()}
+              onClick={() =>
+                createNote.mutate(
+                  { submissionId: submission.id, body: noteBody },
+                  { onSuccess: () => setNoteBody('') }
+                )
+              }
+              className="w-full rounded bg-white px-3 py-1.5 text-xs font-semibold text-black disabled:opacity-40"
+            >
+              {createNote.isPending ? 'Saving…' : 'Save note'}
+            </button>
           </div>
           <div className="space-y-2">
             {(notes.data?.notes ?? []).map((note) => (
-              <div key={note.id} className="rounded-md border p-3 text-xs text-white/70" style={{ borderColor: '#242424' }}>
-                <div className="mb-1 text-[10px] text-white/35">{new Date(note.createdAt).toLocaleString()}</div>
+              <div
+                key={note.id}
+                className="rounded-md border p-3 text-xs text-white/70"
+                style={{ borderColor: '#242424' }}
+              >
+                <div className="mb-1 text-[10px] text-white/35">
+                  {new Date(note.createdAt).toLocaleString()}
+                </div>
                 <p className="whitespace-pre-wrap">{note.body}</p>
               </div>
             ))}
-            {!notes.isLoading && (notes.data?.notes ?? []).length === 0 && <p className="text-xs text-white/40">No recruiter notes yet.</p>}
+            {!notes.isLoading && (notes.data?.notes ?? []).length === 0 && (
+              <p className="text-xs text-white/40">No recruiter notes yet.</p>
+            )}
           </div>
         </div>
       )}
@@ -387,21 +497,121 @@ const CandidateDetail: React.FC<{
         <div className="mt-5 space-y-4">
           <div className="space-y-2 rounded-md border p-3" style={{ borderColor: '#242424' }}>
             <div className="text-xs font-semibold text-white/65">Create offer</div>
-            <input value={offerTitle} onChange={(event) => setOfferTitle(event.target.value)} placeholder="Offer title" className="w-full rounded border bg-black/30 px-2 py-1.5 text-xs text-white" />
-            <div className="grid grid-cols-2 gap-2"><input type="number" min="0" value={offerSalary} onChange={(event) => setOfferSalary(event.target.value)} placeholder="Salary" className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white" /><input value={offerCurrency} onChange={(event) => setOfferCurrency(event.target.value.toUpperCase())} maxLength={8} placeholder="Currency" className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white" /></div>
-            <div className="grid grid-cols-2 gap-2"><input type="date" value={offerStartDate} onChange={(event) => setOfferStartDate(event.target.value)} className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white" /><input type="date" value={offerExpiresAt} onChange={(event) => setOfferExpiresAt(event.target.value)} className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white" /></div>
-            <textarea value={offerTerms} onChange={(event) => setOfferTerms(event.target.value)} rows={3} placeholder="Terms and conditions" className="w-full resize-y rounded border bg-black/30 px-2 py-1.5 text-xs text-white" />
-            <button type="button" disabled={createOffer.isPending || !offerTitle.trim()} onClick={() => createOffer.mutate({ submissionId: submission.id, title: offerTitle, salary: Number(offerSalary) || 0, salaryCurrency: offerCurrency || 'USD', startDate: offerStartDate, expiresAt: offerExpiresAt, terms: offerTerms }, { onSuccess: () => { setOfferTitle(''); setOfferSalary(''); setOfferStartDate(''); setOfferExpiresAt(''); setOfferTerms(''); } })} className="w-full rounded bg-white px-3 py-1.5 text-xs font-semibold text-black disabled:opacity-40">{createOffer.isPending ? 'Creating…' : 'Create draft offer'}</button>
+            <input
+              value={offerTitle}
+              onChange={(event) => setOfferTitle(event.target.value)}
+              placeholder="Offer title"
+              className="w-full rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="number"
+                min="0"
+                value={offerSalary}
+                onChange={(event) => setOfferSalary(event.target.value)}
+                placeholder="Salary"
+                className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+              />
+              <input
+                value={offerCurrency}
+                onChange={(event) => setOfferCurrency(event.target.value.toUpperCase())}
+                maxLength={8}
+                placeholder="Currency"
+                className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                type="date"
+                value={offerStartDate}
+                onChange={(event) => setOfferStartDate(event.target.value)}
+                className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+              />
+              <input
+                type="date"
+                value={offerExpiresAt}
+                onChange={(event) => setOfferExpiresAt(event.target.value)}
+                className="rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+              />
+            </div>
+            <textarea
+              value={offerTerms}
+              onChange={(event) => setOfferTerms(event.target.value)}
+              rows={3}
+              placeholder="Terms and conditions"
+              className="w-full resize-y rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+            />
+            <button
+              type="button"
+              disabled={createOffer.isPending || !offerTitle.trim()}
+              onClick={() =>
+                createOffer.mutate(
+                  {
+                    submissionId: submission.id,
+                    title: offerTitle,
+                    salary: Number(offerSalary) || 0,
+                    salaryCurrency: offerCurrency || 'USD',
+                    startDate: offerStartDate,
+                    expiresAt: offerExpiresAt,
+                    terms: offerTerms,
+                  },
+                  {
+                    onSuccess: () => {
+                      setOfferTitle('');
+                      setOfferSalary('');
+                      setOfferStartDate('');
+                      setOfferExpiresAt('');
+                      setOfferTerms('');
+                    },
+                  }
+                )
+              }
+              className="w-full rounded bg-white px-3 py-1.5 text-xs font-semibold text-black disabled:opacity-40"
+            >
+              {createOffer.isPending ? 'Creating…' : 'Create draft offer'}
+            </button>
           </div>
           <div className="space-y-2">
             {(offers.data?.offers ?? []).map((offer) => (
-              <div key={offer.id} className="rounded-md border p-3 text-xs" style={{ borderColor: '#242424' }}>
-                <div className="flex items-center justify-between gap-2"><span className="font-medium text-white/80">{offer.title}</span><select value={offer.status} onChange={(event) => updateOffer.mutate({ submissionId: submission.id, offerId: offer.id, status: event.target.value })} className="rounded border bg-black/30 px-1 py-1 text-[10px] text-white"><option value="draft">Draft</option><option value="sent">Sent</option><option value="accepted">Accepted</option><option value="declined">Declined</option><option value="expired">Expired</option></select></div>
-                <div className="mt-1 text-white/50">{offer.salary ? `${offer.salary.toLocaleString()} ${offer.salaryCurrency}` : 'Compensation not set'}{offer.startDate ? ` · starts ${offer.startDate}` : ''}</div>
-                {offer.terms && <p className="mt-2 whitespace-pre-wrap text-white/60">{offer.terms}</p>}
+              <div
+                key={offer.id}
+                className="rounded-md border p-3 text-xs"
+                style={{ borderColor: '#242424' }}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium text-white/80">{offer.title}</span>
+                  <select
+                    value={offer.status}
+                    onChange={(event) =>
+                      updateOffer.mutate({
+                        submissionId: submission.id,
+                        offerId: offer.id,
+                        status: event.target.value,
+                      })
+                    }
+                    className="rounded border bg-black/30 px-1 py-1 text-[10px] text-white"
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="sent">Sent</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="declined">Declined</option>
+                    <option value="expired">Expired</option>
+                  </select>
+                </div>
+                <div className="mt-1 text-white/50">
+                  {offer.salary
+                    ? `${offer.salary.toLocaleString()} ${offer.salaryCurrency}`
+                    : 'Compensation not set'}
+                  {offer.startDate ? ` · starts ${offer.startDate}` : ''}
+                </div>
+                {offer.terms && (
+                  <p className="mt-2 whitespace-pre-wrap text-white/60">{offer.terms}</p>
+                )}
               </div>
             ))}
-            {!offers.isLoading && (offers.data?.offers ?? []).length === 0 && <p className="text-xs text-white/40">No offers created.</p>}
+            {!offers.isLoading && (offers.data?.offers ?? []).length === 0 && (
+              <p className="text-xs text-white/40">No offers created.</p>
+            )}
           </div>
         </div>
       )}
@@ -452,7 +662,6 @@ const CandidateOverview: React.FC<{
 
   return (
     <>
-
       <div className="mt-5 space-y-2 text-xs text-white/65">
         <a href={`mailto:${submission.email}`} className="flex items-center gap-2 hover:text-white">
           <Mail className="h-3.5 w-3.5" /> {submission.email}
@@ -485,9 +694,17 @@ const CandidateOverview: React.FC<{
         </div>
         <div className="flex flex-wrap gap-1.5">
           {tags.map((tag) => (
-            <span key={tag.id} className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-[11px] text-white/75">
+            <span
+              key={tag.id}
+              className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-[11px] text-white/75"
+            >
               {tag.name}
-              <button type="button" onClick={() => onDeleteTag(tag.id)} className="text-white/45 hover:text-white" aria-label={`Remove ${tag.name} tag`}>
+              <button
+                type="button"
+                onClick={() => onDeleteTag(tag.id)}
+                className="text-white/45 hover:text-white"
+                aria-label={`Remove ${tag.name} tag`}
+              >
                 ×
               </button>
             </span>
@@ -501,8 +718,20 @@ const CandidateOverview: React.FC<{
             onAddTag();
           }}
         >
-          <input value={tagName} onChange={(event) => setTagName(event.target.value)} placeholder="Add a tag" maxLength={64} className="min-w-0 flex-1 rounded border bg-black/30 px-2 py-1.5 text-xs text-white" />
-          <button type="submit" disabled={tagPending || !tagName.trim()} className="rounded border px-2 py-1.5 text-[11px] text-white/75 disabled:opacity-40">Add</button>
+          <input
+            value={tagName}
+            onChange={(event) => setTagName(event.target.value)}
+            placeholder="Add a tag"
+            maxLength={64}
+            className="min-w-0 flex-1 rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+          />
+          <button
+            type="submit"
+            disabled={tagPending || !tagName.trim()}
+            className="rounded border px-2 py-1.5 text-[11px] text-white/75 disabled:opacity-40"
+          >
+            Add
+          </button>
         </form>
       </div>
 
@@ -511,14 +740,31 @@ const CandidateOverview: React.FC<{
           <Users className="h-3.5 w-3.5" /> Talent pool
         </div>
         {talentPools.length === 0 ? (
-          <p className="text-[11px] text-white/35">Create a talent pool to group this candidate for future roles.</p>
+          <p className="text-[11px] text-white/35">
+            Create a talent pool to group this candidate for future roles.
+          </p>
         ) : (
           <div className="flex gap-2">
-            <select value={selectedPoolId} onChange={(event) => setSelectedPoolId(event.target.value)} className="min-w-0 flex-1 rounded border bg-black/30 px-2 py-1.5 text-xs text-white">
+            <select
+              value={selectedPoolId}
+              onChange={(event) => setSelectedPoolId(event.target.value)}
+              className="min-w-0 flex-1 rounded border bg-black/30 px-2 py-1.5 text-xs text-white"
+            >
               <option value="">Select a pool</option>
-              {talentPools.map((pool) => <option key={pool.id} value={pool.id}>{pool.name}</option>)}
+              {talentPools.map((pool) => (
+                <option key={pool.id} value={pool.id}>
+                  {pool.name}
+                </option>
+              ))}
             </select>
-            <button type="button" disabled={poolPending || !selectedPoolId} onClick={onAddToPool} className="rounded border px-2 py-1.5 text-[11px] text-white/75 disabled:opacity-40">Add</button>
+            <button
+              type="button"
+              disabled={poolPending || !selectedPoolId}
+              onClick={onAddToPool}
+              className="rounded border px-2 py-1.5 text-[11px] text-white/75 disabled:opacity-40"
+            >
+              Add
+            </button>
           </div>
         )}
       </div>
@@ -546,8 +792,14 @@ const CandidateOverview: React.FC<{
           <div className="mt-2 space-y-2 border-l border-white/10 pl-3">
             {events.slice(0, 8).map((event) => (
               <div key={event.id} className="text-xs text-white/55">
-                <span className="text-white/75">{event.eventType === 'status_changed' ? `Moved from ${event.fromStatus || 'unknown'} to ${event.toStatus}` : event.eventType}</span>
-                <span className="ml-2 text-[10px] text-white/35">{new Date(event.createdAt).toLocaleString()}</span>
+                <span className="text-white/75">
+                  {event.eventType === 'status_changed'
+                    ? `Moved from ${event.fromStatus || 'unknown'} to ${event.toStatus}`
+                    : event.eventType}
+                </span>
+                <span className="ml-2 text-[10px] text-white/35">
+                  {new Date(event.createdAt).toLocaleString()}
+                </span>
               </div>
             ))}
           </div>
@@ -556,14 +808,20 @@ const CandidateOverview: React.FC<{
 
       {submission.coverLetter && (
         <div className="mt-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-white/45">Cover letter</h3>
-          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/70">{submission.coverLetter}</p>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-white/45">
+            Cover letter
+          </h3>
+          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-white/70">
+            {submission.coverLetter}
+          </p>
         </div>
       )}
 
       {Object.keys(answers).length > 0 && (
         <div className="mt-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-white/45">Application answers</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-white/45">
+            Application answers
+          </h3>
           <div className="mt-2 space-y-2">
             {Object.entries(answers).map(([key, value]) => (
               <div key={key} className="rounded-md border p-2.5" style={{ borderColor: '#242424' }}>

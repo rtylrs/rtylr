@@ -73,7 +73,15 @@ const HRConfigRoute = (): React.JSX.Element => {
   }
 
   if (isError || isSetupError) {
-    return <ConfigLoadError onRetry={() => { refetch(); refetchSetup(); }} isRetrying={isFetching} />;
+    return (
+      <ConfigLoadError
+        onRetry={() => {
+          refetch();
+          refetchSetup();
+        }}
+        isRetrying={isFetching}
+      />
+    );
   }
 
   if (!config) {

@@ -62,11 +62,16 @@ const parseCsv = (input: string): Record<string, string>[] => {
   if (rows.length < 2) return [];
 
   const headers = rows[0].map((header) =>
-    header.trim().toLowerCase().replace(/[\s-]+/g, '_')
+    header
+      .trim()
+      .toLowerCase()
+      .replace(/[\s-]+/g, '_')
   );
-  return rows.slice(1).map((values) =>
-    Object.fromEntries(headers.map((header, index) => [header, values[index] ?? '']))
-  );
+  return rows
+    .slice(1)
+    .map((values) =>
+      Object.fromEntries(headers.map((header, index) => [header, values[index] ?? '']))
+    );
 };
 
 const parsePositiveId = (row: Record<string, string>, field: string): number => {
@@ -80,7 +85,8 @@ const parsePositiveId = (row: Record<string, string>, field: string): number => 
 const parseOptionalNumber = (row: Record<string, string>, field: string): number | undefined => {
   if (!row[field]) return undefined;
   const value = Number(row[field]);
-  if (!Number.isFinite(value) || value < 0) throw new Error(`${field} must be a non-negative number`);
+  if (!Number.isFinite(value) || value < 0)
+    throw new Error(`${field} must be a non-negative number`);
   return value;
 };
 
@@ -320,24 +326,45 @@ const EmployeesStep = ({
             {t('setup.employees.csvDescription')}
           </p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Button type="button" variant="ghost" onClick={downloadCsvTemplate} icon={<Download size={13} />}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={downloadCsvTemplate}
+              icon={<Download size={13} />}
+            >
               {t('setup.employees.csvDownloadTemplate')}
             </Button>
-            <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()} icon={<Upload size={13} />}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => fileInputRef.current?.click()}
+              icon={<Upload size={13} />}
+            >
               {t('setup.employees.importCsv')}
             </Button>
           </div>
-          {csvError && <p style={{ margin: 0, color: 'var(--hr-error)', fontSize: 12 }}>{csvError}</p>}
+          {csvError && (
+            <p style={{ margin: 0, color: 'var(--hr-error)', fontSize: 12 }}>{csvError}</p>
+          )}
           {csvRows.length > 0 && (
             <>
               <p style={{ margin: 0, color: 'var(--hr-text-muted)', fontSize: 12 }}>
                 {t('setup.employees.csvRowsReady', { count: csvRows.length })}
               </p>
-              <div style={{ maxHeight: 260, overflow: 'auto', border: '1px solid var(--hr-border)', borderRadius: 8 }}>
+              <div
+                style={{
+                  maxHeight: 260,
+                  overflow: 'auto',
+                  border: '1px solid var(--hr-border)',
+                  borderRadius: 8,
+                }}
+              >
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                   <thead>
                     <tr style={{ background: 'var(--hr-hover)' }}>
-                      <th style={{ padding: 8, textAlign: 'left' }}>{t('setup.employees.csvLine')}</th>
+                      <th style={{ padding: 8, textAlign: 'left' }}>
+                        {t('setup.employees.csvLine')}
+                      </th>
                       <th style={{ padding: 8, textAlign: 'left' }}>{t('common.name')}</th>
                       <th style={{ padding: 8, textAlign: 'left' }}>{t('common.email')}</th>
                       <th style={{ padding: 8, textAlign: 'left' }}>{t('common.status')}</th>
@@ -347,9 +374,16 @@ const EmployeesStep = ({
                     {csvRows.map((row) => (
                       <tr key={row.line} style={{ borderTop: '1px solid var(--hr-border)' }}>
                         <td style={{ padding: 8 }}>{row.line}</td>
-                        <td style={{ padding: 8 }}>{row.payload ? `${row.payload.firstName} ${row.payload.lastName}` : '-'}</td>
+                        <td style={{ padding: 8 }}>
+                          {row.payload ? `${row.payload.firstName} ${row.payload.lastName}` : '-'}
+                        </td>
                         <td style={{ padding: 8 }}>{row.payload?.email ?? '-'}</td>
-                        <td style={{ padding: 8, color: row.error ? 'var(--hr-error)' : 'var(--hr-status-approved)' }}>
+                        <td
+                          style={{
+                            padding: 8,
+                            color: row.error ? 'var(--hr-error)' : 'var(--hr-status-approved)',
+                          }}
+                        >
                           {row.error ?? t('setup.employees.csvReady')}
                         </td>
                       </tr>
@@ -364,9 +398,18 @@ const EmployeesStep = ({
               )}
             </>
           )}
-          {csvResult && <p style={{ margin: 0, color: 'var(--hr-status-approved)', fontSize: 12 }}>{csvResult}</p>}
+          {csvResult && (
+            <p style={{ margin: 0, color: 'var(--hr-status-approved)', fontSize: 12 }}>
+              {csvResult}
+            </p>
+          )}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Button type="button" variant="ghost" onClick={() => setCsvOpen(false)} disabled={csvImporting}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setCsvOpen(false)}
+              disabled={csvImporting}
+            >
               {t('common.close')}
             </Button>
             <Button

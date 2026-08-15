@@ -87,7 +87,8 @@ interface ListPayrollAdjustmentsResponse {
 export const useListPayrollAdjustments = (enabled = true) => {
   return useQuery<ListPayrollAdjustmentsResponse>({
     queryKey: ['payroll-adjustments'],
-    queryFn: async () => unwrap(safe.get<ListPayrollAdjustmentsResponse>('/hr/payroll/adjustments')),
+    queryFn: async () =>
+      unwrap(safe.get<ListPayrollAdjustmentsResponse>('/hr/payroll/adjustments')),
     enabled,
   });
 };
@@ -175,10 +176,16 @@ export const useUpsertPayrollConfig = () => {
           bonusesEnabled: data.bonusesEnabled,
         })
       );
-      const raw = ((res as { config?: PayrollConfigData }).config ?? res) as Record<string, unknown>;
+      const raw = ((res as { config?: PayrollConfigData }).config ?? res) as Record<
+        string,
+        unknown
+      >;
       return {
-        grossModel: ((raw.grossModel ?? raw.gross_model) as PayrollConfigData['grossModel']) ?? 'both',
-        period: ((raw.period ?? raw.periodType ?? raw.period_type) as PayrollConfigData['period']) ?? 'monthly',
+        grossModel:
+          ((raw.grossModel ?? raw.gross_model) as PayrollConfigData['grossModel']) ?? 'both',
+        period:
+          ((raw.period ?? raw.periodType ?? raw.period_type) as PayrollConfigData['period']) ??
+          'monthly',
         overtimeEnabled: Boolean(raw.overtimeEnabled ?? raw.overtime_enabled ?? false),
         deductionsEnabled: Boolean(raw.deductionsEnabled ?? raw.deductions_enabled ?? false),
         bonusesEnabled: Boolean(raw.bonusesEnabled ?? raw.bonuses_enabled ?? false),

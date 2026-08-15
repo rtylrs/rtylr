@@ -19,6 +19,9 @@
   --delta-down: #f87171;
   /* Foreground color for solid-accent buttons */
   --accent-fg: #ffffff;
+  /* Caret AI brand teal - used to make the Caret nav entry read as the app's hero surface */
+  --caret-brand: #63d1c4;
+  --caret-brand-soft: rgba(99, 209, 196, 0.12);
 }
 
 /* ── Dark mode (default) ─────────────────────────────────────── */
@@ -37,6 +40,29 @@
   --hub-input-bg: rgba(255, 255, 255, 0.04);
   --hub-scrollbar: rgba(255, 255, 255, 0.12);
   --hub-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Caret AI - match this app's own dark palette instead of the
+   package's generic default (the shared @voxire/caret styles set these
+   directly on .caret-panel-shell, so the override needs the extra
+   specificity of a compound selector to win). ─────────────────────── */
+:root .caret-panel-shell {
+  --caret-bg: var(--hub-bg);
+  --caret-surface: var(--hub-surface);
+  --caret-surface-high: var(--hub-card);
+  --caret-surface-raised: var(--hub-card);
+  --caret-border: var(--hub-border);
+  --caret-border-strong: var(--hub-border);
+  --caret-text: var(--hub-text);
+  --caret-text-muted: var(--hub-text-muted);
+  --caret-text-dim: var(--hub-text-dim);
+  --caret-input-bg: var(--hub-input-bg);
+  --caret-hover: var(--hub-hover);
+  --caret-active: var(--hub-active);
+  --caret-scrollbar: var(--hub-scrollbar);
+  --caret-accent: var(--caret-brand);
+  --caret-accent-strong: var(--caret-brand);
+  --caret-accent-soft: var(--caret-brand-soft);
 }
 
 /* ── Light mode ──────────────────────────────────────────────── */

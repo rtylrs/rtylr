@@ -19,6 +19,7 @@ import { formatNumber, formatPercent } from '../../shared/lib/format';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
+import CaretAskBar from '../../shared/components/CaretAskBar';
 
 const containerVariants = {
   hidden: {},
@@ -131,9 +132,13 @@ const Dashboard: React.FC = (): React.JSX.Element => {
       variants={containerVariants as any}
       initial="hidden"
       animate="show"
-      className="space-y-6 max-w-7xl"
+      className="space-y-6 max-w-7xl mx-auto"
     >
       <HelmetContainer title="Dashboard · rtylr" />
+      <motion.div variants={itemVariants as any}>
+        <CaretAskBar />
+      </motion.div>
+
       <motion.div variants={itemVariants as any}>
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.dashboard.title')}

@@ -56,11 +56,7 @@ const checklistTriggerIsOffboarding = (triggerType: string | undefined): boolean
   return trigger.includes('offboard') || trigger.includes('terminat');
 };
 
-const checklistCategory = (
-  title: string,
-  description: string,
-  mode: ChecklistMode
-): string => {
+const checklistCategory = (title: string, description: string, mode: ChecklistMode): string => {
   const text = `${title} ${description}`.toLowerCase();
   if (/access|account|permission|badge|system|it/.test(text)) return 'Access';
   if (/equipment|laptop|device|asset|uniform|return/.test(text)) return 'Equipment';
@@ -85,10 +81,7 @@ const checklistTasks = async (mode: ChecklistMode): Promise<unknown[]> => {
   const templatesById = new Map<number, ChecklistTemplatePayload>(
     templates.map((template) => [Number(template.id), template])
   );
-  const itemDetailsById = new Map<
-    number,
-    { title: string; description: string }
-  >();
+  const itemDetailsById = new Map<number, { title: string; description: string }>();
   for (const template of templates) {
     for (const item of template.items ?? []) {
       itemDetailsById.set(Number(item.id), {
@@ -450,7 +443,10 @@ export function useOneOnOnes() {
           duration: 30,
           status: legacyOneOnOneStatus(meeting.status),
           topics: meeting.actionItems
-            ? meeting.actionItems.split('\n').map((topic) => topic.trim()).filter(Boolean)
+            ? meeting.actionItems
+                .split('\n')
+                .map((topic) => topic.trim())
+                .filter(Boolean)
             : [],
           notes: meeting.notes,
         }))
@@ -678,7 +674,9 @@ export function useBirthdays() {
           .map((employee) => ({
             id: Number(employee.id),
             staffId: Number(employee.id),
-            name: `${String(employee.first_name ?? '')} ${String(employee.last_name ?? '')}`.trim() || String(employee.email ?? ''),
+            name:
+              `${String(employee.first_name ?? '')} ${String(employee.last_name ?? '')}`.trim() ||
+              String(employee.email ?? ''),
             date: String(employee.date_of_birth).slice(0, 10),
             department: String(employee.job_title ?? '') || undefined,
           }))
@@ -723,7 +721,15 @@ export function useAvailability() {
         staffClient.listStaff({ search: '', departmentId: '', status: '' }),
       ]);
       const namesById = displayNameByStaffId(staffRes.staff);
-      const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      const weekdays = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+      ];
       return z.array(availabilitySchema).parse(
         (res.entries ?? []).map((entry: AvailabilityPayload) => {
           const staffId = Number(entry.staffId);
@@ -755,8 +761,12 @@ export function useSwaps() {
       return z.array(swapRequestSchema).parse(
         (res.requests ?? []).map((request) => ({
           ...request,
-          requester: request.requester || namesById.get(Number(request.requesterId)) || `#${request.requesterId}`,
-          target: request.target || namesById.get(Number(request.targetId)) || `#${request.targetId}`,
+          requester:
+            request.requester ||
+            namesById.get(Number(request.requesterId)) ||
+            `#${request.requesterId}`,
+          target:
+            request.target || namesById.get(Number(request.targetId)) || `#${request.targetId}`,
         }))
       );
     },
@@ -839,12 +849,13 @@ export function useOvertimeAlerts() {
       const namesById = displayNameByStaffId(staffRes.staff);
       return z.array(overtimeAlertSchema).parse(
         (res.requests ?? [])
-          .filter((request) => ['pending', 'flagged'].includes((request.status ?? '').toLowerCase()))
+          .filter((request) =>
+            ['pending', 'flagged'].includes((request.status ?? '').toLowerCase())
+          )
           .map((request) => ({
             id: Number(request.id),
             staffId: Number(request.employeeId),
-            staffName:
-              namesById.get(Number(request.employeeId)) ?? `#${request.employeeId}`,
+            staffName: namesById.get(Number(request.employeeId)) ?? `#${request.employeeId}`,
             date: request.date ?? '',
             plannedExtraMinutes: Number(request.plannedExtraMinutes ?? 0),
             reason: request.reason ?? '',
@@ -861,10 +872,8 @@ export function useHrSettings() {
     queryKey: ['settings'],
     queryFn: async () => {
       const res = await unwrap(hrExtras.getSettings());
-      const raw = ((res as unknown as { config?: Record<string, unknown> }).config ?? res) as Record<
-        string,
-        unknown
-      >;
+      const raw = ((res as unknown as { config?: Record<string, unknown> }).config ??
+        res) as Record<string, unknown>;
       return hrSettingsSchema.parse({
         workWeekStart: raw.workWeekStart ?? 'Monday',
         overtimeAfterHours: raw.overtimeAfterHours ?? 40,

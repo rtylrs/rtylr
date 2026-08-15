@@ -336,9 +336,8 @@ export const Modal: React.FC<{
   React.useEffect(() => {
     if (!open || typeof document === 'undefined') return undefined;
 
-    previousFocusRef.current = document.activeElement instanceof HTMLElement
-      ? document.activeElement
-      : null;
+    previousFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const dialog = dialogRef.current;
     const focusableSelector =
       'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -441,15 +440,7 @@ export const ConfirmDialog: React.FC<{
   variant?: 'danger' | 'primary';
   onConfirm: () => void;
   onCancel: () => void;
-}> = ({
-  open,
-  title,
-  description,
-  confirmLabel,
-  variant = 'primary',
-  onConfirm,
-  onCancel,
-}) => {
+}> = ({ open, title, description, confirmLabel, variant = 'primary', onConfirm, onCancel }) => {
   const { t } = useTranslation();
 
   return (

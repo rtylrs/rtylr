@@ -201,9 +201,11 @@ const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
                         icon={<CheckCircle size={13} />}
                         onClick={() => {
                           const requiresAttachment =
-                            (item as EmployeeChecklistItemPayload & {
-                              requiresAttachment?: boolean;
-                            }).requiresAttachment === true;
+                            (
+                              item as EmployeeChecklistItemPayload & {
+                                requiresAttachment?: boolean;
+                              }
+                            ).requiresAttachment === true;
                           if (requiresAttachment) {
                             setAttachmentItem(item);
                           } else {

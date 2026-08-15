@@ -176,10 +176,13 @@ const RosterBuilderInner = (): React.JSX.Element => {
       toast.error(t('shifts.roster.cannotPublishConflicts'));
       return;
     }
-    publishMutation.mutate({ weekStart, locationId }, {
-      onSuccess: () => toast.success('Roster published'),
-      onError: () => toast.error('Failed to publish roster'),
-    });
+    publishMutation.mutate(
+      { weekStart, locationId },
+      {
+        onSuccess: () => toast.success('Roster published'),
+        onError: () => toast.error('Failed to publish roster'),
+      }
+    );
   };
 
   const hasConflicts = entries.some((e) => e.assignments.some((a) => a.conflict));

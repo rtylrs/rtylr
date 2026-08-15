@@ -130,9 +130,7 @@ const Settings: React.FC = () => {
                 min={1}
                 max={12}
                 value={form.fiscalYearStartMonth}
-                onChange={(e) =>
-                  setForm({ ...form, fiscalYearStartMonth: Number(e.target.value) })
-                }
+                onChange={(e) => setForm({ ...form, fiscalYearStartMonth: Number(e.target.value) })}
               />
             </div>
             <div>
@@ -143,9 +141,7 @@ const Settings: React.FC = () => {
                 min={0}
                 step={0.05}
                 value={form.overtimeMultiplier}
-                onChange={(e) =>
-                  setForm({ ...form, overtimeMultiplier: Number(e.target.value) })
-                }
+                onChange={(e) => setForm({ ...form, overtimeMultiplier: Number(e.target.value) })}
               />
             </div>
             <div>

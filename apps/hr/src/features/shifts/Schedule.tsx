@@ -192,9 +192,12 @@ const Schedule: React.FC = () => {
                 icon={<Send size={13} />}
                 disabled={!locationId || publish.isPending}
                 onClick={() =>
-                  publish.mutate({ weekStart: dayStr(weekStart), locationId }, {
-                    onSuccess: () => toast.success('Week published'),
-                  })
+                  publish.mutate(
+                    { weekStart: dayStr(weekStart), locationId },
+                    {
+                      onSuccess: () => toast.success('Week published'),
+                    }
+                  )
                 }
               >
                 Publish week

@@ -54,9 +54,7 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
       return;
     }
     setErrors({});
-    const userIdExists = existingEmployees?.employees?.some(
-      (e) => e.userId === result.data.userId
-    );
+    const userIdExists = existingEmployees?.employees?.some((e) => e.userId === result.data.userId);
     if (userIdExists) {
       toast.error(t('employees.form.duplicateUserId'));
       return;

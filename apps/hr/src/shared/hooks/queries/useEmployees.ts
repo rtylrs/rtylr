@@ -146,8 +146,7 @@ export const decodeEmployee = (value: unknown): EmployeeRecord => {
     probationEndDate:
       String(valueOf(row, 'probation_end_date', 'probationEndDate') ?? '') || undefined,
     endDate: String(valueOf(row, 'end_date', 'endDate') ?? '') || undefined,
-    terminationDate:
-      String(valueOf(row, 'termination_date', 'terminationDate') ?? '') || undefined,
+    terminationDate: String(valueOf(row, 'termination_date', 'terminationDate') ?? '') || undefined,
     address: String(valueOf(row, 'address', 'address') ?? ''),
     emergencyContactName: String(
       valueOf(row, 'emergency_contact_name', 'emergencyContactName') ?? ''
@@ -161,9 +160,7 @@ export const decodeEmployee = (value: unknown): EmployeeRecord => {
   };
 };
 
-const encodeEmployeePayload = (
-  data: Partial<CreateEmployeePayload>
-): Record<string, unknown> => {
+const encodeEmployeePayload = (data: Partial<CreateEmployeePayload>): Record<string, unknown> => {
   const row: Record<string, unknown> = {};
   const set = (key: string, value: unknown): void => {
     if (value !== undefined) row[key] = value;

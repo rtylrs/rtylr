@@ -176,8 +176,7 @@ export function useUpdateInvoiceStatus() {
     mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }) =>
       invoicesClient.updateInvoiceStatus({ id, body: { status: STATUS_TO_API[status] } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
-    onError: (error) =>
-      toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 

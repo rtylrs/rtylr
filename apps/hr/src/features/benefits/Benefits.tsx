@@ -51,10 +51,7 @@ const Benefits: React.FC = () => {
                   plan={p}
                   enrolled={enrolled}
                   onEnroll={() =>
-                    enroll.mutate(
-                      { planId: p.id },
-                      { onSuccess: () => toast.success('Enrolled') }
-                    )
+                    enroll.mutate({ planId: p.id }, { onSuccess: () => toast.success('Enrolled') })
                   }
                 />
               );

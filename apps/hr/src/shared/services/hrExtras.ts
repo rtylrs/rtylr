@@ -406,8 +406,7 @@ export const hrExtras = {
 
   // Training
   listCourses: () => safe.get<TrainingCourse[]>('/hr/training', { params: { type: 'courses' } }),
-  listTrainingProgress: () =>
-    safe.get<unknown>('/hr/training/progress'),
+  listTrainingProgress: () => safe.get<unknown>('/hr/training/progress'),
   updateTrainingProgress: (id: number, progress: number) =>
     safe.get<{ success: boolean }>('/hr/training', {
       params: { id, progress, action: 'update-progress' },
@@ -451,8 +450,7 @@ export const hrExtras = {
       staff_id: staffId,
       type: type.toLowerCase(),
     }),
-  endBreak: (id: number) =>
-    safe.post<{ break: BreakLog }>(`/hr/shift/v1/breaks/${id}/end`, {}),
+  endBreak: (id: number) => safe.post<{ break: BreakLog }>(`/hr/shift/v1/breaks/${id}/end`, {}),
 
   // Overtime
   listOvertimeAlerts: () =>

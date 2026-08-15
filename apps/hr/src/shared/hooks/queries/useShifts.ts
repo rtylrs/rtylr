@@ -148,12 +148,13 @@ export const usePublishRoster = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: string | { weekStart: string; locationId?: number }): Promise<void> => {
+    mutationFn: async (
+      data: string | { weekStart: string; locationId?: number }
+    ): Promise<void> => {
       const request = typeof data === 'string' ? { weekStart: data } : data;
       await shiftClient.publishRoster({
         weekStart: request.weekStart,
-        locationId:
-          request.locationId !== undefined ? String(request.locationId) : undefined,
+        locationId: request.locationId !== undefined ? String(request.locationId) : undefined,
       });
     },
     onSuccess: () => {
