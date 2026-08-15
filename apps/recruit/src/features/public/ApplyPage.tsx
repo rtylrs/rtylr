@@ -58,6 +58,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   }
 
   const [consented, setConsented] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
 
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [uploadedKey, setUploadedKey] = useState<string | null>(null);
@@ -125,6 +126,10 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (honeypot.trim() !== '') {
+      setDone(true);
+      return;
+    }
     // Client-side required check before hitting the API - better UX
     // than a round-trip 400. The backend still accepts whatever it's
     // given since we can't yet validate kind-specific rules
@@ -214,6 +219,16 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-5">
+          <div style={{ display: 'none' }} aria-hidden="true">
+            <input
+              type="text"
+              name="website_url_hp"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
           <Field label="Full name" required>
             <input
               required
