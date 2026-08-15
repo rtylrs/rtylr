@@ -367,7 +367,7 @@ const SectionEditor: React.FC<{
     } catch {
       setItems([]);
     }
-  }, [section]);
+  }, [section.id]);
 
   function save() {
     onSave({
