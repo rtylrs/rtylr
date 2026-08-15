@@ -1,8 +1,19 @@
 import axios from 'axios';
 import i18next from 'i18next';
+import { resolveApiBase } from '@voxire/config';
 import { getCookie } from './cookies';
 
-const getBaseUrl = (): string => import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/';
+const getBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_POS_API_URL ?? import.meta.env.VITE_API_URL;
+  if (envUrl) return envUrl.replace(/\/$/, '') + '/';
+  try {
+    const resolved = resolveApiBase();
+    if (resolved) return resolved.replace(/\/$/, '') + '/';
+  } catch {
+    // ignore lookup error
+  }
+  return 'https://api.voxire.com/';
+};
 
 const api = axios.create({
   baseURL: getBaseUrl(),
