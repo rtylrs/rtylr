@@ -4,6 +4,9 @@
   },
   "dashboard": {
     "title": "Business Overview",
+    "caretAskBar": {
+      "placeholder": "Ask Caret anything about your business…"
+    },
     "cards": {
       "revenue": "Revenue (MTD)",
       "customers": "Customers",
