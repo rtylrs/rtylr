@@ -112,10 +112,7 @@ const InvoiceDetail: React.FC = () => {
             description: it.description ?? '',
             quantity: it.quantity ?? 0,
             unitPrice: it.unitPrice ?? 0,
-            taxRate:
-              (it as { taxRate?: number; tax_rate?: number }).taxRate ??
-              (it as { taxRate?: number; tax_rate?: number }).tax_rate ??
-              0,
+            taxRate: it.taxRate ?? 0,
           }))}
           notes={invoice.notes}
           discount={invoice.discount}
