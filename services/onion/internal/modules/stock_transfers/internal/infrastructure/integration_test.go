@@ -214,6 +214,16 @@ func TestUpdateStockTransferStatus_ChangesToCompleted(t *testing.T) {
 	t.Fatalf("updated stock transfer id=%d not found", id)
 }
 
+func TestUpdateStockTransferStatus_UnknownID_ReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	err := repo.UpdateStockTransferStatus(context.Background(), testutil.BusinessID, 999999999, domain.StockTransferStatusDraft)
+	if !errors.Is(err, domain.ErrStockTransferNotFound) {
+		t.Fatalf("UpdateStockTransferStatus unknown ID error = %v, want ErrStockTransferNotFound", err)
+	}
+}
+
 func TestReceivedStockTransfer_CannotBeReopenedOrMovedAgain(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

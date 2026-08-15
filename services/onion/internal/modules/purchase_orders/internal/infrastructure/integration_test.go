@@ -222,6 +222,16 @@ func TestUpdatePurchaseOrderStatus_UpdatesToCancelled(t *testing.T) {
 	}
 }
 
+func TestUpdatePurchaseOrderStatus_UnknownID_ReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	err := repo.UpdatePurchaseOrderStatus(context.Background(), testutil.BusinessID, 999999999, string(domain.POStatusCancelled))
+	if !errors.Is(err, domain.ErrPurchaseOrderNotFound) {
+		t.Fatalf("UpdatePurchaseOrderStatus unknown ID error = %v, want ErrPurchaseOrderNotFound", err)
+	}
+}
+
 func TestListPurchaseOrders_FilterByStatus(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

@@ -228,13 +228,31 @@ func validateStockTransferReferences(ctx context.Context, qtx *sqlc.Queries, bus
 func (r *Repository) UpdateStockTransferStatus(ctx context.Context, businessID, id int64, status domain.StockTransferStatus) error {
 	// Only 'received' moves stock; other transitions are a plain status update.
 	if status != domain.StockTransferStatusReceived {
-		if err := r.queries.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
+		result, err := r.queries.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
 			Status:     sqlc.NullErpStockTransfersStatus{ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(status), Valid: true},
 			BusinessID: businessID,
 			ID:         id,
-		}); err != nil {
+		})
+		if err != nil {
 			logger.Ctx(ctx).Error("Failed to update stock transfer status", logger.Error(err))
 			return err
+		}
+		changed, err := statusUpdateChanged(result)
+		if err != nil {
+			logger.Ctx(ctx).Error("Failed to inspect stock transfer status update", logger.Error(err))
+			return err
+		}
+		if !changed {
+			_, err = r.queries.GetStockTransferForUpdate(ctx, sqlc.GetStockTransferForUpdateParams{
+				BusinessID: businessID,
+				ID:         id,
+			})
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrStockTransferNotFound
+			}
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}
@@ -351,7 +369,7 @@ func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64) 
 		}
 	}
 
-	if err = qtx.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
+	if _, err = qtx.UpdateStockTransferStatus(ctx, sqlc.UpdateStockTransferStatusParams{
 		Status:     sqlc.NullErpStockTransfersStatus{ErpStockTransfersStatus: sqlc.ErpStockTransfersStatus(domain.StockTransferStatusReceived), Valid: true},
 		BusinessID: businessID,
 		ID:         id,

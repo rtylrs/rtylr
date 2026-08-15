@@ -275,11 +275,20 @@ func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, businessID, 
 	}
 
 	if status == string(domain.POStatusReceived) {
-		err = r.queries.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{
+		result, resultErr := r.queries.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{
 			Status:     statusVal,
 			BusinessID: businessID,
 			ID:         id,
 		})
+		if resultErr == nil {
+			changed, changedErr := statusUpdateChanged(result)
+			if changedErr != nil {
+				resultErr = changedErr
+			} else if !changed {
+				_, resultErr = r.GetPurchaseOrderStatus(ctx, businessID, id)
+			}
+		}
+		err = resultErr
 	} else {
 		result, resultErr := r.queries.UpdatePurchaseOrderStatus(ctx, sqlc.UpdatePurchaseOrderStatusParams{
 			Status:     statusVal,
@@ -287,9 +296,10 @@ func (r *Repository) UpdatePurchaseOrderStatus(ctx context.Context, businessID, 
 			ID:         id,
 		})
 		if resultErr == nil {
-			if affected, affectedErr := result.RowsAffected(); affectedErr != nil {
-				resultErr = affectedErr
-			} else if affected == 0 {
+			changed, changedErr := statusUpdateChanged(result)
+			if changedErr != nil {
+				resultErr = changedErr
+			} else if !changed {
 				currentStatus, statusErr := r.GetPurchaseOrderStatus(ctx, businessID, id)
 				if statusErr != nil {
 					resultErr = statusErr
@@ -457,7 +467,7 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		nextStatus = domain.POStatusReceived
 	}
 	if nextStatus == domain.POStatusReceived {
-		err = qtx.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{Status: sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(nextStatus), Valid: true}, BusinessID: businessID, ID: poID})
+		_, err = qtx.UpdatePurchaseOrderStatusReceived(ctx, sqlc.UpdatePurchaseOrderStatusReceivedParams{Status: sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(nextStatus), Valid: true}, BusinessID: businessID, ID: poID})
 	} else {
 		err = qtx.UpdatePurchaseOrderStatusPartial(ctx, sqlc.UpdatePurchaseOrderStatusPartialParams{Status: sqlc.NullErpPurchaseOrdersStatus{ErpPurchaseOrdersStatus: sqlc.ErpPurchaseOrdersStatus(nextStatus), Valid: true}, BusinessID: businessID, ID: poID})
 	}

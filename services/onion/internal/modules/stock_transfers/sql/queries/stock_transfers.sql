@@ -37,7 +37,7 @@ SELECT id FROM erp_products WHERE business_id = ? AND id = ?;
 INSERT INTO erp_stock_transfer_items (transfer_id, product_id, quantity)
 VALUES (?, ?, ?);
 
--- name: UpdateStockTransferStatus :exec
+-- name: UpdateStockTransferStatus :execresult
 UPDATE erp_stock_transfers
 SET status = ?
 WHERE business_id = ? AND id = ?

@@ -40,6 +40,19 @@ func TestListStockTakes_WrongOwner_ReturnsEmpty(t *testing.T) {
 	}
 }
 
+func TestUpdateStockTake_UnknownID_ReturnsNotFound(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+
+	err := repo.UpdateStockTake(context.Background(), testutil.BusinessID, domain.StockTakeUpdateInput{
+		ID:     999999999,
+		Status: domain.StockTakeStatusDraft,
+	})
+	if !errors.Is(err, domain.ErrStockTakeNotFound) {
+		t.Fatalf("UpdateStockTake unknown ID error = %v, want ErrStockTakeNotFound", err)
+	}
+}
+
 func TestCreateStockTake_ReturnsInsertedID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

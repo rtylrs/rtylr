@@ -47,7 +47,7 @@ UPDATE erp_purchase_orders
 SET status = ?
 WHERE business_id = ? AND id = ? AND (status IS NULL OR status <> 'received');
 
--- name: UpdatePurchaseOrderStatusReceived :exec
+-- name: UpdatePurchaseOrderStatusReceived :execresult
 UPDATE erp_purchase_orders SET status = ?, received_at = NOW() WHERE business_id = ? AND id = ?;
 
 -- name: UpdatePurchaseOrderStatusPartial :exec

@@ -219,29 +219,22 @@ func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, inpu
 
 	qtx := r.queries.WithTx(tx)
 
-	// When completing a stock take we reconcile on-hand stock to the counted
-	// quantities (and ledger the variance). Lock the row first and capture the
-	// prior status so a repeated "complete" is a no-op rather than re-applying
-	// (and double-ledgering) the same counts.
-	alreadyCompleted := false
-	var warehouseID sql.NullInt64
-	if input.Status == domain.StockTakeStatusCompleted {
-		var prior sqlc.GetStockTakeStatusForUpdateRow
-		prior, err = qtx.GetStockTakeStatusForUpdate(ctx, sqlc.GetStockTakeStatusForUpdateParams{
-			BusinessID: businessID,
-			ID:         input.ID,
-		})
-		if errors.Is(err, sql.ErrNoRows) {
-			err = domain.ErrStockTakeNotFound
-			return err
-		}
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to lock stock take for completion", logger.Error(err))
-			return err
-		}
-		warehouseID = prior.WarehouseID
-		alreadyCompleted = prior.Status.Valid && prior.Status.ErpStockTakesStatus == sqlc.ErpStockTakesStatus(domain.StockTakeStatusCompleted)
+	// Lock the row before any status update so unknown IDs fail closed. This
+	// also lets repeated completion requests remain idempotent when MySQL
+	// reports zero changed rows for an unchanged status.
+	prior, err := qtx.GetStockTakeStatusForUpdate(ctx, sqlc.GetStockTakeStatusForUpdateParams{
+		BusinessID: businessID,
+		ID:         input.ID,
+	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrStockTakeNotFound
 	}
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to lock stock take", logger.Error(err))
+		return err
+	}
+	alreadyCompleted := prior.Status.Valid && prior.Status.ErpStockTakesStatus == sqlc.ErpStockTakesStatus(domain.StockTakeStatusCompleted)
+	warehouseID := prior.WarehouseID
 
 	statusVal := sqlc.NullErpStockTakesStatus{
 		ErpStockTakesStatus: sqlc.ErpStockTakesStatus(input.Status),
