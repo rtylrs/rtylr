@@ -139,6 +139,11 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       }
     }
 
+    if (customization.requireConsent && !consented) {
+      toast.error('You must agree to data processing to apply');
+      return;
+    }
+
     // Prefer the uploaded-to-R2 key; fall back to the manually typed
     // URL for candidates who'd rather link out (Drive, personal site).
     const resumeRef = uploadedKey ?? (resumeUrl || undefined);
@@ -154,6 +159,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
         resumeUrl: resumeRef,
         coverLetter: coverLetter || undefined,
         answersJson,
+        consented,
       },
       {
         onSuccess: () => {
