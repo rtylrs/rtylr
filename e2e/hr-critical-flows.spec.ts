@@ -3,50 +3,137 @@ import { test, expect, type Page, type Route } from './fixtures';
 const HR_URL = process.env.HR_URL ?? 'http://localhost:5180';
 const API = 'http://localhost:9999';
 
-const USER = { id: 1, email: 'hr-admin@acme.test', fullName: 'HR Admin', role: 'hr_admin', apps: ['hr'], planSlug: 'pro' };
+const USER = {
+  id: 1,
+  email: 'hr-admin@acme.test',
+  fullName: 'HR Admin',
+  role: 'hr_admin',
+  apps: ['hr'],
+  planSlug: 'pro',
+};
 
 async function installStubs(page: Page): Promise<void> {
   await page.route(`${API}/hr/**`, (route: Route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
   );
   await page.route(`${API}/subscriptions/**`, (route: Route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ subscription: null, billing: null }) })
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ subscription: null, billing: null }),
+    })
   );
   await page.route(`${API}/hub/user/v1/users/me`, (route: Route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(USER) })
   );
   await page.route(`${API}/hr/config`, (route: Route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ config: {
-      id: 1, setup_completed_at: '2026-01-01T00:00:00Z', currency: 'USD', weekly_hours: 40,
-      payroll_enabled: true, payroll_configured: true, payroll_period: 'monthly',
-    } }) })
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        config: {
+          id: 1,
+          setup_completed_at: '2026-01-01T00:00:00Z',
+          currency: 'USD',
+          weekly_hours: 40,
+          payroll_enabled: true,
+          payroll_configured: true,
+          payroll_period: 'monthly',
+        },
+      }),
+    })
   );
   await page.route(`${API}/hr/dashboard/v1/dashboard`, (route: Route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
-      totalStaff: 1, onShiftToday: 0, openPositions: 0, monthlyPayroll: 0, recentActivity: [],
-      todayAtGlance: { shiftsScheduled: 0, newApplications: 0, pendingApprovals: 0 },
-      config: { currency: 'USD', weeklyHours: 40, payrollConfigured: true, payrollEnabled: true },
-    }) })
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        totalStaff: 1,
+        onShiftToday: 0,
+        openPositions: 0,
+        monthlyPayroll: 0,
+        recentActivity: [],
+        todayAtGlance: { shiftsScheduled: 0, newApplications: 0, pendingApprovals: 0 },
+        config: { currency: 'USD', weeklyHours: 40, payrollConfigured: true, payrollEnabled: true },
+      }),
+    })
   );
   await page.route(`${API}/hr/payroll/runs`, (route: Route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ runs: [
-      { id: 7, period_start: '2026-08-01', period_end: '2026-08-31', status: 'approved', total_gross: 12000, total_net: 9600, entries: [{ id: 1 }] },
-    ], total: 1 }) })
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        runs: [
+          {
+            id: 7,
+            period_start: '2026-08-01',
+            period_end: '2026-08-31',
+            status: 'approved',
+            total_gross: 12000,
+            total_net: 9600,
+            entries: [{ id: 1 }],
+          },
+        ],
+        total: 1,
+      }),
+    })
   );
   await page.route(`${API}/hr/leave/v1/balances`, (route: Route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ balances: [
-      { leave_type_id: 3, entitled_days: 20, used_days: 5, pending_days: 2, remaining_days: 13 },
-    ] }) })
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        balances: [
+          {
+            leave_type_id: 3,
+            entitled_days: 20,
+            used_days: 5,
+            pending_days: 2,
+            remaining_days: 13,
+          },
+        ],
+      }),
+    })
   );
   await page.route(`${API}/hr/time-entry/v1/timesheets**`, (route: Route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ timesheets: [
-      { id: 12, employee_id: 42, period_start: '2026-08-03', period_end: '2026-08-09', total_minutes: 2400, entries: [{ id: 1 }], status: 'submitted' },
-    ], total: 1 }) })
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        timesheets: [
+          {
+            id: 12,
+            employee_id: 42,
+            period_start: '2026-08-03',
+            period_end: '2026-08-09',
+            total_minutes: 2400,
+            entries: [{ id: 1 }],
+            status: 'submitted',
+          },
+        ],
+        total: 1,
+      }),
+    })
   );
   await page.route(`${API}/hr/timesheets`, (route: Route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ timesheets: [
-      { id: 12, employee_id: 42, period_start: '2026-08-03', period_end: '2026-08-09', total_minutes: 2400, entries: [{ id: 1 }], status: 'submitted' },
-    ], total: 1 }) })
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        timesheets: [
+          {
+            id: 12,
+            employee_id: 42,
+            period_start: '2026-08-03',
+            period_end: '2026-08-09',
+            total_minutes: 2400,
+            entries: [{ id: 1 }],
+            status: 'submitted',
+          },
+        ],
+        total: 1,
+      }),
+    })
   );
 }
 

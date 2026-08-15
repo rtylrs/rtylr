@@ -98,10 +98,7 @@ const Receiving: React.FC = () => {
       className="w-full min-w-0 space-y-5"
     >
       <HelmetContainer title={`${t('receiving.title')} · rtylr`} />
-      <PageHeader
-        title={t('receiving.title')}
-        description={t('receiving.description')}
-      />
+      <PageHeader title={t('receiving.title')} description={t('receiving.description')} />
 
       {isLoading ? (
         <Skeleton className="h-40 w-full rounded-xl" />
@@ -223,7 +220,10 @@ const Receiving: React.FC = () => {
                   PO-{o.id} / {supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`}
                 </p>
                 <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-                  {t('receiving.orderSummary', { count: (o.items ?? []).length, date: formatDate(o.expectedDelivery ?? '') })}
+                  {t('receiving.orderSummary', {
+                    count: (o.items ?? []).length,
+                    date: formatDate(o.expectedDelivery ?? ''),
+                  })}
                 </p>
               </div>
               <span

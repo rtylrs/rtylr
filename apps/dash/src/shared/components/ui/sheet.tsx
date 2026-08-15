@@ -77,6 +77,7 @@ const SheetContent: React.FC<SheetContentProps> = ({ children, className, side =
         }}
       >
         <button
+          aria-label="Close panel"
           className="absolute right-4 top-4 rounded-lg p-1 text-gray-400 hover:text-gray-600 hover:bg-black/5 transition-colors"
           onClick={() => setOpen(false)}
         >

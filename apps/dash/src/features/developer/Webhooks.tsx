@@ -48,6 +48,9 @@ const Webhooks: React.FC = () => {
   const [events, setEvents] = useState<string[]>([]);
   const [toDelete, setToDelete] = useState<Webhook | null>(null);
 
+  const [createdSecret, setCreatedSecret] = useState<string | null>(null);
+  const [copiedSecret, setCopiedSecret] = useState(false);
+
   const submitCreate = async () => {
     if (!url.trim()) {
       toast.error('Webhook URL is required');
@@ -58,10 +61,15 @@ const Webhooks: React.FC = () => {
       return;
     }
     try {
-      await create.mutateAsync({ url, events });
+      const res = await create.mutateAsync({ url, events });
       setUrl('');
       setEvents([]);
       setCreateOpen(false);
+      if (res?.secret) {
+        setCreatedSecret(res.secret);
+      } else {
+        toast.success('Webhook created');
+      }
     } catch {
       // onError in hook handles toast
     }
@@ -179,6 +187,50 @@ const Webhooks: React.FC = () => {
               >
                 Create webhook
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={!!createdSecret} onOpenChange={(open) => !open && setCreatedSecret(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Save your webhook signing secret</DialogTitle>
+              <DialogDescription>
+                This secret is used to verify signature headers (`X-Signature-256`) sent with
+                webhook requests. It will only be shown once.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-2">
+              <Label htmlFor="wh-secret-display">Signing Secret</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="wh-secret-display"
+                  readOnly
+                  value={createdSecret || ''}
+                  className="font-mono text-xs"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    if (createdSecret) {
+                      try {
+                        await navigator.clipboard.writeText(createdSecret);
+                        setCopiedSecret(true);
+                        toast.success('Signing secret copied to clipboard');
+                        setTimeout(() => setCopiedSecret(false), 2000);
+                      } catch {
+                        toast.error('Failed to copy signing secret');
+                      }
+                    }
+                  }}
+                >
+                  {copiedSecret ? 'Copied' : 'Copy'}
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setCreatedSecret(null)}>Done</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

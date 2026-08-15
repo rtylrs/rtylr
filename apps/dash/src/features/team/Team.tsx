@@ -277,7 +277,7 @@ const Team: React.FC = (): React.JSX.Element => {
 
         {/* Member list */}
         <div
-          className="rounded-xl"
+          className="rounded-xl overflow-hidden"
           style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
         >
           {isLoading ? (
@@ -296,199 +296,210 @@ const Team: React.FC = (): React.JSX.Element => {
             </div>
           ) : (
             <>
-              {/* Header */}
-              <div
-                className="grid grid-cols-12 gap-3 px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider"
-                style={{
-                  color: 'var(--dash-text-dim)',
-                  borderBottom: '1px solid var(--dash-border)',
-                }}
-              >
-                <div className="col-span-1 flex items-center">
-                  <input
-                    type="checkbox"
-                    aria-label="Select all on this page"
-                    checked={allPageSelected}
-                    onChange={toggleAllPage}
-                    style={{ accentColor: '#4583C4' }}
-                  />
-                </div>
-                <div className="col-span-3">Member</div>
-                <div className="col-span-2">Role</div>
-                <div className="col-span-4">Licenses</div>
-                <div className="col-span-1">Status</div>
-                <div className="col-span-1"></div>
-              </div>
-
-              {/* Rows */}
-              {paged.map((m) => {
-                const apps = m.apps ?? [];
-                const isChecked = selected.has(m.id);
-                return (
+              <div className="overflow-x-auto min-w-full">
+                <div className="min-w-[680px]">
+                  {/* Header */}
                   <div
-                    key={m.id}
-                    className="grid grid-cols-12 gap-3 items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)] cursor-pointer"
-                    style={{ borderBottom: '1px solid var(--dash-border)' }}
-                    onClick={() => navigate({ to: `/team/${m.id}` })}
+                    className="grid grid-cols-12 gap-3 px-5 py-2.5 text-[10px] font-semibold uppercase tracking-wider"
+                    style={{
+                      color: 'var(--dash-text-dim)',
+                      borderBottom: '1px solid var(--dash-border)',
+                    }}
                   >
-                    {/* Checkbox */}
-                    <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
+                    <div className="col-span-1 flex items-center">
                       <input
                         type="checkbox"
-                        aria-label={`Select ${m.name || m.email}`}
-                        checked={isChecked}
-                        onChange={() => toggleRow(m.id)}
+                        aria-label="Select all on this page"
+                        checked={allPageSelected}
+                        onChange={toggleAllPage}
                         style={{ accentColor: '#4583C4' }}
                       />
                     </div>
+                    <div className="col-span-3">Member</div>
+                    <div className="col-span-2">Role</div>
+                    <div className="col-span-4">Licenses</div>
+                    <div className="col-span-1">Status</div>
+                    <div className="col-span-1"></div>
+                  </div>
 
-                    {/* Name + email */}
-                    <div className="col-span-3 flex items-center gap-3 min-w-0">
+                  {/* Rows */}
+                  {paged.map((m) => {
+                    const apps = m.apps ?? [];
+                    const isChecked = selected.has(m.id);
+                    return (
                       <div
-                        className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
-                        style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                        key={m.id}
+                        className="grid grid-cols-12 gap-3 items-center px-5 py-3 transition-colors hover:bg-[var(--dash-hover)] cursor-pointer"
+                        style={{ borderBottom: '1px solid var(--dash-border)' }}
+                        onClick={() => navigate({ to: `/team/${m.id}` })}
                       >
-                        {(m.name || m.email || '?').charAt(0).toUpperCase()}
-                      </div>
-                      <div className="min-w-0">
-                        <p
-                          className="text-sm font-medium truncate"
-                          style={{ color: 'var(--dash-text)' }}
-                        >
-                          {m.name || m.email}
-                        </p>
-                        <p
-                          className="text-[11px] truncate"
-                          style={{ color: 'var(--dash-text-dim)' }}
-                        >
-                          {m.email}
-                        </p>
-                      </div>
-                    </div>
+                        {/* Checkbox */}
+                        <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            aria-label={`Select ${m.name || m.email}`}
+                            checked={isChecked}
+                            onChange={() => toggleRow(m.id)}
+                            style={{ accentColor: '#4583C4' }}
+                          />
+                        </div>
 
-                    {/* Role */}
-                    <div className="col-span-2">
-                      <RoleBadge role={m.role} />
-                    </div>
+                        {/* Name + email */}
+                        <div className="col-span-3 flex items-center gap-3 min-w-0">
+                          <div
+                            className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
+                            style={{ background: 'rgba(69,131,196,0.12)', color: '#4583C4' }}
+                          >
+                            {(m.name || m.email || '?').charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p
+                              className="text-sm font-medium truncate"
+                              style={{ color: 'var(--dash-text)' }}
+                            >
+                              {m.name || m.email}
+                            </p>
+                            <p
+                              className="text-[11px] truncate"
+                              style={{ color: 'var(--dash-text-dim)' }}
+                            >
+                              {m.email}
+                            </p>
+                          </div>
+                        </div>
 
-                    {/* App licenses */}
-                    <div className="col-span-4 flex items-center gap-1.5 flex-wrap">
-                      {apps.length === 0 ? (
-                        <span className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                          No licenses
-                        </span>
-                      ) : (
-                        apps.map((appId: string) => {
-                          const meta = APP_ICONS[appId];
-                          if (!meta)
-                            return (
-                              <span
-                                key={appId}
-                                className="text-[10px] px-1.5 py-0.5 rounded"
-                                style={{
-                                  background: 'var(--dash-hover)',
-                                  color: 'var(--dash-text-muted)',
+                        {/* Role */}
+                        <div className="col-span-2">
+                          <RoleBadge role={m.role} />
+                        </div>
+
+                        {/* App licenses */}
+                        <div className="col-span-4 flex items-center gap-1.5 flex-wrap">
+                          {apps.length === 0 ? (
+                            <span className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
+                              No licenses
+                            </span>
+                          ) : (
+                            apps.map((appId: string) => {
+                              const meta = APP_ICONS[appId];
+                              if (!meta)
+                                return (
+                                  <span
+                                    key={appId}
+                                    className="text-[10px] px-1.5 py-0.5 rounded"
+                                    style={{
+                                      background: 'var(--dash-hover)',
+                                      color: 'var(--dash-text-muted)',
+                                    }}
+                                  >
+                                    {appId}
+                                  </span>
+                                );
+                              const Icon = meta.icon;
+                              return (
+                                <div
+                                  key={appId}
+                                  className="h-7 w-7 rounded-lg flex items-center justify-center"
+                                  style={{ background: `${meta.color}12` }}
+                                  title={appId.toUpperCase()}
+                                >
+                                  <Icon size={14} style={{ color: meta.color }} />
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+
+                        {/* Status */}
+                        <div className="col-span-1 flex items-center gap-1.5">
+                          <span
+                            className="h-2 w-2 rounded-full inline-block shrink-0"
+                            style={{
+                              background:
+                                m.status === 'active' || m.isActive ? '#10b981' : '#ef4444',
+                            }}
+                          />
+                          <span
+                            className="text-[11px] capitalize truncate"
+                            style={{ color: 'var(--dash-text-muted)' }}
+                          >
+                            {m.status === 'active' || m.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="col-span-1 flex justify-end relative">
+                          <button
+                            aria-label="Member actions"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMenuOpen(menuOpen === m.id ? null : m.id);
+                            }}
+                            className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)]"
+                            style={{ color: 'var(--dash-text-muted)' }}
+                          >
+                            <MoreHorizontal size={14} />
+                          </button>
+
+                          {menuOpen === m.id && (
+                            <div
+                              className="absolute right-0 top-8 z-50 rounded-lg py-1 w-48 shadow-lg"
+                              style={{
+                                background: 'var(--dash-surface)',
+                                border: '1px solid var(--dash-border)',
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
+                                style={{ color: 'var(--dash-text-muted)' }}
+                                onClick={() => {
+                                  navigate({ to: `/team/${m.id}` });
+                                  setMenuOpen(null);
                                 }}
                               >
-                                {appId}
-                              </span>
-                            );
-                          const Icon = meta.icon;
-                          return (
-                            <div
-                              key={appId}
-                              className="h-7 w-7 rounded-lg flex items-center justify-center"
-                              style={{ background: `${meta.color}12` }}
-                              title={appId.toUpperCase()}
-                            >
-                              <Icon size={14} style={{ color: meta.color }} />
+                                <Pencil size={12} /> Edit member
+                              </button>
+                              <a
+                                href={`mailto:${m.email}`}
+                                className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
+                                style={{ color: 'var(--dash-text-muted)' }}
+                                onClick={() => setMenuOpen(null)}
+                              >
+                                <Mail size={12} /> Send email
+                              </a>
+                              <button
+                                className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
+                                style={{ color: 'var(--dash-text-muted)' }}
+                                onClick={() => {
+                                  navigate({ to: `/team/${m.id}` });
+                                  setMenuOpen(null);
+                                }}
+                              >
+                                <Shield size={12} /> Change role
+                              </button>
+                              <div
+                                className="my-1"
+                                style={{ borderTop: '1px solid var(--dash-border)' }}
+                              />
+                              <button
+                                className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
+                                style={{ color: '#ef4444' }}
+                                onClick={() => {
+                                  setConfirm(m);
+                                  setMenuOpen(null);
+                                }}
+                              >
+                                <UserX size={12} /> Deactivate
+                              </button>
                             </div>
-                          );
-                        })
-                      )}
-                    </div>
-
-                    {/* Status */}
-                    <div className="col-span-1">
-                      <span
-                        className="h-2 w-2 rounded-full inline-block"
-                        style={{
-                          background: m.status === 'active' || m.isActive ? '#10b981' : '#ef4444',
-                        }}
-                      />
-                    </div>
-
-                    {/* Actions */}
-                    <div className="col-span-1 flex justify-end relative">
-                      <button
-                        aria-label="Member actions"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setMenuOpen(menuOpen === m.id ? null : m.id);
-                        }}
-                        className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)]"
-                        style={{ color: 'var(--dash-text-muted)' }}
-                      >
-                        <MoreHorizontal size={14} />
-                      </button>
-
-                      {menuOpen === m.id && (
-                        <div
-                          className="absolute right-0 top-8 z-50 rounded-lg py-1 w-48 shadow-lg"
-                          style={{
-                            background: 'var(--dash-surface)',
-                            border: '1px solid var(--dash-border)',
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button
-                            className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
-                            style={{ color: 'var(--dash-text-muted)' }}
-                            onClick={() => {
-                              navigate({ to: `/team/${m.id}` });
-                              setMenuOpen(null);
-                            }}
-                          >
-                            <Pencil size={12} /> Edit member
-                          </button>
-                          <a
-                            href={`mailto:${m.email}`}
-                            className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
-                            style={{ color: 'var(--dash-text-muted)' }}
-                            onClick={() => setMenuOpen(null)}
-                          >
-                            <Mail size={12} /> Send email
-                          </a>
-                          <button
-                            className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
-                            style={{ color: 'var(--dash-text-muted)' }}
-                            onClick={() => {
-                              navigate({ to: `/team/${m.id}` });
-                              setMenuOpen(null);
-                            }}
-                          >
-                            <Shield size={12} /> Change role
-                          </button>
-                          <div
-                            className="my-1"
-                            style={{ borderTop: '1px solid var(--dash-border)' }}
-                          />
-                          <button
-                            className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
-                            style={{ color: '#ef4444' }}
-                            onClick={() => {
-                              setConfirm(m);
-                              setMenuOpen(null);
-                            }}
-                          >
-                            <UserX size={12} /> Deactivate
-                          </button>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
 
               {/* Pagination */}
               {totalPages > 1 && (

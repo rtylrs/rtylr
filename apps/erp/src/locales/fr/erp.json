@@ -133,20 +133,52 @@
     "comingSoon": "This action is not available yet."
   },
   "warehouses": {
-    "title": "Entrepôts", "new": "Nouvel entrepôt", "count": "{{count}} emplacements de stockage actifs",
-    "empty": { "title": "Aucun entrepôt", "description": "Créez votre premier entrepôt pour suivre les emplacements" },
-    "status": { "default": "Par défaut", "inactive": "Inactif" }, "delete": "Supprimer l'entrepôt",
-    "managedBy": "Géré par {{name}}", "capacity": "Capacité",
-    "deleteConfirm": { "title": "Supprimer l'entrepôt ?", "description": "Les produits affectés à cet entrepôt seront désaffectés." },
-    "fields": { "name": "Nom de l'entrepôt", "address": "Adresse (facultatif)", "manager": "Nom du responsable (facultatif)", "capacity": "Capacité (facultatif)" },
+    "title": "Entrepôts",
+    "new": "Nouvel entrepôt",
+    "count": "{{count}} emplacements de stockage actifs",
+    "empty": {
+      "title": "Aucun entrepôt",
+      "description": "Créez votre premier entrepôt pour suivre les emplacements"
+    },
+    "status": { "default": "Par défaut", "inactive": "Inactif" },
+    "delete": "Supprimer l'entrepôt",
+    "managedBy": "Géré par {{name}}",
+    "capacity": "Capacité",
+    "deleteConfirm": {
+      "title": "Supprimer l'entrepôt ?",
+      "description": "Les produits affectés à cet entrepôt seront désaffectés."
+    },
+    "fields": {
+      "name": "Nom de l'entrepôt",
+      "address": "Adresse (facultatif)",
+      "manager": "Nom du responsable (facultatif)",
+      "capacity": "Capacité (facultatif)"
+    },
     "validation": { "nameRequired": "Le nom de l'entrepôt est requis" },
-    "toast": { "created": "Entrepôt créé", "createFailed": "Échec de la création de l'entrepôt", "deleted": "Entrepôt supprimé" }
+    "toast": {
+      "created": "Entrepôt créé",
+      "createFailed": "Échec de la création de l'entrepôt",
+      "deleted": "Entrepôt supprimé"
+    }
   },
   "receiving": {
-    "title": "Réception des marchandises", "description": "Recevez les articles des commandes ouvertes", "receiveFor": "Recevoir les articles de BC-{{id}}",
-    "closeDetails": "Fermer les détails de réception", "expected": "Attendu : {{count}}", "ok": "OK", "markReceived": "Marquer reçu",
-    "empty": { "title": "Aucune commande à recevoir", "description": "Toutes les commandes ont été reçues" },
-    "orderSummary": "{{count}} articles / Prévu le {{date}}", "validation": { "overReceived": "Impossible de recevoir plus d'unités que commandé" },
-    "toast": { "completed": "Réception terminée, tous les articles reçus", "completedVariance": "Réception terminée avec un écart de {{count}} unités", "updateFailed": "Échec de la mise à jour de la réception" }
+    "title": "Réception des marchandises",
+    "description": "Recevez les articles des commandes ouvertes",
+    "receiveFor": "Recevoir les articles de BC-{{id}}",
+    "closeDetails": "Fermer les détails de réception",
+    "expected": "Attendu : {{count}}",
+    "ok": "OK",
+    "markReceived": "Marquer reçu",
+    "empty": {
+      "title": "Aucune commande à recevoir",
+      "description": "Toutes les commandes ont été reçues"
+    },
+    "orderSummary": "{{count}} articles / Prévu le {{date}}",
+    "validation": { "overReceived": "Impossible de recevoir plus d'unités que commandé" },
+    "toast": {
+      "completed": "Réception terminée, tous les articles reçus",
+      "completedVariance": "Réception terminée avec un écart de {{count}} unités",
+      "updateFailed": "Échec de la mise à jour de la réception"
+    }
   }
 }

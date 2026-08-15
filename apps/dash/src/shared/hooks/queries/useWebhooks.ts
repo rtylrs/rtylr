@@ -24,7 +24,7 @@ export const useCreateWebhook = () => {
   return useMutation({
     mutationFn: async (payload: { url: string; events: string[] }) => {
       const res = await unwrap(safe.post('/hub/developer/v1/webhooks', payload));
-      return res as { id: number; message?: string };
+      return res as { id: number; secret?: string; message?: string };
     },
     onSuccess: () => {
       toast.success('Webhook created');

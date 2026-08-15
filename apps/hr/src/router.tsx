@@ -260,7 +260,8 @@ const timeRoute = createRoute({
       <Suspense fallback={<PageLoader />}>
         <TimeLogging />
       </Suspense>,
-      (config) => config.timeTrackingModel === 'time_logging' || config.timeTrackingModel === 'both',
+      (config) =>
+        config.timeTrackingModel === 'time_logging' || config.timeTrackingModel === 'both',
       'hr:shifts'
     ),
 });
