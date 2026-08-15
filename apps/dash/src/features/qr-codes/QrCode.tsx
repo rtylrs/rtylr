@@ -81,7 +81,7 @@ function QrCode() {
       <HelmetContainer title="QR code generator · rtylr" />
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-primary">QR Code Generator</h1>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div
             className="rounded-xl p-5 border shadow-card space-y-4"
             style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
@@ -247,10 +247,11 @@ function QrCode() {
           >
             <div
               ref={qrRef}
-              className="flex flex-col items-center justify-center rounded-lg overflow-hidden"
+              className="flex flex-col items-center justify-center rounded-lg overflow-hidden max-w-full"
               style={{
                 width: qrOptions.size + 200,
                 height: qrOptions.size + 200,
+                maxWidth: '100%',
                 backgroundColor: qrOptions.backgroundColor || qrOptions.bgColor,
               }}
             >
