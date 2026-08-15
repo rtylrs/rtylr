@@ -8,7 +8,7 @@ import { Breadcrumbs, Button, Card, PageHeader, Select } from '../../shared/comp
 
 const REQUIRED = ['name', 'email', 'phone'];
 
-function parseCsv(input: string): string[][] {
+export function parseCsv(input: string): string[][] {
   const records: string[][] = [];
   let record: string[] = [];
   let field = '';
