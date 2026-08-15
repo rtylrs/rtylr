@@ -102,6 +102,11 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                             onClick={async () => {
                               try {
                                 const url = await fetchResumeURL(s.id);
+                                const parsed = new URL(url);
+                                if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+                                  toast.error('Invalid resume URL scheme');
+                                  return;
+                                }
                                 window.open(url, '_blank', 'noopener,noreferrer');
                               } catch {
                                 toast.error("Couldn't open resume");
