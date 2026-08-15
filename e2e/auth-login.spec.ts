@@ -75,7 +75,7 @@ test.describe('Auth login', () => {
     await expect(page.locator('input[type="password"]').first()).toBeVisible();
   });
 
-  test.skip('login form can submit and sets the token cookie', async ({ page }) => {
+  test('login form can submit and sets the token cookie', async ({ page }) => {
     await page.goto(AUTH_URL);
 
     // The login screen is behind a Suspense + plan-aware wrapper,

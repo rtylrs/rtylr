@@ -62,14 +62,21 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
   const emailError = getEmailError(email);
   const isValid = !emailError && password.length >= 8;
 
-  // If the request is missing required params, show an error immediately.
+  const isInvalidRequest =
+    !params.clientId ||
+    !params.redirectUri ||
+    !params.codeChallenge ||
+    !isAllowedOAuthRedirect(params.redirectUri);
+
+  // If the request is missing required params or uses an invalid redirect URI, block immediately.
   useEffect((): void => {
-    if (!params.clientId || !params.redirectUri || !params.codeChallenge) {
-      setError('Invalid authorization request - missing required parameters.');
+    if (isInvalidRequest) {
+      setError('Invalid authorization request — missing parameters or unauthorized redirect URI.');
     }
-  }, [params]);
+  }, [isInvalidRequest]);
 
   const handleLogin = (): void => {
+    if (isInvalidRequest) return;
     setError(null);
     loginMutation.mutate(
       { email, password },
