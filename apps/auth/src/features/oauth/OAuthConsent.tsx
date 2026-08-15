@@ -79,6 +79,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
   }, [isInvalidRequest]);
 
   const handleLogin = (): void => {
+    if (isInvalidRequest) return;
     setError(null);
     loginMutation.mutate(
       { email, password },

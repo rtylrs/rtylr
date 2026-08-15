@@ -25,14 +25,6 @@ export default defineConfig(() => ({
   resolve: {
     alias: {
       '@app': path.resolve(__dirname, './src'),
-      '@pages': path.resolve(__dirname, './src/pages'),
-      '@components': path.resolve(__dirname, './src/components'),
-      '@hooks': path.resolve(__dirname, './src/hooks'),
-      '@utils': path.resolve(__dirname, './src/utils'),
-      '@styles': path.resolve(__dirname, './src/styles'),
-      '@interfaces': path.resolve(__dirname, './src/interfaces'),
-      '@scss': path.resolve(__dirname, './src/scss/'),
-      '@root': path.resolve(__dirname, '../..'),
     },
     dedupe: ['react', 'react-dom', 'react/jsx-runtime', 'react-dom/client'],
   },
@@ -70,11 +62,7 @@ export default defineConfig(() => ({
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks(id: string): string | undefined {
-          if (
-            /node_modules\/(react|react-dom|react-router-dom|@tanstack\/react-router|zustand)\//.test(
-              id
-            )
-          ) {
+          if (/node_modules\/(react|react-dom|@tanstack\/react-router|zustand)\//.test(id)) {
             return 'react-vendor';
           }
           if (/node_modules\/(motion|lucide-react)\//.test(id)) {
@@ -86,14 +74,7 @@ export default defineConfig(() => ({
     },
   },
   optimizeDeps: {
-    include: [
-      'react',
-      'react-dom',
-      'react-router-dom',
-      'motion',
-      '@voxire/config',
-      '@voxire/utils',
-    ],
+    include: ['react', 'react-dom', 'motion', '@voxire/config', '@voxire/utils'],
     exclude: ['@voxire/components', '@voxire/ui', '@voxire/tailwind-config'],
   },
 }));

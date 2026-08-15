@@ -44,14 +44,16 @@ const VerifyEmail: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleResend = (): void => {
-    const email = params.get('email') ?? '';
-    if (!email) {
-      notify.error('No email address found to resend verification');
+  const [resendEmail, setResendEmail] = useState(params.get('email') ?? '');
+
+  const handleResend = (targetEmail?: string): void => {
+    const emailToUse = targetEmail || resendEmail || params.get('email') || '';
+    if (!emailToUse) {
+      notify.error('Please enter your email address to resend verification');
       return;
     }
     resendMutation.mutate(
-      { email },
+      { email: emailToUse },
       {
         onSuccess: () => notify.success('Verification email sent'),
         onError: () => notify.error('Failed to send verification email'),
@@ -102,13 +104,26 @@ const VerifyEmail: React.FC = () => {
             <p className="mt-4 text-sm text-red-600">
               This verification link is invalid or has expired.
             </p>
-            <div className="mt-6">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleResend();
+              }}
+              className="mt-6 space-y-3"
+            >
+              <input
+                type="email"
+                placeholder="Enter your email address"
+                value={resendEmail}
+                onChange={(e) => setResendEmail(e.target.value)}
+                required
+                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-base md:text-sm text-[#111] placeholder:text-[#999] outline-none focus:border-[#4583C4]"
+              />
               <Button
-                type="button"
+                type="submit"
                 variant="outline"
                 fullWidth
                 height={40}
-                onClick={handleResend}
                 loading={resendMutation.isPending}
               >
                 <span className="inline-flex items-center gap-2">
@@ -116,7 +131,7 @@ const VerifyEmail: React.FC = () => {
                   Resend verification email
                 </span>
               </Button>
-            </div>
+            </form>
           </>
         )}
 

@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { APP_URLS } from '@voxire/config';
 import type { GoogleAuthRequest } from '@voxire/voxie/common/auth/v1/types';
 import { useGoogleAuth } from '../../shared/hooks/useAuth';
-import { storageGet, storageRemove } from '../../shared/lib/storage';
+import { sessionStorageGet, sessionStorageRemove } from '../../shared/lib/storage';
 import { SOCIAL_AUTH_BUSINESS_NAME_KEY, SOCIAL_AUTH_REDIRECT_KEY } from '../../shared/lib/social';
 
 type KnownAppId = keyof typeof APP_URLS;
@@ -30,10 +30,10 @@ const Callback: React.FC = (): React.JSX.Element => {
       return;
     }
 
-    const redirectParam = storageGet(SOCIAL_AUTH_REDIRECT_KEY);
-    const businessName = storageGet(SOCIAL_AUTH_BUSINESS_NAME_KEY);
-    storageRemove(SOCIAL_AUTH_REDIRECT_KEY);
-    storageRemove(SOCIAL_AUTH_BUSINESS_NAME_KEY);
+    const redirectParam = sessionStorageGet(SOCIAL_AUTH_REDIRECT_KEY);
+    const businessName = sessionStorageGet(SOCIAL_AUTH_BUSINESS_NAME_KEY);
+    sessionStorageRemove(SOCIAL_AUTH_REDIRECT_KEY);
+    sessionStorageRemove(SOCIAL_AUTH_BUSINESS_NAME_KEY);
 
     const request: GoogleAuthRequest = {
       code,

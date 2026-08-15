@@ -105,7 +105,7 @@ const Automations: React.FC = () => {
               return (
                 <div
                   key={a.id}
-                  onClick={() => navigate({ to: `/automations/new?id=${a.id}` })}
+                  onClick={() => navigate({ to: '/automations/new', search: { id: a.id } })}
                   style={{
                     background: 'var(--hub-card)',
                     border: '1px solid var(--hub-border)',

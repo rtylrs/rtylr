@@ -98,65 +98,114 @@ export const loyaltyMemberSchema = z.object({
 export const loyaltyRewardSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(Number),
   name: z.string(),
-  description: z.string(),
-  pointsCost: z.number(),
-  category: z.string(),
-  stock: z.number().nullable(),
-  active: z.boolean(),
+  description: z.string().catch(''),
+  pointsCost: z.number().catch(0),
+  category: z.string().catch('general'),
+  stock: z
+    .union([z.number(), z.string(), z.null(), z.undefined()])
+    .transform((val) => {
+      if (val == null) return null;
+      const num = Number(val);
+      return Number.isNaN(num) ? null : num;
+    })
+    .nullable()
+    .catch(null),
+  active: z.boolean().catch(true),
   icon: z.string().nullable().optional(),
 });
 
 const legacyLoyaltyTierSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
+  id: z.union([z.string(), z.number()]).transform(Number).optional(),
+  tierId: z.union([z.string(), z.number()]).transform(Number).optional(),
+  tier_id: z.union([z.string(), z.number()]).transform(Number).optional(),
   name: z.string(),
-  threshold: z.number(),
-  multiplier: z.number(),
-  perks: z.array(z.string()).default([]),
-  color: z.string(),
+  threshold: z.number().optional(),
+  minPoints: z.number().optional(),
+  min_points: z.number().optional(),
+  multiplier: z.number().optional(),
+  discountPct: z.number().optional(),
+  discount_pct: z.number().optional(),
+  perks: z.union([z.string(), z.array(z.string())]).optional(),
+  color: z.string().optional(),
+  sortOrder: z.number().optional(),
+  sort_order: z.number().optional(),
 });
 
 const backendLoyaltyTierSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
+  id: z.union([z.string(), z.number()]).transform(Number).optional(),
+  tierId: z.union([z.string(), z.number()]).transform(Number).optional(),
+  tier_id: z.union([z.string(), z.number()]).transform(Number).optional(),
   name: z.string(),
-  minPoints: z.number().catch(0),
-  discountPct: z.number().catch(0),
+  minPoints: z.number().optional(),
+  min_points: z.number().optional(),
+  discountPct: z.number().optional(),
+  discount_pct: z.number().optional(),
   perks: z.union([z.string(), z.array(z.string())]).optional(),
-  sortOrder: z.number().catch(0),
+  sortOrder: z.number().optional(),
+  sort_order: z.number().optional(),
 });
+
+export interface LoyaltyTier {
+  id: number;
+  name: string;
+  threshold: number;
+  multiplier: number;
+  discountPct: number;
+  perks: string[];
+  color: string;
+  sortOrder: number;
+}
 
 export const loyaltyTierSchema = z
   .union([legacyLoyaltyTierSchema, backendLoyaltyTierSchema])
-  .transform((value) => {
-    if ('minPoints' in value) {
-      let perks: string[] = [];
-      if (Array.isArray(value.perks)) perks = value.perks;
-      if (typeof value.perks === 'string') {
-        try {
-          const parsed = JSON.parse(value.perks) as unknown;
-          if (Array.isArray(parsed))
-            perks = parsed.filter((item): item is string => typeof item === 'string');
-        } catch {
-          perks = value.perks ? [value.perks] : [];
-        }
+  .transform((value): LoyaltyTier => {
+    const minPoints =
+      'threshold' in value && value.threshold !== undefined
+        ? value.threshold
+        : (value.minPoints ?? value.min_points ?? 0);
+    const discountPct =
+      'multiplier' in value && value.multiplier !== undefined
+        ? value.multiplier
+        : (value.discountPct ?? value.discount_pct ?? 0);
+    const sortOrder =
+      'sortOrder' in value && value.sortOrder !== undefined
+        ? value.sortOrder
+        : (value.sort_order ?? 0);
+    let perks: string[] = [];
+    if (Array.isArray(value.perks)) perks = value.perks;
+    if (typeof value.perks === 'string') {
+      try {
+        const parsed = JSON.parse(value.perks) as unknown;
+        if (Array.isArray(parsed))
+          perks = parsed.filter((item): item is string => typeof item === 'string');
+      } catch {
+        perks = value.perks ? [value.perks] : [];
       }
-      const colors: Record<string, string> = {
-        Bronze: '#a16207',
-        Silver: '#64748b',
-        Gold: '#f59e0b',
-        Platinum: '#8b5cf6',
-      };
-      return {
-        id: value.id,
-        name: value.name,
-        threshold: value.minPoints,
-        multiplier: value.discountPct,
-        discountPct: value.discountPct,
-        perks,
-        color: colors[value.name] ?? '#3b82f6',
-        sortOrder: value.sortOrder,
-      };
     }
-    return value;
+    const colors: Record<string, string> = {
+      Bronze: '#a16207',
+      Silver: '#64748b',
+      Gold: '#f59e0b',
+      Platinum: '#8b5cf6',
+    };
+    const id =
+      'id' in value && value.id !== undefined
+        ? value.id
+        : 'tierId' in value && value.tierId !== undefined
+          ? value.tierId
+          : 'tier_id' in value && value.tier_id !== undefined
+            ? value.tier_id
+            : 0;
+    return {
+      id,
+      name: value.name,
+      threshold: minPoints,
+      multiplier: discountPct,
+      discountPct,
+      perks,
+      color: 'color' in value && value.color ? value.color : (colors[value.name] ?? '#3b82f6'),
+      sortOrder,
+    };
   });
 
 export interface LoyaltyConfig {
@@ -177,16 +226,6 @@ export interface LoyaltyConfig {
 export type LoyaltyTransaction = z.infer<typeof loyaltyTransactionSchema>;
 export type LoyaltyMember = z.infer<typeof loyaltyMemberSchema>;
 export type LoyaltyReward = z.infer<typeof loyaltyRewardSchema>;
-export interface LoyaltyTier {
-  id: number;
-  name: string;
-  threshold: number;
-  multiplier: number;
-  discountPct?: number;
-  perks: string[];
-  color: string;
-  sortOrder?: number;
-}
 
 // -- Domain constants ---------------------------------------------------------
 
@@ -220,7 +259,11 @@ export function isUpgradeTransaction(tx: LoyaltyTransaction): boolean {
 export function getTransactionLabel(type: LoyaltyTransaction['type']): string {
   if (type === 'earn') return 'Points Earned';
   if (type === 'redeem') return 'Points Redeemed';
-  return 'Tier Upgrade';
+  if (type === 'award') return 'Points Awarded';
+  if (type === 'adjust') return 'Points Adjusted';
+  if (type === 'expire') return 'Points Expired';
+  if (type === 'upgrade') return 'Tier Upgrade';
+  return String(type);
 }
 
 export function isActiveMember(member: LoyaltyMember, atRiskDays = 90): boolean {

@@ -7,9 +7,9 @@ const statementClient = createOneKitClient(StatementServiceClient, 'finance');
 
 // finance.statement.v1.GetBalanceSheet has no as-of-date param - it's always
 // the current point-in-time balance sheet.
-export function useBalanceSheet() {
+export function useBalanceSheet(asOfDate?: string) {
   return useQuery({
-    queryKey: ['balance-sheet'],
+    queryKey: ['balance-sheet', { asOfDate: asOfDate || 'today' }],
     queryFn: async () => {
       const res = await statementClient.getBalanceSheet({});
       return balanceSheetSchema.parse({
