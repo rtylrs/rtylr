@@ -52,6 +52,10 @@ const Checkout = (): React.JSX.Element => {
       setErrorMessage('Please enter your phone number.');
       return false;
     }
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMessage('Please enter a valid email address.');
+      return false;
+    }
     if (items.length === 0) {
       setErrorMessage('Your cart is empty.');
       return false;
