@@ -122,6 +122,7 @@ func (x *WorkType) GetUpdatedAt() string {
 type WorkDay struct {
 	Id             int64   `json:"id,omitempty"`
 	EmployeeId     int64   `json:"employee_id,omitempty"`
+	UserId         *int64  `json:"user_id,omitempty"`
 	Date           string  `json:"date,omitempty"`
 	Timezone       string  `json:"timezone,omitempty"`
 	WorkMode       string  `json:"work_mode,omitempty"`
@@ -194,6 +195,18 @@ func (x *WorkDay) GetEmployeeId() int64 {
 		return zero
 	}
 	return x.EmployeeId
+}
+
+func (x *WorkDay) GetUserId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.UserId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.UserId
 }
 
 func (x *WorkDay) GetDate() string {

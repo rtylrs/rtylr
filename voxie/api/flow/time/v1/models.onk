@@ -31,6 +31,11 @@ message WorkDay {
   id: int64
   /// employee_id is the person the day belongs to.
   employee_id: int64
+  /// user_id is the employee's auth user id, populated when the caller already
+  /// resolved it (the team view, which joins against workspace membership).
+  /// Callers reading their own day already know their own identity and get
+  /// this unset.
+  user_id: int64? @nullable
   /// date is the calendar day in the person's own timezone, as YYYY-MM-DD.
   date: string
   /// timezone is the IANA zone the day was recorded in. Stored per record because

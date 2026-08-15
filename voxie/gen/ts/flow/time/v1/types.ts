@@ -47,6 +47,7 @@ return violations;
 export interface WorkDay {
 id?: string;
 employeeId?: string;
+userId?: string;
 date?: string;
 timezone?: string;
 workMode?: string;
@@ -71,6 +72,7 @@ if (v === null || v === undefined) return v;
 return {
 id: v.id,
 employeeId: v.employee_id,
+userId: v.user_id,
 date: v.date,
 timezone: v.timezone,
 workMode: v.work_mode,
@@ -95,6 +97,7 @@ export function encodeWorkDay(v: WorkDay): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
+if (v.userId !== undefined) { out.user_id = v.userId; }
 if (v.date !== undefined) { out.date = v.date; }
 if (v.timezone !== undefined) { out.timezone = v.timezone; }
 if (v.workMode !== undefined) { out.work_mode = v.workMode; }
