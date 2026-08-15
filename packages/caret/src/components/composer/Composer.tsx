@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 
 import { X } from 'lucide-react';
 import { caretTokens, caretRadius } from '../../ui/tokens';
 import ModePicker from './ModePicker';
+import ApprovalPicker from './ApprovalPicker';
 import MicButton, { type VoiceInputStatus } from './MicButton';
 import AttachButton from './AttachButton';
 import SendButton from './SendButton';
@@ -18,6 +19,8 @@ export interface ComposerProps {
   onAttach?: (files: File[]) => void;
   placeholder?: string;
   autoFocus?: boolean;
+  /** 'lg' renders a roomier console for full-screen/home contexts. Defaults to 'md'. */
+  size?: 'md' | 'lg';
 }
 
 function voiceErrorMessage(error: string): string {
@@ -43,7 +46,9 @@ export const Composer: React.FC<ComposerProps> = ({
   onAttach,
   placeholder = 'Ask Caret anything…',
   autoFocus = true,
+  size = 'md',
 }) => {
+  const isLarge = size === 'lg';
   const [value, setValue] = useState('');
   const [slashCommandIndex, setSlashCommandIndex] = useState(0);
   const [voiceStatus, setVoiceStatus] = useState<VoiceInputStatus | null>(null);
@@ -130,11 +135,11 @@ export const Composer: React.FC<ComposerProps> = ({
     <div
       className="caret-composer"
       style={{
-        margin: '10px 10px 11px',
-        background: caretTokens.surfaceRaised,
+        margin: isLarge ? '0' : '10px 10px 11px',
+        background: isLarge ? caretTokens.surface : caretTokens.surfaceRaised,
         border: `1px solid ${caretTokens.border}`,
-        borderRadius: caretRadius.xl,
-        padding: '8px 8px 8px 12px',
+        borderRadius: isLarge ? 22 : caretRadius.xl,
+        padding: isLarge ? '8px 10px 8px 8px' : '8px 8px 8px 12px',
         display: 'flex',
         flexDirection: 'column',
         gap: 6,
@@ -263,11 +268,16 @@ export const Composer: React.FC<ComposerProps> = ({
         className="caret-composer-row"
         style={{
           display: 'flex',
-          alignItems: 'flex-end',
+          alignItems: isLarge ? 'center' : 'flex-end',
           minWidth: 0,
-          gap: 5,
+          gap: isLarge ? 8 : 5,
         }}
       >
+        {isLarge && (
+          <div style={{ flexShrink: 0 }}>
+            <ModePicker />
+          </div>
+        )}
         <textarea
           className="caret-composer-input"
           ref={taRef}
@@ -289,13 +299,13 @@ export const Composer: React.FC<ComposerProps> = ({
             border: 'none',
             outline: 'none',
             color: caretTokens.text,
-            fontSize: 14,
-            lineHeight: '20px',
-            padding: '6px 3px',
+            fontSize: isLarge ? 16 : 14,
+            lineHeight: isLarge ? '24px' : '20px',
+            padding: isLarge ? '10px 3px' : '6px 3px',
             fontFamily: 'inherit',
-            height: 32,
-            minHeight: 32,
-            maxHeight: 140,
+            height: isLarge ? 44 : 32,
+            minHeight: isLarge ? 44 : 32,
+            maxHeight: isLarge ? 200 : 140,
             overflowY: 'auto',
             boxSizing: 'border-box',
             display: 'block',
@@ -306,17 +316,18 @@ export const Composer: React.FC<ComposerProps> = ({
         />
         <div
           className="caret-composer-actions"
-          style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}
+          style={{ display: 'flex', alignItems: 'center', gap: isLarge ? 5 : 3, flexShrink: 0 }}
         >
-          <ModePicker compact />
+          {!isLarge && <ModePicker compact />}
+          <ApprovalPicker />
           {onAttach && <AttachButton onFiles={onAttach} />}
           {voiceEnabled && (
             <MicButton onTranscript={appendTranscript} onStatusChange={updateVoiceStatus} />
           )}
           {isStreaming ? (
-            <StopButton onStop={onStop} />
+            <StopButton onStop={onStop} size={size} />
           ) : (
-            <SendButton disabled={!value.trim()} onClick={send} />
+            <SendButton disabled={!value.trim()} onClick={send} size={size} />
           )}
         </div>
       </div>

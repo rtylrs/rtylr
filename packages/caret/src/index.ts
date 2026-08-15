@@ -13,7 +13,10 @@ export { default as MessageList } from './components/MessageList';
 export { default as MessageBubble } from './components/MessageBubble';
 export { default as MessageBlocks } from './components/MessageBlocks';
 export { default as MessageActions } from './components/MessageActions';
-export { default as EmptyState } from './components/EmptyState';
+export { default as WelcomeHero } from './components/WelcomeHero';
+export type { WelcomeHeroProps } from './components/WelcomeHero';
+export { default as IntroCards } from './components/IntroCards';
+export type { IntroCardsProps } from './components/IntroCards';
 export { default as SettingsPanel } from './components/SettingsPanel';
 export { default as ApprovalDialog } from './components/ApprovalDialog';
 

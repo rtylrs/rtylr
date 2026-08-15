@@ -1,17 +1,10 @@
 import React from 'react';
-import { Compass, Wand2, BarChart3, LifeBuoy } from 'lucide-react';
 import Menu from '../../ui/Menu';
 import Pill from '../../ui/Pill';
 import IconButton from '../../ui/IconButton';
 import { useCaretSettingsStore } from '../../stores/settingsStore';
-import { CARET_MODES, type CaretMode } from '../../types/mode';
-
-const MODE_ICON: Record<CaretMode, React.ReactNode> = {
-  ask: <Compass size={11} />,
-  agent: <Wand2 size={11} />,
-  analyst: <BarChart3 size={11} />,
-  support: <LifeBuoy size={11} />,
-};
+import { CARET_MODES } from '../../types/mode';
+import { CARET_MODE_ICONS as MODE_ICON } from '../../lib/modeIcons';
 
 export interface ModePickerProps {
   compact?: boolean;
