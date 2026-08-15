@@ -29,8 +29,13 @@ const EmailVerification = () => {
     verifyMutation
       .mutateAsync({ token })
       .then((r) => {
-        setMessage(r.message || 'Your email has been verified.');
-        setSuccess(true);
+        if (r?.verified === false) {
+          setMessage(r.message || 'Email verification failed. Please try again.');
+          setSuccess(false);
+        } else {
+          setMessage(r.message || 'Your email has been verified.');
+          setSuccess(true);
+        }
       })
       .catch(() => {
         setMessage('Email verification failed. Please try again.');
