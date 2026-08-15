@@ -16,6 +16,7 @@ type mockRepo struct {
 	createErr   error
 	createCalls int
 	postErr     error
+	payrollErr  error
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64, _, _ int32) ([]domain.JournalEntry, error) {
@@ -33,6 +34,10 @@ func (m *mockRepo) Create(_ context.Context, _, _ int64, _ domain.JournalEntryIn
 
 func (m *mockRepo) Post(_ context.Context, _, _ int64) error {
 	return m.postErr
+}
+
+func (m *mockRepo) PostPayrollJournal(_ context.Context, _ domain.PayrollJournalInput) error {
+	return m.payrollErr
 }
 
 func TestList_Delegates(t *testing.T) {
@@ -122,6 +127,42 @@ func TestPost_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
 	if err := s.Post(context.Background(), 1, 10); err != nil {
 		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestPostPayrollJournal_ValidatesBeforeRepository(t *testing.T) {
+	repo := &mockRepo{}
+	s := &Service{repo: repo}
+
+	err := s.PostPayrollJournal(context.Background(), domain.PayrollJournalInput{
+		OwnerID:     1,
+		BusinessID:  1,
+		RunID:       7,
+		PeriodStart: "2026-08-01",
+		PeriodEnd:   "2026-08-31",
+		TotalGross:  1000,
+		TotalNet:    1100,
+	})
+	if err == nil {
+		t.Fatal("expected invalid payroll journal error")
+	}
+}
+
+func TestPostPayrollJournal_PropagatesRepositoryError(t *testing.T) {
+	want := errors.New("journal unavailable")
+	s := &Service{repo: &mockRepo{payrollErr: want}}
+
+	err := s.PostPayrollJournal(context.Background(), domain.PayrollJournalInput{
+		OwnerID:     1,
+		BusinessID:  1,
+		RunID:       7,
+		PeriodStart: "2026-08-01",
+		PeriodEnd:   "2026-08-31",
+		TotalGross:  1000,
+		TotalNet:    900,
+	})
+	if !errors.Is(err, want) {
+		t.Fatalf("expected repository error %v, got %v", want, err)
 	}
 }
 

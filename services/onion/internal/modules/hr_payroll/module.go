@@ -64,6 +64,13 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 	}
 }
 
+// SetFinancePoster connects payroll exports to the central finance journal.
+// Keeping the dependency behind the domain interface prevents payroll from
+// depending on journal persistence details.
+func (m *Module) SetFinancePoster(p domain.FinanceJournalPoster) {
+	m.service.SetFinancePoster(p)
+}
+
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
 	routes.RegisterRoutes(ctx, router, m.service)
 }

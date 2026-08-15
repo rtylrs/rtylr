@@ -1,6 +1,10 @@
 package domain
 
-import "context"
+import (
+	"context"
+
+	"github.com/voxire/onion/internal/platform/financejournal"
+)
 
 type Repository interface {
 	// Payroll Config
@@ -53,21 +57,12 @@ type PermissionProvider interface {
 // expected to translate the call into the appropriate journal entries
 // (debit payroll expense, credit payable / cash) inside its own bounded
 // context. Implementations must be idempotent on (ownerID, runID).
-type FinanceJournalPoster interface {
-	PostPayrollJournal(ctx context.Context, entry PayrollJournalEntry) error
-}
+type FinanceJournalPoster = financejournal.PayrollJournalPoster
 
 // PayrollJournalEntry is the payload handed to the finance module when a
 // payroll run is exported. Money figures are passed in the currency stored
 // on the run record; finance is responsible for any conversion.
-type PayrollJournalEntry struct {
-	OwnerID     int64
-	RunID       int64
-	PeriodStart string
-	PeriodEnd   string
-	TotalGross  float64
-	TotalNet    float64
-}
+type PayrollJournalEntry = financejournal.PayrollJournalEntry
 
 // NotificationDispatcher lets the payroll service emit notifications without
 // depending on the notification module directly. Implementations should be

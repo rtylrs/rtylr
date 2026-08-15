@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/financejournal"
 )
 
 var (
@@ -72,6 +74,10 @@ type JournalLineInput struct {
 	Debit     float64 `json:"debit"`
 	Credit    float64 `json:"credit"`
 }
+
+// PayrollJournalInput is the finance-owned representation of a payroll export.
+// The repository turns it into one idempotent, posted double-entry record.
+type PayrollJournalInput = financejournal.PayrollJournalEntry
 
 // IsPosted reports whether the entry has been posted to the ledger.
 func (j *JournalEntry) IsPosted() bool {

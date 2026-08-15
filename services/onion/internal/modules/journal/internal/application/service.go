@@ -22,6 +22,7 @@ type repository interface {
 	Get(ctx context.Context, businessID, id int64) (domain.JournalEntry, error)
 	Create(ctx context.Context, ownerID, businessID int64, input domain.JournalEntryInput) (int64, error)
 	Post(ctx context.Context, businessID, id int64) error
+	PostPayrollJournal(ctx context.Context, input domain.PayrollJournalInput) error
 }
 
 type Service struct {
@@ -92,5 +93,35 @@ func (s *Service) Post(ctx context.Context, businessID, id int64) error {
 		return err
 	}
 	invalidateJournalScope(ctx, businessID)
+	return nil
+}
+
+func (s *Service) PostPayrollJournal(ctx context.Context, input domain.PayrollJournalInput) error {
+	if err := validatePayrollJournalInput(input); err != nil {
+		return err
+	}
+	if err := s.repo.PostPayrollJournal(ctx, input); err != nil {
+		return err
+	}
+	invalidateJournalScope(ctx, input.BusinessID)
+	return nil
+}
+
+func validatePayrollJournalInput(input domain.PayrollJournalInput) error {
+	if input.OwnerID <= 0 || input.BusinessID <= 0 || input.RunID <= 0 {
+		return fmt.Errorf("payroll journal owner, business, and run IDs must be positive")
+	}
+	if input.TotalGross <= 0 {
+		return fmt.Errorf("payroll journal gross total must be positive")
+	}
+	if input.TotalNet <= 0 || input.TotalNet > input.TotalGross {
+		return fmt.Errorf("payroll journal net total must be positive and no greater than gross total")
+	}
+	if _, err := time.Parse("2006-01-02", input.PeriodStart); err != nil {
+		return fmt.Errorf("payroll journal period start must be in YYYY-MM-DD format")
+	}
+	if _, err := time.Parse("2006-01-02", input.PeriodEnd); err != nil {
+		return fmt.Errorf("payroll journal period end must be in YYYY-MM-DD format")
+	}
 	return nil
 }

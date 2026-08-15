@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"time"
 
@@ -155,6 +156,137 @@ func (r *Repository) Post(ctx context.Context, businessID, id int64) error {
 	}
 
 	return nil
+}
+
+func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.PayrollJournalInput) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = tx.Rollback()
+			panic(p)
+		}
+	}()
+
+	var entryID int64
+	var status string
+	err = tx.QueryRowContext(ctx, `
+		SELECT id, status
+		FROM finance_journal_entries
+		WHERE business_id = ? AND source_type = ? AND source_id = ?
+		FOR UPDATE`, input.BusinessID, payrollSourceType, input.RunID).Scan(&entryID, &status)
+	if err == nil {
+		if status == "draft" {
+			if _, err := tx.ExecContext(ctx, `
+				UPDATE finance_journal_entries
+				SET status = 'posted', posted_at = CURRENT_TIMESTAMP
+				WHERE id = ? AND business_id = ? AND status = 'draft'`, entryID, input.BusinessID); err != nil {
+				_ = tx.Rollback()
+				return err
+			}
+		}
+		if err := tx.Commit(); err != nil {
+			return err
+		}
+		return nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		_ = tx.Rollback()
+		return err
+	}
+
+	expenseAccountID, err := r.ensurePayrollAccount(ctx, tx, input, "Payroll Expense", "expense")
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	payableAccountID, err := r.ensurePayrollAccount(ctx, tx, input, "Payroll Payable", "liability")
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	deductions := roundMoney(input.TotalGross - input.TotalNet)
+	description := fmt.Sprintf("Payroll %d: %s to %s", input.RunID, input.PeriodStart, input.PeriodEnd)
+	result, err := tx.ExecContext(ctx, `
+		INSERT INTO finance_journal_entries
+			(owner_id, business_id, date, description, status, source_type, source_id, posted_at)
+		VALUES (?, ?, ?, ?, 'posted', ?, ?, CURRENT_TIMESTAMP)`,
+		input.OwnerID, input.BusinessID, input.PeriodEnd, description, payrollSourceType, input.RunID)
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	entryID, err = result.LastInsertId()
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+
+	lines := []struct {
+		accountID int64
+		debit     float64
+		credit    float64
+	}{
+		{accountID: expenseAccountID, debit: roundMoney(input.TotalGross)},
+		{accountID: payableAccountID, credit: roundMoney(input.TotalNet)},
+	}
+	if deductions > 0 {
+		deductionsAccountID, accountErr := r.ensurePayrollAccount(ctx, tx, input, "Payroll Deductions Payable", "liability")
+		if accountErr != nil {
+			_ = tx.Rollback()
+			return accountErr
+		}
+		lines = append(lines, struct {
+			accountID int64
+			debit     float64
+			credit    float64
+		}{accountID: deductionsAccountID, credit: deductions})
+	}
+	for _, line := range lines {
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO finance_journal_lines (entry_id, account_id, debit, credit)
+			VALUES (?, ?, ?, ?)`, entryID, line.accountID, line.debit, line.credit); err != nil {
+			_ = tx.Rollback()
+			return err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return nil
+}
+
+const payrollSourceType = "payroll_run"
+
+func (r *Repository) ensurePayrollAccount(ctx context.Context, tx *sql.Tx, input domain.PayrollJournalInput, name, accountType string) (int64, error) {
+	var accountID int64
+	err := tx.QueryRowContext(ctx, `
+		SELECT id
+		FROM finance_accounts
+		WHERE business_id = ? AND name = ? AND type = ? AND is_active = TRUE
+		ORDER BY id
+		LIMIT 1
+		FOR UPDATE`, input.BusinessID, name, accountType).Scan(&accountID)
+	if err == nil {
+		return accountID, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return 0, err
+	}
+	result, err := tx.ExecContext(ctx, `
+		INSERT INTO finance_accounts (owner_id, business_id, name, code, type, currency, balance, is_active)
+		VALUES (?, ?, ?, NULL, ?, 'USD', 0, TRUE)`, input.OwnerID, input.BusinessID, name, accountType)
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+func roundMoney(value float64) float64 {
+	return math.Round(value*100) / 100
 }
 
 func (r *Repository) GetLines(ctx context.Context, entryID int64) ([]domain.JournalLine, error) {

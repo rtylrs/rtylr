@@ -8,6 +8,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/journal/internal/api"
 	"github.com/voxire/onion/internal/modules/journal/internal/application"
+	journalDomain "github.com/voxire/onion/internal/modules/journal/internal/domain"
+	"github.com/voxire/onion/internal/platform/financejournal"
 	financejournalv1 "github.com/voxire/voxie/gen/go/finance/journal/v1"
 )
 
@@ -17,6 +19,29 @@ type Module struct {
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{service: application.NewService(ctx, db)}
+}
+
+// PayrollPoster adapts the central journal service to the payroll module's
+// finance boundary. Keeping the adapter here ensures payroll cannot bypass
+// journal validation, posting, or idempotency rules.
+func (m *Module) PayrollPoster() financejournal.PayrollJournalPoster {
+	return payrollPoster{service: m.service}
+}
+
+type payrollPoster struct {
+	service *application.Service
+}
+
+func (p payrollPoster) PostPayrollJournal(ctx context.Context, entry financejournal.PayrollJournalEntry) error {
+	return p.service.PostPayrollJournal(ctx, journalDomain.PayrollJournalInput{
+		OwnerID:     entry.OwnerID,
+		BusinessID:  entry.BusinessID,
+		RunID:       entry.RunID,
+		PeriodStart: entry.PeriodStart,
+		PeriodEnd:   entry.PeriodEnd,
+		TotalGross:  entry.TotalGross,
+		TotalNet:    entry.TotalNet,
+	})
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

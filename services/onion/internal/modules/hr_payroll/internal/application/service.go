@@ -368,6 +368,7 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 
 	if postErr := s.financePoster.PostPayrollJournal(ctx, domain.PayrollJournalEntry{
 		OwnerID:     ownerID,
+		BusinessID:  run.BusinessID,
 		RunID:       runID,
 		PeriodStart: run.PeriodStart,
 		PeriodEnd:   run.PeriodEnd,

@@ -491,6 +491,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	financeReportsModule := financereports.NewModule(ctx, dbclient.Pool())
 	flowInsightsModule := flowinsights.NewModule(ctx, dbclient.Pool())
 	journalModule := journal.NewModule(ctx, dbclient.Pool())
+	hrPayrollModule.SetFinancePoster(journalModule.PayrollPoster())
 	kpisModule := kpis.NewModule(ctx, dbclient.Pool())
 	posDaySummaryModule := posdaysummary.NewModule(ctx, dbclient.Pool())
 	invoicesModule := invoices.NewModule(ctx, dbclient.Pool())
