@@ -794,7 +794,16 @@ func (s *Service) BulkInvite(ctx context.Context, ownerID, businessID int64, inp
 			continue
 		}
 		if input.GroupID > 0 {
-			_ = s.repo.AddGroupMembers(ctx, ownerID, input.GroupID, ownerID, []int64{userID})
+			if groupErr := s.AddGroupMembers(ctx, ownerID, input.GroupID, ownerID, []int64{userID}); groupErr != nil {
+				results = append(results, domain.BulkInviteResult{
+					Email:   email,
+					UserID:  userID,
+					Token:   token,
+					Status:  "error",
+					Message: fmt.Sprintf("group assignment failed: %v", groupErr),
+				})
+				continue
+			}
 		}
 		status := "invited"
 		if token == "" {

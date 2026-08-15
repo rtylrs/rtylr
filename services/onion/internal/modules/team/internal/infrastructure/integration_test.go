@@ -2,9 +2,12 @@ package infrastructure_test
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
@@ -18,6 +21,34 @@ func TestTeam_ListPermissions_NoError(t *testing.T) {
 	_, err := repo.ListPermissions(context.Background(), testutil.OwnerID)
 	if err != nil {
 		t.Fatalf("ListPermissions: %v", err)
+	}
+}
+
+func TestTeam_BulkInvite_ReportsMissingGroup(t *testing.T) {
+	db := testutil.OpenDB(t)
+	email := fmt.Sprintf("missing-group-invite-%d@test.local", time.Now().UnixNano())
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM invite_tokens WHERE user_id IN (SELECT id FROM users WHERE email = ?)", email)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM user_app_permissions WHERE user_id IN (SELECT id FROM users WHERE email = ?)", email)
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM users WHERE email = ?", email)
+	})
+	service := application.NewService(context.Background(), db)
+	results, err := service.BulkInvite(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.BulkInviteInput{
+		Emails:  []string{email},
+		Role:    domain.RoleStaff,
+		GroupID: 9999999,
+	})
+	if err != nil {
+		t.Fatalf("BulkInvite: %v", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("BulkInvite returned %d results, want 1", len(results))
+	}
+	if results[0].Status != "error" {
+		t.Fatalf("status = %q, want error", results[0].Status)
+	}
+	if !strings.Contains(results[0].Message, "group assignment failed") {
+		t.Fatalf("message = %q, want group assignment failure", results[0].Message)
 	}
 }
 
