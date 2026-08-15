@@ -70,8 +70,13 @@ function applyTheme(theme: ThemeConfig) {
   }
 }
 
-const Menu: React.FC = () => {
-  const { id } = useParams({ strict: false });
+interface MenuProps {
+  id?: string;
+}
+
+const Menu: React.FC<MenuProps> = ({ id: propId }) => {
+  const params = useParams({ strict: false });
+  const id = propId || params.id || params.slug;
   const [categories, setCategories] = useState<MenuCategoryData[]>([]);
   const [business, setBusiness] = useState<BusinessInfo | null>(null);
   const [layout, setLayout] = useState<LayoutType>('grid');
