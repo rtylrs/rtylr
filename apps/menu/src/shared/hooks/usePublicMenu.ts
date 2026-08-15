@@ -1,17 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { cdnImageUrl } from '@voxire/config';
+import { z } from 'zod';
 import api from '../lib/api';
-
-/**
- * usePublicMenu - hits the new `/pos/public/*` anonymous endpoints
- * the backend exposed this session. Complements the legacy
- * `/menu/{mongoId}` flow; this one is for POS-powered menus keyed by
- * numeric `business_id`.
- *
- * Both fetches are issued in parallel. The hook returns a merged
- * envelope so the screen doesn't have to orchestrate two queries
- * itself.
- */
 
 export interface PublicBusiness {
   id: number;
@@ -58,12 +48,34 @@ interface MenuApiResponse {
   }[];
 }
 
+const publicBusinessSchema = z.object({
+  id: z.number().catch(0),
+  name: z.string().catch(''),
+  logo_url: z.string().catch(''),
+  currency: z.string().catch('USD'),
+  timezone: z.string().catch('UTC'),
+});
+
+const publicMenuItemSchema = z.object({
+  id: z.number().catch(0),
+  owner_id: z.number().catch(0),
+  category_id: z.number().catch(0),
+  name: z.string().catch(''),
+  sku: z.string().catch(''),
+  sale_price: z.number().catch(0),
+  image: z.string().optional(),
+  image_url: z.string().optional(),
+  is_active: z.boolean().catch(true),
+  created_at: z.string().catch(''),
+  updated_at: z.string().catch(''),
+});
+
 async function fetchPublicBusiness(businessId: number): Promise<PublicBusiness> {
   const res = await api.get<{ business: BusinessApiResponse }>(
     '/hub/business/v1/businesses/public',
     { params: { business_id: businessId } }
   );
-  const data = res.data.business;
+  const data = publicBusinessSchema.parse(res.data.business ?? {});
   return {
     id: data.id,
     name: data.name,
@@ -80,7 +92,8 @@ async function fetchPublicMenu(
   const params: Record<string, number> = { business_id: businessId };
   if (locationId && locationId > 0) params.location_id = locationId;
   const res = await api.get<MenuApiResponse>('/pos/menu-item/v1/menu-items/public', { params });
-  return (res.data.items ?? []).map((i) => ({
+  const items = (res.data.items ?? []).map((item) => publicMenuItemSchema.parse(item));
+  return items.map((i) => ({
     id: i.id,
     ownerId: i.owner_id,
     categoryId: i.category_id,
