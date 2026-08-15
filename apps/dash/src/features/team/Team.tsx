@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import {
@@ -139,7 +140,16 @@ const Team: React.FC = (): React.JSX.Element => {
 
   const handleBulkDeactivate = async (): Promise<void> => {
     try {
-      for (const id of Array.from(selected)) {
+      const nonOwnerIds = Array.from(selected).filter((id) => {
+        const mem = members.find((m) => m.id === id);
+        return mem && mem.role?.toLowerCase() !== 'owner';
+      });
+      if (nonOwnerIds.length === 0) {
+        toast.error('Workspace owner(s) cannot be deactivated');
+        setBulkConfirmDeactivate(false);
+        return;
+      }
+      for (const id of nonOwnerIds) {
         await deactivate.mutateAsync(id);
       }
       clearSelection();
@@ -482,16 +492,18 @@ const Team: React.FC = (): React.JSX.Element => {
                                 className="my-1"
                                 style={{ borderTop: '1px solid var(--dash-border)' }}
                               />
-                              <button
-                                className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
-                                style={{ color: '#ef4444' }}
-                                onClick={() => {
-                                  setConfirm(m);
-                                  setMenuOpen(null);
-                                }}
-                              >
-                                <UserX size={12} /> Deactivate
-                              </button>
+                              {m.role?.toLowerCase() !== 'owner' && (
+                                <button
+                                  className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
+                                  style={{ color: '#ef4444' }}
+                                  onClick={() => {
+                                    setConfirm(m);
+                                    setMenuOpen(null);
+                                  }}
+                                >
+                                  <UserX size={12} /> Deactivate
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>
