@@ -112,6 +112,21 @@ const PosMenu: React.FC = (): React.JSX.Element => {
     );
   }
 
+  const hasItems = categories.some((cat) => cat.items && cat.items.length > 0);
+  if (!hasItems) {
+    return (
+      <>
+        <HelmetContainer title="Menu · rtylr" />
+        <div className="min-h-screen flex flex-col items-center justify-center gap-2 bg-white px-4 text-center">
+          <h2 className="text-lg font-semibold text-gray-800">No menu items available</h2>
+          <p className="text-sm text-gray-500">
+            This menu is currently empty. Please check back later.
+          </p>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <HelmetContainer title="Menu · rtylr" />
