@@ -16,7 +16,7 @@ export const ApprovalPicker: React.FC = () => {
   return (
     <Menu
       side="top"
-      align="start"
+      align="end"
       minWidth={230}
       trigger={
         <IconButton

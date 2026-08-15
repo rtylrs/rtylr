@@ -18,8 +18,8 @@ export const ModePicker: React.FC<ModePickerProps> = ({ compact = false }) => {
   return (
     <Menu
       side="top"
-      align="end"
-      minWidth={168}
+      align={compact ? 'end' : 'start'}
+      minWidth={240}
       trigger={
         compact ? (
           <IconButton
