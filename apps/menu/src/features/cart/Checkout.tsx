@@ -15,6 +15,7 @@ interface OrderItem {
 
 interface PlaceOrderRequest {
   owner_id: number;
+  location_id?: number;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -29,7 +30,7 @@ interface PlaceOrderResponse {
 
 const Checkout = (): React.JSX.Element => {
   const navigate = useNavigate();
-  const { items, businessId, total, setItemNote, clearCart } = useCartStore();
+  const { items, businessId, locationId, total, setItemNote, clearCart } = useCartStore();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -95,6 +96,7 @@ const Checkout = (): React.JSX.Element => {
 
     const body: PlaceOrderRequest = {
       owner_id: businessId,
+      location_id: locationId || undefined,
       customer_name: name.trim(),
       customer_email: email.trim(),
       customer_phone: phone.trim(),
