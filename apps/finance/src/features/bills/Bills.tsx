@@ -11,7 +11,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useBills } from './useBills';
-import { useCreateBill } from '../../shared/hooks/queries/useBills';
+import { useCreateBill, useUpdateBill } from '../../shared/hooks/queries/useBills';
 import {
   cardStyle,
   ghostBtn,
@@ -156,8 +156,27 @@ const Bills: React.FC = () => {
       return next;
     });
 
+  const updateBill = useUpdateBill();
   const payAll = (): void => {
-    toast.info(t('bills.bulkPaymentSoon'));
+    const ids = Array.from(selected);
+    ids.forEach((id) => {
+      const b = data.find((x) => x.id === id);
+      updateBill.mutate({
+        id,
+        body: {
+          supplierId: typeof b?.supplier === 'string' ? b.supplier : '',
+          amount: typeof b?.amount === 'number' ? b.amount : undefined,
+          currency: typeof b?.currency === 'string' ? b.currency : 'USD',
+          dueDate: typeof b?.dueDate === 'string' ? b.dueDate : '',
+          status: 'paid',
+          description:
+            typeof (b as Record<string, unknown>)?.description === 'string'
+              ? String((b as Record<string, unknown>).description)
+              : '',
+        },
+      });
+    });
+    toast.success(t('bills.markedPaid', { count: ids.length }));
     setSelected(new Set());
   };
 
@@ -172,7 +191,8 @@ const Bills: React.FC = () => {
         title={t('bills.title')}
         subtitle={
           <>
-            {t('bills.outstanding', { count: unpaid.length })} <>&middot;</> <MoneyDisplay amount={totalDue} /> {t('bills.total')}
+            {t('bills.outstanding', { count: unpaid.length })} <>&middot;</>{' '}
+            <MoneyDisplay amount={totalDue} /> {t('bills.total')}
           </>
         }
         actions={
@@ -183,7 +203,7 @@ const Bills: React.FC = () => {
               </button>
             )}
             <button style={ghostBtn} aria-label="New Bill" onClick={() => setShowCreate(true)}>
-                <Plus size={13} /> {t('bills.new')}
+              <Plus size={13} /> {t('bills.new')}
             </button>
           </>
         }
@@ -202,7 +222,16 @@ const Bills: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                {['', t('bills.number'), t('bills.vendor'), t('bills.category'), t('bills.amount'), t('bills.due'), t('bills.status'), ''].map((h, i) => (
+                {[
+                  '',
+                  t('bills.number'),
+                  t('bills.vendor'),
+                  t('bills.category'),
+                  t('bills.amount'),
+                  t('bills.due'),
+                  t('bills.status'),
+                  '',
+                ].map((h, i) => (
                   <th
                     key={i}
                     style={{
@@ -269,8 +298,14 @@ const Bills: React.FC = () => {
                   <td style={{ padding: '12px 16px' }}>
                     {b.status === 'unpaid' || b.status === 'overdue' ? (
                       <button
-                        style={{ ...ghostBtn, padding: '4px 10px' }}
-                        onClick={() => toast.info(t('bills.schedulingSoon'))}
+                        style={{
+                          ...ghostBtn,
+                          padding: '4px 10px',
+                          opacity: 0.6,
+                          cursor: 'not-allowed',
+                        }}
+                        disabled
+                        title={t('bills.schedulingSoon')}
                       >
                         <Clock size={12} /> {t('bills.schedule')}
                       </button>
