@@ -39,6 +39,8 @@ export interface Customer {
   totalSpent: number;
   visits: number;
   loyaltyPoints: number;
+  /** Canonical persisted tier from the CRM customer API. */
+  loyaltyTier?: string;
   lastVisit: string;
   initials: string;
   tags?: string[];
@@ -58,7 +60,18 @@ export interface CustomersParams {
 
 export interface TimelineEntry {
   id: number;
-  type: 'visit' | 'purchase' | 'email' | 'sms' | 'note' | 'points' | 'reward';
+  type:
+    | 'visit'
+    | 'purchase'
+    | 'email'
+    | 'sms'
+    | 'note'
+    | 'points'
+    | 'reward'
+    | 'adjust'
+    | 'expire'
+    | 'award'
+    | 'upgrade';
   title: string;
   description?: string;
   at: string;

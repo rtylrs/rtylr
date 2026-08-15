@@ -32,7 +32,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         width: 48,
         height: 48,
         borderRadius: 12,
-        background: 'rgba(16,185,129,0.12)',
+        background: 'var(--finance-accent-soft)',
         marginBottom: 14,
       }}
     >

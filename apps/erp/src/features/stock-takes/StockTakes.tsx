@@ -6,6 +6,8 @@ import { useStockTakes, useCreateStockTake, useUpdateStockTake } from './useStoc
 import { stockTakeStatusLabel, stockTakeProgress, stockTakeVariance } from './stockTakeSchema';
 import type { UpdateStockTakeItemBody } from '@voxire/voxie/erp/stock_take/v1/types';
 import { useWarehouses } from '../warehouses/useWarehouses';
+import { useInventoryReport } from '../inventory/useInventory';
+import { buildStockTakeItems } from './stockTakeUtils';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
@@ -13,7 +15,7 @@ import { formatDate } from '../../shared/lib/format';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -21,7 +23,7 @@ const inputStyle: React.CSSProperties = {
   border: '1px solid var(--hub-border)',
   background: 'var(--hub-input-bg)',
   color: 'var(--hub-text)',
-  fontSize: '13px',
+  fontSize: '16px',
   outline: 'none',
   width: '100%',
   boxSizing: 'border-box',
@@ -34,11 +36,17 @@ const StockTakes: React.FC = () => {
   const stockTakes = stockTakeResult?.stockTakes ?? [];
   const hasMore = stockTakeResult?.hasMore ?? false;
   const { data: warehouses = [] } = useWarehouses();
+  const {
+    data: inventoryItems = [],
+    isLoading: inventoryLoading,
+    isError: inventoryError,
+  } = useInventoryReport();
   const createMut = useCreateStockTake();
   const updateMut = useUpdateStockTake();
   const [showCreate, setShowCreate] = useState(false);
   const [newWarehouseId, setNewWarehouseId] = useState('');
   const [newNotes, setNewNotes] = useState('');
+  const itemsToCount = buildStockTakeItems(inventoryItems);
 
   const warehouseName = (id: string): string =>
     warehouses.find((w) => w.id === id)?.name ?? `Warehouse #${id}`;
@@ -48,11 +56,23 @@ const StockTakes: React.FC = () => {
       toast.error('Warehouse is required');
       return;
     }
+    if (inventoryLoading) {
+      toast.error('Inventory is still loading');
+      return;
+    }
+    if (itemsToCount.length === 0) {
+      toast.error(
+        inventoryError
+          ? 'Unable to load inventory for this stock take'
+          : 'No inventory items to count'
+      );
+      return;
+    }
     try {
       await createMut.mutateAsync({
         warehouseId: newWarehouseId,
         notes: newNotes.trim(),
-        items: [],
+        items: itemsToCount,
       });
       toast.success('Stock take created');
       setShowCreate(false);
@@ -65,7 +85,7 @@ const StockTakes: React.FC = () => {
 
   const handleComplete = async (id: string, items: UpdateStockTakeItemBody[]): Promise<void> => {
     const uncounted = items.filter(
-      (item) => (item.expectedQty ?? 0) > 0 && !item.countedQty
+      (item) => (item.expectedQty ?? 0) > 0 && item.countedQty == null
     ).length;
     const doComplete = async (): Promise<void> => {
       try {
@@ -98,7 +118,7 @@ const StockTakes: React.FC = () => {
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} /> New Stock Take
           </button>
@@ -124,7 +144,7 @@ const StockTakes: React.FC = () => {
             );
             const statusColor =
               st.status === 'completed'
-                ? '#10b981'
+                ? 'var(--erp-success)'
                 : st.status === 'in_progress'
                   ? AMBER
                   : 'var(--hub-text-dim)';
@@ -138,7 +158,9 @@ const StockTakes: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <div
                       className="h-10 w-10 rounded-lg flex items-center justify-center"
-                      style={{ background: 'rgba(245,158,11,0.1)' }}
+                      style={{
+                        background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
+                      }}
                     >
                       <ClipboardList size={16} style={{ color: AMBER }} />
                     </div>
@@ -167,14 +189,20 @@ const StockTakes: React.FC = () => {
                         }
                         disabled={updateMut.isPending}
                         className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg disabled:opacity-40"
-                        style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}
+                        style={{
+                          background: 'color-mix(in srgb, var(--erp-success) 12%, transparent)',
+                          color: 'var(--erp-success)',
+                        }}
                       >
                         <CheckCircle2 size={12} /> Complete
                       </button>
                     )}
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                      style={{ background: `${statusColor}20`, color: statusColor }}
+                      style={{
+                        background: `color-mix(in srgb, ${statusColor} 13%, transparent)`,
+                        color: statusColor,
+                      }}
                     >
                       {stockTakeStatusLabel(st.status ?? '')}
                     </span>
@@ -201,7 +229,9 @@ const StockTakes: React.FC = () => {
                     </p>
                     <p
                       className="text-sm font-bold"
-                      style={{ color: variance !== 0 ? '#f87171' : '#10b981' }}
+                      style={{
+                        color: variance !== 0 ? 'var(--erp-danger)' : 'var(--erp-success)',
+                      }}
                     >
                       {variance !== 0 ? `${variance} items` : 'None'}
                     </p>
@@ -223,7 +253,7 @@ const StockTakes: React.FC = () => {
       {showCreate && (
         <div
           className="fixed inset-0 flex items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          style={{ background: 'var(--hub-overlay)', zIndex: 9999 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowCreate(false);
           }}
@@ -253,6 +283,13 @@ const StockTakes: React.FC = () => {
               placeholder="Notes (optional)"
               style={inputStyle}
             />
+            <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }} aria-live="polite">
+              {inventoryLoading
+                ? 'Loading current inventory…'
+                : inventoryError
+                  ? 'Inventory could not be loaded.'
+                  : `${itemsToCount.length} inventory item${itemsToCount.length === 1 ? '' : 's'} will be included with current stock as the expected quantity.`}
+            </p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowCreate(false)}
@@ -263,9 +300,14 @@ const StockTakes: React.FC = () => {
               </button>
               <button
                 onClick={handleCreate}
-                disabled={createMut.isPending || !newWarehouseId}
+                disabled={
+                  createMut.isPending ||
+                  !newWarehouseId ||
+                  inventoryLoading ||
+                  itemsToCount.length === 0
+                }
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: '#000' }}
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>

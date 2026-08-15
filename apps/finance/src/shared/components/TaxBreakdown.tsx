@@ -76,7 +76,7 @@ const TaxBreakdown: React.FC<TaxBreakdownProps> = ({ items, discount = 0 }) => {
             display: 'flex',
             justifyContent: 'space-between',
             fontSize: 13,
-            color: '#f59e0b',
+            color: 'var(--finance-warning)',
           }}
         >
           <span>Discount</span>

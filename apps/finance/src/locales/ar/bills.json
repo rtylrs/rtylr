@@ -1,3 +1,25 @@
 {
-  "created": "تم إنشاء الفاتورة"
+  "created": "تم إنشاء الفاتورة",
+  "vendorRequired": "اسم المورد مطلوب",
+  "amountPositive": "يجب أن يكون المبلغ أكبر من صفر",
+  "new": "فاتورة جديدة",
+  "create": "إنشاء فاتورة",
+  "vendor": "المورد",
+  "vendorPlaceholder": "اسم المورد أو البائع",
+  "amount": "المبلغ",
+  "dueDate": "تاريخ الاستحقاق",
+  "description": "الوصف",
+  "descriptionPlaceholder": "ملاحظات اختيارية",
+  "bulkPaymentSoon": "الدفع الجماعي للفواتير قريباً",
+  "title": "الفواتير المستحقة الدفع",
+  "outstanding": "{{count}} مستحقة",
+  "total": "الإجمالي",
+  "empty": "لا توجد فواتير",
+  "emptyDescription": "تتبع فواتير الموردين لتخطيط التدفقات النقدية الخارجة.",
+  "number": "رقم الفاتورة",
+  "category": "الفئة",
+  "due": "الاستحقاق",
+  "status": "الحالة",
+  "schedulingSoon": "جدولة الفاتورة قريبةً",
+  "schedule": "جدولة"
 }

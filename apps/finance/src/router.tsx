@@ -12,6 +12,7 @@ import { ErrorBoundary } from '@voxire/ui';
 import { FullScreenLoader } from '@voxire/components';
 import { unwrap } from '@voxire/api';
 import { safe } from './shared/lib/api';
+import { z } from 'zod';
 import DefaultLayout from './layouts/DefaultLayout';
 
 const Dashboard = React.lazy(() => import('./features/dashboard/Dashboard'));
@@ -80,6 +81,10 @@ const invoicesRoute = createRoute({
 const newInvoiceRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/invoices/new',
+  validateSearch: z.object({
+    clone: z.string().min(1).optional().catch(undefined),
+    client: z.string().min(1).optional().catch(undefined),
+  }),
   component: wrap(<NewInvoice />),
 });
 
@@ -193,7 +198,7 @@ const settingsRoute = createRoute({
 
 const catchAllRoute = createRoute({
   getParentRoute: () => layoutRoute,
-  path: '*',
+  path: '$',
   component: () => <Navigate to="/" replace />,
 });
 

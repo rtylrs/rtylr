@@ -1,0 +1,57 @@
+{
+  "title": "Equipment",
+  "subtitle": "Request equipment and manage approvals",
+  "newRequest": "New Request",
+  "requestCreated": "Equipment request submitted",
+  "requestUpdated": "Equipment request updated",
+  "neededBy": "Needed by {{date}}",
+  "approve": "Approve",
+  "reject": "Reject",
+  "emptyTitle": "No equipment requests",
+  "emptyDescription": "Equipment requests will appear here.",
+  "tabs": {
+    "myRequests": "My Requests",
+    "pendingApprovals": "Pending Approvals"
+  },
+  "urgencies": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "statuses": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "ordered": "Ordered",
+    "delivered": "Delivered",
+    "rejected": "Rejected"
+  },
+  "form": {
+    "title": "New Equipment Request",
+    "type": "Equipment Type",
+    "typePlaceholder": "e.g. Laptop, Monitor, Desk",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe what you need and why",
+    "urgency": "Urgency",
+    "neededBy": "Needed By",
+    "submit": "Submit Request"
+  },
+  "assets": {
+    "title": "Asset Register",
+    "subtitle": "Company-wide equipment and asset inventory",
+    "emptyTitle": "No assets registered",
+    "emptyDescription": "Assets will appear here once equipment is assigned.",
+    "table": {
+      "name": "Asset Name",
+      "serialNumber": "Serial Number",
+      "assignedDate": "Assigned Date",
+      "condition": "Condition",
+      "returnedDate": "Returned Date"
+    },
+    "conditions": {
+      "new": "New",
+      "good": "Good",
+      "fair": "Fair",
+      "damaged": "Damaged"
+    }
+  }
+}

@@ -3,13 +3,24 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { useJournal, useCreateJournalEntry } from '../../shared/hooks/useChartOfAccounts';
 import { cardStyle, primaryBtn, ghostBtn, inputStyle } from '../../shared/lib/tokens';
 
+interface LineInput {
+  id: string;
+  accountName: string;
+  accountId: number;
+  type: 'debit' | 'credit';
+  amount: number;
+}
+
 const Journal: React.FC = () => {
+  const { t } = useTranslation('journal');
   const [page, setPage] = useState(1);
   const { data: journalData, isLoading } = useJournal({ page });
   const data = journalData?.entries ?? [];
@@ -18,59 +29,75 @@ const Journal: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [memo, setMemo] = useState('');
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [debitAcc, setDebitAcc] = useState('');
-  const [debitAccId, setDebitAccId] = useState(0);
-  const [creditAcc, setCreditAcc] = useState('');
-  const [creditAccId, setCreditAccId] = useState(0);
-  const [amount, setAmount] = useState('');
+
+  const [lines, setLines] = useState<LineInput[]>([
+    { id: '1', accountName: '', accountId: 0, type: 'debit', amount: 0 },
+    { id: '2', accountName: '', accountId: 0, type: 'credit', amount: 0 },
+  ]);
+
+  const addLine = (type: 'debit' | 'credit'): void => {
+    setLines((prev) => [
+      ...prev,
+      { id: String(Date.now() + Math.random()), accountName: '', accountId: 0, type, amount: 0 },
+    ]);
+  };
+
+  const removeLine = (id: string): void => {
+    if (lines.length <= 2) {
+      toast.error('Journal entry requires at least two lines');
+      return;
+    }
+    setLines((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  const updateLine = (id: string, field: keyof LineInput, value: unknown): void => {
+    setLines((prev) => prev.map((l) => (l.id === id ? { ...l, [field]: value } : l)));
+  };
+
+  const totalDebits = lines
+    .filter((l) => l.type === 'debit')
+    .reduce((sum, l) => sum + (l.amount || 0), 0);
+  const totalCredits = lines
+    .filter((l) => l.type === 'credit')
+    .reduce((sum, l) => sum + (l.amount || 0), 0);
 
   const handleCreate = async (): Promise<void> => {
     if (!memo.trim()) {
-      toast.error('Memo is required');
+      toast.error(t('memoRequired'));
       return;
     }
-    const parsedAmount = parseFloat(amount);
-    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
-      toast.error('Amount must be greater than zero');
+    if (Math.abs(totalDebits - totalCredits) > 0.01 || totalDebits === 0) {
+      toast.error(
+        `Journal entry must balance: Debits (${totalDebits}) must equal Credits (${totalCredits})`
+      );
       return;
     }
     const today = new Date().toISOString().slice(0, 10);
     if (date > today) {
-      toast.error('Date cannot be in the future');
+      toast.error(t('futureDate'));
       return;
     }
-    const amt = parsedAmount;
     try {
       await createMut.mutateAsync({
         date,
         description: memo.trim(),
-        lines: [
-          {
-            accountId: debitAccId,
-            accountName: debitAcc || 'Debit Account',
-            debit: amt,
-            credit: 0,
-            description: '',
-          },
-          {
-            accountId: creditAccId,
-            accountName: creditAcc || 'Credit Account',
-            debit: 0,
-            credit: amt,
-            description: '',
-          },
-        ],
+        lines: lines.map((l) => ({
+          accountId: l.accountId,
+          accountName: l.accountName || (l.type === 'debit' ? 'Debit Account' : 'Credit Account'),
+          debit: l.type === 'debit' ? l.amount : 0,
+          credit: l.type === 'credit' ? l.amount : 0,
+          description: '',
+        })),
       });
-      toast.success('Journal entry created');
+      toast.success(t('created'));
       setShowCreate(false);
       setMemo('');
-      setAmount('');
-      setDebitAcc('');
-      setDebitAccId(0);
-      setCreditAcc('');
-      setCreditAccId(0);
-    } catch {
-      toast.error('Failed to create journal entry');
+      setLines([
+        { id: '1', accountName: '', accountId: 0, type: 'debit', amount: 0 },
+        { id: '2', accountName: '', accountId: 0, type: 'credit', amount: 0 },
+      ]);
+    } catch (error) {
+      toast.error(getOneKitErrorMessage(error, t('createFailed')));
     }
   };
 
@@ -80,13 +107,13 @@ const Journal: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Journal · rtylr" />
+      <HelmetContainer title={`${t('title')} · rtylr`} />
       <PageHeader
-        title="Journal"
+        title={t('title')}
         subtitle={`${data.length} entries`}
         actions={
           <button style={primaryBtn} onClick={() => setShowCreate(true)}>
-            <Plus size={13} /> New entry
+            <Plus size={13} /> {t('newEntry')}
           </button>
         }
       />
@@ -98,8 +125,9 @@ const Journal: React.FC = () => {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {data.map((e) => {
-            const debits = (e.lines ?? []).reduce((s: number, l) => s + (l.debit ?? 0), 0);
-            const credits = (e.lines ?? []).reduce((s: number, l) => s + (l.credit ?? 0), 0);
+            // The API returns authoritative entry totals; do not recompute accounting
+            // invariants from client-side floating-point line values.
+            const isBalanced = e.debit != null && e.credit != null && e.debit === e.credit;
             return (
               <div key={e.id} style={{ ...cardStyle, padding: 18 }}>
                 <div
@@ -121,13 +149,10 @@ const Journal: React.FC = () => {
                   <div
                     style={{
                       fontSize: 11,
-                      color:
-                        debits === credits
-                          ? 'var(--hub-text-dim)'
-                          : 'var(--finance-danger, #ef4444)',
+                      color: isBalanced ? 'var(--hub-text-dim)' : 'var(--finance-danger)',
                     }}
                   >
-                    {debits === credits ? 'Balanced' : 'Out of balance'}
+                    {isBalanced ? t('balanced') : t('outOfBalance')}
                   </div>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -135,36 +160,36 @@ const Journal: React.FC = () => {
                     <tr>
                       <th
                         style={{
-                          textAlign: 'left',
+                          textAlign: 'start',
                           fontSize: 10,
                           textTransform: 'uppercase',
                           color: 'var(--hub-text-dim)',
                           padding: '6px 4px',
                         }}
                       >
-                        Account
+                        {t('account')}
                       </th>
                       <th
                         style={{
-                          textAlign: 'right',
+                          textAlign: 'end',
                           fontSize: 10,
                           textTransform: 'uppercase',
                           color: 'var(--hub-text-dim)',
                           padding: '6px 4px',
                         }}
                       >
-                        Debit
+                        {t('debit')}
                       </th>
                       <th
                         style={{
-                          textAlign: 'right',
+                          textAlign: 'end',
                           fontSize: 10,
                           textTransform: 'uppercase',
                           color: 'var(--hub-text-dim)',
                           padding: '6px 4px',
                         }}
                       >
-                        Credit
+                        {t('credit')}
                       </th>
                     </tr>
                   </thead>
@@ -178,7 +203,7 @@ const Journal: React.FC = () => {
                           style={{
                             padding: '8px 4px',
                             fontSize: 13,
-                            textAlign: 'right',
+                            textAlign: 'end',
                             color: l.debit ? 'var(--hub-text)' : 'var(--hub-text-dim)',
                           }}
                         >
@@ -188,7 +213,7 @@ const Journal: React.FC = () => {
                           style={{
                             padding: '8px 4px',
                             fontSize: 13,
-                            textAlign: 'right',
+                            textAlign: 'end',
                             color: l.credit ? 'var(--hub-text)' : 'var(--hub-text-dim)',
                           }}
                         >
@@ -208,7 +233,7 @@ const Journal: React.FC = () => {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.5)',
+            background: 'var(--finance-overlay)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -222,14 +247,16 @@ const Journal: React.FC = () => {
             style={{
               ...cardStyle,
               padding: 24,
-              width: 400,
+              width: 520,
+              maxHeight: '90vh',
+              overflowY: 'auto',
               display: 'flex',
               flexDirection: 'column',
               gap: 12,
             }}
           >
             <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-              New Journal Entry
+              {t('newJournalEntry')}
             </h3>
             <input
               style={inputStyle}
@@ -240,55 +267,112 @@ const Journal: React.FC = () => {
             />
             <input
               style={inputStyle}
-              placeholder="Memo / description"
+              placeholder={t('memoPlaceholder')}
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
             />
-            <input
-              style={inputStyle}
-              placeholder="Debit account name"
-              value={debitAcc}
-              onChange={(e) => setDebitAcc(e.target.value)}
-            />
-            <input
-              style={inputStyle}
-              type="number"
-              min="0"
-              step="1"
-              placeholder="Debit account ID (optional)"
-              value={debitAccId || ''}
-              onChange={(e) => setDebitAccId(parseInt(e.target.value, 10) || 0)}
-            />
-            <input
-              style={inputStyle}
-              placeholder="Credit account name"
-              value={creditAcc}
-              onChange={(e) => setCreditAcc(e.target.value)}
-            />
-            <input
-              style={inputStyle}
-              type="number"
-              min="0"
-              step="1"
-              placeholder="Credit account ID (optional)"
-              value={creditAccId || ''}
-              onChange={(e) => setCreditAccId(parseInt(e.target.value, 10) || 0)}
-            />
-            <input
-              style={inputStyle}
-              type="number"
-              min="0"
-              step="0.01"
-              placeholder="Amount"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--hub-text)' }}>
+                  Entry Lines
+                </span>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button
+                    type="button"
+                    style={{ ...ghostBtn, fontSize: 11, padding: '2px 8px' }}
+                    onClick={() => addLine('debit')}
+                  >
+                    + Add Debit
+                  </button>
+                  <button
+                    type="button"
+                    style={{ ...ghostBtn, fontSize: 11, padding: '2px 8px' }}
+                    onClick={() => addLine('credit')}
+                  >
+                    + Add Credit
+                  </button>
+                </div>
+              </div>
+
+              {lines.map((l) => (
+                <div key={l.id} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      background:
+                        l.type === 'debit'
+                          ? 'var(--finance-info-soft)'
+                          : 'var(--finance-accent-soft)',
+                      color: l.type === 'debit' ? 'var(--finance-info)' : 'var(--finance-accent)',
+                    }}
+                  >
+                    {l.type}
+                  </span>
+                  <input
+                    style={{ ...inputStyle, flex: 2 }}
+                    placeholder="Account name"
+                    value={l.accountName}
+                    onChange={(e) => updateLine(l.id, 'accountName', e.target.value)}
+                  />
+                  <input
+                    style={{ ...inputStyle, flex: 1 }}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Amount"
+                    value={l.amount || ''}
+                    onChange={(e) => updateLine(l.id, 'amount', parseFloat(e.target.value) || 0)}
+                  />
+                  {lines.length > 2 && (
+                    <button
+                      type="button"
+                      style={{ ...ghostBtn, padding: '2px 6px', color: 'var(--finance-danger)' }}
+                      onClick={() => removeLine(l.id)}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  padding: '8px 0',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  borderTop: '1px solid var(--hub-border)',
+                  color:
+                    Math.abs(totalDebits - totalCredits) < 0.01 && totalDebits > 0
+                      ? 'var(--finance-accent)'
+                      : 'var(--finance-danger)',
+                }}
+              >
+                <span>
+                  Debits: ${totalDebits.toFixed(2)} | Credits: ${totalCredits.toFixed(2)}
+                </span>
+                <span>
+                  {Math.abs(totalDebits - totalCredits) < 0.01 && totalDebits > 0
+                    ? 'Balanced ✓'
+                    : totalDebits === 0
+                      ? 'Enter amounts'
+                      : `Imbalance: $${Math.abs(totalDebits - totalCredits).toFixed(2)}`}
+                </span>
+              </div>
+            </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button style={ghostBtn} onClick={() => setShowCreate(false)}>
-                Cancel
+                {t('cancel')}
               </button>
               <button style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>
-                {createMut.isPending ? 'Creating…' : 'Create'}
+                {createMut.isPending ? t('creating') : t('create')}
               </button>
             </div>
           </div>

@@ -36,7 +36,14 @@ interface GroupedCategory {
 const Menu: React.FC<{}> = () => {
   const navigate = useNavigate();
   const { userId } = useUserStore();
-  const { items, status, id: menuId } = useMenuStore();
+  const {
+    items,
+    status,
+    id: menuId,
+    deleteCategory,
+    deleteBanner,
+    deleteMenuItem,
+  } = useMenuStore();
   useGetMenu(userId as string);
 
   useEffect(() => {
@@ -53,7 +60,8 @@ const Menu: React.FC<{}> = () => {
       return (
         <div
           key={item._id}
-          className="flex items-center justify-between p-3 border border-black/10 rounded-lg bg-white"
+          className="flex items-center justify-between p-3 border rounded-lg"
+          style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
         >
           <div className="flex items-center gap-3">
             {imageUrl && (
@@ -75,6 +83,12 @@ const Menu: React.FC<{}> = () => {
               ${(toFiniteNumber(item.details.price) / 100).toFixed(2)}
             </span>
           )}
+          <button
+            className="text-xs text-red-500 hover:underline px-2 py-1"
+            onClick={() => deleteMenuItem(item._id as string)}
+          >
+            Delete
+          </button>
         </div>
       );
     });
@@ -83,7 +97,8 @@ const Menu: React.FC<{}> = () => {
   const renderFlatItem = (item: StoreItem) => (
     <div
       key={item._id}
-      className="flex items-center justify-between p-4 border border-black/10 rounded-xl bg-white"
+      className="flex items-center justify-between p-4 border rounded-xl"
+      style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
     >
       <div className="min-w-0">
         <p className="text-sm font-semibold text-primary truncate">{item.details?.name}</p>
@@ -102,13 +117,23 @@ const Menu: React.FC<{}> = () => {
         >
           {item.details?.isActive === false ? 'Inactive' : 'Active'}
         </span>
+        <button
+          className="text-xs text-red-500 hover:underline px-2 py-1"
+          onClick={() => deleteMenuItem(item._id as string)}
+        >
+          Delete
+        </button>
       </div>
     </div>
   );
 
   const renderCategory = (category: StoreItem) => {
     return (
-      <div key={category._id} className="border border-black/10 rounded-xl p-4 bg-white mb-3">
+      <div
+        key={category._id}
+        className="border rounded-xl p-4 mb-3"
+        style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+      >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-primary">{category?.details?.name}</span>
@@ -131,7 +156,7 @@ const Menu: React.FC<{}> = () => {
             </button>
             <button
               className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-              disabled
+              onClick={() => deleteCategory((category.itemId || category._id) as string)}
             >
               Delete
             </button>
@@ -144,7 +169,11 @@ const Menu: React.FC<{}> = () => {
 
   const renderParentCategory = (parentCategory: StoreItem, childCategories: StoreItem[]) => {
     return (
-      <div key={parentCategory._id} className="border border-black/10 rounded-xl p-4 bg-white mb-4">
+      <div
+        key={parentCategory._id}
+        className="border rounded-xl p-4 mb-4"
+        style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+      >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="font-bold text-primary">{parentCategory?.details?.name}</span>
@@ -159,7 +188,9 @@ const Menu: React.FC<{}> = () => {
           <div className="flex gap-2">
             <button
               className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-              disabled
+              onClick={() =>
+                deleteCategory((parentCategory.itemId || parentCategory._id) as string)
+              }
             >
               Delete
             </button>
@@ -195,13 +226,17 @@ const Menu: React.FC<{}> = () => {
     return items.map((item) => {
       if (item.type === 'banner') {
         return (
-          <div key={item._id} className="border border-black/10 rounded-xl p-4 bg-white mb-4">
+          <div
+            key={item._id}
+            className="border rounded-xl p-4 mb-4"
+            style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+          >
             <div className="flex items-center justify-between mb-2">
               <p className="font-semibold text-primary">{item?.details?.banner?.title}</p>
               <div>
                 <button
                   className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
-                  disabled
+                  onClick={() => deleteBanner(item._id as string)}
                 >
                   Delete
                 </button>
@@ -253,7 +288,14 @@ const Menu: React.FC<{}> = () => {
         {items.length > 0 ? (
           <div className="space-y-2">{renderSections(items as StoreItem[])}</div>
         ) : (
-          <div className="rounded-xl border border-black/10 bg-white p-8 text-center text-sm text-muted">
+          <div
+            className="rounded-xl border p-8 text-center text-sm"
+            style={{
+              background: 'var(--dash-card)',
+              borderColor: 'var(--dash-border)',
+              color: 'var(--dash-text-muted)',
+            }}
+          >
             No POS menu items yet.
           </div>
         )}

@@ -7,6 +7,8 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 
+const updateProjectMutate = vi.hoisted(() => vi.fn());
+
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ projectId: 'p1', workspaceId: 'w1' }),
   useNavigate: () => vi.fn(),
@@ -18,7 +20,7 @@ vi.mock('@tanstack/react-router', () => ({
 }));
 
 vi.mock('./useProjects', () => ({
-  useUpdateProject: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateProject: () => ({ mutate: updateProjectMutate, isPending: false }),
   useDeleteProject: () => ({ mutate: vi.fn(), isPending: false }),
   useMoveProject: () => ({ mutate: vi.fn(), isPending: false }),
 }));
@@ -49,11 +51,14 @@ function renderProjectSettings() {
         taskCount: 0,
         completedCount: 0,
         memberAvatars: [],
+        description: 'Existing description',
+        status: 'archived',
         health: 'on_track',
         progress: 0,
         startDate: '2026-01-01',
         targetDate: '2026-06-01',
         lead: 'u1',
+        icon: 'briefcase',
       },
     ],
     workspaces: [{ id: 'w1', name: 'Workspace', color: '#000' }],
@@ -70,6 +75,7 @@ function renderProjectSettings() {
 describe('ProjectSettings integrations tab', () => {
   beforeEach(() => {
     useFlowStore.setState({ projects: [], workspaces: [] });
+    updateProjectMutate.mockClear();
   });
 
   it('shows a translated reason on each disabled Connect button instead of a silent disabled control', () => {
@@ -80,5 +86,33 @@ describe('ProjectSettings integrations tab', () => {
 
     expect(comingSoonButtons).toHaveLength(3);
     comingSoonButtons.forEach((button) => expect(button).toBeDisabled());
+  });
+
+  it('sends the untouched project fields when saving a name-only edit', () => {
+    renderProjectSettings();
+
+    fireEvent.change(screen.getByDisplayValue('Demo project'), {
+      target: { value: 'Renamed project' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    expect(updateProjectMutate).toHaveBeenCalledWith(
+      {
+        id: 'p1',
+        data: {
+          name: 'Renamed project',
+          description: 'Existing description',
+          icon: 'briefcase',
+          color: '#3b82f6',
+          status: 'archived',
+          startDate: '2026-01-01',
+          dueDate: '2026-06-01',
+        },
+      },
+      expect.objectContaining({
+        onSuccess: expect.any(Function),
+        onError: expect.any(Function),
+      })
+    );
   });
 });

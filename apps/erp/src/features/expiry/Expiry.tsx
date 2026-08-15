@@ -1,15 +1,13 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { CalendarX, TrendingDown } from 'lucide-react';
+import { CalendarX } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useExpiry } from './useExpiry';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
 import { formatDate, daysUntil } from '../../shared/lib/format';
-import { toast } from 'sonner';
-
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const Expiry: React.FC = () => {
   const { data: items = [], isLoading } = useExpiry();
@@ -28,15 +26,6 @@ const Expiry: React.FC = () => {
       <PageHeader
         title="Expiry Tracking"
         description={`${items.length} batches with expiry dates`}
-        actions={
-          <button
-            onClick={() => toast.info('Auto-markdown rules coming soon')}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000' }}
-          >
-            <TrendingDown size={14} /> Auto-Markdown
-          </button>
-        }
       />
 
       <div
@@ -71,7 +60,7 @@ const Expiry: React.FC = () => {
             const days = daysUntil(item.expiryDate ?? '');
             const isExpired = days < 0;
             const isUrgent = days <= 7 && days >= 0;
-            const color = isExpired ? '#f87171' : isUrgent ? AMBER : '#10b981';
+            const color = isExpired ? 'var(--erp-danger)' : isUrgent ? AMBER : 'var(--erp-success)';
             return (
               <div
                 key={`${item.productId}-${item.batchId}`}
@@ -103,7 +92,7 @@ const Expiry: React.FC = () => {
                 </span>
                 <span
                   className="text-[10px] font-semibold px-2 py-0.5 rounded-full w-fit"
-                  style={{ background: `${color}20`, color }}
+                  style={{ background: `color-mix(in srgb, ${color} 13%, transparent)`, color }}
                 >
                   {isExpired ? `${Math.abs(days)}d overdue` : `${days}d`}
                 </span>

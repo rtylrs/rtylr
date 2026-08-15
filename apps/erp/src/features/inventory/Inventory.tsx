@@ -13,14 +13,23 @@ import {
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import PaginationControls from '../../shared/components/PaginationControls';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
 const statusConfig: Record<ProductStockStatus, { color: string; bg: string }> = {
-  'In Stock': { color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-  'Low Stock': { color: AMBER, bg: 'rgba(245,158,11,0.1)' },
-  'Out of Stock': { color: '#f87171', bg: 'rgba(248,113,113,0.1)' },
+  'In Stock': {
+    color: 'var(--erp-success)',
+    bg: 'color-mix(in srgb, var(--erp-success) 10%, transparent)',
+  },
+  'Low Stock': {
+    color: AMBER,
+    bg: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
+  },
+  'Out of Stock': {
+    color: 'var(--erp-danger)',
+    bg: 'color-mix(in srgb, var(--erp-danger) 10%, transparent)',
+  },
 };
 
 // ─── Animation variants ───────────────────────────────────────────────────────
@@ -92,7 +101,7 @@ const Inventory: React.FC = () => {
           data-testid="inventory-add-product-button"
           onClick={() => setQuickAddOpen(true)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-          style={{ background: AMBER, color: '#000' }}
+          style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLElement).style.opacity = '0.9';
           }}
@@ -127,7 +136,8 @@ const Inventory: React.FC = () => {
             color: 'var(--hub-text)',
           }}
           onFocus={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.5)';
+            (e.currentTarget as HTMLElement).style.borderColor =
+              'color-mix(in srgb, var(--erp-accent) 50%, transparent)';
           }}
           onBlur={(e) => {
             (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
@@ -236,7 +246,7 @@ const Inventory: React.FC = () => {
                         style={{
                           color:
                             product.stockQuantity === 0
-                              ? '#f87171'
+                              ? 'var(--erp-danger)'
                               : (product.stockQuantity ?? 0) < (product.lowStockThreshold ?? 0)
                                 ? AMBER
                                 : 'var(--hub-text)',

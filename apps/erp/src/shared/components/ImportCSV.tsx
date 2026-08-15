@@ -3,7 +3,7 @@ import { Upload, FileText, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ImportCSVProps {
-  onImport: (rows: Array<Record<string, string>>) => void;
+  onImport: (rows: Array<Record<string, string>>) => void | number | Promise<void | number>;
   expectedColumns?: string[];
 }
 
@@ -24,6 +24,7 @@ function parseCSV(text: string): Array<Record<string, string>> {
 const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<Array<Record<string, string>> | null>(null);
+  const [importing, setImporting] = useState(false);
 
   const handleFile = async (file: File) => {
     const text = await file.text();
@@ -35,11 +36,17 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
     setPreview(rows);
   };
 
-  const confirm = () => {
-    if (preview) {
-      onImport(preview);
-      toast.success(`Imported ${preview.length} rows`);
+  const confirm = async (): Promise<void> => {
+    if (!preview || importing) return;
+    setImporting(true);
+    try {
+      const created = await onImport(preview);
+      toast.success(`Imported ${created ?? preview.length} rows`);
       setPreview(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Import failed');
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -47,6 +54,7 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
     <div>
       <input
         ref={fileRef}
+        data-testid="csv-file-input"
         type="file"
         accept=".csv"
         className="hidden"
@@ -70,7 +78,7 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
       {preview && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-6"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
+          style={{ background: 'var(--hub-overlay-heavy)' }}
         >
           <div
             className="w-full max-w-3xl rounded-xl p-5"
@@ -128,15 +136,17 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
                 onClick={() => setPreview(null)}
                 className="px-3 py-1.5 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
+                disabled={importing}
               >
                 Cancel
               </button>
               <button
                 onClick={confirm}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                style={{ background: '#f59e0b', color: '#000' }}
+                style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
+                disabled={importing}
               >
-                Import {preview.length} rows
+                {importing ? 'Importing…' : `Import ${preview.length} rows`}
               </button>
             </div>
           </div>

@@ -1,3 +1,25 @@
 {
-  "created": "Facture fournisseur créée"
+  "created": "Facture fournisseur créée",
+  "vendorRequired": "Le nom du fournisseur est obligatoire",
+  "amountPositive": "Le montant doit être supérieur à zéro",
+  "new": "Nouvelle facture",
+  "create": "Créer la facture",
+  "vendor": "Fournisseur",
+  "vendorPlaceholder": "Nom du fournisseur ou vendeur",
+  "amount": "Montant",
+  "dueDate": "Date d'échéance",
+  "description": "Description",
+  "descriptionPlaceholder": "Notes facultatives",
+  "bulkPaymentSoon": "Le paiement groupé des factures arrive bientôt",
+  "title": "Factures à payer",
+  "outstanding": "{{count}} en attente",
+  "total": "total",
+  "empty": "Aucune facture",
+  "emptyDescription": "Suivez les factures fournisseurs pour planifier les sorties de trésorerie.",
+  "number": "N° de facture",
+  "category": "Catégorie",
+  "due": "Échéance",
+  "status": "Statut",
+  "schedulingSoon": "La planification de la facture arrive bientôt",
+  "schedule": "Planifier"
 }

@@ -62,12 +62,9 @@ import { useNotifications } from '../features/inbox/useNotifications';
 import { apiProjectToProject, apiWorkspaceToWorkspace } from '../shared/lib/projectMapper';
 import { LicenseBanner } from '@voxire/components';
 import { safe } from '../shared/lib/api';
-import { useRealtime } from '../shared/lib/realtime';
-import { useQueryClient } from '@tanstack/react-query';
+import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../shared/lib/memberUtils';
-import type { RealtimeEvent } from '@voxire/api';
-import { useCallback } from 'react';
 
 const ACCENT_DEFAULT = '#64C5B9';
 
@@ -84,7 +81,7 @@ const sx = 'px-3';
 
 /** Collapsible group headers, compact, same row height as nav links. */
 const sidebarSectionHeaderClass =
-  'w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-md text-left transition-colors hover:bg-[var(--flow-hover)]';
+  'w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-md text-start transition-colors hover:bg-[var(--flow-hover)]';
 
 interface SidebarLinkProps {
   to: string;
@@ -347,42 +344,12 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   }, [teamMembers, setMembers]);
 
   // ── Realtime wiring ─────────────────────────────────────────────────
-  // Subscribe the layout to the current workspace's topic AND the user's
-  // personal topic. Any project/member change triggers a fresh fetch of
-  // the sidebar data so teammates see new projects instantly. We rely on
-  // react-query invalidation (cheap) rather than patching state by hand.
-  const qc = useQueryClient();
-  const handleRealtime = useCallback(
-    (e: RealtimeEvent): void => {
-      if (e.type.startsWith('project.')) {
-        qc.invalidateQueries({ queryKey: ['projects'] });
-      }
-      if (e.type.startsWith('workspace.')) {
-        qc.invalidateQueries({ queryKey: ['workspaces'] });
-        qc.invalidateQueries({ queryKey: ['workspace-members'] });
-      }
-      if (e.type.startsWith('notification.')) {
-        // Refresh the inbox list + header badge. Pushed on the
-        // user:<id> topic so no project context needed.
-        qc.invalidateQueries({ queryKey: ['notifications'] });
-      }
-    },
-    [qc]
-  );
+  // Topics, invalidation fanout and the self-event skip all live in
+  // useLayoutRealtime, alongside useTaskRealtime and useProjectRealtime.
   const userId = user?.id;
   const caretUserId = Number(userId) || 0;
-  const realtimeTopics = useMemo(() => {
-    const t: string[] = [];
-    // Only subscribe to a numeric workspace id - "personal" is not a
-    // valid server-side topic (it's a client-only sentinel).
-    if (currentWorkspaceId && currentWorkspaceId !== PERSONAL_WORKSPACE_ID) {
-      t.push(`workspace:${currentWorkspaceId}`);
-    }
-    if (userId) t.push(`user:${userId}`);
-    return t;
-  }, [currentWorkspaceId, userId]);
   const shouldUseRealtime = !location.pathname.startsWith('/settings');
-  useRealtime(shouldUseRealtime ? realtimeTopics : [], handleRealtime);
+  useLayoutRealtime(currentWorkspaceId, userId, shouldUseRealtime);
 
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   useForesightLinks(sidebarRef, {
@@ -538,13 +505,13 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform);
   const modKey = isMac ? '⌘' : 'Ctrl';
 
-  const logoFilter =
+  const logoSrc =
     theme === 'dark' ||
     (theme === 'system' &&
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-color-scheme: dark)').matches)
-      ? 'brightness(0) invert(1)'
-      : 'brightness(0)';
+      ? '/logo.png'
+      : '/logo-dark.png';
 
   return (
     <>
@@ -570,14 +537,9 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           >
             <Menu size={20} strokeWidth={2} />
           </button>
-          <img
-            src="/logo.png"
-            alt=""
-            className="h-5 w-auto shrink-0"
-            style={{ filter: logoFilter }}
-          />
+          <img src={logoSrc} alt="" className="h-7 w-auto shrink-0" />
           <span
-            className="min-w-0 flex-1 truncate text-left text-[13px] font-semibold"
+            className="min-w-0 flex-1 truncate text-start text-[13px] font-semibold"
             style={{ color: 'var(--flow-text)' }}
           >
             {activeWorkspace.name}
@@ -614,30 +576,27 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
         <aside
           className={cn(
-            'fixed inset-y-0 left-0 z-50 flex h-full w-[min(18rem,88vw)] flex-col overflow-hidden border-r border-[var(--flow-border)] transition-transform duration-300 ease-out lg:static lg:inset-auto lg:z-auto lg:h-full lg:min-h-0 lg:w-60 lg:max-w-none lg:shrink-0 lg:translate-x-0',
-            mobileNavOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+            'fixed inset-y-0 start-0 z-50 flex h-full w-[min(18rem,88vw)] flex-col overflow-hidden border-e border-[var(--flow-border)] transition-transform duration-300 ease-out lg:static lg:inset-auto lg:z-auto lg:h-full lg:min-h-0 lg:w-60 lg:max-w-none lg:shrink-0 lg:translate-x-0',
+            mobileNavOpen
+              ? 'translate-x-0'
+              : '-translate-x-full rtl:translate-x-full lg:translate-x-0 lg:rtl:translate-x-0'
           )}
           style={{
             background: 'var(--flow-surface)',
             paddingTop: 'env(safe-area-inset-top)',
           }}
         >
-          {/* Logo, same markup as Hub `DefaultLayout` (img src + filter + padding) */}
+          {/* Theme-specific rtylr wordmark. */}
           <div
             className={cn('flex items-center gap-2.5 py-2.5', sx)}
             style={{ borderBottom: '1px solid var(--flow-border)' }}
           >
-            <img
-              src="/logo.png"
-              alt="rtylr"
-              className="h-6 w-auto"
-              style={{ filter: logoFilter }}
-            />
+            <img src={logoSrc} alt="rtylr" className="h-9 w-auto" />
             <button
               type="button"
               aria-label="Close menu"
               onClick={() => setMobileNavOpen(false)}
-              className="ml-auto flex h-9 w-9 items-center justify-center rounded-lg lg:hidden hover:bg-[var(--flow-hover)]"
+              className="ms-auto flex h-9 w-9 items-center justify-center rounded-lg lg:hidden hover:bg-[var(--flow-hover)]"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               <X size={18} strokeWidth={2} />
@@ -662,7 +621,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 {activeWorkspace.name.charAt(0)}
               </span>
               <span
-                className="flex-1 text-left text-[12px] font-medium truncate"
+                className="flex-1 text-start text-[12px] font-medium truncate"
                 style={{ color: 'var(--flow-text)' }}
               >
                 {activeWorkspace.name}
@@ -683,7 +642,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -4, scale: 0.97 }}
                   transition={{ duration: 0.12 }}
-                  className="absolute left-0 right-0 z-50 mt-1 rounded-lg py-1 shadow-lg"
+                  className="absolute inset-x-0 z-50 mt-1 rounded-lg py-1 shadow-lg"
                   style={{
                     background: 'var(--flow-card)',
                     border: '1px solid var(--flow-border)',
@@ -698,7 +657,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         navigate({ to: `/w/${ws.id}` as string });
                         setWorkspaceSwitcherOpen(false);
                       }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-left transition-colors hover:bg-[var(--flow-hover)]"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
                       style={{
                         color:
                           ws.id === currentWorkspaceId
@@ -718,7 +677,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       {ws.name}
                       {ws.id === currentWorkspaceId && (
                         <span
-                          className="ml-auto h-1.5 w-1.5 rounded-full"
+                          className="ms-auto h-1.5 w-1.5 rounded-full"
                           style={{ background: 'var(--accent)' }}
                         />
                       )}
@@ -738,7 +697,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               }}
             >
               <Search size={12} />
-              <span className="flex-1 text-left">Search…</span>
+              <span className="flex-1 text-start">Search…</span>
               <span
                 className="hidden text-[9px] font-mono px-1.5 py-0.5 rounded sm:inline"
                 style={{ background: 'var(--flow-active)' }}
@@ -994,14 +953,14 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 />
                 <div className="flex flex-col items-start min-w-0 flex-1">
                   <span
-                    className="text-[12px] font-medium truncate w-full text-left"
+                    className="text-[12px] font-medium truncate w-full text-start"
                     style={{ color: 'var(--flow-text)' }}
                   >
                     {userName}
                   </span>
                   {userEmail && (
                     <span
-                      className="text-[10px] truncate w-full text-left"
+                      className="text-[10px] truncate w-full text-start"
                       style={{ color: 'var(--flow-text-muted)' }}
                     >
                       {userEmail}
@@ -1010,7 +969,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 </div>
                 <ChevronRight
                   size={12}
-                  className="shrink-0"
+                  className="flow-directional-icon shrink-0"
                   style={{ color: 'var(--flow-text-dim)' }}
                 />
               </button>
@@ -1022,7 +981,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 4, scale: 0.97 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute bottom-full left-0 right-0 mb-1 rounded-lg py-1 z-50"
+                    className="absolute bottom-full inset-x-0 mb-1 rounded-lg py-1 z-50"
                     style={{
                       background: 'var(--flow-card)',
                       border: '1px solid var(--flow-border)',
@@ -1073,7 +1032,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     />
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-left transition-colors hover:bg-[var(--flow-hover)]"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
                       style={{ color: '#ef4444' }}
                     >
                       <LogOut size={13} />

@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import EmptyState from '../../shared/components/EmptyState';
@@ -10,7 +11,8 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useBills } from './useBills';
-import { useCreateBill } from '../../shared/hooks/queries/useBills';
+import { useCreateBill, useUpdateBill } from '../../shared/hooks/queries/useBills';
+import { useSettings } from '../../shared/lib/settings';
 import {
   cardStyle,
   ghostBtn,
@@ -21,10 +23,10 @@ import {
 } from '../../shared/lib/tokens';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  unpaid: { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
-  paid: { background: 'rgba(16,185,129,0.12)', color: '#10b981' },
-  overdue: { background: 'rgba(239,68,68,0.12)', color: '#ef4444' },
-  scheduled: { background: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
+  unpaid: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
+  paid: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
+  overdue: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
+  scheduled: { background: 'var(--finance-info-soft)', color: 'var(--finance-info)' },
 };
 
 interface NewBillForm {
@@ -35,6 +37,8 @@ interface NewBillForm {
 }
 
 const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  const { t } = useTranslation();
+  const baseCurrency = useSettings((s) => s.currency);
   const createBill = useCreateBill();
   const [form, setForm] = useState<NewBillForm>({
     vendor: '',
@@ -45,18 +49,23 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
 
   const handleSubmit = (): void => {
     if (!form.vendor.trim()) {
-      toast.error('Vendor name is required');
+      toast.error(t('bills.vendorRequired'));
       return;
     }
     if (form.amount <= 0) {
-      toast.error('Amount must be greater than zero');
+      toast.error(t('bills.amountPositive'));
       return;
     }
+    const derivedSupplierId =
+      form.vendor
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-') || '1';
     createBill.mutate(
       {
-        supplierId: '0',
+        supplierId: derivedSupplierId,
         amount: form.amount,
-        currency: 'USD',
+        currency: baseCurrency ?? 'USD',
         dueDate: form.dueDate,
         status: 'unpaid',
         description: form.description || form.vendor,
@@ -79,12 +88,12 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
     <Modal
       open={open}
       onClose={onClose}
-      title="New Bill"
+      title={t('bills.new')}
       width={440}
       footer={
         <>
           <button style={ghostBtn} onClick={onClose} disabled={createBill.isPending}>
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             style={{ ...primaryBtn, opacity: createBill.isPending ? 0.6 : 1 }}
@@ -92,30 +101,30 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
             disabled={createBill.isPending}
           >
             <CheckCircle size={13} />
-            {createBill.isPending ? 'Saving…' : 'Create Bill'}
+            {createBill.isPending ? t('common.saving') : t('bills.create')}
           </button>
         </>
       }
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Vendor</label>
+          <label style={labelStyle}>{t('bills.vendor')}</label>
           <input
             value={form.vendor}
             onChange={(e) => setForm((f) => ({ ...f, vendor: e.target.value }))}
-            placeholder="Supplier or vendor name"
+            placeholder={t('bills.vendorPlaceholder')}
             style={inputStyle}
           />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Amount</label>
+          <label style={labelStyle}>{t('bills.amount')}</label>
           <CurrencyInput
             value={form.amount}
             onChange={(v) => setForm((f) => ({ ...f, amount: v }))}
           />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Due Date</label>
+          <label style={labelStyle}>{t('bills.dueDate')}</label>
           <input
             type="date"
             value={form.dueDate}
@@ -124,11 +133,11 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
           />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <label style={labelStyle}>Description</label>
+          <label style={labelStyle}>{t('bills.description')}</label>
           <input
             value={form.description}
             onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            placeholder="Optional notes"
+            placeholder={t('bills.descriptionPlaceholder')}
             style={inputStyle}
           />
         </div>
@@ -138,6 +147,7 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
 };
 
 const Bills: React.FC = () => {
+  const { t } = useTranslation();
   const { data = [], isLoading } = useBills();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showCreate, setShowCreate] = useState(false);
@@ -153,8 +163,27 @@ const Bills: React.FC = () => {
       return next;
     });
 
+  const updateBill = useUpdateBill();
   const payAll = (): void => {
-    toast.info('Bulk bill payment coming soon');
+    const ids = Array.from(selected);
+    ids.forEach((id) => {
+      const b = data.find((x) => x.id === id);
+      updateBill.mutate({
+        id,
+        body: {
+          supplierId: typeof b?.supplier === 'string' ? b.supplier : '',
+          amount: typeof b?.amount === 'number' ? b.amount : undefined,
+          currency: typeof b?.currency === 'string' ? b.currency : 'USD',
+          dueDate: typeof b?.dueDate === 'string' ? b.dueDate : '',
+          status: 'paid',
+          description:
+            typeof (b as Record<string, unknown>)?.description === 'string'
+              ? String((b as Record<string, unknown>).description)
+              : '',
+        },
+      });
+    });
+    toast.success(t('bills.markedPaid', { count: ids.length }));
     setSelected(new Set());
   };
 
@@ -164,12 +193,13 @@ const Bills: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Bills to pay · rtylr" />
+      <HelmetContainer title={`${t('bills.title')} · rtylr`} />
       <PageHeader
-        title="Bills to Pay"
+        title={t('bills.title')}
         subtitle={
           <>
-            {unpaid.length} outstanding <>&middot;</> <MoneyDisplay amount={totalDue} /> total
+            {t('bills.outstanding', { count: unpaid.length })} <>&middot;</>{' '}
+            <MoneyDisplay amount={totalDue} /> {t('bills.total')}
           </>
         }
         actions={
@@ -180,7 +210,7 @@ const Bills: React.FC = () => {
               </button>
             )}
             <button style={ghostBtn} aria-label="New Bill" onClick={() => setShowCreate(true)}>
-              <Plus size={13} /> New Bill
+              <Plus size={13} /> {t('bills.new')}
             </button>
           </>
         }
@@ -193,18 +223,27 @@ const Bills: React.FC = () => {
           <SkeletonRow />
         </div>
       ) : data.length === 0 ? (
-        <EmptyState title="No bills" description="Track supplier invoices to plan cash outflows." />
+        <EmptyState title={t('bills.empty')} description={t('bills.emptyDescription')} />
       ) : (
         <div style={{ ...cardStyle, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                {['', 'Bill #', 'Vendor', 'Category', 'Amount', 'Due', 'Status', ''].map((h, i) => (
+                {[
+                  '',
+                  t('bills.number'),
+                  t('bills.vendor'),
+                  t('bills.category'),
+                  t('bills.amount'),
+                  t('bills.due'),
+                  t('bills.status'),
+                  '',
+                ].map((h, i) => (
                   <th
                     key={i}
                     style={{
                       padding: '10px 16px',
-                      textAlign: 'left',
+                      textAlign: 'start',
                       fontSize: 11,
                       fontWeight: 600,
                       textTransform: 'uppercase',
@@ -244,9 +283,7 @@ const Bills: React.FC = () => {
                       padding: '12px 16px',
                       fontSize: 12,
                       color:
-                        b.status === 'overdue'
-                          ? 'var(--finance-danger, #ef4444)'
-                          : 'var(--hub-text-muted)',
+                        b.status === 'overdue' ? 'var(--finance-danger)' : 'var(--hub-text-muted)',
                     }}
                   >
                     {b.dueDate}
@@ -268,10 +305,16 @@ const Bills: React.FC = () => {
                   <td style={{ padding: '12px 16px' }}>
                     {b.status === 'unpaid' || b.status === 'overdue' ? (
                       <button
-                        style={{ ...ghostBtn, padding: '4px 10px' }}
-                        onClick={() => toast.info('Bill scheduling coming soon')}
+                        style={{
+                          ...ghostBtn,
+                          padding: '4px 10px',
+                          opacity: 0.6,
+                          cursor: 'not-allowed',
+                        }}
+                        disabled
+                        title={t('bills.schedulingSoon')}
                       >
-                        <Clock size={12} /> Schedule
+                        <Clock size={12} /> {t('bills.schedule')}
                       </button>
                     ) : (
                       <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>-</span>

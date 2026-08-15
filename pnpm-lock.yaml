@@ -1007,6 +1007,9 @@ importers:
       '@voxire/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@voxire/permissions':
+        specifier: workspace:*
+        version: link:../../packages/permissions
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config

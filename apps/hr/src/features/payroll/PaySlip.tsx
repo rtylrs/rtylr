@@ -13,14 +13,12 @@ import {
   Breadcrumbs,
   Pill,
 } from '../../shared/components/ui';
-
-function fmt(n: number): string {
-  return n.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-  });
-}
+import { useHrSettings } from '../../shared/hooks/useHrExtras';
+import { formatCurrency } from '../../shared/lib/hrNumberUtils';
+import {
+  PayrollConfigRequired,
+  usePayrollConfigured,
+} from '../../shared/components/PayrollConfigGuard';
 
 interface BreakdownRowProps {
   label: string;
@@ -67,9 +65,13 @@ const routeApi = getRouteApi('/hr-config/payroll/my-payslips/view');
 
 const PaySlip = (): React.JSX.Element => {
   const { t } = useTranslation();
+  const { data: settings } = useHrSettings();
   const { runId } = routeApi.useSearch();
+  const payrollConfigured = usePayrollConfigured();
 
-  const { data: run, isLoading } = useGetMyPayrollRun(runId);
+  const { data: run, isLoading } = useGetMyPayrollRun(runId, { enabled: payrollConfigured });
+
+  if (!payrollConfigured) return <PayrollConfigRequired />;
 
   if (isLoading) {
     return (
@@ -152,18 +154,25 @@ const PaySlip = (): React.JSX.Element => {
             >
               {t('payroll.paySlip.earnings')}
             </div>
-            <BreakdownRow label={t('payroll.table.basePay')} value={fmt(basePay)} />
+            <BreakdownRow
+              label={t('payroll.table.basePay')}
+              value={formatCurrency(basePay, settings?.currency)}
+            />
             <BreakdownRow
               label={t('payroll.table.overtimePay')}
-              value={fmt(overtimePay)}
+              value={formatCurrency(overtimePay, settings?.currency)}
               color={overtimePay > 0 ? 'var(--hr-status-submitted)' : undefined}
             />
             <BreakdownRow
               label={t('payroll.table.bonuses')}
-              value={fmt(bonuses)}
+              value={formatCurrency(bonuses, settings?.currency)}
               color={bonuses > 0 ? 'var(--hr-status-approved)' : undefined}
             />
-            <BreakdownRow label={t('payroll.paySlip.grossPay')} value={fmt(gross)} bold />
+            <BreakdownRow
+              label={t('payroll.paySlip.grossPay')}
+              value={formatCurrency(gross, settings?.currency)}
+              bold
+            />
           </div>
 
           {/* Deductions section */}
@@ -182,7 +191,7 @@ const PaySlip = (): React.JSX.Element => {
             </div>
             <BreakdownRow
               label={t('payroll.table.deductions')}
-              value={`-${fmt(deductions)}`}
+              value={`-${formatCurrency(deductions, settings?.currency)}`}
               color="var(--hr-error)"
             />
           </div>
@@ -208,7 +217,7 @@ const PaySlip = (): React.JSX.Element => {
                 fontVariantNumeric: 'tabular-nums',
               }}
             >
-              {fmt(netPay)}
+              {formatCurrency(netPay, settings?.currency)}
             </span>
           </div>
         </Card>

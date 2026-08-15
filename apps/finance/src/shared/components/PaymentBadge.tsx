@@ -3,11 +3,11 @@ import React from 'react';
 export type PaymentStatus = 'paid' | 'partial' | 'unpaid' | 'overdue' | 'refunded';
 
 const STYLE: Record<PaymentStatus, React.CSSProperties> = {
-  paid: { background: 'rgba(16,185,129,0.12)', color: '#10b981' },
-  partial: { background: 'rgba(245,158,11,0.12)', color: '#f59e0b' },
-  unpaid: { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
-  overdue: { background: 'rgba(239,68,68,0.12)', color: '#ef4444' },
-  refunded: { background: 'rgba(139,92,246,0.12)', color: '#8b5cf6' },
+  paid: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
+  partial: { background: 'var(--finance-warning-soft)', color: 'var(--finance-warning)' },
+  unpaid: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
+  overdue: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
+  refunded: { background: 'var(--finance-purple-soft)', color: 'var(--finance-purple)' },
 };
 
 const LABEL: Record<PaymentStatus, string> = {

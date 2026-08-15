@@ -35,7 +35,10 @@ const ProductTagInput: React.FC<ProductTagInputProps> = ({
         <span
           key={t}
           className="flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full"
-          style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b' }}
+          style={{
+            background: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
+            color: 'var(--erp-accent)',
+          }}
         >
           {t}
           <button onClick={() => remove(t)}>

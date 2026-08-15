@@ -10,6 +10,7 @@ import {
   Card,
   Pill,
   EmptyState,
+  QueryError,
   Skeleton,
   ACCENT,
 } from '../../shared/components/ui';
@@ -38,7 +39,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const Attendance = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data, isLoading } = useGetMyAttendance({});
+  const { data, isLoading, isError, isFetching, refetch } = useGetMyAttendance({});
 
   const records = data?.records ?? [];
 
@@ -65,7 +66,9 @@ const Attendance = (): React.JSX.Element => {
           {t('attendance.history')}
         </h3>
 
-        {isLoading ? (
+        {isError ? (
+          <QueryError onRetry={() => refetch()} isRetrying={isFetching} />
+        ) : isLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <Skeleton height={56} />
             <Skeleton height={56} />
@@ -79,7 +82,7 @@ const Attendance = (): React.JSX.Element => {
             description={t('attendance.emptyDescription')}
           />
         ) : (
-          <Card style={{ padding: 0, overflow: 'hidden' }}>
+          <Card style={{ padding: 0, overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
               <thead>
                 <tr style={{ background: 'var(--hr-hover)' }}>

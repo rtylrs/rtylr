@@ -1,4 +1,4 @@
-import { unwrap } from '@voxire/api';
+import { getOneKitErrorMessage, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -48,8 +48,8 @@ export const useFinanceInviteMember = (): UseMutationResult<unknown, unknown, In
       toast.success('Invitation sent');
       void qc.invalidateQueries({ queryKey: ['finance-team'] });
     },
-    onError: (): void => {
-      toast.error('Failed to send invitation');
+    onError: (error): void => {
+      toast.error(getOneKitErrorMessage(error, 'Failed to send invitation'));
     },
   });
 };
@@ -63,8 +63,8 @@ export const useFinanceDeactivateMember = (): UseMutationResult<unknown, unknown
       toast.success('Member removed');
       void qc.invalidateQueries({ queryKey: ['finance-team'] });
     },
-    onError: (): void => {
-      toast.error('Failed to remove member');
+    onError: (error): void => {
+      toast.error(getOneKitErrorMessage(error, 'Failed to remove member'));
     },
   });
 };

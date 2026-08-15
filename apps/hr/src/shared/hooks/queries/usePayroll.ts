@@ -45,6 +45,10 @@ interface ListPayrollRunsParams {
   offset?: number;
 }
 
+interface PayrollQueryOptions {
+  enabled?: boolean;
+}
+
 /**
  * The self-service endpoints take no `status`: onion restricts them to
  * approved/exported server-side and resolves the employee from the session,
@@ -69,17 +73,28 @@ export const useGetPayrollConfig = () => {
   return useQuery<PayrollConfigData>({
     queryKey: ['payroll-config'],
     queryFn: async (): Promise<PayrollConfigData> => {
-      const res = await unwrap(safe.get<{ config: PayrollConfigData }>('/hr/payroll/config'));
-      const config = (
-        res as { config: Partial<PayrollConfigData> & { periodType?: PayrollConfigData['period'] } }
-      ).config;
-      return {
-        grossModel: config.grossModel ?? 'both',
-        period: config.period ?? config.periodType ?? 'monthly',
-        overtimeEnabled: config.overtimeEnabled ?? false,
-        deductionsEnabled: config.deductionsEnabled ?? false,
-        bonusesEnabled: config.bonusesEnabled ?? false,
-      };
+      try {
+        const res = await unwrap(safe.get<Record<string, unknown>>('/hr/payroll/config'));
+        const raw = ((res as any)?.config || res || {}) as Record<string, unknown>;
+        return {
+          grossModel:
+            ((raw.grossModel ?? raw.gross_model) as PayrollConfigData['grossModel']) ?? 'both',
+          period:
+            ((raw.period ?? raw.periodType ?? raw.period_type) as PayrollConfigData['period']) ??
+            'monthly',
+          overtimeEnabled: Boolean(raw.overtimeEnabled ?? raw.overtime_enabled ?? false),
+          deductionsEnabled: Boolean(raw.deductionsEnabled ?? raw.deductions_enabled ?? false),
+          bonusesEnabled: Boolean(raw.bonusesEnabled ?? raw.bonuses_enabled ?? false),
+        };
+      } catch {
+        return {
+          grossModel: 'both',
+          period: 'monthly',
+          overtimeEnabled: false,
+          deductionsEnabled: false,
+          bonusesEnabled: false,
+        };
+      }
     },
   });
 };
@@ -114,24 +129,28 @@ export const useUpsertPayrollConfig = () => {
 
 /* ── Run hooks ── */
 
-export const useListPayrollRuns = (params?: ListPayrollRunsParams) => {
+export const useListPayrollRuns = (
+  params?: ListPayrollRunsParams,
+  options?: PayrollQueryOptions
+) => {
   return useQuery<ListPayrollRunsResponse>({
     queryKey: ['payroll-runs', params],
     queryFn: async (): Promise<ListPayrollRunsResponse> => {
       const res = await unwrap(safe.get<ListPayrollRunsResponse>('/hr/payroll/runs', { params }));
       return res as ListPayrollRunsResponse;
     },
+    enabled: options?.enabled ?? true,
   });
 };
 
-export const useGetPayrollRun = (id: number | undefined) => {
+export const useGetPayrollRun = (id: number | undefined, options?: PayrollQueryOptions) => {
   return useQuery<PayrollRunPayload>({
     queryKey: ['payroll-run', id],
     queryFn: async (): Promise<PayrollRunPayload> => {
       const res = await unwrap(safe.get<{ run: PayrollRunPayload }>(`/hr/payroll/runs/${id}`));
       return (res as { run: PayrollRunPayload }).run;
     },
-    enabled: !!id,
+    enabled: !!id && (options?.enabled ?? true),
   });
 };
 
@@ -147,7 +166,10 @@ export const useGetPayrollRun = (id: number | undefined) => {
  * Their query keys are deliberately distinct from the admin hooks' so that
  * invalidating one never serves company-wide data into a self-service screen.
  */
-export const useListMyPayrollRuns = (params?: ListMyPayrollRunsParams) => {
+export const useListMyPayrollRuns = (
+  params?: ListMyPayrollRunsParams,
+  options?: PayrollQueryOptions
+) => {
   return useQuery<ListPayrollRunsResponse>({
     queryKey: ['my-payroll-runs', params],
     queryFn: async (): Promise<ListPayrollRunsResponse> => {
@@ -156,6 +178,7 @@ export const useListMyPayrollRuns = (params?: ListMyPayrollRunsParams) => {
       );
       return res as ListPayrollRunsResponse;
     },
+    enabled: options?.enabled ?? true,
   });
 };
 
@@ -163,23 +186,24 @@ export const useListMyPayrollRuns = (params?: ListMyPayrollRunsParams) => {
  * Returns the run with `entries` containing exactly the caller's own entry.
  * A run that isn't theirs, or isn't approved/exported, comes back as a 404.
  */
-export const useGetMyPayrollRun = (id: number | undefined) => {
+export const useGetMyPayrollRun = (id: number | undefined, options?: PayrollQueryOptions) => {
   return useQuery<PayrollRunPayload>({
     queryKey: ['my-payroll-run', id],
     queryFn: async (): Promise<PayrollRunPayload> => {
       const res = await unwrap(safe.get<{ run: PayrollRunPayload }>(`/hr/payroll/my-runs/${id}`));
       return (res as { run: PayrollRunPayload }).run;
     },
-    enabled: !!id,
+    enabled: !!id && (options?.enabled ?? true),
   });
 };
 
-export const useTriggerPayrollRun = () => {
+export const useTriggerPayrollRun = (enabled = true) => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (data: TriggerPayrollRunRequest): Promise<void> => {
+      if (!enabled) return;
       await unwrap(safe.post('/hr/payroll/runs/trigger', data));
     },
     onSuccess: () => {
@@ -192,12 +216,13 @@ export const useTriggerPayrollRun = () => {
   });
 };
 
-export const useApprovePayrollRun = () => {
+export const useApprovePayrollRun = (enabled = true) => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (data: ApprovePayrollRunRequest): Promise<void> => {
+      if (!enabled) return;
       await unwrap(safe.post(`/hr/payroll/runs/${data.runId}/approve`, data));
     },
     onSuccess: (_data: void, variables: ApprovePayrollRunRequest) => {

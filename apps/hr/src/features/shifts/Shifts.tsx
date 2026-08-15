@@ -67,10 +67,9 @@ const Shifts = (): React.JSX.Element => {
   const isMobile = useIsMobile(900);
   const [weekOffset, setWeekOffset] = useState(0);
   const [selectedDay, setSelectedDay] = useState(todayIdx);
+  const week = useMemo(() => getWeekRange(weekOffset), [weekOffset]);
   const { data: fetchedShifts, isLoading } = useShifts();
   const shifts: Shift[] = fetchedShifts ?? [];
-
-  const week = useMemo(() => getWeekRange(weekOffset), [weekOffset]);
   const days = DAY_KEYS.map((k) => t(`timesheets.days.${k}`));
 
   const dayShifts = shifts.filter((s) => s.day === days[selectedDay]);

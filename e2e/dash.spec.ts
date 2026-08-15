@@ -86,7 +86,7 @@ async function stubDashAPIs(page: import('@playwright/test').Page): Promise<void
   );
 }
 
-test.describe.skip('Dash', () => {
+test.describe('Dash', () => {
   test.beforeEach(async ({ page, context }) => {
     await primeAuthCookie(context);
     await stubDashAPIs(page);

@@ -1,0 +1,8 @@
+{
+  "title": "Offboarding",
+  "subtitle": "Exit checklist for departing employees",
+  "emptyTitle": "No offboarding in progress",
+  "emptyDescription": "Departing employees' checklists will show here.",
+  "tasksComplete": "{{done}} of {{total}} complete",
+  "updated": "Updated"
+}

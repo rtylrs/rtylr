@@ -11,13 +11,14 @@ import {
   Input,
   Select,
   Skeleton,
+  EmptyState,
   useIsMobile,
 } from '../../shared/components/ui';
 import { HrSettings } from '../../shared/services/hrExtras';
 
 const Settings: React.FC = () => {
   const isMobile = useIsMobile(900);
-  const { data, isLoading } = useHrSettings();
+  const { data, isLoading, isError, isFetching, refetch } = useHrSettings();
   const update = useUpdateHrSettings();
 
   const [form, setForm] = useState<HrSettings | null>(null);
@@ -25,6 +26,28 @@ const Settings: React.FC = () => {
   useEffect(() => {
     if (data && !form) setForm(data);
   }, [data, form]);
+
+  if (isError && !form) {
+    return (
+      <div role="alert">
+        <EmptyState
+          title="Unable to load HR settings"
+          description="Please try again."
+          action={
+            <Button
+              variant="primary"
+              onClick={() => {
+                void refetch();
+              }}
+              disabled={isFetching}
+            >
+              Retry
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
 
   if (isLoading || !form) {
     return <Skeleton height={280} />;

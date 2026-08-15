@@ -1,0 +1,57 @@
+{
+  "title": "الإجازات",
+  "subtitle": "إدارة طلبات الإجازات والأرصدة",
+  "newRequest": "طلب جديد",
+  "requestCreated": "تم تقديم طلب الإجازة",
+  "requestUpdated": "تم تحديث طلب الإجازة",
+  "employee": "الموظف",
+  "days": "أيام",
+  "emptyTitle": "لا توجد طلبات إجازة",
+  "emptyDescription": "ستظهر طلبات الإجازة هنا بعد تقديمها.",
+  "noLeaveTypes": "لم يتم تهيئة أنواع الإجازات",
+  "configureLeaveTypes": "قم بإعداد سياسات الإجازات قبل تقديم الطلبات.",
+  "goToSettings": "الذهاب إلى الإعدادات",
+  "tabs": {
+    "myLeave": "إجازاتي",
+    "teamCalendar": "تقويم الفريق"
+  },
+  "statuses": {
+    "all": "الكل",
+    "pending": "قيد الانتظار",
+    "approved": "موافق عليه",
+    "rejected": "مرفوض",
+    "cancelled": "ملغاة"
+  },
+  "balances": {
+    "emptyTitle": "لا توجد أرصدة إجازات",
+    "emptyDescription": "ستظهر أرصدة إجازاتك بعد تهيئة أنواع الإجازات.",
+    "daysLeft": "أيام متبقية",
+    "entitled": "المستحق",
+    "used": "المستخدم",
+    "pending": "قيد الانتظار"
+  },
+  "form": {
+    "title": "طلب إجازة جديد",
+    "subtitle": "تقديم طلب إجازة للموافقة",
+    "leaveType": "نوع الإجازة",
+    "selectType": "اختر نوع الإجازة",
+    "remainingBalance": "الرصيد المتبقي",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "reason": "السبب",
+    "reasonPlaceholder": "لماذا تطلب إجازة؟",
+    "notes": "ملاحظات",
+    "notesPlaceholder": "ملاحظات إضافية (اختياري)",
+    "submit": "تقديم الطلب",
+    "errorPastDate": "لا يمكن أن تكون تواريخ الإجازة في الماضي",
+    "errorOverlap": "يتداخل هذا النطاق الزمني مع طلب إجازة معتمد موجود"
+  },
+  "calendar": {
+    "prevMonth": "الشهر السابق",
+    "nextMonth": "الشهر التالي",
+    "department": "القسم",
+    "location": "الموقع",
+    "emptyTitle": "لا توجد إجازات مجدولة",
+    "emptyDescription": "ستظهر الإجازات الموافق عليها في التقويم."
+  }
+}

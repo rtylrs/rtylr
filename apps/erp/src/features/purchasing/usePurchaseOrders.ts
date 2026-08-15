@@ -16,10 +16,33 @@ const purchaseOrderClient = createOneKitClient(PurchaseOrderServiceClient, 'erp'
 
 export type { CreatePurchaseOrderRequest, PurchaseOrder };
 
-interface UsePurchaseOrdersParams {
+export interface UsePurchaseOrdersParams {
   page?: number;
   pageSize?: number;
   status?: string;
+}
+
+const EXPORT_PAGE_SIZE = 100;
+
+export async function fetchAllPurchaseOrders(
+  params: Pick<UsePurchaseOrdersParams, 'status'> = {}
+): Promise<PurchaseOrder[]> {
+  const purchaseOrders: PurchaseOrder[] = [];
+  let page = 1;
+
+  while (true) {
+    const response = await purchaseOrderClient.listPurchaseOrders({
+      status: params.status ?? '',
+      page,
+      pageSize: EXPORT_PAGE_SIZE,
+    });
+    const pageOrders = response.purchaseOrders ?? [];
+    purchaseOrders.push(...pageOrders);
+
+    const hasMore = response.hasMore ?? pageOrders.length === EXPORT_PAGE_SIZE;
+    if (!hasMore || pageOrders.length === 0) return purchaseOrders;
+    page += 1;
+  }
 }
 
 export function usePurchaseOrders(params: UsePurchaseOrdersParams = {}) {
@@ -27,6 +50,13 @@ export function usePurchaseOrders(params: UsePurchaseOrdersParams = {}) {
   return useQuery<ListPurchaseOrdersResponse>({
     queryKey: ['purchase-orders', { page, pageSize, status }],
     queryFn: () => purchaseOrderClient.listPurchaseOrders({ page, pageSize, status }),
+  });
+}
+
+export function useAllPurchaseOrders() {
+  return useQuery<PurchaseOrder[]>({
+    queryKey: ['purchase-orders', 'all'],
+    queryFn: () => fetchAllPurchaseOrders(),
   });
 }
 

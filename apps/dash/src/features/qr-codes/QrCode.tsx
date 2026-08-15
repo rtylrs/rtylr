@@ -9,10 +9,17 @@ import { saveAs } from 'file-saver';
 import { useUserStore } from '../../shared/stores/userStore';
 import { QrCodeTemplate, QrCodeTemplates, QrOptions } from './templates';
 
+import { APP_URLS } from '@voxire/config';
+
 function QrCode() {
-  const { userId, user } = useUserStore();
+  const { user } = useUserStore();
+  const businessIdentifier =
+    user?.businessSlug || user?.business_slug || user?.businessId || user?.id || '';
+  const menuBaseUrl = (APP_URLS.menu ?? 'https://menu.rtylr.com').replace(/\/$/, '');
+  const initialUrl = businessIdentifier ? `${menuBaseUrl}/${businessIdentifier}` : menuBaseUrl;
+
   const [qrOptions, setQrOptions] = useState<QrOptions>({
-    url: 'https://rtylr.voxire.com/restaurant/' + userId,
+    url: initialUrl,
     size: 150,
     fgColor: '#000000',
     bgColor: '#ffffff',
@@ -26,9 +33,19 @@ function QrCode() {
 
   const qrRef = useRef(null);
 
+  useEffect(() => {
+    if (businessIdentifier) {
+      setQrOptions((current) => ({
+        ...current,
+        url: `${menuBaseUrl}/${businessIdentifier}`,
+      }));
+    }
+  }, [businessIdentifier, menuBaseUrl]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setQrOptions({ ...qrOptions, [name]: value });
+    const target = e.target as HTMLInputElement;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    setQrOptions({ ...qrOptions, [target.name]: value });
   };
 
   const handleDownload = async () => {
@@ -65,7 +82,10 @@ function QrCode() {
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-primary">QR Code Generator</h1>
         <div className="grid grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl p-5 border border-black/5 shadow-card space-y-4">
+          <div
+            className="rounded-xl p-5 border shadow-card space-y-4"
+            style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+          >
             <div className="flex flex-wrap gap-2">
               {QrCodeTemplates.map((template) => (
                 <div
@@ -221,7 +241,10 @@ function QrCode() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl p-5 border border-black/5 shadow-card flex flex-col items-center gap-4">
+          <div
+            className="rounded-xl p-5 border shadow-card flex flex-col items-center gap-4"
+            style={{ background: 'var(--dash-card)', borderColor: 'var(--dash-border)' }}
+          >
             <div
               ref={qrRef}
               className="flex flex-col items-center justify-center rounded-lg overflow-hidden"

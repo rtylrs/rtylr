@@ -24,6 +24,8 @@ import {
   MessageSquare,
   Search,
   Sparkles,
+  Menu,
+  X,
 } from 'lucide-react';
 import { CaretPanel, CaretButton, useCaretStore, useCaretSettingsStore } from '@voxire/caret';
 import { LicenseBanner } from '@voxire/components';
@@ -94,8 +96,6 @@ const routeLabels: Record<string, string> = {
   '/security': 'Security',
   '/theme': 'Theme',
   '/help': 'Help center',
-  '/export': 'Export data',
-  '/import': 'Import data',
   '/settings': 'Manage account',
   '/settings/account': 'Account',
   '/settings/general': 'General',
@@ -196,8 +196,8 @@ const SidebarSection: React.FC<{
       </button>
       {open && (
         <div
-          className="ml-5 pl-2 mt-0.5 space-y-0.5"
-          style={{ borderLeft: '1px solid var(--dash-border)' }}
+          className="ms-5 ps-2 mt-0.5 space-y-0.5"
+          style={{ borderInlineStart: '1px solid var(--dash-border)' }}
         >
           {items.map((item) => (
             <SidebarNavItem key={item.path} {...item} />
@@ -328,6 +328,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
     [pathname, search, user?.apps, user?.businessName, user?.role]
   );
 
+  const [mobileSidebarOpen, setMobileSidebarOpen] = React.useState(false);
+
   const handleLogout = (): void => {
     useBusinessStore.getState().reset();
     useConfigStore.getState().reset();
@@ -338,15 +340,27 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   return (
     <>
       <div
-        className="dash-shell flex h-screen overflow-hidden"
+        className="dash-shell flex h-screen overflow-hidden relative"
         style={{ background: 'var(--dash-bg)' }}
       >
+        {/* Mobile sidebar overlay backdrop */}
+        {mobileSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+        )}
+
         {/* Sidebar */}
         <aside
-          className="dash-sidebar w-64 flex flex-col shrink-0 overflow-hidden"
+          className={cn(
+            'dash-sidebar w-64 flex flex-col shrink-0 overflow-hidden transition-transform duration-200 z-40',
+            'fixed md:relative inset-y-0 start-0 h-full',
+            mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          )}
           style={{
             background: 'var(--dash-surface)',
-            borderRight: '1px solid var(--dash-border)',
+            borderInlineEnd: '1px solid var(--dash-border)',
           }}
         >
           {/* Logo */}
@@ -355,16 +369,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             style={{ borderBottom: '1px solid var(--dash-border)' }}
           >
             <img
-              src="/logo.png"
+              src={
+                theme === 'dark' ||
+                (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+                  ? '/logo.png'
+                  : '/logo-dark.png'
+              }
               alt="rtylr"
-              className="h-6 w-auto"
-              style={{
-                filter:
-                  theme === 'dark' ||
-                  (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-                    ? 'brightness(0) invert(1)'
-                    : 'brightness(0)',
-              }}
+              className="h-9 w-auto"
             />
           </div>
 
@@ -505,35 +517,45 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             <LicenseBanner safe={safe} />
             {/* Topbar */}
             <header
-              className="dash-topbar h-11 flex items-center justify-between px-6 shrink-0"
+              className="dash-topbar h-11 flex items-center justify-between px-4 sm:px-6 shrink-0"
               style={{
                 background: 'var(--dash-surface)',
                 borderBottom: '1px solid var(--dash-border)',
               }}
             >
-              {pageTitle === '__caret__' ? (
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-6 w-6 rounded-lg flex items-center justify-center"
-                    style={{ background: 'rgba(139,92,246,0.1)' }}
-                  >
-                    <Sparkles size={13} style={{ color: '#8b5cf6' }} />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setMobileSidebarOpen((v) => !v)}
+                  className="md:hidden h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
+                  style={{ color: 'var(--dash-text-muted)' }}
+                  aria-label="Toggle navigation menu"
+                >
+                  <Menu size={16} />
+                </button>
+                {pageTitle === '__caret__' ? (
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-6 w-6 rounded-lg flex items-center justify-center"
+                      style={{ background: 'rgba(139,92,246,0.1)' }}
+                    >
+                      <Sparkles size={13} style={{ color: '#8b5cf6' }} />
+                    </div>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                      Caret
+                    </span>
+                    <span
+                      className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                      style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}
+                    >
+                      AI
+                    </span>
                   </div>
-                  <span className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                    Caret
-                  </span>
-                  <span
-                    className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
-                    style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}
-                  >
-                    AI
-                  </span>
-                </div>
-              ) : (
-                <h1 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                  {pageTitle}
-                </h1>
-              )}
+                ) : (
+                  <h1 className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
+                    {pageTitle}
+                  </h1>
+                )}
+              </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setCommandPaletteOpen(true)}

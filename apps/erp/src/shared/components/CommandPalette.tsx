@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useId, useMemo, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Search, Package, Users, ShoppingCart, LayoutDashboard, ArrowRight } from 'lucide-react';
 import { useProducts } from '../../features/products/useProducts';
 import { useSuppliers } from '../../features/suppliers/useSuppliers';
 import { usePurchaseOrders } from '../../features/purchasing/usePurchaseOrders';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 
 interface CommandPaletteProps {
   open: boolean;
@@ -41,6 +42,8 @@ const NAV_ITEMS: Result[] = [
 
 const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
   const nav = useNavigate();
+  const titleId = useId();
+  const dialogRef = useDialogFocus<HTMLDivElement>({ open, onClose });
   const [q, setQ] = useState('');
   const [activeIdx, setActiveIdx] = useState(0);
   const { data: productResult } = useProducts();
@@ -140,8 +143,13 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
 
   return (
     <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
       className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4"
-      style={{ background: 'rgba(0,0,0,0.55)' }}
+      style={{ background: 'var(--hub-overlay-medium)' }}
+      tabIndex={-1}
       onClick={onClose}
     >
       <div
@@ -153,6 +161,9 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
           boxShadow: 'var(--hub-shadow)',
         }}
       >
+        <h2 id={titleId} className="sr-only">
+          Command palette
+        </h2>
         <div
           className="flex items-center gap-2 px-4 py-3"
           style={{ borderBottom: '1px solid var(--hub-border)' }}
@@ -160,6 +171,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
           <Search size={14} style={{ color: 'var(--hub-text-dim)' }} />
           <input
             autoFocus
+            aria-label="Search products, suppliers, orders, or pages"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search products, suppliers, orders, pages…"
@@ -193,7 +205,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left"
                   style={{ background: active ? 'var(--hub-hover)' : 'transparent' }}
                 >
-                  <Icon size={14} style={{ color: '#f59e0b' }} />
+                  <Icon size={14} style={{ color: 'var(--erp-accent)' }} />
                   <div className="flex-1 min-w-0">
                     <p
                       className="text-sm font-medium truncate"

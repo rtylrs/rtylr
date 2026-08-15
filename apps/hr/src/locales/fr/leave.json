@@ -1,0 +1,57 @@
+{
+  "title": "Congés",
+  "subtitle": "Gérer les demandes de congé et les soldes",
+  "newRequest": "Nouvelle demande",
+  "requestCreated": "Demande de congé soumise",
+  "requestUpdated": "Demande de congé mise à jour",
+  "employee": "Employé",
+  "days": "jours",
+  "emptyTitle": "Aucune demande de congé",
+  "emptyDescription": "Les demandes de congé apparaîtront ici une fois soumises.",
+  "noLeaveTypes": "Aucun type de congé configuré",
+  "configureLeaveTypes": "Configurez les politiques de congé avant de soumettre des demandes.",
+  "goToSettings": "Aller aux Paramètres",
+  "tabs": {
+    "myLeave": "Mes Congés",
+    "teamCalendar": "Calendrier de l'équipe"
+  },
+  "statuses": {
+    "all": "Tous",
+    "pending": "En attente",
+    "approved": "Approuvé",
+    "rejected": "Rejeté",
+    "cancelled": "Annulé"
+  },
+  "balances": {
+    "emptyTitle": "Aucun solde de congé",
+    "emptyDescription": "Vos soldes de congé apparaîtront une fois les types configurés.",
+    "daysLeft": "jours restants",
+    "entitled": "Droit",
+    "used": "Utilisé",
+    "pending": "En attente"
+  },
+  "form": {
+    "title": "Nouvelle demande de congé",
+    "subtitle": "Soumettre une demande de congé pour approbation",
+    "leaveType": "Type de congé",
+    "selectType": "Sélectionner un type de congé",
+    "remainingBalance": "Solde restant",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "reason": "Motif",
+    "reasonPlaceholder": "Pourquoi demandez-vous un congé ?",
+    "notes": "Notes",
+    "notesPlaceholder": "Notes supplémentaires (facultatif)",
+    "submit": "Soumettre la demande",
+    "errorPastDate": "Les dates de congé ne peuvent pas être dans le passé",
+    "errorOverlap": "Cette plage de dates chevauche une demande de congé approuvée existante"
+  },
+  "calendar": {
+    "prevMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "department": "Département",
+    "location": "Emplacement",
+    "emptyTitle": "Aucun congé planifié",
+    "emptyDescription": "Les congés approuvés apparaîtront sur le calendrier."
+  }
+}

@@ -188,8 +188,8 @@ const AdminDashboard: React.FC = () => {
         <GridLayout
           className="layout"
           layouts={layouts}
-          breakpoints={{ lg: 0 }}
-          cols={{ lg: 4 }}
+          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+          cols={{ lg: 4, md: 3, sm: 2, xs: 1, xxs: 1 }}
           rowHeight={80}
           width={containerWidth}
           onLayoutChange={handleLayoutChange}

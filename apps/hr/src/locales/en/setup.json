@@ -1,0 +1,103 @@
+{
+  "title": "Set up your HR workspace",
+  "subtitle": "Complete these steps to configure HR for your organization.",
+  "configSaved": "Configuration saved",
+  "stepCompleted": "Step completed",
+  "finishSetup": "Finish setup",
+  "statusError": "Unable to load setup status. Please try again.",
+  "steps": {
+    "companyProfile": "Company Profile",
+    "workSchedule": "Work Schedule",
+    "orgStructure": "Org Structure",
+    "locations": "Locations",
+    "rolesPermissions": "Roles & Permissions",
+    "payrollConfig": "Payroll Config",
+    "notifications": "Notifications",
+    "employees": "Employees"
+  },
+  "companyProfile": {
+    "title": "Company Profile",
+    "description": "Tell us about your company so we can tailor the HR experience.",
+    "name": "Company name",
+    "industry": "Industry",
+    "country": "Country",
+    "timezone": "Timezone",
+    "currency": "Currency"
+  },
+  "workSchedule": {
+    "title": "Default Work Schedule",
+    "description": "Set the standard working hours for your organization.",
+    "scheduleName": "Schedule name",
+    "workingDays": "Working days",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "breakMinutes": "Break duration (minutes)",
+    "weeklyHours": "Weekly contracted hours",
+    "dailyOt": "Daily OT threshold (minutes)",
+    "weeklyOt": "Weekly OT threshold (minutes)",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    }
+  },
+  "orgStructure": {
+    "title": "Organization Structure",
+    "description": "Create departments to organize your team.",
+    "addDepartment": "Add department",
+    "departmentName": "Department name",
+    "parentDepartment": "Parent department",
+    "noDepartments": "No departments added yet"
+  },
+  "locations": {
+    "title": "Locations",
+    "description": "Add your office or branch locations.",
+    "singleLocation": "We have a single location",
+    "addLocation": "Add location",
+    "locationName": "Location name",
+    "locationAddress": "Address",
+    "locationTimezone": "Timezone",
+    "noLocations": "No locations added yet"
+  },
+  "rolesPermissions": {
+    "title": "Roles & Permissions",
+    "description": "Configure the default roles and what each role can do.",
+    "roleName": "Role name",
+    "permissions": "Permissions"
+  },
+  "payrollConfig": {
+    "title": "Payroll Configuration",
+    "description": "Set up how payroll works for your organization.",
+    "grossModel": "Gross pay model",
+    "hourly": "Hourly",
+    "salary": "Salary",
+    "both": "Both",
+    "period": "Pay period",
+    "weekly": "Weekly",
+    "biweekly": "Bi-weekly",
+    "monthly": "Monthly",
+    "enableOvertime": "Enable overtime tracking",
+    "enableDeductions": "Enable deductions",
+    "enableBonuses": "Enable bonuses"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Choose how your team receives notifications.",
+    "emailEnabled": "Email notifications",
+    "smsEnabled": "SMS / WhatsApp notifications",
+    "channelNote": "Channel credentials can be configured later in Settings."
+  },
+  "employees": {
+    "title": "Add Employees",
+    "description": "Add your first employees to get started. You can also import from CSV.",
+    "addEmployee": "Add employee",
+    "importCsv": "Import CSV",
+    "csvComingSoon": "CSV import coming soon",
+    "noEmployees": "No employees added yet. Add your first employee to continue.",
+    "noEmployeesHint": "No employees added yet. You can add them here or from the Staff section after setup."
+  }
+}

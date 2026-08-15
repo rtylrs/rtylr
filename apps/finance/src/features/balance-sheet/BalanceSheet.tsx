@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import PageHeader from '../../shared/components/PageHeader';
@@ -66,7 +66,8 @@ const Section: React.FC<{
 };
 
 const BalanceSheet: React.FC = () => {
-  const { data, isLoading } = useBalanceSheet();
+  const [asOfDate, setAsOfDate] = useState(new Date().toISOString().slice(0, 10));
+  const { data, isLoading } = useBalanceSheet(asOfDate);
 
   if (isLoading || !data) {
     return (
@@ -82,9 +83,9 @@ const BalanceSheet: React.FC = () => {
     );
   }
 
-  const totalAssets = data.assets.reduce((s: number, r) => s + r.amount, 0);
-  const totalLiab = data.liabilities.reduce((s: number, r) => s + r.amount, 0);
-  const totalEquity = data.equity.reduce((s: number, r) => s + r.amount, 0);
+  const totalAssets = data.totalAssets ?? 0;
+  const totalLiab = data.totalLiabilities ?? 0;
+  const totalEquity = data.totalEquity ?? 0;
 
   return (
     <motion.div
@@ -95,8 +96,29 @@ const BalanceSheet: React.FC = () => {
       <HelmetContainer title="Balance sheet · rtylr" />
       <PageHeader
         title="Balance Sheet"
-        subtitle="As of today"
+        subtitle={`As of ${asOfDate}`}
         breadcrumbs={[{ label: 'Reports' }, { label: 'Balance Sheet' }]}
+        actions={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <label style={{ fontSize: 12, color: 'var(--hub-text-muted)', fontWeight: 500 }}>
+              As of Date:
+            </label>
+            <input
+              type="date"
+              value={asOfDate}
+              max={new Date().toISOString().slice(0, 10)}
+              onChange={(e) => setAsOfDate(e.target.value)}
+              style={{
+                padding: '5px 10px',
+                borderRadius: 8,
+                border: '1px solid var(--hub-border)',
+                background: 'var(--hub-surface)',
+                color: 'var(--hub-text)',
+                fontSize: 12,
+              }}
+            />
+          </div>
+        }
       />
 
       <div
@@ -121,8 +143,8 @@ const BalanceSheet: React.FC = () => {
         }}
       >
         <Stat label="Total Assets" value={totalAssets} />
-        <Stat label="Total Liabilities" value={totalLiab} color="#ef4444" />
-        <Stat label="Total Equity" value={totalEquity} color="#8b5cf6" />
+        <Stat label="Total Liabilities" value={totalLiab} color="var(--finance-danger)" />
+        <Stat label="Total Equity" value={totalEquity} color="var(--finance-purple)" />
         <Stat label="Check" value={totalAssets - (totalLiab + totalEquity)} color={ACCENT} />
       </div>
     </motion.div>

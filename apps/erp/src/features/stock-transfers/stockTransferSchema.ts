@@ -39,6 +39,25 @@ export interface CreateStockTransferItemInput {
   quantity: number;
 }
 
+export interface StockTransferDraftItem {
+  productId: string;
+  quantity: string;
+}
+
+export interface StockTransferItemInput {
+  productId: string;
+  quantity: number;
+}
+
+export function toStockTransferItems(items: StockTransferDraftItem[]): StockTransferItemInput[] {
+  return items.flatMap((item) => {
+    const productId = item.productId.trim();
+    const quantity = Number(item.quantity);
+    if (!productId || !Number.isFinite(quantity) || quantity <= 0) return [];
+    return [{ productId, quantity }];
+  });
+}
+
 export interface CreateStockTransferInput {
   fromWarehouseId: number;
   toWarehouseId: number;

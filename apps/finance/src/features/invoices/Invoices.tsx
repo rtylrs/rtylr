@@ -4,6 +4,7 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Plus, Send, CheckCircle, Eye, FileText, Download, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
 import { Invoice } from '../../shared/services/financeApi';
 import { useInvoices, useUpdateInvoiceStatus } from './useInvoices';
@@ -19,13 +20,14 @@ import SendInvoiceModal from '../../shared/components/SendInvoiceModal';
 import { exportQuickbooksInvoices, exportXeroInvoices } from '../../shared/lib/exports';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 
-type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
+type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue' | 'Cancelled';
 
 const statusStyle: Record<InvoiceStatus, React.CSSProperties> = {
-  Draft: { background: 'rgba(113,113,122,0.15)', color: '#a1a1aa' },
-  Sent: { background: 'rgba(59,130,246,0.12)', color: '#3b82f6' },
-  Paid: { background: 'rgba(16,185,129,0.12)', color: '#10b981' },
-  Overdue: { background: 'rgba(239,68,68,0.12)', color: '#ef4444' },
+  Draft: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
+  Sent: { background: 'var(--finance-info-soft)', color: 'var(--finance-info)' },
+  Paid: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
+  Overdue: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
+  Cancelled: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
 };
 
 const Invoices: React.FC = () => {
@@ -46,7 +48,8 @@ const Invoices: React.FC = () => {
       { id: inv.id, status: 'Paid' },
       {
         onSuccess: () => toast.success(t('invoices.markedPaid', { id: inv.id })),
-        onError: () => toast.error(t('invoices.markPaidFailed', { id: inv.id })),
+        onError: (error) =>
+          toast.error(getOneKitErrorMessage(error, t('invoices.markPaidFailed', { id: inv.id }))),
       }
     );
   };
@@ -136,8 +139,8 @@ const Invoices: React.FC = () => {
           }
         />
       ) : (
-        <div style={{ ...cardStyle, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div style={{ ...cardStyle, overflowX: 'auto' }}>
+          <table style={{ width: '100%', minWidth: 720, borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
                 {['', 'Invoice #', 'Client', 'Amount', 'Status', 'Due Date', 'Actions'].map(
@@ -146,7 +149,7 @@ const Invoices: React.FC = () => {
                       key={i}
                       style={{
                         padding: '10px 16px',
-                        textAlign: 'left',
+                        textAlign: 'start',
                         fontSize: 11,
                         fontWeight: 600,
                         textTransform: 'uppercase',
@@ -224,7 +227,10 @@ const Invoices: React.FC = () => {
                     style={{
                       padding: '12px 16px',
                       fontSize: 12,
-                      color: inv.status === 'Overdue' ? '#ef4444' : 'var(--hub-text-muted)',
+                      color:
+                        inv.status === 'Overdue'
+                          ? 'var(--finance-danger)'
+                          : 'var(--hub-text-muted)',
                     }}
                   >
                     {inv.dueDate}
@@ -244,8 +250,8 @@ const Invoices: React.FC = () => {
                           style={{
                             ...ghostBtn,
                             padding: '4px 10px',
-                            color: '#3b82f6',
-                            borderColor: 'rgba(59,130,246,0.3)',
+                            color: 'var(--finance-info)',
+                            borderColor: 'var(--finance-info-border)',
                           }}
                           onClick={() => setSendTarget(inv)}
                           aria-label={`Send invoice ${inv.id}`}
@@ -258,8 +264,8 @@ const Invoices: React.FC = () => {
                           style={{
                             ...ghostBtn,
                             padding: '4px 10px',
-                            color: '#10b981',
-                            borderColor: 'rgba(16,185,129,0.3)',
+                            color: 'var(--finance-accent)',
+                            borderColor: 'var(--finance-accent-border)',
                             opacity: updateStatus.isPending ? 0.6 : 1,
                           }}
                           onClick={() => markPaid(inv)}
@@ -314,7 +320,6 @@ const Invoices: React.FC = () => {
         open={sendTarget !== null}
         onClose={() => setSendTarget(null)}
         invoiceId={sendTarget?.id ?? ''}
-        defaultTo={sendTarget?.clientEmail}
       />
     </motion.div>
   );

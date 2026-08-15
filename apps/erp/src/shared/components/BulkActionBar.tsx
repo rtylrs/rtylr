@@ -36,7 +36,10 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({
         >
           <span
             className="text-xs font-semibold px-3 py-1 rounded-lg mr-1"
-            style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}
+            style={{
+              background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)',
+              color: 'var(--erp-accent)',
+            }}
           >
             {count} selected
           </span>
@@ -89,9 +92,10 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({
             <button
               onClick={onDelete}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
-              style={{ color: '#f87171' }}
+              style={{ color: 'var(--erp-danger)' }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)';
+                (e.currentTarget as HTMLElement).style.background =
+                  'color-mix(in srgb, var(--erp-danger) 10%, transparent)';
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.background = 'transparent';

@@ -1,0 +1,71 @@
+{
+  "welcome": "مرحباً بك في الموارد البشرية",
+  "subtitle": "إدارة فريقك وجداولك ورواتبك من هنا.",
+  "quickActions": {
+    "addStaff": "إضافة موظف",
+    "scheduleShift": "جدولة مناوبة",
+    "runPayroll": "تشغيل الرواتب"
+  },
+  "quickActionsTitle": "إجراءات سريعة",
+  "recentActivity": "النشاط الأخير",
+  "viewAll": "عرض الكل",
+  "noActivity": "لا يوجد نشاط حديث.",
+  "todayAtGlance": "نظرة على اليوم",
+  "recentHires": "التعيينات الأخيرة",
+  "noRecentHires": "لا توجد تعيينات حديثة.",
+  "stats": {
+    "totalStaff": "إجمالي الموظفين",
+    "onShift": "في المناوبة اليوم",
+    "openPositions": "الوظائف الشاغرة",
+    "monthlyPayroll": "رواتب هذا الشهر",
+    "thisMonth": "هذا الشهر"
+  },
+  "glance": {
+    "shiftsScheduled": "المناوبات المجدولة",
+    "newApplications": "الطلبات الجديدة",
+    "pendingApprovals": "الموافقات المعلقة"
+  },
+  "metrics": {
+    "headcount": "عدد الموظفين",
+    "totalActive": "الإجمالي النشط",
+    "avgTenure": "متوسط مدة الخدمة",
+    "years": "سنوات",
+    "allStaff": "عبر جميع الموظفين",
+    "openPositions": "الوظائف الشاغرة",
+    "beingFilled": "قيد التوظيف"
+  },
+  "alerts": {
+    "expiringDocuments": "مستندات تنتهي قريباً",
+    "expiringCount": "{{count}} مستند تنتهي صلاحيته خلال 30 يوماً.",
+    "overtimeAlerts": "تنبيهات العمل الإضافي",
+    "overtimeCount": "{{count}} موظف تجاوزوا ساعات العمل الأسبوعية."
+  },
+  "widgets": {
+    "hoursThisWeek": "ساعات هذا الأسبوع",
+    "hours": "ساعات",
+    "leaveBalance": "رصيد الإجازات",
+    "noLeaveTypes": "لم يتم تكوين أنواع الإجازات.",
+    "daysLeft": "أيام متبقية",
+    "upcomingShifts": "المناوبات القادمة",
+    "noShifts": "لا توجد مناوبات قادمة.",
+    "pendingApprovals": "الموافقات المعلقة",
+    "noApprovals": "لا توجد موافقات معلقة!",
+    "teamAttendance": "حضور الفريق اليوم",
+    "present": "حاضر",
+    "absent": "غائب",
+    "late": "متأخر",
+    "headcount": "عدد الموظفين",
+    "thisMonth": "هذا الشهر",
+    "fullTime": "دوام كامل",
+    "partTime": "دوام جزئي",
+    "contractors": "متعاقدون",
+    "payrollCost": "تكلفة الرواتب",
+    "payrollNotConfigured": "لم يتم تهيئة الرواتب بعد.",
+    "vsLastMonth": "مقارنة بالشهر الماضي",
+    "setupCompletion": "إكمال الإعداد",
+    "stepsCompleted": "خطوات مكتملة",
+    "noData": "لا تتوفر بيانات.",
+    "dragToReorder": "اسحب لإعادة الترتيب",
+    "errorFallback": "الأداة غير متاحة"
+  }
+}

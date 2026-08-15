@@ -3,8 +3,33 @@
  * Keeps visual consistency with the existing Tailwind + CSS variable design.
  */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const ACCENT = 'var(--hr-accent)';
+
+export const QueryError: React.FC<{ onRetry: () => void; isRetrying?: boolean }> = ({
+  onRetry,
+  isRetrying = false,
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div
+      role="alert"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 12,
+        padding: 32,
+      }}
+    >
+      <p style={{ margin: 0, color: 'var(--hr-text)' }}>{t('common.loadError')}</p>
+      <Button variant="primary" onClick={onRetry} disabled={isRetrying}>
+        {t('common.retry')}
+      </Button>
+    </div>
+  );
+};
 
 export function useMediaQuery(query: string): boolean {
   const getMatch = () => (typeof window !== 'undefined' ? window.matchMedia(query).matches : false);

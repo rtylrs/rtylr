@@ -34,5 +34,12 @@
   },
   "tax": {
     "exportAria": "Export tax summary for accountant"
+  },
+  "cashFlow": {
+    "title": "Cash Flow",
+    "totalInflow": "Total inflow",
+    "totalOutflow": "Total outflow",
+    "netCashFlow": "Net cash flow",
+    "reports": "Reports"
   }
 }

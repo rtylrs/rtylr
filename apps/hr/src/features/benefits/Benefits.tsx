@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { Shield } from 'lucide-react';
@@ -7,26 +8,34 @@ import {
   useBenefitEnrollments,
   useEnrollBenefit,
 } from '../../shared/hooks/useHrExtras';
+import { useUserStore } from '@voxire/auth';
 import { Card, SectionHeader, EmptyState, Skeleton } from '../../shared/components/ui';
 import BenefitPlanCard from '../../shared/components/BenefitPlanCard';
 
 const Benefits: React.FC = () => {
-  const { data: plans, isLoading } = useBenefits();
-  const { data: enrollments = [] } = useBenefitEnrollments();
+  const { t } = useTranslation('benefits');
+  const user = useUserStore((s) => s.user);
+  const currentStaffId = Number(user?.id) || 1;
+  const currentStaffName = user?.name || user?.email || 'Team member';
+  const { data: plans, isLoading: plansLoading } = useBenefits();
+  const { data: enrollments = [], isLoading: enrollLoading } = useBenefitEnrollments();
   const enroll = useEnrollBenefit();
+
+  const loading = plansLoading || enrollLoading;
 
   return (
     <>
       <HelmetContainer title="Benefits · rtylr" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <SectionHeader title="Benefits" subtitle="Health, dental, vision, 401k and more" />
-        {isLoading ? (
+        <SectionHeader title={t('title')} subtitle={t('subtitle')} />
+
+        {loading ? (
           <Skeleton height={200} />
         ) : !plans || plans.length === 0 ? (
           <EmptyState
             icon={<Shield size={20} />}
-            title="No benefit plans"
-            description="Create plans to allow enrollment."
+            title={t('emptyTitle')}
+            description={t('emptyDescription')}
           />
         ) : (
           <div
@@ -37,7 +46,9 @@ const Benefits: React.FC = () => {
             }}
           >
             {plans.map((p) => {
-              const enrolled = enrollments.some((e) => e.planId === p.id && e.staffId === 1);
+              const enrolled = enrollments.some(
+                (e) => e.planId === p.id && Number(e.staffId) === currentStaffId
+              );
               return (
                 <BenefitPlanCard
                   key={p.id}
@@ -45,8 +56,13 @@ const Benefits: React.FC = () => {
                   enrolled={enrolled}
                   onEnroll={() =>
                     enroll.mutate(
-                      { staffId: 1, staffName: 'Alex Chen', planId: p.id, planName: p.name },
-                      { onSuccess: () => toast.success('Enrolled') }
+                      {
+                        staffId: currentStaffId,
+                        staffName: currentStaffName,
+                        planId: p.id,
+                        planName: p.name,
+                      },
+                      { onSuccess: () => toast.success(t('enrolled')) }
                     )
                   }
                 />
@@ -56,10 +72,10 @@ const Benefits: React.FC = () => {
         )}
 
         <Card>
-          <SectionHeader title="Active enrollments" />
+          <SectionHeader title={t('activeEnrollments')} />
           <div style={{ marginTop: 10, fontSize: 12 }}>
             {enrollments.length === 0 && (
-              <p style={{ color: 'var(--hr-text-muted)' }}>No enrollments yet.</p>
+              <p style={{ color: 'var(--hr-text-muted)' }}>{t('noEnrollments')}</p>
             )}
             {enrollments.map((e) => (
               <div

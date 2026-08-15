@@ -51,11 +51,13 @@ describe('useKpis', () => {
     expect(result.current.data?.revenueSeries).toEqual([100, 200, 300]);
   });
 
-  it('calls the correct endpoint', async () => {
+  it('calls the correct endpoint with range parameter', async () => {
     mockGet.mockResolvedValue(mockKpis);
 
-    renderHook(() => useKpis(), { wrapper: createWrapper() });
-    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/hub/dashboard/v1/kpis'));
+    renderHook(() => useKpis('7d'), { wrapper: createWrapper() });
+    await waitFor(() =>
+      expect(mockGet).toHaveBeenCalledWith('/hub/dashboard/v1/kpis', { params: { range: '7d' } })
+    );
   });
 
   it('handles API error', async () => {

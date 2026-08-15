@@ -2,6 +2,7 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { InvoicesServiceClient } from '@voxire/voxie/finance/invoices/v1/client';
 import type {
   CreateInvoiceRequest,
@@ -11,6 +12,7 @@ import type {
 import { InvoicePaymentServiceClient } from '@voxire/voxie/finance/invoices/payments/v1/client';
 import type { Invoice } from '../../shared/services/financeApi';
 import { invoiceSchema } from '../../shared/schemas/invoices';
+import { useListInvoices } from '../../shared/hooks/queries/useInvoices';
 
 const invoicesClient = createOneKitClient(InvoicesServiceClient, 'finance');
 const paymentsClient = createOneKitClient(InvoicePaymentServiceClient, 'finance');
@@ -25,8 +27,8 @@ const STATUS_FROM_API: Record<string, Invoice['status']> = {
   partial: 'Sent',
   paid: 'Paid',
   overdue: 'Overdue',
-  cancelled: 'Draft',
-  void: 'Draft',
+  cancelled: 'Cancelled',
+  void: 'Cancelled',
 };
 
 function fromApiSummary(inv: InvoiceSummary): Invoice {
@@ -82,27 +84,20 @@ export interface InvoiceListResult {
 
 export function useInvoices(params: UseInvoicesParams = {}) {
   const { page = 1, pageSize = 50 } = params;
-  return useQuery<InvoiceListResult>({
-    queryKey: ['invoices', { page, pageSize }],
-    queryFn: async (): Promise<InvoiceListResult> => {
-      const res = await invoicesClient.listInvoices({
-        status: '',
-        search: '',
-        dateFrom: '',
-        dateTo: '',
-        page,
-        pageSize,
-      });
-      return {
-        invoices: z
-          .array(invoiceSchema)
-          .parse((res.invoices ?? []).map(fromApiSummary)) as Invoice[],
-        hasMore: res.hasMore ?? false,
-        page: res.page ?? page,
-        pageSize: res.pageSize ?? pageSize,
-      };
-    },
-  });
+  const query = useListInvoices({ page, pageSize });
+  return {
+    ...query,
+    data: query.data
+      ? {
+          invoices: z
+            .array(invoiceSchema)
+            .parse((query.data.invoices ?? []).map(fromApiSummary)) as Invoice[],
+          hasMore: query.data.hasMore ?? false,
+          page: query.data.page ?? page,
+          pageSize: query.data.pageSize ?? pageSize,
+        }
+      : undefined,
+  };
 }
 
 export function useInvoiceDetail(id: string | undefined) {
@@ -119,6 +114,7 @@ export function useInvoiceDetail(id: string | undefined) {
 
 export function useCreateInvoice() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: async (data: CreateInvoiceRequest): Promise<Invoice> => {
       const res = await invoicesClient.createInvoice(data);
@@ -126,12 +122,13 @@ export function useCreateInvoice() {
       return fromApiDetail(res.invoice);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to create invoice')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 
 export function useUpdateInvoice() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: async ({
       id,
@@ -145,16 +142,17 @@ export function useUpdateInvoice() {
       return fromApiDetail(res.invoice);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to update invoice')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 
 export function useDeleteInvoice() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (id: string) => invoicesClient.deleteInvoice({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to delete invoice')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 
@@ -163,21 +161,23 @@ const STATUS_TO_API: Record<Invoice['status'], string> = {
   Sent: 'sent',
   Paid: 'paid',
   Overdue: 'overdue',
+  Cancelled: 'cancelled',
 };
 
 export function useUpdateInvoiceStatus() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }) =>
       invoicesClient.updateInvoiceStatus({ id, body: { status: STATUS_TO_API[status] } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
-    onError: (error) =>
-      toast.error(getOneKitErrorMessage(error, 'Failed to update invoice status')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 
 export function useRecordPayment() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({
       id,
@@ -207,6 +207,6 @@ export function useRecordPayment() {
       qc.invalidateQueries({ queryKey: ['invoices'] });
       qc.invalidateQueries({ queryKey: ['invoice', variables.id] });
     },
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to record payment')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }

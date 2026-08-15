@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Currency } from './money';
 
+export const DEFAULT_CATEGORY_COLOR = '#14b8a6';
+
 export interface FinanceSettings {
   currency: Currency;
   defaultTaxRate: number;

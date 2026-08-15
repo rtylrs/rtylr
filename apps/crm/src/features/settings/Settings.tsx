@@ -41,9 +41,6 @@ const GeneralTab: React.FC = () => {
     fromEmail: '',
     fromName: '',
     smsSenderId: '',
-    businessName: '',
-    atRiskDays: 60,
-    currency: 'USD',
   };
   const [form, setForm] = useState<Settings>(defaultSettings);
 
@@ -83,22 +80,7 @@ const GeneralTab: React.FC = () => {
         >
           Business
         </h4>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-          <Input
-            label="Business name"
-            value={form.businessName}
-            onChange={(e) => set('businessName', e.target.value)}
-          />
-          <Select
-            label="Currency"
-            value={form.currency}
-            onChange={(e) => set('currency', e.target.value)}
-          >
-            <option value="USD">USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="CAD">CAD ($)</option>
-          </Select>
+        <div style={{ display: 'grid', gap: '12px' }}>
           <Select
             label="Timezone"
             value={form.timezone}
@@ -110,12 +92,10 @@ const GeneralTab: React.FC = () => {
             <option value="Europe/Paris">Paris</option>
             <option value="Asia/Tokyo">Tokyo</option>
           </Select>
-          <Input
-            label="At-risk after (days)"
-            type="number"
-            value={form.atRiskDays}
-            onChange={(e) => set('atRiskDays', Number(e.target.value))}
-          />
+          <p style={{ margin: 0, fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+            Business profile, currency, and at-risk policy are not available from the CRM settings
+            service yet.
+          </p>
         </div>
       </Card>
 

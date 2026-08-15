@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check, X } from 'lucide-react';
 import { Textarea } from './ui';
 
@@ -15,6 +16,7 @@ const ApprovalButtons: React.FC<Props> = ({
   allowNote = false,
   size = 'sm',
 }) => {
+  const { t } = useTranslation();
   const [note, setNote] = useState('');
   const [open, setOpen] = useState(false);
   const pad = size === 'md' ? '8px 14px' : '5px 10px';
@@ -24,7 +26,7 @@ const ApprovalButtons: React.FC<Props> = ({
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <Textarea
-          placeholder="Optional note"
+          placeholder={t('common.optionalNote', { defaultValue: 'Optional note' })}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           style={{ minHeight: 60 }}
@@ -52,7 +54,7 @@ const ApprovalButtons: React.FC<Props> = ({
               justifyContent: 'center',
             }}
           >
-            <Check size={12} /> Approve
+            <Check size={12} /> {t('common.approve', { defaultValue: 'Approve' })}
           </button>
           <button
             onClick={() => {
@@ -76,7 +78,7 @@ const ApprovalButtons: React.FC<Props> = ({
               justifyContent: 'center',
             }}
           >
-            <X size={12} /> Reject
+            <X size={12} /> {t('common.reject', { defaultValue: 'Reject' })}
           </button>
         </div>
       </div>
@@ -101,7 +103,7 @@ const ApprovalButtons: React.FC<Props> = ({
           gap: 4,
         }}
       >
-        <Check size={12} /> Approve
+        <Check size={12} /> {t('common.approve', { defaultValue: 'Approve' })}
       </button>
       <button
         onClick={() => (allowNote ? setOpen(true) : onReject())}
@@ -119,7 +121,7 @@ const ApprovalButtons: React.FC<Props> = ({
           gap: 4,
         }}
       >
-        <X size={12} /> Reject
+        <X size={12} /> {t('common.reject', { defaultValue: 'Reject' })}
       </button>
     </div>
   );

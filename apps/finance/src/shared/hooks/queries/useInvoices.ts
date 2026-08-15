@@ -7,9 +7,9 @@ import type { ListInvoicesResponse } from '@voxire/voxie/finance/invoices/v1/typ
 
 const invoicesClient = createOneKitClient(InvoicesServiceClient, 'finance');
 
-interface ListInvoicesParams {
-  limit: number;
-  offset: number;
+export interface ListInvoicesParams {
+  page?: number;
+  pageSize?: number;
   status?: string;
   search?: string;
   dateFrom?: string;
@@ -17,29 +17,36 @@ interface ListInvoicesParams {
 }
 
 export const useListInvoices = (params: ListInvoicesParams) => {
+  const page = params.page ?? 1;
+  const pageSize = params.pageSize ?? 50;
+
   return useQuery<ListInvoicesResponse>({
-    queryKey: ['invoices', 'filter', params],
+    queryKey: [
+      'invoices',
+      'filter',
+      {
+        page,
+        pageSize,
+        status: params.status ?? '',
+        search: params.search ?? '',
+        dateFrom: params.dateFrom ?? '',
+        dateTo: params.dateTo ?? '',
+      },
+    ],
     queryFn: (): Promise<ListInvoicesResponse> =>
       invoicesClient.listInvoices({
         status: params.status ?? '',
         search: params.search ?? '',
         dateFrom: params.dateFrom ?? '',
         dateTo: params.dateTo ?? '',
-        page: Math.floor(params.offset / Math.max(1, params.limit)) + 1,
-        pageSize: params.limit,
+        page,
+        pageSize,
       }),
   });
 };
 
 export interface SendInvoiceRequest {
   invoiceId: string;
-  // finance.invoices.v1.SendInvoice takes only the invoice id - it doesn't
-  // support custom recipient/subject/body (the legacy REST endpoint it
-  // replaces silently ignored these same fields too).
-  to: string;
-  cc?: string;
-  subject: string;
-  body: string;
 }
 
 export interface SendInvoiceResponse {
@@ -55,9 +62,9 @@ export const useSendInvoice = () => {
       const res = await invoicesClient.sendInvoice({ id: data.invoiceId });
       return { message: res.message ?? '' };
     },
-    onSuccess: (_data: SendInvoiceResponse, variables: SendInvoiceRequest) => {
+    onSuccess: (_data: SendInvoiceResponse) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success(t('invoices.sent', { to: variables.to }));
+      toast.success(t('invoices.sent'));
     },
     onError: (error) => {
       toast.error(getOneKitErrorMessage(error, t('errors.generic')));

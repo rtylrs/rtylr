@@ -1,17 +1,30 @@
 import { useEffect } from 'react';
-import { getRealtimeClient, type RealtimeEvent } from '@voxire/api';
+import {
+  createOneKitFetch,
+  getOneKitApiBaseUrl,
+  getRealtimeClient,
+  type RealtimeEvent,
+} from '@voxire/api';
 
-/**
- * getToken reads the auth cookie set by the auth app. The cookie is
- * marked HttpOnly in production - but we intentionally use a
- * non-HttpOnly `token` cookie for the JWT so the WebSocket handshake
- * can pass it via query string. The http-only cookie for session
- * identity remains separate.
- */
-function getTokenFromCookie(): string | null {
-  if (typeof document === 'undefined') return null;
-  const match = document.cookie.match(/(?:^|;\s*)token=([^;]+)/);
-  return match ? decodeURIComponent(match[1]) : null;
+const oneKitFetch = createOneKitFetch('flow');
+
+/** Exchange the authenticated REST session for a one-use WS ticket. */
+export async function getRealtimeTicket(): Promise<string | null> {
+  const baseUrl = getOneKitApiBaseUrl().replace(/\/$/, '');
+  try {
+    const response = await oneKitFetch(`${baseUrl}/flow/ws-ticket`, {
+      method: 'POST',
+      headers: { Accept: 'application/json' },
+    });
+    if (!response.ok) return null;
+
+    const body: unknown = await response.json();
+    if (!body || typeof body !== 'object' || !('ticket' in body)) return null;
+    const ticket = (body as { ticket?: unknown }).ticket;
+    return typeof ticket === 'string' && ticket.length > 0 ? ticket : null;
+  } catch {
+    return null;
+  }
 }
 
 function resolveWsUrl(): string {
@@ -24,7 +37,7 @@ function resolveWsUrl(): string {
 
 const client = getRealtimeClient({
   url: resolveWsUrl(),
-  getToken: getTokenFromCookie,
+  getTicket: getRealtimeTicket,
 });
 
 /**

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
-import { signOut, useUserStore } from '@voxire/auth';
+import { useUserStore } from '@voxire/auth';
 import { unwrap } from '@voxire/api';
 import { LicenseBanner } from '@voxire/components';
 import { buildCaretRouteContext, CaretButton, CaretPanel, useCaretStore } from '@voxire/caret';
@@ -53,9 +53,12 @@ import type { HRCompanyConfigPayload } from '@voxire/voxie/hr/setup/v1/types';
 import { useForesightLinks } from '@voxire/utils';
 import { safe } from '../shared/lib/api';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
+import { signOutFromHR } from '../shared/lib/hrSignOut';
 import CommandPalette from '../shared/components/CommandPalette';
 import GlobalShortcuts from '../shared/components/GlobalShortcuts';
 import { useMediaQuery } from '../shared/components/ui';
+import { canHrPermission, type HRPermission } from '../shared/lib/hrPermissions';
+import { isPayrollConfigured } from '../shared/lib/payrollConfig';
 
 /* -- Types -- */
 interface NavItem {
@@ -64,7 +67,15 @@ interface NavItem {
   icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
   /** Optional guard: item is only shown when this returns true for the current config */
   configGuard?: (timeTrackingModel: string, config: HRCompanyConfigPayload | null) => boolean;
+  permission?: HRPermission;
 }
+
+type EquipmentConfig = HRCompanyConfigPayload & { equipmentEnabled?: boolean | string };
+
+const isEquipmentEnabled = (config: HRCompanyConfigPayload | null): boolean => {
+  const value = (config as EquipmentConfig | null)?.equipmentEnabled;
+  return value === true || value === 'true';
+};
 
 /* -- Nav config -- */
 const ACCENT = '#8b5cf6';
@@ -79,24 +90,34 @@ const navSections: NavSection[] = [
     i18nKey: 'layout.sections.workspace',
     items: [
       { i18nKey: 'nav.dashboard', path: '/', icon: LayoutDashboard },
-      { i18nKey: 'nav.staff', path: '/staff', icon: Users },
-      { i18nKey: 'nav.departments', path: '/departments', icon: Building2 },
+      { i18nKey: 'nav.staff', path: '/staff', icon: Users, permission: 'hr:staff' },
+      {
+        i18nKey: 'nav.departments',
+        path: '/departments',
+        icon: Building2,
+        permission: 'hr:departments',
+      },
       { i18nKey: 'nav.orgChart', path: '/org-chart', icon: Network },
     ],
   },
   {
     i18nKey: 'layout.sections.time',
     items: [
-      { i18nKey: 'nav.shifts', path: '/shifts', icon: Clock },
-      { i18nKey: 'nav.schedule', path: '/schedule', icon: CalendarDays },
-      { i18nKey: 'nav.rosterBuilder', path: '/shifts/roster', icon: CalendarRange },
+      { i18nKey: 'nav.shifts', path: '/shifts', icon: Clock, permission: 'hr:shifts' },
+      { i18nKey: 'nav.schedule', path: '/schedule', icon: CalendarDays, permission: 'hr:shifts' },
+      {
+        i18nKey: 'nav.rosterBuilder',
+        path: '/shifts/roster',
+        icon: CalendarRange,
+        permission: 'hr:shifts:manage',
+      },
       {
         i18nKey: 'nav.timeLogging',
         path: '/time',
         icon: PlayCircle,
         configGuard: (m) => m === 'time_logging' || m === 'both',
       },
-      { i18nKey: 'nav.timesheets', path: '/timesheets', icon: Timer },
+      { i18nKey: 'nav.timesheets', path: '/timesheets', icon: Timer, permission: 'hr:shifts' },
       {
         i18nKey: 'nav.attendance',
         path: '/attendance',
@@ -107,24 +128,45 @@ const navSections: NavSection[] = [
         i18nKey: 'nav.approvals',
         path: '/timesheets/approvals',
         icon: CheckSquare,
+        permission: 'hr:time_off:approve',
       },
-      { i18nKey: 'nav.timeOff', path: '/time-off', icon: Calendar },
-      { i18nKey: 'nav.leave', path: '/leave', icon: Palmtree },
-      { i18nKey: 'nav.overtime', path: '/overtime', icon: ClockArrowUp },
-      { i18nKey: 'nav.calendar', path: '/calendar', icon: Calendar },
+      { i18nKey: 'nav.timeOff', path: '/time-off', icon: Calendar, permission: 'hr:time_off' },
+      { i18nKey: 'nav.leave', path: '/leave', icon: Palmtree, permission: 'hr:time_off' },
+      { i18nKey: 'nav.overtime', path: '/overtime', icon: ClockArrowUp, permission: 'hr:time_off' },
+      { i18nKey: 'nav.calendar', path: '/calendar', icon: Calendar, permission: 'hr:time_off' },
     ],
   },
   {
     i18nKey: 'layout.sections.people',
     items: [
-      { i18nKey: 'nav.reviews', path: '/reviews', icon: ClipboardList },
+      { i18nKey: 'nav.reviews', path: '/reviews', icon: ClipboardList, permission: 'hr:reviews' },
       { i18nKey: 'nav.oneOnOnes', path: '/one-on-ones', icon: MessageSquare },
-      { i18nKey: 'nav.performance', path: '/performance', icon: BarChart3 },
+      {
+        i18nKey: 'nav.performance',
+        path: '/performance',
+        icon: BarChart3,
+        permission: 'hr:reviews',
+      },
       { i18nKey: 'nav.myReview', path: '/performance/my-review', icon: Star },
       { i18nKey: 'nav.goals', path: '/performance/goals', icon: Target },
-      { i18nKey: 'nav.onboarding', path: '/onboarding', icon: Rocket },
-      { i18nKey: 'nav.offboarding', path: '/offboarding', icon: LogOut },
-      { i18nKey: 'nav.training', path: '/training', icon: GraduationCap },
+      {
+        i18nKey: 'nav.onboarding',
+        path: '/onboarding',
+        icon: Rocket,
+        permission: 'hr:staff:manage',
+      },
+      {
+        i18nKey: 'nav.offboarding',
+        path: '/offboarding',
+        icon: LogOut,
+        permission: 'hr:staff:manage',
+      },
+      {
+        i18nKey: 'nav.training',
+        path: '/training',
+        icon: GraduationCap,
+        permission: 'hr:staff:manage',
+      },
     ],
   },
   {
@@ -134,37 +176,49 @@ const navSections: NavSection[] = [
         i18nKey: 'nav.payroll',
         path: '/payroll',
         icon: DollarSign,
-        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
+        configGuard: (_m, cfg) => isPayrollConfigured(cfg),
+        permission: 'hr:payroll',
       },
       {
         i18nKey: 'nav.myPaySlips',
         path: '/payroll/my-payslips',
         icon: Receipt,
-        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
+        configGuard: (_m, cfg) => isPayrollConfigured(cfg),
+        permission: 'hr:payroll',
       },
       {
         i18nKey: 'nav.payrollConfig',
         path: '/settings/payroll-config',
         icon: Settings,
-        configGuard: (_m, cfg) => !!cfg?.payrollPeriod,
+        permission: 'hr:payroll',
       },
       { i18nKey: 'nav.benefits', path: '/benefits', icon: Shield },
       {
         i18nKey: 'nav.equipment',
         path: '/equipment',
         icon: Package,
-        configGuard: (_m, cfg) => !!cfg,
+        configGuard: (_m, cfg) => isEquipmentEnabled(cfg),
       },
       {
         i18nKey: 'nav.assets',
         path: '/equipment/assets',
         icon: HardDrive,
-        configGuard: (_m, cfg) => !!cfg,
+        configGuard: (_m, cfg) => isEquipmentEnabled(cfg),
       },
       { i18nKey: 'nav.documents', path: '/documents', icon: FileText },
-      { i18nKey: 'nav.reports', path: '/reports', icon: FileBarChart },
-      { i18nKey: 'nav.operations', path: '/operations', icon: Timer },
-      { i18nKey: 'nav.settings', path: '/settings', icon: Settings },
+      {
+        i18nKey: 'nav.reports',
+        path: '/reports',
+        icon: FileBarChart,
+        permission: 'insights:reports',
+      },
+      {
+        i18nKey: 'nav.operations',
+        path: '/operations',
+        icon: Timer,
+        permission: 'hr:shifts:manage',
+      },
+      { i18nKey: 'nav.settings', path: '/settings', icon: Settings, permission: 'hub:settings' },
     ],
   },
 ];
@@ -440,7 +494,7 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
             />
             <button
               onClick={() => {
-                signOut('hr');
+                signOutFromHR();
               }}
               style={{
                 display: 'flex',
@@ -485,6 +539,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const [theme, setTheme] = useTheme();
   const hrUser = useUserStore((s) => s.user);
+  const role = useUserStore((s) => s.user?.role ?? s.role);
   const setAuthUser = useUserStore((s) => s.setUser);
   useEffect(() => {
     if (hrUser?.name || hrUser?.email) return;
@@ -633,7 +688,18 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src="/logo.png?v=2" alt="rtylr" className="rtylr-logo h-6 w-auto" />
+            <img
+              src={
+                theme === 'dark' ||
+                (theme === 'system' &&
+                  typeof window !== 'undefined' &&
+                  window.matchMedia('(prefers-color-scheme: dark)').matches)
+                  ? '/logo.png'
+                  : '/logo-dark.png'
+              }
+              alt="rtylr"
+              className="h-9 w-auto"
+            />
           </div>
         </div>
 
@@ -651,7 +717,9 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         >
           {navSections.map((section) => {
             const visibleItems = section.items.filter(
-              (item) => !item.configGuard || item.configGuard(timeTrackingModel, config)
+              (item) =>
+                (!item.configGuard || item.configGuard(timeTrackingModel, config)) &&
+                (!item.permission || canHrPermission(role, item.permission))
             );
             if (visibleItems.length === 0) return null;
             const isCollapsed = collapsedSections[section.i18nKey] ?? false;

@@ -1,9 +1,11 @@
-import { createOneKitClient, unwrap } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
 import { z } from 'zod';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { safe } from '../lib/api';
 import { BankAccountServiceClient } from '@voxire/voxie/finance/bank_account/v1/client';
-import { bankAccountSchema } from '../schemas/accounts';
+import { bankAccountSchema, bankTransactionSchema } from '../schemas/accounts';
 import { unwrapList } from '../lib/unwrapList';
 
 const bankAccountClient = createOneKitClient(BankAccountServiceClient, 'finance');
@@ -33,6 +35,37 @@ export function useBankAccounts() {
   });
 }
 
+export function useCreateBankAccount() {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: (data: {
+      name: string;
+      bankName: string;
+      accountType: string;
+      lastFour: string;
+      balance: number;
+      currency: string;
+    }) =>
+      bankAccountClient.createBankAccount({
+        name: data.name,
+        bankName: data.bankName,
+        accountType: data.accountType,
+        lastFour: data.lastFour,
+        balance: data.balance,
+        currency: data.currency,
+        isPrimary: false,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['bank-accounts'] });
+    },
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
+    },
+  });
+}
+
 // finance.bank_account.v1.BankAccountService has no transaction/feed
 // endpoint yet - this genuinely has no backend contract to migrate to.
 export function useBankTransactions(accountId?: string) {
@@ -41,7 +74,7 @@ export function useBankTransactions(accountId?: string) {
     queryFn: async () => {
       const params = accountId ? { account_id: accountId } : undefined;
       const res = await unwrap(safe.get<unknown>('/finance/bank-feeds', { params }));
-      return z.array(bankAccountSchema).parse(unwrapList(res, 'transactions'));
+      return z.array(bankTransactionSchema).parse(unwrapList(res, 'transactions'));
     },
   });
 }

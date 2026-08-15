@@ -20,7 +20,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, selected, onToggle, 
       className="rounded-xl p-3 transition-colors"
       style={{
         background: 'var(--hub-card)',
-        border: selected ? '1px solid rgba(245,158,11,0.5)' : '1px solid var(--hub-border)',
+        border: selected
+          ? '1px solid color-mix(in srgb, var(--erp-accent) 50%, transparent)'
+          : '1px solid var(--hub-border)',
       }}
     >
       <div className="flex items-start gap-3">

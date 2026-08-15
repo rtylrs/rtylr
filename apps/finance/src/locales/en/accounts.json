@@ -1,3 +1,13 @@
 {
-  "created": "Account created"
+  "created": "Account created",
+  "nameRequired": "Account name is required",
+  "title": "Chart of Accounts",
+  "count": "{{count}} accounts",
+  "new": "New Account",
+  "search": "Search accounts",
+  "code": "Code",
+  "name": "Name",
+  "type": "Type",
+  "balance": "Balance",
+  "codeOptional": "Account code (optional)"
 }

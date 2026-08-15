@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { uploadAsset } from '@voxire/api';
+import { getOneKitErrorMessage, uploadAsset } from '@voxire/api';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -63,7 +63,7 @@ const GeneralTab: React.FC = () => {
       const uploaded = await uploadAsset(file);
       settings.setSetting('logoUrl', uploaded.url);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Upload failed');
+      toast.error(getOneKitErrorMessage(err, 'Upload failed'));
     } finally {
       setUploadingLogo(false);
       if (logoInputRef.current) logoInputRef.current.value = '';
@@ -80,8 +80,8 @@ const GeneralTab: React.FC = () => {
       // Settings are persisted locally via Zustand persist middleware on every setSetting call.
       // This button confirms the current state is intentionally saved.
       toast.success('Settings saved');
-    } catch {
-      toast.error('Failed to save settings');
+    } catch (error) {
+      toast.error(getOneKitErrorMessage(error, 'Failed to save settings'));
     }
   };
 
@@ -286,8 +286,8 @@ const TeamTab: React.FC = () => {
           setShowInvite(false);
           toast.success('Invitation sent');
         },
-        onError: () => {
-          toast.error('Failed to send invitation');
+        onError: (error) => {
+          toast.error(getOneKitErrorMessage(error, 'Failed to send invitation'));
         },
       }
     );
@@ -475,7 +475,8 @@ const TeamTab: React.FC = () => {
                 onClick={() => {
                   deactivate.mutate(m.id, {
                     onSuccess: () => toast.success(`${m.name} removed`),
-                    onError: () => toast.error(`Failed to remove ${m.name}`),
+                    onError: (error) =>
+                      toast.error(getOneKitErrorMessage(error, `Failed to remove ${m.name}`)),
                   });
                 }}
                 style={{

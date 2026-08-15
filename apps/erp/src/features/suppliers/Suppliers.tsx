@@ -10,11 +10,18 @@ import SupplierScorecard from '../../shared/components/SupplierScorecard';
 import ExportButton from '../../shared/components/ExportButton';
 import PaginationControls from '../../shared/components/PaginationControls';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const PALETTE = ['#10b981', AMBER, '#4583C4', '#8b5cf6', '#f87171', '#3b82f6'];
+const PALETTE = [
+  'var(--erp-success)',
+  AMBER,
+  'var(--accent)',
+  'var(--erp-violet)',
+  'var(--erp-danger)',
+  'var(--erp-blue)',
+];
 
 function getSupplierColor(supplier: Supplier, index: number): string {
   return PALETTE[index % PALETTE.length];
@@ -152,7 +159,9 @@ const Suppliers: React.FC = () => {
             onClick={() => setShowScorecards((v) => !v)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium"
             style={{
-              background: showScorecards ? 'rgba(245,158,11,0.12)' : 'var(--hub-hover)',
+              background: showScorecards
+                ? 'color-mix(in srgb, var(--erp-accent) 12%, transparent)'
+                : 'var(--hub-hover)',
               color: showScorecards ? AMBER : 'var(--hub-text-muted)',
               border: '1px solid var(--hub-border)',
             }}
@@ -175,7 +184,7 @@ const Suppliers: React.FC = () => {
             data-testid="suppliers-add-button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-opacity"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.opacity = '0.9';
             }}
@@ -211,15 +220,14 @@ const Suppliers: React.FC = () => {
                 <motion.div
                   key={supplier.id}
                   variants={itemVariants}
-                  className="rounded-xl p-5 flex flex-col gap-4 transition-colors cursor-pointer"
+                  className="rounded-xl p-5 flex flex-col gap-4 transition-colors"
                   style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
-                  whileHover={{ scale: 1.015, transition: { duration: 0.15 } }}
                 >
                   {/* Header row */}
                   <div className="flex items-start gap-3">
                     <span
                       className="flex items-center justify-center h-10 w-10 rounded-xl text-sm font-bold shrink-0"
-                      style={{ background: `${color}18`, color }}
+                      style={{ background: `color-mix(in srgb, ${color} 9%, transparent)`, color }}
                     >
                       {initials}
                     </span>
@@ -237,8 +245,10 @@ const Suppliers: React.FC = () => {
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0"
                       style={{
-                        background: supplier.isActive ? 'rgba(16,185,129,0.1)' : 'var(--hub-hover)',
-                        color: supplier.isActive ? '#10b981' : 'var(--hub-text-muted)',
+                        background: supplier.isActive
+                          ? 'color-mix(in srgb, var(--erp-success) 10%, transparent)'
+                          : 'var(--hub-hover)',
+                        color: supplier.isActive ? 'var(--erp-success)' : 'var(--hub-text-muted)',
                       }}
                     >
                       {supplier.isActive ? 'Active' : 'Inactive'}
@@ -305,7 +315,7 @@ const Suppliers: React.FC = () => {
       {showCreate && (
         <div
           className="fixed inset-0 flex items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          style={{ background: 'var(--hub-overlay)', zIndex: 9999 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowCreate(false);
           }}
@@ -356,7 +366,7 @@ const Suppliers: React.FC = () => {
                   !newCountry.trim()
                 }
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: '#000' }}
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>

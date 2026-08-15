@@ -1,0 +1,10 @@
+{
+  "directory": "Staff Directory",
+  "memberCount": "{{count}} team members",
+  "inviteStaff": "Invite Staff",
+  "searchPlaceholder": "Search staff… (press /)",
+  "emptyState": {
+    "title": "No staff members",
+    "description": "Adjust filters or invite someone to your team."
+  }
+}

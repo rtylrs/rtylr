@@ -18,9 +18,9 @@ const EmptyState: React.FC<EmptyStateProps> = ({
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div
         className="flex items-center justify-center h-16 w-16 rounded-full mb-4"
-        style={{ background: 'rgba(245,158,11,0.08)' }}
+        style={{ background: 'color-mix(in srgb, var(--erp-accent) 8%, transparent)' }}
       >
-        <Icon size={28} style={{ color: '#f59e0b' }} />
+        <Icon size={28} style={{ color: 'var(--erp-accent)' }} />
       </div>
       <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--hub-text)' }}>
         {title}

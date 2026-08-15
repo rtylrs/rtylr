@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { X, PackagePlus, Plus, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { uploadAsset } from '@voxire/api';
@@ -13,6 +13,7 @@ import {
   type Product,
 } from '../../features/products/useProducts';
 import UnitSelector from './UnitSelector';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 import { useCategories } from '../../features/categories/useCategories';
 import { useSuppliers } from '../../features/suppliers/useSuppliers';
 import { useBrands } from '../../features/brands/useBrands';
@@ -136,6 +137,8 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const { data: brands = [] } = useBrands();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
+  const titleId = useId();
+  const dialogRef = useDialogFocus<HTMLDivElement>({ open, onClose });
 
   // Re-seed local state when a different product is loaded for editing.
   useEffect(() => {
@@ -285,12 +288,14 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
-      aria-label={t('erp.products.new')}
+      aria-labelledby={titleId}
       data-testid="quick-add-product-modal"
       className="fixed inset-0 z-50 flex items-center justify-center p-6"
-      style={{ background: 'rgba(0,0,0,0.6)' }}
+      style={{ background: 'var(--hub-overlay-heavy)' }}
+      tabIndex={-1}
       onClick={onClose}
     >
       <div
@@ -300,10 +305,11 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       >
         <div className="flex items-center justify-between mb-4">
           <h3
+            id={titleId}
             className="text-sm font-semibold flex items-center gap-2"
             style={{ color: 'var(--hub-text)' }}
           >
-            <PackagePlus size={14} style={{ color: '#f59e0b' }} />
+            <PackagePlus size={14} style={{ color: 'var(--erp-accent)' }} />
             {t('erp.products.new')}
           </h3>
           <button onClick={onClose} aria-label={t('common.close')}>
@@ -455,7 +461,8 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
           </div>
           {margin !== null && (
             <div className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-              {t('erp.products.fields.margin')}: <span style={{ color: '#22c55e' }}>{margin}%</span>
+              {t('erp.products.fields.margin')}:{' '}
+              <span style={{ color: 'var(--erp-success)' }}>{margin}%</span>
             </div>
           )}
           <div className="grid grid-cols-3 gap-3">
@@ -686,7 +693,11 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
             onClick={handleSubmit}
             disabled={pending}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-            style={{ background: '#f59e0b', color: '#000', opacity: pending ? 0.6 : 1 }}
+            style={{
+              background: 'var(--erp-accent)',
+              color: 'var(--erp-accent-foreground)',
+              opacity: pending ? 0.6 : 1,
+            }}
           >
             {pending
               ? t('erp.products.creating')

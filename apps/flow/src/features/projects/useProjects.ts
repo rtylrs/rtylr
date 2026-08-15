@@ -2,7 +2,7 @@ import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
-import type { ApiProject } from '../../shared/services/flowApi';
+import type { ApiProject, ProjectUpdate } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
 export function useProjects(workspaceId: string | undefined) {
@@ -33,13 +33,7 @@ export function useCreateProject() {
 export function useUpdateProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: Partial<{ name: string; color: string; description: string }>;
-    }) => {
+    mutationFn: ({ id, data }: { id: string; data: ProjectUpdate }) => {
       return unwrap(flowApi.updateProject(id, data)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),

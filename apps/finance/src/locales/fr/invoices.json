@@ -1,9 +1,10 @@
 {
-  "created": "Invoice created",
-  "updated": "Invoice updated",
-  "deleted": "Invoice deleted",
-  "paymentRecorded": "Payment recorded",
-  "statusUpdated": "Invoice status updated",
-  "markedPaid": "Marked {{id}} paid",
-  "markPaidFailed": "Failed to mark {{id}} paid"
+  "created": "Facture créée",
+  "updated": "Facture mise à jour",
+  "deleted": "Facture supprimée",
+  "sent": "Facture envoyée à {{to}}",
+  "paymentRecorded": "Paiement enregistré",
+  "statusUpdated": "Statut de la facture mis à jour",
+  "markedPaid": "{{id}} marquée comme payée",
+  "markPaidFailed": "Impossible de marquer {{id}} comme payée"
 }

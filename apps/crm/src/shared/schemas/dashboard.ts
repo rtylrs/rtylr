@@ -5,9 +5,16 @@ const finiteNumber = z.preprocess((value) => {
   return Number.isFinite(parsed) ? parsed : 0;
 }, z.number());
 
+const optionalFiniteNumber = z.preprocess((value) => {
+  if (value === undefined || value === null || value === '') return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}, z.number().optional());
+
 // Accept both the backend proto shape (firstName/lastName/totalSpent/
 // loyaltyTier) and the legacy display shape, and normalize to what
-// Dashboard.tsx renders. The backend has no "visits" field, so it defaults to 0.
+// Dashboard.tsx renders. The backend has no "visits" field, so it remains
+// undefined instead of being presented as a real zero.
 export const topCustomerSchema = z
   .object({
     name: z.string().optional(),
@@ -22,7 +29,7 @@ export const topCustomerSchema = z
   .transform((c) => ({
     name: c.name ?? `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim(),
     spend: c.spend ?? String(c.totalSpent ?? 0),
-    visits: c.visits ?? 0,
+    visits: c.visits,
     tier: c.tier ?? c.loyaltyTier ?? '',
   }));
 
@@ -42,8 +49,8 @@ export const dashboardStatsSchema = z
     new_this_month: finiteNumber.optional(),
     activeLoyaltyMembers: finiteNumber.optional(),
     active_loyalty_members: finiteNumber.optional(),
-    campaignReach: finiteNumber.optional(),
-    campaign_reach: finiteNumber.optional(),
+    campaignReach: optionalFiniteNumber,
+    campaign_reach: optionalFiniteNumber,
     // Trend strings + recentCampaigns have no backend source yet; default so the
     // dashboard loads instead of throwing on missing fields.
     totalCustomersChange: z.string().optional(),
@@ -63,7 +70,10 @@ export const dashboardStatsSchema = z
     totalCustomers: raw.totalCustomers ?? raw.total_customers ?? 0,
     newThisMonth: raw.newThisMonth ?? raw.new_this_month ?? 0,
     activeLoyaltyMembers: raw.activeLoyaltyMembers ?? raw.active_loyalty_members ?? 0,
-    campaignReach: raw.campaignReach ?? raw.campaign_reach ?? 0,
+    // The CRM dashboard endpoint does not currently provide campaign reach.
+    // Keep it undefined so the UI can say "Unavailable" instead of presenting
+    // a fabricated zero as a real metric.
+    campaignReach: raw.campaignReach ?? raw.campaign_reach,
     totalCustomersChange: raw.totalCustomersChange ?? raw.total_customers_change ?? '',
     newThisMonthChange: raw.newThisMonthChange ?? raw.new_this_month_change ?? '',
     activeLoyaltyMembersChange:

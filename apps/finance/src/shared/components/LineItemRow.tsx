@@ -44,7 +44,7 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
             if (!isNaN(v) && v > 0) onChange({ ...item, quantity: v });
           }}
           disabled={disabled}
-          style={{ ...inputStyle, textAlign: 'right' }}
+          style={{ ...inputStyle, textAlign: 'end' }}
         />
       </td>
       <td style={{ padding: 8, width: 140 }}>
@@ -64,14 +64,14 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
             if (!isNaN(v) && v >= 0) onChange({ ...item, taxRate: v });
           }}
           disabled={disabled}
-          style={{ ...inputStyle, textAlign: 'right' }}
+          style={{ ...inputStyle, textAlign: 'end' }}
         />
       </td>
       <td
         style={{
           padding: 8,
           width: 120,
-          textAlign: 'right',
+          textAlign: 'end',
           fontSize: 13,
           color: 'var(--hub-text)',
           fontWeight: 600,
@@ -87,7 +87,7 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            color: '#ef4444',
+            color: 'var(--finance-danger)',
             padding: 4,
           }}
           title="Remove line"

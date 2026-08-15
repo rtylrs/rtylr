@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { Plus, Search } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
@@ -22,6 +23,7 @@ const TYPES: (AccountType | 'all')[] = [
 const ACCOUNT_TYPES = ['asset', 'liability', 'equity', 'revenue', 'expense'] as const;
 
 const ChartOfAccounts: React.FC = () => {
+  const { t } = useTranslation();
   const { data = [], isLoading } = useChartOfAccounts();
   const createMut = useCreateAccount();
   const [filter, setFilter] = useState<AccountType | 'all'>('all');
@@ -33,7 +35,7 @@ const ChartOfAccounts: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim()) {
-      toast.error('Account name is required');
+      toast.error(t('accounts.nameRequired'));
       return;
     }
     try {
@@ -67,13 +69,13 @@ const ChartOfAccounts: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Chart of accounts · rtylr" />
+      <HelmetContainer title={`${t('accounts.title')} · rtylr`} />
       <PageHeader
-        title="Chart of Accounts"
-        subtitle={`${filtered.length} accounts`}
+        title={t('accounts.title')}
+        subtitle={t('accounts.count', { count: filtered.length })}
         actions={
           <button style={primaryBtn} onClick={() => setShowCreate(true)}>
-            <Plus size={13} /> New Account
+            <Plus size={13} /> {t('accounts.new')}
           </button>
         }
       />
@@ -101,7 +103,7 @@ const ChartOfAccounts: React.FC = () => {
                 fontWeight: 500,
                 cursor: 'pointer',
                 background: filter === t ? ACCENT : 'transparent',
-                color: filter === t ? 'var(--hub-bg, #fff)' : 'var(--hub-text-muted)',
+                color: filter === t ? 'var(--hub-bg)' : 'var(--hub-text-muted)',
                 textTransform: 'capitalize',
               }}
             >
@@ -112,13 +114,18 @@ const ChartOfAccounts: React.FC = () => {
         <div style={{ position: 'relative', flex: 1, maxWidth: 280 }}>
           <Search
             size={13}
-            style={{ position: 'absolute', left: 10, top: 11, color: 'var(--hub-text-dim)' }}
+            style={{
+              position: 'absolute',
+              insetInlineStart: 10,
+              top: 11,
+              color: 'var(--hub-text-dim)',
+            }}
           />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search accounts"
-            style={{ ...inputStyle, paddingLeft: 30 }}
+            placeholder={t('accounts.search')}
+            style={{ ...inputStyle, paddingInlineStart: 30 }}
           />
         </div>
       </div>
@@ -132,12 +139,17 @@ const ChartOfAccounts: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                {['Code', 'Name', 'Type', 'Balance'].map((h) => (
+                {[
+                  t('accounts.code'),
+                  t('accounts.name'),
+                  t('accounts.type'),
+                  t('accounts.balance'),
+                ].map((h) => (
                   <th
                     key={h}
                     style={{
                       padding: '10px 16px',
-                      textAlign: h === 'Balance' ? 'right' : 'left',
+                      textAlign: h === 'Balance' ? 'end' : 'start',
                       fontSize: 11,
                       fontWeight: 600,
                       textTransform: 'uppercase',
@@ -175,7 +187,7 @@ const ChartOfAccounts: React.FC = () => {
                       padding: '12px 16px',
                       fontSize: 13,
                       fontWeight: 600,
-                      textAlign: 'right',
+                      textAlign: 'end',
                     }}
                   >
                     <MoneyDisplay amount={a.balance} />
@@ -191,7 +203,7 @@ const ChartOfAccounts: React.FC = () => {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0,0,0,0.5)',
+            background: 'var(--finance-overlay)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -212,17 +224,17 @@ const ChartOfAccounts: React.FC = () => {
             }}
           >
             <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-              New Account
+              {t('accounts.new')}
             </h3>
             <input
               style={inputStyle}
-              placeholder="Account name"
+              placeholder={t('accounts.name')}
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
             />
             <input
               style={inputStyle}
-              placeholder="Account code (optional)"
+              placeholder={t('accounts.codeOptional')}
               value={newCode}
               onChange={(e) => setNewCode(e.target.value)}
             />
@@ -239,10 +251,10 @@ const ChartOfAccounts: React.FC = () => {
             </select>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button style={ghostBtn} onClick={() => setShowCreate(false)}>
-                Cancel
+                {t('common.cancel')}
               </button>
               <button style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>
-                {createMut.isPending ? 'Creating…' : 'Create'}
+                {createMut.isPending ? t('common.creating') : t('common.create')}
               </button>
             </div>
           </div>

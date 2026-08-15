@@ -14,6 +14,7 @@ import { inputStyle, ACCENT } from '../lib/tokens';
 import type { Client } from './ClientSelect';
 import { unwrap } from '@voxire/api';
 import { safe } from '../lib/api';
+import { parseClientsResponse } from '../schemas/clients';
 
 interface Result {
   id: string;
@@ -91,8 +92,8 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
     if (open) {
       setQuery('');
       setIndex(0);
-      void unwrap(safe.get<Client[]>('/crm/customers'))
-        .then((data) => setClients(data ?? []))
+      void unwrap(safe.get<unknown>('/crm/customers'))
+        .then((data) => setClients(parseClientsResponse(data)))
         .catch(() => {});
     }
   }, [open]);
@@ -105,7 +106,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
       .map((c) => ({
         id: `client-${c.id}`,
         label: c.name,
-        sub: c.email,
+        sub: c.email ?? undefined,
         to: `/invoices/new?client=${c.id}`,
         icon: Users,
         group: 'Clients',
@@ -192,10 +193,10 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
                 padding: '10px 12px',
                 borderRadius: 8,
                 border: 'none',
-                background: active ? 'rgba(16,185,129,0.1)' : 'transparent',
+                background: active ? 'var(--finance-accent-faint)' : 'transparent',
                 color: 'var(--hub-text)',
                 cursor: 'pointer',
-                textAlign: 'left',
+                textAlign: 'start',
                 marginBottom: 2,
               }}
             >
@@ -206,7 +207,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
               </div>
               <span
                 style={{
-                  marginLeft: 'auto',
+                  marginInlineStart: 'auto',
                   fontSize: 10,
                   color: 'var(--hub-text-dim)',
                   textTransform: 'uppercase',

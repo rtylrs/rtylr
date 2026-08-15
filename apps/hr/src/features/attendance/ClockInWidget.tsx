@@ -227,6 +227,8 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
   const isClockedIn = activeRecord && !activeRecord.clockOutAt;
 
   const enabledMethods = config?.clockInMethods ?? ['app'];
+  const isAppEnabled = enabledMethods.includes('app');
+  const isQrEnabled = enabledMethods.includes('qr');
   const isPinEnabled = enabledMethods.includes('pin');
   const isGpsEnabled = enabledMethods.includes('gps');
 
@@ -372,21 +374,25 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              <Button
-                variant="primary"
-                onClick={handleClockIn}
-                disabled={clockIn.isPending}
-                icon={<LogIn size={14} />}
-              >
-                {t('attendance.clockWidget.clockInApp')}
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => toast.info(t('attendance.qrComingSoon'))}
-                icon={<QrCode size={14} />}
-              >
-                {t('attendance.clockWidget.clockInQR')}
-              </Button>
+              {isAppEnabled && (
+                <Button
+                  variant="primary"
+                  onClick={handleClockIn}
+                  disabled={clockIn.isPending}
+                  icon={<LogIn size={14} />}
+                >
+                  {t('attendance.clockWidget.clockInApp')}
+                </Button>
+              )}
+              {isQrEnabled && (
+                <Button
+                  variant="secondary"
+                  onClick={() => toast.info(t('attendance.qrComingSoon'))}
+                  icon={<QrCode size={14} />}
+                >
+                  {t('attendance.clockWidget.clockInQR')}
+                </Button>
+              )}
               {isPinEnabled && (
                 <Button
                   variant="secondary"

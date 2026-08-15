@@ -1,22 +1,29 @@
 import { z } from 'zod';
 
+const resourceIdSchema = z.union([z.string(), z.number()]).transform(String);
+
 export const bankAccountSchema = z
   .object({
-    id: z.union([z.string(), z.number()]).transform(String).optional(),
-    name: z.string().default(''),
-    type: z.string().optional().nullable(),
-    balance: z.number().optional().nullable(),
-    currency: z.string().optional().nullable(),
-    institution: z.string().optional().nullable(),
-    mask: z.string().optional().nullable(),
-    // transaction fields (used when parsed as bank transactions)
-    matched: z.boolean().optional(),
-    description: z.string().optional().nullable(),
-    date: z.string().optional().nullable(),
-    category: z.string().optional().nullable(),
-    amount: z.number().optional().nullable(),
+    id: resourceIdSchema,
+    name: z.string(),
+    type: z.string().nullable(),
+    balance: z.number().nullable(),
+    currency: z.string().nullable(),
+    institution: z.string().nullable(),
+    mask: z.string().nullable(),
   })
-  .passthrough();
+  .strict();
+
+export const bankTransactionSchema = z
+  .object({
+    id: resourceIdSchema,
+    matched: z.boolean(),
+    description: z.string().nullable(),
+    date: z.string().nullable(),
+    category: z.string().nullable(),
+    amount: z.number().nullable(),
+  })
+  .strict();
 
 export const chartOfAccountSchema = z
   .object({
@@ -29,4 +36,5 @@ export const chartOfAccountSchema = z
   .passthrough();
 
 export type BankAccountRaw = z.infer<typeof bankAccountSchema>;
+export type BankTransactionRaw = z.infer<typeof bankTransactionSchema>;
 export type ChartOfAccountRaw = z.infer<typeof chartOfAccountSchema>;

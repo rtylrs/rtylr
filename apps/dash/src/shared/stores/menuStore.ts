@@ -56,10 +56,17 @@ interface MenuActions {
   editCategory: (id: string, updates: Partial<Category>) => void;
   deleteCategory: (id: string) => void;
   addBanner: (banner: Banner) => void;
+  deleteBanner: (id: string) => void;
+  addMenuItem: (categoryId: string, item: Partial<MenuItem>) => Promise<void>;
+  deleteMenuItem: (id: string) => void;
 }
 
 function isCategory(item: Category | Banner | MenuItem): item is Category {
   return (item as Category).type === 'category';
+}
+
+function isMenuItem(item: Category | Banner | MenuItem): item is MenuItem {
+  return !isCategory(item) && !('bannerImage' in item);
 }
 
 const initialState: MenuState = {
@@ -102,12 +109,46 @@ export const useMenuStore = create<MenuState & MenuActions>()(
           ),
         })),
 
+      addBanner: (banner) => set((state) => ({ items: [...state.items, banner] })),
+
       deleteCategory: (id) =>
         set((state) => ({
-          items: state.items.filter((item) => !isCategory(item) || item.id !== id),
+          items: state.items.filter(
+            (item) =>
+              !isCategory(item) ||
+              (item._id !== id && (item as any).id !== id && item.itemId !== id)
+          ),
         })),
 
-      addBanner: (banner) => set((state) => ({ items: [...state.items, banner] })),
+      deleteBanner: (id) =>
+        set((state) => ({
+          items: state.items.filter((item) => (item as Banner)._id !== id),
+        })),
+
+      addMenuItem: async (categoryId, item) => {
+        const id = String(Date.now());
+        const newItem: MenuItem = {
+          _id: id,
+          itemId: id,
+          type: 'item',
+          name: (item.name as string) ?? 'New Product',
+          details: {
+            name: (item.name as string) ?? '',
+            description: (item.description as string) ?? '',
+            price: item.price ? Number(item.price) : 0,
+            isActive: item.isAvailable !== false,
+          },
+          ...item,
+        };
+        set((state) => ({ items: [...state.items, newItem] }));
+      },
+
+      deleteMenuItem: (id) =>
+        set((state) => ({
+          items: state.items.filter(
+            (item) => item._id !== id && (!isMenuItem(item) || item.itemId !== id)
+          ),
+        })),
     }),
     {
       name: 'menu-store',

@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { getTier, nextTier, pointsToNextTier, tierColor, tierThresholds } from './tiers';
+import {
+  getCustomerTier,
+  getTier,
+  nextTier,
+  pointsToNextTier,
+  tierColor,
+  tierThresholds,
+  thresholdsFromConfig,
+} from './tiers';
 import type { Tier } from './tiers';
 
 // ── getTier ───────────────────────────────────────────────────────────────────
@@ -39,6 +47,18 @@ describe('getTier', () => {
   it('returns Platinum for points above 2500', () => {
     expect(getTier(2501)).toBe('Platinum');
     expect(getTier(9999)).toBe('Platinum');
+  });
+});
+
+describe('persisted/configured tiers', () => {
+  it('prefers a persisted backend tier over stale local thresholds', () => {
+    expect(getCustomerTier(600, 'gold')).toBe('Gold');
+  });
+
+  it('uses configured thresholds for customers without a persisted tier', () => {
+    const thresholds = thresholdsFromConfig({ silverMin: 100, goldMin: 300, platinumMin: 700 });
+    expect(getTier(350, thresholds)).toBe('Gold');
+    expect(pointsToNextTier(350, thresholds)).toBe(350);
   });
 });
 

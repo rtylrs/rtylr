@@ -129,3 +129,9 @@
 .flow-shimmer {
   animation: flow-shimmer 1.4s infinite;
 }
+
+/* Directional affordances should follow the language direction without
+ * requiring each control to choose a separate icon. */
+[dir='rtl'] .flow-directional-icon {
+  transform: scaleX(-1);
+}

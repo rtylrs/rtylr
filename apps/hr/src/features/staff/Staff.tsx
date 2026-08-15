@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
+import { useNavigate } from '@tanstack/react-router';
 import type { Variants } from 'motion/react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -43,6 +44,7 @@ const cardAnim: Variants = {
 
 const Staff: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile(900);
   const [activeTab, setActiveTab] = useState<FilterTab>('All');
   const [search, setSearch] = useState('');
@@ -87,6 +89,7 @@ const Staff: React.FC = () => {
             </p>
           </div>
           <button
+            onClick={() => navigate({ to: '/employees/new' })}
             style={{
               display: 'flex',
               alignItems: 'center',

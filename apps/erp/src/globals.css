@@ -14,6 +14,26 @@
   --accent-muted: rgba(69, 131, 196, 0.12);
   --accent-border: rgba(69, 131, 196, 0.3);
   --accent-focus: rgba(69, 131, 196, 0.5);
+
+  /* ERP semantic palette. Keep screen components on these tokens so a theme
+   * or contrast adjustment has one source of truth. */
+  --erp-accent: #f59e0b;
+  --erp-accent-foreground: #000;
+  --erp-success: #10b981;
+  --erp-danger: #f87171;
+  --erp-danger-strong: #ef4444;
+  --erp-info: #60a5fa;
+  --erp-purple: #a78bfa;
+  --erp-violet: #8b5cf6;
+  --erp-blue: #3b82f6;
+  --erp-warning-text: #92400e;
+
+  --hub-overlay-light: rgba(0, 0, 0, 0.4);
+  --hub-overlay: rgba(0, 0, 0, 0.5);
+  --hub-overlay-medium: rgba(0, 0, 0, 0.55);
+  --hub-overlay-heavy: rgba(0, 0, 0, 0.6);
+  --hub-overlay-opaque: rgba(0, 0, 0, 0.85);
+  --hub-highlight: rgba(255, 255, 255, 0.1);
 }
 
 /* ── Dark mode (default) ─────────────────────────────────────── */
@@ -95,4 +115,10 @@
   --primary-color: var(--hub-text);
   --accent-color: #4583c4;
   --primary-font: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+}
+
+/* Directional affordances should follow the language direction without
+ * requiring each control to choose a separate icon. */
+[dir='rtl'] .erp-directional-icon {
+  transform: scaleX(-1);
 }

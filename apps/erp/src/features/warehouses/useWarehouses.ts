@@ -10,6 +10,7 @@ import type {
   UpdateWarehouseResponse,
   Warehouse,
 } from '@voxire/voxie/erp/warehouse/v1/types';
+import { withErpListBounds } from '../../shared/lib/erpListBounds';
 
 const warehouseClient = createOneKitClient(WarehouseServiceClient, 'erp');
 
@@ -23,7 +24,7 @@ export function useWarehouses() {
   return useQuery<Warehouse[]>({
     queryKey: ['warehouses'],
     queryFn: async () => {
-      const response = await warehouseClient.listWarehouses({});
+      const response = await warehouseClient.listWarehouses(withErpListBounds({}));
       return response.warehouses ?? [];
     },
   });

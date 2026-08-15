@@ -1,0 +1,83 @@
+{
+  "title": "Paie",
+  "subtitle": "Gérer les cycles de paie et la rémunération des employés",
+  "triggerRun": "Lancer un cycle",
+  "configRequired": "Configurez la paie d'abord",
+  "configRequiredDescription": "Configurez votre paie avant de lancer un cycle.",
+  "goToConfig": "Aller à la configuration de la paie",
+  "configSaved": "Configuration de la paie enregistrée",
+  "runTriggered": "Cycle de paie lancé",
+  "runApproved": "Cycle de paie approuvé",
+  "exported": "Paie exportée avec succès",
+  "backToRuns": "Retour aux cycles de paie",
+  "emptyTitle": "Aucun cycle de paie",
+  "emptyDescription": "Lancez un nouveau cycle de paie pour commencer.",
+  "employeeCount": "{{count}} employés",
+  "netTotal": "Total net",
+  "statuses": {
+    "all": "Tous",
+    "draft": "Brouillon",
+    "in_review": "En revue",
+    "approved": "Approuvé",
+    "exported": "Exporté"
+  },
+  "stats": {
+    "totalGross": "Brut total",
+    "totalDeductions": "Déductions totales",
+    "totalNet": "Paie nette",
+    "pendingRuns": "Cycles en attente"
+  },
+  "table": {
+    "employee": "Employé",
+    "employeeId": "Employé #{{id}}",
+    "hours": "Heures",
+    "basePay": "Salaire de base",
+    "overtimePay": "Heures supplémentaires",
+    "deductions": "Déductions",
+    "bonuses": "Primes",
+    "netPay": "Salaire net",
+    "deductionsExceedGross": "Les déductions dépassent le salaire brut"
+  },
+  "runDetail": {
+    "subtitle": "{{count}} entrées dans ce cycle",
+    "approve": "Approuver le cycle",
+    "exportCsv": "Exporter CSV",
+    "notFound": "Cycle de paie introuvable",
+    "notFoundDescription": "Ce cycle de paie n’a pas pu être chargé."
+  },
+  "paySlip": {
+    "title": "Fiche de paie",
+    "myPaySlips": "Mes fiches de paie",
+    "myPaySlipsSubtitle": "Consultez vos fiches de paie complétées",
+    "period": "Période de paie",
+    "earnings": "Revenus",
+    "grossPay": "Salaire brut",
+    "deductionsSection": "Déductions",
+    "notFound": "Fiche de paie introuvable",
+    "notFoundDescription": "Cette fiche de paie n'a pas pu être chargée.",
+    "backToSlips": "Retour aux fiches de paie",
+    "emptyTitle": "Aucune fiche de paie",
+    "emptyDescription": "Vos fiches de paie apparaîtront ici après le traitement de la paie."
+  },
+  "config": {
+    "title": "Configuration de la paie",
+    "subtitle": "Configurez le fonctionnement de la paie pour votre organisation",
+    "grossModel": "Modèle de salaire brut",
+    "grossModels": {
+      "hourly": "Horaire",
+      "salary": "Salaire",
+      "both": "Les deux"
+    },
+    "period": "Période de paie",
+    "periods": {
+      "weekly": "Hebdomadaire",
+      "biweekly": "Bimensuel",
+      "monthly": "Mensuel"
+    },
+    "enableOvertime": "Activer le suivi des heures supplémentaires",
+    "enableDeductions": "Activer les déductions",
+    "enableBonuses": "Activer les primes",
+    "saved": "Configuration de la paie enregistrée",
+    "notConfiguredNotice": "La paie n'est pas encore configurée - remplissez le formulaire pour commencer"
+  }
+}

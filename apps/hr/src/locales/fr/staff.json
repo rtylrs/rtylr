@@ -1,0 +1,10 @@
+{
+  "directory": "Répertoire du personnel",
+  "memberCount": "{{count}} membres de l'équipe",
+  "inviteStaff": "Inviter du personnel",
+  "searchPlaceholder": "Rechercher le personnel… (appuyez /)",
+  "emptyState": {
+    "title": "Aucun membre du personnel",
+    "description": "Ajustez les filtres ou invitez quelqu'un dans votre équipe."
+  }
+}

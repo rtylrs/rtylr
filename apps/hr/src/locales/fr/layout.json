@@ -1,0 +1,30 @@
+{
+  "sections": {
+    "workspace": "Espace de travail",
+    "time": "Temps",
+    "people": "Personnes",
+    "hr": "RH"
+  },
+  "appearance": "Apparence",
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "signOut": "Déconnexion",
+  "hr": "RH",
+  "routes": {
+    "requestTimeOff": "Demande de congé",
+    "timeOffCalendar": "Calendrier des congés",
+    "shiftSchedule": "Horaire des quarts",
+    "performanceReviews": "Évaluations de performance",
+    "newReview": "Nouvelle évaluation",
+    "employeeProfile": "Profil de l'employé",
+    "timesheetDetail": "Détail de la feuille de temps",
+    "newLeaveRequest": "Nouvelle demande de congé",
+    "payrollConfig": "Configuration de la paie",
+    "payrollRunDetail": "Exécution de la paie",
+    "checklistTemplates": "Modèles de listes",
+    "reviewCycleDetail": "Cycle d'évaluation"
+  }
+}

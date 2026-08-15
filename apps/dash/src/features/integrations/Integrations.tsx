@@ -123,14 +123,21 @@ const Integrations: React.FC = () => {
                     >
                       <Plug2 size={19} style={{ color: '#4583C4' }} />
                     </div>
-                    {isConnected && (
+                    {i.status === 'coming_soon' ? (
+                      <span
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                        style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b' }}
+                      >
+                        Coming Soon
+                      </span>
+                    ) : isConnected ? (
                       <span
                         className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
                         style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}
                       >
                         Connected
                       </span>
-                    )}
+                    ) : null}
                   </div>
 
                   <div className="flex-1">
@@ -148,7 +155,19 @@ const Integrations: React.FC = () => {
                   </div>
 
                   <div className="flex items-center justify-end">
-                    {isConnected ? (
+                    {i.status === 'coming_soon' ? (
+                      <button
+                        disabled
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold opacity-50 cursor-not-allowed"
+                        style={{
+                          background: 'var(--dash-hover)',
+                          color: 'var(--dash-text-muted)',
+                          border: '1px solid var(--dash-border)',
+                        }}
+                      >
+                        Coming Soon
+                      </button>
+                    ) : isConnected ? (
                       <button
                         onClick={() => disconnect.mutate(i.id)}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"

@@ -1,0 +1,53 @@
+{
+  "title": "Documents",
+  "subtitle": "Employee document vault",
+  "uploaded": "Document uploaded successfully",
+  "deleted": "Document deleted",
+  "selectEmployeeFirst": "Select an employee first",
+  "expiringSoon": "{{count}} document(s) expiring soon",
+  "filterEmployee": "Employee",
+  "filterSelect": "Select",
+  "filterType": "Type",
+  "emptyTitle": "No documents yet",
+  "emptyDescription": "Upload I-9, W4, contracts, and other files.",
+  "table": {
+    "document": "Document",
+    "employee": "Employee",
+    "type": "Type",
+    "uploaded": "Uploaded"
+  },
+  "deleteTitle": "Delete document?",
+  "deleteConfirm": "This action cannot be undone.",
+  "deleteButton": "Delete",
+  "vault": {
+    "title": "Documents",
+    "upload": "Upload",
+    "uploadTitle": "Upload Document",
+    "expiryWarning": "{{count}} document(s) expiring or expired",
+    "emptyTitle": "No documents yet",
+    "emptyDescription": "Upload employee documents to keep them organized.",
+    "table": {
+      "name": "Document",
+      "type": "Type",
+      "storageMode": "Storage",
+      "expiryDate": "Expiry Date"
+    },
+    "types": {
+      "id_card": "ID Card",
+      "contract": "Contract",
+      "certificate": "Certificate",
+      "visa": "Visa",
+      "other": "Other"
+    },
+    "storageModes": {
+      "stored": "Stored",
+      "linked": "Linked"
+    },
+    "form": {
+      "name": "Document Name",
+      "namePlaceholder": "e.g. Passport, Employment Contract",
+      "type": "Document Type",
+      "expiryDate": "Expiry Date"
+    }
+  }
+}

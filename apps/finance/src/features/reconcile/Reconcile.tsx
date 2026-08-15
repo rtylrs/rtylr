@@ -3,13 +3,14 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Link2, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
-import { unwrap } from '@voxire/api';
+import { getOneKitErrorMessage, unwrap } from '@voxire/api';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { useBankTransactions } from '../../shared/hooks/useBankAccounts';
 import { useListInvoices } from '../../shared/hooks/queries/useInvoices';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 import { financeApi } from '../../shared/services/financeApi';
+import { findExactMatches } from './reconcileHelper';
 
 interface Candidate {
   id: string;
@@ -19,7 +20,7 @@ interface Candidate {
 
 const Reconcile: React.FC = () => {
   const { data: transactions = [] } = useBankTransactions();
-  const { data: invoicesResp } = useListInvoices({ limit: 200, offset: 0, status: 'sent' });
+  const { data: invoicesResp } = useListInvoices({ page: 1, pageSize: 200, status: 'sent' });
   const candidates: Candidate[] = (invoicesResp?.invoices ?? []).map((inv) => ({
     id: String(inv.id),
     label: `${inv.invoiceNumber} - ${inv.clientName}`,
@@ -36,20 +37,22 @@ const Reconcile: React.FC = () => {
       await unwrap(financeApi.matchTransaction(txId, 'invoice', candidateId));
       setMatches((prev) => ({ ...prev, [txId]: candidateId }));
       toast.success(`Matched transaction to ${candidateId}`);
-    } catch {
-      toast.error('Failed to match transaction');
+    } catch (error) {
+      toast.error(getOneKitErrorMessage(error, 'Failed to match transaction'));
     }
   };
 
   const handleAutoMatch = async (): Promise<void> => {
     setAutoMatching(true);
     try {
-      const exactMatches = unmatched.flatMap((transaction) => {
-        const candidate = candidates.find(
-          (item) => Math.abs(item.amount) === Math.abs(transaction.amount ?? 0)
-        );
-        return transaction.id && candidate ? [{ transactionId: transaction.id, candidate }] : [];
-      });
+      const exactMatches = findExactMatches(
+        unmatched.map((t) => ({
+          id: t.id ?? '',
+          description: t.description ?? '',
+          amount: t.amount ?? 0,
+        })),
+        candidates
+      );
       for (const item of exactMatches) {
         await unwrap(financeApi.matchTransaction(item.transactionId, 'invoice', item.candidate.id));
       }
@@ -59,8 +62,8 @@ const Reconcile: React.FC = () => {
         return next;
       });
       toast.success('Auto-match completed');
-    } catch {
-      toast.error('Auto-match failed');
+    } catch (error) {
+      toast.error(getOneKitErrorMessage(error, 'Auto-match failed'));
     } finally {
       setAutoMatching(false);
     }

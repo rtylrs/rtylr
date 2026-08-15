@@ -52,7 +52,9 @@ const TaxReport: React.FC = () => {
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--hub-text-muted)' }}>Tax owed</div>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#f59e0b', marginTop: 6 }}>
+          <div
+            style={{ fontSize: 22, fontWeight: 700, color: 'var(--finance-warning)', marginTop: 6 }}
+          >
             <MoneyDisplay amount={totalOwed} />
           </div>
         </div>
@@ -96,7 +98,7 @@ const TaxReport: React.FC = () => {
                     key={h}
                     style={{
                       padding: '10px 16px',
-                      textAlign: 'left',
+                      textAlign: 'start',
                       fontSize: 11,
                       fontWeight: 600,
                       textTransform: 'uppercase',
@@ -131,9 +133,9 @@ const TaxReport: React.FC = () => {
                           borderRadius: 20,
                           fontWeight: 600,
                           background: filed
-                            ? 'color-mix(in srgb, var(--finance-accent, #10b981) 12%, transparent)'
-                            : 'color-mix(in srgb, var(--finance-warning, #f59e0b) 12%, transparent)',
-                          color: filed ? ACCENT : 'var(--finance-warning, #f59e0b)',
+                            ? 'color-mix(in srgb, var(--finance-accent) 12%, transparent)'
+                            : 'color-mix(in srgb, var(--finance-warning) 12%, transparent)',
+                          color: filed ? ACCENT : 'var(--finance-warning)',
                         }}
                       >
                         {p.status}

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { X, Keyboard } from 'lucide-react';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 
 interface KeyboardShortcutsModalProps {
   open: boolean;
@@ -19,11 +20,19 @@ const SHORTCUTS = [
 ];
 
 const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ open, onClose }) => {
+  const titleId = useId();
+  const dialogRef = useDialogFocus<HTMLDivElement>({ open, onClose });
+
   if (!open) return null;
   return (
     <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
       className="fixed inset-0 z-50 flex items-center justify-center p-6"
-      style={{ background: 'rgba(0,0,0,0.6)' }}
+      style={{ background: 'var(--hub-overlay-heavy)' }}
+      tabIndex={-1}
       onClick={onClose}
     >
       <div
@@ -33,13 +42,14 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ open, o
       >
         <div className="flex items-center justify-between mb-4">
           <h3
+            id={titleId}
             className="text-sm font-semibold flex items-center gap-2"
             style={{ color: 'var(--hub-text)' }}
           >
-            <Keyboard size={14} style={{ color: '#f59e0b' }} />
+            <Keyboard size={14} style={{ color: 'var(--erp-accent)' }} />
             Keyboard Shortcuts
           </h3>
-          <button onClick={onClose}>
+          <button onClick={onClose} aria-label="Close keyboard shortcuts">
             <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
           </button>
         </div>

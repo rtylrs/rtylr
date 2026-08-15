@@ -10,10 +10,12 @@ import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 interface ReceiveLine {
+  id?: string;
   sku: string;
   name: string;
   expected: number;
@@ -26,7 +28,10 @@ const Receiving: React.FC = () => {
   const orders = ordersResult?.purchaseOrders ?? [];
   const supplierNameById = new Map((supplierResult?.suppliers ?? []).map((s) => [s.id, s.name]));
   const updateStatus = useUpdatePurchaseOrderStatus();
-  const open = orders.filter((o) => o.status === 'sent' || o.status === 'approved');
+  const { t } = useTranslation('erp');
+  const open = orders.filter(
+    (o) => o.status === 'sent' || o.status === 'approved' || o.status === 'partial'
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [lines, setLines] = useState<ReceiveLine[]>([]);
 
@@ -34,10 +39,11 @@ const Receiving: React.FC = () => {
     setSelectedId(order.id ?? null);
     setLines(
       (order.items ?? []).map((item) => ({
+        id: item.id,
         sku: item.productId ?? '',
         name: `Product #${item.productId ?? ''}`,
         expected: item.quantityOrdered ?? 0,
-        received: (item.quantityReceived || item.quantityOrdered) ?? 0,
+        received: item.quantityReceived ?? item.quantityOrdered ?? 0,
       }))
     );
   };
@@ -55,20 +61,31 @@ const Receiving: React.FC = () => {
   const completeReceipt = () => {
     const overReceived = lines.filter((l) => l.received > l.expected);
     if (overReceived.length > 0) {
-      toast.error('Cannot receive more units than ordered');
+      toast.error(t('receiving.validation.overReceived'));
       return;
     }
+    const hasReceivedItems = lines.some((line) => line.received > 0);
+    const isFullyReceived = lines.every((line) => line.received === line.expected);
+    const status = isFullyReceived ? 'received' : hasReceivedItems ? 'partial' : 'approved';
     const variance = lines.reduce((sum, l) => sum + (l.expected - l.received), 0);
     toast.success(
       variance === 0
-        ? 'Receipt completed, all items received'
-        : `Receipt completed with ${variance} unit variance`
+        ? t('receiving.toast.completed')
+        : t('receiving.toast.completedVariance', { count: variance })
     );
     if (selectedId !== null) {
-      // Backend expects the lowercase status enum (draft|sent|approved|partial|received|cancelled).
       updateStatus.mutate(
-        { id: selectedId, body: { status: 'received' } },
-        { onError: () => toast.error('Failed to update receipt status') }
+        {
+          id: selectedId,
+          body: {
+            status,
+            items: lines.map((line) => ({
+              id: line.id,
+              quantityReceived: line.received,
+            })),
+          },
+        },
+        { onError: () => toast.error(t('receiving.toast.updateFailed')) }
       );
     }
     setSelectedId(null);
@@ -80,11 +97,8 @@ const Receiving: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full min-w-0 space-y-5"
     >
-      <HelmetContainer title="Goods receiving · rtylr" />
-      <PageHeader
-        title="Goods Receiving"
-        description="Receive items against open purchase orders"
-      />
+      <HelmetContainer title={`${t('receiving.title')} · rtylr`} />
+      <PageHeader title={t('receiving.title')} description={t('receiving.description')} />
 
       {isLoading ? (
         <Skeleton className="h-40 w-full rounded-xl" />
@@ -95,9 +109,13 @@ const Receiving: React.FC = () => {
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
-              Receive items for PO-{selectedId}
+              {t('receiving.receiveFor', { id: selectedId })}
             </h3>
-            <button onClick={() => setSelectedId(null)}>
+            <button
+              onClick={() => setSelectedId(null)}
+              aria-label={t('receiving.closeDetails')}
+              className="h-11 w-11 rounded-lg flex items-center justify-center"
+            >
               <XIcon size={14} style={{ color: 'var(--hub-text-muted)' }} />
             </button>
           </div>
@@ -115,16 +133,17 @@ const Receiving: React.FC = () => {
                       {line.name}
                     </p>
                     <p className="text-[10px] font-mono" style={{ color: 'var(--hub-text-dim)' }}>
-                      {line.sku} / Expected {line.expected}
+                      {line.sku} / {t('receiving.expected', { count: line.expected })}
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => adjust(line.sku, -1)}
-                      className="h-6 w-6 rounded flex items-center justify-center"
+                      aria-label={`Decrease received quantity for ${line.name}`}
+                      className="h-11 w-11 rounded flex items-center justify-center"
                       style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
                     >
-                      <Minus size={12} />
+                      <Minus size={16} />
                     </button>
                     <span
                       className="text-sm font-semibold min-w-[40px] text-center"
@@ -134,20 +153,24 @@ const Receiving: React.FC = () => {
                     </span>
                     <button
                       onClick={() => adjust(line.sku, 1)}
-                      className="h-6 w-6 rounded flex items-center justify-center"
+                      aria-label={`Increase received quantity for ${line.name}`}
+                      className="h-11 w-11 rounded flex items-center justify-center"
                       style={{ background: 'var(--hub-card)', color: 'var(--hub-text-muted)' }}
                     >
-                      <Plus size={12} />
+                      <Plus size={16} />
                     </button>
                   </div>
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full min-w-[48px] text-center"
                     style={{
-                      background: variance === 0 ? 'rgba(16,185,129,0.1)' : 'rgba(248,113,113,0.1)',
-                      color: variance === 0 ? '#10b981' : '#f87171',
+                      background:
+                        variance === 0
+                          ? 'color-mix(in srgb, var(--erp-success) 10%, transparent)'
+                          : 'color-mix(in srgb, var(--erp-danger) 10%, transparent)',
+                      color: variance === 0 ? 'var(--erp-success)' : 'var(--erp-danger)',
                     }}
                   >
-                    {variance === 0 ? 'OK' : `${variance > 0 ? '+' : ''}${variance}`}
+                    {variance === 0 ? t('receiving.ok') : `${variance > 0 ? '+' : ''}${variance}`}
                   </span>
                 </div>
               );
@@ -156,16 +179,16 @@ const Receiving: React.FC = () => {
           <button
             onClick={completeReceipt}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
-            <Check size={14} /> Mark Received
+            <Check size={14} /> {t('receiving.markReceived')}
           </button>
         </div>
       ) : open.length === 0 ? (
         <EmptyState
           icon={PackageCheck}
-          title="No open orders to receive"
-          description="All orders have been received"
+          title={t('receiving.empty.title')}
+          description={t('receiving.empty.description')}
         />
       ) : (
         <div className="space-y-2">
@@ -179,7 +202,8 @@ const Receiving: React.FC = () => {
                 border: '1px solid var(--hub-border)',
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(245,158,11,0.4)';
+                (e.currentTarget as HTMLElement).style.borderColor =
+                  'color-mix(in srgb, var(--erp-accent) 40%, transparent)';
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLElement).style.borderColor = 'var(--hub-border)';
@@ -187,7 +211,7 @@ const Receiving: React.FC = () => {
             >
               <div
                 className="h-9 w-9 rounded-lg flex items-center justify-center"
-                style={{ background: 'rgba(245,158,11,0.12)' }}
+                style={{ background: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)' }}
               >
                 <PackageCheck size={14} style={{ color: AMBER }} />
               </div>
@@ -196,12 +220,18 @@ const Receiving: React.FC = () => {
                   PO-{o.id} / {supplierNameById.get(o.supplierId) ?? `Supplier #${o.supplierId}`}
                 </p>
                 <p className="text-[11px]" style={{ color: 'var(--hub-text-dim)' }}>
-                  {(o.items ?? []).length} items / Expected {formatDate(o.expectedDelivery ?? '')}
+                  {t('receiving.orderSummary', {
+                    count: (o.items ?? []).length,
+                    date: formatDate(o.expectedDelivery ?? ''),
+                  })}
                 </p>
               </div>
               <span
                 className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                style={{ background: 'rgba(245,158,11,0.1)', color: AMBER }}
+                style={{
+                  background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)',
+                  color: AMBER,
+                }}
               >
                 {o.status}
               </span>

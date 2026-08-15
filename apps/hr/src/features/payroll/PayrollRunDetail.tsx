@@ -1,4 +1,5 @@
 import React, { useRef, useCallback } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { getRouteApi, Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -15,6 +16,13 @@ import {
   Breadcrumbs,
   EmptyState,
 } from '../../shared/components/ui';
+import { canHrPermission } from '../../shared/lib/hrPermissions';
+import { useHrSettings } from '../../shared/hooks/useHrExtras';
+import { formatCurrency } from '../../shared/lib/hrNumberUtils';
+import {
+  PayrollConfigRequired,
+  usePayrollConfigured,
+} from '../../shared/components/PayrollConfigGuard';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'var(--hr-text-muted)',
@@ -22,14 +30,6 @@ const STATUS_COLORS: Record<string, string> = {
   approved: 'var(--hr-status-approved)',
   exported: 'var(--hr-status-paid)',
 };
-
-function fmt(n: number): string {
-  return n.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  });
-}
 
 const ROW_HEIGHT = 56;
 const HEADER_HEIGHT = 44;
@@ -43,8 +43,12 @@ const routeApi = getRouteApi('/hr-config/payroll/$id');
 const PayrollRunDetailContent = (): React.JSX.Element => {
   const { id: runId } = routeApi.useParams();
   const { t } = useTranslation();
-  const { data: run, isLoading } = useGetPayrollRun(runId);
-  const approveRun = useApprovePayrollRun();
+  const { data: settings } = useHrSettings();
+  const payrollConfigured = usePayrollConfigured();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
+  const { data: run, isLoading } = useGetPayrollRun(runId, { enabled: payrollConfigured });
+  const approveRun = useApprovePayrollRun(payrollConfigured);
   const parentRef = useRef<HTMLDivElement>(null);
 
   const entries = run?.entries ?? [];
@@ -89,6 +93,8 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
     a.click();
     URL.revokeObjectURL(url);
   }, [run]);
+
+  if (!payrollConfigured) return <PayrollConfigRequired />;
 
   if (isLoading) {
     return (
@@ -142,7 +148,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
             <Pill color={STATUS_COLORS[run.status ?? '']}>
               {t(`payroll.statuses.${run.status}`)}
             </Pill>
-            {run.status === 'in_review' && (
+            {canRunPayroll && run.status === 'in_review' && (
               <Button
                 variant="primary"
                 icon={<CheckCircle size={13} />}
@@ -152,9 +158,11 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                 {t('payroll.runDetail.approve')}
               </Button>
             )}
-            <Button variant="secondary" icon={<Download size={13} />} onClick={handleExport}>
-              {t('payroll.runDetail.exportCsv')}
-            </Button>
+            {canRunPayroll && (
+              <Button variant="secondary" icon={<Download size={13} />} onClick={handleExport}>
+                {t('payroll.runDetail.exportCsv')}
+              </Button>
+            )}
           </div>
         }
       />
@@ -170,17 +178,17 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
         {[
           {
             label: t('payroll.stats.totalGross'),
-            value: fmt(run.totalGross ?? 0),
+            value: formatCurrency(run.totalGross ?? 0, settings?.currency),
             color: 'var(--accent)',
           },
           {
             label: t('payroll.stats.totalDeductions'),
-            value: fmt(totalDeductions),
+            value: formatCurrency(totalDeductions, settings?.currency),
             color: 'var(--hr-error)',
           },
           {
             label: t('payroll.stats.totalNet'),
-            value: fmt(run.totalNet ?? 0),
+            value: formatCurrency(run.totalNet ?? 0, settings?.currency),
             color: 'var(--hr-status-approved)',
           },
         ].map((stat) => (
@@ -217,7 +225,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
           background: 'var(--hr-card)',
           border: '1px solid var(--hr-border)',
           borderRadius: 12,
-          overflow: 'hidden',
+          overflowX: 'auto',
         }}
       >
         {/* Table header */}
@@ -335,7 +343,9 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                   <span style={{ fontSize: 13, color: 'var(--hr-text)' }}>
                     {entry.hoursWorked}h
                   </span>
-                  <span style={{ fontSize: 13, color: 'var(--hr-text)' }}>{fmt(basePay)}</span>
+                  <span style={{ fontSize: 13, color: 'var(--hr-text)' }}>
+                    {formatCurrency(basePay, settings?.currency)}
+                  </span>
                   <span
                     style={{
                       fontSize: 13,
@@ -343,7 +353,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                         overtimePay > 0 ? 'var(--hr-status-submitted)' : 'var(--hr-text-muted)',
                     }}
                   >
-                    {overtimePay > 0 ? fmt(overtimePay) : '-'}
+                    {overtimePay > 0 ? formatCurrency(overtimePay, settings?.currency) : '-'}
                   </span>
                   <span
                     style={{
@@ -351,7 +361,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                       color: deductions > 0 ? 'var(--hr-error)' : 'var(--hr-text-muted)',
                     }}
                   >
-                    {deductions > 0 ? fmt(deductions) : '-'}
+                    {deductions > 0 ? formatCurrency(deductions, settings?.currency) : '-'}
                   </span>
                   <span
                     style={{
@@ -359,7 +369,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                       color: bonuses > 0 ? 'var(--hr-status-approved)' : 'var(--hr-text-muted)',
                     }}
                   >
-                    {bonuses > 0 ? fmt(bonuses) : '-'}
+                    {bonuses > 0 ? formatCurrency(bonuses, settings?.currency) : '-'}
                   </span>
                   <span
                     style={{
@@ -368,7 +378,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                       color: 'var(--hr-status-approved)',
                     }}
                   >
-                    {fmt(netPay)}
+                    {formatCurrency(netPay, settings?.currency)}
                   </span>
                 </div>
               );

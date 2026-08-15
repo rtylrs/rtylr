@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
@@ -10,16 +11,19 @@ import {
   Button,
   EmptyState,
   Skeleton,
+  QueryError,
   Tabs,
   Pill,
 } from '../../shared/components/ui';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import LeaveBalances from './LeaveBalances';
+import { canHrPermission } from '../../shared/lib/hrPermissions';
+import { isHrRequestStatus, normalizeHrRequestStatus } from '../../shared/lib/requestStatus';
 
 const STATUS_COLORS: Record<string, string> = {
-  Pending: 'var(--hr-status-submitted)',
-  Approved: 'var(--hr-status-approved)',
-  Rejected: 'var(--hr-status-rejected)',
+  pending: 'var(--hr-status-submitted)',
+  approved: 'var(--hr-status-approved)',
+  rejected: 'var(--hr-status-rejected)',
 };
 
 const TAB_KEYS = ['myLeave', 'teamCalendar'] as const;
@@ -33,11 +37,13 @@ const Leave = (): React.JSX.Element => {
   const { t } = useTranslation();
   const [tab, setTab] = useState<TabKey>('myLeave');
   const [statusFilter, setStatusFilter] = useState<(typeof FILTER_STATUSES)[number]>('All');
-  const { data: requests, isLoading } = useListLeaveRequests();
+  const { data: requests, isLoading, isError, isFetching, refetch } = useListLeaveRequests();
   const approveLeave = useApproveLeave();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canApprove = canHrPermission(role, 'hr:time_off:approve');
 
   const filteredRequests = (requests ?? []).filter((r) =>
-    statusFilter === 'All' ? true : r.status === statusFilter
+    statusFilter === 'All' ? true : isHrRequestStatus(r.status, statusFilter)
   );
 
   const tabLabels = TAB_KEYS.map((key) => t(`leave.tabs.${key}`));
@@ -82,7 +88,9 @@ const Leave = (): React.JSX.Element => {
               }}
             />
 
-            {isLoading ? (
+            {isError ? (
+              <QueryError onRetry={() => refetch()} isRetrying={isFetching} />
+            ) : isLoading ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[1, 2, 3].map((i) => (
                   <Skeleton key={i} height={72} />
@@ -113,8 +121,10 @@ const Leave = (): React.JSX.Element => {
                         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
                           {t('leave.employee')} #{req.employeeId}
                         </span>
-                        <Pill color={STATUS_COLORS[req.status ?? '']}>
-                          {t(`leave.statuses.${(req.status ?? '').toLowerCase()}`)}
+                        <Pill color={STATUS_COLORS[normalizeHrRequestStatus(req.status)]}>
+                          {t(`leave.statuses.${(req.status ?? '').toLowerCase()}`, {
+                            defaultValue: req.status || '—',
+                          })}
                         </Pill>
                         <span style={{ fontSize: 10, color: 'var(--hr-text-dim)' }}>
                           #{req.leaveTypeId}
@@ -129,7 +139,7 @@ const Leave = (): React.JSX.Element => {
                         </div>
                       )}
                     </div>
-                    {req.status === 'Pending' && (
+                    {canApprove && isHrRequestStatus(req.status, 'pending') && (
                       <ApprovalButtons
                         onApprove={() =>
                           approveLeave.mutate({

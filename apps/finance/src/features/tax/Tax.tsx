@@ -3,27 +3,28 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Download, Settings, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { TaxPeriod } from '../../shared/services/financeApi';
 import { useTaxReport, useTaxConfig, useCreateTaxConfig } from '../../shared/hooks/useTax';
 import { exportTaxSummaryCsv } from '../../shared/lib/exports';
 
-const ACCENT = 'var(--finance-accent, #10b981)';
+const ACCENT = 'var(--finance-accent)';
 
 const fmt = (n: number) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
 
 const statusStyle: Record<TaxPeriod['status'], React.CSSProperties> = {
   Filed: {
-    background: 'color-mix(in srgb, var(--finance-accent, #10b981) 12%, transparent)',
-    color: 'var(--finance-accent, #10b981)',
+    background: 'color-mix(in srgb, var(--finance-accent) 12%, transparent)',
+    color: 'var(--finance-accent)',
   },
   Pending: {
-    background: 'color-mix(in srgb, var(--finance-warning, #f59e0b) 12%, transparent)',
-    color: 'var(--finance-warning, #f59e0b)',
+    background: 'color-mix(in srgb, var(--finance-warning) 12%, transparent)',
+    color: 'var(--finance-warning)',
   },
   Due: {
-    background: 'color-mix(in srgb, var(--finance-danger, #ef4444) 12%, transparent)',
-    color: 'var(--finance-danger, #ef4444)',
+    background: 'color-mix(in srgb, var(--finance-danger) 12%, transparent)',
+    color: 'var(--finance-danger)',
   },
 };
 
@@ -112,7 +113,7 @@ const Tax: React.FC = () => {
               padding: '7px 14px',
               borderRadius: 8,
               background: ACCENT,
-              color: '#fff',
+              color: 'var(--finance-white)',
               border: 'none',
               fontSize: 13,
               fontWeight: 600,
@@ -148,13 +149,13 @@ const Tax: React.FC = () => {
           {
             label: 'Tax Collected',
             value: taxCollected,
-            color: 'var(--finance-accent, #10b981)',
+            color: 'var(--finance-accent)',
             note: 'From invoices',
           },
           {
             label: 'Tax Owed',
             value: taxOwed,
-            color: 'var(--finance-warning, #f59e0b)',
+            color: 'var(--finance-warning)',
             note: 'Net payable',
           },
         ].map(({ label, value, color, note }) => (
@@ -204,14 +205,13 @@ const Tax: React.FC = () => {
             gap: 12,
             padding: '14px 16px',
             borderRadius: 10,
-            background: 'color-mix(in srgb, var(--finance-warning, #f59e0b) 8%, transparent)',
-            border:
-              '1px solid color-mix(in srgb, var(--finance-warning, #f59e0b) 25%, transparent)',
+            background: 'color-mix(in srgb, var(--finance-warning) 8%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--finance-warning) 25%, transparent)',
           }}
         >
           <AlertTriangle
             size={16}
-            style={{ color: 'var(--finance-warning, #f59e0b)', flexShrink: 0, marginTop: 1 }}
+            style={{ color: 'var(--finance-warning)', flexShrink: 0, marginTop: 1 }}
           />
           <div>
             <p
@@ -219,7 +219,7 @@ const Tax: React.FC = () => {
                 margin: 0,
                 fontSize: 13,
                 fontWeight: 600,
-                color: 'var(--finance-warning, #f59e0b)',
+                color: 'var(--finance-warning)',
                 marginBottom: 2,
               }}
             >
@@ -241,7 +241,7 @@ const Tax: React.FC = () => {
           transition={{ duration: 0.2 }}
           style={{
             ...cardStyle,
-            border: '1px solid color-mix(in srgb, var(--finance-accent, #10b981) 30%, transparent)',
+            border: '1px solid color-mix(in srgb, var(--finance-accent) 30%, transparent)',
           }}
         >
           <h3
@@ -296,7 +296,7 @@ const Tax: React.FC = () => {
                       color: 'var(--hub-text)',
                       fontSize: 13,
                       outline: 'none',
-                      textAlign: 'right',
+                      textAlign: 'end',
                     }}
                   />
                   <span style={{ fontSize: 13, color: 'var(--hub-text-muted)' }}>%</span>
@@ -311,33 +311,28 @@ const Tax: React.FC = () => {
               padding: '7px 16px',
               borderRadius: 7,
               background: ACCENT,
-              color: '#fff',
+              color: 'var(--finance-white)',
               border: 'none',
               fontSize: 13,
               fontWeight: 600,
               cursor: saveRates.isPending ? 'not-allowed' : 'pointer',
               opacity: saveRates.isPending ? 0.6 : 1,
             }}
-            onClick={() => {
+            onClick={async () => {
               const invalid = editableRates.find((r) => isNaN(r.rate) || r.rate < 0);
               if (invalid) {
                 toast.error('Tax rates must be valid non-negative numbers');
                 return;
               }
-              const last = editableRates[editableRates.length - 1];
-              editableRates.forEach((r, idx) => {
-                saveRates.mutate(r, {
-                  onSuccess: () => {
-                    if (r === last) {
-                      toast.success('Tax rates saved');
-                      setShowConfig(false);
-                    }
-                  },
-                  onError: () => {
-                    toast.error(`Failed to save rate: ${r.name}`);
-                  },
-                });
-              });
+              try {
+                for (const r of editableRates) {
+                  await saveRates.mutateAsync(r);
+                }
+                toast.success('Tax rates saved');
+                setShowConfig(false);
+              } catch (error) {
+                toast.error(getOneKitErrorMessage(error, 'Failed to save tax rates'));
+              }
             }}
           >
             {saveRates.isPending ? 'Saving…' : 'Save Rates'}
@@ -383,7 +378,7 @@ const Tax: React.FC = () => {
                   key={h}
                   style={{
                     padding: '10px 16px',
-                    textAlign: 'left',
+                    textAlign: 'start',
                     fontSize: 11,
                     fontWeight: 600,
                     textTransform: 'uppercase',
@@ -467,10 +462,7 @@ const Tax: React.FC = () => {
                   style={{
                     padding: '12px 16px',
                     fontSize: 12,
-                    color:
-                      tp.status === 'Due'
-                        ? 'var(--finance-danger, #ef4444)'
-                        : 'var(--hub-text-muted)',
+                    color: tp.status === 'Due' ? 'var(--finance-danger)' : 'var(--hub-text-muted)',
                   }}
                 >
                   {tp.dueDate}

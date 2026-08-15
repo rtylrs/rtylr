@@ -1,0 +1,31 @@
+{
+  "title": "المناوبات",
+  "weekOf": "أسبوع {{start}} – {{end}}",
+  "prevWeek": "الأسبوع السابق",
+  "nextWeek": "الأسبوع التالي",
+  "today": "اليوم",
+  "shiftsCount": "مناوبة",
+  "shiftCreated": "تم إنشاء المناوبة",
+  "assignmentCreated": "تم تعيين المناوبة",
+  "rosterPublished": "تم نشر جدول المناوبات",
+  "emptyDay": "لا توجد مناوبات مجدولة",
+  "emptyDayDescription": "لا توجد مناوبات مجدولة لهذا اليوم.",
+  "statuses": {
+    "scheduled": "مجدولة",
+    "inProgress": "قيد التنفيذ",
+    "completed": "مكتملة"
+  },
+  "roster": {
+    "title": "بناء جدول المناوبات",
+    "publish": "نشر الجدول",
+    "employee": "الموظف",
+    "assignShift": "تعيين مناوبة",
+    "selectShift": "قالب المناوبة",
+    "choosePlaceholder": "اختر مناوبة…",
+    "assign": "تعيين",
+    "conflictsWarning": "بعض التعيينات بها تعارضات في الجدولة.",
+    "cannotPublishConflicts": "قم بحل جميع تعارضات الجدولة قبل نشر الجدول.",
+    "emptyTitle": "لا توجد بيانات جدول",
+    "emptyDescription": "أضف موظفين إلى هذا الموقع لبناء الجدول."
+  }
+}

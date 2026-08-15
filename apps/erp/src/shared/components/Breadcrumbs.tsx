@@ -31,7 +31,13 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
                 {item.label}
               </span>
             )}
-            {!isLast && <ChevronRight size={11} style={{ color: 'var(--hub-text-dim)' }} />}
+            {!isLast && (
+              <ChevronRight
+                size={11}
+                className="erp-directional-icon"
+                style={{ color: 'var(--hub-text-dim)' }}
+              />
+            )}
           </React.Fragment>
         );
       })}

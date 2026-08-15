@@ -8,7 +8,7 @@ import { Skeleton } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
 import { toast } from 'sonner';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const inputStyle: React.CSSProperties = {
   padding: '8px 12px',
@@ -65,7 +65,7 @@ const PriceLists: React.FC = () => {
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: '#000' }}
+            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Plus size={14} /> New Price List
           </button>
@@ -96,7 +96,7 @@ const PriceLists: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <div
                     className="h-10 w-10 rounded-lg flex items-center justify-center"
-                    style={{ background: 'rgba(245,158,11,0.12)' }}
+                    style={{ background: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)' }}
                   >
                     <Tags size={16} style={{ color: AMBER }} />
                   </div>
@@ -107,7 +107,10 @@ const PriceLists: React.FC = () => {
                     {l.currency && (
                       <span
                         className="text-[10px] font-medium px-1.5 py-0.5 rounded"
-                        style={{ background: 'rgba(245,158,11,0.12)', color: AMBER }}
+                        style={{
+                          background: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
+                          color: AMBER,
+                        }}
                       >
                         {l.currency}
                       </span>
@@ -117,7 +120,10 @@ const PriceLists: React.FC = () => {
                 {l.isDefault && (
                   <span
                     className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}
+                    style={{
+                      background: 'color-mix(in srgb, var(--erp-success) 12%, transparent)',
+                      color: 'var(--erp-success)',
+                    }}
                   >
                     <Star size={10} /> Default
                   </span>
@@ -131,7 +137,7 @@ const PriceLists: React.FC = () => {
       {showCreate && (
         <div
           className="fixed inset-0 flex items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 9999 }}
+          style={{ background: 'var(--hub-overlay)', zIndex: 9999 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowCreate(false);
           }}
@@ -178,7 +184,7 @@ const PriceLists: React.FC = () => {
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
-                style={{ background: AMBER, color: '#000' }}
+                style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
                 {createMut.isPending ? 'Creating…' : 'Create'}
               </button>

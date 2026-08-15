@@ -101,7 +101,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
       </div>
       {mentionOpen && (
         <div
-          className="absolute left-2 bottom-full mb-1 rounded-lg py-1 z-20 w-48"
+          className="absolute start-2 bottom-full mb-1 rounded-lg py-1 z-20 w-48"
           style={{
             background: 'var(--flow-card)',
             border: '1px solid var(--flow-border)',
@@ -112,7 +112,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
             <button
               key={m.id}
               onClick={() => insertMention('@' + m.name)}
-              className="w-full text-left px-3 py-1.5 text-[12px] hover:bg-[var(--flow-hover)] flex items-center gap-2"
+              className="w-full text-start px-3 py-1.5 text-[12px] hover:bg-[var(--flow-hover)] flex items-center gap-2"
               style={{ color: 'var(--flow-text)' }}
             >
               <span

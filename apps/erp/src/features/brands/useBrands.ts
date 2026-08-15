@@ -10,6 +10,7 @@ import type {
   UpdateBrandRequest,
   UpdateBrandResponse,
 } from '@voxire/voxie/erp/brand/v1/types';
+import { withErpListBounds } from '../../shared/lib/erpListBounds';
 
 const brandClient = createOneKitClient(BrandServiceClient, 'erp');
 
@@ -19,7 +20,7 @@ export function useBrands() {
   return useQuery<Brand[]>({
     queryKey: ['brands'],
     queryFn: async () => {
-      const response = await brandClient.listBrands({});
+      const response = await brandClient.listBrands(withErpListBounds({}));
       return response.brands ?? [];
     },
   });

@@ -1,24 +1,32 @@
 import React, { useState } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
-import { Play, DollarSign, TrendingUp, Users, Clock, Settings } from 'lucide-react';
+import { Play, DollarSign, TrendingUp, Users, Clock } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useListPayrollRuns, useTriggerPayrollRun } from '../../shared/hooks/queries/usePayroll';
 import type {
   PayrollRunPayload,
   ListPayrollRunsParams,
 } from '../../shared/hooks/queries/usePayroll';
-import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import {
   Card,
   SectionHeader,
   Button,
   EmptyState,
   Skeleton,
+  QueryError,
   Tabs,
   Pill,
 } from '../../shared/components/ui';
+import { useHrSettings } from '../../shared/hooks/useHrExtras';
+import { formatCurrency } from '../../shared/lib/hrNumberUtils';
+import { canHrPermission } from '../../shared/lib/hrPermissions';
+import {
+  PayrollConfigRequired,
+  usePayrollConfigured,
+} from '../../shared/components/PayrollConfigGuard';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'var(--hr-text-muted)',
@@ -30,43 +38,21 @@ const STATUS_COLORS: Record<string, string> = {
 const FILTER_STATUSES = ['all', 'draft', 'in_review', 'approved', 'exported'] as const;
 type StatusFilter = (typeof FILTER_STATUSES)[number];
 
-function fmt(n: number): string {
-  return n.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  });
-}
-
 const Payroll = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const config = useHRConfigStore((s) => s.config);
+  const { data: settings } = useHrSettings();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
+  const payrollConfigured = usePayrollConfigured();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [params] = useState<ListPayrollRunsParams>({ limit: 50, offset: 0 });
 
-  const { data, isLoading } = useListPayrollRuns(params);
-  const triggerRun = useTriggerPayrollRun();
+  const { data, isLoading, isError, isFetching, refetch } = useListPayrollRuns(params, {
+    enabled: payrollConfigured,
+  });
+  const triggerRun = useTriggerPayrollRun(payrollConfigured);
 
-  if (!config?.payrollPeriod) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <SectionHeader title={t('payroll.title')} subtitle={t('payroll.subtitle')} />
-        <EmptyState
-          icon={<Settings size={20} />}
-          title={t('payroll.configRequired')}
-          description={t('payroll.configRequiredDescription')}
-          action={
-            <Link
-              to="/settings/payroll-config"
-              style={{ color: 'var(--hr-accent)', textDecoration: 'none', fontSize: 12 }}
-            >
-              {t('payroll.goToConfig')}
-            </Link>
-          }
-        />
-      </div>
-    );
-  }
+  if (!payrollConfigured) return <PayrollConfigRequired />;
 
   const runs = data?.runs ?? [];
   const filteredRuns = runs.filter((r: PayrollRunPayload) =>
@@ -79,8 +65,11 @@ const Payroll = (): React.JSX.Element => {
 
   const handleTriggerRun = (): void => {
     const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+    const y = now.getFullYear();
+    const m = now.getMonth();
+    const start = `${y}-${String(m + 1).padStart(2, '0')}-01`;
+    const lastDay = new Date(y, m + 1, 0).getDate();
+    const end = `${y}-${String(m + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
     triggerRun.mutate({ periodStart: start, periodEnd: end });
   };
 
@@ -92,14 +81,16 @@ const Payroll = (): React.JSX.Element => {
           title={t('payroll.title')}
           subtitle={t('payroll.subtitle')}
           right={
-            <Button
-              variant="primary"
-              icon={<Play size={13} />}
-              onClick={handleTriggerRun}
-              disabled={triggerRun.isPending}
-            >
-              {t('payroll.triggerRun')}
-            </Button>
+            canRunPayroll ? (
+              <Button
+                variant="primary"
+                icon={<Play size={13} />}
+                onClick={handleTriggerRun}
+                disabled={triggerRun.isPending}
+              >
+                {t('payroll.triggerRun')}
+              </Button>
+            ) : undefined
           }
         />
 
@@ -114,14 +105,14 @@ const Payroll = (): React.JSX.Element => {
           {[
             {
               label: t('payroll.stats.totalGross'),
-              value: fmt(totalGross),
+              value: formatCurrency(totalGross, settings?.currency),
               icon: DollarSign,
               color: 'var(--accent)',
               bg: 'var(--accent-muted)',
             },
             {
               label: t('payroll.stats.totalNet'),
-              value: fmt(totalNet),
+              value: formatCurrency(totalNet, settings?.currency),
               icon: TrendingUp,
               color: 'var(--hr-status-approved)',
               bg: 'color-mix(in srgb, var(--hr-status-approved) 12%, transparent)',
@@ -175,7 +166,9 @@ const Payroll = (): React.JSX.Element => {
         />
 
         {/* Runs list */}
-        {isLoading ? (
+        {isError ? (
+          <QueryError onRetry={() => refetch()} isRetrying={isFetching} />
+        ) : isLoading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {[1, 2, 3].map((i) => (
               <Skeleton key={i} height={72} />
@@ -219,7 +212,8 @@ const Payroll = (): React.JSX.Element => {
                     <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
                       <Users size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                       {t('payroll.employeeCount', { count: run.entries?.length ?? 0 })} ·{' '}
-                      {t('payroll.netTotal')}: {fmt(run.totalNet ?? 0)}
+                      {t('payroll.netTotal')}:{' '}
+                      {formatCurrency(run.totalNet ?? 0, settings?.currency)}
                     </div>
                   </div>
                 </Card>

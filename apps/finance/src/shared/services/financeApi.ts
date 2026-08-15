@@ -28,6 +28,7 @@ export interface DashboardStats {
   // Returned by the deployed backend DashboardResponse.
   totalReceivable: number;
   overdueAmount: number;
+  totalRevenueMtd: number;
   totalExpensesMtd: number;
   netProfitMtd: number;
   // Not yet returned by the backend; safe defaults applied by the schema.
@@ -68,7 +69,7 @@ export interface Invoice {
   amount: number;
   currency?: string | null;
   paid?: number;
-  status: 'Draft' | 'Sent' | 'Paid' | 'Overdue';
+  status: 'Draft' | 'Sent' | 'Paid' | 'Overdue' | 'Cancelled';
   dueDate: string;
   issuedDate: string;
   items?: InvoiceLine[];

@@ -4,6 +4,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Plus, Search } from 'lucide-react';
+import { QueryError } from '../../shared/components/ui';
 import { useListEmployees } from '../../shared/hooks/queries/useEmployees';
 import type { EmployeePayload } from '@voxire/voxie/hr/employee/v1/types';
 
@@ -17,7 +18,7 @@ const Employees = (): React.JSX.Element => {
   const [departmentFilter, setDepartmentFilter] = useState<number | undefined>();
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
 
-  const { data, isLoading } = useListEmployees({
+  const { data, isLoading, isError, isFetching, refetch } = useListEmployees({
     limit: PAGE_SIZE,
     offset,
     departmentId: departmentFilter,
@@ -30,7 +31,13 @@ const Employees = (): React.JSX.Element => {
   const parentRef = useRef<HTMLDivElement>(null);
 
   const filteredEmployees = searchTerm
-    ? employees.filter((e) => (e.jobTitle ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
+    ? employees.filter((e) =>
+        Object.values(e)
+          .filter((value): value is string => typeof value === 'string')
+          .join(' ')
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
     : employees;
 
   // Count must track the filtered list, otherwise searching leaves the
@@ -71,156 +78,165 @@ const Employees = (): React.JSX.Element => {
           </button>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative flex-1" style={{ minWidth: 200 }}>
-            <Search
-              size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2"
-              style={{ color: 'var(--hr-text-dim)' }}
-            />
-            <input
-              type="text"
-              placeholder={t('employees.search')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ ...inputStyle, paddingLeft: '32px', width: '100%' }}
-            />
-          </div>
-          <select
-            value={statusFilter ?? ''}
-            onChange={(e) => setStatusFilter(e.target.value || undefined)}
-            style={inputStyle}
-            aria-label={t('employees.filterByStatus')}
-          >
-            <option value="">{t('employees.filterByStatus')}</option>
-            <option value="active">{t('employees.statuses.active')}</option>
-            <option value="probation">{t('employees.statuses.probation')}</option>
-            <option value="inactive">{t('employees.statuses.inactive')}</option>
-            <option value="terminated">{t('employees.statuses.terminated')}</option>
-          </select>
-        </div>
-
-        {/* Virtualised table */}
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <div
-              className="h-6 w-6 rounded-full border-2 animate-spin"
-              style={{ borderColor: 'var(--hr-border)', borderTopColor: 'var(--accent)' }}
-            />
-          </div>
-        ) : filteredEmployees.length === 0 ? (
-          <p className="py-12 text-center text-sm" style={{ color: 'var(--hr-text-dim)' }}>
-            {t('employees.noEmployees')}
-          </p>
+        {isError ? (
+          <QueryError onRetry={() => refetch()} isRetrying={isFetching} />
         ) : (
           <>
-            <div
-              className="rounded-lg overflow-hidden"
-              style={{ border: '1px solid var(--hr-border)' }}
-            >
-              {/* Header */}
-              <div
-                className="grid grid-cols-4 gap-4 px-4 py-2 text-xs font-medium"
-                style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
-              >
-                <span>{t('employees.jobTitle')}</span>
-                <span>{t('employees.contractType')}</span>
-                <span>{t('employees.hireDate')}</span>
-                <span>{t('common.status')}</span>
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative flex-1" style={{ minWidth: 200 }}>
+                <Search
+                  size={14}
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
+                  style={{ color: 'var(--hr-text-dim)' }}
+                />
+                <input
+                  type="text"
+                  placeholder={t('employees.search')}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ ...inputStyle, paddingLeft: '32px', width: '100%' }}
+                />
               </div>
-
-              {/* Virtualised rows */}
-              <div
-                ref={parentRef}
-                className="overflow-auto"
-                style={{ maxHeight: 'calc(100vh - 280px)' }}
+              <select
+                value={statusFilter ?? ''}
+                onChange={(e) => setStatusFilter(e.target.value || undefined)}
+                style={inputStyle}
+                aria-label={t('employees.filterByStatus')}
               >
-                <div
-                  style={{
-                    height: `${virtualizer.getTotalSize()}px`,
-                    width: '100%',
-                    position: 'relative',
-                  }}
-                >
-                  {virtualizer.getVirtualItems().map((virtualRow) => {
-                    const emp: EmployeePayload | undefined = filteredEmployees[virtualRow.index];
-                    if (!emp) return null;
-                    return (
-                      <div
-                        key={virtualRow.key}
-                        data-index={virtualRow.index}
-                        ref={virtualizer.measureElement}
-                        className="grid grid-cols-4 gap-4 px-4 py-3 cursor-pointer transition-colors"
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          transform: `translateY(${virtualRow.start}px)`,
-                          borderTop: '1px solid var(--hr-border)',
-                        }}
-                        onClick={() => navigate({ to: `/employees/${emp.id}` as any })}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.background = 'var(--hr-hover)';
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.background = 'transparent';
-                        }}
-                      >
-                        <span className="truncate text-sm" style={{ color: 'var(--hr-text)' }}>
-                          {emp.jobTitle}
-                        </span>
-                        <span className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
-                          {t(`employees.contractTypes.${emp.contractType}` as const)}
-                        </span>
-                        <span className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
-                          {emp.hireDate}
-                        </span>
-                        <span>
-                          <span
-                            className="rounded-full px-2 py-0.5 text-xs font-medium"
-                            style={{
-                              background:
-                                emp.status === 'active'
-                                  ? 'rgba(34,197,94,0.15)'
-                                  : 'var(--hr-hover)',
-                              color: emp.status === 'active' ? '#22c55e' : 'var(--hr-text-muted)',
-                            }}
-                          >
-                            {t(`employees.statuses.${emp.status}` as const)}
-                          </span>
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+                <option value="">{t('employees.filterByStatus')}</option>
+                <option value="active">{t('employees.statuses.active')}</option>
+                <option value="probation">{t('employees.statuses.probation')}</option>
+                <option value="inactive">{t('employees.statuses.inactive')}</option>
+                <option value="terminated">{t('employees.statuses.terminated')}</option>
+              </select>
             </div>
 
-            {/* Pagination */}
-            {total > PAGE_SIZE && (
-              <div className="flex items-center justify-center gap-4 py-2">
-                <button
-                  disabled={offset === 0}
-                  onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
-                  className="rounded px-3 py-1 text-sm disabled:opacity-40"
-                  style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
-                >
-                  {t('common.back')}
-                </button>
-                <span className="text-xs" style={{ color: 'var(--hr-text-dim)' }}>
-                  {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} / {total}
-                </span>
-                <button
-                  disabled={offset + PAGE_SIZE >= total}
-                  onClick={() => setOffset(offset + PAGE_SIZE)}
-                  className="rounded px-3 py-1 text-sm disabled:opacity-40"
-                  style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
-                >
-                  {t('common.next')}
-                </button>
+            {/* Virtualised table */}
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <div
+                  className="h-6 w-6 rounded-full border-2 animate-spin"
+                  style={{ borderColor: 'var(--hr-border)', borderTopColor: 'var(--accent)' }}
+                />
               </div>
+            ) : filteredEmployees.length === 0 ? (
+              <p className="py-12 text-center text-sm" style={{ color: 'var(--hr-text-dim)' }}>
+                {t('employees.noEmployees')}
+              </p>
+            ) : (
+              <>
+                <div
+                  className="rounded-lg overflow-hidden"
+                  style={{ border: '1px solid var(--hr-border)' }}
+                >
+                  {/* Header */}
+                  <div
+                    className="grid grid-cols-4 gap-4 px-4 py-2 text-xs font-medium"
+                    style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
+                  >
+                    <span>{t('employees.jobTitle')}</span>
+                    <span>{t('employees.contractType')}</span>
+                    <span>{t('employees.hireDate')}</span>
+                    <span>{t('common.status')}</span>
+                  </div>
+
+                  {/* Virtualised rows */}
+                  <div
+                    ref={parentRef}
+                    className="overflow-auto"
+                    style={{ maxHeight: 'calc(100vh - 280px)' }}
+                  >
+                    <div
+                      style={{
+                        height: `${virtualizer.getTotalSize()}px`,
+                        width: '100%',
+                        position: 'relative',
+                      }}
+                    >
+                      {virtualizer.getVirtualItems().map((virtualRow) => {
+                        const emp: EmployeePayload | undefined =
+                          filteredEmployees[virtualRow.index];
+                        if (!emp) return null;
+                        return (
+                          <div
+                            key={virtualRow.key}
+                            data-index={virtualRow.index}
+                            ref={virtualizer.measureElement}
+                            className="grid grid-cols-4 gap-4 px-4 py-3 cursor-pointer transition-colors"
+                            style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '100%',
+                              transform: `translateY(${virtualRow.start}px)`,
+                              borderTop: '1px solid var(--hr-border)',
+                            }}
+                            onClick={() => navigate({ to: `/employees/${emp.id}` as any })}
+                            onMouseEnter={(e) => {
+                              (e.currentTarget as HTMLDivElement).style.background =
+                                'var(--hr-hover)';
+                            }}
+                            onMouseLeave={(e) => {
+                              (e.currentTarget as HTMLDivElement).style.background = 'transparent';
+                            }}
+                          >
+                            <span className="truncate text-sm" style={{ color: 'var(--hr-text)' }}>
+                              {emp.jobTitle}
+                            </span>
+                            <span className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
+                              {t(`employees.contractTypes.${emp.contractType}` as const)}
+                            </span>
+                            <span className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
+                              {emp.hireDate}
+                            </span>
+                            <span>
+                              <span
+                                className="rounded-full px-2 py-0.5 text-xs font-medium"
+                                style={{
+                                  background:
+                                    emp.status === 'active'
+                                      ? 'rgba(34,197,94,0.15)'
+                                      : 'var(--hr-hover)',
+                                  color:
+                                    emp.status === 'active' ? '#22c55e' : 'var(--hr-text-muted)',
+                                }}
+                              >
+                                {t(`employees.statuses.${emp.status}` as const)}
+                              </span>
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pagination */}
+                {total > PAGE_SIZE && (
+                  <div className="flex items-center justify-center gap-4 py-2">
+                    <button
+                      disabled={offset === 0}
+                      onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
+                      className="rounded px-3 py-1 text-sm disabled:opacity-40"
+                      style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
+                    >
+                      {t('common.back')}
+                    </button>
+                    <span className="text-xs" style={{ color: 'var(--hr-text-dim)' }}>
+                      {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} / {total}
+                    </span>
+                    <button
+                      disabled={offset + PAGE_SIZE >= total}
+                      onClick={() => setOffset(offset + PAGE_SIZE)}
+                      className="rounded px-3 py-1 text-sm disabled:opacity-40"
+                      style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}
+                    >
+                      {t('common.next')}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}

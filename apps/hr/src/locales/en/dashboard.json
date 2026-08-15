@@ -1,0 +1,71 @@
+{
+  "welcome": "Welcome to HR",
+  "subtitle": "Manage your team, schedules, and payroll from here.",
+  "quickActions": {
+    "addStaff": "Add Staff Member",
+    "scheduleShift": "Schedule Shift",
+    "runPayroll": "Run Payroll"
+  },
+  "quickActionsTitle": "Quick Actions",
+  "recentActivity": "Recent Activity",
+  "viewAll": "View all",
+  "noActivity": "No recent activity.",
+  "todayAtGlance": "Today at a Glance",
+  "recentHires": "Recent Hires",
+  "noRecentHires": "No recent hires.",
+  "stats": {
+    "totalStaff": "Total Staff",
+    "onShift": "On Shift Today",
+    "openPositions": "Open Positions",
+    "monthlyPayroll": "This Month Payroll",
+    "thisMonth": "this month"
+  },
+  "glance": {
+    "shiftsScheduled": "Shifts scheduled",
+    "newApplications": "New applications",
+    "pendingApprovals": "Pending approvals"
+  },
+  "metrics": {
+    "headcount": "Headcount",
+    "totalActive": "Total active",
+    "avgTenure": "Avg Tenure",
+    "years": "yrs",
+    "allStaff": "Across all staff",
+    "openPositions": "Open Positions",
+    "beingFilled": "Being filled"
+  },
+  "alerts": {
+    "expiringDocuments": "Documents expiring soon",
+    "expiringCount": "{{count}} documents expire in the next 30 days.",
+    "overtimeAlerts": "Overtime alerts",
+    "overtimeCount": "{{count}} employees exceeded weekly hours."
+  },
+  "widgets": {
+    "hoursThisWeek": "Hours This Week",
+    "hours": "hours",
+    "leaveBalance": "Leave Balance",
+    "noLeaveTypes": "No leave types configured.",
+    "daysLeft": "days left",
+    "upcomingShifts": "Upcoming Shifts",
+    "noShifts": "No upcoming shifts.",
+    "pendingApprovals": "Pending Approvals",
+    "noApprovals": "All caught up!",
+    "teamAttendance": "Team Attendance Today",
+    "present": "Present",
+    "absent": "Absent",
+    "late": "Late",
+    "headcount": "Headcount",
+    "thisMonth": "this month",
+    "fullTime": "Full-time",
+    "partTime": "Part-time",
+    "contractors": "Contractors",
+    "payrollCost": "Payroll Cost",
+    "payrollNotConfigured": "Payroll not configured yet.",
+    "vsLastMonth": "vs last month",
+    "setupCompletion": "Setup Completion",
+    "stepsCompleted": "steps completed",
+    "noData": "No data available.",
+    "dragToReorder": "Drag to reorder",
+    "errorFallback": "Widget unavailable"
+  }
+}

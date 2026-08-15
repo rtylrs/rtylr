@@ -17,7 +17,7 @@ on:
 jobs:
   build:
     name: Build all apps
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     outputs:
       version: ${{ steps.v.outputs.version }}
     steps:
@@ -72,7 +72,7 @@ jobs:
   publish:
     name: Publish rtylr/${{ matrix.app }}
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     strategy:
       fail-fast: false
       matrix:

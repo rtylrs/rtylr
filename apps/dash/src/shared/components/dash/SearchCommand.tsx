@@ -94,7 +94,7 @@ export const SearchCommand: React.FC = () => {
         label: 'Activity Log',
         group: 'Navigate',
         icon: ActivityIcon,
-        action: go('/activity'),
+        action: go('/audit'),
       },
       {
         id: 'nav-audit',

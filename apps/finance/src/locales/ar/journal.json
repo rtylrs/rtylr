@@ -1,3 +1,21 @@
 {
-  "created": "تم إنشاء قيد اليومية"
+  "title": "دفتر اليومية",
+  "newEntry": "قيد جديد",
+  "memoRequired": "البيان مطلوب",
+  "amountZero": "يجب أن يكون المبلغ أكبر من صفر",
+  "futureDate": "لا يمكن اختيار تاريخ في المستقبل",
+  "created": "تم إنشاء قيد اليومية",
+  "createFailed": "فشل إنشاء قيد اليومية",
+  "balanced": "متوازن",
+  "outOfBalance": "غير متوازن",
+  "account": "الحساب",
+  "debit": "مدين",
+  "credit": "دائن",
+  "newJournalEntry": "قيد يومية جديد",
+  "memoPlaceholder": "البيان / الوصف",
+  "debitAccPlaceholder": "اسم الحساب المدين",
+  "creditAccPlaceholder": "اسم الحساب الدائن",
+  "cancel": "إلغاء",
+  "create": "إنشاء",
+  "creating": "جاري الإنشاء…"
 }

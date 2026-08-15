@@ -84,7 +84,7 @@ const SupplierSelect: React.FC<SupplierSelectProps> = ({
               }}
             >
               <span className="truncate">{s.name}</span>
-              {value === s.id && <Check size={12} style={{ color: '#f59e0b' }} />}
+              {value === s.id && <Check size={12} style={{ color: 'var(--erp-accent)' }} />}
             </button>
           ))}
           {filtered.length === 0 && (

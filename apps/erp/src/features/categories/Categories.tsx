@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, Folder, GripVertical, Edit3, Trash2 } from 'lucide-react';
+import { Plus, Folder, Edit3, Trash2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import {
   useCategories,
@@ -14,7 +14,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { toast } from 'sonner';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
 
 const Categories: React.FC = () => {
   const { data: categories = [], isLoading } = useCategories();
@@ -68,7 +68,7 @@ const Categories: React.FC = () => {
         <button
           onClick={handleCreate}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-          style={{ background: AMBER, color: '#000' }}
+          style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
         >
           <Plus size={14} /> Add
         </button>
@@ -98,12 +98,9 @@ const Categories: React.FC = () => {
                 borderBottom: i < categories.length - 1 ? '1px solid var(--hub-border)' : 'none',
               }}
             >
-              <button className="cursor-grab" style={{ color: 'var(--hub-text-dim)' }}>
-                <GripVertical size={14} />
-              </button>
               <div
                 className="flex items-center justify-center h-8 w-8 rounded-lg"
-                style={{ background: 'rgba(245,158,11,0.1)' }}
+                style={{ background: 'color-mix(in srgb, var(--erp-accent) 10%, transparent)' }}
               >
                 <Folder size={14} style={{ color: AMBER }} />
               </div>
@@ -169,9 +166,10 @@ const Categories: React.FC = () => {
                       )
                     }
                     className="h-7 w-7 rounded-lg flex items-center justify-center text-xs font-bold"
-                    style={{ color: '#10b981' }}
+                    style={{ color: 'var(--erp-success)' }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'rgba(16,185,129,0.1)';
+                      (e.currentTarget as HTMLElement).style.background =
+                        'color-mix(in srgb, var(--erp-success) 10%, transparent)';
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.background = 'transparent';
@@ -183,9 +181,10 @@ const Categories: React.FC = () => {
                     aria-label="Cancel edit"
                     onClick={() => setEditingId(null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center text-xs font-bold"
-                    style={{ color: '#f87171' }}
+                    style={{ color: 'var(--erp-danger)' }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)';
+                      (e.currentTarget as HTMLElement).style.background =
+                        'color-mix(in srgb, var(--erp-danger) 10%, transparent)';
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.background = 'transparent';
@@ -216,9 +215,10 @@ const Categories: React.FC = () => {
                   <button
                     onClick={() => setConfirmDelete(cat.id ?? null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center"
-                    style={{ color: '#f87171' }}
+                    style={{ color: 'var(--erp-danger)' }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.1)';
+                      (e.currentTarget as HTMLElement).style.background =
+                        'color-mix(in srgb, var(--erp-danger) 10%, transparent)';
                     }}
                     onMouseLeave={(e) => {
                       (e.currentTarget as HTMLElement).style.background = 'transparent';

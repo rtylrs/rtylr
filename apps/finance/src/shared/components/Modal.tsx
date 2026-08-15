@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 import { motion } from 'motion/react';
 import { X } from 'lucide-react';
 
@@ -12,6 +12,61 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 480, footer }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  const titleId = useId();
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    if (!open) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    const focusableSelector =
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    requestAnimationFrame(() => {
+      const firstFocusable = dialog?.querySelector<HTMLElement>(focusableSelector);
+      (firstFocusable ?? dialog)?.focus();
+    });
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+
+      if (event.key !== 'Tab' || !dialog) return;
+
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(focusableSelector));
+      if (focusable.length === 0) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+
+      const firstFocusable = focusable[0];
+      const lastFocusable = focusable[focusable.length - 1];
+      if (!dialog.contains(document.activeElement)) {
+        event.preventDefault();
+        (event.shiftKey ? lastFocusable : firstFocusable).focus();
+      } else if (event.shiftKey && document.activeElement === firstFocusable) {
+        event.preventDefault();
+        lastFocusable.focus();
+      } else if (!event.shiftKey && document.activeElement === lastFocusable) {
+        event.preventDefault();
+        firstFocusable.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      if (previouslyFocused?.isConnected) previouslyFocused.focus();
+    };
+  }, [open]);
+
   if (!open) return null;
   return (
     <div
@@ -19,7 +74,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
         position: 'fixed',
         inset: 0,
         zIndex: 50,
-        background: 'rgba(0,0,0,0.6)',
+        background: 'var(--finance-overlay-strong)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -28,6 +83,11 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
       onClick={onClose}
     >
       <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
         initial={{ opacity: 0, scale: 0.95, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.2 }}
@@ -41,7 +101,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
           maxWidth: '90vw',
           maxHeight: '90vh',
           overflow: 'auto',
-          boxShadow: '0 40px 80px rgba(0,0,0,0.4)',
+          boxShadow: '0 40px 80px var(--finance-overlay-medium)',
         }}
       >
         <div
@@ -52,10 +112,15 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
             marginBottom: 20,
           }}
         >
-          <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--hub-text)' }}>
+          <h2
+            id={titleId}
+            style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--hub-text)' }}
+          >
             {title}
           </h2>
           <button
+            type="button"
+            aria-label="Close dialog"
             onClick={onClose}
             style={{
               background: 'none',

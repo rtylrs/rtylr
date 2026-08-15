@@ -2,12 +2,13 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { ChevronDown, Search } from 'lucide-react';
 import { unwrap } from '@voxire/api';
 import { safe } from '../lib/api';
+import { parseClientsResponse } from '../schemas/clients';
 
 export interface Client {
   id: string;
   name: string;
-  email?: string;
-  company?: string;
+  email?: string | null;
+  company?: string | null;
 }
 
 interface ClientSelectProps {
@@ -21,8 +22,8 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
   const [clients, setClients] = useState<Client[]>([]);
 
   useEffect(() => {
-    void unwrap(safe.get<Client[]>('/crm/customers'))
-      .then((data) => setClients(data ?? []))
+    void unwrap(safe.get<unknown>('/crm/customers'))
+      .then((data) => setClients(parseClientsResponse(data)))
       .catch(() => {});
   }, []);
 
@@ -57,8 +58,8 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
           style={{
             position: 'absolute',
             top: '100%',
-            left: 0,
-            right: 0,
+            insetInlineStart: 0,
+            insetInlineEnd: 0,
             marginTop: 4,
             background: 'var(--hub-surface)',
             border: '1px solid var(--hub-border)',
@@ -67,7 +68,7 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
             zIndex: 20,
             maxHeight: 260,
             overflowY: 'auto',
-            boxShadow: '0 10px 28px rgba(0,0,0,0.3)',
+            boxShadow: '0 10px 28px var(--finance-overlay-light)',
           }}
         >
           <div
@@ -107,7 +108,7 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
               }}
               style={{
                 width: '100%',
-                textAlign: 'left',
+                textAlign: 'start',
                 background: 'transparent',
                 border: 'none',
                 padding: '8px 10px',

@@ -1,9 +1,10 @@
-import { unwrap } from '@voxire/api';
+import { createOneKitClient, unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
+import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/client';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { hrExtras } from '../services/hrExtras';
-import { hrApi } from '../services/hrApi';
 import { staffMemberSchema } from '../schemas/staff';
 import { timeOffEntrySchema } from '../schemas/timeOff';
 import {
@@ -21,16 +22,34 @@ import { trainingCourseSchema, trainingProgressSchema } from '../schemas/trainin
 import { birthdaySchema, anniversarySchema, employeeProfileSchema } from '../schemas/staff';
 import { hrSettingsSchema } from '../schemas/settings';
 
+const staffClient = createOneKitClient(StaffServiceClient, 'hr');
+const departmentClient = createOneKitClient(DepartmentServiceClient, 'hr');
+
 /* ── 31. useStaffById ── */
 export function useStaffById(id: number | undefined) {
   return useQuery({
     queryKey: ['staff', id],
     enabled: id !== undefined,
     queryFn: async () => {
-      const list = await unwrap(hrApi.listStaff());
-      const raw = list ?? [];
-      const parsed = z.array(staffMemberSchema).parse(Array.isArray(raw) ? raw : []);
-      return parsed.find((s) => s.id === id) ?? null;
+      if (id === undefined) return null;
+      const [staffResponse, departmentsResponse] = await Promise.all([
+        staffClient.getStaff({ id: String(id) }),
+        departmentClient.listDepartments({}),
+      ]);
+      const staff = staffResponse.staff;
+      if (!staff) return null;
+      const department = (departmentsResponse.departments ?? []).find(
+        (item) => item.id === staff.departmentId
+      );
+      return staffMemberSchema.parse({
+        id: staff.id,
+        name: `${staff.firstName ?? ''} ${staff.lastName ?? ''}`.trim(),
+        role: staff.role ?? '',
+        department: department?.name ?? '',
+        email: staff.email ?? '',
+        employmentType: staff.employmentType,
+        status: staff.status,
+      });
     },
   });
 }
@@ -52,7 +71,10 @@ export function useSubmitTimeOff() {
   return useMutation({
     mutationFn: (data: Parameters<typeof hrExtras.submitTimeOff>[0]) =>
       unwrap(hrExtras.submitTimeOff(data)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['time-off'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['time-off-extras'] });
+      qc.invalidateQueries({ queryKey: ['time-off'] });
+    },
     onError: () => toast.error('Failed to submit time off request'),
   });
 }
@@ -62,7 +84,10 @@ export function useApproveTimeOff() {
   return useMutation({
     mutationFn: ({ id, approved, note }: { id: number; approved: boolean; note?: string }) =>
       unwrap(hrExtras.approveTimeOff(id, approved, note)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['time-off'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['time-off-extras'] });
+      qc.invalidateQueries({ queryKey: ['time-off'] });
+    },
     onError: () => toast.error('Failed to update time off request'),
   });
 }
@@ -418,7 +443,7 @@ export function useHrSettings() {
     queryKey: ['settings'],
     queryFn: async () => {
       const res = await unwrap(hrExtras.getSettings());
-      return hrSettingsSchema.parse(res);
+      return hrSettingsSchema.parse(res.config);
     },
   });
 }

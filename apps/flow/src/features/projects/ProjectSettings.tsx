@@ -168,7 +168,21 @@ const ProjectSettings: React.FC = () => {
             <button
               onClick={() =>
                 updateProject.mutate(
-                  { id: projectId!, data: { name, description } },
+                  {
+                    id: projectId!,
+                    data: {
+                      // The project endpoint is a full PUT. Include the
+                      // untouched snapshot fields so a name/description edit
+                      // cannot erase dates or other persisted settings.
+                      name,
+                      description,
+                      icon: project.icon ?? 'folder',
+                      color: project.color,
+                      status: project.status ?? 'active',
+                      startDate: project.startDate,
+                      dueDate: project.targetDate,
+                    },
+                  },
                   {
                     onSuccess: () => toast.success(t('toasts.project.updated')),
                     onError: () => toast.error(t('toasts.project.updateFailed')),

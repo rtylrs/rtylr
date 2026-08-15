@@ -18,6 +18,7 @@ import {
 import { useLayoutPresetsStore } from '../../shared/stores/layoutPresetsStore';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useMenuStore } from '../../shared/stores/menuStore';
+import { useUpdateBusinessConfig } from '../../shared/hooks/queries/useBusiness';
 
 // -- Placeholder image helper ------------------------------------------------
 
@@ -590,8 +591,16 @@ const Design: React.FC = () => {
     setNewPresetName('');
   };
 
+  const updateConfig = useUpdateBusinessConfig();
+
   const handleSave = () => {
     saveActivePreset();
+    const { presets, activePresetId, draftConfig } = useLayoutPresetsStore.getState();
+    updateConfig.mutate({
+      layout_presets: presets,
+      active_preset_id: activePresetId,
+      draft_config: draftConfig,
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 1800);
   };

@@ -6,19 +6,24 @@ import { FileText, DollarSign } from 'lucide-react';
 import { useListMyPayrollRuns } from '../../shared/hooks/queries/usePayroll';
 import type { PayrollRunPayload } from '../../shared/hooks/queries/usePayroll';
 import { SectionHeader, Card, Pill, Skeleton, EmptyState } from '../../shared/components/ui';
-
-function fmt(n: number): string {
-  return n.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  });
-}
+import { useHrSettings } from '../../shared/hooks/useHrExtras';
+import { formatCurrency } from '../../shared/lib/hrNumberUtils';
+import {
+  PayrollConfigRequired,
+  usePayrollConfigured,
+} from '../../shared/components/PayrollConfigGuard';
 
 const MyPaySlips = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data, isLoading } = useListMyPayrollRuns({ limit: 50, offset: 0 });
+  const { data: settings } = useHrSettings();
+  const payrollConfigured = usePayrollConfigured();
+  const { data, isLoading } = useListMyPayrollRuns(
+    { limit: 50, offset: 0 },
+    { enabled: payrollConfigured }
+  );
   const runs = data?.runs ?? [];
+
+  if (!payrollConfigured) return <PayrollConfigRequired />;
 
   return (
     <>
@@ -87,7 +92,8 @@ const MyPaySlips = (): React.JSX.Element => {
                       </Pill>
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                      {t('payroll.netTotal')}: {fmt(run.totalNet ?? 0)}
+                      {t('payroll.netTotal')}:{' '}
+                      {formatCurrency(run.totalNet ?? 0, settings?.currency)}
                     </div>
                   </div>
                 </Card>

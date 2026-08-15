@@ -1,7 +1,9 @@
-import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { RecurringInvoiceServiceClient } from '@voxire/voxie/finance/recurring_invoice/v1/client';
 import { recurringInvoiceSchema } from '../../shared/schemas/recurringInvoices';
 
@@ -27,6 +29,7 @@ interface CreateRecurringPayload {
 
 export function useCreateRecurringInvoice() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (data: CreateRecurringPayload) =>
       recurringClient.createRecurringInvoice({
@@ -39,20 +42,36 @@ export function useCreateRecurringInvoice() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['recurring-invoices'] });
     },
-    onError: (error) =>
-      toast.error(getOneKitErrorMessage(error, 'Failed to create recurring invoice')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 
 export function useSetRecurringStatus() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'active' | 'paused' }) =>
       status === 'paused'
         ? recurringClient.pauseRecurringInvoice({ id })
         : recurringClient.resumeRecurringInvoice({ id }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recurring-invoices'] }),
-    onError: (error) =>
-      toast.error(getOneKitErrorMessage(error, 'Failed to update recurring invoice status')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
+  });
+}
+
+export function useRunRecurringInvoiceNow() {
+  const qc = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation({
+    mutationFn: ({ id }: { id: string }) =>
+      unwrap(safe.post(`/finance/recurring-invoices/${id}/trigger`, {})),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['recurring-invoices'] });
+      void qc.invalidateQueries({ queryKey: ['invoices'] });
+      toast.success(
+        t('recurring.invoiceTriggered', { defaultValue: 'Invoice triggered successfully' })
+      );
+    },
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }

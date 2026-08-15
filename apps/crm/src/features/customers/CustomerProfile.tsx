@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -36,14 +36,18 @@ import {
   ConsentBanner,
   LoyaltyPointsInput,
 } from '../../shared/components/crm';
-import { getTier, pointsToNextTier } from '../../shared/lib/tiers';
+import { getCustomerTier, pointsToNextTier, thresholdsFromConfig } from '../../shared/lib/tiers';
 
 const CustomerProfile: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const customerId = Number(id);
-  const { data: fetched, isLoading } = useGetCustomerFull(customerId);
-  const { data: fetchedTimeline } = useCustomerTimeline(customerId);
+  const { data: fetched, isLoading, isError } = useGetCustomerFull(customerId);
+  const [timelineCursor, setTimelineCursor] = useState<string>();
+  const { data: fetchedTimeline } = useCustomerTimeline(customerId, timelineCursor);
+  const [timelineEntries, setTimelineEntries] = useState<
+    NonNullable<typeof fetchedTimeline>['entries']
+  >([]);
   const update = useUpdateCustomer();
   const remove = useDeleteCustomer();
   const award = useAwardPoints();
@@ -54,12 +58,32 @@ const CustomerProfile: React.FC = () => {
   const [newTag, setNewTag] = useState('');
 
   const customer = fetched;
-  const timeline = fetchedTimeline ?? [];
+  useEffect(() => {
+    if (!fetchedTimeline) return;
+    setTimelineEntries((entries) =>
+      timelineCursor ? [...entries, ...fetchedTimeline.entries] : fetchedTimeline.entries
+    );
+  }, [fetchedTimeline, timelineCursor]);
+  useEffect(() => {
+    setTimelineCursor(undefined);
+    setTimelineEntries([]);
+  }, [customerId]);
+  const timeline = timelineEntries;
 
   if (isLoading) {
     return (
       <div style={{ maxWidth: '1100px' }}>
         <SkeletonList count={6} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div style={{ maxWidth: '1100px', textAlign: 'center', padding: '60px 20px' }}>
+        <p style={{ fontSize: '14px', color: 'var(--hub-text-muted)' }}>
+          Unable to load this customer. Please try again.
+        </p>
       </div>
     );
   }
@@ -72,10 +96,12 @@ const CustomerProfile: React.FC = () => {
     );
   }
 
-  const tier = getTier(customer.loyaltyPoints);
-  const next = pointsToNextTier(customer.loyaltyPoints);
+  const thresholds = thresholdsFromConfig(loyaltyConfig);
+  const tier = getCustomerTier(customer.loyaltyPoints, customer.loyaltyTier, thresholds);
+  const next = pointsToNextTier(customer.loyaltyPoints, thresholds, customer.loyaltyTier);
   const tags = customer.tags || [];
-  const consent = customer.consent || { email: true, sms: false, marketing: true };
+  // Missing consent means unknown, never opt-in. The backend now persists this map for new records.
+  const consent = customer.consent || { email: false, sms: false, marketing: false };
 
   const handleAddTag = () => {
     if (!newTag.trim()) {
@@ -157,7 +183,20 @@ const CustomerProfile: React.FC = () => {
 
   const handleExport = () => {
     exportData.mutate(customer.id, {
-      onSuccess: () => toast.success('Customer data export started'),
+      onSuccess: (data) => {
+        toast.success('Customer data exported');
+        if (data) {
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `customer-export-${customer.id}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+      },
       onError: () => toast.error('Failed to export customer data'),
     });
   };
@@ -382,6 +421,15 @@ const CustomerProfile: React.FC = () => {
                   <TimelineEntryRow key={t.id} entry={t} />
                 ))}
               </div>
+              {fetchedTimeline?.nextCursor && (
+                <Button
+                  variant="outline"
+                  onClick={() => setTimelineCursor(fetchedTimeline.nextCursor)}
+                  style={{ marginTop: '14px' }}
+                >
+                  Load more
+                </Button>
+              )}
             </Card>
           </div>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useSettings } from '../lib/settingsStore';
+import { useErpSettings } from '../hooks/queries/useErpSettings';
 import { formatCurrency } from '../lib/format';
 
 interface TaxRateSelectorProps {
@@ -19,7 +20,9 @@ const TaxRateSelector: React.FC<TaxRateSelectorProps> = ({
   inclusive = false,
   onInclusiveToggle,
 }) => {
-  const defaultRate = useSettings((s) => s.taxRate);
+  const localDefaultRate = useSettings((s) => s.taxRate);
+  const { data: serverSettings } = useErpSettings();
+  const defaultRate = serverSettings?.taxRate ?? localDefaultRate;
   const effectiveRate = rate ?? defaultRate;
 
   const netPrice = inclusive ? price / (1 + effectiveRate / 100) : price;
@@ -76,7 +79,7 @@ const TaxRateSelector: React.FC<TaxRateSelectorProps> = ({
         </div>
         <div className="flex justify-between text-sm font-semibold">
           <span style={{ color: 'var(--hub-text)' }}>Total</span>
-          <span style={{ color: '#f59e0b' }}>{formatCurrency(grossPrice)}</span>
+          <span style={{ color: 'var(--erp-accent)' }}>{formatCurrency(grossPrice)}</span>
         </div>
       </div>
     </div>

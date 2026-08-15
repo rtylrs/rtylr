@@ -2,6 +2,7 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { ReportServiceClient } from '@voxire/voxie/finance/report/v1/client';
 import type { TaxConfig, TaxReport, PLReport } from '../services/financeApi';
 import { taxConfigSchema, taxReportSchema, plReportSchema } from '../schemas/tax';
@@ -30,6 +31,7 @@ export function useTaxReport() {
 
 export function useCreateTaxConfig() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (data: { name: string; rate: number }) =>
       reportClient.createTaxConfig({
@@ -42,7 +44,7 @@ export function useCreateTaxConfig() {
       qc.invalidateQueries({ queryKey: ['tax-config'] });
       qc.invalidateQueries({ queryKey: ['tax-report'] });
     },
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to create tax config')),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 
@@ -66,7 +68,7 @@ function periodToAnchor(period: string): { period: string; date: string } {
 export function usePLByPeriod(period: string) {
   const anchor = periodToAnchor(period);
   return useQuery({
-    queryKey: ['pl', period],
+    queryKey: ['pl', 'filter', { period }],
     queryFn: async () => {
       const res = await reportClient.getPLReport(anchor);
       return plReportSchema.parse(res) as PLReport;

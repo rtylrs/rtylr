@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
@@ -11,14 +12,15 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useQuotes, useCreateQuote, useConvertQuote, useUpdateQuoteStatus } from './useQuotes';
+import { formatDate } from '../../shared/lib/date';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  Draft: { background: 'rgba(113,113,122,0.15)', color: 'var(--finance-text-dim, #a1a1aa)' },
-  Sent: { background: 'rgba(59,130,246,0.12)', color: 'var(--finance-accent-blue, #3b82f6)' },
-  Accepted: { background: 'rgba(16,185,129,0.12)', color: 'var(--finance-accent, #10b981)' },
-  Declined: { background: 'rgba(239,68,68,0.12)', color: 'var(--finance-danger, #ef4444)' },
-  Expired: { background: 'rgba(245,158,11,0.12)', color: 'var(--finance-warning, #f59e0b)' },
+  Draft: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
+  Sent: { background: 'var(--finance-info-soft)', color: 'var(--finance-accent-blue)' },
+  Accepted: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
+  Declined: { background: 'var(--finance-danger-soft)', color: 'var(--finance-danger)' },
+  Expired: { background: 'var(--finance-warning-soft)', color: 'var(--finance-warning)' },
 };
 
 interface NewQuoteForm {
@@ -160,7 +162,7 @@ const Quotes: React.FC = () => {
   const handleConvert = (id: string): void => {
     convertQuote.mutate(id, {
       onSuccess: () => toast.success('Quote converted to invoice'),
-      onError: () => toast.error('Failed to convert quote'),
+      onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to convert quote')),
     });
   };
 
@@ -214,7 +216,7 @@ const Quotes: React.FC = () => {
                       key={h}
                       style={{
                         padding: '10px 16px',
-                        textAlign: 'left',
+                        textAlign: 'start',
                         fontSize: 11,
                         fontWeight: 600,
                         textTransform: 'uppercase',
@@ -263,7 +265,7 @@ const Quotes: React.FC = () => {
                   <td
                     style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
                   >
-                    {q.issuedDate}
+                    {formatDate(q.issuedDate ?? '')}
                   </td>
                   <td
                     style={{ padding: '12px 16px', fontSize: 12, color: 'var(--hub-text-muted)' }}
@@ -276,8 +278,8 @@ const Quotes: React.FC = () => {
                         style={{
                           ...ghostBtn,
                           padding: '4px 10px',
-                          color: 'var(--finance-accent, #10b981)',
-                          borderColor: 'rgba(16,185,129,0.3)',
+                          color: 'var(--finance-accent)',
+                          borderColor: 'var(--finance-accent-border)',
                           opacity: convertQuote.isPending ? 0.6 : 1,
                         }}
                         aria-label={`Convert quote ${q.id} to invoice`}

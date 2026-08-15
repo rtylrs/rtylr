@@ -154,7 +154,7 @@ const Header: React.FC = () => {
         }}
         onClick={handleLogoClick}
       >
-        <img src={'/logo.png'} alt="Logo" />
+        <img src="/logo-dark.png" alt="rtylr" />
       </div>
 
       <div

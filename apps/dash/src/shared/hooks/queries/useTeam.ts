@@ -84,17 +84,18 @@ function isTeamListResult(value: unknown): value is TeamListResult {
   );
 }
 
-// hub.team.members.v1.ListTeam has no pagination support - the whole list is
-// always returned in one call. page/pageSize are UI-only and echoed back.
 export const useTeam = (params: UseTeamParams = {}) => {
   const { page = 1, pageSize = 50 } = params;
   return useQuery<TeamListResult>({
     queryKey: ['team', { page, pageSize }],
     queryFn: async (): Promise<TeamListResult> => {
-      const res = await membersClient.listTeam({});
+      const res = await membersClient.listTeam({ page, pageSize } as any);
+      const allMembers = (res.users ?? []).map(fromApiMember);
+      const total = (res as any).total ?? allMembers.length;
+      const hasMore = page * pageSize < total;
       return {
-        members: (res.users ?? []).map(fromApiMember),
-        hasMore: false,
+        members: allMembers,
+        hasMore,
         page,
         pageSize,
       };
@@ -127,13 +128,12 @@ export const useInviteMember = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: InviteMemberPayload) => {
-      // hub.team.invitations.v1.InviteUser has no group_id field - group
-      // assignment at invite time isn't supported by the backend yet.
       return invitationsClient.inviteUser({
         email: payload.email,
         fullName: payload.fullName,
         role: payload.role,
         apps: payload.apps,
+        ...(payload.groupId ? { groupId: String(payload.groupId) } : {}),
         ...(payload.password ? { password: payload.password } : {}),
       });
     },
@@ -151,6 +151,7 @@ export const useUpdateMember = () => {
     mutationFn: async ({ id, patch }: { id: string; patch: Partial<TeamMember> }) => {
       return permissionsClient.updatePermissions({
         userId: id,
+        ...(patch.fullName || patch.name ? { fullName: patch.fullName ?? patch.name } : {}),
         apps: patch.apps ?? [],
         role: patch.role ?? 'staff',
       });

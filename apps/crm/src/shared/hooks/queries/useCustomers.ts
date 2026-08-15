@@ -1,6 +1,4 @@
 import { unwrap } from '@voxire/api';
-import type { CreateCustomerRequest } from '@voxire/voxie/crm/customer/v1/types';
-import type { UpdateCustomerRequest } from '@voxire/voxie/crm/customer/v1/types';
 import {
   useMutation,
   useQuery,
@@ -22,11 +20,13 @@ export interface ListCustomersParams {
   search?: string;
   limit: number;
   offset: number;
+  tier?: string;
+  tag?: string;
 }
 
 type CustomerInput = Partial<Customer>;
 
-interface UpdateCustomerPayload {
+export interface UpdateCustomerPayload {
   id: number;
   data: CustomerInput;
 }
@@ -40,6 +40,71 @@ export interface CustomerFullPayload extends Customer {
   loyalty?: Record<string, unknown>;
   visitHistory?: Record<string, unknown>[];
   tier?: string | null;
+  loyaltyTransactions?: Record<string, unknown>[];
+  recentVisits?: Record<string, unknown>[];
+}
+
+interface CustomerMutationResponse {
+  customerId?: number;
+  message?: string;
+}
+
+interface CustomerWireInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth?: string;
+  gender?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  loyaltyTier?: string;
+  tags: string[];
+  notes: string;
+  isActive?: boolean;
+  consent?: Customer['consent'];
+}
+
+function splitName(input: CustomerInput): { firstName: string; lastName: string } {
+  const firstName = String(input.firstName ?? '').trim();
+  const lastName = String(input.lastName ?? '').trim();
+  if (firstName) return { firstName, lastName };
+  const parts = String(input.name ?? '')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  return { firstName: parts.shift() ?? '', lastName: lastName || parts.join(' ') };
+}
+
+function toCustomerWireInput(input: CustomerInput): CustomerWireInput {
+  const { firstName, lastName } = splitName(input);
+  return {
+    firstName,
+    lastName,
+    email: String(input.email ?? ''),
+    phone: String(input.phone ?? ''),
+    dateOfBirth: String(input.dateOfBirth ?? input.birthday ?? '').trim() || undefined,
+    gender: input.gender,
+    address: input.address,
+    city: input.city,
+    country: input.country,
+    loyaltyTier: input.loyaltyTier,
+    tags: Array.isArray(input.tags) ? input.tags : [],
+    notes: String(input.notes ?? ''),
+    isActive: input.isActive,
+    consent: input.consent,
+  };
+}
+
+function normalizeCustomerResponse(value: unknown): Customer {
+  const envelope = (value ?? {}) as { customer?: unknown };
+  return customerSchema.parse(envelope.customer ?? value);
+}
+
+export interface CustomerTimelinePage {
+  entries: TimelineEntry[];
+  nextCursor?: string;
 }
 
 // ── Queries ──────────────────────────────────────────────────────────────────
@@ -48,7 +113,16 @@ export const useListCustomers = (params: ListCustomersParams): UseQueryResult<Cu
   useQuery<Customer[]>({
     queryKey: ['crm-customers', 'filter', params],
     queryFn: async (): Promise<Customer[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/customers', { params }));
+      const limit = Math.max(1, Math.min(params.limit, 100));
+      const page = Math.floor(Math.max(0, params.offset) / limit) + 1;
+      const requestParams = {
+        page,
+        page_size: limit,
+        search: params.search,
+        tier: params.tier,
+        tag: params.tag,
+      };
+      const res = await unwrap(safe.get<unknown>('/crm/customers', { params: requestParams }));
       return z.array(customerSchema).parse(unwrapList(res, 'customers'));
     },
   });
@@ -58,7 +132,7 @@ export const useGetCustomer = (id: number | undefined): UseQueryResult<Customer>
     queryKey: ['crm-customer', id],
     queryFn: async (): Promise<Customer> => {
       const res = await unwrap(safe.get<unknown>('/crm/customers/detail', { params: { id } }));
-      return customerSchema.parse(res);
+      return normalizeCustomerResponse(res);
     },
     enabled: !!id,
   });
@@ -67,34 +141,73 @@ export const useGetCustomerFull = (id: number | undefined): UseQueryResult<Custo
   useQuery<CustomerFullPayload>({
     queryKey: ['crm-customer', id, 'full'],
     queryFn: async (): Promise<CustomerFullPayload> => {
-      const res = await unwrap(
-        safe.get<CustomerFullPayload>('/crm/customers/detail/full', { params: { id } })
-      );
-      return res as CustomerFullPayload;
+      const res = await unwrap(safe.get<unknown>('/crm/customers/detail/full', { params: { id } }));
+      const envelope = (res ?? {}) as {
+        customer?: unknown;
+        loyaltyTransactions?: Record<string, unknown>[];
+        recentVisits?: Record<string, unknown>[];
+        loyalty_transactions?: Record<string, unknown>[];
+        recent_visits?: Record<string, unknown>[];
+      };
+      const customer = customerSchema.parse(envelope.customer ?? res);
+      return {
+        ...customer,
+        loyaltyTransactions: envelope.loyaltyTransactions ?? envelope.loyalty_transactions ?? [],
+        recentVisits: envelope.recentVisits ?? envelope.recent_visits ?? [],
+        visitHistory: envelope.recentVisits ?? envelope.recent_visits ?? [],
+      };
     },
     enabled: !!id,
   });
 
-export const useCustomerTimeline = (id: number | undefined): UseQueryResult<TimelineEntry[]> =>
-  useQuery<TimelineEntry[]>({
-    queryKey: ['crm-customer', id, 'timeline'],
-    queryFn: async (): Promise<TimelineEntry[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/customers/timeline', { params: { id } }));
-      return z.array(timelineEntrySchema).parse(unwrapList(res, 'entries', 'timeline'));
+export const useCustomerTimeline = (
+  id: number | undefined,
+  cursor?: string
+): UseQueryResult<CustomerTimelinePage> =>
+  useQuery<CustomerTimelinePage>({
+    queryKey: ['crm-customer', id, 'timeline', cursor],
+    queryFn: async (): Promise<CustomerTimelinePage> => {
+      const res = (await unwrap(
+        safe.get<unknown>('/crm/customers/timeline', {
+          params: { customer_id: id, cursor, limit: 50 },
+        })
+      )) as { entries?: unknown; nextCursor?: string; next_cursor?: string };
+      const rawEntries = unwrapList(res, 'entries', 'timeline');
+      const entries = rawEntries.map((entry) => {
+        const value = (entry ?? {}) as Record<string, unknown>;
+        const description = String(value.description ?? '');
+        return {
+          id: Number(value.id ?? 0),
+          type: String(value.type ?? 'visit'),
+          title: description || String(value.type ?? 'Activity'),
+          description: description || undefined,
+          at: String(value.createdAt ?? value.created_at ?? ''),
+          meta: (value.metadata ?? value.meta) as Record<string, unknown> | undefined,
+        };
+      });
+      return {
+        entries: z.array(timelineEntrySchema).parse(entries),
+        nextCursor: res.nextCursor ?? res.next_cursor,
+      };
     },
     enabled: !!id,
   });
 
 // ── Mutations ────────────────────────────────────────────────────────────────
 
-export const useCreateCustomer = (): UseMutationResult<Customer, unknown, CustomerInput> => {
+export const useCreateCustomer = (): UseMutationResult<
+  CustomerMutationResponse,
+  unknown,
+  CustomerInput
+> => {
   const qc = useQueryClient();
   const { t } = useTranslation();
-  return useMutation<Customer, unknown, CustomerInput>({
-    mutationFn: async (data: CustomerInput): Promise<Customer> => {
-      const request: CreateCustomerRequest = data as CreateCustomerRequest;
-      const res = await unwrap(safe.post<Customer>('/crm/customers', request));
-      return res as Customer;
+  return useMutation<CustomerMutationResponse, unknown, CustomerInput>({
+    mutationFn: async (data: CustomerInput): Promise<CustomerMutationResponse> => {
+      const res = await unwrap(
+        safe.post<CustomerMutationResponse>('/crm/customers', toCustomerWireInput(data))
+      );
+      return res as CustomerMutationResponse;
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
@@ -107,22 +220,32 @@ export const useCreateCustomer = (): UseMutationResult<Customer, unknown, Custom
 };
 
 export const useUpdateCustomer = (): UseMutationResult<
-  Customer,
+  CustomerMutationResponse,
   unknown,
   UpdateCustomerPayload
 > => {
   const qc = useQueryClient();
   const { t } = useTranslation();
-  return useMutation<Customer, unknown, UpdateCustomerPayload>({
-    mutationFn: async (payload: UpdateCustomerPayload): Promise<Customer> => {
-      const request: UpdateCustomerRequest = {
-        id: String(payload.id),
-        ...payload.data,
-      } as UpdateCustomerRequest;
-      const res = await unwrap(safe.put<Customer>('/crm/customers', request));
-      return res as Customer;
+  return useMutation<CustomerMutationResponse, unknown, UpdateCustomerPayload>({
+    mutationFn: async (payload: UpdateCustomerPayload): Promise<CustomerMutationResponse> => {
+      const cachedFromDetails =
+        qc.getQueryData<Customer>(['crm-customer', payload.id, 'full']) ??
+        qc.getQueryData<Customer>(['crm-customer', payload.id]);
+      // List-page edits (for example bulk tag updates) do not have a detail
+      // query cached. Reuse the canonical row from any loaded customer page so
+      // the backend's required first/last-name fields are preserved.
+      const cachedFromLists = qc
+        .getQueriesData<Customer[]>({ queryKey: ['crm-customers'] })
+        .flatMap(([, rows]) => rows ?? [])
+        .find((customer) => customer.id === payload.id);
+      const cached = cachedFromDetails ?? cachedFromLists;
+      const merged = toCustomerWireInput({ ...cached, ...payload.data });
+      const res = await unwrap(
+        safe.put<CustomerMutationResponse>('/crm/customers', { id: payload.id, ...merged })
+      );
+      return res as CustomerMutationResponse;
     },
-    onSuccess: (_data: Customer, variables: UpdateCustomerPayload): void => {
+    onSuccess: (_data: CustomerMutationResponse, variables: UpdateCustomerPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       void qc.invalidateQueries({ queryKey: ['crm-customer', variables.id] });
       toast.success(t('crm.customers.updated'));
@@ -179,7 +302,7 @@ export const useImportCustomerRows = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<unknown, unknown, ImportCustomerRowsPayload>({
     mutationFn: (payload: ImportCustomerRowsPayload): Promise<unknown> =>
-      unwrap(safe.post('/crm/customers/import', { customers: payload.customers })),
+      unwrap(safe.post('/crm/customers/import', payload)),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       toast.success(t('crm.customers.imported'));
@@ -190,11 +313,19 @@ export const useImportCustomerRows = (): UseMutationResult<
   });
 };
 
-export const useExportCustomers = (): UseMutationResult<unknown, unknown, number> => {
+export interface CustomerExportPayload {
+  customer?: unknown;
+  transactions?: unknown[];
+  timeline?: unknown[];
+}
+
+export const useExportCustomers = (): UseMutationResult<CustomerExportPayload, unknown, number> => {
   const { t } = useTranslation();
-  return useMutation<unknown, unknown, number>({
-    mutationFn: (id: number): Promise<unknown> =>
-      unwrap(safe.get('/crm/customers/export', { params: { id } })),
+  return useMutation<CustomerExportPayload, unknown, number>({
+    mutationFn: (id: number): Promise<CustomerExportPayload> =>
+      unwrap(
+        safe.get<CustomerExportPayload>('/crm/customers/export', { params: { customer_id: id } })
+      ) as Promise<CustomerExportPayload>,
     onSuccess: (): void => {
       toast.success(t('crm.customers.exported'));
     },

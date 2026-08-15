@@ -91,9 +91,38 @@ describe('flowApi', () => {
       description: '-',
       icon: 'folder',
       color: '#6366f1',
-      start_date: '1970-01-01',
-      due_date: '1970-01-01',
+      start_date: undefined,
+      due_date: undefined,
     });
+  });
+
+  it('updateProject forwards the current project snapshot without fake dates', () => {
+    flowApi.updateProject('7', {
+      name: 'Renamed project',
+      description: 'Existing description',
+      icon: 'briefcase',
+      color: '#22c55e',
+      status: 'active',
+      startDate: '2026-01-01',
+      dueDate: '2026-06-01',
+    });
+
+    expect(safe.put).toHaveBeenCalledWith('/flow/project/v1/projects/7', {
+      name: 'Renamed project',
+      description: 'Existing description',
+      icon: 'briefcase',
+      color: '#22c55e',
+      status: 'active',
+      start_date: '2026-01-01',
+      due_date: '2026-06-01',
+    });
+  });
+
+  it('does not manufacture omitted project update fields', () => {
+    flowApi.updateProject('7', { color: '#22c55e' });
+
+    const [, body] = (safe.put as unknown as { mock: { calls: [string, object][] } }).mock.calls[0];
+    expect(JSON.parse(JSON.stringify(body))).toEqual({ color: '#22c55e' });
   });
 
   it('deleteProject calls DELETE /flow/project/v1/projects/{id}', () => {
@@ -288,6 +317,13 @@ describe('flowApi', () => {
     flowApi.getMilestones('p-1');
     expect(safe.get).toHaveBeenCalledWith('/flow/milestone/v1/milestones', {
       params: { project_id: 'p-1' },
+    });
+  });
+
+  it('getMilestones supports workspace filters', () => {
+    flowApi.getMilestones({ projectId: 'p-1', workspaceId: 'w-1' });
+    expect(safe.get).toHaveBeenCalledWith('/flow/milestone/v1/milestones', {
+      params: { project_id: 'p-1', workspace_id: 'w-1' },
     });
   });
 

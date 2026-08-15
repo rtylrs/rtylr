@@ -34,10 +34,12 @@ import {
   Settings as SettingsIcon,
   Tag,
   FileCheck,
+  Menu,
+  X,
 } from 'lucide-react';
 import GlobalSearch from '../shared/components/GlobalSearch';
 
-const ACCENT = 'var(--finance-accent, #10b981)';
+const ACCENT = 'var(--finance-accent)';
 
 interface NavItem {
   label: string;
@@ -170,7 +172,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
         <span
           style={{
             position: 'relative',
-            marginLeft: 'auto',
+            marginInlineStart: 'auto',
             height: 6,
             width: 6,
             borderRadius: '50%',
@@ -205,6 +207,7 @@ const DefaultLayout: React.FC = () => {
   );
   const [searchOpen, setSearchOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const financeUser = useUserStore((s) => s.user);
   const setAuthUser = useUserStore((s) => s.setUser);
@@ -271,24 +274,62 @@ const DefaultLayout: React.FC = () => {
         navigate({ to: '/expenses/new' });
       } else if (e.key === 'Escape') {
         setSearchOpen(false);
+        setSidebarOpen(false);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [navigate]);
 
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
   return (
     <>
       <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
-        <aside
+        <div
+          className="fixed inset-x-0 top-0 z-40 flex h-11 items-center justify-between px-4 md:hidden"
           style={{
-            width: 224,
-            display: 'flex',
-            flexDirection: 'column',
-            flexShrink: 0,
-            overflow: 'hidden',
             background: 'var(--hub-surface)',
-            borderRight: '1px solid var(--hub-border)',
+            borderBottom: '1px solid var(--hub-border)',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open navigation menu"
+            aria-expanded={sidebarOpen}
+            aria-controls="finance-sidebar"
+            className="flex h-11 w-11 items-center justify-center rounded-lg"
+            style={{ color: 'var(--hub-text-muted)' }}
+          >
+            <Menu size={18} />
+          </button>
+          <h1 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
+            {pageTitle}
+          </h1>
+          <div className="h-11 w-11" aria-hidden="true" />
+        </div>
+
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
+        <aside
+          id="finance-sidebar"
+          aria-label="Primary navigation"
+          className={[
+            sidebarOpen ? 'fixed inset-y-0 start-0 z-50 flex' : 'hidden',
+            'md:flex w-56 flex-col shrink-0 overflow-hidden',
+          ].join(' ')}
+          style={{
+            background: 'var(--hub-surface)',
+            borderInlineEnd: '1px solid var(--hub-border)',
           }}
         >
           <div
@@ -298,9 +339,30 @@ const DefaultLayout: React.FC = () => {
               gap: 10,
               padding: 16,
               borderBottom: '1px solid var(--hub-border)',
+              justifyContent: 'space-between',
             }}
           >
-            <img src="/logo.png?v=2" alt="rtylr" className="rtylr-logo h-6 w-auto" />
+            <img
+              src={
+                theme === 'dark' ||
+                (theme === 'system' &&
+                  typeof window !== 'undefined' &&
+                  window.matchMedia('(prefers-color-scheme: dark)').matches)
+                  ? '/logo.png'
+                  : '/logo-dark.png'
+              }
+              alt="rtylr"
+              className="h-9 w-auto"
+            />
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Close navigation menu"
+              className="flex h-11 w-11 items-center justify-center rounded-lg md:hidden"
+              style={{ color: 'var(--hub-text-muted)' }}
+            >
+              <X size={18} />
+            </button>
           </div>
 
           <div style={{ padding: '6px 8px' }}>
@@ -322,7 +384,9 @@ const DefaultLayout: React.FC = () => {
             >
               <SearchIcon size={12} />
               <span>Search</span>
-              <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}>
+              <span
+                style={{ marginInlineStart: 'auto', fontSize: 10, color: 'var(--hub-text-dim)' }}
+              >
                 Cmd K
               </span>
             </button>
@@ -394,20 +458,19 @@ const DefaultLayout: React.FC = () => {
                   size="sm"
                   className="h-6 w-6"
                   style={{
-                    background:
-                      'color-mix(in srgb, var(--finance-accent, #10b981) 15%, transparent)',
+                    background: 'color-mix(in srgb, var(--finance-accent) 15%, transparent)',
                   }}
                 />
                 <div className="flex flex-col items-start min-w-0 flex-1">
                   <span
-                    className="text-xs font-medium truncate w-full text-left"
+                    className="text-xs font-medium truncate w-full text-start"
                     style={{ color: 'var(--hub-text)' }}
                   >
                     {userName}
                   </span>
                   {userEmail && (
                     <span
-                      className="text-[10px] truncate w-full text-left"
+                      className="text-[10px] truncate w-full text-start"
                       style={{ color: 'var(--hub-text-muted)' }}
                     >
                       {userEmail}
@@ -428,7 +491,7 @@ const DefaultLayout: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 4 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute bottom-full left-0 right-0 mb-1 rounded-xl p-2 z-50"
+                    className="absolute bottom-full start-0 end-0 mb-1 rounded-xl p-2 z-50"
                     style={{
                       background: 'var(--hub-card)',
                       border: '1px solid var(--hub-border)',
@@ -456,7 +519,7 @@ const DefaultLayout: React.FC = () => {
                           style={{
                             background:
                               theme === value
-                                ? 'color-mix(in srgb, var(--finance-accent, #10b981) 12%, transparent)'
+                                ? 'color-mix(in srgb, var(--finance-accent) 12%, transparent)'
                                 : 'var(--hub-hover)',
                             color: theme === value ? ACCENT : 'var(--hub-text-muted)',
                             border:
@@ -478,10 +541,10 @@ const DefaultLayout: React.FC = () => {
                       type="button"
                       onClick={() => signOut('finance')}
                       className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
-                      style={{ color: 'var(--hr-error, #ef4444)' }}
+                      style={{ color: 'var(--finance-danger)' }}
                       onMouseEnter={(e) => {
                         (e.currentTarget as HTMLElement).style.background =
-                          'color-mix(in srgb, var(--hr-error, #ef4444) 8%, transparent)';
+                          'color-mix(in srgb, var(--finance-danger) 8%, transparent)';
                       }}
                       onMouseLeave={(e) => {
                         (e.currentTarget as HTMLElement).style.background = 'transparent';
@@ -498,16 +561,11 @@ const DefaultLayout: React.FC = () => {
         </aside>
 
         {/* Main content + Caret AI inline column */}
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+        <div className="flex flex-1 overflow-hidden">
+          <div className="flex min-w-0 flex-1 flex-col overflow-hidden pt-11 md:pt-0">
             <header
+              className="hidden h-11 shrink-0 items-center justify-between px-6 md:flex"
               style={{
-                height: 44,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '0 24px',
-                flexShrink: 0,
                 background: 'var(--hub-surface)',
                 borderBottom: '1px solid var(--hub-border)',
               }}

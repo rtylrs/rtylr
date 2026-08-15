@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { uploadAsset } from '@voxire/api';
+import { getOneKitErrorMessage, uploadAsset } from '@voxire/api';
 import { cdnImageUrl } from '@voxire/config';
 import { Upload, FileImage, X } from 'lucide-react';
 
@@ -22,7 +22,7 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
       const uploaded = await uploadAsset(file);
       onChange(uploaded.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      setError(getOneKitErrorMessage(err, 'Upload failed'));
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = '';
@@ -45,12 +45,12 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
         if (!uploading) fileRef.current?.click();
       }}
       style={{
-        border: `2px dashed ${dragging ? 'var(--hub-accent, #10b981)' : 'var(--hub-border)'}`,
+        border: `2px dashed ${dragging ? 'var(--finance-accent)' : 'var(--hub-border)'}`,
         borderRadius: 12,
         padding: 24,
         textAlign: 'center',
         cursor: uploading ? 'wait' : 'pointer',
-        background: dragging ? 'rgba(16,185,129,0.08)' : 'var(--hub-hover)',
+        background: dragging ? 'var(--finance-accent-subtle)' : 'var(--hub-hover)',
         transition: 'all 0.15s',
         position: 'relative',
         minHeight: 160,
@@ -67,7 +67,7 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
       />
       {uploading ? (
         <>
-          <Upload size={28} style={{ color: 'var(--hub-accent, #10b981)', marginBottom: 10 }} />
+          <Upload size={28} style={{ color: 'var(--finance-accent)', marginBottom: 10 }} />
           <div style={{ fontSize: 13, color: 'var(--hub-text)', fontWeight: 600 }}>
             Uploading receipt...
           </div>
@@ -87,9 +87,9 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
             style={{
               position: 'absolute',
               top: -8,
-              right: -8,
-              background: 'var(--hub-error, #ef4444)',
-              color: '#fff',
+              insetInlineEnd: -8,
+              background: 'var(--finance-danger)',
+              color: 'var(--finance-white)',
               border: 'none',
               borderRadius: '50%',
               width: 22,
@@ -130,9 +130,7 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
         </div>
       )}
       {error && (
-        <div style={{ marginTop: 10, color: 'var(--hub-error, #ef4444)', fontSize: 11 }}>
-          {error}
-        </div>
+        <div style={{ marginTop: 10, color: 'var(--finance-danger)', fontSize: 11 }}>{error}</div>
       )}
     </div>
   );

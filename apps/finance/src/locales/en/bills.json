@@ -1,3 +1,25 @@
 {
-  "created": "Bill created"
+  "created": "Bill created",
+  "vendorRequired": "Vendor name is required",
+  "amountPositive": "Amount must be greater than zero",
+  "new": "New Bill",
+  "create": "Create Bill",
+  "vendor": "Vendor",
+  "vendorPlaceholder": "Supplier or vendor name",
+  "amount": "Amount",
+  "dueDate": "Due Date",
+  "description": "Description",
+  "descriptionPlaceholder": "Optional notes",
+  "bulkPaymentSoon": "Bulk bill payment coming soon",
+  "title": "Bills to Pay",
+  "outstanding": "{{count}} outstanding",
+  "total": "total",
+  "empty": "No bills",
+  "emptyDescription": "Track supplier invoices to plan cash outflows.",
+  "number": "Bill #",
+  "category": "Category",
+  "due": "Due",
+  "status": "Status",
+  "schedulingSoon": "Bill scheduling coming soon",
+  "schedule": "Schedule"
 }

@@ -40,8 +40,13 @@ const LeaveRequestForm = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const userId = useUserStore((s) => s.userId);
-  const { data: leaveTypes, isLoading: typesLoading } = useListLeaveTypes();
-  const { data: balances } = useListLeaveBalances();
+  const {
+    data: leaveTypes,
+    isLoading: typesLoading,
+    isError: typesError,
+    refetch: refetchLeaveTypes,
+  } = useListLeaveTypes();
+  const { data: balances } = useListLeaveBalances(userId ?? undefined);
   const { data: existingRequests } = useListLeaveRequests({
     employeeId: userId ?? undefined,
     status: undefined,
@@ -58,8 +63,10 @@ const LeaveRequestForm = (): React.JSX.Element => {
 
   const selectedBalance = useMemo(() => {
     if (!balances || form.leaveTypeId === '') return null;
-    return balances.find((b) => b.leaveTypeId === form.leaveTypeId) ?? null;
-  }, [balances, form.leaveTypeId]);
+    return (
+      balances.find((b) => b.employeeId === userId && b.leaveTypeId === form.leaveTypeId) ?? null
+    );
+  }, [balances, form.leaveTypeId, userId]);
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
@@ -76,16 +83,31 @@ const LeaveRequestForm = (): React.JSX.Element => {
     setErrors({});
     const { leaveTypeId, startDate, endDate, notes } = result.data;
 
-    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     if (startDate < today || endDate < today) {
       toast.error(t('leave.form.errorPastDate'));
       return;
     }
 
-    const approvedRequests = (existingRequests ?? []).filter((r) => r.status === 'approved');
-    const hasOverlap = approvedRequests.some(
-      (r) => startDate <= (r.endDate ?? '') && endDate >= (r.startDate ?? '')
-    );
+    const requestedDays = daysBetween(startDate, endDate);
+    const remainingDays = selectedBalance?.remainingDays;
+    if (remainingDays !== undefined && requestedDays > remainingDays) {
+      toast.error(
+        `Requested ${requestedDays} day(s) exceeds remaining balance of ${remainingDays} day(s)`
+      );
+      return;
+    }
+
+    const activeRequests = (existingRequests ?? []).filter((r) => {
+      const st = (r.status || '').toLowerCase();
+      return st === 'approved' || st === 'pending';
+    });
+    const hasOverlap = activeRequests.some((r) => {
+      const rStart = r.startDate || '';
+      const rEnd = r.endDate || r.startDate || '';
+      return startDate <= rEnd && endDate >= rStart;
+    });
     if (hasOverlap) {
       toast.error(t('leave.form.errorOverlap'));
       return;
@@ -122,6 +144,22 @@ const LeaveRequestForm = (): React.JSX.Element => {
     );
   }
 
+  if (typesError) {
+    return (
+      <Card style={{ textAlign: 'center', padding: 32 }}>
+        <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hr-error)', margin: '0 0 8px' }}>
+          Unable to load leave policies
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--hr-text-muted)', margin: '0 0 16px' }}>
+          The leave policy service could not be reached. Try again.
+        </p>
+        <Button variant="secondary" onClick={() => refetchLeaveTypes()}>
+          Retry
+        </Button>
+      </Card>
+    );
+  }
+
   if (!leaveTypes || leaveTypes.length === 0) {
     return (
       <Card style={{ textAlign: 'center', padding: 32 }}>
@@ -131,8 +169,8 @@ const LeaveRequestForm = (): React.JSX.Element => {
         <p style={{ fontSize: 12, color: 'var(--hr-text-muted)', margin: '0 0 16px' }}>
           {t('leave.configureLeaveTypes')}
         </p>
-        <Button variant="primary" onClick={() => navigate({ to: '/settings' })}>
-          {t('leave.goToSettings')}
+        <Button variant="primary" onClick={() => navigate({ to: '/settings/leave-policy' })}>
+          Configure leave policies
         </Button>
       </Card>
     );

@@ -31,12 +31,12 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
       className="flex items-center gap-3 px-4 py-2.5 text-sm shrink-0"
       role="alert"
       style={{
-        background: 'rgba(245,158,11,0.12)',
-        borderBottom: '1px solid rgba(245,158,11,0.25)',
+        background: 'color-mix(in srgb, var(--erp-accent) 12%, transparent)',
+        borderBottom: '1px solid color-mix(in srgb, var(--erp-accent) 25%, transparent)',
       }}
     >
-      <Clock size={14} style={{ color: '#f59e0b', flexShrink: 0 }} />
-      <p className="flex-1 font-medium" style={{ color: '#92400e' }}>
+      <Clock size={14} style={{ color: 'var(--erp-accent)', flexShrink: 0 }} />
+      <p className="flex-1 font-medium" style={{ color: 'var(--erp-warning-text)' }}>
         {days === 0
           ? 'Your trial ends today.'
           : `Your trial ends in ${days} day${days !== 1 ? 's' : ''}.`}{' '}
@@ -45,7 +45,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
       <a
         href={`${resolveAppUrl('dash')}/settings/billing`}
         className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold shrink-0"
-        style={{ background: '#f59e0b', color: '#fff' }}
+        style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
       >
         <Zap size={11} />
         Activate plan
@@ -55,7 +55,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
         aria-label="Dismiss"
         onClick={dismiss}
         className="h-6 w-6 flex items-center justify-center rounded shrink-0 hover:bg-amber-100 transition-colors"
-        style={{ color: '#92400e' }}
+        style={{ color: 'var(--erp-warning-text)' }}
       >
         <X size={12} />
       </button>

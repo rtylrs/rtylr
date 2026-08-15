@@ -44,6 +44,8 @@ export const dashboardStatsSchema = z
     overdue_amount: finiteNumber.optional(),
     totalExpensesMtd: finiteNumber.optional(),
     total_expenses_mtd: finiteNumber.optional(),
+    totalRevenueMtd: finiteNumber.optional(),
+    total_revenue_mtd: finiteNumber.optional(),
     netProfitMtd: finiteNumber.optional(),
     net_profit_mtd: finiteNumber.optional(),
 
@@ -67,6 +69,7 @@ export const dashboardStatsSchema = z
     totalReceivable: raw.totalReceivable ?? raw.total_receivable ?? 0,
     overdueAmount: raw.overdueAmount ?? raw.overdue_amount ?? 0,
     totalExpensesMtd: raw.totalExpensesMtd ?? raw.total_expenses_mtd ?? 0,
+    totalRevenueMtd: raw.totalRevenueMtd ?? raw.total_revenue_mtd ?? 0,
     netProfitMtd: raw.netProfitMtd ?? raw.net_profit_mtd ?? 0,
     outstandingInvoicesCount: raw.outstandingInvoicesCount ?? raw.outstanding_invoices_count ?? 0,
     totalRevenueMtdChange: raw.totalRevenueMtdChange ?? raw.total_revenue_mtd_change ?? '+0%',

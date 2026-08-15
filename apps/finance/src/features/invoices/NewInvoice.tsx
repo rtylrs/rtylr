@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate } from '@tanstack/react-router';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { ChevronRight, Plus, ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/types';
 import PageHeader from '../../shared/components/PageHeader';
 import ClientSelect, { Client } from '../../shared/components/ClientSelect';
 import LineItemRow, { LineItem } from '../../shared/components/LineItemRow';
 import TaxBreakdown from '../../shared/components/TaxBreakdown';
 import InvoicePreview from '../../shared/components/InvoicePreview';
-import { useCreateInvoice, useUpdateInvoiceStatus } from './useInvoices';
+import { useCreateInvoice, useInvoiceDetail, useUpdateInvoiceStatus } from './useInvoices';
 import {
   cardStyle,
   ghostBtn,
@@ -20,11 +21,16 @@ import {
   ACCENT,
 } from '../../shared/lib/tokens';
 import { useSettings } from '../../shared/lib/settings';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
+
+const newInvoiceRoute = getRouteApi('/layout/invoices/new');
 
 const STEPS = ['Client', 'Items', 'Tax & Notes', 'Preview'] as const;
 
 const NewInvoice: React.FC = () => {
   const navigate = useNavigate();
+  const { clone, client: clientId } = newInvoiceRoute.useSearch();
   const settings = useSettings();
   const [step, setStep] = useState(0);
   const [client, setClient] = useState<Client | null>(null);
@@ -42,6 +48,41 @@ const NewInvoice: React.FC = () => {
   const [discount, setDiscount] = useState(0);
   const createInvoice = useCreateInvoice();
   const updateInvoiceStatus = useUpdateInvoiceStatus();
+  const { data: sourceInvoice } = useInvoiceDetail(clone);
+
+  useEffect(() => {
+    if (sourceInvoice) {
+      setClient({
+        id: sourceInvoice.id,
+        name: sourceInvoice.client,
+        email: sourceInvoice.clientEmail,
+      });
+      setIssuedDate(sourceInvoice.issuedDate ?? today);
+      setDueDate(sourceInvoice.dueDate ?? due);
+      setInvoiceNumber(sourceInvoice.number ?? sourceInvoice.id);
+      setItems(
+        (sourceInvoice.items ?? []).map((item, index) => ({
+          id: `clone-${index}`,
+          description: item.description ?? '',
+          quantity: item.quantity ?? 1,
+          unitPrice: item.unitPrice ?? 0,
+          taxRate: settings.defaultTaxRate,
+        }))
+      );
+      setNotes(sourceInvoice.notes ?? settings.invoiceNotes);
+      setDiscount(sourceInvoice.discount ?? 0);
+    }
+  }, [sourceInvoice]);
+
+  useEffect(() => {
+    if (!clientId || clone) return;
+    void unwrap(safe.get<Client[]>('/crm/customers'))
+      .then((clients) => {
+        const selected = (clients ?? []).find((entry) => entry.id === clientId);
+        if (selected) setClient(selected);
+      })
+      .catch(() => {});
+  }, [clientId, clone]);
 
   const addItem = () =>
     setItems((prev) => [
@@ -112,8 +153,13 @@ const NewInvoice: React.FC = () => {
                 toast.success(`Invoice ${invoiceNumber} sent`);
                 navigate({ to: '/invoices' });
               },
-              onError: () => {
-                toast.error(`Invoice ${invoiceNumber} saved as draft — couldn't mark it sent`);
+              onError: (error) => {
+                toast.error(
+                  getOneKitErrorMessage(
+                    error,
+                    `Invoice ${invoiceNumber} saved as draft — couldn't mark it sent`
+                  )
+                );
                 navigate({ to: '/invoices' });
               },
             }
@@ -123,7 +169,7 @@ const NewInvoice: React.FC = () => {
         toast.success(`Invoice ${invoiceNumber} saved as Draft`);
         navigate({ to: '/invoices' });
       },
-      onError: () => toast.error('Failed to save invoice'),
+      onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to save invoice')),
     });
   };
 
@@ -154,7 +200,8 @@ const NewInvoice: React.FC = () => {
                 border: 'none',
                 cursor: 'pointer',
                 background: step === i ? ACCENT : 'transparent',
-                color: step === i ? '#fff' : step > i ? ACCENT : 'var(--hub-text-muted)',
+                color:
+                  step === i ? 'var(--finance-white)' : step > i ? ACCENT : 'var(--hub-text-muted)',
                 fontSize: 12,
                 fontWeight: 600,
               }}
@@ -167,7 +214,7 @@ const NewInvoice: React.FC = () => {
                   width: 18,
                   height: 18,
                   borderRadius: 9,
-                  background: step === i ? 'rgba(255,255,255,0.25)' : 'var(--hub-hover)',
+                  background: step === i ? 'var(--finance-white-overlay)' : 'var(--hub-hover)',
                   fontSize: 10,
                 }}
               >
@@ -236,7 +283,7 @@ const NewInvoice: React.FC = () => {
                         style={{
                           padding: '8px',
                           textAlign:
-                            h === 'Total' || h === 'Qty' || h === 'Tax %' ? 'right' : 'left',
+                            h === 'Total' || h === 'Qty' || h === 'Tax %' ? 'end' : 'start',
                           fontSize: 10,
                           textTransform: 'uppercase',
                           letterSpacing: '0.06em',

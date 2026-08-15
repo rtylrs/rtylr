@@ -82,6 +82,11 @@ describe('formatCurrency', () => {
     const result = formatCurrency(1234.56);
     expect(result).toContain('1,234.56');
   });
+
+  it('formats the configured tenant currency', () => {
+    expect(formatCurrency(1234.56, 'EUR', 'en-US')).toContain('€1,234.56');
+    expect(formatCurrency(1234.56, 'GBP', 'en-US')).toContain('£1,234.56');
+  });
 });
 
 describe('formatPercent', () => {

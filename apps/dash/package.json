@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "vitest run src --environment happy-dom",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "generate-icons": "node scripts/generate-icons.js"

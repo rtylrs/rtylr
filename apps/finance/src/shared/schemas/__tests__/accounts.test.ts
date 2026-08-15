@@ -1,17 +1,28 @@
 import { describe, it, expect } from 'vitest';
-import { bankAccountSchema, chartOfAccountSchema } from '../accounts';
+import { bankAccountSchema, bankTransactionSchema, chartOfAccountSchema } from '../accounts';
+
+const account = {
+  id: 'BA-1',
+  name: 'Business Checking',
+  type: 'checking',
+  balance: 25000,
+  currency: 'USD',
+  institution: 'Chase',
+  mask: '1234',
+};
+
+const transaction = {
+  id: 'TX-1',
+  matched: true,
+  description: 'Coffee',
+  date: '2026-05-01',
+  category: 'Food',
+  amount: -5.5,
+};
 
 describe('bankAccountSchema', () => {
   it('parses a bank account with all fields', () => {
-    const result = bankAccountSchema.parse({
-      id: 'BA-1',
-      name: 'Business Checking',
-      type: 'checking',
-      balance: 25000,
-      currency: 'USD',
-      institution: 'Chase',
-      mask: '1234',
-    });
+    const result = bankAccountSchema.parse(account);
     expect(result.id).toBe('BA-1');
     expect(result.name).toBe('Business Checking');
     expect(result.balance).toBe(25000);
@@ -19,25 +30,17 @@ describe('bankAccountSchema', () => {
   });
 
   it('coerces a numeric id to string', () => {
-    const result = bankAccountSchema.parse({ id: 7, name: 'Savings' });
+    const result = bankAccountSchema.parse({ ...account, id: 7 });
     expect(result.id).toBe('7');
   });
 
-  it('defaults name to empty string when omitted', () => {
-    const result = bankAccountSchema.parse({});
-    expect(result.name).toBe('');
-  });
-
-  it('allows optional fields to be absent', () => {
-    const result = bankAccountSchema.parse({ name: 'Checking' });
-    expect(result.id).toBeUndefined();
-    expect(result.type).toBeUndefined();
-    expect(result.balance).toBeUndefined();
+  it('rejects an incomplete account shape', () => {
+    expect(() => bankAccountSchema.parse({ name: 'Savings' })).toThrow();
   });
 
   it('allows nullable fields to be null', () => {
     const result = bankAccountSchema.parse({
-      name: 'Savings',
+      ...account,
       type: null,
       balance: null,
       currency: null,
@@ -48,23 +51,38 @@ describe('bankAccountSchema', () => {
     expect(result.balance).toBeNull();
   });
 
-  it('parses transaction-style fields when present', () => {
-    const result = bankAccountSchema.parse({
-      name: 'TX',
-      matched: true,
-      description: 'Coffee',
-      date: '2026-05-01',
-      category: 'Food',
-      amount: -5.5,
-    });
+  it('rejects transaction fields and unknown account fields', () => {
+    expect(() => bankAccountSchema.parse({ ...account, ...transaction })).toThrow();
+    expect(() => bankAccountSchema.parse({ ...account, extraField: 'extra' })).toThrow();
+  });
+});
+
+describe('bankTransactionSchema', () => {
+  it('parses a bank transaction with all fields', () => {
+    const result = bankTransactionSchema.parse(transaction);
+    expect(result.id).toBe('TX-1');
     expect(result.matched).toBe(true);
-    expect(result.description).toBe('Coffee');
     expect(result.amount).toBe(-5.5);
   });
 
-  it('passes through unknown fields', () => {
-    const result = bankAccountSchema.parse({ name: 'Test', extraField: 'extra' });
-    expect((result as Record<string, unknown>).extraField).toBe('extra');
+  it('rejects an account-shaped object', () => {
+    expect(() => bankTransactionSchema.parse(account)).toThrow();
+  });
+
+  it('allows nullable transaction details', () => {
+    const result = bankTransactionSchema.parse({
+      ...transaction,
+      description: null,
+      date: null,
+      category: null,
+      amount: null,
+    });
+    expect(result.description).toBeNull();
+    expect(result.amount).toBeNull();
+  });
+
+  it('rejects unknown transaction fields', () => {
+    expect(() => bankTransactionSchema.parse({ ...transaction, extraField: 'extra' })).toThrow();
   });
 });
 

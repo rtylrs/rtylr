@@ -1,0 +1,52 @@
+{
+  "title": "Timesheets",
+  "subtitle": "View and submit your timesheet periods.",
+  "entries": "entries",
+  "total": "Total",
+  "submit": "Submit Timesheet",
+  "submitted": "Timesheet submitted for approval",
+  "approved": "Timesheet approved",
+  "rejected": "Timesheet rejected",
+  "rejectionReason": "Rejection reason",
+  "noReasonProvided": "No reason provided",
+  "entriesTitle": "Time Entries",
+  "noEntries": "No time entries in this period.",
+  "emptyTitle": "No timesheets yet",
+  "emptyDescription": "Your timesheet periods will appear here.",
+  "filters": {
+    "all": "All",
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "approved": "Approved",
+    "rejected": "Rejected"
+  },
+  "statuses": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "locked": "Locked"
+  },
+  "days": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
+  "approvals": {
+    "title": "Timesheet Approvals",
+    "subtitle": "{{count}} timesheets pending your review",
+    "emptyTitle": "All caught up",
+    "emptyDescription": "No timesheets are pending approval.",
+    "employeeId": "Employee #{{id}}",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectTitle": "Reject Timesheet",
+    "reasonLabel": "Reason for rejection",
+    "reasonPlaceholder": "Explain why this timesheet is being rejected…",
+    "confirmReject": "Reject Timesheet"
+  }
+}

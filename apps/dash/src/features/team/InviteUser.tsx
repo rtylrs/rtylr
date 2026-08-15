@@ -85,7 +85,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<TeamMember['role']>('staff');
-  const [selectedApps, setSelectedApps] = useState<string[]>(['pos']);
+  const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<number[]>([]);
   const [authMethod, setAuthMethod] = useState<'invite' | 'manual'>('invite');
   const [password, setPassword] = useState('');
@@ -95,7 +95,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   // Bulk tab state
   const [bulkEmailsRaw, setBulkEmailsRaw] = useState('');
   const [bulkRole, setBulkRole] = useState<string>('staff');
-  const [bulkApps, setBulkApps] = useState<string[]>(['pos']);
+  const [bulkApps, setBulkApps] = useState<string[]>([]);
   const [bulkLocations, setBulkLocations] = useState<number[]>([]);
   const [bulkGroupId, setBulkGroupId] = useState<string>('');
   const [bulkResults, setBulkResults] = useState<BulkResult[] | null>(null);
@@ -580,6 +580,7 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               {/* Seat cost preview */}
               {sub &&
                 sub.pricePerSeatCents > 0 &&
+                sub.seatCount >= sub.includedSeatLimit &&
                 (() => {
                   const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
                     computeSeatProration(sub.pricePerSeatCents);

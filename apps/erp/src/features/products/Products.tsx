@@ -6,12 +6,15 @@ import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown, Package } 
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
 import {
+  fetchAllProducts,
   getProductStockStatus,
   useProducts,
   useDeleteProduct,
+  useCreateProduct,
   type Product,
   type ProductFilters,
 } from './useProducts';
+import { importProducts } from './importProducts';
 import { useCategories } from '../categories/useCategories';
 import ProductCard from '../../shared/components/ProductCard';
 import StockBadge from '../../shared/components/StockBadge';
@@ -28,7 +31,30 @@ import { formatCurrency } from '../../shared/lib/format';
 import { toast } from 'sonner';
 import { Link } from '@tanstack/react-router';
 
-const AMBER = '#f59e0b';
+const AMBER = 'var(--erp-accent)';
+
+function filterAndSortProducts(rawProducts: Product[], filters: ProductFilters): Product[] {
+  let out = rawProducts;
+
+  if (filters.status) {
+    out = out.filter((product) => getProductStockStatus(product) === filters.status);
+  }
+
+  if (filters.sort) {
+    const direction = filters.sortDir === 'desc' ? -1 : 1;
+    out = [...out].sort((a, b) => {
+      if (filters.sort === 'name') return (a.name ?? '').localeCompare(b.name ?? '') * direction;
+      if (filters.sort === 'stock')
+        return ((a.stockQuantity ?? 0) - (b.stockQuantity ?? 0)) * direction;
+      if (filters.sort === 'price') return ((a.salePrice ?? 0) - (b.salePrice ?? 0)) * direction;
+      if (filters.sort === 'category')
+        return (a.categoryId ?? '').localeCompare(b.categoryId ?? '') * direction;
+      return 0;
+    });
+  }
+
+  return out;
+}
 
 const Products: React.FC = () => {
   const { t } = useTranslation();
@@ -44,33 +70,15 @@ const Products: React.FC = () => {
 
   const mergedFilters: ProductFilters = { ...filters, search: debouncedSearch, page, pageSize };
   const { data: productResult, isLoading } = useProducts(mergedFilters);
-  const rawProducts = productResult?.products ?? [];
-  const products = useMemo(() => {
-    let out = rawProducts;
-
-    if (filters.status) {
-      out = out.filter((product) => getProductStockStatus(product) === filters.status);
-    }
-
-    if (filters.sort) {
-      const direction = filters.sortDir === 'desc' ? -1 : 1;
-      out = [...out].sort((a, b) => {
-        if (filters.sort === 'name') return (a.name ?? '').localeCompare(b.name ?? '') * direction;
-        if (filters.sort === 'stock')
-          return ((a.stockQuantity ?? 0) - (b.stockQuantity ?? 0)) * direction;
-        if (filters.sort === 'price') return ((a.salePrice ?? 0) - (b.salePrice ?? 0)) * direction;
-        if (filters.sort === 'category')
-          return (a.categoryId ?? '').localeCompare(b.categoryId ?? '') * direction;
-        return 0;
-      });
-    }
-
-    return out;
-  }, [rawProducts, filters.status, filters.sort, filters.sortDir]);
+  const products = useMemo(
+    () => filterAndSortProducts(productResult?.products ?? [], filters),
+    [productResult?.products, filters]
+  );
   const totalProducts = productResult?.total ?? products.length;
   const hasMore = productResult?.hasMore ?? false;
   const { data: categories = [] } = useCategories();
   const deleteMut = useDeleteProduct();
+  const createProduct = useCreateProduct();
   const categoryNameById = useMemo(() => {
     const map = new Map<string, string>();
     categories.forEach((category) => map.set(String(category.id), category.name ?? ''));
@@ -113,9 +121,9 @@ const Products: React.FC = () => {
     }
   };
 
-  const exportable = useMemo(
-    () =>
-      products.map((p) => ({
+  const toExportRows = useCallback(
+    (items: Product[]) =>
+      items.map((p) => ({
         id: p.id,
         name: p.name,
         sku: p.sku,
@@ -126,8 +134,16 @@ const Products: React.FC = () => {
         salePrice: p.salePrice,
         status: getProductStockStatus(p),
       })),
-    [products, categoryNameFor]
+    [categoryNameFor]
   );
+  const exportable = useMemo(() => toExportRows(products), [products, toExportRows]);
+  const getAllExportable = useCallback(async () => {
+    const allProducts = await fetchAllProducts({
+      search: debouncedSearch,
+      categoryId: filters.categoryId,
+    });
+    return toExportRows(filterAndSortProducts(allProducts, filters));
+  }, [debouncedSearch, filters, toExportRows]);
 
   return (
     <motion.div
@@ -142,17 +158,24 @@ const Products: React.FC = () => {
         actions={
           <>
             <ImportCSV
-              onImport={(rows) =>
-                toast.info(`${rows.length} rows parsed - bulk import coming soon`)
-              }
-              expectedColumns={['name', 'sku', 'category', 'stock']}
+              onImport={(rows) => importProducts(rows, (input) => createProduct.mutateAsync(input))}
+              expectedColumns={[
+                'name',
+                'sku',
+                'category_id',
+                'supplier_id',
+                'barcode',
+                'description',
+                'unit',
+                'stock_quantity',
+              ]}
             />
-            <ExportButton data={exportable} filename="products.csv" />
+            <ExportButton data={exportable} getData={getAllExportable} filename="products.csv" />
             <button
               data-testid="products-new-button"
               onClick={() => setShowAdd(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-              style={{ background: AMBER, color: '#000' }}
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
             >
               <Plus size={14} />
               {t('erp.products.new')}
@@ -261,7 +284,7 @@ const Products: React.FC = () => {
               data-testid="products-empty-create-button"
               onClick={() => setShowAdd(true)}
               className="px-3 py-2 rounded-lg text-xs font-semibold"
-              style={{ background: AMBER, color: '#000' }}
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
             >
               {t('erp.products.create')}
             </button>
@@ -363,7 +386,7 @@ const Products: React.FC = () => {
                     style={{
                       color:
                         p.stockQuantity === 0
-                          ? '#f87171'
+                          ? 'var(--erp-danger)'
                           : (p.stockQuantity ?? 0) < (p.lowStockThreshold ?? 0)
                             ? AMBER
                             : 'var(--hub-text)',
@@ -460,9 +483,6 @@ const Products: React.FC = () => {
         count={selected.size}
         onClear={() => setSelected(new Set())}
         onDelete={handleBulkDelete}
-        onArchive={() => {
-          toast.info('Archive coming soon');
-        }}
         onExport={() => {
           const rows = products.filter((p) => selected.has(p.id ?? ''));
           if (rows.length === 0) return;

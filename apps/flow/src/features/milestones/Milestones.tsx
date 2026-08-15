@@ -16,9 +16,14 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   completed: { bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
 };
 
+import { useFlowStore } from '../../shared/stores/flowStore';
+
 const Milestones: React.FC = () => {
   const { t } = useTranslation();
-  const { data: milestones = [], isLoading } = useMilestones();
+  const { activeWorkspaceId } = useFlowStore();
+  const { data: milestones = [], isLoading } = useMilestones({
+    workspaceId: activeWorkspaceId || undefined,
+  });
   const createMilestone = useCreateMilestone();
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -34,13 +39,45 @@ const Milestones: React.FC = () => {
     );
   }
 
-  if (milestones.length === 0) {
+  if (milestones.length === 0 && !showCreate) {
     return (
-      <EmptyState
-        icon={MilestoneIcon}
-        title="No milestones yet"
-        description="Track major delivery targets across your projects."
-      />
+      <div className="flex flex-col h-full">
+        <HelmetContainer title="Milestones · rtylr" />
+        <div
+          className="flex items-center justify-between px-6 py-4 shrink-0"
+          style={{ borderBottom: '1px solid var(--flow-border)' }}
+        >
+          <div>
+            <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+              Milestones
+            </h1>
+            <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+              0 tracked
+            </p>
+          </div>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
+            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+          >
+            <Plus size={11} /> New milestone
+          </button>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center p-6">
+          <EmptyState
+            icon={MilestoneIcon}
+            title="No milestones yet"
+            description="Track major delivery targets across your projects."
+          />
+          <button
+            onClick={() => setShowCreate(true)}
+            className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-semibold"
+            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+          >
+            <Plus size={13} /> Create first milestone
+          </button>
+        </div>
+      </div>
     );
   }
 
@@ -103,7 +140,11 @@ const Milestones: React.FC = () => {
                   return;
                 }
                 createMilestone.mutate(
-                  { name: newName, targetDate: newDate || new Date().toISOString().slice(0, 10) },
+                  {
+                    workspaceId: activeWorkspaceId || undefined,
+                    name: newName,
+                    targetDate: newDate || new Date().toISOString().slice(0, 10),
+                  },
                   {
                     onSuccess: () => {
                       toast.success(t('toasts.milestoneCreated'));

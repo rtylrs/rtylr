@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { Calculator, RefreshCw, Clock, Coffee, AlertTriangle, MapPin } from 'lucide-react';
@@ -31,6 +32,9 @@ import {
   useIsMobile,
 } from '../../shared/components/ui';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
+import { formatCurrency } from '../../shared/lib/hrNumberUtils';
+import { canHrPermission, canViewCompensation } from '../../shared/lib/hrPermissions';
+import { normalizeHrRequestStatus } from '../../shared/lib/requestStatus';
 
 const TABS = ['Labor Cost', 'Swap Shifts', 'Availability', 'Breaks', 'Overtime'] as const;
 
@@ -52,12 +56,19 @@ const WEEKDAY_KEYS = [
 const Operations: React.FC = () => {
   const { t } = useTranslation();
   const isMobile = useIsMobile(900);
-  const [tab, setTab] = useState<(typeof TABS)[number]>('Labor Cost');
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const showCompensation = canViewCompensation(role);
+  const [tab, setTab] = useState<(typeof TABS)[number]>(
+    showCompensation ? 'Labor Cost' : 'Swap Shifts'
+  );
   const { data: staff = [] } = useStaff();
-  const { data: payroll = [] } = usePayroll();
+  const { data: payroll = [] } = usePayroll({ enabled: showCompensation });
   const { data: swaps = [] } = useSwaps();
   const createSwap = useCreateSwap();
   const resolveSwap = useResolveSwap();
+  const canManageShifts = canHrPermission(role, 'hr:shifts:manage');
+  const visibleTabs = showCompensation ? TABS : TABS.filter((name) => name !== 'Labor Cost');
+  const activeTab = !showCompensation && tab === 'Labor Cost' ? 'Swap Shifts' : tab;
   const { data: availability = [] } = useAvailability();
 
   /**
@@ -133,9 +144,13 @@ const Operations: React.FC = () => {
           title="Operations"
           subtitle="Labor cost, shift swaps, availability, breaks, overtime"
         />
-        <Tabs tabs={[...TABS]} active={tab} onChange={(t) => setTab(t as typeof tab)} />
+        <Tabs
+          tabs={[...visibleTabs]}
+          active={activeTab}
+          onChange={(t) => setTab(t as typeof tab)}
+        />
 
-        {tab === 'Labor Cost' && (
+        {activeTab === 'Labor Cost' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div
               style={{
@@ -176,7 +191,7 @@ const Operations: React.FC = () => {
                   </span>
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>
-                  ${weeklyCost.toLocaleString()}
+                  {formatCurrency(weeklyCost, settings?.currency)}
                 </div>
               </Card>
               <Card>
@@ -192,7 +207,7 @@ const Operations: React.FC = () => {
                   Monthly (est)
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>
-                  ${monthlyCost.toLocaleString()}
+                  {formatCurrency(monthlyCost, settings?.currency)}
                 </div>
               </Card>
               <Card>
@@ -224,7 +239,7 @@ const Operations: React.FC = () => {
                   Blended rate
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--hr-text)' }}>
-                  ${blendedRate.toFixed(2)}/h
+                  {formatCurrency(blendedRate, settings?.currency)}/h
                 </div>
               </Card>
             </div>
@@ -262,7 +277,7 @@ const Operations: React.FC = () => {
           </div>
         )}
 
-        {tab === 'Swap Shifts' && (
+        {activeTab === 'Swap Shifts' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <Card>
               <SectionHeader title="Request a swap" />
@@ -361,53 +376,56 @@ const Operations: React.FC = () => {
               />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {swaps.map((s) => (
-                  <Card key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
-                        {s.requester}{' '}
-                        <span style={{ color: 'var(--hr-text-muted)' }}>wants to swap with</span>{' '}
-                        {s.target}
+                {swaps.map((s) => {
+                  const status = normalizeHrRequestStatus(s.status);
+                  return (
+                    <Card key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
+                          {s.requester}{' '}
+                          <span style={{ color: 'var(--hr-text-muted)' }}>wants to swap with</span>{' '}
+                          {s.target}
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
+                          {s.shiftDay} • {s.reason}
+                        </div>
                       </div>
-                      <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
-                        {s.shiftDay} • {s.reason}
-                      </div>
-                    </div>
-                    <Pill
-                      color={
-                        s.status === 'Accepted'
-                          ? '#10b981'
-                          : s.status === 'Rejected'
-                            ? '#ef4444'
-                            : '#f59e0b'
-                      }
-                    >
-                      {s.status}
-                    </Pill>
-                    {s.status === 'Pending' && (
-                      <ApprovalButtons
-                        onApprove={() =>
-                          resolveSwap.mutate(
-                            { id: s.id, accepted: true },
-                            { onSuccess: () => toast.success('Swap accepted') }
-                          )
+                      <Pill
+                        color={
+                          status === 'accepted'
+                            ? '#10b981'
+                            : status === 'rejected'
+                              ? '#ef4444'
+                              : '#f59e0b'
                         }
-                        onReject={() =>
-                          resolveSwap.mutate(
-                            { id: s.id, accepted: false },
-                            { onSuccess: () => toast.success('Swap rejected') }
-                          )
-                        }
-                      />
-                    )}
-                  </Card>
-                ))}
+                      >
+                        {s.status}
+                      </Pill>
+                      {canManageShifts && status === 'pending' && (
+                        <ApprovalButtons
+                          onApprove={() =>
+                            resolveSwap.mutate(
+                              { id: s.id, accepted: true },
+                              { onSuccess: () => toast.success('Swap accepted') }
+                            )
+                          }
+                          onReject={() =>
+                            resolveSwap.mutate(
+                              { id: s.id, accepted: false },
+                              { onSuccess: () => toast.success('Swap rejected') }
+                            )
+                          }
+                        />
+                      )}
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>
         )}
 
-        {tab === 'Availability' && (
+        {activeTab === 'Availability' && (
           <Card style={{ padding: 0, overflow: 'hidden' }}>
             {availability.length === 0 ? (
               <EmptyState
@@ -514,7 +532,7 @@ const Operations: React.FC = () => {
           </Card>
         )}
 
-        {tab === 'Breaks' && (
+        {activeTab === 'Breaks' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <Card>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -638,7 +656,7 @@ const Operations: React.FC = () => {
           </div>
         )}
 
-        {tab === 'Overtime' && (
+        {activeTab === 'Overtime' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {overtimeAlerts.length === 0 ? (
               <EmptyState

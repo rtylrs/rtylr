@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { getOneKitErrorMessage } from '@voxire/api';
 import Modal from './Modal';
 import CurrencyInput from './CurrencyInput';
 import { inputStyle, primaryBtn, ghostBtn, labelStyle } from '../lib/tokens';
@@ -65,7 +66,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           toast.success(`Recorded ${formatMoney(value)} payment`);
           onClose();
         },
-        onError: () => toast.error('Failed to record payment'),
+        onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to record payment')),
       }
     );
   };

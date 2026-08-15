@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Plus, Clock } from 'lucide-react';
@@ -16,12 +17,14 @@ import {
   Pill,
 } from '../../shared/components/ui';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
+import { canHrPermission } from '../../shared/lib/hrPermissions';
+import { isHrRequestStatus, normalizeHrRequestStatus } from '../../shared/lib/requestStatus';
 import OvertimeRequestForm from './OvertimeRequestForm';
 
 const STATUS_COLORS: Record<string, string> = {
-  Pending: 'var(--hr-status-submitted)',
-  Approved: 'var(--hr-status-approved)',
-  Rejected: 'var(--hr-status-rejected)',
+  pending: 'var(--hr-status-submitted)',
+  approved: 'var(--hr-status-approved)',
+  rejected: 'var(--hr-status-rejected)',
 };
 
 const FILTER_STATUSES = ['All', 'Pending', 'Approved', 'Rejected'] as const;
@@ -32,9 +35,11 @@ const Overtime = (): React.JSX.Element => {
   const [formOpen, setFormOpen] = useState(false);
   const { data: requests, isLoading } = useListOvertimeRequests();
   const approveOvertime = useApproveOvertime();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canApprove = canHrPermission(role, 'hr:time_off:approve');
 
   const filteredRequests = (requests ?? []).filter((r) =>
-    statusFilter === 'All' ? true : r.status === statusFilter
+    statusFilter === 'All' ? true : isHrRequestStatus(r.status, statusFilter)
   );
 
   const formatMinutes = (mins: number): string => {
@@ -105,8 +110,10 @@ const Overtime = (): React.JSX.Element => {
                     <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--hr-text)' }}>
                       {t('overtime.employee')} #{req.employeeId}
                     </span>
-                    <Pill color={STATUS_COLORS[req.status ?? '']}>
-                      {t(`overtime.statuses.${(req.status ?? '').toLowerCase()}`)}
+                    <Pill color={STATUS_COLORS[normalizeHrRequestStatus(req.status)]}>
+                      {t(`overtime.statuses.${(req.status ?? '').toLowerCase()}`, {
+                        defaultValue: req.status || '—',
+                      })}
                     </Pill>
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 3 }}>
@@ -119,7 +126,7 @@ const Overtime = (): React.JSX.Element => {
                     </div>
                   )}
                 </div>
-                {req.status === 'Pending' && (
+                {canApprove && isHrRequestStatus(req.status, 'pending') && (
                   <ApprovalButtons
                     onApprove={() =>
                       approveOvertime.mutate({

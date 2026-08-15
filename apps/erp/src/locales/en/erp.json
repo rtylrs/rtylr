@@ -127,6 +127,58 @@
   },
   "common": {
     "cancel": "Cancel",
+    "create": "Create",
+    "creating": "Creating…",
+    "delete": "Delete",
     "comingSoon": "This action is not available yet."
+  },
+  "warehouses": {
+    "title": "Warehouses",
+    "new": "New Warehouse",
+    "count": "{{count}} active storage locations",
+    "empty": {
+      "title": "No warehouses",
+      "description": "Create your first warehouse to track stock locations"
+    },
+    "status": { "default": "Default", "inactive": "Inactive" },
+    "delete": "Delete warehouse",
+    "managedBy": "Managed by {{name}}",
+    "capacity": "Capacity",
+    "deleteConfirm": {
+      "title": "Delete warehouse?",
+      "description": "Products assigned to this warehouse will become unassigned."
+    },
+    "fields": {
+      "name": "Warehouse name",
+      "address": "Address (optional)",
+      "manager": "Manager name (optional)",
+      "capacity": "Capacity (optional)"
+    },
+    "validation": { "nameRequired": "Warehouse name is required" },
+    "toast": {
+      "created": "Warehouse created",
+      "createFailed": "Failed to create warehouse",
+      "deleted": "Warehouse deleted"
+    }
+  },
+  "receiving": {
+    "title": "Goods Receiving",
+    "description": "Receive items against open purchase orders",
+    "receiveFor": "Receive items for PO-{{id}}",
+    "closeDetails": "Close receiving details",
+    "expected": "Expected {{count}}",
+    "ok": "OK",
+    "markReceived": "Mark Received",
+    "empty": {
+      "title": "No open orders to receive",
+      "description": "All orders have been received"
+    },
+    "orderSummary": "{{count}} items / Expected {{date}}",
+    "validation": { "overReceived": "Cannot receive more units than ordered" },
+    "toast": {
+      "completed": "Receipt completed, all items received",
+      "completedVariance": "Receipt completed with {{count}} unit variance",
+      "updateFailed": "Failed to update receipt status"
+    }
   }
 }

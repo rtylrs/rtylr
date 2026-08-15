@@ -45,7 +45,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name = 'Product' })
                   onClick={() => setSelected(i)}
                   className="w-16 h-16 rounded-lg overflow-hidden shrink-0"
                   style={{
-                    border: selected === i ? '2px solid #f59e0b' : '1px solid var(--hub-border)',
+                    border:
+                      selected === i
+                        ? '2px solid var(--erp-accent)'
+                        : '1px solid var(--hub-border)',
                   }}
                 >
                   {imageUrl && <img src={imageUrl} alt="" className="w-full h-full object-cover" />}
@@ -58,12 +61,12 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name = 'Product' })
       {lightbox && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-6"
-          style={{ background: 'rgba(0,0,0,0.85)' }}
+          style={{ background: 'var(--hub-overlay-opaque)' }}
           onClick={() => setLightbox(false)}
         >
           <button
             className="absolute top-4 right-4 h-8 w-8 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.1)', color: '#fff' }}
+            style={{ background: 'var(--hub-highlight)', color: 'var(--hub-text)' }}
           >
             <X size={16} />
           </button>

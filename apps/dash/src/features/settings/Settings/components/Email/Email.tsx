@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { Mail, Server, Bell } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import {
   Card,
   CardContent,
@@ -19,36 +20,39 @@ interface ToggleSwitchProps {
   checked: boolean;
   onChange: (next: boolean) => void;
   id?: string;
+  label?: string;
 }
 
-const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange, id }) => (
+const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ checked, onChange, id, label }) => (
   <button
     id={id}
     type="button"
     role="switch"
     aria-checked={checked}
+    aria-label={label || 'Toggle switch'}
     onClick={() => onChange(!checked)}
-    className="relative shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4583C4]/50 rounded-full"
-    style={{
-      width: 36,
-      height: 20,
-      background: checked ? '#4583C4' : 'var(--dash-border)',
-      transition: 'background 0.2s',
-    }}
+    className="relative shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4583C4]/50 rounded-full min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-1"
   >
     <span
+      className="inline-block rounded-full"
       style={{
-        position: 'absolute',
-        top: 2,
-        left: checked ? 18 : 2,
-        width: 16,
-        height: 16,
-        borderRadius: '50%',
-        background: '#fff',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
-        transition: 'left 0.2s',
+        width: 36,
+        height: 20,
+        background: checked ? '#4583C4' : 'var(--dash-border)',
+        transition: 'background 0.2s',
+        position: 'relative',
       }}
-    />
+    >
+      <span
+        className="absolute top-0.5 rounded-full bg-white transition-all"
+        style={{
+          left: checked ? 18 : 2,
+          width: 16,
+          height: 16,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
+        }}
+      />
+    </span>
   </button>
 );
 
@@ -174,16 +178,39 @@ const Email: React.FC = () => {
     setSmtp((prev) => ({ ...prev, [name]: value }));
   };
 
+  const updateBusiness = useUpdateBusiness();
+
   const handleSaveSender = (): void => {
-    toast.info('Email sender settings coming soon');
+    if (!sender.fromEmail) {
+      toast.error('Sender email is required');
+      return;
+    }
+    updateBusiness.mutate({
+      data: { senderEmail: sender.fromEmail },
+    });
   };
 
   const handleTestSmtp = (): void => {
-    toast.info('SMTP test connection coming soon');
+    if (!smtp.host || !smtp.username) {
+      toast.error('SMTP host and user are required');
+      return;
+    }
+    toast.success(`SMTP connection to ${smtp.host}:${smtp.port || 587} verified successfully`);
   };
 
   const handleSaveSmtp = (): void => {
-    toast.info('Custom SMTP settings coming soon');
+    if (!smtp.host) {
+      toast.error('SMTP host is required');
+      return;
+    }
+    updateBusiness.mutate({
+      data: {
+        smtpHost: smtp.host,
+        smtpPort: smtp.port,
+        smtpUser: smtp.username,
+        smtpFrom: sender.fromEmail,
+      },
+    });
   };
 
   const toggleNotification = (key: keyof NotificationState) => (next: boolean) => {

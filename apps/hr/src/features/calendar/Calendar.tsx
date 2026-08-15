@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useTimeOff } from '../../shared/hooks/useHrExtras';
 import { Card, SectionHeader, Button, ACCENT, useIsMobile } from '../../shared/components/ui';
+import { isHrRequestStatus } from '../../shared/lib/requestStatus';
 
 function startOfMonth(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), 1);
@@ -21,7 +22,7 @@ function dayStr(date: Date) {
 
 const CalendarScreen: React.FC = () => {
   const isMobile = useIsMobile(900);
-  const [view, setView] = useState(new Date(2026, 3, 1));
+  const [view, setView] = useState(new Date());
   const { data: timeOff = [] } = useTimeOff();
 
   const cells = useMemo(() => {
@@ -34,7 +35,7 @@ const CalendarScreen: React.FC = () => {
       const date = new Date(view.getFullYear(), view.getMonth(), d);
       const str = dayStr(date);
       const events = timeOff.filter(
-        (t) => t.status === 'Approved' && str >= t.startDate && str <= t.endDate
+        (t) => isHrRequestStatus(t.status, 'approved') && str >= t.startDate && str <= t.endDate
       );
       cells.push({ date, events });
     }

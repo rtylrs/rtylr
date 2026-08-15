@@ -9,6 +9,8 @@ import { createOneKitClient } from '@voxire/api';
 import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/client';
 import type { ResetPasswordRequest } from '@voxire/voxie/common/auth/v1/types';
 
+import { getEmailError } from '../../shared/lib/validation';
+
 const authClient = createOneKitClient(AuthServiceClient, 'auth');
 
 const ResetPassword: React.FC = () => {
@@ -19,7 +21,13 @@ const ResetPassword: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
 
+  const emailError = getEmailError(email);
+
   const handleReset = async (): Promise<void> => {
+    if (emailError) {
+      setMessage(t('auth.login.invalidEmailFormat', 'Please enter a valid email address.'));
+      return;
+    }
     setLoading(true);
     try {
       const request: ResetPasswordRequest = { email };
@@ -66,7 +74,7 @@ const ResetPassword: React.FC = () => {
                 required
                 autoFocus
                 disabled={requestSent}
-                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20 disabled:bg-[#f5f5f5] disabled:text-[#999]"
+                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-base md:text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20 disabled:bg-[#f5f5f5] disabled:text-[#999]"
               />
             </div>
 

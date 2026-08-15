@@ -1,0 +1,57 @@
+{
+  "title": "Équipement",
+  "subtitle": "Demander du matériel et gérer les approbations",
+  "newRequest": "Nouvelle demande",
+  "requestCreated": "Demande d'équipement soumise",
+  "requestUpdated": "Demande d'équipement mise à jour",
+  "neededBy": "Nécessaire avant le {{date}}",
+  "approve": "Approuver",
+  "reject": "Rejeter",
+  "emptyTitle": "Aucune demande d'équipement",
+  "emptyDescription": "Les demandes d'équipement apparaîtront ici.",
+  "tabs": {
+    "myRequests": "Mes demandes",
+    "pendingApprovals": "Approbations en attente"
+  },
+  "urgencies": {
+    "low": "Faible",
+    "medium": "Moyen",
+    "high": "Élevé"
+  },
+  "statuses": {
+    "pending": "En attente",
+    "approved": "Approuvé",
+    "ordered": "Commandé",
+    "delivered": "Livré",
+    "rejected": "Rejeté"
+  },
+  "form": {
+    "title": "Nouvelle demande d'équipement",
+    "type": "Type d'équipement",
+    "typePlaceholder": "ex. Ordinateur portable, Écran, Bureau",
+    "description": "Description",
+    "descriptionPlaceholder": "Décrivez ce dont vous avez besoin et pourquoi",
+    "urgency": "Urgence",
+    "neededBy": "Nécessaire avant",
+    "submit": "Soumettre la demande"
+  },
+  "assets": {
+    "title": "Registre des actifs",
+    "subtitle": "Inventaire des équipements et actifs de l'entreprise",
+    "emptyTitle": "Aucun actif enregistré",
+    "emptyDescription": "Les actifs apparaîtront ici une fois l'équipement attribué.",
+    "table": {
+      "name": "Nom de l'actif",
+      "serialNumber": "Numéro de série",
+      "assignedDate": "Date d'attribution",
+      "condition": "État",
+      "returnedDate": "Date de retour"
+    },
+    "conditions": {
+      "new": "Neuf",
+      "good": "Bon",
+      "fair": "Correct",
+      "damaged": "Endommagé"
+    }
+  }
+}

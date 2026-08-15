@@ -52,6 +52,8 @@ export const useUpdateBusiness = () => {
       setIfPresent('city');
       setIfPresent('zipcode');
       setIfPresent('country');
+      setIfPresent('businessType', 'business_type');
+      setIfPresent('business_type');
       if (data.maintenanceMode !== undefined) payload.maintenance_mode = data.maintenanceMode;
 
       return unwrap<{ config?: Record<string, unknown> }>(
@@ -75,6 +77,26 @@ export const useUpdateBusiness = () => {
     onError: (error: unknown) => {
       const err = error as { message?: string };
       toast.error(err.message || 'Failed to update business information');
+    },
+  });
+};
+
+export const useUpdateBusinessConfig = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: Record<string, unknown>) => {
+      return unwrap<{ config?: Record<string, unknown> }>(
+        safe.put('/hub/config/v1/config', payload)
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['business'] });
+      queryClient.invalidateQueries({ queryKey: ['config'] });
+      toast.success('Design configuration saved');
+    },
+    onError: (error: unknown) => {
+      const err = error as { message?: string };
+      toast.error(err.message || 'Failed to save configuration');
     },
   });
 };

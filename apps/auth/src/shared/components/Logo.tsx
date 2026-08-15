@@ -8,15 +8,13 @@ interface LogoProps {
   className?: string;
 }
 
-// Renders the rtylr mark from ASSETS.logos, tinted via CSS so the single
-// (near-white) asset works on either background without a second file.
+// Use the supplied light and dark wordmarks directly so their gradients remain intact.
 const Logo: React.FC<LogoProps> = ({ variant = 'dark', className }) => (
   <img
-    src={ASSETS.logos.light}
+    src={variant === 'light' ? ASSETS.logos.light : '/logo-dark.png'}
     alt="rtylr"
     className={className}
     draggable={false}
-    style={{ filter: variant === 'light' ? 'brightness(0) invert(1)' : 'brightness(0)' }}
   />
 );
 

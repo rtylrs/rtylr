@@ -27,11 +27,17 @@ interface CampaignStatusPayload {
   status: string;
 }
 
-export const useListCampaigns = (): UseQueryResult<Campaign[]> =>
+export interface CampaignMutationResponse {
+  campaignId?: number;
+  campaign_id?: number;
+  message?: string;
+}
+
+export const useListCampaigns = (limit = 100, offset = 0): UseQueryResult<Campaign[]> =>
   useQuery<Campaign[]>({
-    queryKey: ['crm-campaigns'],
+    queryKey: ['crm-campaigns', { limit, offset }],
     queryFn: async (): Promise<Campaign[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/campaigns'));
+      const res = await unwrap(safe.get<unknown>('/crm/campaigns', { params: { limit, offset } }));
       return z.array(campaignSchema).parse(unwrapList(res, 'campaigns'));
     },
   });
@@ -40,8 +46,6 @@ export const useGetCampaign = (id: number | undefined): UseQueryResult<Campaign>
   useQuery<Campaign>({
     queryKey: ['crm-campaign', id],
     queryFn: async (): Promise<Campaign> => {
-      // Backend campaigns module registers GET /crm/campaigns/{id} and wraps
-      // the result in a `{ campaign: ... }` envelope.
       const res = await unwrap(safe.get<unknown>(`/crm/campaigns/${id}`));
       const envelope = (res ?? {}) as { campaign?: unknown };
       return campaignSchema.parse(envelope.campaign ?? res);
@@ -53,26 +57,29 @@ export const useCampaignStats = (id: number | undefined): UseQueryResult<Campaig
   useQuery<CampaignStats>({
     queryKey: ['crm-campaign', id, 'stats'],
     queryFn: async (): Promise<CampaignStats> => {
-      // The stats handler reads the `campaign_id` query parameter. Query params
-      // are sent verbatim (the api interceptor only camel→snake-cases the body),
-      // so the snake_case key must be passed literally here.
       const res = await unwrap(
         safe.get<unknown>('/crm/campaigns/stats', { params: { campaign_id: id } })
       );
-      return campaignStatsSchema.parse(res);
+      const envelope = (res ?? {}) as { stats?: unknown };
+      return campaignStatsSchema.parse(envelope.stats ?? res);
     },
     enabled: !!id,
   });
 
-export const useCreateCampaign = (): UseMutationResult<Campaign, unknown, Partial<Campaign>> => {
+export const useCreateCampaign = (): UseMutationResult<
+  CampaignMutationResponse,
+  unknown,
+  Partial<Campaign>
+> => {
   const qc = useQueryClient();
   const { t } = useTranslation();
-  return useMutation<Campaign, unknown, Partial<Campaign>>({
-    mutationFn: async (data: Partial<Campaign>): Promise<Campaign> => {
-      const res = await unwrap(
-        safe.post<Campaign>('/crm/campaigns', data as CreateCampaignRequest)
-      );
-      return res as Campaign;
+  return useMutation<CampaignMutationResponse, unknown, Partial<Campaign>>({
+    mutationFn: async (data: Partial<Campaign>): Promise<CampaignMutationResponse> => {
+      const res = (await unwrap(
+        safe.post<unknown>('/crm/campaigns', data as CreateCampaignRequest)
+      )) as { campaignId?: number; campaign_id?: number; message?: string };
+      const campaignId = res.campaignId ?? res.campaign_id;
+      return { campaignId, campaign_id: campaignId, message: res.message };
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
@@ -85,23 +92,23 @@ export const useCreateCampaign = (): UseMutationResult<Campaign, unknown, Partia
 };
 
 export const useUpdateCampaign = (): UseMutationResult<
-  Campaign,
+  CampaignMutationResponse,
   unknown,
   UpdateCampaignPayload
 > => {
   const qc = useQueryClient();
   const { t } = useTranslation();
-  return useMutation<Campaign, unknown, UpdateCampaignPayload>({
-    mutationFn: async (payload: UpdateCampaignPayload): Promise<Campaign> => {
+  return useMutation<CampaignMutationResponse, unknown, UpdateCampaignPayload>({
+    mutationFn: async (payload: UpdateCampaignPayload): Promise<CampaignMutationResponse> => {
       const res = await unwrap(
-        safe.put<Campaign>(`/crm/campaigns/${payload.id}`, {
+        safe.put<CampaignMutationResponse>(`/crm/campaigns/${payload.id}`, {
           id: String(payload.id),
           ...payload.data,
         } as UpdateCampaignRequest)
       );
-      return res as Campaign;
+      return res as CampaignMutationResponse;
     },
-    onSuccess: (_data: Campaign, variables: UpdateCampaignPayload): void => {
+    onSuccess: (_data: CampaignMutationResponse, variables: UpdateCampaignPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
       void qc.invalidateQueries({ queryKey: ['crm-campaign', variables.id] });
       toast.success(t('crm.campaigns.updated'));

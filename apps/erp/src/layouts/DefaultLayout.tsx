@@ -165,8 +165,8 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
       <span className="relative">{label}</span>
       {isActive && (
         <span
-          className="relative ml-auto h-1 w-1 rounded-full shrink-0"
-          style={{ background: '#f59e0b' }}
+          className="relative h-1 w-1 rounded-full shrink-0"
+          style={{ background: 'var(--erp-accent)', marginInlineStart: 'auto' }}
         />
       )}
     </Link>
@@ -314,15 +314,19 @@ const DefaultLayout: React.FC = () => {
       <div className="flex h-screen overflow-hidden" style={{ background: 'var(--hub-bg)' }}>
         {/* Mobile top bar */}
         <div
-          className="fixed top-0 left-0 right-0 z-40 flex md:hidden items-center justify-between h-11 px-4 shrink-0"
+          className="fixed top-0 z-40 flex md:hidden items-center justify-between h-11 px-4 shrink-0"
           style={{
             background: 'var(--hub-surface)',
             borderBottom: '1px solid var(--hub-border)',
+            insetInline: 0,
           }}
         >
           <button
             onClick={() => setSidebarOpen(true)}
-            className="h-8 w-8 rounded-lg flex items-center justify-center"
+            aria-label="Open navigation menu"
+            aria-expanded={sidebarOpen}
+            aria-controls="erp-sidebar"
+            className="h-11 w-11 rounded-lg flex items-center justify-center"
             style={{ color: 'var(--hub-text-muted)' }}
           >
             <Menu size={18} />
@@ -338,27 +342,43 @@ const DefaultLayout: React.FC = () => {
           <div
             className="fixed inset-0 z-40 bg-black/50 md:hidden"
             onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
           />
         )}
 
         <aside
+          id="erp-sidebar"
+          aria-label="Primary navigation"
           className={cn(
-            sidebarOpen ? 'fixed inset-y-0 left-0 z-50 flex' : 'hidden',
+            sidebarOpen ? 'fixed inset-y-0 z-50 flex' : 'hidden',
             'md:flex w-56 flex-col shrink-0 overflow-hidden'
           )}
           style={{
             background: 'var(--hub-surface)',
-            borderRight: '1px solid var(--hub-border)',
+            borderInlineEnd: '1px solid var(--hub-border)',
+            insetInlineStart: sidebarOpen ? 0 : undefined,
           }}
         >
           <div
             className="flex items-center justify-between gap-2.5 px-4 py-4"
             style={{ borderBottom: '1px solid var(--hub-border)' }}
           >
-            <img src="/logo.png?v=2" alt="rtylr" className="h-6 w-auto" />
+            <img
+              src={
+                theme === 'dark' ||
+                (theme === 'system' &&
+                  typeof window !== 'undefined' &&
+                  window.matchMedia('(prefers-color-scheme: dark)').matches)
+                  ? '/logo.png'
+                  : '/logo-dark.png'
+              }
+              alt="rtylr"
+              className="h-9 w-auto"
+            />
             <button
               onClick={() => setSidebarOpen(false)}
-              className="h-7 w-7 rounded-lg flex md:hidden items-center justify-center"
+              aria-label="Close navigation menu"
+              className="h-11 w-11 rounded-lg flex md:hidden items-center justify-center"
               style={{ color: 'var(--hub-text-muted)' }}
             >
               <X size={16} />
@@ -401,6 +421,9 @@ const DefaultLayout: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setShowUserMenu((v) => !v)}
+                aria-label={showUserMenu ? 'Close user menu' : 'Open user menu'}
+                aria-expanded={showUserMenu}
+                aria-haspopup="menu"
                 className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150"
                 style={{ background: 'transparent' }}
                 onMouseEnter={(e) => {
@@ -415,19 +438,19 @@ const DefaultLayout: React.FC = () => {
                   alt={userName}
                   size="sm"
                   className="h-6 w-6"
-                  style={{ background: 'rgba(245,158,11,0.15)' }}
+                  style={{ background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)' }}
                 />
                 <div className="flex flex-col items-start min-w-0 flex-1">
                   <span
-                    className="text-xs font-medium truncate w-full text-left"
-                    style={{ color: 'var(--hub-text)' }}
+                    className="text-xs font-medium truncate w-full"
+                    style={{ color: 'var(--hub-text)', textAlign: 'start' }}
                   >
                     {userName}
                   </span>
                   {userEmail && (
                     <span
-                      className="text-[10px] truncate w-full text-left"
-                      style={{ color: 'var(--hub-text-muted)' }}
+                      className="text-[10px] truncate w-full"
+                      style={{ color: 'var(--hub-text-muted)', textAlign: 'start' }}
                     >
                       {userEmail}
                     </span>
@@ -435,7 +458,7 @@ const DefaultLayout: React.FC = () => {
                 </div>
                 <ChevronRight
                   size={12}
-                  className="shrink-0"
+                  className="erp-directional-icon shrink-0"
                   style={{ color: 'var(--hub-text-dim)' }}
                 />
               </button>
@@ -447,11 +470,12 @@ const DefaultLayout: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 4 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute bottom-full left-0 right-0 mb-1 rounded-xl p-2 z-50"
+                    className="absolute bottom-full mb-1 rounded-xl p-2 z-50"
                     style={{
                       background: 'var(--hub-card)',
                       border: '1px solid var(--hub-border)',
                       boxShadow: 'var(--hub-shadow)',
+                      insetInline: 0,
                     }}
                   >
                     <p
@@ -474,11 +498,13 @@ const DefaultLayout: React.FC = () => {
                           className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
                           style={{
                             background:
-                              theme === value ? 'rgba(245,158,11,0.12)' : 'var(--hub-hover)',
-                            color: theme === value ? '#f59e0b' : 'var(--hub-text-muted)',
+                              theme === value
+                                ? 'color-mix(in srgb, var(--erp-accent) 12%, transparent)'
+                                : 'var(--hub-hover)',
+                            color: theme === value ? 'var(--erp-accent)' : 'var(--hub-text-muted)',
                             border:
                               theme === value
-                                ? '1px solid rgba(245,158,11,0.3)'
+                                ? '1px solid color-mix(in srgb, var(--erp-accent) 30%, transparent)'
                                 : '1px solid transparent',
                           }}
                         >
@@ -494,9 +520,10 @@ const DefaultLayout: React.FC = () => {
                     <button
                       onClick={handleLogout}
                       className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
-                      style={{ color: '#ef4444' }}
+                      style={{ color: 'var(--erp-danger-strong)' }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)';
+                        (e.currentTarget as HTMLElement).style.background =
+                          'color-mix(in srgb, var(--erp-danger-strong) 8%, transparent)';
                       }}
                       onMouseLeave={(e) => {
                         (e.currentTarget as HTMLElement).style.background = 'transparent';
@@ -528,7 +555,8 @@ const DefaultLayout: React.FC = () => {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setPaletteOpen(true)}
-                  className="flex items-center gap-2 h-7 px-3 rounded-lg text-xs"
+                  aria-label="Open search"
+                  className="flex items-center gap-2 h-11 px-3 rounded-lg text-xs"
                   style={{
                     background: 'var(--hub-hover)',
                     color: 'var(--hub-text-muted)',
@@ -546,7 +574,8 @@ const DefaultLayout: React.FC = () => {
                 </button>
                 <button
                   onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="h-7 w-7 rounded-lg flex items-center justify-center"
+                  aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+                  className="h-11 w-11 rounded-lg flex items-center justify-center"
                   style={{ color: 'var(--hub-text-muted)' }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
@@ -559,7 +588,8 @@ const DefaultLayout: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setShortcutsOpen(true)}
-                  className="h-7 w-7 rounded-lg flex items-center justify-center"
+                  aria-label="Open keyboard shortcuts"
+                  className="h-11 w-11 rounded-lg flex items-center justify-center"
                   style={{ color: 'var(--hub-text-muted)' }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
@@ -570,8 +600,10 @@ const DefaultLayout: React.FC = () => {
                 >
                   <Keyboard size={14} />
                 </button>
-                <button
-                  className="h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150"
+                <Link
+                  to="/alerts"
+                  aria-label="Open notifications"
+                  className="h-11 w-11 rounded-lg flex items-center justify-center transition-colors duration-150"
                   style={{ color: 'var(--hub-text-muted)' }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
@@ -581,7 +613,7 @@ const DefaultLayout: React.FC = () => {
                   }}
                 >
                   <Bell size={14} />
-                </button>
+                </Link>
                 <CaretButton />
               </div>
             </header>

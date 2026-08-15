@@ -247,11 +247,7 @@ const Menus: React.FC = () => {
                       </Badge>
                     </div>
                     <div className="flex justify-start md:justify-end">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => navigate({ to: `/menu/${menu._id}` })}
-                      >
+                      <Button size="sm" variant="outline" onClick={() => navigate({ to: '/menu' })}>
                         <ExternalLink size={13} />
                         Open
                       </Button>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUserStore } from '@voxire/auth';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
@@ -22,6 +23,7 @@ import {
   Label,
   ACCENT,
 } from '../../../shared/components/ui';
+import { canHrPermission } from '../../../shared/lib/hrPermissions';
 
 function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);
@@ -35,6 +37,8 @@ const TimesheetApprovals = (): React.JSX.Element => {
   const { data, isLoading } = useListTimesheets({ status: 'submitted' });
   const approveMutation = useApproveTimesheet();
   const rejectMutation = useRejectTimesheet();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canApprove = canHrPermission(role, 'hr:time_off:approve');
 
   const [rejectTarget, setRejectTarget] = useState<TimesheetPayload | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -160,26 +164,28 @@ const TimesheetApprovals = (): React.JSX.Element => {
                     <Pill color="var(--hr-status-submitted)">
                       {t('timesheets.statuses.submitted')}
                     </Pill>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <Button
-                        variant="primary"
-                        style={{ padding: '6px 12px', fontSize: 11 }}
-                        onClick={() => handleApprove(Number(ts.id ?? 0))}
-                        disabled={approveMutation.isPending}
-                        icon={<CheckCircle size={13} />}
-                      >
-                        {t('timesheets.approvals.approve')}
-                      </Button>
-                      <Button
-                        variant="danger"
-                        style={{ padding: '6px 12px', fontSize: 11 }}
-                        onClick={() => setRejectTarget(ts)}
-                        disabled={rejectMutation.isPending}
-                        icon={<XCircle size={13} />}
-                      >
-                        {t('timesheets.approvals.reject')}
-                      </Button>
-                    </div>
+                    {canApprove && (
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <Button
+                          variant="primary"
+                          style={{ padding: '6px 12px', fontSize: 11 }}
+                          onClick={() => handleApprove(Number(ts.id ?? 0))}
+                          disabled={approveMutation.isPending}
+                          icon={<CheckCircle size={13} />}
+                        >
+                          {t('timesheets.approvals.approve')}
+                        </Button>
+                        <Button
+                          variant="danger"
+                          style={{ padding: '6px 12px', fontSize: 11 }}
+                          onClick={() => setRejectTarget(ts)}
+                          disabled={rejectMutation.isPending}
+                          icon={<XCircle size={13} />}
+                        >
+                          {t('timesheets.approvals.reject')}
+                        </Button>
+                      </div>
+                    )}
                   </Card>
                 </motion.div>
               );
