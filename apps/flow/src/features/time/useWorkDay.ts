@@ -71,21 +71,21 @@ export function useWorkDaysRange(from: string, to: string) {
 }
 
 /**
- * Every member's work day for one date, for the team view. Requires at least
- * admin on the workspace - enforced server-side, not just hidden in the UI:
- * a caller without it gets a real 403 from this same call.
+ * Every member's work days across a range, for the team view and reports.
+ * Requires at least admin on the workspace - enforced server-side, not just
+ * hidden in the UI: a caller without it gets a real 403 from this same call.
  */
-export function useWorkDaysForWorkspace(workspaceId: string | undefined, date: string) {
+export function useWorkDaysForWorkspace(workspaceId: string | undefined, from: string, to: string) {
   return useQuery({
-    queryKey: ['work-days-team', workspaceId, date],
+    queryKey: ['work-days-team', workspaceId, from, to],
     queryFn: () =>
       timeClient.listWorkDaysForWorkspace({
         workspaceId: workspaceId!,
-        from: date,
-        to: date,
-        limit: 200,
+        from,
+        to,
+        limit: 500,
       }),
-    enabled: !!workspaceId && !!date,
+    enabled: !!workspaceId && !!from && !!to,
   });
 }
 

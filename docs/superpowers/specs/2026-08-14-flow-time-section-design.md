@@ -494,18 +494,27 @@ alongside the existing day view, and the route keeps working for a single day
 when no range is selected, so nothing about today's screen changes for
 someone who never touches it.
 
-### 6. Reports v1: client-aggregated, deliberately
+### 6. Reports v1: day-level only, and grouping by project needs the RPC this section said it didn't
 
-No new aggregation RPC yet. `/time/reports` calls `ListWorkDaysForWorkspace`
-(or `ListWorkDays` for a single person, depending on the viewer's permission)
-over a range and groups by `project_id` / `work_type_id` / `employee_id`
-client-side. This is the same judgment call step 1 made in reverse: step 1
-avoided inventing schema for hypothetical needs, and this avoids inventing a
-grouped-aggregation endpoint (already scoped in step 6 of the build order
-above) before there is enough real report usage to know its actual shape.
-When step 6 lands for real, this screen swaps its data source, not its
-layout — the same seam pattern as `timeSettingsStore`, applied to a query
-instead of a store.
+The first draft of this section proposed grouping by `project_id` /
+`work_type_id` client-side from `ListWorkDaysForWorkspace`. Building it found
+that premise wrong too: `WorkDay` deliberately excludes lines
+("the lines are not loaded: a week view needs each day's totals, not every
+line on every day" - the same comment on `ListWorkDays` this RPC reuses), and
+`project_id`/`work_type_id` live on `WorkDayLine`, not `WorkDay`. There is no
+endpoint that returns lines across a range or a workspace, only per-day
+(`GetWorkDay`) - calling it once per work day to build a report would be a
+real N+1, not a shortcut.
+
+**Shipped instead:** `/time/reports` groups only what `ListWorkDaysForWorkspace`
+actually carries - clocked, logged and gap minutes per employee, summed
+across a chosen range. Grouping by project or work type is not drawn disabled
+with a reason the way a missing permission would be; it is absent from the
+screen entirely, because the concept genuinely needs data this call cannot
+provide, not a permission this user lacks. That grouped aggregation endpoint
+is still step 6 of the original build order - this did not shrink it, it
+confirmed it is real, separate work, and this screen's data source swaps to
+it once it exists, same seam as `timeSettingsStore`.
 
 ### Build order for this amendment
 
@@ -515,13 +524,18 @@ instead of a store.
    application layer (`ca4ba95a` + the matching rtylr commit). Turned out to
    need no schema or contract change at all - the field already existed
    end to end.
-3. **`ListWorkDaysForWorkspace` + `/time/team`.** This is where the
-   employee-id-to-workspace resolution actually gets built, using
+3. **Shipped: `ListWorkDaysForWorkspace` + `/time/team`.** This is where the
+   employee-id-to-workspace resolution actually got built, using
    `RequireWorkspaceRole` - the real permission work, folded into the feature
-   that needs it rather than shipped as a standalone step with nothing to
-   attach to yet. `canLogForOthers` gets computed for real once this
-   resolution exists, rather than staying hardcoded false.
-4. **Week strip on `/time`.**
-5. **`/time/reports`**, client-aggregated.
+   that needed it rather than shipped as a standalone step with nothing to
+   attach to yet. Also added `WorkDay.user_id`, needed for the frontend to
+   join a day back to the workspace roster it already has. `canLogForOthers`
+   still hardcodes false - it needs the same resolution, applied to a single
+   employee rather than a whole roster, not yet built.
+4. **Shipped: week strip on `/time`.** No backend change; `startOfWeek`/
+   `endOfWeek` gained an optional `weekStart` so the strip honors the
+   workspace's configured week start.
+5. **Shipped: `/time/reports`**, day-level totals only - see the corrected
+   section above for why project/work-type grouping did not ship with it.
 
 4 and 5 are independently shippable once 3 lands; 1 and 2 already have.
