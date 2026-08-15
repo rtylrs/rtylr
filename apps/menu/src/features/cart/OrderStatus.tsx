@@ -44,8 +44,12 @@ const STEP_FOR_STATUS: Record<string, number> = {
 
 const CANCELLED_STATUSES = new Set(['cancelled', 'refunded', 'voided']);
 
-const stepForStatus = (s: string): number => STEP_FOR_STATUS[s] ?? 0;
-const isCancelled = (s: string | null): boolean => s != null && CANCELLED_STATUSES.has(s);
+const stepForStatus = (s: string): number => {
+  const norm = s.toLowerCase();
+  return STEP_FOR_STATUS[norm] ?? -1;
+};
+const isCancelled = (s: string | null): boolean =>
+  s != null && CANCELLED_STATUSES.has(s.toLowerCase());
 const isTerminal = (s: string | null): boolean =>
   s != null && (isCancelled(s) || stepForStatus(s) === STATUS_STEPS.length - 1);
 
@@ -224,6 +228,7 @@ const OrderStatus = (): React.JSX.Element => {
               {currentIndex === 1 && 'Being prepared...'}
               {currentIndex === 2 && 'Ready for pickup!'}
               {currentIndex === 3 && 'Order complete!'}
+              {currentIndex === -1 && `Status: ${status}`}
             </p>
           </div>
         )}
