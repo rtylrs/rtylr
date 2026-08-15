@@ -61,10 +61,28 @@ export const useMarkNotificationRead = () => {
       qc.setQueryData<Notification[]>(['notifications'], (old) =>
         (old ?? []).map((n) => (n.id === id ? { ...n, read: true } : n))
       );
+      qc.setQueriesData<{ pages: NotificationPage[]; pageParams: unknown[] }>(
+        { queryKey: ['notifications', 'pages'] },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              notifications: page.notifications.map((n) =>
+                n.id === id ? { ...n, read: true } : n
+              ),
+            })),
+          };
+        }
+      );
       return { prev };
     },
     onError: (_err, _id, ctx) => {
       if (ctx?.prev) qc.setQueryData(['notifications'], ctx.prev);
+    },
+    onSettled: () => {
+      void qc.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 };
@@ -80,6 +98,19 @@ export const useMarkAllNotificationsRead = () => {
       const prev = qc.getQueryData<Notification[]>(['notifications']);
       qc.setQueryData<Notification[]>(['notifications'], (old) =>
         (old ?? []).map((n) => ({ ...n, read: true }))
+      );
+      qc.setQueriesData<{ pages: NotificationPage[]; pageParams: unknown[] }>(
+        { queryKey: ['notifications', 'pages'] },
+        (old) => {
+          if (!old) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              notifications: page.notifications.map((n) => ({ ...n, read: true })),
+            })),
+          };
+        }
       );
       return { prev };
     },
