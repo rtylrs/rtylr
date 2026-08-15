@@ -48,7 +48,7 @@ async function stubPublicMenuAPIs(page: import('@playwright/test').Page): Promis
   );
 }
 
-test.describe.skip('Public menu (POS-backed)', () => {
+test.describe('Public menu (POS-backed)', () => {
   test.beforeEach(async ({ page }) => {
     await stubPublicMenuAPIs(page);
   });
