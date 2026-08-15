@@ -160,6 +160,18 @@ const Menu: React.FC<MenuProps> = ({ id: propId }) => {
     navigate({ to: '/checkout' });
   };
 
+  const handleReviewSubmit = async (review: { rating: number; name: string; comment: string }) => {
+    try {
+      await api.post('/crm/feedback/v1/feedback/public', {
+        rating: review.rating,
+        name: review.name,
+        comment: review.comment,
+      });
+    } catch {
+      // ignore
+    }
+  };
+
   const layoutProps = {
     business,
     categories,
@@ -167,6 +179,7 @@ const Menu: React.FC<MenuProps> = ({ id: propId }) => {
     enableAiChat: true,
     onAiMessage: handleAiMessage,
     onCheckout: handleCheckout,
+    onSubmitReview: handleReviewSubmit,
   };
 
   const content =
