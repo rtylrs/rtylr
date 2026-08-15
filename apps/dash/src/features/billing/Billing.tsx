@@ -320,7 +320,10 @@ const BillingSummary: React.FC<{
 
 const PlanAction: React.FC<{
   plan: PlanPayload;
+  cycle?: BillingCycle;
+  seatCount?: number;
   isCurrent: boolean;
+  isCancelled?: boolean;
   isGranted?: boolean;
   currentTier?: number;
   ownerEmail: string;
@@ -328,7 +331,10 @@ const PlanAction: React.FC<{
   disabledLabel?: string;
 }> = ({
   plan,
+  cycle = 'monthly',
+  seatCount,
   isCurrent,
+  isCancelled = false,
   isGranted,
   currentTier,
   ownerEmail,
@@ -338,9 +344,14 @@ const PlanAction: React.FC<{
   const checkout = useCheckout();
 
   const handleCheckout = (): void => {
-    if (disabled || isCurrent || checkout.isPending) return;
+    if ((isCurrent && !isCancelled) || disabled || checkout.isPending) return;
     checkout.mutate(
-      { planSlug: plan.slug, email: ownerEmail || undefined },
+      {
+        planSlug: plan.slug,
+        billingCycle: cycle,
+        seatCount,
+        email: ownerEmail || undefined,
+      },
       {
         onSuccess: (data) => {
           window.location.href = data.checkoutUrl;
@@ -355,12 +366,13 @@ const PlanAction: React.FC<{
   const actionLabel = useMemo(() => {
     if (!isCurrent && disabled) return disabledLabel;
     if (isCurrent && isGranted) return 'Granted';
+    if (isCurrent && isCancelled) return 'Resubscribe';
     if (isCurrent) return 'Current plan';
     if (currentTier === undefined) return 'Choose plan';
     return plan.tierOrder > currentTier ? 'Upgrade' : 'Switch';
-  }, [currentTier, disabled, disabledLabel, isCurrent, isGranted, plan.tierOrder]);
+  }, [currentTier, disabled, disabledLabel, isCurrent, isCancelled, isGranted, plan.tierOrder]);
 
-  const isDisabled = isCurrent || disabled || checkout.isPending;
+  const isDisabled = (isCurrent && !isCancelled) || disabled || checkout.isPending;
 
   return (
     <button
@@ -369,14 +381,17 @@ const PlanAction: React.FC<{
       disabled={isDisabled}
       className="inline-flex shrink-0 items-center justify-center gap-1.5 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity disabled:cursor-not-allowed disabled:opacity-70"
       style={{
-        background: isCurrent || disabled ? 'var(--dash-hover)' : '#4583C4',
-        color: isCurrent || disabled ? 'var(--dash-text-muted)' : '#fff',
-        border: isCurrent || disabled ? '1px solid var(--dash-border)' : '1px solid transparent',
+        background: (isCurrent && !isCancelled) || disabled ? 'var(--dash-hover)' : '#4583C4',
+        color: (isCurrent && !isCancelled) || disabled ? 'var(--dash-text-muted)' : '#fff',
+        border:
+          (isCurrent && !isCancelled) || disabled
+            ? '1px solid var(--dash-border)'
+            : '1px solid transparent',
       }}
     >
       {checkout.isPending ? <Loader2 size={12} className="animate-spin" /> : null}
       {checkout.isPending ? 'Opening...' : actionLabel}
-      {!isCurrent && !disabled && !checkout.isPending ? (
+      {(!isCurrent || isCancelled) && !disabled && !checkout.isPending ? (
         <ArrowRight size={12} className="shrink-0" />
       ) : null}
     </button>
@@ -387,6 +402,7 @@ const SuitePlanCard: React.FC<{
   plan: PlanPayload;
   cycle: BillingCycle;
   isCurrent: boolean;
+  isCancelled?: boolean;
   currentTier?: number;
   seats: number;
   includedSeatLimit: number;
@@ -397,6 +413,7 @@ const SuitePlanCard: React.FC<{
   plan,
   cycle,
   isCurrent,
+  isCancelled = false,
   currentTier,
   seats,
   includedSeatLimit,
@@ -442,7 +459,10 @@ const SuitePlanCard: React.FC<{
         </div>
         <PlanAction
           plan={plan}
+          cycle={cycle}
+          seatCount={seats}
           isCurrent={isCurrent}
+          isCancelled={isCancelled}
           isGranted={isGranted}
           currentTier={currentTier}
           ownerEmail={ownerEmail}
@@ -581,6 +601,7 @@ const PlansSection: React.FC<{
   const seats = billing?.currentSeatCount ?? sub?.seatCount ?? 1;
   const includedSeatLimit = billing?.includedSeatLimit ?? sub?.includedSeatLimit ?? 10;
   const isGranted = Boolean(sub?.isGranted ?? billing?.isGranted);
+  const isCancelled = sub?.status === 'cancelled' || billing?.status === 'cancelled';
   const planActionsDisabled = sub?.status === 'trial' || billing?.status === 'trial';
 
   return (
@@ -625,6 +646,7 @@ const PlansSection: React.FC<{
                 plan={plan}
                 cycle={cycle}
                 isCurrent={plan.slug === sub?.planSlug}
+                isCancelled={isCancelled}
                 isGranted={isGranted && plan.slug === sub?.planSlug}
                 currentTier={currentTier}
                 seats={seats}

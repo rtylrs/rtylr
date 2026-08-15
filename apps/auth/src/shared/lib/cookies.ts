@@ -16,7 +16,12 @@ export function getCookie(name: string): string | null {
   const parts = document.cookie.split('; ');
   for (const part of parts) {
     if (part.startsWith(nameEQ)) {
-      return decodeURIComponent(part.substring(nameEQ.length));
+      const raw = part.substring(nameEQ.length);
+      try {
+        return decodeURIComponent(raw);
+      } catch {
+        return raw;
+      }
     }
   }
   return null;

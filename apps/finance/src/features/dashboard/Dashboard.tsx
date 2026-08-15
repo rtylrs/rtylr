@@ -14,11 +14,10 @@ import { BarDataPoint, Transaction, OverdueInvoice } from '../../shared/services
 import { useFinanceDashboard } from './useDashboard';
 import FinanceKpiWidgets from '../../shared/components/FinanceKpiWidgets';
 import OverdueInvoicesWidget from '../../shared/components/OverdueInvoicesWidget';
+import { ErrorBoundary } from '@voxire/ui';
+import { formatMoney, type Currency } from '../../shared/lib/money';
 
-const ACCENT = 'var(--finance-accent)';
-
-const fmt = (n: number) =>
-  n.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 });
+const fmt = (n: number, currency = 'USD') => formatMoney(n, currency as Currency, 0);
 
 // ── Components ───────────────────────────────────────────────────
 const cardStyle: React.CSSProperties = {
@@ -289,89 +288,100 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* KPI Widgets */}
-      <FinanceKpiWidgets />
+      <ErrorBoundary>
+        <FinanceKpiWidgets />
+      </ErrorBoundary>
 
       {/* Overdue widget + chart grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
-        {barData.length > 0 ? (
-          <div style={{ ...cardStyle, padding: 20 }}>
-            <h2
+        <ErrorBoundary>
+          {barData.length > 0 ? (
+            <div style={{ ...cardStyle, padding: 20 }}>
+              <h2
+                style={{
+                  margin: '0 0 20px',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: 'var(--hub-text)',
+                }}
+              >
+                Revenue vs Expenses
+              </h2>
+              <BarChart barData={barData} />
+            </div>
+          ) : (
+            <div
               style={{
-                margin: '0 0 20px',
-                fontSize: 14,
-                fontWeight: 600,
-                color: 'var(--hub-text)',
+                ...cardStyle,
+                padding: 20,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--hub-text-dim)',
+                fontSize: 13,
+                minHeight: 180,
               }}
             >
-              Revenue vs Expenses
-            </h2>
-            <BarChart barData={barData} />
-          </div>
-        ) : (
-          <div
-            style={{
-              ...cardStyle,
-              padding: 20,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--hub-text-dim)',
-              fontSize: 13,
-              minHeight: 180,
-            }}
-          >
-            {loading ? 'Loading chart...' : 'No chart data available'}
-          </div>
-        )}
-        <OverdueInvoicesWidget
-          items={overdueInvoices.map((i) => ({
-            id: i.id,
-            client: i.client,
-            amount: i.amount,
-            daysOverdue: i.daysOverdue,
-          }))}
-        />
+              {loading ? 'Loading chart...' : 'No chart data available'}
+            </div>
+          )}
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <OverdueInvoicesWidget
+            items={overdueInvoices.map((i) => ({
+              id: i.id,
+              client: i.client,
+              amount: i.amount,
+              daysOverdue: i.daysOverdue,
+            }))}
+          />
+        </ErrorBoundary>
       </div>
 
       {/* Recent transactions */}
-      <div style={cardStyle}>
-        <h2 style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}>
-          Recent Transactions
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-          {transactions.map((t, i) => (
-            <div
-              key={t.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 0',
-                borderBottom: i < transactions.length - 1 ? '1px solid var(--hub-border)' : 'none',
-              }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <span style={{ fontSize: 13, color: 'var(--hub-text)', fontWeight: 500 }}>
-                  {t.description}
-                </span>
-                <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
-                  {t.id} · {t.date}
-                </span>
-              </div>
-              <span
+      <ErrorBoundary>
+        <div style={cardStyle}>
+          <h2
+            style={{ margin: '0 0 16px', fontSize: 14, fontWeight: 600, color: 'var(--hub-text)' }}
+          >
+            Recent Transactions
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {transactions.map((t, i) => (
+              <div
+                key={t.id}
                 style={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: t.type === 'credit' ? 'var(--finance-accent)' : 'var(--finance-danger)',
-                  fontVariantNumeric: 'tabular-nums',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 0',
+                  borderBottom:
+                    i < transactions.length - 1 ? '1px solid var(--hub-border)' : 'none',
                 }}
               >
-                {t.amount}
-              </span>
-            </div>
-          ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <span style={{ fontSize: 13, color: 'var(--hub-text)', fontWeight: 500 }}>
+                    {t.description}
+                  </span>
+                  <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
+                    {t.id} · {t.date}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: t.type === 'credit' ? 'var(--finance-accent)' : 'var(--finance-danger)',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {t.amount}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </ErrorBoundary>
     </motion.div>
   );
 };
