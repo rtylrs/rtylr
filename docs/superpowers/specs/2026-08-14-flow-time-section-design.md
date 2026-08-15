@@ -402,40 +402,66 @@ this path never did, and the hole went unnoticed. That is what live
 verification without a second account will miss: the button was correctly
 disabled, for the wrong reason.
 
-Fix: `scope()` must deny any `employeeID` argument that differs from the
-caller unless the caller holds the new permission below. This is a
-correctness fix independent of everything else in this amendment and should
-land first, on its own commit, regardless of what else in this section gets
-built.
+**Shipped** (`3d754ec7`): `scope()` now denies any `employeeID` argument that
+differs from the caller, unconditionally. Not "unless the caller holds a
+permission" — investigating what that permission would check against found
+there is nothing to check yet (next section), and closing a live hole should
+not wait on the feature that will eventually relax it. This is a correctness
+fix independent of everything else in this amendment, landed first, on its
+own commit.
 
-### 3. One new permission, in the system that already exists
+### 3. One new permission, and it is not where the first draft of this section said
 
-`@voxire/permissions` (`packages/permissions/src/capabilities.ts`) is a
-business-wide `Resource × Action` matrix, configured through Dash's existing
-`/permissions` and `/roles` screens, and it already lists `flow:projects`,
-`flow:tasks`, `flow:views`, `flow:roadmap`. Flow's project-membership roles
-(`useCurrentProjectRole`, `flow_project_members`) are a separate, narrower
-system for per-project viewer/editor/admin and are the wrong place for this:
-seeing a colleague's logged hours is a business-wide grant, not something that
-varies project to project.
+The first draft of this section proposed adding `flow:time` to
+`@voxire/permissions` (`packages/permissions/src/capabilities.ts`), the
+business-wide `Resource × Action` matrix configured through Dash's
+`/permissions` and `/roles` screens. Investigating how to enforce it
+server-side found the premise wrong: **that matrix is not enforced anywhere in
+onion.** It is stored correctly - the `roles` module's `AllPermissions()` and
+`UpdatePermissionMatrix` genuinely persist a business's role → capability
+grid - but nothing in the backend ever reads it to gate a request. Confirmed
+by grepping every other module for an import of `modules/roles`: there are
+none. Adding `flow:time` there would have shipped a Dash toggle that looks
+like it restricts who sees a colleague's hours and does not, which is worse
+than no control at all - a toggle a business owner unchecks believing access
+is now denied is a lie, not a gap.
 
-Decision: add `flow:time` to the resource list and `view_team` to the action
-set, alongside the existing `manage` action already used elsewhere in the
-matrix for the "log on someone's behalf" case. Two distinct grants, both
-possible to hold independently:
+What is actually enforced, anywhere in this backend, for anything resembling
+"does this caller have standing over that resource":
 
-- `flow:time:manage` — record a day or line for someone else (this is what
-  `canLogForOthers` should have been computed from all along).
-- `flow:time:view_team` — see other people's days in the team view. Does not
-  imply `manage`; a manager who can see the team should not automatically be
-  able to edit someone else's entries.
+- `hr_payroll`'s single `manage_payroll` check, via `hr_core`'s freeform
+  per-employee permission blob. Narrow, payroll-only, not reusable.
+- Flow's own `Service.RequireProjectRole` / `RequireWorkspaceRole`
+  (`internal/modules/workspaces/internal/application/service.go:269-286`),
+  gating on `flow_project_members.role` / `flow_workspace_members.role`
+  (`viewer` < `member` < `admin`). Real, tested
+  (`internal/modules/workspaces/internal/api/task_role_test.go`), and already
+  used by every mutating Flow task/comment/attachment/time-log handler.
 
-This is the "configurable per workspace" requirement in practice: Dash's role
-matrix is how every other cross-cutting Flow permission is already
-configured, and a second, Flow-local permission store would duplicate it for
-no reason this feature needs. `scope()` checks
-`flow:time:manage` for a differing `employeeID` on write paths, and the new
-team-view endpoint below checks `flow:time:view_team`.
+Decision: model `manage` and `view_team` as workspace-role requirements using
+the pattern that is real, not the one that only looks real. Concretely:
+
+- **Viewing someone else's day** requires the caller hold at least
+  `FlowRoleAdmin` on a workspace the target employee is also a member of.
+  `RequireWorkspaceRole` already exists; what's new is resolving an
+  `employee_id` to the workspaces they belong to, which needs the
+  `hr_employees.user_id` link (confirmed unique) since workspace membership is
+  keyed on auth `user_id`, not HR `employee_id`. This resolution does not
+  exist in the workspaces module today and is new plumbing, not a config
+  toggle - which is exactly why it lands with the team view (next section)
+  rather than as a standalone permission commit: there is nothing to gate
+  until that resolution exists.
+- **Logging for someone else** (`canLogForOthers`) waits for the same
+  resolution rather than getting its own shortcut. `scope()`'s unconditional
+  deny above already closes the hole; loosening it correctly and loosening it
+  first are different things, and only the first is safe to do under time
+  pressure.
+
+This is a real, product-wide gap worth its own attention independent of Flow
+time: every other resource in `capabilities.ts` - `hr:staff:manage`,
+`erp:inventory:adjust`, `crm:customers:manage`, `finance:invoices:create`, all
+of it - is equally unenforced. Flagged separately; not this amendment's job to
+fix the whole product's authorization story.
 
 ### 4. Team/manager view: scoped by workspace, not HR reporting lines
 
@@ -448,13 +474,16 @@ by `hr_employees.user_id` (unique), so resolving a workspace's member list to
 the set of employee ids to query is a lookup, not a new concept.
 
 New: `ListWorkDaysForWorkspace(workspace_id, from, to)` in the same
-`TimeService`. Requires `flow:time:view_team`. Resolves workspace members to
-employee ids server-side (not a client-side loop calling `ListWorkDays` once
-per person — that's an N+1 the client has no business making), then returns
-one page of work days across all of them for the range. New screen:
-`/time/team`, a roster with one row per member showing today's status
-(logged / gap / not started) and a date picker for other days, reusing the
-same `WorkDay` shape the My Day screen already renders.
+`TimeService`. Requires `Service.RequireWorkspaceRole(ctx, workspaceID,
+callerID, domain.FlowRoleAdmin)` - the same real check every other
+Flow-mutating handler already uses, not a new permission system. Resolves
+workspace members to employee ids server-side via `hr_employees.user_id` (not
+a client-side loop calling `ListWorkDays` once per person - that's an N+1 the
+client has no business making), then returns one page of work days across all
+of them for the range. New screen: `/time/team`, a roster with one row per
+member showing today's status (logged / gap / not started) and a date picker
+for other days, reusing the same `WorkDay` shape the My Day screen already
+renders.
 
 ### 5. Week/history view: mostly free
 
@@ -480,17 +509,19 @@ instead of a store.
 
 ### Build order for this amendment
 
-1. **The `scope()` fix, alone.** It is a real gap regardless of anything else
-   here, and every other item in this section depends on the permission it
-   introduces.
-2. **`flow:time` resource + `manage`/`view_team` actions** in
-   `@voxire/permissions`, and `canLogForOthers` computed for real instead of
-   hardcoded.
-3. **Project picker**, required in the UI, enforced in onion's application
-   layer.
-4. **`ListWorkDaysForWorkspace` + `/time/team`.**
-5. **Week strip on `/time`.**
-6. **`/time/reports`**, client-aggregated.
+1. **Shipped: the `scope()` fix, alone** (`3d754ec7`). An unconditional deny,
+   not gated on a permission, because there was nothing real to gate it on.
+2. **Shipped: project picker**, required in the UI, enforced in onion's
+   application layer (`ca4ba95a` + the matching rtylr commit). Turned out to
+   need no schema or contract change at all - the field already existed
+   end to end.
+3. **`ListWorkDaysForWorkspace` + `/time/team`.** This is where the
+   employee-id-to-workspace resolution actually gets built, using
+   `RequireWorkspaceRole` - the real permission work, folded into the feature
+   that needs it rather than shipped as a standalone step with nothing to
+   attach to yet. `canLogForOthers` gets computed for real once this
+   resolution exists, rather than staying hardcoded false.
+4. **Week strip on `/time`.**
+5. **`/time/reports`**, client-aggregated.
 
-Each of 3–6 is independently shippable; 1 and 2 are the only hard
-dependency the rest share.
+4 and 5 are independently shippable once 3 lands; 1 and 2 already have.
