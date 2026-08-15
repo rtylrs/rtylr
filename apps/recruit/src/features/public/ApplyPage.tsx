@@ -11,6 +11,7 @@ import {
 } from '../../shared/hooks/queries/usePublic';
 import { applyBrand } from '../../templates/resolver';
 import { applySEO, loadAnalytics } from '../../shared/lib/seo';
+import { FLAG_KEYS, resolveFlag } from '@voxire/config';
 import NotFound from './NotFound';
 
 /**
@@ -34,6 +35,8 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   const slug = rawSlug ?? '';
   const careerSlug = rawCareerSlug ?? '';
   const navigate = useNavigate();
+
+  const isFileUploadEnabled = resolveFlag(FLAG_KEYS.APP_RECRUIT_FILE_UPLOAD);
 
   const { data, isLoading, error } = usePublicCareer(slug, careerSlug);
   const submit = useSubmitApplication();
@@ -242,64 +245,66 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
               style={{ borderColor: 'var(--recruit-border)' }}
             />
           </Field>
-          <Field label="Resume">
-            {/* Hidden native input; we render a styled dropzone ourselves. */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              onChange={onPickFile}
-              className="hidden"
-            />
-            {!resumeFile && !uploadedKey && (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed bg-white px-4 py-6 text-sm transition hover:bg-gray-50"
-                style={{ borderColor: 'var(--recruit-border)' }}
-              >
-                <Upload className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
-                <span>Upload your resume</span>
-                <span className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
-                  · PDF or Word, up to 10 MB
-                </span>
-              </button>
-            )}
-            {resumeFile && (
-              <div
-                className="flex items-center gap-3 rounded-md border bg-white px-3 py-2.5 text-sm"
-                style={{ borderColor: 'var(--recruit-border)' }}
-              >
-                <FileText className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-medium">{resumeFile.name}</div>
-                  <div className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
-                    {uploading
-                      ? 'Uploading…'
-                      : uploadedKey
-                        ? 'Uploaded'
-                        : uploadError
-                          ? uploadError
-                          : `${(resumeFile.size / 1024 / 1024).toFixed(1)} MB`}
-                  </div>
-                </div>
-                {uploadedKey && !uploading && (
-                  <Check className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
-                )}
+          {isFileUploadEnabled && (
+            <Field label="Resume">
+              {/* Hidden native input; we render a styled dropzone ourselves. */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={onPickFile}
+                className="hidden"
+              />
+              {!resumeFile && !uploadedKey && (
                 <button
                   type="button"
-                  onClick={clearFile}
-                  className="rounded-md p-1 hover:bg-gray-100"
-                  title="Remove"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed bg-white px-4 py-6 text-sm transition hover:bg-gray-50"
+                  style={{ borderColor: 'var(--recruit-border)' }}
                 >
-                  <X className="h-4 w-4" style={{ color: 'var(--recruit-muted)' }} />
+                  <Upload className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
+                  <span>Upload your resume</span>
+                  <span className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
+                    · PDF or Word, up to 10 MB
+                  </span>
                 </button>
-              </div>
-            )}
-            {uploadError && !resumeFile && (
-              <p className="mt-1 text-xs text-red-600 font-medium">{uploadError}</p>
-            )}
-          </Field>
+              )}
+              {resumeFile && (
+                <div
+                  className="flex items-center gap-3 rounded-md border bg-white px-3 py-2.5 text-sm"
+                  style={{ borderColor: 'var(--recruit-border)' }}
+                >
+                  <FileText className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-medium">{resumeFile.name}</div>
+                    <div className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
+                      {uploading
+                        ? 'Uploading…'
+                        : uploadedKey
+                          ? 'Uploaded'
+                          : uploadError
+                            ? uploadError
+                            : `${(resumeFile.size / 1024 / 1024).toFixed(1)} MB`}
+                    </div>
+                  </div>
+                  {uploadedKey && !uploading && (
+                    <Check className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
+                  )}
+                  <button
+                    type="button"
+                    onClick={clearFile}
+                    className="rounded-md p-1 hover:bg-gray-100"
+                    title="Remove"
+                  >
+                    <X className="h-4 w-4" style={{ color: 'var(--recruit-muted)' }} />
+                  </button>
+                </div>
+              )}
+              {uploadError && !resumeFile && (
+                <p className="mt-1 text-xs text-red-600 font-medium">{uploadError}</p>
+              )}
+            </Field>
+          )}
 
           {/* Fallback for candidates who'd rather link out. Hidden when
               a file is picked - two resume sources on one form is
