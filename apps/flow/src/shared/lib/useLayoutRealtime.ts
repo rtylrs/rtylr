@@ -31,6 +31,11 @@ export function useLayoutRealtime(
 
   const onEvent = useCallback(
     (e: RealtimeEvent): void => {
+      if (e.type.startsWith('notification.')) {
+        // Refresh the inbox list + header badge across all user tabs.
+        qc.invalidateQueries({ queryKey: ['notifications'] });
+        return;
+      }
       if (e.actor_id && currentUserId && String(e.actor_id) === currentUserId) {
         return;
       }
@@ -40,11 +45,6 @@ export function useLayoutRealtime(
       if (e.type.startsWith('workspace.')) {
         qc.invalidateQueries({ queryKey: ['workspaces'] });
         qc.invalidateQueries({ queryKey: ['workspace-members'] });
-      }
-      if (e.type.startsWith('notification.')) {
-        // Refresh the inbox list + header badge. Pushed on the
-        // user:<id> topic so no project context needed.
-        qc.invalidateQueries({ queryKey: ['notifications'] });
       }
     },
     [qc, currentUserId]
