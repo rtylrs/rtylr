@@ -757,6 +757,104 @@ func (x *ListWorkDaysResponse) GetPagination() *common_pagination_v1.PaginationR
 	return x.Pagination
 }
 
+type ListWorkDaysForWorkspaceRequest struct {
+	WorkspaceId int64  `json:"workspace_id,omitempty"`
+	From        string `json:"from,omitempty"`
+	To          string `json:"to,omitempty"`
+	Page        int32  `json:"page,omitempty"`
+	Limit       int32  `json:"limit,omitempty"`
+}
+
+func (m *ListWorkDaysForWorkspaceRequest) MarshalJSON() ([]byte, error) {
+	type alias ListWorkDaysForWorkspaceRequest
+	aux := struct {
+		*alias
+		WorkspaceId string `json:"workspace_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *ListWorkDaysForWorkspaceRequest) UnmarshalJSON(data []byte) error {
+	type alias ListWorkDaysForWorkspaceRequest
+	aux := struct {
+		*alias
+		WorkspaceId string `json:"workspace_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.WorkspaceId != "" {
+		v, err := strconv.ParseInt(aux.WorkspaceId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.WorkspaceId = v
+	}
+	return nil
+}
+
+func (x *ListWorkDaysForWorkspaceRequest) GetWorkspaceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.WorkspaceId
+}
+
+func (x *ListWorkDaysForWorkspaceRequest) GetFrom() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.From
+}
+
+func (x *ListWorkDaysForWorkspaceRequest) GetTo() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.To
+}
+
+func (x *ListWorkDaysForWorkspaceRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListWorkDaysForWorkspaceRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+type ListWorkDaysForWorkspaceResponse struct {
+	WorkDays   []*WorkDay                               `json:"work_days,omitempty"`
+	Pagination *common_pagination_v1.PaginationResponse `json:"pagination,omitempty"`
+}
+
+func (x *ListWorkDaysForWorkspaceResponse) GetWorkDays() []*WorkDay {
+	if x == nil {
+		var zero []*WorkDay
+		return zero
+	}
+	return x.WorkDays
+}
+
+func (x *ListWorkDaysForWorkspaceResponse) GetPagination() *common_pagination_v1.PaginationResponse {
+	if x == nil {
+		var zero *common_pagination_v1.PaginationResponse
+		return zero
+	}
+	return x.Pagination
+}
+
 type CreateWorkDayLineRequest struct {
 	WorkDayId       int64   `json:"work_day_id,omitempty"`
 	ClientKey       string  `json:"client_key,omitempty"`

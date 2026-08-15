@@ -140,6 +140,46 @@ func (c *TimeServiceClient) ListWorkDays(ctx context.Context, req *ListWorkDaysR
 	return result, nil
 }
 
+func (c *TimeServiceClient) ListWorkDaysForWorkspace(ctx context.Context, req *ListWorkDaysForWorkspaceRequest) (*ListWorkDaysForWorkspaceResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/flow/time/v1/work-days/team"
+	query := url.Values{}
+	query.Set("workspace_id", strconv.FormatInt(int64(req.WorkspaceId), 10))
+	query.Set("from", req.From)
+	query.Set("to", req.To)
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	if len(query) > 0 {
+		path += "?" + query.Encode()
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", c.BaseURL+path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(ListWorkDaysForWorkspaceResponse)
+	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
 func (c *TimeServiceClient) CreateWorkDayLine(ctx context.Context, req *CreateWorkDayLineRequest) (*CreateWorkDayLineResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {

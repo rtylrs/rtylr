@@ -202,6 +202,7 @@ type TimeServiceServer interface {
 	GetWorkDay(ctx context.Context, req *GetWorkDayRequest) (*GetWorkDayResponse, error)
 	UpsertWorkDay(ctx context.Context, req *UpsertWorkDayRequest) (*UpsertWorkDayResponse, error)
 	ListWorkDays(ctx context.Context, req *ListWorkDaysRequest) (*ListWorkDaysResponse, error)
+	ListWorkDaysForWorkspace(ctx context.Context, req *ListWorkDaysForWorkspaceRequest) (*ListWorkDaysForWorkspaceResponse, error)
 	CreateWorkDayLine(ctx context.Context, req *CreateWorkDayLineRequest) (*CreateWorkDayLineResponse, error)
 	UpdateWorkDayLine(ctx context.Context, req *UpdateWorkDayLineRequest) (*UpdateWorkDayLineResponse, error)
 	DeleteWorkDayLine(ctx context.Context, req *DeleteWorkDayLineRequest) (*DeleteWorkDayLineResponse, error)
@@ -338,6 +339,52 @@ func RegisterTimeServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "TimeService", Method: "listWorkDays", HTTPMethod: "GET", Route: "/flow/time/v1/work-days/range", AuthSchemes: nil}))
+	mux.Handle("GET /flow/time/v1/work-days/team", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(ListWorkDaysForWorkspaceRequest)
+		if r.URL.Query().Get("workspace_id") != "" {
+			parsedWorkspaceId, err := parseInt64(r.URL.Query().Get("workspace_id"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter workspace_id: "+err.Error())
+				return
+			}
+			req.WorkspaceId = parsedWorkspaceId
+		}
+		if r.URL.Query().Get("from") != "" {
+			req.From = r.URL.Query().Get("from")
+		}
+		if r.URL.Query().Get("to") != "" {
+			req.To = r.URL.Query().Get("to")
+		}
+		if r.URL.Query().Get("page") != "" {
+			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
+		}
+		if r.URL.Query().Get("limit") != "" {
+			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.ListWorkDaysForWorkspace(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "TimeService", Method: "listWorkDaysForWorkspace", HTTPMethod: "GET", Route: "/flow/time/v1/work-days/team", AuthSchemes: nil}))
 	mux.Handle("POST /flow/time/v1/work-days/{work_day_id}/lines", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateWorkDayLineRequest)
 		if r.Body != nil {

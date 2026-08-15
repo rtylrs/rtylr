@@ -363,6 +363,71 @@ if (v.pagination !== undefined && v.pagination !== null) violations.push(...comm
 return violations;
 }
 
+export interface ListWorkDaysForWorkspaceRequest {
+workspaceId: string;
+from: string;
+to: string;
+page?: number;
+limit?: number;
+}
+
+export function decodeListWorkDaysForWorkspaceRequest(v: any): ListWorkDaysForWorkspaceRequest {
+if (v === null || v === undefined) return v;
+return {
+workspaceId: v.workspace_id,
+from: v.from,
+to: v.to,
+page: v.page,
+limit: v.limit,
+};
+}
+
+export function encodeListWorkDaysForWorkspaceRequest(v: ListWorkDaysForWorkspaceRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
+if (v.from !== undefined) { out.from = v.from; }
+if (v.to !== undefined) { out.to = v.to; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+return out;
+}
+
+export function validateListWorkDaysForWorkspaceRequest(v: ListWorkDaysForWorkspaceRequest): string[] {
+const violations: string[] = [];
+if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (!(v.from !== undefined && v.from !== null) || v.from === "") violations.push("from is required");
+if (!(v.to !== undefined && v.to !== null) || v.to === "") violations.push("to is required");
+return violations;
+}
+
+export interface ListWorkDaysForWorkspaceResponse {
+workDays?: (WorkDay)[];
+pagination?: common_pagination_v1.PaginationResponse;
+}
+
+export function decodeListWorkDaysForWorkspaceResponse(v: any): ListWorkDaysForWorkspaceResponse {
+if (v === null || v === undefined) return v;
+return {
+workDays: (v.work_days !== undefined ? (v.work_days as any[]).map(decodeWorkDay) : v.work_days),
+pagination: (v.pagination !== undefined ? common_pagination_v1.decodePaginationResponse(v.pagination) : v.pagination),
+};
+}
+
+export function encodeListWorkDaysForWorkspaceResponse(v: ListWorkDaysForWorkspaceResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.workDays !== undefined) { out.work_days = (v.workDays as any[]).map(encodeWorkDay); }
+if (v.pagination !== undefined) { out.pagination = common_pagination_v1.encodePaginationResponse(v.pagination); }
+return out;
+}
+
+export function validateListWorkDaysForWorkspaceResponse(v: ListWorkDaysForWorkspaceResponse): string[] {
+const violations: string[] = [];
+if (v.workDays !== undefined && v.workDays !== null) for (const item of v.workDays) violations.push(...validateWorkDay(item).map((message) => "work_days: " + message));
+if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
+return violations;
+}
+
 export interface CreateWorkDayLineRequest {
 workDayId: string;
 clientKey: string;

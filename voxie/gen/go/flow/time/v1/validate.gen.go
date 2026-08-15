@@ -162,6 +162,47 @@ func (m *ListWorkDaysResponse) Validate() error {
 	return nil
 }
 
+func (m *ListWorkDaysForWorkspaceRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.WorkspaceId <= 0 {
+		violations = append(violations, "workspace_id must be greater than 0")
+	}
+	if m.From == "" {
+		violations = append(violations, "from is required")
+	}
+	if m.To == "" {
+		violations = append(violations, "to is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListWorkDaysForWorkspaceResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.WorkDays {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "work_days: "+err.Error())
+		}
+	}
+	if m.Pagination != nil {
+		if err := m.Pagination.Validate(); err != nil {
+			violations = append(violations, "pagination: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *CreateWorkDayLineRequest) Validate() error {
 	if m == nil {
 		return nil

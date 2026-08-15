@@ -12,6 +12,8 @@ service TimeService {
 
   listWorkDays(ListWorkDaysRequest) -> ListWorkDaysResponse @get("/work-days/range")
 
+  listWorkDaysForWorkspace(ListWorkDaysForWorkspaceRequest) -> ListWorkDaysForWorkspaceResponse @get("/work-days/team")
+
   createWorkDayLine(CreateWorkDayLineRequest) -> CreateWorkDayLineResponse @post("/work-days/{work_day_id}/lines")
 
   updateWorkDayLine(UpdateWorkDayLineRequest) -> UpdateWorkDayLineResponse @patch("/work-days/lines/{id}")

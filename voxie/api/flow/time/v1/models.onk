@@ -161,6 +161,25 @@ message ListWorkDaysResponse {
   pagination: PaginationResponse
 }
 
+message ListWorkDaysForWorkspaceRequest {
+  /// workspace_id is whose members' days this lists. The caller must hold at
+  /// least admin on this workspace.
+  workspace_id: int64 @required @gt(0) @query("workspace_id")
+  /// from is the inclusive start of the range, as YYYY-MM-DD.
+  from: string @required @query("from")
+  /// to is the inclusive end of the range, as YYYY-MM-DD.
+  to: string @required @query("to")
+  /// The current result page.
+  page: int32 @query("page")
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+}
+
+message ListWorkDaysForWorkspaceResponse {
+  work_days: WorkDay[]
+  pagination: PaginationResponse
+}
+
 message CreateWorkDayLineRequest {
   /// work_day_id is the day to add the line to.
   work_day_id: int64 @required @gt(0)
