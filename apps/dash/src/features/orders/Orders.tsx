@@ -18,6 +18,10 @@ import {
   TableCell,
   Badge,
   Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from '../../shared/components/ui';
 
 type OrderStatus = 'all' | 'pending' | 'in_progress' | 'completed';
@@ -207,38 +211,33 @@ const Orders: React.FC = () => {
             {
               label: 'Pending',
               count: pendingOrders.length,
-              color: '#f59e0b',
-              bg: 'rgba(245,158,11,0.12)',
-              border: 'rgba(245,158,11,0.2)',
               icon: Clock,
             },
             {
               label: 'In Progress',
               count: inProgressOrders.length,
-              color: '#4583C4',
-              bg: 'rgba(69,131,196,0.12)',
-              border: 'rgba(69,131,196,0.2)',
               icon: Loader2,
             },
             {
               label: 'Completed',
               count: completedOrders.length,
-              color: '#10b981',
-              bg: 'rgba(16,185,129,0.12)',
-              border: 'rgba(16,185,129,0.2)',
               icon: CheckCircle2,
             },
-          ].map(({ label, count, color, bg, border, icon: Icon }) => (
+          ].map(({ label, count, icon: Icon }) => (
             <div
               key={label}
               className="rounded-xl p-4 flex items-center justify-between"
-              style={{ background: bg, border: `1px solid ${border}`, color }}
+              style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
             >
               <div className="flex items-center gap-2">
-                <Icon size={16} />
-                <span className="text-sm font-semibold">{label}</span>
+                <Icon size={16} style={{ color: 'var(--dash-text-muted)' }} />
+                <span className="text-sm font-medium" style={{ color: 'var(--dash-text-muted)' }}>
+                  {label}
+                </span>
               </div>
-              <span className="text-2xl font-bold">{count}</span>
+              <span className="text-2xl font-bold" style={{ color: 'var(--dash-text)' }}>
+                {count}
+              </span>
             </div>
           ))}
         </div>
@@ -279,63 +278,62 @@ const Orders: React.FC = () => {
       </div>
 
       {/* Order Detail Modal */}
-      {selectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div
-            className="w-full max-w-md rounded-xl p-6 space-y-4 shadow-xl"
-            style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold" style={{ color: 'var(--dash-text)' }}>
-                Order #{selectedOrder.id}
-              </h3>
-              <Badge variant={statusBadgeVariant[selectedOrder.status]}>
-                {statusLabel[selectedOrder.status]}
-              </Badge>
-            </div>
+      <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+        <DialogContent className="max-w-md">
+          {selectedOrder && (
+            <div className="space-y-4">
+              <DialogHeader>
+                <div className="flex items-center justify-between pr-6">
+                  <DialogTitle>Order #{selectedOrder.id}</DialogTitle>
+                  <Badge variant={statusBadgeVariant[selectedOrder.status]}>
+                    {statusLabel[selectedOrder.status]}
+                  </Badge>
+                </div>
+              </DialogHeader>
 
-            <div className="space-y-2 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-              <div
-                className="flex justify-between border-b pb-2"
-                style={{ borderColor: 'var(--dash-border)' }}
-              >
-                <span>Customer</span>
-                <span className="font-medium" style={{ color: 'var(--dash-text)' }}>
-                  {selectedOrder.customerName || selectedOrder.customerEmail || 'Guest'}
-                </span>
+              <div className="space-y-2 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+                <div
+                  className="flex justify-between border-b pb-2"
+                  style={{ borderColor: 'var(--dash-border)' }}
+                >
+                  <span>Customer</span>
+                  <span className="font-medium" style={{ color: 'var(--dash-text)' }}>
+                    {selectedOrder.customerName || selectedOrder.customerEmail || 'Guest'}
+                  </span>
+                </div>
+                <div
+                  className="flex justify-between border-b pb-2"
+                  style={{ borderColor: 'var(--dash-border)' }}
+                >
+                  <span>Subtotal</span>
+                  <span className="font-medium" style={{ color: 'var(--dash-text)' }}>
+                    ${selectedOrder.subtotal.toFixed(2)}
+                  </span>
+                </div>
+                <div
+                  className="flex justify-between border-b pb-2"
+                  style={{ borderColor: 'var(--dash-border)' }}
+                >
+                  <span>Total</span>
+                  <span className="font-bold text-base" style={{ color: 'var(--dash-text)' }}>
+                    ${selectedOrder.total.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between pt-1 text-xs">
+                  <span>Placed At</span>
+                  <span>{new Date(selectedOrder.createdAt).toLocaleString()}</span>
+                </div>
               </div>
-              <div
-                className="flex justify-between border-b pb-2"
-                style={{ borderColor: 'var(--dash-border)' }}
-              >
-                <span>Subtotal</span>
-                <span className="font-medium" style={{ color: 'var(--dash-text)' }}>
-                  ${selectedOrder.subtotal.toFixed(2)}
-                </span>
-              </div>
-              <div
-                className="flex justify-between border-b pb-2"
-                style={{ borderColor: 'var(--dash-border)' }}
-              >
-                <span>Total</span>
-                <span className="font-bold text-base" style={{ color: 'var(--dash-text)' }}>
-                  ${selectedOrder.total.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between pt-1 text-xs">
-                <span>Placed At</span>
-                <span>{new Date(selectedOrder.createdAt).toLocaleString()}</span>
-              </div>
-            </div>
 
-            <div className="flex justify-end pt-2">
-              <Button variant="outline" onClick={() => setSelectedOrder(null)}>
-                Close
-              </Button>
+              <div className="flex justify-end pt-2">
+                <Button variant="outline" onClick={() => setSelectedOrder(null)}>
+                  Close
+                </Button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
