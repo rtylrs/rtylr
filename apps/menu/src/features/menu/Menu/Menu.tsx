@@ -176,8 +176,7 @@ const Menu: React.FC<MenuProps> = ({ id: propId }) => {
     business,
     categories,
     enableCart: true,
-    enableAiChat: true,
-    onAiMessage: handleAiMessage,
+    enableAiChat: false,
     onCheckout: handleCheckout,
     onSubmitReview: handleReviewSubmit,
   };
