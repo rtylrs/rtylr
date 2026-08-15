@@ -27,8 +27,8 @@ const STATUS_FROM_API: Record<string, Invoice['status']> = {
   partial: 'Sent',
   paid: 'Paid',
   overdue: 'Overdue',
-  cancelled: 'Draft',
-  void: 'Draft',
+  cancelled: 'Cancelled',
+  void: 'Cancelled',
 };
 
 function fromApiSummary(inv: InvoiceSummary): Invoice {
@@ -161,6 +161,7 @@ const STATUS_TO_API: Record<Invoice['status'], string> = {
   Sent: 'sent',
   Paid: 'paid',
   Overdue: 'overdue',
+  Cancelled: 'cancelled',
 };
 
 export function useUpdateInvoiceStatus() {

@@ -16,6 +16,7 @@ import { safe } from '../../shared/lib/api';
 import { Button, HelmetContainer, LicenseBanner } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 
+import { getCookie } from '../../shared/lib/cookies';
 import { getEmailError } from '../../shared/lib/validation';
 
 const userClient = createOneKitClient(UserServiceClient, 'auth');
@@ -83,12 +84,19 @@ const Login: React.FC = (): React.JSX.Element => {
   };
 
   useEffect((): void => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'oauth_failed') {
+      notify.error(t('auth.common.socialUnavailable'));
+    }
+  }, [t]);
+
+  useEffect((): void => {
     clearError();
   }, [clearError]);
 
   useEffect((): void => {
-    const tokenCookie = document.cookie.split(';').some((c) => c.trim().startsWith('token='));
-    if (isAuthenticated && tokenCookie) {
+    const hasToken = !!getCookie('token');
+    if (isAuthenticated && hasToken) {
       void redirectTo();
     }
   }, [isAuthenticated, redirectTo]);
@@ -145,9 +153,15 @@ const Login: React.FC = (): React.JSX.Element => {
               onChange={(e) => setEmail(e.target.value)}
               autoFocus
               required
-              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+              aria-invalid={!!emailError}
+              aria-describedby={emailError ? 'login-email-error' : undefined}
+              className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 text-base md:text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
             />
-            {emailError && <p className="text-xs text-red-500">{emailError}</p>}
+            {emailError && (
+              <p id="login-email-error" className="text-xs text-red-500" role="alert">
+                {emailError}
+              </p>
+            )}
           </div>
 
           {/* Password */}
@@ -164,13 +178,13 @@ const Login: React.FC = (): React.JSX.Element => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
+                className="w-full h-10 rounded-lg border border-[#e5e5e5] bg-white px-3 pr-10 text-base md:text-sm text-[#111] placeholder:text-[#999] outline-none transition-colors focus:border-[#4583C4] focus:ring-2 focus:ring-[#4583C4]/20"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] text-xs font-medium min-h-[36px] px-1 flex items-center"
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -193,6 +207,7 @@ const Login: React.FC = (): React.JSX.Element => {
             <div
               className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5"
               role="alert"
+              aria-live="polite"
             >
               <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
               <p className="text-xs text-red-600 leading-relaxed">{errorMessage}</p>

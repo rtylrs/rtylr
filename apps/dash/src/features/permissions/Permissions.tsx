@@ -139,6 +139,7 @@ const Permissions: React.FC = () => {
               </div>
             </div>
           </div>
+          </div>
         </div>
       </div>
     </>

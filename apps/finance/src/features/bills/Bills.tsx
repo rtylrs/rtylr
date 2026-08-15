@@ -11,7 +11,8 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useBills } from './useBills';
-import { useCreateBill } from '../../shared/hooks/queries/useBills';
+import { useCreateBill, useUpdateBill } from '../../shared/hooks/queries/useBills';
+import { useSettings } from '../../shared/lib/settings';
 import {
   cardStyle,
   ghostBtn,
@@ -37,6 +38,7 @@ interface NewBillForm {
 
 const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const { t } = useTranslation();
+  const baseCurrency = useSettings((s) => s.currency);
   const createBill = useCreateBill();
   const [form, setForm] = useState<NewBillForm>({
     vendor: '',
@@ -54,11 +56,16 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
       toast.error(t('bills.amountPositive'));
       return;
     }
+    const derivedSupplierId =
+      form.vendor
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-') || '1';
     createBill.mutate(
       {
-        supplierId: '0',
+        supplierId: derivedSupplierId,
         amount: form.amount,
-        currency: 'USD',
+        currency: baseCurrency ?? 'USD',
         dueDate: form.dueDate,
         status: 'unpaid',
         description: form.description || form.vendor,
@@ -156,8 +163,27 @@ const Bills: React.FC = () => {
       return next;
     });
 
+  const updateBill = useUpdateBill();
   const payAll = (): void => {
-    toast.info(t('bills.bulkPaymentSoon'));
+    const ids = Array.from(selected);
+    ids.forEach((id) => {
+      const b = data.find((x) => x.id === id);
+      updateBill.mutate({
+        id,
+        body: {
+          supplierId: typeof b?.supplier === 'string' ? b.supplier : '',
+          amount: typeof b?.amount === 'number' ? b.amount : undefined,
+          currency: typeof b?.currency === 'string' ? b.currency : 'USD',
+          dueDate: typeof b?.dueDate === 'string' ? b.dueDate : '',
+          status: 'paid',
+          description:
+            typeof (b as Record<string, unknown>)?.description === 'string'
+              ? String((b as Record<string, unknown>).description)
+              : '',
+        },
+      });
+    });
+    toast.success(t('bills.markedPaid', { count: ids.length }));
     setSelected(new Set());
   };
 
@@ -279,8 +305,14 @@ const Bills: React.FC = () => {
                   <td style={{ padding: '12px 16px' }}>
                     {b.status === 'unpaid' || b.status === 'overdue' ? (
                       <button
-                        style={{ ...ghostBtn, padding: '4px 10px' }}
-                        onClick={() => toast.info(t('bills.schedulingSoon'))}
+                        style={{
+                          ...ghostBtn,
+                          padding: '4px 10px',
+                          opacity: 0.6,
+                          cursor: 'not-allowed',
+                        }}
+                        disabled
+                        title={t('bills.schedulingSoon')}
                       >
                         <Clock size={12} /> {t('bills.schedule')}
                       </button>
