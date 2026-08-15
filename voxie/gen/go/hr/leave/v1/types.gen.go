@@ -839,6 +839,59 @@ func (x *ApproveLeaveResponse) GetSuccess() bool {
 	return x.Success
 }
 
+type CancelLeaveRequestRequest struct {
+	RequestId int64 `json:"request_id,omitempty"`
+}
+
+func (m *CancelLeaveRequestRequest) MarshalJSON() ([]byte, error) {
+	type alias CancelLeaveRequestRequest
+	aux := struct {
+		*alias
+		RequestId string `json:"request_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.RequestId = strconv.FormatInt(m.RequestId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *CancelLeaveRequestRequest) UnmarshalJSON(data []byte) error {
+	type alias CancelLeaveRequestRequest
+	aux := struct {
+		*alias
+		RequestId string `json:"request_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.RequestId != "" {
+		v, err := strconv.ParseInt(aux.RequestId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.RequestId = v
+	}
+	return nil
+}
+
+func (x *CancelLeaveRequestRequest) GetRequestId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RequestId
+}
+
+type CancelLeaveResponse struct {
+	Success bool `json:"success,omitempty"`
+}
+
+func (x *CancelLeaveResponse) GetSuccess() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.Success
+}
+
 type ListLeaveTypesRequest struct {
 }
 

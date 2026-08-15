@@ -141,6 +141,18 @@ message ApproveLeaveResponse {
   success: bool
 }
 
+message CancelLeaveRequestRequest {
+  /// request_id is the leave request being withdrawn. Only the request's own
+  /// subject may cancel it, and only while it is still pending - the leave
+  /// approval permission grants no override here.
+  request_id: int64 @required @gt(0)
+}
+
+message CancelLeaveResponse {
+  /// Whether the request was still pending and is now canceled.
+  success: bool
+}
+
 message ListLeaveTypesRequest {}
 
 message ListLeaveTypesResponse {

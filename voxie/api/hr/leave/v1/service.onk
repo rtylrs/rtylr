@@ -11,6 +11,9 @@ service LeaveService {
   /// ApproveLeave approves a leave request.
   approveLeave(ApproveLeaveRequest) -> ApproveLeaveResponse @patch("/requests/{request_id}/approve") @body("body")
 
+  /// CancelLeaveRequest withdraws the caller's own pending leave request.
+  cancelLeaveRequest(CancelLeaveRequestRequest) -> CancelLeaveResponse @patch("/requests/{request_id}/cancel")
+
   /// ListLeaveTypes returns configured leave types.
   listLeaveTypes(ListLeaveTypesRequest) -> ListLeaveTypesResponse @get("/types")
 

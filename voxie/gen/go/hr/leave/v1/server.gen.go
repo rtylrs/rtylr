@@ -202,6 +202,7 @@ type LeaveServiceServer interface {
 	ListLeaveRequests(ctx context.Context, req *ListLeaveRequestsRequest) (*ListLeaveRequestsResponse, error)
 	CreateLeaveRequest(ctx context.Context, req *CreateLeaveRequestRequest) (*CreateLeaveRequestResponse, error)
 	ApproveLeave(ctx context.Context, req *ApproveLeaveRequest) (*ApproveLeaveResponse, error)
+	CancelLeaveRequest(ctx context.Context, req *CancelLeaveRequestRequest) (*CancelLeaveResponse, error)
 	ListLeaveTypes(ctx context.Context, req *ListLeaveTypesRequest) (*ListLeaveTypesResponse, error)
 	CreateLeaveType(ctx context.Context, req *CreateLeaveTypeRequest) (*CreateLeaveTypeResponse, error)
 	UpdateLeaveType(ctx context.Context, req *UpdateLeaveTypeRequest) (*UpdateLeaveTypeResponse, error)
@@ -318,6 +319,34 @@ func RegisterLeaveServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "LeaveService", Method: "approveLeave", HTTPMethod: "PATCH", Route: "/hr/leave/v1/requests/{request_id}/approve", AuthSchemes: nil}))
+	mux.Handle("PATCH /hr/leave/v1/requests/{request_id}/cancel", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(CancelLeaveRequestRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		parsedRequestId, err := parseInt64(r.PathValue("request_id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter request_id: "+err.Error())
+			return
+		}
+		req.RequestId = parsedRequestId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.CancelLeaveRequest(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "LeaveService", Method: "cancelLeaveRequest", HTTPMethod: "PATCH", Route: "/hr/leave/v1/requests/{request_id}/cancel", AuthSchemes: nil}))
 	mux.Handle("GET /hr/leave/v1/types", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListLeaveTypesRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {

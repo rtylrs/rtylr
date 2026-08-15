@@ -367,6 +367,52 @@ const violations: string[] = [];
 return violations;
 }
 
+export interface CancelLeaveRequestRequest {
+requestId: string;
+}
+
+export function decodeCancelLeaveRequestRequest(v: any): CancelLeaveRequestRequest {
+if (v === null || v === undefined) return v;
+return {
+requestId: v.request_id,
+};
+}
+
+export function encodeCancelLeaveRequestRequest(v: CancelLeaveRequestRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.requestId !== undefined) { out.request_id = v.requestId; }
+return out;
+}
+
+export function validateCancelLeaveRequestRequest(v: CancelLeaveRequestRequest): string[] {
+const violations: string[] = [];
+if (!(v.requestId !== undefined && v.requestId !== null)) violations.push("request_id is required");
+if (v.requestId !== undefined && v.requestId !== null && !(Number(v.requestId) > 0)) violations.push("request_id violates @gt");
+return violations;
+}
+
+export interface CancelLeaveResponse {
+success?: boolean;
+}
+
+export function decodeCancelLeaveResponse(v: any): CancelLeaveResponse {
+if (v === null || v === undefined) return v;
+return {
+success: v.success,
+};
+}
+
+export function encodeCancelLeaveResponse(v: CancelLeaveResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.success !== undefined) { out.success = v.success; }
+return out;
+}
+
+export function validateCancelLeaveResponse(v: CancelLeaveResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListLeaveTypesRequest {
 }
 

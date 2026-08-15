@@ -166,6 +166,31 @@ func (m *ApproveLeaveResponse) Validate() error {
 	return nil
 }
 
+func (m *CancelLeaveRequestRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.RequestId <= 0 {
+		violations = append(violations, "request_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *CancelLeaveResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ListLeaveTypesRequest) Validate() error {
 	if m == nil {
 		return nil
