@@ -14,6 +14,8 @@
     "unknownAuthor": "Inconnu",
     "deleteEntryLabel": "Supprimer l'entrée de {{duration}}",
     "duration": "Durée",
+    "taskDescription": "Tâche",
+    "taskDescriptionPlaceholder": "Choisissez un type de travail pour remplir ce champ",
     "durationPlaceholder": "90m, 1.5h ou 1:30",
     "durationHint": "Minutes, heures décimales, ou heures et minutes.",
     "durationInvalid": "Saisissez une durée du type 90m, 1.5h ou 1:30.",

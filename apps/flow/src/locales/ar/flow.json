@@ -14,6 +14,8 @@
     "unknownAuthor": "غير معروف",
     "deleteEntryLabel": "حذف مدخل {{duration}}",
     "duration": "المدة",
+    "taskDescription": "المهمة",
+    "taskDescriptionPlaceholder": "اختر نوع العمل لتعبئة هذا الحقل",
     "durationPlaceholder": "90m أو 1.5h أو 1:30",
     "durationHint": "دقائق، أو ساعات عشرية، أو ساعات ودقائق.",
     "durationInvalid": "أدخل مدة بالشكل 90m أو 1.5h أو 1:30.",

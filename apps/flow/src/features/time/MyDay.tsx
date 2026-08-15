@@ -2,16 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
-import { formatDurationClock, parseDurationInput } from '../../shared/lib/durationUtils';
+import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { addDays, formatWeekDayShort, startOfWeek } from '../../shared/lib/dateUtils';
-import DurationField from '../tasks/components/DurationField';
 import { useFlowStore } from '../../shared/stores/flowStore';
-import { useProjects } from '../projects/useProjects';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
+import LogTimeDialog from './LogTimeDialog';
 import {
-  newClientKey,
   todayLocalDate,
-  useCreateWorkDayLine,
   useDeleteWorkDayLine,
   useUpsertWorkDay,
   useWorkDay,
@@ -43,10 +40,9 @@ const MyDay = (): React.JSX.Element => {
   const { data, isLoading } = useWorkDay(date);
   const { data: workTypesData } = useWorkTypes();
   const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
-  const { data: projects } = useProjects(activeWorkspaceId);
   const upsertDay = useUpsertWorkDay();
-  const createLine = useCreateWorkDayLine();
   const deleteLine = useDeleteWorkDayLine();
+  const [logTimeOpen, setLogTimeOpen] = useState(false);
 
   const weekStart = useTimeSettingsStore((s) => s.weekStart);
   const weekDays = useMemo(() => {
@@ -66,11 +62,6 @@ const MyDay = (): React.JSX.Element => {
   const lines = useMemo(() => data?.lines ?? [], [data]);
   const workTypes = workTypesData?.workTypes ?? [];
 
-  const [duration, setDuration] = useState('');
-  const [description, setDescription] = useState('');
-  const [projectId, setProjectId] = useState('');
-  const [workTypeId, setWorkTypeId] = useState('');
-
   const clocked = day?.clockedMinutes ?? 0;
   const logged = day?.loggedMinutes ?? 0;
   const gap = day?.gapMinutes ?? 0;
@@ -85,34 +76,6 @@ const MyDay = (): React.JSX.Element => {
       endTime: patch.endTime ?? day?.endTime ?? undefined,
       breakMinutes: patch.breakMinutes ?? day?.breakMinutes ?? 0,
     });
-  };
-
-  const canAddLine = parseDurationInput(duration) !== null && projectId !== '';
-
-  const addLine = () => {
-    const minutes = parseDurationInput(duration);
-    if (minutes === null || !day?.id || !projectId) return;
-    createLine.mutate(
-      {
-        date,
-        workDayId: day.id,
-        // Generated here, before the request leaves, so a retry after a dropped
-        // connection resolves to the same entry rather than a second one.
-        clientKey: newClientKey(),
-        durationMinutes: minutes,
-        description: description.trim(),
-        projectId,
-        workTypeId: workTypeId || undefined,
-        isBillable: true,
-      },
-      {
-        onSuccess: () => {
-          setDuration('');
-          setDescription('');
-          setProjectId('');
-        },
-      }
-    );
   };
 
   return (
@@ -339,80 +302,29 @@ const MyDay = (): React.JSX.Element => {
                   {t('flow.time.setTheDayFirst')}
                 </p>
               ) : (
-                <div className="grid gap-3 sm:grid-cols-[10rem_1fr_auto] sm:items-end">
-                  <DurationField
-                    id="line-duration"
-                    label={t('flow.time.duration')}
-                    value={duration}
-                    onChange={setDuration}
-                    onSubmit={addLine}
-                    placeholder={t('flow.time.durationPlaceholder')}
-                    invalidMessage={t('flow.time.durationInvalid')}
-                  />
-                  <div>
-                    <label
-                      htmlFor="line-description"
-                      className={labelClass}
-                      style={{ color: 'var(--flow-text-muted)' }}
-                    >
-                      {t('flow.time.description')}
-                    </label>
-                    <input
-                      id="line-description"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && addLine()}
-                      className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-                      style={inputStyle}
-                    />
-                    <select
-                      aria-label={t('flow.time.project')}
-                      value={projectId}
-                      onChange={(e) => setProjectId(e.target.value)}
-                      required
-                      className="flow-focus mt-2 min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-                      style={inputStyle}
-                    >
-                      <option value="">{t('flow.time.selectProject')}</option>
-                      {(projects ?? []).map((project) => (
-                        <option key={project.id} value={project.id}>
-                          {project.name}
-                        </option>
-                      ))}
-                    </select>
-                    {workTypes.length > 0 && (
-                      <select
-                        aria-label={t('flow.time.workType')}
-                        value={workTypeId}
-                        onChange={(e) => setWorkTypeId(e.target.value)}
-                        className="flow-focus mt-2 min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-                        style={inputStyle}
-                      >
-                        <option value="">{t('flow.time.noWorkType')}</option>
-                        {workTypes.map((type) => (
-                          <option key={type.id} value={type.id}>
-                            {type.name}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={addLine}
-                    disabled={!canAddLine || createLine.isPending}
-                    className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded px-4 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2.5"
-                    style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
-                  >
-                    <Plus size={14} aria-hidden="true" />
-                    {t('flow.time.addLine')}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setLogTimeOpen(true)}
+                  className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded px-4 text-[13px] font-semibold md:min-h-0 md:py-2.5"
+                  style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
+                >
+                  <Plus size={14} aria-hidden="true" />
+                  {t('flow.time.logAction')}
+                </button>
               )}
             </section>
           </>
         )}
       </div>
+
+      <LogTimeDialog
+        open={logTimeOpen}
+        onOpenChange={setLogTimeOpen}
+        date={date}
+        workDayId={day?.id ?? ''}
+        workspaceId={activeWorkspaceId}
+        workTypes={workTypes}
+      />
     </div>
   );
 };

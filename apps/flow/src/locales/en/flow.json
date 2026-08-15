@@ -14,6 +14,8 @@
     "unknownAuthor": "Unknown",
     "deleteEntryLabel": "Delete the {{duration}} entry",
     "duration": "Duration",
+    "taskDescription": "Task",
+    "taskDescriptionPlaceholder": "Pick a type of work to fill this in",
     "durationPlaceholder": "90m, 1.5h or 1:30",
     "durationHint": "Minutes, decimal hours, or hours and minutes.",
     "durationInvalid": "Enter a duration like 90m, 1.5h or 1:30.",
