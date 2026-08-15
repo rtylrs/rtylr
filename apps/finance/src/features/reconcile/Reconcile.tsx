@@ -9,7 +9,7 @@ import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { useBankTransactions } from '../../shared/hooks/useBankAccounts';
 import { useListInvoices } from '../../shared/hooks/queries/useInvoices';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
-import { financeApi } from '../../shared/services/financeApi';
+import { safe } from '../../shared/lib/api';
 import { findExactMatches } from './reconcileHelper';
 
 interface Candidate {
@@ -34,7 +34,13 @@ const Reconcile: React.FC = () => {
 
   const match = async (txId: string, candidateId: string): Promise<void> => {
     try {
-      await unwrap(financeApi.matchTransaction(txId, 'invoice', candidateId));
+      await unwrap(
+        safe.post('/finance/reconcile/match', {
+          transactionId: txId,
+          targetType: 'invoice',
+          targetId: candidateId,
+        })
+      );
       setMatches((prev) => ({ ...prev, [txId]: candidateId }));
       toast.success(`Matched transaction to ${candidateId}`);
     } catch (error) {
@@ -54,7 +60,13 @@ const Reconcile: React.FC = () => {
         candidates
       );
       for (const item of exactMatches) {
-        await unwrap(financeApi.matchTransaction(item.transactionId, 'invoice', item.candidate.id));
+        await unwrap(
+          safe.post('/finance/reconcile/match', {
+            transactionId: item.transactionId,
+            targetType: 'invoice',
+            targetId: item.candidate.id,
+          })
+        );
       }
       setMatches((prev) => {
         const next = { ...prev };
