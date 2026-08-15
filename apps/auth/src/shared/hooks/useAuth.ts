@@ -71,7 +71,16 @@ export const useRegisterRestaurant = () => {
       setLoading(true);
       setError(null);
     },
-    onSuccess: (data) => persistSession(login, data.token),
+    onSuccess: (data, variables) => {
+      if (variables.businessName) {
+        try {
+          localStorage.setItem('rtylr_business_name', variables.businessName);
+        } catch {
+          // ignore storage quota errors
+        }
+      }
+      persistSession(login, data.token);
+    },
     onError: (error) => {
       setError(getOneKitErrorMessage(error, 'Registration failed'));
       setLoading(false);

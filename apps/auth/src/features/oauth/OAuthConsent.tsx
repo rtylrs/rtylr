@@ -62,16 +62,19 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
   const emailError = getEmailError(email);
   const isValid = !emailError && password.length >= 8;
 
-  const isInvalidRequest =
-    !params.clientId ||
-    !params.redirectUri ||
-    !params.codeChallenge ||
-    !isAllowedOAuthRedirect(params.redirectUri);
+  const isInvalidRequest = useMemo(() => {
+    if (!params.clientId || !params.redirectUri || !params.codeChallenge) {
+      return 'Invalid authorization request - missing required parameters.';
+    }
+    if (!isAllowedOAuthRedirect(params.redirectUri)) {
+      return 'Invalid redirect URI - must belong to an authorized domain.';
+    }
+    return null;
+  }, [params]);
 
-  // If the request is missing required params or uses an invalid redirect URI, block immediately.
   useEffect((): void => {
     if (isInvalidRequest) {
-      setError('Invalid authorization request — missing parameters or unauthorized redirect URI.');
+      setError(isInvalidRequest);
     }
   }, [isInvalidRequest]);
 
@@ -171,7 +174,7 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
 
           <button
             type="submit"
-            disabled={!isValid || loginMutation.isPending}
+            disabled={!isValid || loginMutation.isPending || !!isInvalidRequest}
             className="w-full rounded-lg bg-[#4583C4] py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {loginMutation.isPending ? 'Signing in…' : 'Continue'}

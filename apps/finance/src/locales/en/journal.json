@@ -1,3 +1,21 @@
 {
-  "created": "Journal entry created"
+  "title": "Journal",
+  "newEntry": "New entry",
+  "memoRequired": "Memo is required",
+  "amountZero": "Amount must be greater than zero",
+  "futureDate": "Date cannot be in the future",
+  "created": "Journal entry created",
+  "createFailed": "Failed to create journal entry",
+  "balanced": "Balanced",
+  "outOfBalance": "Out of balance",
+  "account": "Account",
+  "debit": "Debit",
+  "credit": "Credit",
+  "newJournalEntry": "New Journal Entry",
+  "memoPlaceholder": "Memo / description",
+  "debitAccPlaceholder": "Debit account name",
+  "creditAccPlaceholder": "Credit account name",
+  "cancel": "Cancel",
+  "create": "Create",
+  "creating": "Creating…"
 }

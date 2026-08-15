@@ -34,5 +34,12 @@
   },
   "tax": {
     "exportAria": "Exporter le résumé fiscal pour le comptable"
+  },
+  "cashFlow": {
+    "title": "Flux de trésorerie",
+    "totalInflow": "Entrées totales",
+    "totalOutflow": "Sorties totales",
+    "netCashFlow": "Flux de trésorerie net",
+    "reports": "Rapports"
   }
 }

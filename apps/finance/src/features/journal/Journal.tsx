@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -19,6 +20,7 @@ interface LineInput {
 }
 
 const Journal: React.FC = () => {
+  const { t } = useTranslation('journal');
   const [page, setPage] = useState(1);
   const { data: journalData, isLoading } = useJournal({ page });
   const data = journalData?.entries ?? [];
@@ -61,7 +63,7 @@ const Journal: React.FC = () => {
 
   const handleCreate = async (): Promise<void> => {
     if (!memo.trim()) {
-      toast.error('Memo is required');
+      toast.error(t('memoRequired'));
       return;
     }
     if (Math.abs(totalDebits - totalCredits) > 0.01 || totalDebits === 0) {
@@ -72,7 +74,7 @@ const Journal: React.FC = () => {
     }
     const today = new Date().toISOString().slice(0, 10);
     if (date > today) {
-      toast.error('Date cannot be in the future');
+      toast.error(t('futureDate'));
       return;
     }
     try {
@@ -87,7 +89,7 @@ const Journal: React.FC = () => {
           description: '',
         })),
       });
-      toast.success('Journal entry created');
+      toast.success(t('created'));
       setShowCreate(false);
       setMemo('');
       setLines([
@@ -95,7 +97,7 @@ const Journal: React.FC = () => {
         { id: '2', accountName: '', accountId: 0, type: 'credit', amount: 0 },
       ]);
     } catch (error) {
-      toast.error(getOneKitErrorMessage(error, 'Failed to create journal entry'));
+      toast.error(getOneKitErrorMessage(error, t('createFailed')));
     }
   };
 
@@ -105,13 +107,13 @@ const Journal: React.FC = () => {
       animate={{ opacity: 1, y: 0 }}
       style={{ display: 'flex', flexDirection: 'column', gap: 20 }}
     >
-      <HelmetContainer title="Journal · rtylr" />
+      <HelmetContainer title={`${t('title')} · rtylr`} />
       <PageHeader
-        title="Journal"
+        title={t('title')}
         subtitle={`${data.length} entries`}
         actions={
           <button style={primaryBtn} onClick={() => setShowCreate(true)}>
-            <Plus size={13} /> New entry
+            <Plus size={13} /> {t('newEntry')}
           </button>
         }
       />
@@ -150,7 +152,7 @@ const Journal: React.FC = () => {
                       color: isBalanced ? 'var(--hub-text-dim)' : 'var(--finance-danger)',
                     }}
                   >
-                    {isBalanced ? 'Balanced' : 'Out of balance'}
+                    {isBalanced ? t('balanced') : t('outOfBalance')}
                   </div>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -165,7 +167,7 @@ const Journal: React.FC = () => {
                           padding: '6px 4px',
                         }}
                       >
-                        Account
+                        {t('account')}
                       </th>
                       <th
                         style={{
@@ -176,7 +178,7 @@ const Journal: React.FC = () => {
                           padding: '6px 4px',
                         }}
                       >
-                        Debit
+                        {t('debit')}
                       </th>
                       <th
                         style={{
@@ -187,7 +189,7 @@ const Journal: React.FC = () => {
                           padding: '6px 4px',
                         }}
                       >
-                        Credit
+                        {t('credit')}
                       </th>
                     </tr>
                   </thead>
@@ -254,7 +256,7 @@ const Journal: React.FC = () => {
             }}
           >
             <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-              New Journal Entry
+              {t('newJournalEntry')}
             </h3>
             <input
               style={inputStyle}
@@ -265,11 +267,10 @@ const Journal: React.FC = () => {
             />
             <input
               style={inputStyle}
-              placeholder="Memo / description"
+              placeholder={t('memoPlaceholder')}
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
             />
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
@@ -368,10 +369,10 @@ const Journal: React.FC = () => {
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button style={ghostBtn} onClick={() => setShowCreate(false)}>
-                Cancel
+                {t('cancel')}
               </button>
               <button style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>
-                {createMut.isPending ? 'Creating…' : 'Create'}
+                {createMut.isPending ? t('creating') : t('create')}
               </button>
             </div>
           </div>

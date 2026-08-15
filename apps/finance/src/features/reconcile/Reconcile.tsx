@@ -10,6 +10,7 @@ import { useBankTransactions } from '../../shared/hooks/useBankAccounts';
 import { useListInvoices } from '../../shared/hooks/queries/useInvoices';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 import { financeApi } from '../../shared/services/financeApi';
+import { findExactMatches } from './reconcileHelper';
 
 interface Candidate {
   id: string;
@@ -44,12 +45,14 @@ const Reconcile: React.FC = () => {
   const handleAutoMatch = async (): Promise<void> => {
     setAutoMatching(true);
     try {
-      const exactMatches = unmatched.flatMap((transaction) => {
-        const candidate = candidates.find(
-          (item) => Math.abs(item.amount) === Math.abs(transaction.amount ?? 0)
-        );
-        return transaction.id && candidate ? [{ transactionId: transaction.id, candidate }] : [];
-      });
+      const exactMatches = findExactMatches(
+        unmatched.map((t) => ({
+          id: t.id ?? '',
+          description: t.description ?? '',
+          amount: t.amount ?? 0,
+        })),
+        candidates
+      );
       for (const item of exactMatches) {
         await unwrap(financeApi.matchTransaction(item.transactionId, 'invoice', item.candidate.id));
       }
