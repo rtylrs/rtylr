@@ -33,16 +33,15 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
 
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!menu) return [];
-    const items = menu.items
-      .filter((i) => i.isActive)
-      .map((i) => ({
-        id: String(i.id),
-        name: i.name,
-        price: i.salePrice,
-        currency: menu.business.currency,
-        description: undefined,
-        image: i.imageUrl,
-      }));
+    const items = menu.items.map((i) => ({
+      id: String(i.id),
+      name: i.name,
+      price: i.salePrice,
+      currency: menu.business.currency,
+      description: undefined,
+      image: i.imageUrl,
+      available: i.isActive,
+    }));
     return [{ id: 'all', name: 'Menu', items }];
   }, [menu]);
 
