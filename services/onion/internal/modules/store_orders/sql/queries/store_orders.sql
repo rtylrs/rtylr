@@ -1,6 +1,6 @@
 -- name: ListStoreOrders :many
 SELECT id, owner_id, business_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes, created_at, updated_at
-FROM store_orders WHERE business_id = ? ORDER BY created_at DESC;
+FROM store_orders WHERE business_id = ? ORDER BY created_at DESC, id DESC LIMIT 500;
 
 -- name: GetStoreOrder :one
 SELECT id, owner_id, business_id, customer_email, customer_name, customer_phone, status, subtotal, tax, shipping_cost, total, shipping_address, notes, created_at, updated_at

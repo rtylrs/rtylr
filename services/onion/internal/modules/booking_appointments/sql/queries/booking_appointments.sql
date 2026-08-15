@@ -7,11 +7,11 @@ WHERE business_id = ? AND id = ?;
 
 -- name: ListAppointments :many
 SELECT id, owner_id, business_id, service_id, resource_id, staff_id, customer_name, customer_email, customer_phone, start_time, end_time, status, notes, created_at, updated_at
-FROM booking_appointments WHERE business_id = ? ORDER BY start_time DESC;
+FROM booking_appointments WHERE business_id = ? ORDER BY start_time DESC, id DESC LIMIT 500;
 
 -- name: ListAppointmentsByDateRange :many
 SELECT id, owner_id, business_id, service_id, resource_id, staff_id, customer_name, customer_email, customer_phone, start_time, end_time, status, notes, created_at, updated_at
-FROM booking_appointments WHERE business_id = ? AND start_time >= ? AND start_time < ? ORDER BY start_time ASC;
+FROM booking_appointments WHERE business_id = ? AND start_time >= ? AND start_time < ? ORDER BY start_time ASC, id ASC LIMIT 500;
 
 -- name: CreateAppointment :execresult
 INSERT INTO booking_appointments (owner_id, business_id, service_id, resource_id, staff_id, customer_name, customer_email, customer_phone, start_time, end_time, status, notes)

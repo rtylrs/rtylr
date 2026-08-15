@@ -3,7 +3,8 @@ SELECT id, owner_id, business_id, staff_id, type, start_date, end_date, days_cou
        status, reason, approved_by, approved_at, notes, created_at, updated_at
 FROM hr_time_off_requests
 WHERE business_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC, id DESC
+LIMIT 500;
 
 -- name: CreateTimeOffRequest :execresult
 INSERT INTO hr_time_off_requests
