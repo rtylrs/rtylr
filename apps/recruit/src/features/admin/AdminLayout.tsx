@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, Outlet, useLocation } from '@tanstack/react-router';
 import { Briefcase, Inbox, Palette, LayoutGrid } from 'lucide-react';
-import { signOut } from '@voxire/auth';
+import { signOut, useUserStore } from '@voxire/auth';
 
 /**
  * AdminLayout - wraps the authenticated admin routes under /admin.
@@ -9,6 +9,19 @@ import { signOut } from '@voxire/auth';
  * template resolver and bypass this shell entirely.
  */
 const AdminLayout: React.FC = (): React.JSX.Element => {
+  const user = useUserStore((s) => s.user);
+  const isOwnerOrAdmin = user?.role === 'owner' || user?.role === 'admin';
+
+  if (user && !isOwnerOrAdmin) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a0a] p-6 text-center text-white/70">
+        <h2 className="text-xl font-semibold text-white">Access Denied</h2>
+        <p className="mt-2 text-sm text-white/60">
+          Owner or Admin permission is required to access Recruit administration and candidate data.
+        </p>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen" style={{ background: '#0a0a0a', color: '#fafaf9' }}>
       <aside
