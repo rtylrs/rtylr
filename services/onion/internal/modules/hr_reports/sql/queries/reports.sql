@@ -54,12 +54,12 @@ LEFT JOIN hr_departments d ON d.id = e.department_id AND d.business_id = e.busin
 CROSS JOIN hr_leave_types lt ON lt.business_id = e.business_id AND lt.is_active = TRUE
 LEFT JOIN hr_leave_balances lb ON lb.employee_id = e.id AND lb.business_id = e.business_id AND lb.leave_type_id = lt.id AND lb.year = YEAR(?)
 LEFT JOIN (
-    SELECT employee_id, business_id, leave_type_id,
+    SELECT req.employee_id, req.business_id, req.leave_type_id,
            COUNT(*) AS requests_in_period,
-           COALESCE(SUM(CASE WHEN status = 'approved' THEN total_days ELSE 0 END), 0) AS approved_days_in_period
-    FROM hr_leave_requests
-    WHERE business_id = ? AND start_date <= ? AND end_date >= ?
-    GROUP BY employee_id, business_id, leave_type_id
+           COALESCE(SUM(CASE WHEN req.status = 'approved' THEN req.total_days ELSE 0 END), 0) AS approved_days_in_period
+    FROM hr_leave_requests req
+    WHERE req.business_id = ? AND req.start_date <= ? AND req.end_date >= ?
+    GROUP BY req.employee_id, req.business_id, req.leave_type_id
 ) lr ON lr.employee_id = e.id AND lr.business_id = e.business_id AND lr.leave_type_id = lt.id
 WHERE e.business_id = ?
   AND e.status = 'active'

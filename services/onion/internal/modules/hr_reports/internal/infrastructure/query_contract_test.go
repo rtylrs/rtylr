@@ -22,7 +22,7 @@ func TestLeaveSummaryPreAggregatesRequestsBeforeEmployeeJoin(t *testing.T) {
 		t.Fatalf("read reports queries: %v", err)
 	}
 	sql := string(query)
-	if !strings.Contains(sql, "GROUP BY employee_id, business_id, leave_type_id") {
+	if !strings.Contains(sql, "GROUP BY req.employee_id, req.business_id, req.leave_type_id") && !strings.Contains(sql, "GROUP BY employee_id, business_id, leave_type_id") {
 		t.Fatal("leave requests must be pre-aggregated by employee, tenant, and leave type")
 	}
 	if !strings.Contains(sql, ") lr ON lr.employee_id = e.id") {
