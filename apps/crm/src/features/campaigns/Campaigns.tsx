@@ -67,6 +67,15 @@ const STATUS_TO_DISPLAY: Record<string, CampaignStatus> = {
   scheduled: 'Scheduled',
   sent: 'Sent',
   cancelled: 'Cancelled',
+  canceled: 'Cancelled',
+  DRAFT: 'Draft',
+  ACTIVE: 'Active',
+  PAUSED: 'Paused',
+  COMPLETED: 'Completed',
+  SCHEDULED: 'Scheduled',
+  SENT: 'Sent',
+  CANCELLED: 'Cancelled',
+  CANCELED: 'Cancelled',
 };
 
 /** Projects a backend campaign payload onto the local display shape. */
