@@ -46,6 +46,8 @@ export const useUpdateBusiness = () => {
       setIfPresent('logoUrl', 'logo_url');
       setIfPresent('instagram');
       setIfPresent('senderEmail', 'sender_email');
+      setIfPresent('smtpFrom', 'smtp_from');
+      setIfPresent('notificationPreferences', 'notification_preferences');
       setIfPresent('mapsUrl', 'maps_url');
       setIfPresent('website');
       setIfPresent('address');
