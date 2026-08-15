@@ -1,0 +1,14 @@
+{
+  "apply": "Postuler",
+  "fullName": "Nom complet",
+  "email": "Adresse e-mail",
+  "phone": "Téléphone",
+  "resume": "CV",
+  "coverLetter": "Lettre de motivation",
+  "submit": "Envoyer la candidature",
+  "submitting": "Envoi en cours...",
+  "success": "Candidature envoyée avec succès !",
+  "error": "Échec de l'envoi. Veuillez réessayer.",
+  "retry": "Réessayer",
+  "back": "Retour aux offres"
+}
