@@ -1,0 +1,131 @@
+import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
+import { useFlowStore } from '../../shared/stores/flowStore';
+import { useWorkspaceMembers } from '../workspace-manager/useWorkspaceManager';
+import GateNotice from '../../shared/components/GateNotice';
+import { formatDurationClock } from '../../shared/lib/durationUtils';
+import { todayLocalDate, useWorkDaysForWorkspace, type WorkDay } from './useWorkDay';
+
+const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-wider';
+
+/**
+ * The team view: one row per workspace member, for the day selected.
+ *
+ * Requires at least admin on the workspace, enforced server-side by the same
+ * call this screen makes - a member without it gets a real 403, rendered as
+ * teamAccessDenied rather than a raw error or an empty roster that looks like
+ * nobody logged anything.
+ */
+const TeamView = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const [date, setDate] = useState(todayLocalDate());
+  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
+
+  const { data: members, isLoading: membersLoading } = useWorkspaceMembers(activeWorkspaceId);
+  const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, date, date);
+
+  const dayByUserId = useMemo(() => {
+    const map = new Map<string, WorkDay>();
+    for (const day of data?.workDays ?? []) {
+      if (day.userId) map.set(day.userId, day);
+    }
+    return map;
+  }, [data]);
+
+  return (
+    <div className="h-full overflow-y-auto">
+      <HelmetContainer title="Team · rtylr" />
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+        <header className="mb-6">
+          <h1 className="text-[20px] font-bold" style={{ color: 'var(--flow-text)' }}>
+            {t('flow.time.team')}
+          </h1>
+          <label htmlFor="team-view-date" className="sr-only">
+            {t('flow.time.date')}
+          </label>
+          <input
+            id="team-view-date"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="flow-focus mt-2 min-h-[44px] rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
+            style={{
+              background: 'var(--flow-input-bg)',
+              border: '1px solid var(--flow-border)',
+              color: 'var(--flow-text)',
+            }}
+          />
+        </header>
+
+        {isError ? (
+          <GateNotice reason={t('flow.time.teamAccessDenied')} className="text-[13px]" />
+        ) : membersLoading || isLoading ? (
+          <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+            {t('flow.time.loadingDay')}
+          </p>
+        ) : (
+          <ul className="space-y-1.5">
+            {(members ?? []).map((member) => {
+              const day = dayByUserId.get(member.userId);
+              return (
+                <li
+                  key={member.id}
+                  className="flex items-center justify-between gap-3 rounded-md p-3"
+                  style={{ background: 'var(--flow-hover)' }}
+                >
+                  <span className="text-[13px] font-medium" style={{ color: 'var(--flow-text)' }}>
+                    {member.name}
+                  </span>
+                  {day ? (
+                    <div className="flex items-baseline gap-4">
+                      <Figure
+                        label={t('flow.time.logged')}
+                        value={formatDurationClock(day.loggedMinutes ?? 0)}
+                      />
+                      <Figure
+                        label={t('flow.time.unaccounted')}
+                        value={formatDurationClock(Math.abs(day.gapMinutes ?? 0))}
+                        tone={
+                          (day.gapMinutes ?? 0) === 0 ? undefined : 'var(--flow-status-pending)'
+                        }
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+                      {t('flow.time.teamNotStarted')}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const Figure = ({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: string;
+}): React.JSX.Element => (
+  <div className="text-right">
+    <span className={labelClass} style={{ color: 'var(--flow-text-muted)' }}>
+      {label}
+    </span>
+    <span
+      className="text-[13px] font-semibold tabular-nums"
+      style={{ color: tone ?? 'var(--flow-text)' }}
+    >
+      {value}
+    </span>
+  </div>
+);
+
+export default TeamView;

@@ -14,6 +14,7 @@ import FlowLayout from './layouts/FlowLayout';
 import { PERSONAL_WORKSPACE_ID } from './shared/lib/personalWorkspace';
 import { safe } from './shared/lib/api';
 import PreviewRouteUnavailable from './shared/components/PreviewRouteUnavailable';
+import { settingsSearchSchema } from './shared/schemas/settings';
 // The preview-route fallback is eager so a disabled deep link can explain its state
 // without waiting for a lazy route component to load.
 
@@ -29,6 +30,9 @@ const ProjectCalendar = React.lazy(() => import('./features/projects/ProjectCale
 const ProjectDashboard = React.lazy(() => import('./features/projects/ProjectDashboard'));
 const Inbox = React.lazy(() => import('./features/inbox/Inbox'));
 const FlowSettings = React.lazy(() => import('./features/settings/FlowSettings'));
+const MyDay = React.lazy(() => import('./features/time/MyDay'));
+const TeamView = React.lazy(() => import('./features/time/TeamView'));
+const TimeReports = React.lazy(() => import('./features/time/TimeReports'));
 const TaskDetail = React.lazy(() => import('./features/tasks/TaskDetail'));
 const Timeline = React.lazy(() => import('./features/timeline/Timeline'));
 const CalendarView = React.lazy(() => import('./features/calendar/Calendar'));
@@ -170,7 +174,7 @@ const taskDetailRoute = createRoute({
 });
 
 // "My tasks" shows every task assigned to the user across all workspaces and
-// projects (it is not workspace-scoped) — a single cross-project board.
+// projects (it is not workspace-scoped): a single cross-project board.
 const myIssuesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my-issues',
@@ -249,9 +253,28 @@ const inboxRoute = createRoute({
   component: () => withLayout(<Inbox />),
 });
 
+const myDayRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/time',
+  component: () => withLayout(<MyDay />),
+});
+
+const teamViewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/time/team',
+  component: () => withLayout(<TeamView />),
+});
+
+const timeReportsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/time/reports',
+  component: () => withLayout(<TimeReports />),
+});
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
+  validateSearch: settingsSearchSchema,
   component: () => withLayout(<FlowSettings />),
 });
 
@@ -289,6 +312,9 @@ const routeTree = rootRoute.addChildren([
   triageRoute,
   archiveRoute,
   inboxRoute,
+  myDayRoute,
+  teamViewRoute,
+  timeReportsRoute,
   settingsRoute,
   catchAllRoute,
 ]);

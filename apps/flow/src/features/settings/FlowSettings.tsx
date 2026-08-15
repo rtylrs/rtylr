@@ -12,6 +12,7 @@ import {
   UserPlus,
   LayoutDashboard,
   Plus,
+  Clock,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useQuery, useMutation } from '@tanstack/react-query';
@@ -34,9 +35,12 @@ import { useLifePreferences } from '../../shared/lib/lifePreferences';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiUserSettings } from '../../shared/services/flowApi';
 import { getCookie } from '@voxire/auth';
+import { getRouteApi } from '@tanstack/react-router';
+import type { SettingsSectionId } from '../../shared/schemas/settings';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useLabels, useCreateLabel, useDeleteLabel } from '../../features/tasks/useLabels';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import TimeSection from './sections/TimeSection';
 import {
   useWorkspaces,
   useCreateWorkspace,
@@ -55,6 +59,11 @@ function buildSections(
   const sections: SettingsSection[] = [
     { id: 'team', label: t('common.settings.team'), icon: Users },
     { id: 'notifications', label: t('common.settings.notifications'), icon: Bell },
+    // Admin/owner only: rates and the approval lock change what the whole
+    // workspace can edit. Gated on the same role check as Workspaces.
+    ...(canManageWorkspaces
+      ? [{ id: 'time', label: t('flow.settings.time.section'), icon: Clock }]
+      : []),
     { id: 'appearance', label: t('common.settings.appearance'), icon: Palette },
     { id: 'labels', label: t('common.settings.labels'), icon: Tag },
     { id: 'life', label: t('common.settings.life'), icon: Sparkles },
@@ -976,6 +985,7 @@ const SECTION_CONTENT: Record<string, React.FC> = {
   notifications: NotificationsSection,
   appearance: AppearanceSection,
   labels: LabelsSection,
+  time: TimeSection,
   life: LifeRhythmSection,
   shortcuts: ShortcutsSection,
 };
@@ -1007,12 +1017,22 @@ function getRoleFromToken(token: string | null): string {
 
 const MANAGE_WORKSPACE_ROLES = new Set(['owner', 'admin', 'manager']);
 
+// getRouteApi takes a route id, which for a top-level route is its path.
+const settingsRouteApi = getRouteApi('/settings');
+
 const FlowSettings: React.FC = () => {
   const { t } = useTranslation();
   const token = getCookie('token');
   const role = useMemo(() => getRoleFromToken(token), [token]);
   const canManageWorkspaces = MANAGE_WORKSPACE_ROLES.has(role);
-  const [activeSection, setActiveSection] = useState(canManageWorkspaces ? 'workspaces' : 'team');
+  // ?section=time makes a section linkable, so the sidebar can point at one.
+  const { section } = settingsRouteApi.useSearch();
+  const [activeSection, setActiveSection] = useState<SettingsSectionId | string>(
+    section ?? (canManageWorkspaces ? 'workspaces' : 'team')
+  );
+  useEffect(() => {
+    if (section) setActiveSection(section);
+  }, [section]);
   const sections = buildSections(t, canManageWorkspaces);
 
   const ActiveComponent =

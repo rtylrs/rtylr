@@ -9,6 +9,8 @@ import {
   relativeDayLabel,
   isWithinDays,
   formatDateShort,
+  formatEntryTimestamp,
+  formatWeekDayShort,
   addDays,
   startOfWeek,
   endOfWeek,
@@ -132,5 +134,54 @@ describe('startOfWeek', () => {
 describe('endOfWeek', () => {
   it('returns Sunday six days after Monday', () => {
     expect(endOfWeek('2026-06-15')).toBe('2026-06-21');
+  });
+});
+
+describe('startOfWeek and endOfWeek with weekStart: sunday', () => {
+  it('returns the Sunday on or before a Wednesday', () => {
+    // 2026-06-17 is a Wednesday; 2026-06-14 is the preceding Sunday.
+    expect(startOfWeek('2026-06-17', 'sunday')).toBe('2026-06-14');
+  });
+
+  it('returns the same day for a Sunday', () => {
+    expect(startOfWeek('2026-06-14', 'sunday')).toBe('2026-06-14');
+  });
+
+  it('ends on the following Saturday', () => {
+    expect(endOfWeek('2026-06-14', 'sunday')).toBe('2026-06-20');
+  });
+});
+
+describe('formatEntryTimestamp', () => {
+  it('renders a weekday, day and month for a full ISO timestamp', () => {
+    expect(formatEntryTimestamp('2026-08-11T09:00:00Z', 'en-US')).toBe('Tue, Aug 11');
+  });
+
+  it('follows each locale’s own day/month order rather than pinning one', () => {
+    expect(formatEntryTimestamp('2026-08-11T09:00:00Z', 'en-GB')).toBe('Tue 11 Aug');
+  });
+
+  it('localises the month name but keeps Latin numerals in Arabic', () => {
+    const formatted = formatEntryTimestamp('2026-08-11T09:00:00Z', 'ar');
+
+    expect(formatted).toMatch(/11/);
+    expect(formatted).not.toMatch(/[٠-٩]/);
+  });
+
+  it('returns an empty string for an unparseable value rather than "Invalid Date"', () => {
+    expect(formatEntryTimestamp('', 'en-US')).toBe('');
+    expect(formatEntryTimestamp('not a date', 'en-US')).toBe('');
+  });
+});
+
+describe('formatWeekDayShort', () => {
+  it('renders a short weekday and day number, in the locale-native order', () => {
+    expect(formatWeekDayShort('2026-08-11', 'en-US')).toBe('11 Tue');
+  });
+
+  it('keeps Latin numerals in Arabic', () => {
+    const formatted = formatWeekDayShort('2026-08-11', 'ar');
+    expect(formatted).toMatch(/11/);
+    expect(formatted).not.toMatch(/[٠-٩]/);
   });
 });

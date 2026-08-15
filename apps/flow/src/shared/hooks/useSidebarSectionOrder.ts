@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-export const SIDEBAR_SECTION_IDS = ['plan', 'team', 'projects'] as const;
+export const SIDEBAR_SECTION_IDS = ['plan', 'team', 'time', 'projects'] as const;
 export type SidebarSectionId = (typeof SIDEBAR_SECTION_IDS)[number];
 
 const STORAGE_KEY = 'flow.sidebar.sectionOrder-v1';
@@ -40,7 +40,13 @@ function save(order: SidebarSectionId[]) {
   }
 }
 
-/** User-defined order of Plan / Team / Projects in the Flow sidebar (localStorage). */
+/**
+ * User-defined order of the collapsible sidebar groups (localStorage).
+ *
+ * Adding an id needs no storage migration: normalize() drops ids it does not
+ * know and appends any known id missing from the stored array, so an older
+ * stored order simply gains the new group at the end.
+ */
 export function useSidebarSectionOrder() {
   const [order, setOrder] = useState<SidebarSectionId[]>(load);
 

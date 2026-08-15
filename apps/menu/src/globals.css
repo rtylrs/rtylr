@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '../../../packages/tailwind-config/theme.css';
 
 /* v4 auto-detects content relative to this CSS file. We add an
  * explicit @source for the cross-workspace packages we pull classes

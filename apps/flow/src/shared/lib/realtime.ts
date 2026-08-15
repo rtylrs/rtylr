@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   createOneKitFetch,
   getOneKitApiBaseUrl,
   getRealtimeClient,
   type RealtimeEvent,
+  type RealtimeStatus,
 } from '@voxire/api';
 
 const oneKitFetch = createOneKitFetch('flow');
@@ -60,4 +61,17 @@ export function useRealtime(topics: string[], handler: (event: RealtimeEvent) =>
     // fresh array literal without thrashing subscriptions.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topics.join('|'), handler]);
+}
+
+/**
+ * Observe the realtime connection state.
+ *
+ * Surfaces that would otherwise show stale data silently use this to say so.
+ * `reconnecting` means the client is retrying with backoff and writes still
+ * work; `disconnected` means it is not coming back on its own.
+ */
+export function useRealtimeStatus(): RealtimeStatus {
+  const [status, setStatus] = useState<RealtimeStatus>(() => client.getStatus());
+  useEffect(() => client.subscribeStatus(setStatus), []);
+  return status;
 }
