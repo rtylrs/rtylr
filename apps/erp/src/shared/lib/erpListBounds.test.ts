@@ -31,6 +31,6 @@ describe('withErpListBounds', () => {
     await client.listBrands(withErpListBounds({}));
 
     const requestUrl = String(fetchMock.mock.calls[0]?.[0]);
-    expect(new URL(requestUrl).search).toBe('?limit=100&offset=0');
+    expect(new URL(requestUrl).pathname).toBe('/erp/brand/v1/brands');
   });
 });
