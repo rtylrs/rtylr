@@ -33,6 +33,7 @@ import {
   Clock,
   UserCircle,
   CalendarOff,
+  Contact,
 } from 'lucide-react';
 import { useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
@@ -889,6 +890,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               to="/time/reports"
                               icon={BarChart3}
                               label={t('flow.time.reports')}
+                            />
+                            <SidebarLink
+                              to="/directory"
+                              icon={Contact}
+                              label={t('flow.directory.heading')}
                             />
                             <SidebarLink
                               to="/settings"

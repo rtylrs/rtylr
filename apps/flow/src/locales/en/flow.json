@@ -105,6 +105,13 @@
       "rateNotSet": "Not set"
     }
   },
+  "directory": {
+    "heading": "Directory",
+    "searchPlaceholder": "Search by name",
+    "noResults": "No one matches your search.",
+    "loadFailedTitle": "Couldn't load the directory",
+    "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or the directory couldn't be reached. Ask an admin if you think this is wrong."
+  },
   "leave": {
     "heading": "Leave",
     "balanceHeading": "Your balance",

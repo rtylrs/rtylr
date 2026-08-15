@@ -105,6 +105,13 @@
       "rateNotSet": "Non défini"
     }
   },
+  "directory": {
+    "heading": "Annuaire",
+    "searchPlaceholder": "Rechercher par nom",
+    "noResults": "Personne ne correspond à votre recherche.",
+    "loadFailedTitle": "Impossible de charger l'annuaire",
+    "loadFailedDescription": "Cela peut arriver si votre rôle n'a pas la permission de le voir, ou si l'annuaire n'a pas pu être atteint. Demandez à un administrateur si vous pensez que c'est une erreur."
+  },
   "leave": {
     "heading": "Congés",
     "balanceHeading": "Votre solde",
