@@ -55,10 +55,10 @@ const Audit: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `rtylr-audit-${Date.now()}.csv`;
+    a.download = `rtylr-audit-page-${page}-${Date.now()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success('Audit log exported');
+    toast.success(`Exported page ${page} (${filtered.length} entries)`);
   };
 
   return (
@@ -84,7 +84,7 @@ const Audit: React.FC = () => {
           </div>
           <Button variant="secondary" onClick={exportCsv}>
             <Download size={14} />
-            Export CSV
+            Export CSV (page {page})
           </Button>
         </div>
 
