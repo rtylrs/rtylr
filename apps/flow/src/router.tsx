@@ -34,6 +34,7 @@ const MyDay = React.lazy(() => import('./features/time/MyDay'));
 const ProfileScreen = React.lazy(() => import('./features/profile/ProfileScreen'));
 const LeaveScreen = React.lazy(() => import('./features/leave/LeaveScreen'));
 const DirectoryScreen = React.lazy(() => import('./features/directory/DirectoryScreen'));
+const PresenceScreen = React.lazy(() => import('./features/presence/PresenceScreen'));
 const TeamView = React.lazy(() => import('./features/time/TeamView'));
 const TimeReports = React.lazy(() => import('./features/time/TimeReports'));
 const TaskDetail = React.lazy(() => import('./features/tasks/TaskDetail'));
@@ -292,6 +293,12 @@ const directoryRoute = createRoute({
   component: () => withLayout(<DirectoryScreen />),
 });
 
+const presenceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/presence',
+  component: () => withLayout(<PresenceScreen />),
+});
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
@@ -339,6 +346,7 @@ const routeTree = rootRoute.addChildren([
   teamViewRoute,
   timeReportsRoute,
   directoryRoute,
+  presenceRoute,
   settingsRoute,
   catchAllRoute,
 ]);

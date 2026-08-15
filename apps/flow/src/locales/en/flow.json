@@ -105,6 +105,14 @@
       "rateNotSet": "Not set"
     }
   },
+  "presence": {
+    "heading": "Who's in today",
+    "onLeave": "On leave",
+    "notStarted": "Not started",
+    "noResults": "No one to show yet.",
+    "loadFailedTitle": "Couldn't load who's in today",
+    "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or presence couldn't be reached. Ask an admin if you think this is wrong."
+  },
   "directory": {
     "heading": "Directory",
     "searchPlaceholder": "Search by name",

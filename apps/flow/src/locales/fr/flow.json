@@ -105,6 +105,14 @@
       "rateNotSet": "Non défini"
     }
   },
+  "presence": {
+    "heading": "Qui est présent aujourd'hui",
+    "onLeave": "En congé",
+    "notStarted": "Pas commencé",
+    "noResults": "Personne à afficher pour l'instant.",
+    "loadFailedTitle": "Impossible de charger qui est présent aujourd'hui",
+    "loadFailedDescription": "Cela peut arriver si votre rôle n'a pas la permission de le voir, ou si les données n'ont pas pu être atteintes. Demandez à un administrateur si vous pensez que c'est une erreur."
+  },
   "directory": {
     "heading": "Annuaire",
     "searchPlaceholder": "Rechercher par nom",

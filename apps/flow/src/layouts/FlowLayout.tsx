@@ -34,6 +34,7 @@ import {
   UserCircle,
   CalendarOff,
   Contact,
+  Radar,
 } from 'lucide-react';
 import { useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
@@ -895,6 +896,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               to="/directory"
                               icon={Contact}
                               label={t('flow.directory.heading')}
+                            />
+                            <SidebarLink
+                              to="/presence"
+                              icon={Radar}
+                              label={t('flow.presence.heading')}
                             />
                             <SidebarLink
                               to="/settings"
