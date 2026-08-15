@@ -60,6 +60,10 @@ const OrderStatus = (): React.JSX.Element => {
   const businessId = new URLSearchParams(searchStr).get('business_id');
 
   const orderNumber = new URLSearchParams(searchStr).get('number') ?? '';
+  const businessId =
+    new URLSearchParams(searchStr).get('business_id') ??
+    new URLSearchParams(searchStr).get('businessId') ??
+    '';
 
   const [status, setStatus] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState(false);
