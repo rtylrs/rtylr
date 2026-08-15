@@ -9,15 +9,22 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary: 'bg-primary text-white hover:opacity-90 active:opacity-80',
-        secondary: 'bg-secondary text-white hover:opacity-90 active:opacity-80',
-        accent: 'bg-accent text-white hover:opacity-90 active:opacity-80',
-        outline: 'border border-current bg-transparent hover:bg-black/5 active:bg-black/10',
-        ghost: 'bg-transparent hover:bg-black/5 active:bg-black/8',
+        secondary:
+          'bg-secondary text-secondary-foreground hover:opacity-90 active:opacity-80 dark:text-white',
+        // Not text-white: white on the accent fill measures 1.9:1 and fails
+        // WCAG AA at every size. accent-foreground is near-black (~11:1).
+        accent: 'bg-accent text-accent-foreground hover:opacity-90 active:opacity-80',
+        outline:
+          'border border-border text-foreground bg-transparent hover:bg-muted/50 active:bg-muted',
+        ghost: 'text-foreground bg-transparent hover:bg-muted/50 active:bg-muted',
         soft: 'bg-primary/10 text-primary hover:bg-primary/15',
         danger: 'bg-destructive text-white hover:opacity-90',
         'dark-outline': 'border border-white/20 text-white bg-transparent hover:bg-white/8',
       },
       size: {
+        // 30px, for toolbar and table-row actions in dense grids. One requested
+        // size rather than each screen inventing its own height.
+        xs: 'h-[30px] px-3.5 text-xs',
         sm: 'h-8 px-3 text-xs',
         md: 'h-10 px-4 text-sm',
         lg: 'h-12 px-6 text-base',

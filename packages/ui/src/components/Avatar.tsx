@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../lib/cn';
 
-type AvatarSize = 'sm' | 'md' | 'lg';
+type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
 
 interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   src?: string;
@@ -11,6 +11,8 @@ interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
+  // 24px, for the 32-44px rows in dense tables where sm at 28px crowds.
+  xs: 'h-6 w-6 text-[10px]',
   sm: 'h-7 w-7 text-xs',
   md: 'h-9 w-9 text-sm',
   lg: 'h-12 w-12 text-base',

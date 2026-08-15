@@ -16,7 +16,10 @@ const config: Omit<Config, 'content'> = {
         },
         accent: {
           DEFAULT: '#03aed2',
-          foreground: '#ffffff',
+          // Near-black, not white: white on the accent fill measures 1.9:1 and
+          // fails WCAG AA at every size. Consumers map this to
+          // --color-accent-foreground in their own @theme block.
+          foreground: '#0a0a0a',
         },
         // Admin / Hub
         admin: {

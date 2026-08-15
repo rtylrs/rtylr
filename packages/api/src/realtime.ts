@@ -43,6 +43,16 @@ interface TopicSub {
 const MIN_BACKOFF_MS = 500;
 const MAX_BACKOFF_MS = 30_000;
 
+/**
+ * Connection state, for surfaces that must tell the user their view may be
+ * stale. `reconnecting` is distinct from `disconnected`: the former is retrying
+ * with backoff, the latter followed an explicit close and will never recover on
+ * its own.
+ */
+export type RealtimeStatus = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
+
+type StatusHandler = (status: RealtimeStatus) => void;
+
 export class RealtimeClient {
   private url: string;
   private getTicket: () => Promise<string | null | undefined>;
@@ -53,10 +63,49 @@ export class RealtimeClient {
   private closed = false;
   private pingInterval: ReturnType<typeof setInterval> | null = null;
   private connectionPromise: Promise<void> | null = null;
+  private status: RealtimeStatus = 'disconnected';
+  private statusHandlers = new Set<StatusHandler>();
 
   constructor(opts: ClientOptions) {
     this.url = opts.url;
     this.getTicket = opts.getTicket;
+  }
+
+  /** Current connection state. */
+  getStatus(): RealtimeStatus {
+    return this.status;
+  }
+
+  /**
+   * Observe the connection state. The handler fires immediately with the current
+   * status, so a component that mounts mid-connection renders the truth rather
+   * than waiting for the next transition. Returns an unsubscribe function.
+   */
+  subscribeStatus(handler: StatusHandler): () => void {
+    this.statusHandlers.add(handler);
+    // Guarded like every other notification: the immediate call is the one most
+    // likely to throw, because it runs during the caller's own render.
+    try {
+      handler(this.status);
+    } catch {
+      // Registration still succeeded; a broken handler is the handler's problem.
+    }
+    return () => {
+      this.statusHandlers.delete(handler);
+    };
+  }
+
+  private setStatus(next: RealtimeStatus): void {
+    if (this.status === next) return;
+    this.status = next;
+    for (const handler of this.statusHandlers) {
+      try {
+        handler(next);
+      } catch {
+        // A listener that throws must not stop the others, or one broken
+        // indicator silences every other consumer of this state.
+      }
+    }
   }
 
   /** Subscribe a handler to `topic`. Returns an unsubscribe function. */
@@ -92,6 +141,10 @@ export class RealtimeClient {
     }
     this.ws?.close();
     this.ws = null;
+    // Set directly rather than waiting for onclose: a socket that never opened
+    // has no onclose to fire, and the caller has already been told the session
+    // is over.
+    this.setStatus('disconnected');
   }
 
   // ─── private ──────────────────────────────────────────────────────────
@@ -123,6 +176,9 @@ export class RealtimeClient {
   }
 
   private async connect(): Promise<void> {
+    if (!this.closed) {
+      this.setStatus(this.reconnectAttempts > 0 ? 'reconnecting' : 'connecting');
+    }
     let ticket: string | null | undefined;
     try {
       ticket = await this.getTicket();
@@ -160,6 +216,7 @@ export class RealtimeClient {
 
     ws.onopen = (): void => {
       this.reconnectAttempts = 0;
+      this.setStatus('connected');
       // Re-subscribe to everything that was active before the connect.
       const topics = Array.from(this.subs.keys());
       if (topics.length > 0) {
@@ -197,7 +254,13 @@ export class RealtimeClient {
         this.pingInterval = null;
       }
       this.ws = null;
-      if (this.closed) return;
+      if (this.closed) {
+        this.setStatus('disconnected');
+        return;
+      }
+      // Retrying with backoff, which is not the same as being disconnected: the
+      // caller can keep buffering rather than treating the session as over.
+      this.setStatus('reconnecting');
       this.scheduleReconnect();
     };
   }

@@ -8,6 +8,9 @@ describe('RealtimeClient', () => {
 
   it('subscribes and handles incoming WebSocket messages', () => {
     let mockWsInstance: any = null;
+    const capture = (ws: any): void => {
+      mockWsInstance = ws;
+    };
 
     class MockWebSocket {
       static CONNECTING = 0;
@@ -23,7 +26,7 @@ describe('RealtimeClient', () => {
       onerror: any;
       onclose: any;
       constructor(public url: string) {
-        mockWsInstance = this;
+        capture(this);
       }
     }
 
@@ -92,6 +95,9 @@ describe('RealtimeClient', () => {
 
   it('removes a legacy token from the supplied URL before opening the socket', async () => {
     let mockWsInstance: any = null;
+    const capture = (ws: any): void => {
+      mockWsInstance = ws;
+    };
 
     class MockWebSocket {
       static CONNECTING = 0;
@@ -107,7 +113,7 @@ describe('RealtimeClient', () => {
       onerror: any;
       onclose: any;
       constructor(public url: string) {
-        mockWsInstance = this;
+        capture(this);
       }
     }
 
@@ -122,5 +128,134 @@ describe('RealtimeClient', () => {
     expect(mockWsInstance.url).toBe('wss://test.voxire.com/ws?ticket=single-use-ticket');
     expect(mockWsInstance.url).not.toContain('reusable-jwt');
     client.close();
+  });
+
+  describe('connection state', () => {
+    function stubSocket() {
+      let instance: any = null;
+      const capture = (ws: any): void => {
+        instance = ws;
+      };
+      class MockWebSocket {
+        static CONNECTING = 0;
+        static OPEN = 1;
+        static CLOSING = 2;
+        static CLOSED = 3;
+        readyState = 0;
+        close = vi.fn();
+        send = vi.fn();
+        onopen: any;
+        onmessage: any;
+        onerror: any;
+        onclose: any;
+        constructor(public url: string) {
+          capture(this);
+        }
+      }
+      vi.stubGlobal('WebSocket', MockWebSocket);
+      return () => instance;
+    }
+
+    it('reports disconnected before anything has tried to connect', () => {
+      stubSocket();
+      const client = new RealtimeClient({
+        url: 'wss://test.voxire.com/ws',
+        getTicket: async () => 'ticket',
+      });
+
+      expect(client.getStatus()).toBe('disconnected');
+      client.close();
+    });
+
+    it('hands a new listener the current status immediately, not on next change', () => {
+      stubSocket();
+      const client = new RealtimeClient({
+        url: 'wss://test.voxire.com/ws',
+        getTicket: async () => 'ticket',
+      });
+
+      const seen: string[] = [];
+      client.subscribeStatus((s) => seen.push(s));
+
+      expect(seen).toEqual(['disconnected']);
+      client.close();
+    });
+
+    it('moves to connected when the socket opens and back on close', async () => {
+      const socket = stubSocket();
+      const client = new RealtimeClient({
+        url: 'wss://test.voxire.com/ws',
+        getTicket: async () => 'ticket',
+      });
+
+      const seen: string[] = [];
+      client.subscribeStatus((s) => seen.push(s));
+      client.subscribe('project:1', vi.fn());
+
+      await vi.waitFor(() => expect(socket()).not.toBeNull());
+      expect(seen).toContain('connecting');
+
+      socket().readyState = 1;
+      socket().onopen?.();
+      expect(client.getStatus()).toBe('connected');
+      expect(seen).toContain('connected');
+
+      socket().onclose?.();
+      expect(client.getStatus()).toBe('reconnecting');
+      expect(seen).toContain('reconnecting');
+
+      client.close();
+    });
+
+    it('reports disconnected after an explicit close, never reconnecting', async () => {
+      const socket = stubSocket();
+      const client = new RealtimeClient({
+        url: 'wss://test.voxire.com/ws',
+        getTicket: async () => 'ticket',
+      });
+      client.subscribe('project:1', vi.fn());
+      await vi.waitFor(() => expect(socket()).not.toBeNull());
+      socket().onopen?.();
+
+      client.close();
+
+      expect(client.getStatus()).toBe('disconnected');
+    });
+
+    it('stops notifying a listener that unsubscribed', async () => {
+      const socket = stubSocket();
+      const client = new RealtimeClient({
+        url: 'wss://test.voxire.com/ws',
+        getTicket: async () => 'ticket',
+      });
+
+      const seen: string[] = [];
+      const unsub = client.subscribeStatus((s) => seen.push(s));
+      unsub();
+      client.subscribe('project:1', vi.fn());
+      await vi.waitFor(() => expect(socket()).not.toBeNull());
+      socket().onopen?.();
+
+      expect(seen).toEqual(['disconnected']);
+      client.close();
+    });
+
+    it('does not let one throwing listener stop the others', () => {
+      stubSocket();
+      const client = new RealtimeClient({
+        url: 'wss://test.voxire.com/ws',
+        getTicket: async () => 'ticket',
+      });
+
+      const second = vi.fn();
+      client.subscribeStatus(() => {
+        throw new Error('listener blew up');
+      });
+      client.subscribeStatus(second);
+      client.subscribe('project:1', vi.fn());
+
+      expect(second).toHaveBeenCalled();
+      client.close();
+    });
   });
 });

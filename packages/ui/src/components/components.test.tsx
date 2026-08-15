@@ -143,4 +143,67 @@ describe('@voxire/ui components', () => {
       expect(recoverFromDynamicImportError(new Error('Syntax error'))).toBe(false);
     });
   });
+
+  describe('Button — accent contrast and dense size', () => {
+    it('does not put white on the accent fill, which measures 1.9:1', () => {
+      render(<Button variant="accent">Save</Button>);
+
+      const cls = screen.getByRole('button', { name: 'Save' }).className;
+      expect(cls).not.toContain('text-white');
+      expect(cls).toContain('text-accent-foreground');
+    });
+
+    it('leaves the other variants on white, where the fill is dark enough', () => {
+      render(<Button variant="primary">Primary</Button>);
+
+      expect(screen.getByRole('button', { name: 'Primary' }).className).toContain('text-white');
+    });
+
+    it('offers an xs size for toolbar and table-row actions', () => {
+      render(
+        <Button variant="accent" size="xs">
+          Export
+        </Button>
+      );
+
+      expect(screen.getByRole('button', { name: 'Export' }).className).toContain('h-[30px]');
+    });
+
+    it('keeps md as the default size', () => {
+      render(<Button>Default</Button>);
+
+      expect(screen.getByRole('button', { name: 'Default' }).className).toContain('h-10');
+    });
+  });
+
+  describe('Badge — dense size', () => {
+    it('offers a sm size at 10px for dense table rows', () => {
+      render(<Badge size="sm">Pending</Badge>);
+
+      expect(screen.getByText('Pending').className).toContain('text-[10px]');
+    });
+
+    it('stays at text-xs by default, so existing badges do not change', () => {
+      render(<Badge>Default</Badge>);
+
+      expect(screen.getByText('Default').className).toContain('text-xs');
+    });
+  });
+
+  describe('Avatar — dense size', () => {
+    it('offers an xs size at 24px with 10px initials', () => {
+      render(<Avatar initials="MK" size="xs" />);
+
+      const cls = screen.getByText('MK').parentElement?.className ?? '';
+      expect(cls).toContain('h-6');
+      expect(cls).toContain('w-6');
+      expect(cls).toContain('text-[10px]');
+    });
+
+    it('keeps md as the default size, so existing avatars do not change', () => {
+      render(<Avatar initials="SO" />);
+
+      expect(screen.getByText('SO').parentElement?.className ?? '').toContain('h-9');
+    });
+  });
 });
