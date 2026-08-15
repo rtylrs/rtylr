@@ -14,6 +14,7 @@ import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useQuotes, useCreateQuote, useConvertQuote, useUpdateQuoteStatus } from './useQuotes';
 import { formatDate } from '../../shared/lib/date';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
+import { useSettings } from '../../shared/lib/settings';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
   Draft: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
@@ -33,6 +34,7 @@ interface NewQuoteForm {
 
 const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const createQuote = useCreateQuote();
+  const currency = useSettings((s) => s.currency);
   const [form, setForm] = useState<NewQuoteForm>({
     client: '',
     amount: 0,
@@ -41,7 +43,8 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
     description: '',
   });
 
-  const handleSubmit = (): void => {
+  const handleSubmit = (e: React.FormEvent): void => {
+    e.preventDefault();
     if (!form.client.trim()) {
       toast.error('Client name is required');
       return;
@@ -54,7 +57,7 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
       {
         client: form.client,
         amount: form.amount,
-        currency: 'USD',
+        currency,
         issuedDate: form.issuedDate,
         expiresAt: form.expiresAt,
         description: form.description || undefined,

@@ -6,6 +6,8 @@ import { cashFlowSeriesPointSchema } from '../../shared/schemas/cashFlow';
 import type { CashFlowPoint } from '../../shared/components/CashFlowChart';
 import { unwrapList } from '../../shared/lib/unwrapList';
 
+import { minorToMajor } from '../../shared/lib/money';
+
 export function useCashFlow() {
   const now = new Date();
   const from = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().slice(0, 10);
@@ -21,8 +23,8 @@ export function useCashFlow() {
       const series = z.array(cashFlowSeriesPointSchema).parse(unwrapList(res, 'series'));
       return series.map((p) => ({
         month: p.date,
-        inflow: Math.round(p.inflowMinorUnits) / 100,
-        outflow: Math.round(p.outflowMinorUnits) / 100,
+        inflow: minorToMajor(Math.round(p.inflowMinorUnits)),
+        outflow: minorToMajor(Math.round(p.outflowMinorUnits)),
       }));
     },
   });

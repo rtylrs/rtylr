@@ -79,6 +79,23 @@ export function convert(amount: number, from: Currency, to: Currency): number {
   return amountInUsd * toRate;
 }
 
+const ZERO_DECIMAL_CURRENCIES: ReadonlySet<Currency> = new Set<Currency>(['JPY']);
+
+export function fractionDigitsForCurrency(currency: Currency): number {
+  return ZERO_DECIMAL_CURRENCIES.has(currency) ? 0 : 2;
+}
+
+export function minorToMajor(amount: number, currency: Currency = 'USD'): number {
+  const digits = fractionDigitsForCurrency(currency);
+  const divisor = Math.pow(10, digits);
+  return amount / divisor;
+}
+
+export function majorToMinor(amount: number, currency: Currency = 'USD'): number {
+  const digits = fractionDigitsForCurrency(currency);
+  return Math.round(amount * Math.pow(10, digits));
+}
+
 export function parseMoney(input: string): number {
   const cleaned = input.replace(/[^0-9.\-]/g, '');
   const n = parseFloat(cleaned);
