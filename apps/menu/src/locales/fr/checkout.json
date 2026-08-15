@@ -1,0 +1,18 @@
+{
+  "title": "Commander",
+  "name": "Nom",
+  "namePlaceholder": "Votre nom",
+  "phone": "Téléphone",
+  "phonePlaceholder": "ex: +33 6 12 34 56 78",
+  "email": "E-mail (optionnel)",
+  "emailPlaceholder": "vous@exemple.com",
+  "notes": "Instructions (optionnel)",
+  "notesPlaceholder": "Instructions spéciales...",
+  "placeOrder": "Passer la commande",
+  "submitting": "Commande en cours...",
+  "emptyCart": "Votre panier est vide",
+  "nameRequired": "Veuillez entrer votre nom.",
+  "phoneRequired": "Veuillez entrer votre numéro de téléphone.",
+  "emailInvalid": "Veuillez entrer une adresse e-mail valide.",
+  "orderFailed": "Échec de la commande. Veuillez réessayer."
+}
