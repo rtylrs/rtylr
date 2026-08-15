@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Save, Plus, Zap, Mail, MessageSquare, Gift } from 'lucide-react';
 import {
@@ -20,21 +20,19 @@ interface Node {
 
 const triggers = [
   { label: 'New customer', description: 'When a customer is created' },
-  { label: 'Birthday', description: "On the customer's birthday" },
-  { label: 'Inactive customer', description: 'When a customer becomes inactive' },
-  { label: 'Order created', description: 'After a qualifying order' },
-  { label: 'Tier upgrade', description: 'When tier changes' },
+  { label: 'Tag added', description: 'When a tag is added to a customer' },
+  { label: 'Points threshold', description: 'When customer points reach target' },
 ];
 const actions = [
-  { label: 'Send email', description: 'Sends an email template', icon: Mail },
+  { label: 'Send email', description: 'Sends an email campaign', icon: Mail },
   { label: 'Send SMS', description: 'Sends an SMS message', icon: MessageSquare },
   { label: 'Award points', description: 'Adds loyalty points', icon: Gift },
 ];
 
 const AutomationBuilder: React.FC = () => {
   const navigate = useNavigate();
-  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  const automationId = Number(new URLSearchParams(searchStr).get('id') || 0) || undefined;
+  const search = useSearch({ strict: false }) as { id?: number };
+  const automationId = search?.id ? Number(search.id) : undefined;
   const isEditing = !!automationId;
   const create = useCreateAutomation();
   const update = useUpdateAutomation();

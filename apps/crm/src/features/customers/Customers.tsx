@@ -15,8 +15,9 @@ import {
   Tag as TagIcon,
 } from 'lucide-react';
 import { useListCustomers, useUpdateCustomer } from '../../shared/hooks/queries/useCustomers';
+import { useLoyaltyConfig } from '../../shared/hooks/queries/useLoyalty';
 import { type Customer } from '../../shared/schemas/customers';
-import { getCustomerTier, Tier, tierColor } from '../../shared/lib/tiers';
+import { getCustomerTier, thresholdsFromConfig, Tier, tierColor } from '../../shared/lib/tiers';
 import { Button, EmptyState, PageHeader, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, TagChip } from '../../shared/components/crm';
 
@@ -111,6 +112,9 @@ const Customers: React.FC = () => {
     search: search.trim() || undefined,
   });
   const update = useUpdateCustomer();
+  const { data: loyaltyConfig } = useLoyaltyConfig();
+  const thresholds = thresholdsFromConfig(loyaltyConfig);
+
   useEffect(() => {
     if (!fetchedCustomers) return;
     setLoadedCustomers((previous) => {
@@ -134,7 +138,8 @@ const Customers: React.FC = () => {
 
   const filtered = customers.filter((c) => {
     const matchTier =
-      tierFilter === 'All' || getCustomerTier(c.loyaltyPoints, c.loyaltyTier) === tierFilter;
+      tierFilter === 'All' ||
+      getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds) === tierFilter;
     return matchTier;
   });
 
@@ -205,7 +210,7 @@ const Customers: React.FC = () => {
         String(c.totalSpent),
         String(c.visits),
         String(c.loyaltyPoints),
-        getCustomerTier(c.loyaltyPoints, c.loyaltyTier),
+        getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds),
       ]),
     ];
     const csv = rows
@@ -451,7 +456,7 @@ const Customers: React.FC = () => {
                 <tbody>
                   <AnimatePresence>
                     {filtered.map((c) => {
-                      const tier = getCustomerTier(c.loyaltyPoints, c.loyaltyTier);
+                      const tier = getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds);
                       const isExpanded = expandedId === c.id;
                       const isSelected = selected.has(c.id);
                       return (
