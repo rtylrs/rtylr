@@ -304,7 +304,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const userEmail = user?.email || null;
   const userName = user?.fullName || 'User';
   const businessName = user?.businessName || 'My Business';
-  const isConsoleAdmin = user?.isConsoleAdmin === true || user?.is_console_admin === true;
+  const isConsoleAdmin = user?.isConsoleAdmin === true;
+
   const caretSystemContext = React.useMemo(
     () =>
       buildDashSystemContext({
