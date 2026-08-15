@@ -153,11 +153,14 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
     // given since we can't yet validate kind-specific rules
     // server-side.
     for (const f of customFields) {
-      if (!f.required) continue;
       const v = answers[String(f.id)];
       const empty = v === undefined || v === '' || (Array.isArray(v) && v.length === 0);
-      if (empty) {
+      if (f.required && empty) {
         toast.error(`"${f.label}" is required`);
+        return;
+      }
+      if (typeof v === 'string' && v.length > 5000) {
+        toast.error(`"${f.label}" exceeds maximum length of 5000 characters`);
         return;
       }
     }
