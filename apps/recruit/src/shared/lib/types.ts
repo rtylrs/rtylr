@@ -38,7 +38,7 @@ export type FontPairingId =
 
 export interface Customization {
   id: number;
-  ownerId: number;
+  ownerId?: number;
   slug: string;
   brandName: string;
   tagline: string;
@@ -61,10 +61,10 @@ export interface Customization {
   gaMeasurementId: string;
   metaPixelId: string;
   requireConsent: boolean;
-  notificationEmail: string;
-  emailNotifications: boolean;
-  createdAt: string;
-  updatedAt: string;
+  notificationEmail?: string;
+  emailNotifications?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // SectionKind is the discriminator for content sections. Templates

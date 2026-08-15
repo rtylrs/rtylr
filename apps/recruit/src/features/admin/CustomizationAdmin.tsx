@@ -167,8 +167,8 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
     setGaMeasurementId(existing.gaMeasurementId);
     setMetaPixelId(existing.metaPixelId);
     setRequireConsent(existing.requireConsent);
-    setNotificationEmail(existing.notificationEmail);
-    setEmailNotifications(existing.emailNotifications);
+    setNotificationEmail(existing.notificationEmail ?? '');
+    setEmailNotifications(existing.emailNotifications ?? true);
   }, [existing]);
 
   const onSubmit = (e: React.FormEvent) => {
