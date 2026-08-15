@@ -21,7 +21,7 @@ function blocksToText(blocks: ContentBlock[]): string {
     .map((block) => {
       if (block.type === 'text') return block.content;
       if (block.type === 'thinking') return '';
-      return `[tool:${block.name}]`;
+      return '[business check]';
     })
     .filter(Boolean)
     .join('\n');

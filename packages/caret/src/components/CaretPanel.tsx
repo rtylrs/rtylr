@@ -25,8 +25,7 @@ import HeaderBar from './header/HeaderBar';
 import MessageList from './MessageList';
 import MessageSkeleton from './MessageSkeleton';
 import { Composer } from './composer';
-import ChatTabs from './ChatTabs';
-import EmptyState from './EmptyState';
+import WelcomeHero from './WelcomeHero';
 import SettingsPanel from './SettingsPanel';
 import { ChatList } from './sidebar';
 
@@ -36,8 +35,15 @@ export interface CaretPanelProps {
   pageContext?: CaretPageContext;
   userId: number;
   apiBaseUrl: string;
-  /** 'inline' renders inside a flex column the parent controls. */
-  variant?: 'inline';
+  /**
+   * 'inline' renders inside a flex column the parent controls (a side panel).
+   * 'fullscreen' fills its container edge-to-edge as a stand-alone page/route.
+   * 'overlay' floats as a centered, rounded panel over a dimmed backdrop -
+   * summoned from an "Ask Caret" trigger elsewhere on the page.
+   * Both 'fullscreen' and 'overlay' show a centered welcome hero when empty
+   * and a centered chat column once messages exist.
+   */
+  variant?: 'inline' | 'fullscreen' | 'overlay';
 }
 
 type ToolDecision = 'approve' | 'deny';
@@ -108,7 +114,6 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
   const caret = useCaretStore();
   const activeTab = caret.tabs.find((tab) => tab.id === caret.activeTabId) ?? caret.tabs[0];
   const activeTabId = activeTab?.id ?? caret.activeTabId;
-  const showTabStrip = caret.tabs.length > 1;
   const sessionId = activeTab?.sessionId ?? null;
   const messages = activeTab?.messages ?? EMPTY_MESSAGES;
   const isStreaming = activeTab?.isStreaming ?? false;
@@ -357,8 +362,31 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
     [sendPromptWithIntent]
   );
 
-  const rootStyle: React.CSSProperties =
-    variant === 'inline'
+  const isFullscreen = variant === 'fullscreen';
+  const isOverlay = variant === 'overlay';
+  const [expanded, setExpanded] = useState(false);
+  /** Detached from the docked/compact presentation into a full, floating workspace. */
+  const isDetached = !isFullscreen && expanded;
+  const isBig = isFullscreen || isDetached;
+  const isEmpty = !isLoading && messages.length === 0;
+  const mainShowsChat = view === 'chat' || (isBig && view === 'history');
+
+  const rootStyle: React.CSSProperties = isDetached
+    ? {
+        position: 'fixed',
+        inset: 'clamp(16px, 3vh, 48px) clamp(16px, 3vw, 64px)',
+        zIndex: 9999,
+        background: caretTokens.bg,
+        boxSizing: 'border-box',
+        borderRadius: 20,
+        border: `1px solid ${caretTokens.border}`,
+        boxShadow: caretTokens.shadow,
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        transition: 'inset 0.18s ease',
+      }
+    : variant === 'inline' || isFullscreen
       ? {
           position: 'relative',
           width: '100%',
@@ -366,67 +394,74 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
           background: caretTokens.bg,
           boxSizing: 'border-box',
           minWidth: 0,
-          borderLeft: `1px solid ${caretTokens.border}`,
+          borderLeft: isFullscreen ? 'none' : `1px solid ${caretTokens.border}`,
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
         }
-      : {
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          width: panelWidth,
-          height: '100dvh',
-          zIndex: 9999,
-          background: caretTokens.bg,
-          boxSizing: 'border-box',
-          minWidth: 0,
-          borderLeft: `1px solid ${caretTokens.border}`,
-          display: 'flex',
-          flexDirection: 'column',
-          transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
-          transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-          willChange: 'transform',
-        };
+      : isOverlay
+        ? {
+            position: 'relative',
+            width: 'min(880px, 92vw)',
+            height: 'min(760px, 86vh)',
+            background: caretTokens.bg,
+            boxSizing: 'border-box',
+            minWidth: 0,
+            borderRadius: 20,
+            border: `1px solid ${caretTokens.border}`,
+            boxShadow: caretTokens.shadow,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            transform: isOpen ? 'scale(1) translateY(0)' : 'scale(0.97) translateY(8px)',
+            transition: 'transform 0.18s ease',
+          }
+        : {
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            width: panelWidth,
+            height: '100dvh',
+            zIndex: 9999,
+            background: caretTokens.bg,
+            boxSizing: 'border-box',
+            minWidth: 0,
+            borderLeft: `1px solid ${caretTokens.border}`,
+            display: 'flex',
+            flexDirection: 'column',
+            transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
+            transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+            willChange: 'transform',
+          };
 
-  return (
-    <aside
-      role="complementary"
-      aria-label="Caret AI assistant"
-      className={introPlaying ? 'caret-panel-shell caret-intro' : 'caret-panel-shell'}
-      style={rootStyle}
+  const centerColStyle: React.CSSProperties | undefined = isBig
+    ? { width: '100%', maxWidth: 820, margin: '0 auto', padding: '0 24px', boxSizing: 'border-box' }
+    : undefined;
+  const composerWrapStyle: React.CSSProperties | undefined = isBig
+    ? { ...centerColStyle, paddingBottom: 20 }
+    : undefined;
+
+  const mainColumn = (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        minHeight: 0,
+        overflow: 'hidden',
+      }}
     >
-      <span
-        role="separator"
-        aria-orientation="vertical"
-        aria-label="Resize Caret panel"
-        onMouseDown={onMouseDown}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: -3,
-          width: 6,
-          height: '100%',
-          cursor: 'col-resize',
-          zIndex: 10,
-        }}
+      <HeaderBar
+        onNewChat={newChat}
+        hideClose={isFullscreen}
+        title={activeTab?.title}
+        expanded={!isFullscreen ? expanded : undefined}
+        onToggleExpand={!isFullscreen ? () => setExpanded((v) => !v) : undefined}
       />
-
-      <HeaderBar onNewChat={newChat} />
-      {view === 'chat' && (
+      {mainShowsChat && (
         <>
-          {showTabStrip && (
-            <ChatTabs
-              tabs={caret.tabs}
-              activeTabId={activeTabId}
-              onSelect={caret.setActiveTab}
-              onClose={closeChatTab}
-            />
-          )}
           <div
             id={`caret-chat-panel-${activeTabId}`}
-            role={showTabStrip ? 'tabpanel' : undefined}
-            aria-labelledby={showTabStrip ? `caret-chat-tab-${activeTabId}` : undefined}
             style={{
               display: 'flex',
               flex: 1,
@@ -435,42 +470,53 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
               overflow: 'hidden',
             }}
           >
-            {isLoading ? (
-              <div
-                style={{
-                  flex: 1,
-                  overflowY: 'auto',
-                  padding: 18,
-                }}
-              >
-                <MessageSkeleton />
-              </div>
-            ) : messages.length === 0 ? (
-              <EmptyState label={`No messages yet. ${emptyState.composerPlaceholder}`} />
-            ) : (
-              <MessageList
-                messages={messages}
+            <div
+              style={{
+                flex: 1,
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                ...centerColStyle,
+              }}
+            >
+              {isEmpty ? (
+                <WelcomeHero
+                  size={isBig ? 'lg' : 'sm'}
+                  emptyState={emptyState}
+                  onStarter={sendStarter}
+                />
+              ) : isLoading ? (
+                <div style={{ flex: 1, overflowY: 'auto', padding: 18 }}>
+                  <MessageSkeleton />
+                </div>
+              ) : (
+                <MessageList
+                  messages={messages}
+                  isStreaming={isStreaming}
+                  scrollKey={activeTabId}
+                  showThinking={showThinking}
+                  onApproveTool={onApprove}
+                  onDenyTool={onDeny}
+                  followUps={followUps}
+                  onFollowUp={sendStarter}
+                />
+              )}
+            </div>
+            <div style={composerWrapStyle}>
+              <Composer
+                key={activeTabId}
+                size={isBig ? 'lg' : 'md'}
                 isStreaming={isStreaming}
-                scrollKey={activeTabId}
-                showThinking={showThinking}
-                onApproveTool={onApprove}
-                onDenyTool={onDeny}
-                followUps={followUps}
-                onFollowUp={sendStarter}
+                onSubmit={(t) => sendPromptWithIntent(t)}
+                onStop={() => stopStreaming(activeTabId)}
+                placeholder={emptyState.composerPlaceholder}
               />
-            )}
-            <Composer
-              key={activeTabId}
-              isStreaming={isStreaming}
-              onSubmit={(t) => sendPromptWithIntent(t)}
-              onStop={() => stopStreaming(activeTabId)}
-              placeholder={emptyState.composerPlaceholder}
-            />
+            </div>
           </div>
         </>
       )}
 
-      {view === 'history' && (
+      {!isBig && view === 'history' && (
         <ChatList
           chats={sessions}
           activeId={sessionId}
@@ -481,7 +527,91 @@ const CaretPanel: React.FC<CaretPanelProps> = ({
       )}
 
       {view === 'settings' && <SettingsPanel />}
+    </div>
+  );
+
+  const panel = (
+    <aside
+      role="complementary"
+      aria-label="Caret AI assistant"
+      className={
+        (introPlaying ? 'caret-panel-shell caret-intro' : 'caret-panel-shell') +
+        (isBig ? ' caret-panel-textured' : '')
+      }
+      style={rootStyle}
+    >
+      {variant === 'inline' && !isDetached && (
+        <span
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize Caret panel"
+          onMouseDown={onMouseDown}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: -3,
+            width: 6,
+            height: '100%',
+            cursor: 'col-resize',
+            zIndex: 10,
+          }}
+        />
+      )}
+
+      {isBig ? (
+        <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+          <div
+            style={{
+              width: 260,
+              flexShrink: 0,
+              minHeight: 0,
+              borderRight: `1px solid ${caretTokens.border}`,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              background: caretTokens.bg,
+            }}
+          >
+            <ChatList
+              chats={sessions}
+              activeId={sessionId}
+              onSelect={selectChat}
+              onNew={newChat}
+              onDelete={deleteChat}
+            />
+          </div>
+          {mainColumn}
+        </div>
+      ) : (
+        mainColumn
+      )}
     </aside>
+  );
+
+  if (!isOverlay && !isDetached) return panel;
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: isOpen ? 'rgba(0, 0, 0, 0.45)' : 'transparent',
+        backdropFilter: isOpen ? 'blur(6px)' : 'none',
+        WebkitBackdropFilter: isOpen ? 'blur(6px)' : 'none',
+        opacity: isOpen ? 1 : 0,
+        pointerEvents: isOpen ? 'auto' : 'none',
+        transition: 'opacity 0.18s ease, background 0.18s ease, backdrop-filter 0.18s ease',
+      }}
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) caret.close();
+      }}
+    >
+      {panel}
+    </div>
   );
 };
 

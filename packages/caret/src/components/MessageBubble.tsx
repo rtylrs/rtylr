@@ -24,7 +24,7 @@ function blocksToText(blocks: ContentBlock[]): string {
     .map((b) => {
       if (b.type === 'text') return b.content;
       if (b.type === 'thinking') return '';
-      return `[tool:${b.name}]`;
+      return '[business check]';
     })
     .filter(Boolean)
     .join('\n');
@@ -62,14 +62,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       >
         <div
           style={{
-            maxWidth: '88%',
-            padding: '8px 11px',
-            borderRadius: 4,
-            border: `1px solid ${caretTokens.border}`,
-            background: caretTokens.surfaceHigh,
+            maxWidth: '82%',
+            padding: '10px 14px',
+            borderRadius: '16px 16px 4px 16px',
+            background: caretTokens.accentSoft,
             color: caretTokens.text,
             fontSize: 13.5,
-            lineHeight: 1.5,
+            lineHeight: 1.55,
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
           }}
