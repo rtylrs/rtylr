@@ -87,11 +87,10 @@ employee.
 
 The contract has optional `employee_id` and `status` query filters
 (`models.onk:87-92`), but `list_leave_requests_handler.go:19-22` and
-`domain.ListLeaveRequestsParams` (`types.go:59-62`) only take `limit`/`offset`
-
-- there is no filtering code at all. Today, "list my leave requests" is not
-  actually expressible: the endpoint returns every request in the tenant,
-  unscoped, to whoever calls it.
+`domain.ListLeaveRequestsParams` (`types.go:59-62`) only take `limit`/`offset` -
+there is no filtering code at all. Today, "list my leave requests" is not
+actually expressible: the endpoint returns every request in the tenant,
+unscoped, to whoever calls it.
 
 ### 3. `listStaff` returns salary and emergency-contact data to any authenticated caller
 
@@ -128,9 +127,9 @@ Two views, both hitting `hr.leave.v1` directly:
   business-configurable (`hr.leave.v1`'s `listLeaveTypes`), so the type
   picker is a real config-driven list, not a hardcoded enum - consistent
   with this repo's "never hardcode a business rule" rule.
-- No cancel exists in the contract today. A submitted request cannot be
-  withdrawn through this API. Worth deciding whether that's acceptable for
-  v1 or needs its own small HR contract addition - flagged, not decided here.
+- **Cancel one.** No cancel RPC exists in the contract today - decided below
+  that this ships as a small addition alongside the other HR fixes, scoped
+  to the caller's own request and only while it is still `pending`.
 
 ### Profile
 
@@ -161,13 +160,16 @@ permission itself.
 
 The one genuinely new backend capability in this document. Everything built
 today for `/time/team` (`ListWorkDaysForWorkspace`) resolves through one
-workspace's membership; this needs the same shape resolved for every
-employee in the business regardless of workspace, gated by the new
-business-wide permission rather than `RequireWorkspaceRole`. Whether this
-reuses the same `WorkDay`-shaped response or needs less detail (just mode +
-onsite/remote/on-leave, not full clocked/logged/gap figures - a company-wide
-presence view arguably doesn't need someone's exact minutes visible to every
-colleague) is an open call, not decided here.
+workspace's membership; this needs the same resolution for every employee in
+the business regardless of workspace, gated by the new business-wide
+permission rather than `RequireWorkspaceRole`. Decided below: this is
+**presence only** - mode (onsite/remote/hybrid), on-leave, or not-started-yet
+
+- not the full `WorkDay` shape. No clocked/logged/gap minutes: a company-wide
+  view watched by every employee is a different exposure than the
+  workspace-admin-gated Team view, and showing colleagues' exact hours to
+  people with no management relationship over them is not what "who's in
+  today" is asking for.
 
 ## Log Hours, from the screenshot
 
@@ -194,10 +196,11 @@ screen itself:
 1. **Fix the two HR gaps**, on their own, the same way `scope()` shipped
    alone today: deny a cross-employee `employee_id` on
    `createLeaveRequest`/`listLeaveRequests` until real authorization exists,
-   implement the declared list filters for real, and resolve the `listStaff`
-   over-exposure. This is HR's contract and HR's backend - whoever owns that
-   surface needs to sign off on landing it there, the same way Flow's
-   dependency on HR itself needed an explicit yes earlier in this project.
+   implement the declared list filters for real, add the cancel RPC, and
+   resolve the `listStaff` over-exposure. This is HR's contract and HR's
+   backend - it lands as its own separate, clearly-labeled change against
+   HR's code, reviewed as the authorization-model change it is, independent
+   of who ends up writing it.
 2. **Log Hours rebuild** - independently shippable, no dependency on step 1.
 3. **Leave** - depends on step 1's fixes to be safe to ship at all.
 4. **Profile** - depends on nothing new; can land any time after step 2.
@@ -206,12 +209,39 @@ screen itself:
    new backend query; the least-specified item here and the one most likely
    to need its own round of questions when it's actually picked up.
 
-## Still genuinely open
+## Decisions on the three items left open
 
-1. **Leave's missing cancel RPC.** Acceptable gap for v1, or does HR need a
-   small addition first?
-2. **Who's in today's response shape.** Full work-day detail, or a
-   deliberately thinner presence-only view?
-3. **Who owns fixing the two HR gaps.** This document assumes whoever builds
-   Leave/Directory does it, since Flow can't safely proceed without it, but
-   that is this session's assumption, not a decision made with HR's owner.
+### 1. Cancel a pending leave request: add it, scoped tight
+
+A self-service leave feature with no way to withdraw your own request will
+surface as a real complaint the first time someone submits one by mistake or
+their plans change - "submit" without "undo" is half a feature. Add a small
+`cancelLeaveRequest` RPC alongside the other HR fixes: the caller may only
+cancel their own request (same ownership check as the `employee_id` fix
+above), and only while `status` is still `pending`. Once a request is
+approved, cancelling it can have payroll or scheduling consequences a bare
+status flip should not trigger silently - that path, if it's ever needed,
+is a request to a manager, not a self-service button.
+
+### 2. Who's in today: presence only, no minutes
+
+The existing Team view is workspace-admin-gated - only someone who manages
+that specific team sees it. A company-wide version watched by every employee
+is a different exposure entirely: showing exact clocked/logged/gap minutes
+for every colleague, including people with no management relationship to
+each other, is peer surveillance wearing the costume of reference info. The
+feature's own stated purpose - "who's onsite/remote/on leave right now" - is
+about mode and status, not performance. Ship it thin: mode
+(onsite/remote/hybrid), on-leave, or not-started-yet. No minutes, no gap
+figures. Widening it later is a real, separate decision if it turns out to
+be genuinely wanted - not the default to ship with.
+
+### 3. Who owns fixing the two HR gaps: not mine to assign, but the process is
+
+Which person at Voxire signs off on a change to HR's authorization surface
+is not something to decide from inside a design doc. What can be decided:
+the fix ships as its own separate, clearly-labeled change against HR's code
+
+- never folded quietly into a Flow PR - because it alters another app's
+  authorization model and deserves review as exactly that, independent of who
+  ends up writing it or when.
