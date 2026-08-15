@@ -77,6 +77,18 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     logo: biz.business.logoUrl || undefined,
   };
 
+  const hasItems = categories.some((cat) => cat.items && cat.items.length > 0);
+  if (!hasItems) {
+    return (
+      <div style={{ padding: 48, textAlign: 'center' }}>
+        <h1 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>No menu items available</h1>
+        <p style={{ fontSize: 14, opacity: 0.7 }}>
+          This menu is currently empty. Please check back later.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <>
       <HelmetContainer title="Menu · rtylr" />
