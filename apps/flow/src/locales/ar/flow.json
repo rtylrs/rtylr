@@ -113,6 +113,36 @@
       "rateNotSet": "غير محدّد"
     }
   },
+  "leave": {
+    "heading": "الإجازات",
+    "balanceHeading": "رصيدك",
+    "noBalances": "لا يوجد رصيد إجازات بعد. اطلب من الموارد البشرية إعداد أنواع الإجازة واستحقاقك.",
+    "entitled": "المستحق",
+    "used": "المستخدم",
+    "pending": "قيد الانتظار",
+    "remaining": "المتبقي",
+    "requestsHeading": "طلباتك",
+    "noRequests": "لا توجد طلبات إجازة بعد.",
+    "newRequest": "طلب إجازة",
+    "leaveType": "النوع",
+    "selectLeaveType": "اختر نوعاً",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "totalDays": "عدد الأيام",
+    "notes": "ملاحظات (اختياري)",
+    "submit": "إرسال الطلب",
+    "requestSubmitted": "تم إرسال طلب الإجازة",
+    "requestFailed": "تعذّر إرسال طلب الإجازة",
+    "cancelRequestLabel": "إلغاء هذا الطلب",
+    "requestCanceled": "تم إلغاء طلب الإجازة",
+    "cancelFailed": "تعذّر إلغاء طلب الإجازة",
+    "status": {
+      "pending": "قيد الانتظار",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض",
+      "cancelled": "ملغى"
+    }
+  },
   "profile": {
     "heading": "الملف الشخصي",
     "noRecordTitle": "لا يوجد سجل موارد بشرية مرتبط بعد",

@@ -105,6 +105,36 @@
       "rateNotSet": "Non défini"
     }
   },
+  "leave": {
+    "heading": "Congés",
+    "balanceHeading": "Votre solde",
+    "noBalances": "Aucun solde de congés pour l'instant. Demandez aux RH de configurer vos types de congés et votre droit.",
+    "entitled": "Acquis",
+    "used": "Utilisé",
+    "pending": "En attente",
+    "remaining": "Restant",
+    "requestsHeading": "Vos demandes",
+    "noRequests": "Aucune demande de congé pour l'instant.",
+    "newRequest": "Demander un congé",
+    "leaveType": "Type",
+    "selectLeaveType": "Sélectionner un type",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "totalDays": "Jours",
+    "notes": "Notes (facultatif)",
+    "submit": "Envoyer la demande",
+    "requestSubmitted": "Demande de congé envoyée",
+    "requestFailed": "Impossible d'envoyer la demande de congé",
+    "cancelRequestLabel": "Annuler cette demande",
+    "requestCanceled": "Demande de congé annulée",
+    "cancelFailed": "Impossible d'annuler la demande de congé",
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuvé",
+      "rejected": "Refusé",
+      "cancelled": "Annulé"
+    }
+  },
   "profile": {
     "heading": "Profil",
     "noRecordTitle": "Aucune fiche RH associée pour l'instant",

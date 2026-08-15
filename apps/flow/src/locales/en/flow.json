@@ -105,6 +105,36 @@
       "rateNotSet": "Not set"
     }
   },
+  "leave": {
+    "heading": "Leave",
+    "balanceHeading": "Your balance",
+    "noBalances": "No leave balances yet. Ask HR to set up your leave types and entitlement.",
+    "entitled": "Entitled",
+    "used": "Used",
+    "pending": "Pending",
+    "remaining": "Remaining",
+    "requestsHeading": "Your requests",
+    "noRequests": "No leave requests yet.",
+    "newRequest": "Request time off",
+    "leaveType": "Type",
+    "selectLeaveType": "Select a type",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "totalDays": "Days",
+    "notes": "Notes (optional)",
+    "submit": "Submit request",
+    "requestSubmitted": "Leave request submitted",
+    "requestFailed": "Could not submit the leave request",
+    "cancelRequestLabel": "Cancel this request",
+    "requestCanceled": "Leave request canceled",
+    "cancelFailed": "Could not cancel the leave request",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    }
+  },
   "profile": {
     "heading": "Profile",
     "noRecordTitle": "No HR record linked yet",

@@ -32,6 +32,7 @@ import {
   Shield,
   Clock,
   UserCircle,
+  CalendarOff,
 } from 'lucide-react';
 import { useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
@@ -726,6 +727,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 />
                 <SidebarLink to="/today" icon={Sun} label="Today" badge={todayFocusCount} />
                 <SidebarLink to="/profile" icon={UserCircle} label={t('flow.profile.heading')} />
+                <SidebarLink to="/leave" icon={CalendarOff} label={t('flow.leave.heading')} />
                 <SidebarLink
                   to={`/w/${currentWorkspaceId}`}
                   icon={LayoutGrid}
