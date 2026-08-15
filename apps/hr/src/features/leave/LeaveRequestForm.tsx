@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
-import { useUserStore } from '@voxire/auth';
 import {
   useListLeaveTypes,
   useCreateLeaveRequest,
   useListLeaveBalances,
   useListLeaveRequests,
 } from '../../shared/hooks/queries/useLeave';
+import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
 import {
   Card,
   SectionHeader,
@@ -39,16 +39,17 @@ function daysBetween(start: string, end: string): number {
 const LeaveRequestForm = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const userId = useUserStore((s) => s.userId);
+  const { data: myEmployeeId } = useMyEmployeeId();
+  const employeeId = myEmployeeId !== undefined ? String(myEmployeeId) : undefined;
   const {
     data: leaveTypes,
     isLoading: typesLoading,
     isError: typesError,
     refetch: refetchLeaveTypes,
   } = useListLeaveTypes();
-  const { data: balances } = useListLeaveBalances(userId ?? undefined);
+  const { data: balances } = useListLeaveBalances(employeeId);
   const { data: existingRequests } = useListLeaveRequests({
-    employeeId: userId ?? undefined,
+    employeeId,
     status: undefined,
   });
   const createRequest = useCreateLeaveRequest();
@@ -64,9 +65,10 @@ const LeaveRequestForm = (): React.JSX.Element => {
   const selectedBalance = useMemo(() => {
     if (!balances || form.leaveTypeId === '') return null;
     return (
-      balances.find((b) => b.employeeId === userId && b.leaveTypeId === form.leaveTypeId) ?? null
+      balances.find((b) => b.employeeId === employeeId && b.leaveTypeId === form.leaveTypeId) ??
+      null
     );
-  }, [balances, form.leaveTypeId, userId]);
+  }, [balances, form.leaveTypeId, employeeId]);
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
@@ -115,7 +117,7 @@ const LeaveRequestForm = (): React.JSX.Element => {
 
     createRequest.mutate(
       {
-        employeeId: userId ?? '',
+        employeeId: employeeId ?? '',
         leaveTypeId,
         startDate,
         endDate,
@@ -270,7 +272,11 @@ const LeaveRequestForm = (): React.JSX.Element => {
               <Button type="button" variant="ghost" onClick={() => navigate({ to: '/leave' })}>
                 {t('common.cancel')}
               </Button>
-              <Button type="submit" variant="primary" disabled={createRequest.isPending}>
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={createRequest.isPending || !employeeId}
+              >
                 {createRequest.isPending ? t('common.loading') : t('leave.form.submit')}
               </Button>
             </div>

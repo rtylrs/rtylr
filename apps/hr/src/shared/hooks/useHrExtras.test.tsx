@@ -5,11 +5,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   getSettings: vi.fn(),
+  getMyEmployee: vi.fn(),
 }));
 
 vi.mock('../services/hrExtras', () => ({
   hrExtras: {
     getSettings: mocks.getSettings,
+    getMyEmployee: mocks.getMyEmployee,
   },
 }));
 
@@ -22,7 +24,7 @@ vi.mock('sonner', () => ({
   toast: { error: vi.fn() },
 }));
 
-import { useHrSettings } from './useHrExtras';
+import { useHrSettings, useMyEmployeeId } from './useHrExtras';
 
 const settings = {
   workWeekStart: 'Monday' as const,
@@ -52,5 +54,21 @@ describe('useHrSettings', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toEqual(settings);
+  });
+});
+
+describe('useMyEmployeeId', () => {
+  beforeEach(() => {
+    mocks.getMyEmployee.mockReset();
+  });
+
+  it("resolves the caller's own hr_employees.id from /hr/employees/me, not the hub auth user id", async () => {
+    mocks.getMyEmployee.mockResolvedValue({ employee: { id: '4201' } });
+
+    const { result } = renderHook(() => useMyEmployeeId(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toBe(4201);
   });
 });
