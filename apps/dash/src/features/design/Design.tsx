@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Plus, CaretDown } from 'phosphor-react';
+import { Plus, ChevronDown, X } from 'lucide-react';
+
 import {
   MenuLayout,
   MenuLayoutConfig,
@@ -192,9 +193,8 @@ function SectionCard({
         >
           {title}
         </span>
-        <CaretDown
+        <ChevronDown
           size={14}
-          weight="bold"
           style={{
             color: 'var(--dash-text-dim)',
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -770,7 +770,7 @@ const Design: React.FC = () => {
                         transition: 'opacity 0.15s',
                       }}
                     >
-                      <X size={12} weight="bold" />
+                      <X size={12} />
                     </button>
                   )}
                 </div>
@@ -817,7 +817,7 @@ const Design: React.FC = () => {
                   transition: 'all 0.15s',
                 }}
               >
-                <Plus size={14} weight="bold" />
+                <Plus size={14} />
               </button>
             </div>
           </aside>
