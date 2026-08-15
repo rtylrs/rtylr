@@ -1,0 +1,25 @@
+{
+  "availability": {
+    "emptyTitle": "Aucune disponibilité définie",
+    "emptyDescription": "Demandez à votre équipe d'indiquer les heures où elle peut travailler.",
+    "available": "Disponible",
+    "blocked": "Bloqué",
+    "saved": "Disponibilité enregistrée",
+    "saveFailed": "Impossible d'enregistrer la disponibilité",
+    "columns": {
+      "employee": "Employé",
+      "day": "Jour",
+      "available": "Disponible",
+      "hours": "Heures"
+    },
+    "weekdays": {
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi",
+      "sunday": "Dimanche"
+    }
+  }
+}

@@ -3,9 +3,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { ShiftPayload } from '@voxire/voxie/hr/shift/v1/types';
 import type { CreateShiftRequest } from '@voxire/voxie/hr/shift/v1/types';
 import type { ListShiftsResponse } from '@voxire/voxie/hr/shift/v1/types';
+import type { CreateShiftAssignmentResponse } from '@voxire/voxie/hr/shift/v1/types';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+
+/**
+ * Availability warnings are advisory and easy to miss, so they outlast the
+ * default toast. A scheduler who assigned someone outside their stated hours
+ * needs long enough to read who and when before deciding to undo it.
+ */
+const WARNING_TOAST_DURATION_MS = 10_000;
 
 interface RosterParams {
   weekStart: string;
@@ -90,18 +98,28 @@ export const useCreateShiftAssignment = () => {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: CreateShiftAssignmentPayload): Promise<void> => {
-      await unwrap(
-        safe.post('/hr/shifts/roster/assignments', {
+    mutationFn: (data: CreateShiftAssignmentPayload): Promise<CreateShiftAssignmentResponse> =>
+      unwrap(
+        safe.post<CreateShiftAssignmentResponse>('/hr/shifts/roster/assignments', {
           employeeId: data.staffId,
           shiftId: data.shiftId,
           date: data.date,
         })
-      );
-    },
-    onSuccess: () => {
+      ),
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['roster'] });
       toast.success(t('shifts.assignmentCreated'));
+
+      // Advisory conflicts from the contract's non-blocking warnings field. The
+      // assignment was created, so a scheduling clash with the assignee's stated
+      // availability arrives here rather than as an error, and dropping it would
+      // leave the roster silently holding a shift nobody agreed to work.
+      //
+      // Shown as given because the server composes these strings; they are not
+      // translation keys, and there is no code alongside them to map to one.
+      for (const warning of response.warnings ?? []) {
+        toast.warning(warning, { duration: WARNING_TOAST_DURATION_MS });
+      }
     },
     onError: () => {
       toast.error(t('errors.generic'));

@@ -2,7 +2,6 @@
  * Extended HR service layer backed by real API endpoints.
  */
 import { safe } from '../lib/api';
-import { unwrap } from '@voxire/api';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -174,16 +173,6 @@ export interface Anniversary {
   name: string;
   date: string;
   years: number;
-}
-
-export interface Availability {
-  id: number;
-  staffId: number;
-  staffName: string;
-  day: string;
-  canWork: boolean;
-  startTime?: string;
-  endTime?: string;
 }
 
 export interface SwapRequest {
@@ -411,16 +400,10 @@ export const hrExtras = {
   listAnniversaries: () =>
     safe.get<Anniversary[]>('/hr/staff', { params: { view: 'anniversaries' } }),
 
-  // Availability
-  listAvailability: () =>
-    safe.get<Availability[]>('/hr/shifts', { params: { view: 'availability' } }),
-  setAvailability: (row: Availability) =>
-    safe.put<Availability>('/hr/shifts', {
-      id: row.id,
-      date: row.day,
-      startTime: row.startTime,
-      endTime: row.endTime,
-    }),
+  // Availability lives in shared/hooks/queries/useAvailability.ts, which calls
+  // the hr.shift.v1 availability endpoints through the generated client. The
+  // calls that used to sit here issued GET and PUT against /hr/shifts with a
+  // view=availability parameter no handler has ever read.
 
   // Swaps
   listSwaps: () => safe.get<SwapRequest[]>('/hr/shifts', { params: { view: 'swaps' } }),
