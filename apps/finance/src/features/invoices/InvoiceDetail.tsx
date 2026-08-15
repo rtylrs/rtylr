@@ -224,11 +224,7 @@ const InvoiceDetail: React.FC = () => {
         </div>
       </div>
 
-      <SendInvoiceModal
-        open={showSend}
-        onClose={() => setShowSend(false)}
-        invoiceId={invoice.id}
-      />
+      <SendInvoiceModal open={showSend} onClose={() => setShowSend(false)} invoiceId={invoice.id} />
       <RecordPaymentModal
         open={showPayment}
         onClose={() => setShowPayment(false)}
@@ -246,7 +242,8 @@ const InvoiceDetail: React.FC = () => {
               setShowVoid(false);
               navigate({ to: '/invoices' });
             },
-            onError: (error) => toast.error(getOneKitErrorMessage(error, `Failed to void invoice ${invoice.id}`)),
+            onError: (error) =>
+              toast.error(getOneKitErrorMessage(error, `Failed to void invoice ${invoice.id}`)),
           })
         }
         title="Void invoice"

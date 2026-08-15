@@ -465,7 +465,6 @@ function BusinessRoute(): React.JSX.Element | null {
     user &&
     user.isOwner === false &&
     !hasManagementRole &&
-    !hasAssignedApps &&
     !staffAllowedPaths.some((p) => pathname.startsWith(p))
   ) {
     return <StaffView user={user} />;

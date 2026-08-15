@@ -21,7 +21,7 @@ export const invoiceSchema = z.object({
   amount: z.number().default(0),
   currency: z.string().optional().nullable(),
   paid: z.number().optional().nullable(),
-  status: z.enum(['Draft', 'Sent', 'Paid', 'Overdue']).catch('Draft'),
+  status: z.enum(['Draft', 'Sent', 'Paid', 'Overdue', 'Cancelled']).catch('Draft'),
   dueDate: z.string().default(''),
   issuedDate: z.string().default(''),
   items: z.array(invoiceLineSchema).optional().nullable(),

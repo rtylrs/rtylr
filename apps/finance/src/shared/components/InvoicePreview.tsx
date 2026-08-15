@@ -153,15 +153,11 @@ const InvoicePreview: React.FC<InvoicePreviewProps> = ({
           {items.map((it) => (
             <tr key={it.id} style={{ borderBottom: '1px solid var(--finance-invoice-border)' }}>
               <td style={{ padding: '10px 4px', fontSize: 12 }}>{it.description || 'Item'}</td>
-              <td style={{ padding: '10px 4px', fontSize: 12, textAlign: 'end' }}>
-                {it.quantity}
-              </td>
+              <td style={{ padding: '10px 4px', fontSize: 12, textAlign: 'end' }}>{it.quantity}</td>
               <td style={{ padding: '10px 4px', fontSize: 12, textAlign: 'end' }}>
                 <MoneyDisplay amount={it.unitPrice} />
               </td>
-              <td
-                style={{ padding: '10px 4px', fontSize: 12, textAlign: 'end', fontWeight: 600 }}
-              >
+              <td style={{ padding: '10px 4px', fontSize: 12, textAlign: 'end', fontWeight: 600 }}>
                 <MoneyDisplay amount={it.quantity * it.unitPrice} />
               </td>
             </tr>

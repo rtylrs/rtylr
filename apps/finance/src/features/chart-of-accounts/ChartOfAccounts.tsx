@@ -114,7 +114,12 @@ const ChartOfAccounts: React.FC = () => {
         <div style={{ position: 'relative', flex: 1, maxWidth: 280 }}>
           <Search
             size={13}
-            style={{ position: 'absolute', insetInlineStart: 10, top: 11, color: 'var(--hub-text-dim)' }}
+            style={{
+              position: 'absolute',
+              insetInlineStart: 10,
+              top: 11,
+              color: 'var(--hub-text-dim)',
+            }}
           />
           <input
             value={query}
@@ -134,7 +139,12 @@ const ChartOfAccounts: React.FC = () => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                {[t('accounts.code'), t('accounts.name'), t('accounts.type'), t('accounts.balance')].map((h) => (
+                {[
+                  t('accounts.code'),
+                  t('accounts.name'),
+                  t('accounts.type'),
+                  t('accounts.balance'),
+                ].map((h) => (
                   <th
                     key={h}
                     style={{

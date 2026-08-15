@@ -318,26 +318,21 @@ const Tax: React.FC = () => {
               cursor: saveRates.isPending ? 'not-allowed' : 'pointer',
               opacity: saveRates.isPending ? 0.6 : 1,
             }}
-            onClick={() => {
+            onClick={async () => {
               const invalid = editableRates.find((r) => isNaN(r.rate) || r.rate < 0);
               if (invalid) {
                 toast.error('Tax rates must be valid non-negative numbers');
                 return;
               }
-              const last = editableRates[editableRates.length - 1];
-              editableRates.forEach((r, idx) => {
-                saveRates.mutate(r, {
-                  onSuccess: () => {
-                    if (r === last) {
-                      toast.success('Tax rates saved');
-                      setShowConfig(false);
-                    }
-                  },
-                  onError: (error) => {
-                    toast.error(getOneKitErrorMessage(error, `Failed to save rate: ${r.name}`));
-                  },
-                });
-              });
+              try {
+                for (const r of editableRates) {
+                  await saveRates.mutateAsync(r);
+                }
+                toast.success('Tax rates saved');
+                setShowConfig(false);
+              } catch (error) {
+                toast.error(getOneKitErrorMessage(error, 'Failed to save tax rates'));
+              }
             }}
           >
             {saveRates.isPending ? 'Saving…' : 'Save Rates'}

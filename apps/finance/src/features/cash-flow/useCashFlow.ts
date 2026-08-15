@@ -21,8 +21,8 @@ export function useCashFlow() {
       const series = z.array(cashFlowSeriesPointSchema).parse(unwrapList(res, 'series'));
       return series.map((p) => ({
         month: p.date,
-        inflow: p.inflowMinorUnits / 100,
-        outflow: p.outflowMinorUnits / 100,
+        inflow: Math.round(p.inflowMinorUnits) / 100,
+        outflow: Math.round(p.outflowMinorUnits) / 100,
       }));
     },
   });

@@ -475,7 +475,8 @@ const TeamTab: React.FC = () => {
                 onClick={() => {
                   deactivate.mutate(m.id, {
                     onSuccess: () => toast.success(`${m.name} removed`),
-                    onError: (error) => toast.error(getOneKitErrorMessage(error, `Failed to remove ${m.name}`)),
+                    onError: (error) =>
+                      toast.error(getOneKitErrorMessage(error, `Failed to remove ${m.name}`)),
                   });
                 }}
                 style={{
