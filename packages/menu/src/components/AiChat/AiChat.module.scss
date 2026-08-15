@@ -193,7 +193,7 @@
   padding: 10px 14px;
   border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.12));
   border-radius: 20px;
-  font-size: 0.875rem;
+  font-size: 16px;
   background: var(--menu-input-bg, rgba(0, 0, 0, 0.03));
   color: var(--menu-text, #1a1a1a);
   outline: none;
@@ -213,8 +213,10 @@
 }
 
 .aiChat__sendBtn {
-  width: 36px;
-  height: 36px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: var(--menu-accent, #1a1a1a);

@@ -44,6 +44,9 @@ const MenuCart: React.FC<MenuCartProps> = ({
             onClick={onClose}
           />
           <motion.aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="Your Order"
             className={classNames(styles.cart, className)}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}

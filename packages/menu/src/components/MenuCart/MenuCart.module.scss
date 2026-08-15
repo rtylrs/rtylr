@@ -57,7 +57,12 @@
   font-size: 1.1rem;
   cursor: pointer;
   color: var(--menu-subtext, rgba(26, 26, 26, 0.5));
-  padding: 4px 8px;
+  padding: 8px 12px;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 4px;
 
   &:hover {
@@ -137,8 +142,10 @@
 }
 
 .cart__qtyBtn {
-  width: 28px;
-  height: 28px;
+  min-width: 44px;
+  min-height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid var(--menu-border, rgba(0, 0, 0, 0.15));
   background: none;

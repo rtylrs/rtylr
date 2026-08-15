@@ -156,6 +156,9 @@ const AiChat: React.FC<AiChatProps> = ({
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="AI Assistant"
             className={styles.aiChat__panel}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
