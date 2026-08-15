@@ -79,6 +79,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
     ];
     if (!allowed.includes(file.type)) {
       setUploadError('Please upload a PDF or Word document');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
     setResumeFile(file);
@@ -94,6 +95,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       const msg = err instanceof Error ? err.message : 'Upload failed';
       setUploadError(msg);
       setResumeFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } finally {
       setUploading(false);
     }
@@ -293,6 +295,9 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
                   <X className="h-4 w-4" style={{ color: 'var(--recruit-muted)' }} />
                 </button>
               </div>
+            )}
+            {uploadError && !resumeFile && (
+              <p className="mt-1 text-xs text-red-600 font-medium">{uploadError}</p>
             )}
           </Field>
 
