@@ -250,7 +250,8 @@ export interface Lead {
 
 export interface PipelineColumn {
   stage: LeadStage;
-  leadCount: number;
+  // The backend contract exposes the number of leads as `count`.
+  count: number;
   totalMrr: number;
 }
 
@@ -543,26 +544,28 @@ interface CreateContractMutationPayload extends ContractMutationPayload {
   leadId: number;
 }
 
-function toCreateContractPayload(data: CreateContractRequest): CreateContractMutationPayload {
+export function toCreateContractPayload(
+  data: CreateContractRequest
+): CreateContractMutationPayload {
   return {
     leadId: data.leadId,
     plan: data.plan,
     mrr: data.mrr,
     seats: data.seats,
-    signedAt: data.signedAt,
-    signedByName: data.signedBy,
+    signedAt: data.signedAt?.trim() || undefined,
+    signedByName: data.signedBy?.trim() ?? '',
     closedBy: toOptionalFiniteNumber(data.closedBy),
     notes: data.notes,
   };
 }
 
-function toContractUpdatePayload(data: UpdateContractRequest): ContractMutationPayload {
+export function toContractUpdatePayload(data: UpdateContractRequest): ContractMutationPayload {
   return {
     plan: data.plan,
     mrr: data.mrr,
     seats: data.seats,
-    signedAt: data.signedAt,
-    signedByName: data.signedBy,
+    signedAt: data.signedAt?.trim() || undefined,
+    signedByName: data.signedBy?.trim(),
     closedBy: toOptionalFiniteNumber(data.closedBy),
     notes: data.notes,
   };

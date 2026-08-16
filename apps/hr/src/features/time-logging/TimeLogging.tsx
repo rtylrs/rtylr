@@ -4,6 +4,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, Clock, Trash2, Pencil } from 'lucide-react';
 import { useListTimeEntries, useDeleteTimeEntry } from '../../shared/hooks/queries/useTimeEntries';
+import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
 import type { TimeEntryPayload } from '@voxire/voxie/hr/time_entry/v1/types';
 import {
   SectionHeader,
@@ -65,7 +66,11 @@ const STATUS_COLORS: Record<string, string> = {
 const TimeLogging = (): React.JSX.Element => {
   const { t } = useTranslation();
   const week = useMemo(getWeekRange, []);
-  const { data, isLoading } = useListTimeEntries({ date: week.start });
+  const { data: myEmployeeId, isError: employeeLookupFailed } = useMyEmployeeId();
+  const { data, isLoading } = useListTimeEntries(
+    { date: week.start, employeeId: myEmployeeId === undefined ? undefined : String(myEmployeeId) },
+    { enabled: myEmployeeId !== undefined }
+  );
   const deleteEntry = useDeleteTimeEntry();
 
   const [formOpen, setFormOpen] = useState(false);
@@ -109,7 +114,13 @@ const TimeLogging = (): React.JSX.Element => {
 
         <ActiveTimer onStop={handleTimerStop} />
 
-        {isLoading ? (
+        {employeeLookupFailed ? (
+          <EmptyState
+            icon={<Clock size={20} />}
+            title={t('timeLogging.employeeLookupFailed')}
+            description={t('errors.unauthorized')}
+          />
+        ) : isLoading || myEmployeeId === undefined ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <Skeleton height={60} />
             <Skeleton height={60} />

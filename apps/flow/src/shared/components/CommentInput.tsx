@@ -9,11 +9,7 @@ interface CommentInputProps {
   disabled?: boolean;
 }
 
-export const CommentInput: React.FC<CommentInputProps> = ({
-  onSubmit,
-  placeholder = 'Leave a comment… @mention to notify',
-  disabled,
-}) => {
+export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholder, disabled }) => {
   const { t } = useTranslation();
   const [value, setValue] = useState('');
   const [mentionOpen, setMentionOpen] = useState(false);
@@ -56,7 +52,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKey}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t('flow.taskDetail.commentPlaceholder')}
         disabled={disabled}
         className="w-full bg-transparent outline-none resize-none p-3 text-[12px] disabled:opacity-60"
         rows={3}
@@ -73,7 +69,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
             disabled={disabled}
             className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
             style={{ color: 'var(--flow-text-dim)' }}
-            title="Mention someone"
+            title={t('flow.taskDetail.mentionSomeone')}
           >
             <AtSign size={12} />
           </button>
@@ -96,7 +92,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Send size={11} />
-          Comment
+          {t('flow.taskDetail.comment')}
         </button>
       </div>
       {mentionOpen && (

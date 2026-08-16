@@ -9,7 +9,11 @@ import {
 import { toast } from 'sonner';
 import { safe } from '../../lib/api';
 import { unwrapList } from '../../lib/unwrapList';
-import { toLeadMutationPayload } from '../../services/crmApi';
+import {
+  toContractUpdatePayload,
+  toCreateContractPayload,
+  toLeadMutationPayload,
+} from '../../services/crmApi';
 import type {
   PipelineColumn,
   Lead,
@@ -304,7 +308,9 @@ export const useCreateContract = (): UseMutationResult<
   const qc = useQueryClient();
   return useMutation<Contract, unknown, CreateContractRequest>({
     mutationFn: async (data: CreateContractRequest): Promise<Contract> => {
-      const res = await unwrap(safe.post<Contract>('/crm/sales/contracts', data));
+      const res = await unwrap(
+        safe.post<Contract>('/crm/sales/contracts', toCreateContractPayload(data))
+      );
       return res as Contract;
     },
     onSuccess: (): void => {
@@ -332,7 +338,10 @@ export const useUpdateContract = (): UseMutationResult<
   return useMutation<Contract, unknown, UpdateContractPayload>({
     mutationFn: async (payload: UpdateContractPayload): Promise<Contract> => {
       const res = await unwrap(
-        safe.put<Contract>(`/crm/sales/contracts/${payload.id}`, payload.data)
+        safe.put<Contract>(
+          `/crm/sales/contracts/${payload.id}`,
+          toContractUpdatePayload(payload.data)
+        )
       );
       return res as Contract;
     },

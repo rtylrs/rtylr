@@ -185,6 +185,7 @@ const MyDay = (): React.JSX.Element => {
                   </label>
                   <input
                     id="day-start"
+                    key={`day-start-${date}`}
                     type="time"
                     defaultValue={day?.startTime ?? ''}
                     onBlur={(e) => saveDay({ startTime: e.target.value })}
@@ -202,6 +203,7 @@ const MyDay = (): React.JSX.Element => {
                   </label>
                   <input
                     id="day-end"
+                    key={`day-end-${date}`}
                     type="time"
                     defaultValue={day?.endTime ?? ''}
                     onBlur={(e) => saveDay({ endTime: e.target.value })}
@@ -219,6 +221,7 @@ const MyDay = (): React.JSX.Element => {
                   </label>
                   <input
                     id="day-break"
+                    key={`day-break-${date}`}
                     type="number"
                     min={0}
                     defaultValue={day?.breakMinutes ?? 0}

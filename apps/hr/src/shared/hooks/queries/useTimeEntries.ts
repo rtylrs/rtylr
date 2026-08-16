@@ -13,9 +13,13 @@ import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
-export const useListTimeEntries = (params: ListTimeEntriesRequest) => {
+export const useListTimeEntries = (
+  params: ListTimeEntriesRequest,
+  options?: { enabled?: boolean }
+) => {
   return useQuery<ListTimeEntriesResponse>({
     queryKey: ['time-entries', 'filter', params],
+    enabled: options?.enabled ?? true,
     queryFn: async (): Promise<ListTimeEntriesResponse> => {
       const res = await unwrap(safe.get<ListTimeEntriesResponse>('/hr/time-entries', { params }));
       return res as ListTimeEntriesResponse;

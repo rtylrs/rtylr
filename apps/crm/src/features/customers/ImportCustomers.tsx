@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
 import { Upload, FileText, Check } from 'lucide-react';
 import { useImportCustomerRows } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, PageHeader, Select } from '../../shared/components/ui';
@@ -99,11 +98,7 @@ const ImportCustomers: React.FC = () => {
       { customers: payload, dedupe },
       {
         onSuccess: () => {
-          toast.success(`Imported ${payload.length} customers`);
           navigate({ to: '/customers' });
-        },
-        onError: () => {
-          toast.error('Failed to import customers');
         },
       }
     );

@@ -22,8 +22,10 @@ import { useListCustomers } from '../../shared/hooks/queries/useCustomers';
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import type { DashboardStats } from '../../shared/schemas/dashboard';
 import { CustomerAvatar } from '../../shared/components/crm';
+import { isAtRisk } from '../../shared/lib/customerUtils';
 
 const ACCENT = '#3b82f6';
+const AT_RISK_DAYS = 60;
 
 interface StatItem {
   label: string;
@@ -136,7 +138,7 @@ const Dashboard: React.FC = () => {
     customersPool.length > 0
       ? Math.round(customersPool.reduce((s, c) => s + c.totalSpent, 0) / customersPool.length)
       : 0;
-  const atRisk = customersPool.filter((c) => /month|weeks/.test(c.lastVisit)).slice(0, 4);
+  const atRisk = customersPool.filter((c) => isAtRisk(c, AT_RISK_DAYS)).slice(0, 4);
   const churnRate =
     customersPool.length > 0 ? Math.round((atRisk.length / customersPool.length) * 100) : 0;
   const topSegment =

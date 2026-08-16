@@ -79,6 +79,17 @@ describe('isAtRisk', () => {
     const c = makeCustomer({ lastVisitAt: '2024-04-25' });
     expect(isAtRisk(c, 30, now)).toBe(false);
   });
+
+  it('uses the canonical lastVisitAt field when it is an ISO timestamp', () => {
+    const now = new Date('2024-05-10');
+    const c = makeCustomer({ lastVisitAt: '2024-03-01T12:00:00Z' });
+    expect(isAtRisk(c, 60, now)).toBe(true);
+  });
+
+  it('treats customers without a visit as at risk', () => {
+    const c = makeCustomer({ lastVisitAt: null });
+    expect(isAtRisk(c, 60, new Date('2024-05-10'))).toBe(true);
+  });
 });
 
 describe('getTags', () => {

@@ -15,6 +15,7 @@ import { PERSONAL_WORKSPACE_ID } from './shared/lib/personalWorkspace';
 import { safe } from './shared/lib/api';
 import PreviewRouteUnavailable from './shared/components/PreviewRouteUnavailable';
 import { settingsSearchSchema } from './shared/schemas/settings';
+import { useTranslation } from 'react-i18next';
 // The preview-route fallback is eager so a disabled deep link can explain its state
 // without waiting for a lazy route component to load.
 
@@ -52,23 +53,28 @@ const MyIssues = React.lazy(() => import('./features/tasks/MyIssues'));
 const Archive = React.lazy(() => import('./features/archive/Archive'));
 const WorkspaceManager = React.lazy(() => import('./features/workspace-manager/WorkspaceManager'));
 
+const RouteLoading = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  return (
+    <div
+      style={{
+        padding: '32px',
+        color: 'var(--flow-text-muted)',
+        fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+        fontSize: '13px',
+      }}
+    >
+      {t('flow.shell.loading')}
+    </div>
+  );
+};
+
 function withLayout(element: React.ReactNode): React.ReactNode {
   return (
     <FlowLayout>
       <ErrorBoundary>
         <Suspense
-          fallback={
-            <div
-              style={{
-                padding: '32px',
-                color: 'var(--flow-text-muted)',
-                fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
-                fontSize: '13px',
-              }}
-            >
-              Loading...
-            </div>
-          }
+          fallback={<RouteLoading />}
         >
           {element}
         </Suspense>

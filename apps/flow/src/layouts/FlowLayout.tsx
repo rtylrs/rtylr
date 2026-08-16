@@ -98,6 +98,7 @@ const SidebarSectionReorder: React.FC<{
   order: SidebarSectionId[];
   moveSection: (id: SidebarSectionId, direction: 'up' | 'down') => void;
 }> = ({ id, order, moveSection }) => {
+  const { t } = useTranslation();
   const i = order.indexOf(id);
   const canUp = i > 0;
   const canDown = i >= 0 && i < order.length - 1;
@@ -110,8 +111,8 @@ const SidebarSectionReorder: React.FC<{
       <button
         type="button"
         disabled={!canUp}
-        aria-label="Move section up"
-        title="Move up"
+        aria-label={t('flow.shell.moveSectionUp')}
+        title={t('flow.shell.moveUp')}
         className={cn(
           'rounded p-px transition-colors flex items-center justify-center',
           canUp ? 'hover:bg-[var(--flow-hover)]' : 'opacity-25 cursor-not-allowed'
@@ -123,8 +124,8 @@ const SidebarSectionReorder: React.FC<{
       <button
         type="button"
         disabled={!canDown}
-        aria-label="Move section down"
-        title="Move down"
+        aria-label={t('flow.shell.moveSectionDown')}
+        title={t('flow.shell.moveDown')}
         className={cn(
           'rounded p-px transition-colors flex items-center justify-center',
           canDown ? 'hover:bg-[var(--flow-hover)]' : 'opacity-25 cursor-not-allowed'
@@ -274,7 +275,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   const PERSONAL_FALLBACK: Workspace = {
     id: PERSONAL_WORKSPACE_ID,
-    name: 'Personal',
+    name: t('flow.shell.personal'),
     color: ACCENT_DEFAULT,
   };
 
@@ -448,22 +449,22 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const flowPageTitle = activeProject
     ? activeProject.name
     : location.pathname.startsWith('/inbox')
-      ? 'Inbox'
+      ? t('nav.inbox')
       : location.pathname.startsWith('/my-issues')
-        ? 'My tasks'
+        ? t('flow.shell.myTasks')
         : location.pathname.startsWith('/today')
-          ? 'Today'
+          ? t('nav.focusToday')
           : location.pathname.startsWith('/triage')
-            ? 'Triage'
+            ? t('flow.shell.triage')
             : location.pathname.startsWith('/calendar')
-              ? 'Calendar'
+              ? t('flow.shell.calendar')
               : location.pathname.startsWith('/cycles')
-                ? 'Cycles'
+                ? t('flow.shell.cycles')
                 : location.pathname.startsWith('/milestones')
-                  ? 'Milestones'
+                  ? t('flow.shell.milestones')
                   : location.pathname.startsWith('/settings')
-                    ? 'Settings'
-                    : 'Workspace';
+                    ? t('nav.settings')
+                    : t('flow.shell.workspace');
   const caretPageContext = useMemo(
     () =>
       buildCaretRouteContext({
@@ -485,9 +486,9 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           open_tasks: Math.max(0, project.taskCount - project.completedCount),
         })),
         hints: [
-          `${myIssuesCount} assigned open tasks`,
-          `${todayFocusCount} due or pinned focus items`,
-          inQuietHours ? 'quiet hours are active' : undefined,
+          t('flow.shell.assignedOpenTasks', { count: myIssuesCount }),
+          t('flow.shell.focusItems', { count: todayFocusCount }),
+          inQuietHours ? t('flow.shell.quietHoursActive') : undefined,
         ].filter((hint): hint is string => Boolean(hint)),
       }),
     [
@@ -539,7 +540,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         >
           <button
             type="button"
-            aria-label="Open menu"
+            aria-label={t('flow.shell.openMenu')}
             onClick={() => setMobileNavOpen(true)}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text)' }}
@@ -555,7 +556,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           </span>
           <button
             type="button"
-            aria-label="Search"
+            aria-label={t('common.search')}
             onClick={() => setCommandBarOpen(true)}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
@@ -564,7 +565,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           </button>
           <button
             type="button"
-            aria-label="New task"
+            aria-label={t('flow.shell.newTask')}
             onClick={() => setQuickCreateOpen(true)}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--accent)' }}
@@ -577,7 +578,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         {mobileNavOpen && (
           <button
             type="button"
-            aria-label="Close menu"
+            aria-label={t('flow.shell.closeMenu')}
             className="fixed inset-0 z-40 bg-black/50 lg:hidden"
             onClick={() => setMobileNavOpen(false)}
           />
@@ -603,7 +604,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             <img src={logoSrc} alt="rtylr" className="h-9 w-auto" />
             <button
               type="button"
-              aria-label="Close menu"
+              aria-label={t('flow.shell.closeMenu')}
               onClick={() => setMobileNavOpen(false)}
               className="ms-auto flex h-9 w-9 items-center justify-center rounded-lg lg:hidden hover:bg-[var(--flow-hover)]"
               style={{ color: 'var(--flow-text-muted)' }}
@@ -706,7 +707,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               }}
             >
               <Search size={12} />
-              <span className="flex-1 text-start">Search…</span>
+              <span className="flex-1 text-start">{t('flow.shell.searchPlaceholder')}</span>
               <span
                 className="hidden text-[9px] font-mono px-1.5 py-0.5 rounded sm:inline"
                 style={{ background: 'var(--flow-active)' }}
@@ -719,24 +720,34 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           <div ref={sidebarRef} className={cn('flex-1 min-h-0 overflow-y-auto py-2', sx)}>
             <div className="flex flex-col gap-2">
               <nav className="flex flex-col gap-px">
-                <SidebarLink to="/inbox" icon={Inbox} label="Inbox" badge={unreadNotifications} />
+                <SidebarLink
+                  to="/inbox"
+                  icon={Inbox}
+                  label={t('nav.inbox')}
+                  badge={unreadNotifications}
+                />
                 <SidebarLink
                   to="/my-issues"
                   icon={ListTodo}
-                  label="My tasks"
+                  label={t('flow.shell.myTasks')}
                   badge={myIssuesCount}
                   exact
                 />
-                <SidebarLink to="/today" icon={Sun} label="Today" badge={todayFocusCount} />
+                <SidebarLink
+                  to="/today"
+                  icon={Sun}
+                  label={t('nav.focusToday')}
+                  badge={todayFocusCount}
+                />
                 <SidebarLink to="/profile" icon={UserCircle} label={t('flow.profile.heading')} />
                 <SidebarLink to="/leave" icon={CalendarOff} label={t('flow.leave.heading')} />
                 <SidebarLink
                   to={`/w/${currentWorkspaceId}`}
                   icon={LayoutGrid}
-                  label="Dashboard"
+                  label={t('nav.dashboard')}
                   exact
                 />
-                <SidebarLink to="/triage" icon={Eye} label="Triage" />
+                <SidebarLink to="/triage" icon={Eye} label={t('flow.shell.triage')} />
                 {/* Backlog is now a column inside /my-issues - no
                     standalone sidebar entry. */}
               </nav>
@@ -763,7 +774,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               className="text-[12px] font-semibold tracking-wide"
                               style={{ color: 'var(--flow-text-muted)' }}
                             >
-                              Plan
+                              {t('flow.shell.plan')}
                             </span>
                             <ChevronDown
                               size={14}
@@ -779,15 +790,23 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         <SidebarCollapsible open={!isSidebarSectionCollapsed('plan')}>
                           <nav className="flex flex-col gap-px pt-px">
                             {showPreviewRoutes && (
-                              <SidebarLink to="/roadmap" icon={Map} label="Roadmap" />
+                              <SidebarLink to="/roadmap" icon={Map} label={t('flow.shell.roadmap')} />
                             )}
-                            <SidebarLink to="/cycles" icon={Timer} label="Cycles" />
-                            <SidebarLink to="/milestones" icon={Milestone} label="Milestones" />
+                            <SidebarLink to="/cycles" icon={Timer} label={t('flow.shell.cycles')} />
+                            <SidebarLink
+                              to="/milestones"
+                              icon={Milestone}
+                              label={t('flow.shell.milestones')}
+                            />
                             {showPreviewRoutes && (
-                              <SidebarLink to="/timeline" icon={Timer} label="Timeline" />
+                              <SidebarLink to="/timeline" icon={Timer} label={t('flow.shell.timeline')} />
                             )}
-                            <SidebarLink to="/calendar" icon={Calendar} label="Calendar" />
-                            <SidebarLink to="/views" icon={Eye} label="Views" />
+                            <SidebarLink
+                              to="/calendar"
+                              icon={Calendar}
+                              label={t('flow.shell.calendar')}
+                            />
+                            <SidebarLink to="/views" icon={Eye} label={t('flow.shell.views')} />
                           </nav>
                         </SidebarCollapsible>
                       </div>
@@ -812,7 +831,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               className="text-[12px] font-semibold tracking-wide"
                               style={{ color: 'var(--flow-text-muted)' }}
                             >
-                              Team
+                              {t('flow.shell.team')}
                             </span>
                             <ChevronDown
                               size={14}
@@ -828,17 +847,17 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         <SidebarCollapsible open={!isSidebarSectionCollapsed('team')}>
                           <nav className="flex flex-col gap-px pt-px">
                             {showPreviewRoutes && (
-                              <SidebarLink to="/team" icon={Users} label="Workload" />
+                              <SidebarLink to="/team" icon={Users} label={t('flow.shell.workload')} />
                             )}
                             <SidebarLink
                               to={`/w/${currentWorkspaceId}/members`}
                               icon={Shield}
-                              label="Members"
+                              label={t('flow.shell.members')}
                             />
                             {showPreviewRoutes && (
-                              <SidebarLink to="/insights" icon={BarChart3} label="Insights" />
+                              <SidebarLink to="/insights" icon={BarChart3} label={t('flow.shell.insights')} />
                             )}
-                            <SidebarLink to="/archive" icon={Archive} label="Archive" />
+                            <SidebarLink to="/archive" icon={Archive} label={t('flow.shell.archive')} />
                           </nav>
                         </SidebarCollapsible>
                       </div>
@@ -932,7 +951,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               className="text-[12px] font-semibold tracking-wide truncate"
                               style={{ color: 'var(--flow-text-muted)' }}
                             >
-                              Projects
+                              {t('nav.projects')}
                             </span>
                             <ChevronDown
                               size={14}
@@ -948,7 +967,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             type="button"
                             className="h-8 w-8 shrink-0 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--flow-hover)]"
                             style={{ color: 'var(--flow-text-muted)' }}
-                            title="New Project"
+                            title={t('flow.shell.newProject')}
                             onClick={() => {
                               setNewProjectName('');
                               setNewProjectDescription('');
@@ -1016,7 +1035,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             className={cn('flex flex-col gap-1.5 py-2', sx)}
             style={{ borderTop: '1px solid var(--flow-border)' }}
           >
-            <SidebarLink to="/settings" icon={Settings} label="Settings" />
+            <SidebarLink to="/settings" icon={Settings} label={t('nav.settings')} />
             <CaretButton className="w-full justify-start" />
 
             <div className="relative">
@@ -1073,14 +1092,14 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
                         style={{ color: 'var(--flow-text-dim)' }}
                       >
-                        Appearance
+                        {t('flow.shell.appearance')}
                       </p>
                       <div className="flex gap-1">
                         {(
                           [
-                            { value: 'light', icon: Sun, label: 'Light' },
-                            { value: 'dark', icon: Moon, label: 'Dark' },
-                            { value: 'system', icon: Monitor, label: 'System' },
+                            { value: 'light', icon: Sun, label: t('flow.shell.light') },
+                            { value: 'dark', icon: Moon, label: t('flow.shell.dark') },
+                            { value: 'system', icon: Monitor, label: t('flow.shell.system') },
                           ] as const
                         ).map(({ value, icon: Icon, label }) => (
                           <button
@@ -1116,7 +1135,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       style={{ color: '#ef4444' }}
                     >
                       <LogOut size={13} />
-                      Sign out
+                      {t('flow.shell.signOut')}
                     </button>
                   </motion.div>
                 )}
@@ -1137,7 +1156,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             >
               <motion.button
                 type="button"
-                aria-label="Close"
+                      aria-label={t('common.close')}
                 className="absolute inset-0 cursor-default"
                 style={{ background: 'rgba(0,0,0,0.45)' }}
                 onClick={() => setNewProjectOpen(false)}
@@ -1164,7 +1183,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       type="color"
                       value={newProjectColor}
                       onChange={(e) => setNewProjectColor(e.target.value)}
-                      title="Pick a color"
+                      title={t('flow.shell.pickColor')}
                       className="h-8 w-8 shrink-0 rounded-md cursor-pointer border-0 p-0.5"
                       style={{
                         background: 'var(--flow-input-bg)',
@@ -1174,14 +1193,14 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     <input
                       autoFocus
                       type="text"
-                      placeholder="Project name"
+                      placeholder={t('flow.shell.projectNamePlaceholder')}
                       value={newProjectName}
                       onChange={(e) => setNewProjectName(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           if (!newProjectName.trim()) {
-                            toast.error('Project name is required');
+                            toast.error(t('flow.shell.projectNameRequired'));
                             return;
                           }
                           if (!currentWorkspaceId) return;
@@ -1193,7 +1212,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             },
                             {
                               onSuccess: () => setNewProjectOpen(false),
-                              onError: () => toast.error('Something went wrong. Please try again.'),
+                              onError: () => toast.error(t('errors.generic')),
                             }
                           );
                         }
@@ -1208,7 +1227,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     />
                   </div>
                   <textarea
-                    placeholder="Description (optional)"
+                    placeholder={t('flow.shell.projectDescriptionPlaceholder')}
                     value={newProjectDescription}
                     onChange={(e) => setNewProjectDescription(e.target.value)}
                     rows={3}
@@ -1227,7 +1246,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)]"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="button"
@@ -1242,14 +1261,14 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         },
                         {
                           onSuccess: () => setNewProjectOpen(false),
-                          onError: () => toast.error('Something went wrong. Please try again.'),
+                          onError: () => toast.error(t('errors.generic')),
                         }
                       );
                     }}
                     className="px-4 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{ background: 'var(--accent)', color: '#0a0a0a' }}
                   >
-                    {createProject.isPending ? 'Creating…' : 'Create'}
+                    {createProject.isPending ? t('flow.shell.creating') : t('common.create')}
                   </button>
                 </div>
               </motion.div>
@@ -1270,9 +1289,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   borderBottom: '1px solid var(--flow-border)',
                 }}
               >
-                Quiet hours ({lifePrefs.quietStart}–{lifePrefs.quietEnd}), non-urgent reminders stay
-                soft. Digest preference: {lifePrefs.digestHour}:00. Change in Settings → Life &
-                rhythm.
+                {t('flow.shell.quietHoursNotice', {
+                  start: lifePrefs.quietStart,
+                  end: lifePrefs.quietEnd,
+                  digestHour: lifePrefs.digestHour,
+                })}
               </div>
             )}
             <LicenseBanner safe={safe} />

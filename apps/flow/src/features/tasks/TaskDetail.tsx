@@ -3,6 +3,7 @@ import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import {
   ArrowLeft,
   Copy,
@@ -43,13 +44,7 @@ import { useLabels, useSetTaskLabels } from './useLabels';
 import { useTaskActivity } from './useTaskActivity';
 import { useTaskRealtime } from '../../shared/lib/useTaskRealtime';
 import TimePanel from './components/TimePanel';
-import {
-  useFlowStore,
-  PRIORITY_LABELS,
-  STATUS_LABELS,
-  Attachment,
-  Task,
-} from '../../shared/stores/flowStore';
+import { useFlowStore, Attachment, Task } from '../../shared/stores/flowStore';
 import type { ApiTask, ApiTaskDetail, ApiTaskActivity } from '../../shared/services/flowApi';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useCanEditTask, useCanDeleteResource } from '../../shared/lib/currentUser';
@@ -66,17 +61,20 @@ import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPres
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-function formatRelative(dateStr: string): string {
+function formatRelative(dateStr: string, t: TFunction): string {
   const d = new Date(dateStr);
   const diff = Date.now() - d.getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('flow.taskDetail.justNow');
+  if (mins < 60) return t('flow.taskDetail.minutesAgo', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('flow.taskDetail.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  if (days < 30) return `${days}d ago`;
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  if (days < 30) return t('flow.taskDetail.daysAgo', { count: days });
+  return d.toLocaleDateString(t('flow.taskDetail.dateLocale'), {
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 function humanizeValue(action: string, value: string): string {
@@ -104,55 +102,34 @@ function inferAttachmentMime(name: string): string {
   return 'application/octet-stream';
 }
 
-function describeActivity(a: ApiTaskActivity): React.ReactNode {
+function describeActivity(a: ApiTaskActivity, t: TFunction): React.ReactNode {
   const action = a.action;
   const oldVal = humanizeValue(action, a.oldValue);
   const newVal = humanizeValue(action, a.newValue);
 
   if (action === 'status_changed' || action === 'status_change') {
-    return (
-      <>
-        status changed from <strong>{oldVal}</strong> to <strong>{newVal}</strong>
-      </>
-    );
+    return t('flow.taskDetail.statusChanged', { from: oldVal, to: newVal });
   }
   if (action === 'priority_changed' || action === 'priority_change') {
-    return (
-      <>
-        priority changed from <strong>{oldVal}</strong> to <strong>{newVal}</strong>
-      </>
-    );
+    return t('flow.taskDetail.priorityChanged', { from: oldVal, to: newVal });
   }
   if (action === 'assignee_changed' || action === 'assignee_change') {
-    return (
-      <>
-        assigned to <strong>{newVal}</strong>
-      </>
-    );
+    return t('flow.taskDetail.assigneeChanged', { to: newVal });
   }
   if (action === 'title_changed' || action === 'title_change') {
-    return <>title updated</>;
+    return t('flow.taskDetail.titleChanged');
   }
   if (action === 'due_date_changed' || action === 'due_date_change') {
-    return (
-      <>
-        due date set to <strong>{newVal}</strong>
-      </>
-    );
+    return t('flow.taskDetail.dueDateChanged', { to: newVal });
   }
   // generic
   const label = action
     .replace(/_/g, ' ')
     .replace(/\bchanged\b/, 'changed')
     .trim();
-  if (a.newValue) {
-    return (
-      <>
-        {label} → <strong>{newVal}</strong>
-      </>
-    );
-  }
-  return <>{label}</>;
+  return a.newValue
+    ? t('flow.taskDetail.genericActivity', { label, value: newVal })
+    : t('flow.taskDetail.genericActivityNoValue', { label });
 }
 
 function activityIcon(action: string): React.ComponentType<{ size?: number }> {
@@ -225,21 +202,25 @@ const TaskDetail: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
-        Loading task...
+        {t('flow.taskDetail.loading')}
       </div>
     );
   }
 
   const task = detail?.task;
-  const taskComments = (detail?.comments ?? []).map((c) => ({
-    id: c.id,
-    taskId: c.taskId,
-    authorId: c.userId,
-    author: c.userId,
-    authorInitials: c.userId.slice(0, 2).toUpperCase(),
-    body: c.content,
-    createdAt: c.createdAt,
-  }));
+  const taskComments = (detail?.comments ?? []).map((c) => {
+    const author = members.find((member) => String(member.id) === String(c.userId));
+    const authorName = author?.name || t('flow.time.unknownAuthor');
+    return {
+      id: c.id,
+      taskId: c.taskId,
+      authorId: c.userId,
+      author: authorName,
+      authorInitials: author?.initials || getInitials(authorName),
+      body: c.content,
+      createdAt: c.createdAt,
+    };
+  });
 
   const taskSubtasks = (detail?.subtasks ?? []).map((s) => ({
     id: s.id,
@@ -257,7 +238,7 @@ const TaskDetail: React.FC = () => {
     return (
       <div className="p-10 text-center">
         <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
-          Task not found.
+          {t('flow.taskDetail.notFound')}
         </p>
       </div>
     );
@@ -318,6 +299,14 @@ const TaskDetail: React.FC = () => {
     'done',
     'cancelled',
   ];
+  const statusLabelKeys: Record<Task['status'], string> = {
+    backlog: 'backlog',
+    todo: 'todo',
+    in_progress: 'inProgress',
+    in_review: 'inReview',
+    done: 'done',
+    cancelled: 'cancelled',
+  };
 
   // Handle set labels via new API
   const handleToggleLabel = (labelId: number) => {
@@ -331,7 +320,7 @@ const TaskDetail: React.FC = () => {
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
-      <HelmetContainer title="Task · rtylr" />
+      <HelmetContainer title={`${t('flow.taskDetail.project')} · rtylr`} />
       {/* Main area. shrink-0 with an auto basis below lg: as flex-1 its basis is
           0%, so in this fixed-height scrolling column the taller rail claimed
           every pixel and the title and description collapsed out of view on a
@@ -352,7 +341,7 @@ const TaskDetail: React.FC = () => {
             <Breadcrumbs
               items={[
                 {
-                  label: project?.name || 'Project',
+                  label: project?.name || t('flow.taskDetail.project'),
                   to: `/w/${task.workspaceId}/p/${task.projectId}`,
                 },
                 { label: task.identifier ?? task.id },
@@ -363,13 +352,14 @@ const TaskDetail: React.FC = () => {
             <button
               onClick={() => {
                 navigator.clipboard?.writeText(task.identifier ?? task.id);
-                toast.success(`Copied ${task.identifier ?? task.id}`);
+                toast.success(t('toasts.task.copied', { id: task.identifier ?? task.id }));
               }}
               className="flex h-8 items-center gap-1 rounded px-2 text-[11px] hover:bg-[var(--flow-hover)] sm:h-7"
               style={{ color: 'var(--flow-text-muted)' }}
-              title="Copy ID"
+              title={t('flow.taskDetail.copyId')}
             >
-              <Copy size={11} /> <span className="hidden sm:inline">Copy ID</span>
+              <Copy size={11} />
+              <span className="hidden sm:inline">{t('flow.taskDetail.copyId')}</span>
             </button>
             <button
               onClick={() => {
@@ -386,7 +376,7 @@ const TaskDetail: React.FC = () => {
               }}
               className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
               style={{ color: 'var(--flow-text-muted)' }}
-              title={!canEdit ? t('common.readOnlyAccess') : 'Archive'}
+              title={!canEdit ? t('common.readOnlyAccess') : t('flow.taskDetail.archive')}
               disabled={updateTaskMut.isPending || !canEdit}
             >
               <Archive size={12} />
@@ -407,7 +397,7 @@ const TaskDetail: React.FC = () => {
               }}
               className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
               style={{ color: '#ef4444' }}
-              title={!canRemove ? t('common.deleteRestricted') : 'Delete'}
+              title={!canRemove ? t('common.deleteRestricted') : t('flow.taskDetail.delete')}
               disabled={deleteTaskMut.isPending || !canRemove}
             >
               <Trash2 size={12} />
@@ -445,7 +435,7 @@ const TaskDetail: React.FC = () => {
             <textarea
               value={task.description || ''}
               onChange={(e) => updateTask(task.id, { description: e.target.value })}
-              placeholder="Add a description…"
+              placeholder={t('flow.taskDetail.descriptionPlaceholder')}
               rows={5}
               disabled={!canEdit}
               className="w-full bg-transparent outline-none text-[13px] leading-relaxed mb-6 resize-none disabled:opacity-70"
@@ -460,7 +450,7 @@ const TaskDetail: React.FC = () => {
                   className="text-[11px] font-semibold uppercase tracking-wider"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
-                  Subtasks
+                  {t('flow.taskDetail.subtasks')}
                 </h3>
               </div>
               <SubtaskList
@@ -476,7 +466,7 @@ const TaskDetail: React.FC = () => {
                 className="text-[11px] font-semibold uppercase tracking-wider mb-3"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
-                Attachments
+                {t('flow.taskDetail.attachments')}
               </h3>
               <AttachmentUpload
                 attachments={taskAttachments}
@@ -495,18 +485,20 @@ const TaskDetail: React.FC = () => {
               className="flex items-center gap-1 mb-4"
               style={{ borderBottom: '1px solid var(--flow-border)' }}
             >
-              {(['comments', 'activity'] as const).map((t) => (
+              {(['comments', 'activity'] as const).map((tabName) => (
                 <button
-                  key={t}
-                  onClick={() => setTab(t)}
+                  key={tabName}
+                  onClick={() => setTab(tabName)}
                   className="px-3 py-2 text-[12px] font-medium capitalize"
                   style={{
-                    color: tab === t ? 'var(--flow-text)' : 'var(--flow-text-muted)',
-                    borderBottom: tab === t ? '2px solid #64C5B9' : '2px solid transparent',
+                    color: tab === tabName ? 'var(--flow-text)' : 'var(--flow-text-muted)',
+                    borderBottom: tab === tabName ? '2px solid #64C5B9' : '2px solid transparent',
                   }}
                 >
-                  {t}
-                  {t === 'comments' && (
+                  {tabName === 'comments'
+                    ? t('flow.taskDetail.comments')
+                    : t('flow.taskDetail.activity')}
+                  {tabName === 'comments' && (
                     <span
                       className="ms-1.5 text-[10px] px-1 rounded"
                       style={{
@@ -533,7 +525,11 @@ const TaskDetail: React.FC = () => {
                       body,
                       user
                         ? { id: user.id, name: user.name, initials: getInitials(user.name) }
-                        : { id: 'local', name: 'You', initials: 'YO' }
+                        : {
+                            id: 'local',
+                            name: t('flow.taskDetail.you'),
+                            initials: getInitials(t('flow.taskDetail.you')),
+                          }
                     )
                   }
                   disabled={!canEdit}
@@ -541,7 +537,7 @@ const TaskDetail: React.FC = () => {
               </div>
             )}
 
-            {tab === 'activity' && <ActivitySection entries={taskActivityData} />}
+            {tab === 'activity' && <ActivitySection entries={taskActivityData} t={t} />}
           </div>
         </motion.div>
       </div>
@@ -553,14 +549,14 @@ const TaskDetail: React.FC = () => {
           background: 'var(--flow-surface)',
         }}
       >
-        <DetailField icon={CircleDot} label="Status">
+        <DetailField icon={CircleDot} label={t('flow.taskDetail.status')}>
           <select
             value={task.status}
             onChange={(e) => {
               const next = e.target.value as Task['status'];
               if (next === 'done' && task.status !== 'done') {
                 toast.success(t('toasts.task.niceWork'), {
-                  description: 'Task marked complete.',
+                  description: t('flow.taskDetail.taskMarkedComplete'),
                   icon: '🎉',
                 });
               }
@@ -572,13 +568,13 @@ const TaskDetail: React.FC = () => {
           >
             {statuses.map((s) => (
               <option key={s} value={s} style={{ background: 'var(--flow-card)' }}>
-                {STATUS_LABELS[s]}
+                {t(`flow.taskDetail.${statusLabelKeys[s]}`)}
               </option>
             ))}
           </select>
         </DetailField>
 
-        <DetailField icon={Flag} label="Priority">
+        <DetailField icon={Flag} label={t('flow.taskDetail.priority')}>
           <select
             value={task.priority}
             onChange={(e) => updateTask(task.id, { priority: e.target.value as Task['priority'] })}
@@ -588,13 +584,13 @@ const TaskDetail: React.FC = () => {
           >
             {priorities.map((p) => (
               <option key={p} value={p} style={{ background: 'var(--flow-card)' }}>
-                {PRIORITY_LABELS[p]}
+                {p === 'no_priority' ? t('flow.taskDetail.noPriority') : t(`priority.${p}`)}
               </option>
             ))}
           </select>
         </DetailField>
 
-        <DetailField icon={UserIcon} label="Assignee">
+        <DetailField icon={UserIcon} label={t('flow.taskDetail.assignee')}>
           <div className="flex items-center gap-2">
             <AssigneeAvatar name={task.assignee} initials={task.assigneeInitials} size={18} />
             <select
@@ -621,7 +617,7 @@ const TaskDetail: React.FC = () => {
           </div>
         </DetailField>
 
-        <DetailField icon={CalendarIcon} label="Due date">
+        <DetailField icon={CalendarIcon} label={t('flow.taskDetail.dueDate')}>
           <DueDatePicker
             value={task.dueDate}
             onChange={(d) => updateTask(task.id, { dueDate: d })}
@@ -629,12 +625,12 @@ const TaskDetail: React.FC = () => {
           />
         </DetailField>
 
-        <DetailField icon={Clock} label="Estimate">
+        <DetailField icon={Clock} label={t('flow.taskDetail.estimate')}>
           <input
             type="number"
             value={task.estimate || ''}
             onChange={(e) => updateTask(task.id, { estimate: Number(e.target.value) })}
-            placeholder="hours"
+            placeholder={t('flow.taskDetail.hours')}
             disabled={!canEdit}
             className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
@@ -649,7 +645,7 @@ const TaskDetail: React.FC = () => {
           currentUserId={user?.id ?? null}
         />
 
-        <DetailField icon={Gauge} label="Effort">
+        <DetailField icon={Gauge} label={t('flow.taskDetail.effort')}>
           <div className="flex flex-wrap gap-1">
             <button
               type="button"
@@ -679,7 +675,9 @@ const TaskDetail: React.FC = () => {
                       ? `1px solid ${'var(--accent)'}66`
                       : '1px solid var(--flow-border)',
                 }}
-                title={!canEdit ? t('common.readOnlyAccess') : `${m} minutes`}
+                title={
+                  !canEdit ? t('common.readOnlyAccess') : `${m} ${t('flow.taskDetail.minutes')}`
+                }
               >
                 {formatEffortMinutes(m)}
               </button>
@@ -687,22 +685,22 @@ const TaskDetail: React.FC = () => {
           </div>
         </DetailField>
 
-        <DetailField icon={Hourglass} label="Waiting on">
+        <DetailField icon={Hourglass} label={t('flow.taskDetail.waitingOn')}>
           <input
             value={task.waitingOn || ''}
             onChange={(e) => updateTask(task.id, { waitingOn: e.target.value || undefined })}
-            placeholder="Person, team, approval…"
+            placeholder={t('flow.taskDetail.waitingPlaceholder')}
             disabled={!canEdit}
             className="bg-transparent text-[12px] outline-none w-full placeholder:opacity-50 disabled:opacity-70"
             style={{ color: 'var(--flow-text)' }}
           />
         </DetailField>
 
-        <DetailField icon={Lightbulb} label="Decision">
+        <DetailField icon={Lightbulb} label={t('flow.taskDetail.decision')}>
           <textarea
             value={task.decisionNote || ''}
             onChange={(e) => updateTask(task.id, { decisionNote: e.target.value || undefined })}
-            placeholder="Why this approach (one line)"
+            placeholder={t('flow.taskDetail.decisionPlaceholder')}
             rows={2}
             disabled={!canEdit}
             className="w-full bg-transparent text-[12px] outline-none resize-none placeholder:opacity-50 rounded-md px-2 py-1.5 disabled:opacity-70"
@@ -710,7 +708,7 @@ const TaskDetail: React.FC = () => {
           />
         </DetailField>
 
-        <DetailField icon={Pin} label="Today">
+        <DetailField icon={Pin} label={t('flow.taskDetail.today')}>
           <button
             type="button"
             onClick={() => updateTask(task.id, { focusPin: !task.focusPin })}
@@ -723,12 +721,12 @@ const TaskDetail: React.FC = () => {
               border: task.focusPin ? `1px solid ${'var(--accent)'}55` : '1px solid transparent',
             }}
           >
-            {task.focusPin ? 'Pinned to Today view' : 'Pin to Today view'}
+            {task.focusPin ? t('flow.taskDetail.pinnedToToday') : t('flow.taskDetail.pinToToday')}
           </button>
         </DetailField>
 
         {cycle && (
-          <DetailField icon={Timer} label="Cycle">
+          <DetailField icon={Timer} label={t('flow.taskDetail.cycle')}>
             <span className="text-[12px]" style={{ color: 'var(--flow-text)' }}>
               {cycle.name}
             </span>
@@ -736,7 +734,7 @@ const TaskDetail: React.FC = () => {
         )}
 
         {milestone && (
-          <DetailField icon={MilestoneIcon} label="Milestone">
+          <DetailField icon={MilestoneIcon} label={t('flow.taskDetail.milestone')}>
             <span className="text-[12px]" style={{ color: 'var(--flow-text)' }}>
               {milestone.name}
             </span>
@@ -744,7 +742,7 @@ const TaskDetail: React.FC = () => {
         )}
 
         {projectSections.length > 0 && (
-          <DetailField icon={LayoutList} label="Section">
+          <DetailField icon={LayoutList} label={t('flow.taskDetail.section')}>
             <select
               value={task.sectionId ?? ''}
               onChange={(e) => updateTask(task.id, { sectionId: e.target.value || undefined })}
@@ -752,7 +750,7 @@ const TaskDetail: React.FC = () => {
               className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
               style={{ color: 'var(--flow-text)' }}
             >
-              <option value="">No section</option>
+              <option value="">{t('flow.taskDetail.noSection')}</option>
               {projectSections.map((s) => (
                 <option key={s.id} value={s.id} style={{ background: 'var(--flow-card)' }}>
                   {s.name}
@@ -821,7 +819,7 @@ const TaskDetail: React.FC = () => {
           </DetailField>
         ))}
 
-        <DetailField icon={Link2} label="Dependencies">
+        <DetailField icon={Link2} label={t('flow.taskDetail.dependencies')}>
           <div className="space-y-1.5">
             {dependencyTasks.map((dt) => (
               <div key={dt.id} className="flex items-center justify-between gap-1">
@@ -844,7 +842,7 @@ const TaskDetail: React.FC = () => {
                       })
                     }
                   >
-                    Remove
+                    {t('flow.taskDetail.remove')}
                   </button>
                 )}
               </div>
@@ -857,7 +855,7 @@ const TaskDetail: React.FC = () => {
                   className="bg-transparent text-[11px] outline-none flex-1 min-w-0 rounded px-1"
                   style={{ color: 'var(--flow-text)', border: '1px solid var(--flow-border)' }}
                 >
-                  <option value="">Add dependency…</option>
+                  <option value="">{t('flow.taskDetail.addDependency')}</option>
                   {dependencyCandidates.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.identifier} {c.title}
@@ -877,14 +875,14 @@ const TaskDetail: React.FC = () => {
                   className="text-[10px] px-1.5 py-0.5 rounded font-semibold disabled:opacity-40"
                   style={{ background: 'var(--accent)', color: '#0a0a0a' }}
                 >
-                  Add
+                  {t('flow.taskDetail.add')}
                 </button>
               </div>
             )}
           </div>
         </DetailField>
 
-        <DetailField icon={Tag} label="Labels">
+        <DetailField icon={Tag} label={t('flow.taskDetail.labels')}>
           <div className="flex flex-wrap gap-1 relative">
             {taskLabels.length === 0 && canEdit && (
               <button
@@ -892,7 +890,7 @@ const TaskDetail: React.FC = () => {
                 className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
-                + Add label
+                {t('flow.taskDetail.addLabel')}
               </button>
             )}
             {taskLabels.map((l) => (
@@ -909,7 +907,7 @@ const TaskDetail: React.FC = () => {
                 className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
-                + Add
+                {t('flow.taskDetail.addShort')}
               </button>
             )}
             {labelPickerOpen && (
@@ -919,7 +917,7 @@ const TaskDetail: React.FC = () => {
               >
                 {allLabels.length === 0 && (
                   <p className="text-[11px] px-2 py-1" style={{ color: 'var(--flow-text-dim)' }}>
-                    No labels yet
+                    {t('flow.taskDetail.noLabels')}
                   </p>
                 )}
                 {allLabels.map((l) => {
@@ -962,11 +960,14 @@ const TaskDetail: React.FC = () => {
 
 // ── Activity Section ──────────────────────────────────────────────────────────
 
-const ActivitySection: React.FC<{ entries: ApiTaskActivity[] }> = ({ entries }) => {
+const ActivitySection: React.FC<{ entries: ApiTaskActivity[]; t: TFunction }> = ({
+  entries,
+  t,
+}) => {
   if (entries.length === 0) {
     return (
       <div className="text-[12px] text-center py-4" style={{ color: 'var(--flow-text-dim)' }}>
-        No activity yet.
+        {t('flow.taskDetail.noActivity')}
       </div>
     );
   }
@@ -983,9 +984,9 @@ const ActivitySection: React.FC<{ entries: ApiTaskActivity[] }> = ({ entries }) 
               <Icon size={10} />
             </span>
             <div className="flex-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-              {describeActivity(a)}
+              {describeActivity(a, t)}
               <span className="ms-2" style={{ color: 'var(--flow-text-dim)' }}>
-                {formatRelative(a.createdAt)}
+                {formatRelative(a.createdAt, t)}
               </span>
             </div>
           </div>

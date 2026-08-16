@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { useCreateTimeEntry } from '../../shared/hooks/queries/useTimeEntries';
+import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import { timeEntryFormSchema } from '../../shared/schemas/timeEntries';
 import { Modal, Button, Input, Textarea, Label, Checkbox } from '../../shared/components/ui';
@@ -23,6 +24,7 @@ const TimeEntryForm = ({
 }: TimeEntryFormProps): React.JSX.Element | null => {
   const { t } = useTranslation();
   const createEntry = useCreateTimeEntry();
+  const { data: myEmployeeId, isError: employeeLookupFailed } = useMyEmployeeId();
   const config = useHRConfigStore((s) => s.config);
 
   const today = new Date().toISOString().slice(0, 10);
@@ -64,7 +66,7 @@ const TimeEntryForm = ({
       description,
       isBillable,
       source: prefill?.source ?? 'manual',
-      employeeId: 0, // Backend fills from auth context
+      employeeId: myEmployeeId ?? 0,
     };
 
     const result = timeEntryFormSchema.safeParse(formData);
@@ -196,6 +198,11 @@ const TimeEntryForm = ({
         />
 
         {/* Validation errors */}
+        {employeeLookupFailed && (
+          <p style={{ color: 'var(--hr-error)', fontSize: 12 }}>
+            {t('timeLogging.form.employeeLookupFailed')}
+          </p>
+        )}
         {errors.durationMinutes && (
           <p style={{ color: 'var(--hr-error)', fontSize: 12 }}>
             {t('timeLogging.form.durationRequired')}
@@ -207,7 +214,11 @@ const TimeEntryForm = ({
           <Button variant="ghost" type="button" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button variant="primary" type="submit" disabled={createEntry.isPending}>
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={createEntry.isPending || myEmployeeId === undefined}
+          >
             {createEntry.isPending ? t('common.loading') : t('common.save')}
           </Button>
         </div>
