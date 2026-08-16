@@ -46,16 +46,18 @@ export function CookieBanner({
     <div
       role="dialog"
       aria-label="Cookie consent"
+      aria-modal="false"
+      aria-describedby="cookie-consent-desc"
       className={className}
       style={{
         position: 'fixed',
-        bottom: 20,
-        left: 20,
+        bottom: 16,
+        left: 16,
         zIndex: 9999,
-        maxWidth: 380,
+        maxWidth: 'min(380px, calc(100vw - 32px))',
         padding: '14px 16px',
         borderRadius: 14,
-        background: 'rgba(15, 15, 15, 0.82)',
+        background: 'rgba(15, 15, 15, 0.92)',
         color: 'rgba(255,255,255,0.92)',
         border: '1px solid rgba(255,255,255,0.08)',
         backdropFilter: 'blur(20px)',
@@ -71,12 +73,15 @@ export function CookieBanner({
         gap: 12,
       }}
     >
-      <div style={{ color: 'rgba(255,255,255,0.78)', fontSize: 12.5 }}>
+      <div id="cookie-consent-desc" style={{ color: 'rgba(255,255,255,0.78)', fontSize: 12.5 }}>
         We use essential cookies to run rtylr, and optional analytics to understand which features
         to build next.{' '}
         <a
           href={privacyUrl}
           style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            minHeight: 24,
             color: 'rgba(255,255,255,0.92)',
             textDecoration: 'underline',
             textDecorationColor: 'rgba(255,255,255,0.3)',
@@ -87,12 +92,17 @@ export function CookieBanner({
         </a>
         .
       </div>
-      <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center' }}>
         <button
           type="button"
           onClick={handleDecline}
           style={{
-            padding: '6px 12px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 44,
+            minWidth: 44,
+            padding: '10px 16px',
             borderRadius: 999,
             border: '1px solid rgba(255,255,255,0.12)',
             background: 'transparent',
@@ -119,7 +129,12 @@ export function CookieBanner({
           type="button"
           onClick={handleAccept}
           style={{
-            padding: '6px 14px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 44,
+            minWidth: 44,
+            padding: '10px 18px',
             borderRadius: 999,
             border: 'none',
             background: 'rgba(255,255,255,0.95)',
