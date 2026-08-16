@@ -18,6 +18,7 @@ import { Avatar } from '@voxire/ui';
 import { useUserStore, type StoredUser } from '../stores/userStore';
 import { normalizeConfigData, useConfigStore } from '../stores/configStore';
 import { safe } from '../lib/api';
+import { useBusinessFavicon } from '../hooks/useBusinessFavicon';
 
 const getCookieToken = (): string | null =>
   document.cookie
@@ -369,8 +370,11 @@ function BusinessRoute(): React.JSX.Element | null {
   const token = getCookieToken();
   const { user, setUser, setToken } = useUserStore();
   const { setWebsiteData, setContactInfo, setMaintanance, setAboutContent } = useConfigStore();
+  const logoUrl = useConfigStore((s) => s.websiteData?.logoUrl as string | undefined);
   const [loading, setLoading] = useState(true);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useBusinessFavicon(logoUrl);
 
   useEffect((): void => {
     if (!token) {

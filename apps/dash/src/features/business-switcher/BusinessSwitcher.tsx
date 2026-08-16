@@ -18,11 +18,42 @@ import {
   type OwnedBusiness,
 } from '../../shared/hooks/queries/useBusinesses';
 
+interface BusinessLogoProps {
+  logoUrl?: string;
+  name: string;
+  size: number;
+}
+
+const BusinessLogo: React.FC<BusinessLogoProps> = ({ logoUrl, name, size }): React.JSX.Element => {
+  if (logoUrl) {
+    return (
+      <img
+        src={logoUrl}
+        alt=""
+        width={size}
+        height={size}
+        className="rounded object-cover shrink-0"
+        style={{ height: size, width: size }}
+      />
+    );
+  }
+
+  return (
+    <span
+      className="rounded flex items-center justify-center shrink-0"
+      style={{ height: size, width: size, background: 'rgba(69,131,196,0.12)' }}
+      aria-label={name}
+    >
+      <Building2 size={Math.round(size * 0.55)} style={{ color: '#4583C4' }} />
+    </span>
+  );
+};
+
 const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useUserStore();
-  const currentBusinessId = user?.businessId ?? 0;
+  const currentBusinessId = Number(user?.businessId ?? 0);
 
   const { data } = useListMyBusinesses();
   const businesses: OwnedBusiness[] = data?.businesses ?? [];
@@ -69,12 +100,11 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
             className="flex items-center gap-2 w-full px-3 py-2 rounded-lg cursor-pointer text-sm transition-colors duration-150 hover:bg-[var(--dash-hover)]"
             style={{ color: 'var(--dash-text-muted)' }}
           >
-            <span
-              className="h-5 w-5 rounded flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(69,131,196,0.12)' }}
-            >
-              <Building2 size={11} style={{ color: '#4583C4' }} />
-            </span>
+            <BusinessLogo
+              logoUrl={currentBusiness?.logoUrl}
+              name={currentBusiness?.name ?? user?.businessName ?? ''}
+              size={20}
+            />
             <span
               className="dash-sidebar-label flex-1 truncate text-left text-xs"
               style={{ color: 'var(--dash-text)' }}
@@ -123,6 +153,7 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
           <div className="max-h-60 overflow-y-auto">
             {filteredBusinesses.map((b) => (
               <DropdownMenuItem key={b.id} onClick={() => handleSwitch(b)}>
+                <BusinessLogo logoUrl={b.logoUrl} name={b.name} size={16} />
                 <span className="flex-1 truncate">{b.name}</span>
                 {b.id === currentBusinessId && <Check size={13} style={{ color: '#4583C4' }} />}
                 {switchMutation.isPending && b.id !== currentBusinessId && (

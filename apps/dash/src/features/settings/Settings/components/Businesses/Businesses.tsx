@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ArrowRightLeft, Building2, Check, Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
+import { uploadAsset } from '@voxire/api';
+import {
+  ArrowRightLeft,
+  Building2,
+  Camera,
+  Check,
+  Loader2,
+  Pencil,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 import { setCookie, removeCookie, getDefaultCookieDomain } from '@voxire/auth';
 import { cn } from '../../../../../shared/lib/utils';
 import {
@@ -27,6 +37,7 @@ import {
   useDeleteBusiness,
   useListMyBusinesses,
   useRenameBusiness,
+  useSetBusinessLogo,
   useSwitchBusiness,
   type OwnedBusiness,
 } from '../../../../../shared/hooks/queries/useBusinesses';
@@ -52,6 +63,7 @@ const Businesses: React.FC = () => {
   const { data: billing } = useBillingDetail();
   const createBusiness = useCreateSubBusiness();
   const renameBusiness = useRenameBusiness();
+  const setBusinessLogo = useSetBusinessLogo();
   const deleteBusiness = useDeleteBusiness();
   const switchBusiness = useSwitchBusiness();
 
@@ -74,6 +86,30 @@ const Businesses: React.FC = () => {
   const [renameName, setRenameName] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<OwnedBusiness | null>(null);
   const [switchingId, setSwitchingId] = useState<number | null>(null);
+  const [logoUploadTargetId, setLogoUploadTargetId] = useState<number | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const openLogoUpload = (business: OwnedBusiness, event: React.MouseEvent): void => {
+    event.stopPropagation();
+    setLogoUploadTargetId(business.id);
+    logoInputRef.current?.click();
+  };
+
+  const handleLogoUpload = async (file?: File | null): Promise<void> => {
+    const businessId = logoUploadTargetId;
+    if (!file || !businessId) return;
+
+    try {
+      const uploaded = await uploadAsset(file);
+      await setBusinessLogo.mutateAsync({ businessId, logoUrl: uploaded.url });
+      toast.success(t('businesses.logoUploadSuccess'));
+    } catch (error) {
+      toast.error(errorMessage(error, t('businesses.logoUploadError')));
+    } finally {
+      setLogoUploadTargetId(null);
+      if (logoInputRef.current) logoInputRef.current.value = '';
+    }
+  };
 
   const handleSwitch = (business: OwnedBusiness, event?: React.MouseEvent): void => {
     event?.stopPropagation();
@@ -201,6 +237,15 @@ const Businesses: React.FC = () => {
   return (
     <>
       <HelmetContainer title={`${t('businesses.manageTitle')} · rtylr`} />
+      <input
+        ref={logoInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          void handleLogoUpload(e.target.files?.[0]);
+        }}
+      />
       <div className="w-full max-w-6xl space-y-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3.5">
@@ -296,13 +341,37 @@ const Businesses: React.FC = () => {
                     >
                       <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
                         <div
-                          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105"
+                          className="group/logo relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl transition-transform group-hover:scale-105"
                           style={{
                             background: isCurrent ? 'rgba(69,131,196,0.14)' : 'var(--dash-hover)',
                             color: isCurrent ? '#4583C4' : 'var(--dash-text-muted)',
                           }}
                         >
-                          <Building2 size={20} />
+                          {business.logoUrl ? (
+                            <img
+                              src={business.logoUrl}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <Building2 size={20} />
+                          )}
+                          {isOwned && (
+                            <button
+                              type="button"
+                              onClick={(e) => openLogoUpload(business, e)}
+                              disabled={setBusinessLogo.isPending}
+                              aria-label={`${t('businesses.changeLogo')} ${business.name}`}
+                              title={t('businesses.changeLogo')}
+                              className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity cursor-pointer group-hover/logo:opacity-100"
+                            >
+                              {setBusinessLogo.isPending && logoUploadTargetId === business.id ? (
+                                <Loader2 size={15} className="animate-spin text-white" />
+                              ) : (
+                                <Camera size={15} className="text-white" />
+                              )}
+                            </button>
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">

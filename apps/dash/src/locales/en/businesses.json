@@ -40,5 +40,8 @@
   "deleteSuccess": "Business deleted",
   "deleteError": "Failed to delete business",
   "onlyBusinessError": "You cannot delete your only remaining business.",
-  "activeDeleteError": "Choose another business before deleting the current one."
+  "activeDeleteError": "Choose another business before deleting the current one.",
+  "changeLogo": "Change logo",
+  "logoUploadSuccess": "Logo updated",
+  "logoUploadError": "Failed to upload logo"
 }

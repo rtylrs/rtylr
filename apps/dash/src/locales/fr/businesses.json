@@ -40,5 +40,8 @@
   "deleteSuccess": "Entreprise supprimée",
   "deleteError": "Échec de la suppression",
   "onlyBusinessError": "Vous ne pouvez pas supprimer votre seule entreprise restante.",
-  "activeDeleteError": "Choisissez une autre entreprise avant de supprimer l’entreprise actuelle."
+  "activeDeleteError": "Choisissez une autre entreprise avant de supprimer l’entreprise actuelle.",
+  "changeLogo": "Changer le logo",
+  "logoUploadSuccess": "Logo mis à jour",
+  "logoUploadError": "Échec du téléversement du logo"
 }

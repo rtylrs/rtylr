@@ -40,5 +40,8 @@
   "deleteSuccess": "تم حذف النشاط التجاري",
   "deleteError": "فشل حذف النشاط التجاري",
   "onlyBusinessError": "لا يمكنك حذف نشاطك التجاري الوحيد المتبقي.",
-  "activeDeleteError": "اختر نشاطًا تجاريًا آخر قبل حذف النشاط الحالي."
+  "activeDeleteError": "اختر نشاطًا تجاريًا آخر قبل حذف النشاط الحالي.",
+  "changeLogo": "تغيير الشعار",
+  "logoUploadSuccess": "تم تحديث الشعار",
+  "logoUploadError": "فشل رفع الشعار"
 }

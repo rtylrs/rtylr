@@ -96,6 +96,39 @@ export const useRenameBusiness = () => {
   });
 };
 
+interface SetBusinessLogoRequest {
+  businessId: number;
+  logoUrl: string;
+}
+
+export const useSetBusinessLogo = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ businessId, logoUrl }: SetBusinessLogoRequest) =>
+      unwrap(
+        safe.patch<{ business?: unknown }>(
+          `/hub/business/v1/businesses/${encodeURIComponent(String(businessId))}/logo`,
+          { logoUrl }
+        )
+      ),
+    onSuccess: (_response, variables) => {
+      void queryClient.invalidateQueries({ queryKey: ['businesses', 'mine'] });
+      void queryClient.invalidateQueries({ queryKey: ['business'] });
+      void queryClient.invalidateQueries({ queryKey: ['user'] });
+      const currentUser = useUserStore.getState().user;
+      if (currentUser && Number(currentUser.businessId) === variables.businessId) {
+        useUserStore.getState().setUser({ ...currentUser, logo: variables.logoUrl });
+      }
+      const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
+      useConfigStore.getState().setWebsiteData({
+        ...currentWebsiteData,
+        logoUrl: variables.logoUrl,
+      });
+    },
+  });
+};
+
 export const useDeleteBusiness = () => {
   const queryClient = useQueryClient();
 
