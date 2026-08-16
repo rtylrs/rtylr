@@ -23,7 +23,7 @@
     "@voxire/types": "workspace:*",
     "@voxire/ui": "workspace:*",
     "@voxire/voxie": "workspace:*",
-    "axios": "^1.15.2",
+    "axios": "^1.19.0",
     "lucide-react": "^1.8.0",
     "motion": "^12.38.0",
     "react": "^19.2.5",

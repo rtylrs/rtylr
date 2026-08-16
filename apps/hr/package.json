@@ -22,7 +22,7 @@
     "@voxire/permissions": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "@voxire/ui": "workspace:*",
-    "axios": "^1.15.2",
+    "axios": "^1.19.0",
     "i18next": "^26.0.6",
     "lucide-react": "^1.8.0",
     "motion": "^12.38.0",
