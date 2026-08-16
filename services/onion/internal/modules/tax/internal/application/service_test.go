@@ -37,14 +37,14 @@ func TestGetConfig_Delegates(t *testing.T) {
 
 func TestGetConfig_ReturnsConfig(t *testing.T) {
 	cfg := domain.TaxConfig{
-		OwnerID:  5,
-		TaxName:  "VAT",
-		TaxRate:  0.20,
-		IsActive: true,
+		OwnerID:            5,
+		TaxName:            "VAT",
+		TaxRateBasisPoints: 2000,
+		IsActive:           true,
 	}
 	s := &Service{repo: &mockRepo{cfg: cfg}}
 	got, err := s.GetConfig(context.Background(), 5)
-	if err != nil || got.TaxName != "VAT" || got.TaxRate != 0.20 {
+	if err != nil || got.TaxName != "VAT" || got.TaxRateBasisPoints != 2000 {
 		t.Errorf("fields not preserved: %+v err=%v", got, err)
 	}
 }
@@ -60,9 +60,9 @@ func TestGetConfig_PropagatesError(t *testing.T) {
 func TestUpdateConfig_HappyPath(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
 	err := s.UpdateConfig(context.Background(), domain.TaxConfigInput{
-		OwnerID: 1,
-		TaxName: "GST",
-		TaxRate: 0.10,
+		OwnerID:            1,
+		TaxName:            "GST",
+		TaxRateBasisPoints: 1000,
 	})
 	if err != nil {
 		t.Errorf("unexpected: %v", err)
@@ -78,9 +78,9 @@ func TestUpdateConfig_PropagatesError(t *testing.T) {
 }
 
 func TestGetPLReport_Delegates(t *testing.T) {
-	s := &Service{repo: &mockRepo{pl: domain.PLReport{TotalRevenue: 1000}}}
+	s := &Service{repo: &mockRepo{pl: domain.PLReport{TotalRevenueMinorUnits: 100000}}}
 	got, err := s.GetPLReport(context.Background(), 1)
-	if err != nil || got.TotalRevenue != 1000 {
+	if err != nil || got.TotalRevenueMinorUnits != 100000 {
 		t.Errorf("got %+v err %v", got, err)
 	}
 }
@@ -95,20 +95,20 @@ func TestGetPLReport_PropagatesError(t *testing.T) {
 
 func TestGetPLReport_FieldsPreserved(t *testing.T) {
 	pl := domain.PLReport{
-		TotalRevenue:  5000,
-		TotalExpenses: 2000,
-		GrossProfit:   3000,
-		NetProfit:     2500,
+		TotalRevenueMinorUnits:  500000,
+		TotalExpensesMinorUnits: 200000,
+		GrossProfitMinorUnits:   300000,
+		NetProfitMinorUnits:     250000,
 	}
 	s := &Service{repo: &mockRepo{pl: pl}}
 	got, err := s.GetPLReport(context.Background(), 1)
-	if err != nil || got.NetProfit != 2500 || got.GrossProfit != 3000 {
+	if err != nil || got.NetProfitMinorUnits != 250000 || got.GrossProfitMinorUnits != 300000 {
 		t.Errorf("fields not preserved: %+v err=%v", got, err)
 	}
 }
 
 func TestGetConfig_IsInclusivePreserved(t *testing.T) {
-	cfg := domain.TaxConfig{IsInclusive: true, TaxRate: 0.15}
+	cfg := domain.TaxConfig{IsInclusive: true, TaxRateBasisPoints: 1500}
 	s := &Service{repo: &mockRepo{cfg: cfg}}
 	got, err := s.GetConfig(context.Background(), 1)
 	if err != nil || !got.IsInclusive {
@@ -130,7 +130,7 @@ func TestUpdateConfig_InactiveConfig(t *testing.T) {
 func TestGetPLReport_ZeroValues(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
 	got, err := s.GetPLReport(context.Background(), 1)
-	if err != nil || got.TotalRevenue != 0 || got.NetProfit != 0 {
+	if err != nil || got.TotalRevenueMinorUnits != 0 || got.NetProfitMinorUnits != 0 {
 		t.Errorf("expected zero values: %+v err=%v", got, err)
 	}
 }

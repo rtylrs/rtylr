@@ -23,11 +23,11 @@ func TestTax_UpsertConfig_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	if err := repo.UpsertConfig(context.Background(), domain.TaxConfigInput{
-		OwnerID:     testutil.OwnerID,
-		TaxName:     "VAT",
-		TaxRate:     20.0,
-		IsInclusive: false,
-		IsActive:    true,
+		OwnerID:            testutil.OwnerID,
+		TaxName:            "VAT",
+		TaxRateBasisPoints: 2000,
+		IsInclusive:        false,
+		IsActive:           true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
@@ -37,10 +37,10 @@ func TestTax_UpsertConfig_ThenGet(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	if err := repo.UpsertConfig(context.Background(), domain.TaxConfigInput{
-		OwnerID:  testutil.OwnerID,
-		TaxName:  "GST",
-		TaxRate:  10.0,
-		IsActive: true,
+		OwnerID:            testutil.OwnerID,
+		TaxName:            "GST",
+		TaxRateBasisPoints: 1000,
+		IsActive:           true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
@@ -58,12 +58,12 @@ func TestTax_UpsertConfig_UpdatesRate(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	if err := repo.UpsertConfig(context.Background(), domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxRate: 15.0, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxRateBasisPoints: 1500, IsActive: true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig 15%%: %v", err)
 	}
 	if err := repo.UpsertConfig(context.Background(), domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxRate: 18.0, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxRateBasisPoints: 1800, IsActive: true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig 18%%: %v", err)
 	}
@@ -72,8 +72,8 @@ func TestTax_UpsertConfig_UpdatesRate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetConfig: %v", err)
 	}
-	if cfg.TaxRate != 18.0 {
-		t.Errorf("expected tax rate 18.0, got %f", cfg.TaxRate)
+	if cfg.TaxRateBasisPoints != 1800 {
+		t.Errorf("expected tax rate 1800 basis points, got %d", cfg.TaxRateBasisPoints)
 	}
 }
 
@@ -93,7 +93,7 @@ func TestTax_UpsertConfig_Idempotent(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	input := domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxName: "Sales Tax", TaxRate: 7.5, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxName: "Sales Tax", TaxRateBasisPoints: 750, IsActive: true,
 	}
 	for i := 0; i < 3; i++ {
 		if err := repo.UpsertConfig(context.Background(), input); err != nil {
@@ -106,7 +106,7 @@ func TestTax_UpsertConfig_InactiveFlag(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	if err := repo.UpsertConfig(context.Background(), domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxRate: 0.0, IsActive: false,
+		OwnerID: testutil.OwnerID, TaxRateBasisPoints: 0, IsActive: false,
 	}); err != nil {
 		t.Fatalf("UpsertConfig inactive: %v", err)
 	}
@@ -127,8 +127,8 @@ func TestTax_GetPLReport_NoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetPLReport: %v", err)
 	}
-	if report.GrossProfit != report.TotalRevenue-report.TotalExpenses {
-		t.Errorf("GrossProfit mismatch: %.2f != %.2f - %.2f", report.GrossProfit, report.TotalRevenue, report.TotalExpenses)
+	if report.GrossProfitMinorUnits != report.TotalRevenueMinorUnits-report.TotalExpensesMinorUnits {
+		t.Errorf("GrossProfit mismatch: %d != %d - %d", report.GrossProfitMinorUnits, report.TotalRevenueMinorUnits, report.TotalExpensesMinorUnits)
 	}
 }
 
@@ -139,8 +139,8 @@ func TestTax_GetPLReport_NetEqualsGross(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetPLReport: %v", err)
 	}
-	if report.NetProfit != report.GrossProfit {
-		t.Errorf("expected NetProfit == GrossProfit, got %.2f vs %.2f", report.NetProfit, report.GrossProfit)
+	if report.NetProfitMinorUnits != report.GrossProfitMinorUnits {
+		t.Errorf("expected NetProfit == GrossProfit, got %d vs %d", report.NetProfitMinorUnits, report.GrossProfitMinorUnits)
 	}
 }
 
@@ -148,11 +148,11 @@ func TestTax_UpsertConfig_WithIsInclusive(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	if err := repo.UpsertConfig(context.Background(), domain.TaxConfigInput{
-		OwnerID:     testutil.OwnerID,
-		TaxName:     "Inclusive Tax",
-		TaxRate:     10.0,
-		IsInclusive: true,
-		IsActive:    true,
+		OwnerID:            testutil.OwnerID,
+		TaxName:            "Inclusive Tax",
+		TaxRateBasisPoints: 1000,
+		IsInclusive:        true,
+		IsActive:           true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig inclusive: %v", err)
 	}
@@ -164,7 +164,7 @@ func TestTax_GetConfig_ReturnsOwnerID(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxRate: 5.0, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxRateBasisPoints: 500, IsActive: true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
@@ -184,7 +184,7 @@ func TestTax_GetConfig_ReturnsNonZeroID(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxRate: 5.0, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxRateBasisPoints: 500, IsActive: true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
@@ -204,7 +204,7 @@ func TestTax_UpsertConfig_TaxNamePersisted(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxName: "PersistName", TaxRate: 3.0, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxName: "PersistName", TaxRateBasisPoints: 300, IsActive: true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
@@ -224,10 +224,10 @@ func TestTax_UpsertConfig_IsInclusivePersisted(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.TaxConfigInput{
-		OwnerID:     testutil.OwnerID,
-		TaxRate:     8.0,
-		IsInclusive: true,
-		IsActive:    true,
+		OwnerID:            testutil.OwnerID,
+		TaxRateBasisPoints: 800,
+		IsInclusive:        true,
+		IsActive:           true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
@@ -247,7 +247,7 @@ func TestTax_UpsertConfig_ZeroRateAllowed(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxRate: 0.0, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxRateBasisPoints: 0, IsActive: true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig zero rate: %v", err)
 	}
@@ -256,8 +256,8 @@ func TestTax_UpsertConfig_ZeroRateAllowed(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetConfig: %v", err)
 	}
-	if cfg.TaxRate < 0 {
-		t.Errorf("TaxRate should be non-negative, got %f", cfg.TaxRate)
+	if cfg.TaxRateBasisPoints < 0 {
+		t.Errorf("TaxRateBasisPoints should be non-negative, got %d", cfg.TaxRateBasisPoints)
 	}
 }
 
@@ -281,8 +281,8 @@ func TestTax_GetPLReport_TotalRevenueNonNegative(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetPLReport: %v", err)
 	}
-	if report.TotalRevenue < 0 {
-		t.Errorf("TotalRevenue should be non-negative, got %f", report.TotalRevenue)
+	if report.TotalRevenueMinorUnits < 0 {
+		t.Errorf("TotalRevenue should be non-negative, got %d", report.TotalRevenueMinorUnits)
 	}
 }
 
@@ -295,8 +295,8 @@ func TestTax_GetPLReport_TotalExpensesNonNegative(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetPLReport: %v", err)
 	}
-	if report.TotalExpenses < 0 {
-		t.Errorf("TotalExpenses should be non-negative, got %f", report.TotalExpenses)
+	if report.TotalExpensesMinorUnits < 0 {
+		t.Errorf("TotalExpenses should be non-negative, got %d", report.TotalExpensesMinorUnits)
 	}
 }
 
@@ -313,8 +313,8 @@ func TestTax_GetPLReport_IdempotentCalls(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetPLReport second: %v", err)
 	}
-	if r1.TotalRevenue != r2.TotalRevenue {
-		t.Errorf("idempotent calls differ: %.2f vs %.2f", r1.TotalRevenue, r2.TotalRevenue)
+	if r1.TotalRevenueMinorUnits != r2.TotalRevenueMinorUnits {
+		t.Errorf("idempotent calls differ: %d vs %d", r1.TotalRevenueMinorUnits, r2.TotalRevenueMinorUnits)
 	}
 }
 
@@ -324,7 +324,7 @@ func TestTax_UpsertConfig_HighRate(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxName: "High Rate", TaxRate: 99.99, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxName: "High Rate", TaxRateBasisPoints: 9999, IsActive: true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig high rate: %v", err)
 	}
@@ -333,8 +333,8 @@ func TestTax_UpsertConfig_HighRate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetConfig: %v", err)
 	}
-	if cfg.TaxRate != 99.99 {
-		t.Errorf("expected TaxRate=99.99, got %f", cfg.TaxRate)
+	if cfg.TaxRateBasisPoints != 9999 {
+		t.Errorf("expected TaxRateBasisPoints=9999, got %d", cfg.TaxRateBasisPoints)
 	}
 }
 
@@ -344,7 +344,7 @@ func TestTax_UpsertConfig_EmptyTaxName(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxName: "", TaxRate: 5.0, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxName: "", TaxRateBasisPoints: 500, IsActive: true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig empty name: %v", err)
 	}
@@ -356,7 +356,7 @@ func TestTax_GetConfig_HasCreatedAt(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxRate: 5.0, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxRateBasisPoints: 500, IsActive: true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
@@ -376,12 +376,12 @@ func TestTax_UpsertConfig_ActiveThenInactive(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxRate: 12.0, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxRateBasisPoints: 1200, IsActive: true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig active: %v", err)
 	}
 	if err := repo.UpsertConfig(ctx, domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxRate: 12.0, IsActive: false,
+		OwnerID: testutil.OwnerID, TaxRateBasisPoints: 1200, IsActive: false,
 	}); err != nil {
 		t.Fatalf("UpsertConfig inactive: %v", err)
 	}
@@ -404,9 +404,9 @@ func TestTax_GetPLReport_GrossProfitFormula(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetPLReport: %v", err)
 	}
-	expected := report.TotalRevenue - report.TotalExpenses
-	if report.GrossProfit != expected {
-		t.Errorf("GrossProfit=%.2f, want TotalRevenue-TotalExpenses=%.2f", report.GrossProfit, expected)
+	expected := report.TotalRevenueMinorUnits - report.TotalExpensesMinorUnits
+	if report.GrossProfitMinorUnits != expected {
+		t.Errorf("GrossProfit=%d, want TotalRevenue-TotalExpenses=%d", report.GrossProfitMinorUnits, expected)
 	}
 }
 
@@ -416,7 +416,7 @@ func TestTax_UpsertConfig_FractionalRate(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.TaxConfigInput{
-		OwnerID: testutil.OwnerID, TaxRate: 7.25, IsActive: true,
+		OwnerID: testutil.OwnerID, TaxRateBasisPoints: 725, IsActive: true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig fractional: %v", err)
 	}
@@ -425,7 +425,7 @@ func TestTax_UpsertConfig_FractionalRate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetConfig: %v", err)
 	}
-	if cfg.TaxRate != 7.25 {
-		t.Errorf("expected TaxRate=7.25, got %f", cfg.TaxRate)
+	if cfg.TaxRateBasisPoints != 725 {
+		t.Errorf("expected TaxRateBasisPoints=725, got %d", cfg.TaxRateBasisPoints)
 	}
 }

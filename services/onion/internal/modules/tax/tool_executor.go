@@ -62,12 +62,12 @@ func (m *Module) executeGetPLReportTool(ctx context.Context) (map[string]any, er
 	}
 
 	return map[string]any{
-		"report":         report,
-		"total_revenue":  report.TotalRevenue,
-		"total_expenses": report.TotalExpenses,
-		"gross_profit":   report.GrossProfit,
-		"net_profit":     report.NetProfit,
-		"is_profitable":  report.NetProfit > 0,
+		"report":                     taxReportToolPayload(report),
+		"total_revenue_minor_units":  report.TotalRevenueMinorUnits,
+		"total_expenses_minor_units": report.TotalExpensesMinorUnits,
+		"gross_profit_minor_units":   report.GrossProfitMinorUnits,
+		"net_profit_minor_units":     report.NetProfitMinorUnits,
+		"is_profitable":              report.NetProfitMinorUnits > 0,
 	}, nil
 }
 
@@ -85,12 +85,22 @@ func taxToolBusinessID(ctx context.Context) (int64, error) {
 
 func taxConfigToolPayload(config domain.TaxConfig) map[string]any {
 	return map[string]any{
-		"id":           config.ID,
-		"tax_name":     config.TaxName,
-		"tax_rate":     config.TaxRate,
-		"is_inclusive": config.IsInclusive,
-		"is_active":    config.IsActive,
-		"created_at":   config.CreatedAt,
-		"updated_at":   config.UpdatedAt,
+		"id":                    config.ID,
+		"tax_name":              config.TaxName,
+		"tax_rate":              float64(config.TaxRateBasisPoints) / 100,
+		"tax_rate_basis_points": config.TaxRateBasisPoints,
+		"is_inclusive":          config.IsInclusive,
+		"is_active":             config.IsActive,
+		"created_at":            config.CreatedAt,
+		"updated_at":            config.UpdatedAt,
+	}
+}
+
+func taxReportToolPayload(report domain.PLReport) map[string]any {
+	return map[string]any{
+		"total_revenue_minor_units":  report.TotalRevenueMinorUnits,
+		"total_expenses_minor_units": report.TotalExpensesMinorUnits,
+		"gross_profit_minor_units":   report.GrossProfitMinorUnits,
+		"net_profit_minor_units":     report.NetProfitMinorUnits,
 	}
 }

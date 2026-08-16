@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"math"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/tax/internal/application"
@@ -58,12 +59,12 @@ func (a *TaxAPI) UpdateTaxConfig(ctx context.Context, req *financetaxv1.UpdateTa
 	}
 
 	err := a.service.UpdateConfig(ctx, domain.TaxConfigInput{
-		OwnerID:     device.User.UserID,
-		BusinessID:  businessID,
-		TaxName:     req.GetTaxName(),
-		TaxRate:     req.GetTaxRate(),
-		IsInclusive: req.GetIsInclusive(),
-		IsActive:    req.GetIsActive(),
+		OwnerID:            device.User.UserID,
+		BusinessID:         businessID,
+		TaxName:            req.GetTaxName(),
+		TaxRateBasisPoints: percentToBasisPoints(req.GetTaxRate()),
+		IsInclusive:        req.GetIsInclusive(),
+		IsActive:           req.GetIsActive(),
 	})
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update tax config")
@@ -89,11 +90,21 @@ func (a *TaxAPI) GetPLReport(ctx context.Context, _ *financetaxv1.GetPLReportReq
 	}
 
 	return &financetaxv1.GetPLReportResponse{
-		TotalRevenue:  report.TotalRevenue,
-		TotalExpenses: report.TotalExpenses,
-		GrossProfit:   report.GrossProfit,
-		NetProfit:     report.NetProfit,
+		TotalRevenue:  minorUnitsToMajor(report.TotalRevenueMinorUnits),
+		TotalExpenses: minorUnitsToMajor(report.TotalExpensesMinorUnits),
+		GrossProfit:   minorUnitsToMajor(report.GrossProfitMinorUnits),
+		NetProfit:     minorUnitsToMajor(report.NetProfitMinorUnits),
 	}, nil
+}
+
+// minorUnitsToMajor is kept at the API boundary because the generated tax
+// response still uses float64 fields. Internal tax calculations stay exact.
+func minorUnitsToMajor(value int64) float64 {
+	return float64(value) / 100
+}
+
+func percentToBasisPoints(value float64) int64 {
+	return int64(math.Round(value * 100))
 }
 
 func newTaxConfig(config domain.TaxConfig) *financetaxv1.TaxConfig {
@@ -101,10 +112,14 @@ func newTaxConfig(config domain.TaxConfig) *financetaxv1.TaxConfig {
 		Id:          config.ID,
 		OwnerId:     config.OwnerID,
 		TaxName:     config.TaxName,
-		TaxRate:     config.TaxRate,
+		TaxRate:     basisPointsToPercent(config.TaxRateBasisPoints),
 		IsInclusive: config.IsInclusive,
 		IsActive:    config.IsActive,
 		CreatedAt:   config.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:   config.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
+}
+
+func basisPointsToPercent(value int64) float64 {
+	return float64(value) / 100
 }
