@@ -69,6 +69,10 @@ CREATE TABLE IF NOT EXISTS flow_work_types (
     workspace_id BIGINT NOT NULL,
     parent_id BIGINT NULL,
     name VARCHAR(255) NOT NULL,
+    -- Shown to employees as a read-only "Task Description" once they pick this
+    -- type in Log Hours - added after this file was first applied everywhere,
+    -- see zz_flow_work_types_description.sql for the idempotent live-DB patch.
+    description TEXT,
     hr_category_id BIGINT NULL,
     sort_order INT NOT NULL DEFAULT 0,
     -- Archived rather than deleted: historic entries keep pointing at it.
