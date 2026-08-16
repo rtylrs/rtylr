@@ -93,6 +93,9 @@ const Training = React.lazy(() => import('./features/training/Training'));
 const OrgChart = React.lazy(() => import('./features/departments/OrgChart'));
 const SettingsScreen = React.lazy(() => import('./features/settings/Settings'));
 const LeavePolicySettings = React.lazy(() => import('./features/settings/LeavePolicySettings'));
+const RolesPermissions = React.lazy(
+  () => import('./features/settings/roles-permissions/RolesPermissions')
+);
 const Operations = React.lazy(() => import('./features/operations/Operations'));
 const LeaveScreen = React.lazy(() => import('./features/leave/Leave'));
 const LeaveRequestFormScreen = React.lazy(() => import('./features/leave/LeaveRequestForm'));
@@ -693,6 +696,18 @@ const settingsRoute = createRoute({
     ),
 });
 
+const rolesPermissionsSettingsRoute = createRoute({
+  getParentRoute: () => hrConfigRoute,
+  path: '/settings/roles-permissions',
+  component: () =>
+    wrap(
+      <Suspense fallback={<PageLoader />}>
+        <RolesPermissions />
+      </Suspense>,
+      'hub:settings'
+    ),
+});
+
 const leavePolicySettingsRoute = createRoute({
   getParentRoute: () => hrConfigRoute,
   path: '/settings/leave-policy',
@@ -758,6 +773,7 @@ const routeTree = rootRoute.addChildren([
     reportsRoute,
     operationsRoute,
     settingsRoute,
+    rolesPermissionsSettingsRoute,
     leavePolicySettingsRoute,
   ]),
   catchAllRoute,
