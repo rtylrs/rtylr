@@ -78,6 +78,7 @@ return violations;
 }
 
 export interface CreateEmployeeRequest {
+userId?: string;
 departmentId?: string;
 locationId?: string;
 workScheduleId?: string;
@@ -96,6 +97,7 @@ address?: string;
 export function decodeCreateEmployeeRequest(v: any): CreateEmployeeRequest {
 if (v === null || v === undefined) return v;
 return {
+userId: v.user_id,
 departmentId: v.department_id,
 locationId: v.location_id,
 workScheduleId: v.work_schedule_id,
@@ -114,6 +116,7 @@ address: v.address,
 
 export function encodeCreateEmployeeRequest(v: CreateEmployeeRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.userId !== undefined) { out.user_id = v.userId; }
 if (v.departmentId !== undefined) { out.department_id = v.departmentId; }
 if (v.locationId !== undefined) { out.location_id = v.locationId; }
 if (v.workScheduleId !== undefined) { out.work_schedule_id = v.workScheduleId; }
@@ -336,6 +339,7 @@ return violations;
 }
 
 export interface UpdateEmployeeBody {
+userId?: string;
 departmentId?: string;
 locationId?: string;
 workScheduleId?: string;
@@ -359,6 +363,7 @@ notes?: string;
 export function decodeUpdateEmployeeBody(v: any): UpdateEmployeeBody {
 if (v === null || v === undefined) return v;
 return {
+userId: v.user_id,
 departmentId: v.department_id,
 locationId: v.location_id,
 workScheduleId: v.work_schedule_id,
@@ -382,6 +387,7 @@ notes: v.notes,
 
 export function encodeUpdateEmployeeBody(v: UpdateEmployeeBody): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.userId !== undefined) { out.user_id = v.userId; }
 if (v.departmentId !== undefined) { out.department_id = v.departmentId; }
 if (v.locationId !== undefined) { out.location_id = v.locationId; }
 if (v.workScheduleId !== undefined) { out.work_schedule_id = v.workScheduleId; }

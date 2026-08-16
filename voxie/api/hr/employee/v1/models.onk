@@ -43,6 +43,8 @@ message EmployeePayload {
 }
 
 message CreateEmployeeRequest {
+  /// user_id links this employee record to an existing login account; zero leaves it unlinked.
+  user_id: int64
   /// department_id is the department assignment; zero leaves it unset.
   department_id: int64
   /// location_id is the work location assignment; zero leaves it unset.
@@ -127,6 +129,8 @@ message ListEmployeesResponse {
 }
 
 message UpdateEmployeeBody {
+  /// user_id links this employee record to an existing login account; zero leaves it unlinked.
+  user_id: int64
   /// department_id is the department assignment; zero leaves it unset.
   department_id: int64
   /// location_id is the work location assignment; zero leaves it unset.
