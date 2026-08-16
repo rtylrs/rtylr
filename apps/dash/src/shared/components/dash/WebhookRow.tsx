@@ -8,9 +8,9 @@ export interface WebhookRowProps {
 }
 
 const STATUS_META = {
-  active: { icon: CheckCircle2, color: '#10b981', label: 'Active' },
-  paused: { icon: PauseCircle, color: '#6b7280', label: 'Paused' },
-  failing: { icon: AlertTriangle, color: '#ef4444', label: 'Failing' },
+  active: { icon: CheckCircle2, color: 'var(--status-active)', label: 'Active' },
+  paused: { icon: PauseCircle, color: 'var(--dash-text-muted)', label: 'Paused' },
+  failing: { icon: AlertTriangle, color: 'var(--status-cancelled)', label: 'Failing' },
 } as const;
 
 function formatRelative(iso?: string): string {
@@ -61,7 +61,7 @@ export const WebhookRow: React.FC<WebhookRowProps> = ({ webhook, onDelete }) => 
       </div>
       <button
         className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:bg-red-500/10 shrink-0"
-        style={{ color: '#ef4444' }}
+        style={{ color: 'var(--status-cancelled)' }}
         onClick={() => onDelete?.(webhook.id)}
         aria-label="Delete webhook"
       >

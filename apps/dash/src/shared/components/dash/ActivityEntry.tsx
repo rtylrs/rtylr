@@ -26,7 +26,12 @@ export interface ActivityEntryProps {
 export const ActivityEntryRow: React.FC<ActivityEntryProps> = ({ entry, showIp, index = 0 }) => {
   const sev = entry.severity ?? 'info';
   const Icon = sev === 'critical' ? AlertCircle : sev === 'warning' ? AlertTriangle : Info;
-  const iconColor = sev === 'critical' ? '#ef4444' : sev === 'warning' ? '#f59e0b' : '#4583C4';
+  const iconColor =
+    sev === 'critical'
+      ? 'var(--status-cancelled)'
+      : sev === 'warning'
+        ? 'var(--status-trial)'
+        : 'var(--accent)';
 
   return (
     <motion.div
@@ -37,7 +42,7 @@ export const ActivityEntryRow: React.FC<ActivityEntryProps> = ({ entry, showIp, 
     >
       <div
         className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-        style={{ background: `${iconColor}15` }}
+        style={{ background: 'var(--dash-hover)' }}
       >
         <Icon size={14} style={{ color: iconColor }} />
       </div>

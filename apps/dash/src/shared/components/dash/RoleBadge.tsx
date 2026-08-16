@@ -17,16 +17,36 @@ const LABELS: Record<string, string> = {
 };
 
 const COLORS: Record<string, { bg: string; fg: string; border: string }> = {
-  owner: { bg: 'rgba(239,68,68,0.12)', fg: '#ef4444', border: 'rgba(239,68,68,0.25)' },
-  admin: { bg: 'rgba(69,131,196,0.14)', fg: '#4583C4', border: 'rgba(69,131,196,0.3)' },
-  operator: { bg: 'rgba(139,92,246,0.14)', fg: '#8b5cf6', border: 'rgba(139,92,246,0.3)' },
-  billing: { bg: 'rgba(245,158,11,0.14)', fg: '#f59e0b', border: 'rgba(245,158,11,0.3)' },
-  menu_manager: { bg: 'rgba(100,197,185,0.14)', fg: '#64C5B9', border: 'rgba(100,197,185,0.3)' },
-  staff: { bg: 'rgba(16,185,129,0.14)', fg: '#10b981', border: 'rgba(16,185,129,0.3)' },
-  viewer: { bg: 'rgba(156,163,175,0.18)', fg: '#6b7280', border: 'rgba(156,163,175,0.3)' },
+  owner: {
+    bg: 'var(--status-cancelled-bg)',
+    fg: 'var(--status-cancelled)',
+    border: 'var(--status-cancelled-bg)',
+  },
+  admin: { bg: 'var(--accent-muted)', fg: 'var(--accent)', border: 'var(--accent-border)' },
+  operator: { bg: 'rgba(139,92,246,0.14)', fg: 'var(--app-crm)', border: 'rgba(139,92,246,0.3)' },
+  billing: {
+    bg: 'var(--status-trial-bg)',
+    fg: 'var(--status-trial)',
+    border: 'var(--status-trial-bg)',
+  },
+  menu_manager: {
+    bg: 'rgba(100,197,185,0.14)',
+    fg: 'var(--app-flow)',
+    border: 'rgba(100,197,185,0.3)',
+  },
+  staff: {
+    bg: 'var(--status-active-bg)',
+    fg: 'var(--status-active)',
+    border: 'var(--status-active-bg)',
+  },
+  viewer: { bg: 'var(--dash-hover)', fg: 'var(--dash-text-muted)', border: 'var(--dash-border)' },
 };
 
-const DEFAULT = { bg: 'rgba(100,197,185,0.14)', fg: '#64C5B9', border: 'rgba(100,197,185,0.3)' };
+const DEFAULT = {
+  bg: 'var(--dash-hover)',
+  fg: 'var(--dash-text-dim)',
+  border: 'var(--dash-border)',
+};
 
 export const RoleBadge: React.FC<RoleBadgeProps> = ({ role, className }) => {
   const c = COLORS[role.toLowerCase()] ?? DEFAULT;

@@ -46,9 +46,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             {destructive && (
               <div
                 className="h-9 w-9 rounded-full flex items-center justify-center shrink-0"
-                style={{ background: 'rgba(239,68,68,0.15)' }}
+                style={{ background: 'var(--status-cancelled-bg)' }}
               >
-                <AlertTriangle size={16} style={{ color: '#ef4444' }} />
+                <AlertTriangle size={16} style={{ color: 'var(--status-cancelled)' }} />
               </div>
             )}
             <DialogTitle>{title}</DialogTitle>
