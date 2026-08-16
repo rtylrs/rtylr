@@ -22,5 +22,22 @@
     "administration": "Administration",
     "reports": "Rapports",
     "payroll": "Paie"
+  },
+  "permissions": {
+    "view_own_profile": "Voir son propre profil",
+    "view_own_schedule": "Voir son propre planning",
+    "request_time_off": "Demander un congé",
+    "view_team": "Voir l'équipe",
+    "approve_time_off": "Approuver les congés",
+    "manage_schedules": "Gérer les plannings",
+    "manage_employees": "Gérer les employés",
+    "manage_roles": "Gérer les rôles",
+    "manage_departments": "Gérer les départements",
+    "manage_locations": "Gérer les emplacements",
+    "manage_hr_config": "Gérer la configuration RH",
+    "view_reports": "Voir les rapports",
+    "manage_payroll": "Gérer la paie",
+    "manage_benefits": "Gérer les avantages",
+    "manage_approval_chains": "Gérer les chaînes d'approbation"
   }
 }

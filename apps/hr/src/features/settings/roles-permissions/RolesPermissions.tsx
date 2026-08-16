@@ -109,7 +109,7 @@ const RoleCard = ({
                       aria-label={entry.label}
                     />
                     <span className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
-                      {entry.label}
+                      {t(`rolesPermissions.permissions.${entry.key}`, entry.label)}
                     </span>
                   </label>
                 ))}
@@ -140,8 +140,14 @@ const RoleCard = ({
 
 const RolesPermissions = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data: roles, isLoading, isError } = useListRoles();
-  const { data: catalog } = useListPermissionCatalog();
+  const { data: roles, isLoading: rolesLoading, isError: rolesError } = useListRoles();
+  const {
+    data: catalog,
+    isLoading: catalogLoading,
+    isError: catalogError,
+  } = useListPermissionCatalog();
+  const isLoading = rolesLoading || catalogLoading;
+  const isError = rolesError || catalogError;
   const [expandedRoleId, setExpandedRoleId] = useState<number | null>(null);
   const [isAddingRole, setIsAddingRole] = useState(false);
   const [newRoleName, setNewRoleName] = useState('');

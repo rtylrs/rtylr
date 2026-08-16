@@ -22,5 +22,22 @@
     "administration": "الإدارة",
     "reports": "التقارير",
     "payroll": "الرواتب"
+  },
+  "permissions": {
+    "view_own_profile": "عرض الملف الشخصي الخاص بك",
+    "view_own_schedule": "عرض جدولك الخاص",
+    "request_time_off": "طلب إجازة",
+    "view_team": "عرض الفريق",
+    "approve_time_off": "الموافقة على الإجازات",
+    "manage_schedules": "إدارة الجداول",
+    "manage_employees": "إدارة الموظفين",
+    "manage_roles": "إدارة الأدوار",
+    "manage_departments": "إدارة الأقسام",
+    "manage_locations": "إدارة المواقع",
+    "manage_hr_config": "إدارة إعدادات الموارد البشرية",
+    "view_reports": "عرض التقارير",
+    "manage_payroll": "إدارة الرواتب",
+    "manage_benefits": "إدارة المزايا",
+    "manage_approval_chains": "إدارة سلاسل الموافقة"
   }
 }

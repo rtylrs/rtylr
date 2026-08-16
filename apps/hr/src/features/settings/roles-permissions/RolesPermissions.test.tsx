@@ -82,6 +82,16 @@ describe('RolesPermissions', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Unable to load roles');
   });
 
+  it('shows the error state when only the permission catalog fails to load', () => {
+    mocks.useListPermissionCatalog.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    });
+    render(<RolesPermissions />);
+    expect(screen.getByRole('alert')).toHaveTextContent('Unable to load roles');
+  });
+
   it('renders each role with its granted/total permission count', () => {
     render(<RolesPermissions />);
     expect(screen.getByText('Manager')).toBeInTheDocument();
