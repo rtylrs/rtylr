@@ -37,14 +37,14 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
   return (
     <>
       <HelmetContainer title="Submissions · rtylr" />
-      <div className="px-10 py-8">
+      <div className="px-4 py-6 sm:px-10 sm:py-8">
         <h1 className="text-2xl font-semibold tracking-tight">Submissions</h1>
         <p className="mt-1 text-sm text-white/60">
           {submissions.length} {submissions.length === 1 ? 'application' : 'applications'}
           {filter && ` in "${filter}"`}
         </p>
 
-        <div className="mt-6 flex items-center gap-2 text-sm">
+        <div className="mt-6 flex flex-wrap items-center gap-2 text-sm">
           <FilterChip active={filter === ''} onClick={() => handleFilterChange('')}>
             All
           </FilterChip>
@@ -260,9 +260,10 @@ const FilterChip: React.FC<{
   children: React.ReactNode;
 }> = ({ active, onClick, children }) => (
   <button
+    type="button"
     onClick={onClick}
     className={cn(
-      'rounded-full px-3 py-1 text-xs font-medium transition',
+      'inline-flex min-h-[44px] items-center rounded-full px-4 py-2 text-xs font-medium transition',
       active ? 'bg-white text-black' : 'border border-white/10 text-white/70 hover:bg-white/5'
     )}
   >

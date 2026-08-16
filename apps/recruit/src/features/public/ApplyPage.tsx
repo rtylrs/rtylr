@@ -13,6 +13,7 @@ import { applyBrand } from '../../templates/resolver';
 import { applySEO, loadAnalytics } from '../../shared/lib/seo';
 import { FLAG_KEYS, resolveFlag } from '@voxire/config';
 import NotFound from './NotFound';
+import { cleanMojibake } from '../../shared/lib/sanitize';
 
 /**
  * ApplyPage - form at recruit.rtylr.com/:slug/:careerSlug/apply.
@@ -233,16 +234,18 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       <main className="mx-auto max-w-xl px-6 py-12">
         <Link
           to={`/${slug}/${careerSlug}` as any}
-          className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+          className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium hover:underline"
           style={{ color: 'var(--recruit-muted)' }}
         >
           <ArrowLeft className="h-4 w-4" />
           Back to role
         </Link>
 
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight">Apply for {career.title}</h1>
+        <h1 className="mt-6 text-3xl font-semibold tracking-tight">
+          Apply for {cleanMojibake(career.title)}
+        </h1>
         <p className="mt-2 text-sm" style={{ color: 'var(--recruit-muted)' }}>
-          {customization.brandName} - {career.location || 'Remote'}
+          {cleanMojibake(customization.brandName)} - {cleanMojibake(career.location) || 'Remote'}
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-5">

@@ -1309,6 +1309,9 @@ importers:
       '@voxire/consent':
         specifier: workspace:*
         version: link:../../packages/consent
+      '@voxire/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@voxire/observability':
         specifier: workspace:*
         version: link:../../packages/observability

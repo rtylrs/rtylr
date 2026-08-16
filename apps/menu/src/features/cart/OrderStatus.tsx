@@ -57,7 +57,6 @@ const OrderStatus = (): React.JSX.Element => {
   const { id } = useParams({ strict: false });
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const { clearCart } = useCartStore();
-  const businessId = new URLSearchParams(searchStr).get('business_id');
 
   const orderNumber = new URLSearchParams(searchStr).get('number') ?? '';
   const businessId =
