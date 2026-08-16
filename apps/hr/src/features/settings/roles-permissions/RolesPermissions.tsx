@@ -1,0 +1,187 @@
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
+import {
+  useListRoles,
+  useListPermissionCatalog,
+  useUpdateRole,
+} from '../../../shared/hooks/queries/useRoles';
+import type { Role, PermissionCatalogEntry } from '../../../shared/schemas/rolesPermissions';
+import { Button, Card, SectionHeader } from '../../../shared/components/ui';
+
+function groupByCategory(
+  catalog: PermissionCatalogEntry[]
+): Array<{ category: string; entries: PermissionCatalogEntry[] }> {
+  const order: string[] = [];
+  const groups = new Map<string, PermissionCatalogEntry[]>();
+  for (const entry of catalog) {
+    if (!groups.has(entry.category)) {
+      order.push(entry.category);
+      groups.set(entry.category, []);
+    }
+    groups.get(entry.category)?.push(entry);
+  }
+  return order.map((category) => ({ category, entries: groups.get(category) ?? [] }));
+}
+
+interface RoleCardProps {
+  role: Role;
+  catalog: PermissionCatalogEntry[];
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+}
+
+const RoleCard = ({
+  role,
+  catalog,
+  isExpanded,
+  onToggleExpand,
+}: RoleCardProps): React.JSX.Element => {
+  const { t } = useTranslation();
+  const updateRole = useUpdateRole();
+  const [pending, setPending] = useState<Record<string, boolean>>(role.permissions);
+  const grantedCount = Object.values(pending).filter(Boolean).length;
+  const isDirty = JSON.stringify(pending) !== JSON.stringify(role.permissions);
+
+  const togglePermission = (key: string): void => {
+    setPending((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const save = (): void => {
+    updateRole.mutate({
+      id: role.id,
+      name: role.name,
+      description: role.description,
+      permissions: JSON.stringify(pending),
+    });
+  };
+
+  return (
+    <Card>
+      <button
+        type="button"
+        onClick={onToggleExpand}
+        className="flex w-full min-h-[44px] items-center justify-between gap-3 px-1 text-left"
+      >
+        <div>
+          <span className="text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
+            {role.name}
+          </span>
+          <span
+            className="ms-2 rounded px-1.5 py-0.5 text-xs"
+            style={{
+              background: role.isSystem ? 'var(--hr-hover)' : 'var(--accent)',
+              color: role.isSystem ? 'var(--hr-text-dim)' : 'var(--hr-card-bg)',
+            }}
+          >
+            {role.isSystem
+              ? t('rolesPermissions.systemRoleBadge')
+              : t('rolesPermissions.customRoleBadge')}
+          </span>
+        </div>
+        <span className="text-xs" style={{ color: 'var(--hr-text-dim)' }}>
+          {t('rolesPermissions.permissionsGrantedCount', {
+            granted: grantedCount,
+            total: catalog.length,
+          })}
+        </span>
+      </button>
+
+      {isExpanded && (
+        <div className="mt-3 flex flex-col gap-4">
+          {groupByCategory(catalog).map(({ category, entries }) => (
+            <div key={category}>
+              <p
+                className="text-xs font-semibold uppercase"
+                style={{ color: 'var(--hr-text-dim)' }}
+              >
+                {t(`rolesPermissions.categories.${category}`, category)}
+              </p>
+              <div className="mt-1.5 flex flex-col gap-2">
+                {entries.map((entry) => (
+                  <label key={entry.key} className="flex min-h-[44px] items-center gap-2">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={Boolean(pending[entry.key])}
+                      onChange={() => togglePermission(entry.key)}
+                      aria-label={entry.label}
+                    />
+                    <span className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
+                      {entry.label}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="primary"
+              onClick={save}
+              disabled={!isDirty || updateRole.isPending}
+            >
+              {updateRole.isPending ? t('rolesPermissions.saving') : t('rolesPermissions.save')}
+            </Button>
+            {isDirty && !updateRole.isPending && (
+              <span className="text-xs" style={{ color: 'var(--hr-text-dim)' }}>
+                {t('rolesPermissions.unsavedChanges')}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+};
+
+const RolesPermissions = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { data: roles, isLoading, isError } = useListRoles();
+  const { data: catalog } = useListPermissionCatalog();
+  const [expandedRoleId, setExpandedRoleId] = useState<number | null>(null);
+
+  if (isLoading) {
+    return (
+      <div role="status" className="flex items-center justify-center py-20">
+        <div
+          className="h-8 w-8 rounded-full border-2 animate-spin"
+          style={{ borderColor: 'var(--hr-border)', borderTopColor: 'var(--accent)' }}
+        />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <p role="alert" className="py-10 text-center text-sm" style={{ color: 'var(--hr-text)' }}>
+        {t('rolesPermissions.loadError')}
+      </p>
+    );
+  }
+
+  return (
+    <>
+      <HelmetContainer title="Roles & Permissions · rtylr" />
+      <div className="flex flex-col gap-4">
+        <SectionHeader
+          title={t('rolesPermissions.title')}
+          subtitle={t('rolesPermissions.subtitle')}
+        />
+        {(roles ?? []).map((role) => (
+          <RoleCard
+            key={role.id}
+            role={role}
+            catalog={catalog ?? []}
+            isExpanded={expandedRoleId === role.id}
+            onToggleExpand={() => setExpandedRoleId(expandedRoleId === role.id ? null : role.id)}
+          />
+        ))}
+      </div>
+    </>
+  );
+};
+
+export default RolesPermissions;
