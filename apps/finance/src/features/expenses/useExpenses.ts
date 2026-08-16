@@ -43,11 +43,8 @@ function fromApiCategory(c: ApiExpenseCategory): ExpenseCategory {
   return { id: toFiniteNumber(c.id), name: c.name ?? '', color: c.color ?? '' };
 }
 
-// finance.expenses.v1.ExpensesService.ListExpenses has no pagination
-// (returns the full set) - paginate client-side to keep this hook's
-// page/pageSize contract intact for callers.
 export function useExpenses(params: UseExpensesParams = {}) {
-  const { page = 1, pageSize = 50 } = params;
+  const { page = 1, pageSize = 25 } = params;
   return useQuery<ExpenseListResult>({
     queryKey: ['expenses', 'filter', { page, pageSize }],
     queryFn: async (): Promise<ExpenseListResult> => {

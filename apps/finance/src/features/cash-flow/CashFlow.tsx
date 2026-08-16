@@ -11,9 +11,9 @@ import { cardStyle, ACCENT } from '../../shared/lib/tokens';
 
 const CashFlow: React.FC = () => {
   const { t } = useTranslation('finance');
-  const { data = [] } = useCashFlow();
   const [period, setPeriod] = useState<'month' | 'quarter' | 'year'>('month');
   const [date, setDate] = useState(new Date());
+  const { data = [] } = useCashFlow({ period, date });
 
   const net = data.reduce((s: number, d) => s + (d.inflow - d.outflow), 0);
   const totalIn = data.reduce((s: number, d) => s + d.inflow, 0);
