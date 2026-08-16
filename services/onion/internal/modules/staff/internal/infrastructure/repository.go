@@ -76,6 +76,14 @@ func (r *Repository) ListStaff(ctx context.Context, businessID int64, search, de
 	}
 	defer rows.Close()
 
+	return scanStaffRows(rows)
+}
+
+// scanStaffRows reads the shared staff-list projection (s.id through
+// s.updated_at, plus the joined department name) used by both ListStaff and
+// ListStaffDirectory. Keeping the scan in one place means a column added to
+// one caller's SELECT is scanned the same way for the other.
+func scanStaffRows(rows *sql.Rows) ([]domain.Staff, error) {
 	staff := make([]domain.Staff, 0)
 	for rows.Next() {
 		var s domain.Staff
@@ -168,6 +176,55 @@ func (r *Repository) ListStaff(ctx context.Context, businessID int64, search, de
 	}
 
 	return staff, rows.Err()
+}
+
+// ListStaffDirectory returns one page of the business-wide staff list,
+// ordered the same way as ListStaff. Unlike ListStaff it takes no search/
+// department/status filters - the directory is deliberately the plain
+// roster, not the admin screen's filtered view.
+func (r *Repository) ListStaffDirectory(ctx context.Context, businessID int64, limit, offset int64) ([]domain.Staff, error) {
+	query, args, err := sq.
+		Select("s.id", "s.owner_id", "s.business_id", "s.user_id", "s.department_id",
+			"COALESCE(d.name, '') AS department_name",
+			"s.first_name", "s.last_name", "s.email", "s.phone",
+			"s.role", "s.employment_type", "s.status", "s.salary", "s.hourly_rate", "s.overtime_rate",
+			"s.start_date", "s.end_date", "s.address", "s.emergency_contact_name", "s.emergency_contact_phone",
+			"s.apps", "s.notes", "s.created_at", "s.updated_at").
+		From("hr_staff s").
+		LeftJoin("hr_departments d ON d.id = s.department_id AND d.business_id = s.business_id").
+		Where(sq.Eq{"s.business_id": businessID}).
+		OrderBy("s.last_name ASC", "s.first_name ASC").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to build staff directory query", logger.Error(err))
+		return nil, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, query, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to list staff directory", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+
+	return scanStaffRows(rows)
+}
+
+// CountStaffDirectory returns the total staff count for a business, used
+// alongside ListStaffDirectory to build the paginated response's total.
+func (r *Repository) CountStaffDirectory(ctx context.Context, businessID int64) (int64, error) {
+	var total int64
+	err := r.pool.QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM hr_staff WHERE business_id = ?", businessID,
+	).Scan(&total)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to count staff directory", logger.Error(err))
+		return 0, err
+	}
+	return total, nil
 }
 
 func (r *Repository) GetStaffByID(ctx context.Context, businessID, staffID int64) (*domain.Staff, error) {

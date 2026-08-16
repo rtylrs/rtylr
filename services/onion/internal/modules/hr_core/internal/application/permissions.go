@@ -13,6 +13,7 @@ const (
 	permissionManageEmployees = "manage_employees"
 	permissionManagePayroll   = "manage_payroll"
 	permissionManageRoles     = "manage_roles"
+	permissionViewDirectory   = "view_directory"
 )
 
 // permissionResolver resolves which hr_employees row belongs to the calling

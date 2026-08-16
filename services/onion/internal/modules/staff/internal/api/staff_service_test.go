@@ -10,10 +10,12 @@ import (
 )
 
 type fakeStaffPermissionProvider struct {
-	employeeID    int64
-	lookupErr     error
-	permissions   map[string]bool
-	permissionErr error
+	employeeID       int64
+	lookupErr        error
+	permissions      map[string]bool
+	permissionErr    error
+	directoryEnabled bool
+	directoryErr     error
 }
 
 func (f fakeStaffPermissionProvider) GetEmployeeIDByUserID(context.Context, int64, int64) (int64, error) {
@@ -28,6 +30,13 @@ func (f fakeStaffPermissionProvider) HasPermission(_ context.Context, _, _ int64
 		return false, f.permissionErr
 	}
 	return f.permissions[key], nil
+}
+
+func (f fakeStaffPermissionProvider) IsDirectoryEnabled(context.Context, int64) (bool, error) {
+	if f.directoryErr != nil {
+		return false, f.directoryErr
+	}
+	return f.directoryEnabled, nil
 }
 
 func TestCanViewSensitiveDetailsRequiresHRPermission(t *testing.T) {
@@ -55,37 +64,47 @@ func TestCanViewSensitiveDetailsRequiresHRPermission(t *testing.T) {
 	}
 }
 
+// TestCanViewDirectoryRequiresPermission covers the permission gate on its
+// own, so every case here has the business toggle already on. The toggle
+// itself is covered by TestCanViewDirectoryDeniesWhenBusinessHasNotEnabledIt.
 func TestCanViewDirectoryRequiresPermission(t *testing.T) {
 	ctx := context.Background()
 
 	if canViewDirectory(ctx, fakeStaffPermissionProvider{
-		employeeID:  4101,
-		permissions: map[string]bool{"manage_payroll": true},
+		directoryEnabled: true,
+		employeeID:       4101,
+		permissions:      map[string]bool{"manage_payroll": true},
 	}, 1001, 700) {
 		t.Fatal("holding an unrelated permission must not grant directory access")
 	}
 
 	if !canViewDirectory(ctx, fakeStaffPermissionProvider{
-		employeeID:  4101,
-		permissions: map[string]bool{"view_directory": true},
+		directoryEnabled: true,
+		employeeID:       4101,
+		permissions:      map[string]bool{"view_directory": true},
 	}, 1001, 700) {
 		t.Fatal("a caller with view_directory should see the directory")
 	}
 
 	if canViewDirectory(ctx, fakeStaffPermissionProvider{
-		employeeID:    4101,
-		permissionErr: errors.New("permission store unavailable"),
+		directoryEnabled: true,
+		employeeID:       4101,
+		permissionErr:    errors.New("permission store unavailable"),
 	}, 1001, 700) {
 		t.Fatal("permission lookup errors must fail closed")
 	}
 
 	if canViewDirectory(ctx, fakeStaffPermissionProvider{
-		lookupErr: errors.New("employee lookup failed"),
+		directoryEnabled: true,
+		lookupErr:        errors.New("employee lookup failed"),
 	}, 1001, 700) {
 		t.Fatal("an unresolvable caller must fail closed")
 	}
 
-	if canViewDirectory(ctx, fakeStaffPermissionProvider{employeeID: 4101}, 1001, 0) {
+	if canViewDirectory(ctx, fakeStaffPermissionProvider{
+		directoryEnabled: true,
+		employeeID:       4101,
+	}, 1001, 0) {
 		t.Fatal("a zero caller user id must fail closed")
 	}
 }
@@ -172,5 +191,110 @@ func TestNewStaffPayloadOmitsSensitiveDetailWhenCallerUserIDUnresolved(t *testin
 	payload := newStaffPayload(staff, false, 0)
 	if payload.Salary != 0 {
 		t.Fatalf("an unresolved caller id must not coincide with an unset staff.UserID: %+v", payload)
+	}
+}
+
+func TestCanViewDirectoryDeniesWhenBusinessHasNotEnabledIt(t *testing.T) {
+	ctx := context.Background()
+	if canViewDirectory(ctx, fakeStaffPermissionProvider{
+		employeeID:       4101,
+		directoryEnabled: false,
+		permissions:      map[string]bool{"view_directory": true},
+	}, 1001, 700) {
+		t.Fatal("directory_enabled=false must deny even a caller holding view_directory")
+	}
+}
+
+func TestCanViewDirectoryDeniesWithoutViewDirectoryPermission(t *testing.T) {
+	ctx := context.Background()
+	if canViewDirectory(ctx, fakeStaffPermissionProvider{
+		employeeID:       4101,
+		directoryEnabled: true,
+		permissions:      map[string]bool{"view_own_profile": true},
+	}, 1001, 700) {
+		t.Fatal("a caller without view_directory must be denied even when the business has enabled the directory")
+	}
+}
+
+func TestCanViewDirectoryAllowsWhenBothGatesPass(t *testing.T) {
+	ctx := context.Background()
+	if !canViewDirectory(ctx, fakeStaffPermissionProvider{
+		employeeID:       4101,
+		directoryEnabled: true,
+		permissions:      map[string]bool{"view_directory": true},
+	}, 1001, 700) {
+		t.Fatal("a caller holding view_directory at a business with the directory enabled should be allowed")
+	}
+}
+
+func TestCanViewDirectoryFailsClosedOnConfigLookupError(t *testing.T) {
+	ctx := context.Background()
+	if canViewDirectory(ctx, fakeStaffPermissionProvider{
+		employeeID:   4101,
+		directoryErr: errors.New("hr config store unavailable"),
+		permissions:  map[string]bool{"view_directory": true},
+	}, 1001, 700) {
+		t.Fatal("a directory config lookup error must fail closed")
+	}
+}
+
+func TestCanViewDirectoryFailsClosedOnPermissionLookupError(t *testing.T) {
+	ctx := context.Background()
+	if canViewDirectory(ctx, fakeStaffPermissionProvider{
+		employeeID:       4101,
+		directoryEnabled: true,
+		permissionErr:    errors.New("permission store unavailable"),
+	}, 1001, 700) {
+		t.Fatal("a permission lookup error must fail closed")
+	}
+}
+
+func TestCanViewDirectoryFailsClosedWithNoResolvableEmployee(t *testing.T) {
+	ctx := context.Background()
+	if canViewDirectory(ctx, fakeStaffPermissionProvider{
+		directoryEnabled: true,
+		lookupErr:        errors.New("no employee row for this user"),
+		permissions:      map[string]bool{"view_directory": true},
+	}, 1001, 700) {
+		t.Fatal("a caller with no resolvable employee row must be denied")
+	}
+}
+
+func TestCanViewDirectoryDeniesNilProvider(t *testing.T) {
+	if canViewDirectory(context.Background(), nil, 1001, 700) {
+		t.Fatal("a nil permission provider must deny rather than panic")
+	}
+}
+
+func TestNewDirectoryStaffEntryNeverCarriesSensitiveFields(t *testing.T) {
+	entry := newDirectoryStaffEntry(domain.Staff{
+		ID:                    4102,
+		FirstName:             "Directory",
+		LastName:              "Entry",
+		Role:                  "Server",
+		Salary:                5000,
+		Address:               "12 Cedar St",
+		EmergencyContactName:  "Sam Employee",
+		EmergencyContactPhone: "+1-555-0100",
+	})
+	encoded, err := json.Marshal(entry)
+	if err != nil {
+		t.Fatalf("marshal entry: %v", err)
+	}
+
+	var fields map[string]any
+	if err := json.Unmarshal(encoded, &fields); err != nil {
+		t.Fatalf("unmarshal entry: %v", err)
+	}
+	for _, key := range []string{
+		"salary", "hourly_rate", "overtime_rate",
+		"address", "emergency_contact_name", "emergency_contact_phone",
+	} {
+		if _, present := fields[key]; present {
+			t.Fatalf("directory entry contains %q, which DirectoryStaffEntry has no field for: %s", key, encoded)
+		}
+	}
+	if fields["first_name"] != "Directory" || fields["role"] != "Server" {
+		t.Fatalf("non-sensitive fields were lost: %s", encoded)
 	}
 }

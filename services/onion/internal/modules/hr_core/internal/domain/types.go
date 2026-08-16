@@ -119,6 +119,7 @@ type HRCompanyConfigRecord struct {
 	DefaultWorkScheduleID int64     `json:"default_work_schedule_id"`
 	OvertimeEnabled       bool      `json:"overtime_enabled"`
 	OvertimeMultiplier    float64   `json:"overtime_multiplier"`
+	DirectoryEnabled      bool      `json:"directory_enabled"`
 	CreatedAt             time.Time `json:"created_at"`
 	UpdatedAt             time.Time `json:"updated_at"`
 }

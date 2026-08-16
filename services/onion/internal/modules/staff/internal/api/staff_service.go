@@ -48,6 +48,51 @@ func (a *StaffAPI) ListStaff(ctx context.Context, req *hrstaffv1.ListStaffReques
 	return &hrstaffv1.ListStaffResponse{Staff: payloads}, nil
 }
 
+// maxDirectoryPageSize bounds how many rows a single directory page can
+// request, regardless of what the caller asks for - the generated request
+// only validates page_size > 0, so an unbounded value would defeat pagination.
+const maxDirectoryPageSize = 100
+
+// ListStaffDirectory serves the company-wide staff roster to any employee
+// whose business has turned the directory on and whose role holds
+// view_directory - both real checks against hr_core, not decorative ones.
+// Unlike ListStaff, it can never expose salary, address, or emergency-contact
+// data: DirectoryStaffEntry has no fields for them at the contract level.
+func (a *StaffAPI) ListStaffDirectory(ctx context.Context, req *hrstaffv1.ListStaffDirectoryRequest) (*hrstaffv1.ListStaffDirectoryResponse, error) {
+	businessID, err := resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	device := authPkg.DeviceCtx(ctx)
+
+	if !canViewDirectory(ctx, a.permissions, businessID, device.User.UserID) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	pageSize := req.GetPageSize()
+	if pageSize > maxDirectoryPageSize {
+		pageSize = maxDirectoryPageSize
+	}
+	offset := (req.GetPage() - 1) * pageSize
+
+	staffList, total, listErr := a.Service.ListStaffDirectory(ctx, businessID, pageSize, offset)
+	if listErr != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list staff directory")
+	}
+
+	entries := make([]*hrstaffv1.DirectoryStaffEntry, 0, len(staffList))
+	for _, staff := range staffList {
+		entries = append(entries, newDirectoryStaffEntry(staff))
+	}
+
+	return &hrstaffv1.ListStaffDirectoryResponse{
+		Staff:    entries,
+		Total:    total,
+		Page:     req.GetPage(),
+		PageSize: pageSize,
+	}, nil
+}
+
 func (a *StaffAPI) CreateStaff(ctx context.Context, req *hrstaffv1.CreateStaffRequest) (*hrstaffv1.CreateStaffResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
@@ -237,6 +282,25 @@ func newStaffPayload(staff domain.Staff, hasSensitiveDetailsPermission bool, cal
 		Notes:                 staff.Notes,
 		CreatedAt:             formatStaffTime(staff.CreatedAt),
 		UpdatedAt:             formatStaffTime(staff.UpdatedAt),
+	}
+}
+
+// newDirectoryStaffEntry projects a Staff record onto the minimal directory
+// shape. There is no permission fork here the way newStaffPayload has one for
+// compensation/contact fields - DirectoryStaffEntry simply has no field to
+// carry salary, address, or emergency-contact data, so there is nothing to
+// zero out.
+func newDirectoryStaffEntry(staff domain.Staff) *hrstaffv1.DirectoryStaffEntry {
+	return &hrstaffv1.DirectoryStaffEntry{
+		Id:             staff.ID,
+		FirstName:      staff.FirstName,
+		LastName:       staff.LastName,
+		DepartmentId:   staff.DepartmentID,
+		Role:           staff.Role,
+		EmploymentType: staff.EmploymentType,
+		Status:         staff.Status,
+		Email:          staff.Email,
+		Phone:          staff.Phone,
 	}
 }
 

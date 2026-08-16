@@ -3,10 +3,12 @@ package hr_core
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/go-chi/chi/v5"
 
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
+	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/routes"
 )
 
@@ -56,6 +58,21 @@ func (m *Module) HasPermission(ctx context.Context, ownerID, employeeID int64, p
 
 func (m *Module) HasRole(ctx context.Context, ownerID, employeeID, roleID int64) (bool, error) {
 	return m.service.HasRole(ctx, ownerID, employeeID, roleID)
+}
+
+// IsDirectoryEnabled reports whether the business has turned on the
+// company-wide staff directory. A business with no HR config yet (setup not
+// complete) has not opted in, so that case reports false rather than erroring
+// - the directory endpoint should deny quietly, not fail the request.
+func (m *Module) IsDirectoryEnabled(ctx context.Context, businessID int64) (bool, error) {
+	cfg, err := m.service.GetHRConfig(ctx, businessID)
+	if err != nil {
+		if errors.Is(err, domain.ErrSetupNotComplete) {
+			return false, nil
+		}
+		return false, err
+	}
+	return cfg.DirectoryEnabled, nil
 }
 
 // EmployeeSummary is the minimal shape another module needs to resolve who

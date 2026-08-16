@@ -26,6 +26,20 @@ func (s *Service) ListStaff(ctx context.Context, businessID int64, search, depar
 	return s.repo.ListStaff(ctx, businessID, search, departmentID, status)
 }
 
+// ListStaffDirectory returns one page of the business-wide staff roster plus
+// the total count, for the directory endpoint's permission-gated caller.
+func (s *Service) ListStaffDirectory(ctx context.Context, businessID, limit, offset int64) ([]domain.Staff, int64, error) {
+	staff, err := s.repo.ListStaffDirectory(ctx, businessID, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	total, err := s.repo.CountStaffDirectory(ctx, businessID)
+	if err != nil {
+		return nil, 0, err
+	}
+	return staff, total, nil
+}
+
 func (s *Service) CreateStaff(ctx context.Context, input domain.StaffInput) (int64, error) {
 	return s.repo.CreateStaff(ctx, input)
 }

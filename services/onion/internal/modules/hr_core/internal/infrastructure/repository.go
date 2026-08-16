@@ -570,6 +570,7 @@ func (r *Repository) GetHRConfig(ctx context.Context, businessID int64) (*domain
 		DefaultWorkScheduleID: row.DefaultWorkScheduleID.Int64,
 		OvertimeEnabled:       row.OvertimeEnabled,
 		OvertimeMultiplier:    parseFloat(row.OvertimeMultiplier),
+		DirectoryEnabled:      row.DirectoryEnabled,
 		CreatedAt:             row.CreatedAt,
 		UpdatedAt:             row.UpdatedAt,
 	}, nil
@@ -586,6 +587,7 @@ func (r *Repository) UpsertHRConfig(ctx context.Context, businessID int64, cfg d
 		DefaultWorkScheduleID: nullInt64(cfg.DefaultWorkScheduleID),
 		OvertimeEnabled:       cfg.OvertimeEnabled,
 		OvertimeMultiplier:    strconv.FormatFloat(cfg.OvertimeMultiplier, 'f', 2, 64),
+		DirectoryEnabled:      cfg.DirectoryEnabled,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to upsert hr config", logger.Any("business_id", businessID), logger.Error(err))

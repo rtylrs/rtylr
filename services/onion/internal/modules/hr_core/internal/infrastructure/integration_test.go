@@ -335,6 +335,46 @@ func TestCreateWorkSchedule_PersistsAndReturnsID(t *testing.T) {
 	}
 }
 
+func TestUpsertHRConfig_DirectoryEnabled_Roundtrip(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	if _, err := repo.UpsertHRConfig(ctx, testutil.OwnerID, domain.HRCompanyConfigRecord{
+		CompanyName:      "Directory Test Co",
+		DefaultCurrency:  "USD",
+		DefaultTimezone:  "UTC",
+		DirectoryEnabled: true,
+	}); err != nil {
+		t.Fatalf("UpsertHRConfig (enable): %v", err)
+	}
+
+	cfg, err := repo.GetHRConfig(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetHRConfig after enable: %v", err)
+	}
+	if !cfg.DirectoryEnabled {
+		t.Error("expected DirectoryEnabled=true after upsert, got false")
+	}
+
+	if _, err := repo.UpsertHRConfig(ctx, testutil.OwnerID, domain.HRCompanyConfigRecord{
+		CompanyName:      "Directory Test Co",
+		DefaultCurrency:  "USD",
+		DefaultTimezone:  "UTC",
+		DirectoryEnabled: false,
+	}); err != nil {
+		t.Fatalf("UpsertHRConfig (disable): %v", err)
+	}
+
+	cfg, err = repo.GetHRConfig(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetHRConfig after disable: %v", err)
+	}
+	if cfg.DirectoryEnabled {
+		t.Error("expected DirectoryEnabled=false after disabling, got true")
+	}
+}
+
 func TestListRoles_ZeroOwner_ReturnsEmpty(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

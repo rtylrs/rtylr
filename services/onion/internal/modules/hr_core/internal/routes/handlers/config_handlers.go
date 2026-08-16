@@ -22,6 +22,7 @@ type HRConfigPayload struct {
 	DefaultWorkScheduleID int64   `json:"default_work_schedule_id"`
 	OvertimeEnabled       bool    `json:"overtime_enabled"`
 	OvertimeMultiplier    float64 `json:"overtime_multiplier"`
+	DirectoryEnabled      bool    `json:"directory_enabled"`
 	CreatedAt             string  `json:"created_at"`
 	UpdatedAt             string  `json:"updated_at"`
 }
@@ -32,8 +33,9 @@ func configToPayload(c domain.HRCompanyConfigRecord) *HRConfigPayload {
 		FiscalYearStartMonth: c.FiscalYearStartMonth, DefaultCurrency: c.DefaultCurrency,
 		DefaultTimezone: c.DefaultTimezone, DefaultWorkScheduleID: c.DefaultWorkScheduleID,
 		OvertimeEnabled: c.OvertimeEnabled, OvertimeMultiplier: c.OvertimeMultiplier,
-		CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt: c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		DirectoryEnabled: c.DirectoryEnabled,
+		CreatedAt:        c.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:        c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
 
@@ -81,6 +83,7 @@ type (
 		DefaultWorkScheduleID int64   `json:"default_work_schedule_id"`
 		OvertimeEnabled       bool    `json:"overtime_enabled"`
 		OvertimeMultiplier    float64 `json:"overtime_multiplier"`
+		DirectoryEnabled      bool    `json:"directory_enabled"`
 	}
 )
 
@@ -110,6 +113,7 @@ func (h *UpsertHRConfigHandler) Serve(ctx context.Context, req *UpsertHRConfigRe
 		DefaultWorkScheduleID: req.DefaultWorkScheduleID,
 		OvertimeEnabled:       req.OvertimeEnabled,
 		OvertimeMultiplier:    req.OvertimeMultiplier,
+		DirectoryEnabled:      req.DirectoryEnabled,
 	}
 
 	updated, err := h.Service.UpsertHRConfig(ctx, device.User.UserID, cfg)

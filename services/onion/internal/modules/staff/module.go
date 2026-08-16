@@ -29,6 +29,10 @@ func (a *hrCorePermissionAdapter) HasPermission(ctx context.Context, businessID,
 	return a.core.HasPermission(ctx, businessID, employeeID, permissionKey)
 }
 
+func (a *hrCorePermissionAdapter) IsDirectoryEnabled(ctx context.Context, businessID int64) (bool, error) {
+	return a.core.IsDirectoryEnabled(ctx, businessID)
+}
+
 func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Module {
 	var permissions api.PermissionProvider
 	if hrCoreModule != nil {

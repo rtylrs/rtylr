@@ -34,6 +34,63 @@ func TestListStaff_ReturnsAliceAndBob(t *testing.T) {
 	}
 }
 
+func TestListStaffDirectory_ReturnsAliceAndBob(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	staff, err := repo.ListStaffDirectory(ctx, testutil.OwnerID, 100, 0)
+	if err != nil {
+		t.Fatalf("ListStaffDirectory: %v", err)
+	}
+	if len(staff) < 2 {
+		t.Fatalf("expected at least 2 staff members, got %d", len(staff))
+	}
+
+	names := make(map[string]bool)
+	for _, s := range staff {
+		names[s.FirstName] = true
+	}
+	if !names["Alice"] {
+		t.Error("expected Alice in staff directory")
+	}
+	if !names["Bob"] {
+		t.Error("expected Bob in staff directory")
+	}
+}
+
+func TestListStaffDirectory_LimitOne_ReturnsSingleRow(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	staff, err := repo.ListStaffDirectory(ctx, testutil.OwnerID, 1, 0)
+	if err != nil {
+		t.Fatalf("ListStaffDirectory: %v", err)
+	}
+	if len(staff) != 1 {
+		t.Fatalf("expected exactly 1 row with limit=1, got %d", len(staff))
+	}
+}
+
+func TestCountStaffDirectory_MatchesUnpaginatedTotal(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	all, err := repo.ListStaffDirectory(ctx, testutil.OwnerID, 1000, 0)
+	if err != nil {
+		t.Fatalf("ListStaffDirectory: %v", err)
+	}
+	total, err := repo.CountStaffDirectory(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("CountStaffDirectory: %v", err)
+	}
+	if total != int64(len(all)) {
+		t.Fatalf("expected total=%d to match unpaginated row count=%d", total, len(all))
+	}
+}
+
 func TestGetStaffByID_AliceID4101(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
