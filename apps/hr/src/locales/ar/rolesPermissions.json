@@ -1,0 +1,26 @@
+{
+  "title": "الأدوار والصلاحيات",
+  "subtitle": "تحكم بدقة فيما يمكن لكل دور في عملك فعله.",
+  "loadError": "تعذر تحميل الأدوار",
+  "addRole": "إضافة دور",
+  "newRoleNamePlaceholder": "اسم الدور",
+  "newRoleDescriptionPlaceholder": "الوصف (اختياري)",
+  "createRole": "إنشاء دور",
+  "systemRoleBadge": "افتراضي",
+  "customRoleBadge": "مخصص",
+  "permissionsGrantedCount": "{{granted}}/{{total}} صلاحية",
+  "save": "حفظ",
+  "saving": "جارٍ الحفظ…",
+  "unsavedChanges": "لديك تغييرات غير محفوظة",
+  "created": "تم إنشاء الدور",
+  "updated": "تم تحديث صلاحيات الدور",
+  "categories": {
+    "general": "عام",
+    "employees": "الموظفون",
+    "time_off": "الإجازات",
+    "scheduling": "الجدولة",
+    "administration": "الإدارة",
+    "reports": "التقارير",
+    "payroll": "الرواتب"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Roles & Permissions",
+  "subtitle": "Control exactly what each role in your business can do.",
+  "loadError": "Unable to load roles",
+  "addRole": "Add role",
+  "newRoleNamePlaceholder": "Role name",
+  "newRoleDescriptionPlaceholder": "Description (optional)",
+  "createRole": "Create role",
+  "systemRoleBadge": "Default",
+  "customRoleBadge": "Custom",
+  "permissionsGrantedCount": "{{granted}}/{{total}} permissions",
+  "save": "Save",
+  "saving": "Saving…",
+  "unsavedChanges": "You have unsaved changes",
+  "created": "Role created",
+  "updated": "Role permissions updated",
+  "categories": {
+    "general": "General",
+    "employees": "Employees",
+    "time_off": "Time off",
+    "scheduling": "Scheduling",
+    "administration": "Administration",
+    "reports": "Reports",
+    "payroll": "Payroll"
+  }
+}

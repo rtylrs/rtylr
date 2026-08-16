@@ -1,0 +1,26 @@
+{
+  "title": "Rôles et permissions",
+  "subtitle": "Contrôlez précisément ce que chaque rôle de votre entreprise peut faire.",
+  "loadError": "Impossible de charger les rôles",
+  "addRole": "Ajouter un rôle",
+  "newRoleNamePlaceholder": "Nom du rôle",
+  "newRoleDescriptionPlaceholder": "Description (facultatif)",
+  "createRole": "Créer le rôle",
+  "systemRoleBadge": "Par défaut",
+  "customRoleBadge": "Personnalisé",
+  "permissionsGrantedCount": "{{granted}}/{{total}} permissions",
+  "save": "Enregistrer",
+  "saving": "Enregistrement…",
+  "unsavedChanges": "Modifications non enregistrées",
+  "created": "Rôle créé",
+  "updated": "Permissions du rôle mises à jour",
+  "categories": {
+    "general": "Général",
+    "employees": "Employés",
+    "time_off": "Congés",
+    "scheduling": "Planification",
+    "administration": "Administration",
+    "reports": "Rapports",
+    "payroll": "Paie"
+  }
+}
