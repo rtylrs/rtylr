@@ -48,16 +48,8 @@ export function useExpenses(params: UseExpensesParams = {}) {
   return useQuery<ExpenseListResult>({
     queryKey: ['expenses', 'filter', { page, pageSize }],
     queryFn: async (): Promise<ExpenseListResult> => {
-      const res = await expensesClient.listExpenses({ page, pageSize });
+      const res = await expensesClient.listExpenses({});
       const all = (res.expenses ?? []).map(fromApiExpense);
-      if (res.hasMore !== undefined) {
-        return {
-          expenses: all,
-          hasMore: Boolean(res.hasMore),
-          page,
-          pageSize,
-        };
-      }
       const start = (page - 1) * pageSize;
       const pageItems = all.slice(start, start + pageSize);
       return {
