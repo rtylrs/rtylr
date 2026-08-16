@@ -22,6 +22,11 @@ type mockRepo struct {
 		ownerID    int64
 		name       string
 	}
+	setLogo struct {
+		businessID int64
+		ownerID    int64
+		logoURL    string
+	}
 	deactivate struct {
 		businessID int64
 		ownerID    int64
@@ -65,6 +70,13 @@ func (m *mockRepo) RenameBusiness(_ context.Context, businessID, ownerID int64, 
 	m.rename.businessID = businessID
 	m.rename.ownerID = ownerID
 	m.rename.name = name
+	return m.err == nil, m.err
+}
+
+func (m *mockRepo) SetBusinessLogo(_ context.Context, businessID, ownerID int64, logoURL string) (bool, error) {
+	m.setLogo.businessID = businessID
+	m.setLogo.ownerID = ownerID
+	m.setLogo.logoURL = logoURL
 	return m.err == nil, m.err
 }
 

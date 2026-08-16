@@ -50,6 +50,11 @@ UPDATE businesses
 SET name = ?
 WHERE id = ? AND owner_id = ? AND is_active = TRUE;
 
+-- name: SetBusinessLogo :execresult
+UPDATE businesses
+SET logo_url = ?
+WHERE id = ? AND owner_id = ? AND is_active = TRUE;
+
 -- name: DeactivateBusiness :execresult
 UPDATE businesses
 SET is_active = FALSE

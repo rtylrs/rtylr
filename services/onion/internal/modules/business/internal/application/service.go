@@ -27,6 +27,7 @@ type repository interface {
 	CreateSubBusiness(ctx context.Context, name string, ownerUserID, parentBusinessID int64) (int64, error)
 	CheckSubBusinessOwnership(ctx context.Context, ownerUserID, parentBusinessID int64) (bool, error)
 	RenameBusiness(ctx context.Context, businessID, ownerUserID int64, name string) (bool, error)
+	SetBusinessLogo(ctx context.Context, businessID, ownerUserID int64, logoURL string) (bool, error)
 	DeactivateBusiness(ctx context.Context, businessID, ownerUserID int64) (bool, error)
 	CountActiveOwnedBusinesses(ctx context.Context, ownerUserID int64) (int64, error)
 }
@@ -84,6 +85,7 @@ var (
 	ErrSubBusinessNameEmpty     = errors.New("business name is required")
 	ErrBusinessNotOwned         = errors.New("business not found or not owned by user")
 	ErrBusinessNameEmpty        = errors.New("business name is required")
+	ErrLogoURLEmpty             = errors.New("logo url is required")
 	ErrCannotDeleteOnlyBusiness = errors.New("cannot delete the only remaining business")
 )
 
@@ -114,6 +116,25 @@ func (s *Service) RenameBusiness(ctx context.Context, businessID, ownerUserID in
 	}
 
 	updated, err := s.repo.RenameBusiness(ctx, businessID, ownerUserID, name)
+	if err != nil {
+		return err
+	}
+	if !updated {
+		return ErrBusinessNotOwned
+	}
+
+	cacher.Of[domain.BusinessProfile]().Delete(ctx, []string{cacheKeys.BusinessProfile(businessID)})
+	cacher.Of[[]domain.OwnedBusiness]().Delete(ctx, []string{cacheKeys.UserBusinesses(ownerUserID)})
+	return nil
+}
+
+func (s *Service) SetLogo(ctx context.Context, businessID, ownerUserID int64, logoURL string) error {
+	logoURL = strings.TrimSpace(logoURL)
+	if logoURL == "" {
+		return ErrLogoURLEmpty
+	}
+
+	updated, err := s.repo.SetBusinessLogo(ctx, businessID, ownerUserID, logoURL)
 	if err != nil {
 		return err
 	}

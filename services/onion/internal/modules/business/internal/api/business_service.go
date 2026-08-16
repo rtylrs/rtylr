@@ -191,6 +191,37 @@ func (a *BusinessAPI) RenameBusiness(ctx context.Context, req *hubbusinessv1.Ren
 	}, nil
 }
 
+func (a *BusinessAPI) SetLogo(ctx context.Context, req *hubbusinessv1.SetLogoRequest) (*hubbusinessv1.SetLogoResponse, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	logoURL := strings.TrimSpace(req.GetLogoUrl())
+	if logoURL == "" {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Logo URL is required")
+	}
+	if len(logoURL) > 512 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Logo URL must be 512 characters or fewer")
+	}
+
+	if err := a.Service.SetLogo(ctx, req.GetBusinessId(), device.User.UserID, logoURL); err != nil {
+		switch {
+		case errors.Is(err, application.ErrLogoURLEmpty):
+			return nil, onekiterrors.New(http.StatusBadRequest, "Logo URL is required")
+		case errors.Is(err, application.ErrBusinessNotOwned):
+			return nil, onekiterrors.PermissionDenied()
+		default:
+			logger.Ctx(ctx).Error("set business logo failed", logger.Error(err))
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to set business logo")
+		}
+	}
+
+	return &hubbusinessv1.SetLogoResponse{
+		Business: &hubbusinessv1.Business{Id: req.GetBusinessId(), LogoUrl: logoURL},
+	}, nil
+}
+
 func (a *BusinessAPI) DeleteBusiness(ctx context.Context, req *hubbusinessv1.DeleteBusinessRequest) (*hubbusinessv1.DeleteBusinessResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {

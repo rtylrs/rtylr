@@ -140,6 +140,19 @@ func (r *Repository) RenameBusiness(ctx context.Context, businessID, ownerUserID
 	return affected > 0, err
 }
 
+func (r *Repository) SetBusinessLogo(ctx context.Context, businessID, ownerUserID int64, logoURL string) (bool, error) {
+	result, err := r.queries.SetBusinessLogo(ctx, sqlc.SetBusinessLogoParams{
+		LogoUrl: sql.NullString{String: logoURL, Valid: logoURL != ""},
+		ID:      businessID,
+		OwnerID: ownerUserID,
+	})
+	if err != nil {
+		return false, err
+	}
+	affected, err := result.RowsAffected()
+	return affected > 0, err
+}
+
 func (r *Repository) DeactivateBusiness(ctx context.Context, businessID, ownerUserID int64) (bool, error) {
 	result, err := r.queries.DeactivateBusiness(ctx, sqlc.DeactivateBusinessParams{
 		ID:      businessID,
