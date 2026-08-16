@@ -5,6 +5,7 @@ import { ArrowRight, MapPin, Briefcase } from 'lucide-react';
 import Header from '../shared/Header';
 import Sections from '../shared/Sections';
 import type { IndexProps } from '../resolver';
+import { cleanMojibake } from '../../shared/lib/sanitize';
 
 // Minimal - clean single-column list. Calm neutral palette, strong
 // hierarchy. Works for every business without customisation; the
@@ -13,20 +14,20 @@ const MinimalIndex: React.FC<IndexProps> = ({ careers, customization, sections }
   return (
     <div className="min-h-screen">
       <Header customization={customization} />
-      <main className="mx-auto max-w-3xl px-6 py-16">
+      <main id="main-content" className="mx-auto max-w-3xl px-6 py-16">
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Open roles at {customization.brandName}
+          Open roles at {cleanMojibake(customization.brandName)}
         </h1>
         {customization.aboutBlurb && (
           <p className="mt-4 max-w-2xl text-base" style={{ color: 'var(--recruit-muted)' }}>
-            {customization.aboutBlurb}
+            {cleanMojibake(customization.aboutBlurb)}
           </p>
         )}
         {customization.heroImageUrl && (
           <div className="mt-6 overflow-hidden rounded-lg">
             <img
               src={customization.heroImageUrl}
-              alt={customization.brandName || 'Careers'}
+              alt={cleanMojibake(customization.brandName) || 'Careers'}
               className="h-64 w-full object-cover"
             />
           </div>
@@ -49,7 +50,7 @@ const MinimalIndex: React.FC<IndexProps> = ({ careers, customization, sections }
                 style={{ borderColor: 'var(--recruit-border)' }}
               >
                 <div className="min-w-0">
-                  <div className="truncate text-base font-semibold">{c.title}</div>
+                  <div className="truncate text-base font-semibold">{cleanMojibake(c.title)}</div>
                   <div
                     className="mt-1 flex items-center gap-4 text-xs"
                     style={{ color: 'var(--recruit-muted)' }}
@@ -57,17 +58,17 @@ const MinimalIndex: React.FC<IndexProps> = ({ careers, customization, sections }
                     {c.department && (
                       <span className="inline-flex items-center gap-1">
                         <Briefcase className="h-3 w-3" />
-                        {c.department}
+                        {cleanMojibake(c.department)}
                       </span>
                     )}
                     {c.location && (
                       <span className="inline-flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
-                        {c.location}
+                        {cleanMojibake(c.location)}
                       </span>
                     )}
-                    {c.workMode && <span>{c.workMode}</span>}
-                    {c.employmentType && <span>{c.employmentType}</span>}
+                    {c.workMode && <span>{cleanMojibake(c.workMode)}</span>}
+                    {c.employmentType && <span>{cleanMojibake(c.employmentType)}</span>}
                   </div>
                 </div>
                 <ArrowRight

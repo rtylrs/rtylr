@@ -3,6 +3,8 @@ import { cn } from '@voxire/ui';
 import { cdnImageUrl } from '@voxire/config';
 import type { Customization } from '../../shared/lib/types';
 
+import { cleanMojibake } from '../../shared/lib/sanitize';
+
 interface HeaderProps {
   customization: Customization;
   compact?: boolean;
@@ -14,6 +16,8 @@ interface HeaderProps {
 // the main site) without the template having to know about it.
 const Header: React.FC<HeaderProps> = ({ customization, compact = false }) => {
   const logoUrl = cdnImageUrl(customization.logoUrl);
+  const brandName = cleanMojibake(customization.brandName);
+  const tagline = cleanMojibake(customization.tagline);
 
   return (
     <header
@@ -39,20 +43,20 @@ const Header: React.FC<HeaderProps> = ({ customization, compact = false }) => {
         className={cn('mx-auto flex max-w-5xl items-center gap-3 px-6', compact ? 'py-4' : 'py-6')}
       >
         {logoUrl ? (
-          <img src={logoUrl} alt={`${customization.brandName} logo`} className="h-8 w-auto" />
+          <img src={logoUrl} alt={`${brandName} logo`} className="h-8 w-auto" />
         ) : (
           <div
             className="flex h-8 w-8 items-center justify-center rounded-md text-sm font-semibold text-white"
             style={{ background: 'var(--recruit-accent)' }}
           >
-            {customization.brandName.slice(0, 1).toUpperCase()}
+            {brandName.slice(0, 1).toUpperCase()}
           </div>
         )}
         <div className="min-w-0">
-          <div className="truncate text-sm font-semibold">{customization.brandName}</div>
-          {!compact && customization.tagline && (
+          <div className="truncate text-sm font-semibold">{brandName}</div>
+          {!compact && tagline && (
             <div className="truncate text-xs" style={{ color: 'var(--recruit-muted)' }}>
-              {customization.tagline}
+              {tagline}
             </div>
           )}
         </div>
