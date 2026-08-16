@@ -110,9 +110,11 @@ describe('MyDay: week strip', () => {
   });
 });
 
-describe('MyDay: project on a logged line', () => {
-  it('renders a project picker with the workspace projects', () => {
+describe('MyDay: Log time dialog', () => {
+  it('opens the log time dialog with a project picker showing the workspace projects', () => {
     render(<MyDay />);
+    fireEvent.click(screen.getByRole('button', { name: 'flow.time.logAction' }));
+
     const select = screen.getByLabelText('flow.time.project') as HTMLSelectElement;
     expect(Array.from(select.options).map((o) => o.textContent)).toEqual([
       'flow.time.selectProject',
@@ -123,16 +125,20 @@ describe('MyDay: project on a logged line', () => {
 
   it('keeps Add disabled until a project is chosen, even with a valid duration', () => {
     render(<MyDay />);
+    fireEvent.click(screen.getByRole('button', { name: 'flow.time.logAction' }));
+
     fireEvent.change(screen.getByLabelText('flow.time.duration'), { target: { value: '1:30' } });
-    expect(screen.getByRole('button', { name: 'flow.time.addLine' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'flow.time.logAmount' })).toBeDisabled();
   });
 
   it('enables Add once duration and project are both set, and sends projectId', () => {
     render(<MyDay />);
+    fireEvent.click(screen.getByRole('button', { name: 'flow.time.logAction' }));
+
     fireEvent.change(screen.getByLabelText('flow.time.duration'), { target: { value: '1:30' } });
     fireEvent.change(screen.getByLabelText('flow.time.project'), { target: { value: '2' } });
 
-    const addButton = screen.getByRole('button', { name: 'flow.time.addLine' });
+    const addButton = screen.getByRole('button', { name: 'flow.time.logAmount' });
     expect(addButton).not.toBeDisabled();
     fireEvent.click(addButton);
 

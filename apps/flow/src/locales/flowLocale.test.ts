@@ -62,6 +62,8 @@ describe('flow locale parity', () => {
       'time.durationInvalid',
       'board.confirmRemoveColumn',
       'time.date',
+      // "Type" is the ordinary French word too, same as "Date" above.
+      'leave.leaveType',
     ]);
 
     const copied = keyPaths(en).filter((path) => {

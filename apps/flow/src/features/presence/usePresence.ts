@@ -1,0 +1,19 @@
+import { useQuery } from '@tanstack/react-query';
+import { unwrap } from '@voxire/api';
+import { safe } from '../../shared/lib/api';
+import { presenceResponseSchema } from '../../shared/schemas/presence';
+
+/**
+ * Business-wide "who's in today," gated server-side by view_directory
+ * (onion PR #267) - a caller without it gets a real 403 here, the same
+ * disabled-with-a-reason rule Directory and Team/Reports already use.
+ */
+export function usePresence() {
+  return useQuery({
+    queryKey: ['presence-today'],
+    queryFn: async () => {
+      const res = await unwrap(safe.get<unknown>('/flow/presence/today'));
+      return presenceResponseSchema.parse(res);
+    },
+  });
+}

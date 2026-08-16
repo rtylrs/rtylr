@@ -14,6 +14,8 @@
     "unknownAuthor": "Unknown",
     "deleteEntryLabel": "Delete the {{duration}} entry",
     "duration": "Duration",
+    "taskDescription": "Task",
+    "taskDescriptionPlaceholder": "Pick a type of work to fill this in",
     "durationPlaceholder": "90m, 1.5h or 1:30",
     "durationHint": "Minutes, decimal hours, or hours and minutes.",
     "durationInvalid": "Enter a duration like 90m, 1.5h or 1:30.",
@@ -102,6 +104,69 @@
       "rateFor": "Hourly rate for {{name}}",
       "rateNotSet": "Not set"
     }
+  },
+  "presence": {
+    "heading": "Who's in today",
+    "onLeave": "On leave",
+    "notStarted": "Not started",
+    "noResults": "No one to show yet.",
+    "loadFailedTitle": "Couldn't load who's in today",
+    "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or presence couldn't be reached. Ask an admin if you think this is wrong."
+  },
+  "directory": {
+    "heading": "Directory",
+    "searchPlaceholder": "Search by name",
+    "noResults": "No one matches your search.",
+    "loadFailedTitle": "Couldn't load the directory",
+    "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or the directory couldn't be reached. Ask an admin if you think this is wrong."
+  },
+  "leave": {
+    "heading": "Leave",
+    "balanceHeading": "Your balance",
+    "noBalances": "No leave balances yet. Ask HR to set up your leave types and entitlement.",
+    "entitled": "Entitled",
+    "used": "Used",
+    "pending": "Pending",
+    "remaining": "Remaining",
+    "requestsHeading": "Your requests",
+    "noRequests": "No leave requests yet.",
+    "newRequest": "Request time off",
+    "leaveType": "Type",
+    "selectLeaveType": "Select a type",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "totalDays": "Days",
+    "notes": "Notes (optional)",
+    "submit": "Submit request",
+    "requestSubmitted": "Leave request submitted",
+    "requestFailed": "Could not submit the leave request",
+    "cancelRequestLabel": "Cancel this request",
+    "requestCanceled": "Leave request canceled",
+    "cancelFailed": "Could not cancel the leave request",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
+    }
+  },
+  "profile": {
+    "heading": "Profile",
+    "noRecordTitle": "No HR record linked yet",
+    "noRecordDescription": "Your account isn't linked to a staff record in HR yet. Ask an admin to link it.",
+    "role": "Role",
+    "department": "Department",
+    "employmentType": "Employment type",
+    "status": "Status",
+    "startDate": "Started",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "emergencyContact": "Emergency contact",
+    "bio": "About",
+    "activity": "Flow activity",
+    "hoursLoggedThisWeek": "{{hours}} logged this week",
+    "viewMyDay": "View My day"
   },
   "board": {
     "settingsTitle": "Board settings",

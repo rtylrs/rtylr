@@ -14,6 +14,8 @@
     "unknownAuthor": "غير معروف",
     "deleteEntryLabel": "حذف مدخل {{duration}}",
     "duration": "المدة",
+    "taskDescription": "المهمة",
+    "taskDescriptionPlaceholder": "اختر نوع العمل لتعبئة هذا الحقل",
     "durationPlaceholder": "90m أو 1.5h أو 1:30",
     "durationHint": "دقائق، أو ساعات عشرية، أو ساعات ودقائق.",
     "durationInvalid": "أدخل مدة بالشكل 90m أو 1.5h أو 1:30.",
@@ -110,6 +112,69 @@
       "rateFor": "السعر بالساعة لـ {{name}}",
       "rateNotSet": "غير محدّد"
     }
+  },
+  "presence": {
+    "heading": "من موجود اليوم",
+    "onLeave": "في إجازة",
+    "notStarted": "لم يبدأ بعد",
+    "noResults": "لا يوجد أحد لعرضه بعد.",
+    "loadFailedTitle": "تعذّر تحميل من موجود اليوم",
+    "loadFailedDescription": "قد يحدث هذا إذا كان دورك لا يملك صلاحية الاطلاع عليه، أو تعذّر الوصول إلى البيانات. اطلب من أحد المدراء إن كنت تظن أن هذا خطأ."
+  },
+  "directory": {
+    "heading": "دليل الموظفين",
+    "searchPlaceholder": "ابحث بالاسم",
+    "noResults": "لا يوجد أحد يطابق بحثك.",
+    "loadFailedTitle": "تعذّر تحميل دليل الموظفين",
+    "loadFailedDescription": "قد يحدث هذا إذا كان دورك لا يملك صلاحية الاطلاع عليه، أو تعذّر الوصول إلى الدليل. اطلب من أحد المدراء إن كنت تظن أن هذا خطأ."
+  },
+  "leave": {
+    "heading": "الإجازات",
+    "balanceHeading": "رصيدك",
+    "noBalances": "لا يوجد رصيد إجازات بعد. اطلب من الموارد البشرية إعداد أنواع الإجازة واستحقاقك.",
+    "entitled": "المستحق",
+    "used": "المستخدم",
+    "pending": "قيد الانتظار",
+    "remaining": "المتبقي",
+    "requestsHeading": "طلباتك",
+    "noRequests": "لا توجد طلبات إجازة بعد.",
+    "newRequest": "طلب إجازة",
+    "leaveType": "النوع",
+    "selectLeaveType": "اختر نوعاً",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
+    "totalDays": "عدد الأيام",
+    "notes": "ملاحظات (اختياري)",
+    "submit": "إرسال الطلب",
+    "requestSubmitted": "تم إرسال طلب الإجازة",
+    "requestFailed": "تعذّر إرسال طلب الإجازة",
+    "cancelRequestLabel": "إلغاء هذا الطلب",
+    "requestCanceled": "تم إلغاء طلب الإجازة",
+    "cancelFailed": "تعذّر إلغاء طلب الإجازة",
+    "status": {
+      "pending": "قيد الانتظار",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض",
+      "cancelled": "ملغى"
+    }
+  },
+  "profile": {
+    "heading": "الملف الشخصي",
+    "noRecordTitle": "لا يوجد سجل موارد بشرية مرتبط بعد",
+    "noRecordDescription": "حسابك غير مرتبط بسجل موظف في الموارد البشرية بعد. اطلب من أحد المدراء ربطه.",
+    "role": "الدور",
+    "department": "القسم",
+    "employmentType": "نوع التوظيف",
+    "status": "الحالة",
+    "startDate": "تاريخ البدء",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "address": "العنوان",
+    "emergencyContact": "جهة الاتصال في حالات الطوارئ",
+    "bio": "نبذة",
+    "activity": "نشاط Flow",
+    "hoursLoggedThisWeek": "{{hours}} مسجّلة هذا الأسبوع",
+    "viewMyDay": "عرض يومي"
   },
   "board": {
     "settingsTitle": "إعدادات اللوحة",

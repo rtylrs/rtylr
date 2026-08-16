@@ -244,6 +244,16 @@
   animation: flow-shimmer 1.4s infinite;
 }
 
+/* --flow-border is 1.1:1 and cannot serve as a focus indicator. This is the
+ * one focus treatment: 2px at 2px offset, 9.4:1 against --flow-bg. */
+.flow-focus {
+  outline: none;
+}
+.flow-focus:focus-visible {
+  outline: 2px solid var(--flow-focus-ring);
+  outline-offset: 2px;
+}
+
 /* Directional affordances should follow the language direction without
  * requiring each control to choose a separate icon. */
 [dir='rtl'] .flow-directional-icon {

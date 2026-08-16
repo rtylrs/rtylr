@@ -14,6 +14,8 @@
     "unknownAuthor": "Inconnu",
     "deleteEntryLabel": "Supprimer l'entrée de {{duration}}",
     "duration": "Durée",
+    "taskDescription": "Tâche",
+    "taskDescriptionPlaceholder": "Choisissez un type de travail pour remplir ce champ",
     "durationPlaceholder": "90m, 1.5h ou 1:30",
     "durationHint": "Minutes, heures décimales, ou heures et minutes.",
     "durationInvalid": "Saisissez une durée du type 90m, 1.5h ou 1:30.",
@@ -102,6 +104,69 @@
       "rateFor": "Tarif horaire de {{name}}",
       "rateNotSet": "Non défini"
     }
+  },
+  "presence": {
+    "heading": "Qui est présent aujourd'hui",
+    "onLeave": "En congé",
+    "notStarted": "Pas commencé",
+    "noResults": "Personne à afficher pour l'instant.",
+    "loadFailedTitle": "Impossible de charger qui est présent aujourd'hui",
+    "loadFailedDescription": "Cela peut arriver si votre rôle n'a pas la permission de le voir, ou si les données n'ont pas pu être atteintes. Demandez à un administrateur si vous pensez que c'est une erreur."
+  },
+  "directory": {
+    "heading": "Annuaire",
+    "searchPlaceholder": "Rechercher par nom",
+    "noResults": "Personne ne correspond à votre recherche.",
+    "loadFailedTitle": "Impossible de charger l'annuaire",
+    "loadFailedDescription": "Cela peut arriver si votre rôle n'a pas la permission de le voir, ou si l'annuaire n'a pas pu être atteint. Demandez à un administrateur si vous pensez que c'est une erreur."
+  },
+  "leave": {
+    "heading": "Congés",
+    "balanceHeading": "Votre solde",
+    "noBalances": "Aucun solde de congés pour l'instant. Demandez aux RH de configurer vos types de congés et votre droit.",
+    "entitled": "Acquis",
+    "used": "Utilisé",
+    "pending": "En attente",
+    "remaining": "Restant",
+    "requestsHeading": "Vos demandes",
+    "noRequests": "Aucune demande de congé pour l'instant.",
+    "newRequest": "Demander un congé",
+    "leaveType": "Type",
+    "selectLeaveType": "Sélectionner un type",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "totalDays": "Jours",
+    "notes": "Notes (facultatif)",
+    "submit": "Envoyer la demande",
+    "requestSubmitted": "Demande de congé envoyée",
+    "requestFailed": "Impossible d'envoyer la demande de congé",
+    "cancelRequestLabel": "Annuler cette demande",
+    "requestCanceled": "Demande de congé annulée",
+    "cancelFailed": "Impossible d'annuler la demande de congé",
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuvé",
+      "rejected": "Refusé",
+      "cancelled": "Annulé"
+    }
+  },
+  "profile": {
+    "heading": "Profil",
+    "noRecordTitle": "Aucune fiche RH associée pour l'instant",
+    "noRecordDescription": "Votre compte n'est pas encore associé à une fiche employé dans RH. Demandez à un administrateur de l'associer.",
+    "role": "Poste",
+    "department": "Département",
+    "employmentType": "Type d'emploi",
+    "status": "Statut",
+    "startDate": "Date d'entrée",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "emergencyContact": "Contact d'urgence",
+    "bio": "À propos",
+    "activity": "Activité Flow",
+    "hoursLoggedThisWeek": "{{hours}} saisies cette semaine",
+    "viewMyDay": "Voir Ma journée"
   },
   "board": {
     "settingsTitle": "Réglages du tableau",

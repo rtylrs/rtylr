@@ -31,6 +31,10 @@ const ProjectDashboard = React.lazy(() => import('./features/projects/ProjectDas
 const Inbox = React.lazy(() => import('./features/inbox/Inbox'));
 const FlowSettings = React.lazy(() => import('./features/settings/FlowSettings'));
 const MyDay = React.lazy(() => import('./features/time/MyDay'));
+const ProfileScreen = React.lazy(() => import('./features/profile/ProfileScreen'));
+const LeaveScreen = React.lazy(() => import('./features/leave/LeaveScreen'));
+const DirectoryScreen = React.lazy(() => import('./features/directory/DirectoryScreen'));
+const PresenceScreen = React.lazy(() => import('./features/presence/PresenceScreen'));
 const TeamView = React.lazy(() => import('./features/time/TeamView'));
 const TimeReports = React.lazy(() => import('./features/time/TimeReports'));
 const TaskDetail = React.lazy(() => import('./features/tasks/TaskDetail'));
@@ -259,6 +263,18 @@ const myDayRoute = createRoute({
   component: () => withLayout(<MyDay />),
 });
 
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/profile',
+  component: () => withLayout(<ProfileScreen />),
+});
+
+const leaveRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/leave',
+  component: () => withLayout(<LeaveScreen />),
+});
+
 const teamViewRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/time/team',
@@ -269,6 +285,18 @@ const timeReportsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/time/reports',
   component: () => withLayout(<TimeReports />),
+});
+
+const directoryRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/directory',
+  component: () => withLayout(<DirectoryScreen />),
+});
+
+const presenceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/presence',
+  component: () => withLayout(<PresenceScreen />),
 });
 
 const settingsRoute = createRoute({
@@ -313,8 +341,12 @@ const routeTree = rootRoute.addChildren([
   archiveRoute,
   inboxRoute,
   myDayRoute,
+  profileRoute,
+  leaveRoute,
   teamViewRoute,
   timeReportsRoute,
+  directoryRoute,
+  presenceRoute,
   settingsRoute,
   catchAllRoute,
 ]);
