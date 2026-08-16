@@ -124,6 +124,7 @@ func toDomainWorkType(row sqlc.FlowWorkType) domain.WorkType {
 		ID:           row.ID,
 		ParentID:     int64Value(row.ParentID),
 		Name:         row.Name,
+		Description:  stringValue(row.Description),
 		HRCategoryID: int64Value(row.HrCategoryID),
 		SortOrder:    row.SortOrder,
 		Archived:     row.Archived,
@@ -350,6 +351,7 @@ func (r *Repository) CreateWorkType(ctx context.Context, input domain.WorkTypeIn
 		WorkspaceID:  input.WorkspaceID,
 		ParentID:     nullInt64(input.ParentID),
 		Name:         input.Name,
+		Description:  nullString(input.Description),
 		HrCategoryID: nullInt64(input.HRCategoryID),
 		SortOrder:    input.SortOrder,
 	})
@@ -381,6 +383,7 @@ func (r *Repository) GetWorkType(ctx context.Context, id, ownerID, businessID in
 func (r *Repository) UpdateWorkType(ctx context.Context, input domain.WorkTypeInput) (domain.WorkType, error) {
 	if _, err := r.queries.UpdateWorkType(ctx, sqlc.UpdateWorkTypeParams{
 		Name:         input.Name,
+		Description:  nullString(input.Description),
 		ParentID:     nullInt64(input.ParentID),
 		HrCategoryID: nullInt64(input.HRCategoryID),
 		SortOrder:    input.SortOrder,

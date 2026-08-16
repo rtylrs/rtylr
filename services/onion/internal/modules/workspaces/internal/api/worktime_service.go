@@ -145,6 +145,7 @@ func toContractWorkType(workType domain.WorkType) *flowtimev1.WorkType {
 		Id:           workType.ID,
 		ParentId:     ptrInt64(workType.ParentID),
 		Name:         workType.Name,
+		Description:  workType.Description,
 		HrCategoryId: ptrInt64(workType.HRCategoryID),
 		SortOrder:    workType.SortOrder,
 		Archived:     workType.Archived,
@@ -376,6 +377,7 @@ func (a *WorkTimeAPI) CreateWorkType(ctx context.Context, req *flowtimev1.Create
 		WorkspaceID:  businessID,
 		ParentID:     req.GetParentId(),
 		Name:         req.GetName(),
+		Description:  req.GetDescription(),
 		HRCategoryID: req.GetHrCategoryId(),
 		SortOrder:    req.GetSortOrder(),
 	})
@@ -398,6 +400,7 @@ func (a *WorkTimeAPI) UpdateWorkType(ctx context.Context, req *flowtimev1.Update
 		WorkspaceID:  businessID,
 		ParentID:     req.GetParentId(),
 		Name:         req.GetName(),
+		Description:  req.GetDescription(),
 		HRCategoryID: req.GetHrCategoryId(),
 		SortOrder:    req.GetSortOrder(),
 		Archived:     req.GetArchived(),

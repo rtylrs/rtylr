@@ -121,6 +121,7 @@ type WorkType struct {
 	ID           int64
 	ParentID     int64
 	Name         string
+	Description  string
 	HRCategoryID int64
 	SortOrder    int32
 	Archived     bool
@@ -136,6 +137,7 @@ type WorkTypeInput struct {
 	WorkspaceID  int64
 	ParentID     int64
 	Name         string
+	Description  string
 	HRCategoryID int64
 	SortOrder    int32
 	Archived     bool
