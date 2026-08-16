@@ -40,6 +40,7 @@ VALUES (?, ?, ?, ?, ?);
 -- name: FindSupportCustomerByEmail :one
 SELECT id FROM support_customers
 WHERE business_id = ? AND email = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: InsertSupportCustomer :exec
