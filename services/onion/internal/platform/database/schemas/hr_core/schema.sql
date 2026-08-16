@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS hr_company_config (
     default_work_schedule_id BIGINT,
     overtime_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     overtime_multiplier DECIMAL(4,2) NOT NULL DEFAULT 1.50,
+    directory_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uk_hr_config_owner (owner_id)
