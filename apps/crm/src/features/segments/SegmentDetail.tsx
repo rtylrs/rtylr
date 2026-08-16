@@ -11,9 +11,15 @@ const SegmentDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const { data: fetched, isLoading: segmentLoading, error: segmentError } = useGetSegment(id);
-  const { data: fetchedCustomers, isLoading } = useSegmentCustomers(id);
+  const {
+    data: fetchedCustomerPages,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = useSegmentCustomers(id);
   const segment = fetched;
-  const customers = fetchedCustomers ?? [];
+  const customers = fetchedCustomerPages?.pages.flatMap((page) => page.customers) ?? [];
 
   if (segmentLoading) {
     return (
@@ -224,6 +230,17 @@ const SegmentDetail: React.FC = () => {
                   </span>
                 </div>
               ))}
+              {hasNextPage && (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 16px' }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => void fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? 'Loading...' : 'Load more customers'}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </Card>

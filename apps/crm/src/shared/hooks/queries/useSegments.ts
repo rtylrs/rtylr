@@ -1,6 +1,7 @@
 import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import {
   useMutation,
+  useInfiniteQuery,
   useQuery,
   useQueryClient,
   type UseMutationResult,
@@ -39,6 +40,43 @@ function fromApiSegment(s: ApiSegment): Segment {
 
 function fromApiSegmentCustomer(c: ApiSegmentCustomer): Customer {
   return customerSchema.parse(c);
+}
+
+export interface SegmentCustomersPage {
+  customers: Customer[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+const SEGMENT_CUSTOMERS_PAGE_SIZE = 50;
+
+function positiveNumber(value: string | undefined, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+export function parseSegmentCustomersPage(
+  response: {
+    customers?: ApiSegmentCustomer[];
+    total?: string;
+    page?: string;
+    pageSize?: string;
+  },
+  requestedPage: number
+): SegmentCustomersPage {
+  const customers = (response.customers ?? []).map(fromApiSegmentCustomer);
+  const page = positiveNumber(response.page, requestedPage);
+  const pageSize = positiveNumber(response.pageSize, SEGMENT_CUSTOMERS_PAGE_SIZE);
+  const total = positiveNumber(response.total, customers.length);
+  return { customers, total, page, pageSize };
+}
+
+export function getNextSegmentCustomerPage(page: SegmentCustomersPage): number | undefined {
+  if (page.customers.length === 0 || page.page * page.pageSize >= page.total) {
+    return undefined;
+  }
+  return page.page + 1;
 }
 
 // Segments only carry a single `filters` JSON string on the wire; the UI's
@@ -93,17 +131,19 @@ export const useGetSegment = (id: string | undefined): UseQueryResult<Segment> =
     enabled: !!id,
   });
 
-export const useSegmentCustomers = (id: string | undefined): UseQueryResult<Customer[]> =>
-  useQuery<Customer[]>({
+export const useSegmentCustomers = (id: string | undefined) =>
+  useInfiniteQuery({
     queryKey: ['crm-segment', id, 'customers'],
-    queryFn: async (): Promise<Customer[]> => {
+    initialPageParam: 1,
+    queryFn: async ({ pageParam }): Promise<SegmentCustomersPage> => {
       const res = await segmentClient.getSegmentCustomers({
         segmentId: id ?? '',
-        page: String(1),
-        pageSize: String(50),
+        page: String(pageParam),
+        pageSize: String(SEGMENT_CUSTOMERS_PAGE_SIZE),
       });
-      return z.array(customerSchema).parse((res.customers ?? []).map(fromApiSegmentCustomer));
+      return parseSegmentCustomersPage(res, pageParam);
     },
+    getNextPageParam: getNextSegmentCustomerPage,
     enabled: !!id,
   });
 
