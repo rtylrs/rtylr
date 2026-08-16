@@ -1,6 +1,7 @@
 import { unwrap, createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import i18next from 'i18next';
 import { safe } from '../../lib/api';
 import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/client';
 
@@ -98,10 +99,10 @@ export const useCreateGroup = (): ReturnType<
       return (res as { group: Group })?.group;
     },
     onSuccess: () => {
-      toast.success('Group created');
+      toast.success(i18next.t('toasts.groupCreated', 'Group created'));
       qc.invalidateQueries({ queryKey: ['groups'] });
     },
-    onError: () => toast.error('Failed to create group'),
+    onError: () => toast.error(i18next.t('toasts.failedCreateGroup', 'Failed to create group')),
   });
 };
 
@@ -131,11 +132,11 @@ export const useUpdateGroup = (
       return (res as { group: Group })?.group;
     },
     onSuccess: () => {
-      toast.success('Group saved');
+      toast.success(i18next.t('toasts.groupSaved', 'Group saved'));
       qc.invalidateQueries({ queryKey: ['groups'] });
       qc.invalidateQueries({ queryKey: ['groups', id] });
     },
-    onError: () => toast.error('Failed to save group'),
+    onError: () => toast.error(i18next.t('toasts.failedSaveGroup', 'Failed to save group')),
   });
 };
 
@@ -146,10 +147,10 @@ export const useDeleteGroup = (): ReturnType<typeof useMutation<void, Error, num
       await unwrap(safe.delete(`/hub/team/groups/v1/groups/${groupId}`));
     },
     onSuccess: () => {
-      toast.success('Group deleted');
+      toast.success(i18next.t('toasts.groupDeleted', 'Group deleted'));
       qc.invalidateQueries({ queryKey: ['groups'] });
     },
-    onError: () => toast.error('Failed to delete group'),
+    onError: () => toast.error(i18next.t('toasts.failedDeleteGroup', 'Failed to delete group')),
   });
 };
 
@@ -164,11 +165,11 @@ export const useAddGroupMembers = (
       );
     },
     onSuccess: () => {
-      toast.success('Members added');
+      toast.success(i18next.t('toasts.membersAdded', 'Members added'));
       qc.invalidateQueries({ queryKey: ['groups'] });
       qc.invalidateQueries({ queryKey: ['groups', groupId] });
     },
-    onError: () => toast.error('Failed to add members'),
+    onError: () => toast.error(i18next.t('toasts.failedAddMembers', 'Failed to add members')),
   });
 };
 
@@ -181,11 +182,11 @@ export const useRemoveGroupMember = (
       await unwrap(safe.delete(`/hub/team/groups/v1/groups/${groupId}/members/${userId}`));
     },
     onSuccess: () => {
-      toast.success('Member removed');
+      toast.success(i18next.t('toasts.memberRemoved', 'Member removed'));
       qc.invalidateQueries({ queryKey: ['groups', groupId] });
       qc.invalidateQueries({ queryKey: ['team'] });
     },
-    onError: () => toast.error('Failed to remove member'),
+    onError: () => toast.error(i18next.t('toasts.failedRemoveMember', 'Failed to remove member')),
   });
 };
 
@@ -224,6 +225,9 @@ export const useBulkInvite = (): ReturnType<
       qc.invalidateQueries({ queryKey: ['team'] });
       qc.invalidateQueries({ queryKey: ['groups'] });
     },
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Bulk invite failed')),
+    onError: (error) =>
+      toast.error(
+        getOneKitErrorMessage(error, i18next.t('toasts.bulkInviteFailed', 'Bulk invite failed'))
+      ),
   });
 };

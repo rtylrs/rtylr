@@ -437,6 +437,8 @@ export const useBillingHistory = () =>
     select: (data) => (data.history ?? []).map(normalizeBillingHistory),
   });
 
+import i18next from 'i18next';
+
 export const useSetSubscription = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -444,9 +446,10 @@ export const useSetSubscription = () => {
       unwrap(safe.post('/hub/subscription/v1/my', { plan_slug: data.planSlug })),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['subscription'] });
-      toast.success('Subscription updated');
+      toast.success(i18next.t('toasts.subscriptionUpdated', 'Subscription updated'));
     },
-    onError: () => toast.error('Failed to update subscription'),
+    onError: () =>
+      toast.error(i18next.t('toasts.failedUpdateSubscription', 'Failed to update subscription')),
   });
 };
 

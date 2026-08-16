@@ -30,6 +30,8 @@ import {
 import { APP_URLS } from '@voxire/config';
 import { useCommandPalette } from '../../stores/commandPaletteStore';
 
+import { useTranslation } from 'react-i18next';
+
 interface CommandItem {
   id: string;
   label: string;
@@ -40,6 +42,7 @@ interface CommandItem {
 }
 
 export const SearchCommand: React.FC = () => {
+  const { t } = useTranslation('common');
   const { open, setOpen } = useCommandPalette();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
@@ -57,127 +60,148 @@ export const SearchCommand: React.FC = () => {
       setOpen(false);
       setQuery('');
     };
+    const groupNavigate = t('nav.navigate', 'Navigate');
+    const groupApps = t('nav.apps', 'Apps');
+
     return [
       // Navigation
       {
         id: 'nav-dashboard',
-        label: 'Go to Dashboard',
-        group: 'Navigate',
+        label: t('nav.goToDashboard', 'Go to Dashboard'),
+        group: groupNavigate,
         icon: LayoutDashboard,
         action: go('/'),
       },
       {
         id: 'nav-team',
-        label: 'Team Members',
-        group: 'Navigate',
+        label: t('nav.teamMembers', 'Team Members'),
+        group: groupNavigate,
         icon: Users,
         action: go('/team'),
       },
       {
         id: 'nav-invite',
-        label: 'Invite Member',
-        group: 'Navigate',
+        label: t('nav.inviteMember', 'Invite Member'),
+        group: groupNavigate,
         icon: UserCog,
         action: go('/team/invite'),
       },
       {
         id: 'nav-permissions',
-        label: 'Permissions',
-        group: 'Navigate',
+        label: t('nav.permissions', 'Permissions'),
+        group: groupNavigate,
         icon: Shield,
         action: go('/permissions'),
       },
-      { id: 'nav-roles', label: 'Roles', group: 'Navigate', icon: Shield, action: go('/roles') },
-      { id: 'nav-apps', label: 'All Apps', group: 'Navigate', icon: Boxes, action: go('/apps') },
+      {
+        id: 'nav-roles',
+        label: t('nav.roles', 'Roles'),
+        group: groupNavigate,
+        icon: Shield,
+        action: go('/roles'),
+      },
+      {
+        id: 'nav-apps',
+        label: t('nav.allApps', 'All Apps'),
+        group: groupNavigate,
+        icon: Boxes,
+        action: go('/apps'),
+      },
       {
         id: 'nav-activity',
-        label: 'Activity Log',
-        group: 'Navigate',
+        label: t('nav.activityLog', 'Activity Log'),
+        group: groupNavigate,
         icon: ActivityIcon,
         action: go('/audit'),
       },
       {
         id: 'nav-audit',
-        label: 'Audit Log',
-        group: 'Navigate',
+        label: t('nav.auditLog', 'Audit Log'),
+        group: groupNavigate,
         icon: ScrollText,
         action: go('/audit'),
       },
       {
         id: 'nav-notifications',
-        label: 'Notifications',
-        group: 'Navigate',
+        label: t('nav.notifications', 'Notifications'),
+        group: groupNavigate,
         icon: Bell,
         action: go('/notifications'),
       },
       {
         id: 'nav-account',
-        label: 'Account',
-        group: 'Navigate',
+        label: t('nav.account', 'Account'),
+        group: groupNavigate,
         icon: UserCog,
         action: go('/account'),
       },
       {
         id: 'nav-billing',
-        label: 'Billing',
-        group: 'Navigate',
+        label: t('nav.billing', 'Billing'),
+        group: groupNavigate,
         icon: CreditCard,
         action: go('/billing'),
       },
       {
         id: 'nav-integrations',
-        label: 'Integrations',
-        group: 'Navigate',
+        label: t('nav.integrations', 'Integrations'),
+        group: groupNavigate,
         icon: Plug2,
         action: go('/integrations'),
       },
       {
         id: 'nav-api-keys',
-        label: 'API Keys',
-        group: 'Navigate',
+        label: t('nav.apiKeys', 'API Keys'),
+        group: groupNavigate,
         icon: KeyRound,
         action: go('/api-keys'),
       },
       {
         id: 'nav-webhooks',
-        label: 'Webhooks',
-        group: 'Navigate',
+        label: t('nav.webhooks', 'Webhooks'),
+        group: groupNavigate,
         icon: Webhook,
         action: go('/webhooks'),
       },
       {
         id: 'nav-security',
-        label: 'Security',
-        group: 'Navigate',
+        label: t('nav.security', 'Security'),
+        group: groupNavigate,
         icon: Shield,
         action: go('/security'),
       },
       {
         id: 'nav-settings',
-        label: 'Settings',
-        group: 'Navigate',
+        label: t('nav.settings', 'Settings'),
+        group: groupNavigate,
         icon: Settings,
         action: go('/settings'),
       },
       {
         id: 'nav-menus',
-        label: 'Menus',
-        group: 'Navigate',
+        label: t('nav.menus', 'Menus'),
+        group: groupNavigate,
         icon: UtensilsCrossed,
         action: go('/menus'),
       },
-      { id: 'nav-qr', label: 'QR Codes', group: 'Navigate', icon: QrCode, action: go('/qr-codes') },
+      {
+        id: 'nav-qr',
+        label: t('nav.qrCodes', 'QR Codes'),
+        group: groupNavigate,
+        icon: QrCode,
+        action: go('/qr-codes'),
+      },
       {
         id: 'nav-design',
-        label: 'Design',
-        group: 'Navigate',
+        label: t('nav.design', 'Design'),
+        group: groupNavigate,
         icon: Palette,
         action: go('/design'),
       },
       {
         id: 'nav-analytics',
-        label: 'Analytics',
-        group: 'Navigate',
+        label: t('nav.analytics', 'Analytics'),
+        group: groupNavigate,
         icon: BarChart3,
         action: go('/analytics'),
       },
@@ -185,48 +209,48 @@ export const SearchCommand: React.FC = () => {
       // Apps launcher
       {
         id: 'app-pos',
-        label: 'Launch POS',
-        group: 'Apps',
+        label: `${t('common.launch', 'Launch')} POS`,
+        group: groupApps,
         icon: MonitorSpeaker,
         action: launchApp(APP_URLS.pos),
       },
       {
         id: 'app-erp',
-        label: 'Launch ERP',
-        group: 'Apps',
+        label: `${t('common.launch', 'Launch')} ERP`,
+        group: groupApps,
         icon: Package,
         action: launchApp(APP_URLS.erp),
       },
       {
         id: 'app-hr',
-        label: 'Launch HR',
-        group: 'Apps',
+        label: `${t('common.launch', 'Launch')} HR`,
+        group: groupApps,
         icon: UserCheck,
         action: launchApp(APP_URLS.hr),
       },
       {
         id: 'app-crm',
-        label: 'Launch CRM',
-        group: 'Apps',
+        label: `${t('common.launch', 'Launch')} CRM`,
+        group: groupApps,
         icon: Users,
         action: launchApp(APP_URLS.crm),
       },
       {
         id: 'app-finance',
-        label: 'Launch Finance',
-        group: 'Apps',
+        label: `${t('common.launch', 'Launch')} Finance`,
+        group: groupApps,
         icon: CreditCard,
         action: launchApp(APP_URLS.finance),
       },
       {
         id: 'app-flow',
-        label: 'Launch Flow',
-        group: 'Apps',
+        label: `${t('common.launch', 'Launch')} Flow`,
+        group: groupApps,
         icon: Layers,
         action: launchApp(APP_URLS.flow),
       },
     ];
-  }, [navigate, setOpen]);
+  }, [navigate, setOpen, t]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return items;

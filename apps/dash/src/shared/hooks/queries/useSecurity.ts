@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 import { securityStateSchema } from '../../schemas/security';
 import { toast } from 'sonner';
+import i18next from 'i18next';
 
 export type { SecurityState, Session, TrustedDevice } from '../../schemas/security';
 
@@ -24,10 +25,17 @@ export const useToggleTwoFactor = () => {
       return enabled;
     },
     onSuccess: (enabled) => {
-      toast.success(enabled ? 'Two-factor enabled' : 'Two-factor disabled');
+      toast.success(
+        enabled
+          ? i18next.t('toasts.twoFactorEnabled', 'Two-factor enabled')
+          : i18next.t('toasts.twoFactorDisabled', 'Two-factor disabled')
+      );
       qc.invalidateQueries({ queryKey: ['security'] });
     },
-    onError: () => toast.error('Failed to update two-factor settings'),
+    onError: () =>
+      toast.error(
+        i18next.t('toasts.failedTwoFactorUpdate', 'Failed to update two-factor settings')
+      ),
   });
 };
 
@@ -38,9 +46,10 @@ export const useRevokeSession = () => {
       await unwrap(safe.post('/hub/security/v1/invalidate-sessions'));
     },
     onSuccess: () => {
-      toast.success('Signed out of all sessions');
+      toast.success(i18next.t('toasts.signedOutSessions', 'Signed out of all sessions'));
       qc.invalidateQueries({ queryKey: ['security'] });
     },
-    onError: () => toast.error('Failed to sign out sessions'),
+    onError: () =>
+      toast.error(i18next.t('toasts.failedSignOutSessions', 'Failed to sign out sessions')),
   });
 };

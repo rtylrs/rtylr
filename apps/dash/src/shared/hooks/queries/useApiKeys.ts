@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { safe } from '../../lib/api';
 import { apiKeySchema } from '../../schemas/apiKeys';
 import { toast } from 'sonner';
+import i18next from 'i18next';
 
 export type { ApiKey } from '../../schemas/apiKeys';
 type ApiKey = z.infer<typeof apiKeySchema>;
@@ -27,10 +28,10 @@ export const useCreateApiKey = () => {
       return res as { id: number; key: string; message: string };
     },
     onSuccess: () => {
-      toast.success('API key created');
+      toast.success(i18next.t('toasts.apiKeyCreated', 'API key created'));
       qc.invalidateQueries({ queryKey: ['api-keys'] });
     },
-    onError: () => toast.error('Failed to create API key'),
+    onError: () => toast.error(i18next.t('toasts.failedCreateApiKey', 'Failed to create API key')),
   });
 };
 
@@ -42,9 +43,9 @@ export const useRevokeApiKey = () => {
       return id;
     },
     onSuccess: () => {
-      toast.success('API key revoked');
+      toast.success(i18next.t('toasts.apiKeyRevoked', 'API key revoked'));
       qc.invalidateQueries({ queryKey: ['api-keys'] });
     },
-    onError: () => toast.error('Failed to revoke API key'),
+    onError: () => toast.error(i18next.t('toasts.failedRevokeApiKey', 'Failed to revoke API key')),
   });
 };

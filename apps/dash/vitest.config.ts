@@ -1,22 +1,11 @@
-import { defineConfig } from 'vitest/config';
-import path from 'path';
+import { defineConfig, mergeConfig } from 'vitest/config';
+import rootConfig from '../../vitest.config';
 
-export default defineConfig({
-  resolve: {
-    alias: {
-      react: path.resolve(__dirname, '../../node_modules/react'),
-      'react-dom': path.resolve(__dirname, '../../node_modules/react-dom'),
+export default mergeConfig(
+  rootConfig,
+  defineConfig({
+    test: {
+      include: ['src/**/*.test.{ts,tsx}'],
     },
-  },
-  test: {
-    globals: true,
-    environment: 'happy-dom',
-    setupFiles: [path.resolve(__dirname, '../../test/setup.ts')],
-    include: ['src/**/*.test.{ts,tsx}'],
-    server: {
-      deps: {
-        inline: [/react/, /@tanstack\/react-query/, /lucide-react/],
-      },
-    },
-  },
-});
+  })
+);
