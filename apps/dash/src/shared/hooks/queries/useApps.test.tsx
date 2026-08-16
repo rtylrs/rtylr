@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -7,25 +8,30 @@ import { useApps } from './useApps';
 
 const mockGet = vi.fn();
 
-vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((v) => v),
-}));
+vi.mock('@voxire/api', async (importOriginal) => {
+  const actual = await importOriginal<object>();
+  return {
+    ...actual,
+    unwrap: vi.fn((v) => v),
+  };
+});
 
 vi.mock('../../lib/api', () => ({
   safe: { get: (...args: unknown[]) => mockGet(...args) },
 }));
 
-function createWrapper() {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client }, children);
-}
+let queryClient: QueryClient;
+
+const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
 
 describe('useApps', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
   });
 
   it('fetches and maps apps correctly', async () => {
@@ -36,7 +42,7 @@ describe('useApps', () => {
       ],
     });
 
-    const { result } = renderHook(() => useApps(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toHaveLength(2);
@@ -51,7 +57,7 @@ describe('useApps', () => {
       apps: [{ id: 'erp', name: 'ERP', description: 'ERP', isEnabled: false }],
     });
 
-    const { result } = renderHook(() => useApps(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data![0].status).toBe('coming_soon');
@@ -60,7 +66,7 @@ describe('useApps', () => {
   it('returns empty array when response is not an array', async () => {
     mockGet.mockResolvedValue({ apps: 'not an array' });
 
-    const { result } = renderHook(() => useApps(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toEqual([]);
@@ -69,7 +75,7 @@ describe('useApps', () => {
   it('returns empty array when res is null', async () => {
     mockGet.mockResolvedValue(null);
 
-    const { result } = renderHook(() => useApps(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toEqual([]);
@@ -80,7 +86,7 @@ describe('useApps', () => {
       apps: [{ id: 'unknown_app', name: 'Unknown', isEnabled: true }],
     });
 
-    const { result } = renderHook(() => useApps(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data![0].href).toBe('#');
@@ -91,7 +97,7 @@ describe('useApps', () => {
   it('handles API error', async () => {
     mockGet.mockRejectedValue(new Error('Network error'));
 
-    const { result } = renderHook(() => useApps(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(result.current.isError).toBe(true));
 
     expect(result.current.error).toBeDefined();
@@ -100,7 +106,7 @@ describe('useApps', () => {
   it('handles flat array response (no .apps wrapper)', async () => {
     mockGet.mockResolvedValue([{ id: 'crm', name: 'CRM', isEnabled: true }]);
 
-    const { result } = renderHook(() => useApps(), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toHaveLength(1);
@@ -110,7 +116,7 @@ describe('useApps', () => {
   it('calls safe.get with /hub/app/v1/apps', async () => {
     mockGet.mockResolvedValue({ apps: [] });
 
-    renderHook(() => useApps(), { wrapper: createWrapper() });
+    renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/hub/app/v1/apps'));
   });
 });
