@@ -157,7 +157,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
       {isActive && (
         <motion.span
           className="relative ml-auto h-1 w-1 rounded-full shrink-0"
-          style={{ background: '#4583C4' }}
+          style={{ background: 'var(--accent)' }}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 600, damping: 20 }}
@@ -436,7 +436,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     initials={getInitials(userName)}
                     size="sm"
                     className="shrink-0"
-                    style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
+                    style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
                   />
                   <div className="dash-sidebar-user flex flex-col items-start min-w-0 flex-1">
                     <span
@@ -483,12 +483,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                         onClick={() => setTheme(value)}
                         className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
                         style={{
-                          background:
-                            theme === value ? 'rgba(69,131,196,0.15)' : 'var(--dash-hover)',
-                          color: theme === value ? '#4583C4' : 'var(--dash-text-muted)',
+                          background: theme === value ? 'var(--accent-muted)' : 'var(--dash-hover)',
+                          color: theme === value ? 'var(--accent)' : 'var(--dash-text-muted)',
                           border:
                             theme === value
-                              ? '1px solid rgba(69,131,196,0.3)'
+                              ? '1px solid var(--accent-border)'
                               : '1px solid transparent',
                         }}
                       >
@@ -548,14 +547,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                       className="h-6 w-6 rounded-lg flex items-center justify-center"
                       style={{ background: 'rgba(139,92,246,0.1)' }}
                     >
-                      <Sparkles size={13} style={{ color: '#8b5cf6' }} />
+                      <Sparkles size={13} style={{ color: 'var(--app-crm)' }} />
                     </div>
                     <span className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                       Caret
                     </span>
                     <span
                       className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
-                      style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}
+                      style={{ background: 'rgba(139,92,246,0.1)', color: 'var(--app-crm)' }}
                     >
                       AI
                     </span>
@@ -598,7 +597,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   {unreadCount > 0 && (
                     <span
                       className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full"
-                      style={{ background: '#ef4444' }}
+                      style={{ background: 'var(--status-cancelled)' }}
                     />
                   )}
                 </button>

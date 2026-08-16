@@ -20,8 +20,8 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
-  default: { background: '#4583C4' },
-  secondary: { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' },
+  default: { background: 'var(--accent)' },
+  secondary: { background: 'var(--dash-hover)', border: '1px solid var(--dash-border)' },
   outline: {
     background: 'transparent',
     border: '1px solid var(--accent-border)',
@@ -29,7 +29,7 @@ const variantStyles: Record<ButtonVariant, React.CSSProperties> = {
   },
   ghost: { background: 'transparent' },
   destructive: {},
-  accent: { background: '#4583C4' },
+  accent: { background: 'var(--accent)' },
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -45,7 +45,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cn(
-          'inline-flex items-center justify-center gap-2 font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4583C4]/40 disabled:pointer-events-none disabled:opacity-40 hover:opacity-90',
+          'inline-flex items-center justify-center gap-2 font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 disabled:pointer-events-none disabled:opacity-40 hover:opacity-90',
           variantClasses[variant],
           sizeClasses[size],
           className
