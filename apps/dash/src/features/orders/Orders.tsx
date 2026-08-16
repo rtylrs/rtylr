@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { ShoppingBag, Clock, CheckCircle2, Loader2, Info } from 'lucide-react';
-import { useOrders, type HubOrder } from '../../shared/hooks/queries/useOrders';
+import {
+  useOrders,
+  useUpdateOrderStatus,
+  type HubOrder,
+} from '../../shared/hooks/queries/useOrders';
 import {
   Card,
   CardContent,
@@ -117,6 +121,19 @@ const Orders: React.FC = () => {
   const [tab, setTab] = useState<OrderStatus>('all');
   const [selectedOrder, setSelectedOrder] = useState<HubOrder | null>(null);
   const { data: allOrders = [], isLoading, isError } = useOrders();
+  const updateStatusMutation = useUpdateOrderStatus();
+
+  const handleStatusUpdate = (newStatus: string) => {
+    if (!selectedOrder) return;
+    updateStatusMutation.mutate(
+      { id: selectedOrder.id, status: newStatus },
+      {
+        onSuccess: () => {
+          setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
+        },
+      }
+    );
+  };
 
   const pendingOrders = useMemo(() => allOrders.filter((o) => o.status === 'pending'), [allOrders]);
   const inProgressOrders = useMemo(
@@ -325,8 +342,77 @@ const Orders: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-2">
-                <Button variant="outline" onClick={() => setSelectedOrder(null)}>
+              {selectedOrder.items && selectedOrder.items.length > 0 && (
+                <div
+                  className="space-y-2 pt-2 border-t"
+                  style={{ borderColor: 'var(--dash-border)' }}
+                >
+                  <h4 className="text-xs font-semibold text-primary">Line Items</h4>
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                    {selectedOrder.items.map((item, idx) => (
+                      <div
+                        key={item.id || idx}
+                        className="flex justify-between items-center text-xs p-2 rounded-lg"
+                        style={{ background: 'var(--dash-hover)' }}
+                      >
+                        <div>
+                          <span className="font-medium text-primary">{item.name}</span>
+                          <span className="text-muted ml-2">x{item.quantity}</span>
+                        </div>
+                        <span className="font-semibold text-primary">
+                          ${((item.price * item.quantity) / 100).toFixed(2)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div
+                className="flex items-center justify-end gap-2 pt-3 border-t"
+                style={{ borderColor: 'var(--dash-border)' }}
+              >
+                {selectedOrder.status === 'pending' && (
+                  <>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={updateStatusMutation.isPending}
+                      onClick={() => handleStatusUpdate('cancelled')}
+                    >
+                      Cancel Order
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      disabled={updateStatusMutation.isPending}
+                      onClick={() => handleStatusUpdate('in_progress')}
+                    >
+                      Process Order
+                    </Button>
+                  </>
+                )}
+                {selectedOrder.status === 'in_progress' && (
+                  <>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={updateStatusMutation.isPending}
+                      onClick={() => handleStatusUpdate('cancelled')}
+                    >
+                      Cancel Order
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      disabled={updateStatusMutation.isPending}
+                      onClick={() => handleStatusUpdate('completed')}
+                    >
+                      Complete Order
+                    </Button>
+                  </>
+                )}
+                <Button variant="outline" size="sm" onClick={() => setSelectedOrder(null)}>
                   Close
                 </Button>
               </div>
