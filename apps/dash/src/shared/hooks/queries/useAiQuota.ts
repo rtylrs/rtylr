@@ -72,6 +72,8 @@ export const useAiQuotaMode = () =>
     staleTime: 30_000,
   });
 
+import i18next from 'i18next';
+
 export const useUpdateAiQuotaMode = () => {
   const qc = useQueryClient();
   return useMutation({
@@ -83,8 +85,9 @@ export const useUpdateAiQuotaMode = () => {
         returnedMode === 'pool' || returnedMode === 'per_person' ? returnedMode : requestedMode;
       qc.setQueryData<AiQuotaMode>(['ai-quota-settings'], nextMode);
       qc.invalidateQueries({ queryKey: ['ai-usage'] });
-      toast.success('AI allocation updated');
+      toast.success(i18next.t('toasts.aiAllocationUpdated', 'AI allocation updated'));
     },
-    onError: () => toast.error('Failed to update AI allocation'),
+    onError: () =>
+      toast.error(i18next.t('toasts.failedUpdateAiAllocation', 'Failed to update AI allocation')),
   });
 };

@@ -11,6 +11,7 @@ import type {
 } from '@voxire/voxie/hub/team/members/v1/types';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import i18next from 'i18next';
 import { teamMemberSchema } from '../../schemas/team';
 
 export type { TeamMember } from '../../schemas/team';
@@ -138,10 +139,16 @@ export const useInviteMember = () => {
       });
     },
     onSuccess: () => {
-      toast.success('Invitation sent');
+      toast.success(i18next.t('toasts.invitationSent', 'Invitation sent'));
       qc.invalidateQueries({ queryKey: ['team'] });
     },
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to send invitation')),
+    onError: (error) =>
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('toasts.failedSendInvitation', 'Failed to send invitation')
+        )
+      ),
   });
 };
 
@@ -157,7 +164,7 @@ export const useUpdateMember = () => {
       });
     },
     onSuccess: (_data, { id, patch }) => {
-      toast.success('Member updated');
+      toast.success(i18next.t('toasts.memberUpdated', 'Member updated'));
       qc.getQueriesData({ queryKey: ['team'] }).forEach(([queryKey, cached]) => {
         if (!isTeamListResult(cached)) return;
         qc.setQueryData<TeamListResult>(queryKey, {
@@ -171,7 +178,13 @@ export const useUpdateMember = () => {
         old ? applyMemberPatch(old, patch) : old
       );
     },
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to update member')),
+    onError: (error) =>
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('toasts.failedUpdateMember', 'Failed to update member')
+        )
+      ),
   });
 };
 
@@ -183,10 +196,16 @@ export const useDeactivateMember = () => {
       return id;
     },
     onSuccess: () => {
-      toast.success('Member deactivated');
+      toast.success(i18next.t('toasts.memberDeactivated', 'Member deactivated'));
       qc.invalidateQueries({ queryKey: ['team'] });
     },
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to deactivate member')),
+    onError: (error) =>
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('toasts.failedDeactivateMember', 'Failed to deactivate member')
+        )
+      ),
   });
 };
 
@@ -199,23 +218,21 @@ export interface AccessRequest {
   createdAt: string;
 }
 
-function fromApiAccessRequest(r: ApiAccessRequest): AccessRequest {
-  return {
-    id: Number(r.id),
-    userId: Number(r.userId),
-    app: r.app ?? '',
-    requesterName: r.requesterName ?? '',
-    requesterEmail: r.requesterEmail ?? '',
-    createdAt: r.createdAt ?? '',
-  };
-}
-
 export const useAccessRequests = () =>
   useQuery<AccessRequest[]>({
     queryKey: ['team', 'access-requests'],
     queryFn: async () => {
-      const res = await accessClient.listAccessRequests({});
-      return (res.requests ?? []).map(fromApiAccessRequest);
+      const res = (await accessClient.listAccessRequests({})) as {
+        requests?: ApiAccessRequest[];
+      };
+      return (res.requests ?? []).map((r) => ({
+        id: Number(r.id),
+        userId: Number(r.userId),
+        app: r.app ?? '',
+        requesterName: r.requesterName ?? '',
+        requesterEmail: r.requesterEmail ?? '',
+        createdAt: r.createdAt ?? '',
+      }));
     },
     staleTime: 30_000,
   });
@@ -229,6 +246,12 @@ export const useApproveAccessRequest = () => {
       void qc.invalidateQueries({ queryKey: ['team', 'access-requests'] });
       void qc.invalidateQueries({ queryKey: ['team'] });
     },
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to grant access')),
+    onError: (error) =>
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('toasts.failedGrantAccess', 'Failed to grant access')
+        )
+      ),
   });
 };

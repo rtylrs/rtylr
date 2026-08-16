@@ -2,6 +2,7 @@ import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AccessServiceClient } from '@voxire/voxie/pos/access/v1/client';
 import { toast } from 'sonner';
+import i18next from 'i18next';
 
 const accessClient = createOneKitClient(AccessServiceClient, 'dash');
 
@@ -52,7 +53,13 @@ export const useAssignPOSLocation = () => {
         canManageTerminals: input.canManageTerminals,
         canViewReports: input.canViewReports,
       }),
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to assign location')),
+    onError: (error) =>
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('toasts.failedAssignLocation', 'Failed to assign location')
+        )
+      ),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['pos-member-locations'] });
     },
@@ -63,7 +70,13 @@ export const useRemovePOSLocation = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => accessClient.removeLocation({ id: String(id) }),
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to remove location')),
+    onError: (error) =>
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('toasts.failedRemoveLocation', 'Failed to remove location')
+        )
+      ),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['pos-member-locations'] });
     },
