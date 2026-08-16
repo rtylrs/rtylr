@@ -32,8 +32,7 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 // dynamic-query: squirrel
-func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, departmentID, status string) ([]domain.Staff, error) {
-	businessID := ownerID
+func (r *Repository) ListStaff(ctx context.Context, businessID int64, search, departmentID, status string) ([]domain.Staff, error) {
 	// cross-schema read from hr_departments — to include department name in staff list response
 	builder := sq.
 		Select("s.id", "s.owner_id", "s.business_id", "s.user_id", "s.department_id",
@@ -171,10 +170,10 @@ func (r *Repository) ListStaff(ctx context.Context, ownerID int64, search, depar
 	return staff, rows.Err()
 }
 
-func (r *Repository) GetStaffByID(ctx context.Context, ownerID, staffID int64) (*domain.Staff, error) {
+func (r *Repository) GetStaffByID(ctx context.Context, businessID, staffID int64) (*domain.Staff, error) {
 	row, err := r.queries.GetStaffByID(ctx, sqlc.GetStaffByIDParams{
 		ID:         staffID,
-		BusinessID: ownerID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -332,8 +331,7 @@ func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (
 	return staffID, nil
 }
 
-func (r *Repository) UpdateStaff(ctx context.Context, ownerID int64, input domain.StaffUpdateInput) error {
-	businessID := ownerID
+func (r *Repository) UpdateStaff(ctx context.Context, businessID int64, input domain.StaffUpdateInput) error {
 	appsJSON := json.RawMessage("[]")
 	if input.Apps != "" {
 		appsJSON = json.RawMessage(input.Apps)
@@ -394,8 +392,7 @@ func (r *Repository) UpdateStaff(ctx context.Context, ownerID int64, input domai
 	return tx.Commit()
 }
 
-func (r *Repository) DeleteStaff(ctx context.Context, ownerID, staffID int64) error {
-	businessID := ownerID
+func (r *Repository) DeleteStaff(ctx context.Context, businessID, staffID int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -434,9 +431,9 @@ func (r *Repository) DeleteStaff(ctx context.Context, ownerID, staffID int64) er
 	return tx.Commit()
 }
 
-func (r *Repository) ClockIn(ctx context.Context, ownerID, staffID int64) error {
+func (r *Repository) ClockIn(ctx context.Context, businessID, staffID int64) error {
 	err := r.queries.ClockIn(ctx, sqlc.ClockInParams{
-		BusinessID: ownerID,
+		BusinessID: businessID,
 		StaffID:    sql.NullInt64{Int64: staffID, Valid: true},
 	})
 	if err != nil {
@@ -446,9 +443,9 @@ func (r *Repository) ClockIn(ctx context.Context, ownerID, staffID int64) error 
 	return nil
 }
 
-func (r *Repository) ClockOut(ctx context.Context, ownerID, staffID int64) error {
+func (r *Repository) ClockOut(ctx context.Context, businessID, staffID int64) error {
 	err := r.queries.ClockOut(ctx, sqlc.ClockOutParams{
-		BusinessID: ownerID,
+		BusinessID: businessID,
 		StaffID:    sql.NullInt64{Int64: staffID, Valid: true},
 	})
 	if err != nil {
@@ -458,32 +455,32 @@ func (r *Repository) ClockOut(ctx context.Context, ownerID, staffID int64) error
 	return nil
 }
 
-func (r *Repository) CountActiveStaff(ctx context.Context, ownerID int64) (int, error) {
-	count, err := r.queries.CountActiveStaff(ctx, ownerID)
+func (r *Repository) CountActiveStaff(ctx context.Context, businessID int64) (int, error) {
+	count, err := r.queries.CountActiveStaff(ctx, businessID)
 	if err != nil {
 		return 0, err
 	}
 	return int(count), nil
 }
 
-func (r *Repository) CountOnShiftToday(ctx context.Context, ownerID int64) (int, error) {
-	count, err := r.queries.CountOnShiftToday(ctx, ownerID)
+func (r *Repository) CountOnShiftToday(ctx context.Context, businessID int64) (int, error) {
+	count, err := r.queries.CountOnShiftToday(ctx, businessID)
 	if err != nil {
 		return 0, err
 	}
 	return int(count), nil
 }
 
-func (r *Repository) CountPendingTimeOff(ctx context.Context, ownerID int64) (int, error) {
-	count, err := r.queries.CountPendingTimeOff(ctx, ownerID)
+func (r *Repository) CountPendingTimeOff(ctx context.Context, businessID int64) (int, error) {
+	count, err := r.queries.CountPendingTimeOff(ctx, businessID)
 	if err != nil {
 		return 0, err
 	}
 	return int(count), nil
 }
 
-func (r *Repository) CountDraftPayroll(ctx context.Context, ownerID int64) (int, error) {
-	count, err := r.queries.CountDraftPayroll(ctx, ownerID)
+func (r *Repository) CountDraftPayroll(ctx context.Context, businessID int64) (int, error) {
+	count, err := r.queries.CountDraftPayroll(ctx, businessID)
 	if err != nil {
 		return 0, err
 	}
@@ -514,8 +511,7 @@ type staffEmployeeSyncRow struct {
 	Notes                 sql.NullString
 }
 
-func (r *Repository) syncEmployeeFromStaff(ctx context.Context, qtx *sqlc.Queries, ownerID, staffID int64) error {
-	businessID := ownerID
+func (r *Repository) syncEmployeeFromStaff(ctx context.Context, qtx *sqlc.Queries, businessID, staffID int64) error {
 	staff, err := loadStaffEmployeeSyncRow(ctx, qtx, businessID, staffID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

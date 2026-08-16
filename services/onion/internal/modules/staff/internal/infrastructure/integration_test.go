@@ -14,7 +14,7 @@ func TestListStaff_ReturnsAliceAndBob(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	staff, err := repo.ListStaff(ctx, testutil.OwnerID, "", "", "")
+	staff, err := repo.ListStaff(ctx, testutil.BusinessID, "", "", "")
 	if err != nil {
 		t.Fatalf("ListStaff: %v", err)
 	}
@@ -39,7 +39,7 @@ func TestGetStaffByID_AliceID4101(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	s, err := repo.GetStaffByID(ctx, testutil.OwnerID, 4101)
+	s, err := repo.GetStaffByID(ctx, testutil.BusinessID, 4101)
 	if err != nil {
 		t.Fatalf("GetStaffByID: %v", err)
 	}
@@ -102,7 +102,7 @@ func TestListStaff_SearchByName(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	staff, err := repo.ListStaff(ctx, testutil.OwnerID, "Alice", "", "")
+	staff, err := repo.ListStaff(ctx, testutil.BusinessID, "Alice", "", "")
 	if err != nil {
 		t.Fatalf("ListStaff search: %v", err)
 	}
@@ -122,7 +122,7 @@ func TestGetStaffByID_Bob(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	s, err := repo.GetStaffByID(ctx, testutil.OwnerID, 4102)
+	s, err := repo.GetStaffByID(ctx, testutil.BusinessID, 4102)
 	if err != nil {
 		t.Fatalf("GetStaffByID(4102): %v", err)
 	}
@@ -136,7 +136,7 @@ func TestGetStaffByID_EmploymentTypePart(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	s, err := repo.GetStaffByID(ctx, testutil.OwnerID, 4102)
+	s, err := repo.GetStaffByID(ctx, testutil.BusinessID, 4102)
 	if err != nil {
 		t.Fatalf("GetStaffByID(4102): %v", err)
 	}
@@ -161,7 +161,7 @@ func TestCountActiveStaff_AtLeastTwo(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	count, err := repo.CountActiveStaff(ctx, testutil.OwnerID)
+	count, err := repo.CountActiveStaff(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("CountActiveStaff: %v", err)
 	}
@@ -204,7 +204,12 @@ func TestCreateStaff_PersistsName(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.StaffInput{
+		// OwnerID is the caller's own user id; BusinessID is a distinct value
+		// (unlike the shared 30_hr.sql fixture rows, which intentionally set
+		// them equal). Using different constants here actually exercises the
+		// businessID contract instead of letting owner_id=business_id mask it.
 		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
 		FirstName:      "Carol",
 		LastName:       "Test",
 		Email:          "carol@test.local",
@@ -223,7 +228,7 @@ func TestCreateStaff_PersistsName(t *testing.T) {
 		t.Fatalf("expected positive ID, got %d", id)
 	}
 
-	s, err := repo.GetStaffByID(ctx, testutil.OwnerID, id)
+	s, err := repo.GetStaffByID(ctx, testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetStaffByID after create: %v", err)
 	}
@@ -238,7 +243,12 @@ func TestCreateStaff_RoleIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.StaffInput{
+		// OwnerID is the caller's own user id; BusinessID is a distinct value
+		// (unlike the shared 30_hr.sql fixture rows, which intentionally set
+		// them equal). Using different constants here actually exercises the
+		// businessID contract instead of letting owner_id=business_id mask it.
 		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
 		FirstName:      "Dave",
 		LastName:       "Roley",
 		Email:          "dave.roley@test.local",
@@ -253,7 +263,7 @@ func TestCreateStaff_RoleIsStored(t *testing.T) {
 		t.Fatalf("CreateStaff: %v", err)
 	}
 
-	s, err := repo.GetStaffByID(ctx, testutil.OwnerID, id)
+	s, err := repo.GetStaffByID(ctx, testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetStaffByID after create: %v", err)
 	}
@@ -268,7 +278,12 @@ func TestCreateStaff_SalaryIsStored(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.StaffInput{
+		// OwnerID is the caller's own user id; BusinessID is a distinct value
+		// (unlike the shared 30_hr.sql fixture rows, which intentionally set
+		// them equal). Using different constants here actually exercises the
+		// businessID contract instead of letting owner_id=business_id mask it.
 		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
 		FirstName:      "Eve",
 		LastName:       "Pay",
 		Email:          "eve.pay@test.local",
@@ -284,7 +299,7 @@ func TestCreateStaff_SalaryIsStored(t *testing.T) {
 		t.Fatalf("CreateStaff: %v", err)
 	}
 
-	s, err := repo.GetStaffByID(ctx, testutil.OwnerID, id)
+	s, err := repo.GetStaffByID(ctx, testutil.BusinessID, id)
 	if err != nil {
 		t.Fatalf("GetStaffByID after create: %v", err)
 	}

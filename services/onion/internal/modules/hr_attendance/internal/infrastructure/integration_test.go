@@ -345,12 +345,12 @@ func TestSetEmployeePINHash_ThenGetReturnsSameHash(t *testing.T) {
 	ctx := context.Background()
 
 	wantHash := "test-hash-value-abc123"
-	err := repo.SetEmployeePINHash(ctx, testutil.OwnerID, 4101, wantHash)
+	err := repo.SetEmployeePINHash(ctx, testutil.BusinessID, 4101, wantHash)
 	if err != nil {
 		t.Fatalf("SetEmployeePINHash: %v", err)
 	}
 
-	got, err := repo.GetEmployeePINHash(ctx, testutil.OwnerID, 4101)
+	got, err := repo.GetEmployeePINHash(ctx, testutil.BusinessID, 4101)
 	if err != nil {
 		t.Fatalf("GetEmployeePINHash: %v", err)
 	}
@@ -364,17 +364,17 @@ func TestSetEmployeePINHash_OverwritesPreviousHash(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	err := repo.SetEmployeePINHash(ctx, testutil.OwnerID, 4101, "first-hash")
+	err := repo.SetEmployeePINHash(ctx, testutil.BusinessID, 4101, "first-hash")
 	if err != nil {
 		t.Fatalf("SetEmployeePINHash first: %v", err)
 	}
 
-	err = repo.SetEmployeePINHash(ctx, testutil.OwnerID, 4101, "second-hash")
+	err = repo.SetEmployeePINHash(ctx, testutil.BusinessID, 4101, "second-hash")
 	if err != nil {
 		t.Fatalf("SetEmployeePINHash second: %v", err)
 	}
 
-	got, err := repo.GetEmployeePINHash(ctx, testutil.OwnerID, 4101)
+	got, err := repo.GetEmployeePINHash(ctx, testutil.BusinessID, 4101)
 	if err != nil {
 		t.Fatalf("GetEmployeePINHash: %v", err)
 	}

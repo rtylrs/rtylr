@@ -94,7 +94,7 @@ func TestGetEmployee_Alice_HasCorrectFields(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	emp, err := repo.GetEmployee(ctx, testutil.OwnerID, 4101)
+	emp, err := repo.GetEmployee(ctx, testutil.BusinessID, 4101)
 	if err != nil {
 		t.Fatalf("GetEmployee: %v", err)
 	}

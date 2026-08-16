@@ -384,7 +384,7 @@ func TestGetStaffPayRates_ValidStaff_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	rates, err := repo.GetStaffPayRates(ctx, testutil.OwnerID, 4101)
+	rates, err := repo.GetStaffPayRates(ctx, testutil.BusinessID, 4101)
 	if err != nil {
 		t.Fatalf("GetStaffPayRates staff_id=4101: %v", err)
 	}
@@ -398,7 +398,7 @@ func TestGetStaffPayRates_SecondStaff_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	rates, err := repo.GetStaffPayRates(ctx, testutil.OwnerID, 4102)
+	rates, err := repo.GetStaffPayRates(ctx, testutil.BusinessID, 4102)
 	if err != nil {
 		t.Fatalf("GetStaffPayRates staff_id=4102: %v", err)
 	}

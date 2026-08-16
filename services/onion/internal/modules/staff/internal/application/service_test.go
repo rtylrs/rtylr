@@ -10,17 +10,17 @@ import (
 
 // staffRepo mirrors all methods called on *infrastructure.Repository.
 type staffRepo interface {
-	ListStaff(ctx context.Context, ownerID int64, search, departmentID, status string) ([]domain.Staff, error)
+	ListStaff(ctx context.Context, businessID int64, search, departmentID, status string) ([]domain.Staff, error)
 	CreateStaff(ctx context.Context, input domain.StaffInput) (int64, error)
-	UpdateStaff(ctx context.Context, ownerID int64, input domain.StaffUpdateInput) error
-	GetStaffByID(ctx context.Context, ownerID, staffID int64) (*domain.Staff, error)
-	DeleteStaff(ctx context.Context, ownerID, staffID int64) error
-	ClockIn(ctx context.Context, ownerID, staffID int64) error
-	ClockOut(ctx context.Context, ownerID, staffID int64) error
-	CountActiveStaff(ctx context.Context, ownerID int64) (int, error)
-	CountOnShiftToday(ctx context.Context, ownerID int64) (int, error)
-	CountPendingTimeOff(ctx context.Context, ownerID int64) (int, error)
-	CountDraftPayroll(ctx context.Context, ownerID int64) (int, error)
+	UpdateStaff(ctx context.Context, businessID int64, input domain.StaffUpdateInput) error
+	GetStaffByID(ctx context.Context, businessID, staffID int64) (*domain.Staff, error)
+	DeleteStaff(ctx context.Context, businessID, staffID int64) error
+	ClockIn(ctx context.Context, businessID, staffID int64) error
+	ClockOut(ctx context.Context, businessID, staffID int64) error
+	CountActiveStaff(ctx context.Context, businessID int64) (int, error)
+	CountOnShiftToday(ctx context.Context, businessID int64) (int, error)
+	CountPendingTimeOff(ctx context.Context, businessID int64) (int, error)
+	CountDraftPayroll(ctx context.Context, businessID int64) (int, error)
 }
 
 type mockStaffRepo struct {
@@ -84,48 +84,48 @@ func (m *mockStaffRepo) CountDraftPayroll(_ context.Context, _ int64) (int, erro
 // testService is a thin wrapper that uses the interface instead of the concrete type.
 type testService struct{ repo staffRepo }
 
-func (s *testService) ListStaff(ctx context.Context, ownerID int64, search, departmentID, status string) ([]domain.Staff, error) {
-	return s.repo.ListStaff(ctx, ownerID, search, departmentID, status)
+func (s *testService) ListStaff(ctx context.Context, businessID int64, search, departmentID, status string) ([]domain.Staff, error) {
+	return s.repo.ListStaff(ctx, businessID, search, departmentID, status)
 }
 
 func (s *testService) CreateStaff(ctx context.Context, input domain.StaffInput) (int64, error) {
 	return s.repo.CreateStaff(ctx, input)
 }
 
-func (s *testService) UpdateStaff(ctx context.Context, ownerID int64, input domain.StaffUpdateInput) error {
-	return s.repo.UpdateStaff(ctx, ownerID, input)
+func (s *testService) UpdateStaff(ctx context.Context, businessID int64, input domain.StaffUpdateInput) error {
+	return s.repo.UpdateStaff(ctx, businessID, input)
 }
 
-func (s *testService) GetStaffByID(ctx context.Context, ownerID, staffID int64) (*domain.Staff, error) {
-	return s.repo.GetStaffByID(ctx, ownerID, staffID)
+func (s *testService) GetStaffByID(ctx context.Context, businessID, staffID int64) (*domain.Staff, error) {
+	return s.repo.GetStaffByID(ctx, businessID, staffID)
 }
 
-func (s *testService) DeleteStaff(ctx context.Context, ownerID, staffID int64) error {
-	return s.repo.DeleteStaff(ctx, ownerID, staffID)
+func (s *testService) DeleteStaff(ctx context.Context, businessID, staffID int64) error {
+	return s.repo.DeleteStaff(ctx, businessID, staffID)
 }
 
-func (s *testService) ClockIn(ctx context.Context, ownerID, staffID int64) error {
-	return s.repo.ClockIn(ctx, ownerID, staffID)
+func (s *testService) ClockIn(ctx context.Context, businessID, staffID int64) error {
+	return s.repo.ClockIn(ctx, businessID, staffID)
 }
 
-func (s *testService) ClockOut(ctx context.Context, ownerID, staffID int64) error {
-	return s.repo.ClockOut(ctx, ownerID, staffID)
+func (s *testService) ClockOut(ctx context.Context, businessID, staffID int64) error {
+	return s.repo.ClockOut(ctx, businessID, staffID)
 }
 
-func (s *testService) GetDashboardStats(ctx context.Context, ownerID int64) (domain.DashboardStats, error) {
-	total, err := s.repo.CountActiveStaff(ctx, ownerID)
+func (s *testService) GetDashboardStats(ctx context.Context, businessID int64) (domain.DashboardStats, error) {
+	total, err := s.repo.CountActiveStaff(ctx, businessID)
 	if err != nil {
 		return domain.DashboardStats{}, err
 	}
-	onShift, err := s.repo.CountOnShiftToday(ctx, ownerID)
+	onShift, err := s.repo.CountOnShiftToday(ctx, businessID)
 	if err != nil {
 		return domain.DashboardStats{}, err
 	}
-	pending, err := s.repo.CountPendingTimeOff(ctx, ownerID)
+	pending, err := s.repo.CountPendingTimeOff(ctx, businessID)
 	if err != nil {
 		return domain.DashboardStats{}, err
 	}
-	draft, err := s.repo.CountDraftPayroll(ctx, ownerID)
+	draft, err := s.repo.CountDraftPayroll(ctx, businessID)
 	if err != nil {
 		return domain.DashboardStats{}, err
 	}

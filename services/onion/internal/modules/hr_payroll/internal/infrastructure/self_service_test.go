@@ -15,7 +15,7 @@ func TestGetPayrollEntryForEmployee_ReturnsAlicesOwnEntry(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	entry, err := repo.GetPayrollEntryForEmployee(ctx, testutil.OwnerID, 4301, 4101)
+	entry, err := repo.GetPayrollEntryForEmployee(ctx, testutil.BusinessID, 4301, 4101)
 	if err != nil {
 		t.Fatalf("GetPayrollEntryForEmployee: %v", err)
 	}
@@ -32,7 +32,7 @@ func TestGetPayrollEntryForEmployee_DoesNotReturnAnotherEmployeesEntry(t *testin
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	entry, err := repo.GetPayrollEntryForEmployee(ctx, testutil.OwnerID, 4301, 4102)
+	entry, err := repo.GetPayrollEntryForEmployee(ctx, testutil.BusinessID, 4301, 4102)
 	if err != nil {
 		t.Fatalf("GetPayrollEntryForEmployee: %v", err)
 	}
@@ -63,7 +63,7 @@ func TestListPayrollRunsForEmployee_IncludesRunWhereEmployeeHasEntry(t *testing.
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	runs, total, err := repo.ListPayrollRunsForEmployee(ctx, testutil.OwnerID, 4101, domain.ListPayrollRunsParams{Limit: 100})
+	runs, total, err := repo.ListPayrollRunsForEmployee(ctx, testutil.BusinessID, 4101, domain.ListPayrollRunsParams{Limit: 100})
 	if err != nil {
 		t.Fatalf("ListPayrollRunsForEmployee: %v", err)
 	}

@@ -45,7 +45,7 @@ func TestListMyPayrollRunsHandler_Serve_ReturnsOnlyCallersRuns(t *testing.T) {
 	svc := application.NewService(context.Background(), db, fakeApprovalChainProvider{}, fakePermissionProvider{employeeID: 4101, allowed: false})
 	h := &ListMyPayrollRunsHandler{Service: svc}
 
-	resp, err := h.Serve(deviceContext(testutil.OwnerID), &ListMyPayrollRunsRequest{Limit: 100})
+	resp, err := h.Serve(deviceContext(testutil.BusinessID), &ListMyPayrollRunsRequest{Limit: 100})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -65,7 +65,7 @@ func TestGetMyPayrollRunHandler_Serve_ReturnsOnlyCallersOwnEntry(t *testing.T) {
 	svc := application.NewService(context.Background(), db, fakeApprovalChainProvider{}, fakePermissionProvider{employeeID: 4101, allowed: false})
 	h := &GetMyPayrollRunHandler{Service: svc}
 
-	ctx := withURLParam(deviceContext(testutil.OwnerID), "id", "4301")
+	ctx := withURLParam(deviceContext(testutil.BusinessID), "id", "4301")
 	resp, err := h.Serve(ctx, &GetMyPayrollRunRequest{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

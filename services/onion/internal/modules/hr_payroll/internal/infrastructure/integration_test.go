@@ -36,7 +36,7 @@ func TestListPayrollRuns_ReturnsMarch2026Approved(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	runs, total, err := repo.ListPayrollRuns(ctx, testutil.OwnerID, domain.ListPayrollRunsParams{
+	runs, total, err := repo.ListPayrollRuns(ctx, testutil.BusinessID, domain.ListPayrollRunsParams{
 		Limit:  100,
 		Offset: 0,
 	})
@@ -73,7 +73,7 @@ func TestListPayrollEntries_Run4301HasTwoEntries(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	entries, err := repo.ListPayrollEntries(ctx, testutil.OwnerID, 4301)
+	entries, err := repo.ListPayrollEntries(ctx, testutil.BusinessID, 4301)
 	if err != nil {
 		t.Fatalf("ListPayrollEntries: %v", err)
 	}
@@ -98,7 +98,7 @@ func TestGetPayrollConfig_MonthlyPeriod(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	cfg, err := repo.GetPayrollConfig(ctx, testutil.OwnerID)
+	cfg, err := repo.GetPayrollConfig(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetPayrollConfig: %v", err)
 	}
@@ -132,7 +132,7 @@ func TestListPayrollRuns_ContainsRun4301(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	runs, _, err := repo.ListPayrollRuns(ctx, testutil.OwnerID, domain.ListPayrollRunsParams{
+	runs, _, err := repo.ListPayrollRuns(ctx, testutil.BusinessID, domain.ListPayrollRunsParams{
 		Limit:  100,
 		Offset: 0,
 	})
@@ -152,7 +152,7 @@ func TestListPayrollRuns_Run4301IsApproved(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	runs, _, err := repo.ListPayrollRuns(ctx, testutil.OwnerID, domain.ListPayrollRunsParams{
+	runs, _, err := repo.ListPayrollRuns(ctx, testutil.BusinessID, domain.ListPayrollRunsParams{
 		Limit:  100,
 		Offset: 0,
 	})
@@ -175,7 +175,7 @@ func TestGetPayrollRunByID_4301(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	run, err := repo.GetPayrollRun(ctx, testutil.OwnerID, 4301)
+	run, err := repo.GetPayrollRun(ctx, testutil.BusinessID, 4301)
 	if err != nil {
 		t.Fatalf("GetPayrollRun: %v", err)
 	}
@@ -203,7 +203,7 @@ func TestGetPayrollEntries_ForRun4301_Returns2Entries(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	entries, err := repo.ListPayrollEntries(ctx, testutil.OwnerID, 4301)
+	entries, err := repo.ListPayrollEntries(ctx, testutil.BusinessID, 4301)
 	if err != nil {
 		t.Fatalf("ListPayrollEntries: %v", err)
 	}
@@ -217,7 +217,7 @@ func TestGetPayrollEntries_AliceNetPay1100(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	entries, err := repo.ListPayrollEntries(ctx, testutil.OwnerID, 4301)
+	entries, err := repo.ListPayrollEntries(ctx, testutil.BusinessID, 4301)
 	if err != nil {
 		t.Fatalf("ListPayrollEntries: %v", err)
 	}
@@ -237,7 +237,7 @@ func TestGetPayrollEntries_BobNetPay600(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	entries, err := repo.ListPayrollEntries(ctx, testutil.OwnerID, 4301)
+	entries, err := repo.ListPayrollEntries(ctx, testutil.BusinessID, 4301)
 	if err != nil {
 		t.Fatalf("ListPayrollEntries: %v", err)
 	}
@@ -301,7 +301,12 @@ func TestUpsertPayrollConfig_Persists(t *testing.T) {
 		t.Fatalf("UpsertPayrollConfig: %v", err)
 	}
 
-	cfg, err := repo.GetPayrollConfig(ctx, testutil.OwnerID)
+	// hr_payroll_config has a UNIQUE KEY on owner_id, so this upsert matches the
+	// shared 30_hr.sql fixture row (owner_id=testutil.OwnerID) and updates its
+	// period fields in place — but ON DUPLICATE KEY UPDATE never touches
+	// business_id, so the row's business_id stays testutil.BusinessID (the
+	// fixture's original value) and the read-back must filter on that.
+	cfg, err := repo.GetPayrollConfig(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetPayrollConfig after upsert: %v", err)
 	}

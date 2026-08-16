@@ -15,7 +15,7 @@ func TestListEmployees_ReturnsAliceAndBob(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	employees, total, err := repo.ListEmployees(ctx, testutil.OwnerID, domain.ListEmployeesParams{
+	employees, total, err := repo.ListEmployees(ctx, testutil.BusinessID, domain.ListEmployeesParams{
 		Limit:  100,
 		Offset: 0,
 	})
@@ -43,7 +43,7 @@ func TestGetEmployee_AliceHasSalary1200(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	emp, err := repo.GetEmployee(ctx, testutil.OwnerID, 4101)
+	emp, err := repo.GetEmployee(ctx, testutil.BusinessID, 4101)
 	if err != nil {
 		t.Fatalf("GetEmployee: %v", err)
 	}
@@ -60,7 +60,7 @@ func TestListDepartments_ReturnsOperations(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	departments, err := repo.ListDepartments(ctx, testutil.OwnerID, 0)
+	departments, err := repo.ListDepartments(ctx, testutil.BusinessID, 0)
 	if err != nil {
 		t.Fatalf("ListDepartments: %v", err)
 	}
@@ -96,7 +96,7 @@ func TestListDepartments_ContainsOperations(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	depts, err := repo.ListDepartments(ctx, testutil.OwnerID, 0)
+	depts, err := repo.ListDepartments(ctx, testutil.BusinessID, 0)
 	if err != nil {
 		t.Fatalf("ListDepartments: %v", err)
 	}
@@ -114,7 +114,7 @@ func TestGetDepartmentByID_4001_IsOperations(t *testing.T) {
 	ctx := context.Background()
 
 	// Verify department 4001 appears in the list with name Operations.
-	depts, err := repo.ListDepartments(ctx, testutil.OwnerID, 0)
+	depts, err := repo.ListDepartments(ctx, testutil.BusinessID, 0)
 	if err != nil {
 		t.Fatalf("ListDepartments: %v", err)
 	}
