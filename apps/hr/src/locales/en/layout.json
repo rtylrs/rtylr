@@ -25,6 +25,7 @@
     "payrollConfig": "Payroll Configuration",
     "payrollRunDetail": "Payroll Run",
     "checklistTemplates": "Checklist Templates",
-    "reviewCycleDetail": "Review Cycle"
+    "reviewCycleDetail": "Review Cycle",
+    "rolesPermissions": "Roles & Permissions"
   }
 }
