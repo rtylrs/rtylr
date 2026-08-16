@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Avatar } from '@voxire/ui';
 import { useLocation, useRouterState, Link, Outlet } from '@tanstack/react-router';
 import { useForesightLinks } from '@voxire/utils';
@@ -75,6 +75,18 @@ const DefaultLayout: React.FC = () => {
   const userId = Number(insightsUser?.id) || 0;
   const toggleCaret = useCaretStore((s) => s.toggle);
 
+  const pageItems = useMemo<PageItem[]>(
+    () => [
+      { label: t('nav.revenue', 'Revenue'), path: '/revenue', icon: TrendingUp },
+      { label: t('nav.customers', 'Customers'), path: '/customers', icon: Users },
+      { label: t('nav.products', 'Products'), path: '/products', icon: Package },
+      { label: t('nav.operations', 'Operations'), path: '/operations', icon: Briefcase },
+      { label: t('nav.financial', 'Financial'), path: '/financial', icon: DollarSign },
+      { label: t('nav.reports', 'Reports'), path: '/reports', icon: FileText },
+    ],
+    [t]
+  );
+
   useEffect(() => {
     if (insightsUser?.name || insightsUser?.email) return;
     unwrap(safe.get<{ user: { id: number; name: string; email: string } | null }>('/account'))
@@ -117,6 +129,12 @@ const DefaultLayout: React.FC = () => {
 
   useEffect(() => {
     applyTheme(theme);
+    if (theme === 'system') {
+      const media = window.matchMedia('(prefers-color-scheme: dark)');
+      const listener = () => applyTheme('system');
+      media.addEventListener('change', listener);
+      return () => media.removeEventListener('change', listener);
+    }
   }, [theme]);
 
   useEffect(() => {
@@ -193,8 +211,8 @@ const DefaultLayout: React.FC = () => {
               onClick={() => setShowPagesMenu((v) => !v)}
               aria-haspopup="menu"
               aria-expanded={showPagesMenu}
-              aria-label="Pages"
-              className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-medium transition-colors duration-150"
+              aria-label={t('nav.pages', 'Pages')}
+              className="flex items-center gap-1.5 min-h-[44px] px-3 rounded-lg text-xs font-medium transition-colors duration-150"
               style={{
                 color: 'var(--hub-text-muted)',
                 background: showPagesMenu ? 'var(--hub-hover)' : 'transparent',
@@ -208,7 +226,7 @@ const DefaultLayout: React.FC = () => {
               }}
             >
               <LayoutGrid size={14} />
-              <span className="hidden sm:inline">Pages</span>
+              <span className="hidden sm:inline">{t('nav.pages', 'Pages')}</span>
               <ChevronDown size={12} />
             </button>
 
@@ -220,7 +238,7 @@ const DefaultLayout: React.FC = () => {
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.12 }}
                   role="menu"
-                  className="absolute top-full left-0 mt-1 w-48 rounded-xl p-1.5 z-50"
+                  className="absolute top-full start-0 mt-1 w-48 rounded-xl p-1.5 z-50"
                   style={{
                     background: 'var(--hub-card)',
                     border: '1px solid var(--hub-border)',
@@ -235,7 +253,7 @@ const DefaultLayout: React.FC = () => {
                         key={item.path}
                         to={item.path}
                         role="menuitem"
-                        className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors duration-150"
+                        className="flex items-center gap-2.5 px-2.5 py-2.5 min-h-[44px] rounded-lg text-sm font-medium transition-colors duration-150"
                         style={{
                           color: isActive ? 'var(--hub-text)' : 'var(--hub-text-muted)',
                           background: isActive ? 'var(--hub-active)' : 'transparent',
@@ -264,8 +282,8 @@ const DefaultLayout: React.FC = () => {
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
-            aria-label="Toggle theme"
-            className="h-9 w-9 rounded-lg flex items-center justify-center"
+            aria-label={t('nav.toggleTheme', 'Toggle theme')}
+            className="min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center"
             style={{ color: 'var(--hub-text-muted)' }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';

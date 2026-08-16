@@ -1,6 +1,6 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { motion } from 'motion/react';
+import { motion, type Variants } from 'motion/react';
 import {
   DollarSign,
   ShoppingCart,
@@ -14,19 +14,20 @@ import { Bar } from 'react-chartjs-2';
 import type { ChartOptions } from 'chart.js';
 import { useInsightsDashboard } from '../../shared/hooks/queries/useInsightsDashboard';
 import { useRevenueSeries } from '../../shared/hooks/queries/useRevenue';
-import { formatMoney } from '../../shared/utils/money';
+import { useInsightsSettings } from '../../shared/hooks/queries/useInsightsSettings';
+import { formatMoney, type Currency } from '../../shared/utils/money';
 import { formatNumber, formatPercent } from '../../shared/lib/format';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
 import CaretAskBar from '../../shared/components/CaretAskBar';
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.05 } },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
@@ -54,7 +55,17 @@ interface DeltaBadgeProps {
 }
 
 const DeltaBadge = ({ deltaPct }: DeltaBadgeProps): React.JSX.Element => {
-  const up = deltaPct >= 0;
+  const { t } = useTranslation();
+  if (deltaPct === 0) {
+    return (
+      <div className="flex items-center gap-1 mt-1">
+        <span className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+          {formatPercent(0)} {t('insights.dashboard.vsPrior', 'vs prior')}
+        </span>
+      </div>
+    );
+  }
+  const up = deltaPct > 0;
   return (
     <div className="flex items-center gap-1 mt-1">
       {up ? (
@@ -63,7 +74,7 @@ const DeltaBadge = ({ deltaPct }: DeltaBadgeProps): React.JSX.Element => {
         <ArrowDownRight size={12} style={{ color: 'var(--delta-down)' }} />
       )}
       <span className="text-xs" style={{ color: up ? 'var(--delta-up)' : 'var(--delta-down)' }}>
-        {formatPercent(deltaPct)} vs prior
+        {formatPercent(deltaPct)} {t('insights.dashboard.vsPrior', 'vs prior')}
       </span>
     </div>
   );
@@ -73,6 +84,8 @@ const Dashboard: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data, isLoading, isError, refetch } = useInsightsDashboard();
   const { data: seriesData } = useRevenueSeries();
+  const { data: settings } = useInsightsSettings();
+  const currency = (settings?.defaultCurrency as Currency) || 'USD';
 
   if (isError) {
     return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
@@ -96,7 +109,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
   const stats = [
     {
       label: t('insights.dashboard.cards.revenue'),
-      value: data ? formatMoney(data.revenue.value) : '-',
+      value: data ? formatMoney(data.revenue.value, currency) : '-',
       deltaPct: data?.revenue.deltaPct ?? 0,
       icon: DollarSign,
       sparkline: true,
@@ -129,20 +142,20 @@ const Dashboard: React.FC = (): React.JSX.Element => {
 
   return (
     <motion.div
-      variants={containerVariants as any}
+      variants={containerVariants}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-7xl mx-auto"
     >
       <HelmetContainer title="Dashboard · rtylr" />
-      <motion.div variants={itemVariants as any}>
+      <motion.div variants={itemVariants}>
         <CaretAskBar />
       </motion.div>
 
-      <motion.div variants={itemVariants as any}>
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
+      <motion.div variants={itemVariants}>
+        <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.dashboard.title')}
-        </h2>
+        </h1>
         <p className="text-sm mt-0.5" style={{ color: 'var(--hub-text-muted)' }}>
           {today}
         </p>
@@ -155,16 +168,13 @@ const Dashboard: React.FC = (): React.JSX.Element => {
           ))}
         </div>
       ) : (
-        <motion.div
-          variants={containerVariants as any}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-        >
+        <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
               <motion.div
                 key={stat.label}
-                variants={itemVariants as any}
+                variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{
                   background: 'var(--hub-card)',
@@ -187,7 +197,7 @@ const Dashboard: React.FC = (): React.JSX.Element => {
                 </p>
                 <DeltaBadge deltaPct={stat.deltaPct} />
                 {stat.sparkline && revenueSparkPoints.length > 1 && (
-                  <div style={{ height: 44, marginTop: 12 }}>
+                  <div style={{ height: 44, marginTop: 12 }} aria-label="Revenue sparkline">
                     <Bar data={sparklineData} options={sparklineOptions} />
                   </div>
                 )}

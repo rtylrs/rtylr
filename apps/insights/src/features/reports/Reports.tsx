@@ -1,7 +1,6 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { motion } from 'motion/react';
-import { toast } from 'sonner';
+import { motion, type Variants } from 'motion/react';
 import { FileText, Download, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,12 +12,12 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.05 } },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
@@ -37,52 +36,44 @@ const Reports: React.FC = (): React.JSX.Element => {
 
   return (
     <motion.div
-      variants={containerVariants as any}
+      variants={containerVariants}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-7xl"
     >
       <HelmetContainer title="Reports · rtylr" />
-      <motion.div variants={itemVariants as any} className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
+      <motion.div variants={itemVariants} className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.reports.title')}
-        </h2>
+        </h1>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => exportRevenue.mutate({})}
             disabled={exportRevenue.isPending}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium min-h-[44px]"
             style={{ background: 'var(--hub-active)', color: 'var(--hub-text)' }}
             aria-label={t('insights.reports.exportRevenue')}
           >
             {exportRevenue.isPending ? (
-              <Loader2 size={12} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin" />
             ) : (
-              <Download size={12} />
+              <Download size={14} />
             )}
             {t('insights.reports.exportRevenue')}
           </button>
           <button
             type="button"
-            onClick={() =>
-              generateRevenue.mutate(
-                {},
-                {
-                  onSuccess: () => toast.success('Report generated'),
-                  onError: () => toast.error('Failed to generate report'),
-                }
-              )
-            }
+            onClick={() => generateRevenue.mutate({})}
             disabled={generateRevenue.isPending}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-medium"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium min-h-[44px]"
             style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
             aria-label={t('insights.reports.generateRevenue')}
           >
             {generateRevenue.isPending ? (
-              <Loader2 size={12} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin" />
             ) : (
-              <FileText size={12} />
+              <FileText size={14} />
             )}
             {t('insights.reports.generateRevenue')}
           </button>
@@ -90,15 +81,15 @@ const Reports: React.FC = (): React.JSX.Element => {
       </motion.div>
 
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <div className="flex items-center gap-2 mb-4">
           <FileText size={14} style={{ color: 'var(--accent)' }} />
-          <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+          <h2 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
             {t('insights.reports.templates')}
-          </h3>
+          </h2>
         </div>
 
         {isLoading ? (
