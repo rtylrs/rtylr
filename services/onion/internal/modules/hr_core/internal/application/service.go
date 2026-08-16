@@ -298,35 +298,41 @@ func (s *Service) HasRole(ctx context.Context, ownerID, employeeID, roleID int64
 func (s *Service) SeedDefaultRoles(ctx context.Context, ownerID int64) error {
 	defaultRoles := []domain.RoleRecord{
 		{Name: "Employee", Description: "Standard employee with basic access", IsSystem: true, Permissions: mustJSON(map[string]bool{
-			"view_own_profile": true, "view_own_schedule": true, "request_time_off": true,
-			"view_directory": true,
+			domain.PermissionViewOwnProfile: true, domain.PermissionViewOwnSchedule: true, domain.PermissionRequestTimeOff: true,
+			domain.PermissionViewDirectory: true,
 		})},
 		{Name: "Manager", Description: "Team manager with approval rights", IsSystem: true, Permissions: mustJSON(map[string]bool{
-			"view_own_profile": true, "view_own_schedule": true, "request_time_off": true,
-			"view_team": true, "approve_time_off": true, "manage_schedules": true,
-			"view_directory": true,
+			domain.PermissionViewOwnProfile: true, domain.PermissionViewOwnSchedule: true, domain.PermissionRequestTimeOff: true,
+			domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionManageSchedules: true,
+			domain.PermissionViewDirectory: true,
 		})},
 		{Name: "HR Admin", Description: "Full HR administration access", IsSystem: true, Permissions: mustJSON(map[string]bool{
-			"view_own_profile": true, "view_own_schedule": true, "request_time_off": true,
-			"view_team": true, "approve_time_off": true, "manage_schedules": true,
-			"manage_employees": true, "manage_roles": true, "manage_departments": true,
-			"manage_locations": true, "manage_hr_config": true, "view_reports": true,
-			"view_directory": true,
+			domain.PermissionViewOwnProfile: true, domain.PermissionViewOwnSchedule: true, domain.PermissionRequestTimeOff: true,
+			domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionManageSchedules: true,
+			domain.PermissionManageEmployees: true, domain.PermissionManageRoles: true, domain.PermissionManageDepartments: true,
+			domain.PermissionManageLocations: true, domain.PermissionManageHRConfig: true, domain.PermissionViewReports: true,
+			domain.PermissionViewDirectory: true,
 		})},
 		{Name: "Finance/Payroll Manager", Description: "Payroll and finance operations", IsSystem: true, Permissions: mustJSON(map[string]bool{
-			"view_own_profile": true, "view_team": true, "manage_payroll": true,
-			"view_reports": true, "manage_benefits": true,
-			"view_directory": true,
+			domain.PermissionViewOwnProfile: true, domain.PermissionViewTeam: true, domain.PermissionManagePayroll: true,
+			domain.PermissionViewReports: true, domain.PermissionManageBenefits: true,
+			domain.PermissionViewDirectory: true,
 		})},
 		{Name: "Executive", Description: "Executive-level oversight", IsSystem: true, Permissions: mustJSON(map[string]bool{
-			"view_own_profile": true, "view_team": true, "approve_time_off": true,
-			"manage_employees": true, "manage_roles": true, "manage_departments": true,
-			"manage_locations": true, "manage_hr_config": true, "manage_payroll": true,
-			"view_reports": true, "manage_benefits": true, "manage_approval_chains": true,
-			"view_directory": true,
+			domain.PermissionViewOwnProfile: true, domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true,
+			domain.PermissionManageEmployees: true, domain.PermissionManageRoles: true, domain.PermissionManageDepartments: true,
+			domain.PermissionManageLocations: true, domain.PermissionManageHRConfig: true, domain.PermissionManagePayroll: true,
+			domain.PermissionViewReports: true, domain.PermissionManageBenefits: true, domain.PermissionManageApprovalChains: true,
+			domain.PermissionViewDirectory: true,
 		})},
 	}
 	return s.repo.SeedDefaultRoles(ctx, ownerID, defaultRoles)
+}
+
+// ListPermissionCatalog returns the full set of fine-grained HR permission
+// keys a role can be granted. It is a fixed, in-memory catalog — no DB call.
+func (s *Service) ListPermissionCatalog() []domain.PermissionRecord {
+	return domain.AllPermissions()
 }
 
 // --- Setup Wizard ---

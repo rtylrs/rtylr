@@ -594,9 +594,13 @@ func (r *Repository) UpsertHRConfig(ctx context.Context, businessID int64, cfg d
 	return r.GetHRConfig(ctx, businessID)
 }
 
+// SeedDefaultRoles inserts any of the given roles that don't already exist for
+// this business (matched by name). It never touches a role that already
+// exists. A business's customization via UpdateRole must survive every
+// subsequent hire, not just the first one.
 func (r *Repository) SeedDefaultRoles(ctx context.Context, businessID int64, roles []domain.RoleRecord) error {
 	for _, role := range roles {
-		_, err := r.queries.UpsertRole(ctx, sqlc.UpsertRoleParams{
+		_, err := r.queries.InsertRoleIfMissing(ctx, sqlc.InsertRoleIfMissingParams{
 			OwnerID:     businessID,
 			BusinessID:  businessID,
 			Name:        role.Name,

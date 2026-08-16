@@ -82,7 +82,9 @@ type RoleRecord struct {
 
 type PermissionRecord struct {
 	Key         string `json:"key"`
+	Label       string `json:"label"`
 	Description string `json:"description"`
+	Category    string `json:"category"`
 }
 
 type EmployeeRoleRecord struct {

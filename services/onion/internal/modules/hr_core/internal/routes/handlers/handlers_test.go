@@ -293,3 +293,13 @@ func TestAssignRoleHandler_Validate_ValidRoleID(t *testing.T) {
 		t.Errorf("expected nil for valid role_id, got %v", se)
 	}
 }
+
+// --- ListPermissionCatalogHandler ---
+
+func TestListPermissionCatalogHandler_Serve_AnonymousDenied(t *testing.T) {
+	h := &ListPermissionCatalogHandler{}
+	_, err := h.Serve(context.Background(), &ListPermissionCatalogRequest{})
+	if oneKitStatus(err) != http.StatusForbidden && oneKitStatus(err) != http.StatusUnauthorized {
+		t.Errorf("expected a permission-denied status for anonymous device, got %d", oneKitStatus(err))
+	}
+}

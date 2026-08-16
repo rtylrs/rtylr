@@ -13,10 +13,9 @@ WHERE business_id = ? AND id = ?;
 INSERT INTO hr_roles (owner_id, business_id, name, description, permissions, is_system)
 VALUES (?, ?, ?, ?, ?, ?);
 
--- name: UpsertRole :execresult
-INSERT INTO hr_roles (owner_id, business_id, name, description, permissions, is_system)
-VALUES (?, ?, ?, ?, ?, ?)
-ON DUPLICATE KEY UPDATE description = VALUES(description), permissions = VALUES(permissions), updated_at = NOW();
+-- name: InsertRoleIfMissing :execresult
+INSERT IGNORE INTO hr_roles (owner_id, business_id, name, description, permissions, is_system)
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: UpdateRole :exec
 UPDATE hr_roles

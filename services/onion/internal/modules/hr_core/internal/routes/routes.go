@@ -106,4 +106,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPOSTWithValidation[handlers.AssignRoleRequest, handlers.AssignRoleResponse](
 		ctx, router, handlers.AssignRoleRoutes(), &handlers.AssignRoleHandler{Service: service},
 	)
+	serverHttp.RegisterGET[handlers.ListPermissionCatalogRequest, handlers.ListPermissionCatalogResponse](
+		ctx, router, handlers.ListPermissionCatalogRoutes(), &handlers.ListPermissionCatalogHandler{Service: service},
+	)
 }

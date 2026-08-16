@@ -2,7 +2,11 @@ package infrastructure_test
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/infrastructure"
@@ -142,5 +146,90 @@ func TestAssignRole_NoError(t *testing.T) {
 	err = repo.AssignRole(ctx, testutil.OwnerID, 4101, role.ID)
 	if err != nil {
 		t.Fatalf("AssignRole: %v", err)
+	}
+}
+
+func TestSeedDefaultRoles_DoesNotOverwriteCustomizedPermissions(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	seeded := []domain.RoleRecord{
+		{Name: "Clobber Test Manager", Description: "Team manager with approval rights", IsSystem: true, Permissions: `{"approve_time_off":true}`},
+	}
+	if err := repo.SeedDefaultRoles(ctx, testutil.OwnerID, seeded); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+
+	roles, err := repo.ListRoles(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListRoles: %v", err)
+	}
+	var role *domain.RoleRecord
+	for i := range roles {
+		if roles[i].Name == "Clobber Test Manager" {
+			role = &roles[i]
+		}
+	}
+	if role == nil {
+		t.Fatal("expected seeded role to exist")
+	}
+
+	// Business customizes the role via the already-working PUT /hr/roles/{id} path.
+	role.Permissions = `{"approve_time_off":true,"manage_payroll":true}`
+	if _, err := repo.UpdateRole(ctx, testutil.OwnerID, *role); err != nil {
+		t.Fatalf("UpdateRole: %v", err)
+	}
+
+	// A later hire re-runs SeedDefaultRoles with the same hardcoded default set.
+	if err := repo.SeedDefaultRoles(ctx, testutil.OwnerID, seeded); err != nil {
+		t.Fatalf("re-seed: %v", err)
+	}
+
+	after, err := repo.ListRoles(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListRoles after reseed: %v", err)
+	}
+	for _, r := range after {
+		if r.Name == "Clobber Test Manager" {
+			var got map[string]bool
+			if err := json.Unmarshal([]byte(r.Permissions), &got); err != nil {
+				t.Fatalf("failed to parse permissions JSON: %v", err)
+			}
+			want := map[string]bool{"approve_time_off": true, "manage_payroll": true}
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("customized permissions were clobbered: got %v, want %v", got, want)
+			}
+			return
+		}
+	}
+	t.Fatal("seeded role disappeared after re-seed")
+}
+
+func TestSeedDefaultRoles_StillInsertsMissingDefaultRole(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	before, err := repo.ListRoles(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListRoles before: %v", err)
+	}
+	beforeCount := len(before)
+
+	roleName := fmt.Sprintf("Brand New Default Role %d", time.Now().UnixNano())
+	newDefault := []domain.RoleRecord{
+		{Name: roleName, Description: "A role introduced in a later release", IsSystem: true, Permissions: `{"view_reports":true}`},
+	}
+	if err := repo.SeedDefaultRoles(ctx, testutil.OwnerID, newDefault); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+
+	after, err := repo.ListRoles(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("ListRoles after: %v", err)
+	}
+	if len(after) != beforeCount+1 {
+		t.Errorf("expected role count to increase by 1, before=%d after=%d", beforeCount, len(after))
 	}
 }

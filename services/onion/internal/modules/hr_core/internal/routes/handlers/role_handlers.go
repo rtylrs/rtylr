@@ -204,3 +204,38 @@ func (h *AssignRoleHandler) Serve(ctx context.Context, req *AssignRoleRequest) (
 
 	return AssignRoleResponse{Success: true}, nil
 }
+
+// --- List Permission Catalog ---
+
+func ListPermissionCatalogRoutes() []string { return []string{"/hr/permissions"} }
+
+type (
+	ListPermissionCatalogHandler  struct{ Service *application.Service }
+	ListPermissionCatalogRequest  struct{}
+	ListPermissionCatalogResponse struct {
+		Permissions []*PermissionCatalogPayload `json:"permissions"`
+	}
+)
+
+type PermissionCatalogPayload struct {
+	Key         string `json:"key"`
+	Label       string `json:"label"`
+	Description string `json:"description"`
+	Category    string `json:"category"`
+}
+
+func (h *ListPermissionCatalogHandler) Serve(ctx context.Context, _ *ListPermissionCatalogRequest) (ListPermissionCatalogResponse, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return ListPermissionCatalogResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	catalog := h.Service.ListPermissionCatalog()
+	payloads := make([]*PermissionCatalogPayload, 0, len(catalog))
+	for _, p := range catalog {
+		payloads = append(payloads, &PermissionCatalogPayload{
+			Key: p.Key, Label: p.Label, Description: p.Description, Category: p.Category,
+		})
+	}
+	return ListPermissionCatalogResponse{Permissions: payloads}, nil
+}
