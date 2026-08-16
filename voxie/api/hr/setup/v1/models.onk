@@ -43,6 +43,11 @@ message HRCompanyConfigPayload {
   /// "erp", "crm", "pos", "hr"). Drives cross-app UI affordances such as
   /// the "Import from Flow" button on HR timesheets.
   subscribed_apps: string[]
+  /// Whether the company-wide staff directory is visible to employees
+  /// outside HR (e.g. Flow's Directory screen). Defaults to false: the
+  /// business owner must opt in before any employee's role/department/
+  /// contact info is exposed beyond HR's own admin screens.
+  directory_enabled: bool
 }
 
 /// GetSetupStatusResponse summarises setup wizard progress and current HR configuration.

@@ -129,3 +129,33 @@ message ClockOutRequest {
 message ClockOutResponse {
   success: bool
 }
+
+/// DirectoryStaffEntry is the deliberately minimal projection of Staff shown
+/// in the company-wide directory. It never carries salary, hourly_rate,
+/// overtime_rate, address, or emergency_contact_* - those stay HR-admin-only
+/// regardless of caller, enforced here at the contract level rather than
+/// relying solely on runtime field-zeroing.
+message DirectoryStaffEntry {
+  id: int64
+  first_name: string
+  last_name: string
+  department_id: int64
+  role: string
+  employment_type: string
+  /// The current lifecycle state.
+  status: string
+  email: string
+  phone: string
+}
+
+message ListStaffDirectoryRequest {
+  page: int64 @required @gt(0) @query("page")
+  page_size: int64 @required @gt(0) @query("page_size")
+}
+
+message ListStaffDirectoryResponse {
+  staff: DirectoryStaffEntry[]
+  total: int64
+  page: int64
+  page_size: int64
+}

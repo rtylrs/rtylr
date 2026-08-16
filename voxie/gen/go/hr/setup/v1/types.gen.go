@@ -138,6 +138,7 @@ type HRCompanyConfigPayload struct {
 	UpdatedAt         int64    `json:"updated_at,omitempty"`
 	ClockInMethods    []string `json:"clock_in_methods,omitempty"`
 	SubscribedApps    []string `json:"subscribed_apps,omitempty"`
+	DirectoryEnabled  bool     `json:"directory_enabled,omitempty"`
 }
 
 func (m *HRCompanyConfigPayload) MarshalJSON() ([]byte, error) {
@@ -289,6 +290,14 @@ func (x *HRCompanyConfigPayload) GetSubscribedApps() []string {
 		return zero
 	}
 	return x.SubscribedApps
+}
+
+func (x *HRCompanyConfigPayload) GetDirectoryEnabled() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.DirectoryEnabled
 }
 
 type GetSetupStatusResponse struct {

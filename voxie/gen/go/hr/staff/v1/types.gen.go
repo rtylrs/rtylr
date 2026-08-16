@@ -1029,3 +1029,274 @@ func (x *ClockOutResponse) GetSuccess() bool {
 	}
 	return x.Success
 }
+
+type DirectoryStaffEntry struct {
+	Id             int64  `json:"id,omitempty"`
+	FirstName      string `json:"first_name,omitempty"`
+	LastName       string `json:"last_name,omitempty"`
+	DepartmentId   int64  `json:"department_id,omitempty"`
+	Role           string `json:"role,omitempty"`
+	EmploymentType string `json:"employment_type,omitempty"`
+	Status         string `json:"status,omitempty"`
+	Email          string `json:"email,omitempty"`
+	Phone          string `json:"phone,omitempty"`
+}
+
+func (m *DirectoryStaffEntry) MarshalJSON() ([]byte, error) {
+	type alias DirectoryStaffEntry
+	aux := struct {
+		*alias
+		Id           string `json:"id,omitempty"`
+		DepartmentId string `json:"department_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	aux.DepartmentId = strconv.FormatInt(m.DepartmentId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *DirectoryStaffEntry) UnmarshalJSON(data []byte) error {
+	type alias DirectoryStaffEntry
+	aux := struct {
+		*alias
+		Id           string `json:"id,omitempty"`
+		DepartmentId string `json:"department_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	if aux.DepartmentId != "" {
+		v, err := strconv.ParseInt(aux.DepartmentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DepartmentId = v
+	}
+	return nil
+}
+
+func (x *DirectoryStaffEntry) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *DirectoryStaffEntry) GetFirstName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.FirstName
+}
+
+func (x *DirectoryStaffEntry) GetLastName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LastName
+}
+
+func (x *DirectoryStaffEntry) GetDepartmentId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.DepartmentId
+}
+
+func (x *DirectoryStaffEntry) GetRole() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Role
+}
+
+func (x *DirectoryStaffEntry) GetEmploymentType() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.EmploymentType
+}
+
+func (x *DirectoryStaffEntry) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Status
+}
+
+func (x *DirectoryStaffEntry) GetEmail() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Email
+}
+
+func (x *DirectoryStaffEntry) GetPhone() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Phone
+}
+
+type ListStaffDirectoryRequest struct {
+	Page     int64 `json:"page,omitempty"`
+	PageSize int64 `json:"page_size,omitempty"`
+}
+
+func (m *ListStaffDirectoryRequest) MarshalJSON() ([]byte, error) {
+	type alias ListStaffDirectoryRequest
+	aux := struct {
+		*alias
+		Page     string `json:"page,omitempty"`
+		PageSize string `json:"page_size,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Page = strconv.FormatInt(m.Page, 10)
+	aux.PageSize = strconv.FormatInt(m.PageSize, 10)
+	return json.Marshal(aux)
+}
+
+func (m *ListStaffDirectoryRequest) UnmarshalJSON(data []byte) error {
+	type alias ListStaffDirectoryRequest
+	aux := struct {
+		*alias
+		Page     string `json:"page,omitempty"`
+		PageSize string `json:"page_size,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Page != "" {
+		v, err := strconv.ParseInt(aux.Page, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Page = v
+	}
+	if aux.PageSize != "" {
+		v, err := strconv.ParseInt(aux.PageSize, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.PageSize = v
+	}
+	return nil
+}
+
+func (x *ListStaffDirectoryRequest) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListStaffDirectoryRequest) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}
+
+type ListStaffDirectoryResponse struct {
+	Staff    []*DirectoryStaffEntry `json:"staff,omitempty"`
+	Total    int64                  `json:"total,omitempty"`
+	Page     int64                  `json:"page,omitempty"`
+	PageSize int64                  `json:"page_size,omitempty"`
+}
+
+func (m *ListStaffDirectoryResponse) MarshalJSON() ([]byte, error) {
+	type alias ListStaffDirectoryResponse
+	aux := struct {
+		*alias
+		Total    string `json:"total,omitempty"`
+		Page     string `json:"page,omitempty"`
+		PageSize string `json:"page_size,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Total = strconv.FormatInt(m.Total, 10)
+	aux.Page = strconv.FormatInt(m.Page, 10)
+	aux.PageSize = strconv.FormatInt(m.PageSize, 10)
+	return json.Marshal(aux)
+}
+
+func (m *ListStaffDirectoryResponse) UnmarshalJSON(data []byte) error {
+	type alias ListStaffDirectoryResponse
+	aux := struct {
+		*alias
+		Total    string `json:"total,omitempty"`
+		Page     string `json:"page,omitempty"`
+		PageSize string `json:"page_size,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Total != "" {
+		v, err := strconv.ParseInt(aux.Total, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Total = v
+	}
+	if aux.Page != "" {
+		v, err := strconv.ParseInt(aux.Page, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Page = v
+	}
+	if aux.PageSize != "" {
+		v, err := strconv.ParseInt(aux.PageSize, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.PageSize = v
+	}
+	return nil
+}
+
+func (x *ListStaffDirectoryResponse) GetStaff() []*DirectoryStaffEntry {
+	if x == nil {
+		var zero []*DirectoryStaffEntry
+		return zero
+	}
+	return x.Staff
+}
+
+func (x *ListStaffDirectoryResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListStaffDirectoryResponse) GetPage() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListStaffDirectoryResponse) GetPageSize() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PageSize
+}

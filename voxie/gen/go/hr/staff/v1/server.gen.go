@@ -206,6 +206,7 @@ type StaffServiceServer interface {
 	DeleteStaff(ctx context.Context, req *DeleteStaffRequest) (*DeleteStaffResponse, error)
 	ClockIn(ctx context.Context, req *ClockInRequest) (*ClockInResponse, error)
 	ClockOut(ctx context.Context, req *ClockOutRequest) (*ClockOutResponse, error)
+	ListStaffDirectory(ctx context.Context, req *ListStaffDirectoryRequest) (*ListStaffDirectoryResponse, error)
 }
 
 func RegisterStaffServiceServer(first any, rest ...any) error {
@@ -403,5 +404,37 @@ func RegisterStaffServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "StaffService", Method: "clockOut", HTTPMethod: "POST", Route: "/hr/staff/v1/staff/clock-out", AuthSchemes: nil}))
+	mux.Handle("GET /hr/staff/v1/staff/directory", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(ListStaffDirectoryRequest)
+		if r.URL.Query().Get("page") != "" {
+			parsedPage, err := parseInt64(r.URL.Query().Get("page"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
+		}
+		if r.URL.Query().Get("page_size") != "" {
+			parsedPageSize, err := parseInt64(r.URL.Query().Get("page_size"))
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page_size: "+err.Error())
+				return
+			}
+			req.PageSize = parsedPageSize
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.ListStaffDirectory(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "StaffService", Method: "listStaffDirectory", HTTPMethod: "GET", Route: "/hr/staff/v1/staff/directory", AuthSchemes: nil}))
 	return nil
 }

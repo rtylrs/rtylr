@@ -49,6 +49,7 @@ createdAt?: string;
 updatedAt?: string;
 clockInMethods?: (string)[];
 subscribedApps?: (string)[];
+directoryEnabled?: boolean;
 }
 
 export function decodeHRCompanyConfigPayload(v: any): HRCompanyConfigPayload {
@@ -65,6 +66,7 @@ createdAt: v.created_at,
 updatedAt: v.updated_at,
 clockInMethods: v.clock_in_methods,
 subscribedApps: v.subscribed_apps,
+directoryEnabled: v.directory_enabled,
 };
 }
 
@@ -81,6 +83,7 @@ if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 if (v.clockInMethods !== undefined) { out.clock_in_methods = v.clockInMethods; }
 if (v.subscribedApps !== undefined) { out.subscribed_apps = v.subscribedApps; }
+if (v.directoryEnabled !== undefined) { out.directory_enabled = v.directoryEnabled; }
 return out;
 }
 

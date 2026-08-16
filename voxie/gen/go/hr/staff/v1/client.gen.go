@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -271,6 +272,43 @@ func (c *StaffServiceClient) ClockOut(ctx context.Context, req *ClockOutRequest)
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(ClockOutResponse)
+	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+	return result, nil
+}
+
+func (c *StaffServiceClient) ListStaffDirectory(ctx context.Context, req *ListStaffDirectoryRequest) (*ListStaffDirectoryResponse, error) {
+	if validator, ok := any(req).(interface{ Validate() error }); ok {
+		if err := validator.Validate(); err != nil {
+			return nil, fmt.Errorf("validate request: %w", err)
+		}
+	}
+	path := "/hr/staff/v1/staff/directory"
+	query := url.Values{}
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("page_size", strconv.FormatInt(int64(req.PageSize), 10))
+	if len(query) > 0 {
+		path += "?" + query.Encode()
+	}
+	httpReq, err := http.NewRequestWithContext(ctx, "GET", c.BaseURL+path, nil)
+	if err != nil {
+		return nil, fmt.Errorf("build request: %w", err)
+	}
+	for k, v := range c.Headers {
+		httpReq.Header.Set(k, v)
+	}
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
+	}
+	result := new(ListStaffDirectoryResponse)
 	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}

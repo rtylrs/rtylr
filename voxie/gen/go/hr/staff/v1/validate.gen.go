@@ -321,3 +321,47 @@ func (m *ClockOutResponse) Validate() error {
 	}
 	return nil
 }
+
+func (m *DirectoryStaffEntry) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListStaffDirectoryRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Page <= 0 {
+		violations = append(violations, "page must be greater than 0")
+	}
+	if m.PageSize <= 0 {
+		violations = append(violations, "page_size must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *ListStaffDirectoryResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	for _, value := range m.Staff {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "staff: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}

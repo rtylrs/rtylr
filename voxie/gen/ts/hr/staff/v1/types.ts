@@ -577,3 +577,110 @@ const violations: string[] = [];
 return violations;
 }
 
+export interface DirectoryStaffEntry {
+id?: string;
+firstName?: string;
+lastName?: string;
+departmentId?: string;
+role?: string;
+employmentType?: string;
+status?: string;
+email?: string;
+phone?: string;
+}
+
+export function decodeDirectoryStaffEntry(v: any): DirectoryStaffEntry {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+firstName: v.first_name,
+lastName: v.last_name,
+departmentId: v.department_id,
+role: v.role,
+employmentType: v.employment_type,
+status: v.status,
+email: v.email,
+phone: v.phone,
+};
+}
+
+export function encodeDirectoryStaffEntry(v: DirectoryStaffEntry): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.firstName !== undefined) { out.first_name = v.firstName; }
+if (v.lastName !== undefined) { out.last_name = v.lastName; }
+if (v.departmentId !== undefined) { out.department_id = v.departmentId; }
+if (v.role !== undefined) { out.role = v.role; }
+if (v.employmentType !== undefined) { out.employment_type = v.employmentType; }
+if (v.status !== undefined) { out.status = v.status; }
+if (v.email !== undefined) { out.email = v.email; }
+if (v.phone !== undefined) { out.phone = v.phone; }
+return out;
+}
+
+export function validateDirectoryStaffEntry(v: DirectoryStaffEntry): string[] {
+const violations: string[] = [];
+return violations;
+}
+
+export interface ListStaffDirectoryRequest {
+page: string;
+pageSize: string;
+}
+
+export function decodeListStaffDirectoryRequest(v: any): ListStaffDirectoryRequest {
+if (v === null || v === undefined) return v;
+return {
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListStaffDirectoryRequest(v: ListStaffDirectoryRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
+}
+
+export function validateListStaffDirectoryRequest(v: ListStaffDirectoryRequest): string[] {
+const violations: string[] = [];
+if (!(v.page !== undefined && v.page !== null)) violations.push("page is required");
+if (v.page !== undefined && v.page !== null && !(Number(v.page) > 0)) violations.push("page violates @gt");
+if (!(v.pageSize !== undefined && v.pageSize !== null)) violations.push("page_size is required");
+if (v.pageSize !== undefined && v.pageSize !== null && !(Number(v.pageSize) > 0)) violations.push("page_size violates @gt");
+return violations;
+}
+
+export interface ListStaffDirectoryResponse {
+staff?: (DirectoryStaffEntry)[];
+total?: string;
+page?: string;
+pageSize?: string;
+}
+
+export function decodeListStaffDirectoryResponse(v: any): ListStaffDirectoryResponse {
+if (v === null || v === undefined) return v;
+return {
+staff: (v.staff !== undefined ? (v.staff as any[]).map(decodeDirectoryStaffEntry) : v.staff),
+total: v.total,
+page: v.page,
+pageSize: v.page_size,
+};
+}
+
+export function encodeListStaffDirectoryResponse(v: ListStaffDirectoryResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.staff !== undefined) { out.staff = (v.staff as any[]).map(encodeDirectoryStaffEntry); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
+return out;
+}
+
+export function validateListStaffDirectoryResponse(v: ListStaffDirectoryResponse): string[] {
+const violations: string[] = [];
+if (v.staff !== undefined && v.staff !== null) for (const item of v.staff) violations.push(...validateDirectoryStaffEntry(item).map((message) => "staff: " + message));
+return violations;
+}
+

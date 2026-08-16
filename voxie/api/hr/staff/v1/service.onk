@@ -22,4 +22,10 @@ service StaffService {
 
   /// Records a staff clock-out event.
   clockOut(ClockOutRequest) -> ClockOutResponse @post("/staff/clock-out")
+
+  /// Returns the paginated, business-wide staff directory. Gated by both
+  /// the business's directory_enabled config flag and the caller's
+  /// view_directory permission; distinct from listStaff, which serves
+  /// HR's own admin screens with the full Staff shape.
+  listStaffDirectory(ListStaffDirectoryRequest) -> ListStaffDirectoryResponse @get("/staff/directory")
 }
