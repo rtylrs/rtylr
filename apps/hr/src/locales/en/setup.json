@@ -65,9 +65,18 @@
   },
   "rolesPermissions": {
     "title": "Roles & Permissions",
-    "description": "Configure the default roles and what each role can do.",
-    "roleName": "Role name",
-    "permissions": "Permissions"
+    "description": "These are the default roles your business starts with.",
+    "previewNotice": "You can customize exactly what each role can do anytime from Settings → Roles & Permissions, once setup is complete.",
+    "defaultRoles": {
+      "employee": { "name": "Employee", "description": "Standard employee with basic access" },
+      "manager": { "name": "Manager", "description": "Team manager with approval rights" },
+      "hrAdmin": { "name": "HR Admin", "description": "Full HR administration access" },
+      "payrollManager": {
+        "name": "Finance/Payroll Manager",
+        "description": "Payroll and finance operations"
+      },
+      "executive": { "name": "Executive", "description": "Executive-level oversight" }
+    }
   },
   "payrollConfig": {
     "title": "Payroll Configuration",

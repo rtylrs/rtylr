@@ -1,0 +1,43 @@
+{
+  "title": "Roles & Permissions",
+  "subtitle": "Control exactly what each role in your business can do.",
+  "loadError": "Unable to load roles",
+  "addRole": "Add role",
+  "newRoleNamePlaceholder": "Role name",
+  "newRoleDescriptionPlaceholder": "Description (optional)",
+  "createRole": "Create role",
+  "systemRoleBadge": "Default",
+  "customRoleBadge": "Custom",
+  "permissionsGrantedCount": "{{granted}}/{{total}} permissions",
+  "save": "Save",
+  "saving": "Saving…",
+  "unsavedChanges": "You have unsaved changes",
+  "created": "Role created",
+  "updated": "Role permissions updated",
+  "categories": {
+    "general": "General",
+    "employees": "Employees",
+    "time_off": "Time off",
+    "scheduling": "Scheduling",
+    "administration": "Administration",
+    "reports": "Reports",
+    "payroll": "Payroll"
+  },
+  "permissions": {
+    "view_own_profile": "View own profile",
+    "view_own_schedule": "View own schedule",
+    "request_time_off": "Request time off",
+    "view_team": "View team",
+    "approve_time_off": "Approve time off",
+    "manage_schedules": "Manage schedules",
+    "manage_employees": "Manage employees",
+    "manage_roles": "Manage roles",
+    "manage_departments": "Manage departments",
+    "manage_locations": "Manage locations",
+    "manage_hr_config": "Manage HR configuration",
+    "view_reports": "View reports",
+    "manage_payroll": "Manage payroll",
+    "manage_benefits": "Manage benefits",
+    "manage_approval_chains": "Manage approval chains"
+  }
+}
