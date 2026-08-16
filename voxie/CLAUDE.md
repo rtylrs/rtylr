@@ -114,7 +114,7 @@ voxie/
 - **Cross-directory references:** reference another directory's message/enum by its plain name — no import statement. `onek` resolves it automatically as long as the name isn't ambiguous (declared identically in more than one *other* directory); if it is, rename one side (see `crm.customer.v1.Customer` vs the POS-specific `PosCustomer` in `pos.customer.v1` for a real example of this).
 - **`int64`/`uint64` wire encoding defaults to a JSON string** (matches proto's old `INT64_ENCODING_STRING`) — only add `@encode(number)` when a field genuinely needs to serialize as a plain JSON number.
 - **Validation decorators:** `@required`, `@gt(N)`/`@gte(N)`/`@lt(N)`/`@lte(N)` (numeric bounds, stackable), `@pattern("regex")`, `@email`, `@uri`, `@min_items(N)`/`@max_items(N)` (repeated fields), `@in("a", "b", ...)`.
-- **Optionality:** `field: T?` for an optional field; add `@nullable` when JSON `null` (not just field absence) is a meaningful, distinct value.
+- **Optionality:** `field: T?` for an optional field; add `@nullable` when JSON `null` (not just field absence) is a meaningful, distinct value. Generated Go tags are always `omitempty`, so a non-optional scalar cannot send its zero value: read "Optionality" below before adding a field to an `Update*Body`.
 - **Request-body binding:** a whole request-as-body POST/PUT/PATCH needs no annotation. A request with a nested body sub-message (mirroring the old proto `body: "body"` HTTP option) uses `@body("field_name")` on the RPC declaration.
 - **No cross-field validation yet:** a constraint like "exactly one of these fields is required" (the old proto `buf.validate.message.oneof`) has no `.onk` decorator equivalent. Leave the fields as plain optionals and add a hand-written check in the handler (see `flow.task.v1.ListTasksRequest` for the one existing case).
 - **No field-reservation mechanism:** unlike proto's `reserved`, `.onk` doesn't track removed field numbers (there are no field numbers at all — fields are matched by JSON key). Never delete or rename a field a live consumer still reads; deprecate it in a comment instead (see below) and never reuse the old name for something semantically different.
@@ -167,7 +167,11 @@ Enums are the most dangerous part of a schema to change. Follow these rules:
 
 ### Optionality
 
-Every field is present-or-absent in JSON; there are no proto3-style implicit zero values to worry about. Use `field: T?` whenever "the field was not provided" is a meaningful, distinct state from any concrete value of `T` (e.g. `false`, `0`, `""`), and add `@nullable` when an explicit JSON `null` also needs to be distinguishable from absence. Document in a comment why a field is optional/nullable.
+`onek` emits `json:",omitempty"` on **every** generated Go field, optional or not; `T?` only controls whether the generated Go type is a pointer. A non-optional scalar therefore cannot transmit its zero value: a plain `bool` marshals `false` to nothing at all, and `0` / `""` vanish the same way, arriving indistinguishable from an absent field.
+
+Use `field: T?` whenever "the field was not provided" is a meaningful, distinct state from any concrete value of `T` (`false`, `0`, `""`). On an `Update*Body` this is not a style choice: if the zero value is a meaningful write, the field **must** be `T? @nullable`, or that write silently no-ops. The pointer then gives the three states a `SET col = COALESCE(?, col)` handler expects: `nil` (leave unchanged), `&true`, `&false`. See `UpdateTaskBody.archived` and `UpdateLocationBody.is_active`.
+
+Add `@nullable` when an explicit JSON `null` also needs to be distinguishable from absence. Document in a comment why a field is optional/nullable, and check the generated struct tag before committing. On the TypeScript side the generated `encodeXBody` guards with `if (v.field !== undefined)` rather than a falsy check, so `false` survives serialisation once the field is optional.
 
 ### When to Introduce a Breaking Change
 
