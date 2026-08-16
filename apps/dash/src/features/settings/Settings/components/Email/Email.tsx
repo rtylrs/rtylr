@@ -214,7 +214,11 @@ const Email: React.FC = () => {
   };
 
   const toggleNotification = (key: keyof NotificationState) => (next: boolean) => {
-    setNotifications((prev) => ({ ...prev, [key]: next }));
+    const nextState = { ...notifications, [key]: next };
+    setNotifications(nextState);
+    updateBusiness.mutate({
+      data: { notificationPreferences: nextState },
+    });
   };
 
   return (
