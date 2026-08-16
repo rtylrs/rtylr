@@ -34,6 +34,8 @@ interface UserState {
   isAuthenticated: boolean;
   role: string | null;
   userId: string | null;
+  addons: Addons;
+  visits: any[];
 }
 
 interface UserActions {
@@ -43,6 +45,8 @@ interface UserActions {
   setUser: (user: StoredUser) => void;
   setRole: (role: string) => void;
   setUserId: (userId: string) => void;
+  setAddons: (addons: Addons) => void;
+  setVisits: (visits: any[]) => void;
 }
 
 const initialState: UserState = {
@@ -51,6 +55,8 @@ const initialState: UserState = {
   isAuthenticated: false,
   role: null,
   userId: null,
+  addons: { feedback: false, about: false, contact: false, landing: false },
+  visits: [],
 };
 
 export const useUserStore = create<UserState & UserActions>()(
@@ -64,11 +70,7 @@ export const useUserStore = create<UserState & UserActions>()(
         removeCookie('token', { domain: getDefaultCookieDomain() });
         removeCookie('token');
         set({
-          user: null,
-          isAuthenticated: false,
-          role: null,
-          userId: null,
-          token: null,
+          ...initialState,
         });
       },
 
@@ -79,6 +81,10 @@ export const useUserStore = create<UserState & UserActions>()(
       setRole: (role) => set({ role }),
 
       setUserId: (userId) => set({ userId }),
+
+      setAddons: (addons) => set({ addons }),
+
+      setVisits: (visits) => set({ visits }),
     }),
     {
       name: 'user-store',
