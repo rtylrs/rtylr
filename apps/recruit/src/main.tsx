@@ -8,6 +8,7 @@ import { loadRuntimeConfig } from '@voxire/config';
 import { FullScreenLoader } from '@voxire/components';
 import { router } from './router';
 
+import './shared/services/i18next';
 import './globals.css';
 
 const queryClient = new QueryClient({

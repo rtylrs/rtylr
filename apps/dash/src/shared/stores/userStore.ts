@@ -16,15 +16,16 @@ export interface StoredUser {
   role?: string;
   businessId?: number;
   businessName?: string;
+  businessSlug?: string;
+  business_slug?: string;
+  logo?: string;
   isOwner?: boolean;
   isConsoleAdmin?: boolean;
-  is_console_admin?: boolean;
   apps?: string[];
   onboarded?: boolean;
   planSlug?: string;
   subscriptionStatus?: string;
   effectiveResources?: Record<string, string>;
-  [key: string]: unknown;
 }
 
 interface UserState {
@@ -34,7 +35,7 @@ interface UserState {
   role: string | null;
   userId: string | null;
   addons: Addons;
-  visits: unknown[];
+  visits: any[];
 }
 
 interface UserActions {
@@ -45,7 +46,7 @@ interface UserActions {
   setRole: (role: string) => void;
   setUserId: (userId: string) => void;
   setAddons: (addons: Addons) => void;
-  setVisits: (visits: unknown[]) => void;
+  setVisits: (visits: any[]) => void;
 }
 
 const initialState: UserState = {
@@ -54,39 +55,22 @@ const initialState: UserState = {
   isAuthenticated: false,
   role: null,
   userId: null,
-  addons: {
-    feedback: false,
-    about: false,
-    contact: false,
-    landing: false,
-  },
+  addons: { feedback: false, about: false, contact: false, landing: false },
   visits: [],
 };
 
 export const useUserStore = create<UserState & UserActions>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
 
       login: (user) => set({ user, isAuthenticated: true }),
 
       logout: () => {
-        // Hand-rolled `document.cookie = ...` without a Domain attr
-        // only clears the cookie for the current host (dash.rtylr.com).
-        // The shared `.rtylr.com` cookie survives, so auth.rtylr.com
-        // still sees the token on the next navigation and bounces
-        // you right back in. Use the shared helper which matches the
-        // exact domain set at login.
         removeCookie('token', { domain: getDefaultCookieDomain() });
-        // Belt + suspenders: also clear host-only variant in case an
-        // older session persisted one with no Domain.
         removeCookie('token');
         set({
-          user: null,
-          isAuthenticated: false,
-          role: null,
-          userId: null,
-          token: null,
+          ...initialState,
         });
       },
 
@@ -109,8 +93,6 @@ export const useUserStore = create<UserState & UserActions>()(
         isAuthenticated: state.isAuthenticated,
         role: state.role,
         userId: state.userId,
-        addons: state.addons,
-        visits: state.visits,
       }),
     }
   )

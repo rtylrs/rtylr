@@ -77,12 +77,23 @@ async function stubDashAPIs(page: import('@playwright/test').Page): Promise<void
   // generic 200 empty response lets every widget render.
   await page.route(
     /\/(team|activity|notifications|erp\/inventory|erp\/products|hr\/time-off|user\/me|get-configs|business\/me)/,
-    (route) =>
-      route.fulfill({
+    (route) => {
+      const url = route.request().url();
+      if (
+        url.includes('/src/') ||
+        url.endsWith('.tsx') ||
+        url.endsWith('.ts') ||
+        url.endsWith('.jsx') ||
+        url.endsWith('.js')
+      ) {
+        return route.continue();
+      }
+      return route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({}),
-      })
+      });
+    }
   );
 }
 

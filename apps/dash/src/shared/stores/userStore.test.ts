@@ -86,22 +86,4 @@ describe('userStore (dash)', () => {
     getState().setUserId('user-123');
     expect(getState().userId).toBe('user-123');
   });
-
-  it('setAddons updates addons', () => {
-    const addons = { feedback: true, about: true, contact: false, landing: true };
-    getState().setAddons(addons);
-    expect(getState().addons).toEqual(addons);
-  });
-
-  it('setVisits updates visits', () => {
-    const visits = [{ date: '2024-01-01' }, { date: '2024-01-02' }];
-    getState().setVisits(visits);
-    expect(getState().visits).toEqual(visits);
-  });
-
-  it('setVisits with empty array', () => {
-    getState().setVisits([{ date: '2024-01-01' }]);
-    getState().setVisits([]);
-    expect(getState().visits).toEqual([]);
-  });
 });

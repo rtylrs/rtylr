@@ -1,42 +1,44 @@
 import React from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { ChevronRight, Home } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const ROUTE_LABELS: Record<string, string> = {
-  '': 'Hub',
-  team: 'Team',
-  invite: 'Invite',
-  permissions: 'Permissions',
-  roles: 'Roles',
-  apps: 'Apps',
-  activity: 'Activity',
-  notifications: 'Notifications',
-  account: 'Account',
-  billing: 'Billing',
-  integrations: 'Integrations',
-  'api-keys': 'API Keys',
-  webhooks: 'Webhooks',
-  audit: 'Audit',
-  security: 'Security',
-  settings: 'Settings',
-  subscription: 'Billing',
-  menus: 'Menus',
-  menu: 'Menu',
-  orders: 'Orders',
-  'qr-codes': 'QR Codes',
-  design: 'Design',
-  analytics: 'Analytics',
-  marketplace: 'Marketplace',
-  changelog: "What's new",
-  flags: 'Feature Flags',
-  help: 'Help Center',
-  referrals: 'Referrals',
-  export: 'Export Data',
-  import: 'Import Data',
-  theme: 'Theme',
+const ROUTE_KEYS: Record<string, string> = {
+  '': 'hub',
+  team: 'team',
+  invite: 'inviteMember',
+  permissions: 'permissions',
+  roles: 'roles',
+  apps: 'apps',
+  activity: 'activityLog',
+  notifications: 'notifications',
+  account: 'account',
+  billing: 'billing',
+  integrations: 'integrations',
+  'api-keys': 'apiKeys',
+  webhooks: 'webhooks',
+  audit: 'auditLog',
+  security: 'security',
+  settings: 'settings',
+  subscription: 'billing',
+  menus: 'menus',
+  menu: 'menu',
+  orders: 'orders',
+  'qr-codes': 'qrCodes',
+  design: 'design',
+  analytics: 'analytics',
+  marketplace: 'marketplace',
+  changelog: 'whatsNew',
+  flags: 'featureFlags',
+  help: 'helpCenter',
+  referrals: 'referrals',
+  export: 'exportData',
+  import: 'importData',
+  theme: 'theme',
 };
 
 export const Breadcrumbs: React.FC<{ className?: string }> = ({ className }) => {
+  const { t } = useTranslation('common');
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const segments = pathname.split('/').filter(Boolean);
   if (segments.length === 0) return null;
@@ -47,16 +49,17 @@ export const Breadcrumbs: React.FC<{ className?: string }> = ({ className }) => 
         <li>
           <Link to="/" className="flex items-center gap-1 hover:opacity-70 transition-opacity">
             <Home size={11} />
-            Hub
+            {t('nav.hub', 'Hub')}
           </Link>
         </li>
         {segments.map((seg, i) => {
           const path = '/' + segments.slice(0, i + 1).join('/');
           const isLast = i === segments.length - 1;
-          const label = ROUTE_LABELS[seg] ?? seg;
+          const key = ROUTE_KEYS[seg];
+          const label = key ? t(`nav.${key}`) : seg;
           return (
             <React.Fragment key={path}>
-              <ChevronRight size={11} className="shrink-0" />
+              <ChevronRight size={11} className="shrink-0 rtl:rotate-180" />
               <li>
                 {isLast ? (
                   <span style={{ color: 'var(--dash-text)' }} className="font-medium">

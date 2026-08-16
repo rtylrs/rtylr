@@ -8,6 +8,7 @@ import { Badge, Button } from '../../shared/components/ui';
 
 interface MenuEntry {
   _id: string;
+  id?: string;
   menuName?: string;
   name?: string;
   items?: unknown[];
@@ -247,7 +248,16 @@ const Menus: React.FC = () => {
                       </Badge>
                     </div>
                     <div className="flex justify-start md:justify-end">
-                      <Button size="sm" variant="outline" onClick={() => navigate({ to: '/menu' })}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          navigate({
+                            to: '/menu',
+                            search: { menuId: String(menu.id || menu._id || '') },
+                          })
+                        }
+                      >
                         <ExternalLink size={13} />
                         Open
                       </Button>

@@ -367,13 +367,50 @@ const AdminDashboard: React.FC = () => {
 
 // ─── Staff (fallback) ───────────────────────────────────────────────────────
 
-const StaffDashboard: React.FC<{ userApps: string[] }> = () => (
-  <div className="flex items-center justify-center h-64">
-    <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-      Redirecting...
-    </p>
-  </div>
-);
+const StaffDashboard: React.FC<{ userApps: string[] }> = ({ userApps }) => {
+  React.useEffect(() => {
+    if (userApps.length > 0) {
+      const firstApp = userApps[0];
+      const validApps = ['pos', 'erp', 'hr', 'crm', 'finance', 'flow', 'insights'];
+      if (validApps.includes(firstApp)) {
+        window.location.href = `https://${firstApp}.rtylr.com`;
+      }
+    }
+  }, [userApps]);
+
+  return (
+    <div className="max-w-xl mx-auto py-12 text-center space-y-4">
+      <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
+        Welcome to rtylr
+      </h2>
+      <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+        Select an app below to access your workspace.
+      </p>
+      <div className="flex flex-wrap justify-center gap-3 pt-2">
+        {userApps.length > 0 ? (
+          userApps.map((app) => (
+            <a
+              key={app}
+              href={`https://${app}.rtylr.com`}
+              className="px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors hover:bg-[var(--dash-hover)]"
+              style={{
+                background: 'var(--dash-card)',
+                border: '1px solid var(--dash-border)',
+                color: 'var(--dash-text)',
+              }}
+            >
+              Open {app}
+            </a>
+          ))
+        ) : (
+          <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+            No apps assigned to your staff account. Please contact your workspace administrator.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 // ─── Root ───────────────────────────────────────────────────────────────────
 

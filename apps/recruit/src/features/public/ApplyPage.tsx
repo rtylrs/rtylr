@@ -11,7 +11,9 @@ import {
 } from '../../shared/hooks/queries/usePublic';
 import { applyBrand } from '../../templates/resolver';
 import { applySEO, loadAnalytics } from '../../shared/lib/seo';
+import { FLAG_KEYS, resolveFlag } from '@voxire/config';
 import NotFound from './NotFound';
+import { cleanMojibake } from '../../shared/lib/sanitize';
 
 /**
  * ApplyPage - form at recruit.rtylr.com/:slug/:careerSlug/apply.
@@ -34,6 +36,8 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   const slug = rawSlug ?? '';
   const careerSlug = rawCareerSlug ?? '';
   const navigate = useNavigate();
+
+  const isFileUploadEnabled = resolveFlag(FLAG_KEYS.APP_RECRUIT_FILE_UPLOAD);
 
   const { data, isLoading, error } = usePublicCareer(slug, careerSlug);
   const submit = useSubmitApplication();
@@ -58,6 +62,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
   }
 
   const [consented, setConsented] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
 
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [uploadedKey, setUploadedKey] = useState<string | null>(null);
@@ -79,6 +84,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
     ];
     if (!allowed.includes(file.type)) {
       setUploadError('Please upload a PDF or Word document');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
     setResumeFile(file);
@@ -94,6 +100,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       const msg = err instanceof Error ? err.message : 'Upload failed';
       setUploadError(msg);
       setResumeFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     } finally {
       setUploading(false);
     }
@@ -116,25 +123,52 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       </div>
     );
   }
-  if (error || !data) return <NotFound />;
+  if (error && !data) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white p-6 text-center">
+        <h2 className="text-lg font-semibold text-gray-900">Failed to load application form</h2>
+        <p className="text-sm text-gray-500">Please try refreshing the page.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!data) return <NotFound />;
 
   const { career, customization } = data;
   const customFields = data.fields ?? [];
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (honeypot.trim() !== '') {
+      setDone(true);
+      return;
+    }
     // Client-side required check before hitting the API - better UX
     // than a round-trip 400. The backend still accepts whatever it's
     // given since we can't yet validate kind-specific rules
     // server-side.
     for (const f of customFields) {
-      if (!f.required) continue;
       const v = answers[String(f.id)];
       const empty = v === undefined || v === '' || (Array.isArray(v) && v.length === 0);
-      if (empty) {
+      if (f.required && empty) {
         toast.error(`"${f.label}" is required`);
         return;
       }
+      if (typeof v === 'string' && v.length > 5000) {
+        toast.error(`"${f.label}" exceeds maximum length of 5000 characters`);
+        return;
+      }
+    }
+
+    if (customization.requireConsent && !consented) {
+      toast.error('You must agree to data processing to apply');
+      return;
     }
 
     // Prefer the uploaded-to-R2 key; fall back to the manually typed
@@ -152,6 +186,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
         resumeUrl: resumeRef,
         coverLetter: coverLetter || undefined,
         answersJson,
+        consented,
       },
       {
         onSuccess: () => {
@@ -199,19 +234,31 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       <main className="mx-auto max-w-xl px-6 py-12">
         <Link
           to={`/${slug}/${careerSlug}` as any}
-          className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+          className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium hover:underline"
           style={{ color: 'var(--recruit-muted)' }}
         >
           <ArrowLeft className="h-4 w-4" />
           Back to role
         </Link>
 
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight">Apply for {career.title}</h1>
+        <h1 className="mt-6 text-3xl font-semibold tracking-tight">
+          Apply for {cleanMojibake(career.title)}
+        </h1>
         <p className="mt-2 text-sm" style={{ color: 'var(--recruit-muted)' }}>
-          {customization.brandName} - {career.location || 'Remote'}
+          {cleanMojibake(customization.brandName)} - {cleanMojibake(career.location) || 'Remote'}
         </p>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-5">
+          <div style={{ display: 'none' }} aria-hidden="true">
+            <input
+              type="text"
+              name="website_url_hp"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
           <Field label="Full name" required>
             <input
               required
@@ -240,61 +287,66 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
               style={{ borderColor: 'var(--recruit-border)' }}
             />
           </Field>
-          <Field label="Resume">
-            {/* Hidden native input; we render a styled dropzone ourselves. */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              onChange={onPickFile}
-              className="hidden"
-            />
-            {!resumeFile && !uploadedKey && (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed bg-white px-4 py-6 text-sm transition hover:bg-gray-50"
-                style={{ borderColor: 'var(--recruit-border)' }}
-              >
-                <Upload className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
-                <span>Upload your resume</span>
-                <span className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
-                  · PDF or Word, up to 10 MB
-                </span>
-              </button>
-            )}
-            {resumeFile && (
-              <div
-                className="flex items-center gap-3 rounded-md border bg-white px-3 py-2.5 text-sm"
-                style={{ borderColor: 'var(--recruit-border)' }}
-              >
-                <FileText className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-medium">{resumeFile.name}</div>
-                  <div className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
-                    {uploading
-                      ? 'Uploading…'
-                      : uploadedKey
-                        ? 'Uploaded'
-                        : uploadError
-                          ? uploadError
-                          : `${(resumeFile.size / 1024 / 1024).toFixed(1)} MB`}
-                  </div>
-                </div>
-                {uploadedKey && !uploading && (
-                  <Check className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
-                )}
+          {isFileUploadEnabled && (
+            <Field label="Resume">
+              {/* Hidden native input; we render a styled dropzone ourselves. */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                onChange={onPickFile}
+                className="hidden"
+              />
+              {!resumeFile && !uploadedKey && (
                 <button
                   type="button"
-                  onClick={clearFile}
-                  className="rounded-md p-1 hover:bg-gray-100"
-                  title="Remove"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex w-full items-center justify-center gap-2 rounded-md border border-dashed bg-white px-4 py-6 text-sm transition hover:bg-gray-50"
+                  style={{ borderColor: 'var(--recruit-border)' }}
                 >
-                  <X className="h-4 w-4" style={{ color: 'var(--recruit-muted)' }} />
+                  <Upload className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
+                  <span>Upload your resume</span>
+                  <span className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
+                    · PDF or Word, up to 10 MB
+                  </span>
                 </button>
-              </div>
-            )}
-          </Field>
+              )}
+              {resumeFile && (
+                <div
+                  className="flex items-center gap-3 rounded-md border bg-white px-3 py-2.5 text-sm"
+                  style={{ borderColor: 'var(--recruit-border)' }}
+                >
+                  <FileText className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-medium">{resumeFile.name}</div>
+                    <div className="text-xs" style={{ color: 'var(--recruit-muted)' }}>
+                      {uploading
+                        ? 'Uploading…'
+                        : uploadedKey
+                          ? 'Uploaded'
+                          : uploadError
+                            ? uploadError
+                            : `${(resumeFile.size / 1024 / 1024).toFixed(1)} MB`}
+                    </div>
+                  </div>
+                  {uploadedKey && !uploading && (
+                    <Check className="h-4 w-4" style={{ color: 'var(--recruit-accent)' }} />
+                  )}
+                  <button
+                    type="button"
+                    onClick={clearFile}
+                    className="rounded-md p-1 hover:bg-gray-100"
+                    title="Remove"
+                  >
+                    <X className="h-4 w-4" style={{ color: 'var(--recruit-muted)' }} />
+                  </button>
+                </div>
+              )}
+              {uploadError && !resumeFile && (
+                <p className="mt-1 text-xs text-red-600 font-medium">{uploadError}</p>
+              )}
+            </Field>
+          )}
 
           {/* Fallback for candidates who'd rather link out. Hidden when
               a file is picked - two resume sources on one form is

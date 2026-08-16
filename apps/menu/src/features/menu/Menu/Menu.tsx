@@ -70,53 +70,57 @@ function applyTheme(theme: ThemeConfig) {
   }
 }
 
-const Menu: React.FC = () => {
-  const { id } = useParams({ strict: false });
+interface MenuProps {
+  id?: string;
+}
+
+const Menu: React.FC<MenuProps> = ({ id: propId }) => {
+  const params = useParams({ strict: false });
+  const id = propId || params.id || params.slug;
   const [categories, setCategories] = useState<MenuCategoryData[]>([]);
   const [business, setBusiness] = useState<BusinessInfo | null>(null);
   const [layout, setLayout] = useState<LayoutType>('grid');
   const [status, setStatus] = useState<'idle' | 'loading' | 'succeeded' | 'failed'>('idle');
   const [retryCount, setRetryCount] = useState(0);
 
+  const handleSuccess = useCallback((response: any) => {
+    setRetryCount(0);
+    const { details } = response;
+    const theme: ThemeConfig = details.theme ?? {};
+
+    const cats = transformCategories(details.menu?.items ?? []);
+    setCategories(cats);
+
+    setBusiness({
+      name: details.business?.name ?? 'Menu',
+      logo: cdnImageUrl(details.business?.logo),
+      coverImage: cdnImageUrl(details.business?.coverImage),
+      description: details.business?.description,
+      address: details.business?.address,
+      phone: details.business?.phone,
+      hours: details.business?.hours,
+    });
+
+    setLayout(theme.layout ?? 'grid');
+    applyTheme(theme);
+
+    setStatus('succeeded');
+  }, []);
+
+  const handleError = useCallback(() => {
+    setStatus('failed');
+  }, []);
+
   const getMenu = useAsync({
     fn: menuApi.getMenu,
-    onSuccess: (response) => {
-      setRetryCount(0);
-      const { details } = response;
-      const theme: ThemeConfig = details.theme ?? {};
-
-      const cats = transformCategories(details.menu?.items ?? []);
-      setCategories(cats);
-
-      setBusiness({
-        name: details.business?.name ?? 'Menu',
-        logo: cdnImageUrl(details.business?.logo),
-        coverImage: cdnImageUrl(details.business?.coverImage),
-        description: details.business?.description,
-        address: details.business?.address,
-        phone: details.business?.phone,
-        hours: details.business?.hours,
-      });
-
-      setLayout(theme.layout ?? 'grid');
-      applyTheme(theme);
-
-      setStatus('succeeded');
-    },
-    onError: () => {
-      setStatus('failed');
-      if (retryCount < 3) {
-        setTimeout(() => {
-          getMenu.main({ id });
-          setRetryCount((r) => r + 1);
-        }, 8000);
-      }
-    },
+    onSuccess: handleSuccess,
+    onError: handleError,
     callOnMount: false,
   });
   const { main: loadMenu } = getMenu;
 
   useEffect(() => {
+    if (!id) return;
     setStatus('loading');
     loadMenu({ id });
   }, [id, loadMenu]);
@@ -151,12 +155,29 @@ const Menu: React.FC = () => {
 
   if (!business) return null;
 
+  const handleCheckout = () => {
+    navigate({ to: '/checkout' });
+  };
+
+  const handleReviewSubmit = async (review: { rating: number; name: string; comment: string }) => {
+    try {
+      await api.post('/crm/feedback/v1/feedback/public', {
+        rating: review.rating,
+        name: review.name,
+        comment: review.comment,
+      });
+    } catch {
+      // ignore
+    }
+  };
+
   const layoutProps = {
     business,
     categories,
     enableCart: true,
-    enableAiChat: true,
-    onAiMessage: handleAiMessage,
+    enableAiChat: false,
+    onCheckout: handleCheckout,
+    onSubmitReview: handleReviewSubmit,
   };
 
   const content =

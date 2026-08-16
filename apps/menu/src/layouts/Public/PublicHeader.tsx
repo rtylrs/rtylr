@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { FaBars, FaChevronDown, FaSignOutAlt, FaTimes } from 'react-icons/fa';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 
+import { APP_URLS } from '@voxire/config';
 import { Button } from '@voxire/components';
 import useColors from '../../shared/hooks/useColors';
 import { useWindowDimensions } from '@voxire/utils';
@@ -104,12 +105,14 @@ const Header: React.FC = () => {
     navigate({ to: '/auth/login' });
   }, [navigate]);
 
+  const landingUrl = (APP_URLS.landing || 'https://rtylr.com').replace(/\/$/, '');
+
   const handleNavigation = useCallback(
     (path: string) => {
       setDropdown(false);
-      navigate({ to: path });
+      window.open(`${landingUrl}${path}`, '_blank', 'noopener,noreferrer');
     },
-    [navigate]
+    [landingUrl]
   );
 
   const handleExternalLink = useCallback(() => {

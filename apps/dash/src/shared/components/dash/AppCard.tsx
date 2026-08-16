@@ -20,7 +20,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
       return (
         <span
           className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
-          style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}
+          style={{ background: 'var(--status-trial-bg)', color: 'var(--status-trial)' }}
         >
           <Lock size={9} />
           Upgrade
@@ -31,7 +31,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
       return (
         <span
           className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase"
-          style={{ background: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }}
+          style={{ background: 'rgba(139,92,246,0.15)', color: 'var(--app-crm)' }}
         >
           Beta
         </span>
@@ -79,7 +79,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onLaunch }) => {
 
   const cardStyle: React.CSSProperties = {
     background: 'var(--dash-card)',
-    border: isLocked ? '1px solid rgba(245,158,11,0.2)' : '1px solid var(--dash-border)',
+    border: isLocked ? '1px solid var(--status-trial-bg)' : '1px solid var(--dash-border)',
     opacity: isComingSoon ? 0.6 : 1,
   };
 

@@ -65,9 +65,21 @@
   },
   "rolesPermissions": {
     "title": "Rôles et permissions",
-    "description": "Configurez les rôles par défaut et ce que chaque rôle peut faire.",
-    "roleName": "Nom du rôle",
-    "permissions": "Permissions"
+    "description": "Voici les rôles par défaut avec lesquels votre entreprise commence.",
+    "previewNotice": "Vous pourrez personnaliser précisément ce que chaque rôle peut faire à tout moment depuis Paramètres → Rôles et permissions, une fois la configuration terminée.",
+    "defaultRoles": {
+      "employee": { "name": "Employé", "description": "Employé standard avec accès de base" },
+      "manager": { "name": "Manager", "description": "Manager d'équipe avec droits d'approbation" },
+      "hrAdmin": {
+        "name": "Administrateur RH",
+        "description": "Accès complet à l'administration RH"
+      },
+      "payrollManager": {
+        "name": "Responsable paie/finance",
+        "description": "Opérations de paie et de finance"
+      },
+      "executive": { "name": "Direction", "description": "Supervision au niveau de la direction" }
+    }
   },
   "payrollConfig": {
     "title": "Configuration de la paie",

@@ -44,8 +44,12 @@ const STEP_FOR_STATUS: Record<string, number> = {
 
 const CANCELLED_STATUSES = new Set(['cancelled', 'refunded', 'voided']);
 
-const stepForStatus = (s: string): number => STEP_FOR_STATUS[s] ?? 0;
-const isCancelled = (s: string | null): boolean => s != null && CANCELLED_STATUSES.has(s);
+const stepForStatus = (s: string): number => {
+  const norm = s.toLowerCase();
+  return STEP_FOR_STATUS[norm] ?? -1;
+};
+const isCancelled = (s: string | null): boolean =>
+  s != null && CANCELLED_STATUSES.has(s.toLowerCase());
 const isTerminal = (s: string | null): boolean =>
   s != null && (isCancelled(s) || stepForStatus(s) === STATUS_STEPS.length - 1);
 
@@ -55,28 +59,47 @@ const OrderStatus = (): React.JSX.Element => {
   const { clearCart } = useCartStore();
 
   const orderNumber = new URLSearchParams(searchStr).get('number') ?? '';
+  const businessId =
+    new URLSearchParams(searchStr).get('business_id') ??
+    new URLSearchParams(searchStr).get('businessId') ??
+    '';
 
   const [status, setStatus] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchStatus = useCallback(async (): Promise<void> => {
     if (!id) return;
     try {
-      const res = await api.get<OrderStatusResponse>(`/pos/orders/v1/orders/${id}/public-status`);
+      const params = businessId ? { business_id: businessId } : undefined;
+      const res = await api.get<OrderStatusResponse>(`/pos/orders/v1/orders/${id}/public-status`, {
+        params,
+      });
       setStatus(res.data.status);
       setFetchError(false);
+      setNotFound(false);
 
       // Stop polling once the order reaches a terminal state (done/cancelled).
       if (isTerminal(res.data.status) && intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-    } catch {
-      setFetchError(true);
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 404) {
+        setNotFound(true);
+        setFetchError(false);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      } else {
+        setFetchError(true);
+      }
     }
-  }, [id]);
+  }, [id, businessId]);
 
   useEffect(() => {
     void fetchStatus();
@@ -86,9 +109,21 @@ const OrderStatus = (): React.JSX.Element => {
     };
   }, [fetchStatus]);
 
+  const navigate = useNavigate();
+
   const handleOrderAnother = (): void => {
     clearCart();
-    window.history.back();
+    const returnUrl = new URLSearchParams(searchStr).get('return_url');
+    if (returnUrl) {
+      window.location.href = returnUrl;
+      return;
+    }
+    const slug = new URLSearchParams(searchStr).get('slug');
+    if (slug) {
+      void navigate({ to: `/${slug}` });
+      return;
+    }
+    void navigate({ to: '/' });
   };
 
   const cancelled = isCancelled(status);
@@ -196,12 +231,25 @@ const OrderStatus = (): React.JSX.Element => {
               {currentIndex === 1 && 'Being prepared...'}
               {currentIndex === 2 && 'Ready for pickup!'}
               {currentIndex === 3 && 'Order complete!'}
+              {currentIndex === -1 && `Status: ${status}`}
+            </p>
+          </div>
+        )}
+
+        {/* Not Found state */}
+        {notFound && (
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ color: '#dc2626', fontSize: '15px', fontWeight: 600, marginBottom: 8 }}>
+              Order not found
+            </p>
+            <p style={{ color: 'rgba(0,0,0,0.5)', fontSize: '13px', marginBottom: 16 }}>
+              We could not find an order matching this ID. Please check your order link.
             </p>
           </div>
         )}
 
         {/* Loading state */}
-        {status == null && !fetchError && (
+        {status == null && !fetchError && !notFound && (
           <p style={{ color: 'rgba(0,0,0,0.4)', fontSize: '15px' }}>Loading order status...</p>
         )}
 

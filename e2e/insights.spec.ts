@@ -3,8 +3,7 @@ import { test, expect } from './fixtures';
 /**
  * Insights e2e - dashboard loads, pillar screens switch, scheduled
  * reports CRUD works through the UI. All /insights/* endpoints are
- * stubbed via page.route() - the whole namespace landed as a new
- * backend module this session so this spec nails the contract.
+ * stubbed via page.route() matching generated OneKit routes.
  */
 
 const INSIGHTS_URL = process.env.INSIGHTS_URL ?? 'http://localhost:5187';
@@ -24,7 +23,7 @@ async function primeAuthCookie(context: import('@playwright/test').BrowserContex
 }
 
 async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<void> {
-  await page.route('**/insights/dashboard', (route) =>
+  await page.route(/.*\/insights\/dashboard.*/, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -37,15 +36,15 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route('**/insights/revenue*', (route) =>
+  await page.route(/.*\/insights\/revenue.*/, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ series: [] }),
+      body: JSON.stringify({ series: [], apps: [], comparisons: [] }),
     })
   );
 
-  await page.route('**/insights/customers*', (route) =>
+  await page.route(/.*\/insights\/customer.*/, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -53,7 +52,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route('**/insights/products*', (route) =>
+  await page.route(/.*\/insights\/product.*/, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -61,7 +60,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route('**/insights/financial/*', (route) =>
+  await page.route(/.*\/insights\/financial.*/, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -69,7 +68,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route('**/insights/operations*', (route) =>
+  await page.route(/.*\/insights\/operation.*/, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -77,7 +76,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route('**/insights/reports/templates', (route) =>
+  await page.route(/.*\/insights\/report.*/, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -86,19 +85,22 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
           { id: 'revenue-monthly', name: 'Monthly Revenue' },
           { id: 'ar-aging', name: 'A/R Aging' },
         ],
+        reports: [],
       }),
     })
   );
 
-  await page.route('**/insights/settings', (route) => {
+  await page.route(/.*\/insights\/setting.*/, (route) => {
     if (route.request().method() === 'PUT') {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          default_currency: 'USD',
-          fiscal_year_start: '01-01',
-          timezone: 'UTC',
+          settings: {
+            currency: 'USD',
+            defaultPeriod: '',
+            comparePrevious: false,
+          },
         }),
       });
       return;
@@ -107,27 +109,25 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        default_currency: 'USD',
-        fiscal_year_start: '01-01',
-        timezone: 'UTC',
+        settings: {
+          currency: 'USD',
+          defaultPeriod: '',
+          comparePrevious: false,
+        },
       }),
     });
   });
 
-  await page.route('**/insights/settings/scheduled-reports*', (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ reports: [] }),
-    })
-  );
-
-  await page.route(/\/(user\/me|get-configs|business\/me)/, (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({}),
-    })
+  await page.route(
+    /.*(\/hub\/user\/v1\/users\/me|\/user\/me|\/get-configs|\/business\/me|\/account).*/,
+    (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          user: { id: 1, name: 'Test User', email: 'test@example.com' },
+        }),
+      })
   );
 }
 
@@ -139,7 +139,7 @@ test.describe('Insights', () => {
 
   test('dashboard loads past auth guard', async ({ page }) => {
     await page.goto(INSIGHTS_URL);
-    await expect(page.getByRole('heading').first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 10_000 });
   });
 
   test('renders without console errors', async ({ page }) => {

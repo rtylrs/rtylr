@@ -60,15 +60,15 @@ function revenueDollars(item: BestSeller): number {
   return item.revenue ?? 0;
 }
 
-const useBestSellers = () =>
+const useBestSellers = (range: string = '7d') =>
   useQuery({
-    queryKey: ['dash-best-sellers'],
+    queryKey: ['dash-best-sellers', range],
     queryFn: async (): Promise<BestSeller[]> => {
       const res = await unwrap(
         safe.get<{ products?: RawBestSeller[] } | RawBestSeller[]>(
           '/insights/product/v1/best-sellers',
           {
-            params: { limit: 5 },
+            params: { limit: 5, range },
           }
         )
       );
@@ -79,8 +79,8 @@ const useBestSellers = () =>
 
 const Analytics: React.FC = () => {
   const [range, setRange] = useState('7d');
-  const { data: kpis, isLoading } = useKpis();
-  const { data: bestSellers = [], isLoading: sellersLoading } = useBestSellers();
+  const { data: kpis, isLoading } = useKpis(range);
+  const { data: bestSellers = [], isLoading: sellersLoading } = useBestSellers(range);
 
   const avgOrderValue = kpis && kpis.ordersToday > 0 ? kpis.revenueToday / kpis.ordersToday : 0;
 

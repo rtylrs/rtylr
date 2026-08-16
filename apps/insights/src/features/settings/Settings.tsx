@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { motion } from 'motion/react';
-import { toast } from 'sonner';
+import { motion, type Variants } from 'motion/react';
 import { Clock, Loader2, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -14,12 +13,12 @@ import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.05 } },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
@@ -50,38 +49,29 @@ const Settings: React.FC = (): React.JSX.Element => {
   const scheduledList = scheduledRes?.scheduledReports ?? [];
 
   const handleSave = (): void => {
-    updateSettings.mutate(
-      { defaultCurrency, fiscalYearStart, timezone },
-      {
-        onSuccess: () => toast.success('Settings saved'),
-        onError: () => toast.error('Failed to save settings'),
-      }
-    );
+    updateSettings.mutate({ defaultCurrency, fiscalYearStart, timezone });
   };
 
   const handleDeleteScheduled = (id: string): void => {
-    deleteScheduled.mutate(id, {
-      onSuccess: () => toast.success('Scheduled report deleted'),
-      onError: () => toast.error('Failed to delete scheduled report'),
-    });
+    deleteScheduled.mutate(id);
   };
 
   return (
     <motion.div
-      variants={containerVariants as any}
+      variants={containerVariants}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-3xl"
     >
       <HelmetContainer title="Settings · rtylr" />
-      <motion.div variants={itemVariants as any}>
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
+      <motion.div variants={itemVariants}>
+        <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.settings.title')}
-        </h2>
+        </h1>
       </motion.div>
 
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="rounded-xl p-5 space-y-4"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
@@ -160,31 +150,33 @@ const Settings: React.FC = (): React.JSX.Element => {
         )}
       </motion.div>
 
-      <motion.div variants={itemVariants as any}>
+      <motion.div variants={itemVariants}>
         <button
           type="button"
           onClick={handleSave}
-          disabled={updateSettings.isPending}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold min-h-[44px]"
+          disabled={updateSettings.isPending || settingsLoading}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold min-h-[44px] disabled:opacity-50"
           style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
-          aria-label={t('insights.settings.saved')}
+          aria-label={t('insights.settings.save', 'Save settings')}
         >
           {updateSettings.isPending && <Loader2 size={14} className="animate-spin" />}
-          {t('insights.settings.saved')}
+          {updateSettings.isPending
+            ? t('insights.settings.saving', 'Saving…')
+            : t('insights.settings.save', 'Save settings')}
         </button>
       </motion.div>
 
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Clock size={14} style={{ color: 'var(--accent)' }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
+            <h2 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               {t('insights.settings.scheduledReports.title')}
-            </h3>
+            </h2>
           </div>
         </div>
         {schedLoading ? (
@@ -214,11 +206,14 @@ const Settings: React.FC = (): React.JSX.Element => {
                 <button
                   type="button"
                   onClick={() => handleDeleteScheduled(s.id)}
-                  className="h-11 w-11 rounded flex items-center justify-center"
+                  className="min-h-[44px] min-w-[44px] rounded flex items-center justify-center"
                   style={{ color: 'var(--hub-text-dim)' }}
-                  aria-label={t('insights.settings.scheduledReports.delete')}
+                  aria-label={t(
+                    'insights.settings.scheduledReports.delete',
+                    'Delete scheduled report'
+                  )}
                 >
-                  <Trash2 size={12} />
+                  <Trash2 size={14} />
                 </button>
               </div>
             ))}

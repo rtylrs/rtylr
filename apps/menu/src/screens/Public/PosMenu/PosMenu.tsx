@@ -37,18 +37,16 @@ const PosMenu: React.FC = (): React.JSX.Element => {
   // ERP products today, so we bucket everything into one "Menu" group.
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!data) return [];
-    const items = data.items
-      .filter((i) => i.isActive)
-      .map((i) => ({
-        id: String(i.id),
-        name: i.name,
-        price: i.salePrice,
-        currency: data.business.currency,
-        description: undefined,
-        image: i.imageUrl,
-        badges: [],
-        available: i.isActive,
-      }));
+    const items = data.items.map((i) => ({
+      id: String(i.id),
+      name: i.name,
+      price: i.salePrice,
+      currency: data.business.currency,
+      description: undefined,
+      image: i.imageUrl,
+      badges: [],
+      available: i.isActive,
+    }));
     if (items.length === 0) return [];
     return [
       {
@@ -109,6 +107,21 @@ const PosMenu: React.FC = (): React.JSX.Element => {
         <h2 className="text-lg font-semibold text-gray-800">Failed to load menu</h2>
         <p className="text-sm text-gray-500">Please try refreshing the page.</p>
       </div>
+    );
+  }
+
+  const hasItems = categories.some((cat) => cat.items && cat.items.length > 0);
+  if (!hasItems) {
+    return (
+      <>
+        <HelmetContainer title="Menu · rtylr" />
+        <div className="min-h-screen flex flex-col items-center justify-center gap-2 bg-white px-4 text-center">
+          <h2 className="text-lg font-semibold text-gray-800">No menu items available</h2>
+          <p className="text-sm text-gray-500">
+            This menu is currently empty. Please check back later.
+          </p>
+        </div>
+      </>
     );
   }
 

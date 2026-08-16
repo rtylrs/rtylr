@@ -17,23 +17,26 @@ export const DangerZone: React.FC<DangerZoneProps> = ({ actions }) => {
   return (
     <div
       className="rounded-xl"
-      style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.3)' }}
+      style={{
+        background: 'var(--status-cancelled-bg)',
+        border: '1px solid var(--status-cancelled)',
+      }}
     >
       <div
         className="px-5 py-4 flex items-center gap-2"
-        style={{ borderBottom: '1px solid rgba(239,68,68,0.2)' }}
+        style={{ borderBottom: '1px solid var(--status-cancelled-bg)' }}
       >
-        <AlertTriangle size={16} style={{ color: '#ef4444' }} />
-        <p className="text-sm font-semibold" style={{ color: '#ef4444' }}>
+        <AlertTriangle size={16} style={{ color: 'var(--status-cancelled)' }} />
+        <p className="text-sm font-semibold" style={{ color: 'var(--status-cancelled)' }}>
           Danger zone
         </p>
       </div>
-      <div className="divide-y" style={{ borderColor: 'rgba(239,68,68,0.2)' }}>
+      <div className="divide-y" style={{ borderColor: 'var(--status-cancelled-bg)' }}>
         {actions.map((a, i) => (
           <div
             key={i}
             className="flex items-center justify-between gap-4 px-5 py-4"
-            style={{ borderTop: i > 0 ? '1px solid rgba(239,68,68,0.15)' : undefined }}
+            style={{ borderTop: i > 0 ? '1px solid var(--status-cancelled-bg)' : undefined }}
           >
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>

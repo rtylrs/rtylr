@@ -4,7 +4,9 @@ import { uploadAsset } from '@voxire/api';
 import { Palette, Upload } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { Button, Input, Label } from '../../shared/components/ui';
-import { Breadcrumbs, SettingSection } from '../../shared/components/dash';
+import { SettingSection } from '../../shared/components/dash';
+import { useUpdateBusiness } from '../../shared/hooks/queries/useBusiness';
+import { useConfigStore } from '../../shared/stores/configStore';
 
 const COLORS = [
   '#4583C4',
@@ -19,9 +21,14 @@ const COLORS = [
 
 const ThemeCustomizer: React.FC = () => {
   const navigate = useNavigate();
-  const [accent, setAccent] = useState('#4583C4');
-  const [brandName, setBrandName] = useState('My Business');
-  const [logoUrl, setLogoUrl] = useState('');
+  const updateBusiness = useUpdateBusiness();
+  const websiteData = useConfigStore((s) => s.websiteData);
+
+  const [accent, setAccent] = useState((websiteData?.primaryColor as string) || '#4583C4');
+  const [brandName, setBrandName] = useState(
+    (websiteData?.brandName as string) || (websiteData?.siteName as string) || 'My Business'
+  );
+  const [logoUrl, setLogoUrl] = useState((websiteData?.logoUrl as string) || '');
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,25 +46,41 @@ const ThemeCustomizer: React.FC = () => {
     }
   };
 
+  const handleSave = () => {
+    document.documentElement.style.setProperty('--dash-accent', accent);
+    updateBusiness.mutate({
+      data: {
+        primaryColor: accent,
+        brandName,
+        logoUrl,
+      },
+    });
+  };
+
   return (
     <>
       <HelmetContainer title="Theme · rtylr" />
       <div className="space-y-5 max-w-3xl">
-        <div className="flex items-center gap-3">
-          <div
-            className="h-9 w-9 rounded-xl flex items-center justify-center"
-            style={{ background: 'rgba(139,92,246,0.15)' }}
-          >
-            <Palette size={16} style={{ color: '#8b5cf6' }} />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="h-9 w-9 rounded-xl flex items-center justify-center"
+              style={{ background: 'rgba(69,131,196,0.15)' }}
+            >
+              <Palette size={16} style={{ color: '#4583C4' }} />
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
+                Theme
+              </h1>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                Your workspace branding.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-semibold" style={{ color: 'var(--dash-text)' }}>
-              Theme
-            </h1>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-              Your workspace branding.
-            </p>
-          </div>
+          <Button onClick={handleSave} disabled={updateBusiness.isPending}>
+            {updateBusiness.isPending ? 'Saving...' : 'Save Theme'}
+          </Button>
         </div>
 
         <SettingSection

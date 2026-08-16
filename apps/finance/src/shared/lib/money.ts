@@ -60,25 +60,44 @@ export function formatCompact(n: number, currency: Currency = 'USD'): string {
   return `${getCurrencySymbol(currency)}${safeNumber.toFixed(0)}`;
 }
 
-export function parseMoney(input: string): number {
-  const cleaned = input.replace(/[^0-9.\-]/g, '');
-  const n = parseFloat(cleaned);
-  return isFinite(n) ? n : 0;
-}
-
 export const FX_RATES: Record<Currency, number> = {
-  USD: 1,
+  USD: 1.0,
   EUR: 0.92,
   GBP: 0.79,
   JPY: 155.0,
   CAD: 1.36,
-  AUD: 1.52,
+  AUD: 1.51,
   CHF: 0.91,
   CNY: 7.23,
 };
 
 export function convert(amount: number, from: Currency, to: Currency): number {
   if (from === to) return amount;
-  const inUsd = amount / (FX_RATES[from] ?? 1);
-  return inUsd * (FX_RATES[to] ?? 1);
+  const fromRate = FX_RATES[from] ?? 1.0;
+  const toRate = FX_RATES[to] ?? 1.0;
+  const amountInUsd = amount / fromRate;
+  return amountInUsd * toRate;
+}
+
+const ZERO_DECIMAL_CURRENCIES: ReadonlySet<Currency> = new Set<Currency>(['JPY']);
+
+export function fractionDigitsForCurrency(currency: Currency): number {
+  return ZERO_DECIMAL_CURRENCIES.has(currency) ? 0 : 2;
+}
+
+export function minorToMajor(amount: number, currency: Currency = 'USD'): number {
+  const digits = fractionDigitsForCurrency(currency);
+  const divisor = Math.pow(10, digits);
+  return amount / divisor;
+}
+
+export function majorToMinor(amount: number, currency: Currency = 'USD'): number {
+  const digits = fractionDigitsForCurrency(currency);
+  return Math.round(amount * Math.pow(10, digits));
+}
+
+export function parseMoney(input: string): number {
+  const cleaned = input.replace(/[^0-9.\-]/g, '');
+  const n = parseFloat(cleaned);
+  return isFinite(n) ? n : 0;
 }

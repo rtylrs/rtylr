@@ -5,10 +5,12 @@ import {
   createRouter,
   Outlet,
   Navigate,
+  redirect,
 } from '@tanstack/react-router';
 import { ErrorBoundary } from '@voxire/ui';
 import { Spinner } from '@voxire/components';
 import { BusinessRoute } from './shared/utils/BusinessRoute';
+import { useUserStore } from './shared/stores/userStore';
 import AppLayout from './layouts/AppLayout';
 import SettingsLayout from './features/settings/Settings/components/SettingsLayout';
 import NoMatch from './features/extras/NoMatch';
@@ -64,6 +66,14 @@ const wrap = (children: React.ReactNode) => (
     <Suspense fallback={fallback}>{children}</Suspense>
   </AppLayout>
 );
+
+const requireAdminOrOwner = () => {
+  const user = useUserStore.getState().user;
+  const role = useUserStore.getState().role || user?.role;
+  if (role && role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'owner') {
+    throw redirect({ to: '/' });
+  }
+};
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -184,12 +194,14 @@ const teamMemberDetailRoute = createRoute({
 const permissionsRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/permissions',
+  beforeLoad: requireAdminOrOwner,
   component: () => wrap(<Permissions />),
 });
 
 const rolesRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/roles',
+  beforeLoad: requireAdminOrOwner,
   component: () => wrap(<Roles />),
 });
 
@@ -202,6 +214,7 @@ const appsRoute = createRoute({
 const auditRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/audit',
+  beforeLoad: requireAdminOrOwner,
   component: () => wrap(<Audit />),
 });
 
@@ -226,12 +239,14 @@ const billingRedirectRoute = createRoute({
 const apiKeysRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/api-keys',
+  beforeLoad: requireAdminOrOwner,
   component: () => wrap(<ApiKeys />),
 });
 
 const webhooksRoute = createRoute({
   getParentRoute: () => businessRoute,
   path: '/webhooks',
+  beforeLoad: requireAdminOrOwner,
   component: () => wrap(<Webhooks />),
 });
 

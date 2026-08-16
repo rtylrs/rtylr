@@ -12,11 +12,13 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   businessId: number;
+  locationId?: number;
   addItem: (item: Omit<CartItem, 'quantity' | 'notes'>) => void;
   removeItem: (menuItemId: number) => void;
   updateQuantity: (menuItemId: number, qty: number) => void;
   setItemNote: (menuItemId: number, note: string) => void;
   setBusinessId: (id: number) => void;
+  setLocationId: (id?: number) => void;
   clearCart: () => void;
   total: () => number;
   itemCount: () => number;
@@ -27,6 +29,7 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
       businessId: 0,
+      locationId: undefined,
 
       addItem: (item) => {
         set((state) => {
@@ -72,8 +75,12 @@ export const useCartStore = create<CartState>()(
         set({ businessId: id });
       },
 
+      setLocationId: (id) => {
+        set({ locationId: id });
+      },
+
       clearCart: () => {
-        set({ items: [], businessId: 0 });
+        set({ items: [], businessId: 0, locationId: undefined });
       },
 
       total: () => {

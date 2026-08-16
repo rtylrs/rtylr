@@ -21,10 +21,10 @@ export interface NotificationItemProps {
 }
 
 const TYPE_META = {
-  info: { icon: Info, color: '#4583C4' },
-  success: { icon: CheckCircle2, color: '#10b981' },
-  warning: { icon: AlertTriangle, color: '#f59e0b' },
-  error: { icon: AlertCircle, color: '#ef4444' },
+  info: { icon: Info, color: 'var(--accent)' },
+  success: { icon: CheckCircle2, color: 'var(--status-active)' },
+  warning: { icon: AlertTriangle, color: 'var(--status-trial)' },
+  error: { icon: AlertCircle, color: 'var(--status-cancelled)' },
 } as const;
 
 export const NotificationItem: React.FC<NotificationItemProps> = ({
@@ -45,7 +45,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
     >
       <div
         className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-        style={{ background: `${meta.color}15` }}
+        style={{ background: 'var(--dash-hover)' }}
       >
         <Icon size={14} style={{ color: meta.color }} />
       </div>
@@ -57,7 +57,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
           {!notification.read && (
             <span
               className="h-1.5 w-1.5 rounded-full shrink-0 mt-1.5"
-              style={{ background: '#4583C4' }}
+              style={{ background: 'var(--accent)' }}
             />
           )}
         </div>

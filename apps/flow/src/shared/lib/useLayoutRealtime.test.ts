@@ -106,7 +106,7 @@ describe('useLayoutRealtime', () => {
   // wasteful and clobbers an in-flight optimistic update. Matches
   // useTaskRealtime and useProjectRealtime.
   describe('self-authored events', () => {
-    it.each(['project.created', 'workspace.member_added', 'notification.created'])(
+    it.each(['project.created', 'workspace.member_added'])(
       'ignores %s when the current user is the actor',
       (type) => {
         const spy = mount();
@@ -114,6 +114,12 @@ describe('useLayoutRealtime', () => {
         expect(spy).not.toHaveBeenCalled();
       }
     );
+
+    it('processes notification events even when the current user is the actor', () => {
+      const spy = mount();
+      handler?.(event({ type: 'notification.created', actor_id: 42 }));
+      expect(keys(spy)).toEqual([JSON.stringify(['notifications'])]);
+    });
 
     // actor_id arrives numeric from the server while the store holds a string.
     it('compares actor_id and user id as strings', () => {

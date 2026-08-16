@@ -5,6 +5,26 @@ const finiteNumber = z.preprocess((value) => {
   return Number.isFinite(parsed) ? parsed : 0;
 }, z.number());
 
+export const dashOrderItemSchema = z
+  .object({
+    id: z.union([z.string(), z.number()]).transform(String).optional(),
+    name: z.string().optional(),
+    title: z.string().optional(),
+    quantity: finiteNumber.optional(),
+    qty: finiteNumber.optional(),
+    unitPrice: finiteNumber.optional(),
+    unit_price: finiteNumber.optional(),
+    price: finiteNumber.optional(),
+  })
+  .transform((raw) => ({
+    id: raw.id ?? '',
+    name: raw.name || raw.title || 'Product',
+    quantity: raw.quantity ?? raw.qty ?? 1,
+    price: raw.unitPrice ?? raw.unit_price ?? raw.price ?? 0,
+  }));
+
+export type HubOrderItem = z.infer<typeof dashOrderItemSchema>;
+
 export const dashOrderSchema = z
   .object({
     id: z.union([z.string(), z.number()]).transform(String),
@@ -25,6 +45,8 @@ export const dashOrderSchema = z
     shippingAddress: z.string().optional(),
     shipping_address: z.string().optional(),
     notes: z.string().optional().default(''),
+    items: z.array(dashOrderItemSchema).optional(),
+    line_items: z.array(dashOrderItemSchema).optional(),
     createdAt: z.string().optional(),
     created_at: z.string().optional(),
     updatedAt: z.string().optional(),
@@ -43,6 +65,7 @@ export const dashOrderSchema = z
     total: raw.total,
     shippingAddress: raw.shippingAddress ?? raw.shipping_address ?? '',
     notes: raw.notes,
+    items: raw.items ?? raw.line_items ?? [],
     createdAt: raw.createdAt ?? raw.created_at ?? '',
     updatedAt: raw.updatedAt ?? raw.updated_at ?? '',
   }));

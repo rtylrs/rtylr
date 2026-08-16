@@ -24,12 +24,9 @@ function getCategoryColor(cat: string): string {
 
 type CategoryNameLookup = (categoryId?: number | null) => string;
 
-const fmt = (n: number) =>
-  toFiniteNumber(n).toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  });
+import { formatMoney, type Currency } from '../../shared/lib/money';
+
+const fmt = (n: number, currency: Currency = 'USD') => formatMoney(n, currency, 0);
 
 const cardStyle: React.CSSProperties = {
   background: 'var(--hub-card)',

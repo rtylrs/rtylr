@@ -1,0 +1,18 @@
+{
+  "title": "إتمام الطلب",
+  "name": "الاسم",
+  "namePlaceholder": "اسمك الكامل",
+  "phone": "رقم الهاتف",
+  "phonePlaceholder": "مثال: +961 3 123456",
+  "email": "البريد الإلكتروني (اختياري)",
+  "emailPlaceholder": "you@example.com",
+  "notes": "ملاحظات الطلب (اختياري)",
+  "notesPlaceholder": "أي تعليمات خاصة أو متطلبات إضافية...",
+  "placeOrder": "تأكيد الطلب",
+  "submitting": "جاري تأكيد الطلب...",
+  "emptyCart": "سلة التسوق فارغة",
+  "nameRequired": "يرجى إدخال الاسم.",
+  "phoneRequired": "يرجى إدخال رقم الهاتف.",
+  "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح.",
+  "orderFailed": "فشل في تأكيد الطلب. يرجى المحاولة مرة أخرى."
+}

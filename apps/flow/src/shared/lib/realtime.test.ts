@@ -64,7 +64,7 @@ describe('useRealtimeStatus', () => {
     });
   }
 
-  it('starts from the client\'s current status rather than assuming connected', () => {
+  it("starts from the client's current status rather than assuming connected", () => {
     mocks.state.status = 'connecting';
     const { result } = renderHook(() => useRealtimeStatus());
 

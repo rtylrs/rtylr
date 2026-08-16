@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import api from '../../shared/lib/api';
@@ -14,6 +15,7 @@ interface OrderItem {
 
 interface PlaceOrderRequest {
   owner_id: number;
+  location_id?: number;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -28,7 +30,7 @@ interface PlaceOrderResponse {
 
 const Checkout = (): React.JSX.Element => {
   const navigate = useNavigate();
-  const { items, businessId, total, setItemNote, clearCart } = useCartStore();
+  const { items, businessId, locationId, total, setItemNote, clearCart } = useCartStore();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -43,17 +45,42 @@ const Checkout = (): React.JSX.Element => {
   const formatPrice = (price: number): string =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price);
 
+  const onlineOrderingEnabled = import.meta.env.VITE_ONLINE_ORDERING_ENABLED !== 'false';
+
+  const { t } = useTranslation('checkout');
+
+  if (!onlineOrderingEnabled) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
+        <h2 className="text-xl font-semibold">Online Ordering Disabled</h2>
+        <p className="mt-2 text-sm text-gray-600">
+          Online ordering is currently disabled for this menu.
+        </p>
+        <button
+          onClick={() => navigate({ to: '/' })}
+          className="mt-6 rounded-lg bg-black px-4 py-2 text-sm text-white"
+        >
+          Back to Menu
+        </button>
+      </div>
+    );
+  }
+
   const validate = (): boolean => {
     if (!name.trim()) {
-      setErrorMessage('Please enter your name.');
+      setErrorMessage(t('nameRequired'));
       return false;
     }
     if (!phone.trim()) {
-      setErrorMessage('Please enter your phone number.');
+      setErrorMessage(t('phoneRequired'));
+      return false;
+    }
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMessage(t('emailInvalid'));
       return false;
     }
     if (items.length === 0) {
-      setErrorMessage('Your cart is empty.');
+      setErrorMessage(t('emptyCart'));
       return false;
     }
     return true;
@@ -69,6 +96,7 @@ const Checkout = (): React.JSX.Element => {
 
     const body: PlaceOrderRequest = {
       owner_id: businessId,
+      location_id: locationId || undefined,
       customer_name: name.trim(),
       customer_email: email.trim(),
       customer_phone: phone.trim(),
@@ -86,7 +114,12 @@ const Checkout = (): React.JSX.Element => {
       const res = await api.post<PlaceOrderResponse>('/pos/orders/v1/orders/public', body);
       const { order_id, order_number } = res.data;
       clearCart();
-      void navigate({ to: `/order-status/${order_id}?number=${encodeURIComponent(order_number)}` });
+      const bId = body.business_id ? `&business_id=${encodeURIComponent(body.business_id)}` : '';
+      const slug = (search as any)?.slug;
+      const slugQuery = slug ? `&slug=${encodeURIComponent(slug)}` : '';
+      void navigate({
+        to: `/order-status/${order_id}?number=${encodeURIComponent(order_number)}${bId}${slugQuery}`,
+      });
     } catch {
       setErrorMessage('Failed to place order. Please try again.');
     } finally {

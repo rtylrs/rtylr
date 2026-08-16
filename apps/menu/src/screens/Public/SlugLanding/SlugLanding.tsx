@@ -35,7 +35,7 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
   if (isLoading) return <FullScreenLoader />;
 
   if (isError) {
-    if (isMongoId(slug)) return <Menu />;
+    if (isMongoId(slug)) return <Menu id={slug} />;
     return (
       <div
         style={{

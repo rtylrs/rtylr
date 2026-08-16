@@ -51,66 +51,76 @@ import { useNotifications } from '../shared/hooks/queries/useNotifications';
 import { isAddonEnabled, useAddons } from '../shared/hooks/queries/useAddons';
 import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
 import { buildDashPageContext, buildDashSystemContext } from '../shared/lib/dashCaretContext';
+import { useTranslation } from 'react-i18next';
 
 interface NavItem {
+  key: string;
   label: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
 }
 
-const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
-  { label: 'Team', path: '/team', icon: Users },
-  { label: 'Apps', path: '/apps', icon: Grid3x3 },
+const rawNavItems: NavItem[] = [
+  { key: 'dashboard', label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { key: 'team', label: 'Team', path: '/team', icon: Users },
+  { key: 'apps', label: 'Apps', path: '/apps', icon: Grid3x3 },
 ];
 
-const menuSubItems: NavItem[] = [
-  { label: 'Menus', path: '/menus', icon: UtensilsCrossed },
-  { label: 'QR Codes', path: '/qr-codes', icon: QrCode },
-  { label: 'Design', path: '/design', icon: Palette },
+const rawMenuSubItems: NavItem[] = [
+  { key: 'menus', label: 'Menus', path: '/menus', icon: UtensilsCrossed },
+  { key: 'qrCodes', label: 'QR Codes', path: '/qr-codes', icon: QrCode },
+  { key: 'design', label: 'Design', path: '/design', icon: Palette },
 ];
 
-const routeLabels: Record<string, string> = {
-  '/': 'Dashboard',
-  '/chat': '__caret__',
-  '/menus': 'Menus',
-  '/orders': 'Orders',
-  '/qr-codes': 'QR Codes',
-  '/design': 'Design',
-  '/analytics': 'Analytics',
-  '/menu': 'Menu',
-  '/create-item': 'Create Item',
-  '/create-banner': 'Create Banner',
-  '/team': 'Team',
-  '/team/invite': 'Invite member',
-  '/permissions': 'Permissions',
-  '/roles': 'Roles',
-  '/apps': 'Apps',
-  '/audit': 'Audit log',
-  '/notifications': 'Notifications',
-  '/account': 'Account',
-  '/billing': 'Billing',
-  '/integrations': 'Integrations',
-  '/api-keys': 'API Keys',
-  '/webhooks': 'Webhooks',
-  '/security': 'Security',
-  '/theme': 'Theme',
-  '/help': 'Help center',
-  '/settings': 'Manage account',
-  '/settings/account': 'Account',
-  '/settings/general': 'General',
-  '/settings/industry': 'Industry',
-  '/settings/domain': 'Custom Domain',
-  '/settings/email': 'Email Settings',
-  '/settings/billing': 'Billing',
-  '/settings/subscription': 'Billing',
-  '/settings/addons': 'Addons',
+const routeKeys: Record<string, { key: string; fallback: string }> = {
+  '/': { key: 'dashboard', fallback: 'Dashboard' },
+  '/chat': { key: 'chat', fallback: '__caret__' },
+  '/menus': { key: 'menus', fallback: 'Menus' },
+  '/orders': { key: 'orders', fallback: 'Orders' },
+  '/qr-codes': { key: 'qrCodes', fallback: 'QR Codes' },
+  '/design': { key: 'design', fallback: 'Design' },
+  '/analytics': { key: 'analytics', fallback: 'Analytics' },
+  '/menu': { key: 'menu', fallback: 'Menu' },
+  '/create-item': { key: 'createItem', fallback: 'Create Item' },
+  '/create-banner': { key: 'createBanner', fallback: 'Create Banner' },
+  '/team': { key: 'team', fallback: 'Team' },
+  '/team/invite': { key: 'inviteMember', fallback: 'Invite member' },
+  '/permissions': { key: 'permissions', fallback: 'Permissions' },
+  '/roles': { key: 'roles', fallback: 'Roles' },
+  '/apps': { key: 'apps', fallback: 'Apps' },
+  '/audit': { key: 'auditLog', fallback: 'Audit log' },
+  '/notifications': { key: 'notifications', fallback: 'Notifications' },
+  '/account': { key: 'account', fallback: 'Account' },
+  '/billing': { key: 'billing', fallback: 'Billing' },
+  '/integrations': { key: 'integrations', fallback: 'Integrations' },
+  '/api-keys': { key: 'apiKeys', fallback: 'API Keys' },
+  '/webhooks': { key: 'webhooks', fallback: 'Webhooks' },
+  '/security': { key: 'security', fallback: 'Security' },
+  '/theme': { key: 'theme', fallback: 'Theme' },
+  '/help': { key: 'helpCenter', fallback: 'Help center' },
+  '/settings': { key: 'manageAccount', fallback: 'Manage account' },
+  '/settings/account': { key: 'account', fallback: 'Account' },
+  '/settings/general': { key: 'general', fallback: 'General' },
+  '/settings/industry': { key: 'industry', fallback: 'Industry' },
+  '/settings/domain': { key: 'customDomain', fallback: 'Custom Domain' },
+  '/settings/email': { key: 'emailSettings', fallback: 'Email Settings' },
+  '/settings/billing': { key: 'billing', fallback: 'Billing' },
+  '/settings/subscription': { key: 'billing', fallback: 'Billing' },
+  '/settings/addons': { key: 'addons', fallback: 'Addons' },
 };
 
-function getPageTitle(pathname: string): string {
-  if (routeLabels[pathname]) return routeLabels[pathname];
-  const match = Object.keys(routeLabels).find((key) => pathname.startsWith(key) && key !== '/');
-  return match ? routeLabels[match] : 'Dash';
+function getPageTitle(pathname: string, t: (key: string, options?: any) => string): string {
+  const matchEntry = routeKeys[pathname]
+    ? routeKeys[pathname]
+    : Object.keys(routeKeys).find((key) => pathname.startsWith(key) && key !== '/')
+      ? routeKeys[Object.keys(routeKeys).find((key) => pathname.startsWith(key) && key !== '/')!]
+      : null;
+
+  if (matchEntry) {
+    if (matchEntry.key === 'chat') return '__caret__';
+    return t(`nav.${matchEntry.key}`, matchEntry.fallback);
+  }
+  return 'Dash';
 }
 
 function getInitials(name?: string | null): string {
@@ -157,7 +167,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
       {isActive && (
         <motion.span
           className="relative ml-auto h-1 w-1 rounded-full shrink-0"
-          style={{ background: '#4583C4' }}
+          style={{ background: 'var(--accent)' }}
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 600, damping: 20 }}
@@ -190,7 +200,10 @@ const SidebarSection: React.FC<{
         <span className="dash-sidebar-label flex-1 text-left">{label}</span>
         <ChevronRight
           size={12}
-          className={cn('dash-sidebar-chevron shrink-0 transition-transform', open && 'rotate-90')}
+          className={cn(
+            'dash-sidebar-chevron shrink-0 transition-transform rtl:rotate-180',
+            open && 'rotate-90'
+          )}
           style={{ color: 'var(--dash-text-dim)' }}
         />
       </button>
@@ -200,7 +213,7 @@ const SidebarSection: React.FC<{
           style={{ borderInlineStart: '1px solid var(--dash-border)' }}
         >
           {items.map((item) => (
-            <SidebarNavItem key={item.path} {...item} />
+            <SidebarNavItem key={item.path} label={item.label} path={item.path} icon={item.icon} />
           ))}
         </div>
       )}
@@ -300,11 +313,23 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const unreadCount = Array.isArray(notifications)
     ? notifications.filter((n) => !n.read).length
     : 0;
-  const pageTitle = getPageTitle(pathname);
+  const { t } = useTranslation('common');
+  const pageTitle = getPageTitle(pathname, t);
+
+  const navItems = rawNavItems.map((item) => ({
+    ...item,
+    label: t(`nav.${item.key}`, item.label),
+  }));
+
+  const menuSubItems = rawMenuSubItems.map((item) => ({
+    ...item,
+    label: t(`nav.${item.key}`, item.label),
+  }));
   const userEmail = user?.email || null;
   const userName = user?.fullName || 'User';
   const businessName = user?.businessName || 'My Business';
-  const isConsoleAdmin = user?.isConsoleAdmin === true || user?.is_console_admin === true;
+  const isConsoleAdmin = user?.isConsoleAdmin === true;
+
   const caretSystemContext = React.useMemo(
     () =>
       buildDashSystemContext({
@@ -339,6 +364,12 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
   return (
     <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-3 focus:bg-[var(--dash-surface)] focus:text-[var(--dash-text)] focus:border focus:border-[var(--dash-border)] focus:rounded-lg focus:shadow-lg focus:top-2 focus:left-2"
+      >
+        Skip to main content
+      </a>
       <div
         className="dash-shell flex h-screen overflow-hidden relative"
         style={{ background: 'var(--dash-bg)' }}
@@ -385,12 +416,21 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
             {navItems.map((item) => (
-              <SidebarNavItem key={item.path} {...item} />
+              <SidebarNavItem
+                key={item.path}
+                label={item.label}
+                path={item.path}
+                icon={item.icon}
+              />
             ))}
 
             {/* Storefront section - only shown when menu addon is enabled */}
             {menuAddonEnabled && (
-              <SidebarSection label="Storefront" icon={Store} items={menuSubItems} />
+              <SidebarSection
+                label={t('nav.storefront', 'Storefront')}
+                icon={Store}
+                items={menuSubItems}
+              />
             )}
 
             <AppsSection />
@@ -414,7 +454,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               }}
             >
               <Settings size={16} />
-              <span className="dash-sidebar-label">Manage account</span>
+              <span className="dash-sidebar-label">{t('nav.manageAccount', 'Manage account')}</span>
             </Link>
 
             <DropdownMenu>
@@ -426,7 +466,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     initials={getInitials(userName)}
                     size="sm"
                     className="shrink-0"
-                    style={{ background: 'rgba(69,131,196,0.15)', color: '#4583C4' }}
+                    style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
                   />
                   <div className="dash-sidebar-user flex flex-col items-start min-w-0 flex-1">
                     <span
@@ -473,12 +513,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                         onClick={() => setTheme(value)}
                         className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
                         style={{
-                          background:
-                            theme === value ? 'rgba(69,131,196,0.15)' : 'var(--dash-hover)',
-                          color: theme === value ? '#4583C4' : 'var(--dash-text-muted)',
+                          background: theme === value ? 'var(--accent-muted)' : 'var(--dash-hover)',
+                          color: theme === value ? 'var(--accent)' : 'var(--dash-text-muted)',
                           border:
                             theme === value
-                              ? '1px solid rgba(69,131,196,0.3)'
+                              ? '1px solid var(--accent-border)'
                               : '1px solid transparent',
                         }}
                       >
@@ -538,14 +577,14 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                       className="h-6 w-6 rounded-lg flex items-center justify-center"
                       style={{ background: 'rgba(139,92,246,0.1)' }}
                     >
-                      <Sparkles size={13} style={{ color: '#8b5cf6' }} />
+                      <Sparkles size={13} style={{ color: 'var(--app-crm)' }} />
                     </div>
                     <span className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                       Caret
                     </span>
                     <span
                       className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
-                      style={{ background: 'rgba(139,92,246,0.1)', color: '#8b5cf6' }}
+                      style={{ background: 'rgba(139,92,246,0.1)', color: 'var(--app-crm)' }}
                     >
                       AI
                     </span>
@@ -580,13 +619,15 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   onClick={() => navigate({ to: '/notifications' })}
                   className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}
-                  aria-label="Notifications"
+                  aria-label={
+                    unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'
+                  }
                 >
                   <Bell size={14} />
                   {unreadCount > 0 && (
                     <span
                       className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full"
-                      style={{ background: '#ef4444' }}
+                      style={{ background: 'var(--status-cancelled)' }}
                     />
                   )}
                 </button>
@@ -597,6 +638,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             {/* Page content */}
             <AnimatePresence mode="wait">
               <motion.main
+                id="main-content"
                 key={pathname}
                 initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}

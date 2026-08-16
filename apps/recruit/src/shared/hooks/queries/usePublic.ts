@@ -57,6 +57,7 @@ interface SubmitApplicationBody {
   // or string[] for multi_select / boolean). The server stores this
   // opaquely and the admin decodes it for display.
   answersJson?: string;
+  consented?: boolean;
 }
 
 interface SubmitApplicationResponse {

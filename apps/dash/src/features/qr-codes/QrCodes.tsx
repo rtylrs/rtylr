@@ -90,7 +90,7 @@ const QrCodes: React.FC = () => {
             </div>
             <Button size="sm" onClick={() => navigate({ to: '/qr-codes/create' })}>
               <Plus size={14} />
-              QR Code
+              Custom QR Generator
             </Button>
           </div>
         </div>

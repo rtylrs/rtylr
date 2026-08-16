@@ -1,18 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { Plus } from 'lucide-react';
-import { Button } from '../../shared/components/ui';
-import { Breadcrumbs, SkeletonGrid } from '../../shared/components/dash';
+import {
+  Button,
+  Input,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../../shared/components/ui';
+import { SkeletonGrid } from '../../shared/components/dash';
 import { useCustomRoles, useCreateCustomRole } from '../../shared/hooks/queries/usePermissions';
+import { useUserStore } from '../../shared/stores/userStore';
 
 const Roles: React.FC = () => {
+  const user = useUserStore((s) => s.user);
   const { data = [], isLoading } = useCustomRoles();
   const createRole = useCreateCustomRole();
+  const [open, setOpen] = useState(false);
+  const [roleName, setRoleName] = useState('');
 
-  const handleCreateRole = () => {
-    const name = window.prompt('Enter new role name:');
-    if (name && name.trim()) {
-      createRole.mutate({ name: name.trim() });
+  const isAdminOrOwner =
+    user?.role?.toLowerCase() === 'admin' || user?.role?.toLowerCase() === 'owner';
+
+  const handleCreateRole = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAdminOrOwner) return;
+    const name = roleName.trim();
+    if (name) {
+      createRole.mutate({ name });
+      setRoleName('');
+      setOpen(false);
     }
   };
 
@@ -29,10 +48,12 @@ const Roles: React.FC = () => {
               Build purpose-built roles for your business. Assign them to members in Team.
             </p>
           </div>
-          <Button onClick={handleCreateRole}>
-            <Plus size={14} />
-            New role
-          </Button>
+          {isAdminOrOwner && (
+            <Button onClick={() => setOpen(true)}>
+              <Plus size={14} />
+              New role
+            </Button>
+          )}
         </div>
 
         {isLoading ? (
@@ -76,6 +97,35 @@ const Roles: React.FC = () => {
           </div>
         )}
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <form onSubmit={handleCreateRole} className="space-y-4">
+            <DialogHeader>
+              <DialogTitle>Create Custom Role</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2">
+              <label className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
+                Role Name
+              </label>
+              <Input
+                value={roleName}
+                onChange={(e) => setRoleName(e.target.value)}
+                placeholder="e.g. Shift Manager"
+                autoFocus
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!roleName.trim() || createRole.isPending}>
+                Create Role
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

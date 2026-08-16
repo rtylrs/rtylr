@@ -4,6 +4,8 @@ import { ArrowLeft, MapPin, Briefcase, Clock, Award } from 'lucide-react';
 
 import Header from '../shared/Header';
 import type { JobProps } from '../resolver';
+import { cleanMojibake } from '../../shared/lib/sanitize';
+import SemanticContent from '../../shared/components/SemanticContent';
 
 const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
   return (
@@ -12,14 +14,16 @@ const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
       <main className="mx-auto max-w-3xl px-6 py-12">
         <Link
           to={`/${slug}` as any}
-          className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
+          className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium hover:underline"
           style={{ color: 'var(--recruit-muted)' }}
         >
           <ArrowLeft className="h-4 w-4" />
           All roles
         </Link>
 
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">{career.title}</h1>
+        <h1 className="mt-6 text-3xl font-semibold tracking-tight sm:text-4xl">
+          {cleanMojibake(career.title)}
+        </h1>
 
         <div
           className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm"
@@ -28,45 +32,42 @@ const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
           {career.department && (
             <span className="inline-flex items-center gap-1.5">
               <Briefcase className="h-4 w-4" />
-              {career.department}
+              {cleanMojibake(career.department)}
             </span>
           )}
           {career.location && (
             <span className="inline-flex items-center gap-1.5">
               <MapPin className="h-4 w-4" />
-              {career.location}
+              {cleanMojibake(career.location)}
             </span>
           )}
           {career.workMode && (
             <span className="inline-flex items-center gap-1.5">
               <Clock className="h-4 w-4" />
-              {career.workMode}
+              {cleanMojibake(career.workMode)}
             </span>
           )}
           {career.seniority && (
             <span className="inline-flex items-center gap-1.5">
               <Award className="h-4 w-4" />
-              {career.seniority}
+              {cleanMojibake(career.seniority)}
             </span>
           )}
-          {career.employmentType && <span>{career.employmentType}</span>}
+          {career.employmentType && <span>{cleanMojibake(career.employmentType)}</span>}
         </div>
 
         <article
-          className="prose prose-sm mt-10 max-w-none whitespace-pre-wrap leading-relaxed"
+          className="mt-10 max-w-none text-sm leading-relaxed"
           style={{ color: 'var(--recruit-fg)' }}
         >
-          {career.details}
+          <SemanticContent content={career.details} />
         </article>
 
         {career.requirements && (
           <section className="mt-8">
             <h2 className="text-sm font-semibold uppercase tracking-wider">Requirements</h2>
-            <div
-              className="mt-3 whitespace-pre-wrap text-sm leading-relaxed"
-              style={{ color: 'var(--recruit-fg)' }}
-            >
-              {career.requirements}
+            <div className="mt-3 text-sm leading-relaxed" style={{ color: 'var(--recruit-fg)' }}>
+              <SemanticContent content={career.requirements} />
             </div>
           </section>
         )}
@@ -84,7 +85,7 @@ const MinimalJob: React.FC<JobProps> = ({ career, customization, slug }) => {
 
         <Link
           to={`/${slug}/${career.slug}/apply` as any}
-          className="mt-12 inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+          className="mt-12 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
           style={{ background: 'var(--recruit-accent)' }}
         >
           Apply for this role

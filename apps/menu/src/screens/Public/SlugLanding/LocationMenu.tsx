@@ -29,20 +29,24 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     isLoading: menuLoading,
     isError: menuError,
   } = usePublicMenu(businessId, location?.id ?? null);
-  const { clearCart, setBusinessId, addItem, updateQuantity } = useCartStore();
+  const { clearCart, setBusinessId, setLocationId, addItem, updateQuantity } = useCartStore();
+
+  React.useEffect(() => {
+    if (businessId) setBusinessId(businessId);
+    if (location?.id) setLocationId(location.id);
+  }, [businessId, location?.id, setBusinessId, setLocationId]);
 
   const categories = useMemo<MenuCategoryData[]>(() => {
     if (!menu) return [];
-    const items = menu.items
-      .filter((i) => i.isActive)
-      .map((i) => ({
-        id: String(i.id),
-        name: i.name,
-        price: i.salePrice,
-        currency: menu.business.currency,
-        description: undefined,
-        image: i.imageUrl,
-      }));
+    const items = menu.items.map((i) => ({
+      id: String(i.id),
+      name: i.name,
+      price: i.salePrice,
+      currency: menu.business.currency,
+      description: undefined,
+      image: i.imageUrl,
+      available: i.isActive,
+    }));
     return [{ id: 'all', name: 'Menu', items }];
   }, [menu]);
 
@@ -76,6 +80,18 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
     name: `${biz.business.name} - ${location.name}`,
     logo: biz.business.logoUrl || undefined,
   };
+
+  const hasItems = categories.some((cat) => cat.items && cat.items.length > 0);
+  if (!hasItems) {
+    return (
+      <div style={{ padding: 48, textAlign: 'center' }}>
+        <h1 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>No menu items available</h1>
+        <p style={{ fontSize: 14, opacity: 0.7 }}>
+          This menu is currently empty. Please check back later.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>

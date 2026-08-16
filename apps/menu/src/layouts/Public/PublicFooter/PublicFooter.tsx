@@ -1,35 +1,35 @@
 import { FaInstagram } from 'react-icons/fa';
 import { Link } from '@tanstack/react-router';
 import PackageJson from '@root/package.json';
+import { APP_URLS } from '@voxire/config';
 import { useConfigStore } from '../../../stores/configStore';
 import React from 'react';
 
 const Footer: React.FC = () => {
   const config = useConfigStore((s) => s.contactInfo);
+  const landingUrl = (APP_URLS.landing || 'https://rtylr.com').replace(/\/$/, '');
 
   const footerSections = [
     {
       title: 'Company',
       links: [
-        { to: '/about', label: 'About Us' },
-        { to: '/contact', label: 'Contact Us' },
+        { to: `${landingUrl}/about`, label: 'About Us', external: true },
+        { to: `${landingUrl}/contact`, label: 'Contact Us', external: true },
         { to: 'https://voxire.com/careers', label: 'Careers', external: true },
       ],
     },
     {
       title: 'Quick Links',
       links: [
-        { to: '/faqs', label: 'FAQs' },
-        { to: '/pricing', label: 'Pricing' },
-        { to: '/feedback', label: 'Feedback' },
+        { to: `${landingUrl}/faqs`, label: 'FAQs', external: true },
+        { to: `${landingUrl}/pricing`, label: 'Pricing', external: true },
       ],
     },
     {
       title: 'Legal',
       links: [
-        { to: '/', label: 'Privacy Policy' },
-        { to: '/', label: 'Terms and Conditions' },
-        { to: '/', label: 'Disclaimer' },
+        { to: `${landingUrl}/privacy`, label: 'Privacy Policy', external: true },
+        { to: `${landingUrl}/terms`, label: 'Terms and Conditions', external: true },
       ],
     },
   ];

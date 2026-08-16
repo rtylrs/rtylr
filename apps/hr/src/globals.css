@@ -80,6 +80,14 @@
   --hr-shadow: 0 8px 32px rgba(0, 0, 0, 0.14), 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
+.rtylr-logo {
+  filter: brightness(0) invert(1);
+}
+
+:root[data-theme='light'] .rtylr-logo {
+  filter: brightness(0);
+}
+
 /* ── Tailwind colour tokens re-pointed at this app's runtime theme ──────────
  * This app sets --accent itself, so bg-accent / ring-accent follow its own
  * brand rather than the shared preset's cyan. */
@@ -87,7 +95,6 @@
   --color-accent: var(--accent);
   --color-ring: var(--accent);
 }
-
 @layer base {
   *,
   *::before,

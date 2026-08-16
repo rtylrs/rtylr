@@ -29,10 +29,12 @@ import { useConfigStore } from '../../../../../shared/stores/configStore';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import { toast } from 'sonner';
 
+const DOMAIN_REGEX = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/;
+
 const Domain: React.FC = () => {
   const user = useUserStore((s) => s.user);
   const websiteData = useConfigStore((s) => s.websiteData) as
-    | { slug?: string; domain?: string }
+    | { slug?: string; domain?: string; customDomain?: string }
     | undefined;
   const updateBusiness = useUpdateBusiness();
   const fallbackSlug =
@@ -43,9 +45,12 @@ const Domain: React.FC = () => {
   const slug = websiteData?.slug || fallbackSlug;
   const menuUrl = `menu.rtylr.com/${slug}`;
 
+  const configuredDomain = websiteData?.customDomain || websiteData?.domain;
+  const isConfigured = Boolean(configuredDomain && DOMAIN_REGEX.test(configuredDomain));
+
   const [copied, setCopied] = useState(false);
   const [dnsOpen, setDnsOpen] = useState(true);
-  const [customDomainInput, setCustomDomainInput] = useState(websiteData?.domain || '');
+  const [customDomainInput, setCustomDomainInput] = useState(configuredDomain || '');
 
   const handleCopy = async () => {
     try {
@@ -66,16 +71,21 @@ const Domain: React.FC = () => {
 
   const handleConnectDomain = () => {
     const domain = customDomainInput.trim().toLowerCase();
-    if (!domain) {
-      toast.error('Please enter a valid domain');
+    if (!domain || !DOMAIN_REGEX.test(domain)) {
+      toast.error('Please enter a valid domain (e.g. menu.yourbrand.com)');
       return;
     }
-    updateBusiness.mutate({
-      data: { website: domain },
-    });
+    updateBusiness.mutate(
+      {
+        data: { customDomain: domain, website: domain },
+      },
+      {
+        onSuccess: () => {
+          toast.success('Custom domain saved. DNS propagation may take up to 24 hours.');
+        },
+      }
+    );
   };
-
-  const isConfigured = !!websiteData?.domain || !!customDomainInput;
 
   return (
     <>

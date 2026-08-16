@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { safe } from '../../lib/api';
 import { permissionMatrixSchema, customRoleSchema } from '../../schemas/permissions';
+import i18next from 'i18next';
 
 export type { PermissionDef, PermissionMatrix, CustomRole } from '../../schemas/permissions';
 export type Role = 'owner' | 'admin' | 'manager' | 'staff' | 'viewer' | string;
@@ -38,10 +39,16 @@ export const useUpdatePermissions = () => {
       return unwrap(safe.put('/hub/permission/v1/permissions', payload));
     },
     onSuccess: () => {
-      toast.success('Permission updated');
+      toast.success(i18next.t('toasts.permissionUpdated', 'Permission updated'));
       qc.invalidateQueries({ queryKey: ['permissions'] });
     },
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to update permission')),
+    onError: (error) =>
+      toast.error(
+        getOneKitErrorMessage(
+          error,
+          i18next.t('toasts.failedUpdatePermission', 'Failed to update permission')
+        )
+      ),
   });
 };
 
@@ -52,9 +59,12 @@ export const useCreateCustomRole = () => {
       return unwrap(safe.post('/hub/permission/v1/roles', payload));
     },
     onSuccess: () => {
-      toast.success('Role created');
+      toast.success(i18next.t('toasts.roleCreated', 'Role created'));
       qc.invalidateQueries({ queryKey: ['custom-roles'] });
     },
-    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to create role')),
+    onError: (error) =>
+      toast.error(
+        getOneKitErrorMessage(error, i18next.t('toasts.failedCreateRole', 'Failed to create role'))
+      ),
   });
 };

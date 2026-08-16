@@ -9,6 +9,7 @@ interface ContactInfo {
 interface ConfigState {
   websiteData: Record<string, unknown> | null;
   aboutContent: Record<string, unknown> | null;
+  maintenance: boolean;
   maintanance: boolean;
   businessCount: number;
   contactInfo: ContactInfo;
@@ -19,6 +20,7 @@ interface ConfigState {
 interface ConfigActions {
   setWebsiteData: (data: Record<string, unknown>) => void;
   setAboutContent: (content: Record<string, unknown> | null) => void;
+  setMaintenance: (maintenance: boolean) => void;
   setMaintanance: (maintanance: boolean) => void;
   setBusinessCount: (count: number) => void;
   setContactInfo: (info: ContactInfo) => void;
@@ -62,6 +64,7 @@ export const normalizeConfigData = (data: Record<string, unknown>): Record<strin
 const initialState: ConfigState = {
   websiteData: null,
   aboutContent: null,
+  maintenance: false,
   maintanance: false,
   businessCount: 0,
   contactInfo: {
@@ -94,7 +97,9 @@ export const useConfigStore = create<ConfigState & ConfigActions>()(
 
       setAboutContent: (aboutContent) => set({ aboutContent }),
 
-      setMaintanance: (maintanance) => set({ maintanance }),
+      setMaintenance: (maintenance) => set({ maintenance, maintanance: maintenance }),
+
+      setMaintanance: (maintanance) => set({ maintenance: maintanance, maintanance }),
 
       setBusinessCount: (businessCount) => set({ businessCount }),
 
@@ -111,6 +116,7 @@ export const useConfigStore = create<ConfigState & ConfigActions>()(
       partialize: (state) => ({
         websiteData: state.websiteData,
         aboutContent: state.aboutContent,
+        maintenance: state.maintenance,
         maintanance: state.maintanance,
         businessCount: state.businessCount,
         contactInfo: state.contactInfo,
