@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Building2, Check, ChevronRight, Loader2, Search, Settings2 } from 'lucide-react';
+import { Building2, Check, ChevronsUpDown, Loader2, Search, Settings2 } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { setCookie, removeCookie, getDefaultCookieDomain } from '@voxire/auth';
 import {
@@ -91,29 +91,29 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
 
   return (
     <div
-      className="dash-business-switcher px-2 py-1.5"
+      className="dash-business-switcher px-2 pt-2 pb-2"
       style={{ borderBottom: '1px solid var(--dash-border)' }}
     >
       <DropdownMenu>
         <DropdownMenuTrigger>
           <button
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg cursor-pointer text-sm transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+            className="flex items-center gap-2.5 w-full px-2 py-2 rounded-lg cursor-pointer transition-colors duration-150 hover:bg-[var(--dash-hover)]"
             style={{ color: 'var(--dash-text-muted)' }}
           >
             <BusinessLogo
               logoUrl={currentBusiness?.logoUrl}
               name={currentBusiness?.name ?? user?.businessName ?? ''}
-              size={20}
+              size={32}
             />
             <span
-              className="dash-sidebar-label flex-1 truncate text-left text-xs"
+              className="dash-sidebar-label flex-1 truncate text-left text-sm font-semibold"
               style={{ color: 'var(--dash-text)' }}
             >
               {currentBusiness?.name ?? user?.businessName ?? t('businesses.myBusinesses')}
             </span>
-            <ChevronRight
-              size={11}
-              className="dash-sidebar-chevron"
+            <ChevronsUpDown
+              size={13}
+              className="dash-sidebar-chevron shrink-0"
               style={{ color: 'var(--dash-text-dim)' }}
             />
           </button>

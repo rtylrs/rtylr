@@ -58,6 +58,7 @@ interface NavItem {
   label: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
+  badge?: number | string;
 }
 
 const rawNavItems: NavItem[] = [
@@ -133,7 +134,7 @@ function getInitials(name?: string | null): string {
     .slice(0, 2);
 }
 
-const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
+const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon, badge }) => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isActive = path === '/' ? pathname === '/' : pathname.startsWith(path);
 
@@ -163,7 +164,15 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
       >
         <Icon size={16} />
       </motion.span>
-      <span className="dash-sidebar-label relative">{label}</span>
+      <span className="dash-sidebar-label relative flex-1 truncate">{label}</span>
+      {badge !== undefined && badge !== null && badge !== '' && (
+        <span
+          className="dash-sidebar-label relative shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium leading-none"
+          style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
+        >
+          {badge}
+        </span>
+      )}
       {isActive && (
         <motion.span
           className="relative ml-auto h-1 w-1 rounded-full shrink-0"
