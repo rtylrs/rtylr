@@ -218,6 +218,12 @@ const navSections: NavSection[] = [
         icon: Timer,
         permission: 'hr:shifts:manage',
       },
+      {
+        i18nKey: 'nav.rolesPermissions',
+        path: '/settings/roles-permissions',
+        icon: Shield,
+        permission: 'hub:settings',
+      },
       { i18nKey: 'nav.settings', path: '/settings', icon: Settings, permission: 'hub:settings' },
     ],
   },
@@ -261,6 +267,7 @@ const routeLabelKeys: Record<string, string> = {
   '/performance/my-review': 'nav.myReview',
   '/performance/goals': 'nav.goals',
   '/reports': 'nav.reports',
+  '/settings/roles-permissions': 'layout.routes.rolesPermissions',
 };
 
 /* -- Theme helpers -- */

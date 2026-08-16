@@ -59,6 +59,7 @@ interface MenuActions {
   addBanner: (banner: Banner) => void;
   deleteBanner: (id: string) => void;
   addMenuItem: (categoryId: string, item: Partial<MenuItem>) => Promise<void>;
+  updateMenuItem: (id: string, updates: Partial<MenuItem>) => void;
   deleteMenuItem: (id: string) => void;
 }
 
@@ -143,6 +144,40 @@ export const useMenuStore = create<MenuState & MenuActions>()(
         };
         set((state) => ({ items: [...state.items, newItem] }));
       },
+
+      updateMenuItem: (id, updates) =>
+        set((state) => ({
+          items: state.items.map((item) => {
+            const itemIdMatch = (item as any)._id === id || (item as any).itemId === id;
+            if (itemIdMatch) {
+              const currentDetails = (item as MenuItem).details || {
+                name: (item as MenuItem).name || '',
+              };
+              const newDetails = { ...currentDetails, ...updates.details };
+              return { ...item, ...updates, details: newDetails } as MenuItem;
+            }
+            if (isCategory(item) && (item as any).details?.menuItems) {
+              const updatedSubItems = ((item as any).details.menuItems as MenuItem[]).map(
+                (subItem) => {
+                  if (subItem._id === id || subItem.itemId === id) {
+                    const currentSubDetails = subItem.details || { name: subItem.name || '' };
+                    const newSubDetails = { ...currentSubDetails, ...updates.details };
+                    return { ...subItem, ...updates, details: newSubDetails } as MenuItem;
+                  }
+                  return subItem;
+                }
+              );
+              return {
+                ...item,
+                details: {
+                  ...((item as any).details || {}),
+                  menuItems: updatedSubItems,
+                },
+              } as Category;
+            }
+            return item;
+          }),
+        })),
 
       deleteMenuItem: (id) =>
         set((state) => ({
