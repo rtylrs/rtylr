@@ -10,7 +10,7 @@
   "dependencies": {
     "@voxire/config": "workspace:*",
     "@voxire/types": "workspace:*",
-    "axios": "^1.15.2",
+    "axios": "^1.19.0",
     "neverthrow": "8.2.0"
   },
   "devDependencies": {
