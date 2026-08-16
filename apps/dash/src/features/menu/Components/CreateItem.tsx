@@ -7,8 +7,10 @@ import { useMenuStore } from '../../../shared/stores/menuStore';
 
 const CreateItem: React.FC = () => {
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  const { addMenuItem } = useMenuStore();
-  const categoryId = new URLSearchParams(searchStr).get('categoryId') || 'uncategorized';
+  const { items, addMenuItem, updateMenuItem } = useMenuStore();
+  const searchParams = new URLSearchParams(searchStr);
+  const categoryId = searchParams.get('categoryId') || 'uncategorized';
+  const itemId = searchParams.get('itemId');
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -23,6 +25,38 @@ const CreateItem: React.FC = () => {
   const [tags, setTags] = useState<string[]>([]);
   const [isVeg, setIsVeg] = useState(false);
   const [isHalal, setIsHalal] = useState(false);
+
+  React.useEffect(() => {
+    if (!itemId) return;
+    let found: any = items.find((i: any) => i._id === itemId || i.itemId === itemId);
+    if (!found) {
+      for (const cat of items) {
+        if ((cat as any).type === 'category' && (cat as any).details?.menuItems) {
+          found = (cat as any).details.menuItems.find(
+            (i: any) => i._id === itemId || i.itemId === itemId
+          );
+          if (found) break;
+        }
+      }
+    }
+    if (found) {
+      const details = found.details || found;
+      setName(details.name || found.name || '');
+      setDescription(details.description || '');
+      if (details.price !== undefined) {
+        setPrice((Number(details.price) / 100).toString());
+      }
+      if (details.salePrice) {
+        setSalePrice((Number(details.salePrice) / 100).toString());
+      }
+      if (details.isAvailable !== undefined) setIsAvailable(Boolean(details.isAvailable));
+      if (details.ingredients) setIngredients(details.ingredients);
+      if (details.allergens) setAllergens(details.allergens);
+      if (details.tags) setTags(details.tags);
+      if (details.isVeg !== undefined) setIsVeg(Boolean(details.isVeg));
+      if (details.isHalal !== undefined) setIsHalal(Boolean(details.isHalal));
+    }
+  }, [itemId, items]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -62,17 +96,24 @@ const CreateItem: React.FC = () => {
       isHalal,
     };
 
-    addMenuItem(categoryId, item).then(() => {
+    if (itemId) {
+      updateMenuItem(itemId, item);
+      toast.success('Item updated');
       window.history.back();
-    });
+    } else {
+      addMenuItem(categoryId, item).then(() => {
+        toast.success('Item created');
+        window.history.back();
+      });
+    }
   };
 
   return (
     <>
-      <HelmetContainer title="Create item · rtylr" />
+      <HelmetContainer title={itemId ? 'Edit item · rtylr' : 'Create item · rtylr'} />
       <div className="max-w-2xl mx-auto space-y-6">
         <h2 className="text-xl font-bold" style={{ color: 'var(--dash-text)' }}>
-          Create Menu Item
+          {itemId ? 'Edit Menu Item' : 'Create Menu Item'}
         </h2>
         <form
           onSubmit={handleSubmit}

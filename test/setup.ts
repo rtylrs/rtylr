@@ -2,6 +2,10 @@ import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 
+// Enable React 19 act environment for testing-library
+// @ts-expect-error - IS_REACT_ACT_ENVIRONMENT global
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
 // Suppress happy-dom network noise: AbortError on teardown, NetworkError from
 // Google Fonts/GTM fetches that can't reach the network in jsdom/happy-dom.
 const originalConsoleError = console.error;

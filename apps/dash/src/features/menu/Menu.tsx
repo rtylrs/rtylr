@@ -78,17 +78,30 @@ const Menu: React.FC<{}> = () => {
               )}
             </div>
           </div>
-          {item?.details?.price !== undefined && (
-            <span className="text-sm font-semibold text-primary">
-              ${(toFiniteNumber(item.details.price) / 100).toFixed(2)}
-            </span>
-          )}
-          <button
-            className="text-xs text-red-500 hover:underline px-2 py-1"
-            onClick={() => deleteMenuItem(item._id as string)}
-          >
-            Delete
-          </button>
+          <div className="flex items-center gap-2">
+            {item?.details?.price !== undefined && (
+              <span className="text-sm font-semibold text-primary">
+                ${(toFiniteNumber(item.details.price) / 100).toFixed(2)}
+              </span>
+            )}
+            <button
+              className="text-xs text-blue-500 hover:underline px-2 py-1"
+              onClick={() => {
+                navigate({
+                  to: '/create-item',
+                  search: { itemId: (item.itemId || item._id) as string },
+                });
+              }}
+            >
+              Edit
+            </button>
+            <button
+              className="text-xs text-red-500 hover:underline px-2 py-1"
+              onClick={() => deleteMenuItem(item._id as string)}
+            >
+              Delete
+            </button>
+          </div>
         </div>
       );
     });
@@ -117,6 +130,17 @@ const Menu: React.FC<{}> = () => {
         >
           {item.details?.isActive === false ? 'Inactive' : 'Active'}
         </span>
+        <button
+          className="text-xs text-blue-500 hover:underline px-2 py-1"
+          onClick={() => {
+            navigate({
+              to: '/create-item',
+              search: { itemId: (item.itemId || item._id) as string },
+            });
+          }}
+        >
+          Edit
+        </button>
         <button
           className="text-xs text-red-500 hover:underline px-2 py-1"
           onClick={() => deleteMenuItem(item._id as string)}

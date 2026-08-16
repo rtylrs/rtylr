@@ -40,21 +40,6 @@ export const locationsSchema = z.object({
   ),
 });
 
-export const rolesPermissionsSchema = z.object({
-  roles: z.array(
-    z.object({
-      name: z.string().min(1),
-      permissions: z.array(
-        z.object({
-          key: z.string(),
-          label: z.string(),
-          isGranted: z.boolean(),
-        })
-      ),
-    })
-  ),
-});
-
 export const payrollConfigSchema = z.object({
   payrollGrossModel: z.enum(['hourly', 'salary', 'both']),
   payrollPeriod: z.enum(['weekly', 'biweekly', 'monthly']),
@@ -72,6 +57,5 @@ export type CompanyProfileFormData = z.infer<typeof companyProfileSchema>;
 export type WorkScheduleFormData = z.infer<typeof workScheduleSchema>;
 export type OrgStructureFormData = z.infer<typeof orgStructureSchema>;
 export type LocationsFormData = z.infer<typeof locationsSchema>;
-export type RolesPermissionsFormData = z.infer<typeof rolesPermissionsSchema>;
 export type PayrollConfigFormData = z.infer<typeof payrollConfigSchema>;
 export type NotificationsFormData = z.infer<typeof notificationsSchema>;
