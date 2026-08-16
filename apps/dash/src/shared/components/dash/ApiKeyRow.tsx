@@ -66,7 +66,7 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
       </div>
       <button
         className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:bg-red-500/10"
-        style={{ color: '#ef4444' }}
+        style={{ color: 'var(--status-cancelled)' }}
         onClick={() => onRevoke?.(apiKey.id)}
         aria-label="Revoke API key"
       >

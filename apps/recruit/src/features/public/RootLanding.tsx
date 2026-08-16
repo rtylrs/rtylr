@@ -13,7 +13,10 @@ import { HelmetContainer } from '@voxire/components';
 const RootLanding: React.FC = (): React.JSX.Element => (
   <>
     <HelmetContainer title="Recruit · rtylr" />
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+    <main
+      id="main-content"
+      className="flex min-h-screen flex-col items-center justify-center px-6 text-center"
+    >
       <div className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--recruit-muted)' }}>
         rtylr · recruit
       </div>
@@ -29,7 +32,7 @@ const RootLanding: React.FC = (): React.JSX.Element => (
       <div className="mt-10 flex items-center gap-3">
         <a
           href={`${resolveAppUrl('landing')}/pricing`}
-          className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90"
           style={{ background: 'var(--recruit-accent)' }}
         >
           See pricing
@@ -37,13 +40,13 @@ const RootLanding: React.FC = (): React.JSX.Element => (
         </a>
         <a
           href={`${resolveAuthUrl()}?redirect=recruit`}
-          className="inline-flex items-center gap-2 rounded-lg border px-6 py-3 text-sm font-semibold"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border px-6 py-3 text-sm font-semibold"
           style={{ borderColor: 'var(--recruit-border)' }}
         >
           Start free
         </a>
       </div>
-    </div>
+    </main>
   </>
 );
 

@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { Mail, Server, Bell } from 'lucide-react';
 import { toast } from 'sonner';
+import { useMutation } from '@tanstack/react-query';
+import { unwrap, getOneKitErrorMessage } from '@voxire/api';
+import { safe } from '../../../../../shared/lib/api';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import {
   Card,
@@ -186,16 +189,35 @@ const Email: React.FC = () => {
       return;
     }
     updateBusiness.mutate({
-      data: { senderEmail: sender.fromEmail },
+      data: {
+        senderName: sender.senderName,
+        senderEmail: sender.fromEmail,
+        replyTo: sender.replyTo,
+      },
     });
   };
+
+  const testSmtpMutation = useMutation({
+    mutationFn: (data: { host: string; port: number; username: string }) =>
+      unwrap(safe.post('/hub/settings/email/test', data)),
+    onSuccess: () => {
+      toast.success(`SMTP connection to ${smtp.host}:${smtp.port || 587} verified successfully`);
+    },
+    onError: (err) => {
+      toast.error(getOneKitErrorMessage(err, 'Failed to test SMTP connection'));
+    },
+  });
 
   const handleTestSmtp = (): void => {
     if (!smtp.host || !smtp.username) {
       toast.error('SMTP host and user are required');
       return;
     }
-    toast.success(`SMTP connection to ${smtp.host}:${smtp.port || 587} verified successfully`);
+    testSmtpMutation.mutate({
+      host: smtp.host,
+      port: Number(smtp.port) || 587,
+      username: smtp.username,
+    });
   };
 
   const handleSaveSmtp = (): void => {
@@ -206,15 +228,20 @@ const Email: React.FC = () => {
     updateBusiness.mutate({
       data: {
         smtpHost: smtp.host,
-        smtpPort: smtp.port,
+        smtpPort: Number(smtp.port) || 587,
         smtpUser: smtp.username,
+        smtpPassword: smtp.password,
         smtpFrom: sender.fromEmail,
       },
     });
   };
 
   const toggleNotification = (key: keyof NotificationState) => (next: boolean) => {
-    setNotifications((prev) => ({ ...prev, [key]: next }));
+    const nextState = { ...notifications, [key]: next };
+    setNotifications(nextState);
+    updateBusiness.mutate({
+      data: { notificationPreferences: nextState },
+    });
   };
 
   return (

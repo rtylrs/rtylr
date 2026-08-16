@@ -26,7 +26,6 @@ import {
   Lightbulb,
   Activity,
   Type,
-  Plus,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useTask } from './useTask';
@@ -43,7 +42,7 @@ import {
 import { useLabels, useSetTaskLabels } from './useLabels';
 import { useTaskActivity } from './useTaskActivity';
 import { useTaskRealtime } from '../../shared/lib/useTaskRealtime';
-import { useTimeLogs, useLogTime, useDeleteTimeLog } from './useTimeLogs';
+import TimePanel from './components/TimePanel';
 import {
   useFlowStore,
   PRIORITY_LABELS,
@@ -96,25 +95,6 @@ function humanizeValue(action: string, value: string): string {
     return value.charAt(0).toUpperCase() + value.slice(1);
   }
   return value;
-}
-
-function formatDuration(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (h === 0) return `${m}m`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}m`;
-}
-
-function parseDurationInput(raw: string): number | null {
-  const trimmed = raw.trim().toLowerCase();
-  // e.g. "1.5h" or "1h"
-  const hoursMatch = trimmed.match(/^(\d+(?:\.\d+)?)h$/);
-  if (hoursMatch) return Math.round(parseFloat(hoursMatch[1]) * 60);
-  // e.g. "90m" or "90"
-  const minsMatch = trimmed.match(/^(\d+)m?$/);
-  if (minsMatch) return parseInt(minsMatch[1], 10);
-  return null;
 }
 
 function inferAttachmentMime(name: string): string {
@@ -207,10 +187,7 @@ const TaskDetail: React.FC = () => {
   const setTaskLabelsMut = useSetTaskLabels();
 
   const { data: taskActivityData = [] } = useTaskActivity(id ?? '');
-  const { data: timeLogsData } = useTimeLogs(id ?? '');
   const { data: taskAttachmentData } = useTaskAttachments(id);
-  const logTimeMut = useLogTime();
-  const deleteTimeLogMut = useDeleteTimeLog();
   const addAttachmentMut = useAddAttachment();
   const removeAttachmentMut = useRemoveAttachment();
 
@@ -221,7 +198,6 @@ const TaskDetail: React.FC = () => {
     milestones,
     archiveTask,
     attachments,
-    timelogs: storeTimelogs,
     projects,
     tasks: allTasks,
     sections,
@@ -229,16 +205,8 @@ const TaskDetail: React.FC = () => {
   } = useFlowStore();
   const [labelPickerOpen, setLabelPickerOpen] = useState(false);
 
-  // Time log form state
-  const [logFormOpen, setLogFormOpen] = useState(false);
-  const [logDurationInput, setLogDurationInput] = useState('');
-  const [logDescription, setLogDescription] = useState('');
-
   const updateTask = (taskId: string, patch: Partial<Task>) => {
     updateTaskMut.mutate({ id: taskId, data: patch as Partial<ApiTask> });
-  };
-  const deleteTask = (taskId: string) => {
-    deleteTaskMut.mutate(taskId);
   };
   const addComment = (
     taskId: string,
@@ -336,17 +304,10 @@ const TaskDetail: React.FC = () => {
   const cycle = cycles.find((c) => c.id === task.cycleId);
   const milestone = milestones.find((m) => m.id === task.milestoneId);
 
-  // Time logs from API (preferred) or store fallback
-  const apiLogs = timeLogsData?.timeLogs ?? [];
-  const storeLogs = storeTimelogs.filter((tl) => tl.taskId === task.id);
-  const hasApiLogs = apiLogs.length > 0 || timeLogsData !== undefined;
-  const totalMinutes = hasApiLogs
-    ? apiLogs.reduce((s, l) => s + l.durationMinutes, 0)
-    : storeLogs.reduce((s, t) => s + t.minutes, 0);
-
+  // Totals and the entry list now live in TimePanel, which reads the time-log
+  // query itself. The old store fallback went with them: it only ever applied
+  // while the query was still in flight, and TimePanel has a loading state.
   const estimatedHours = task.estimatedHours ?? task.estimate ?? null;
-  const actualHours =
-    task.actualHours ?? (totalMinutes > 0 ? Math.round((totalMinutes / 60) * 10) / 10 : null);
 
   const priorities: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
   const statuses: Task['status'][] = [
@@ -368,27 +329,14 @@ const TaskDetail: React.FC = () => {
     setLabelPickerOpen(false);
   };
 
-  const handleSubmitTimeLog = () => {
-    const mins = parseDurationInput(logDurationInput);
-    if (!mins || mins <= 0) {
-      toast.error(t('toasts.task.invalidDuration'));
-      return;
-    }
-    logTimeMut.mutate({
-      task_id: Number(task.id),
-      duration_minutes: mins,
-      description: logDescription.trim() || undefined,
-    });
-    setLogDurationInput('');
-    setLogDescription('');
-    setLogFormOpen(false);
-  };
-
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
       <HelmetContainer title="Task · rtylr" />
-      {/* Main area */}
-      <div className="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
+      {/* Main area. shrink-0 with an auto basis below lg: as flex-1 its basis is
+          0%, so in this fixed-height scrolling column the taller rail claimed
+          every pixel and the title and description collapsed out of view on a
+          phone. It only shares the row with the rail from lg up. */}
+      <div className="flex min-h-0 w-full min-w-0 shrink-0 flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden">
         <div
           className="flex shrink-0 items-center justify-between gap-2 px-4 py-3 sm:px-6"
           style={{ borderBottom: '1px solid var(--flow-border)' }}
@@ -693,134 +641,13 @@ const TaskDetail: React.FC = () => {
           />
         </DetailField>
 
-        {/* Time Tracking */}
-        <DetailField icon={Timer} label="Time">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-[12px]">
-              <span style={{ color: 'var(--flow-text-muted)' }}>Estimated</span>
-              <span style={{ color: 'var(--flow-text)' }}>
-                {estimatedHours != null ? `${estimatedHours}h` : '-'}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-[12px]">
-              <span style={{ color: 'var(--flow-text-muted)' }}>Actual</span>
-              <span style={{ color: 'var(--flow-text)' }}>
-                {actualHours != null ? `${actualHours}h` : '-'}
-              </span>
-            </div>
-
-            {/* Log list */}
-            {apiLogs.length > 0 && (
-              <div className="space-y-1 pt-1">
-                {apiLogs.map((log) => (
-                  <div
-                    key={log.id}
-                    className="flex items-start justify-between gap-1 rounded px-2 py-1"
-                    style={{ background: 'var(--flow-hover)' }}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <span
-                        className="text-[11px] font-semibold"
-                        style={{ color: 'var(--accent)' }}
-                      >
-                        {formatDuration(log.durationMinutes)}
-                      </span>
-                      {log.description && (
-                        <p
-                          className="text-[10px] truncate mt-0.5"
-                          style={{ color: 'var(--flow-text-muted)' }}
-                        >
-                          {log.description}
-                        </p>
-                      )}
-                      <p className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
-                        {formatRelative(log.loggedAt || log.createdAt)}
-                      </p>
-                    </div>
-                    {canEdit && (user == null || String(log.userId) === user.id) && (
-                      <button
-                        type="button"
-                        onClick={() => deleteTimeLogMut.mutate({ id: log.id, taskId: task.id })}
-                        className="shrink-0 hover:opacity-70 mt-0.5"
-                        style={{ color: 'var(--flow-text-dim)' }}
-                        title="Delete log"
-                      >
-                        <Trash2 size={10} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Log time form */}
-            {logFormOpen ? (
-              <div className="space-y-1.5 pt-1">
-                <input
-                  autoFocus
-                  placeholder="Duration: 90m or 1.5h"
-                  value={logDurationInput}
-                  onChange={(e) => setLogDurationInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSubmitTimeLog();
-                    if (e.key === 'Escape') setLogFormOpen(false);
-                  }}
-                  className="w-full rounded px-2 py-1 text-[11px] outline-none"
-                  style={{
-                    background: 'var(--flow-hover)',
-                    border: '1px solid var(--flow-border)',
-                    color: 'var(--flow-text)',
-                  }}
-                />
-                <input
-                  placeholder="Description (optional)"
-                  value={logDescription}
-                  onChange={(e) => setLogDescription(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSubmitTimeLog();
-                    if (e.key === 'Escape') setLogFormOpen(false);
-                  }}
-                  className="w-full rounded px-2 py-1 text-[11px] outline-none"
-                  style={{
-                    background: 'var(--flow-hover)',
-                    border: '1px solid var(--flow-border)',
-                    color: 'var(--flow-text)',
-                  }}
-                />
-                <div className="flex gap-1">
-                  <button
-                    type="button"
-                    onClick={handleSubmitTimeLog}
-                    disabled={logTimeMut.isPending}
-                    className="flex-1 py-1 rounded text-[10px] font-semibold disabled:opacity-40"
-                    style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-                  >
-                    {logTimeMut.isPending ? 'Logging…' : 'Log'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLogFormOpen(false)}
-                    className="px-2 py-1 rounded text-[10px]"
-                    style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setLogFormOpen(true)}
-                disabled={!canEdit}
-                title={!canEdit ? t('common.readOnlyAccess') : undefined}
-                className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)] disabled:opacity-40"
-                style={{ color: 'var(--flow-text-dim)' }}
-              >
-                <Plus size={9} /> Log time
-              </button>
-            )}
-          </div>
-        </DetailField>
+        <TimePanel
+          taskId={task.id}
+          estimateHours={estimatedHours}
+          canLog={canEdit}
+          canLogForOthers={false}
+          currentUserId={user?.id ?? null}
+        />
 
         <DetailField icon={Gauge} label="Effort">
           <div className="flex flex-wrap gap-1">
@@ -1178,9 +1005,12 @@ const DetailField: React.FC<{
   <div className="mb-5">
     <div className="flex items-center gap-1.5 mb-1.5">
       <Icon size={11} />
+      {/* muted, not dim: --flow-text-dim measures 2.24:1 and never carries
+       * text. TimePanel's own heading uses the same treatment, so leaving this
+       * dim would put two versions of one label style side by side. */}
       <span
         className="text-[10px] uppercase tracking-wider font-semibold"
-        style={{ color: 'var(--flow-text-dim)' }}
+        style={{ color: 'var(--flow-text-muted)' }}
       >
         {label}
       </span>

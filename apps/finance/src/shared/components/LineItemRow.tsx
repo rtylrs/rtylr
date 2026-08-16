@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 import MoneyDisplay from './MoneyDisplay';
 import { inputStyle } from '../lib/tokens';
+import { computeTaxBreakdown, roundMoney } from '../lib/tax';
 
 export interface LineItem {
   id: string;
@@ -20,9 +21,9 @@ interface LineItemRowProps {
 }
 
 const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, disabled }) => {
-  const subtotal = item.quantity * item.unitPrice;
-  const tax = subtotal * (item.taxRate / 100);
-  const total = subtotal + tax;
+  const subtotal = roundMoney(item.quantity * item.unitPrice);
+  const breakdown = computeTaxBreakdown({ subtotal, taxRate: item.taxRate });
+  const total = breakdown.total;
 
   return (
     <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>

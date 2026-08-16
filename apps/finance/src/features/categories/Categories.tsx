@@ -1,40 +1,98 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
-import { CheckCircle, Plus, Tag } from 'lucide-react';
+import { CheckCircle, Edit2, Plus, Tag, Trash2 } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import EmptyState from '../../shared/components/EmptyState';
 import Modal from '../../shared/components/Modal';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import {
   useCreateExpenseCategory,
+  useDeleteExpenseCategory,
   useExpenseCategories,
+  useUpdateExpenseCategory,
 } from '../../shared/hooks/useExpenseCategories';
 import { cardStyle, ghostBtn, inputStyle, labelStyle, primaryBtn } from '../../shared/lib/tokens';
 import { DEFAULT_CATEGORY_COLOR } from '../../shared/lib/settings';
+import type { ExpenseCategory } from '../../shared/services/financeApi';
 
 const Categories: React.FC = () => {
   const { data = [], isLoading } = useExpenseCategories();
   const createCategory = useCreateExpenseCategory();
-  const [showCreate, setShowCreate] = React.useState(false);
-  const [name, setName] = React.useState('');
-  const [color, setColor] = React.useState(DEFAULT_CATEGORY_COLOR);
+  const updateCategory = useUpdateExpenseCategory();
+  const deleteCategory = useDeleteExpenseCategory();
+
+  const [showCreate, setShowCreate] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<ExpenseCategory | null>(null);
+  const [deletingCategoryId, setDeletingCategoryId] = useState<number | null>(null);
+
+  const [name, setName] = useState('');
+  const [color, setColor] = useState(DEFAULT_CATEGORY_COLOR);
+  const [budget, setBudget] = useState<string>('');
+
+  const [editName, setEditName] = useState('');
+  const [editColor, setEditColor] = useState(DEFAULT_CATEGORY_COLOR);
+  const [editBudget, setEditBudget] = useState<string>('');
 
   const handleCreate = (): void => {
     const trimmedName = name.trim();
     if (!trimmedName) return;
 
     createCategory.mutate(
-      { name: trimmedName, color },
+      {
+        name: trimmedName,
+        color,
+        budget: budget ? parseFloat(budget) : undefined,
+      },
       {
         onSuccess: () => {
           setShowCreate(false);
           setName('');
           setColor(DEFAULT_CATEGORY_COLOR);
+          setBudget('');
         },
       }
     );
+  };
+
+  const startEdit = (c: ExpenseCategory): void => {
+    setEditingCategory(c);
+    setEditName(c.name);
+    setEditColor(c.color || DEFAULT_CATEGORY_COLOR);
+    setEditBudget(c.budget ? String(c.budget) : '');
+  };
+
+  const handleUpdate = (): void => {
+    if (!editingCategory) return;
+    const trimmed = editName.trim();
+    if (!trimmed) return;
+
+    updateCategory.mutate(
+      {
+        id: editingCategory.id,
+        data: {
+          name: trimmed,
+          color: editColor,
+          budget: editBudget ? parseFloat(editBudget) : 0,
+        },
+      },
+      {
+        onSuccess: () => {
+          setEditingCategory(null);
+        },
+      }
+    );
+  };
+
+  const handleDelete = (): void => {
+    if (deletingCategoryId == null) return;
+    deleteCategory.mutate(deletingCategoryId, {
+      onSuccess: () => {
+        setDeletingCategoryId(null);
+      },
+    });
   };
 
   return (
@@ -98,14 +156,35 @@ const Categories: React.FC = () => {
                       {c.name}
                     </span>
                   </div>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      color: over ? 'var(--finance-error)' : 'var(--hub-text-dim)',
-                    }}
-                  >
-                    {pct}%
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <button
+                      type="button"
+                      onClick={() => startEdit(c)}
+                      className="p-1 rounded hover:bg-white/10 text-white/60 hover:text-white transition"
+                      title="Edit Category"
+                      aria-label={`Edit ${c.name}`}
+                    >
+                      <Edit2 size={13} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeletingCategoryId(c.id)}
+                      className="p-1 rounded hover:bg-red-500/10 text-white/60 hover:text-red-400 transition"
+                      title="Delete Category"
+                      aria-label={`Delete ${c.name}`}
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: over ? 'var(--finance-error)' : 'var(--hub-text-dim)',
+                        marginLeft: 4,
+                      }}
+                    >
+                      {pct}%
+                    </span>
+                  </div>
                 </div>
                 <div
                   style={{
@@ -143,6 +222,7 @@ const Categories: React.FC = () => {
         </div>
       )}
 
+      {/* Create Modal */}
       <Modal
         open={showCreate}
         onClose={() => setShowCreate(false)}
@@ -182,6 +262,21 @@ const Categories: React.FC = () => {
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={labelStyle} htmlFor="expense-category-budget">
+              Monthly Budget (Optional)
+            </label>
+            <input
+              id="expense-category-budget"
+              type="number"
+              min="0"
+              step="1"
+              value={budget}
+              onChange={(event) => setBudget(event.target.value)}
+              placeholder="e.g. 500"
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle} htmlFor="expense-category-color">
               Color
             </label>
@@ -195,6 +290,86 @@ const Categories: React.FC = () => {
           </div>
         </div>
       </Modal>
+
+      {/* Edit Modal */}
+      <Modal
+        open={Boolean(editingCategory)}
+        onClose={() => setEditingCategory(null)}
+        title="Edit Expense Category"
+        footer={
+          <>
+            <button
+              style={ghostBtn}
+              onClick={() => setEditingCategory(null)}
+              disabled={updateCategory.isPending}
+            >
+              Cancel
+            </button>
+            <button
+              style={{ ...primaryBtn, opacity: updateCategory.isPending ? 0.6 : 1 }}
+              onClick={handleUpdate}
+              disabled={updateCategory.isPending || !editName.trim()}
+            >
+              <CheckCircle size={13} />
+              {updateCategory.isPending ? 'Saving…' : 'Save Changes'}
+            </button>
+          </>
+        }
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={labelStyle} htmlFor="edit-category-name">
+              Name
+            </label>
+            <input
+              id="edit-category-name"
+              autoFocus
+              value={editName}
+              onChange={(event) => setEditName(event.target.value)}
+              placeholder="e.g. Travel"
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={labelStyle} htmlFor="edit-category-budget">
+              Monthly Budget
+            </label>
+            <input
+              id="edit-category-budget"
+              type="number"
+              min="0"
+              step="1"
+              value={editBudget}
+              onChange={(event) => setEditBudget(event.target.value)}
+              placeholder="e.g. 500"
+              style={inputStyle}
+            />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <label style={labelStyle} htmlFor="edit-category-color">
+              Color
+            </label>
+            <input
+              id="edit-category-color"
+              type="color"
+              value={editColor}
+              onChange={(event) => setEditColor(event.target.value)}
+              style={{ ...inputStyle, height: 38, padding: 4 }}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={deletingCategoryId != null}
+        title="Delete Expense Category"
+        message="Are you sure you want to delete this category? Any existing expenses in this category will become uncategorized."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={handleDelete}
+        onClose={() => setDeletingCategoryId(null)}
+      />
     </motion.div>
   );
 };

@@ -15,6 +15,7 @@ interface OrderItem {
 
 interface PlaceOrderRequest {
   owner_id: number;
+  location_id?: number;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -29,7 +30,7 @@ interface PlaceOrderResponse {
 
 const Checkout = (): React.JSX.Element => {
   const navigate = useNavigate();
-  const { items, businessId, total, setItemNote, clearCart } = useCartStore();
+  const { items, businessId, locationId, total, setItemNote, clearCart } = useCartStore();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -44,7 +45,26 @@ const Checkout = (): React.JSX.Element => {
   const formatPrice = (price: number): string =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(price);
 
+  const onlineOrderingEnabled = import.meta.env.VITE_ONLINE_ORDERING_ENABLED !== 'false';
+
   const { t } = useTranslation('checkout');
+
+  if (!onlineOrderingEnabled) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center">
+        <h2 className="text-xl font-semibold">Online Ordering Disabled</h2>
+        <p className="mt-2 text-sm text-gray-600">
+          Online ordering is currently disabled for this menu.
+        </p>
+        <button
+          onClick={() => navigate({ to: '/' })}
+          className="mt-6 rounded-lg bg-black px-4 py-2 text-sm text-white"
+        >
+          Back to Menu
+        </button>
+      </div>
+    );
+  }
 
   const validate = (): boolean => {
     if (!name.trim()) {
@@ -76,6 +96,7 @@ const Checkout = (): React.JSX.Element => {
 
     const body: PlaceOrderRequest = {
       owner_id: businessId,
+      location_id: locationId || undefined,
       customer_name: name.trim(),
       customer_email: email.trim(),
       customer_phone: phone.trim(),

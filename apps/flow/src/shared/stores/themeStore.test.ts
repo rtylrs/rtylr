@@ -1,17 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useThemeStore, initTheme } from './themeStore';
+import { useThemeStore, initTheme, DEFAULT_THEME } from './themeStore';
 
 const { getState, setState } = useThemeStore;
 
 beforeEach(() => {
-  setState({ theme: 'light' });
+  setState({ theme: DEFAULT_THEME });
   document.documentElement.removeAttribute('data-theme');
   localStorage.clear();
 });
 
 describe('themeStore', () => {
-  it('has light as the default theme', () => {
-    expect(getState().theme).toBe('light');
+  // Dark is the mode Flow is designed in: every screen in the design set is drawn
+  // dark, and globals.css resolves dark from a bare `:root`.
+  it('has dark as the default theme', () => {
+    expect(DEFAULT_THEME).toBe('dark');
+    expect(getState().theme).toBe('dark');
   });
 
   it('setTheme updates theme to light', () => {
@@ -47,10 +50,10 @@ describe('themeStore', () => {
     expect(getState().theme).toBe('light');
   });
 
-  it('initTheme applies light when no stored value', () => {
+  it('initTheme applies dark when no stored value', () => {
     localStorage.clear();
     initTheme();
-    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 
   it('initTheme applies stored theme from localStorage', () => {
@@ -61,6 +64,12 @@ describe('themeStore', () => {
 
   it('initTheme handles malformed localStorage gracefully', () => {
     localStorage.setItem('flow-theme', 'not-json');
+    initTheme();
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  });
+
+  it('still honours a stored light preference, so existing users keep their choice', () => {
+    localStorage.setItem('flow-theme', JSON.stringify({ state: { theme: 'light' } }));
     initTheme();
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
   });

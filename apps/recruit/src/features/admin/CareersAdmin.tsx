@@ -39,8 +39,8 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
   return (
     <>
       <HelmetContainer title="Careers · rtylr" />
-      <div className="px-10 py-8">
-        <div className="flex items-baseline justify-between">
+      <div className="px-4 py-6 sm:px-10 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Careers</h1>
             <p className="mt-1 text-sm text-white/60">
@@ -48,21 +48,22 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
               {careers.filter((c) => c.isPublished).length} published
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             {slug && (
               <a
                 href={`${APP_URLS.recruit}/${slug}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm hover:bg-white/5"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-md border border-white/10 px-3.5 py-2.5 text-sm hover:bg-white/5"
               >
                 <ExternalLink className="h-4 w-4" />
                 View public page
               </a>
             )}
             <button
+              type="button"
               onClick={() => setCreating(true)}
-              className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-black hover:bg-white/90"
             >
               <Plus className="h-4 w-4" />
               New role

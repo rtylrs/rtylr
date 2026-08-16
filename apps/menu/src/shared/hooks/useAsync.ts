@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash';
 
 type AsyncFunction<T> = (data: unknown) => Promise<T>;
@@ -43,6 +43,14 @@ export default function useAsync<T>({
   const [loading, setLoading] = useState<boolean>(false);
   const [requestData, setRequestData] = useState<unknown>(null);
 
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  }, [onSuccess, onError]);
+
   const execute = useCallback(
     async (data: unknown) => {
       try {
@@ -53,16 +61,16 @@ export default function useAsync<T>({
         const res = await fn(data);
         setResult(res);
         setSuccess(true);
-        onSuccess(res);
+        onSuccessRef.current?.(res);
       } catch (error) {
         const message = errorMessage(error);
         setError(message);
-        onError(message, error);
+        onErrorRef.current?.(message, error);
       } finally {
         setLoading(false);
       }
     },
-    [fn, onError, onSuccess]
+    [fn]
   );
 
   const debouncedMain = useMemo(() => debounce(execute, debounceTime), [debounceTime, execute]);

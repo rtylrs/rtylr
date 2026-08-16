@@ -25,6 +25,7 @@
     "payrollConfig": "تهيئة الرواتب",
     "payrollRunDetail": "دورة الرواتب",
     "checklistTemplates": "قوالب قوائم المراجعة",
-    "reviewCycleDetail": "دورة التقييم"
+    "reviewCycleDetail": "دورة التقييم",
+    "rolesPermissions": "الأدوار والصلاحيات"
   }
 }

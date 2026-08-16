@@ -2,11 +2,23 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => {
   const fetch = vi.fn();
+  const statusHandlers = new Set<(s: string) => void>();
+  const state = { status: 'disconnected' as string };
   return {
     fetch,
     createOneKitFetch: vi.fn(() => fetch),
     getOneKitApiBaseUrl: vi.fn(() => 'https://api.test/'),
-    getRealtimeClient: vi.fn(() => ({ subscribe: vi.fn() })),
+    statusHandlers,
+    state,
+    getRealtimeClient: vi.fn(() => ({
+      subscribe: vi.fn(),
+      getStatus: () => state.status,
+      subscribeStatus: (h: (s: string) => void) => {
+        statusHandlers.add(h);
+        h(state.status);
+        return () => statusHandlers.delete(h);
+      },
+    })),
   };
 });
 
@@ -16,7 +28,8 @@ vi.mock('@voxire/api', () => ({
   getRealtimeClient: mocks.getRealtimeClient,
 }));
 
-import { getRealtimeTicket } from './realtime';
+import { renderHook, act } from '@testing-library/react';
+import { getRealtimeTicket, useRealtimeStatus } from './realtime';
 
 describe('getRealtimeTicket', () => {
   beforeEach(() => {
@@ -40,5 +53,43 @@ describe('getRealtimeTicket', () => {
     mocks.fetch.mockResolvedValue({ ok: false, json: async () => ({}) });
 
     await expect(getRealtimeTicket()).resolves.toBeNull();
+  });
+});
+
+describe('useRealtimeStatus', () => {
+  function emit(next: string) {
+    mocks.state.status = next;
+    act(() => {
+      mocks.statusHandlers.forEach((h) => h(next));
+    });
+  }
+
+  it("starts from the client's current status rather than assuming connected", () => {
+    mocks.state.status = 'connecting';
+    const { result } = renderHook(() => useRealtimeStatus());
+
+    expect(result.current).toBe('connecting');
+  });
+
+  it('re-renders when the connection drops and again when it returns', () => {
+    mocks.state.status = 'connected';
+    const { result } = renderHook(() => useRealtimeStatus());
+    expect(result.current).toBe('connected');
+
+    emit('reconnecting');
+    expect(result.current).toBe('reconnecting');
+
+    emit('connected');
+    expect(result.current).toBe('connected');
+  });
+
+  it('unsubscribes on unmount, so a closed panel does not keep updating', () => {
+    mocks.state.status = 'connected';
+    const { unmount } = renderHook(() => useRealtimeStatus());
+    const before = mocks.statusHandlers.size;
+
+    unmount();
+
+    expect(mocks.statusHandlers.size).toBe(before - 1);
   });
 });

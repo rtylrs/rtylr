@@ -33,8 +33,8 @@ export const PermissionCheckbox: React.FC<PermissionCheckboxProps> = ({
         onClick={() => onChange?.(!checked)}
         className="h-4 w-4 rounded flex items-center justify-center transition-all shrink-0"
         style={{
-          background: checked ? '#4583C4' : 'var(--dash-hover)',
-          border: `1px solid ${checked ? '#4583C4' : 'var(--dash-border)'}`,
+          background: checked ? 'var(--accent)' : 'var(--dash-hover)',
+          border: `1px solid ${checked ? 'var(--accent)' : 'var(--dash-border)'}`,
         }}
         aria-checked={checked}
         aria-label={ariaLabel || label || 'Permission toggle'}

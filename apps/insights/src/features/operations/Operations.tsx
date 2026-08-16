@@ -1,6 +1,6 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { motion } from 'motion/react';
+import { motion, type Variants } from 'motion/react';
 import { Users, Calendar, Clock, Activity } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,12 +15,12 @@ import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.05 } },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
@@ -62,16 +62,16 @@ const Operations: React.FC = (): React.JSX.Element => {
 
   return (
     <motion.div
-      variants={containerVariants as any}
+      variants={containerVariants}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-7xl"
     >
       <HelmetContainer title="Operations · rtylr" />
-      <motion.div variants={itemVariants as any}>
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
+      <motion.div variants={itemVariants}>
+        <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.operations.title')}
-        </h2>
+        </h1>
       </motion.div>
 
       {kpisLoading ? (
@@ -81,16 +81,13 @@ const Operations: React.FC = (): React.JSX.Element => {
           ))}
         </div>
       ) : (
-        <motion.div
-          variants={containerVariants as any}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-        >
+        <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
               <motion.div
                 key={stat.label}
-                variants={itemVariants as any}
+                variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
               >
@@ -116,13 +113,13 @@ const Operations: React.FC = (): React.JSX.Element => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <motion.div
-          variants={itemVariants as any}
+          variants={itemVariants}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
-          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+          <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
             {t('insights.operations.headcount')}
-          </h3>
+          </h2>
           {headcountLoading ? (
             <SkeletonRow cols={2} />
           ) : !headcount ? (
@@ -147,13 +144,13 @@ const Operations: React.FC = (): React.JSX.Element => {
         </motion.div>
 
         <motion.div
-          variants={itemVariants as any}
+          variants={itemVariants}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
-          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+          <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
             {t('insights.operations.utilization')}
-          </h3>
+          </h2>
           {utilLoading ? (
             <SkeletonRow cols={2} />
           ) : !utilization ? (
@@ -165,20 +162,20 @@ const Operations: React.FC = (): React.JSX.Element => {
               </p>
               <p className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
                 {utilization.scheduledHours.toFixed(1)} / {utilization.availableHours.toFixed(1)}{' '}
-                hours
+                {t('insights.operations.hours', 'hours')}
               </p>
             </div>
           )}
         </motion.div>
 
         <motion.div
-          variants={itemVariants as any}
+          variants={itemVariants}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
-          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+          <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
             {t('insights.operations.shifts')}
-          </h3>
+          </h2>
           {shiftsLoading ? (
             <SkeletonRow cols={2} />
           ) : !shifts ? (
@@ -186,19 +183,27 @@ const Operations: React.FC = (): React.JSX.Element => {
           ) : (
             <div className="space-y-2 text-xs" style={{ color: 'var(--hub-text)' }}>
               <div className="flex justify-between">
-                <span style={{ color: 'var(--hub-text-muted)' }}>Scheduled</span>
+                <span style={{ color: 'var(--hub-text-muted)' }}>
+                  {t('insights.operations.scheduled', 'Scheduled')}
+                </span>
                 <span className="font-semibold">{formatNumber(shifts.scheduled)}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: 'var(--hub-text-muted)' }}>Completed</span>
+                <span style={{ color: 'var(--hub-text-muted)' }}>
+                  {t('insights.operations.completed', 'Completed')}
+                </span>
                 <span className="font-semibold">{formatNumber(shifts.completed)}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: 'var(--hub-text-muted)' }}>No-shows</span>
+                <span style={{ color: 'var(--hub-text-muted)' }}>
+                  {t('insights.operations.noShows', 'No-shows')}
+                </span>
                 <span className="font-semibold">{formatNumber(shifts.noShows)}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: 'var(--hub-text-muted)' }}>Completion</span>
+                <span style={{ color: 'var(--hub-text-muted)' }}>
+                  {t('insights.operations.completion', 'Completion')}
+                </span>
                 <span className="font-semibold">{shifts.completionRatePct.toFixed(1)}%</span>
               </div>
             </div>
@@ -206,13 +211,13 @@ const Operations: React.FC = (): React.JSX.Element => {
         </motion.div>
 
         <motion.div
-          variants={itemVariants as any}
+          variants={itemVariants}
           className="rounded-xl p-5"
           style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
         >
-          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+          <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
             {t('insights.operations.timeOff')}
-          </h3>
+          </h2>
           {timeOffLoading ? (
             <SkeletonRow cols={2} />
           ) : !timeOff ? (
@@ -220,11 +225,15 @@ const Operations: React.FC = (): React.JSX.Element => {
           ) : (
             <div className="space-y-2 text-xs" style={{ color: 'var(--hub-text)' }}>
               <div className="flex justify-between">
-                <span style={{ color: 'var(--hub-text-muted)' }}>Pending</span>
+                <span style={{ color: 'var(--hub-text-muted)' }}>
+                  {t('insights.operations.pending', 'Pending')}
+                </span>
                 <span className="font-semibold">{formatNumber(timeOff.pending)}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: 'var(--hub-text-muted)' }}>Approved</span>
+                <span style={{ color: 'var(--hub-text-muted)' }}>
+                  {t('insights.operations.approved', 'Approved')}
+                </span>
                 <span className="font-semibold">{formatNumber(timeOff.approved)}</span>
               </div>
             </div>

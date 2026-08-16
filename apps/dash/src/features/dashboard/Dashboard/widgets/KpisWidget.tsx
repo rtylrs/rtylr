@@ -1,5 +1,5 @@
 import React from 'react';
-import { DollarSign, ShoppingBag, Users, FileText } from 'lucide-react';
+import { DollarSign, ShoppingBag, Users, TrendingUp, FileText } from 'lucide-react';
 import { Skeleton } from '../../../../shared/components/ui';
 import { useKpis } from '../../../../shared/hooks/queries/useKpis';
 

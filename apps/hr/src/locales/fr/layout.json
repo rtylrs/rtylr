@@ -25,6 +25,7 @@
     "payrollConfig": "Configuration de la paie",
     "payrollRunDetail": "Exécution de la paie",
     "checklistTemplates": "Modèles de listes",
-    "reviewCycleDetail": "Cycle d'évaluation"
+    "reviewCycleDetail": "Cycle d'évaluation",
+    "rolesPermissions": "Rôles et permissions"
   }
 }

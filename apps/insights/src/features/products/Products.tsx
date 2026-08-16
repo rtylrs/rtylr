@@ -1,6 +1,6 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { motion } from 'motion/react';
+import { motion, type Variants } from 'motion/react';
 import { Package, TrendingDown, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -10,18 +10,19 @@ import {
   useProductMargins,
   useProductCategoryMix,
 } from '../../shared/hooks/queries/useInsightsProducts';
-import { formatMoney } from '../../shared/utils/money';
+import { useInsightsSettings } from '../../shared/hooks/queries/useInsightsSettings';
+import { formatMoney, type Currency } from '../../shared/utils/money';
 import { formatNumber } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.05 } },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
@@ -33,6 +34,8 @@ const Products: React.FC = (): React.JSX.Element => {
   const { data: slowRes, isLoading: slowLoading } = useSlowMovers({ days: 60 });
   const { data: marginRes, isLoading: marginLoading } = useProductMargins();
   const { data: catRes, isLoading: catLoading } = useProductCategoryMix();
+  const { data: settings } = useInsightsSettings();
+  const currency = (settings?.defaultCurrency as Currency) || 'USD';
 
   if (isError) {
     return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
@@ -72,16 +75,16 @@ const Products: React.FC = (): React.JSX.Element => {
 
   return (
     <motion.div
-      variants={containerVariants as any}
+      variants={containerVariants}
       initial="hidden"
       animate="show"
       className="space-y-6 max-w-7xl"
     >
       <HelmetContainer title="Products · rtylr" />
-      <motion.div variants={itemVariants as any}>
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
+      <motion.div variants={itemVariants}>
+        <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.products.title')}
-        </h2>
+        </h1>
       </motion.div>
 
       {kpisLoading ? (
@@ -91,16 +94,13 @@ const Products: React.FC = (): React.JSX.Element => {
           ))}
         </div>
       ) : (
-        <motion.div
-          variants={containerVariants as any}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-        >
+        <motion.div variants={containerVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
               <motion.div
                 key={stat.label}
-                variants={itemVariants as any}
+                variants={itemVariants}
                 className="rounded-xl p-5"
                 style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
               >
@@ -125,13 +125,13 @@ const Products: React.FC = (): React.JSX.Element => {
       )}
 
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
-        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+        <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
           {t('insights.products.bestSellers')}
-        </h3>
+        </h2>
         {bestLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -160,13 +160,13 @@ const Products: React.FC = (): React.JSX.Element => {
                   </span>
                 </div>
                 <span className="text-xs text-center" style={{ color: 'var(--hub-text-muted)' }}>
-                  {formatNumber(p.unitsSold)} units
+                  {formatNumber(p.unitsSold)} {t('insights.products.units', 'units')}
                 </span>
                 <span
                   className="text-xs font-semibold text-right"
                   style={{ color: 'var(--hub-text)' }}
                 >
-                  {formatMoney(p.revenueMinorUnits)}
+                  {formatMoney(p.revenueMinorUnits, currency)}
                 </span>
               </div>
             ))}
@@ -175,13 +175,13 @@ const Products: React.FC = (): React.JSX.Element => {
       </motion.div>
 
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
-        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+        <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
           {t('insights.products.margins')}
-        </h3>
+        </h2>
         {marginLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -202,7 +202,7 @@ const Products: React.FC = (): React.JSX.Element => {
                   {b.label}
                 </span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatNumber(b.productCount)} products
+                  {formatNumber(b.productCount)} {t('insights.products.products', 'products')}
                 </span>
               </div>
             ))}
@@ -211,13 +211,13 @@ const Products: React.FC = (): React.JSX.Element => {
       </motion.div>
 
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
-        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+        <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
           {t('insights.products.slowMovers')}
-        </h3>
+        </h2>
         {slowLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -238,7 +238,7 @@ const Products: React.FC = (): React.JSX.Element => {
                   {p.name}
                 </span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatNumber(p.stockQuantity)} in stock
+                  {formatNumber(p.stockQuantity)} {t('insights.products.inStock', 'in stock')}
                 </span>
               </div>
             ))}
@@ -247,13 +247,13 @@ const Products: React.FC = (): React.JSX.Element => {
       </motion.div>
 
       <motion.div
-        variants={itemVariants as any}
+        variants={itemVariants}
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
-        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+        <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
           {t('insights.products.categoryMix')}
-        </h3>
+        </h2>
         {catLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -274,13 +274,13 @@ const Products: React.FC = (): React.JSX.Element => {
                   {c.categoryName}
                 </span>
                 <span className="text-xs text-center" style={{ color: 'var(--hub-text-muted)' }}>
-                  {formatNumber(c.unitsSold)} units
+                  {formatNumber(c.unitsSold)} {t('insights.products.units', 'units')}
                 </span>
                 <span
                   className="text-xs font-semibold text-right"
                   style={{ color: 'var(--hub-text)' }}
                 >
-                  {formatMoney(c.revenueMinorUnits)}
+                  {formatMoney(c.revenueMinorUnits, currency)}
                 </span>
               </div>
             ))}

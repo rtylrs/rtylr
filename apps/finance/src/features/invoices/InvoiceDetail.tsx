@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useParams, useNavigate } from '@tanstack/react-router';
+import { getRouteApi, useNavigate } from '@tanstack/react-router';
+
+const routeApi = getRouteApi('/layout/invoices/$id');
 import { motion } from 'motion/react';
 import { Send, Copy, XCircle, CreditCard, Printer } from 'lucide-react';
 import { toast } from 'sonner';
@@ -18,7 +20,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import { ACCENT, cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
 
 const InvoiceDetail: React.FC = () => {
-  const { id } = useParams({ strict: false });
+  const { id } = routeApi.useParams();
   const navigate = useNavigate();
   const { data: invoice, isLoading } = useInvoiceDetail(id);
   const deleteInvoice = useDeleteInvoice();
@@ -112,10 +114,7 @@ const InvoiceDetail: React.FC = () => {
             description: it.description ?? '',
             quantity: it.quantity ?? 0,
             unitPrice: it.unitPrice ?? 0,
-            taxRate:
-              (it as { taxRate?: number; tax_rate?: number }).taxRate ??
-              (it as { taxRate?: number; tax_rate?: number }).tax_rate ??
-              0,
+            taxRate: it.taxRate ?? 0,
           }))}
           notes={invoice.notes}
           discount={invoice.discount}

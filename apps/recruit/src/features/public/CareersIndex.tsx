@@ -38,7 +38,22 @@ const CareersIndex: React.FC = (): React.JSX.Element => {
     );
   }
 
-  if (error || !data) return <NotFound />;
+  if (error && !data) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white p-6 text-center">
+        <h2 className="text-lg font-semibold text-gray-900">Failed to load careers page</h2>
+        <p className="text-sm text-gray-500">Please try refreshing the page.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!data) return <NotFound />;
 
   const Template = resolveIndex(data.customization.template);
   return (

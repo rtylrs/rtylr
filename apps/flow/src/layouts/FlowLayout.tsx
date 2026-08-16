@@ -30,6 +30,7 @@ import {
   Menu,
   X,
   Shield,
+  Clock,
 } from 'lucide-react';
 import { useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
@@ -37,7 +38,9 @@ import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '
 import { useForesightLinks } from '@voxire/utils';
 import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
+import { useTranslation } from 'react-i18next';
 import { useThemeStore } from '../shared/stores/themeStore';
+import { accentTints, ACCENT_DEFAULT, type ResolvedTheme } from '../shared/lib/colorUtils';
 import { useFlowStore } from '../shared/stores/flowStore';
 import { cn } from '../shared/lib/utils';
 import CommandBar from '../shared/components/CommandBar';
@@ -66,16 +69,6 @@ import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../shared/lib/memberUtils';
 
-const ACCENT_DEFAULT = '#64C5B9';
-
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 /** Horizontal inset for sidebar content (single column). */
 const sx = 'px-3';
 
@@ -85,6 +78,8 @@ const sidebarSectionHeaderClass =
 
 interface SidebarLinkProps {
   to: string;
+  /** Search params for links that target a section of a screen, e.g. Settings. */
+  search?: Record<string, string>;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   label: string;
   exact?: boolean;
@@ -168,6 +163,7 @@ const SidebarCollapsible: React.FC<{ open: boolean; children: React.ReactNode }>
 
 const SidebarLink: React.FC<SidebarLinkProps> = ({
   to,
+  search,
   icon: Icon,
   label,
   exact,
@@ -185,6 +181,7 @@ const SidebarLink: React.FC<SidebarLinkProps> = ({
   return (
     <Link
       to={to}
+      search={search}
       className={cn(
         'relative flex min-h-[40px] items-center gap-2.5 px-3 py-2 rounded-md text-[12px] font-medium transition-colors duration-150 lg:min-h-0 lg:py-1.5',
         isActive ? '' : 'hover:bg-[var(--flow-hover)]'
@@ -224,6 +221,7 @@ interface FlowLayoutProps {
 }
 
 const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
+  const { t } = useTranslation();
   const location = useLocation();
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
@@ -321,7 +319,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   }, [apiProjects, setProjects]);
 
   // Seed the store's members from the business team so the assignee picker (and
-  // any other member-driven UI) has people to choose from — nothing else calls
+  // any other member-driven UI) has people to choose from. Nothing else calls
   // setMembers, so without this the store stays empty and assignment is impossible.
   const { data: teamMembers } = useFlowTeam();
   useEffect(() => {
@@ -396,14 +394,21 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   // Sync --accent CSS vars to the active workspace color so every component
   // in the tree can reference var(--accent) without prop-drilling.
+  //
+  // These land as inline styles on documentElement, which beats every stylesheet
+  // rule - so the per-mode alphas have to be applied here. A light-mode value for
+  // --accent-muted written in globals.css is silently overridden the moment this
+  // layout mounts, which is on every authenticated screen.
   useEffect(() => {
-    const color = activeWorkspace.color || ACCENT_DEFAULT;
+    const resolved: ResolvedTheme =
+      document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
     const root = document.documentElement;
-    root.style.setProperty('--accent', color);
-    root.style.setProperty('--accent-muted', hexToRgba(color, 0.12));
-    root.style.setProperty('--accent-border', hexToRgba(color, 0.3));
-    root.style.setProperty('--accent-focus', hexToRgba(color, 0.5));
-  }, [activeWorkspace.color]);
+    for (const [name, value] of Object.entries(
+      accentTints(activeWorkspace.color || ACCENT_DEFAULT, resolved)
+    )) {
+      root.style.setProperty(name, value);
+    }
+  }, [activeWorkspace.color, theme]);
   // Hide the auto-provisioned personal project - it's the backend's bucket for
   // the dedicated "My Tasks" page (top nav) and, like Asana, must not surface in
   // the Projects list. The authoritative match is the id returned by
@@ -828,6 +833,65 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               <SidebarLink to="/insights" icon={BarChart3} label="Insights" />
                             )}
                             <SidebarLink to="/archive" icon={Archive} label="Archive" />
+                          </nav>
+                        </SidebarCollapsible>
+                      </div>
+                    )}
+
+                    {sectionId === 'time' && (
+                      <div className="flex flex-col gap-0">
+                        <div className="group flex items-center gap-0 min-h-0">
+                          <div className={sidebarReorderWrapClass}>
+                            <SidebarSectionReorder
+                              id="time"
+                              order={sidebarSectionOrder}
+                              moveSection={moveSidebarSection}
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => toggleSidebarSection('time')}
+                            className={cn(sidebarSectionHeaderClass, 'flex-1')}
+                          >
+                            <span
+                              className="text-[12px] font-semibold tracking-wide"
+                              style={{ color: 'var(--flow-text-muted)' }}
+                            >
+                              {t('flow.time.heading')}
+                            </span>
+                            <ChevronDown
+                              size={14}
+                              strokeWidth={2}
+                              className={cn(
+                                'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                                isSidebarSectionCollapsed('time') && '-rotate-90'
+                              )}
+                              style={{ color: 'var(--flow-text-muted)' }}
+                            />
+                          </button>
+                        </div>
+                        <SidebarCollapsible open={!isSidebarSectionCollapsed('time')}>
+                          <nav className="flex flex-col gap-px pt-px">
+                            {/* Timesheet, Review and Workload join these here
+                             * as their backends land. Team and Reports have
+                             * no client-side gate: a caller without workspace
+                             * admin still opens them and sees why, the same
+                             * disabled-with-a-reason rule as everywhere else,
+                             * just enforced by a real 403 instead of a
+                             * client-only guess. */}
+                            <SidebarLink to="/time" icon={Clock} label={t('flow.time.myDay')} />
+                            <SidebarLink to="/time/team" icon={Users} label={t('flow.time.team')} />
+                            <SidebarLink
+                              to="/time/reports"
+                              icon={BarChart3}
+                              label={t('flow.time.reports')}
+                            />
+                            <SidebarLink
+                              to="/settings"
+                              search={{ section: 'time' }}
+                              icon={Settings}
+                              label={t('flow.settings.time.section')}
+                            />
                           </nav>
                         </SidebarCollapsible>
                       </div>

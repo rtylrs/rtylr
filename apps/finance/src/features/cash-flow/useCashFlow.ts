@@ -8,12 +8,38 @@ import { unwrapList } from '../../shared/lib/unwrapList';
 
 import { minorToMajor } from '../../shared/lib/money';
 
-export function useCashFlow() {
-  const now = new Date();
-  const from = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString().slice(0, 10);
-  const to = now.toISOString().slice(0, 10);
+export interface UseCashFlowOptions {
+  period?: 'month' | 'quarter' | 'year';
+  date?: Date;
+}
+
+export function useCashFlow(options?: UseCashFlowOptions) {
+  const period = options?.period ?? 'month';
+  const baseDate = options?.date ?? new Date();
+
+  let from: string;
+  let to: string;
+
+  if (period === 'month') {
+    const start = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+    const end = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
+    from = start.toISOString().slice(0, 10);
+    to = end.toISOString().slice(0, 10);
+  } else if (period === 'quarter') {
+    const q = Math.floor(baseDate.getMonth() / 3);
+    const start = new Date(baseDate.getFullYear(), q * 3, 1);
+    const end = new Date(baseDate.getFullYear(), (q + 1) * 3, 0);
+    from = start.toISOString().slice(0, 10);
+    to = end.toISOString().slice(0, 10);
+  } else {
+    const start = new Date(baseDate.getFullYear(), 0, 1);
+    const end = new Date(baseDate.getFullYear(), 11, 31);
+    from = start.toISOString().slice(0, 10);
+    to = end.toISOString().slice(0, 10);
+  }
+
   return useQuery({
-    queryKey: ['cash-flow', 'filter', { from, to }],
+    queryKey: ['cash-flow', 'filter', { from, to, period }],
     queryFn: async (): Promise<CashFlowPoint[]> => {
       // Backend cash-flow time series lives at /insights/financial/cash-flow and
       // returns { series: [{ date, inflowMinorUnits, outflowMinorUnits }] }.
