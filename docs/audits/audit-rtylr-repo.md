@@ -47,19 +47,62 @@ You are running on a teammate's own machine, which may have uncommitted work in 
 
 **Do not write real data.** Every app defaults to the production API (`https://api.voxire.com/`) when no `.env.local` is present. Do not click save, delete, send, or pay. Do not run flows that mutate.
 
-## Two-phase protocol: report first, file second
+## Claim this unit first, and confirm nobody else has it
 
-**Do not create any issues during the audit.** Eight people are running audits in parallel, and an unreviewed batch from eight agents at once would flood the trackers.
+Fifteen units are being audited by eight people at once. **Two people auditing the same unit produces duplicate issues**, which costs real triage time and has already happened on this project. The claim below is the only thing preventing that, so do not skip it.
 
-**Phase 1, report.** When the audit is complete, post your **complete findings list as a single comment** on the tracking issue:
+### Step 1: check for an existing claim
 
+Before you read a single file:
+
+```bash
+gh issue view 685 --repo tryrtylr/rtylr --comments | grep -iE "CLAIM|DONE|RELEASE" | grep -i "repo"
 ```
-https://github.com/tryrtylr/rtylr/issues/685
+
+Also check whether this unit has already been filed:
+
+```bash
+gh issue list --repo tryrtylr/rtylr --label "audit:repo-2026-08-16" --state all --limit 50
 ```
 
-Format that comment as a numbered list. For each candidate finding give: the proposed imperative title, the exact `file:line`, a one line failure scenario, the proposed severity, and the proposed labels. Also state your baseline results and anything you could not check. Then stop and wait.
+**If either shows an active claim, or issues already filed under this batch label, stop now.** Do not audit this unit. Report back to whoever gave you this prompt and say the unit is already taken, naming who has it. Do not pick a different unit on your own.
 
-**Phase 2, file.** Only after @AbedAmouneh replies approving that comment, create the issues. If the reply asks for changes, revise and post again. Never file without an explicit approval.
+A claim counts as released only if the same person later posted `RELEASE: repo`. A `DONE: repo` means the unit is finished, not free.
+
+### Step 2: post your claim
+
+```bash
+gh issue comment 685 --repo tryrtylr/rtylr \
+  --body "CLAIM: repo | @<your-github-handle> | started $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+```
+
+Use that exact format. The keyword, the unit name, your handle, and a UTC timestamp. Everything else in the comment is optional.
+
+### Step 3: re-check for a race
+
+Wait 60 seconds, then run the Step 1 check again. Two agents can claim within seconds of each other, and the timestamp is what breaks the tie.
+
+**If someone else claimed this unit with an earlier timestamp, you yield.** Post:
+
+```bash
+gh issue comment 685 --repo tryrtylr/rtylr \
+  --body "RELEASE: repo | yielding to @<their-handle>, they claimed first"
+```
+
+Then stop and report back. If your timestamp is earlier, continue.
+
+### Step 4: file directly, then close out
+
+Once the claim holds, you file issues yourself as you confirm them. **No approval step is needed.** The evidence bar below is what keeps quality up, not a reviewer, so apply it strictly to your own findings.
+
+When you have finished, post:
+
+```bash
+gh issue comment 685 --repo tryrtylr/rtylr \
+  --body "DONE: repo | <N> issues filed | <links to the summary issue>"
+```
+
+If you abandon the run partway, post `RELEASE: repo | not completed, <reason>` so somebody else can pick it up. Never leave a claim hanging.
 
 ## Deduplicate before you file
 

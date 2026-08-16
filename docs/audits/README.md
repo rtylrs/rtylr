@@ -1,6 +1,6 @@
 # Audit prompts, 2026-08-16 round
 
-Self-contained prompts for running an independent code audit with Codex. Each file is one unit of work: hand it to the agent and it sets up, audits its unit, reports, and (after approval) files GitHub issues against the correct repository.
+Self-contained prompts for running an independent code audit with Codex. Each file is one unit of work: hand it to the agent and it claims the unit, sets up, audits it, and files GitHub issues against the correct repository.
 
 **Tracking and coordination: [rtylr#685](https://github.com/tryrtylr/rtylr/issues/685).** Claim your unit there before you start.
 
@@ -50,7 +50,9 @@ Three of these units file **outside** `tryrtylr/rtylr`, and the vault sits under
 
 **Discovery only.** Fetch and read freely, run tests, but never pull, checkout, switch branches, rebase, stash, commit or edit a file. Dirty worktrees are left exactly as found, which matters because these run on teammates' own machines where a checkout could clobber work in progress.
 
-**Two-phase filing.** The agent posts its complete findings list as a single comment on [#685](https://github.com/tryrtylr/rtylr/issues/685) and stops. Issues are created only after explicit approval. With eight people running in parallel, this is what stops the trackers being flooded with an unreviewed or duplicated batch.
+**A claim protocol, so two people never audit the same unit.** Before reading any code the agent checks [#685](https://github.com/tryrtylr/rtylr/issues/685) for an existing claim on its unit and checks whether that unit's batch label already has issues. If either shows the unit is taken, it stops and reports back rather than picking a different unit on its own. Otherwise it posts `CLAIM: <unit> | @handle | <UTC timestamp>`, waits 60 seconds, and re-checks: whoever holds the earlier timestamp keeps the unit, and the other yields with `RELEASE:`. It closes with `DONE: <unit> | <N> issues filed`, or `RELEASE:` if it abandons the run, so a claim is never left hanging.
+
+Filing is direct, with no approval step. That puts the whole quality burden on the evidence bar below, which the prompts tell the agent to enforce on itself precisely because nobody is reviewing the batch before it lands.
 
 **Five audit dimensions.** Correctness and silent failures; security, tenancy and RBAC; mobile-first, accessibility and i18n; architecture conformance and dead code; and missing cross-app connections.
 
