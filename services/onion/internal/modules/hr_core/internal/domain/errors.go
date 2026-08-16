@@ -10,6 +10,7 @@ var (
 	ErrInviteTokenInvalid = errors.New("invite token invalid or expired")
 	ErrInviteTokenExpired = errors.New("invite token expired")
 	ErrSetupNotComplete   = errors.New("hr setup not complete")
+	ErrUserAlreadyLinked  = errors.New("user is already linked to another employee record")
 
 	// ErrPermissionDenied is returned when the caller is authenticated but
 	// lacks the role permission an HR administration write requires. Handlers

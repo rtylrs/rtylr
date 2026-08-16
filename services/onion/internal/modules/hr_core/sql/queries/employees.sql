@@ -31,7 +31,7 @@ INSERT INTO hr_employees (
 
 -- name: UpdateEmployee :exec
 UPDATE hr_employees
-SET department_id = ?, location_id = ?, work_schedule_id = ?,
+SET user_id = ?, department_id = ?, location_id = ?, work_schedule_id = ?,
     first_name = ?, last_name = ?, email = ?, phone = ?,
     employment_type = ?, status = ?, salary = ?, hourly_rate = ?,
     overtime_rate = ?, start_date = ?, end_date = ?,

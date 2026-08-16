@@ -6,14 +6,26 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
+
+// isDuplicateUserIDError reports whether err is a MySQL duplicate-entry error
+// on hr_employees' global uniq_employee_user_id constraint - the case where a
+// caller tries to link a user_id already linked to another employee record
+// (possibly in a different business, since the constraint isn't tenant-scoped).
+func isDuplicateUserIDError(err error) bool {
+	var mysqlErr *mysql.MySQLError
+	return errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 &&
+		strings.Contains(mysqlErr.Message, "uniq_employee_user_id")
+}
 
 type Repository struct {
 	queries *sqlc.Queries
@@ -82,6 +94,9 @@ func (r *Repository) GetEmployeeIDByUserID(ctx context.Context, businessID, user
 func (r *Repository) CreateEmployee(ctx context.Context, businessID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
 	result, err := r.queries.CreateEmployee(ctx, employeeToParams(businessID, emp))
 	if err != nil {
+		if isDuplicateUserIDError(err) {
+			return nil, domain.ErrUserAlreadyLinked
+		}
 		logger.Ctx(ctx).Error("failed to create employee", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
@@ -97,6 +112,7 @@ func (r *Repository) CreateEmployee(ctx context.Context, businessID int64, emp d
 
 func (r *Repository) UpdateEmployee(ctx context.Context, businessID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
 	err := r.queries.UpdateEmployee(ctx, sqlc.UpdateEmployeeParams{
+		UserID:                nullInt64(emp.UserID),
 		DepartmentID:          nullInt64(emp.DepartmentID),
 		LocationID:            nullInt64(emp.LocationID),
 		WorkScheduleID:        nullInt64(emp.WorkScheduleID),
@@ -119,6 +135,9 @@ func (r *Repository) UpdateEmployee(ctx context.Context, businessID int64, emp d
 		BusinessID:            businessID,
 	})
 	if err != nil {
+		if isDuplicateUserIDError(err) {
+			return nil, domain.ErrUserAlreadyLinked
+		}
 		logger.Ctx(ctx).Error("failed to update employee", logger.Any("business_id", businessID), logger.Any("employee_id", emp.ID), logger.Error(err))
 		return nil, err
 	}
@@ -144,6 +163,9 @@ func (r *Repository) CreateEmployeeWithBalances(ctx context.Context, businessID 
 	result, err := qtx.CreateEmployee(ctx, employeeToParams(businessID, emp))
 	if err != nil {
 		_ = tx.Rollback()
+		if isDuplicateUserIDError(err) {
+			return nil, domain.ErrUserAlreadyLinked
+		}
 		logger.Ctx(ctx).Error("failed to create employee in tx", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
 	}
