@@ -22,7 +22,6 @@ import type {
   WorkScheduleFormData,
   OrgStructureFormData,
   LocationsFormData,
-  RolesPermissionsFormData,
   PayrollConfigFormData,
   NotificationsFormData,
 } from '../../shared/schemas/wizardSchemas';
@@ -139,8 +138,8 @@ const SetupWizard = (): React.JSX.Element => {
     handleStepComplete('locations', data as Record<string, unknown>);
   };
 
-  const handleRolesPermissions = (roles: RolesPermissionsFormData['roles']): void => {
-    handleStepComplete('roles_permissions', { roles });
+  const handleRolesPermissions = (): void => {
+    handleStepComplete('roles_permissions');
   };
 
   const handlePayrollConfig = (data: PayrollConfigFormData): void => {
