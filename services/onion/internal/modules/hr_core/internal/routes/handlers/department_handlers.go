@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrdepartmentv1 "github.com/voxire/voxie/gen/go/hr/department/v1"
 )
 
@@ -46,10 +47,14 @@ func (h *ListHRCoreDepartmentsHandler) Serve(ctx context.Context, req *ListHRCor
 	if device.IsAnonymous || device.User == nil {
 		return ListHRCoreDepartmentsResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListHRCoreDepartmentsResponse{}, onekiterrors.PermissionDenied()
+	}
 
-	departments, err := h.Service.ListDepartments(ctx, device.User.UserID, req.LocationID)
+	departments, err := h.Service.ListDepartments(ctx, businessID, req.LocationID)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list departments", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list departments", logger.Any("business_id", businessID), logger.Error(err))
 		return ListHRCoreDepartmentsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list departments")
 	}
 
@@ -90,11 +95,15 @@ func (h *CreateHRCoreDepartmentHandler) Serve(ctx context.Context, req *CreateHR
 	if device.IsAnonymous || device.User == nil {
 		return CreateHRCoreDepartmentResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateHRCoreDepartmentResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	dept := domain.DepartmentRecord{Name: req.Name, LocationID: req.LocationID, ParentDepartmentID: req.ParentDepartmentID, DefaultWorkScheduleID: req.DefaultWorkScheduleID}
-	created, err := h.Service.CreateDepartment(ctx, device.User.UserID, dept)
+	created, err := h.Service.CreateDepartment(ctx, businessID, dept)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create department", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create department", logger.Any("business_id", businessID), logger.Error(err))
 		return CreateHRCoreDepartmentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create department")
 	}
 
@@ -131,6 +140,10 @@ func (h *UpdateHRCoreDepartmentHandler) Serve(ctx context.Context, req *UpdateHR
 	if device.IsAnonymous || device.User == nil {
 		return UpdateHRCoreDepartmentResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateHRCoreDepartmentResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -139,9 +152,9 @@ func (h *UpdateHRCoreDepartmentHandler) Serve(ctx context.Context, req *UpdateHR
 	}
 
 	dept := domain.DepartmentRecord{ID: id, Name: req.Name, LocationID: req.LocationID, ParentDepartmentID: req.ParentDepartmentID, DefaultWorkScheduleID: req.DefaultWorkScheduleID}
-	updated, err := h.Service.UpdateDepartment(ctx, device.User.UserID, dept)
+	updated, err := h.Service.UpdateDepartment(ctx, businessID, dept)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to update department", logger.Any("owner_id", device.User.UserID), logger.Any("department_id", id), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to update department", logger.Any("business_id", businessID), logger.Any("department_id", id), logger.Error(err))
 		return UpdateHRCoreDepartmentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update department")
 	}
 
