@@ -45,7 +45,8 @@ SELECT m.user_id, u.email, COALESCE(u.full_name,'') AS full_name, m.added_at
 FROM user_group_members m
 JOIN users u ON u.id = m.user_id
 WHERE m.group_id = ?
-ORDER BY m.added_at DESC;
+ORDER BY m.added_at DESC
+LIMIT 500;
 
 -- name: ListUserGroups :many
 SELECT g.id, g.name, g.color
