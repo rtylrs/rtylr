@@ -64,6 +64,12 @@ describe('flow locale parity', () => {
       'time.date',
       // "Type" is the ordinary French word too, same as "Date" above.
       'leave.leaveType',
+      // "Section" is the ordinary French word too; taskDetail.noSection
+      // ("Aucune section") already establishes it as the correct term here.
+      'taskDetail.section',
+      // Pure placeholder with no prose to translate, same as the duration
+      // placeholders above.
+      'taskDetail.genericActivityNoValue',
     ]);
 
     const copied = keyPaths(en).filter((path) => {
