@@ -73,11 +73,7 @@ function withLayout(element: React.ReactNode): React.ReactNode {
   return (
     <FlowLayout>
       <ErrorBoundary>
-        <Suspense
-          fallback={<RouteLoading />}
-        >
-          {element}
-        </Suspense>
+        <Suspense fallback={<RouteLoading />}>{element}</Suspense>
       </ErrorBoundary>
     </FlowLayout>
   );

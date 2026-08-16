@@ -790,7 +790,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         <SidebarCollapsible open={!isSidebarSectionCollapsed('plan')}>
                           <nav className="flex flex-col gap-px pt-px">
                             {showPreviewRoutes && (
-                              <SidebarLink to="/roadmap" icon={Map} label={t('flow.shell.roadmap')} />
+                              <SidebarLink
+                                to="/roadmap"
+                                icon={Map}
+                                label={t('flow.shell.roadmap')}
+                              />
                             )}
                             <SidebarLink to="/cycles" icon={Timer} label={t('flow.shell.cycles')} />
                             <SidebarLink
@@ -799,7 +803,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               label={t('flow.shell.milestones')}
                             />
                             {showPreviewRoutes && (
-                              <SidebarLink to="/timeline" icon={Timer} label={t('flow.shell.timeline')} />
+                              <SidebarLink
+                                to="/timeline"
+                                icon={Timer}
+                                label={t('flow.shell.timeline')}
+                              />
                             )}
                             <SidebarLink
                               to="/calendar"
@@ -847,7 +855,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         <SidebarCollapsible open={!isSidebarSectionCollapsed('team')}>
                           <nav className="flex flex-col gap-px pt-px">
                             {showPreviewRoutes && (
-                              <SidebarLink to="/team" icon={Users} label={t('flow.shell.workload')} />
+                              <SidebarLink
+                                to="/team"
+                                icon={Users}
+                                label={t('flow.shell.workload')}
+                              />
                             )}
                             <SidebarLink
                               to={`/w/${currentWorkspaceId}/members`}
@@ -855,9 +867,17 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               label={t('flow.shell.members')}
                             />
                             {showPreviewRoutes && (
-                              <SidebarLink to="/insights" icon={BarChart3} label={t('flow.shell.insights')} />
+                              <SidebarLink
+                                to="/insights"
+                                icon={BarChart3}
+                                label={t('flow.shell.insights')}
+                              />
                             )}
-                            <SidebarLink to="/archive" icon={Archive} label={t('flow.shell.archive')} />
+                            <SidebarLink
+                              to="/archive"
+                              icon={Archive}
+                              label={t('flow.shell.archive')}
+                            />
                           </nav>
                         </SidebarCollapsible>
                       </div>
@@ -1156,7 +1176,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             >
               <motion.button
                 type="button"
-                      aria-label={t('common.close')}
+                aria-label={t('common.close')}
                 className="absolute inset-0 cursor-default"
                 style={{ background: 'rgba(0,0,0,0.45)' }}
                 onClick={() => setNewProjectOpen(false)}
