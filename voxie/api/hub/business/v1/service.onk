@@ -32,6 +32,9 @@ service BusinessService {
   /// Renames an active business owned by the current user.
   renameBusiness(RenameBusinessRequest) -> RenameBusinessResponse @patch("/businesses/{business_id}/name")
 
+  /// Sets the logo for an active business owned by the current user.
+  setLogo(SetLogoRequest) -> SetLogoResponse @patch("/businesses/{business_id}/logo")
+
   /// Removes an active business owned by the current user.
   deleteBusiness(DeleteBusinessRequest) -> DeleteBusinessResponse @delete("/businesses/{business_id}")
 }

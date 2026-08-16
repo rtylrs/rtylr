@@ -389,6 +389,39 @@ func (m *RenameBusinessResponse) Validate() error {
 	return nil
 }
 
+func (m *SetLogoRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.BusinessId <= 0 {
+		violations = append(violations, "business_id must be greater than 0")
+	}
+	if m.LogoUrl == "" {
+		violations = append(violations, "logo_url is required")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *SetLogoResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Business != nil {
+		if err := m.Business.Validate(); err != nil {
+			violations = append(violations, "business: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *DeleteBusinessRequest) Validate() error {
 	if m == nil {
 		return nil

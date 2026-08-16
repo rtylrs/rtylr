@@ -712,6 +712,57 @@ if (v.business !== undefined && v.business !== null) violations.push(...validate
 return violations;
 }
 
+export interface SetLogoRequest {
+businessId: string;
+logoUrl: string;
+}
+
+export function decodeSetLogoRequest(v: any): SetLogoRequest {
+if (v === null || v === undefined) return v;
+return {
+businessId: v.business_id,
+logoUrl: v.logo_url,
+};
+}
+
+export function encodeSetLogoRequest(v: SetLogoRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.logoUrl !== undefined) { out.logo_url = v.logoUrl; }
+return out;
+}
+
+export function validateSetLogoRequest(v: SetLogoRequest): string[] {
+const violations: string[] = [];
+if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
+if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+if (!(v.logoUrl !== undefined && v.logoUrl !== null) || v.logoUrl === "") violations.push("logo_url is required");
+return violations;
+}
+
+export interface SetLogoResponse {
+business?: Business;
+}
+
+export function decodeSetLogoResponse(v: any): SetLogoResponse {
+if (v === null || v === undefined) return v;
+return {
+business: (v.business !== undefined ? decodeBusiness(v.business) : v.business),
+};
+}
+
+export function encodeSetLogoResponse(v: SetLogoResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.business !== undefined) { out.business = encodeBusiness(v.business); }
+return out;
+}
+
+export function validateSetLogoResponse(v: SetLogoResponse): string[] {
+const violations: string[] = [];
+if (v.business !== undefined && v.business !== null) violations.push(...validateBusiness(v.business).map((message) => "business: " + message));
+return violations;
+}
+
 export interface DeleteBusinessRequest {
 businessId: string;
 }

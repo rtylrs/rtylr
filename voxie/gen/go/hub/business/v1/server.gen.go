@@ -209,6 +209,7 @@ type BusinessServiceServer interface {
 	SetSlug(ctx context.Context, req *SetSlugRequest) (*SetSlugResponse, error)
 	UpdateBusiness(ctx context.Context, req *UpdateBusinessRequest) (*UpdateBusinessResponse, error)
 	RenameBusiness(ctx context.Context, req *RenameBusinessRequest) (*RenameBusinessResponse, error)
+	SetLogo(ctx context.Context, req *SetLogoRequest) (*SetLogoResponse, error)
 	DeleteBusiness(ctx context.Context, req *DeleteBusinessRequest) (*DeleteBusinessResponse, error)
 }
 
@@ -466,6 +467,34 @@ func RegisterBusinessServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "BusinessService", Method: "renameBusiness", HTTPMethod: "PATCH", Route: "/hub/business/v1/businesses/{business_id}/name", AuthSchemes: nil}))
+	mux.Handle("PATCH /hub/business/v1/businesses/{business_id}/logo", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(SetLogoRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		parsedBusinessId, err := parseInt64(r.PathValue("business_id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter business_id: "+err.Error())
+			return
+		}
+		req.BusinessId = parsedBusinessId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.SetLogo(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "BusinessService", Method: "setLogo", HTTPMethod: "PATCH", Route: "/hub/business/v1/businesses/{business_id}/logo", AuthSchemes: nil}))
 	mux.Handle("DELETE /hub/business/v1/businesses/{business_id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(DeleteBusinessRequest)
 		parsedBusinessId, err := parseInt64(r.PathValue("business_id"))

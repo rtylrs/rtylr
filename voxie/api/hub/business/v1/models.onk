@@ -156,6 +156,16 @@ message RenameBusinessResponse {
   business: Business
 }
 
+message SetLogoRequest {
+  business_id: int64 @required @gt(0)
+  /// Public URL of an already-uploaded asset (see @voxire/api uploadAsset).
+  logo_url: string @required
+}
+
+message SetLogoResponse {
+  business: Business
+}
+
 message DeleteBusinessRequest {
   business_id: int64 @required @gt(0)
 }

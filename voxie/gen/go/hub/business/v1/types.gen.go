@@ -1035,6 +1035,68 @@ func (x *RenameBusinessResponse) GetBusiness() *Business {
 	return x.Business
 }
 
+type SetLogoRequest struct {
+	BusinessId int64  `json:"business_id,omitempty"`
+	LogoUrl    string `json:"logo_url,omitempty"`
+}
+
+func (m *SetLogoRequest) MarshalJSON() ([]byte, error) {
+	type alias SetLogoRequest
+	aux := struct {
+		*alias
+		BusinessId string `json:"business_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *SetLogoRequest) UnmarshalJSON(data []byte) error {
+	type alias SetLogoRequest
+	aux := struct {
+		*alias
+		BusinessId string `json:"business_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.BusinessId != "" {
+		v, err := strconv.ParseInt(aux.BusinessId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.BusinessId = v
+	}
+	return nil
+}
+
+func (x *SetLogoRequest) GetBusinessId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.BusinessId
+}
+
+func (x *SetLogoRequest) GetLogoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.LogoUrl
+}
+
+type SetLogoResponse struct {
+	Business *Business `json:"business,omitempty"`
+}
+
+func (x *SetLogoResponse) GetBusiness() *Business {
+	if x == nil {
+		var zero *Business
+		return zero
+	}
+	return x.Business
+}
+
 type DeleteBusinessRequest struct {
 	BusinessId int64 `json:"business_id,omitempty"`
 }
