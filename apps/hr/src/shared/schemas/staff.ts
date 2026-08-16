@@ -10,6 +10,10 @@ export const staffMemberSchema = z.object({
   status: z.enum(['Active', 'Inactive']).catch('Active'),
 });
 
+export const myEmployeeSchema = z.object({
+  id: z.union([z.string(), z.number()]).transform(Number),
+});
+
 export const employeeProfileSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(Number),
   photoUrl: z.string().optional(),

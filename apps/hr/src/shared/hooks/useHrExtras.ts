@@ -19,11 +19,33 @@ import { onboardingTaskSchema, offboardingTaskSchema } from '../schemas/onboardi
 import { documentItemSchema } from '../schemas/documents';
 import { benefitPlanSchema, benefitEnrollmentSchema } from '../schemas/benefits';
 import { trainingCourseSchema, trainingProgressSchema } from '../schemas/training';
-import { birthdaySchema, anniversarySchema, employeeProfileSchema } from '../schemas/staff';
+import {
+  birthdaySchema,
+  anniversarySchema,
+  employeeProfileSchema,
+  myEmployeeSchema,
+} from '../schemas/staff';
 import { hrSettingsSchema } from '../schemas/settings';
 
 const staffClient = createOneKitClient(StaffServiceClient, 'hr');
 const departmentClient = createOneKitClient(DepartmentServiceClient, 'hr');
+
+/**
+ * The caller's own hr_employees.id - not the same id as the hub auth user id
+ * (`useUserStore((s) => s.userId)`). hr.employee.v1 has no self-lookup RPC, so
+ * `/hr/employees/me` is the only correct source for this: sending the auth
+ * user id where an employee_id is expected fails leave/overtime/equipment
+ * requests outright once the receiving endpoint validates ownership.
+ */
+export function useMyEmployeeId() {
+  return useQuery({
+    queryKey: ['my-employee-id'],
+    queryFn: async () => {
+      const res = await unwrap(hrExtras.getMyEmployee());
+      return myEmployeeSchema.parse(res.employee).id;
+    },
+  });
+}
 
 /* ── 31. useStaffById ── */
 export function useStaffById(id: number | undefined) {
