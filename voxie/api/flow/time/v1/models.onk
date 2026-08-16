@@ -12,6 +12,11 @@ message WorkType {
   parent_id: int64? @nullable
   /// name is the display name of this work type.
   name: string
+  /// description is a business-authored explanation of what this work type
+  /// covers, shown to employees as a read-only "Task Description" once they
+  /// pick the type in Log Hours - distinct from the free-text description an
+  /// employee types for what they actually did.
+  description: string
   /// hr_category_id maps this node to an HR payroll category.
   hr_category_id: int64? @nullable
   /// sort_order controls the order the tree is presented in.
@@ -244,6 +249,8 @@ message ListWorkTypesResponse {
 message CreateWorkTypeRequest {
   /// name is the display name.
   name: string @required
+  /// description is shown to employees as the task description once picked.
+  description: string
   /// parent_id nests this node under a top-level type.
   parent_id: int64? @nullable
   /// hr_category_id maps the node onto an HR payroll category.
@@ -258,6 +265,8 @@ message CreateWorkTypeResponse {
 message UpdateWorkTypeRequest {
   id: int64 @required @gt(0)
   name: string @required
+  /// description is shown to employees as the task description once picked.
+  description: string
   parent_id: int64? @nullable
   hr_category_id: int64? @nullable
   sort_order: int32

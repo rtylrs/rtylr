@@ -11,6 +11,7 @@ type WorkType struct {
 	Id           int64  `json:"id,omitempty"`
 	ParentId     *int64 `json:"parent_id,omitempty"`
 	Name         string `json:"name,omitempty"`
+	Description  string `json:"description,omitempty"`
 	HrCategoryId *int64 `json:"hr_category_id,omitempty"`
 	SortOrder    int32  `json:"sort_order,omitempty"`
 	Archived     bool   `json:"archived,omitempty"`
@@ -73,6 +74,14 @@ func (x *WorkType) GetName() string {
 		return zero
 	}
 	return x.Name
+}
+
+func (x *WorkType) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
 }
 
 func (x *WorkType) GetHrCategoryId() int64 {
@@ -1220,6 +1229,7 @@ func (x *ListWorkTypesResponse) GetWorkTypes() []*WorkType {
 
 type CreateWorkTypeRequest struct {
 	Name         string `json:"name,omitempty"`
+	Description  string `json:"description,omitempty"`
 	ParentId     *int64 `json:"parent_id,omitempty"`
 	HrCategoryId *int64 `json:"hr_category_id,omitempty"`
 	SortOrder    int32  `json:"sort_order,omitempty"`
@@ -1231,6 +1241,14 @@ func (x *CreateWorkTypeRequest) GetName() string {
 		return zero
 	}
 	return x.Name
+}
+
+func (x *CreateWorkTypeRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
 }
 
 func (x *CreateWorkTypeRequest) GetParentId() int64 {
@@ -1280,6 +1298,7 @@ func (x *CreateWorkTypeResponse) GetWorkType() *WorkType {
 type UpdateWorkTypeRequest struct {
 	Id           int64  `json:"id,omitempty"`
 	Name         string `json:"name,omitempty"`
+	Description  string `json:"description,omitempty"`
 	ParentId     *int64 `json:"parent_id,omitempty"`
 	HrCategoryId *int64 `json:"hr_category_id,omitempty"`
 	SortOrder    int32  `json:"sort_order,omitempty"`
@@ -1329,6 +1348,14 @@ func (x *UpdateWorkTypeRequest) GetName() string {
 		return zero
 	}
 	return x.Name
+}
+
+func (x *UpdateWorkTypeRequest) GetDescription() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Description
 }
 
 func (x *UpdateWorkTypeRequest) GetParentId() int64 {

@@ -5,6 +5,7 @@ export interface WorkType {
 id?: string;
 parentId?: string;
 name?: string;
+description?: string;
 hrCategoryId?: string;
 sortOrder?: number;
 archived?: boolean;
@@ -18,6 +19,7 @@ return {
 id: v.id,
 parentId: v.parent_id,
 name: v.name,
+description: v.description,
 hrCategoryId: v.hr_category_id,
 sortOrder: v.sort_order,
 archived: v.archived,
@@ -31,6 +33,7 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.parentId !== undefined) { out.parent_id = v.parentId; }
 if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
 if (v.hrCategoryId !== undefined) { out.hr_category_id = v.hrCategoryId; }
 if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
 if (v.archived !== undefined) { out.archived = v.archived; }
@@ -670,6 +673,7 @@ return violations;
 
 export interface CreateWorkTypeRequest {
 name: string;
+description?: string;
 parentId?: string;
 hrCategoryId?: string;
 sortOrder?: number;
@@ -679,6 +683,7 @@ export function decodeCreateWorkTypeRequest(v: any): CreateWorkTypeRequest {
 if (v === null || v === undefined) return v;
 return {
 name: v.name,
+description: v.description,
 parentId: v.parent_id,
 hrCategoryId: v.hr_category_id,
 sortOrder: v.sort_order,
@@ -688,6 +693,7 @@ sortOrder: v.sort_order,
 export function encodeCreateWorkTypeRequest(v: CreateWorkTypeRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
 if (v.parentId !== undefined) { out.parent_id = v.parentId; }
 if (v.hrCategoryId !== undefined) { out.hr_category_id = v.hrCategoryId; }
 if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
@@ -726,6 +732,7 @@ return violations;
 export interface UpdateWorkTypeRequest {
 id: string;
 name: string;
+description?: string;
 parentId?: string;
 hrCategoryId?: string;
 sortOrder?: number;
@@ -737,6 +744,7 @@ if (v === null || v === undefined) return v;
 return {
 id: v.id,
 name: v.name,
+description: v.description,
 parentId: v.parent_id,
 hrCategoryId: v.hr_category_id,
 sortOrder: v.sort_order,
@@ -748,6 +756,7 @@ export function encodeUpdateWorkTypeRequest(v: UpdateWorkTypeRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.name !== undefined) { out.name = v.name; }
+if (v.description !== undefined) { out.description = v.description; }
 if (v.parentId !== undefined) { out.parent_id = v.parentId; }
 if (v.hrCategoryId !== undefined) { out.hr_category_id = v.hrCategoryId; }
 if (v.sortOrder !== undefined) { out.sort_order = v.sortOrder; }
