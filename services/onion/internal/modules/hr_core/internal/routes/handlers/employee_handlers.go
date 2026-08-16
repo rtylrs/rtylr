@@ -170,6 +170,7 @@ func CreateEmployeeRoutes() []string { return []string{"/hr/employees"} }
 type CreateEmployeeHandler struct{ Service *application.Service }
 
 type CreateEmployeeRequest struct {
+	UserID         int64   `json:"user_id"`
 	DepartmentID   int64   `json:"department_id"`
 	LocationID     int64   `json:"location_id"`
 	WorkScheduleID int64   `json:"work_schedule_id"`
@@ -214,6 +215,7 @@ func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRe
 	}
 
 	emp := domain.EmployeeRecord{
+		UserID:         req.UserID,
 		DepartmentID:   req.DepartmentID,
 		LocationID:     req.LocationID,
 		WorkScheduleID: req.WorkScheduleID,
@@ -238,6 +240,9 @@ func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRe
 		if errors.Is(err, domain.ErrPermissionDenied) {
 			return CreateEmployeeResponse{}, onekiterrors.PermissionDenied()
 		}
+		if errors.Is(err, domain.ErrUserAlreadyLinked) {
+			return CreateEmployeeResponse{}, onekiterrors.New(http.StatusConflict, "This user is already linked to another employee record")
+		}
 		logger.Ctx(ctx).Error("failed to create employee", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return CreateEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create employee")
 	}
@@ -252,6 +257,7 @@ func UpdateEmployeeRoutes() []string { return []string{"/hr/employees/{id}"} }
 type UpdateEmployeeHandler struct{ Service *application.Service }
 
 type UpdateEmployeeRequest struct {
+	UserID                int64   `json:"user_id"`
 	DepartmentID          int64   `json:"department_id"`
 	LocationID            int64   `json:"location_id"`
 	WorkScheduleID        int64   `json:"work_schedule_id"`
@@ -310,6 +316,7 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 
 	emp := domain.EmployeeRecord{
 		ID:                    id,
+		UserID:                req.UserID,
 		DepartmentID:          req.DepartmentID,
 		LocationID:            req.LocationID,
 		WorkScheduleID:        req.WorkScheduleID,
@@ -345,6 +352,9 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 		}
 		if errors.Is(err, domain.ErrEmployeeNotFound) {
 			return UpdateEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "Employee not found")
+		}
+		if errors.Is(err, domain.ErrUserAlreadyLinked) {
+			return UpdateEmployeeResponse{}, onekiterrors.New(http.StatusConflict, "This user is already linked to another employee record")
 		}
 		logger.Ctx(ctx).Error("failed to update employee", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", id), logger.Error(err))
 		return UpdateEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update employee")
