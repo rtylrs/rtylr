@@ -56,7 +56,7 @@ export const Breadcrumbs: React.FC<{ className?: string }> = ({ className }) => 
           const label = ROUTE_LABELS[seg] ?? seg;
           return (
             <React.Fragment key={path}>
-              <ChevronRight size={11} className="shrink-0" />
+              <ChevronRight size={11} className="shrink-0 rtl:rotate-180" />
               <li>
                 {isLast ? (
                   <span style={{ color: 'var(--dash-text)' }} className="font-medium">

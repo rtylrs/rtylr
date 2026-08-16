@@ -458,7 +458,7 @@ const Account: React.FC = () => {
                     onClick={() => setLoginHistoryPage((page) => Math.max(1, page - 1))}
                     disabled={loginHistoryPage === 1 || isLoginHistoryFetching}
                   >
-                    <ChevronLeft size={14} />
+                    <ChevronLeft size={14} className="rtl:rotate-180" />
                     Previous
                   </Button>
                   <span className="text-xs text-gray-500 whitespace-nowrap">
@@ -471,7 +471,7 @@ const Account: React.FC = () => {
                     disabled={!loginHistoryData.hasMore || isLoginHistoryFetching}
                   >
                     Next
-                    <ChevronRight size={14} />
+                    <ChevronRight size={14} className="rtl:rotate-180" />
                   </Button>
                 </div>
               </div>

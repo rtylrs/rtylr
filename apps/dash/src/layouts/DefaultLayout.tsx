@@ -190,7 +190,10 @@ const SidebarSection: React.FC<{
         <span className="dash-sidebar-label flex-1 text-left">{label}</span>
         <ChevronRight
           size={12}
-          className={cn('dash-sidebar-chevron shrink-0 transition-transform', open && 'rotate-90')}
+          className={cn(
+            'dash-sidebar-chevron shrink-0 transition-transform rtl:rotate-180',
+            open && 'rotate-90'
+          )}
           style={{ color: 'var(--dash-text-dim)' }}
         />
       </button>
