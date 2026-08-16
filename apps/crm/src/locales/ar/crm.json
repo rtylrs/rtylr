@@ -20,6 +20,7 @@
     "merged": "Customers merged",
     "mergeFailed": "Failed to merge customers",
     "imported": "Imported {{count}} customers",
+    "importSummary": "تمت معالجة {{total}} عميلًا: تم استيراد {{imported}} وفشل {{failed}}",
     "importFailed": "Failed to import customers",
     "tagAdded": "Tag \"{{tag}}\" added",
     "tagRemoved": "Tag \"{{tag}}\" removed",

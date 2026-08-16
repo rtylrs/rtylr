@@ -293,19 +293,32 @@ interface ImportCustomerRowsPayload {
   dedupe: boolean;
 }
 
+export interface CustomerImportResult {
+  totalProcessed: number;
+  imported: number;
+  failed: number;
+  message?: string;
+}
+
 export const useImportCustomerRows = (): UseMutationResult<
-  unknown,
+  CustomerImportResult,
   unknown,
   ImportCustomerRowsPayload
 > => {
   const qc = useQueryClient();
   const { t } = useTranslation();
-  return useMutation<unknown, unknown, ImportCustomerRowsPayload>({
-    mutationFn: (payload: ImportCustomerRowsPayload): Promise<unknown> =>
-      unwrap(safe.post('/crm/customers/import', payload)),
-    onSuccess: (): void => {
+  return useMutation<CustomerImportResult, unknown, ImportCustomerRowsPayload>({
+    mutationFn: async (payload: ImportCustomerRowsPayload): Promise<CustomerImportResult> =>
+      unwrap(safe.post<CustomerImportResult>('/crm/customers/import', payload)),
+    onSuccess: (result: CustomerImportResult): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
-      toast.success(t('crm.customers.imported'));
+      toast.success(
+        t('crm.customers.importSummary', {
+          total: result.totalProcessed,
+          imported: result.imported,
+          failed: result.failed,
+        })
+      );
     },
     onError: (): void => {
       toast.error(t('errors.generic'));

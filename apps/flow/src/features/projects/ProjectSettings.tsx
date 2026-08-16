@@ -30,7 +30,7 @@ import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import type { ApiProjectMember } from '../../shared/services/flowApi';
 
 const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
-  manager: { icon: <Crown size={10} />, color: '#f59e0b' },
+  admin: { icon: <Crown size={10} />, color: '#f59e0b' },
   member: { icon: <Shield size={10} />, color: 'var(--accent)' },
   viewer: { icon: <Eye size={10} />, color: '#8b5cf6' },
 };
@@ -73,7 +73,7 @@ const ProjectSettings: React.FC = () => {
 
   const [showAddMember, setShowAddMember] = useState(false);
   const [newEmail, setNewEmail] = useState('');
-  const [newRole, setNewRole] = useState<'manager' | 'member' | 'viewer'>('member');
+  const [newRole, setNewRole] = useState<'admin' | 'member' | 'viewer'>('member');
 
   // Type-to-confirm modal state for project deletion. Native confirm()
   // is too easy to click through; the user has to retype the project
@@ -236,7 +236,7 @@ const ProjectSettings: React.FC = () => {
                 />
                 <select
                   value={newRole}
-                  onChange={(e) => setNewRole(e.target.value as 'manager' | 'member' | 'viewer')}
+                  onChange={(e) => setNewRole(e.target.value as 'admin' | 'member' | 'viewer')}
                   className="rounded px-2 py-1.5 text-[11px] outline-none"
                   style={{
                     background: 'var(--flow-input-bg)',
@@ -244,7 +244,7 @@ const ProjectSettings: React.FC = () => {
                     color: 'var(--flow-text)',
                   }}
                 >
-                  <option value="manager">Manager</option>
+                  <option value="admin">Admin</option>
                   <option value="member">Member</option>
                   <option value="viewer">Viewer</option>
                 </select>
@@ -347,7 +347,7 @@ const ProjectSettings: React.FC = () => {
                           className="text-[11px] outline-none bg-transparent cursor-pointer"
                           style={{ color: roleMeta.color }}
                         >
-                          <option value="manager">Manager</option>
+                          <option value="admin">Admin</option>
                           <option value="member">Member</option>
                           <option value="viewer">Viewer</option>
                         </select>

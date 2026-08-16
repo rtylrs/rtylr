@@ -4,6 +4,8 @@ export const automationNodeSchema = z.object({
   id: z.string(),
   type: z.string(),
   label: z.string(),
+  /** Stable backend identifier; label is presentation-only. */
+  automationType: z.string().optional(),
   x: z.number(),
   y: z.number(),
 });
@@ -42,17 +44,30 @@ function automationTriggerLabel(triggerType: string): string {
     loyalty_tier_down: 'Tier downgrade',
     date_birthday: 'Birthday',
     inactivity: 'Inactive customer',
+    tag_added: 'Tag added',
+    points_threshold: 'Points threshold',
   };
   return labels[triggerType] ?? triggerType;
 }
 
-function actionLabel(action: unknown): string {
+function automationActionType(action: unknown): string {
   if (typeof action === 'string') return action;
   if (action && typeof action === 'object') {
     const value = action as Record<string, unknown>;
-    return String(value.type ?? value.action ?? value.label ?? 'Action');
+    return String(value.type ?? value.action ?? value.automationType ?? value.label ?? '');
   }
-  return 'Action';
+  return '';
+}
+
+function actionLabel(action: unknown): string {
+  const labels: Record<string, string> = {
+    send_email: 'Send email',
+    send_sms: 'Send SMS',
+    award_points: 'Award points',
+    tag_add: 'Add tag',
+  };
+  const type = automationActionType(action);
+  return (labels[type] ?? type) || 'Action';
 }
 
 /** Normalize the backend automation payload while retaining the legacy UI fields. */
@@ -88,11 +103,19 @@ const automationSchemaDefinition = z
         createdAt: value.createdAt,
         updatedAt: value.updatedAt,
         nodes: [
-          { id: 'n1', type: 'trigger', label: trigger, x: 0, y: 0 },
+          {
+            id: 'n1',
+            type: 'trigger',
+            label: trigger,
+            automationType: value.triggerType,
+            x: 0,
+            y: 0,
+          },
           ...actions.map((action, index) => ({
             id: `n${index + 2}`,
             type: 'action',
             label: actionLabel(action),
+            automationType: automationActionType(action),
             x: 0,
             y: (index + 1) * 80,
           })),

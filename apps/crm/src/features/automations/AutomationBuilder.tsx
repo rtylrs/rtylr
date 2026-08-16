@@ -7,6 +7,8 @@ import {
   useCreateAutomation,
   useGetAutomation,
   useUpdateAutomation,
+  actionTypeFor,
+  triggerTypeFor,
 } from '../../shared/hooks/queries/useAutomations';
 import { Breadcrumbs, Button, Card, Input, PageHeader } from '../../shared/components/ui';
 import { AutomationNode } from '../../shared/components/crm';
@@ -15,18 +17,24 @@ interface Node {
   id: string;
   type: 'trigger' | 'action' | 'delay' | 'condition';
   label: string;
+  automationType: string;
   description?: string;
 }
 
 const triggers = [
-  { label: 'New customer', description: 'When a customer is created' },
-  { label: 'Tag added', description: 'When a tag is added to a customer' },
-  { label: 'Points threshold', description: 'When customer points reach target' },
+  { type: 'customer_signup', label: 'New customer', description: 'When a customer is created' },
+  { type: 'tag_added', label: 'Tag added', description: 'When a tag is added to a customer' },
+  {
+    type: 'points_threshold',
+    label: 'Points threshold',
+    description: 'When customer points reach target',
+  },
 ];
 const actions = [
-  { label: 'Send email', description: 'Sends an email campaign', icon: Mail },
-  { label: 'Send SMS', description: 'Sends an SMS message', icon: MessageSquare },
-  { label: 'Award points', description: 'Adds loyalty points', icon: Gift },
+  { type: 'send_email', label: 'Send email', description: 'Sends an email campaign', icon: Mail },
+  { type: 'send_sms', label: 'Send SMS', description: 'Sends an SMS message', icon: MessageSquare },
+  { type: 'award_points', label: 'Award points', description: 'Adds loyalty points', icon: Gift },
+  { type: 'tag_add', label: 'Add tag', description: 'Adds a tag to the customer', icon: Plus },
 ];
 
 const AutomationBuilder: React.FC = () => {
@@ -39,7 +47,13 @@ const AutomationBuilder: React.FC = () => {
   const { data: existing } = useGetAutomation(automationId);
   const [name, setName] = useState('');
   const [nodes, setNodes] = useState<Node[]>([
-    { id: 'n1', type: 'trigger', label: 'New customer', description: 'When a customer is created' },
+    {
+      id: 'n1',
+      type: 'trigger',
+      automationType: 'customer_signup',
+      label: 'New customer',
+      description: 'When a customer is created',
+    },
   ]);
 
   React.useEffect(() => {
@@ -51,13 +65,26 @@ const AutomationBuilder: React.FC = () => {
           id: node.id,
           type: node.type as Node['type'],
           label: node.label,
+          automationType:
+            node.automationType ??
+            (node.type === 'trigger'
+              ? triggerTypeFor(node.label)
+              : String(actionTypeFor(node.label))),
         }))
       );
     }
   }, [existing]);
 
   const addTrigger = (t: (typeof triggers)[number]) => {
-    setNodes([{ id: 'n1', type: 'trigger', label: t.label, description: t.description }]);
+    setNodes([
+      {
+        id: 'n1',
+        type: 'trigger',
+        automationType: t.type,
+        label: t.label,
+        description: t.description,
+      },
+    ]);
   };
 
   const addAction = (a: (typeof actions)[number]) => {
@@ -65,7 +92,8 @@ const AutomationBuilder: React.FC = () => {
       ...n,
       {
         id: 'n' + (n.length + 1),
-        type: (a as any).type || 'action',
+        type: 'action',
+        automationType: a.type,
         label: a.label,
         description: a.description,
       },
@@ -81,6 +109,8 @@ const AutomationBuilder: React.FC = () => {
     const payload = {
       name,
       trigger: nodes[0]?.label,
+      triggerType: nodes[0]?.automationType,
+      actions: nodes.slice(1).map((node) => ({ type: node.automationType })),
       nodes: nodes.map((node) => ({ ...node, x: 0, y: 0 })),
       isActive: false,
       status: 'paused' as const,

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Comment } from '../stores/flowStore';
 import AssigneeAvatar from './AssigneeAvatar';
 
@@ -6,16 +7,16 @@ interface CommentListProps {
   comments: Comment[];
 }
 
-function timeAgo(ts: string): string {
+function timeAgo(ts: string, t: ReturnType<typeof useTranslation>['t']): string {
   const d = new Date(ts);
   const diff = Date.now() - d.getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('flow.taskDetail.justNow');
+  if (mins < 60) return t('flow.taskDetail.minutesAgo', { count: mins });
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t('flow.taskDetail.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t('flow.taskDetail.daysAgo', { count: days });
 }
 
 function renderBody(body: string): React.ReactNode {
@@ -55,10 +56,11 @@ function renderBody(body: string): React.ReactNode {
 }
 
 export const CommentList: React.FC<CommentListProps> = ({ comments }) => {
+  const { t } = useTranslation();
   if (comments.length === 0) {
     return (
       <div className="text-[12px] text-center py-6" style={{ color: 'var(--flow-text-dim)' }}>
-        No comments yet. Start the conversation.
+        {t('flow.taskDetail.noComments')}
       </div>
     );
   }
@@ -73,7 +75,7 @@ export const CommentList: React.FC<CommentListProps> = ({ comments }) => {
                 {c.author}
               </span>
               <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-                {timeAgo(c.createdAt)}
+                {timeAgo(c.createdAt, t)}
               </span>
             </div>
             <div

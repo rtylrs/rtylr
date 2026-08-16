@@ -5,6 +5,7 @@
   "created": "Time entry created",
   "updated": "Time entry updated",
   "deleted": "Time entry deleted",
+  "employeeLookupFailed": "Your employee profile could not be loaded",
   "noDescription": "No description",
   "billable": "Billable",
   "emptyTitle": "No time entries this week",
@@ -38,6 +39,7 @@
     "descriptionPlaceholder": "What did you work on?",
     "billable": "Billable",
     "durationRequired": "Duration must be at least 1 minute",
-    "invalidTimeRange": "End time must be after start time"
+    "invalidTimeRange": "End time must be after start time",
+    "employeeLookupFailed": "Your employee profile could not be loaded. Please refresh and try again."
   }
 }

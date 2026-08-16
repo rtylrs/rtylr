@@ -37,6 +37,8 @@ export function triggerTypeFor(value?: string): string {
     'Post visit': 'order_created',
     'Tier upgrade': 'loyalty_tier_up',
     'Tier downgrade': 'loyalty_tier_down',
+    'Tag added': 'tag_added',
+    'Points threshold': 'points_threshold',
   };
   return map[value ?? ''] ?? value ?? 'customer_signup';
 }
@@ -53,19 +55,27 @@ export function actionTypeFor(value: unknown): unknown {
 }
 
 function toBackendRequest(data: Partial<Automation>): BackendAutomationRequest {
-  const actions = (
-    Array.isArray(data.actions)
-      ? data.actions
-      : (data.nodes ?? []).slice(1).map((node) => ({ type: node.label }))
-  ).map((action) =>
-    typeof action === 'object' && action !== null
-      ? {
-          ...(action as Record<string, unknown>),
-          type: actionTypeFor((action as Record<string, unknown>).type),
-        }
-      : actionTypeFor(action)
-  );
-  const triggerType = data.triggerType ?? triggerTypeFor(data.trigger);
+  const rawActions = Array.isArray(data.actions) ? data.actions : (data.nodes ?? []).slice(1);
+  const actions = rawActions.map((action) => {
+    const value =
+      action && typeof action === 'object' ? (action as Record<string, unknown>) : { type: action };
+    const rawType = value.automationType ?? value.type ?? value.label;
+    const canonicalType = actionTypeFor(rawType);
+    const {
+      id: _id,
+      label: _label,
+      x: _x,
+      y: _y,
+      automationType: _automationType,
+      ...config
+    } = value;
+    return {
+      ...config,
+      type: String(canonicalType ?? ''),
+    };
+  });
+  const triggerType =
+    data.triggerType ?? data.nodes?.[0]?.automationType ?? triggerTypeFor(data.trigger);
   const triggerConfig =
     data.triggerConfig && typeof data.triggerConfig === 'object'
       ? (data.triggerConfig as Record<string, unknown>)

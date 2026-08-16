@@ -5,6 +5,7 @@
   "created": "Entrée de temps créée",
   "updated": "Entrée de temps mise à jour",
   "deleted": "Entrée de temps supprimée",
+  "employeeLookupFailed": "Votre profil employé n'a pas pu être chargé",
   "noDescription": "Pas de description",
   "billable": "Facturable",
   "emptyTitle": "Aucune entrée de temps cette semaine",
@@ -38,6 +39,7 @@
     "descriptionPlaceholder": "Sur quoi avez-vous travaillé ?",
     "billable": "Facturable",
     "durationRequired": "La durée doit être d'au moins 1 minute",
-    "invalidTimeRange": "L'heure de fin doit être après l'heure de début"
+    "invalidTimeRange": "L'heure de fin doit être après l'heure de début",
+    "employeeLookupFailed": "Votre profil employé n'a pas pu être chargé. Veuillez actualiser la page."
   }
 }

@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useFlowStore } from '../../shared/stores/flowStore';
+import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { useWorkspaceMembers } from '../workspace-manager/useWorkspaceManager';
 import GateNotice from '../../shared/components/GateNotice';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
@@ -25,9 +26,15 @@ interface PersonTotals {
 const TimeReports = (): React.JSX.Element => {
   const { t } = useTranslation();
   const today = todayLocalDate();
-  const [from, setFrom] = useState(startOfWeek(today));
-  const [to, setTo] = useState(endOfWeek(today));
+  const weekStart = useTimeSettingsStore((s) => s.weekStart);
+  const [from, setFrom] = useState(startOfWeek(today, weekStart));
+  const [to, setTo] = useState(endOfWeek(today, weekStart));
   const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
+
+  useEffect(() => {
+    setFrom(startOfWeek(today, weekStart));
+    setTo(endOfWeek(today, weekStart));
+  }, [today, weekStart]);
 
   const { data: members, isLoading: membersLoading } = useWorkspaceMembers(activeWorkspaceId);
   const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, from, to);

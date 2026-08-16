@@ -158,7 +158,7 @@ const Pipeline: React.FC = () => {
     STAGES.forEach(({ key }) => {
       const fromApi = (pipelineCols ?? []).find((c) => c.stage === key);
       if (fromApi) {
-        result[key] = { count: fromApi.leadCount, mrr: fromApi.totalMrr };
+        result[key] = { count: fromApi.count, mrr: fromApi.totalMrr };
       } else {
         const stageLeads = byStage[key] ?? [];
         result[key] = {

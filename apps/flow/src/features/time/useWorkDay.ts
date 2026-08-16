@@ -111,6 +111,7 @@ export function useUpsertWorkDay() {
       }),
     onSuccess: (_data, input) => {
       void queryClient.invalidateQueries({ queryKey: workDayKey(input.date) });
+      void queryClient.invalidateQueries({ queryKey: ['work-days-range'] });
     },
     onError: () => toast.error(t('flow.time.daySaveFailed')),
   });
@@ -146,6 +147,7 @@ export function useCreateWorkDayLine() {
       }),
     onSuccess: (_data, input) => {
       void queryClient.invalidateQueries({ queryKey: workDayKey(input.date) });
+      void queryClient.invalidateQueries({ queryKey: ['work-days-range'] });
     },
     onError: () => toast.error(t('flow.time.lineSaveFailed')),
   });
@@ -157,6 +159,7 @@ export function useDeleteWorkDayLine() {
     mutationFn: ({ id }: { id: string; date: string }) => timeClient.deleteWorkDayLine({ id }),
     onSuccess: (_data, input) => {
       void queryClient.invalidateQueries({ queryKey: workDayKey(input.date) });
+      void queryClient.invalidateQueries({ queryKey: ['work-days-range'] });
     },
     onError: () => toast.error(t('flow.time.lineDeleteFailed')),
   });

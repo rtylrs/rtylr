@@ -300,7 +300,7 @@ export interface ApiWorkspaceMember {
   userId: string;
   name: string;
   email: string;
-  role: 'manager' | 'member' | 'viewer';
+  role: 'admin' | 'member' | 'viewer';
   invitedBy?: string;
   joinedAt: string;
 }
@@ -310,9 +310,8 @@ export interface ApiWorkspaceMember {
  * enum. Distinct from the business-wide team role (`Member['role']` in flowStore),
  * which is company scoped and says nothing about a given project.
  *
- * The enum is admin|member|viewer. onion still accepts "manager" as an input alias
- * when writing a role, but never stores it and never returns it, so anything read
- * back from the API is one of these three.
+ * The enum is admin|member|viewer. The API accepts the legacy "manager" alias
+ * at its boundary but normalizes it to admin before persistence.
  */
 export type FlowProjectRole = 'admin' | 'member' | 'viewer';
 

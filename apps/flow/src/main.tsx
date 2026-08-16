@@ -7,6 +7,7 @@ import { bootObservability } from '@voxire/observability';
 import { loadRuntimeConfig } from '@voxire/config';
 import { router } from './router';
 import { initTheme } from './shared/stores/themeStore';
+import { useTranslation } from 'react-i18next';
 import './shared/services/i18next';
 import './globals.css';
 
@@ -15,22 +16,25 @@ initTheme();
 
 bootObservability({ app: 'flow' });
 
-const BootLoader = (): React.JSX.Element => (
-  <div
-    style={{
-      display: 'flex',
-      height: '100vh',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: '#0a0a0a',
-      color: 'rgba(240,240,238,0.5)',
-      fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
-      fontSize: '14px',
-    }}
-  >
-    Loading Flow...
-  </div>
-);
+const BootLoader = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  return (
+    <div
+      style={{
+        display: 'flex',
+        height: '100vh',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#0a0a0a',
+        color: 'rgba(240,240,238,0.5)',
+        fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
+        fontSize: '14px',
+      }}
+    >
+      {t('flow.shell.loadingApp')}
+    </div>
+  );
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {

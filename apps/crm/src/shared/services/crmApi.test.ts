@@ -12,9 +12,14 @@ vi.mock('../lib/api', () => ({
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((v: unknown) => v),
+  toOptionalFiniteNumber: vi.fn((value: unknown) => {
+    if (value === null || value === undefined || value === '') return undefined;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }),
 }));
 
-import { crmApi } from './crmApi';
+import { crmApi, toContractUpdatePayload, toCreateContractPayload } from './crmApi';
 import { safe } from '../lib/api';
 
 describe('crmApi', () => {
@@ -203,6 +208,59 @@ describe('crmApi', () => {
       actions: undefined,
       isActive: false,
     });
+  });
+
+  // Sales contracts
+  it('maps contract creation fields to the backend contract shape', () => {
+    crmApi.createContract({
+      leadId: 7,
+      plan: 'pro',
+      mrr: 125,
+      seats: 4,
+      signedAt: '2026-08-16',
+      signedBy: '  Jane Doe  ',
+      closedBy: '',
+      notes: 'signed',
+    });
+    expect(safe.post).toHaveBeenCalledWith('/crm/sales/contracts', {
+      leadId: 7,
+      plan: 'pro',
+      mrr: 125,
+      seats: 4,
+      signedAt: '2026-08-16',
+      signedByName: 'Jane Doe',
+      closedBy: undefined,
+      notes: 'signed',
+    });
+  });
+
+  it('omits an invalid optional closed-by id from contract updates', () => {
+    expect(
+      toContractUpdatePayload({
+        plan: 'scale',
+        signedBy: 'Jane Doe',
+        closedBy: 'not-a-user-id',
+      })
+    ).toEqual({
+      plan: 'scale',
+      mrr: undefined,
+      seats: undefined,
+      signedAt: undefined,
+      signedByName: 'Jane Doe',
+      closedBy: undefined,
+      notes: undefined,
+    });
+    expect(
+      toCreateContractPayload({
+        leadId: 1,
+        plan: 'free',
+        mrr: 0,
+        seats: 1,
+        signedAt: '',
+        signedBy: '',
+        closedBy: '12',
+      })
+    ).toMatchObject({ leadId: 1, signedAt: undefined, signedByName: '', closedBy: 12 });
   });
 
   // Templates

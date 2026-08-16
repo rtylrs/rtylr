@@ -16,7 +16,7 @@ import type { ApiWorkspaceMember } from '../../shared/services/flowApi';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 
 const ROLE_LABELS: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
-  manager: { label: 'Manager', icon: <Crown size={11} />, color: '#f59e0b' },
+  admin: { label: 'Admin', icon: <Crown size={11} />, color: '#f59e0b' },
   member: { label: 'Member', icon: <Shield size={11} />, color: 'var(--accent)' },
   viewer: { label: 'Viewer', icon: <Eye size={11} />, color: '#8b5cf6' },
 };
@@ -24,8 +24,8 @@ const ROLE_LABELS: Record<string, { label: string; icon: React.ReactNode; color:
 const MemberRow: React.FC<{
   member: ApiWorkspaceMember;
   workspaceId: string;
-  isLastManager: boolean;
-}> = ({ member, workspaceId, isLastManager }) => {
+  isLastAdmin: boolean;
+}> = ({ member, workspaceId, isLastAdmin }) => {
   const remove = useRemoveWorkspaceMember(workspaceId);
   const updateRole = useUpdateWorkspaceMemberRole(workspaceId);
   const [confirmRemove, setConfirmRemove] = useState(false);
@@ -80,14 +80,14 @@ const MemberRow: React.FC<{
           className="text-[11px] outline-none bg-transparent cursor-pointer"
           style={{ color: roleInfo.color }}
         >
-          <option value="manager">Manager</option>
+          <option value="admin">Admin</option>
           <option value="member">Member</option>
           <option value="viewer">Viewer</option>
         </select>
       </div>
       <button
         onClick={() => {
-          if (isLastManager) return toast.error('Cannot remove the last manager');
+          if (isLastAdmin) return toast.error('Cannot remove the last admin');
           setConfirmRemove(true);
         }}
         className="h-7 w-7 rounded flex items-center justify-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -96,7 +96,7 @@ const MemberRow: React.FC<{
         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
         title="Remove member"
         aria-label="Remove member"
-        disabled={isLastManager}
+        disabled={isLastAdmin}
       >
         <Trash2 size={11} />
       </button>
@@ -137,11 +137,11 @@ const WorkspaceManager: React.FC = () => {
   const { data: orgMembers = [] } = useFlowTeam();
 
   const [selectedUserId, setSelectedUserId] = useState('');
-  const [inviteRole, setInviteRole] = useState<'manager' | 'member' | 'viewer'>('member');
+  const [inviteRole, setInviteRole] = useState<'admin' | 'member' | 'viewer'>('member');
   const [showInvite, setShowInvite] = useState(false);
   const [search, setSearch] = useState('');
 
-  const managerCount = members.filter((m) => m.role === 'manager').length;
+  const adminCount = members.filter((m) => m.role === 'admin').length;
 
   const existingUserIds = useMemo(() => new Set(members.map((m) => String(m.userId))), [members]);
 
@@ -279,7 +279,7 @@ const WorkspaceManager: React.FC = () => {
             <div className="flex items-center gap-2">
               <select
                 value={inviteRole}
-                onChange={(e) => setInviteRole(e.target.value as 'manager' | 'member' | 'viewer')}
+                onChange={(e) => setInviteRole(e.target.value as 'admin' | 'member' | 'viewer')}
                 className="rounded px-3 py-2 text-[12px] outline-none"
                 style={{
                   background: 'var(--flow-input-bg)',
@@ -287,7 +287,7 @@ const WorkspaceManager: React.FC = () => {
                   color: 'var(--flow-text)',
                 }}
               >
-                <option value="manager">Manager</option>
+                <option value="admin">Admin</option>
                 <option value="member">Member</option>
                 <option value="viewer">Viewer</option>
               </select>
@@ -336,7 +336,7 @@ const WorkspaceManager: React.FC = () => {
                 key={m.id}
                 member={m}
                 workspaceId={wsId}
-                isLastManager={m.role === 'manager' && managerCount <= 1}
+                isLastAdmin={m.role === 'admin' && adminCount <= 1}
               />
             ))}
           </div>
