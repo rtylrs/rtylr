@@ -3,6 +3,7 @@ packages:
   - 'packages/*'
 
 overrides:
+  postcss: '>=8.5.23'
   protobufjs: '>=8.2.0'
   '@protobufjs/utf8': '>=1.1.1'
   undici: ^6.22.0
