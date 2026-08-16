@@ -52,7 +52,8 @@ SELECT g.id, g.name, g.color
 FROM user_group_members m
 JOIN user_groups g ON g.id = m.group_id
 WHERE m.user_id = ? AND m.owner_id = ?
-ORDER BY g.name;
+ORDER BY g.name
+LIMIT 500;
 
 -- name: ListUserGroupResourcePermissions :many
 SELECT ugm.group_id, ugrp.resource_key, ugrp.permission_level
