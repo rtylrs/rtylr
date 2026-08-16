@@ -8,6 +8,7 @@ const dashboardClient = createOneKitClient(DashboardServiceClient, 'insights');
 export const useInsightsDashboard = (): UseQueryResult<InsightsDashboardResponse> => {
   return useQuery<InsightsDashboardResponse>({
     queryKey: ['insights-dashboard'],
+    refetchInterval: 60000,
     queryFn: async (): Promise<InsightsDashboardResponse> => {
       const res = await dashboardClient.getDashboardSummary({});
       return {

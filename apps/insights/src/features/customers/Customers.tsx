@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion, type Variants } from 'motion/react';
 import { Users, UserPlus, UserMinus, Star } from 'lucide-react';
@@ -11,7 +11,8 @@ import {
   useCustomerChurn,
   useCustomerLTV,
 } from '../../shared/hooks/queries/useInsightsCustomers';
-import { formatMoney } from '../../shared/utils/money';
+import { useInsightsSettings } from '../../shared/hooks/queries/useInsightsSettings';
+import { formatMoney, type Currency } from '../../shared/utils/money';
 import { formatNumber } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonBlock, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
@@ -27,48 +28,53 @@ const itemVariants: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
-const topCustomersBarOptions: ChartOptions<'bar'> = {
-  responsive: true,
-  maintainAspectRatio: false,
-  indexAxis: 'y',
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      backgroundColor: 'var(--hub-card)',
-      titleColor: 'var(--hub-text-muted)',
-      bodyColor: 'var(--hub-text)',
-      borderColor: 'var(--hub-border)',
-      borderWidth: 1,
-      padding: 10,
-      callbacks: {
-        label: (ctx): string => formatMoney((ctx.raw as number) * 100),
-      },
-    },
-  },
-  scales: {
-    x: {
-      grid: { color: 'var(--hub-border)' },
-      ticks: {
-        color: 'var(--hub-text-muted)',
-        font: { size: 11 },
-        callback: (value): string => formatMoney((value as number) * 100),
-      },
-      border: { display: false },
-    },
-    y: {
-      grid: { display: false },
-      ticks: { color: 'var(--hub-text-muted)', font: { size: 11 } },
-      border: { display: false },
-    },
-  },
-};
-
 const Customers: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: kpis, isLoading: kpisLoading, isError, refetch } = useCustomerKPIs();
   const { data: topRes, isLoading: topLoading } = useTopCustomers({ limit: 10 });
   const { data: churnRes, isLoading: churnLoading } = useCustomerChurn();
   const { data: ltvRes, isLoading: ltvLoading } = useCustomerLTV();
+  const { data: settings } = useInsightsSettings();
+  const currency = (settings?.defaultCurrency as Currency) || 'USD';
+
+  const topCustomersBarOptions: ChartOptions<'bar'> = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'var(--hub-card)',
+          titleColor: 'var(--hub-text-muted)',
+          bodyColor: 'var(--hub-text)',
+          borderColor: 'var(--hub-border)',
+          borderWidth: 1,
+          padding: 10,
+          callbacks: {
+            label: (ctx): string => formatMoney((ctx.raw as number) * 100, currency),
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: 'var(--hub-border)' },
+          ticks: {
+            color: 'var(--hub-text-muted)',
+            font: { size: 11 },
+            callback: (value): string => formatMoney((value as number) * 100, currency),
+          },
+          border: { display: false },
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: 'var(--hub-text-muted)', font: { size: 11 } },
+          border: { display: false },
+        },
+      },
+    }),
+    [currency]
+  );
 
   if (isError) {
     return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
@@ -105,9 +111,9 @@ const Customers: React.FC = (): React.JSX.Element => {
     >
       <HelmetContainer title="Customers · rtylr" />
       <motion.div variants={itemVariants}>
-        <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
+        <h1 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('insights.customers.title')}
-        </h2>
+        </h1>
       </motion.div>
 
       {kpisLoading ? (
@@ -169,15 +175,18 @@ const Customers: React.FC = (): React.JSX.Element => {
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
-        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+        <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
           {t('insights.customers.top')}
-        </h3>
+        </h2>
         {topLoading ? (
           <SkeletonBlock className="h-64 w-full" />
         ) : topList.length === 0 ? (
           <EmptyState title="" description={t('insights.customers.empty')} />
         ) : (
-          <div style={{ height: Math.max(180, topList.length * 36) }}>
+          <div
+            style={{ height: Math.max(180, topList.length * 36) }}
+            aria-label="Top customers chart"
+          >
             <Bar data={topCustomersBarData} options={topCustomersBarOptions} />
           </div>
         )}
@@ -188,9 +197,9 @@ const Customers: React.FC = (): React.JSX.Element => {
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
-        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+        <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
           {t('insights.customers.ltv')}
-        </h3>
+        </h2>
         {ltvLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -211,7 +220,7 @@ const Customers: React.FC = (): React.JSX.Element => {
                   {b.label}
                 </span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
-                  {formatNumber(b.customerCount)} customers
+                  {formatNumber(b.customerCount)} {t('insights.customers.customers', 'customers')}
                 </span>
               </div>
             ))}
@@ -224,9 +233,9 @@ const Customers: React.FC = (): React.JSX.Element => {
         className="rounded-xl p-5"
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
-        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
+        <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--hub-text)' }}>
           {t('insights.customers.churn')}
-        </h3>
+        </h2>
         {churnLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -249,7 +258,8 @@ const Customers: React.FC = (): React.JSX.Element => {
                 <span className="text-xs font-semibold" style={{ color: 'var(--hub-text)' }}>
                   {w.churnPct.toFixed(1)}%{' '}
                   <span style={{ color: 'var(--hub-text-muted)' }}>
-                    ({formatNumber(w.churnedCount)} churned)
+                    ({formatNumber(w.churnedCount)}{' '}
+                    {t('insights.customers.churnedCount', 'churned')})
                   </span>
                 </span>
               </div>
