@@ -444,7 +444,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	aiQuotaModule := aiquota.NewModule(ctx, dbclient.Pool())
 	aiQueryModule := aiquery.NewModule(ctx)
 	hrCoreModule := hrcore.NewModule(ctx, dbclient.Pool())
-	hrAttendanceModule := hrattendance.NewModule(ctx, dbclient.Pool())
+	hrAttendanceModule := hrattendance.NewModule(ctx, dbclient.Pool(), hrCoreModule)
 	hrLeaveModule := hrleave.NewModule(ctx, dbclient.Pool(), hrCoreModule)
 	hrOvertimeModule := hrovertime.NewModule(ctx, dbclient.Pool(), hrCoreModule)
 	hrPayrollModule := hrpayroll.NewModule(ctx, dbclient.Pool(), hrCoreModule)

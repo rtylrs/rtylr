@@ -1,6 +1,9 @@
 package domain
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+)
 
 func TestIsEnabled_WhenActive(t *testing.T) {
 	a := Automation{IsActive: true}
@@ -62,6 +65,8 @@ func TestTriggerConstants_AreUnique(t *testing.T) {
 		TriggerLoyaltyTierDown,
 		TriggerDateBirthday,
 		TriggerInactivity,
+		TriggerTagAdded,
+		TriggerPointsThreshold,
 	}
 	seen := make(map[string]bool)
 	for _, tr := range triggers {
@@ -69,6 +74,30 @@ func TestTriggerConstants_AreUnique(t *testing.T) {
 			t.Errorf("duplicate trigger constant: %q", tr)
 		}
 		seen[tr] = true
+	}
+}
+
+func TestNormalizeAutomationActions_UsesCanonicalObjectTypes(t *testing.T) {
+	got, err := NormalizeAutomationActions([]byte(`["send_email",{"type":"tag_add","tag":"vip"}]`))
+	if err != nil {
+		t.Fatalf("NormalizeAutomationActions: %v", err)
+	}
+
+	var actions []map[string]any
+	if err := json.Unmarshal(got, &actions); err != nil {
+		t.Fatalf("decode normalized actions: %v", err)
+	}
+	if len(actions) != 2 || actions[0]["type"] != ActionSendEmail || actions[1]["type"] != ActionTagAdd {
+		t.Fatalf("unexpected normalized actions: %#v", actions)
+	}
+}
+
+func TestValidateAutomationDefinition_RejectsPresentationValues(t *testing.T) {
+	if err := ValidateAutomationDefinition("New customer", []byte(`[{"type":"Send email"}]`)); err == nil {
+		t.Fatal("expected presentation labels to be rejected")
+	}
+	if err := ValidateAutomationDefinition(TriggerCustomerSignup, []byte(`[{"type":"send_email"}]`)); err != nil {
+		t.Fatalf("expected canonical definition to pass: %v", err)
 	}
 }
 

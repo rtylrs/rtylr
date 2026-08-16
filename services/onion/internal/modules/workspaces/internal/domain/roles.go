@@ -7,12 +7,24 @@ const (
 	FlowRoleMember = "member"
 	FlowRoleAdmin  = "admin"
 
-	// FlowRoleManager is the name the API layer uses for the top tier
-	// (validFlowMemberRole accepts manager|member|viewer). The column is
+	// FlowRoleManager is a legacy API alias for the top tier. The column is
 	// ENUM('admin','member','viewer') and cannot store it, so it is treated
 	// as an alias of FlowRoleAdmin rather than a rank of its own.
 	FlowRoleManager = "manager"
 )
+
+// CanonicalFlowMemberRole accepts the public API's legacy manager alias and
+// returns the value that can be stored in the Flow role enum.
+func CanonicalFlowMemberRole(role string) (string, bool) {
+	switch role {
+	case FlowRoleViewer, FlowRoleMember, FlowRoleAdmin:
+		return role, true
+	case FlowRoleManager:
+		return FlowRoleAdmin, true
+	default:
+		return "", false
+	}
+}
 
 // Role tiers, ordered viewer < member < admin. Zero means "not a role we
 // recognise" and never satisfies anything.

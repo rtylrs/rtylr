@@ -17,6 +17,7 @@ func GetAttendanceRoutes() []string { return []string{"/hr/attendance"} }
 type GetAttendanceHandler struct{ Service *application.Service }
 
 type GetAttendanceRequest struct {
+	OwnerID    int64  `json:"owner_id"`
 	EmployeeID int64  `json:"employee_id"`
 	DateFrom   string `json:"date_from"`
 	DateTo     string `json:"date_to"`
@@ -33,18 +34,18 @@ type GetAttendanceResponse struct {
 
 func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequest) (GetAttendanceResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.IsAnonymous || device.User == nil {
+	if device.IsAnonymous || device.User == nil || req.OwnerID <= 0 || req.EmployeeID <= 0 {
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	records, total, err := h.Service.GetMyAttendance(ctx, device.User.UserID, req.EmployeeID, domain.ListAttendanceParams{
+	records, total, err := h.Service.GetMyAttendance(ctx, req.OwnerID, req.EmployeeID, domain.ListAttendanceParams{
 		DateFrom: req.DateFrom,
 		DateTo:   req.DateTo,
 		Limit:    req.Limit,
 		Offset:   req.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to get attendance", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get attendance", logger.Any("owner_id", req.OwnerID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
 		return GetAttendanceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get attendance")
 	}
 

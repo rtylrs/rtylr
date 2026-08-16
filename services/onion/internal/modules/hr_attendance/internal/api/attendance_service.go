@@ -5,21 +5,50 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
 )
 
-type AttendanceAPI struct {
-	Service *application.Service
+type EmployeeResolver interface {
+	GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error)
 }
 
-func NewAttendanceAPI(service *application.Service) *AttendanceAPI {
-	return &AttendanceAPI{Service: service}
+type AttendanceAPI struct {
+	Service          *application.Service
+	EmployeeResolver EmployeeResolver
+}
+
+func NewAttendanceAPI(service *application.Service, employeeResolver EmployeeResolver) *AttendanceAPI {
+	return &AttendanceAPI{Service: service, EmployeeResolver: employeeResolver}
+}
+
+func (a *AttendanceAPI) resolveIdentity(ctx context.Context) (int64, int64, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil || a.EmployeeResolver == nil {
+		return 0, 0, onekiterrors.PermissionDenied()
+	}
+
+	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if err != nil {
+		return 0, 0, onekiterrors.PermissionDenied()
+	}
+	employeeID, err := a.EmployeeResolver.GetEmployeeIDByUserID(ctx, businessID, device.User.UserID)
+	if err != nil || employeeID <= 0 {
+		return 0, 0, onekiterrors.PermissionDenied()
+	}
+	return businessID, employeeID, nil
 }
 
 func (a *AttendanceAPI) ListAttendance(ctx context.Context, req *hrattendancev1.ListAttendanceRequest) (*hrattendancev1.ListAttendanceResponse, error) {
+	ownerID, employeeID, err := a.resolveIdentity(ctx)
+	if err != nil {
+		return nil, err
+	}
 	date := req.GetDate()
 	result, err := (&GetAttendanceHandler{Service: a.Service}).Serve(ctx, &GetAttendanceRequest{
-		EmployeeID: req.GetEmployeeId(),
+		OwnerID:    ownerID,
+		EmployeeID: employeeID,
 		DateFrom:   date,
 		DateTo:     date,
 		Limit:      50,
@@ -36,13 +65,12 @@ func (a *AttendanceAPI) ListAttendance(ctx context.Context, req *hrattendancev1.
 }
 
 func (a *AttendanceAPI) AttendanceClockIn(ctx context.Context, req *hrattendancev1.AttendanceClockInRequest) (*hrattendancev1.AttendanceClockInResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	var ownerID, employeeID int64
-	if device.User != nil {
-		ownerID = device.User.UserID
-		employeeID = device.User.UserID
+	ownerID, employeeID, err := a.resolveIdentity(ctx)
+	if err != nil {
+		return nil, err
 	}
-	result, err := (&ClockInHandler{Service: a.Service}).Serve(ctx, &ClockInRequest{
+	handler := &ClockInHandler{Service: a.Service}
+	clockInReq := &ClockInRequest{
 		OwnerID:       ownerID,
 		EmployeeID:    employeeID,
 		LocationID:    req.GetLocationId(),
@@ -51,7 +79,11 @@ func (a *AttendanceAPI) AttendanceClockIn(ctx context.Context, req *hrattendance
 		ClockInLng:    req.GetLng(),
 		QRToken:       req.GetQrToken(),
 		Pin:           req.GetPin(),
-	})
+	}
+	if err := handler.Validate(ctx, clockInReq); err != nil {
+		return nil, err
+	}
+	result, err := handler.Serve(ctx, clockInReq)
 	if err != nil {
 		return nil, err
 	}

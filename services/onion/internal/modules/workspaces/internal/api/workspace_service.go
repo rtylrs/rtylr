@@ -174,14 +174,15 @@ func (a *WorkspaceAPI) AddWorkspaceMember(ctx context.Context, req *flowworkspac
 	if role == "" {
 		role = domain.FlowRoleMember
 	}
-	if !validFlowMemberRole(role) {
-		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
+	canonicalRole, ok := domain.CanonicalFlowMemberRole(role)
+	if !ok {
+		return nil, onekiterrors.New(http.StatusBadRequest, "role must be admin, member, or viewer")
 	}
 
 	input := domain.AddWorkspaceMemberInput{
 		WorkspaceID: req.GetWorkspaceId(),
 		UserID:      req.GetUserId(),
-		Role:        role,
+		Role:        canonicalRole,
 	}
 
 	if err := a.Service.AddWorkspaceMember(ctx, input); err != nil {
@@ -243,23 +244,23 @@ func (a *WorkspaceAPI) resolveWorkspaceID(ctx context.Context, userID, workspace
 }
 
 func toWorkspaceMember(m domain.WorkspaceMember) *flowworkspacev1.WorkspaceMember {
+	role, ok := domain.CanonicalFlowMemberRole(m.Role)
+	if !ok {
+		role = m.Role
+	}
 	out := &flowworkspacev1.WorkspaceMember{
 		Id:          m.ID,
 		WorkspaceId: m.WorkspaceID,
 		UserId:      m.UserID,
 		Name:        m.Name,
 		Email:       m.Email,
-		Role:        m.Role,
+		Role:        role,
 		JoinedAt:    m.JoinedAt.Format("2006-01-02T15:04:05Z"),
 	}
 	if m.InvitedBy != nil {
 		out.InvitedBy = *m.InvitedBy
 	}
 	return out
-}
-
-func validFlowMemberRole(role string) bool {
-	return role == "manager" || role == "member" || role == "viewer"
 }
 
 func (a *WorkspaceAPI) ListWorkspaceMembers(ctx context.Context, req *flowworkspacev1.ListWorkspaceMembersRequest) (*flowworkspacev1.ListWorkspaceMembersResponse, error) {
@@ -297,8 +298,9 @@ func (a *WorkspaceAPI) UpdateWorkspaceMemberRole(ctx context.Context, req *floww
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if !validFlowMemberRole(req.GetRole()) {
-		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
+	role, ok := domain.CanonicalFlowMemberRole(req.GetRole())
+	if !ok {
+		return nil, onekiterrors.New(http.StatusBadRequest, "role must be admin, member, or viewer")
 	}
 	if err := a.Service.RequireWorkspaceRole(ctx, req.GetWorkspaceId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
@@ -307,7 +309,7 @@ func (a *WorkspaceAPI) UpdateWorkspaceMemberRole(ctx context.Context, req *floww
 	if err := a.Service.UpdateWorkspaceMemberRole(ctx, domain.UpdateWorkspaceMemberRoleInput{
 		WorkspaceID: req.GetWorkspaceId(),
 		UserID:      req.GetUserId(),
-		Role:        req.GetRole(),
+		Role:        role,
 	}); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update role")
 	}

@@ -70,3 +70,24 @@ func TestRoleAllows_ViewerTierAdmitsEveryKnownRole(t *testing.T) {
 		}
 	}
 }
+
+func TestCanonicalFlowMemberRole(t *testing.T) {
+	cases := []struct {
+		input string
+		want  string
+		ok    bool
+	}{
+		{input: domain.FlowRoleAdmin, want: domain.FlowRoleAdmin, ok: true},
+		{input: domain.FlowRoleManager, want: domain.FlowRoleAdmin, ok: true},
+		{input: domain.FlowRoleMember, want: domain.FlowRoleMember, ok: true},
+		{input: domain.FlowRoleViewer, want: domain.FlowRoleViewer, ok: true},
+		{input: "owner", ok: false},
+	}
+
+	for _, tc := range cases {
+		got, ok := domain.CanonicalFlowMemberRole(tc.input)
+		if got != tc.want || ok != tc.ok {
+			t.Errorf("CanonicalFlowMemberRole(%q) = (%q, %v), want (%q, %v)", tc.input, got, ok, tc.want, tc.ok)
+		}
+	}
+}

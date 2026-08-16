@@ -39,13 +39,17 @@ func toProjectColumn(c domain.ProjectColumn) *flowprojectv1.ProjectColumn {
 }
 
 func toProjectMember(m domain.ProjectMember) *flowprojectv1.ProjectMember {
+	role, ok := domain.CanonicalFlowMemberRole(m.Role)
+	if !ok {
+		role = m.Role
+	}
 	out := &flowprojectv1.ProjectMember{
 		Id:        m.ID,
 		ProjectId: m.ProjectID,
 		UserId:    m.UserID,
 		Name:      m.Name,
 		Email:     m.Email,
-		Role:      m.Role,
+		Role:      role,
 		AddedAt:   m.AddedAt.Format("2006-01-02T15:04:05Z"),
 	}
 	if m.AddedBy != nil {
@@ -210,13 +214,14 @@ func (a *ProjectAPI) AddProjectMember(ctx context.Context, req *flowprojectv1.Ad
 	if role == "" {
 		role = "member"
 	}
-	if !validFlowMemberRole(role) {
-		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
+	canonicalRole, ok := domain.CanonicalFlowMemberRole(role)
+	if !ok {
+		return nil, onekiterrors.New(http.StatusBadRequest, "role must be admin, member, or viewer")
 	}
 	if err := a.Service.AddProjectMember(ctx, domain.AddProjectMemberInput{
 		ProjectID: req.GetProjectId(),
 		UserID:    req.GetUserId(),
-		Role:      role,
+		Role:      canonicalRole,
 		AddedBy:   authUser.UserID,
 	}); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to add project member")
@@ -247,8 +252,9 @@ func (a *ProjectAPI) UpdateProjectMemberRole(ctx context.Context, req *flowproje
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if !validFlowMemberRole(req.GetRole()) {
-		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
+	role, ok := domain.CanonicalFlowMemberRole(req.GetRole())
+	if !ok {
+		return nil, onekiterrors.New(http.StatusBadRequest, "role must be admin, member, or viewer")
 	}
 	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
@@ -257,7 +263,7 @@ func (a *ProjectAPI) UpdateProjectMemberRole(ctx context.Context, req *flowproje
 	if err := a.Service.UpdateProjectMemberRole(ctx, domain.UpdateProjectMemberRoleInput{
 		ProjectID: req.GetProjectId(),
 		UserID:    req.GetUserId(),
-		Role:      req.GetRole(),
+		Role:      role,
 	}); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update role")
 	}
@@ -277,10 +283,11 @@ func (a *ProjectAPI) InviteProjectMember(ctx context.Context, req *flowprojectv1
 	if role == "" {
 		role = "member"
 	}
-	if !validFlowMemberRole(role) {
-		return nil, onekiterrors.New(http.StatusBadRequest, "role must be manager, member, or viewer")
+	canonicalRole, ok := domain.CanonicalFlowMemberRole(role)
+	if !ok {
+		return nil, onekiterrors.New(http.StatusBadRequest, "role must be admin, member, or viewer")
 	}
-	found, err := a.Service.InviteProjectMemberByEmail(ctx, req.GetProjectId(), req.GetEmail(), role, authUser.UserID)
+	found, err := a.Service.InviteProjectMemberByEmail(ctx, req.GetProjectId(), req.GetEmail(), canonicalRole, authUser.UserID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to invite member")
 	}
