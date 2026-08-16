@@ -113,7 +113,7 @@ describe('RolesPermissions', () => {
     fireEvent.change(screen.getByPlaceholderText('Role name'), { target: { value: 'Shift Lead' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create role' }));
 
-    expect(createMutate).toHaveBeenCalledWith({
+    expect(createMutate.mock.calls[0][0]).toEqual({
       name: 'Shift Lead',
       description: '',
       permissions: '{}',

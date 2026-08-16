@@ -151,14 +151,20 @@ const RolesPermissions = (): React.JSX.Element => {
   const submitNewRole = (event: React.FormEvent): void => {
     event.preventDefault();
     if (!newRoleName.trim()) return;
-    createRole.mutate({
-      name: newRoleName.trim(),
-      description: newRoleDescription.trim(),
-      permissions: '{}',
-    });
-    setNewRoleName('');
-    setNewRoleDescription('');
-    setIsAddingRole(false);
+    createRole.mutate(
+      {
+        name: newRoleName.trim(),
+        description: newRoleDescription.trim(),
+        permissions: '{}',
+      },
+      {
+        onSuccess: () => {
+          setNewRoleName('');
+          setNewRoleDescription('');
+          setIsAddingRole(false);
+        },
+      }
+    );
   };
 
   if (isLoading) {
