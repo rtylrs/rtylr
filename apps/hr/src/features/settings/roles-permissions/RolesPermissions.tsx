@@ -106,7 +106,7 @@ const RoleCard = ({
                       className="h-4 w-4"
                       checked={Boolean(pending[entry.key])}
                       onChange={() => togglePermission(entry.key)}
-                      aria-label={entry.label}
+                      aria-label={t(`rolesPermissions.permissions.${entry.key}`, entry.label)}
                     />
                     <span className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
                       {t(`rolesPermissions.permissions.${entry.key}`, entry.label)}
