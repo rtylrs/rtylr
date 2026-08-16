@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { safe } from '../../lib/api';
 import { integrationSchema } from '../../schemas/integrations';
 import { toast } from 'sonner';
+import i18next from 'i18next';
 
 export type { Integration } from '../../schemas/integrations';
 
@@ -26,10 +27,11 @@ export const useConnectIntegration = () => {
       return id;
     },
     onSuccess: () => {
-      toast.success('Integration connected');
+      toast.success(i18next.t('toasts.integrationConnected', 'Integration connected'));
       qc.invalidateQueries({ queryKey: ['integrations'] });
     },
-    onError: () => toast.error('Failed to connect integration'),
+    onError: () =>
+      toast.error(i18next.t('toasts.failedConnectIntegration', 'Failed to connect integration')),
   });
 };
 
@@ -41,9 +43,12 @@ export const useDisconnectIntegration = () => {
       return id;
     },
     onSuccess: () => {
-      toast.success('Integration disconnected');
+      toast.success(i18next.t('toasts.integrationDisconnected', 'Integration disconnected'));
       qc.invalidateQueries({ queryKey: ['integrations'] });
     },
-    onError: () => toast.error('Failed to disconnect integration'),
+    onError: () =>
+      toast.error(
+        i18next.t('toasts.failedDisconnectIntegration', 'Failed to disconnect integration')
+      ),
   });
 };

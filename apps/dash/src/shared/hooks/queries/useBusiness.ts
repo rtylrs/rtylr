@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { normalizeConfigData, useConfigStore } from '../../stores/configStore';
+import i18next from 'i18next';
 
 export const useSetBusinessSlug = () => {
   const queryClient = useQueryClient();
@@ -16,11 +17,11 @@ export const useSetBusinessSlug = () => {
       setWebsiteData({ ...currentWebsiteData, slug });
       queryClient.invalidateQueries({ queryKey: ['business'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
-      toast.success('Slug updated');
+      toast.success(i18next.t('toasts.slugUpdated', 'Slug updated'));
     },
     onError: (error: unknown) => {
       const err = error as { message?: string };
-      toast.error(err.message || 'Failed to update slug');
+      toast.error(err.message || i18next.t('toasts.failedUpdateSlug', 'Failed to update slug'));
     },
   });
 };
@@ -80,11 +81,16 @@ export const useUpdateBusiness = () => {
       }
       queryClient.invalidateQueries({ queryKey: ['business'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
-      toast.success('Business information updated successfully');
+      toast.success(
+        i18next.t('toasts.businessInfoUpdated', 'Business information updated successfully')
+      );
     },
     onError: (error: unknown) => {
       const err = error as { message?: string };
-      toast.error(err.message || 'Failed to update business information');
+      toast.error(
+        err.message ||
+          i18next.t('toasts.failedUpdateBusinessInfo', 'Failed to update business information')
+      );
     },
   });
 };
@@ -100,11 +106,13 @@ export const useUpdateBusinessConfig = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] });
       queryClient.invalidateQueries({ queryKey: ['config'] });
-      toast.success('Design configuration saved');
+      toast.success(i18next.t('toasts.designConfigSaved', 'Design configuration saved'));
     },
     onError: (error: unknown) => {
       const err = error as { message?: string };
-      toast.error(err.message || 'Failed to save configuration');
+      toast.error(
+        err.message || i18next.t('toasts.failedSaveConfig', 'Failed to save configuration')
+      );
     },
   });
 };
