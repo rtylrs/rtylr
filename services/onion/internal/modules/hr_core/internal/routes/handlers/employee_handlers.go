@@ -15,6 +15,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrstaffv1 "github.com/voxire/voxie/gen/go/hr/staff/v1"
 )
 
@@ -67,13 +68,16 @@ func (h *ListEmployeesHandler) Serve(ctx context.Context, req *ListEmployeesRequ
 	if device.IsAnonymous || device.User == nil {
 		return ListEmployeesResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListEmployeesResponse{}, onekiterrors.PermissionDenied()
+	}
 
-	// The caller is both the tenant scope and the viewer whose compensation
-	// entitlement is resolved; this module keys employee rows off the calling
-	// user's id.
-	employees, total, err := h.Service.ListEmployeesForViewer(ctx, device.User.UserID, device.User.UserID, req.Limit, req.Offset)
+	// businessID is the tenant scope; device.User.UserID is the viewer whose
+	// compensation entitlement is resolved.
+	employees, total, err := h.Service.ListEmployeesForViewer(ctx, businessID, device.User.UserID, req.Limit, req.Offset)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list employees", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list employees", logger.Any("business_id", businessID), logger.Error(err))
 		return ListEmployeesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list employees")
 	}
 
@@ -108,13 +112,17 @@ func (h *GetEmployeeHandler) Serve(ctx context.Context, _ *GetEmployeeRequest) (
 	if parseErr != nil {
 		return GetEmployeeResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetEmployeeResponse{}, onekiterrors.PermissionDenied()
+	}
 
-	emp, err := h.Service.GetEmployeeForViewer(ctx, device.User.UserID, device.User.UserID, id)
+	emp, err := h.Service.GetEmployeeForViewer(ctx, businessID, device.User.UserID, id)
 	if err != nil {
 		if errors.Is(err, domain.ErrEmployeeNotFound) {
 			return GetEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "Employee not found")
 		}
-		logger.Ctx(ctx).Error("failed to get employee", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", id), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get employee", logger.Any("business_id", businessID), logger.Any("employee_id", id), logger.Error(err))
 		return GetEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get employee")
 	}
 
@@ -145,18 +153,22 @@ func (h *GetMyEmployeeHandler) Serve(ctx context.Context, _ *GetMyEmployeeReques
 	if device.IsAnonymous || device.User == nil {
 		return GetMyEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetMyEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "No employee record is linked to this account")
+	}
 
-	employeeID, err := h.Service.GetEmployeeIDByUserID(ctx, device.User.UserID, device.User.UserID)
+	employeeID, err := h.Service.GetEmployeeIDByUserID(ctx, businessID, device.User.UserID)
 	if err != nil || employeeID <= 0 {
 		return GetMyEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "No employee record is linked to this account")
 	}
 
-	emp, err := h.Service.GetEmployeeForViewer(ctx, device.User.UserID, device.User.UserID, employeeID)
+	emp, err := h.Service.GetEmployeeForViewer(ctx, businessID, device.User.UserID, employeeID)
 	if err != nil {
 		if errors.Is(err, domain.ErrEmployeeNotFound) {
 			return GetMyEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "No employee record is linked to this account")
 		}
-		logger.Ctx(ctx).Error("failed to get own employee record", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get own employee record", logger.Any("business_id", businessID), logger.Error(err))
 		return GetMyEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get employee record")
 	}
 
@@ -213,6 +225,10 @@ func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRe
 	if device.IsAnonymous || device.User == nil {
 		return CreateEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateEmployeeResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	emp := domain.EmployeeRecord{
 		UserID:         req.UserID,
@@ -235,7 +251,7 @@ func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRe
 		}
 	}
 
-	created, err := h.Service.CreateEmployeeForWriter(ctx, device.User.UserID, device.User.UserID, emp)
+	created, err := h.Service.CreateEmployeeForWriter(ctx, businessID, device.User.UserID, emp)
 	if err != nil {
 		if errors.Is(err, domain.ErrPermissionDenied) {
 			return CreateEmployeeResponse{}, onekiterrors.PermissionDenied()
@@ -243,7 +259,7 @@ func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRe
 		if errors.Is(err, domain.ErrUserAlreadyLinked) {
 			return CreateEmployeeResponse{}, onekiterrors.New(http.StatusConflict, "This user is already linked to another employee record")
 		}
-		logger.Ctx(ctx).Error("failed to create employee", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create employee", logger.Any("business_id", businessID), logger.Error(err))
 		return CreateEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create employee")
 	}
 
@@ -307,6 +323,10 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 	if device.IsAnonymous || device.User == nil {
 		return UpdateEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateEmployeeResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -345,7 +365,7 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 		}
 	}
 
-	updated, err := h.Service.UpdateEmployeeForWriter(ctx, device.User.UserID, device.User.UserID, emp)
+	updated, err := h.Service.UpdateEmployeeForWriter(ctx, businessID, device.User.UserID, emp)
 	if err != nil {
 		if errors.Is(err, domain.ErrPermissionDenied) {
 			return UpdateEmployeeResponse{}, onekiterrors.PermissionDenied()
@@ -356,7 +376,7 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 		if errors.Is(err, domain.ErrUserAlreadyLinked) {
 			return UpdateEmployeeResponse{}, onekiterrors.New(http.StatusConflict, "This user is already linked to another employee record")
 		}
-		logger.Ctx(ctx).Error("failed to update employee", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", id), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to update employee", logger.Any("business_id", businessID), logger.Any("employee_id", id), logger.Error(err))
 		return UpdateEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update employee")
 	}
 
@@ -380,6 +400,10 @@ func (h *DeleteEmployeeHandler) Serve(ctx context.Context, _ *DeleteEmployeeRequ
 	if device.IsAnonymous || device.User == nil {
 		return DeleteEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return DeleteEmployeeResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -388,12 +412,12 @@ func (h *DeleteEmployeeHandler) Serve(ctx context.Context, _ *DeleteEmployeeRequ
 	}
 
 	emp := domain.EmployeeRecord{ID: id, Status: "terminated"}
-	_, err := h.Service.UpdateEmployeeForWriter(ctx, device.User.UserID, device.User.UserID, emp)
+	_, err := h.Service.UpdateEmployeeForWriter(ctx, businessID, device.User.UserID, emp)
 	if err != nil {
 		if errors.Is(err, domain.ErrPermissionDenied) {
 			return DeleteEmployeeResponse{}, onekiterrors.PermissionDenied()
 		}
-		logger.Ctx(ctx).Error("failed to delete employee", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", id), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to delete employee", logger.Any("business_id", businessID), logger.Any("employee_id", id), logger.Error(err))
 		return DeleteEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete employee")
 	}
 

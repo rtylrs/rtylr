@@ -11,6 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 // --- Invite Employee ---
@@ -54,6 +55,10 @@ func (h *InviteEmployeeHandler) Serve(ctx context.Context, req *InviteEmployeeRe
 	if device.IsAnonymous || device.User == nil {
 		return InviteEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return InviteEmployeeResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	emp := domain.EmployeeRecord{
 		FirstName:      req.FirstName,
@@ -65,12 +70,12 @@ func (h *InviteEmployeeHandler) Serve(ctx context.Context, req *InviteEmployeeRe
 		LocationID:     req.LocationID,
 	}
 
-	token, err := h.Service.InviteEmployeeForWriter(ctx, device.User.UserID, device.User.UserID, emp)
+	token, err := h.Service.InviteEmployeeForWriter(ctx, businessID, device.User.UserID, emp)
 	if err != nil {
 		if errors.Is(err, domain.ErrPermissionDenied) {
 			return InviteEmployeeResponse{}, onekiterrors.PermissionDenied()
 		}
-		logger.Ctx(ctx).Error("failed to invite employee", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to invite employee", logger.Any("business_id", businessID), logger.Error(err))
 		return InviteEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to invite employee")
 	}
 

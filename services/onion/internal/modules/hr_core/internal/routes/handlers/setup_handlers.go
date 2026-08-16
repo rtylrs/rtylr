@@ -11,6 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type SetupStepPayload struct {
@@ -49,10 +50,14 @@ func (h *GetSetupStatusHandler) Serve(ctx context.Context, _ *GetSetupStatusRequ
 	if device.IsAnonymous || device.User == nil {
 		return GetSetupStatusResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return GetSetupStatusResponse{}, onekiterrors.PermissionDenied()
+	}
 
-	steps, err := h.Service.GetSetupStatus(ctx, device.User.UserID)
+	steps, err := h.Service.GetSetupStatus(ctx, businessID)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to get setup status", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get setup status", logger.Any("business_id", businessID), logger.Error(err))
 		return GetSetupStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get setup status")
 	}
 
@@ -80,15 +85,19 @@ func (h *CompleteSetupStepHandler) Serve(ctx context.Context, _ *CompleteSetupSt
 	if device.IsAnonymous || device.User == nil {
 		return CompleteSetupStepResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CompleteSetupStepResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	stepKey := chi.URLParamFromCtx(ctx, "step_key")
 	if stepKey == "" {
 		return CompleteSetupStepResponse{}, onekiterrors.New(http.StatusBadRequest, "step_key is required")
 	}
 
-	step, err := h.Service.CompleteSetupStep(ctx, device.User.UserID, stepKey)
+	step, err := h.Service.CompleteSetupStep(ctx, businessID, stepKey)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to complete setup step", logger.Any("owner_id", device.User.UserID), logger.String("step_key", stepKey), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to complete setup step", logger.Any("business_id", businessID), logger.String("step_key", stepKey), logger.Error(err))
 		return CompleteSetupStepResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to complete setup step")
 	}
 

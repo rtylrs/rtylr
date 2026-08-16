@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type WorkSchedulePayload struct {
@@ -51,10 +52,14 @@ func (h *ListWorkSchedulesHandler) Serve(ctx context.Context, _ *ListWorkSchedul
 	if device.IsAnonymous || device.User == nil {
 		return ListWorkSchedulesResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListWorkSchedulesResponse{}, onekiterrors.PermissionDenied()
+	}
 
-	schedules, err := h.Service.ListWorkSchedules(ctx, device.User.UserID)
+	schedules, err := h.Service.ListWorkSchedules(ctx, businessID)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list work schedules", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list work schedules", logger.Any("business_id", businessID), logger.Error(err))
 		return ListWorkSchedulesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list work schedules")
 	}
 
@@ -94,11 +99,15 @@ func (h *CreateWorkScheduleHandler) Serve(ctx context.Context, req *CreateWorkSc
 	if device.IsAnonymous || device.User == nil {
 		return CreateWorkScheduleResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateWorkScheduleResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	ws := domain.WorkScheduleRecord{Name: req.Name, ScheduleData: req.ScheduleData, IsDefault: req.IsDefault}
-	created, err := h.Service.CreateWorkSchedule(ctx, device.User.UserID, ws)
+	created, err := h.Service.CreateWorkSchedule(ctx, businessID, ws)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to create work schedule", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create work schedule", logger.Any("business_id", businessID), logger.Error(err))
 		return CreateWorkScheduleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create work schedule")
 	}
 
@@ -134,6 +143,10 @@ func (h *UpdateWorkScheduleHandler) Serve(ctx context.Context, req *UpdateWorkSc
 	if device.IsAnonymous || device.User == nil {
 		return UpdateWorkScheduleResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateWorkScheduleResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -142,9 +155,9 @@ func (h *UpdateWorkScheduleHandler) Serve(ctx context.Context, req *UpdateWorkSc
 	}
 
 	ws := domain.WorkScheduleRecord{ID: id, Name: req.Name, ScheduleData: req.ScheduleData, IsDefault: req.IsDefault}
-	updated, err := h.Service.UpdateWorkSchedule(ctx, device.User.UserID, ws)
+	updated, err := h.Service.UpdateWorkSchedule(ctx, businessID, ws)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to update work schedule", logger.Any("owner_id", device.User.UserID), logger.Any("schedule_id", id), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to update work schedule", logger.Any("business_id", businessID), logger.Any("schedule_id", id), logger.Error(err))
 		return UpdateWorkScheduleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update work schedule")
 	}
 

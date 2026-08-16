@@ -14,6 +14,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 type RolePayload struct {
@@ -53,10 +54,14 @@ func (h *ListRolesHandler) Serve(ctx context.Context, _ *ListRolesRequest) (List
 	if device.IsAnonymous || device.User == nil {
 		return ListRolesResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return ListRolesResponse{}, onekiterrors.PermissionDenied()
+	}
 
-	roles, err := h.Service.ListRoles(ctx, device.User.UserID)
+	roles, err := h.Service.ListRoles(ctx, businessID)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to list roles", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to list roles", logger.Any("business_id", businessID), logger.Error(err))
 		return ListRolesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list roles")
 	}
 
@@ -96,14 +101,18 @@ func (h *CreateRoleHandler) Serve(ctx context.Context, req *CreateRoleRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return CreateRoleResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return CreateRoleResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	role := domain.RoleRecord{Name: req.Name, Description: req.Description, Permissions: req.Permissions}
-	created, err := h.Service.CreateRoleForWriter(ctx, device.User.UserID, device.User.UserID, role)
+	created, err := h.Service.CreateRoleForWriter(ctx, businessID, device.User.UserID, role)
 	if err != nil {
 		if errors.Is(err, domain.ErrPermissionDenied) {
 			return CreateRoleResponse{}, onekiterrors.PermissionDenied()
 		}
-		logger.Ctx(ctx).Error("failed to create role", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to create role", logger.Any("business_id", businessID), logger.Error(err))
 		return CreateRoleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create role")
 	}
 
@@ -139,6 +148,10 @@ func (h *UpdateRoleHandler) Serve(ctx context.Context, req *UpdateRoleRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return UpdateRoleResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return UpdateRoleResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -147,12 +160,12 @@ func (h *UpdateRoleHandler) Serve(ctx context.Context, req *UpdateRoleRequest) (
 	}
 
 	role := domain.RoleRecord{ID: id, Name: req.Name, Description: req.Description, Permissions: req.Permissions}
-	updated, err := h.Service.UpdateRoleForWriter(ctx, device.User.UserID, device.User.UserID, role)
+	updated, err := h.Service.UpdateRoleForWriter(ctx, businessID, device.User.UserID, role)
 	if err != nil {
 		if errors.Is(err, domain.ErrPermissionDenied) {
 			return UpdateRoleResponse{}, onekiterrors.PermissionDenied()
 		}
-		logger.Ctx(ctx).Error("failed to update role", logger.Any("owner_id", device.User.UserID), logger.Any("role_id", id), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to update role", logger.Any("business_id", businessID), logger.Any("role_id", id), logger.Error(err))
 		return UpdateRoleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update role")
 	}
 
@@ -186,6 +199,10 @@ func (h *AssignRoleHandler) Serve(ctx context.Context, req *AssignRoleRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return AssignRoleResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if bizErr != nil {
+		return AssignRoleResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	employeeID, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -193,12 +210,12 @@ func (h *AssignRoleHandler) Serve(ctx context.Context, req *AssignRoleRequest) (
 		return AssignRoleResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid employee id")
 	}
 
-	err := h.Service.AssignRoleForWriter(ctx, device.User.UserID, device.User.UserID, employeeID, req.RoleID)
+	err := h.Service.AssignRoleForWriter(ctx, businessID, device.User.UserID, employeeID, req.RoleID)
 	if err != nil {
 		if errors.Is(err, domain.ErrPermissionDenied) {
 			return AssignRoleResponse{}, onekiterrors.PermissionDenied()
 		}
-		logger.Ctx(ctx).Error("failed to assign role", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", employeeID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to assign role", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return AssignRoleResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to assign role")
 	}
 
