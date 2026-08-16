@@ -102,4 +102,21 @@ describe('RolesPermissions', () => {
       permissions: JSON.stringify({ approve_time_off: true, manage_employees: true }),
     });
   });
+
+  it('creating a role calls createRole with the entered name', () => {
+    const createMutate = vi.fn();
+    mocks.useCreateRole.mockReturnValue({ mutate: createMutate, isPending: false });
+
+    render(<RolesPermissions />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add role' }));
+    fireEvent.change(screen.getByPlaceholderText('Role name'), { target: { value: 'Shift Lead' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create role' }));
+
+    expect(createMutate).toHaveBeenCalledWith({
+      name: 'Shift Lead',
+      description: '',
+      permissions: '{}',
+    });
+  });
 });

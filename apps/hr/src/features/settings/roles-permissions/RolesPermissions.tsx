@@ -4,6 +4,7 @@ import { HelmetContainer } from '@voxire/components';
 import {
   useListRoles,
   useListPermissionCatalog,
+  useCreateRole,
   useUpdateRole,
 } from '../../../shared/hooks/queries/useRoles';
 import type { Role, PermissionCatalogEntry } from '../../../shared/schemas/rolesPermissions';
@@ -142,6 +143,23 @@ const RolesPermissions = (): React.JSX.Element => {
   const { data: roles, isLoading, isError } = useListRoles();
   const { data: catalog } = useListPermissionCatalog();
   const [expandedRoleId, setExpandedRoleId] = useState<number | null>(null);
+  const [isAddingRole, setIsAddingRole] = useState(false);
+  const [newRoleName, setNewRoleName] = useState('');
+  const [newRoleDescription, setNewRoleDescription] = useState('');
+  const createRole = useCreateRole();
+
+  const submitNewRole = (event: React.FormEvent): void => {
+    event.preventDefault();
+    if (!newRoleName.trim()) return;
+    createRole.mutate({
+      name: newRoleName.trim(),
+      description: newRoleDescription.trim(),
+      permissions: '{}',
+    });
+    setNewRoleName('');
+    setNewRoleDescription('');
+    setIsAddingRole(false);
+  };
 
   if (isLoading) {
     return (
@@ -169,7 +187,40 @@ const RolesPermissions = (): React.JSX.Element => {
         <SectionHeader
           title={t('rolesPermissions.title')}
           subtitle={t('rolesPermissions.subtitle')}
+          right={
+            <Button type="button" variant="secondary" onClick={() => setIsAddingRole(true)}>
+              {t('rolesPermissions.addRole')}
+            </Button>
+          }
         />
+
+        {isAddingRole && (
+          <Card>
+            <form onSubmit={submitNewRole} className="flex flex-col gap-3">
+              <input
+                type="text"
+                value={newRoleName}
+                onChange={(e) => setNewRoleName(e.target.value)}
+                placeholder={t('rolesPermissions.newRoleNamePlaceholder')}
+                className="min-h-[44px] rounded-lg px-3"
+                style={{ border: '1px solid var(--hr-border)', fontSize: '16px' }}
+                required
+              />
+              <input
+                type="text"
+                value={newRoleDescription}
+                onChange={(e) => setNewRoleDescription(e.target.value)}
+                placeholder={t('rolesPermissions.newRoleDescriptionPlaceholder')}
+                className="min-h-[44px] rounded-lg px-3"
+                style={{ border: '1px solid var(--hr-border)', fontSize: '16px' }}
+              />
+              <Button type="submit" variant="primary" disabled={createRole.isPending}>
+                {t('rolesPermissions.createRole')}
+              </Button>
+            </form>
+          </Card>
+        )}
+
         {(roles ?? []).map((role) => (
           <RoleCard
             key={role.id}
