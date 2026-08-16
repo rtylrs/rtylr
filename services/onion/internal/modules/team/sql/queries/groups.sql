@@ -31,7 +31,10 @@ ON DUPLICATE KEY UPDATE permission_level = VALUES(permission_level);
 DELETE FROM user_group_resource_permissions WHERE group_id = ?;
 
 -- name: ListGroupResourcePermissions :many
-SELECT resource_key, permission_level FROM user_group_resource_permissions WHERE group_id = ?;
+SELECT resource_key, permission_level
+FROM user_group_resource_permissions
+WHERE group_id = ?
+LIMIT 500;
 
 -- name: AddGroupMember :exec
 INSERT IGNORE INTO user_group_members (group_id, user_id, owner_id, added_by)
