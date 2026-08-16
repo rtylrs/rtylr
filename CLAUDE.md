@@ -751,7 +751,8 @@ Never commit secrets. Never expose sensitive data to the browser. Follow these r
 - **Validate on the server, not just the client.** Frontend validation (Zod, form rules) is for UX only - the backend must independently validate all inputs. Never skip server-side validation because the frontend already checked.
 - **No `dangerouslySetInnerHTML`** with user-supplied content. This is an XSS vector. If rich text rendering is required, use a sanitised rendering library (e.g., DOMPurify) and document the decision.
 - **Never log PII** (email, phone, user IDs) to the browser console in committed code.
-- **Dependency audits:** Run `pnpm audit` periodically and before major releases. Address high/critical vulnerabilities before shipping.
+- **Dependency audits:** Run `pnpm audit` periodically and before major releases. Address high/critical vulnerabilities before shipping. Audit counts are dynamic and may include duplicate advisories across dependency paths, so report the raw count separately from a count deduplicated by package and advisory.
+- **Workspace overrides:** Dependency overrides live in `pnpm-workspace.yaml`. Check `pnpm why <package>` before changing an override, prefer removing unused parents or upgrading the parent package, and document why any remaining transitive override is needed.
 - **No open redirects.** Any redirect that includes a URL from query params (e.g., `?redirect=`) must validate the destination is on an allowed domain before redirecting.
 
 ---
@@ -812,6 +813,13 @@ Run these steps at the start of every new session before touching any file:
 
 - **Error tracking:** `@voxire/observability` wires up Sentry (error tracking) and PostHog (product analytics) on the client — see `packages/observability/src/boot.ts`. Cloudflare Pages deployment logs and the browser console remain useful for debugging.
 - **Escalation:** Contact Abed El-Fattah Amouneh directly - info@voxire.com / +961 3 940 708.
+
+### Dependency vulnerability response
+
+1. Run `pnpm audit --json` from a clean branch and record the raw package advisory counts.
+2. Compare the result with the GitHub Dependabot alert list. Deduplicate repeated lockfile paths by package and advisory before reporting the effective exposure.
+3. Run `pnpm why <package>` and inspect the reachable code path before choosing removal, a parent upgrade, or a narrowly scoped workspace override.
+4. Verify `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint`, `pnpm test`, and `pnpm build` before opening the PR. Record any unresolved advisory and its actual reachability in the PR body.
 
 ---
 

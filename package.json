@@ -42,7 +42,7 @@
     "@voxire/menu": "workspace:*",
     "@voxire/observability": "workspace:*",
     "@voxire/utils": "workspace:*",
-    "axios": "^1.15.2",
+    "axios": "^1.19.0",
     "chart.js": "^4.5.1",
     "cmdk": "^1.1.1",
     "dexie": "^4.4.2",
