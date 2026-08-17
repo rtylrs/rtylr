@@ -14,15 +14,16 @@ import EmptyState from '../../shared/components/EmptyState';
 // Backlog lives here as the leftmost column instead of as its own
 // sidebar tab - keeping unscheduled work next to active work means a
 // single view covers personal task management end-to-end.
-const KANBAN_COLUMNS: { status: string; label: string; color: string }[] = [
-  { status: 'backlog', label: 'Backlog', color: '#6b7280' },
-  { status: 'todo', label: 'Todo', color: '#9ca3af' },
-  { status: 'in_progress', label: 'In Progress', color: '#3b82f6' },
-  { status: 'in_review', label: 'In Review', color: '#f59e0b' },
-  { status: 'done', label: 'Done', color: '#22c55e' },
+const KANBAN_COLUMNS: { status: string; labelKey: string; color: string }[] = [
+  { status: 'backlog', labelKey: 'backlog', color: '#6b7280' },
+  { status: 'todo', labelKey: 'todo', color: '#9ca3af' },
+  { status: 'in_progress', labelKey: 'inProgress', color: '#3b82f6' },
+  { status: 'in_review', labelKey: 'inReview', color: '#f59e0b' },
+  { status: 'done', labelKey: 'done', color: '#22c55e' },
 ];
 
 const MyIssues: React.FC = () => {
+  const { t } = useTranslation();
   const { data: rawTasks = [], isLoading } = useMyIssues();
   // GetMyTasks doesn't filter archived server-side, so exclude client-side
   // to match Triage/FocusToday/FlowLayout.
@@ -40,17 +41,19 @@ const MyIssues: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="My tasks · rtylr" />
+      <HelmetContainer title={`${t('flow.shell.myTasks')} · Flow`} />
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
         <div>
           <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-            My tasks
+            {t('flow.shell.myTasks')}
           </h1>
           <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-            {isLoading ? 'Loading…' : `${tasks.length} tasks assigned to you`}
+            {isLoading
+              ? t('flow.myIssues.loading')
+              : t('flow.myIssues.taskCount', { count: tasks.length })}
           </p>
         </div>
       </div>
@@ -60,8 +63,8 @@ const MyIssues: React.FC = () => {
       {tasks.length === 0 && !isLoading ? (
         <EmptyState
           icon={ListTodo}
-          title="No tasks assigned"
-          description="Nothing is on your plate right now. Nice work!"
+          title={t('flow.myIssues.emptyTitle')}
+          description={t('flow.myIssues.emptyDescription')}
         />
       ) : (
         <div className="flex-1 overflow-x-auto overflow-y-hidden">
@@ -94,7 +97,7 @@ const MyIssues: React.FC = () => {
                       className="text-[12px] font-semibold flex-1"
                       style={{ color: 'var(--flow-text)' }}
                     >
-                      {col.label}
+                      {t(`flow.taskDetail.${col.labelKey}`)}
                     </span>
                     <span
                       className="text-[10px] px-1.5 py-0.5 rounded font-medium"
@@ -114,7 +117,7 @@ const MyIssues: React.FC = () => {
                         className="text-center text-[11px] py-6"
                         style={{ color: 'var(--flow-text-dim)' }}
                       >
-                        No tasks
+                        {t('flow.myIssues.noTasks')}
                       </p>
                     ) : (
                       colTasks.map((t) => (
@@ -172,7 +175,7 @@ const QuickAddRow: React.FC = () => {
             submit();
           }
         }}
-        placeholder="Add a personal task and press Enter"
+        placeholder={t('flow.myIssues.quickAddPlaceholder')}
         disabled={createTask.isPending}
         className="flex-1 bg-transparent outline-none text-[13px] placeholder:opacity-50"
         style={{ color: 'var(--flow-text)' }}
@@ -184,7 +187,7 @@ const QuickAddRow: React.FC = () => {
           className="text-[11px] font-semibold px-2.5 py-1 rounded transition-opacity hover:opacity-90 disabled:opacity-50"
           style={{ background: 'var(--accent)', color: '#ffffff' }}
         >
-          Add
+          {t('flow.myIssues.quickAddButton')}
         </button>
       )}
     </div>
