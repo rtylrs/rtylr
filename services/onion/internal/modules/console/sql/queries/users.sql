@@ -23,7 +23,7 @@ SET full_name = ?, email = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ?;
 
 -- name: DeleteUser :exec
-DELETE FROM users WHERE id = ?;
+DELETE FROM users WHERE id = ? AND business_id = ?;
 
 -- name: BanUser :exec
 UPDATE users
