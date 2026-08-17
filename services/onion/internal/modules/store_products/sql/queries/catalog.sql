@@ -60,6 +60,7 @@ ORDER BY sp.sort_order ASC, sp.id ASC;
 SELECT id
 FROM erp_products
 WHERE business_id = ? AND id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- cross-schema write to erp_products — update linked catalog product from storefront
