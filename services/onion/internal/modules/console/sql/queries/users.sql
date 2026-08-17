@@ -28,7 +28,7 @@ DELETE FROM users WHERE id = ? AND business_id = ?;
 -- name: BanUser :exec
 UPDATE users
 SET is_banned = TRUE, ban_reason = ?, banned_at = NOW()
-WHERE id = ?;
+WHERE id = ? AND business_id = ?;
 
 -- name: UnbanUser :exec
 UPDATE users
