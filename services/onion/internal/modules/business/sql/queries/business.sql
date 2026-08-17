@@ -42,7 +42,8 @@ SELECT id, name, COALESCE(slug, '') AS slug, COALESCE(address, '') AS address,
        COALESCE(timezone, '') AS timezone, is_active
 FROM hr_locations
 WHERE owner_id = ? AND is_active = TRUE
-ORDER BY is_default DESC, name ASC;
+ORDER BY is_default DESC, name ASC
+LIMIT 100;
 
 -- name: UpdateBusinessSlug :exec
 UPDATE businesses SET slug = ? WHERE id = ?;
