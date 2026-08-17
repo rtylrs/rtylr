@@ -16,4 +16,4 @@ LIMIT 1;
 UPDATE businesses SET name = ? WHERE id = ?;
 
 -- name: DeleteBusiness :exec
-DELETE FROM businesses WHERE id = ?;
+DELETE FROM businesses WHERE id = ? AND owner_id = ?;
