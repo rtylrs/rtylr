@@ -70,9 +70,10 @@ import { apiProjectToProject, apiWorkspaceToWorkspace } from '../shared/lib/proj
 import { LicenseBanner } from '@voxire/components';
 import { safe } from '../shared/lib/api';
 import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
-import { useRealtimeReconnectRefetch } from '../shared/lib/realtime';
+import { useRealtimeReconnectRefetch, useRealtimeStatus } from '../shared/lib/realtime';
 import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../shared/lib/memberUtils';
+import RealtimeConnectionIndicator from '../shared/components/RealtimeConnectionIndicator';
 
 /** Horizontal inset for sidebar content (single column). */
 const sx = 'px-3';
@@ -357,6 +358,9 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // Reconnect can happen regardless of which topics are currently active, so
   // this runs unconditionally rather than gated by shouldUseRealtime.
   useRealtimeReconnectRefetch();
+  // Same connection this drives - surfaced here so a dropped socket is
+  // visible from anywhere in the shell, not just inside TimePanel.
+  const realtimeStatus = useRealtimeStatus();
 
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   useForesightLinks(sidebarRef, {
@@ -576,6 +580,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           >
             <Plus size={20} strokeWidth={2} />
           </button>
+          <RealtimeConnectionIndicator status={realtimeStatus} compact />
           <CaretButton />
         </header>
 
@@ -1059,6 +1064,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             className={cn('flex flex-col gap-1.5 py-2', sx)}
             style={{ borderTop: '1px solid var(--flow-border)' }}
           >
+            <RealtimeConnectionIndicator status={realtimeStatus} />
             <SidebarLink to="/settings" icon={Settings} label={t('nav.settings')} />
             <CaretButton className="w-full justify-start" />
 
