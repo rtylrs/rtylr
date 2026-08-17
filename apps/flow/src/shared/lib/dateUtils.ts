@@ -119,3 +119,20 @@ export function formatWeekDayShort(date: string, locale = 'en-US'): string {
     timeZone: 'UTC',
   }).format(dt);
 }
+
+/**
+ * Formats an ISO date string as a full weekday, day and month, e.g.
+ * "Wednesday 12 November" - for a screen that names the day it is writing
+ * against, rather than assuming the reader already has it in view. Digits
+ * stay Latin for the same reason every other formatter here does: a date a
+ * person reads is not exempt just because it isn't a duration.
+ */
+export function formatFullDayLabel(date: string, locale = 'en-US'): string {
+  const dt = new Date(date + 'T00:00:00Z');
+  return new Intl.DateTimeFormat(`${locale}-u-nu-latn`, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  }).format(dt);
+}
