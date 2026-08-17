@@ -344,5 +344,27 @@
       "priority": "الأولوية",
       "due": "نطاق الاستحقاق"
     }
+  },
+  "cycles": {
+    "pageTitle": "الدورات · rtylr",
+    "sectionUpcoming": "القادمة",
+    "sectionCompleted": "المكتملة"
+  },
+  "roadmap": {
+    "pageTitle": "خارطة الطريق · rtylr"
+  },
+  "triage": {
+    "pageTitle": "الفرز · rtylr",
+    "emptyTitle": "صندوق الوارد صفر"
+  },
+  "team": {
+    "pageTitle": "الفريق · rtylr"
+  },
+  "timeline": {
+    "pageTitle": "الخط الزمني · rtylr"
+  },
+  "myIssues": {
+    "pageTitle": "مهامي · rtylr",
+    "emptyTitle": "لا مهام معيّنة"
   }
 }

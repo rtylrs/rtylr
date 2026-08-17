@@ -52,6 +52,7 @@
     "clearDate": "مسح التاريخ"
   },
   "insights": {
+    "pageTitle": "الرؤى · rtylr",
     "burndown": "منحنى الإنجاز (الدورة النشطة)",
     "throughput": "الإنتاجية (مهام/أسبوع)",
     "velocity": "السرعة (آخر الدورات)",
