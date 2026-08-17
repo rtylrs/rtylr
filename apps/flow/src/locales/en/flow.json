@@ -336,5 +336,27 @@
       "priority": "Priority",
       "due": "Due window"
     }
+  },
+  "cycles": {
+    "pageTitle": "Cycles · rtylr",
+    "sectionUpcoming": "Upcoming",
+    "sectionCompleted": "Completed"
+  },
+  "roadmap": {
+    "pageTitle": "Roadmap · rtylr"
+  },
+  "triage": {
+    "pageTitle": "Triage · rtylr",
+    "emptyTitle": "Inbox zero"
+  },
+  "team": {
+    "pageTitle": "Team · rtylr"
+  },
+  "timeline": {
+    "pageTitle": "Timeline · rtylr"
+  },
+  "myIssues": {
+    "pageTitle": "My tasks · rtylr",
+    "emptyTitle": "No tasks assigned"
   }
 }

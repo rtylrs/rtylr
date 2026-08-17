@@ -52,6 +52,7 @@
     "clearDate": "Clear date"
   },
   "insights": {
+    "pageTitle": "Insights · rtylr",
     "burndown": "Burndown (active cycle)",
     "throughput": "Throughput (tasks/week)",
     "velocity": "Velocity (last cycles)",

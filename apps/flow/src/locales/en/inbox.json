@@ -1,5 +1,6 @@
 {
   "title": "Inbox",
+  "pageTitle": "Inbox · rtylr",
   "unreadCount_one": "{{count}} unread notification",
   "unreadCount_other": "{{count}} unread notifications",
   "markAllRead": "Mark all read",
