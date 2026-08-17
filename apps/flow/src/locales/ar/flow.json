@@ -404,6 +404,9 @@
     "viewMyDay": "عرض يومي"
   },
   "board": {
+    "pageTitle": "اللوحة · rtylr",
+    "addTaskLabel": "إضافة مهمة",
+    "deleteColumnLabel": "حذف العمود",
     "settingsTitle": "إعدادات اللوحة",
     "openSettings": "فتح إعدادات اللوحة",
     "closeSettings": "إغلاق إعدادات اللوحة",
@@ -580,5 +583,26 @@
     "descriptionPlaceholder": "ما الذي يجب إنجازه؟",
     "creating": "جارٍ الإنشاء…",
     "createTask": "إنشاء مهمة"
+  },
+  "projectList": {
+    "pageTitle": "القائمة · rtylr"
+  },
+  "projectOverview": {
+    "pageTitle": "نظرة عامة · rtylr"
+  },
+  "projectTimeline": {
+    "pageTitle": "الخط الزمني · rtylr"
+  },
+  "projectDashboard": {
+    "pageTitle": "لوحة معلومات المشروع · rtylr",
+    "statusBreakdown": "تفصيل الحالة",
+    "byAssignee": "حسب المسؤول"
+  },
+  "projectCalendar": {
+    "pageTitle": "التقويم · rtylr"
+  },
+  "projectSettings": {
+    "pageTitle": "إعدادات المشروع · rtylr",
+    "removeMemberLabel": "إزالة"
   }
 }
