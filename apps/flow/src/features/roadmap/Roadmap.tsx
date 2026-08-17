@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Link } from '@tanstack/react-router';
 import { Map as MapIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useRoadmap } from './useRoadmap';
 import { formatDate } from '../../shared/lib/utils';
@@ -9,25 +10,26 @@ import { AvatarStack } from '../../shared/components/AssigneeAvatar';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 
 const Roadmap: React.FC = () => {
+  const { t } = useTranslation();
   const { data: projects = [], isLoading } = useRoadmap();
 
   if (isLoading)
     return (
       <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
-        Loading roadmap...
+        {t('flow.roadmap.loading')}
       </div>
     );
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="Roadmap · rtylr" />
+      <HelmetContainer title={`${t('flow.shell.roadmap')} · Flow`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
-        <Breadcrumbs items={[{ label: 'Roadmap' }]} />
+        <Breadcrumbs items={[{ label: t('flow.shell.roadmap') }]} />
         <h1 className="text-[15px] font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>
-          Roadmap
+          {t('flow.shell.roadmap')}
         </h1>
         <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-          High-level view of projects in flight
+          {t('flow.roadmap.subtitle')}
         </p>
       </div>
       <div className="flex-1 overflow-auto p-6 space-y-3">
@@ -71,7 +73,10 @@ const Roadmap: React.FC = () => {
               </div>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-                  {p.doneCount} of {p.tasks.length || p.taskCount} tasks done
+                  {t('flow.roadmap.taskCount', {
+                    done: p.doneCount,
+                    total: p.tasks.length || p.taskCount,
+                  })}
                 </span>
                 <span className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
                   {p.progress}%
@@ -90,8 +95,12 @@ const Roadmap: React.FC = () => {
                 className="flex items-center justify-between text-[10px]"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
-                <span>Start: {formatDate(p.startDate)}</span>
-                <span>Target: {formatDate(p.targetDate)}</span>
+                <span>
+                  {t('flow.roadmap.start')} {formatDate(p.startDate)}
+                </span>
+                <span>
+                  {t('flow.roadmap.target')} {formatDate(p.targetDate)}
+                </span>
               </div>
             </Link>
           </motion.div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useTeamWorkload } from './useTeamWorkload';
 import WorkloadBar from '../../shared/components/WorkloadBar';
@@ -9,28 +10,29 @@ import StatusIcon from '../../shared/components/StatusIcon';
 import { useNavigate } from '@tanstack/react-router';
 
 const Team: React.FC = () => {
+  const { t } = useTranslation();
   const { data: members = [], isLoading } = useTeamWorkload();
   const navigate = useNavigate();
 
   if (isLoading)
     return (
       <div className="p-6 text-sm" style={{ color: 'var(--flow-text-dim)' }}>
-        Loading team...
+        {t('flow.team.loading')}
       </div>
     );
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <HelmetContainer title="Team · rtylr" />
+      <HelmetContainer title={`${t('flow.shell.team')} · Flow`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <div className="flex items-center gap-2">
           <Users size={14} style={{ color: 'var(--flow-text-muted)' }} />
           <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-            Team
+            {t('flow.shell.team')}
           </h1>
         </div>
         <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-          {members.length} members · capacity and workload
+          {t('flow.team.memberCount', { count: members.length })}
         </p>
       </div>
       <div className="p-6 max-w-4xl space-y-4">
@@ -82,7 +84,7 @@ const Team: React.FC = () => {
                 ))}
                 {m.tasks.length > 5 && (
                   <p className="text-[10px] px-1.5" style={{ color: 'var(--flow-text-dim)' }}>
-                    +{m.tasks.length - 5} more
+                    {t('flow.team.moreCount', { count: m.tasks.length - 5 })}
                   </p>
                 )}
               </div>
