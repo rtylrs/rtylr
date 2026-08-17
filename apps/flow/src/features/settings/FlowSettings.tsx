@@ -583,7 +583,7 @@ const LabelsSection: React.FC = () => {
       return;
     }
     createLabel.mutate(
-      { workspace_id: Number(workspaceId), name, color: newColor },
+      { workspace_id: workspaceId, name, color: newColor },
       {
         onSuccess: () => {
           setNewName('');
