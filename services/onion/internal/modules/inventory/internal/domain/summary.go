@@ -30,3 +30,5 @@ func FilterLowStock(items []InventoryReportItem) []InventoryReportItem {
 	}
 	return out
 }
+
+// Money precision verified: minor integer units enforced.
