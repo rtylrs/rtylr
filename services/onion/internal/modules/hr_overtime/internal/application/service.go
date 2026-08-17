@@ -35,7 +35,7 @@ type repository interface {
 	ListFlaggedForDate(ctx context.Context, businessID int64, date string) ([]domain.OvertimeRequestRecord, error)
 	GetOvertimeConfig(ctx context.Context, businessID int64) (*domain.OvertimeConfigRecord, error)
 	UpsertOvertimeConfig(ctx context.Context, businessID int64, cfg domain.OvertimeConfigRecord) error
-	ListAllConfiguredOwnerIDs(ctx context.Context) ([]int64, error)
+	ListAllConfiguredOwnerIDs(ctx context.Context, limit, offset int32) ([]int64, error)
 }
 
 type Service struct {
@@ -181,10 +181,24 @@ func (s *Service) DetectAndFlagOvertime(ctx context.Context, businessID int64, d
 }
 
 func (s *Service) RunDailyDetection(ctx context.Context) error {
-	businessIDs, err := s.repo.ListAllConfiguredOwnerIDs(ctx)
-	if err != nil {
-		logger.Ctx(ctx).Error("overtime daily detection: failed to list owner IDs", logger.Error(err))
-		return err
+	// Paginate internally against ListAllConfiguredOwnerIDs' own row cap so the
+	// job still visits every configured business in one run rather than
+	// reimplementing paging at the call site. maxPages is a runaway-loop
+	// safety bound, not a real product limit.
+	const pageSize = int32(100)
+	const maxPages = 100
+
+	var businessIDs []int64
+	for page := int32(0); page < maxPages; page++ {
+		ids, err := s.repo.ListAllConfiguredOwnerIDs(ctx, pageSize, page*pageSize)
+		if err != nil {
+			logger.Ctx(ctx).Error("overtime daily detection: failed to list owner IDs", logger.Error(err))
+			return err
+		}
+		businessIDs = append(businessIDs, ids...)
+		if int32(len(ids)) < pageSize {
+			break
+		}
 	}
 
 	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")

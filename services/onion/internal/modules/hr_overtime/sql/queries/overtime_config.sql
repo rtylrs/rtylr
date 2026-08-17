@@ -12,4 +12,6 @@ ON DUPLICATE KEY UPDATE daily_threshold_minutes = VALUES(daily_threshold_minutes
     updated_at = NOW();
 
 -- name: ListAllConfiguredOwnerIDs :many
-SELECT DISTINCT business_id FROM hr_overtime_config WHERE auto_detect_enabled = TRUE;
+SELECT DISTINCT business_id FROM hr_overtime_config WHERE auto_detect_enabled = TRUE
+ORDER BY business_id ASC
+LIMIT ? OFFSET ?;

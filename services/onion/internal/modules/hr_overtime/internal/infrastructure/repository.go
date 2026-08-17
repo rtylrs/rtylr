@@ -164,8 +164,11 @@ func (r *Repository) UpsertOvertimeConfig(ctx context.Context, businessID int64,
 	return err
 }
 
-func (r *Repository) ListAllConfiguredOwnerIDs(ctx context.Context) ([]int64, error) {
-	return r.queries.ListAllConfiguredOwnerIDs(ctx)
+func (r *Repository) ListAllConfiguredOwnerIDs(ctx context.Context, limit, offset int32) ([]int64, error) {
+	return r.queries.ListAllConfiguredOwnerIDs(ctx, sqlc.ListAllConfiguredOwnerIDsParams{
+		Limit:  limit,
+		Offset: offset,
+	})
 }
 
 // --- Helpers ---

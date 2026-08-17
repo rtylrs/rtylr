@@ -15,6 +15,13 @@ import (
 
 func ListOvertimeRequestsRoutes() []string { return []string{"/hr/overtime/requests"} }
 
+// Mirrors the default/max clamp applied in application.Service.ListOvertimeRequests
+// so an unbounded or absent caller-provided limit never reaches the query layer.
+const (
+	defaultListOvertimeRequestsLimit int32 = 20
+	maxListOvertimeRequestsLimit     int32 = 100
+)
+
 type ListOvertimeRequestsHandler struct{ Service *application.Service }
 
 type ListOvertimeRequestsRequest struct {
@@ -40,8 +47,16 @@ func (h *ListOvertimeRequestsHandler) Serve(ctx context.Context, req *ListOverti
 		return ListOvertimeRequestsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	limit := req.Limit
+	if limit <= 0 {
+		limit = defaultListOvertimeRequestsLimit
+	}
+	if limit > maxListOvertimeRequestsLimit {
+		limit = maxListOvertimeRequestsLimit
+	}
+
 	requests, total, err := h.Service.ListOvertimeRequests(ctx, businessID, domain.ListOvertimeRequestsParams{
-		Limit: req.Limit, Offset: req.Offset,
+		Limit: limit, Offset: req.Offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list overtime requests", logger.Any("business_id", businessID), logger.Error(err))
@@ -53,5 +68,5 @@ func (h *ListOvertimeRequestsHandler) Serve(ctx context.Context, req *ListOverti
 		payloads = append(payloads, overtimeRequestToProto(r))
 	}
 
-	return ListOvertimeRequestsResponse{Requests: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return ListOvertimeRequestsResponse{Requests: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
 }

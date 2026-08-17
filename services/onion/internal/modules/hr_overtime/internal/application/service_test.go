@@ -9,13 +9,14 @@ import (
 )
 
 type mockRepo struct {
-	requests  []domain.OvertimeRequestRecord
-	request   *domain.OvertimeRequestRecord
-	totalReqs int64
-	config    *domain.OvertimeConfigRecord
-	ownerIDs  []int64
-	flagged   []domain.OvertimeRequestRecord
-	err       error
+	requests    []domain.OvertimeRequestRecord
+	request     *domain.OvertimeRequestRecord
+	totalReqs   int64
+	config      *domain.OvertimeConfigRecord
+	ownerIDs    []int64
+	flagged     []domain.OvertimeRequestRecord
+	err         error
+	configCalls []int64
 }
 
 func (m *mockRepo) ListOvertimeRequests(_ context.Context, _ int64, _ domain.ListOvertimeRequestsParams) ([]domain.OvertimeRequestRecord, int64, error) {
@@ -43,7 +44,8 @@ func (m *mockRepo) ListFlaggedForDate(_ context.Context, _ int64, _ string) ([]d
 	return m.flagged, m.err
 }
 
-func (m *mockRepo) GetOvertimeConfig(_ context.Context, _ int64) (*domain.OvertimeConfigRecord, error) {
+func (m *mockRepo) GetOvertimeConfig(_ context.Context, businessID int64) (*domain.OvertimeConfigRecord, error) {
+	m.configCalls = append(m.configCalls, businessID)
 	return m.config, m.err
 }
 
@@ -51,8 +53,19 @@ func (m *mockRepo) UpsertOvertimeConfig(_ context.Context, _ int64, _ domain.Ove
 	return m.err
 }
 
-func (m *mockRepo) ListAllConfiguredOwnerIDs(_ context.Context) ([]int64, error) {
-	return m.ownerIDs, m.err
+func (m *mockRepo) ListAllConfiguredOwnerIDs(_ context.Context, limit, offset int32) ([]int64, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	start := int(offset)
+	if start >= len(m.ownerIDs) {
+		return nil, nil
+	}
+	end := start + int(limit)
+	if end > len(m.ownerIDs) {
+		end = len(m.ownerIDs)
+	}
+	return m.ownerIDs[start:end], nil
 }
 
 type mockApprovalProvider struct {
@@ -223,6 +236,35 @@ func TestUpsertOvertimeConfig_PropagatesRepoError(t *testing.T) {
 	want := errors.New("upsert error")
 	s := &Service{repo: &mockRepo{err: want}}
 	err := s.UpsertOvertimeConfig(context.Background(), 1, domain.OvertimeConfigRecord{})
+	if !errors.Is(err, want) {
+		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+// ---- RunDailyDetection ----
+
+func TestRunDailyDetection_PaginatesAcrossAllConfiguredOwners(t *testing.T) {
+	ownerIDs := make([]int64, 250)
+	for i := range ownerIDs {
+		ownerIDs[i] = int64(i + 1)
+	}
+	repo := &mockRepo{ownerIDs: ownerIDs, config: &domain.OvertimeConfigRecord{AutoDetectEnabled: false}}
+	s := &Service{repo: repo}
+
+	if err := s.RunDailyDetection(context.Background()); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(repo.configCalls) != len(ownerIDs) {
+		t.Fatalf("expected every configured owner to be visited across pages, got %d of %d",
+			len(repo.configCalls), len(ownerIDs))
+	}
+}
+
+func TestRunDailyDetection_PropagatesListOwnerIDsError(t *testing.T) {
+	want := errors.New("list owner ids error")
+	s := &Service{repo: &mockRepo{err: want}}
+	err := s.RunDailyDetection(context.Background())
 	if !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}

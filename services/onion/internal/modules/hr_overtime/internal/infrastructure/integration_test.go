@@ -180,7 +180,7 @@ func TestListAllConfiguredOwnerIDs_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	ids, err := repo.ListAllConfiguredOwnerIDs(ctx)
+	ids, err := repo.ListAllConfiguredOwnerIDs(ctx, 100, 0)
 	if err != nil {
 		t.Fatalf("ListAllConfiguredOwnerIDs: %v", err)
 	}

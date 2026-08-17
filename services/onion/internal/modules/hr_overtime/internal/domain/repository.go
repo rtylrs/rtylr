@@ -14,7 +14,7 @@ type Repository interface {
 
 	GetOvertimeConfig(ctx context.Context, businessID int64) (*OvertimeConfigRecord, error)
 	UpsertOvertimeConfig(ctx context.Context, businessID int64, cfg OvertimeConfigRecord) error
-	ListAllConfiguredOwnerIDs(ctx context.Context) ([]int64, error)
+	ListAllConfiguredOwnerIDs(ctx context.Context, limit, offset int32) ([]int64, error)
 }
 
 type ApprovalChainProvider interface {
