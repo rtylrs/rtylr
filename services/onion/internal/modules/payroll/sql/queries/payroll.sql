@@ -16,7 +16,8 @@ SELECT staff_id, SUM(hours_worked) AS total_hours, SUM(overtime_hours) AS total_
 FROM hr_shifts
 WHERE business_id = ? AND status = 'completed'
   AND date >= ? AND date <= ?
-GROUP BY staff_id;
+GROUP BY staff_id
+LIMIT 200;
 
 -- name: ListPayrollRecords :many
 SELECT id, owner_id, business_id, staff_id, period_start, period_end, period_label,
