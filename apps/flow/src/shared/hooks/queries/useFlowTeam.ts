@@ -5,6 +5,7 @@ import {
   useQueryClient,
   type UseMutationResult,
 } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { MembersServiceClient } from '@voxire/voxie/hub/team/members/v1/client';
 import { PermissionsServiceClient } from '@voxire/voxie/hub/team/permissions/v1/client';
@@ -70,6 +71,7 @@ export const useFlowTeam = (): ReturnType<typeof useQuery<FlowTeamMember[]>> =>
 // External invites happen at the business level (hub Team page); here
 // we only flip the bit for someone already in the org.
 export const useFlowGrantAccess = (): UseMutationResult<unknown, unknown, GrantPayload> => {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<unknown, unknown, GrantPayload>({
     mutationFn: ({ userId, apps, role }: GrantPayload): Promise<unknown> => {
@@ -77,25 +79,26 @@ export const useFlowGrantAccess = (): UseMutationResult<unknown, unknown, GrantP
       return permissionsClient.updatePermissions({ userId, apps: nextApps, role });
     },
     onSuccess: (): void => {
-      toast.success('Flow access granted');
+      toast.success(t('toasts.flowTeam.accessGranted'));
       void qc.invalidateQueries({ queryKey: ['flow-team'] });
     },
     onError: (error): void => {
-      toast.error(getOneKitErrorMessage(error, 'Failed to grant Flow access'));
+      toast.error(getOneKitErrorMessage(error, t('toasts.flowTeam.grantAccessFailed')));
     },
   });
 };
 
 export const useFlowDeactivateMember = (): UseMutationResult<unknown, unknown, string> => {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation<unknown, unknown, string>({
     mutationFn: (id: string): Promise<unknown> => membersClient.removeMember({ userId: id }),
     onSuccess: (): void => {
-      toast.success('Member removed from Flow');
+      toast.success(t('toasts.flowTeam.memberRemoved'));
       void qc.invalidateQueries({ queryKey: ['flow-team'] });
     },
     onError: (error): void => {
-      toast.error(getOneKitErrorMessage(error, 'Failed to remove member'));
+      toast.error(getOneKitErrorMessage(error, t('toasts.flowTeam.removeMemberFailed')));
     },
   });
 };

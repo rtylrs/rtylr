@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiCycle } from '../../shared/services/flowApi';
@@ -19,6 +20,7 @@ export function useCycles(workspaceId?: string): ReturnType<typeof useQuery<ApiC
 }
 
 export function useCreateCycle() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const { activeWorkspaceId } = useFlowStore();
   return useMutation({
@@ -29,17 +31,18 @@ export function useCreateCycle() {
       return unwrap(flowApi.createCycle({ workspaceId: activeWorkspaceId, ...data }));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cycles'] }),
-    onError: () => toast.error('Failed to create cycle'),
+    onError: () => toast.error(t('toasts.cycle.createFailed')),
   });
 }
 
 export function useUpdateCycle() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<ApiCycle> }) => {
       return unwrap(flowApi.updateCycle(id, data)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cycles'] }),
-    onError: () => toast.error('Failed to update cycle'),
+    onError: () => toast.error(t('toasts.cycle.updateFailed')),
   });
 }

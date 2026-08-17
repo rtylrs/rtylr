@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiProjectMember } from '../../shared/services/flowApi';
@@ -26,46 +27,51 @@ export function useProjectMembers(projectId?: string) {
 }
 
 export function useAddProjectMember(projectId: string) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { project_id: number; user_id: number; role?: string }) =>
       unwrap(flowApi.addProjectMember(data)).then(() => {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['project-members', projectId] }),
-    onError: () => toast.error('Failed to add member'),
+    onError: () => toast.error(t('toasts.projectMember.addFailed')),
   });
 }
 
 export function useRemoveProjectMember(projectId: string) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { project_id: number; user_id: number }) =>
       unwrap(flowApi.removeProjectMember(data)).then(() => {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['project-members', projectId] }),
-    onError: () => toast.error('Failed to remove member'),
+    onError: () => toast.error(t('toasts.projectMember.removeFailed')),
   });
 }
 
 export function useUpdateProjectMemberRole(projectId: string) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { project_id: number; user_id: number; role: string }) =>
       unwrap(flowApi.updateProjectMemberRole(data)).then(() => {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['project-members', projectId] }),
-    onError: () => toast.error('Failed to update role'),
+    onError: () => toast.error(t('toasts.projectMember.roleUpdateFailed')),
   });
 }
 
 export function useTransferProjectOwnership() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { project_id: number; new_owner_id: number }) =>
       unwrap(flowApi.transferProjectOwnership(data)).then(() => {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
-    onError: () => toast.error('Failed to transfer ownership'),
+    onError: () => toast.error(t('toasts.projectMember.transferFailed')),
   });
 }
 
 export function useInviteProjectMember(projectId: string) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { email: string; role: string }) =>
@@ -78,8 +84,8 @@ export function useInviteProjectMember(projectId: string) {
       ),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['project-members', projectId] });
-      toast.success('Invitation sent');
+      toast.success(t('toasts.projectMember.invited'));
     },
-    onError: () => toast.error('No user found with that email'),
+    onError: () => toast.error(t('toasts.projectMember.notFoundByEmail')),
   });
 }
