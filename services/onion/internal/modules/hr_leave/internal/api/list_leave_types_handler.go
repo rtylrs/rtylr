@@ -29,18 +29,36 @@ type ListLeaveTypesResponse struct {
 	Offset int32                         `json:"offset"`
 }
 
+// defaultLeaveTypesLimit and maxLeaveTypesLimit clamp the caller-supplied
+// limit before it reaches the service, matching the same 20/100 clamp the
+// service itself applies as a second line of defense. Clamping here too keeps
+// the Limit/Offset the response echoes back honest about what was actually
+// used, instead of echoing an unbounded value the query never honored.
+const (
+	defaultLeaveTypesLimit = 20
+	maxLeaveTypesLimit     = 100
+)
+
 func (h *ListLeaveTypesHandler) Serve(ctx context.Context, req *ListLeaveTypesRequest) (ListLeaveTypesResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return ListLeaveTypesResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	limit := req.Limit
+	if limit <= 0 {
+		limit = defaultLeaveTypesLimit
+	}
+	if limit > maxLeaveTypesLimit {
+		limit = maxLeaveTypesLimit
+	}
+
 	types, total, err := h.Service.ListLeaveTypes(ctx, device.User.UserID, domain.ListLeaveTypesParams{
-		Limit: req.Limit, Offset: req.Offset,
+		Limit: limit, Offset: req.Offset,
 	})
 	if err != nil {
 		if errors.Is(err, domain.ErrLeaveNotConfigured) {
-			return ListLeaveTypesResponse{Types: []*hrleavev1.LeaveTypePayload{}, Total: 0, Limit: req.Limit, Offset: req.Offset}, nil
+			return ListLeaveTypesResponse{Types: []*hrleavev1.LeaveTypePayload{}, Total: 0, Limit: limit, Offset: req.Offset}, nil
 		}
 		logger.Ctx(ctx).Error("failed to list leave types", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return ListLeaveTypesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list leave types")
@@ -51,5 +69,5 @@ func (h *ListLeaveTypesHandler) Serve(ctx context.Context, req *ListLeaveTypesRe
 		payloads = append(payloads, leaveTypeToProto(t))
 	}
 
-	return ListLeaveTypesResponse{Types: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return ListLeaveTypesResponse{Types: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
 }

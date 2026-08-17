@@ -31,12 +31,24 @@ SET name = ?, is_paid = ?, requires_approval = ?, accrual_rule = ?, accrual_amou
     is_active = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ?;
 
+-- Bounded-result exemption: called once per owner by the monthly accrual job,
+-- not through any caller-facing pagination. A business's own active leave
+-- types are a small, admin-configured list, so a generous hard cap is a
+-- safety net rather than a real limit in practice.
 -- name: ListAllActiveLeaveTypesForOwner :many
 SELECT id, owner_id, business_id, name, is_paid, requires_approval, accrual_rule, accrual_amount,
        max_carryover_days, min_notice_days, requires_documentation_after_days,
        is_active, created_at, updated_at
 FROM hr_leave_types
-WHERE business_id = ? AND is_active = TRUE;
+WHERE business_id = ? AND is_active = TRUE
+LIMIT 500;
 
+-- Bounded-result exemption: enumerates every tenant across the whole platform
+-- for the monthly accrual cron job, so it cannot take a caller-supplied
+-- limit/offset the way a per-tenant list can. Capped generously so a single
+-- run stays bounded; if the platform ever approaches this many businesses
+-- with active leave types, this needs real keyset pagination in the job
+-- instead of raising the constant.
 -- name: ListDistinctOwnerIDs :many
-SELECT DISTINCT business_id FROM hr_leave_types WHERE is_active = TRUE;
+SELECT DISTINCT business_id FROM hr_leave_types WHERE is_active = TRUE
+LIMIT 5000;

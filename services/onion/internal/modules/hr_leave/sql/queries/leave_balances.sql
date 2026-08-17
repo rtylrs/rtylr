@@ -1,9 +1,15 @@
+-- Bounded-result exemption: scoped to one employee's balances for one year,
+-- naturally bounded by the business's own configured leave type count. No
+-- caller paginates this (GetLeaveBalances returns the whole set for the
+-- employee/year pair), so a generous hard cap is a safety net rather than a
+-- real limit in practice.
 -- name: ListLeaveBalances :many
 SELECT id, owner_id, business_id, employee_id, leave_type_id, year, entitled_days, used_days,
        pending_days, last_accrual_month, created_at, updated_at
 FROM hr_leave_balances
 WHERE business_id = ? AND employee_id = ? AND year = ?
-ORDER BY leave_type_id ASC;
+ORDER BY leave_type_id ASC
+LIMIT 500;
 
 -- name: GetLeaveBalance :one
 SELECT id, owner_id, business_id, employee_id, leave_type_id, year, entitled_days, used_days,
@@ -37,8 +43,15 @@ UPDATE hr_leave_balances
 SET pending_days = GREATEST(pending_days - ?, 0), updated_at = NOW()
 WHERE business_id = ? AND employee_id = ? AND leave_type_id = ? AND year = ?;
 
+-- Bounded-result exemption: called once per owner by the monthly accrual job
+-- to sweep every balance row still owed an accrual for the year, so it takes
+-- no caller-supplied limit/offset. Capped generously rather than left
+-- unbounded; any rows left over past the cap keep their un-advanced
+-- last_accrual_month and are picked up again on the job's next run, so a
+-- capped sweep degrades to "caught up a run late" instead of dropping rows.
 -- name: ListBalancesForAccrual :many
 SELECT id, owner_id, business_id, employee_id, leave_type_id, year, entitled_days, used_days,
        pending_days, last_accrual_month, created_at, updated_at
 FROM hr_leave_balances
-WHERE business_id = ? AND year = ? AND last_accrual_month < ?;
+WHERE business_id = ? AND year = ? AND last_accrual_month < ?
+LIMIT 2000;

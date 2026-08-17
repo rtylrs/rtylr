@@ -51,17 +51,29 @@ UPDATE hr_leave_requests
 SET status = 'canceled', updated_at = NOW()
 WHERE id = ? AND business_id = ? AND status = 'pending';
 
+-- Bounded-result exemption: scoped to one employee's own pending/approved
+-- requests overlapping the date range of a single new request being
+-- validated, called internally from CreateLeaveRequest rather than through
+-- any caller-facing pagination. A single employee cannot realistically have
+-- more than a handful of overlapping requests, so this is a safety net.
 -- name: ListOverlappingLeaveRequests :many
 SELECT id, owner_id, business_id, employee_id, leave_type_id, start_date, end_date, total_days,
        notes, status, current_approval_level, rejection_reason, created_at, updated_at
 FROM hr_leave_requests
 WHERE business_id = ? AND employee_id = ? AND status IN ('pending', 'approved')
-  AND start_date <= ? AND end_date >= ?;
+  AND start_date <= ? AND end_date >= ?
+LIMIT 500;
 
+-- Bounded-result exemption: the calendar handler accepts an open-ended
+-- caller-supplied date range with no limit/offset in its own contract, and
+-- spans every employee in the business rather than one. Capped generously so
+-- a wide or unbounded date range cannot pull the whole company's leave
+-- history in one query.
 -- name: ListLeaveCalendar :many
 SELECT id, owner_id, business_id, employee_id, leave_type_id, start_date, end_date, total_days,
        notes, status, current_approval_level, rejection_reason, created_at, updated_at
 FROM hr_leave_requests
 WHERE business_id = ? AND status IN ('approved', 'pending')
   AND start_date <= ? AND end_date >= ?
-ORDER BY start_date ASC;
+ORDER BY start_date ASC
+LIMIT 1000;

@@ -31,16 +31,34 @@ type ListLeaveRequestsResponse struct {
 	Offset   int32                            `json:"offset"`
 }
 
+// defaultLeaveRequestsLimit and maxLeaveRequestsLimit clamp the caller-supplied
+// limit before it reaches the service, matching the same 20/100 clamp the
+// service itself applies as a second line of defense. Clamping here too keeps
+// the Limit/Offset the response echoes back honest about what was actually
+// used, instead of echoing an unbounded value the query never honored.
+const (
+	defaultLeaveRequestsLimit = 20
+	maxLeaveRequestsLimit     = 100
+)
+
 func (h *ListLeaveRequestsHandler) Serve(ctx context.Context, req *ListLeaveRequestsRequest) (ListLeaveRequestsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return ListLeaveRequestsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	limit := req.Limit
+	if limit <= 0 {
+		limit = defaultLeaveRequestsLimit
+	}
+	if limit > maxLeaveRequestsLimit {
+		limit = maxLeaveRequestsLimit
+	}
+
 	requests, total, err := h.Service.ListLeaveRequests(ctx, device.User.UserID, device.User.UserID, domain.ListLeaveRequestsParams{
 		EmployeeID: req.EmployeeID,
 		Status:     req.Status,
-		Limit:      req.Limit,
+		Limit:      limit,
 		Offset:     req.Offset,
 	})
 	if err != nil {
@@ -56,5 +74,5 @@ func (h *ListLeaveRequestsHandler) Serve(ctx context.Context, req *ListLeaveRequ
 		payloads = append(payloads, leaveRequestToProto(r))
 	}
 
-	return ListLeaveRequestsResponse{Requests: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return ListLeaveRequestsResponse{Requests: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
 }
