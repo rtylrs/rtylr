@@ -175,7 +175,8 @@ DELETE FROM finance_expenses WHERE id = ? AND business_id = ?;
 SELECT id, owner_id, business_id, name, color, icon, created_at
 FROM finance_expense_categories
 WHERE business_id = ?
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT 200;
 
 -- name: CreateExpenseCategory :execresult
 INSERT INTO finance_expense_categories (owner_id, business_id, name, color, icon)
