@@ -149,6 +149,7 @@ SELECT
     updated_at
 FROM careers_customizations
 WHERE business_id = ?
+ORDER BY business_id ASC
 LIMIT 1;
 
 -- name: GetCustomizationBySlug :one
