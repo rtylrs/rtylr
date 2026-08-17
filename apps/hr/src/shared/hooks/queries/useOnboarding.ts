@@ -10,6 +10,19 @@ import type { CompleteChecklistItemResponse } from '@voxire/voxie/hr/onboarding/
 import { safe } from '../../lib/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import {
+  employeeChecklistSummaryListSchema,
+  type EmployeeChecklistSummaryList,
+} from '../../schemas/onboarding';
+
+// EmployeeChecklistSummaryPayload has no generated TS type yet - the backend
+// route (GET /hr/onboarding/checklists/summary) isn't on a bumped voxie
+// pointer at the time this hook was written. The response is validated with
+// employeeChecklistSummaryListSchema instead of a generated contract type.
+interface ListEmployeeChecklistSummariesParams {
+  limit: number;
+  offset: number;
+}
 
 // The generated CompleteChecklistItemRequest body is intentionally empty —
 // the item id travels in the URL path, not the body. attachmentUrl is an
@@ -66,6 +79,16 @@ export const useGetEmployeeChecklist = (employeeId?: number) => {
       return res as ListEmployeeChecklistsResponse;
     },
     enabled: !!employeeId,
+  });
+};
+
+export const useListEmployeeChecklistSummaries = (params: ListEmployeeChecklistSummariesParams) => {
+  return useQuery<EmployeeChecklistSummaryList>({
+    queryKey: ['employee-checklist-summaries', 'filter', params],
+    queryFn: async (): Promise<EmployeeChecklistSummaryList> => {
+      const res = await unwrap(safe.get<unknown>('/hr/onboarding/checklists/summary', { params }));
+      return employeeChecklistSummaryListSchema.parse(res);
+    },
   });
 };
 
