@@ -230,7 +230,32 @@
       "removeLabel": "Supprimer {{name}}",
       "saveFailed": "Impossible d'enregistrer ce type de travail.",
       "deleteFailed": "Impossible de supprimer ce type de travail."
-    }
+    },
+    "workspaces": {
+      "section": "Espaces de travail",
+      "subtitle": "Gérez vos espaces de travail Flow.",
+      "newWorkspace": "Nouvel espace de travail",
+      "namePlaceholder": "Nom de l'espace de travail",
+      "color": "Couleur",
+      "creating": "Création…",
+      "createWorkspace": "Créer un espace de travail"
+    },
+    "team": {
+      "section": "Équipe",
+      "subtitle": "Personnes ayant accès à cet espace de travail Flow.",
+      "grantAccess": "Accorder l'accès à Flow",
+      "grantAccessHint": "Seules les personnes déjà membres de votre entreprise peuvent être ajoutées ici. Ajoutez d'abord les nouvelles personnes depuis la page Équipe.",
+      "teamMember": "Membre de l'équipe",
+      "everyoneHasAccess": "Tout le monde dans votre entreprise a déjà accès à Flow.",
+      "selectMember": "Sélectionnez un membre de l'équipe…",
+      "seatCostNote": "L'ajout de ce membre coûte {{amount}} ce mois-ci ({{daysRemaining}}/{{daysInMonth}} jours), puis {{monthlyAmount}} à partir du 1er {{nextMonth}}.",
+      "granting": "Octroi en cours…",
+      "grantAccessAction": "Accorder l'accès",
+      "addMember": "Ajouter un membre",
+      "noMembersYet": "Aucun membre d'équipe pour l'instant.",
+      "removeMemberLabel": "Supprimer {{name}}"
+    },
+    "sectionNotAvailable": "Cette section n'est pas encore disponible."
   },
   "presence": {
     "heading": "Qui est présent aujourd'hui",

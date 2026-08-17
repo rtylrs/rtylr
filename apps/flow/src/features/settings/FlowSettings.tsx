@@ -70,7 +70,11 @@ function buildSections(
     { id: 'shortcuts', label: t('common.settings.shortcuts'), icon: Keyboard },
   ];
   if (canManageWorkspaces) {
-    sections.unshift({ id: 'workspaces', label: 'Workspaces', icon: LayoutDashboard });
+    sections.unshift({
+      id: 'workspaces',
+      label: t('flow.settings.workspaces.section'),
+      icon: LayoutDashboard,
+    });
   }
   return sections;
 }
@@ -124,10 +128,10 @@ const WorkspacesSection: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          Workspaces
+          {t('flow.settings.workspaces.section')}
         </h2>
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          Manage your Flow workspaces.
+          {t('flow.settings.workspaces.subtitle')}
         </p>
       </div>
 
@@ -137,11 +141,11 @@ const WorkspacesSection: React.FC = () => {
           style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
         >
           <h3 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-            New workspace
+            {t('flow.settings.workspaces.newWorkspace')}
           </h3>
           <input
             type="text"
-            placeholder="Workspace name"
+            placeholder={t('flow.settings.workspaces.namePlaceholder')}
             value={wsName}
             onChange={(e) => setWsName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
@@ -150,7 +154,7 @@ const WorkspacesSection: React.FC = () => {
           />
           <div>
             <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-muted)' }}>
-              Color
+              {t('flow.settings.workspaces.color')}
             </p>
             <div className="flex gap-2">
               {WORKSPACE_COLORS.map((c) => (
@@ -178,7 +182,9 @@ const WorkspacesSection: React.FC = () => {
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               <Plus size={12} />
-              {createWorkspace.isPending ? 'Creating…' : 'Create workspace'}
+              {createWorkspace.isPending
+                ? t('flow.settings.workspaces.creating')
+                : t('flow.settings.workspaces.createWorkspace')}
             </button>
             <button
               type="button"
@@ -186,7 +192,7 @@ const WorkspacesSection: React.FC = () => {
               className="px-3 py-1.5 rounded-lg text-[12px]"
               style={{ color: 'var(--flow-text-muted)' }}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </div>
@@ -198,7 +204,7 @@ const WorkspacesSection: React.FC = () => {
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Plus size={12} />
-          New workspace
+          {t('flow.settings.workspaces.newWorkspace')}
         </button>
       )}
 
@@ -768,6 +774,7 @@ const LabelsSection: React.FC = () => {
 // ── Team Section ─────────────────────────────────────────────────────────────
 
 const TeamSection: React.FC = () => {
+  const { t } = useTranslation();
   const { data: allMembers = [], isLoading } = useFlowTeam();
   const grant = useFlowGrantAccess();
   const deactivate = useFlowDeactivateMember();
@@ -806,10 +813,10 @@ const TeamSection: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          Team
+          {t('flow.settings.team.section')}
         </h2>
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          People who have access to this Flow workspace.
+          {t('flow.settings.team.subtitle')}
         </p>
       </div>
 
@@ -821,11 +828,10 @@ const TeamSection: React.FC = () => {
         >
           <div>
             <h3 className="text-[13px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-              Grant Flow access
+              {t('flow.settings.team.grantAccess')}
             </h3>
             <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-              Only people who are already part of your business can be added here. Add new people
-              from the Team page first.
+              {t('flow.settings.team.grantAccessHint')}
             </p>
           </div>
           <div>
@@ -833,14 +839,14 @@ const TeamSection: React.FC = () => {
               className="block text-[11px] font-medium mb-1"
               style={{ color: 'var(--flow-text-muted)' }}
             >
-              Team member
+              {t('flow.settings.team.teamMember')}
             </label>
             {candidates.length === 0 ? (
               <p
                 className="rounded-lg px-3 py-2 text-[12px]"
                 style={{ ...inputStyle, color: 'var(--flow-text-muted)' }}
               >
-                Everyone in your business already has Flow access.
+                {t('flow.settings.team.everyoneHasAccess')}
               </p>
             ) : (
               <select
@@ -849,7 +855,7 @@ const TeamSection: React.FC = () => {
                 className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
                 style={inputStyle}
               >
-                <option value="">Select a team member…</option>
+                <option value="">{t('flow.settings.team.selectMember')}</option>
                 {candidates.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name === m.email ? m.email : `${m.name} - ${m.email}`}
@@ -865,15 +871,13 @@ const TeamSection: React.FC = () => {
                 computeSeatProration(sub.pricePerSeatCents);
               return (
                 <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-                  Adding this member costs{' '}
-                  <span className="font-semibold" style={{ color: 'var(--flow-text)' }}>
-                    {centsToDisplay(proratedCents)}
-                  </span>{' '}
-                  this month ({daysRemaining}/{daysInMonth} days), then{' '}
-                  <span className="font-semibold" style={{ color: 'var(--flow-text)' }}>
-                    {centsToDisplay(sub.pricePerSeatCents)}/mo
-                  </span>{' '}
-                  from {nextMonthName} 1st.
+                  {t('flow.settings.team.seatCostNote', {
+                    amount: centsToDisplay(proratedCents),
+                    daysRemaining,
+                    daysInMonth,
+                    monthlyAmount: `${centsToDisplay(sub.pricePerSeatCents)}/mo`,
+                    nextMonth: nextMonthName,
+                  })}
                 </p>
               );
             })()}
@@ -886,7 +890,9 @@ const TeamSection: React.FC = () => {
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               <UserPlus size={12} />
-              {grant.isPending ? 'Granting…' : 'Grant access'}
+              {grant.isPending
+                ? t('flow.settings.team.granting')
+                : t('flow.settings.team.grantAccessAction')}
             </button>
             <button
               type="button"
@@ -897,7 +903,7 @@ const TeamSection: React.FC = () => {
               className="px-3 py-1.5 rounded-lg text-[12px] font-medium"
               style={{ color: 'var(--flow-text-muted)' }}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </div>
@@ -909,7 +915,7 @@ const TeamSection: React.FC = () => {
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <UserPlus size={12} />
-          Add member
+          {t('flow.settings.team.addMember')}
         </button>
       )}
 
@@ -927,7 +933,7 @@ const TeamSection: React.FC = () => {
       ) : flowMembers.length === 0 ? (
         <div className="py-8 text-center" style={{ color: 'var(--flow-text-dim)' }}>
           <Users size={24} className="mx-auto mb-2 opacity-40" />
-          <p className="text-[13px]">No team members yet.</p>
+          <p className="text-[13px]">{t('flow.settings.team.noMembersYet')}</p>
         </div>
       ) : (
         <div
@@ -964,7 +970,7 @@ const TeamSection: React.FC = () => {
               </span>
               <button
                 type="button"
-                aria-label={`Remove ${m.name}`}
+                aria-label={t('flow.settings.team.removeMemberLabel', { name: m.name })}
                 onClick={() => deactivate.mutate(m.id)}
                 className="h-7 w-7 flex items-center justify-center rounded hover:bg-[var(--flow-hover)] transition-colors shrink-0"
                 style={{ color: 'var(--flow-text-dim)' }}
@@ -1001,7 +1007,7 @@ const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {
         {sections.find((s) => s.id === id)?.label}
       </p>
       <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-        This section is not yet available.
+        {t('flow.settings.sectionNotAvailable')}
       </p>
     </div>
   );
