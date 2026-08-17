@@ -2,7 +2,8 @@
 SELECT id, owner_id, business_id, template_id, cadence, channel, recipient, is_active, created_at, updated_at
 FROM insights_scheduled_reports
 WHERE business_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT 200;
 
 -- name: GetScheduledReport :one
 SELECT id, owner_id, business_id, template_id, cadence, channel, recipient, is_active, created_at, updated_at
