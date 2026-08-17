@@ -7,5 +7,7 @@
   "noEnrollments": "No enrollments yet.",
   "monthly": "Monthly",
   "enrolled": "Enrolled",
-  "enroll": "Enroll"
+  "enroll": "Enroll",
+  "unknownPlan": "Unknown plan",
+  "statusSince": "{{status}} since {{date}}"
 }
