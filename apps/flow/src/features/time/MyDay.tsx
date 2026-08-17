@@ -1,22 +1,22 @@
 import React, { useMemo, useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getRouteApi } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { addDays, formatWeekDayShort, startOfWeek } from '../../shared/lib/dateUtils';
-import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
-import LogTimeDialog from './LogTimeDialog';
+import AddHours from './AddHours';
+import { WORK_MODES } from './workModes';
 import {
   todayLocalDate,
   useDeleteWorkDayLine,
   useUpsertWorkDay,
   useWorkDay,
   useWorkDaysRange,
-  useWorkTypes,
 } from './useWorkDay';
 
-const WORK_MODES = ['onsite', 'remote', 'hybrid'] as const;
+const routeApi = getRouteApi('/time');
 
 const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-wider';
 const inputStyle: React.CSSProperties = {
@@ -35,14 +35,12 @@ const inputStyle: React.CSSProperties = {
  */
 const MyDay = (): React.JSX.Element => {
   const { t, i18n } = useTranslation();
-  const [date, setDate] = useState(todayLocalDate());
+  const { date: datePrefill } = routeApi.useSearch();
+  const [date, setDate] = useState(datePrefill ?? todayLocalDate());
 
   const { data, isLoading } = useWorkDay(date);
-  const { data: workTypesData } = useWorkTypes();
-  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
   const upsertDay = useUpsertWorkDay();
   const deleteLine = useDeleteWorkDayLine();
-  const [logTimeOpen, setLogTimeOpen] = useState(false);
 
   const weekStart = useTimeSettingsStore((s) => s.weekStart);
   const weekDays = useMemo(() => {
@@ -60,7 +58,6 @@ const MyDay = (): React.JSX.Element => {
 
   const day = data?.workDay;
   const lines = useMemo(() => data?.lines ?? [], [data]);
-  const workTypes = workTypesData?.workTypes ?? [];
 
   const clocked = day?.clockedMinutes ?? 0;
   const logged = day?.loggedMinutes ?? 0;
@@ -81,7 +78,7 @@ const MyDay = (): React.JSX.Element => {
   return (
     <div className="h-full overflow-y-auto">
       <HelmetContainer title={`${t('flow.time.myDay')} · Flow`} />
-      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6">
         <header className="mb-6">
           <h1 className="text-[20px] font-bold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.time.myDay')}
@@ -298,36 +295,15 @@ const MyDay = (): React.JSX.Element => {
                 ))}
               </ul>
 
-              {/* The day has to exist before work can be filed under it, which is
-               * what the upsert above creates. */}
-              {!day?.id ? (
-                <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
-                  {t('flow.time.setTheDayFirst')}
-                </p>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setLogTimeOpen(true)}
-                  className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded px-4 text-[13px] font-semibold md:min-h-0 md:py-2.5"
-                  style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
-                >
-                  <Plus size={14} aria-hidden="true" />
-                  {t('flow.time.logAction')}
-                </button>
-              )}
+              {/* The old "+ Log time" button opened a modal (LogTimeDialog);
+               * that dialog and its own day-must-exist gate are gone. Add
+               * Hours renders inline instead, and creates the work day itself
+               * on first submit if one doesn't exist yet for this date. */}
+              <AddHours date={date} onDateChange={setDate} />
             </section>
           </>
         )}
       </div>
-
-      <LogTimeDialog
-        open={logTimeOpen}
-        onOpenChange={setLogTimeOpen}
-        date={date}
-        workDayId={day?.id ?? ''}
-        workspaceId={activeWorkspaceId}
-        workTypes={workTypes}
-      />
     </div>
   );
 };
