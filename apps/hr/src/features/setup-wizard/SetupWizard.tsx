@@ -48,16 +48,32 @@ const SetupWizard = (): React.JSX.Element => {
 
   const steps = data?.steps ?? [];
 
+  // The single source of truth for "HR setup is done". HRConfigRoute gates every
+  // other HR route on this same field, so reading `isComplete` here instead let
+  // the two guards disagree: with every step ticked but the wizard never
+  // finalised, / redirected to /setup and /setup redirected straight back.
+  // `isComplete` only means "all steps are ticked", which is a precondition -
+  // the wizard's own last step is what writes setupCompletedAt.
+  const isSetupFinalised = Boolean(data?.config?.setupCompletedAt);
+
+  // Redirecting from the render body raised "Cannot update a component while
+  // rendering a different component" and ran the bounce synchronously, which
+  // froze the tab outright rather than merely flickering.
   useEffect(() => {
-    if (data && !data.isComplete) {
-      const firstIncomplete = STEP_KEYS.findIndex(
-        (key) => !steps.some((s) => s.stepKey === key && s.completedAt != null)
-      );
-      if (firstIncomplete >= 0) {
-        setCurrentStepIndex(firstIncomplete);
-      }
+    if (isSetupFinalised) {
+      navigate({ to: '/', replace: true });
     }
-  }, [data, steps, setCurrentStepIndex]);
+  }, [isSetupFinalised, navigate]);
+
+  useEffect(() => {
+    if (!data || isSetupFinalised) return;
+    const firstIncomplete = STEP_KEYS.findIndex(
+      (key) => !steps.some((s) => s.stepKey === key && s.completedAt != null)
+    );
+    // Every step ticked but never finalised: land on the last step so the action
+    // that writes setupCompletedAt stays reachable, instead of restarting at one.
+    setCurrentStepIndex(firstIncomplete >= 0 ? firstIncomplete : STEP_KEYS.length - 1);
+  }, [data, isSetupFinalised, steps, setCurrentStepIndex]);
 
   if (isLoading) {
     return <PageLoader />;
@@ -83,8 +99,8 @@ const SetupWizard = (): React.JSX.Element => {
     );
   }
 
-  if (data?.isComplete) {
-    navigate({ to: '/', replace: true });
+  // The effect above owns the redirect; hold the loader until it lands.
+  if (isSetupFinalised) {
     return <PageLoader />;
   }
 
