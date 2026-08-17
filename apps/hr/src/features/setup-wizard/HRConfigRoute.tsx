@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate, Outlet } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useGetHRConfig } from '../../shared/hooks/queries/useSetup';
+import { isHRSetupComplete } from '../../shared/lib/setupCompletion';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 
 function PageLoader(): React.JSX.Element {
@@ -63,11 +64,9 @@ const HRConfigRoute = (): React.JSX.Element => {
     return <ConfigLoadError onRetry={() => refetch()} isRetrying={isFetching} />;
   }
 
-  if (!config) {
-    return <Navigate to="/setup" replace />;
-  }
-
-  if (!config.setupCompletedAt) {
+  // A missing config and an unfinalised one both mean "run the wizard", and the
+  // shared predicate already folds the null case in.
+  if (!isHRSetupComplete(config)) {
     return <Navigate to="/setup" replace />;
   }
 
