@@ -33,7 +33,7 @@ ORDER BY id ASC
 LIMIT 1;
 
 -- name: RevokeAddonGrant :exec
-UPDATE manual_addon_grants SET revoked_at = NOW() WHERE id = ?;
+UPDATE manual_addon_grants SET revoked_at = NOW() WHERE id = ? AND business_id = ?;
 
 -- name: DeleteAddonGrant :exec
 DELETE FROM manual_addon_grants WHERE id = ? AND business_id = ?;
