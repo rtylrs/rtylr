@@ -19,7 +19,8 @@
     "bulkDeleted_other": "تم حذف {{count}} مهمة",
     "bulkDeleteFailed": "تعذّر الحذف الجماعي",
     "selectProjectFirst": "اختر مشروعاً أولاً",
-    "invalidDuration": "أدخل مدة صحيحة، مثل \"90m\" أو \"1.5h\""
+    "invalidDuration": "أدخل مدة صحيحة، مثل \"90m\" أو \"1.5h\"",
+    "moveFailed": "فشل نقل المهمة"
   },
   "comment": {
     "postFailed": "تعذّر نشر التعليق",
@@ -35,17 +36,45 @@
     "deleteFailed": "تعذّر حذف سجل الوقت"
   },
   "cycle": {
-    "created": "تم إنشاء الدورة"
+    "created": "تم إنشاء الدورة",
+    "createFailed": "فشل إنشاء الدورة",
+    "updateFailed": "فشل تحديث الدورة"
   },
   "label": {
     "created": "تم إنشاء التسمية",
     "createFailed": "تعذّر إنشاء التسمية",
+    "updateFailed": "فشل تحديث التسمية",
     "deleted": "تم حذف التسمية",
-    "deleteFailed": "تعذّر حذف التسمية"
+    "deleteFailed": "تعذّر حذف التسمية",
+    "setFailed": "فشل تعيين تسميات المهمة"
+  },
+  "notification": {
+    "markReadFailed": "فشل تعليم الإشعار كمقروء",
+    "markAllReadFailed": "فشل تعليم جميع الإشعارات كمقروءة"
+  },
+  "column": {
+    "createFailed": "فشل إنشاء العمود",
+    "updateFailed": "فشل تحديث العمود",
+    "deleteFailed": "فشل حذف العمود"
+  },
+  "projectMember": {
+    "addFailed": "فشل إضافة العضو",
+    "removeFailed": "فشل إزالة العضو",
+    "roleUpdateFailed": "فشل تحديث الدور",
+    "transferFailed": "فشل نقل الملكية",
+    "invited": "تم إرسال الدعوة",
+    "notFoundByEmail": "لم يتم العثور على مستخدم بهذا البريد الإلكتروني"
   },
   "project": {
+    "createFailed": "فشل إنشاء المشروع",
     "updated": "تم تحديث المشروع",
-    "updateFailed": "تعذّر تحديث المشروع"
+    "updateFailed": "تعذّر تحديث المشروع",
+    "deleteFailed": "فشل حذف المشروع",
+    "moveFailed": "فشل نقل المشروع"
+  },
+  "milestone": {
+    "createFailed": "فشل إنشاء المرحلة",
+    "updateFailed": "فشل تحديث المرحلة"
   },
   "profile": {
     "updated": "تم تحديث الملف الشخصي",
@@ -56,7 +85,10 @@
     "changeFailed": "تعذّر تغيير كلمة المرور"
   },
   "workspace": {
-    "noActive": "لا توجد مساحة عمل نشطة"
+    "noActive": "لا توجد مساحة عمل نشطة",
+    "createFailed": "فشل إنشاء مساحة العمل",
+    "updateFailed": "فشل تحديث مساحة العمل",
+    "deleteFailed": "فشل حذف مساحة العمل"
   },
   "workspaceMember": {
     "invalidWorkspaceId": "معرف مساحة العمل غير صالح",
@@ -72,5 +104,11 @@
     "selectMember": "اختر عضو فريق",
     "added": "تمت إضافة العضو إلى مساحة العمل",
     "addFailed": "فشل إضافة العضو"
+  },
+  "flowTeam": {
+    "accessGranted": "تم منح الوصول إلى Flow",
+    "grantAccessFailed": "فشل منح الوصول إلى Flow",
+    "memberRemoved": "تمت إزالة العضو من Flow",
+    "removeMemberFailed": "فشل إزالة العضو"
   }
 }

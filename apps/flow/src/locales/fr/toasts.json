@@ -19,7 +19,8 @@
     "bulkDeleted_other": "{{count}} tâches supprimées",
     "bulkDeleteFailed": "Impossible d'effectuer la suppression groupée",
     "selectProjectFirst": "Sélectionnez d'abord un projet",
-    "invalidDuration": "Saisissez une durée valide, par exemple « 90m » ou « 1.5h »"
+    "invalidDuration": "Saisissez une durée valide, par exemple « 90m » ou « 1.5h »",
+    "moveFailed": "Échec du déplacement de la tâche"
   },
   "comment": {
     "postFailed": "Impossible de publier le commentaire",
@@ -35,17 +36,45 @@
     "deleteFailed": "Impossible de supprimer l'entrée de temps"
   },
   "cycle": {
-    "created": "Itération créée"
+    "created": "Itération créée",
+    "createFailed": "Échec de la création de l'itération",
+    "updateFailed": "Échec de la mise à jour de l'itération"
   },
   "label": {
     "created": "Étiquette créée",
     "createFailed": "Impossible de créer l'étiquette",
+    "updateFailed": "Échec de la mise à jour de l'étiquette",
     "deleted": "Étiquette supprimée",
-    "deleteFailed": "Impossible de supprimer l'étiquette"
+    "deleteFailed": "Impossible de supprimer l'étiquette",
+    "setFailed": "Échec de l'attribution des étiquettes de la tâche"
+  },
+  "notification": {
+    "markReadFailed": "Échec du marquage de la notification comme lue",
+    "markAllReadFailed": "Échec du marquage de toutes les notifications comme lues"
+  },
+  "column": {
+    "createFailed": "Échec de la création de la colonne",
+    "updateFailed": "Échec de la mise à jour de la colonne",
+    "deleteFailed": "Échec de la suppression de la colonne"
+  },
+  "projectMember": {
+    "addFailed": "Échec de l'ajout du membre",
+    "removeFailed": "Échec de la suppression du membre",
+    "roleUpdateFailed": "Échec de la mise à jour du rôle",
+    "transferFailed": "Échec du transfert de propriété",
+    "invited": "Invitation envoyée",
+    "notFoundByEmail": "Aucun utilisateur trouvé avec cette adresse e-mail"
   },
   "project": {
+    "createFailed": "Échec de la création du projet",
     "updated": "Projet mis à jour",
-    "updateFailed": "Impossible de mettre à jour le projet"
+    "updateFailed": "Impossible de mettre à jour le projet",
+    "deleteFailed": "Échec de la suppression du projet",
+    "moveFailed": "Échec du déplacement du projet"
+  },
+  "milestone": {
+    "createFailed": "Échec de la création du jalon",
+    "updateFailed": "Échec de la mise à jour du jalon"
   },
   "profile": {
     "updated": "Profil mis à jour",
@@ -56,7 +85,10 @@
     "changeFailed": "Impossible de modifier le mot de passe"
   },
   "workspace": {
-    "noActive": "Aucun espace de travail actif"
+    "noActive": "Aucun espace de travail actif",
+    "createFailed": "Échec de la création de l'espace de travail",
+    "updateFailed": "Échec de la mise à jour de l'espace de travail",
+    "deleteFailed": "Échec de la suppression de l'espace de travail"
   },
   "workspaceMember": {
     "invalidWorkspaceId": "Identifiant d'espace de travail invalide",
@@ -72,5 +104,11 @@
     "selectMember": "Sélectionnez un membre de l'équipe",
     "added": "Membre ajouté à l'espace de travail",
     "addFailed": "Échec de l'ajout du membre"
+  },
+  "flowTeam": {
+    "accessGranted": "Accès à Flow accordé",
+    "grantAccessFailed": "Échec de l'octroi de l'accès à Flow",
+    "memberRemoved": "Membre retiré de Flow",
+    "removeMemberFailed": "Échec de la suppression du membre"
   }
 }

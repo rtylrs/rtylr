@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 
@@ -20,19 +21,21 @@ export function useNotifications() {
 }
 
 export function useMarkNotificationRead() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => unwrap(flowApi.markNotificationRead(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications'] }),
-    onError: () => toast.error('Failed to mark notification read'),
+    onError: () => toast.error(t('toasts.notification.markReadFailed')),
   });
 }
 
 export function useMarkAllNotificationsRead() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => unwrap(flowApi.markAllNotificationsRead()),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['notifications'] }),
-    onError: () => toast.error('Failed to mark all notifications read'),
+    onError: () => toast.error(t('toasts.notification.markAllReadFailed')),
   });
 }

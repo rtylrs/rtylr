@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { unwrap } from '@voxire/api';
 import { flowApi, ApiProjectColumn } from '../../shared/services/flowApi';
@@ -19,6 +20,7 @@ export function useProjectColumns(projectId: string) {
 }
 
 export function useCreateColumn(projectId: string) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { workspaceId: string; name: string; color?: string; sortOrder?: number }) =>
@@ -32,11 +34,12 @@ export function useCreateColumn(projectId: string) {
         })
       ).then((r) => r.column),
     onSuccess: () => qc.invalidateQueries({ queryKey: key(projectId) }),
-    onError: () => toast.error('Failed to create column'),
+    onError: () => toast.error(t('toasts.column.createFailed')),
   });
 }
 
 export function useUpdateColumn(projectId: string) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { id: string; name: string; color?: string; sortOrder?: number }) =>
@@ -49,11 +52,12 @@ export function useUpdateColumn(projectId: string) {
         })
       ),
     onSuccess: () => qc.invalidateQueries({ queryKey: key(projectId) }),
-    onError: () => toast.error('Failed to update column'),
+    onError: () => toast.error(t('toasts.column.updateFailed')),
   });
 }
 
 export function useDeleteColumn(projectId: string) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => unwrap(flowApi.deleteProjectColumn(id)),
@@ -61,11 +65,12 @@ export function useDeleteColumn(projectId: string) {
       qc.invalidateQueries({ queryKey: key(projectId) });
       qc.invalidateQueries({ queryKey: ['tasks'] });
     },
-    onError: () => toast.error('Failed to delete column'),
+    onError: () => toast.error(t('toasts.column.deleteFailed')),
   });
 }
 
 export function useMoveTaskToColumn() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ taskId, columnId }: { taskId: string; columnId: string }) =>
@@ -74,6 +79,6 @@ export function useMoveTaskToColumn() {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['task', taskId] });
     },
-    onError: () => toast.error('Failed to move task'),
+    onError: () => toast.error(t('toasts.task.moveFailed')),
   });
 }

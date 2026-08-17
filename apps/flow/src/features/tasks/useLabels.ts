@@ -1,5 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiLabel } from '../../shared/services/flowApi';
@@ -20,35 +21,39 @@ export function useLabels(workspaceId?: string) {
 }
 
 export function useCreateLabel() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { workspace_id: string; name: string; color: string }) =>
       unwrap(flowApi.createLabel(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
-    onError: () => toast.error('Failed to create label'),
+    onError: () => toast.error(t('toasts.label.createFailed')),
   });
 }
 
 export function useUpdateLabel() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { id: number; name: string; color: string }) =>
       unwrap(flowApi.updateLabel(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
-    onError: () => toast.error('Failed to update label'),
+    onError: () => toast.error(t('toasts.label.updateFailed')),
   });
 }
 
 export function useDeleteLabel() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => unwrap(flowApi.deleteLabel(id)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
-    onError: () => toast.error('Failed to delete label'),
+    onError: () => toast.error(t('toasts.label.deleteFailed')),
   });
 }
 
 export function useSetTaskLabels() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: { task_id: number; label_ids: number[] }) =>
@@ -58,6 +63,6 @@ export function useSetTaskLabels() {
       qc.invalidateQueries({ queryKey: ['tasks'] });
       qc.invalidateQueries({ queryKey: ['my-tasks'] });
     },
-    onError: () => toast.error('Failed to set task labels'),
+    onError: () => toast.error(t('toasts.label.setFailed')),
   });
 }

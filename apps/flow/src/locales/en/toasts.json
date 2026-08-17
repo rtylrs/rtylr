@@ -19,7 +19,8 @@
     "bulkDeleted_other": "Deleted {{count}} tasks",
     "bulkDeleteFailed": "Bulk delete failed",
     "selectProjectFirst": "Select a project first",
-    "invalidDuration": "Enter a valid duration, e.g. \"90m\" or \"1.5h\""
+    "invalidDuration": "Enter a valid duration, e.g. \"90m\" or \"1.5h\"",
+    "moveFailed": "Failed to move task"
   },
   "comment": {
     "postFailed": "Failed to post comment",
@@ -35,17 +36,45 @@
     "deleteFailed": "Failed to delete time log"
   },
   "cycle": {
-    "created": "Cycle created"
+    "created": "Cycle created",
+    "createFailed": "Failed to create cycle",
+    "updateFailed": "Failed to update cycle"
   },
   "label": {
     "created": "Label created",
     "createFailed": "Failed to create label",
+    "updateFailed": "Failed to update label",
     "deleted": "Label deleted",
-    "deleteFailed": "Failed to delete label"
+    "deleteFailed": "Failed to delete label",
+    "setFailed": "Failed to set task labels"
+  },
+  "notification": {
+    "markReadFailed": "Failed to mark notification read",
+    "markAllReadFailed": "Failed to mark all notifications read"
+  },
+  "column": {
+    "createFailed": "Failed to create column",
+    "updateFailed": "Failed to update column",
+    "deleteFailed": "Failed to delete column"
+  },
+  "projectMember": {
+    "addFailed": "Failed to add member",
+    "removeFailed": "Failed to remove member",
+    "roleUpdateFailed": "Failed to update role",
+    "transferFailed": "Failed to transfer ownership",
+    "invited": "Invitation sent",
+    "notFoundByEmail": "No user found with that email"
   },
   "project": {
+    "createFailed": "Failed to create project",
     "updated": "Project updated",
-    "updateFailed": "Failed to update project"
+    "updateFailed": "Failed to update project",
+    "deleteFailed": "Failed to delete project",
+    "moveFailed": "Failed to move project"
+  },
+  "milestone": {
+    "createFailed": "Failed to create milestone",
+    "updateFailed": "Failed to update milestone"
   },
   "profile": {
     "updated": "Profile updated",
@@ -56,7 +85,10 @@
     "changeFailed": "Failed to change password"
   },
   "workspace": {
-    "noActive": "No active workspace"
+    "noActive": "No active workspace",
+    "createFailed": "Failed to create workspace",
+    "updateFailed": "Failed to update workspace",
+    "deleteFailed": "Failed to delete workspace"
   },
   "workspaceMember": {
     "invalidWorkspaceId": "Invalid workspace ID",
@@ -72,5 +104,11 @@
     "selectMember": "Select a team member",
     "added": "Member added to workspace",
     "addFailed": "Failed to add member"
+  },
+  "flowTeam": {
+    "accessGranted": "Flow access granted",
+    "grantAccessFailed": "Failed to grant Flow access",
+    "memberRemoved": "Member removed from Flow",
+    "removeMemberFailed": "Failed to remove member"
   }
 }
