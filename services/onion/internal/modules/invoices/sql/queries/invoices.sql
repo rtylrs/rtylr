@@ -186,7 +186,8 @@ VALUES (?,?,?,?,?);
 SELECT id, owner_id, business_id, name, rate, type, is_default, is_active, created_at
 FROM finance_tax_config
 WHERE business_id = ?
-ORDER BY is_default DESC, name ASC;
+ORDER BY is_default DESC, name ASC
+LIMIT 200;
 
 -- name: CreateTaxConfig :execresult
 INSERT INTO finance_tax_config (owner_id, business_id, name, rate, type, is_default, is_active)
