@@ -3,6 +3,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Milestones from './Milestones';
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
 const mutateSpy = vi.fn();
 
 vi.mock('./useMilestones', () => ({
@@ -23,7 +27,7 @@ describe('Milestones create form', () => {
     render(<Milestones />);
 
     fireEvent.click(screen.getByText(/Create first milestone/i));
-    fireEvent.change(screen.getByPlaceholderText('Milestone name'), {
+    fireEvent.change(screen.getByPlaceholderText('flow.milestones.namePlaceholder'), {
       target: { value: 'Launch' },
     });
 
@@ -40,7 +44,7 @@ describe('Milestones create form', () => {
     render(<Milestones />);
 
     fireEvent.click(screen.getByText(/Create first milestone/i));
-    fireEvent.change(screen.getByPlaceholderText('Milestone name'), {
+    fireEvent.change(screen.getByPlaceholderText('flow.milestones.namePlaceholder'), {
       target: { value: 'Launch' },
     });
 
