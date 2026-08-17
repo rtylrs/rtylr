@@ -13,6 +13,7 @@ SELECT id, owner_email, customer_name, plan, features, seat_limit, expires_at, g
        regenerated_at, revoked_at
 FROM self_host_licenses
 WHERE owner_email = ?
+ORDER BY owner_email ASC
 LIMIT 1;
 
 -- name: CreateSelfHostLicense :execresult
