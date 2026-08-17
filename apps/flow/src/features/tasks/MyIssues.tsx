@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { ListTodo, Plus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
@@ -138,13 +139,14 @@ const MyIssues: React.FC = () => {
 };
 
 const QuickAddRow: React.FC = () => {
+  const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const createTask = useCreateTask();
 
   const submit = (): void => {
     const trimmed = title.trim();
     if (!trimmed) {
-      toast.error('Task title is required');
+      toast.error(t('toasts.task.titleRequired'));
       return;
     }
     // Personal tasks land in Backlog so the leftmost column actually

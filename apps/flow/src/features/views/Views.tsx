@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { Eye, Plus, Flame, Timer, CheckCircle2, Pencil, Trash2, Check, X } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useFlowStore, SavedView } from '../../shared/stores/flowStore';
@@ -21,6 +22,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
 };
 
 const Views: React.FC = () => {
+  const { t } = useTranslation();
   const { data: views = [] } = useViews();
   const createView = useCreateView();
   const updateView = useUpdateView();
@@ -49,10 +51,10 @@ const Views: React.FC = () => {
       { id: v.id, data: { name: editName.trim() } },
       {
         onSuccess: () => {
-          toast.success('View renamed');
+          toast.success(t('toasts.view.renamed'));
           setEditingId(null);
         },
-        onError: () => toast.error('Failed to rename view'),
+        onError: () => toast.error(t('toasts.view.renameFailed')),
       }
     );
   };
@@ -65,11 +67,11 @@ const Views: React.FC = () => {
   const performDelete = (v: SavedView) => {
     deleteView.mutate(v.id, {
       onSuccess: () => {
-        toast.success('View deleted');
+        toast.success(t('toasts.view.deleted'));
         if (selected?.id === v.id) setSelected(null);
         setPendingDelete(null);
       },
-      onError: () => toast.error('Failed to delete view'),
+      onError: () => toast.error(t('toasts.view.deleteFailed')),
     });
   };
 
@@ -94,7 +96,7 @@ const Views: React.FC = () => {
             onClick={() =>
               createView.mutate(
                 { name: 'New view', icon: 'eye', filters: {} },
-                { onSuccess: () => toast.success('View created') }
+                { onSuccess: () => toast.success(t('toasts.view.created')) }
               )
             }
             disabled={createView.isPending}

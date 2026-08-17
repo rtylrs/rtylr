@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight, Calendar, User, CircleUser, FolderInput, Flag, Gauge } from 'lucide-react';
 import { useFlowStore, Task } from '../stores/flowStore';
 import { useUserStore } from '../stores/userStore';
@@ -40,6 +41,7 @@ function FieldRow({
 }
 
 export const QuickCreate: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { quickCreateOpen, setQuickCreateOpen, projects, activeWorkspaceId, sections } =
     useFlowStore();
@@ -77,7 +79,7 @@ export const QuickCreate: React.FC = () => {
 
   const submit = async () => {
     if (!title.trim()) {
-      toast.error('Task title is required');
+      toast.error(t('toasts.task.titleRequired'));
       return;
     }
     if (!projectId) return;
@@ -101,7 +103,9 @@ export const QuickCreate: React.FC = () => {
       });
       const task = res.task;
       const taskId = String(task.id);
-      toast.success(`Created ${task.identifier ?? taskId}`, { description: task.title });
+      toast.success(t('toasts.task.createdWithId', { id: task.identifier ?? taskId }), {
+        description: task.title,
+      });
       setQuickCreateOpen(false);
       navigate({ to: `/task/${taskId}` as string });
     } catch {
