@@ -72,6 +72,7 @@ SELECT
     updated_at
 FROM careers
 WHERE business_id = ? AND slug = ?
+ORDER BY slug ASC
 LIMIT 1;
 
 -- name: CreateRecruitCareer :execresult
