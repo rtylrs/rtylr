@@ -21,6 +21,7 @@ JOIN plans p ON p.id = s.plan_id
 LEFT JOIN users u ON u.id = s.owner_id
 LEFT JOIN businesses b ON b.owner_id = s.owner_id AND COALESCE(b.is_active, TRUE) = TRUE
 WHERE s.owner_id = ?
+ORDER BY s.owner_id ASC
 LIMIT 1;
 
 -- name: UpsertSubscription :exec
