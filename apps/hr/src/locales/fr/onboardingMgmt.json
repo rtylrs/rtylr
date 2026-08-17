@@ -31,6 +31,9 @@
       "progress": "Progression",
       "overdue": "Éléments en retard",
       "triggeredAt": "Démarré"
+    },
+    "pagination": {
+      "range": "{{from}}–{{to}} sur {{total}}"
     }
   },
   "templates": {
