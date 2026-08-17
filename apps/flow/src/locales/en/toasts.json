@@ -20,7 +20,10 @@
     "bulkDeleteFailed": "Bulk delete failed",
     "selectProjectFirst": "Select a project first",
     "invalidDuration": "Enter a valid duration, e.g. \"90m\" or \"1.5h\"",
-    "moveFailed": "Failed to move task"
+    "moveFailed": "Failed to move task",
+    "titleRequired": "Task title is required",
+    "linkCopied": "Link copied",
+    "createdWithId": "Created {{id}}"
   },
   "comment": {
     "postFailed": "Failed to post comment",
@@ -50,12 +53,14 @@
   },
   "notification": {
     "markReadFailed": "Failed to mark notification read",
-    "markAllReadFailed": "Failed to mark all notifications read"
+    "markAllReadFailed": "Failed to mark all notifications read",
+    "savePreferencesFailed": "Failed to save notification preferences"
   },
   "column": {
     "createFailed": "Failed to create column",
     "updateFailed": "Failed to update column",
-    "deleteFailed": "Failed to delete column"
+    "deleteFailed": "Failed to delete column",
+    "nameRequired": "Column name is required"
   },
   "projectMember": {
     "addFailed": "Failed to add member",
@@ -63,18 +68,41 @@
     "roleUpdateFailed": "Failed to update role",
     "transferFailed": "Failed to transfer ownership",
     "invited": "Invitation sent",
-    "notFoundByEmail": "No user found with that email"
+    "notFoundByEmail": "No user found with that email",
+    "roleUpdated": "Role updated",
+    "removed": "Member removed",
+    "transferred": "Ownership transferred",
+    "selectNewOwner": "Select a member",
+    "enterEmail": "Enter an email address"
   },
   "project": {
     "createFailed": "Failed to create project",
     "updated": "Project updated",
     "updateFailed": "Failed to update project",
     "deleteFailed": "Failed to delete project",
-    "moveFailed": "Failed to move project"
+    "moveFailed": "Failed to move project",
+    "moved": "Project moved",
+    "selectWorkspace": "Select a workspace",
+    "deleted": "Project deleted"
   },
   "milestone": {
     "createFailed": "Failed to create milestone",
     "updateFailed": "Failed to update milestone"
+  },
+  "view": {
+    "renamed": "View renamed",
+    "renameFailed": "Failed to rename view",
+    "deleted": "View deleted",
+    "deleteFailed": "Failed to delete view",
+    "created": "View created"
+  },
+  "weeklyReview": {
+    "logged": "Weekly review logged",
+    "streak_one": "{{count}} week streak",
+    "streak_other": "{{count}} week streak",
+    "alreadyLogged": "Already logged this week",
+    "alreadyLoggedStreak_one": "Streak: {{count}} week",
+    "alreadyLoggedStreak_other": "Streak: {{count}} weeks"
   },
   "profile": {
     "updated": "Profile updated",
@@ -88,7 +116,9 @@
     "noActive": "No active workspace",
     "createFailed": "Failed to create workspace",
     "updateFailed": "Failed to update workspace",
-    "deleteFailed": "Failed to delete workspace"
+    "deleteFailed": "Failed to delete workspace",
+    "nameRequired": "Workspace name is required",
+    "created": "Workspace created"
   },
   "workspaceMember": {
     "invalidWorkspaceId": "Invalid workspace ID",
