@@ -19,6 +19,7 @@ vi.mock('@voxire/api', () => ({
 
 import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from './useProjects';
 import { flowApi } from '../../shared/services/flowApi';
+import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 
 const createWrapper = () => {
   const client = new QueryClient({
@@ -36,12 +37,12 @@ describe('useProjects (remote mode)', () => {
   it('fetches projects for a workspace', async () => {
     const data = [{ id: 'p-1', name: 'Project Alpha' }];
     (flowApi.getProjects as any).mockResolvedValue(data);
-    const { result } = renderHook(() => useProjects('ws-1'), {
+    const { result } = renderHook(() => useProjects('12'), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(data);
-    expect(flowApi.getProjects).toHaveBeenCalledWith('ws-1');
+    expect(flowApi.getProjects).toHaveBeenCalledWith('12');
   });
 
   it('does not fetch when workspaceId is undefined', () => {
@@ -52,9 +53,17 @@ describe('useProjects (remote mode)', () => {
     expect(flowApi.getProjects).not.toHaveBeenCalled();
   });
 
+  it('does not fetch while the workspace is the unresolved Personal sentinel', () => {
+    const { result } = renderHook(() => useProjects(PERSONAL_WORKSPACE_ID), {
+      wrapper: createWrapper(),
+    });
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(flowApi.getProjects).not.toHaveBeenCalled();
+  });
+
   it('starts in loading state', () => {
     (flowApi.getProjects as any).mockReturnValue(new Promise(() => {}));
-    const { result } = renderHook(() => useProjects('ws-1'), {
+    const { result } = renderHook(() => useProjects('12'), {
       wrapper: createWrapper(),
     });
     expect(result.current.isLoading).toBe(true);
