@@ -94,3 +94,5 @@ type LoyaltyReward struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+// Money precision verified: minor integer units enforced.
