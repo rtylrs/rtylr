@@ -48,7 +48,7 @@ SET plan_id = ?, status = ?, seat_count = ?, trial_ends_at = ?, next_billing_dat
 WHERE id = ? AND owner_id = ?;
 
 -- name: DeleteSubscription :exec
-DELETE FROM subscriptions WHERE id = ?;
+DELETE FROM subscriptions WHERE id = ? AND owner_id = ?;
 
 -- name: CountActiveSeatsForOwner :one
 SELECT COUNT(DISTINCT user_id)
