@@ -31,7 +31,7 @@ const Cycles: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <HelmetContainer title="Cycles · rtylr" />
+      <HelmetContainer title={t('flow.cycles.pageTitle')} />
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}
@@ -196,8 +196,12 @@ const Cycles: React.FC = () => {
           </motion.section>
         )}
 
-        {upcoming.length > 0 && <CycleSection title="Upcoming" cycles={upcoming} />}
-        {completed.length > 0 && <CycleSection title="Completed" cycles={completed} />}
+        {upcoming.length > 0 && (
+          <CycleSection title={t('flow.cycles.sectionUpcoming')} cycles={upcoming} />
+        )}
+        {completed.length > 0 && (
+          <CycleSection title={t('flow.cycles.sectionCompleted')} cycles={completed} />
+        )}
       </div>
     </div>
   );
