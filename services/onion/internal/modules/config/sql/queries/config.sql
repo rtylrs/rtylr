@@ -92,4 +92,4 @@ INSERT INTO config (
 );
 
 -- name: GetBusinessSlugByID :one
-SELECT slug FROM businesses WHERE id = ? LIMIT 1;
+SELECT slug FROM businesses WHERE id = ? ORDER BY id ASC LIMIT 1;
