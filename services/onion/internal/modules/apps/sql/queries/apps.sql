@@ -2,7 +2,8 @@
 -- name: ListEnabledAddonIDs :many
 SELECT addon_id
 FROM business_addons
-WHERE business_id = ? AND is_enabled = 1;
+WHERE business_id = ? AND is_enabled = 1
+LIMIT 100;
 
 -- cross-schema read from user_app_permissions — app permissions owned by hub module
 -- name: GetUserAllowedAppsJSON :one
