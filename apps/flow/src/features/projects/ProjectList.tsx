@@ -11,6 +11,7 @@ import {
   MoreHorizontal,
   ChevronDown,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useFlowStore, Task } from '../../shared/stores/flowStore';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
@@ -219,6 +220,7 @@ const StatusGroup: React.FC<{
 };
 
 const ProjectList: React.FC = () => {
+  const { t } = useTranslation();
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = 'p-web' } = useParams({ strict: false });
 
   useProjectRealtime(projectId);
@@ -270,7 +272,7 @@ const ProjectList: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="List · rtylr" />
+      <HelmetContainer title={t('flow.projectList.pageTitle')} />
       {/* Header */}
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
