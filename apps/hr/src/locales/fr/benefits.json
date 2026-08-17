@@ -7,5 +7,7 @@
   "noEnrollments": "Aucune inscription pour le moment.",
   "monthly": "Mensuel",
   "enrolled": "Inscrit",
-  "enroll": "S'inscrire"
+  "enroll": "S'inscrire",
+  "unknownPlan": "Régime inconnu",
+  "statusSince": "{{status}} depuis le {{date}}"
 }
