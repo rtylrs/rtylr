@@ -1,0 +1,141 @@
+// @vitest-environment happy-dom
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook, waitFor, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+
+vi.mock('../../shared/services/flowApi', () => ({
+  flowApi: {
+    getCycles: vi.fn(),
+    createCycle: vi.fn(),
+    updateCycle: vi.fn(),
+  },
+}));
+
+vi.mock('sonner', () => ({
+  toast: { error: vi.fn(), success: vi.fn() },
+}));
+
+vi.mock('../../shared/stores/flowStore', () => ({
+  useFlowStore: vi.fn(() => ({ activeWorkspaceId: 'ws-store' })),
+}));
+
+vi.mock('@voxire/api', () => ({
+  unwrap: vi.fn((val) => val),
+}));
+
+import { useCycles, useCreateCycle, useUpdateCycle } from './useCycles';
+import { flowApi } from '../../shared/services/flowApi';
+import { useFlowStore } from '../../shared/stores/flowStore';
+import { toast } from 'sonner';
+
+const createWrapper = () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return {
+    wrapper: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client }, children),
+    client,
+  };
+};
+
+describe('useCycles (remote mode)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
+  });
+
+  it('falls back to the active workspace from the store when no workspaceId is given', async () => {
+    (flowApi.getCycles as any).mockResolvedValue([{ id: 'c-1' }]);
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useCycles(), { wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(flowApi.getCycles).toHaveBeenCalledWith('ws-store');
+  });
+
+  it('uses an explicit workspaceId over the store value', async () => {
+    (flowApi.getCycles as any).mockResolvedValue([{ id: 'c-1' }]);
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useCycles('ws-explicit'), { wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(flowApi.getCycles).toHaveBeenCalledWith('ws-explicit');
+  });
+
+  it('unwraps the enveloped { cycles: [...] } shape', async () => {
+    const cycles = [{ id: 'c-2', name: 'Sprint 1' }];
+    (flowApi.getCycles as any).mockResolvedValue({ cycles });
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useCycles('ws-1'), { wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(cycles);
+  });
+});
+
+describe('useCreateCycle', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
+  });
+
+  it('defaults workspaceId to the active workspace when the caller omits it', async () => {
+    (flowApi.createCycle as any).mockResolvedValue({ id: 'c-new' });
+    const { wrapper, client } = createWrapper();
+    const spy = vi.spyOn(client, 'invalidateQueries');
+    const { result } = renderHook(() => useCreateCycle(), { wrapper });
+    await act(() => result.current.mutateAsync({ name: 'Sprint 1' }));
+    expect(flowApi.createCycle).toHaveBeenCalledWith({ workspaceId: 'ws-store', name: 'Sprint 1' });
+    expect(spy).toHaveBeenCalledWith({ queryKey: ['cycles'] });
+  });
+
+  it('lets an explicit workspaceId on the payload override the active workspace default', async () => {
+    (flowApi.createCycle as any).mockResolvedValue({ id: 'c-new' });
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useCreateCycle(), { wrapper });
+    await act(() => result.current.mutateAsync({ workspaceId: 'ws-explicit', name: 'Sprint 1' }));
+    expect(flowApi.createCycle).toHaveBeenCalledWith({
+      workspaceId: 'ws-explicit',
+      name: 'Sprint 1',
+    });
+  });
+
+  it('shows an error toast and does not invalidate when the create call fails', async () => {
+    (flowApi.createCycle as any).mockRejectedValue(new Error('boom'));
+    const { wrapper, client } = createWrapper();
+    const spy = vi.spyOn(client, 'invalidateQueries');
+    const { result } = renderHook(() => useCreateCycle(), { wrapper });
+    await act(async () => {
+      await result.current.mutateAsync({ name: 'Sprint 1' }).catch(() => {});
+    });
+    expect(toast.error).toHaveBeenCalledWith('Failed to create cycle');
+    expect(spy).not.toHaveBeenCalled();
+  });
+});
+
+describe('useUpdateCycle', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('calls updateCycle with id and data and invalidates cycles on success', async () => {
+    (flowApi.updateCycle as any).mockResolvedValue({});
+    const { wrapper, client } = createWrapper();
+    const spy = vi.spyOn(client, 'invalidateQueries');
+    const { result } = renderHook(() => useUpdateCycle(), { wrapper });
+    await act(() => result.current.mutateAsync({ id: 'c-1', data: { name: 'Renamed' } }));
+    expect(flowApi.updateCycle).toHaveBeenCalledWith('c-1', { name: 'Renamed' });
+    expect(spy).toHaveBeenCalledWith({ queryKey: ['cycles'] });
+  });
+
+  it('shows an error toast and does not invalidate when the update call fails', async () => {
+    (flowApi.updateCycle as any).mockRejectedValue(new Error('boom'));
+    const { wrapper, client } = createWrapper();
+    const spy = vi.spyOn(client, 'invalidateQueries');
+    const { result } = renderHook(() => useUpdateCycle(), { wrapper });
+    await act(async () => {
+      await result.current.mutateAsync({ id: 'c-1', data: { name: 'Renamed' } }).catch(() => {});
+    });
+    expect(toast.error).toHaveBeenCalledWith('Failed to update cycle');
+    expect(spy).not.toHaveBeenCalled();
+  });
+});
