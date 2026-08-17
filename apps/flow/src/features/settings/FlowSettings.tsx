@@ -649,8 +649,8 @@ const LabelsSection: React.FC = () => {
                 boxShadow: !LABEL_COLORS.includes(newColor) ? '0 0 0 2px var(--flow-bg)' : 'none',
                 border: '1px solid var(--flow-border)',
               }}
-              title="Choose custom color"
-              aria-label="Choose custom color"
+              title={t('flow.settings.chooseCustomColorLabel')}
+              aria-label={t('flow.settings.chooseCustomColorLabel')}
             >
               <input
                 ref={customColorInputRef}
@@ -727,7 +727,7 @@ const LabelsSection: React.FC = () => {
                   onClick={() => setPendingDeleteLabel({ id: label.id, name: label.name })}
                   className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-dim)' }}
-                  title="Delete label"
+                  title={t('flow.settings.deleteLabelLabel')}
                 >
                   <Trash2 size={13} />
                 </button>
@@ -741,7 +741,7 @@ const LabelsSection: React.FC = () => {
         onOpenChange={(o) => {
           if (!o) setPendingDeleteLabel(null);
         }}
-        title="Delete label"
+        title={t('flow.settings.deleteLabelLabel')}
         description={
           <>
             Delete <strong>{pendingDeleteLabel?.name}</strong>? It is removed from every task it is
@@ -1042,7 +1042,7 @@ const FlowSettings: React.FC = () => {
 
   return (
     <div className="flex h-full min-h-0 flex-col md:flex-row">
-      <HelmetContainer title="Settings · rtylr" />
+      <HelmetContainer title={t('flow.settings.pageTitle')} />
       {/* Settings sidebar */}
       <div className="w-full shrink-0 overflow-x-auto overflow-y-hidden border-b border-[var(--flow-border)] md:w-[236px] md:border-b-0 md:border-r md:border-[var(--flow-border)] md:overflow-y-auto">
         <div className="flex flex-row gap-1 p-3 md:flex-col md:gap-0 md:p-4">
