@@ -94,8 +94,8 @@ func TestCreateEquipmentRequestHandler_Validate_ValidRequest(t *testing.T) {
 func TestCreateAssetHandler_Validate_MissingName(t *testing.T) {
 	h := &CreateAssetHandler{}
 	se := h.Validate(context.Background(), &CreateAssetRequest{
-		Category:      "Electronics",
-		PurchasePrice: 0,
+		Category:                "Electronics",
+		PurchasePriceMinorUnits: 0,
 	})
 	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
 		t.Errorf("expected 400 for missing name, got %v", se)
@@ -115,9 +115,9 @@ func TestCreateAssetHandler_Validate_MissingCategory(t *testing.T) {
 func TestCreateAssetHandler_Validate_NegativePurchasePrice(t *testing.T) {
 	h := &CreateAssetHandler{}
 	se := h.Validate(context.Background(), &CreateAssetRequest{
-		Name:          "MacBook Pro",
-		Category:      "Electronics",
-		PurchasePrice: -100,
+		Name:                    "MacBook Pro",
+		Category:                "Electronics",
+		PurchasePriceMinorUnits: -10000,
 	})
 	if se == nil || oneKitStatus(se) != http.StatusBadRequest {
 		t.Errorf("expected 400 for negative purchase_price, got %v", se)
@@ -127,9 +127,9 @@ func TestCreateAssetHandler_Validate_NegativePurchasePrice(t *testing.T) {
 func TestCreateAssetHandler_Validate_ValidRequest(t *testing.T) {
 	h := &CreateAssetHandler{}
 	se := h.Validate(context.Background(), &CreateAssetRequest{
-		Name:          "MacBook Pro",
-		Category:      "Electronics",
-		PurchasePrice: 2500,
+		Name:                    "MacBook Pro",
+		Category:                "Electronics",
+		PurchasePriceMinorUnits: 250000,
 	})
 	if se != nil {
 		t.Errorf("expected nil for valid request, got %v", se)

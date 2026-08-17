@@ -20,20 +20,20 @@ type EquipmentRequestRecord struct {
 }
 
 type AssetRecord struct {
-	ID            int64     `json:"id"`
-	OwnerID       int64     `json:"owner_id"`
-	BusinessID    int64     `json:"business_id"`
-	Name          string    `json:"name"`
-	Category      string    `json:"category"`
-	SerialNumber  string    `json:"serial_number"`
-	LocationID    int64     `json:"location_id"`
-	AssignedTo    int64     `json:"assigned_to"`
-	Status        string    `json:"status"`
-	PurchaseDate  string    `json:"purchase_date"`
-	PurchasePrice float64   `json:"purchase_price"`
-	Notes         string    `json:"notes"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID                      int64     `json:"id"`
+	OwnerID                 int64     `json:"owner_id"`
+	BusinessID              int64     `json:"business_id"`
+	Name                    string    `json:"name"`
+	Category                string    `json:"category"`
+	SerialNumber            string    `json:"serial_number"`
+	LocationID              int64     `json:"location_id"`
+	AssignedTo              int64     `json:"assigned_to"`
+	Status                  string    `json:"status"`
+	PurchaseDate            string    `json:"purchase_date"`
+	PurchasePriceMinorUnits int64     `json:"purchase_price_minor_units"`
+	Notes                   string    `json:"notes"`
+	CreatedAt               time.Time `json:"created_at"`
+	UpdatedAt               time.Time `json:"updated_at"`
 }
 
 type ListEquipmentRequestsParams struct {
@@ -52,13 +52,13 @@ type CreateEquipmentRequestParams struct {
 }
 
 type CreateAssetParams struct {
-	Name          string  `json:"name"`
-	Category      string  `json:"category"`
-	SerialNumber  string  `json:"serial_number"`
-	LocationID    int64   `json:"location_id"`
-	PurchaseDate  string  `json:"purchase_date"`
-	PurchasePrice float64 `json:"purchase_price"`
-	Notes         string  `json:"notes"`
+	Name                    string `json:"name"`
+	Category                string `json:"category"`
+	SerialNumber            string `json:"serial_number"`
+	LocationID              int64  `json:"location_id"`
+	PurchaseDate            string `json:"purchase_date"`
+	PurchasePriceMinorUnits int64  `json:"purchase_price_minor_units"`
+	Notes                   string `json:"notes"`
 }
 
 type ListAssetsParams struct {

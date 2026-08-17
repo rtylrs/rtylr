@@ -145,7 +145,7 @@ func (r *Repository) CreateAsset(ctx context.Context, businessID int64, params d
 		LocationID:    nullInt64(params.LocationID),
 		Status:        "available",
 		PurchaseDate:  nullTimeFromDateStr(params.PurchaseDate),
-		PurchasePrice: nullStringFromFloat(params.PurchasePrice),
+		PurchasePrice: nullStringFromMinorUnits(params.PurchasePriceMinorUnits),
 		Notes:         nullString(params.Notes),
 	})
 	if err != nil {
@@ -257,20 +257,20 @@ func assetFromRow(row sqlc.HrAsset) domain.AssetRecord {
 	}
 
 	return domain.AssetRecord{
-		ID:            row.ID,
-		OwnerID:       row.OwnerID,
-		BusinessID:    row.BusinessID,
-		Name:          row.Name,
-		Category:      row.Category,
-		SerialNumber:  row.SerialNumber.String,
-		LocationID:    row.LocationID.Int64,
-		AssignedTo:    row.AssignedTo.Int64,
-		Status:        row.Status,
-		PurchaseDate:  purchaseDate,
-		PurchasePrice: parseFloat(row.PurchasePrice.String),
-		Notes:         row.Notes.String,
-		CreatedAt:     row.CreatedAt,
-		UpdatedAt:     row.UpdatedAt,
+		ID:                      row.ID,
+		OwnerID:                 row.OwnerID,
+		BusinessID:              row.BusinessID,
+		Name:                    row.Name,
+		Category:                row.Category,
+		SerialNumber:            row.SerialNumber.String,
+		LocationID:              row.LocationID.Int64,
+		AssignedTo:              row.AssignedTo.Int64,
+		Status:                  row.Status,
+		PurchaseDate:            purchaseDate,
+		PurchasePriceMinorUnits: decimalStringToMinorUnits(row.PurchasePrice.String),
+		Notes:                   row.Notes.String,
+		CreatedAt:               row.CreatedAt,
+		UpdatedAt:               row.UpdatedAt,
 	}
 }
 
@@ -293,14 +293,26 @@ func nullTimeFromDateStr(s string) sql.NullTime {
 	return sql.NullTime{Time: t, Valid: true}
 }
 
-func nullStringFromFloat(f float64) sql.NullString {
-	if f == 0 {
+// nullStringFromMinorUnits converts an integer minor-units (cents) amount
+// into the DECIMAL(12,2) string representation stored in hr_assets.purchase_price.
+// A zero amount is stored as NULL, matching the prior float-based behavior.
+func nullStringFromMinorUnits(minorUnits int64) sql.NullString {
+	if minorUnits == 0 {
 		return sql.NullString{Valid: false}
 	}
-	return sql.NullString{String: fmt.Sprintf("%.2f", f), Valid: true}
+	major := float64(minorUnits) / 100
+	return sql.NullString{String: fmt.Sprintf("%.2f", major), Valid: true}
 }
 
-func parseFloat(s string) float64 {
+// decimalStringToMinorUnits converts a DECIMAL(12,2) string value read out of
+// hr_assets.purchase_price into integer minor units (cents), the same
+// conversion pattern used by the insights module (decimalToMinorUnits) to
+// avoid representing money as a floating-point value. Empty or unparseable
+// values return 0.
+func decimalStringToMinorUnits(s string) int64 {
+	if s == "" {
+		return 0
+	}
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		logger.Global().Warn("failed to parse decimal value from database",
@@ -309,5 +321,5 @@ func parseFloat(s string) float64 {
 		)
 		return 0
 	}
-	return f
+	return int64(f*100 + 0.5)
 }
