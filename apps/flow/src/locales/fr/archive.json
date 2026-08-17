@@ -1,5 +1,6 @@
 {
   "title": "Archives",
+  "pageTitle": "Archives · rtylr",
   "count_one": "{{count}} tâche archivée",
   "count_other": "{{count}} tâches archivées",
   "emptyTitle": "Rien n'est archivé",

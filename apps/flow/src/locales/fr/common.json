@@ -52,6 +52,7 @@
     "clearDate": "Effacer la date"
   },
   "insights": {
+    "pageTitle": "Analyses · rtylr",
     "burndown": "Burndown (itération active)",
     "throughput": "Débit (tâches/semaine)",
     "velocity": "Vélocité (dernières itérations)",

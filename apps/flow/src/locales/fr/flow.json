@@ -336,5 +336,27 @@
       "priority": "Priorité",
       "due": "Échéance"
     }
+  },
+  "cycles": {
+    "pageTitle": "Itérations · rtylr",
+    "sectionUpcoming": "À venir",
+    "sectionCompleted": "Terminées"
+  },
+  "roadmap": {
+    "pageTitle": "Feuille de route · rtylr"
+  },
+  "triage": {
+    "pageTitle": "Tri · rtylr",
+    "emptyTitle": "Boîte de réception vide"
+  },
+  "team": {
+    "pageTitle": "Équipe · rtylr"
+  },
+  "timeline": {
+    "pageTitle": "Chronologie · rtylr"
+  },
+  "myIssues": {
+    "pageTitle": "Mes tâches · rtylr",
+    "emptyTitle": "Aucune tâche assignée"
   }
 }

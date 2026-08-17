@@ -1,5 +1,6 @@
 {
   "title": "Boîte de réception",
+  "pageTitle": "Boîte de réception · rtylr",
   "unreadCount_one": "{{count}} notification non lue",
   "unreadCount_other": "{{count}} notifications non lues",
   "markAllRead": "Tout marquer comme lu",
