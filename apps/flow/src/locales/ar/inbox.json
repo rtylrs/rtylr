@@ -1,5 +1,10 @@
 {
   "title": "صندوق الوارد",
+  "unreadCount_zero": "لا إشعارات غير مقروءة",
+  "unreadCount_one": "إشعار واحد غير مقروء",
+  "unreadCount_two": "إشعاران غير مقروءان",
+  "unreadCount_few": "{{count}} إشعارات غير مقروءة",
+  "unreadCount_many": "{{count}} إشعار غير مقروء",
   "unreadCount_other": "{{count}} إشعار غير مقروء",
   "markAllRead": "وضع علامة قراءة على الكل",
   "filters": {
