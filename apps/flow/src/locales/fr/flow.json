@@ -362,5 +362,57 @@
       "priority": "Priorité",
       "due": "Échéance"
     }
+  },
+  "views": {
+    "heading": "Vues enregistrées",
+    "addTooltip": "Nouvelle vue",
+    "defaultName": "Nouvelle vue",
+    "renameTooltip": "Renommer",
+    "deleteTooltip": "Supprimer",
+    "emptyList": "Aucune vue enregistrée pour le moment. Cliquez sur + pour en créer une.",
+    "noViewSelected": "Aucune vue sélectionnée",
+    "taskCount_one": "{{count}} tâche",
+    "taskCount_other": "{{count}} tâches",
+    "emptyTasksForView": "Aucune tâche ne correspond aux filtres de cette vue.",
+    "deleteDialog": {
+      "title": "Supprimer la vue enregistrée",
+      "descriptionPrefix": "Supprimer la vue",
+      "descriptionSuffix": "? Les filtres seront perdus ; les tâches elles-mêmes ne seront pas affectées.",
+      "confirmLabel": "Supprimer la vue"
+    }
+  },
+  "calendar": {
+    "heading": "Calendrier",
+    "subtitle": "Tâches organisées par date d'échéance · Cliquez sur un jour pour ajouter une tâche",
+    "today": "Aujourd'hui",
+    "addHint": "+ ajouter",
+    "moreCount": "+{{count}} de plus",
+    "newTaskFor": "Nouvelle tâche pour",
+    "titlePlaceholder": "Titre de la tâche…",
+    "cancel": "Annuler",
+    "create": "Créer",
+    "creating": "Création…"
+  },
+  "milestones": {
+    "heading": "Jalons",
+    "trackedCount_one": "{{count}} suivi",
+    "trackedCount_other": "{{count}} suivis",
+    "newMilestone": "Nouveau jalon",
+    "emptyTitle": "Aucun jalon pour le moment",
+    "emptyDescription": "Suivez les principaux objectifs de livraison de vos projets.",
+    "createFirst": "Créer le premier jalon",
+    "namePlaceholder": "Nom du jalon",
+    "creating": "Création...",
+    "create": "Créer",
+    "cancel": "Annuler",
+    "progress": "Progression",
+    "taskCount": "{{done}} sur {{total}} tâches",
+    "target": "Cible :",
+    "status": {
+      "planning": "Planification",
+      "active": "Actif",
+      "atRisk": "À risque",
+      "completed": "Terminé"
+    }
   }
 }

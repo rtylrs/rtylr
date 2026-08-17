@@ -370,5 +370,65 @@
       "priority": "الأولوية",
       "due": "نطاق الاستحقاق"
     }
+  },
+  "views": {
+    "heading": "العروض المحفوظة",
+    "addTooltip": "عرض جديد",
+    "defaultName": "عرض جديد",
+    "renameTooltip": "إعادة تسمية",
+    "deleteTooltip": "حذف",
+    "emptyList": "لا توجد عروض محفوظة بعد. انقر على + لإنشاء واحد.",
+    "noViewSelected": "لم يتم اختيار عرض",
+    "taskCount_zero": "لا توجد مهام",
+    "taskCount_one": "مهمة واحدة",
+    "taskCount_two": "مهمتان",
+    "taskCount_few": "{{count}} مهام",
+    "taskCount_many": "{{count}} مهمة",
+    "taskCount_other": "{{count}} مهمة",
+    "emptyTasksForView": "لا توجد مهام مطابقة لفلاتر هذا العرض.",
+    "deleteDialog": {
+      "title": "حذف العرض المحفوظ",
+      "descriptionPrefix": "هل تريد حذف عرض",
+      "descriptionSuffix": "؟ سيتم فقدان الفلاتر؛ المهام نفسها لن تتأثر.",
+      "confirmLabel": "حذف العرض"
+    }
+  },
+  "calendar": {
+    "heading": "التقويم",
+    "subtitle": "المهام مرتبة حسب تاريخ الاستحقاق · انقر على يوم لإضافة مهمة",
+    "today": "اليوم",
+    "addHint": "+ إضافة",
+    "moreCount": "+{{count}} أخرى",
+    "newTaskFor": "مهمة جديدة لـ",
+    "titlePlaceholder": "عنوان المهمة…",
+    "cancel": "إلغاء",
+    "create": "إنشاء",
+    "creating": "جارٍ الإنشاء…"
+  },
+  "milestones": {
+    "heading": "المعالم",
+    "trackedCount_zero": "لا معالم متتبعة",
+    "trackedCount_one": "معلم واحد متتبع",
+    "trackedCount_two": "معلمان متتبعان",
+    "trackedCount_few": "{{count}} معالم متتبعة",
+    "trackedCount_many": "{{count}} معلمًا متتبعًا",
+    "trackedCount_other": "{{count}} معلم متتبع",
+    "newMilestone": "معلم جديد",
+    "emptyTitle": "لا توجد معالم بعد",
+    "emptyDescription": "تتبع أهداف التسليم الرئيسية عبر مشاريعك.",
+    "createFirst": "إنشاء أول معلم",
+    "namePlaceholder": "اسم المعلم",
+    "creating": "جارٍ الإنشاء...",
+    "create": "إنشاء",
+    "cancel": "إلغاء",
+    "progress": "التقدم",
+    "taskCount": "{{done}} من {{total}} مهام",
+    "target": "الهدف:",
+    "status": {
+      "planning": "التخطيط",
+      "active": "نشط",
+      "atRisk": "في خطر",
+      "completed": "مكتمل"
+    }
   }
 }

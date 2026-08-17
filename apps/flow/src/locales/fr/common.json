@@ -86,5 +86,40 @@
     "shortcuts": "Raccourcis clavier",
     "about": "À propos",
     "quietHoursNote": "Les heures calmes n'affectent pour l'instant que les bannières intégrées à l'application ; l'heure du digest est enregistrée en attendant l'arrivée des rappels programmés."
+  },
+  "dashboard": {
+    "fallbackName": "là",
+    "greeting": {
+      "morning": "Bonjour",
+      "afternoon": "Bon après-midi",
+      "evening": "Bonsoir"
+    },
+    "greetingSubtitlePrefix": "Voici ce qui se passe dans",
+    "greetingSubtitleSuffix": "aujourd'hui.",
+    "stats": {
+      "openTasks": "Tâches ouvertes",
+      "completedThisWeek": "Terminées cette semaine",
+      "overdue": "En retard"
+    },
+    "weekLoad": {
+      "title": "Charge de la semaine (vos tâches dues cette semaine)",
+      "scheduled": "h planifiées",
+      "capacity": "sur ~{{hours}}h de capacité",
+      "description": "Utilise les puces d'effort ou les heures estimées sur les tâches. Le backlog planifié reste visible dans les projets ; ceci est seulement ce que vous avez déjà programmé pour la semaine."
+    },
+    "reviewStreak": {
+      "title": "Série de revues hebdomadaires",
+      "weeks": "semaines",
+      "button": "J'ai fait ma revue cette semaine",
+      "description": "Un rituel honnête, pas des ouvertures d'application. Appuyez une fois après avoir terminé votre clôture hebdomadaire."
+    },
+    "myTasks": {
+      "title": "Mes tâches",
+      "activeCount": "{{count}} actives"
+    },
+    "projects": {
+      "viewAll": "Voir tout",
+      "percentDone": "{{percent}}% terminé"
+    }
   }
 }

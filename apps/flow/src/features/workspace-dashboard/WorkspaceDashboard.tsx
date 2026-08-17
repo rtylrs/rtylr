@@ -32,13 +32,13 @@ const PRIORITY_COLORS: Record<string, string> = {
   no_priority: '#4b5563',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  backlog: 'Backlog',
-  todo: 'Todo',
-  in_progress: 'In Progress',
-  in_review: 'In Review',
-  done: 'Done',
-  cancelled: 'Cancelled',
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  backlog: 'backlog',
+  todo: 'todo',
+  in_progress: 'inProgress',
+  in_review: 'inReview',
+  done: 'done',
+  cancelled: 'cancelled',
 };
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
@@ -97,9 +97,14 @@ const WorkspaceDashboard: React.FC = () => {
   const workspaceProjects = projects.filter((p) => p.workspaceId === workspaceId);
   const workspaceTasks = tasks.filter((t) => t.workspaceId === workspaceId);
 
-  const firstName = user?.name?.split(' ')[0] || 'there';
+  const firstName = user?.name?.split(' ')[0] || t('common.dashboard.fallbackName');
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const greeting =
+    hour < 12
+      ? t('common.dashboard.greeting.morning')
+      : hour < 17
+        ? t('common.dashboard.greeting.afternoon')
+        : t('common.dashboard.greeting.evening');
 
   const myTasks: ApiTask[] =
     apiStats?.myTasks ??
@@ -161,7 +166,7 @@ const WorkspaceDashboard: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Dashboard · rtylr" />
+      <HelmetContainer title={`${t('nav.dashboard')} · Flow`} />
       <div className="max-w-5xl mx-auto p-4 pb-6 sm:p-6">
         {/* Header */}
         <motion.div
@@ -174,9 +179,9 @@ const WorkspaceDashboard: React.FC = () => {
             {greeting}, {firstName} 👋
           </h1>
           <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
-            Here's what's happening in{' '}
+            {t('common.dashboard.greetingSubtitlePrefix')}{' '}
             <span style={{ color: workspace?.color || 'var(--accent)' }}>{workspace?.name}</span>{' '}
-            today.
+            {t('common.dashboard.greetingSubtitleSuffix')}
           </p>
         </motion.div>
 
@@ -184,28 +189,28 @@ const WorkspaceDashboard: React.FC = () => {
         <div className="grid grid-cols-2 gap-3 mb-8 sm:gap-4 xl:grid-cols-4">
           {statCard(
             <TrendingUp size={15} style={{ color: '#3b82f6' }} />,
-            'Open Tasks',
+            t('common.dashboard.stats.openTasks'),
             openTasks,
             '#3b82f6',
             0
           )}
           {statCard(
             <Clock size={15} style={{ color: 'var(--accent)' }} />,
-            'In Progress',
+            t('flow.taskDetail.inProgress'),
             inProgress,
             'var(--accent)',
             1
           )}
           {statCard(
             <CheckCircle2 size={15} style={{ color: '#22c55e' }} />,
-            'Completed This Week',
+            t('common.dashboard.stats.completedThisWeek'),
             completedThisWeek,
             '#22c55e',
             2
           )}
           {statCard(
             <AlertTriangle size={15} style={{ color: '#ef4444' }} />,
-            'Overdue',
+            t('common.dashboard.stats.overdue'),
             overdue,
             '#ef4444',
             3
@@ -225,7 +230,7 @@ const WorkspaceDashboard: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text-muted)' }}>
-                Week load (your tasks due this week)
+                {t('common.dashboard.weekLoad.title')}
               </span>
               <Gauge size={15} style={{ color: 'var(--accent)' }} />
             </div>
@@ -234,10 +239,10 @@ const WorkspaceDashboard: React.FC = () => {
                 {Math.round(weekLoad.minutes / 60)}
               </span>
               <span className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-                h scheduled
+                {t('common.dashboard.weekLoad.scheduled')}
               </span>
               <span className="text-[12px] ml-auto" style={{ color: 'var(--flow-text-muted)' }}>
-                of ~{myCapacityHours}h capacity
+                {t('common.dashboard.weekLoad.capacity', { hours: myCapacityHours })}
               </span>
             </div>
             <div className="w-full rounded-full h-2" style={{ background: 'var(--flow-hover)' }}>
@@ -250,8 +255,7 @@ const WorkspaceDashboard: React.FC = () => {
               />
             </div>
             <p className="text-[11px] leading-snug" style={{ color: 'var(--flow-text-dim)' }}>
-              Uses effort chips or estimate hours on tasks. Planned backlog stays visible in
-              projects; this is only what you already scheduled for the week.
+              {t('common.dashboard.weekLoad.description')}
             </p>
           </motion.div>
 
@@ -267,7 +271,7 @@ const WorkspaceDashboard: React.FC = () => {
           >
             <div className="flex items-center justify-between">
               <span className="text-[12px] font-medium" style={{ color: 'var(--flow-text-muted)' }}>
-                Weekly review streak
+                {t('common.dashboard.reviewStreak.title')}
               </span>
               <Flame size={15} style={{ color: '#f97316' }} />
             </div>
@@ -277,7 +281,7 @@ const WorkspaceDashboard: React.FC = () => {
                 className="text-[14px] font-medium ml-1"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
-                weeks
+                {t('common.dashboard.reviewStreak.weeks')}
               </span>
             </p>
             <button
@@ -286,10 +290,10 @@ const WorkspaceDashboard: React.FC = () => {
               className="text-[12px] font-semibold py-2 px-3 rounded-lg w-fit transition-opacity hover:opacity-90"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
-              I did my review this week
+              {t('common.dashboard.reviewStreak.button')}
             </button>
             <p className="text-[11px] leading-snug" style={{ color: 'var(--flow-text-dim)' }}>
-              Honest ritual, not app opens. Tap once after you finish your weekly close-out.
+              {t('common.dashboard.reviewStreak.description')}
             </p>
           </motion.div>
         </div>
@@ -314,7 +318,7 @@ const WorkspaceDashboard: React.FC = () => {
                 className="text-[13px] sm:text-[14px] font-semibold"
                 style={{ color: 'var(--flow-text)' }}
               >
-                My Tasks
+                {t('common.dashboard.myTasks.title')}
               </h2>
               <span
                 className="text-[12px] px-2 py-0.5 rounded-full"
@@ -323,7 +327,7 @@ const WorkspaceDashboard: React.FC = () => {
                   color: 'var(--accent)',
                 }}
               >
-                {myTasks.length} active
+                {t('common.dashboard.myTasks.activeCount', { count: myTasks.length })}
               </span>
             </div>
 
@@ -369,7 +373,7 @@ const WorkspaceDashboard: React.FC = () => {
                         color: STATUS_COLORS[task.status].text,
                       }}
                     >
-                      {STATUS_LABELS[task.status]}
+                      {t(`flow.taskDetail.${STATUS_LABEL_KEYS[task.status]}`)}
                     </span>
                   </div>
                 </motion.div>
@@ -393,14 +397,14 @@ const WorkspaceDashboard: React.FC = () => {
               style={{ borderBottom: '1px solid var(--flow-border)' }}
             >
               <h2 className="text-[14px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-                Projects
+                {t('nav.projects')}
               </h2>
               <Link
                 to={`/w/${workspaceId}` as string}
                 className="flex items-center gap-1 text-[11px] transition-colors hover:opacity-70"
                 style={{ color: 'var(--accent)' }}
               >
-                View all
+                {t('common.dashboard.projects.viewAll')}
                 <ArrowRight size={11} />
               </Link>
             </div>
@@ -467,7 +471,7 @@ const WorkspaceDashboard: React.FC = () => {
                           ))}
                         </div>
                         <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-                          {progress}% done
+                          {t('common.dashboard.projects.percentDone', { percent: progress })}
                         </span>
                       </div>
                     </Link>

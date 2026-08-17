@@ -22,15 +22,15 @@ describe('Milestones create form', () => {
   it('submits the exact date picked by the user, not the current date', () => {
     render(<Milestones />);
 
-    fireEvent.click(screen.getByText(/Create first milestone/i));
-    fireEvent.change(screen.getByPlaceholderText('Milestone name'), {
+    fireEvent.click(screen.getByText('flow.milestones.createFirst'));
+    fireEvent.change(screen.getByPlaceholderText('flow.milestones.namePlaceholder'), {
       target: { value: 'Launch' },
     });
 
     const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement;
     fireEvent.change(dateInput, { target: { value: '2026-08-31' } });
 
-    fireEvent.click(screen.getByText('Create'));
+    fireEvent.click(screen.getByText('flow.milestones.create'));
 
     expect(mutateSpy).toHaveBeenCalledTimes(1);
     expect(mutateSpy.mock.calls[0][0].targetDate).toBe('2026-08-31');
@@ -39,14 +39,14 @@ describe('Milestones create form', () => {
   it('never submits a milestone without an explicit target date', () => {
     render(<Milestones />);
 
-    fireEvent.click(screen.getByText(/Create first milestone/i));
-    fireEvent.change(screen.getByPlaceholderText('Milestone name'), {
+    fireEvent.click(screen.getByText('flow.milestones.createFirst'));
+    fireEvent.change(screen.getByPlaceholderText('flow.milestones.namePlaceholder'), {
       target: { value: 'Launch' },
     });
 
     // No date picked - the Create button must be disabled so a click cannot
     // silently submit today's date in its place.
-    const createButton = screen.getByText('Create');
+    const createButton = screen.getByText('flow.milestones.create');
     expect(createButton).toBeDisabled();
 
     fireEvent.click(createButton);

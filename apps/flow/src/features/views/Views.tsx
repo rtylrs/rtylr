@@ -77,7 +77,7 @@ const Views: React.FC = () => {
 
   return (
     <div className="flex h-full">
-      <HelmetContainer title="Views · rtylr" />
+      <HelmetContainer title={`${t('flow.views.heading')} · Flow`} />
       <aside
         className="w-64 shrink-0 px-3 py-4"
         style={{
@@ -90,19 +90,19 @@ const Views: React.FC = () => {
             className="text-[11px] font-semibold uppercase tracking-wider"
             style={{ color: 'var(--flow-text-muted)' }}
           >
-            Saved Views
+            {t('flow.views.heading')}
           </h2>
           <button
             onClick={() =>
               createView.mutate(
-                { name: 'New view', icon: 'eye', filters: {} },
+                { name: t('flow.views.defaultName'), icon: 'eye', filters: {} },
                 { onSuccess: () => toast.success(t('toasts.view.created')) }
               )
             }
             disabled={createView.isPending}
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-dim)' }}
-            title="New view"
+            title={t('flow.views.addTooltip')}
           >
             <Plus size={11} />
           </button>
@@ -163,7 +163,7 @@ const Views: React.FC = () => {
                         onClick={(e) => startEdit(v, e)}
                         className="h-5 w-5 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                         style={{ color: 'var(--flow-text-dim)' }}
-                        title="Rename"
+                        title={t('flow.views.renameTooltip')}
                       >
                         <Pencil size={9} />
                       </button>
@@ -171,7 +171,7 @@ const Views: React.FC = () => {
                         onClick={(e) => handleDelete(v, e)}
                         className="h-5 w-5 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                         style={{ color: 'var(--flow-text-dim)' }}
-                        title="Delete"
+                        title={t('flow.views.deleteTooltip')}
                         onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
                         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
                       >
@@ -186,7 +186,7 @@ const Views: React.FC = () => {
 
           {views.length === 0 && (
             <p className="text-[11px] px-2 py-2" style={{ color: 'var(--flow-text-dim)' }}>
-              No saved views yet. Click + to create one.
+              {t('flow.views.emptyList')}
             </p>
           )}
         </div>
@@ -195,10 +195,10 @@ const Views: React.FC = () => {
       <div className="flex-1 overflow-y-auto">
         <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--flow-border)' }}>
           <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-            {displayView?.name || 'No view selected'}
+            {displayView?.name || t('flow.views.noViewSelected')}
           </h1>
           <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-            {tasks.length} task{tasks.length !== 1 ? 's' : ''}
+            {t('flow.views.taskCount', { count: tasks.length })}
           </p>
         </div>
         <motion.div
@@ -210,7 +210,7 @@ const Views: React.FC = () => {
           {tasks.length === 0 && displayView && (
             <div className="flex items-center justify-center py-20">
               <p className="text-[13px]" style={{ color: 'var(--flow-text-dim)' }}>
-                No tasks match this view's filters.
+                {t('flow.views.emptyTasksForView')}
               </p>
             </div>
           )}
@@ -224,14 +224,14 @@ const Views: React.FC = () => {
         onOpenChange={(o) => {
           if (!o) setPendingDelete(null);
         }}
-        title="Delete saved view"
+        title={t('flow.views.deleteDialog.title')}
         description={
           <>
-            Delete the <strong>{pendingDelete?.name}</strong> view? The filters are lost; tasks
-            themselves aren't affected.
+            {t('flow.views.deleteDialog.descriptionPrefix')} <strong>{pendingDelete?.name}</strong>{' '}
+            {t('flow.views.deleteDialog.descriptionSuffix')}
           </>
         }
-        confirmLabel="Delete view"
+        confirmLabel={t('flow.views.deleteDialog.confirmLabel')}
         pending={deleteView.isPending}
         onConfirm={() => pendingDelete && performDelete(pendingDelete)}
       />

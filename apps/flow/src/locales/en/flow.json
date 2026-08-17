@@ -362,5 +362,57 @@
       "priority": "Priority",
       "due": "Due window"
     }
+  },
+  "views": {
+    "heading": "Saved Views",
+    "addTooltip": "New view",
+    "defaultName": "New view",
+    "renameTooltip": "Rename",
+    "deleteTooltip": "Delete",
+    "emptyList": "No saved views yet. Click + to create one.",
+    "noViewSelected": "No view selected",
+    "taskCount_one": "{{count}} task",
+    "taskCount_other": "{{count}} tasks",
+    "emptyTasksForView": "No tasks match this view's filters.",
+    "deleteDialog": {
+      "title": "Delete saved view",
+      "descriptionPrefix": "Delete the",
+      "descriptionSuffix": "view? The filters are lost; tasks themselves aren't affected.",
+      "confirmLabel": "Delete view"
+    }
+  },
+  "calendar": {
+    "heading": "Calendar",
+    "subtitle": "Tasks organized by due date · Click a day to add a task",
+    "today": "Today",
+    "addHint": "+ add",
+    "moreCount": "+{{count}} more",
+    "newTaskFor": "New task for",
+    "titlePlaceholder": "Task title…",
+    "cancel": "Cancel",
+    "create": "Create",
+    "creating": "Creating…"
+  },
+  "milestones": {
+    "heading": "Milestones",
+    "trackedCount_one": "{{count}} tracked",
+    "trackedCount_other": "{{count}} tracked",
+    "newMilestone": "New milestone",
+    "emptyTitle": "No milestones yet",
+    "emptyDescription": "Track major delivery targets across your projects.",
+    "createFirst": "Create first milestone",
+    "namePlaceholder": "Milestone name",
+    "creating": "Creating...",
+    "create": "Create",
+    "cancel": "Cancel",
+    "progress": "Progress",
+    "taskCount": "{{done}} of {{total}} tasks",
+    "target": "Target:",
+    "status": {
+      "planning": "Planning",
+      "active": "Active",
+      "atRisk": "At risk",
+      "completed": "Completed"
+    }
   }
 }
