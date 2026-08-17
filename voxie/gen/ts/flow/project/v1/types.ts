@@ -224,8 +224,8 @@ name: string;
 description: string;
 icon: string;
 color: string;
-startDate: string;
-dueDate: string;
+startDate?: string;
+dueDate?: string;
 }
 
 export function decodeCreateProjectRequest(v: any): CreateProjectRequest {
@@ -261,8 +261,6 @@ if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
 if (!(v.icon !== undefined && v.icon !== null) || v.icon === "") violations.push("icon is required");
 if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
-if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
-if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
 return violations;
 }
 

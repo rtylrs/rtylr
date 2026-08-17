@@ -105,12 +105,6 @@ func (m *CreateProjectRequest) Validate() error {
 	if m.Color == "" {
 		violations = append(violations, "color is required")
 	}
-	if m.StartDate == "" {
-		violations = append(violations, "start_date is required")
-	}
-	if m.DueDate == "" {
-		violations = append(violations, "due_date is required")
-	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
