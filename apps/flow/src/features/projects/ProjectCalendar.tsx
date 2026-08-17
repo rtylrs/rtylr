@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
@@ -15,6 +16,7 @@ import { useCurrentProject } from './useCurrentProject';
  * for now tasks render as compact chips on the owning day.
  */
 const ProjectCalendar: React.FC = () => {
+  const { t } = useTranslation();
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
   useProjectRealtime(projectId);
@@ -85,7 +87,7 @@ const ProjectCalendar: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="Calendar · rtylr" />
+      <HelmetContainer title={t('flow.projectCalendar.pageTitle')} />
       <ProjectViewTabs
         project={project}
         workspaceId={workspaceId}
