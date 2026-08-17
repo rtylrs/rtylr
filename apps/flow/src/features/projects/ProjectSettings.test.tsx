@@ -143,7 +143,6 @@ describe('ProjectSettings integrations tab', () => {
       },
       expect.objectContaining({
         onSuccess: expect.any(Function),
-        onError: expect.any(Function),
       })
     );
   });
@@ -375,6 +374,7 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
         role: 'member',
       },
     ];
+    updateProjectMutate.mockClear();
     removeMemberMutate.mockClear();
     updateRoleMutate.mockClear();
     moveProjectMutate.mockClear();
@@ -462,5 +462,13 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
     act(() => options.onError?.(new Error('boom')));
 
     expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('does not show a call-site toast when saving a project update fails - the hook already shows one', () => {
+    renderProjectSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    const [, options] = updateProjectMutate.mock.calls[0];
+    expect(options.onError).toBeUndefined();
   });
 });

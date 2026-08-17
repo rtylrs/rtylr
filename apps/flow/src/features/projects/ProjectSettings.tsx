@@ -221,7 +221,6 @@ const ProjectSettings: React.FC = () => {
                   },
                   {
                     onSuccess: () => toast.success(t('toasts.project.updated')),
-                    onError: () => toast.error(t('toasts.project.updateFailed')),
                   }
                 );
               }}
