@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import { useFlowStore } from '../stores/flowStore';
 import { useTasks } from '../../features/tasks/useTasks';
 import { useProjects } from '../../features/projects/useProjects';
@@ -37,6 +38,7 @@ interface CommandItem {
 }
 
 export const CommandBar: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { commandBarOpen, setCommandBarOpen, setQuickCreateOpen, activeWorkspaceId } =
     useFlowStore();
@@ -290,7 +292,7 @@ export const CommandBar: React.FC = () => {
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Type a command or search…"
+                placeholder={t('flow.commandBar.searchPlaceholder')}
                 className="flex-1 bg-transparent outline-none text-[13px]"
                 style={{ color: 'var(--flow-text)' }}
               />
