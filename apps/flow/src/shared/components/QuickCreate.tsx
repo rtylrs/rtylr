@@ -194,7 +194,7 @@ export const QuickCreate: React.FC = () => {
                     submit();
                   }
                 }}
-                placeholder="Task name"
+                placeholder={t('flow.quickCreate.titlePlaceholder')}
                 rows={2}
                 className="w-full bg-transparent outline-none resize-none text-[20px] font-semibold leading-snug placeholder:opacity-40 mb-1"
                 style={{ color: 'var(--flow-text)' }}
@@ -335,7 +335,7 @@ export const QuickCreate: React.FC = () => {
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="What needs to be done?"
+                  placeholder={t('flow.quickCreate.descriptionPlaceholder')}
                   rows={6}
                   className="w-full rounded-lg px-3 py-2.5 text-[13px] leading-relaxed outline-none resize-y min-h-[120px] placeholder:opacity-45"
                   style={{
