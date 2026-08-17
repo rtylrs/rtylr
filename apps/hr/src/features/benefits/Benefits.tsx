@@ -1,41 +1,36 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { Shield } from 'lucide-react';
 import {
   useBenefits,
-  useBenefitEnrollments,
-  useEnrollBenefit,
+  useMyBenefitEnrollments,
+  useEnrollInBenefit,
 } from '../../shared/hooks/useHrExtras';
-import { useUserStore } from '@voxire/auth';
 import { Card, SectionHeader, EmptyState, Skeleton } from '../../shared/components/ui';
 import BenefitPlanCard from '../../shared/components/BenefitPlanCard';
 
-const Benefits: React.FC = () => {
-  const { t } = useTranslation('benefits');
-  const user = useUserStore((s) => s.user);
-  const currentStaffId = Number(user?.id) || 1;
-  const currentStaffName = user?.name || user?.email || 'Team member';
+const Benefits = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const { data: plans, isLoading: plansLoading } = useBenefits();
-  const { data: enrollments = [], isLoading: enrollLoading } = useBenefitEnrollments();
-  const enroll = useEnrollBenefit();
+  const { data: enrollments = [], isLoading: enrollmentsLoading } = useMyBenefitEnrollments();
+  const enroll = useEnrollInBenefit();
 
-  const loading = plansLoading || enrollLoading;
+  const loading = plansLoading || enrollmentsLoading;
 
   return (
     <>
       <HelmetContainer title="Benefits · rtylr" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <SectionHeader title={t('title')} subtitle={t('subtitle')} />
+        <SectionHeader title={t('benefits.title')} subtitle={t('benefits.subtitle')} />
 
         {loading ? (
           <Skeleton height={200} />
         ) : !plans || plans.length === 0 ? (
           <EmptyState
             icon={<Shield size={20} />}
-            title={t('emptyTitle')}
-            description={t('emptyDescription')}
+            title={t('benefits.emptyTitle')}
+            description={t('benefits.emptyDescription')}
           />
         ) : (
           <div
@@ -46,25 +41,17 @@ const Benefits: React.FC = () => {
             }}
           >
             {plans.map((p) => {
+              // Enrollments are the caller's own, resolved server-side - a
+              // cancelled enrollment for this plan should not read as active.
               const enrolled = enrollments.some(
-                (e) => e.planId === p.id && Number(e.staffId) === currentStaffId
+                (e) => e.planId === String(p.id) && e.status === 'active'
               );
               return (
                 <BenefitPlanCard
                   key={p.id}
                   plan={p}
                   enrolled={enrolled}
-                  onEnroll={() =>
-                    enroll.mutate(
-                      {
-                        staffId: currentStaffId,
-                        staffName: currentStaffName,
-                        planId: p.id,
-                        planName: p.name,
-                      },
-                      { onSuccess: () => toast.success(t('enrolled')) }
-                    )
-                  }
+                  onEnroll={() => enroll.mutate(String(p.id))}
                 />
               );
             })}
@@ -72,29 +59,32 @@ const Benefits: React.FC = () => {
         )}
 
         <Card>
-          <SectionHeader title={t('activeEnrollments')} />
+          <SectionHeader title={t('benefits.activeEnrollments')} />
           <div style={{ marginTop: 10, fontSize: 12 }}>
             {enrollments.length === 0 && (
-              <p style={{ color: 'var(--hr-text-muted)' }}>{t('noEnrollments')}</p>
+              <p style={{ color: 'var(--hr-text-muted)' }}>{t('benefits.noEnrollments')}</p>
             )}
-            {enrollments.map((e) => (
-              <div
-                key={e.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '8px 0',
-                  borderBottom: '1px solid var(--hr-border)',
-                }}
-              >
-                <span style={{ color: 'var(--hr-text)' }}>
-                  {e.staffName} - {e.planName}
-                </span>
-                <span style={{ color: 'var(--hr-text-muted)' }}>
-                  {e.status} since {e.startedAt}
-                </span>
-              </div>
-            ))}
+            {enrollments.map((e) => {
+              const plan = plans?.find((p) => String(p.id) === e.planId);
+              return (
+                <div
+                  key={e.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '8px 0',
+                    borderBottom: '1px solid var(--hr-border)',
+                  }}
+                >
+                  <span style={{ color: 'var(--hr-text)' }}>
+                    {plan?.name ?? t('benefits.unknownPlan')}
+                  </span>
+                  <span style={{ color: 'var(--hr-text-muted)' }}>
+                    {t('benefits.statusSince', { status: e.status, date: e.enrolledAt })}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </Card>
       </div>
