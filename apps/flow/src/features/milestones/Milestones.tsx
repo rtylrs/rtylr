@@ -42,7 +42,7 @@ const Milestones: React.FC = () => {
   if (milestones.length === 0 && !showCreate) {
     return (
       <div className="flex flex-col h-full">
-        <HelmetContainer title="Milestones · rtylr" />
+        <HelmetContainer title={t('flow.milestones.pageTitle')} />
         <div
           className="flex items-center justify-between px-6 py-4 shrink-0"
           style={{ borderBottom: '1px solid var(--flow-border)' }}
@@ -66,7 +66,7 @@ const Milestones: React.FC = () => {
         <div className="flex-1 flex flex-col items-center justify-center p-6">
           <EmptyState
             icon={MilestoneIcon}
-            title="No milestones yet"
+            title={t('flow.milestones.emptyTitle')}
             description="Track major delivery targets across your projects."
           />
           <button
@@ -83,7 +83,7 @@ const Milestones: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="Milestones · rtylr" />
+      <HelmetContainer title={t('flow.milestones.pageTitle')} />
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}
