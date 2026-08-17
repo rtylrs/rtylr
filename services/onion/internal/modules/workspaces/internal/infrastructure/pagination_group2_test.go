@@ -31,7 +31,7 @@ func TestWorkspaces_GetWorkspacesByOwner_PaginationAndTotal(t *testing.T) {
 		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteWorkspace(ctx, id, paginationBusinessID) } }(wsID))
 	}
 
-	page1, total1, err := repo.GetWorkspacesByOwner(ctx, paginationBusinessID, 2, 0)
+	page1, total1, err := repo.GetWorkspacesByOwner(ctx, paginationBusinessID, paginationBusinessID, 2, 0)
 	if err != nil {
 		t.Fatalf("GetWorkspacesByOwner page1: %v", err)
 	}
@@ -42,7 +42,7 @@ func TestWorkspaces_GetWorkspacesByOwner_PaginationAndTotal(t *testing.T) {
 		t.Fatalf("expected 2 workspaces on page1, got %d", len(page1))
 	}
 
-	page2, total2, err := repo.GetWorkspacesByOwner(ctx, paginationBusinessID, 2, 2)
+	page2, total2, err := repo.GetWorkspacesByOwner(ctx, paginationBusinessID, paginationBusinessID, 2, 2)
 	if err != nil {
 		t.Fatalf("GetWorkspacesByOwner page2: %v", err)
 	}
@@ -60,7 +60,7 @@ func TestWorkspaces_GetWorkspacesByOwner_PaginationAndTotal(t *testing.T) {
 		}
 	}
 
-	page3, total3, err := repo.GetWorkspacesByOwner(ctx, paginationBusinessID, 2, 4)
+	page3, total3, err := repo.GetWorkspacesByOwner(ctx, paginationBusinessID, paginationBusinessID, 2, 4)
 	if err != nil {
 		t.Fatalf("GetWorkspacesByOwner page3: %v", err)
 	}

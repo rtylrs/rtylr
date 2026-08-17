@@ -41,7 +41,7 @@ func TestWorkspaces_CreateWorkspace_ReturnsPositiveID(t *testing.T) {
 func TestWorkspaces_GetWorkspacesByOwner_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	_, _, err := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID, 100, 0)
+	_, _, err := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID, testutil.OwnerID, 100, 0)
 	if err != nil {
 		t.Fatalf("GetWorkspacesByOwner: %v", err)
 	}
@@ -61,7 +61,7 @@ func TestWorkspaces_CreateWorkspace_AppearsInList(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = repo.DeleteWorkspace(context.Background(), id, testutil.OwnerID) })
 
-	workspaces, _, err := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID, 500, 0)
+	workspaces, _, err := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID, testutil.OwnerID, 500, 0)
 	if err != nil {
 		t.Fatalf("GetWorkspacesByOwner: %v", err)
 	}
@@ -108,7 +108,7 @@ func TestWorkspaces_DeleteWorkspace_RemovesFromList(t *testing.T) {
 		t.Fatalf("DeleteWorkspace: %v", err)
 	}
 
-	workspaces, _, _ := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID, 500, 0)
+	workspaces, _, _ := repo.GetWorkspacesByOwner(context.Background(), testutil.OwnerID, testutil.OwnerID, 500, 0)
 	for _, w := range workspaces {
 		if w.ID == id {
 			t.Errorf("deleted workspace id=%d still in list", id)

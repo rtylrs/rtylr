@@ -67,9 +67,13 @@ func (a *WorkspaceAPI) ListWorkspaces(ctx context.Context, req *flowworkspacev1.
 	if err != nil {
 		return nil, err
 	}
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
 	page, limit, _ := resolvePagination(req.GetPage(), req.GetLimit())
-	workspaces, total, err := a.Service.ListWorkspaces(ctx, businessID, int64(page), int64(limit))
+	workspaces, total, err := a.Service.ListWorkspaces(ctx, businessID, authUser.UserID, int64(page), int64(limit))
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list workspaces")
 	}

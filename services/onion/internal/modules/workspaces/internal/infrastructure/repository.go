@@ -70,15 +70,19 @@ func (r *Repository) CreateWorkspace(ctx context.Context, input domain.Workspace
 	return res.LastInsertId()
 }
 
-func (r *Repository) GetWorkspacesByOwner(ctx context.Context, businessID, limit, offset int64) ([]domain.Workspace, int64, error) {
-	total, err := r.queries.CountWorkspacesByOwner(ctx, businessID)
+func (r *Repository) GetWorkspacesByOwner(ctx context.Context, businessID, ownerID, limit, offset int64) ([]domain.Workspace, int64, error) {
+	total, err := r.queries.CountVisibleWorkspaces(ctx, sqlc.CountVisibleWorkspacesParams{
+		BusinessID: businessID,
+		OwnerID:    ownerID,
+	})
 	if err != nil {
-		logger.Ctx(ctx).Error("CountWorkspacesByOwner failed", logger.Error(err))
+		logger.Ctx(ctx).Error("CountVisibleWorkspaces failed", logger.Error(err))
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.GetWorkspacesByOwner(ctx, sqlc.GetWorkspacesByOwnerParams{
 		BusinessID: businessID,
+		OwnerID:    ownerID,
 		Limit:      int32(limit),
 		Offset:     int32(offset),
 	})
