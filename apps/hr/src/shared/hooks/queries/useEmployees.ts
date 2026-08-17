@@ -22,6 +22,7 @@ interface ListEmployeesParams {
 }
 
 export interface CreateEmployeePayload {
+  userId?: number;
   departmentId: number;
   locationId: number;
   workScheduleId?: number;
@@ -41,6 +42,7 @@ export interface UpdateEmployeePayload extends Partial<CreateEmployeePayload> {
 }
 
 export const toCreateEmployeePayload = (data: EmployeeFormData): CreateEmployeePayload => ({
+  userId: data.userId || undefined,
   departmentId: data.departmentId,
   locationId: data.locationId,
   workScheduleId: data.workScheduleId,

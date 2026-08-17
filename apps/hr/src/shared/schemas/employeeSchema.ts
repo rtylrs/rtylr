@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const employeeSchema = z.object({
-  userId: z.number().int().positive(),
+  userId: z.number().int().min(0),
   departmentId: z.number().int().positive(),
   locationId: z.number().int().positive(),
   firstName: z.string().trim().min(1),

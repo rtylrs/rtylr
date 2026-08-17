@@ -39,7 +39,18 @@
     "userId": "معرف المستخدم",
     "duplicateUserId": "معرف المستخدم موجود بالفعل",
     "departmentId": "القسم",
+    "selectDepartment": "اختر قسمًا",
     "locationId": "الموقع",
+    "createLocation": {
+      "trigger": "+ موقع جديد",
+      "title": "موقع جديد",
+      "name": "الاسم",
+      "namePlaceholder": "مثال: فرع وسط البلد",
+      "address": "العنوان",
+      "addressPlaceholder": "الشارع، المدينة",
+      "submit": "إنشاء الموقع",
+      "created": "تم استخدام الموقع الجديد: {{name}}"
+    },
     "managerId": "المدير",
     "contractType": "نوع العقد",
     "status": "الحالة",

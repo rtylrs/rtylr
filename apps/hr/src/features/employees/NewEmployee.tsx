@@ -10,6 +10,8 @@ import {
   useCreateEmployee,
   useListEmployees,
 } from '../../shared/hooks/queries/useEmployees';
+import { useDepartments } from '../departments/useDepartments';
+import CreateLocationForm from './CreateLocationForm';
 
 interface NewEmployeeProps {
   onCancel?: () => void;
@@ -21,6 +23,9 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
   const navigate = useNavigate();
   const createEmployee = useCreateEmployee();
   const { data: existingEmployees } = useListEmployees({ limit: 1000, offset: 0 });
+  const { data: departments } = useDepartments();
+  const [createLocationOpen, setCreateLocationOpen] = useState(false);
+  const [createdLocationName, setCreatedLocationName] = useState('');
 
   const [form, setForm] = useState<EmployeeFormData>({
     userId: 0,
@@ -53,9 +58,9 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
       return;
     }
     setErrors({});
-    const userIdExists = existingEmployees?.employees?.some(
-      (e) => e.userId === String(result.data.userId)
-    );
+    const userIdExists =
+      result.data.userId > 0 &&
+      existingEmployees?.employees?.some((e) => e.userId === String(result.data.userId));
     if (userIdExists) {
       toast.error(t('employees.form.duplicateUserId'));
       return;
@@ -97,10 +102,15 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
     type: 'text' | 'number' | 'date' = 'text'
   ): React.JSX.Element => (
     <div>
-      <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
+      <label
+        htmlFor={name}
+        className="mb-1 block text-sm font-medium"
+        style={{ color: 'var(--hr-text)' }}
+      >
         {label}
       </label>
       <input
+        id={name}
         type={type}
         value={form[name] as string | number}
         onChange={(e) => {
@@ -143,16 +153,88 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
             {field(t('employees.form.email'), 'email')}
             {field(t('employees.form.jobTitle'), 'jobTitle')}
             {field(t('employees.form.userId'), 'userId', 'number')}
-            {field(t('employees.form.departmentId'), 'departmentId', 'number')}
-            {field(t('employees.form.locationId'), 'locationId', 'number')}
+
+            <div>
+              <label
+                htmlFor="departmentId"
+                className="mb-1 block text-sm font-medium"
+                style={{ color: 'var(--hr-text)' }}
+              >
+                {t('employees.form.departmentId')}
+              </label>
+              <select
+                id="departmentId"
+                value={form.departmentId}
+                onChange={(e) => setForm((f) => ({ ...f, departmentId: Number(e.target.value) }))}
+                style={inputStyle}
+              >
+                <option value={0}>{t('employees.form.selectDepartment')}</option>
+                {(departments ?? []).map((dept) => (
+                  <option key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+              {errors.departmentId && (
+                <p className="mt-1 text-xs text-red-500">{errors.departmentId}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="locationId"
+                className="mb-1 block text-sm font-medium"
+                style={{ color: 'var(--hr-text)' }}
+              >
+                {t('employees.form.locationId')}
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  id="locationId"
+                  type="number"
+                  value={form.locationId}
+                  onChange={(e) => {
+                    setCreatedLocationName('');
+                    setForm((f) => ({ ...f, locationId: Number(e.target.value) }));
+                  }}
+                  style={inputStyle}
+                />
+                <button
+                  type="button"
+                  onClick={() => setCreateLocationOpen(true)}
+                  className="whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold"
+                  style={{
+                    background: 'var(--hr-hover)',
+                    color: 'var(--hr-text)',
+                    border: '1px solid var(--hr-border)',
+                  }}
+                >
+                  {t('employees.form.createLocation.trigger')}
+                </button>
+              </div>
+              {createdLocationName && (
+                <p className="mt-1 text-xs" style={{ color: 'var(--hr-text-muted)' }}>
+                  {t('employees.form.createLocation.created', { name: createdLocationName })}
+                </p>
+              )}
+              {errors.locationId && (
+                <p className="mt-1 text-xs text-red-500">{errors.locationId}</p>
+              )}
+            </div>
+
             {field(t('employees.form.hireDate'), 'hireDate', 'date')}
             {field(t('employees.form.currency'), 'currency')}
 
             <div>
-              <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
+              <label
+                htmlFor="contractType"
+                className="mb-1 block text-sm font-medium"
+                style={{ color: 'var(--hr-text)' }}
+              >
                 {t('employees.form.contractType')}
               </label>
               <select
+                id="contractType"
                 value={form.contractType}
                 onChange={(e) =>
                   setForm((f) => ({
@@ -169,10 +251,15 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
+              <label
+                htmlFor="status"
+                className="mb-1 block text-sm font-medium"
+                style={{ color: 'var(--hr-text)' }}
+              >
                 {t('employees.form.status')}
               </label>
               <select
+                id="status"
                 value={form.status}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, status: e.target.value as EmployeeFormData['status'] }))
@@ -187,10 +274,15 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium" style={{ color: 'var(--hr-text)' }}>
+              <label
+                htmlFor="accountCreationMode"
+                className="mb-1 block text-sm font-medium"
+                style={{ color: 'var(--hr-text)' }}
+              >
                 {t('employees.form.accountCreationMode')}
               </label>
               <select
+                id="accountCreationMode"
                 value={form.accountCreationMode}
                 onChange={(e) =>
                   setForm((f) => ({
@@ -233,6 +325,15 @@ const NewEmployee = ({ onCancel, isWizardMode }: NewEmployeeProps): React.JSX.El
           </div>
         </form>
       </div>
+
+      <CreateLocationForm
+        open={createLocationOpen}
+        onClose={() => setCreateLocationOpen(false)}
+        onCreated={(location) => {
+          setForm((f) => ({ ...f, locationId: location.id }));
+          setCreatedLocationName(location.name);
+        }}
+      />
     </>
   );
 };

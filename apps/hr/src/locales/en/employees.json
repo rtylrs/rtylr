@@ -39,7 +39,18 @@
     "userId": "User ID",
     "duplicateUserId": "User ID already exists",
     "departmentId": "Department",
+    "selectDepartment": "Select a department",
     "locationId": "Location",
+    "createLocation": {
+      "trigger": "+ New location",
+      "title": "New Location",
+      "name": "Name",
+      "namePlaceholder": "e.g. Downtown Branch",
+      "address": "Address",
+      "addressPlaceholder": "Street, city",
+      "submit": "Create Location",
+      "created": "Using new location: {{name}}"
+    },
     "managerId": "Manager",
     "contractType": "Contract type",
     "status": "Status",
