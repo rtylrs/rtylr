@@ -65,7 +65,7 @@ FROM crm_contacts WHERE id = ? AND business_id = ?;
 
 -- cross-schema read from businesses — resolve owner_id for contact creation
 -- name: GetBusinessOwnerID :one
-SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE LIMIT 1;
+SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE ORDER BY owner_id ASC LIMIT 1;
 
 -- name: CreateContact :execresult
 INSERT INTO crm_contacts (owner_id, business_id, lead_id, customer_id, name, role, email, phone, linkedin, is_primary, notes)
