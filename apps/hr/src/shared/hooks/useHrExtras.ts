@@ -1,7 +1,9 @@
-import { createOneKitClient, unwrap } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/client';
+import { BenefitServiceClient } from '@voxire/voxie/hr/benefit/v1/client';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { hrExtras } from '../services/hrExtras';
@@ -17,7 +19,11 @@ import { timesheetRowSchema } from '../schemas/timesheets';
 import { reviewSchema, oneOnOneSchema } from '../schemas/reviews';
 import { onboardingTaskSchema, offboardingTaskSchema } from '../schemas/onboarding';
 import { documentItemSchema } from '../schemas/documents';
-import { benefitPlanSchema, benefitEnrollmentSchema } from '../schemas/benefits';
+import {
+  benefitPlanSchema,
+  benefitEnrollmentSchema,
+  myBenefitEnrollmentSchema,
+} from '../schemas/benefits';
 import { trainingCourseSchema, trainingProgressSchema } from '../schemas/training';
 import {
   birthdaySchema,
@@ -29,6 +35,7 @@ import { hrSettingsSchema } from '../schemas/settings';
 
 const staffClient = createOneKitClient(StaffServiceClient, 'hr');
 const departmentClient = createOneKitClient(DepartmentServiceClient, 'hr');
+const benefitClient = createOneKitClient(BenefitServiceClient, 'hr');
 
 /**
  * The caller's own hr_employees.id - not the same id as the hub auth user id
@@ -325,13 +332,32 @@ export function useBenefitEnrollments() {
   });
 }
 
-export function useEnrollBenefit() {
+/**
+ * The caller's own benefit enrollments, resolved server-side from the auth
+ * token via hr.benefit.v1's ListMyBenefitEnrollments - never from a
+ * client-supplied staff id.
+ */
+export function useMyBenefitEnrollments() {
+  return useQuery({
+    queryKey: ['benefits', 'my-enrollments'],
+    queryFn: async () => {
+      const res = await benefitClient.listMyBenefitEnrollments({});
+      const raw = res.enrollments ?? [];
+      return z.array(myBenefitEnrollmentSchema).parse(raw);
+    },
+  });
+}
+
+export function useEnrollInBenefit() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
-    mutationFn: (data: Parameters<typeof hrExtras.enrollBenefit>[0]) =>
-      unwrap(hrExtras.enrollBenefit(data)),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['benefits'] }),
-    onError: () => toast.error('Failed to enroll in benefit'),
+    mutationFn: (planId: string) => benefitClient.enrollInBenefit({ planId }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['benefits'] });
+      toast.success(t('benefits.enrolled'));
+    },
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
 

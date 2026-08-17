@@ -7,5 +7,7 @@
   "noEnrollments": "لا توجد تسجيلات بعد.",
   "monthly": "شهري",
   "enrolled": "مسجل",
-  "enroll": "تسجيل"
+  "enroll": "تسجيل",
+  "unknownPlan": "خطة غير معروفة",
+  "statusSince": "{{status}} منذ {{date}}"
 }

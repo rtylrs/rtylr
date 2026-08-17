@@ -19,7 +19,7 @@ interface Props {
 }
 
 const BenefitPlanCard: React.FC<Props> = ({ plan, enrolled, onEnroll }) => {
-  const { t } = useTranslation('benefits');
+  const { t } = useTranslation();
   const color = CATEGORY_COLORS[plan.category];
   return (
     <Card style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -44,13 +44,15 @@ const BenefitPlanCard: React.FC<Props> = ({ plan, enrolled, onEnroll }) => {
         }}
       >
         <div>
-          <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>{t('monthly')}</div>
+          <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>{t('benefits.monthly')}</div>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--hr-text)' }}>
             ${plan.monthlyCost}
           </div>
         </div>
         <div>
-          <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>{t('enrolled')}</div>
+          <div style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
+            {t('benefits.enrolled')}
+          </div>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hr-text)' }}>
             {plan.enrolledCount}
           </div>
@@ -69,7 +71,7 @@ const BenefitPlanCard: React.FC<Props> = ({ plan, enrolled, onEnroll }) => {
               fontWeight: 600,
             }}
           >
-            <Check size={12} /> {t('enrolled')}
+            <Check size={12} /> {t('benefits.enrolled')}
           </span>
         ) : (
           <button
@@ -85,7 +87,7 @@ const BenefitPlanCard: React.FC<Props> = ({ plan, enrolled, onEnroll }) => {
               cursor: 'pointer',
             }}
           >
-            {t('enroll')}
+            {t('benefits.enroll')}
           </button>
         )}
       </div>
