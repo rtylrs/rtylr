@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useTeamWorkload } from './useTeamWorkload';
 import WorkloadBar from '../../shared/components/WorkloadBar';
@@ -9,6 +10,7 @@ import StatusIcon from '../../shared/components/StatusIcon';
 import { useNavigate } from '@tanstack/react-router';
 
 const Team: React.FC = () => {
+  const { t } = useTranslation();
   const { data: members = [], isLoading } = useTeamWorkload();
   const navigate = useNavigate();
 
@@ -21,7 +23,7 @@ const Team: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <HelmetContainer title="Team · rtylr" />
+      <HelmetContainer title={t('flow.team.pageTitle')} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <div className="flex items-center gap-2">
           <Users size={14} style={{ color: 'var(--flow-text-muted)' }} />
