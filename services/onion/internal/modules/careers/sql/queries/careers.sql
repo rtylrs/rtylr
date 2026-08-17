@@ -11,7 +11,8 @@ SELECT
     is_active
  FROM careers
 WHERE is_active = true
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT 100;
 
 -- name: CreateCareer :execresult
 INSERT INTO careers (
