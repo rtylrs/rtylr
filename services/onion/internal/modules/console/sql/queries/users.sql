@@ -20,7 +20,7 @@ VALUES (?, ?, ?, ?);
 -- name: UpdateUser :exec
 UPDATE users
 SET full_name = ?, email = ?, updated_at = NOW()
-WHERE id = ?;
+WHERE id = ? AND business_id = ?;
 
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = ?;
