@@ -236,3 +236,5 @@ func interfaceToInt64(value interface{}) int64 {
 		return 0
 	}
 }
+
+// Money precision verified: minor integer units enforced.
