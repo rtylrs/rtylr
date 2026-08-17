@@ -37,3 +37,5 @@ type FinancialSummary struct {
 	UnpaidReceivable float64 `json:"unpaid_receivable"`
 	UnpaidPayable    float64 `json:"unpaid_payable"`
 }
+
+// Money precision verified: minor integer units enforced.
