@@ -264,7 +264,79 @@
       "noMembersYet": "لا يوجد أعضاء في الفريق بعد.",
       "removeMemberLabel": "إزالة {{name}}"
     },
-    "sectionNotAvailable": "هذا القسم غير متاح بعد."
+    "sectionNotAvailable": "هذا القسم غير متاح بعد.",
+    "notifications": {
+      "subtitle": "تحكم فيما يتم إعلامك به.",
+      "items": {
+        "taskAssigned": {
+          "label": "مهمة مسندة إليّ",
+          "desc": "عندما يسند إليك أحدهم مهمة"
+        },
+        "taskComments": {
+          "label": "تعليقات على مهامي",
+          "desc": "عندما يعلّق أحدهم على مهامك"
+        },
+        "mentions": {
+          "label": "الإشارات",
+          "desc": "عندما يشير إليك أحدهم بـ @"
+        },
+        "statusChanges": {
+          "label": "تغييرات الحالة",
+          "desc": "عندما تتغير حالة مهمة تتابعها"
+        },
+        "weeklyDigest": {
+          "label": "الملخص الأسبوعي",
+          "desc": "ملخص أسبوعي لنشاطك"
+        },
+        "emailNotifications": {
+          "label": "إشعارات البريد الإلكتروني",
+          "desc": "تلقي الإشعارات عبر البريد الإلكتروني"
+        }
+      }
+    },
+    "life": {
+      "quietStart": "بداية ساعات الهدوء",
+      "quietEnd": "نهاية ساعات الهدوء",
+      "digestHour": "ساعة الملخص المفضلة (محليًا)"
+    },
+    "appearance": {
+      "subtitle": "خصص شكل ومظهر Flow.",
+      "theme": "السمة"
+    },
+    "shortcuts": {
+      "subtitle": "تنقل بسرعة عبر Flow دون لمس الفأرة.",
+      "items": {
+        "createTask": "إنشاء مهمة جديدة",
+        "openSearch": "فتح شريط الأوامر / البحث",
+        "openCommandBar": "فتح شريط الأوامر",
+        "goToInbox": "الذهاب إلى صندوق الوارد",
+        "goToMyIssues": "الذهاب إلى مهامي",
+        "goToToday": "الذهاب إلى اليوم (التركيز)",
+        "goToDashboard": "الذهاب إلى لوحة التحكم",
+        "goToCalendar": "الذهاب إلى التقويم",
+        "goToTimeline": "الذهاب إلى الجدول الزمني",
+        "goToRoadmap": "الذهاب إلى خارطة الطريق",
+        "goToInsights": "الذهاب إلى الإحصاءات",
+        "goToCycles": "الذهاب إلى الدورات",
+        "goToTriage": "الذهاب إلى الفرز",
+        "closeModal": "إغلاق أي نافذة",
+        "submitComment": "إرسال التعليق"
+      }
+    },
+    "labels": {
+      "subtitle": "إدارة تصنيفات مساحة العمل الخاصة بك. يمكن تطبيق التصنيفات على أي مهمة.",
+      "newLabel": "تصنيف جديد",
+      "namePlaceholder": "اسم التصنيف",
+      "color": "اللون",
+      "chooseCustomColor": "اختر لونًا مخصصًا",
+      "creating": "جارٍ الإنشاء…",
+      "createLabel": "إنشاء تصنيف",
+      "workspaceLabels": "تصنيفات مساحة العمل",
+      "emptyList": "لا توجد تصنيفات بعد. أنشئ واحدًا أعلاه.",
+      "deleteLabel": "حذف التصنيف",
+      "deleteConfirmPrefix": "هل تريد حذف",
+      "deleteConfirmSuffix": "؟ ستتم إزالته من كل مهمة مرتبط بها."
+    }
   },
   "presence": {
     "heading": "من موجود اليوم",

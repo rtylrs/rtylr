@@ -256,7 +256,79 @@
       "noMembersYet": "Aucun membre d'équipe pour l'instant.",
       "removeMemberLabel": "Supprimer {{name}}"
     },
-    "sectionNotAvailable": "Cette section n'est pas encore disponible."
+    "sectionNotAvailable": "Cette section n'est pas encore disponible.",
+    "notifications": {
+      "subtitle": "Contrôlez ce dont vous êtes informé.",
+      "items": {
+        "taskAssigned": {
+          "label": "Tâche qui vous est assignée",
+          "desc": "Quand quelqu'un vous assigne une tâche"
+        },
+        "taskComments": {
+          "label": "Commentaires sur mes tâches",
+          "desc": "Quand quelqu'un commente vos tâches"
+        },
+        "mentions": {
+          "label": "Mentions",
+          "desc": "Quand quelqu'un vous mentionne avec @"
+        },
+        "statusChanges": {
+          "label": "Changements de statut",
+          "desc": "Quand une tâche que vous suivez change de statut"
+        },
+        "weeklyDigest": {
+          "label": "Résumé hebdomadaire",
+          "desc": "Un résumé hebdomadaire de votre activité"
+        },
+        "emailNotifications": {
+          "label": "Notifications par e-mail",
+          "desc": "Recevoir les notifications par e-mail"
+        }
+      }
+    },
+    "life": {
+      "quietStart": "Début des heures calmes",
+      "quietEnd": "Fin des heures calmes",
+      "digestHour": "Heure de résumé préférée (locale)"
+    },
+    "appearance": {
+      "subtitle": "Personnalisez l'apparence de Flow.",
+      "theme": "Thème"
+    },
+    "shortcuts": {
+      "subtitle": "Naviguez rapidement dans Flow sans toucher la souris.",
+      "items": {
+        "createTask": "Créer une nouvelle tâche",
+        "openSearch": "Ouvrir la barre de commande / recherche",
+        "openCommandBar": "Ouvrir la barre de commande",
+        "goToInbox": "Aller à la boîte de réception",
+        "goToMyIssues": "Aller à Mes tâches",
+        "goToToday": "Aller à Aujourd'hui (focus)",
+        "goToDashboard": "Aller au tableau de bord",
+        "goToCalendar": "Aller au calendrier",
+        "goToTimeline": "Aller à la chronologie",
+        "goToRoadmap": "Aller à la feuille de route",
+        "goToInsights": "Aller aux aperçus",
+        "goToCycles": "Aller aux cycles",
+        "goToTriage": "Aller au tri",
+        "closeModal": "Fermer toute fenêtre modale",
+        "submitComment": "Envoyer le commentaire"
+      }
+    },
+    "labels": {
+      "subtitle": "Gérez les étiquettes de votre espace de travail. Les étiquettes peuvent être appliquées à n'importe quelle tâche.",
+      "newLabel": "Nouvelle étiquette",
+      "namePlaceholder": "Nom de l'étiquette",
+      "color": "Couleur",
+      "chooseCustomColor": "Choisir une couleur personnalisée",
+      "creating": "Création…",
+      "createLabel": "Créer l'étiquette",
+      "workspaceLabels": "Étiquettes de l'espace de travail",
+      "emptyList": "Aucune étiquette pour le moment. Créez-en une ci-dessus.",
+      "deleteLabel": "Supprimer l'étiquette",
+      "deleteConfirmPrefix": "Supprimer",
+      "deleteConfirmSuffix": " ? Elle sera retirée de toutes les tâches auxquelles elle est associée."
+    }
   },
   "presence": {
     "heading": "Qui est présent aujourd'hui",

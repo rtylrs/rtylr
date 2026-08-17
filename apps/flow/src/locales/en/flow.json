@@ -256,7 +256,79 @@
       "noMembersYet": "No team members yet.",
       "removeMemberLabel": "Remove {{name}}"
     },
-    "sectionNotAvailable": "This section is not yet available."
+    "sectionNotAvailable": "This section is not yet available.",
+    "notifications": {
+      "subtitle": "Control what you get notified about.",
+      "items": {
+        "taskAssigned": {
+          "label": "Task assigned to me",
+          "desc": "When someone assigns a task to you"
+        },
+        "taskComments": {
+          "label": "Comments on my tasks",
+          "desc": "When someone comments on your tasks"
+        },
+        "mentions": {
+          "label": "Mentions",
+          "desc": "When someone @mentions you"
+        },
+        "statusChanges": {
+          "label": "Status changes",
+          "desc": "When a task you follow changes status"
+        },
+        "weeklyDigest": {
+          "label": "Weekly digest",
+          "desc": "A weekly summary of your activity"
+        },
+        "emailNotifications": {
+          "label": "Email notifications",
+          "desc": "Receive notifications via email"
+        }
+      }
+    },
+    "life": {
+      "quietStart": "Quiet hours start",
+      "quietEnd": "Quiet hours end",
+      "digestHour": "Preferred digest hour (local)"
+    },
+    "appearance": {
+      "subtitle": "Customize the look and feel of Flow.",
+      "theme": "Theme"
+    },
+    "shortcuts": {
+      "subtitle": "Move fast through Flow without touching the mouse.",
+      "items": {
+        "createTask": "Create a new task",
+        "openSearch": "Open command bar / search",
+        "openCommandBar": "Open command bar",
+        "goToInbox": "Go to Inbox",
+        "goToMyIssues": "Go to My Issues",
+        "goToToday": "Go to Today (focus)",
+        "goToDashboard": "Go to Dashboard",
+        "goToCalendar": "Go to Calendar",
+        "goToTimeline": "Go to Timeline",
+        "goToRoadmap": "Go to Roadmap",
+        "goToInsights": "Go to Insights",
+        "goToCycles": "Go to Cycles",
+        "goToTriage": "Go to Triage",
+        "closeModal": "Close any modal",
+        "submitComment": "Submit comment"
+      }
+    },
+    "labels": {
+      "subtitle": "Manage labels for your workspace. Labels can be applied to any task.",
+      "newLabel": "New label",
+      "namePlaceholder": "Label name",
+      "color": "Color",
+      "chooseCustomColor": "Choose custom color",
+      "creating": "Creating…",
+      "createLabel": "Create label",
+      "workspaceLabels": "Workspace labels",
+      "emptyList": "No labels yet. Create one above.",
+      "deleteLabel": "Delete label",
+      "deleteConfirmPrefix": "Delete",
+      "deleteConfirmSuffix": "? It is removed from every task it is attached to."
+    }
   },
   "presence": {
     "heading": "Who's in today",
