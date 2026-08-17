@@ -26,6 +26,7 @@ SELECT id, name, COALESCE(slug, '') AS slug, COALESCE(logo_url, '') AS logo_url,
        COALESCE(currency, 'USD') AS currency, COALESCE(timezone, 'UTC') AS timezone
 FROM businesses
 WHERE id = ? AND is_active = TRUE
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: LookupBusinessBySlug :one
