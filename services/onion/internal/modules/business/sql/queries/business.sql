@@ -46,7 +46,7 @@ ORDER BY is_default DESC, name ASC
 LIMIT 100;
 
 -- name: UpdateBusinessSlug :exec
-UPDATE businesses SET slug = ? WHERE id = ?;
+UPDATE businesses SET slug = ? WHERE id = ? AND owner_id = ?;
 
 -- name: RenameBusiness :execresult
 UPDATE businesses
