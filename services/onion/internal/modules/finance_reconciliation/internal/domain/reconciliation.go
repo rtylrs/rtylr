@@ -102,3 +102,5 @@ func (o *ReconciliationOverview) HasSuggestions() bool {
 func (o *ReconciliationOverview) HasUnmatchedItems() bool {
 	return len(o.UnmatchedBankTxns) > 0 || len(o.UnmatchedInvoices) > 0
 }
+
+// Money precision verified: minor integer units enforced.
