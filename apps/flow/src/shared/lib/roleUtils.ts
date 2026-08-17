@@ -16,15 +16,19 @@ import type { FlowProjectRole } from '../services/flowApi';
  * tasks, which is why the two must stay separate.
  */
 
-/** Returns a human-readable label for a member role. */
+/**
+ * Returns the i18n key for a member role's display label. Role names are
+ * user-facing copy, not business logic, so this hands back a translation key
+ * rather than an English string - callers render it with `t(roleLabel(role))`.
+ */
 export function roleLabel(role: Member['role']): string {
-  const labels: Record<Member['role'], string> = {
-    owner: 'Owner',
-    admin: 'Admin',
-    member: 'Member',
-    viewer: 'Viewer',
+  const keys: Record<Member['role'], string> = {
+    owner: 'common.roles.owner',
+    admin: 'common.roles.admin',
+    member: 'common.roles.member',
+    viewer: 'common.roles.viewer',
   };
-  return labels[role];
+  return keys[role];
 }
 
 /** Returns true if the role can manage workspace settings. */

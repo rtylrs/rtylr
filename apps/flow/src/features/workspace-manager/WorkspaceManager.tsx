@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Users, Plus, Trash2, Shield, Eye, Crown, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
@@ -14,22 +15,29 @@ import {
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import type { ApiWorkspaceMember } from '../../shared/services/flowApi';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import { roleLabel } from '../../shared/lib/roleUtils';
 
-const ROLE_LABELS: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
-  admin: { label: 'Admin', icon: <Crown size={11} />, color: '#f59e0b' },
-  member: { label: 'Member', icon: <Shield size={11} />, color: 'var(--accent)' },
-  viewer: { label: 'Viewer', icon: <Eye size={11} />, color: '#8b5cf6' },
+// Icon and accent color per workspace role. Display text is not part of this
+// map - it comes from roleLabel() + t(), the single source of truth for role
+// names (see shared/lib/roleUtils.ts).
+const ROLE_STYLE: Record<string, { icon: React.ReactNode; color: string }> = {
+  admin: { icon: <Crown size={11} />, color: '#f59e0b' },
+  member: { icon: <Shield size={11} />, color: 'var(--accent)' },
+  viewer: { icon: <Eye size={11} />, color: '#8b5cf6' },
 };
+
+const WORKSPACE_ROLES: Array<'admin' | 'member' | 'viewer'> = ['admin', 'member', 'viewer'];
 
 const MemberRow: React.FC<{
   member: ApiWorkspaceMember;
   workspaceId: string;
   isLastAdmin: boolean;
 }> = ({ member, workspaceId, isLastAdmin }) => {
+  const { t } = useTranslation();
   const remove = useRemoveWorkspaceMember(workspaceId);
   const updateRole = useUpdateWorkspaceMemberRole(workspaceId);
   const [confirmRemove, setConfirmRemove] = useState(false);
-  const roleInfo = ROLE_LABELS[member.role] ?? ROLE_LABELS.member;
+  const roleStyle = ROLE_STYLE[member.role] ?? ROLE_STYLE.member;
   const initials = member.name
     ? member.name
         .split(' ')
@@ -60,8 +68,8 @@ const MemberRow: React.FC<{
           </p>
         )}
       </div>
-      <div className="flex items-center gap-1 shrink-0" style={{ color: roleInfo.color }}>
-        {roleInfo.icon}
+      <div className="flex items-center gap-1 shrink-0" style={{ color: roleStyle.color }}>
+        {roleStyle.icon}
         <select
           value={member.role}
           onChange={(e) => {
@@ -72,30 +80,32 @@ const MemberRow: React.FC<{
                 role: e.target.value,
               },
               {
-                onSuccess: () => toast.success('Role updated'),
-                onError: () => toast.error('Failed to update role'),
+                onSuccess: () => toast.success(t('toasts.workspaceMember.roleUpdated')),
+                onError: () => toast.error(t('toasts.workspaceMember.roleUpdateFailed')),
               }
             );
           }}
           className="text-[11px] outline-none bg-transparent cursor-pointer"
-          style={{ color: roleInfo.color }}
+          style={{ color: roleStyle.color }}
         >
-          <option value="admin">Admin</option>
-          <option value="member">Member</option>
-          <option value="viewer">Viewer</option>
+          {WORKSPACE_ROLES.map((role) => (
+            <option key={role} value={role}>
+              {t(roleLabel(role))}
+            </option>
+          ))}
         </select>
       </div>
       <button
         onClick={() => {
-          if (isLastAdmin) return toast.error('Cannot remove the last admin');
+          if (isLastAdmin) return toast.error(t('toasts.workspaceMember.cannotRemoveLastAdmin'));
           setConfirmRemove(true);
         }}
         className="h-7 w-7 rounded flex items-center justify-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
         style={{ color: 'var(--flow-text-dim)' }}
         onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
-        title="Remove member"
-        aria-label="Remove member"
+        title={t('workspaceManager.removeMemberTitle')}
+        aria-label={t('workspaceManager.removeMemberTitle')}
         disabled={isLastAdmin}
       >
         <Trash2 size={11} />
@@ -103,24 +113,22 @@ const MemberRow: React.FC<{
       <ConfirmDialog
         open={confirmRemove}
         onOpenChange={setConfirmRemove}
-        title="Remove member"
-        description={
-          <>
-            Remove <strong>{member.name || member.email}</strong> from this workspace? They lose
-            access immediately and any tasks they own stay where they are.
-          </>
-        }
-        confirmLabel="Remove"
+        title={t('workspaceManager.removeMemberTitle')}
+        description={t('workspaceManager.removeMemberConfirm', {
+          name: member.name || member.email,
+        })}
+        confirmLabel={t('workspaceManager.removeMemberAction')}
+        cancelLabel={t('common.cancel')}
         pending={remove.isPending}
         onConfirm={() => {
           remove.mutate(
             { workspace_id: Number(workspaceId), user_id: Number(member.userId) },
             {
               onSuccess: () => {
-                toast.success('Member removed');
+                toast.success(t('toasts.workspaceMember.removed'));
                 setConfirmRemove(false);
               },
-              onError: () => toast.error('Failed to remove member'),
+              onError: () => toast.error(t('toasts.workspaceMember.removeFailed')),
             }
           );
         }}
@@ -130,6 +138,7 @@ const MemberRow: React.FC<{
 };
 
 const WorkspaceManager: React.FC = () => {
+  const { t } = useTranslation();
   const { workspaceId } = useParams({ strict: false });
   const wsId = workspaceId ?? '';
   const { data: members = [], isLoading } = useWorkspaceMembers(wsId);
@@ -159,32 +168,32 @@ const WorkspaceManager: React.FC = () => {
 
   const handleAddMember = (): void => {
     if (!selectedUserId) {
-      toast.error('Select a team member');
+      toast.error(t('toasts.workspaceMember.selectMember'));
       return;
     }
     addMember.mutate(
       { workspace_id: Number(wsId), user_id: Number(selectedUserId), role: inviteRole },
       {
         onSuccess: () => {
-          toast.success('Member added to workspace');
+          toast.success(t('toasts.workspaceMember.added'));
           setSelectedUserId('');
           setSearch('');
           setShowInvite(false);
         },
-        onError: () => toast.error('Failed to add member'),
+        onError: () => toast.error(t('toasts.workspaceMember.addFailed')),
       }
     );
   };
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <HelmetContainer title="Workspace members · rtylr" />
+      <HelmetContainer title={t('workspaceManager.pageTitle')} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users size={14} style={{ color: 'var(--flow-text-muted)' }} />
             <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-              Workspace Members
+              {t('workspaceManager.title')}
             </h1>
           </div>
           <button
@@ -192,11 +201,11 @@ const WorkspaceManager: React.FC = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
             style={{ background: 'var(--accent)', color: '#0a0a0a' }}
           >
-            <Plus size={11} /> Add member
+            <Plus size={11} /> {t('workspaceManager.addMember')}
           </button>
         </div>
         <p className="text-[11px] mt-0.5" style={{ color: 'var(--flow-text-dim)' }}>
-          {members.length} member{members.length !== 1 ? 's' : ''} in this workspace
+          {t('workspaceManager.memberCount', { count: members.length })}
         </p>
       </div>
 
@@ -209,7 +218,7 @@ const WorkspaceManager: React.FC = () => {
             style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
           >
             <p className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-              Add a team member to this workspace
+              {t('workspaceManager.addMemberHeading')}
             </p>
             <div
               className="flex items-center gap-2 rounded px-3 py-2"
@@ -221,7 +230,7 @@ const WorkspaceManager: React.FC = () => {
               <Search size={12} style={{ color: 'var(--flow-text-dim)' }} />
               <input
                 type="text"
-                placeholder="Search by name or email..."
+                placeholder={t('workspaceManager.searchPlaceholder')}
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -273,7 +282,7 @@ const WorkspaceManager: React.FC = () => {
             )}
             {search && availableMembers.length === 0 && (
               <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-                No org members found. Only existing team members can be added to workspaces.
+                {t('workspaceManager.noOrgMembersFound')}
               </p>
             )}
             <div className="flex items-center gap-2">
@@ -287,9 +296,11 @@ const WorkspaceManager: React.FC = () => {
                   color: 'var(--flow-text)',
                 }}
               >
-                <option value="admin">Admin</option>
-                <option value="member">Member</option>
-                <option value="viewer">Viewer</option>
+                {WORKSPACE_ROLES.map((role) => (
+                  <option key={role} value={role}>
+                    {t(roleLabel(role))}
+                  </option>
+                ))}
               </select>
               <button
                 onClick={handleAddMember}
@@ -297,7 +308,9 @@ const WorkspaceManager: React.FC = () => {
                 className="flex-1 px-4 py-2 rounded text-[12px] font-semibold disabled:opacity-40"
                 style={{ background: 'var(--accent)', color: '#0a0a0a' }}
               >
-                {addMember.isPending ? 'Adding...' : 'Add to workspace'}
+                {addMember.isPending
+                  ? t('workspaceManager.adding')
+                  : t('workspaceManager.addToWorkspace')}
               </button>
               <button
                 type="button"
@@ -309,7 +322,7 @@ const WorkspaceManager: React.FC = () => {
                 className="px-3 py-2 rounded text-[12px]"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           </motion.div>
@@ -327,7 +340,7 @@ const WorkspaceManager: React.FC = () => {
           </div>
         ) : members.length === 0 ? (
           <div className="text-center py-12 text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-            No members yet. Add someone to get started.
+            {t('workspaceManager.noMembersEmpty')}
           </div>
         ) : (
           <div className="space-y-2 group">

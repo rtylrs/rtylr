@@ -57,5 +57,20 @@
   },
   "workspace": {
     "noActive": "لا توجد مساحة عمل نشطة"
+  },
+  "workspaceMember": {
+    "invalidWorkspaceId": "معرف مساحة العمل غير صالح",
+    "invalidUserId": "معرف المستخدم غير صالح",
+    "addWorkspaceMemberFailed": "فشل إضافة عضو إلى مساحة العمل",
+    "removeWorkspaceMemberFailed": "فشل إزالة العضو من مساحة العمل",
+    "updateRoleFailed": "فشل تحديث دور عضو مساحة العمل",
+    "roleUpdated": "تم تحديث الدور",
+    "roleUpdateFailed": "فشل تحديث الدور",
+    "cannotRemoveLastAdmin": "لا يمكن إزالة المشرف الأخير",
+    "removed": "تمت إزالة العضو",
+    "removeFailed": "فشل إزالة العضو",
+    "selectMember": "اختر عضو فريق",
+    "added": "تمت إضافة العضو إلى مساحة العمل",
+    "addFailed": "فشل إضافة العضو"
   }
 }

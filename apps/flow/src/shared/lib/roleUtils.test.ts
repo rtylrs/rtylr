@@ -27,11 +27,17 @@ function makeMember(overrides: Partial<Member>): Member {
 }
 
 describe('roleLabel', () => {
-  it('returns readable labels', () => {
-    expect(roleLabel('owner')).toBe('Owner');
-    expect(roleLabel('admin')).toBe('Admin');
-    expect(roleLabel('member')).toBe('Member');
-    expect(roleLabel('viewer')).toBe('Viewer');
+  it('returns a translation key for each role, not a hardcoded string', () => {
+    expect(roleLabel('owner')).toBe('common.roles.owner');
+    expect(roleLabel('admin')).toBe('common.roles.admin');
+    expect(roleLabel('member')).toBe('common.roles.member');
+    expect(roleLabel('viewer')).toBe('common.roles.viewer');
+  });
+
+  it('returns a distinct key per role', () => {
+    const roles: Array<Member['role']> = ['owner', 'admin', 'member', 'viewer'];
+    const keys = new Set(roles.map(roleLabel));
+    expect(keys.size).toBe(roles.length);
   });
 });
 

@@ -17,6 +17,10 @@ vi.mock('sonner', () => ({
   toast: { error: vi.fn(), success: vi.fn() },
 }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en-US' } }),
+}));
+
 // Keep the real toFiniteNumber - the wsId === 0 / uid === 0 guards in the
 // hooks below depend on its actual coercion behavior, not a stand-in.
 vi.mock('@voxire/api', async (importOriginal) => {
@@ -91,7 +95,7 @@ describe('useAddWorkspaceMember', () => {
       await result.current.mutateAsync({ workspace_id: 0, user_id: 2 }).catch(() => {});
     });
     expect(flowApi.addWorkspaceMember).not.toHaveBeenCalled();
-    expect(toast.error).toHaveBeenCalledWith('Invalid workspace ID');
+    expect(toast.error).toHaveBeenCalledWith('toasts.workspaceMember.invalidWorkspaceId');
     expect(spy).not.toHaveBeenCalled();
   });
 
@@ -102,7 +106,7 @@ describe('useAddWorkspaceMember', () => {
       await result.current.mutateAsync({ workspace_id: 1, user_id: 0 }).catch(() => {});
     });
     expect(flowApi.addWorkspaceMember).not.toHaveBeenCalled();
-    expect(toast.error).toHaveBeenCalledWith('Invalid user ID');
+    expect(toast.error).toHaveBeenCalledWith('toasts.workspaceMember.invalidUserId');
   });
 
   it('shows an error toast and does not invalidate when the API call fails', async () => {
@@ -113,7 +117,7 @@ describe('useAddWorkspaceMember', () => {
     await act(async () => {
       await result.current.mutateAsync({ workspace_id: 1, user_id: 2 }).catch(() => {});
     });
-    expect(toast.error).toHaveBeenCalledWith('Failed to add workspace member');
+    expect(toast.error).toHaveBeenCalledWith('toasts.workspaceMember.addWorkspaceMemberFailed');
     expect(spy).not.toHaveBeenCalled();
   });
 });
@@ -141,7 +145,7 @@ describe('useRemoveWorkspaceMember', () => {
       await result.current.mutateAsync({ workspace_id: 0, user_id: 2 }).catch(() => {});
     });
     expect(flowApi.removeWorkspaceMember).not.toHaveBeenCalled();
-    expect(toast.error).toHaveBeenCalledWith('Invalid workspace ID');
+    expect(toast.error).toHaveBeenCalledWith('toasts.workspaceMember.invalidWorkspaceId');
   });
 
   it('rejects and never calls the API when user_id is not a valid finite number', async () => {
@@ -151,7 +155,7 @@ describe('useRemoveWorkspaceMember', () => {
       await result.current.mutateAsync({ workspace_id: 1, user_id: 0 }).catch(() => {});
     });
     expect(flowApi.removeWorkspaceMember).not.toHaveBeenCalled();
-    expect(toast.error).toHaveBeenCalledWith('Invalid user ID');
+    expect(toast.error).toHaveBeenCalledWith('toasts.workspaceMember.invalidUserId');
   });
 
   it('shows an error toast and does not invalidate when the API call fails', async () => {
@@ -162,7 +166,7 @@ describe('useRemoveWorkspaceMember', () => {
     await act(async () => {
       await result.current.mutateAsync({ workspace_id: 1, user_id: 2 }).catch(() => {});
     });
-    expect(toast.error).toHaveBeenCalledWith('Failed to remove workspace member');
+    expect(toast.error).toHaveBeenCalledWith('toasts.workspaceMember.removeWorkspaceMemberFailed');
     expect(spy).not.toHaveBeenCalled();
   });
 });
@@ -192,7 +196,7 @@ describe('useUpdateWorkspaceMemberRole', () => {
         .catch(() => {});
     });
     expect(flowApi.updateWorkspaceMemberRole).not.toHaveBeenCalled();
-    expect(toast.error).toHaveBeenCalledWith('Invalid workspace ID');
+    expect(toast.error).toHaveBeenCalledWith('toasts.workspaceMember.invalidWorkspaceId');
   });
 
   it('rejects and never calls the API when user_id is not a valid finite number', async () => {
@@ -204,7 +208,7 @@ describe('useUpdateWorkspaceMemberRole', () => {
         .catch(() => {});
     });
     expect(flowApi.updateWorkspaceMemberRole).not.toHaveBeenCalled();
-    expect(toast.error).toHaveBeenCalledWith('Invalid user ID');
+    expect(toast.error).toHaveBeenCalledWith('toasts.workspaceMember.invalidUserId');
   });
 
   it('shows an error toast and does not invalidate when the API call fails', async () => {
@@ -217,7 +221,7 @@ describe('useUpdateWorkspaceMemberRole', () => {
         .mutateAsync({ workspace_id: 1, user_id: 2, role: 'admin' })
         .catch(() => {});
     });
-    expect(toast.error).toHaveBeenCalledWith('Failed to update workspace member role');
+    expect(toast.error).toHaveBeenCalledWith('toasts.workspaceMember.updateRoleFailed');
     expect(spy).not.toHaveBeenCalled();
   });
 });

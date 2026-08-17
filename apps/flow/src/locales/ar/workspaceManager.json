@@ -1,0 +1,16 @@
+{
+  "pageTitle": "أعضاء مساحة العمل · rtylr",
+  "title": "أعضاء مساحة العمل",
+  "addMember": "إضافة عضو",
+  "memberCount_one": "{{count}} عضو في مساحة العمل هذه",
+  "memberCount_other": "{{count}} أعضاء في مساحة العمل هذه",
+  "addMemberHeading": "إضافة عضو فريق إلى مساحة العمل هذه",
+  "searchPlaceholder": "البحث بالاسم أو البريد الإلكتروني...",
+  "noOrgMembersFound": "لم يتم العثور على أعضاء في المؤسسة. يمكن فقط إضافة أعضاء الفريق الحاليين إلى مساحات العمل.",
+  "addToWorkspace": "إضافة إلى مساحة العمل",
+  "adding": "جارٍ الإضافة...",
+  "noMembersEmpty": "لا يوجد أعضاء بعد. أضف شخصًا للبدء.",
+  "removeMemberTitle": "إزالة العضو",
+  "removeMemberConfirm": "إزالة {{name}} من مساحة العمل هذه؟ سيفقدون الوصول فورًا، وتبقى أي مهام يملكونها كما هي.",
+  "removeMemberAction": "إزالة"
+}

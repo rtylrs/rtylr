@@ -57,5 +57,20 @@
   },
   "workspace": {
     "noActive": "No active workspace"
+  },
+  "workspaceMember": {
+    "invalidWorkspaceId": "Invalid workspace ID",
+    "invalidUserId": "Invalid user ID",
+    "addWorkspaceMemberFailed": "Failed to add workspace member",
+    "removeWorkspaceMemberFailed": "Failed to remove workspace member",
+    "updateRoleFailed": "Failed to update workspace member role",
+    "roleUpdated": "Role updated",
+    "roleUpdateFailed": "Failed to update role",
+    "cannotRemoveLastAdmin": "Cannot remove the last admin",
+    "removed": "Member removed",
+    "removeFailed": "Failed to remove member",
+    "selectMember": "Select a team member",
+    "added": "Member added to workspace",
+    "addFailed": "Failed to add member"
   }
 }
