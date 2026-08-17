@@ -277,7 +277,8 @@ SELECT
 FROM careers_submissions s
 LEFT JOIN careers c ON c.id = s.career_id
 WHERE s.business_id = ?
-ORDER BY s.created_at DESC;
+ORDER BY s.created_at DESC
+LIMIT 100;
 
 -- name: ListCareerSubmissionsByStatus :many
 SELECT
