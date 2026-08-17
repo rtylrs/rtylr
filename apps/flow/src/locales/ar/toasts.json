@@ -20,7 +20,10 @@
     "bulkDeleteFailed": "تعذّر الحذف الجماعي",
     "selectProjectFirst": "اختر مشروعاً أولاً",
     "invalidDuration": "أدخل مدة صحيحة، مثل \"90m\" أو \"1.5h\"",
-    "moveFailed": "فشل نقل المهمة"
+    "moveFailed": "فشل نقل المهمة",
+    "titleRequired": "عنوان المهمة مطلوب",
+    "linkCopied": "تم نسخ الرابط",
+    "createdWithId": "تم إنشاء {{id}}"
   },
   "comment": {
     "postFailed": "تعذّر نشر التعليق",
@@ -50,12 +53,14 @@
   },
   "notification": {
     "markReadFailed": "فشل تعليم الإشعار كمقروء",
-    "markAllReadFailed": "فشل تعليم جميع الإشعارات كمقروءة"
+    "markAllReadFailed": "فشل تعليم جميع الإشعارات كمقروءة",
+    "savePreferencesFailed": "فشل حفظ تفضيلات الإشعارات"
   },
   "column": {
     "createFailed": "فشل إنشاء العمود",
     "updateFailed": "فشل تحديث العمود",
-    "deleteFailed": "فشل حذف العمود"
+    "deleteFailed": "فشل حذف العمود",
+    "nameRequired": "اسم العمود مطلوب"
   },
   "projectMember": {
     "addFailed": "فشل إضافة العضو",
@@ -63,18 +68,41 @@
     "roleUpdateFailed": "فشل تحديث الدور",
     "transferFailed": "فشل نقل الملكية",
     "invited": "تم إرسال الدعوة",
-    "notFoundByEmail": "لم يتم العثور على مستخدم بهذا البريد الإلكتروني"
+    "notFoundByEmail": "لم يتم العثور على مستخدم بهذا البريد الإلكتروني",
+    "roleUpdated": "تم تحديث الدور",
+    "removed": "تمت إزالة العضو",
+    "transferred": "تم نقل الملكية",
+    "selectNewOwner": "اختر عضوًا",
+    "enterEmail": "أدخل عنوان بريد إلكتروني"
   },
   "project": {
     "createFailed": "فشل إنشاء المشروع",
     "updated": "تم تحديث المشروع",
     "updateFailed": "تعذّر تحديث المشروع",
     "deleteFailed": "فشل حذف المشروع",
-    "moveFailed": "فشل نقل المشروع"
+    "moveFailed": "فشل نقل المشروع",
+    "moved": "تم نقل المشروع",
+    "selectWorkspace": "اختر مساحة عمل",
+    "deleted": "تم حذف المشروع"
   },
   "milestone": {
     "createFailed": "فشل إنشاء المرحلة",
     "updateFailed": "فشل تحديث المرحلة"
+  },
+  "view": {
+    "renamed": "تمت إعادة تسمية العرض",
+    "renameFailed": "فشل إعادة تسمية العرض",
+    "deleted": "تم حذف العرض",
+    "deleteFailed": "فشل حذف العرض",
+    "created": "تم إنشاء العرض"
+  },
+  "weeklyReview": {
+    "logged": "تم تسجيل المراجعة الأسبوعية",
+    "streak_one": "سلسلة {{count}} أسبوع متتالٍ",
+    "streak_other": "سلسلة {{count}} أسابيع متتالية",
+    "alreadyLogged": "تم التسجيل بالفعل هذا الأسبوع",
+    "alreadyLoggedStreak_one": "التتابع: {{count}} أسبوع",
+    "alreadyLoggedStreak_other": "التتابع: {{count}} أسابيع"
   },
   "profile": {
     "updated": "تم تحديث الملف الشخصي",
@@ -88,7 +116,9 @@
     "noActive": "لا توجد مساحة عمل نشطة",
     "createFailed": "فشل إنشاء مساحة العمل",
     "updateFailed": "فشل تحديث مساحة العمل",
-    "deleteFailed": "فشل حذف مساحة العمل"
+    "deleteFailed": "فشل حذف مساحة العمل",
+    "nameRequired": "اسم مساحة العمل مطلوب",
+    "created": "تم إنشاء مساحة العمل"
   },
   "workspaceMember": {
     "invalidWorkspaceId": "معرف مساحة العمل غير صالح",
