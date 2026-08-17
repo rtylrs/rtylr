@@ -8,6 +8,7 @@ JOIN plans p ON p.id = s.plan_id
 LEFT JOIN users u ON u.id = s.owner_id
 LEFT JOIN businesses b ON b.owner_id = s.owner_id AND COALESCE(b.is_active, TRUE) = TRUE
 WHERE s.id = ?
+ORDER BY s.id ASC
 LIMIT 1;
 
 -- name: GetSubscriptionByOwner :one
