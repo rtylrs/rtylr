@@ -271,7 +271,7 @@ const Calendar: React.FC = () => {
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && submitCreate()}
-                placeholder="Task title…"
+                placeholder={t('flow.calendar.taskTitlePlaceholder')}
                 className="w-full rounded-lg px-3 py-2 text-[13px] outline-none mb-3"
                 style={{
                   background: 'var(--flow-input-bg)',
