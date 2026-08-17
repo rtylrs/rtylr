@@ -26,7 +26,7 @@ INSERT INTO self_host_licenses (
 UPDATE self_host_licenses
 SET license_key = ?, key_hash = ?, status = 'active', updated_by = ?,
     regenerated_at = CURRENT_TIMESTAMP, revoked_at = NULL
-WHERE id = ?;
+WHERE id = ? AND owner_email = ?;
 
 -- name: RevokeSelfHostLicense :execrows
 UPDATE self_host_licenses
