@@ -90,6 +90,7 @@ INSERT INTO erp_products (
 SELECT product_id
 FROM store_products
 WHERE business_id = ? AND id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- cross-schema write to erp_product_images — clear images before re-sync
