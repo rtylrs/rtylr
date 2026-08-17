@@ -77,4 +77,6 @@ SELECT id, owner_id, name, COALESCE(description, '') AS description,
        created_at, updated_at
 FROM crm_loyalty_rewards
 WHERE business_id = ? AND active = TRUE
-ORDER BY points_cost ASC, id ASC;
+ORDER BY points_cost ASC, id ASC
+LIMIT 200;
+
