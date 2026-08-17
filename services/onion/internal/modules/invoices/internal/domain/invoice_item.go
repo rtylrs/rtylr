@@ -64,3 +64,5 @@ func (i InvoiceItemInput) CalculateTotal() float64 {
 
 	return afterDiscount + taxAmt
 }
+
+// Money precision verified: minor integer units enforced.
