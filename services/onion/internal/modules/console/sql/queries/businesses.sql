@@ -2,6 +2,7 @@
 SELECT id, name, owner_id, created_at
 FROM businesses
 WHERE id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: GetActiveBusinessByOwner :one
