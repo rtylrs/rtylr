@@ -8,7 +8,8 @@ SELECT ba.addon_id, ba.is_enabled, ba.enabled_at, ba.disabled_at,
        a.name, a.description, a.icon, a.price, a.is_free
 FROM business_addons ba
 JOIN addons a ON a.id = ba.addon_id
-WHERE ba.business_id = ?;
+WHERE ba.business_id = ?
+LIMIT 100;
 
 -- name: EnableAddon :exec
 INSERT INTO business_addons (business_id, addon_id, is_enabled, enabled_at)
