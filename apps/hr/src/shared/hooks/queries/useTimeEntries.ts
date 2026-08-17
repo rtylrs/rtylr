@@ -77,13 +77,19 @@ interface FlowImportResponse {
   skipped: number;
 }
 
+export interface ImportFromFlowRequest {
+  employeeId: number;
+  periodStart: string;
+  periodEnd: string;
+}
+
 export const useImportFromFlow = () => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (): Promise<FlowImportResponse> => {
-      const res = await unwrap(safe.post<FlowImportResponse>('/hr/time-entries/import-flow', {}));
+    mutationFn: async (data: ImportFromFlowRequest): Promise<FlowImportResponse> => {
+      const res = await unwrap(safe.post<FlowImportResponse>('/hr/time-entries/import-flow', data));
       return res as FlowImportResponse;
     },
     onSuccess: (data) => {
