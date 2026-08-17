@@ -2,7 +2,8 @@
 SELECT id, owner_id, business_id, name, description, created_at, updated_at
 FROM erp_categories
 WHERE business_id = ?
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT 100;
 
 -- name: CreateCategory :execresult
 INSERT INTO erp_categories (owner_id, business_id, name, description)
