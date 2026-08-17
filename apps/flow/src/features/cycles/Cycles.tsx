@@ -61,7 +61,7 @@ const Cycles: React.FC = () => {
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="Cycle name"
+            placeholder={t('flow.cycles.namePlaceholder')}
             className="w-full rounded-md px-3 py-2 text-[12px] outline-none"
             style={{
               background: 'var(--flow-input-bg)',
