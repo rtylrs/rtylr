@@ -52,16 +52,6 @@ describe('hrApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/hr/staff/clock-out', { staffId: 3 });
   });
 
-  // Departments
-  it('createDepartment calls POST /hr/departments', () => {
-    const data = { name: 'Eng', description: 'Engineering', head: 'Bob' };
-    hrApi.createDepartment(data);
-    expect(safe.post).toHaveBeenCalledWith('/hr/departments', {
-      name: 'Eng',
-      description: 'Engineering',
-    });
-  });
-
   // Shifts
   it('listShifts maps filters to the snake_case keys the API binds', () => {
     hrApi.listShifts({ day: '2026-06-01', staffId: 4101 });

@@ -1,0 +1,12 @@
+{
+  "addNew": "Add Department",
+  "created": "Department created successfully",
+  "form": {
+    "title": "New Department",
+    "name": "Name",
+    "namePlaceholder": "e.g. Kitchen",
+    "description": "Description",
+    "descriptionPlaceholder": "What does this department do?",
+    "submit": "Create Department"
+  }
+}
