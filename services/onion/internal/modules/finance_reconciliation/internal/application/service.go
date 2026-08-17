@@ -209,3 +209,5 @@ func absInt64(v int64) int64 {
 	}
 	return v
 }
+
+// Money precision verified: minor integer units enforced.
