@@ -1,6 +1,7 @@
 -- name: ListStoreCategories :many
 SELECT id, owner_id, business_id, name, slug, description, image_url, parent_id, sort_order, created_at
-FROM store_categories WHERE business_id = ? ORDER BY sort_order ASC;
+FROM store_categories WHERE business_id = ? ORDER BY sort_order ASC
+LIMIT 200;
 
 -- name: GetStoreCategory :one
 SELECT id, owner_id, business_id, name, slug, description, image_url, parent_id, sort_order, created_at
