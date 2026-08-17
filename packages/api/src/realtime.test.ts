@@ -258,4 +258,133 @@ describe('RealtimeClient', () => {
       client.close();
     });
   });
+
+  describe('onDiagnostic', () => {
+    function stubSocket() {
+      let instance: any = null;
+      const capture = (ws: any): void => {
+        instance = ws;
+      };
+      class MockWebSocket {
+        static CONNECTING = 0;
+        static OPEN = 1;
+        static CLOSING = 2;
+        static CLOSED = 3;
+        readyState = 0;
+        close = vi.fn();
+        send = vi.fn();
+        onopen: any;
+        onmessage: any;
+        onerror: any;
+        onclose: any;
+        constructor(public url: string) {
+          capture(this);
+        }
+      }
+      vi.stubGlobal('WebSocket', MockWebSocket);
+      return () => instance;
+    }
+
+    it('reports a dropped malformed message without affecting delivery of the next good one', async () => {
+      const socket = stubSocket();
+      const onDiagnostic = vi.fn();
+      const client = new RealtimeClient({
+        url: 'wss://test.voxire.com/ws',
+        getTicket: async () => 'ticket',
+        onDiagnostic,
+      });
+      const handler = vi.fn();
+      client.subscribe('project:1', handler);
+      await vi.waitFor(() => expect(socket()).not.toBeNull());
+      socket().readyState = 1;
+      socket().onopen?.();
+
+      socket().onmessage({ data: 'not json{{{' });
+      expect(onDiagnostic).toHaveBeenCalledWith({ type: 'malformed_message' });
+      expect(handler).not.toHaveBeenCalled();
+
+      socket().onmessage({
+        data: JSON.stringify({ op: 'event', event: { topic: 'project:1', type: 'updated' } }),
+      });
+      expect(handler).toHaveBeenCalledWith({ topic: 'project:1', type: 'updated' });
+
+      client.close();
+    });
+
+    it('does not fire for the first two reconnect failures', async () => {
+      const socket = stubSocket();
+      const onDiagnostic = vi.fn();
+      const client = new RealtimeClient({
+        url: 'wss://test.voxire.com/ws',
+        getTicket: async () => 'ticket',
+        onDiagnostic,
+      });
+      client.subscribe('project:1', vi.fn());
+      await vi.waitFor(() => expect(socket()).not.toBeNull());
+      socket().onopen?.();
+
+      socket().onclose?.();
+      expect(onDiagnostic).not.toHaveBeenCalled();
+
+      client.close();
+    });
+
+    it('fires once when reconnect failures cross the repeated-failure threshold', async () => {
+      // scheduleReconnect no-ops while its own backoff timer is still pending,
+      // so getting three real failures counted needs that timer to actually
+      // fire (spawning the next socket) between each close - fake time lets
+      // that happen without the test taking 30+ real seconds.
+      vi.useFakeTimers();
+      try {
+        const socket = stubSocket();
+        const onDiagnostic = vi.fn();
+        const client = new RealtimeClient({
+          url: 'wss://test.voxire.com/ws',
+          getTicket: async () => 'ticket',
+          onDiagnostic,
+        });
+        client.subscribe('project:1', vi.fn());
+        await vi.advanceTimersByTimeAsync(0);
+        expect(socket()).not.toBeNull();
+
+        socket().onclose?.(); // failure 1/3
+        expect(onDiagnostic).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(30_000); // let backoff fire -> new socket
+
+        socket().onclose?.(); // failure 2/3
+        expect(onDiagnostic).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(30_000);
+
+        socket().onclose?.(); // failure 3/3 - crosses the threshold
+        expect(onDiagnostic).toHaveBeenCalledWith({
+          type: 'repeated_reconnect_failures',
+          attempt: 3,
+        });
+        expect(onDiagnostic).toHaveBeenCalledTimes(1);
+
+        client.close();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('never calls onDiagnostic when the caller does not supply one', async () => {
+      const socket = stubSocket();
+      const client = new RealtimeClient({
+        url: 'wss://test.voxire.com/ws',
+        getTicket: async () => 'ticket',
+      });
+      client.subscribe('project:1', vi.fn());
+      await vi.waitFor(() => expect(socket()).not.toBeNull());
+
+      expect(() => {
+        socket().onmessage({ data: 'not json' });
+        socket().onclose?.();
+        socket().onclose?.();
+        socket().onclose?.();
+      }).not.toThrow();
+
+      client.close();
+    });
+  });
 });

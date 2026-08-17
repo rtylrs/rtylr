@@ -24,6 +24,18 @@ export interface RealtimeEvent {
 
 type EventHandler = (e: RealtimeEvent) => void;
 
+/**
+ * Non-fatal signal worth a breadcrumb before something user-visible breaks.
+ * Both cases are already handled automatically by the client - a malformed
+ * frame is dropped, a failing reconnect keeps retrying with backoff - so this
+ * is observability only. Emitted once per `repeated_reconnect_failures`
+ * streak (not on every retry) to avoid flooding whatever the caller wires it
+ * to for as long as the outage lasts.
+ */
+export type RealtimeDiagnosticEvent =
+  | { type: 'malformed_message' }
+  | { type: 'repeated_reconnect_failures'; attempt: number };
+
 interface ClientOptions {
   /** Full ws URL, e.g. `wss://api.voxire.com/flow/ws`. */
   url: string;
@@ -33,6 +45,13 @@ interface ClientOptions {
    * never reuses a ticket that may already have been consumed.
    */
   getTicket: () => Promise<string | null | undefined>;
+  /**
+   * Optional hook for reporting non-fatal conditions (a dropped malformed
+   * message, a reconnect that keeps failing) to whatever observability the
+   * caller wires up. Nothing today calls this if omitted - the client's own
+   * recovery behavior is unaffected either way.
+   */
+  onDiagnostic?: (event: RealtimeDiagnosticEvent) => void;
 }
 
 interface TopicSub {
@@ -42,6 +61,8 @@ interface TopicSub {
 
 const MIN_BACKOFF_MS = 500;
 const MAX_BACKOFF_MS = 30_000;
+/** Consecutive reconnect failures before `repeated_reconnect_failures` fires. */
+const REPEATED_RECONNECT_THRESHOLD = 3;
 
 /**
  * Connection state, for surfaces that must tell the user their view may be
@@ -56,6 +77,7 @@ type StatusHandler = (status: RealtimeStatus) => void;
 export class RealtimeClient {
   private url: string;
   private getTicket: () => Promise<string | null | undefined>;
+  private onDiagnostic?: (event: RealtimeDiagnosticEvent) => void;
   private ws: WebSocket | null = null;
   private subs = new Map<string, TopicSub>();
   private reconnectAttempts = 0;
@@ -69,6 +91,7 @@ export class RealtimeClient {
   constructor(opts: ClientOptions) {
     this.url = opts.url;
     this.getTicket = opts.getTicket;
+    this.onDiagnostic = opts.onDiagnostic;
   }
 
   /** Current connection state. */
@@ -105,6 +128,15 @@ export class RealtimeClient {
         // A listener that throws must not stop the others, or one broken
         // indicator silences every other consumer of this state.
       }
+    }
+  }
+
+  private notifyDiagnostic(event: RealtimeDiagnosticEvent): void {
+    try {
+      this.onDiagnostic?.(event);
+    } catch {
+      // A broken diagnostic hook must not affect message handling or
+      // reconnect scheduling - it is observability, not control flow.
     }
   }
 
@@ -240,7 +272,9 @@ export class RealtimeClient {
           }
         }
       } catch {
-        // Malformed payloads: ignore.
+        // Malformed payloads: dropped, but worth a breadcrumb for whoever's
+        // watching before it becomes a user-visible symptom.
+        this.notifyDiagnostic({ type: 'malformed_message' });
       }
     };
 
@@ -268,6 +302,12 @@ export class RealtimeClient {
   private scheduleReconnect(): void {
     if (this.closed || this.reconnectTimer) return;
     const attempt = this.reconnectAttempts++;
+    // Fire once on crossing the threshold, not on every retry after - the
+    // outage can last minutes and a breadcrumb per backoff cycle would just
+    // be noise by the time anyone reads it.
+    if (attempt + 1 === REPEATED_RECONNECT_THRESHOLD) {
+      this.notifyDiagnostic({ type: 'repeated_reconnect_failures', attempt: attempt + 1 });
+    }
     const backoff = Math.min(MAX_BACKOFF_MS, MIN_BACKOFF_MS * Math.pow(2, attempt));
     // Full jitter - helps when many clients bounce at once.
     const delay = Math.floor(Math.random() * backoff);
