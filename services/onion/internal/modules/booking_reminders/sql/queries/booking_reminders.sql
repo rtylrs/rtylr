@@ -1,6 +1,6 @@
 -- name: ListReminders :many
 SELECT id, owner_id, business_id, appointment_id, type, scheduled_at, sent_at, created_at
-FROM booking_reminders WHERE business_id = ? ORDER BY scheduled_at DESC;
+FROM booking_reminders WHERE business_id = ? ORDER BY scheduled_at DESC LIMIT 100;
 
 -- name: CreateReminder :execresult
 INSERT INTO booking_reminders (owner_id, business_id, appointment_id, type, scheduled_at) VALUES (?, ?, ?, ?, ?);
