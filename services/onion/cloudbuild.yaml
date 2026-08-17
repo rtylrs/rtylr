@@ -64,6 +64,7 @@ steps:
         git config --global \
           url."https://x-access-token:$${GITHUB_PAT}@github.com/".insteadOf \
           "https://github.com/"
+        git submodule sync --recursive
         git submodule update --init --recursive
         if [ ! -f ./voxie/go.mod ]; then
           git clone --depth 1 https://github.com/tryrtylr/voxie.git ./voxie
