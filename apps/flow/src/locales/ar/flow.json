@@ -109,7 +109,9 @@
     "inReview": "قيد المراجعة",
     "done": "مكتمل",
     "cancelled": "ملغى",
-    "noPriority": "بلا أولوية"
+    "noPriority": "بلا أولوية",
+    "subtaskAddPlaceholder": "أضف مهمة فرعية…",
+    "subtaskCount": "{{done}} من {{total}}"
   },
   "time": {
     "heading": "الوقت",
@@ -560,5 +562,23 @@
     "noTasks": "لا توجد مهام",
     "quickAddPlaceholder": "أضف مهمة شخصية واضغط Enter",
     "quickAddButton": "إضافة"
+  },
+  "commandBar": {
+    "goToInbox": "الذهاب إلى صندوق الوارد",
+    "workspaceDashboard": "لوحة تحكم مساحة العمل",
+    "groupActions": "إجراءات",
+    "groupNavigation": "التنقل",
+    "searchPlaceholder": "اكتب أمرًا أو ابحث…",
+    "noResults": "لا توجد نتائج"
+  },
+  "quickCreate": {
+    "title": "مهمة جديدة",
+    "subtitle": "أضف التفاصيل ثم أنشئ",
+    "titlePlaceholder": "اسم المهمة",
+    "unassigned": "غير مسندة",
+    "noEffort": "بدون",
+    "descriptionPlaceholder": "ما الذي يجب إنجازه؟",
+    "creating": "جارٍ الإنشاء…",
+    "createTask": "إنشاء مهمة"
   }
 }
