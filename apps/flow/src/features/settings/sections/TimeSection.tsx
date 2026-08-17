@@ -11,6 +11,7 @@ import { useFlowTeam } from '../../../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../../../shared/lib/memberUtils';
 import { formatDurationClock } from '../../../shared/lib/durationUtils';
 import GateNotice from '../../../shared/components/GateNotice';
+import WorkTypesSection from './WorkTypesSection';
 
 const ROUNDING_OPTIONS: RoundingMinutes[] = [0, 5, 10, 15, 30];
 const UNDO_WINDOW_MS = 2000;
@@ -272,6 +273,8 @@ const TimeSection = (): React.JSX.Element => {
           </p>
         </div>
       </section>
+
+      <WorkTypesSection />
 
       <section>
         <h2

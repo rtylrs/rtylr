@@ -212,6 +212,22 @@
       "ratesOnePerPerson": "One rate per person. The per-project column is deliberately empty: per-project rates arrive as a value in that cell, not as a rewrite of this table.",
       "rateFor": "Hourly rate for {{name}}",
       "rateNotSet": "Not set"
+    },
+    "workTypes": {
+      "section": "Work types",
+      "explained": "The list an employee picks from in Log Hours. The description shows up there as the task description once picked.",
+      "loading": "Loading work types…",
+      "empty": "No work types yet. Add one below.",
+      "name": "Name",
+      "namePlaceholder": "e.g. Development",
+      "description": "Description",
+      "descriptionPlaceholder": "Shown to employees once they pick this type",
+      "add": "Add work type",
+      "save": "Save",
+      "cancel": "Cancel",
+      "removeLabel": "Remove {{name}}",
+      "saveFailed": "Could not save that work type.",
+      "deleteFailed": "Could not delete that work type."
     }
   },
   "presence": {

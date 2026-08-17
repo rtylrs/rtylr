@@ -70,6 +70,8 @@ describe('flow locale parity', () => {
       // Pure placeholder with no prose to translate, same as the duration
       // placeholders above.
       'taskDetail.genericActivityNoValue',
+      // "Description" is the same word in French too.
+      'settings.workTypes.description',
     ]);
 
     const copied = keyPaths(en).filter((path) => {

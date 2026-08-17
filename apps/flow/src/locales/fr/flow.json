@@ -212,6 +212,22 @@
       "ratesOnePerPerson": "Un tarif par personne. La colonne par projet est vide à dessein : les tarifs par projet arriveront comme une valeur dans cette cellule, pas comme une refonte de ce tableau.",
       "rateFor": "Tarif horaire de {{name}}",
       "rateNotSet": "Non défini"
+    },
+    "workTypes": {
+      "section": "Types de travail",
+      "explained": "La liste dans laquelle un employé choisit dans Log Hours. La description y apparaît comme la description de la tâche une fois sélectionnée.",
+      "loading": "Chargement des types de travail…",
+      "empty": "Aucun type de travail pour l'instant. Ajoutez-en un ci-dessous.",
+      "name": "Nom",
+      "namePlaceholder": "ex. Développement",
+      "description": "Description",
+      "descriptionPlaceholder": "Affiché aux employés une fois ce type sélectionné",
+      "add": "Ajouter un type de travail",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "removeLabel": "Supprimer {{name}}",
+      "saveFailed": "Impossible d'enregistrer ce type de travail.",
+      "deleteFailed": "Impossible de supprimer ce type de travail."
     }
   },
   "presence": {

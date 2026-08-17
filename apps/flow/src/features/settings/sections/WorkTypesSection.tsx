@@ -1,0 +1,210 @@
+import React, { useState } from 'react';
+import { Plus, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import {
+  useCreateWorkType,
+  useDeleteWorkType,
+  useUpdateWorkType,
+  useWorkTypes,
+} from '../../time/useWorkDay';
+
+const inputClass =
+  'flow-focus min-h-[44px] w-full rounded px-2 py-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]';
+
+function inputStyle(): React.CSSProperties {
+  return {
+    background: 'var(--flow-input-bg)',
+    border: '1px solid var(--flow-border)',
+    color: 'var(--flow-text)',
+  };
+}
+
+/**
+ * The list an employee picks from in Log Hours. Each entry's description is
+ * what shows up there as the read-only "Task Description" once picked - this
+ * is where that text is authored, not typed per entry.
+ */
+const WorkTypesSection = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const { data, isLoading } = useWorkTypes();
+  const createWorkType = useCreateWorkType();
+  const updateWorkType = useUpdateWorkType();
+  const deleteWorkType = useDeleteWorkType();
+
+  const [newName, setNewName] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+
+  const workTypes = (data?.workTypes ?? []).filter((wt) => !wt.parentId);
+
+  const addWorkType = (): void => {
+    if (!newName.trim()) return;
+    createWorkType.mutate(
+      { name: newName.trim(), description: newDescription.trim() },
+      {
+        onSuccess: () => {
+          setNewName('');
+          setNewDescription('');
+        },
+      }
+    );
+  };
+
+  const startEdit = (id: string, name: string, description: string): void => {
+    setEditingId(id);
+    setEditName(name);
+    setEditDescription(description);
+  };
+
+  const saveEdit = (id: string): void => {
+    if (!editName.trim()) return;
+    updateWorkType.mutate(
+      { id, name: editName.trim(), description: editDescription.trim(), archived: false },
+      { onSuccess: () => setEditingId(null) }
+    );
+  };
+
+  return (
+    <section>
+      <h2
+        className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
+        style={{ color: 'var(--flow-text-muted)' }}
+      >
+        {t('flow.settings.workTypes.section')}
+      </h2>
+      <p className="mb-3 text-[11px] leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
+        {t('flow.settings.workTypes.explained')}
+      </p>
+
+      {isLoading ? (
+        <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+          {t('flow.settings.workTypes.loading')}
+        </p>
+      ) : workTypes.length === 0 ? (
+        <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+          {t('flow.settings.workTypes.empty')}
+        </p>
+      ) : (
+        <ul className="space-y-1.5">
+          {workTypes.map((wt) => {
+            const id = wt.id ?? '';
+            const isEditing = editingId === id;
+            return (
+              <li key={id} className="rounded-md p-2" style={{ background: 'var(--flow-hover)' }}>
+                {isEditing ? (
+                  <div className="flex flex-col gap-2">
+                    <input
+                      aria-label={t('flow.settings.workTypes.name')}
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className={inputClass}
+                      style={inputStyle()}
+                    />
+                    <input
+                      aria-label={t('flow.settings.workTypes.description')}
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      placeholder={t('flow.settings.workTypes.descriptionPlaceholder')}
+                      className={inputClass}
+                      style={inputStyle()}
+                    />
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setEditingId(null)}
+                        className="flow-focus min-h-[44px] rounded px-3 text-[13px] font-medium md:min-h-0 md:py-1.5"
+                        style={{ color: 'var(--flow-text-muted)' }}
+                      >
+                        {t('flow.settings.workTypes.cancel')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => saveEdit(id)}
+                        disabled={updateWorkType.isPending}
+                        className="flow-focus min-h-[44px] rounded px-3 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
+                        style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
+                      >
+                        {t('flow.settings.workTypes.save')}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => startEdit(id, wt.name ?? '', wt.description ?? '')}
+                      className="flow-focus min-w-0 flex-1 rounded px-1 py-0.5 text-left"
+                    >
+                      <p
+                        className="truncate text-[13px] font-medium"
+                        style={{ color: 'var(--flow-text)' }}
+                      >
+                        {wt.name}
+                      </p>
+                      {wt.description && (
+                        <p
+                          className="mt-0.5 truncate text-[11px]"
+                          style={{ color: 'var(--flow-text-muted)' }}
+                        >
+                          {wt.description}
+                        </p>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteWorkType.mutate(id)}
+                      aria-label={t('flow.settings.workTypes.removeLabel', { name: wt.name })}
+                      className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded md:h-8 md:w-8"
+                      style={{ color: 'var(--flow-text-muted)' }}
+                    >
+                      <X size={14} aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <div className="mt-3 flex flex-col gap-2">
+        <input
+          aria-label={t('flow.settings.workTypes.name')}
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          placeholder={t('flow.settings.workTypes.namePlaceholder')}
+          className={inputClass}
+          style={inputStyle()}
+        />
+        <input
+          aria-label={t('flow.settings.workTypes.description')}
+          value={newDescription}
+          onChange={(e) => setNewDescription(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              addWorkType();
+            }
+          }}
+          placeholder={t('flow.settings.workTypes.descriptionPlaceholder')}
+          className={inputClass}
+          style={inputStyle()}
+        />
+        <button
+          type="button"
+          onClick={addWorkType}
+          disabled={!newName.trim() || createWorkType.isPending}
+          className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 self-start rounded px-3 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2"
+          style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
+        >
+          <Plus size={14} aria-hidden="true" />
+          {t('flow.settings.workTypes.add')}
+        </button>
+      </div>
+    </section>
+  );
+};
+
+export default WorkTypesSection;
