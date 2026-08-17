@@ -52,6 +52,7 @@ SELECT
     updated_at
 FROM careers_sections
 WHERE id = ? AND business_id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: CreateSection :execresult
