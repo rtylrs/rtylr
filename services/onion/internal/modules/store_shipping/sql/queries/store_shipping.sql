@@ -1,6 +1,7 @@
 -- name: ListShippingMethods :many
 SELECT id, owner_id, business_id, name, price, estimated_days, is_active, created_at
-FROM store_shipping_methods WHERE business_id = ? ORDER BY name ASC;
+FROM store_shipping_methods WHERE business_id = ? ORDER BY name ASC
+LIMIT 200;
 
 -- name: CreateShippingMethod :execresult
 INSERT INTO store_shipping_methods (owner_id, business_id, name, price, estimated_days, is_active) VALUES (?, ?, ?, ?, ?, ?);
