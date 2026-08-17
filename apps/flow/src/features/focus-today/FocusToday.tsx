@@ -53,7 +53,7 @@ const FocusToday: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full max-w-3xl mx-auto px-4 py-6 sm:px-6 sm:py-8">
-      <HelmetContainer title="Today · rtylr" />
+      <HelmetContainer title={`${t('nav.focusToday')} · Flow`} />
       <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center gap-2 mb-1">
           <Sun size={22} style={{ color: ACCENT_VAR }} strokeWidth={2} />
@@ -62,20 +62,19 @@ const FocusToday: React.FC = () => {
           </h1>
         </div>
         <p className="text-[13px] leading-relaxed" style={{ color: 'var(--flow-text-muted)' }}>
-          A short list: pinned items and anything due today. Everything else stays out of this view
-          so you can commit without scanning the whole backlog.
+          {t('common.focusToday.subtitle')}
         </p>
         {backlogHint > 0 && (
           <p className="text-[12px] mt-3" style={{ color: 'var(--flow-text-dim)' }}>
-            {backlogHint} task{backlogHint === 1 ? '' : 's'} still in backlog, use{' '}
+            {t('common.focusToday.backlogHint', { count: backlogHint })}{' '}
             <Link
               to="/triage"
               className="underline-offset-2 hover:underline"
               style={{ color: ACCENT_VAR }}
             >
-              Triage
+              {t('flow.shell.triage')}
             </Link>{' '}
-            when you are ready.
+            {t('common.focusToday.backlogHintSuffix')}
           </p>
         )}
       </motion.div>
@@ -114,47 +113,57 @@ const FocusRow: React.FC<{
   task: Task;
   project: Project | undefined;
   index: number;
-}> = ({ task, project, index }) => (
-  <motion.li
-    initial={{ opacity: 0, x: -6 }}
-    animate={{ opacity: 1, x: 0 }}
-    transition={{ delay: index * 0.04 }}
-  >
-    <Link
-      to={`/task/${task.id}` as string}
-      className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--flow-hover)] transition-colors"
+}> = ({ task, project, index }) => {
+  const { t } = useTranslation();
+  return (
+    <motion.li
+      initial={{ opacity: 0, x: -6 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.04 }}
     >
-      <PriorityIcon priority={task.priority} />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          {task.focusPin && (
-            <Pin size={12} className="shrink-0" style={{ color: ACCENT_VAR }} aria-hidden />
-          )}
-          <span className="text-[13px] font-medium truncate" style={{ color: 'var(--flow-text)' }}>
-            {task.title}
-          </span>
+      <Link
+        to={`/task/${task.id}` as string}
+        className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--flow-hover)] transition-colors"
+      >
+        <PriorityIcon priority={task.priority} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            {task.focusPin && (
+              <Pin size={12} className="shrink-0" style={{ color: ACCENT_VAR }} aria-hidden />
+            )}
+            <span
+              className="text-[13px] font-medium truncate"
+              style={{ color: 'var(--flow-text)' }}
+            >
+              {task.title}
+            </span>
+          </div>
+          <div
+            className="flex items-center gap-2 mt-1 text-[11px]"
+            style={{ color: 'var(--flow-text-dim)' }}
+          >
+            <span className="truncate">{project?.name ?? task.projectName}</span>
+            {task.dueDate && (
+              <>
+                <span>·</span>
+                <span>
+                  {isDueToday(task.dueDate)
+                    ? t('common.focusToday.dueToday')
+                    : formatDate(task.dueDate)}
+                </span>
+              </>
+            )}
+            {task.effortMinutes != null && task.effortMinutes > 0 && (
+              <>
+                <span>·</span>
+                <span>{formatEffortMinutes(task.effortMinutes)}</span>
+              </>
+            )}
+          </div>
         </div>
-        <div
-          className="flex items-center gap-2 mt-1 text-[11px]"
-          style={{ color: 'var(--flow-text-dim)' }}
-        >
-          <span className="truncate">{project?.name ?? task.projectName}</span>
-          {task.dueDate && (
-            <>
-              <span>·</span>
-              <span>{isDueToday(task.dueDate) ? 'Due today' : formatDate(task.dueDate)}</span>
-            </>
-          )}
-          {task.effortMinutes != null && task.effortMinutes > 0 && (
-            <>
-              <span>·</span>
-              <span>{formatEffortMinutes(task.effortMinutes)}</span>
-            </>
-          )}
-        </div>
-      </div>
-    </Link>
-  </motion.li>
-);
+      </Link>
+    </motion.li>
+  );
+};
 
 export default FocusToday;

@@ -43,13 +43,13 @@ const Insights: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <HelmetContainer title="Insights · rtylr" />
+      <HelmetContainer title={`${t('common.insights.heading')} · Flow`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-          Insights
+          {t('common.insights.heading')}
         </h1>
         <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-          Velocity, burndown, and team stats
+          {t('common.insights.subtitle')}
         </p>
       </div>
 
@@ -58,32 +58,32 @@ const Insights: React.FC = () => {
         <div className="grid grid-cols-4 gap-4">
           <Kpi
             icon={CheckCircle2}
-            label="Completed"
+            label={t('common.insights.kpi.completed')}
             value={String(data.doneTasks)}
-            hint={`of ${data.totalTasks}`}
+            hint={t('common.insights.kpi.completedHint', { total: data.totalTasks })}
             color="#22c55e"
           />
           <Kpi
             icon={TrendingUp}
-            label="Velocity"
+            label={t('common.insights.kpi.velocity')}
             value={`${Math.round(
               data.velocity.reduce((s, v) => s + v.completed, 0) / Math.max(1, data.velocity.length)
             )}`}
-            hint="avg per cycle"
+            hint={t('common.insights.kpi.velocityHint')}
             color="#3b82f6"
           />
           <Kpi
             icon={Clock}
-            label="Cycle time"
+            label={t('common.insights.kpi.cycleTime')}
             value={`${data.cycleTime}d`}
-            hint="avg task"
+            hint={t('common.insights.kpi.cycleTimeHint')}
             color="#f59e0b"
           />
           <Kpi
             icon={BarChart3}
-            label="Throughput"
+            label={t('common.insights.kpi.throughput')}
             value={`${data.throughput.reduce((s, t) => s + t.completed, 0)}`}
-            hint="6 weeks"
+            hint={t('common.insights.kpi.throughputHint')}
             color="#a855f7"
           />
         </div>
@@ -269,13 +269,16 @@ const ChartCard: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
   </div>
 );
 
-const EmptyChart: React.FC = () => (
-  <div
-    className="flex items-center justify-center h-40 text-[11px]"
-    style={{ color: 'var(--flow-text-dim)' }}
-  >
-    No data available
-  </div>
-);
+const EmptyChart: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <div
+      className="flex items-center justify-center h-40 text-[11px]"
+      style={{ color: 'var(--flow-text-dim)' }}
+    >
+      {t('common.insights.noData')}
+    </div>
+  );
+};
 
 export default Insights;
