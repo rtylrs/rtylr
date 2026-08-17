@@ -86,6 +86,13 @@ func (h *ListCampaignsHandler) Serve(ctx context.Context, req *ListCampaignsRequ
 	if bizErr != nil {
 		return ListCampaignsResponse{}, onekiterrors.PermissionDenied()
 	}
+	const maxCampaignPageSize int32 = 100
+	if req.Limit <= 0 || req.Limit > maxCampaignPageSize {
+		req.Limit = maxCampaignPageSize
+	}
+	if req.Offset < 0 {
+		req.Offset = 0
+	}
 	page, err := h.Service.ListPaginated(ctx, businessID, req.Limit, req.Offset)
 	if err != nil {
 		return ListCampaignsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list campaigns")
