@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useFlowStore, type Project, type Milestone } from '../../shared/stores/flowStore';
 import { useProjects } from '../projects/useProjects';
@@ -12,6 +13,7 @@ function parseDate(d: string): number {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const Timeline: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const { activeWorkspaceId } = useFlowStore();
   const storeProjects = useFlowStore((s) => s.projects);
   const storeMilestones = useFlowStore((s) => s.milestones);
@@ -29,23 +31,25 @@ const Timeline: React.FC = () => {
       const dt = new Date(t);
       d.push({
         label:
-          dt.getDate() === 1 ? dt.toLocaleString('default', { month: 'short' }) : `${dt.getDate()}`,
+          dt.getDate() === 1
+            ? dt.toLocaleString(i18n.language, { month: 'short' })
+            : `${dt.getDate()}`,
         time: t,
         isMonth: dt.getDate() === 1,
       });
     }
     return { start: s, end: e, days: d };
-  }, []);
+  }, [i18n.language]);
 
   const total = end - start;
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="Timeline · rtylr" />
+      <HelmetContainer title={`${t('flow.shell.timeline')} · Flow`} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
-        <Breadcrumbs items={[{ label: 'Timeline' }]} />
+        <Breadcrumbs items={[{ label: t('flow.shell.timeline') }]} />
         <h1 className="text-[15px] font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>
-          Timeline
+          {t('flow.shell.timeline')}
         </h1>
       </div>
       <div className="flex-1 overflow-auto">
@@ -62,7 +66,7 @@ const Timeline: React.FC = () => {
               className="w-48 shrink-0 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider"
               style={{ color: 'var(--flow-text-dim)', borderRight: '1px solid var(--flow-border)' }}
             >
-              Project
+              {t('flow.timeline.projectColumn')}
             </div>
             <div className="flex-1 flex text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
               {days
