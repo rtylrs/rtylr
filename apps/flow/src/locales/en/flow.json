@@ -40,7 +40,9 @@
     "assignedOpenTasks": "{{count}} assigned open tasks",
     "focusItems": "{{count}} due or pinned focus items",
     "quietHoursActive": "Quiet hours are active",
-    "quietHoursNotice": "Quiet hours ({{start}}–{{end}}), non-urgent reminders stay soft. Digest preference: {{digestHour}}:00. Change in Settings → Life & rhythm."
+    "quietHoursNotice": "Quiet hours ({{start}}–{{end}}), non-urgent reminders stay soft. Digest preference: {{digestHour}}:00. Change in Settings → Life & rhythm.",
+    "realtimeReconnecting": "Reconnecting…",
+    "realtimeDisconnected": "Disconnected. Reload to see the latest."
   },
   "taskDetail": {
     "loading": "Loading task…",
