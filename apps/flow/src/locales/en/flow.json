@@ -486,5 +486,51 @@
       "atRisk": "At risk",
       "completed": "Completed"
     }
+  },
+  "roadmap": {
+    "loading": "Loading roadmap...",
+    "subtitle": "High-level view of projects in flight",
+    "taskCount": "{{done}} of {{total}} tasks done",
+    "start": "Start:",
+    "target": "Target:"
+  },
+  "triage": {
+    "subtitle_one": "{{count}} task needs attention · Capture → set priority & date → move out of backlog",
+    "subtitle_other": "{{count}} tasks need attention · Capture → set priority & date → move out of backlog",
+    "emptyTitle": "Inbox zero",
+    "emptyDescription": "Nothing stuck without a priority or due date. New work lands in capture first-keep triage lean so planned work stays trustworthy."
+  },
+  "team": {
+    "loading": "Loading team...",
+    "memberCount_one": "{{count}} member · capacity and workload",
+    "memberCount_other": "{{count}} members · capacity and workload",
+    "moreCount": "+{{count}} more"
+  },
+  "timeline": {
+    "projectColumn": "Project"
+  },
+  "cycles": {
+    "loading": "Loading cycles...",
+    "subtitle": "Two-week delivery sprints",
+    "newCycle": "New cycle",
+    "namePlaceholder": "Cycle name",
+    "creating": "Creating...",
+    "create": "Create",
+    "cancel": "Cancel",
+    "activeCycle": "Active cycle",
+    "taskCount": "{{done}} of {{total}} tasks done",
+    "sectionUpcoming": "Upcoming",
+    "sectionCompleted": "Completed",
+    "dateRange": "{{start}} to {{end}}"
+  },
+  "myIssues": {
+    "loading": "Loading…",
+    "taskCount_one": "{{count}} task assigned to you",
+    "taskCount_other": "{{count}} tasks assigned to you",
+    "emptyTitle": "No tasks assigned",
+    "emptyDescription": "Nothing is on your plate right now. Nice work!",
+    "noTasks": "No tasks",
+    "quickAddPlaceholder": "Add a personal task and press Enter",
+    "quickAddButton": "Add"
   }
 }
