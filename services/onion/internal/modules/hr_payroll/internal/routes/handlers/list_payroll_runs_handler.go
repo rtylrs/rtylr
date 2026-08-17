@@ -48,6 +48,13 @@ func (h *ListPayrollRunsHandler) Serve(ctx context.Context, req *ListPayrollRuns
 		return ListPayrollRunsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	if req.Limit <= 0 {
+		req.Limit = 50
+	}
+	if req.Limit > 100 {
+		req.Limit = 100
+	}
+
 	runs, total, err := h.Service.ListPayrollRuns(ctx, device.User.UserID, domain.ListPayrollRunsParams{
 		Limit: req.Limit, Offset: req.Offset,
 	})

@@ -40,10 +40,17 @@ WHERE business_id = ? AND id = ? AND status = 'exporting' AND exported_at IS NUL
 SELECT id, owner_id, business_id, period_start, period_end, status, created_by, approved_by, exported_at, total_gross, total_net, created_at, updated_at
 FROM hr_payroll_runs
 WHERE business_id = ? AND period_start = ? AND period_end = ?
+ORDER BY id ASC
 LIMIT 1;
 
+-- ListDistinctPayrollOwnerIDs scans every business with a payroll config, not
+-- just one business, so it stays unpaginated by design - bounded by the same
+-- generous hard LIMIT as the other cross-tenant enumeration queries in this
+-- module (see ListAllPayrollConfigs).
 -- name: ListDistinctPayrollOwnerIDs :many
-SELECT DISTINCT business_id FROM hr_payroll_config;
+SELECT DISTINCT business_id FROM hr_payroll_config
+ORDER BY business_id
+LIMIT 5000;
 
 -- name: ListPayrollRunsForEmployee :many
 SELECT r.id, r.owner_id, r.business_id, r.period_start, r.period_end, r.status, r.created_by, r.approved_by, r.exported_at, r.total_gross, r.total_net, r.created_at, r.updated_at
