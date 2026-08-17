@@ -36,7 +36,7 @@ LIMIT 1;
 UPDATE manual_addon_grants SET revoked_at = NOW() WHERE id = ?;
 
 -- name: DeleteAddonGrant :exec
-DELETE FROM manual_addon_grants WHERE id = ?;
+DELETE FROM manual_addon_grants WHERE id = ? AND business_id = ?;
 
 -- name: IsBusinessAddonEnabled :one
 SELECT COUNT(*) FROM business_addons
