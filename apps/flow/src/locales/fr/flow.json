@@ -108,7 +108,8 @@
     "inReview": "En revue",
     "done": "Terminé",
     "cancelled": "Annulé",
-    "noPriority": "Aucune priorité"
+    "noPriority": "Aucune priorité",
+    "subtaskAddPlaceholder": "Ajouter une sous-tâche…"
   },
   "time": {
     "heading": "Temps",
@@ -181,6 +182,8 @@
     }
   },
   "settings": {
+    "workspaceNamePlaceholder": "Nom de l'espace de travail",
+    "labelNamePlaceholder": "Nom de l'étiquette",
     "time": {
       "section": "Temps",
       "localOnlyWarning": "Ces réglages sont enregistrés dans ce navigateur uniquement. Ils passeront au niveau de l'espace de travail dès que le point d'accès aux réglages de temps existera ; d'ici là, les autres voient les valeurs par défaut.",
@@ -296,6 +299,7 @@
     "viewMyDay": "Voir Ma journée"
   },
   "board": {
+    "columnNamePlaceholder": "Nom de la colonne",
     "settingsTitle": "Réglages du tableau",
     "openSettings": "Ouvrir les réglages du tableau",
     "closeSettings": "Fermer les réglages du tableau",
@@ -336,5 +340,27 @@
       "priority": "Priorité",
       "due": "Échéance"
     }
+  },
+  "cycles": {
+    "namePlaceholder": "Nom de l'itération"
+  },
+  "myIssues": {
+    "quickAddPlaceholder": "Ajoutez une tâche personnelle et appuyez sur Entrée"
+  },
+  "calendar": {
+    "taskTitlePlaceholder": "Titre de la tâche…"
+  },
+  "projectSettings": {
+    "emailPlaceholder": "Adresse e-mail"
+  },
+  "milestones": {
+    "namePlaceholder": "Nom du jalon"
+  },
+  "quickCreate": {
+    "titlePlaceholder": "Nom de la tâche",
+    "descriptionPlaceholder": "Que faut-il faire ?"
+  },
+  "commandBar": {
+    "searchPlaceholder": "Tapez une commande ou une recherche…"
   }
 }
