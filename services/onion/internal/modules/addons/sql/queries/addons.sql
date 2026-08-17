@@ -1,7 +1,8 @@
 -- name: ListAllAddons :many
 SELECT id, name, description, icon, price, is_free, is_default_enabled, sort_order
 FROM addons
-ORDER BY sort_order ASC;
+ORDER BY sort_order ASC
+LIMIT 100;
 
 -- name: ListBusinessAddons :many
 SELECT ba.addon_id, ba.is_enabled, ba.enabled_at, ba.disabled_at,
