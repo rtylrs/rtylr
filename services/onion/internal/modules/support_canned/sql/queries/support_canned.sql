@@ -1,7 +1,8 @@
 -- name: ListCannedResponses :many
 SELECT id, business_id, name, body, category, shortcut, created_at
 FROM support_canned_responses WHERE business_id = ?
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT 200;
 
 -- name: CreateCannedResponse :execresult
 INSERT INTO support_canned_responses (business_id, name, body, category, shortcut)
