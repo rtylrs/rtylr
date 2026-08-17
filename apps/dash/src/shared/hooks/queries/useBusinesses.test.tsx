@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import {
+  useCreateSubBusiness,
   useDeleteBusiness,
   useListMyBusinesses,
   useRenameBusiness,
@@ -87,6 +88,22 @@ describe('business queries', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(mockDelete).toHaveBeenCalledWith('/hub/business/v1/businesses/42');
+  });
+
+  it('sends the int64 parent business ID as a JSON string when creating', async () => {
+    mockPost.mockResolvedValue({ id: '99' });
+
+    const { result } = renderHook(() => useCreateSubBusiness(), { wrapper: createWrapper() });
+
+    act(() => {
+      result.current.mutate({ name: 'Second branch', parentBusinessId: 42 });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(mockPost).toHaveBeenCalledWith('/hub/business/v1/businesses', {
+      name: 'Second branch',
+      parentBusinessId: '42',
+    });
   });
 
   it('sends int64 business IDs as JSON strings when switching', async () => {
