@@ -51,6 +51,7 @@ SELECT
     updated_at
 FROM careers_form_fields
 WHERE id = ? AND business_id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: CreateFormField :execresult
