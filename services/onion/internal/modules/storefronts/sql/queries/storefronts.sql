@@ -2,7 +2,8 @@
 SELECT id, owner_id, business_id, name, domain, logo_url, theme_id, is_published, created_at, updated_at
 FROM store_sites
 WHERE business_id = ?
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT 200;
 
 -- name: CreateStorefront :execresult
 INSERT INTO store_sites (owner_id, business_id, name, domain, logo_url, theme_id, is_published)
