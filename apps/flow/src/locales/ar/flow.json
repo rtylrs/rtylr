@@ -108,7 +108,8 @@
     "inReview": "قيد المراجعة",
     "done": "مكتمل",
     "cancelled": "ملغى",
-    "noPriority": "بلا أولوية"
+    "noPriority": "بلا أولوية",
+    "subtaskAddPlaceholder": "إضافة مهمة فرعية…"
   },
   "time": {
     "heading": "الوقت",
@@ -185,6 +186,8 @@
     }
   },
   "settings": {
+    "workspaceNamePlaceholder": "اسم مساحة العمل",
+    "labelNamePlaceholder": "اسم التسمية",
     "time": {
       "section": "الوقت",
       "localOnlyWarning": "تُحفظ هذه الإعدادات في هذا المتصفّح فقط. ستنتقل إلى مستوى مساحة العمل عند توفّر نقطة إعدادات الوقت، وحتى ذلك الحين يرى بقية المستخدمين القيم الافتراضية.",
@@ -304,6 +307,7 @@
     "viewMyDay": "عرض يومي"
   },
   "board": {
+    "columnNamePlaceholder": "اسم العمود",
     "settingsTitle": "إعدادات اللوحة",
     "openSettings": "فتح إعدادات اللوحة",
     "closeSettings": "إغلاق إعدادات اللوحة",
@@ -344,5 +348,27 @@
       "priority": "الأولوية",
       "due": "نطاق الاستحقاق"
     }
+  },
+  "cycles": {
+    "namePlaceholder": "اسم الدورة"
+  },
+  "myIssues": {
+    "quickAddPlaceholder": "أضف مهمة شخصية واضغط Enter"
+  },
+  "calendar": {
+    "taskTitlePlaceholder": "عنوان المهمة…"
+  },
+  "projectSettings": {
+    "emailPlaceholder": "البريد الإلكتروني"
+  },
+  "milestones": {
+    "namePlaceholder": "اسم المرحلة"
+  },
+  "quickCreate": {
+    "titlePlaceholder": "اسم المهمة",
+    "descriptionPlaceholder": "ما الذي يجب إنجازه؟"
+  },
+  "commandBar": {
+    "searchPlaceholder": "اكتب أمراً أو ابحث…"
   }
 }
