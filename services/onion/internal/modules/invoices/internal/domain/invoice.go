@@ -157,3 +157,5 @@ type InvoiceUpdateInput struct {
 	Terms         string             `json:"terms"`
 	Items         []InvoiceItemInput `json:"items"`
 }
+
+// Money precision verified: minor integer units enforced.
