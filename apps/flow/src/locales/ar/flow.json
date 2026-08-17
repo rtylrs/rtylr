@@ -111,7 +111,8 @@
     "cancelled": "ملغى",
     "noPriority": "بلا أولوية",
     "subtaskAddPlaceholder": "أضف مهمة فرعية…",
-    "subtaskCount": "{{done}} من {{total}}"
+    "subtaskCount": "{{done}} من {{total}}",
+    "removeAttachmentLabel": "إزالة المرفق"
   },
   "time": {
     "heading": "الوقت",
@@ -249,7 +250,8 @@
       "namePlaceholder": "اسم مساحة العمل",
       "color": "اللون",
       "creating": "جارٍ الإنشاء…",
-      "createWorkspace": "إنشاء مساحة عمل"
+      "createWorkspace": "إنشاء مساحة عمل",
+      "chooseColorLabel": "اختيار اللون {{color}}"
     },
     "team": {
       "section": "الفريق",
@@ -338,7 +340,9 @@
       "deleteLabel": "حذف التصنيف",
       "deleteConfirmPrefix": "هل تريد حذف",
       "deleteConfirmSuffix": "؟ ستتم إزالته من كل مهمة مرتبط بها."
-    }
+    },
+    "chooseColorLabel": "اختيار اللون {{color}}",
+    "deleteLabelLabel": "حذف التسمية"
   },
   "presence": {
     "heading": "من موجود اليوم",
@@ -468,7 +472,12 @@
       "descriptionPrefix": "هل تريد حذف عرض",
       "descriptionSuffix": "؟ سيتم فقدان الفلاتر؛ المهام نفسها لن تتأثر.",
       "confirmLabel": "حذف العرض"
-    }
+    },
+    "newViewLabel": "طريقة عرض جديدة",
+    "confirmRenameLabel": "تأكيد إعادة التسمية",
+    "cancelRenameLabel": "إلغاء إعادة التسمية",
+    "renameLabel": "إعادة تسمية",
+    "deleteLabel": "حذف"
   },
   "calendar": {
     "heading": "التقويم",
@@ -480,7 +489,9 @@
     "titlePlaceholder": "عنوان المهمة…",
     "cancel": "إلغاء",
     "create": "إنشاء",
-    "creating": "جارٍ الإنشاء…"
+    "creating": "جارٍ الإنشاء…",
+    "prevMonthLabel": "الشهر السابق",
+    "nextMonthLabel": "الشهر التالي"
   },
   "milestones": {
     "heading": "المعالم",
@@ -585,7 +596,8 @@
     "createTask": "إنشاء مهمة"
   },
   "projectList": {
-    "pageTitle": "القائمة · rtylr"
+    "pageTitle": "القائمة · rtylr",
+    "toggleDoneLabel": "وضع علامة مكتمل"
   },
   "projectOverview": {
     "pageTitle": "نظرة عامة · rtylr"
@@ -604,5 +616,8 @@
   "projectSettings": {
     "pageTitle": "إعدادات المشروع · rtylr",
     "removeMemberLabel": "إزالة"
+  },
+  "bulkEdit": {
+    "clearSelectionLabel": "إلغاء التحديد"
   }
 }
