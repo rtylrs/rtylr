@@ -103,6 +103,7 @@ const Views: React.FC = () => {
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-dim)' }}
             title={t('flow.views.addTooltip')}
+            aria-label={t('flow.views.newViewLabel')}
           >
             <Plus size={11} />
           </button>
@@ -135,6 +136,7 @@ const Views: React.FC = () => {
                     />
                     <button
                       onClick={() => commitEdit(v)}
+                      aria-label={t('flow.views.confirmRenameLabel')}
                       className="h-4 w-4 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                       style={{ color: 'var(--accent)' }}
                     >
@@ -142,6 +144,7 @@ const Views: React.FC = () => {
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
+                      aria-label={t('flow.views.cancelRenameLabel')}
                       className="h-4 w-4 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                       style={{ color: 'var(--flow-text-dim)' }}
                     >
@@ -164,6 +167,7 @@ const Views: React.FC = () => {
                         className="h-5 w-5 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                         style={{ color: 'var(--flow-text-dim)' }}
                         title={t('flow.views.renameTooltip')}
+                        aria-label={t('flow.views.renameLabel')}
                       >
                         <Pencil size={9} />
                       </button>
@@ -172,6 +176,7 @@ const Views: React.FC = () => {
                         className="h-5 w-5 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                         style={{ color: 'var(--flow-text-dim)' }}
                         title={t('flow.views.deleteTooltip')}
+                        aria-label={t('flow.views.deleteLabel')}
                         onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
                         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
                       >

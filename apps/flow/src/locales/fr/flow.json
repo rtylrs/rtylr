@@ -111,7 +111,8 @@
     "cancelled": "Annulé",
     "noPriority": "Aucune priorité",
     "subtaskAddPlaceholder": "Ajouter une sous-tâche…",
-    "subtaskCount": "{{done}} sur {{total}}"
+    "subtaskCount": "{{done}} sur {{total}}",
+    "removeAttachmentLabel": "Supprimer la pièce jointe"
   },
   "time": {
     "heading": "Temps",
@@ -241,7 +242,8 @@
       "namePlaceholder": "Nom de l'espace de travail",
       "color": "Couleur",
       "creating": "Création…",
-      "createWorkspace": "Créer un espace de travail"
+      "createWorkspace": "Créer un espace de travail",
+      "chooseColorLabel": "Choisir la couleur {{color}}"
     },
     "team": {
       "section": "Équipe",
@@ -330,7 +332,9 @@
       "deleteLabel": "Supprimer l'étiquette",
       "deleteConfirmPrefix": "Supprimer",
       "deleteConfirmSuffix": " ? Elle sera retirée de toutes les tâches auxquelles elle est associée."
-    }
+    },
+    "chooseColorLabel": "Choisir la couleur {{color}}",
+    "deleteLabelLabel": "Supprimer l'étiquette"
   },
   "presence": {
     "heading": "Qui est présent aujourd'hui",
@@ -456,7 +460,12 @@
       "descriptionPrefix": "Supprimer la vue",
       "descriptionSuffix": "? Les filtres seront perdus ; les tâches elles-mêmes ne seront pas affectées.",
       "confirmLabel": "Supprimer la vue"
-    }
+    },
+    "newViewLabel": "Nouvelle vue",
+    "confirmRenameLabel": "Confirmer le renommage",
+    "cancelRenameLabel": "Annuler le renommage",
+    "renameLabel": "Renommer",
+    "deleteLabel": "Supprimer"
   },
   "calendar": {
     "heading": "Calendrier",
@@ -468,7 +477,9 @@
     "titlePlaceholder": "Titre de la tâche…",
     "cancel": "Annuler",
     "create": "Créer",
-    "creating": "Création…"
+    "creating": "Création…",
+    "prevMonthLabel": "Mois précédent",
+    "nextMonthLabel": "Mois suivant"
   },
   "milestones": {
     "heading": "Jalons",
@@ -557,7 +568,8 @@
     "createTask": "Créer la tâche"
   },
   "projectList": {
-    "pageTitle": "Liste · rtylr"
+    "pageTitle": "Liste · rtylr",
+    "toggleDoneLabel": "Marquer comme terminé"
   },
   "projectOverview": {
     "pageTitle": "Aperçu · rtylr"
@@ -576,5 +588,8 @@
   "projectSettings": {
     "pageTitle": "Réglages du projet · rtylr",
     "removeMemberLabel": "Supprimer"
+  },
+  "bulkEdit": {
+    "clearSelectionLabel": "Effacer la sélection"
   }
 }

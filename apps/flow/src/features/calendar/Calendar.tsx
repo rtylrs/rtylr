@@ -118,6 +118,7 @@ const Calendar: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
+            aria-label={t('flow.calendar.prevMonthLabel')}
             className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
           >
@@ -131,6 +132,7 @@ const Calendar: React.FC = () => {
           </span>
           <button
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
+            aria-label={t('flow.calendar.nextMonthLabel')}
             className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
           >
@@ -259,6 +261,7 @@ const Calendar: React.FC = () => {
                 </h2>
                 <button
                   onClick={() => setCreateModal(null)}
+                  aria-label={t('common.close')}
                   className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-dim)' }}
                 >

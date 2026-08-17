@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, Calendar, User, CircleUser, FolderInput, Flag, Gauge } from 'lucide-react';
-import { useFlowStore, Task } from '../stores/flowStore';
+import { useFlowStore, Task, PRIORITY_LABELS } from '../stores/flowStore';
 import { useUserStore } from '../stores/userStore';
 import ProjectSelect from './ProjectSelect';
 import PriorityIcon from './PriorityIcon';
@@ -317,6 +317,7 @@ export const QuickCreate: React.FC = () => {
                               : '1px solid transparent',
                         }}
                         title={t(p === 'no_priority' ? 'priority.noPriority' : `priority.${p}`)}
+                        aria-label={PRIORITY_LABELS[p] ?? p}
                       >
                         <PriorityIcon priority={p} />
                       </button>

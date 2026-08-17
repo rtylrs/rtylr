@@ -333,6 +333,7 @@ const TaskDetail: React.FC = () => {
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button
               onClick={() => window.history.back()}
+              aria-label={t('common.back')}
               className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
               style={{ color: 'var(--flow-text-muted)' }}
             >
@@ -377,6 +378,7 @@ const TaskDetail: React.FC = () => {
               className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
               style={{ color: 'var(--flow-text-muted)' }}
               title={!canEdit ? t('common.readOnlyAccess') : t('flow.taskDetail.archive')}
+              aria-label={!canEdit ? t('common.readOnlyAccess') : t('flow.taskDetail.archive')}
               disabled={updateTaskMut.isPending || !canEdit}
             >
               <Archive size={12} />
@@ -398,6 +400,7 @@ const TaskDetail: React.FC = () => {
               className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
               style={{ color: '#ef4444' }}
               title={!canRemove ? t('common.deleteRestricted') : t('flow.taskDetail.delete')}
+              aria-label={!canRemove ? t('common.deleteRestricted') : t('flow.taskDetail.delete')}
               disabled={deleteTaskMut.isPending || !canRemove}
             >
               <Trash2 size={12} />

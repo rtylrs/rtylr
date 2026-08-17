@@ -544,6 +544,7 @@ const KanbanColumn: React.FC<{
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-dim)' }}
             title={t('flow.board.addTaskLabel')}
+            aria-label={t('flow.board.addTaskLabel')}
           >
             <Plus size={11} />
           </button>
@@ -552,6 +553,7 @@ const KanbanColumn: React.FC<{
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] hover:text-red-400"
             style={{ color: 'var(--flow-text-dim)' }}
             title={t('flow.board.deleteColumnLabel')}
+            aria-label={t('flow.board.deleteColumnLabel')}
           >
             <Trash2 size={11} />
           </button>

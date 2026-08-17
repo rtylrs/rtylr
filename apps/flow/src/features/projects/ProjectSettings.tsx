@@ -369,6 +369,7 @@ const ProjectSettings: React.FC = () => {
                         onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
                         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
                         title={t('flow.projectSettings.removeMemberLabel')}
+                        aria-label={t('flow.projectSettings.removeMemberLabel')}
                       >
                         <Trash2 size={10} />
                       </button>

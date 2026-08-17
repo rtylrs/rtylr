@@ -43,6 +43,7 @@ interface TaskRowProps {
 }
 
 export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
+  const { t } = useTranslation();
   const [checked, setChecked] = useState(task.status === 'done');
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const updateTaskStatus = useUpdateTaskStatus();
@@ -89,6 +90,8 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       {/* Checkbox */}
       <button
         onClick={handleToggle}
+        aria-label={t('flow.projectList.toggleDoneLabel')}
+        aria-pressed={checked}
         className="h-4 w-4 rounded shrink-0 flex items-center justify-center transition-colors border"
         style={{
           background: checked ? 'var(--accent)' : 'transparent',

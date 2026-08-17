@@ -70,6 +70,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
             className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
             style={{ color: 'var(--flow-text-dim)' }}
             title={t('flow.taskDetail.mentionSomeone')}
+            aria-label={t('flow.taskDetail.mentionSomeone')}
           >
             <AtSign size={12} />
           </button>
