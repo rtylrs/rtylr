@@ -38,6 +38,13 @@ func (h *ListExpiringDocumentsHandler) Serve(ctx context.Context, req *ListExpir
 		days = 30
 	}
 
+	if req.Limit <= 0 {
+		req.Limit = 20
+	}
+	if req.Limit > 100 {
+		req.Limit = 100
+	}
+
 	docs, total, err := h.Service.ListExpiringDocuments(ctx, businessID, days, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list expiring documents", logger.Any("owner_id", device.User.UserID), logger.Any("days", days), logger.Error(err))
