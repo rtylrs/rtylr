@@ -102,7 +102,11 @@ func (h *ListUsersHandler) Serve(ctx context.Context, req *ListUsersRequest) (Li
 	if name == "" {
 		name = req.FullName
 	}
-	result, err := h.Service.ListUsers(ctx, limit, req.Offset, req.ID, req.Email, name)
+	offset := req.Offset
+	if offset < 0 {
+		offset = 0
+	}
+	result, err := h.Service.ListUsers(ctx, limit, offset, req.ID, req.Email, name)
 	if err != nil {
 		return ListUsersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list users")
 	}
