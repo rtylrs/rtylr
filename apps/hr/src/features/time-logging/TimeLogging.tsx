@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { Plus, Clock, Trash2, Pencil } from 'lucide-react';
 import { useListTimeEntries, useDeleteTimeEntry } from '../../shared/hooks/queries/useTimeEntries';
 import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
+import { getWeekRange } from '../../shared/utils/dateRange';
 import type { TimeEntryPayload } from '@voxire/voxie/hr/time_entry/v1/types';
 import {
   SectionHeader,
@@ -18,25 +19,6 @@ import {
 import ActiveTimer from './ActiveTimer';
 import TimeEntryForm from './TimeEntryForm';
 import FlowImportButton from './FlowImportButton';
-
-function toLocalDateString(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
-function getWeekRange(): { start: string; end: string } {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = day === 0 ? 6 : day - 1; // Monday-based
-  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diff);
-  const sunday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diff + 6);
-  return {
-    start: toLocalDateString(monday),
-    end: toLocalDateString(sunday),
-  };
-}
 
 function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);

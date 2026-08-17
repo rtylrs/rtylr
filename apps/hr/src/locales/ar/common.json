@@ -27,5 +27,7 @@
   "loadError": "حدث خطأ أثناء التحميل. يرجى المحاولة مرة أخرى.",
   "approve": "موافقة",
   "reject": "رفض",
-  "optionalNote": "ملاحظة اختيارية"
+  "optionalNote": "ملاحظة اختيارية",
+  "dateRangeFrom": "من تاريخ",
+  "dateRangeTo": "إلى"
 }

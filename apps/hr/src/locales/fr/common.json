@@ -27,5 +27,7 @@
   "loadError": "Une erreur s’est produite lors du chargement. Veuillez réessayer.",
   "approve": "Approuver",
   "reject": "Refuser",
-  "optionalNote": "Note optionnelle"
+  "optionalNote": "Note optionnelle",
+  "dateRangeFrom": "Date de début",
+  "dateRangeTo": "à"
 }
