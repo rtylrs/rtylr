@@ -16,6 +16,13 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   completed: { bg: 'rgba(59,130,246,0.15)', color: '#3b82f6' },
 };
 
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  planning: 'planning',
+  active: 'active',
+  at_risk: 'atRisk',
+  completed: 'completed',
+};
+
 import { useFlowStore } from '../../shared/stores/flowStore';
 
 const Milestones: React.FC = () => {
@@ -42,17 +49,17 @@ const Milestones: React.FC = () => {
   if (milestones.length === 0 && !showCreate) {
     return (
       <div className="flex flex-col h-full">
-        <HelmetContainer title="Milestones · rtylr" />
+        <HelmetContainer title={`${t('flow.milestones.heading')} · Flow`} />
         <div
           className="flex items-center justify-between px-6 py-4 shrink-0"
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
           <div>
             <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-              Milestones
+              {t('flow.milestones.heading')}
             </h1>
             <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-              0 tracked
+              {t('flow.milestones.trackedCount', { count: 0 })}
             </p>
           </div>
           <button
@@ -60,21 +67,21 @@ const Milestones: React.FC = () => {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
             style={{ background: 'var(--accent)', color: '#0a0a0a' }}
           >
-            <Plus size={11} /> New milestone
+            <Plus size={11} /> {t('flow.milestones.newMilestone')}
           </button>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center p-6">
           <EmptyState
             icon={MilestoneIcon}
-            title="No milestones yet"
-            description="Track major delivery targets across your projects."
+            title={t('flow.milestones.emptyTitle')}
+            description={t('flow.milestones.emptyDescription')}
           />
           <button
             onClick={() => setShowCreate(true)}
             className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-semibold"
             style={{ background: 'var(--accent)', color: '#0a0a0a' }}
           >
-            <Plus size={13} /> Create first milestone
+            <Plus size={13} /> {t('flow.milestones.createFirst')}
           </button>
         </div>
       </div>
@@ -90,10 +97,10 @@ const Milestones: React.FC = () => {
       >
         <div>
           <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-            Milestones
+            {t('flow.milestones.heading')}
           </h1>
           <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-            {milestones.length} tracked
+            {t('flow.milestones.trackedCount', { count: milestones.length })}
           </p>
         </div>
         <button
@@ -101,7 +108,7 @@ const Milestones: React.FC = () => {
           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
-          <Plus size={11} /> New milestone
+          <Plus size={11} /> {t('flow.milestones.newMilestone')}
         </button>
       </div>
       {showCreate && (
@@ -112,7 +119,7 @@ const Milestones: React.FC = () => {
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="Milestone name"
+            placeholder={t('flow.milestones.namePlaceholder')}
             className="w-full rounded-md px-3 py-2 text-[12px] outline-none"
             style={{
               background: 'var(--flow-input-bg)',
@@ -160,7 +167,9 @@ const Milestones: React.FC = () => {
               className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-50"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
-              {createMilestone.isPending ? 'Creating...' : 'Create'}
+              {createMilestone.isPending
+                ? t('flow.milestones.creating')
+                : t('flow.milestones.create')}
             </button>
             <button
               onClick={() => {
@@ -171,7 +180,7 @@ const Milestones: React.FC = () => {
               className="px-3 py-1.5 rounded text-[11px]"
               style={{ color: 'var(--flow-text-muted)' }}
             >
-              Cancel
+              {t('flow.milestones.cancel')}
             </button>
           </div>
         </div>
@@ -215,7 +224,7 @@ const Milestones: React.FC = () => {
                   className="text-[10px] px-2 py-0.5 rounded-full font-semibold capitalize"
                   style={{ background: style.bg, color: style.color }}
                 >
-                  {m.status.replace('_', ' ')}
+                  {t(`flow.milestones.status.${STATUS_LABEL_KEYS[m.status]}`)}
                 </span>
               </div>
               {m.description && (
@@ -225,7 +234,7 @@ const Milestones: React.FC = () => {
               )}
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[10px]" style={{ color: 'var(--flow-text-dim)' }}>
-                  Progress
+                  {t('flow.milestones.progress')}
                 </span>
                 <span className="text-[11px] font-semibold" style={{ color: 'var(--flow-text)' }}>
                   {m.computedProgress}%
@@ -245,9 +254,11 @@ const Milestones: React.FC = () => {
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <span>
-                  {m.doneCount} of {m.taskCount} tasks
+                  {t('flow.milestones.taskCount', { done: m.doneCount, total: m.taskCount })}
                 </span>
-                <span>Target: {formatDate(m.targetDate)}</span>
+                <span>
+                  {t('flow.milestones.target')} {formatDate(m.targetDate)}
+                </span>
               </div>
             </motion.div>
           );
