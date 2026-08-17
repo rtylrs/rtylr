@@ -3,6 +3,7 @@ SELECT id, email, full_name, business_id, is_console_admin,
        is_banned, ban_reason, banned_at, created_at, password_hash
 FROM users
 WHERE email = ?
+ORDER BY email ASC
 LIMIT 1;
 
 -- name: GetUserByID :one
