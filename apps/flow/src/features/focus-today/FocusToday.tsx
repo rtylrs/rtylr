@@ -72,7 +72,7 @@ const FocusToday: React.FC = () => {
               className="underline-offset-2 hover:underline"
               style={{ color: ACCENT_VAR }}
             >
-              {t('flow.triage')}
+              {t('flow.shell.triage')}
             </Link>{' '}
             {t('common.focusToday.backlogHintSuffix')}
           </p>
