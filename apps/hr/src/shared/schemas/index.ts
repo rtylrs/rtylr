@@ -59,8 +59,8 @@ export type { OnboardingTask, OffboardingTask } from './onboarding';
 export { documentItemSchema } from './documents';
 export type { DocumentItem } from './documents';
 
-export { benefitPlanSchema, benefitEnrollmentSchema } from './benefits';
-export type { BenefitPlan, BenefitEnrollment } from './benefits';
+export { benefitPlanSchema, benefitEnrollmentSchema, myBenefitEnrollmentSchema } from './benefits';
+export type { BenefitPlan, BenefitEnrollment, MyBenefitEnrollment } from './benefits';
 
 export { trainingCourseSchema, trainingProgressSchema } from './training';
 export type { TrainingCourse, TrainingProgress } from './training';

@@ -21,3 +21,16 @@ export const benefitEnrollmentSchema = z.object({
 
 export type BenefitPlan = z.infer<typeof benefitPlanSchema>;
 export type BenefitEnrollment = z.infer<typeof benefitEnrollmentSchema>;
+
+// The caller's own enrollment, as returned by hr.benefit.v1's
+// ListMyBenefitEnrollments / EnrollInBenefit. planId stays a string: the wire
+// encodes it using the protobuf-JSON int64 convention, and status is a free
+// backend string (e.g. "active", "cancelled") rather than a fixed UI enum.
+export const myBenefitEnrollmentSchema = z.object({
+  id: z.string(),
+  planId: z.string(),
+  status: z.string(),
+  enrolledAt: z.string(),
+});
+
+export type MyBenefitEnrollment = z.infer<typeof myBenefitEnrollmentSchema>;
