@@ -7,6 +7,7 @@ import {
   useCompleteSetupStep,
   useUpsertHRConfig,
 } from '../../shared/hooks/queries/useSetup';
+import { isHRSetupComplete } from '../../shared/lib/setupCompletion';
 import { useHRSetupStore } from '../../shared/stores/hrSetupStore';
 import WizardProgress, { STEP_KEYS } from './components/WizardProgress';
 import CompanyProfileStep from './steps/CompanyProfileStep';
@@ -47,17 +48,31 @@ const SetupWizard = (): React.JSX.Element => {
   const [showNewEmployee, setShowNewEmployee] = useState(false);
 
   const steps = data?.steps ?? [];
+  // `GET /hr/setup/status` returns the config alongside the step list, so the
+  // authoritative completion marker is already in this response - no second
+  // request needed to agree with HRConfigRoute.
+  const setupComplete = isHRSetupComplete(data?.config);
 
   useEffect(() => {
-    if (data && !data.isComplete) {
-      const firstIncomplete = STEP_KEYS.findIndex(
-        (key) => !steps.some((s) => s.stepKey === key && s.completedAt != null)
-      );
-      if (firstIncomplete >= 0) {
-        setCurrentStepIndex(firstIncomplete);
-      }
+    if (!data || setupComplete) return;
+
+    const firstIncomplete = STEP_KEYS.findIndex(
+      (key) => !steps.some((s) => s.stepKey === key && s.completedAt != null)
+    );
+    // Every step ticked but no timestamp means the closing config write never
+    // landed. Open the last step so its finish action can write it and release
+    // the app, instead of making the user walk all eight again.
+    setCurrentStepIndex(firstIncomplete >= 0 ? firstIncomplete : STEP_KEYS.length - 1);
+  }, [data, steps, setupComplete, setCurrentStepIndex]);
+
+  // Navigating during render is what turned this redirect into a frozen tab:
+  // React warned about the setState-in-render and the two guards ping-ponged
+  // synchronously, pegging the render thread.
+  useEffect(() => {
+    if (setupComplete) {
+      navigate({ to: '/', replace: true });
     }
-  }, [data, steps, setCurrentStepIndex]);
+  }, [setupComplete, navigate]);
 
   if (isLoading) {
     return <PageLoader />;
@@ -83,8 +98,7 @@ const SetupWizard = (): React.JSX.Element => {
     );
   }
 
-  if (data?.isComplete) {
-    navigate({ to: '/', replace: true });
+  if (setupComplete) {
     return <PageLoader />;
   }
 
