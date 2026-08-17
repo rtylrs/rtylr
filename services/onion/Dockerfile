@@ -26,15 +26,6 @@ COPY . .
 RUN set -eux; \
     if [ -d .git ]; then \
       git submodule update --init --recursive; \
-    fi; \
-    if [ ! -f ./voxie/go.mod ]; then \
-      git clone --depth 1 https://github.com/tryrtylr/voxie.git ./voxie; \
-    fi; \
-    if [ ! -f ./internal/platform/database/schemas/hr_core/schema.sql ]; then \
-      git clone --depth 1 https://github.com/tryrtylr/schemas.git ./internal/platform/database/schemas; \
-    fi; \
-    if [ ! -d ./internal/platform/email/templates ]; then \
-      git clone --depth 1 https://github.com/tryrtylr/email-templates.git ./internal/platform/email/templates; \
     fi
 
 RUN go mod download && go mod verify
