@@ -29,7 +29,12 @@
   "emojiPickerComingSoon": "Emoji picker (coming soon)",
   "focusToday": {
     "emptyTitle": "Nothing pinned for today",
-    "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway."
+    "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway.",
+    "subtitle": "A short list: pinned items and anything due today. Everything else stays out of this view so you can commit without scanning the whole backlog.",
+    "backlogHint_one": "{{count}} task still in backlog, use",
+    "backlogHint_other": "{{count}} tasks still in backlog, use",
+    "backlogHintSuffix": "when you are ready.",
+    "dueToday": "Due today"
   },
   "activity": {
     "empty": "No activity yet.",
@@ -55,7 +60,20 @@
     "burndown": "Burndown (active cycle)",
     "throughput": "Throughput (tasks/week)",
     "velocity": "Velocity (last cycles)",
-    "timeByPerson": "Time tracked by person"
+    "timeByPerson": "Time tracked by person",
+    "heading": "Insights",
+    "subtitle": "Velocity, burndown, and team stats",
+    "kpi": {
+      "completed": "Completed",
+      "completedHint": "of {{total}}",
+      "velocity": "Velocity",
+      "velocityHint": "avg per cycle",
+      "cycleTime": "Cycle time",
+      "cycleTimeHint": "avg task",
+      "throughput": "Throughput",
+      "throughputHint": "6 weeks"
+    },
+    "noData": "No data available"
   },
   "settings": {
     "profile": "Profile",
