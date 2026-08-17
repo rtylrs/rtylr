@@ -33,7 +33,8 @@ SELECT
     updated_at
 FROM careers_sections
 WHERE business_id = ? AND enabled = true
-ORDER BY position ASC, id ASC;
+ORDER BY position ASC, id ASC
+LIMIT 100;
 
 -- name: GetSection :one
 SELECT
