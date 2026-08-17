@@ -15,7 +15,7 @@ INSERT INTO manual_access_grants (user_id, plan_id, granted_by, note, expires_at
 VALUES (?, ?, ?, ?, ?);
 
 -- name: GetGrantUserID :one
-SELECT user_id FROM manual_access_grants WHERE id = ? LIMIT 1;
+SELECT user_id FROM manual_access_grants WHERE id = ? ORDER BY id ASC LIMIT 1;
 
 -- name: RevokeGrant :exec
 UPDATE manual_access_grants SET revoked_at = NOW() WHERE id = ?;
