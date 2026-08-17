@@ -29,7 +29,9 @@ vi.mock('@voxire/api', () => ({
 }));
 
 import { renderHook, act } from '@testing-library/react';
-import { getRealtimeTicket, useRealtimeStatus } from './realtime';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+import { getRealtimeTicket, useRealtimeReconnectRefetch, useRealtimeStatus } from './realtime';
 
 describe('getRealtimeTicket', () => {
   beforeEach(() => {
@@ -91,5 +93,87 @@ describe('useRealtimeStatus', () => {
     unmount();
 
     expect(mocks.statusHandlers.size).toBe(before - 1);
+  });
+});
+
+describe('useRealtimeReconnectRefetch', () => {
+  function mount() {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const spy = vi.spyOn(client, 'invalidateQueries');
+    renderHook(() => useRealtimeReconnectRefetch(), {
+      wrapper: ({ children }: { children: React.ReactNode }) =>
+        React.createElement(QueryClientProvider, { client }, children),
+    });
+    return spy;
+  }
+
+  function emit(next: string) {
+    mocks.state.status = next;
+    act(() => {
+      mocks.statusHandlers.forEach((h) => h(next));
+    });
+  }
+
+  function keys(spy: ReturnType<typeof mount>): string[] {
+    return spy.mock.calls.map((call) => JSON.stringify(call[0]?.queryKey));
+  }
+
+  it('does not invalidate on the initial connect - there is nothing to catch up on', () => {
+    mocks.state.status = 'connecting';
+    const spy = mount();
+
+    emit('connected');
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('invalidates the core query keys on a reconnect (reconnecting -> connected)', () => {
+    mocks.state.status = 'connected';
+    const spy = mount();
+
+    emit('reconnecting');
+    expect(spy).not.toHaveBeenCalled();
+
+    emit('connected');
+
+    expect(keys(spy)).toEqual(
+      expect.arrayContaining([
+        JSON.stringify(['tasks']),
+        JSON.stringify(['my-tasks']),
+        JSON.stringify(['projects']),
+        JSON.stringify(['workspaces']),
+        JSON.stringify(['notifications']),
+      ])
+    );
+  });
+
+  it('does not invalidate again on a status change that is not a reconnect', () => {
+    mocks.state.status = 'connected';
+    const spy = mount();
+
+    emit('reconnecting');
+    emit('connected');
+    spy.mockClear();
+
+    emit('reconnecting');
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('unsubscribes on unmount', () => {
+    mocks.state.status = 'connected';
+    const before = mocks.statusHandlers.size;
+    const { unmount } = renderHook(() => useRealtimeReconnectRefetch(), {
+      wrapper: ({ children }: { children: React.ReactNode }) =>
+        React.createElement(
+          QueryClientProvider,
+          { client: new QueryClient({ defaultOptions: { queries: { retry: false } } }) },
+          children
+        ),
+    });
+
+    unmount();
+
+    expect(mocks.statusHandlers.size).toBe(before);
   });
 });
