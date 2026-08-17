@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useParams } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
@@ -17,6 +18,7 @@ import { useCurrentProject } from './useCurrentProject';
  * that the frontend doesn't yet call). For now this is a read-only canvas.
  */
 const ProjectTimeline: React.FC = () => {
+  const { t } = useTranslation();
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
   useProjectRealtime(projectId);
@@ -67,7 +69,7 @@ const ProjectTimeline: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="Timeline · rtylr" />
+      <HelmetContainer title={t('flow.projectTimeline.pageTitle')} />
       <ProjectViewTabs
         project={project}
         workspaceId={workspaceId}

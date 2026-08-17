@@ -108,7 +108,7 @@ const ProjectSettings: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <HelmetContainer title="Project settings · rtylr" />
+      <HelmetContainer title={t('flow.projectSettings.pageTitle')} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs
           items={[
@@ -368,7 +368,7 @@ const ProjectSettings: React.FC = () => {
                         style={{ color: 'var(--flow-text-dim)' }}
                         onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
                         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
-                        title="Remove"
+                        title={t('flow.projectSettings.removeMemberLabel')}
                       >
                         <Trash2 size={10} />
                       </button>

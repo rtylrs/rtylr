@@ -396,6 +396,9 @@
     "viewMyDay": "Voir Ma journée"
   },
   "board": {
+    "pageTitle": "Tableau · rtylr",
+    "addTaskLabel": "Ajouter une tâche",
+    "deleteColumnLabel": "Supprimer la colonne",
     "settingsTitle": "Réglages du tableau",
     "openSettings": "Ouvrir les réglages du tableau",
     "closeSettings": "Fermer les réglages du tableau",
@@ -552,5 +555,26 @@
     "descriptionPlaceholder": "Que faut-il faire ?",
     "creating": "Création…",
     "createTask": "Créer la tâche"
+  },
+  "projectList": {
+    "pageTitle": "Liste · rtylr"
+  },
+  "projectOverview": {
+    "pageTitle": "Aperçu · rtylr"
+  },
+  "projectTimeline": {
+    "pageTitle": "Chronologie · rtylr"
+  },
+  "projectDashboard": {
+    "pageTitle": "Tableau de bord du projet · rtylr",
+    "statusBreakdown": "Répartition par statut",
+    "byAssignee": "Par responsable"
+  },
+  "projectCalendar": {
+    "pageTitle": "Calendrier · rtylr"
+  },
+  "projectSettings": {
+    "pageTitle": "Réglages du projet · rtylr",
+    "removeMemberLabel": "Supprimer"
   }
 }

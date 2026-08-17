@@ -396,6 +396,9 @@
     "viewMyDay": "View My day"
   },
   "board": {
+    "pageTitle": "Board · rtylr",
+    "addTaskLabel": "Add task",
+    "deleteColumnLabel": "Delete column",
     "settingsTitle": "Board settings",
     "openSettings": "Open board settings",
     "closeSettings": "Close board settings",
@@ -552,5 +555,26 @@
     "descriptionPlaceholder": "What needs to be done?",
     "creating": "Creating…",
     "createTask": "Create task"
+  },
+  "projectList": {
+    "pageTitle": "List · rtylr"
+  },
+  "projectOverview": {
+    "pageTitle": "Overview · rtylr"
+  },
+  "projectTimeline": {
+    "pageTitle": "Timeline · rtylr"
+  },
+  "projectDashboard": {
+    "pageTitle": "Project dashboard · rtylr",
+    "statusBreakdown": "Status breakdown",
+    "byAssignee": "By assignee"
+  },
+  "projectCalendar": {
+    "pageTitle": "Calendar · rtylr"
+  },
+  "projectSettings": {
+    "pageTitle": "Project settings · rtylr",
+    "removeMemberLabel": "Remove"
   }
 }

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useParams } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
@@ -18,6 +19,7 @@ import { useCurrentProject } from './useCurrentProject';
  * we can swap to the server-computed values for correctness at scale.
  */
 const ProjectDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
   useProjectRealtime(projectId);
@@ -79,7 +81,7 @@ const ProjectDashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="Project dashboard · rtylr" />
+      <HelmetContainer title={t('flow.projectDashboard.pageTitle')} />
       <ProjectViewTabs
         project={project}
         workspaceId={workspaceId}
@@ -103,7 +105,7 @@ const ProjectDashboard: React.FC = () => {
         </div>
 
         {/* Status breakdown bar */}
-        <Card title="Status breakdown">
+        <Card title={t('flow.projectDashboard.statusBreakdown')}>
           {stats.total === 0 ? (
             <EmptyCopy>No tasks yet. Add a task to populate the dashboard.</EmptyCopy>
           ) : (
@@ -165,7 +167,7 @@ const ProjectDashboard: React.FC = () => {
         </Card>
 
         {/* Assignee distribution */}
-        <Card title="By assignee">
+        <Card title={t('flow.projectDashboard.byAssignee')}>
           {stats.byAssignee.length === 0 ? (
             <EmptyCopy>No tasks yet.</EmptyCopy>
           ) : (

@@ -9,6 +9,7 @@ import {
   Users,
   Milestone as MilestoneIcon,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useProjectOverview } from './useProjectOverview';
 import { useFlowStore } from '../../shared/stores/flowStore';
@@ -25,6 +26,7 @@ const HEALTH: Record<string, { color: string; label: string }> = {
 };
 
 const ProjectOverview: React.FC = () => {
+  const { t } = useTranslation();
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
   useProjectRealtime(projectId);
 
@@ -59,7 +61,7 @@ const ProjectOverview: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-auto">
-      <HelmetContainer title="Overview · rtylr" />
+      <HelmetContainer title={t('flow.projectOverview.pageTitle')} />
       <ProjectViewTabs
         project={project}
         workspaceId={workspaceId}

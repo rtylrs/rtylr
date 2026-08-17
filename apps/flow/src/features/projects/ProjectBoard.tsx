@@ -289,7 +289,7 @@ const ProjectBoard: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="Board · rtylr" />
+      <HelmetContainer title={t('flow.board.pageTitle')} />
       <ProjectViewTabs
         project={project}
         workspaceId={workspaceId}
@@ -413,7 +413,7 @@ const ProjectBoard: React.FC = () => {
         onOpenChange={(o) => {
           if (!o) setPendingDeleteColumn(null);
         }}
-        title="Delete column"
+        title={t('flow.board.deleteColumnLabel')}
         description={
           <>
             Delete the <strong>{pendingDeleteColumn?.name}</strong> column? Tasks in this column
@@ -466,6 +466,7 @@ const KanbanColumn: React.FC<{
   onRename,
   onDelete,
 }) => {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(col.name);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -542,7 +543,7 @@ const KanbanColumn: React.FC<{
             onClick={onAddTask}
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-dim)' }}
-            title="Add task"
+            title={t('flow.board.addTaskLabel')}
           >
             <Plus size={11} />
           </button>
@@ -550,7 +551,7 @@ const KanbanColumn: React.FC<{
             onClick={onDelete}
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] hover:text-red-400"
             style={{ color: 'var(--flow-text-dim)' }}
-            title="Delete column"
+            title={t('flow.board.deleteColumnLabel')}
           >
             <Trash2 size={11} />
           </button>
