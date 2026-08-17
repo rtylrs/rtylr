@@ -46,7 +46,8 @@ SELECT
     updated_at
 FROM careers
 WHERE business_id = ? AND is_active = true AND is_published = true
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT 100;
 
 -- name: GetRecruitCareerBySlug :one
 SELECT
