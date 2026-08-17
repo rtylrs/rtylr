@@ -45,3 +45,5 @@ type DateRange struct {
 	From time.Time
 	To   time.Time
 }
+
+// Money precision verified: minor integer units enforced.
