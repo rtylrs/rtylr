@@ -4,4 +4,5 @@ FROM booking_appointments
 WHERE business_id = ?
   AND start_time >= ?
   AND start_time < ?
-ORDER BY start_time ASC;
+ORDER BY start_time ASC
+LIMIT 100;
