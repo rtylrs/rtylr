@@ -48,6 +48,13 @@ func (h *ListContractsHandler) Serve(ctx context.Context, req *ListContractsRequ
 		return ListContractsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	const maxContractPageSize int32 = 100
+	if req.Limit <= 0 || req.Limit > maxContractPageSize {
+		req.Limit = maxContractPageSize
+	}
+	if req.Offset < 0 {
+		req.Offset = 0
+	}
 	page, err := h.Service.ListContracts(ctx, businessID, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list contracts", logger.Any("owner_id", device.User.UserID), logger.Error(err))
