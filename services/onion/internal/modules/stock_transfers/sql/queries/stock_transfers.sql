@@ -53,4 +53,6 @@ LIMIT 1;
 SELECT id, transfer_id, product_id, quantity, created_at
 FROM erp_stock_transfer_items
 WHERE transfer_id IN (sqlc.slice('transfer_ids'))
-ORDER BY id ASC;
+ORDER BY id ASC
+LIMIT 200;
+
