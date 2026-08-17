@@ -31,7 +31,7 @@ SELECT password_hash FROM users WHERE id = ?;
 
 -- cross-schema read from shared users table — resolve user id from email for password grant
 -- name: GetUserIDByEmail :one
-SELECT id FROM users WHERE email = ? LIMIT 1;
+SELECT id FROM users WHERE email = ? ORDER BY id ASC LIMIT 1;
 
 -- cross-schema read from shared users + user_app_permissions — for JWT claims population
 -- name: GetUserBusinessIDAndRole :one
