@@ -3,7 +3,8 @@ SELECT id, owner_id, business_id, name, email, phone, address, city, country,
        tax_id, payment_terms, notes, is_active, created_at, updated_at
 FROM erp_suppliers
 WHERE business_id = ?
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT 200;
 
 -- name: ListSuppliersPaginated :many
 SELECT id, owner_id, business_id, name, email, phone, address, city, country,
