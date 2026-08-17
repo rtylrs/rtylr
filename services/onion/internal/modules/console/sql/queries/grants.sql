@@ -21,4 +21,4 @@ SELECT user_id FROM manual_access_grants WHERE id = ? ORDER BY id ASC LIMIT 1;
 UPDATE manual_access_grants SET revoked_at = NOW() WHERE id = ?;
 
 -- name: DeleteGrant :exec
-DELETE FROM manual_access_grants WHERE id = ?;
+DELETE FROM manual_access_grants WHERE id = ? AND user_id = ?;
