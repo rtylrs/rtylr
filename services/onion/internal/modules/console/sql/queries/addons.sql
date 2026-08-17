@@ -1,7 +1,8 @@
 -- name: ListAddons :many
 SELECT id, name, description, icon, price, is_free, sort_order
 FROM addons
-ORDER BY sort_order ASC, id ASC;
+ORDER BY sort_order ASC, id ASC
+LIMIT 100;
 
 -- name: AddonExists :one
 SELECT COUNT(*) FROM addons WHERE id = ?;
