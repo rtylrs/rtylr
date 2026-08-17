@@ -250,7 +250,7 @@ const ProjectSettings: React.FC = () => {
                 </select>
                 <button
                   onClick={() => {
-                    if (!newEmail.trim()) return toast.error('Enter an email address');
+                    if (!newEmail.trim()) return toast.error(t('toasts.projectMember.enterEmail'));
                     inviteMember.mutate(
                       { email: newEmail.trim(), role: newRole },
                       {
@@ -339,8 +339,10 @@ const ProjectSettings: React.FC = () => {
                                 role: e.target.value,
                               },
                               {
-                                onSuccess: () => toast.success('Role updated'),
-                                onError: () => toast.error('Failed'),
+                                onSuccess: () =>
+                                  toast.success(t('toasts.projectMember.roleUpdated')),
+                                onError: () =>
+                                  toast.error(t('toasts.projectMember.roleUpdateFailed')),
                               }
                             )
                           }
@@ -357,8 +359,8 @@ const ProjectSettings: React.FC = () => {
                           removeMember.mutate(
                             { project_id: Number(projectId), user_id: Number(m.userId) },
                             {
-                              onSuccess: () => toast.success('Member removed'),
-                              onError: () => toast.error('Failed'),
+                              onSuccess: () => toast.success(t('toasts.projectMember.removed')),
+                              onError: () => toast.error(t('toasts.projectMember.removeFailed')),
                             }
                           )
                         }
@@ -421,11 +423,11 @@ const ProjectSettings: React.FC = () => {
                               },
                               {
                                 onSuccess: () => {
-                                  toast.success('Project moved');
+                                  toast.success(t('toasts.project.moved'));
                                   navigate({ to: `/w/${targetWorkspaceId}` as string });
                                 },
                                 onError: () => {
-                                  toast.error('Failed to move project');
+                                  toast.error(t('toasts.project.moveFailed'));
                                   setConfirmMove(false);
                                 },
                               }
@@ -448,7 +450,8 @@ const ProjectSettings: React.FC = () => {
                     ) : (
                       <button
                         onClick={() => {
-                          if (!targetWorkspaceId) return toast.error('Select a workspace');
+                          if (!targetWorkspaceId)
+                            return toast.error(t('toasts.project.selectWorkspace'));
                           setConfirmMove(true);
                         }}
                         className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold"
@@ -508,11 +511,11 @@ const ProjectSettings: React.FC = () => {
                             { project_id: Number(projectId), new_owner_id: newOwnerId },
                             {
                               onSuccess: () => {
-                                toast.success('Ownership transferred');
+                                toast.success(t('toasts.projectMember.transferred'));
                                 setConfirmTransfer(false);
                               },
                               onError: () => {
-                                toast.error('Failed');
+                                toast.error(t('toasts.projectMember.transferFailed'));
                                 setConfirmTransfer(false);
                               },
                             }
@@ -536,7 +539,8 @@ const ProjectSettings: React.FC = () => {
                     <button
                       onClick={() => {
                         const newOwnerId = Number(transferRef.current?.value);
-                        if (!newOwnerId) return toast.error('Select a member');
+                        if (!newOwnerId)
+                          return toast.error(t('toasts.projectMember.selectNewOwner'));
                         setConfirmTransfer(true);
                       }}
                       className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold"
@@ -676,11 +680,11 @@ const ProjectSettings: React.FC = () => {
                 onClick={() => {
                   deleteProject.mutate(projectId, {
                     onSuccess: () => {
-                      toast.success('Project deleted');
+                      toast.success(t('toasts.project.deleted'));
                       setConfirmDelete(false);
                       navigate({ to: `/w/${project!.workspaceId}` as string });
                     },
-                    onError: () => toast.error('Failed to delete project'),
+                    onError: () => toast.error(t('toasts.project.deleteFailed')),
                   });
                 }}
                 className="px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
