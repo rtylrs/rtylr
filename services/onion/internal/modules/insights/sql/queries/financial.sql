@@ -34,7 +34,8 @@ WHERE business_id = ?
   AND status = 'paid'
   AND reporting_date >= ?
   AND reporting_date <= ?
-GROUP BY day;
+GROUP BY day
+LIMIT 200;
 
 -- name: GetDailyExpenses :many
 SELECT DATE(expense_date) AS day,
