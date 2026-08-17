@@ -22,45 +22,45 @@
   "comingSoon": "Bientôt disponible",
   "emojiPickerComingSoon": "Sélecteur d'émojis (bientôt disponible)",
   "focusToday": {
-    "emptyTitle": "Nothing pinned for today",
-    "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway."
+    "emptyTitle": "Rien n'est épinglé pour aujourd'hui",
+    "emptyHint": "Épinglez des tâches depuis le détail de la tâche, ou fixez une échéance à aujourd'hui. Profitez d'un planning dégagé."
   },
   "activity": {
-    "empty": "No activity yet.",
-    "created": "created this task",
-    "statusChanged": "changed status from {{from}} to {{to}}",
-    "assigneeChanged": "assigned to {{to}}",
-    "priorityChanged": "changed priority from {{from}} to {{to}}",
-    "dueDateChanged": "changed due date to {{to}}",
-    "commented": "commented",
-    "labelAdded": "added label {{detail}}",
-    "attachment": "attached {{detail}}"
+    "empty": "Pas encore d'activité.",
+    "created": "a créé cette tâche",
+    "statusChanged": "a changé le statut de {{from}} à {{to}}",
+    "assigneeChanged": "assigné à {{to}}",
+    "priorityChanged": "a changé la priorité de {{from}} à {{to}}",
+    "dueDateChanged": "a changé la date d'échéance à {{to}}",
+    "commented": "a commenté",
+    "labelAdded": "a ajouté l'étiquette {{detail}}",
+    "attachment": "a joint {{detail}}"
   },
   "datePicker": {
-    "today": "Today",
-    "tomorrow": "Tomorrow",
-    "in3Days": "In 3 days",
-    "nextWeek": "Next week",
-    "in2Weeks": "In 2 weeks",
-    "setDate": "Set date",
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "in3Days": "Dans 3 jours",
+    "nextWeek": "Semaine prochaine",
+    "in2Weeks": "Dans 2 semaines",
+    "setDate": "Définir la date",
     "clearDate": "Effacer la date"
   },
   "insights": {
-    "burndown": "Burndown (active cycle)",
-    "throughput": "Throughput (tasks/week)",
-    "velocity": "Velocity (last cycles)",
-    "timeByPerson": "Time tracked by person"
+    "burndown": "Burndown (itération active)",
+    "throughput": "Débit (tâches/semaine)",
+    "velocity": "Vélocité (dernières itérations)",
+    "timeByPerson": "Temps suivi par personne"
   },
   "settings": {
-    "profile": "Profile",
-    "team": "Team",
-    "billing": "Billing",
+    "profile": "Profil",
+    "team": "Équipe",
+    "billing": "Facturation",
     "notifications": "Notifications",
-    "appearance": "Appearance",
-    "labels": "Labels",
-    "life": "Life & rhythm",
-    "shortcuts": "Keyboard Shortcuts",
-    "about": "About",
-    "quietHoursNote": "Quiet hours affect in-app banners only for now; digest hour is saved for when scheduled reminders ship."
+    "appearance": "Apparence",
+    "labels": "Étiquettes",
+    "life": "Vie et rythme",
+    "shortcuts": "Raccourcis clavier",
+    "about": "À propos",
+    "quietHoursNote": "Les heures calmes n'affectent pour l'instant que les bannières intégrées à l'application ; l'heure du digest est enregistrée en attendant l'arrivée des rappels programmés."
   }
 }

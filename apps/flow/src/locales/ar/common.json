@@ -22,45 +22,45 @@
   "comingSoon": "قريباً",
   "emojiPickerComingSoon": "منتقي الرموز التعبيرية (قريباً)",
   "focusToday": {
-    "emptyTitle": "Nothing pinned for today",
-    "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway."
+    "emptyTitle": "لا توجد مهام مثبّتة لهذا اليوم",
+    "emptyHint": "ثبّت المهام من تفاصيل المهمة، أو حدّد تاريخ استحقاقها اليوم. استمتع بيوم صافٍ."
   },
   "activity": {
-    "empty": "No activity yet.",
-    "created": "created this task",
-    "statusChanged": "changed status from {{from}} to {{to}}",
-    "assigneeChanged": "assigned to {{to}}",
-    "priorityChanged": "changed priority from {{from}} to {{to}}",
-    "dueDateChanged": "changed due date to {{to}}",
-    "commented": "commented",
-    "labelAdded": "added label {{detail}}",
-    "attachment": "attached {{detail}}"
+    "empty": "لا يوجد نشاط بعد.",
+    "created": "أنشأ هذه المهمة",
+    "statusChanged": "غيّر الحالة من {{from}} إلى {{to}}",
+    "assigneeChanged": "عيّن إلى {{to}}",
+    "priorityChanged": "غيّر الأولوية من {{from}} إلى {{to}}",
+    "dueDateChanged": "غيّر تاريخ الاستحقاق إلى {{to}}",
+    "commented": "علّق",
+    "labelAdded": "أضاف تسمية {{detail}}",
+    "attachment": "أرفق {{detail}}"
   },
   "datePicker": {
-    "today": "Today",
-    "tomorrow": "Tomorrow",
-    "in3Days": "In 3 days",
-    "nextWeek": "Next week",
-    "in2Weeks": "In 2 weeks",
-    "setDate": "Set date",
+    "today": "اليوم",
+    "tomorrow": "غداً",
+    "in3Days": "بعد 3 أيام",
+    "nextWeek": "الأسبوع القادم",
+    "in2Weeks": "بعد أسبوعين",
+    "setDate": "تحديد التاريخ",
     "clearDate": "مسح التاريخ"
   },
   "insights": {
-    "burndown": "Burndown (active cycle)",
-    "throughput": "Throughput (tasks/week)",
-    "velocity": "Velocity (last cycles)",
-    "timeByPerson": "Time tracked by person"
+    "burndown": "منحنى الإنجاز (الدورة النشطة)",
+    "throughput": "الإنتاجية (مهام/أسبوع)",
+    "velocity": "السرعة (آخر الدورات)",
+    "timeByPerson": "الوقت المسجَّل لكل شخص"
   },
   "settings": {
-    "profile": "Profile",
-    "team": "Team",
-    "billing": "Billing",
-    "notifications": "Notifications",
-    "appearance": "Appearance",
-    "labels": "Labels",
-    "life": "Life & rhythm",
-    "shortcuts": "Keyboard Shortcuts",
-    "about": "About",
-    "quietHoursNote": "Quiet hours affect in-app banners only for now; digest hour is saved for when scheduled reminders ship."
+    "profile": "الملف الشخصي",
+    "team": "الفريق",
+    "billing": "الفوترة",
+    "notifications": "الإشعارات",
+    "appearance": "المظهر",
+    "labels": "التسميات",
+    "life": "نمط الحياة والإيقاع",
+    "shortcuts": "اختصارات لوحة المفاتيح",
+    "about": "حول",
+    "quietHoursNote": "ساعات الهدوء تؤثر حالياً على إشعارات التطبيق الداخلية فقط؛ وقت الملخص محفوظ لحين إطلاق التذكيرات المجدولة."
   }
 }
