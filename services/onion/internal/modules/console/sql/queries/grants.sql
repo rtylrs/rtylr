@@ -18,7 +18,7 @@ VALUES (?, ?, ?, ?, ?);
 SELECT user_id FROM manual_access_grants WHERE id = ? ORDER BY id ASC LIMIT 1;
 
 -- name: RevokeGrant :exec
-UPDATE manual_access_grants SET revoked_at = NOW() WHERE id = ?;
+UPDATE manual_access_grants SET revoked_at = NOW() WHERE id = ? AND user_id = ?;
 
 -- name: DeleteGrant :exec
 DELETE FROM manual_access_grants WHERE id = ? AND user_id = ?;
