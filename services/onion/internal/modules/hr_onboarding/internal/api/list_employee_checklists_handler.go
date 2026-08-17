@@ -15,6 +15,14 @@ import (
 
 func ListEmployeeChecklistsRoutes() []string { return []string{"/hr/onboarding/checklists"} }
 
+// Mirrors the default/max clamp applied in application.Service.ListEmployeeChecklists
+// so an unbounded or absent caller-provided limit never reaches the query
+// layer, and so the response echoes the value actually used.
+const (
+	defaultListEmployeeChecklistsLimit int32 = 20
+	maxListEmployeeChecklistsLimit     int32 = 100
+)
+
 type ListEmployeeChecklistsHandler struct{ Service *application.Service }
 
 type ListEmployeeChecklistsRequest struct {
@@ -45,8 +53,16 @@ func (h *ListEmployeeChecklistsHandler) Serve(ctx context.Context, req *ListEmpl
 		return ListEmployeeChecklistsResponse{}, onekiterrors.New(http.StatusBadRequest, "employee_id is required")
 	}
 
+	limit := req.Limit
+	if limit <= 0 {
+		limit = defaultListEmployeeChecklistsLimit
+	}
+	if limit > maxListEmployeeChecklistsLimit {
+		limit = maxListEmployeeChecklistsLimit
+	}
+
 	checklists, total, err := h.Service.ListEmployeeChecklists(ctx, businessID, req.EmployeeID, domain.ListEmployeeChecklistsParams{
-		Limit:  req.Limit,
+		Limit:  limit,
 		Offset: req.Offset,
 	})
 	if err != nil {
@@ -59,5 +75,5 @@ func (h *ListEmployeeChecklistsHandler) Serve(ctx context.Context, req *ListEmpl
 		payloads = append(payloads, employeeChecklistToProto(c))
 	}
 
-	return ListEmployeeChecklistsResponse{Checklists: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return ListEmployeeChecklistsResponse{Checklists: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
 }

@@ -52,4 +52,5 @@ WHERE business_id = ? AND employee_checklist_id = ? AND status = 'complete';
 SELECT id, owner_id, business_id, employee_checklist_id, checklist_item_id, assigned_to_employee_id, due_date, status, completed_at, completed_by, attachment_url, created_at, updated_at
 FROM hr_onboarding_employee_checklist_items
 WHERE business_id = ? AND employee_checklist_id = ?
-ORDER BY due_date ASC;
+ORDER BY due_date ASC
+LIMIT 500;

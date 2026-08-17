@@ -14,6 +14,14 @@ import (
 
 func ListTemplatesRoutes() []string { return []string{"/hr/onboarding/templates"} }
 
+// Mirrors the default/max clamp applied in application.Service.ListTemplates
+// so an unbounded or absent caller-provided limit never reaches the query
+// layer, and so the response echoes the value actually used.
+const (
+	defaultListTemplatesLimit int32 = 20
+	maxListTemplatesLimit     int32 = 100
+)
+
 type ListTemplatesHandler struct{ Service *application.Service }
 
 type ListTemplatesRequest struct {
@@ -34,8 +42,16 @@ func (h *ListTemplatesHandler) Serve(ctx context.Context, req *ListTemplatesRequ
 		return ListTemplatesResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	limit := req.Limit
+	if limit <= 0 {
+		limit = defaultListTemplatesLimit
+	}
+	if limit > maxListTemplatesLimit {
+		limit = maxListTemplatesLimit
+	}
+
 	templates, total, err := h.Service.ListTemplates(ctx, device.User.UserID, domain.ListTemplatesParams{
-		Limit:  req.Limit,
+		Limit:  limit,
 		Offset: req.Offset,
 	})
 	if err != nil {
@@ -48,5 +64,5 @@ func (h *ListTemplatesHandler) Serve(ctx context.Context, req *ListTemplatesRequ
 		payloads = append(payloads, templateToProto(t))
 	}
 
-	return ListTemplatesResponse{Templates: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return ListTemplatesResponse{Templates: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
 }

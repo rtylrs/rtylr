@@ -37,4 +37,5 @@ WHERE business_id = ? AND id = ?;
 SELECT id, owner_id, business_id, template_id, title, description, assignee_role, due_offset_days, requires_attachment, created_at, updated_at
 FROM hr_onboarding_checklist_items
 WHERE business_id = ? AND template_id = ?
-ORDER BY due_offset_days ASC;
+ORDER BY due_offset_days ASC
+LIMIT 500;
