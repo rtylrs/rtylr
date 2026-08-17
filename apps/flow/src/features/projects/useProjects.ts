@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiProject, ProjectUpdate } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
+import { isApiWorkspaceId } from '../../shared/lib/personalWorkspace';
 
 export function useProjects(workspaceId: string | undefined) {
   return useQuery<ApiProject[]>({
@@ -13,7 +14,9 @@ export function useProjects(workspaceId: string | undefined) {
       const res = await unwrap(flowApi.getProjects(workspaceId!));
       return unwrapListResponse<ApiProject>(res, 'projects');
     },
-    enabled: !!workspaceId,
+    // Not `!!workspaceId`: the Personal sentinel is a non-empty string, so bare
+    // truthiness fired this query with `workspace_id=personal` and always 400d.
+    enabled: isApiWorkspaceId(workspaceId),
   });
 }
 
