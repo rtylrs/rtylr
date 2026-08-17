@@ -161,7 +161,7 @@ const WorkspaceDashboard: React.FC = () => {
 
   return (
     <>
-      <HelmetContainer title="Dashboard · rtylr" />
+      <HelmetContainer title={t('flow.workspaceDashboard.pageTitle')} />
       <div className="max-w-5xl mx-auto p-4 pb-6 sm:p-6">
         {/* Header */}
         <motion.div
