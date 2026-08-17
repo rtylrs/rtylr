@@ -15,7 +15,8 @@ SELECT
     updated_at
 FROM hub_menu_banners
 WHERE business_id = ?
-ORDER BY position ASC, id ASC;
+ORDER BY position ASC, id ASC
+LIMIT 200;
 
 -- name: GetMenuBanner :one
 SELECT
