@@ -2,6 +2,7 @@
 SELECT items
 FROM hub_navigation_menus
 WHERE business_id = ?
+ORDER BY business_id ASC
 LIMIT 1;
 
 -- name: UpsertHubNavigationMenu :exec
