@@ -70,6 +70,7 @@ import { apiProjectToProject, apiWorkspaceToWorkspace } from '../shared/lib/proj
 import { LicenseBanner } from '@voxire/components';
 import { safe } from '../shared/lib/api';
 import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
+import { useRealtimeReconnectRefetch } from '../shared/lib/realtime';
 import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../shared/lib/memberUtils';
 
@@ -353,6 +354,9 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const caretUserId = Number(userId) || 0;
   const shouldUseRealtime = !location.pathname.startsWith('/settings');
   useLayoutRealtime(currentWorkspaceId, userId, shouldUseRealtime);
+  // Reconnect can happen regardless of which topics are currently active, so
+  // this runs unconditionally rather than gated by shouldUseRealtime.
+  useRealtimeReconnectRefetch();
 
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   useForesightLinks(sidebarRef, {
