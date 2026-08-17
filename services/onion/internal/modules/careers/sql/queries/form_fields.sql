@@ -14,7 +14,8 @@ SELECT
     updated_at
 FROM careers_form_fields
 WHERE business_id = ? AND career_id = ?
-ORDER BY position ASC, id ASC;
+ORDER BY position ASC, id ASC
+LIMIT 100;
 
 -- name: ListFormFieldsByCareer :many
 SELECT
