@@ -17,7 +17,7 @@ interface CreateModal {
 }
 
 const Calendar: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: apiTasks = [] } = useTasks({});
   const tasks = apiTasks as ApiTask[];
   const navigate = useNavigate();
@@ -48,9 +48,9 @@ const Calendar: React.FC = () => {
     }
     return {
       days: cells,
-      monthLabel: cursor.toLocaleString('default', { month: 'long', year: 'numeric' }),
+      monthLabel: cursor.toLocaleString(i18n.language, { month: 'long', year: 'numeric' }),
     };
-  }, [cursor]);
+  }, [cursor, i18n.language]);
 
   const tasksByDate = useMemo(() => {
     const map: Record<string, ApiTask[]> = {};
@@ -102,17 +102,17 @@ const Calendar: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="Calendar · rtylr" />
+      <HelmetContainer title={`${t('flow.calendar.heading')} · Flow`} />
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
         <div>
           <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-            Calendar
+            {t('flow.calendar.heading')}
           </h1>
           <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-            Tasks organized by due date · Click a day to add a task
+            {t('flow.calendar.subtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -141,20 +141,20 @@ const Calendar: React.FC = () => {
             className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)] font-medium"
             style={{ color: 'var(--flow-text-muted)' }}
           >
-            Today
+            {t('flow.calendar.today')}
           </button>
         </div>
       </div>
 
       <div className="flex-1 overflow-auto p-4">
         <div className="grid grid-cols-7 gap-px" style={{ background: 'var(--flow-border)' }}>
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+          {days.slice(0, 7).map((c) => (
             <div
-              key={d}
+              key={c.date.toISOString()}
               className="py-1.5 text-center text-[10px] font-semibold uppercase"
               style={{ background: 'var(--flow-bg)', color: 'var(--flow-text-dim)' }}
             >
-              {d}
+              {new Intl.DateTimeFormat(i18n.language, { weekday: 'short' }).format(c.date)}
             </div>
           ))}
           {days.map((c, i) => {
@@ -189,7 +189,7 @@ const Calendar: React.FC = () => {
                       className="text-[9px] opacity-0 group-hover:opacity-60 transition-opacity"
                       style={{ color: 'var(--flow-text-dim)' }}
                     >
-                      + add
+                      {t('flow.calendar.addHint')}
                     </span>
                   )}
                 </div>
@@ -217,7 +217,7 @@ const Calendar: React.FC = () => {
                       className="text-[9px] px-1 hover:underline"
                       style={{ color: ACCENT_VAR }}
                     >
-                      +{dayTasks.length - 3} more
+                      {t('flow.calendar.moreCount', { count: dayTasks.length - 3 })}
                     </button>
                   )}
                 </div>
@@ -249,9 +249,9 @@ const Calendar: React.FC = () => {
             >
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-                  New task for{' '}
+                  {t('flow.calendar.newTaskFor')}{' '}
                   <span style={{ color: ACCENT_VAR }}>
-                    {new Date(createModal.date + 'T00:00:00').toLocaleDateString('en-US', {
+                    {new Date(createModal.date + 'T00:00:00').toLocaleDateString(i18n.language, {
                       month: 'short',
                       day: 'numeric',
                     })}
@@ -271,7 +271,7 @@ const Calendar: React.FC = () => {
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && submitCreate()}
-                placeholder="Task title…"
+                placeholder={t('flow.calendar.titlePlaceholder')}
                 className="w-full rounded-lg px-3 py-2 text-[13px] outline-none mb-3"
                 style={{
                   background: 'var(--flow-input-bg)',
@@ -305,7 +305,7 @@ const Calendar: React.FC = () => {
                   className="px-3 py-1.5 rounded text-[12px]"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
-                  Cancel
+                  {t('flow.calendar.cancel')}
                 </button>
                 <button
                   onClick={submitCreate}
@@ -313,7 +313,7 @@ const Calendar: React.FC = () => {
                   className="px-3 py-1.5 rounded text-[12px] font-semibold disabled:opacity-40"
                   style={{ background: ACCENT_VAR, color: '#0a0a0a' }}
                 >
-                  {createTask.isPending ? 'Creating…' : 'Create'}
+                  {createTask.isPending ? t('flow.calendar.creating') : t('flow.calendar.create')}
                 </button>
               </div>
             </motion.div>
