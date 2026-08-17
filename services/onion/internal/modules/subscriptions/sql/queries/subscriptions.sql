@@ -116,4 +116,4 @@ SET paddle_subscription_id = ?, paddle_customer_id = ?, status = ?, updated_at =
 WHERE owner_id = ?;
 
 -- name: GetOwnerIDByPaddleSubscription :one
-SELECT owner_id FROM subscriptions WHERE paddle_subscription_id = ? LIMIT 1;
+SELECT owner_id FROM subscriptions WHERE paddle_subscription_id = ? ORDER BY id ASC LIMIT 1;
