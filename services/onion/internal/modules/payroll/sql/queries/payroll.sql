@@ -24,7 +24,8 @@ SELECT id, owner_id, business_id, staff_id, period_start, period_end, period_lab
        deductions, tax_withheld, net_pay, status, paid_at, notes, created_at
 FROM hr_payroll_records
 WHERE business_id = ?
-ORDER BY period_start DESC, staff_id ASC;
+ORDER BY period_start DESC, staff_id ASC
+LIMIT 200;
 
 -- name: ListPayrollRecordsByPeriod :many
 SELECT id, owner_id, business_id, staff_id, period_start, period_end, period_label,
