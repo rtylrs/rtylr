@@ -38,7 +38,7 @@ func ValidatePayrollRun(run PayrollRunRecord) error {
 	if !IsValidPayrollStatus(run.Status) {
 		return ErrInvalidPayrollStatus
 	}
-	if run.TotalGross < 0 || run.TotalNet < 0 {
+	if run.TotalGrossCents < 0 || run.TotalNetCents < 0 {
 		return ErrNegativePayAmount
 	}
 	return nil
@@ -46,13 +46,13 @@ func ValidatePayrollRun(run PayrollRunRecord) error {
 
 // ValidatePayrollEntry checks that a payroll entry has valid amounts.
 func ValidatePayrollEntry(entry PayrollEntryRecord) error {
-	if entry.BasePay < 0 || entry.OvertimePay < 0 || entry.Bonuses < 0 || entry.Deductions < 0 || entry.NetPay < 0 {
+	if entry.BasePayCents < 0 || entry.OvertimePayCents < 0 || entry.BonusesCents < 0 || entry.DeductionsCents < 0 || entry.NetPayCents < 0 {
 		return ErrNegativePayAmount
 	}
 	return nil
 }
 
-// ComputeNetPay derives net pay from the entry components.
-func ComputeNetPay(entry PayrollEntryRecord) float64 {
-	return entry.BasePay + entry.OvertimePay + entry.Bonuses - entry.Deductions
+// ComputeNetPay derives net pay, in cents, from the entry components.
+func ComputeNetPay(entry PayrollEntryRecord) int64 {
+	return entry.BasePayCents + entry.OvertimePayCents + entry.BonusesCents - entry.DeductionsCents
 }

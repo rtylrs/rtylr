@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -155,8 +156,8 @@ func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, businessID
 		PeriodEnd:   periodEnd,
 		Status:      run.Status,
 		CreatedBy:   run.CreatedBy,
-		TotalGross:  fmt.Sprintf("%.2f", run.TotalGross),
-		TotalNet:    fmt.Sprintf("%.2f", run.TotalNet),
+		TotalGross:  centsToDecimalString(run.TotalGrossCents),
+		TotalNet:    centsToDecimalString(run.TotalNetCents),
 	})
 	if err != nil {
 		_ = tx.Rollback()
@@ -186,11 +187,11 @@ func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, businessID
 			EmployeeID:    entry.EmployeeID,
 			HoursWorked:   fmt.Sprintf("%.2f", entry.HoursWorked),
 			OvertimeHours: fmt.Sprintf("%.2f", entry.OvertimeHours),
-			BasePay:       fmt.Sprintf("%.2f", entry.BasePay),
-			OvertimePay:   fmt.Sprintf("%.2f", entry.OvertimePay),
-			Bonuses:       fmt.Sprintf("%.2f", entry.Bonuses),
-			Deductions:    fmt.Sprintf("%.2f", entry.Deductions),
-			NetPay:        fmt.Sprintf("%.2f", entry.NetPay),
+			BasePay:       centsToDecimalString(entry.BasePayCents),
+			OvertimePay:   centsToDecimalString(entry.OvertimePayCents),
+			Bonuses:       centsToDecimalString(entry.BonusesCents),
+			Deductions:    centsToDecimalString(entry.DeductionsCents),
+			NetPay:        centsToDecimalString(entry.NetPayCents),
 		})
 		if entryErr != nil {
 			_ = tx.Rollback()
@@ -424,19 +425,19 @@ func (r *Repository) ListEmployeePayInfo(ctx context.Context, ownerID int64) ([]
 
 	employees := make([]domain.EmployeePayInfo, 0, len(rows))
 	for _, row := range rows {
-		hourlyRate := parseFloat(row.HourlyRate.String)
-		salary := parseFloat(row.Salary.String)
+		hourlyRateCents := nullDecimalStringToCents(row.HourlyRate)
+		salaryCents := nullDecimalStringToCents(row.Salary)
 
 		payType := "monthly"
-		if hourlyRate > 0 && salary == 0 {
+		if hourlyRateCents > 0 && salaryCents == 0 {
 			payType = "hourly"
 		}
 
 		employees = append(employees, domain.EmployeePayInfo{
-			EmployeeID:    row.ID,
-			PayType:       payType,
-			HourlyRate:    hourlyRate,
-			MonthlySalary: salary,
+			EmployeeID:         row.ID,
+			PayType:            payType,
+			HourlyRateCents:    hourlyRateCents,
+			MonthlySalaryCents: salaryCents,
 		})
 	}
 	return employees, nil
@@ -492,17 +493,17 @@ func payrollConfigFromRow(row sqlc.HrPayrollConfig) domain.PayrollConfigRecord {
 
 func payrollRunFromRow(row sqlc.HrPayrollRun) domain.PayrollRunRecord {
 	run := domain.PayrollRunRecord{
-		ID:          row.ID,
-		OwnerID:     row.OwnerID,
-		PeriodStart: row.PeriodStart.Format("2006-01-02"),
-		PeriodEnd:   row.PeriodEnd.Format("2006-01-02"),
-		Status:      row.Status,
-		CreatedBy:   row.CreatedBy,
-		ApprovedBy:  row.ApprovedBy.Int64,
-		TotalGross:  parseFloat(row.TotalGross),
-		TotalNet:    parseFloat(row.TotalNet),
-		CreatedAt:   row.CreatedAt,
-		UpdatedAt:   row.UpdatedAt,
+		ID:              row.ID,
+		OwnerID:         row.OwnerID,
+		PeriodStart:     row.PeriodStart.Format("2006-01-02"),
+		PeriodEnd:       row.PeriodEnd.Format("2006-01-02"),
+		Status:          row.Status,
+		CreatedBy:       row.CreatedBy,
+		ApprovedBy:      row.ApprovedBy.Int64,
+		TotalGrossCents: decimalStringToCentsOrZero(row.TotalGross),
+		TotalNetCents:   decimalStringToCentsOrZero(row.TotalNet),
+		CreatedAt:       row.CreatedAt,
+		UpdatedAt:       row.UpdatedAt,
 	}
 	if row.ExportedAt.Valid {
 		run.ExportedAt = row.ExportedAt.Time
@@ -512,19 +513,19 @@ func payrollRunFromRow(row sqlc.HrPayrollRun) domain.PayrollRunRecord {
 
 func payrollEntryFromRow(row sqlc.HrPayrollEntry) domain.PayrollEntryRecord {
 	return domain.PayrollEntryRecord{
-		ID:            row.ID,
-		OwnerID:       row.OwnerID,
-		PayrollRunID:  row.PayrollRunID,
-		EmployeeID:    row.EmployeeID,
-		HoursWorked:   parseFloat(row.HoursWorked),
-		OvertimeHours: parseFloat(row.OvertimeHours),
-		BasePay:       parseFloat(row.BasePay),
-		OvertimePay:   parseFloat(row.OvertimePay),
-		Bonuses:       parseFloat(row.Bonuses),
-		Deductions:    parseFloat(row.Deductions),
-		NetPay:        parseFloat(row.NetPay),
-		CreatedAt:     row.CreatedAt,
-		UpdatedAt:     row.UpdatedAt,
+		ID:               row.ID,
+		OwnerID:          row.OwnerID,
+		PayrollRunID:     row.PayrollRunID,
+		EmployeeID:       row.EmployeeID,
+		HoursWorked:      parseFloat(row.HoursWorked),
+		OvertimeHours:    parseFloat(row.OvertimeHours),
+		BasePayCents:     decimalStringToCentsOrZero(row.BasePay),
+		OvertimePayCents: decimalStringToCentsOrZero(row.OvertimePay),
+		BonusesCents:     decimalStringToCentsOrZero(row.Bonuses),
+		DeductionsCents:  decimalStringToCentsOrZero(row.Deductions),
+		NetPayCents:      decimalStringToCentsOrZero(row.NetPay),
+		CreatedAt:        row.CreatedAt,
+		UpdatedAt:        row.UpdatedAt,
 	}
 }
 
@@ -540,6 +541,98 @@ func parseFloat(s string) float64 {
 		return 0
 	}
 	return f
+}
+
+// centsToDecimalString renders an integer cents amount as the DECIMAL(15,2)
+// string sqlc expects, using only integer arithmetic so no float64 rounding
+// error can be introduced on the way into the database.
+func centsToDecimalString(cents int64) string {
+	negative := cents < 0
+	if negative {
+		cents = -cents
+	}
+	whole := cents / 100
+	fraction := cents % 100
+	s := strconv.FormatInt(whole, 10) + "." + fmt.Sprintf("%02d", fraction)
+	if negative {
+		s = "-" + s
+	}
+	return s
+}
+
+// decimalStringToCents parses a MySQL DECIMAL value read back as a string
+// into integer cents. It works on the string digits directly rather than
+// through strconv.ParseFloat, so no float64 rounding error can be
+// introduced on the way out of the database.
+func decimalStringToCents(s string) (int64, error) {
+	s = strings.TrimSpace(s)
+	negative := strings.HasPrefix(s, "-")
+	if negative {
+		s = s[1:]
+	}
+
+	whole, fraction, hasFraction := strings.Cut(s, ".")
+	if whole == "" {
+		whole = "0"
+	}
+	if len(fraction) > 2 {
+		fraction = fraction[:2]
+	}
+	for len(fraction) < 2 {
+		fraction += "0"
+	}
+	if !hasFraction {
+		fraction = "00"
+	}
+
+	wholeCents, err := strconv.ParseInt(whole, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	fractionCents, err := strconv.ParseInt(fraction, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	total := wholeCents*100 + fractionCents
+	if negative {
+		total = -total
+	}
+	return total, nil
+}
+
+// decimalStringToCentsOrZero parses a non-nullable DECIMAL value read back
+// as a string into integer cents, logging and returning zero on the (should
+// never happen) case that the database returns something that doesn't parse
+// as a decimal.
+func decimalStringToCentsOrZero(s string) int64 {
+	cents, err := decimalStringToCents(s)
+	if err != nil {
+		logger.Global().Warn("failed to parse decimal value from database",
+			logger.String("value", s),
+			logger.Error(err),
+		)
+		return 0
+	}
+	return cents
+}
+
+// nullDecimalStringToCents parses a nullable MySQL DECIMAL value read back
+// as a string into integer cents, using only integer/string arithmetic so no
+// float64 rounding error can be introduced on the way out of the database.
+func nullDecimalStringToCents(v sql.NullString) int64 {
+	if !v.Valid {
+		return 0
+	}
+	cents, err := decimalStringToCents(v.String)
+	if err != nil {
+		logger.Global().Warn("failed to parse nullable decimal from database",
+			logger.String("value", v.String),
+			logger.Error(err),
+		)
+		return 0
+	}
+	return cents
 }
 
 func interfaceToInt32(v interface{}) int32 {

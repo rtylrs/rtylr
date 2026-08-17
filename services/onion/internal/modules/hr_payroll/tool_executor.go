@@ -229,6 +229,9 @@ func hrPayrollRunToolPayloadPtr(run *domain.PayrollRunRecord) any {
 	return hrPayrollRunToolPayload(*run)
 }
 
+// hrPayrollRunToolPayload builds the Caret tool-call payload. The tool
+// contract carries these amounts as float64 dollars, so the internally
+// stored cents are converted at this boundary only.
 func hrPayrollRunToolPayload(run domain.PayrollRunRecord) map[string]any {
 	return map[string]any{
 		"id":           run.ID,
@@ -238,21 +241,23 @@ func hrPayrollRunToolPayload(run domain.PayrollRunRecord) map[string]any {
 		"created_by":   run.CreatedBy,
 		"approved_by":  run.ApprovedBy,
 		"exported_at":  run.ExportedAt,
-		"total_gross":  run.TotalGross,
-		"total_net":    run.TotalNet,
+		"total_gross":  domain.CentsToDollars(run.TotalGrossCents),
+		"total_net":    domain.CentsToDollars(run.TotalNetCents),
 	}
 }
 
+// hrPayrollEntryToolPayload builds the Caret tool-call payload. Same wire
+// boundary conversion as hrPayrollRunToolPayload above.
 func hrPayrollEntryToolPayload(entry domain.PayrollEntryRecord) map[string]any {
 	return map[string]any{
 		"id":             entry.ID,
 		"employee_id":    entry.EmployeeID,
 		"hours_worked":   entry.HoursWorked,
 		"overtime_hours": entry.OvertimeHours,
-		"base_pay":       entry.BasePay,
-		"overtime_pay":   entry.OvertimePay,
-		"bonuses":        entry.Bonuses,
-		"deductions":     entry.Deductions,
-		"net_pay":        entry.NetPay,
+		"base_pay":       domain.CentsToDollars(entry.BasePayCents),
+		"overtime_pay":   domain.CentsToDollars(entry.OvertimePayCents),
+		"bonuses":        domain.CentsToDollars(entry.BonusesCents),
+		"deductions":     domain.CentsToDollars(entry.DeductionsCents),
+		"net_pay":        domain.CentsToDollars(entry.NetPayCents),
 	}
 }

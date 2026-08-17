@@ -47,11 +47,11 @@ func TestIsValidPeriodType_Invalid(t *testing.T) {
 
 func TestValidatePayrollRun_Valid(t *testing.T) {
 	run := domain.PayrollRunRecord{
-		PeriodStart: "2026-01-01",
-		PeriodEnd:   "2026-01-31",
-		Status:      domain.PayrollStatusDraft,
-		TotalGross:  5000,
-		TotalNet:    4000,
+		PeriodStart:     "2026-01-01",
+		PeriodEnd:       "2026-01-31",
+		Status:          domain.PayrollStatusDraft,
+		TotalGrossCents: 500000,
+		TotalNetCents:   400000,
 	}
 	if err := domain.ValidatePayrollRun(run); err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -82,10 +82,10 @@ func TestValidatePayrollRun_InvalidStatus(t *testing.T) {
 
 func TestValidatePayrollRun_NegativeTotalGross(t *testing.T) {
 	run := domain.PayrollRunRecord{
-		PeriodStart: "2026-01-01",
-		PeriodEnd:   "2026-01-31",
-		Status:      domain.PayrollStatusDraft,
-		TotalGross:  -1,
+		PeriodStart:     "2026-01-01",
+		PeriodEnd:       "2026-01-31",
+		Status:          domain.PayrollStatusDraft,
+		TotalGrossCents: -1,
 	}
 	if err := domain.ValidatePayrollRun(run); !errors.Is(err, domain.ErrNegativePayAmount) {
 		t.Errorf("expected ErrNegativePayAmount, got %v", err)
@@ -94,11 +94,11 @@ func TestValidatePayrollRun_NegativeTotalGross(t *testing.T) {
 
 func TestValidatePayrollEntry_Valid(t *testing.T) {
 	entry := domain.PayrollEntryRecord{
-		BasePay:     2000,
-		OvertimePay: 300,
-		Bonuses:     100,
-		Deductions:  200,
-		NetPay:      2200,
+		BasePayCents:     200000,
+		OvertimePayCents: 30000,
+		BonusesCents:     10000,
+		DeductionsCents:  20000,
+		NetPayCents:      220000,
 	}
 	if err := domain.ValidatePayrollEntry(entry); err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -106,7 +106,7 @@ func TestValidatePayrollEntry_Valid(t *testing.T) {
 }
 
 func TestValidatePayrollEntry_NegativeBasePay(t *testing.T) {
-	entry := domain.PayrollEntryRecord{BasePay: -1}
+	entry := domain.PayrollEntryRecord{BasePayCents: -1}
 	if err := domain.ValidatePayrollEntry(entry); !errors.Is(err, domain.ErrNegativePayAmount) {
 		t.Errorf("expected ErrNegativePayAmount, got %v", err)
 	}
@@ -114,21 +114,21 @@ func TestValidatePayrollEntry_NegativeBasePay(t *testing.T) {
 
 func TestComputeNetPay_CorrectCalculation(t *testing.T) {
 	entry := domain.PayrollEntryRecord{
-		BasePay:     2000,
-		OvertimePay: 300,
-		Bonuses:     100,
-		Deductions:  200,
+		BasePayCents:     200000,
+		OvertimePayCents: 30000,
+		BonusesCents:     10000,
+		DeductionsCents:  20000,
 	}
 	got := domain.ComputeNetPay(entry)
-	want := 2200.0
+	want := int64(220000)
 	if got != want {
 		t.Errorf("ComputeNetPay = %v, want %v", got, want)
 	}
 }
 
 func TestComputeNetPay_NoExtras(t *testing.T) {
-	entry := domain.PayrollEntryRecord{BasePay: 3000}
-	if domain.ComputeNetPay(entry) != 3000 {
+	entry := domain.PayrollEntryRecord{BasePayCents: 300000}
+	if domain.ComputeNetPay(entry) != 300000 {
 		t.Error("ComputeNetPay with no extras should equal BasePay")
 	}
 }

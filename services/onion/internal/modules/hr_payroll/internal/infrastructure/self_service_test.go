@@ -22,8 +22,8 @@ func TestGetPayrollEntryForEmployee_ReturnsAlicesOwnEntry(t *testing.T) {
 	if entry.EmployeeID != 4101 {
 		t.Errorf("EmployeeID = %d, want 4101", entry.EmployeeID)
 	}
-	if entry.NetPay != 1100.0 {
-		t.Errorf("NetPay = %v, want 1100", entry.NetPay)
+	if entry.NetPayCents != 110000 {
+		t.Errorf("NetPayCents = %v, want 110000", entry.NetPayCents)
 	}
 }
 
@@ -39,11 +39,11 @@ func TestGetPayrollEntryForEmployee_DoesNotReturnAnotherEmployeesEntry(t *testin
 	if entry.EmployeeID != 4102 {
 		t.Errorf("EmployeeID = %d, want 4102", entry.EmployeeID)
 	}
-	if entry.NetPay != 600.0 {
-		t.Errorf("NetPay = %v, want 600", entry.NetPay)
+	if entry.NetPayCents != 60000 {
+		t.Errorf("NetPayCents = %v, want 60000", entry.NetPayCents)
 	}
-	if entry.NetPay == 1100.0 {
-		t.Error("got Alice's net pay instead of Bob's — entry lookup is not scoped to employee_id")
+	if entry.NetPayCents == 110000 {
+		t.Error("got Alice's net pay instead of Bob's: entry lookup is not scoped to employee_id")
 	}
 }
 
@@ -91,7 +91,7 @@ func TestListPayrollRunsForEmployee_ExcludesRunWhereEmployeeHasNoEntry(t *testin
 		PeriodEnd:   "2026-12-31",
 		Status:      domain.PayrollStatusApproved,
 	}, []domain.PayrollEntryRecord{
-		{EmployeeID: 4102, NetPay: 500},
+		{EmployeeID: 4102, NetPayCents: 50000},
 	})
 	if err != nil {
 		t.Fatalf("CreatePayrollRunWithEntries: %v", err)
@@ -118,7 +118,7 @@ func TestListPayrollRunsForEmployee_ExcludesDraftRun(t *testing.T) {
 		PeriodEnd:   "2027-01-31",
 		Status:      domain.PayrollStatusDraft,
 	}, []domain.PayrollEntryRecord{
-		{EmployeeID: 4101, NetPay: 700},
+		{EmployeeID: 4101, NetPayCents: 70000},
 	})
 	if err != nil {
 		t.Fatalf("CreatePayrollRunWithEntries: %v", err)

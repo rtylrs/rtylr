@@ -81,15 +81,15 @@ func TestListPayrollEntries_Run4301HasTwoEntries(t *testing.T) {
 		t.Fatalf("expected 2 entries for run 4301, got %d", len(entries))
 	}
 
-	netPays := make(map[float64]bool)
+	netPays := make(map[int64]bool)
 	for _, e := range entries {
-		netPays[e.NetPay] = true
+		netPays[e.NetPayCents] = true
 	}
-	if !netPays[1100.0] {
-		t.Errorf("expected entry with net_pay=1100, got %v", netPays)
+	if !netPays[110000] {
+		t.Errorf("expected entry with net_pay_cents=110000, got %v", netPays)
 	}
-	if !netPays[600.0] {
-		t.Errorf("expected entry with net_pay=600, got %v", netPays)
+	if !netPays[60000] {
+		t.Errorf("expected entry with net_pay_cents=60000, got %v", netPays)
 	}
 }
 
@@ -223,8 +223,8 @@ func TestGetPayrollEntries_AliceNetPay1100(t *testing.T) {
 	}
 	for _, e := range entries {
 		if e.EmployeeID == 4101 {
-			if e.NetPay != 1100.0 {
-				t.Errorf("expected Alice net_pay=1100, got %v", e.NetPay)
+			if e.NetPayCents != 110000 {
+				t.Errorf("expected Alice net_pay_cents=110000, got %v", e.NetPayCents)
 			}
 			return
 		}
@@ -243,8 +243,8 @@ func TestGetPayrollEntries_BobNetPay600(t *testing.T) {
 	}
 	for _, e := range entries {
 		if e.EmployeeID == 4102 {
-			if e.NetPay != 600.0 {
-				t.Errorf("expected Bob net_pay=600, got %v", e.NetPay)
+			if e.NetPayCents != 60000 {
+				t.Errorf("expected Bob net_pay_cents=60000, got %v", e.NetPayCents)
 			}
 			return
 		}

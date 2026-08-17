@@ -192,7 +192,7 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 	}
 
 	entries := make([]domain.PayrollEntryRecord, 0, len(employees))
-	var totalGross, totalNet float64
+	var totalGrossCents, totalNetCents int64
 
 	for _, emp := range employees {
 		hoursWorked := float64(tsMap[emp.EmployeeID]) / 60.0
@@ -207,49 +207,62 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 		}
 		overtimeHours := float64(overtimeMinutes) / 60.0
 
+		// The rate/salary fields are stored as integer cents; the proration
+		// and multiplier arithmetic below is unchanged from before the
+		// cents migration - it just operates on dollar amounts converted
+		// from cents at the top, and the results are converted back to
+		// cents once, at the bottom, before they're stored.
+		hourlyRateDollars := domain.CentsToDollars(emp.HourlyRateCents)
+		monthlySalaryDollars := domain.CentsToDollars(emp.MonthlySalaryCents)
+
 		var basePay float64
 		switch emp.PayType {
 		case "hourly":
-			basePay = hoursWorked * emp.HourlyRate
+			basePay = hoursWorked * hourlyRateDollars
 		case "monthly":
-			basePay = calculateMonthlyBasePay(emp.MonthlySalary, startDate, endDate)
+			basePay = calculateMonthlyBasePay(monthlySalaryDollars, startDate, endDate)
 		default:
-			basePay = calculateMonthlyBasePay(emp.MonthlySalary, startDate, endDate)
+			basePay = calculateMonthlyBasePay(monthlySalaryDollars, startDate, endDate)
 		}
 
 		overtimePay := 0.0
-		if cfg.OvertimeEnabled && overtimeHours > 0 && emp.HourlyRate > 0 {
-			overtimePay = overtimeHours * emp.HourlyRate * multiplier
+		if cfg.OvertimeEnabled && overtimeHours > 0 && hourlyRateDollars > 0 {
+			overtimePay = overtimeHours * hourlyRateDollars * multiplier
 		}
 
 		netPay := basePay + overtimePay
 		grossPay := netPay
 
+		basePayCents := domain.DollarsToCents(basePay)
+		overtimePayCents := domain.DollarsToCents(overtimePay)
+		netPayCents := domain.DollarsToCents(netPay)
+		grossPayCents := domain.DollarsToCents(grossPay)
+
 		entry := domain.PayrollEntryRecord{
-			OwnerID:       ownerID,
-			EmployeeID:    emp.EmployeeID,
-			HoursWorked:   hoursWorked,
-			OvertimeHours: overtimeHours,
-			BasePay:       basePay,
-			OvertimePay:   overtimePay,
-			Bonuses:       0,
-			Deductions:    0,
-			NetPay:        netPay,
+			OwnerID:          ownerID,
+			EmployeeID:       emp.EmployeeID,
+			HoursWorked:      hoursWorked,
+			OvertimeHours:    overtimeHours,
+			BasePayCents:     basePayCents,
+			OvertimePayCents: overtimePayCents,
+			BonusesCents:     0,
+			DeductionsCents:  0,
+			NetPayCents:      netPayCents,
 		}
 
 		entries = append(entries, entry)
-		totalGross += grossPay
-		totalNet += netPay
+		totalGrossCents += grossPayCents
+		totalNetCents += netPayCents
 	}
 
 	run := domain.PayrollRunRecord{
-		OwnerID:     ownerID,
-		PeriodStart: periodStart,
-		PeriodEnd:   periodEnd,
-		Status:      "draft",
-		CreatedBy:   createdBy,
-		TotalGross:  totalGross,
-		TotalNet:    totalNet,
+		OwnerID:         ownerID,
+		PeriodStart:     periodStart,
+		PeriodEnd:       periodEnd,
+		Status:          "draft",
+		CreatedBy:       createdBy,
+		TotalGrossCents: totalGrossCents,
+		TotalNetCents:   totalNetCents,
 	}
 
 	createdRun, createdEntries, err := s.repo.CreatePayrollRunWithEntries(ctx, ownerID, run, entries)
@@ -366,14 +379,18 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 		return domain.ErrFinanceIntegrationUnavailable
 	}
 
+	// The finance journal contract (owned by the finance module, out of
+	// scope for this fix) still carries these amounts as float64 dollars,
+	// so the internally-stored cents are converted at this boundary and
+	// never propagated further as a float.
 	if postErr := s.financePoster.PostPayrollJournal(ctx, domain.PayrollJournalEntry{
 		OwnerID:     ownerID,
 		BusinessID:  run.BusinessID,
 		RunID:       runID,
 		PeriodStart: run.PeriodStart,
 		PeriodEnd:   run.PeriodEnd,
-		TotalGross:  run.TotalGross,
-		TotalNet:    run.TotalNet,
+		TotalGross:  domain.CentsToDollars(run.TotalGrossCents),
+		TotalNet:    domain.CentsToDollars(run.TotalNetCents),
 	}); postErr != nil {
 		if releaseErr := s.repo.ReleasePayrollRunExportClaim(ctx, ownerID, runID); releaseErr != nil {
 			logger.Ctx(ctx).Error("failed to release payroll export claim after finance error",
@@ -411,7 +428,7 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 			Payload: map[string]any{
 				"run_id":       runID,
 				"employee_id":  entry.EmployeeID,
-				"net_pay":      entry.NetPay,
+				"net_pay":      domain.CentsToDollars(entry.NetPayCents),
 				"period_start": run.PeriodStart,
 				"period_end":   run.PeriodEnd,
 			},
