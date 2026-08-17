@@ -47,6 +47,7 @@ WHERE business_id = ? AND id = ?
 SELECT id, owner_id, business_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
 FROM erp_stock_transfers
 WHERE business_id = ? AND id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: ListTransferItemsByTransferIDs :many
