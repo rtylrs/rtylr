@@ -72,4 +72,5 @@ SELECT id, owner_id, business_id, staff_id, department_id, date, start_time, end
        created_at, updated_at
 FROM hr_shifts
 WHERE business_id = ? AND location_id = ?
-ORDER BY start_time ASC;
+ORDER BY start_time ASC
+LIMIT ? OFFSET ?;

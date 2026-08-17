@@ -15,6 +15,15 @@ import (
 
 func ListShiftsRoutes() []string { return []string{"/hr/shifts"} }
 
+// defaultListShiftsLimit and maxListShiftsLimit bound the client-supplied
+// limit before it ever reaches the service layer: an unset or non-positive
+// value falls back to the default, and anything above the max is capped, so
+// a request like ?limit=1000000 can't force an unbounded read.
+const (
+	defaultListShiftsLimit int32 = 50
+	maxListShiftsLimit     int32 = 100
+)
+
 type ListShiftsHandler struct{ Service *application.Service }
 
 // ListShiftsRequest filters the listing. Every filter is optional; with none
@@ -52,8 +61,16 @@ func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (
 		return ListShiftsResponse{}, onekiterrors.New(http.StatusBadRequest, "kind must be either template or attendance")
 	}
 
+	limit := req.Limit
+	if limit <= 0 {
+		limit = defaultListShiftsLimit
+	}
+	if limit > maxListShiftsLimit {
+		limit = maxListShiftsLimit
+	}
+
 	shifts, total, err := h.Service.ListShifts(ctx, businessID, domain.ListShiftsParams{
-		Limit:      req.Limit,
+		Limit:      limit,
 		Offset:     req.Offset,
 		StaffID:    req.StaffID,
 		Date:       req.Date,
@@ -70,5 +87,5 @@ func (h *ListShiftsHandler) Serve(ctx context.Context, req *ListShiftsRequest) (
 		payloads = append(payloads, shiftToProto(s))
 	}
 
-	return ListShiftsResponse{Shifts: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return ListShiftsResponse{Shifts: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
 }

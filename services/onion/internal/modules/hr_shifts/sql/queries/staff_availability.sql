@@ -51,4 +51,5 @@ FROM hr_staff_availability
 WHERE business_id = ?
   AND staff_id = ?
   AND (specific_date = sqlc.arg(on_date) OR (specific_date IS NULL AND day_of_week = sqlc.arg(day_of_week)))
-ORDER BY specific_date IS NULL ASC, start_time ASC;
+ORDER BY specific_date IS NULL ASC, start_time ASC
+LIMIT ? OFFSET ?;

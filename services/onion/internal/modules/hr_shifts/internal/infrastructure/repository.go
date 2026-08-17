@@ -12,6 +12,25 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
+// The three safety limits below bound queries that have no caller-supplied
+// pagination today. Each cap is set well above any legitimate result size for
+// its scope, so it never truncates a real response; it exists only to stop a
+// pathologically large table from being read unbounded into memory.
+const (
+	// listShiftsByLocationSafetyLimit bounds ListShiftsByLocation (all shift
+	// rows for one location).
+	listShiftsByLocationSafetyLimit int32 = 1000
+
+	// listRosterAssignmentsSafetyLimit bounds ListRosterAssignments, which
+	// backs the one-week roster view for a business.
+	listRosterAssignmentsSafetyLimit int32 = 5000
+
+	// listEmployeeAssignmentsForDateSafetyLimit bounds
+	// ListEmployeeAssignmentsForDate (one employee, one date); legitimate
+	// results are at most a handful of rows.
+	listEmployeeAssignmentsForDateSafetyLimit int32 = 100
+)
+
 type Repository struct {
 	queries *sqlc.Queries
 	pool    *sql.DB
@@ -204,6 +223,8 @@ func (r *Repository) ListShiftsByLocation(ctx context.Context, businessID, locat
 	rows, err := r.queries.ListShiftsByLocation(ctx, sqlc.ListShiftsByLocationParams{
 		BusinessID: businessID,
 		LocationID: nullInt64(locationID),
+		Limit:      listShiftsByLocationSafetyLimit,
+		Offset:     0,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list shifts by location", logger.Any("business_id", businessID), logger.Any("location_id", locationID), logger.Error(err))
@@ -230,6 +251,8 @@ func (r *Repository) ListRosterAssignments(ctx context.Context, businessID int64
 		BusinessID: businessID,
 		Date:       ws,
 		Date_2:     we,
+		Limit:      listRosterAssignmentsSafetyLimit,
+		Offset:     0,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list roster assignments", logger.Any("business_id", businessID), logger.Error(err))
@@ -303,6 +326,8 @@ func (r *Repository) ListEmployeeAssignmentsForDate(ctx context.Context, busines
 	rows, err := r.queries.ListEmployeeAssignmentsForDate(ctx, sqlc.ListEmployeeAssignmentsForDateParams{
 		BusinessID: businessID,
 		EmployeeID: employeeID,
+		Limit:      listEmployeeAssignmentsForDateSafetyLimit,
+		Offset:     0,
 		Date:       d,
 	})
 	if err != nil {

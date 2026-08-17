@@ -11,6 +11,12 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
+// listAvailabilityForStaffDateSafetyLimit bounds ListAvailabilityForStaffDate
+// (one staff member, one date/weekday pair). No caller paginates this query;
+// legitimate results are at most a couple of rows (a dated exception plus the
+// matching weekly pattern), so the cap only guards against pathological data.
+const listAvailabilityForStaffDateSafetyLimit int32 = 100
+
 // availabilityFromRow maps the generated model onto the domain record. A dated
 // exception carries no weekday, which the domain represents as NoDayOfWeek
 // rather than a nullable field.
@@ -205,6 +211,8 @@ func (r *Repository) ListAvailabilityForStaffDate(ctx context.Context, businessI
 		StaffID:    staffID,
 		OnDate:     nullDate(date),
 		DayOfWeek:  nullDayOfWeek(dayOfWeek),
+		Limit:      listAvailabilityForStaffDateSafetyLimit,
+		Offset:     0,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list staff availability for date",
