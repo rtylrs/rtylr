@@ -79,7 +79,8 @@ WHERE b.is_active = TRUE
       AND uap.business_id = b.id
       AND uap.is_active = TRUE
   ))
-ORDER BY b.id ASC;
+ORDER BY b.id ASC
+LIMIT 100;
 
 -- name: InsertSubBusiness :execresult
 INSERT INTO businesses (name, owner_id, parent_id) VALUES (?, ?, ?);
