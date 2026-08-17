@@ -10,6 +10,7 @@ ORDER BY created_at DESC LIMIT ? OFFSET ?;
 SELECT id, business_id, title, slug, body, category, is_published, views, created_at, updated_at
 FROM support_articles
 WHERE business_id = ? AND id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: GetArticleBySlug :one
