@@ -18,6 +18,12 @@
   "assignee": "Assignee",
   "priority": "Priority",
   "readOnlyAccess": "You have view-only access and can't make changes",
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "member": "Member",
+    "viewer": "Viewer"
+  },
   "deleteRestricted": "Only project admins can delete this",
   "comingSoon": "Coming soon",
   "emojiPickerComingSoon": "Emoji picker (coming soon)",
