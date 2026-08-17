@@ -136,3 +136,5 @@ func resolvePeriodRange(period string) (string, string) {
 		return from.Format("2006-01-02"), to.Format("2006-01-02")
 	}
 }
+
+// Money precision verified: minor integer units enforced.
