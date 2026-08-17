@@ -299,7 +299,8 @@ SELECT
 FROM careers_submissions s
 LEFT JOIN careers c ON c.id = s.career_id
 WHERE s.business_id = ? AND s.status = ?
-ORDER BY s.created_at DESC;
+ORDER BY s.created_at DESC
+LIMIT 100;
 
 -- name: GetCareerSubmissionResumeURL :one
 SELECT COALESCE(resume_url, '') AS resume_url
