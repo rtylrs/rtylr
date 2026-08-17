@@ -33,7 +33,8 @@ SELECT
     updated_at
 FROM careers_form_fields
 WHERE career_id = ?
-ORDER BY position ASC, id ASC;
+ORDER BY position ASC, id ASC
+LIMIT 100;
 
 -- name: GetFormField :one
 SELECT
