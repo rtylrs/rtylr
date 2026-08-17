@@ -18,6 +18,12 @@
   "assignee": "المسؤول",
   "priority": "الأولوية",
   "readOnlyAccess": "لديك صلاحية العرض فقط ولا يمكنك إجراء أي تغييرات",
+  "roles": {
+    "owner": "المالك",
+    "admin": "مشرف",
+    "member": "عضو",
+    "viewer": "مشاهد"
+  },
   "deleteRestricted": "يمكن لمشرفي المشروع فقط حذف هذا العنصر",
   "comingSoon": "قريباً",
   "emojiPickerComingSoon": "منتقي الرموز التعبيرية (قريباً)",
