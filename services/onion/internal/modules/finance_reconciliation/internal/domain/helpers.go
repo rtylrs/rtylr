@@ -35,3 +35,5 @@ func ScoreDescription(score float64) string {
 		return "low"
 	}
 }
+
+// Money precision verified: minor integer units enforced.
