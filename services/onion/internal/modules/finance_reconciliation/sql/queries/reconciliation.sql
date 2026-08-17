@@ -30,6 +30,7 @@ FOR UPDATE;
 -- name: GetMatchForBankFeed :one
 SELECT id FROM finance_reconciliation_matches
 WHERE business_id = ? AND bank_feed_id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: GetInvoiceForBusiness :one
