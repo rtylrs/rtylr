@@ -6,7 +6,7 @@
 # downloads an amd64 sqlc, which can't run under arm64 emulation).
 FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS builder
 WORKDIR /app
-RUN apk add --no-cache ca-certificates curl bash
+RUN apk add --no-cache ca-certificates curl bash git
 # sqlc: the worker imports the email package, whose generated query code is
 # produced by scripts/generate_sqlc.sh (gitignored, regenerated per build).
 RUN set -eux; \
@@ -19,14 +19,19 @@ RUN set -eux; \
     fi; \
     rm -f /tmp/sqlc.tar.gz; \
     sqlc version
-# voxie is a local `replace` target, so its module file must be present.
-COPY go.mod go.sum ./
-COPY voxie/go.mod voxie/go.sum* ./voxie/
-RUN go mod download
-COPY cmd ./cmd
-COPY internal ./internal
-COPY scripts ./scripts
-COPY voxie ./voxie
+# copy source tree & resolve git submodules if not checked out by host
+COPY . .
+RUN set -eux; \
+    if [ ! -f ./voxie/go.mod ]; then \
+      git clone --depth 1 https://github.com/tryrtylr/voxie.git ./voxie; \
+    fi; \
+    if [ ! -f ./internal/platform/database/schemas/hr_core/schema.sql ]; then \
+      git clone --depth 1 https://github.com/tryrtylr/schemas.git ./internal/platform/database/schemas; \
+    fi; \
+    if [ ! -d ./internal/platform/email/templates ]; then \
+      git clone --depth 1 https://github.com/tryrtylr/email-templates.git ./internal/platform/email/templates; \
+    fi
+RUN go mod download && go mod verify
 RUN chmod +x scripts/*.sh && \
     bash scripts/generate_sqlc.sh
 ARG VERSION=dev

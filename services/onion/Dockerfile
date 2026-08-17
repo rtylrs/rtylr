@@ -6,7 +6,7 @@ FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS builder
 WORKDIR /app
 
 # Layer 1: system tools — cached until this line changes
-RUN apk add --no-cache curl bash
+RUN apk add --no-cache curl bash git ca-certificates
 
 # Layer 2: sqlc binary — use the fast release asset, with Go-module fallback
 # when GitHub's release-assets endpoint is unavailable.
@@ -21,17 +21,23 @@ RUN set -eux; \
     rm -f /tmp/sqlc.tar.gz; \
     sqlc version
 
-# Layer 3: deps — only reruns when go.mod / go.sum change
-COPY go.mod go.sum ./
-COPY voxie/go.mod voxie/go.sum* ./voxie/
+# Layer 3: copy source tree & resolve git submodules
+COPY . .
+RUN set -eux; \
+    if [ -d .git ]; then \
+      git submodule update --init --recursive; \
+    fi; \
+    if [ ! -f ./voxie/go.mod ]; then \
+      git clone --depth 1 https://github.com/tryrtylr/voxie.git ./voxie; \
+    fi; \
+    if [ ! -f ./internal/platform/database/schemas/hr_core/schema.sql ]; then \
+      git clone --depth 1 https://github.com/tryrtylr/schemas.git ./internal/platform/database/schemas; \
+    fi; \
+    if [ ! -d ./internal/platform/email/templates ]; then \
+      git clone --depth 1 https://github.com/tryrtylr/email-templates.git ./internal/platform/email/templates; \
+    fi
+
 RUN go mod download && go mod verify
-
-# Layer 4: source — reruns on any code change but layers 1-3 are already cached
-COPY cmd ./cmd
-COPY internal ./internal
-COPY scripts ./scripts
-COPY voxie ./voxie
-
 RUN chmod +x scripts/*.sh
 RUN bash scripts/generate_sqlc.sh
 

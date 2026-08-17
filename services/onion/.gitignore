@@ -73,3 +73,6 @@ internal/**/sql/*.sql.go
 
 # Per-machine agent config, not shared across machines
 /CLAUDE.md
+.worktrees/
+.codex-worktrees/
+

@@ -22,15 +22,13 @@ RUN cmake -B build -DCMAKE_BUILD_TYPE=Release && \
 # the target arch (emulated for arm64).
 FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS go-builder
 WORKDIR /app
-RUN apk add --no-cache ca-certificates bash
-# Layer cache: deps only re-download when go.mod/go.sum change. voxie is a
-# local `replace` target, so its module file must be present for resolution.
-COPY go.mod go.sum ./
-COPY voxie/go.mod voxie/go.sum* ./voxie/
-RUN go mod download
-COPY cmd ./cmd
-COPY internal ./internal
-COPY voxie ./voxie
+RUN apk add --no-cache ca-certificates bash git
+COPY . .
+RUN set -eux; \
+    if [ ! -f ./voxie/go.mod ]; then \
+      git clone --depth 1 https://github.com/tryrtylr/voxie.git ./voxie; \
+    fi
+RUN go mod download && go mod verify
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
