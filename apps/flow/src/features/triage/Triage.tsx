@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Eye } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Task } from '../../shared/stores/flowStore';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { HelmetContainer } from '@voxire/components';
@@ -9,6 +10,7 @@ import EmptyState from '../../shared/components/EmptyState';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 
 const Triage: React.FC = () => {
+  const { t } = useTranslation();
   const { data: apiTasks } = useTasks({});
   const tasks: Task[] = (apiTasks ?? []).map(apiTaskToTask);
   const { selectedTaskIds } = useFlowStore();
@@ -25,7 +27,7 @@ const Triage: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="Triage · rtylr" />
+      <HelmetContainer title={t('flow.triage.pageTitle')} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <h1 className="text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
           Triage
@@ -39,7 +41,7 @@ const Triage: React.FC = () => {
         {needsTriage.length === 0 ? (
           <EmptyState
             icon={Eye}
-            title="Inbox zero"
+            title={t('flow.triage.emptyTitle')}
             description="Nothing stuck without a priority or due date. New work lands in capture first-keep triage lean so planned work stays trustworthy."
           />
         ) : (
