@@ -74,6 +74,9 @@ describe('flow locale parity', () => {
       'settings.workTypes.description',
       // "Mentions" (as in @mentions) is the same word in French too.
       'settings.notifications.items.mentions.label',
+      // "Actions" and "Navigation" are the same words in French too.
+      'commandBar.groupActions',
+      'commandBar.groupNavigation',
     ]);
 
     const copied = keyPaths(en).filter((path) => {
