@@ -28,6 +28,7 @@
   "comingSoon": "Coming soon",
   "emojiPickerComingSoon": "Emoji picker (coming soon)",
   "focusToday": {
+    "pageTitle": "Today · rtylr",
     "emptyTitle": "Nothing pinned for today",
     "emptyHint": "Pin tasks from task detail, or set a due date to today. Enjoy the clear runway."
   },

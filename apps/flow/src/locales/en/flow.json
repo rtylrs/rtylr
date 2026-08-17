@@ -178,9 +178,15 @@
       "onsite": "Onsite",
       "remote": "Remote",
       "hybrid": "Hybrid"
-    }
+    },
+    "reportsPageTitle": "Reports · rtylr",
+    "myDayPageTitle": "My day · rtylr",
+    "teamPageTitle": "Team · rtylr"
   },
   "settings": {
+    "pageTitle": "Settings · rtylr",
+    "chooseCustomColorLabel": "Choose custom color",
+    "deleteLabelLabel": "Delete label",
     "time": {
       "section": "Time",
       "localOnlyWarning": "These settings are saved in this browser only. They will move to the workspace once the time settings endpoint lands, and anyone else opening Flow sees the defaults until then.",
@@ -336,5 +342,22 @@
       "priority": "Priority",
       "due": "Due window"
     }
+  },
+  "calendar": {
+    "pageTitle": "Calendar · rtylr"
+  },
+  "workspaceDashboard": {
+    "pageTitle": "Dashboard · rtylr"
+  },
+  "milestones": {
+    "pageTitle": "Milestones · rtylr",
+    "emptyTitle": "No milestones yet"
+  },
+  "views": {
+    "pageTitle": "Views · rtylr",
+    "newViewLabel": "New view",
+    "renameLabel": "Rename",
+    "deleteLabel": "Delete",
+    "deleteViewLabel": "Delete saved view"
   }
 }
