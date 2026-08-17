@@ -44,6 +44,13 @@ func (h *ListDocumentsHandler) Serve(ctx context.Context, req *ListDocumentsRequ
 		return ListDocumentsResponse{}, onekiterrors.New(http.StatusBadRequest, "employee_id is required")
 	}
 
+	if req.Limit <= 0 {
+		req.Limit = 20
+	}
+	if req.Limit > 100 {
+		req.Limit = 100
+	}
+
 	docs, total, err := h.Service.ListDocuments(ctx, businessID, req.EmployeeID, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list documents", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
