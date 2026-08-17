@@ -8,7 +8,8 @@ SELECT id, name, slug, apps, price_per_seat_cents,
        is_active, created_at
 FROM plans
 WHERE is_active = TRUE
-ORDER BY is_solo ASC, tier_order ASC, id ASC;
+ORDER BY is_solo ASC, tier_order ASC, id ASC
+LIMIT 200;
 
 -- name: GetPlanBySlug :one
 SELECT id, name, slug, apps, price_per_seat_cents,
