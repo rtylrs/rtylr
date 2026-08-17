@@ -1,61 +1,61 @@
 {
-  "milestoneCreated": "Milestone created",
+  "milestoneCreated": "Jalon créé",
   "task": {
-    "created": "Task created",
-    "createFailed": "Failed to create task",
-    "updateFailed": "Failed to update task",
-    "deleteFailed": "Failed to delete task",
-    "statusUpdateFailed": "Failed to update status",
-    "archived": "Task archived",
-    "deleted": "Task deleted",
-    "restored": "Task restored",
-    "restoreFailed": "Failed to restore task",
-    "copied": "Copied {{id}}",
-    "niceWork": "Nice work!",
-    "bulkUpdated_one": "Updated {{count}} task",
-    "bulkUpdated_other": "Updated {{count}} tasks",
-    "bulkUpdateFailed": "Bulk update failed",
-    "bulkDeleted_one": "Deleted {{count}} task",
-    "bulkDeleted_other": "Deleted {{count}} tasks",
-    "bulkDeleteFailed": "Bulk delete failed",
-    "selectProjectFirst": "Select a project first",
-    "invalidDuration": "Enter a valid duration, e.g. \"90m\" or \"1.5h\""
+    "created": "Tâche créée",
+    "createFailed": "Impossible de créer la tâche",
+    "updateFailed": "Impossible de mettre à jour la tâche",
+    "deleteFailed": "Impossible de supprimer la tâche",
+    "statusUpdateFailed": "Impossible de mettre à jour le statut",
+    "archived": "Tâche archivée",
+    "deleted": "Tâche supprimée",
+    "restored": "Tâche restaurée",
+    "restoreFailed": "Impossible de restaurer la tâche",
+    "copied": "{{id}} copié",
+    "niceWork": "Bien joué !",
+    "bulkUpdated_one": "{{count}} tâche mise à jour",
+    "bulkUpdated_other": "{{count}} tâches mises à jour",
+    "bulkUpdateFailed": "Impossible d'effectuer la mise à jour groupée",
+    "bulkDeleted_one": "{{count}} tâche supprimée",
+    "bulkDeleted_other": "{{count}} tâches supprimées",
+    "bulkDeleteFailed": "Impossible d'effectuer la suppression groupée",
+    "selectProjectFirst": "Sélectionnez d'abord un projet",
+    "invalidDuration": "Saisissez une durée valide, par exemple « 90m » ou « 1.5h »"
   },
   "comment": {
-    "postFailed": "Failed to post comment",
-    "deleteFailed": "Failed to delete comment"
+    "postFailed": "Impossible de publier le commentaire",
+    "deleteFailed": "Impossible de supprimer le commentaire"
   },
   "subtask": {
-    "addFailed": "Failed to add subtask",
-    "updateFailed": "Failed to update subtask"
+    "addFailed": "Impossible d'ajouter la sous-tâche",
+    "updateFailed": "Impossible de mettre à jour la sous-tâche"
   },
   "time": {
-    "logged": "Time logged",
-    "logFailed": "Failed to log time",
-    "deleteFailed": "Failed to delete time log"
+    "logged": "Temps enregistré",
+    "logFailed": "Impossible d'enregistrer le temps",
+    "deleteFailed": "Impossible de supprimer l'entrée de temps"
   },
   "cycle": {
-    "created": "Cycle created"
+    "created": "Itération créée"
   },
   "label": {
-    "created": "Label created",
-    "createFailed": "Failed to create label",
-    "deleted": "Label deleted",
-    "deleteFailed": "Failed to delete label"
+    "created": "Étiquette créée",
+    "createFailed": "Impossible de créer l'étiquette",
+    "deleted": "Étiquette supprimée",
+    "deleteFailed": "Impossible de supprimer l'étiquette"
   },
   "project": {
-    "updated": "Project updated",
-    "updateFailed": "Failed to update project"
+    "updated": "Projet mis à jour",
+    "updateFailed": "Impossible de mettre à jour le projet"
   },
   "profile": {
-    "updated": "Profile updated",
-    "updateFailed": "Failed to update profile"
+    "updated": "Profil mis à jour",
+    "updateFailed": "Impossible de mettre à jour le profil"
   },
   "password": {
-    "changed": "Password changed",
-    "changeFailed": "Failed to change password"
+    "changed": "Mot de passe modifié",
+    "changeFailed": "Impossible de modifier le mot de passe"
   },
   "workspace": {
-    "noActive": "No active workspace"
+    "noActive": "Aucun espace de travail actif"
   }
 }

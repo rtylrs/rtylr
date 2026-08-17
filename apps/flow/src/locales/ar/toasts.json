@@ -1,61 +1,61 @@
 {
-  "milestoneCreated": "Milestone created",
+  "milestoneCreated": "تم إنشاء المرحلة",
   "task": {
-    "created": "Task created",
-    "createFailed": "Failed to create task",
-    "updateFailed": "Failed to update task",
-    "deleteFailed": "Failed to delete task",
-    "statusUpdateFailed": "Failed to update status",
-    "archived": "Task archived",
-    "deleted": "Task deleted",
-    "restored": "Task restored",
-    "restoreFailed": "Failed to restore task",
-    "copied": "Copied {{id}}",
-    "niceWork": "Nice work!",
-    "bulkUpdated_one": "Updated {{count}} task",
-    "bulkUpdated_other": "Updated {{count}} tasks",
-    "bulkUpdateFailed": "Bulk update failed",
-    "bulkDeleted_one": "Deleted {{count}} task",
-    "bulkDeleted_other": "Deleted {{count}} tasks",
-    "bulkDeleteFailed": "Bulk delete failed",
-    "selectProjectFirst": "Select a project first",
-    "invalidDuration": "Enter a valid duration, e.g. \"90m\" or \"1.5h\""
+    "created": "تم إنشاء المهمة",
+    "createFailed": "تعذّر إنشاء المهمة",
+    "updateFailed": "تعذّر تحديث المهمة",
+    "deleteFailed": "تعذّر حذف المهمة",
+    "statusUpdateFailed": "تعذّر تحديث الحالة",
+    "archived": "تمت أرشفة المهمة",
+    "deleted": "تم حذف المهمة",
+    "restored": "تمت استعادة المهمة",
+    "restoreFailed": "تعذّر استعادة المهمة",
+    "copied": "تم نسخ {{id}}",
+    "niceWork": "عمل رائع!",
+    "bulkUpdated_one": "تم تحديث مهمة واحدة",
+    "bulkUpdated_other": "تم تحديث {{count}} مهمة",
+    "bulkUpdateFailed": "تعذّر التحديث الجماعي",
+    "bulkDeleted_one": "تم حذف مهمة واحدة",
+    "bulkDeleted_other": "تم حذف {{count}} مهمة",
+    "bulkDeleteFailed": "تعذّر الحذف الجماعي",
+    "selectProjectFirst": "اختر مشروعاً أولاً",
+    "invalidDuration": "أدخل مدة صحيحة، مثل \"90m\" أو \"1.5h\""
   },
   "comment": {
-    "postFailed": "Failed to post comment",
-    "deleteFailed": "Failed to delete comment"
+    "postFailed": "تعذّر نشر التعليق",
+    "deleteFailed": "تعذّر حذف التعليق"
   },
   "subtask": {
-    "addFailed": "Failed to add subtask",
-    "updateFailed": "Failed to update subtask"
+    "addFailed": "تعذّر إضافة المهمة الفرعية",
+    "updateFailed": "تعذّر تحديث المهمة الفرعية"
   },
   "time": {
-    "logged": "Time logged",
-    "logFailed": "Failed to log time",
-    "deleteFailed": "Failed to delete time log"
+    "logged": "تم تسجيل الوقت",
+    "logFailed": "تعذّر تسجيل الوقت",
+    "deleteFailed": "تعذّر حذف سجل الوقت"
   },
   "cycle": {
-    "created": "Cycle created"
+    "created": "تم إنشاء الدورة"
   },
   "label": {
-    "created": "Label created",
-    "createFailed": "Failed to create label",
-    "deleted": "Label deleted",
-    "deleteFailed": "Failed to delete label"
+    "created": "تم إنشاء التسمية",
+    "createFailed": "تعذّر إنشاء التسمية",
+    "deleted": "تم حذف التسمية",
+    "deleteFailed": "تعذّر حذف التسمية"
   },
   "project": {
-    "updated": "Project updated",
-    "updateFailed": "Failed to update project"
+    "updated": "تم تحديث المشروع",
+    "updateFailed": "تعذّر تحديث المشروع"
   },
   "profile": {
-    "updated": "Profile updated",
-    "updateFailed": "Failed to update profile"
+    "updated": "تم تحديث الملف الشخصي",
+    "updateFailed": "تعذّر تحديث الملف الشخصي"
   },
   "password": {
-    "changed": "Password changed",
-    "changeFailed": "Failed to change password"
+    "changed": "تم تغيير كلمة المرور",
+    "changeFailed": "تعذّر تغيير كلمة المرور"
   },
   "workspace": {
-    "noActive": "No active workspace"
+    "noActive": "لا توجد مساحة عمل نشطة"
   }
 }
