@@ -19,6 +19,8 @@ type ListAssetsHandler struct{ Service *application.Service }
 type ListAssetsRequest struct {
 	LocationID int64  `json:"location_id"`
 	Status     string `json:"status"`
+	Limit      int32  `json:"limit"`
+	Offset     int32  `json:"offset"`
 }
 
 type ListAssetsResponse struct {
@@ -31,7 +33,7 @@ func (h *ListAssetsHandler) Serve(ctx context.Context, req *ListAssetsRequest) (
 		return ListAssetsResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	params := domain.ListAssetsParams{}
+	params := domain.ListAssetsParams{Limit: req.Limit, Offset: req.Offset}
 	if req.LocationID != 0 {
 		params.LocationID = &req.LocationID
 	}

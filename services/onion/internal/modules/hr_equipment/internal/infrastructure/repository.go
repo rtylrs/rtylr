@@ -187,17 +187,21 @@ func (r *Repository) ListAssets(ctx context.Context, businessID int64, params do
 	case hasLocation && hasStatus:
 		rows, err = r.queries.ListAssetsByLocationAndStatus(ctx, sqlc.ListAssetsByLocationAndStatusParams{
 			BusinessID: businessID, LocationID: sql.NullInt64{Int64: *params.LocationID, Valid: true}, Status: *params.Status,
+			Limit: params.Limit, Offset: params.Offset,
 		})
 	case hasLocation:
 		rows, err = r.queries.ListAssetsByLocation(ctx, sqlc.ListAssetsByLocationParams{
 			BusinessID: businessID, LocationID: sql.NullInt64{Int64: *params.LocationID, Valid: true},
+			Limit: params.Limit, Offset: params.Offset,
 		})
 	case hasStatus:
 		rows, err = r.queries.ListAssetsByStatus(ctx, sqlc.ListAssetsByStatusParams{
-			BusinessID: businessID, Status: *params.Status,
+			BusinessID: businessID, Status: *params.Status, Limit: params.Limit, Offset: params.Offset,
 		})
 	default:
-		rows, err = r.queries.ListAssets(ctx, businessID)
+		rows, err = r.queries.ListAssets(ctx, sqlc.ListAssetsParams{
+			BusinessID: businessID, Limit: params.Limit, Offset: params.Offset,
+		})
 	}
 	if err != nil {
 		return nil, err

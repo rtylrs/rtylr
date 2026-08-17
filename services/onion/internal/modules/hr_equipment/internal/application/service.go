@@ -105,6 +105,12 @@ func (s *Service) CreateAsset(ctx context.Context, businessID int64, params doma
 }
 
 func (s *Service) ListAssets(ctx context.Context, businessID int64, params domain.ListAssetsParams) ([]domain.AssetRecord, error) {
+	if params.Limit <= 0 {
+		params.Limit = 20
+	}
+	if params.Limit > 100 {
+		params.Limit = 100
+	}
 	loc := int64(0)
 	if params.LocationID != nil {
 		loc = *params.LocationID
@@ -113,7 +119,7 @@ func (s *Service) ListAssets(ctx context.Context, businessID int64, params domai
 	if params.Status != nil {
 		status = *params.Status
 	}
-	key := cacheKeys.Scoped(hrEquipmentScope, businessID, fmt.Sprintf("assets|loc=%d|s=%s", loc, status))
+	key := cacheKeys.Scoped(hrEquipmentScope, businessID, fmt.Sprintf("assets|loc=%d|s=%s|l=%d|o=%d", loc, status, params.Limit, params.Offset))
 	return cacher.Of[[]domain.AssetRecord]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.AssetRecord, error) {
 			return s.repo.ListAssets(ctx, businessID, params)

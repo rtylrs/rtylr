@@ -142,7 +142,7 @@ func TestListAssets_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	assets, err := repo.ListAssets(ctx, testutil.OwnerID, domain.ListAssetsParams{})
+	assets, err := repo.ListAssets(ctx, testutil.OwnerID, domain.ListAssetsParams{Limit: 50})
 	if err != nil {
 		t.Fatalf("ListAssets: %v", err)
 	}
@@ -155,7 +155,7 @@ func TestListAssets_FilterByStatus(t *testing.T) {
 	ctx := context.Background()
 
 	status := "available"
-	assets, err := repo.ListAssets(ctx, testutil.OwnerID, domain.ListAssetsParams{Status: &status})
+	assets, err := repo.ListAssets(ctx, testutil.OwnerID, domain.ListAssetsParams{Status: &status, Limit: 50})
 	if err != nil {
 		t.Fatalf("ListAssets by status: %v", err)
 	}

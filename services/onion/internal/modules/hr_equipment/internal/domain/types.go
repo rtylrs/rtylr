@@ -64,6 +64,8 @@ type CreateAssetParams struct {
 type ListAssetsParams struct {
 	LocationID *int64
 	Status     *string
+	Limit      int32
+	Offset     int32
 }
 
 type ApprovalChainInfo struct {

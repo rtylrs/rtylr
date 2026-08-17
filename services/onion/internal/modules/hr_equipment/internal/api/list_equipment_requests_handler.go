@@ -36,6 +36,13 @@ func (h *ListEquipmentRequestsHandler) Serve(ctx context.Context, req *ListEquip
 		return ListEquipmentRequestsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	if req.Limit <= 0 {
+		req.Limit = 20
+	}
+	if req.Limit > 100 {
+		req.Limit = 100
+	}
+
 	requests, total, err := h.Service.ListEquipmentRequests(ctx, device.User.UserID, domain.ListEquipmentRequestsParams{
 		EmployeeID: req.EmployeeID,
 		Status:     req.Status,

@@ -13,28 +13,32 @@ SELECT id, owner_id, business_id, name, category, serial_number, location_id, as
        purchase_date, purchase_price, notes, created_at, updated_at
 FROM hr_assets
 WHERE business_id = ?
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT ? OFFSET ?;
 
 -- name: ListAssetsByStatus :many
 SELECT id, owner_id, business_id, name, category, serial_number, location_id, assigned_to, status,
        purchase_date, purchase_price, notes, created_at, updated_at
 FROM hr_assets
 WHERE business_id = ? AND status = ?
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT ? OFFSET ?;
 
 -- name: ListAssetsByLocation :many
 SELECT id, owner_id, business_id, name, category, serial_number, location_id, assigned_to, status,
        purchase_date, purchase_price, notes, created_at, updated_at
 FROM hr_assets
 WHERE business_id = ? AND location_id = ?
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT ? OFFSET ?;
 
 -- name: ListAssetsByLocationAndStatus :many
 SELECT id, owner_id, business_id, name, category, serial_number, location_id, assigned_to, status,
        purchase_date, purchase_price, notes, created_at, updated_at
 FROM hr_assets
 WHERE business_id = ? AND location_id = ? AND status = ?
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT ? OFFSET ?;
 
 -- name: AssignAsset :exec
 UPDATE hr_assets
