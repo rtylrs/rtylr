@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -122,9 +123,9 @@ func (r *Repository) UpdateEmployee(ctx context.Context, businessID int64, emp d
 		Phone:                 nullString(emp.Phone),
 		EmploymentType:        emp.EmploymentType,
 		Status:                emp.Status,
-		Salary:                nullStringFromFloat(emp.Salary),
-		HourlyRate:            nullStringFromFloat(emp.HourlyRate),
-		OvertimeRate:          nullStringFromFloat(emp.OvertimeRate),
+		Salary:                centsToNullDecimalString(emp.SalaryCents),
+		HourlyRate:            centsToNullDecimalString(emp.HourlyRateCents),
+		OvertimeRate:          centsToNullDecimalString(emp.OvertimeRateCents),
 		StartDate:             nullTime(emp.StartDate),
 		EndDate:               nullTime(emp.EndDate),
 		Address:               nullString(emp.Address),
@@ -780,9 +781,9 @@ func employeeFromRow(row sqlc.HrEmployee) domain.EmployeeRecord {
 		Phone:                 row.Phone.String,
 		EmploymentType:        row.EmploymentType,
 		Status:                row.Status,
-		Salary:                parseNullFloat(row.Salary),
-		HourlyRate:            parseNullFloat(row.HourlyRate),
-		OvertimeRate:          parseNullFloat(row.OvertimeRate),
+		SalaryCents:           nullDecimalStringToCents(row.Salary),
+		HourlyRateCents:       nullDecimalStringToCents(row.HourlyRate),
+		OvertimeRateCents:     nullDecimalStringToCents(row.OvertimeRate),
 		StartDate:             row.StartDate.Time,
 		EndDate:               row.EndDate.Time,
 		Address:               row.Address.String,
@@ -808,9 +809,9 @@ func employeeToParams(businessID int64, emp domain.EmployeeRecord) sqlc.CreateEm
 		Phone:                 nullString(emp.Phone),
 		EmploymentType:        emp.EmploymentType,
 		Status:                emp.Status,
-		Salary:                nullStringFromFloat(emp.Salary),
-		HourlyRate:            nullStringFromFloat(emp.HourlyRate),
-		OvertimeRate:          nullStringFromFloat(emp.OvertimeRate),
+		Salary:                centsToNullDecimalString(emp.SalaryCents),
+		HourlyRate:            centsToNullDecimalString(emp.HourlyRateCents),
+		OvertimeRate:          centsToNullDecimalString(emp.OvertimeRateCents),
 		StartDate:             nullTime(emp.StartDate),
 		EndDate:               nullTime(emp.EndDate),
 		Address:               nullString(emp.Address),
@@ -901,11 +902,29 @@ func nullString(v string) sql.NullString {
 	return sql.NullString{String: v, Valid: v != ""}
 }
 
-func nullStringFromFloat(v float64) sql.NullString {
-	if v == 0 {
+// centsToNullDecimalString renders an integer cents amount as the DECIMAL(10,2)
+// string sqlc expects, using only integer arithmetic so no float64 rounding
+// error can be introduced on the way into the database. A zero amount is
+// stored as NULL, matching the previous float-based helper's behaviour.
+func centsToNullDecimalString(cents int64) sql.NullString {
+	if cents == 0 {
 		return sql.NullString{}
 	}
-	return sql.NullString{String: strconv.FormatFloat(v, 'f', 2, 64), Valid: true}
+	return sql.NullString{String: centsToDecimalString(cents), Valid: true}
+}
+
+func centsToDecimalString(cents int64) string {
+	negative := cents < 0
+	if negative {
+		cents = -cents
+	}
+	whole := cents / 100
+	fraction := cents % 100
+	s := strconv.FormatInt(whole, 10) + "." + fmt.Sprintf("%02d", fraction)
+	if negative {
+		s = "-" + s
+	}
+	return s
 }
 
 func nullFloat64(v float64) sql.NullFloat64 {
@@ -916,17 +935,58 @@ func nullTime(v time.Time) sql.NullTime {
 	return sql.NullTime{Time: v, Valid: !v.IsZero()}
 }
 
-func parseNullFloat(v sql.NullString) float64 {
+// nullDecimalStringToCents parses a MySQL DECIMAL(10,2) value read back as a
+// string into integer cents. It works on the string digits directly rather
+// than through strconv.ParseFloat, so no float64 rounding error can be
+// introduced on the way out of the database.
+func nullDecimalStringToCents(v sql.NullString) int64 {
 	if !v.Valid {
 		return 0
 	}
-	f, err := strconv.ParseFloat(v.String, 64)
+	cents, err := decimalStringToCents(v.String)
 	if err != nil {
 		// DECIMAL values from MySQL should always parse; log corruption and return zero
 		logger.Global().Warn("failed to parse nullable decimal from database", logger.String("value", v.String), logger.Error(err))
 		return 0
 	}
-	return f
+	return cents
+}
+
+func decimalStringToCents(s string) (int64, error) {
+	s = strings.TrimSpace(s)
+	negative := strings.HasPrefix(s, "-")
+	if negative {
+		s = s[1:]
+	}
+
+	whole, fraction, hasFraction := strings.Cut(s, ".")
+	if whole == "" {
+		whole = "0"
+	}
+	if len(fraction) > 2 {
+		fraction = fraction[:2]
+	}
+	for len(fraction) < 2 {
+		fraction += "0"
+	}
+	if !hasFraction {
+		fraction = "00"
+	}
+
+	wholeCents, err := strconv.ParseInt(whole, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	fractionCents, err := strconv.ParseInt(fraction, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	total := wholeCents*100 + fractionCents
+	if negative {
+		total = -total
+	}
+	return total, nil
 }
 
 func parseFloat(v string) float64 {

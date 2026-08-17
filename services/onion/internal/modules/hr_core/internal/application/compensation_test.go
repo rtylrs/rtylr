@@ -44,30 +44,30 @@ const (
 func testCoworker() domain.EmployeeRecord {
 	return domain.EmployeeRecord{
 		ID: 4102, UserID: testOtherUserID, FirstName: "Other",
-		Salary: 5000, HourlyRate: 30, OvertimeRate: 45,
+		SalaryCents: 500000, HourlyRateCents: 3000, OvertimeRateCents: 4500,
 	}
 }
 
 func testSelf() domain.EmployeeRecord {
 	return domain.EmployeeRecord{
 		ID: 4101, UserID: testViewerUserID, FirstName: "Self",
-		Salary: 3000, HourlyRate: 20, OvertimeRate: 30,
+		SalaryCents: 300000, HourlyRateCents: 2000, OvertimeRateCents: 3000,
 	}
 }
 
-func assertCompensationVisible(t *testing.T, e domain.EmployeeRecord, salary, hourly, overtime float64) {
+func assertCompensationVisible(t *testing.T, e domain.EmployeeRecord, salaryCents, hourlyCents, overtimeCents int64) {
 	t.Helper()
-	if e.Salary != salary || e.HourlyRate != hourly || e.OvertimeRate != overtime {
-		t.Errorf("expected compensation %v/%v/%v, got %v/%v/%v",
-			salary, hourly, overtime, e.Salary, e.HourlyRate, e.OvertimeRate)
+	if e.SalaryCents != salaryCents || e.HourlyRateCents != hourlyCents || e.OvertimeRateCents != overtimeCents {
+		t.Errorf("expected compensation %v/%v/%v cents, got %v/%v/%v",
+			salaryCents, hourlyCents, overtimeCents, e.SalaryCents, e.HourlyRateCents, e.OvertimeRateCents)
 	}
 }
 
 func assertCompensationHidden(t *testing.T, e domain.EmployeeRecord) {
 	t.Helper()
-	if e.Salary != 0 || e.HourlyRate != 0 || e.OvertimeRate != 0 {
+	if e.SalaryCents != 0 || e.HourlyRateCents != 0 || e.OvertimeRateCents != 0 {
 		t.Errorf("expected compensation to be zeroed, got %v/%v/%v",
-			e.Salary, e.HourlyRate, e.OvertimeRate)
+			e.SalaryCents, e.HourlyRateCents, e.OvertimeRateCents)
 	}
 }
 
@@ -76,7 +76,7 @@ func TestGateCompensation_HRAdminSeesAnotherEmployeeSalary(t *testing.T) {
 
 	got := gateCompensation(context.Background(), viewer, testOwnerID, testViewerUserID, []domain.EmployeeRecord{testCoworker()})
 
-	assertCompensationVisible(t, got[0], 5000, 30, 45)
+	assertCompensationVisible(t, got[0], 500000, 3000, 4500)
 }
 
 func TestGateCompensation_PayrollManagerSeesAnotherEmployeeSalary(t *testing.T) {
@@ -84,7 +84,7 @@ func TestGateCompensation_PayrollManagerSeesAnotherEmployeeSalary(t *testing.T) 
 
 	got := gateCompensation(context.Background(), viewer, testOwnerID, testViewerUserID, []domain.EmployeeRecord{testCoworker()})
 
-	assertCompensationVisible(t, got[0], 5000, 30, 45)
+	assertCompensationVisible(t, got[0], 500000, 3000, 4500)
 }
 
 func TestGateCompensation_PlainEmployeeCannotSeeAnotherEmployeeSalary(t *testing.T) {
@@ -103,7 +103,7 @@ func TestGateCompensation_PlainEmployeeSeesOwnSalary(t *testing.T) {
 
 	got := gateCompensation(context.Background(), viewer, testOwnerID, testViewerUserID, []domain.EmployeeRecord{testSelf()})
 
-	assertCompensationVisible(t, got[0], 3000, 20, 30)
+	assertCompensationVisible(t, got[0], 300000, 2000, 3000)
 }
 
 func TestGateCompensation_PlainEmployeeInListSeesOnlyOwnRow(t *testing.T) {
@@ -113,7 +113,7 @@ func TestGateCompensation_PlainEmployeeInListSeesOnlyOwnRow(t *testing.T) {
 		[]domain.EmployeeRecord{testCoworker(), testSelf(), testCoworker()})
 
 	assertCompensationHidden(t, got[0])
-	assertCompensationVisible(t, got[1], 3000, 20, 30)
+	assertCompensationVisible(t, got[1], 300000, 2000, 3000)
 	assertCompensationHidden(t, got[2])
 }
 
@@ -171,7 +171,7 @@ func TestGateCompensation_FailsClosedWhenCallerHasNoEmployeeRow(t *testing.T) {
 // zero viewer id via the self-service branch.
 func TestGateCompensation_UnlinkedEmployeeIsNotTreatedAsSelf(t *testing.T) {
 	viewer := &fakeCompensationViewer{employeeID: 4101, granted: map[string]bool{}}
-	unlinked := domain.EmployeeRecord{ID: 4103, UserID: 0, Salary: 900, HourlyRate: 9, OvertimeRate: 12}
+	unlinked := domain.EmployeeRecord{ID: 4103, UserID: 0, SalaryCents: 90000, HourlyRateCents: 900, OvertimeRateCents: 1200}
 
 	got := gateCompensation(context.Background(), viewer, testOwnerID, 0, []domain.EmployeeRecord{unlinked})
 
@@ -184,7 +184,7 @@ func TestGateCompensation_DoesNotMutateInputRecords(t *testing.T) {
 
 	gateCompensation(context.Background(), viewer, testOwnerID, testViewerUserID, input)
 
-	if input[0].Salary != 5000 {
-		t.Errorf("expected input record to be left untouched, got salary %v", input[0].Salary)
+	if input[0].SalaryCents != 500000 {
+		t.Errorf("expected input record to be left untouched, got salary cents %v", input[0].SalaryCents)
 	}
 }

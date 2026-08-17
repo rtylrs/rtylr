@@ -26,7 +26,7 @@ func TestGetEmployeeIDByUserID_ThenGetEmployeeForViewer_ResolvesOwnRecord(t *tes
 		Email:          "self.lookup@example.com",
 		Status:         "active",
 		EmploymentType: "full_time",
-		Salary:         6000,
+		SalaryCents:    600000,
 	})
 	if err != nil {
 		t.Fatalf("CreateEmployee: %v", err)
@@ -50,7 +50,7 @@ func TestGetEmployeeIDByUserID_ThenGetEmployeeForViewer_ResolvesOwnRecord(t *tes
 	if emp.ID != created.ID || emp.FirstName != "Self" {
 		t.Fatalf("resolved employee = %+v, want the caller's own record", emp)
 	}
-	if emp.Salary != 6000 {
-		t.Fatalf("Salary = %v, want 6000 - a caller must see their own compensation", emp.Salary)
+	if emp.SalaryCents != 600000 {
+		t.Fatalf("SalaryCents = %v, want 600000 - a caller must see their own compensation", emp.SalaryCents)
 	}
 }

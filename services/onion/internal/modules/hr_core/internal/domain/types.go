@@ -16,9 +16,9 @@ type EmployeeRecord struct {
 	Phone                 string    `json:"phone"`
 	EmploymentType        string    `json:"employment_type"`
 	Status                string    `json:"status"`
-	Salary                float64   `json:"salary"`
-	HourlyRate            float64   `json:"hourly_rate"`
-	OvertimeRate          float64   `json:"overtime_rate"`
+	SalaryCents           int64     `json:"salary_cents"`
+	HourlyRateCents       int64     `json:"hourly_rate_cents"`
+	OvertimeRateCents     int64     `json:"overtime_rate_cents"`
 	StartDate             time.Time `json:"start_date"`
 	EndDate               time.Time `json:"end_date"`
 	Address               string    `json:"address"`

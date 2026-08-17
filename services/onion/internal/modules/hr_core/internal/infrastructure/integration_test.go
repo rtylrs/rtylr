@@ -50,8 +50,8 @@ func TestGetEmployee_AliceHasSalary1200(t *testing.T) {
 	if emp.FirstName != "Alice" {
 		t.Errorf("expected FirstName=Alice, got %q", emp.FirstName)
 	}
-	if emp.Salary != 1200.0 {
-		t.Errorf("expected Salary=1200, got %v", emp.Salary)
+	if emp.SalaryCents != 120000 {
+		t.Errorf("expected SalaryCents=120000, got %v", emp.SalaryCents)
 	}
 }
 

@@ -26,16 +26,17 @@ func canViewAllCompensation(ctx context.Context, viewer permissionResolver, owne
 // zeroed unless the caller is allowed to see them. The value receiver means the
 // caller's record is never mutated, so cached records stay intact.
 //
-// Zeroing is the whole mechanism: Salary, HourlyRate and OvertimeRate are
-// float64 with `omitempty` on the contract type, so a zero value is dropped from
-// the JSON response entirely.
+// Zeroing is the whole mechanism: SalaryCents, HourlyRateCents and
+// OvertimeRateCents are converted to float64 dollars with `omitempty` on the
+// contract type, so a zero cents value converts to a zero dollar value and is
+// dropped from the JSON response entirely.
 func maskCompensation(e domain.EmployeeRecord, viewerUserID int64, canViewAll bool) domain.EmployeeRecord {
 	if canViewAll || isOwnRecord(e, viewerUserID) {
 		return e
 	}
-	e.Salary = 0
-	e.HourlyRate = 0
-	e.OvertimeRate = 0
+	e.SalaryCents = 0
+	e.HourlyRateCents = 0
+	e.OvertimeRateCents = 0
 	return e
 }
 

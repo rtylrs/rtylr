@@ -311,9 +311,9 @@ func (m *Module) executeCreateEmployeeTool(ctx context.Context, input map[string
 		Email:                 parsed.Email,
 		Phone:                 parsed.Phone,
 		EmploymentType:        parsed.EmploymentType,
-		Salary:                parsed.Salary,
-		HourlyRate:            parsed.HourlyRate,
-		OvertimeRate:          parsed.OvertimeRate,
+		SalaryCents:           domain.DollarsToCents(parsed.Salary),
+		HourlyRateCents:       domain.DollarsToCents(parsed.HourlyRate),
+		OvertimeRateCents:     domain.DollarsToCents(parsed.OvertimeRate),
 		StartDate:             parsed.StartDate,
 		Address:               parsed.Address,
 		EmergencyContactName:  parsed.EmergencyContactName,
@@ -338,9 +338,9 @@ func (m *Module) executeCreateEmployeeTool(ctx context.Context, input map[string
 			"department_id":           created.DepartmentID,
 			"location_id":             created.LocationID,
 			"work_schedule_id":        created.WorkScheduleID,
-			"salary":                  created.Salary,
-			"hourly_rate":             created.HourlyRate,
-			"overtime_rate":           created.OvertimeRate,
+			"salary":                  domain.CentsToDollars(created.SalaryCents),
+			"hourly_rate":             domain.CentsToDollars(created.HourlyRateCents),
+			"overtime_rate":           domain.CentsToDollars(created.OvertimeRateCents),
 			"start_date":              formatEmployeeToolDate(created.StartDate),
 			"address":                 created.Address,
 			"emergency_contact_name":  created.EmergencyContactName,
@@ -411,12 +411,12 @@ func parseCreateEmployeeToolInput(input map[string]any) (createEmployeeToolInput
 		Notes:                 strings.TrimSpace(hrToolString(input["notes"])),
 	}
 	if err := domain.ValidateEmployee(domain.EmployeeRecord{
-		FirstName:      parsed.FirstName,
-		LastName:       parsed.LastName,
-		Email:          parsed.Email,
-		Salary:         parsed.Salary,
-		HourlyRate:     parsed.HourlyRate,
-		EmploymentType: parsed.EmploymentType,
+		FirstName:       parsed.FirstName,
+		LastName:        parsed.LastName,
+		Email:           parsed.Email,
+		SalaryCents:     domain.DollarsToCents(parsed.Salary),
+		HourlyRateCents: domain.DollarsToCents(parsed.HourlyRate),
+		EmploymentType:  parsed.EmploymentType,
 	}); err != nil {
 		return createEmployeeToolInput{}, err
 	}
@@ -510,8 +510,8 @@ func employeeToolPayload(e domain.EmployeeRecord) map[string]any {
 		"department_id":    e.DepartmentID,
 		"location_id":      e.LocationID,
 		"work_schedule_id": e.WorkScheduleID,
-		"salary":           e.Salary,
-		"hourly_rate":      e.HourlyRate,
+		"salary":           domain.CentsToDollars(e.SalaryCents),
+		"hourly_rate":      domain.CentsToDollars(e.HourlyRateCents),
 		"start_date":       formatEmployeeToolDate(e.StartDate),
 		"end_date":         formatEmployeeToolDate(e.EndDate),
 	}
@@ -519,7 +519,7 @@ func employeeToolPayload(e domain.EmployeeRecord) map[string]any {
 
 func employeeDetailToolPayload(e domain.EmployeeRecord) map[string]any {
 	payload := employeeToolPayload(e)
-	payload["overtime_rate"] = e.OvertimeRate
+	payload["overtime_rate"] = domain.CentsToDollars(e.OvertimeRateCents)
 	payload["address"] = e.Address
 	payload["emergency_contact_name"] = e.EmergencyContactName
 	payload["emergency_contact_phone"] = e.EmergencyContactPhone

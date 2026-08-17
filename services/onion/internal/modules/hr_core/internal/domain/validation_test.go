@@ -9,10 +9,10 @@ import (
 
 func TestValidateEmployee_ValidRecord(t *testing.T) {
 	emp := domain.EmployeeRecord{
-		FirstName: "Alice",
-		LastName:  "Smith",
-		Email:     "alice@example.com",
-		Salary:    1000,
+		FirstName:   "Alice",
+		LastName:    "Smith",
+		Email:       "alice@example.com",
+		SalaryCents: 100000,
 	}
 	if err := domain.ValidateEmployee(emp); err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -65,10 +65,10 @@ func TestValidateEmployee_EmptyEmail(t *testing.T) {
 
 func TestValidateEmployee_NegativeSalary(t *testing.T) {
 	emp := domain.EmployeeRecord{
-		FirstName: "Alice",
-		LastName:  "Smith",
-		Email:     "alice@example.com",
-		Salary:    -1,
+		FirstName:   "Alice",
+		LastName:    "Smith",
+		Email:       "alice@example.com",
+		SalaryCents: -1,
 	}
 	if err := domain.ValidateEmployee(emp); !errors.Is(err, domain.ErrInvalidSalary) {
 		t.Errorf("expected ErrInvalidSalary, got %v", err)

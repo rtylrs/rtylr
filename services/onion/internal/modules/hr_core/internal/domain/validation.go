@@ -23,10 +23,10 @@ func ValidateEmployee(emp EmployeeRecord) error {
 	if strings.TrimSpace(emp.Email) == "" {
 		return ErrEmptyEmail
 	}
-	if emp.Salary < 0 {
+	if emp.SalaryCents < 0 {
 		return ErrInvalidSalary
 	}
-	if emp.HourlyRate < 0 {
+	if emp.HourlyRateCents < 0 {
 		return ErrInvalidSalary
 	}
 	return nil
