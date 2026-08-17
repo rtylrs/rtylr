@@ -10,6 +10,7 @@ SELECT id, name, slug, price_per_seat_cents, annual_price_per_seat_cents, trial_
        max_seats, max_locations, is_active, is_solo, is_featured, tier_order, tagline, created_at
 FROM plans
 WHERE id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: GetPlanBySlug :one
