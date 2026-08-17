@@ -182,9 +182,15 @@
       "onsite": "في الموقع",
       "remote": "عن بُعد",
       "hybrid": "مختلط"
-    }
+    },
+    "reportsPageTitle": "التقارير · rtylr",
+    "myDayPageTitle": "يومي · rtylr",
+    "teamPageTitle": "الفريق · rtylr"
   },
   "settings": {
+    "pageTitle": "الإعدادات · rtylr",
+    "chooseCustomColorLabel": "اختيار لون مخصص",
+    "deleteLabelLabel": "حذف التسمية",
     "time": {
       "section": "الوقت",
       "localOnlyWarning": "تُحفظ هذه الإعدادات في هذا المتصفّح فقط. ستنتقل إلى مستوى مساحة العمل عند توفّر نقطة إعدادات الوقت، وحتى ذلك الحين يرى بقية المستخدمين القيم الافتراضية.",
@@ -344,5 +350,22 @@
       "priority": "الأولوية",
       "due": "نطاق الاستحقاق"
     }
+  },
+  "calendar": {
+    "pageTitle": "التقويم · rtylr"
+  },
+  "workspaceDashboard": {
+    "pageTitle": "لوحة التحكم · rtylr"
+  },
+  "milestones": {
+    "pageTitle": "المراحل · rtylr",
+    "emptyTitle": "لا توجد مراحل بعد"
+  },
+  "views": {
+    "pageTitle": "طرق العرض · rtylr",
+    "newViewLabel": "طريقة عرض جديدة",
+    "renameLabel": "إعادة تسمية",
+    "deleteLabel": "حذف",
+    "deleteViewLabel": "حذف طريقة العرض المحفوظة"
   }
 }
