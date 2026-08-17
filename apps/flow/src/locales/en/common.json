@@ -68,5 +68,40 @@
     "shortcuts": "Keyboard Shortcuts",
     "about": "About",
     "quietHoursNote": "Quiet hours affect in-app banners only for now; digest hour is saved for when scheduled reminders ship."
+  },
+  "dashboard": {
+    "fallbackName": "there",
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "greetingSubtitlePrefix": "Here's what's happening in",
+    "greetingSubtitleSuffix": "today.",
+    "stats": {
+      "openTasks": "Open Tasks",
+      "completedThisWeek": "Completed This Week",
+      "overdue": "Overdue"
+    },
+    "weekLoad": {
+      "title": "Week load (your tasks due this week)",
+      "scheduled": "h scheduled",
+      "capacity": "of ~{{hours}}h capacity",
+      "description": "Uses effort chips or estimate hours on tasks. Planned backlog stays visible in projects; this is only what you already scheduled for the week."
+    },
+    "reviewStreak": {
+      "title": "Weekly review streak",
+      "weeks": "weeks",
+      "button": "I did my review this week",
+      "description": "Honest ritual, not app opens. Tap once after you finish your weekly close-out."
+    },
+    "myTasks": {
+      "title": "My Tasks",
+      "activeCount": "{{count}} active"
+    },
+    "projects": {
+      "viewAll": "View all",
+      "percentDone": "{{percent}}% done"
+    }
   }
 }
