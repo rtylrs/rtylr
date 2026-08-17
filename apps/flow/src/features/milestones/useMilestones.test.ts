@@ -16,6 +16,10 @@ vi.mock('sonner', () => ({
   toast: { error: vi.fn(), success: vi.fn() },
 }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en-US' } }),
+}));
+
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((val) => val),
 }));
@@ -92,7 +96,7 @@ describe('useCreateMilestone', () => {
     await act(async () => {
       await result.current.mutateAsync({ name: 'Launch' }).catch(() => {});
     });
-    expect(toast.error).toHaveBeenCalledWith('Failed to create milestone');
+    expect(toast.error).toHaveBeenCalledWith('toasts.milestone.createFailed');
     expect(spy).not.toHaveBeenCalled();
   });
 });
@@ -120,7 +124,7 @@ describe('useUpdateMilestone', () => {
     await act(async () => {
       await result.current.mutateAsync({ id: 'm-1', data: { name: 'Renamed' } }).catch(() => {});
     });
-    expect(toast.error).toHaveBeenCalledWith('Failed to update milestone');
+    expect(toast.error).toHaveBeenCalledWith('toasts.milestone.updateFailed');
     expect(spy).not.toHaveBeenCalled();
   });
 });

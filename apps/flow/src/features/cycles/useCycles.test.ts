@@ -16,6 +16,10 @@ vi.mock('sonner', () => ({
   toast: { error: vi.fn(), success: vi.fn() },
 }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en-US' } }),
+}));
+
 vi.mock('../../shared/stores/flowStore', () => ({
   useFlowStore: vi.fn(() => ({ activeWorkspaceId: 'ws-store' })),
 }));
@@ -107,7 +111,7 @@ describe('useCreateCycle', () => {
     await act(async () => {
       await result.current.mutateAsync({ name: 'Sprint 1' }).catch(() => {});
     });
-    expect(toast.error).toHaveBeenCalledWith('Failed to create cycle');
+    expect(toast.error).toHaveBeenCalledWith('toasts.cycle.createFailed');
     expect(spy).not.toHaveBeenCalled();
   });
 });
@@ -135,7 +139,7 @@ describe('useUpdateCycle', () => {
     await act(async () => {
       await result.current.mutateAsync({ id: 'c-1', data: { name: 'Renamed' } }).catch(() => {});
     });
-    expect(toast.error).toHaveBeenCalledWith('Failed to update cycle');
+    expect(toast.error).toHaveBeenCalledWith('toasts.cycle.updateFailed');
     expect(spy).not.toHaveBeenCalled();
   });
 });
