@@ -77,7 +77,7 @@ const Views: React.FC = () => {
 
   return (
     <div className="flex h-full">
-      <HelmetContainer title="Views · rtylr" />
+      <HelmetContainer title={t('flow.views.pageTitle')} />
       <aside
         className="w-64 shrink-0 px-3 py-4"
         style={{
@@ -102,7 +102,7 @@ const Views: React.FC = () => {
             disabled={createView.isPending}
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-dim)' }}
-            title="New view"
+            title={t('flow.views.newViewLabel')}
           >
             <Plus size={11} />
           </button>
@@ -163,7 +163,7 @@ const Views: React.FC = () => {
                         onClick={(e) => startEdit(v, e)}
                         className="h-5 w-5 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                         style={{ color: 'var(--flow-text-dim)' }}
-                        title="Rename"
+                        title={t('flow.views.renameLabel')}
                       >
                         <Pencil size={9} />
                       </button>
@@ -171,7 +171,7 @@ const Views: React.FC = () => {
                         onClick={(e) => handleDelete(v, e)}
                         className="h-5 w-5 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                         style={{ color: 'var(--flow-text-dim)' }}
-                        title="Delete"
+                        title={t('flow.views.deleteLabel')}
                         onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
                         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
                       >
@@ -224,7 +224,7 @@ const Views: React.FC = () => {
         onOpenChange={(o) => {
           if (!o) setPendingDelete(null);
         }}
-        title="Delete saved view"
+        title={t('flow.views.deleteViewLabel')}
         description={
           <>
             Delete the <strong>{pendingDelete?.name}</strong> view? The filters are lost; tasks
