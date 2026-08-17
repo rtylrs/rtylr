@@ -16,6 +16,7 @@ vi.mock('@voxire/api', () => ({
 
 import { useFlowDashboard } from './useDashboard';
 import { flowApi } from '../../shared/services/flowApi';
+import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 
 const createWrapper = () => {
   const client = new QueryClient({
@@ -33,12 +34,12 @@ describe('useFlowDashboard (remote mode)', () => {
   it('fetches dashboard data for a workspace', async () => {
     const data = { totalTasks: 50, completedTasks: 30 };
     (flowApi.getDashboard as any).mockResolvedValue(data);
-    const { result } = renderHook(() => useFlowDashboard('ws-1'), {
+    const { result } = renderHook(() => useFlowDashboard('12'), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(data);
-    expect(flowApi.getDashboard).toHaveBeenCalledWith('ws-1');
+    expect(flowApi.getDashboard).toHaveBeenCalledWith('12');
   });
 
   it('does not fetch when workspaceId is undefined', () => {
@@ -49,9 +50,17 @@ describe('useFlowDashboard (remote mode)', () => {
     expect(flowApi.getDashboard).not.toHaveBeenCalled();
   });
 
+  it('does not fetch while the workspace is the unresolved Personal sentinel', () => {
+    const { result } = renderHook(() => useFlowDashboard(PERSONAL_WORKSPACE_ID), {
+      wrapper: createWrapper(),
+    });
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(flowApi.getDashboard).not.toHaveBeenCalled();
+  });
+
   it('starts in loading state', () => {
     (flowApi.getDashboard as any).mockReturnValue(new Promise(() => {}));
-    const { result } = renderHook(() => useFlowDashboard('ws-1'), {
+    const { result } = renderHook(() => useFlowDashboard('12'), {
       wrapper: createWrapper(),
     });
     expect(result.current.isLoading).toBe(true);
@@ -59,7 +68,7 @@ describe('useFlowDashboard (remote mode)', () => {
 
   it('handles error state', async () => {
     (flowApi.getDashboard as any).mockRejectedValue(new Error('Fetch failed'));
-    const { result } = renderHook(() => useFlowDashboard('ws-1'), {
+    const { result } = renderHook(() => useFlowDashboard('12'), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isError).toBe(true));

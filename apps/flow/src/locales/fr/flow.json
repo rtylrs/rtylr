@@ -36,6 +36,7 @@
     "projectNamePlaceholder": "Nom du projet",
     "projectDescriptionPlaceholder": "Description (facultatif)",
     "projectNameRequired": "Le nom du projet est obligatoire",
+    "createNeedsWorkspace": "Un espace de travail doit être chargé avant de pouvoir créer un projet.",
     "creating": "Création…",
     "assignedOpenTasks": "{{count}} tâches ouvertes assignées",
     "focusItems": "{{count}} éléments dus ou épinglés",

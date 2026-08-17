@@ -50,11 +50,12 @@ import { cn } from '../shared/lib/utils';
 import CommandBar from '../shared/components/CommandBar';
 import QuickCreate from '../shared/components/QuickCreate';
 import BulkEditBar from '../shared/components/BulkEditBar';
+import GateNotice from '../shared/components/GateNotice';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useWorkspaces } from '../features/workspace-dashboard/useWorkspaces';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
 import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
-import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
+import { isApiWorkspaceId, PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 import type { Member, Workspace } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
 import { displayUserEmail, displayUserName } from '../shared/lib/userDisplay';
@@ -295,6 +296,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   }, [apiWorkspaces, workspaces, workspacesLoading]);
 
   const currentWorkspaceId = workspaceId || activeWorkspaceId || liveWorkspaces[0]?.id || '';
+
+  // Creating a project posts workspace_id, so it needs a resolved numeric id -
+  // not the Personal sentinel this layout paints with before workspaces load.
+  const canCreateProject = isApiWorkspaceId(currentWorkspaceId);
 
   // Resolves the caller's auto-provisioned personal project so it can be hidden
   // from the Projects list (its tasks surface in the global "My tasks" view).
@@ -1233,7 +1238,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             toast.error(t('flow.shell.projectNameRequired'));
                             return;
                           }
-                          if (!currentWorkspaceId) return;
+                          if (!canCreateProject) return;
                           createProject.mutate(
                             {
                               workspaceId: currentWorkspaceId,
@@ -1269,37 +1274,47 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     }}
                   />
                 </div>
-                <div className="flex justify-end gap-2 mt-5">
-                  <button
-                    type="button"
-                    onClick={() => setNewProjectOpen(false)}
-                    className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)]"
-                    style={{ color: 'var(--flow-text-muted)' }}
-                  >
-                    {t('common.cancel')}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!newProjectName.trim() || createProject.isPending}
-                    onClick={() => {
-                      if (!newProjectName.trim() || !currentWorkspaceId) return;
-                      createProject.mutate(
-                        {
-                          workspaceId: currentWorkspaceId,
-                          name: newProjectName.trim(),
-                          color: newProjectColor,
-                        },
-                        {
-                          onSuccess: () => setNewProjectOpen(false),
-                          onError: () => toast.error(t('errors.generic')),
-                        }
-                      );
-                    }}
-                    className="px-4 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-                  >
-                    {createProject.isPending ? t('flow.shell.creating') : t('common.create')}
-                  </button>
+                <div className="mt-5 flex flex-col gap-2">
+                  <GateNotice
+                    id="flow-new-project-gate"
+                    reason={canCreateProject ? '' : t('flow.shell.createNeedsWorkspace')}
+                    className="justify-end text-end"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNewProjectOpen(false)}
+                      className="px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)]"
+                      style={{ color: 'var(--flow-text-muted)' }}
+                    >
+                      {t('common.cancel')}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={
+                        !newProjectName.trim() || createProject.isPending || !canCreateProject
+                      }
+                      aria-describedby={canCreateProject ? undefined : 'flow-new-project-gate'}
+                      onClick={() => {
+                        if (!newProjectName.trim() || !canCreateProject) return;
+                        createProject.mutate(
+                          {
+                            workspaceId: currentWorkspaceId,
+                            name: newProjectName.trim(),
+                            color: newProjectColor,
+                          },
+                          {
+                            onSuccess: () => setNewProjectOpen(false),
+                            onError: () => toast.error(t('errors.generic')),
+                          }
+                        );
+                      }}
+                      className="px-4 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+                    >
+                      {createProject.isPending ? t('flow.shell.creating') : t('common.create')}
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
