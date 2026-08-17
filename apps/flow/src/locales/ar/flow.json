@@ -238,7 +238,32 @@
       "removeLabel": "إزالة {{name}}",
       "saveFailed": "تعذّر حفظ نوع العمل.",
       "deleteFailed": "تعذّر حذف نوع العمل."
-    }
+    },
+    "workspaces": {
+      "section": "مساحات العمل",
+      "subtitle": "إدارة مساحات عمل Flow.",
+      "newWorkspace": "مساحة عمل جديدة",
+      "namePlaceholder": "اسم مساحة العمل",
+      "color": "اللون",
+      "creating": "جارٍ الإنشاء…",
+      "createWorkspace": "إنشاء مساحة عمل"
+    },
+    "team": {
+      "section": "الفريق",
+      "subtitle": "الأشخاص الذين لديهم صلاحية الوصول إلى مساحة عمل Flow هذه.",
+      "grantAccess": "منح الوصول إلى Flow",
+      "grantAccessHint": "لا يمكن إضافة إلا أشخاص هم بالفعل جزء من نشاطك التجاري. أضف أشخاصاً جدداً من صفحة الفريق أولاً.",
+      "teamMember": "عضو الفريق",
+      "everyoneHasAccess": "لدى جميع أعضاء نشاطك التجاري صلاحية الوصول إلى Flow بالفعل.",
+      "selectMember": "اختر عضو فريق…",
+      "seatCostNote": "إضافة هذا العضو تكلف {{amount}} هذا الشهر ({{daysRemaining}}/{{daysInMonth}} يومًا)، ثم {{monthlyAmount}} ابتداءً من {{nextMonth}} 1.",
+      "granting": "جارٍ منح الوصول…",
+      "grantAccessAction": "منح الوصول",
+      "addMember": "إضافة عضو",
+      "noMembersYet": "لا يوجد أعضاء في الفريق بعد.",
+      "removeMemberLabel": "إزالة {{name}}"
+    },
+    "sectionNotAvailable": "هذا القسم غير متاح بعد."
   },
   "presence": {
     "heading": "من موجود اليوم",
