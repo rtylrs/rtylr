@@ -31,6 +31,9 @@
       "progress": "Progress",
       "overdue": "Overdue Items",
       "triggeredAt": "Started"
+    },
+    "pagination": {
+      "range": "{{from}}–{{to}} of {{total}}"
     }
   },
   "templates": {
