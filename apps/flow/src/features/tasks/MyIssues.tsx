@@ -172,7 +172,7 @@ const QuickAddRow: React.FC = () => {
             submit();
           }
         }}
-        placeholder="Add a personal task and press Enter"
+        placeholder={t('flow.myIssues.quickAddPlaceholder')}
         disabled={createTask.isPending}
         className="flex-1 bg-transparent outline-none text-[13px] placeholder:opacity-50"
         style={{ color: 'var(--flow-text)' }}
