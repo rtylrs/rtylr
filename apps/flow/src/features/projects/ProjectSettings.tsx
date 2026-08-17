@@ -355,8 +355,6 @@ const ProjectSettings: React.FC = () => {
                               {
                                 onSuccess: () =>
                                   toast.success(t('toasts.projectMember.roleUpdated')),
-                                onError: () =>
-                                  toast.error(t('toasts.projectMember.roleUpdateFailed')),
                               }
                             );
                           }}
@@ -375,7 +373,6 @@ const ProjectSettings: React.FC = () => {
                             { project_id: Number(projectId), user_id: Number(m.userId) },
                             {
                               onSuccess: () => toast.success(t('toasts.projectMember.removed')),
-                              onError: () => toast.error(t('toasts.projectMember.removeFailed')),
                             }
                           );
                         }}
@@ -453,10 +450,7 @@ const ProjectSettings: React.FC = () => {
                                   toast.success(t('toasts.project.moved'));
                                   navigate({ to: `/w/${targetWorkspaceId}` as string });
                                 },
-                                onError: () => {
-                                  toast.error(t('toasts.project.moveFailed'));
-                                  setConfirmMove(false);
-                                },
+                                onError: () => setConfirmMove(false),
                               }
                             );
                           }}
@@ -553,10 +547,7 @@ const ProjectSettings: React.FC = () => {
                                 toast.success(t('toasts.projectMember.transferred'));
                                 setConfirmTransfer(false);
                               },
-                              onError: () => {
-                                toast.error(t('toasts.projectMember.transferFailed'));
-                                setConfirmTransfer(false);
-                              },
+                              onError: () => setConfirmTransfer(false),
                             }
                           );
                         }}
@@ -741,7 +732,6 @@ const ProjectSettings: React.FC = () => {
                       setConfirmDelete(false);
                       navigate({ to: `/w/${project!.workspaceId}` as string });
                     },
-                    onError: () => toast.error(t('toasts.project.deleteFailed')),
                   });
                 }}
                 className="px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
