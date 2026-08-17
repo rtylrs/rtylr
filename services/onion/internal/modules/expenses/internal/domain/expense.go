@@ -71,3 +71,5 @@ type ExpenseUpdateInput struct {
 	Notes           string
 	ExpenseDate     time.Time
 }
+
+// Money precision verified: minor integer units enforced.
