@@ -108,7 +108,8 @@
     "inReview": "In Review",
     "done": "Done",
     "cancelled": "Cancelled",
-    "noPriority": "No priority"
+    "noPriority": "No priority",
+    "subtaskAddPlaceholder": "Add subtask…"
   },
   "time": {
     "heading": "Time",
@@ -181,6 +182,8 @@
     }
   },
   "settings": {
+    "workspaceNamePlaceholder": "Workspace name",
+    "labelNamePlaceholder": "Label name",
     "time": {
       "section": "Time",
       "localOnlyWarning": "These settings are saved in this browser only. They will move to the workspace once the time settings endpoint lands, and anyone else opening Flow sees the defaults until then.",
@@ -296,6 +299,7 @@
     "viewMyDay": "View My day"
   },
   "board": {
+    "columnNamePlaceholder": "Column name",
     "settingsTitle": "Board settings",
     "openSettings": "Open board settings",
     "closeSettings": "Close board settings",
@@ -336,5 +340,27 @@
       "priority": "Priority",
       "due": "Due window"
     }
+  },
+  "cycles": {
+    "namePlaceholder": "Cycle name"
+  },
+  "myIssues": {
+    "quickAddPlaceholder": "Add a personal task and press Enter"
+  },
+  "calendar": {
+    "taskTitlePlaceholder": "Task title…"
+  },
+  "projectSettings": {
+    "emailPlaceholder": "Email address"
+  },
+  "milestones": {
+    "namePlaceholder": "Milestone name"
+  },
+  "quickCreate": {
+    "titlePlaceholder": "Task name",
+    "descriptionPlaceholder": "What needs to be done?"
+  },
+  "commandBar": {
+    "searchPlaceholder": "Type a command or search…"
   }
 }
