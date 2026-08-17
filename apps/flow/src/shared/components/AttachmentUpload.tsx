@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { uploadAsset } from '@voxire/api';
 import { Paperclip, Upload, FileText, Image as ImageIcon, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Attachment } from '../stores/flowStore';
 
 interface AttachmentUploadProps {
@@ -22,6 +23,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
   onRemove,
   disabled,
 }) => {
+  const { t } = useTranslation();
   const ref = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +73,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
               {onRemove && !disabled && (
                 <button
                   onClick={() => onRemove(a.id)}
+                  aria-label={t('flow.taskDetail.removeAttachmentLabel')}
                   className="h-5 w-5 rounded opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-[var(--flow-active)]"
                   style={{ color: 'var(--flow-text-dim)' }}
                 >
