@@ -5,9 +5,19 @@ SELECT COUNT(*) AS cnt FROM flow_workspaces WHERE business_id = ?;
 INSERT INTO flow_workspaces (owner_id, business_id, name, description, icon, color, is_default, created_by)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
+-- A personal workspace has no business_id (it isn't tied to one tenant), so
+-- the plain business_id filter above never matches it. This variant adds it
+-- back in for its own owner, regardless of which business they're currently
+-- acting in.
+-- name: CountVisibleWorkspaces :one
+SELECT COUNT(*) AS cnt FROM flow_workspaces
+WHERE business_id = ? OR (is_personal = TRUE AND owner_id = ?);
+
 -- name: GetWorkspacesByOwner :many
 SELECT id, owner_id, business_id, name, description, icon, color, is_default, created_by, created_at, updated_at
-FROM flow_workspaces WHERE business_id = ? ORDER BY is_default DESC, created_at ASC
+FROM flow_workspaces
+WHERE business_id = ? OR (is_personal = TRUE AND owner_id = ?)
+ORDER BY is_default DESC, created_at ASC
 LIMIT ? OFFSET ?;
 
 -- name: UpdateWorkspace :exec
