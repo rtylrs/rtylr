@@ -57,12 +57,34 @@ type EmployeeChecklistItemRecord struct {
 	UpdatedAt            time.Time `json:"updated_at"`
 }
 
+// EmployeeChecklistSummaryRecord is one employee checklist's progress within a
+// business-wide summary. TotalItems/CompletedItems/OverdueItemsCount and the
+// derived CompletionPercentage are computed server-side (the overdue count
+// against the database's current time) so no caller re-derives them.
+type EmployeeChecklistSummaryRecord struct {
+	ChecklistID          int64     `json:"checklist_id"`
+	EmployeeID           int64     `json:"employee_id"`
+	TemplateID           int64     `json:"template_id"`
+	Status               string    `json:"status"`
+	TotalItems           int32     `json:"total_items"`
+	CompletedItems       int32     `json:"completed_items"`
+	CompletionPercentage int32     `json:"completion_percentage"`
+	OverdueItemsCount    int32     `json:"overdue_items_count"`
+	TriggeredAt          time.Time `json:"triggered_at"`
+	UpdatedAt            time.Time `json:"updated_at"`
+}
+
 type ListTemplatesParams struct {
 	Limit  int32
 	Offset int32
 }
 
 type ListEmployeeChecklistsParams struct {
+	Limit  int32
+	Offset int32
+}
+
+type ListBusinessEmployeeChecklistSummariesParams struct {
 	Limit  int32
 	Offset int32
 }

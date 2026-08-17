@@ -25,6 +25,9 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 	serverHttp.RegisterGET[api.GetEmployeeChecklistRequest, api.GetEmployeeChecklistResponse](
 		ctx, router, api.GetEmployeeChecklistRoutes(), &api.GetEmployeeChecklistHandler{Service: m.service},
 	)
+	serverHttp.RegisterGET[api.ListBusinessEmployeeChecklistSummariesRequest, api.ListBusinessEmployeeChecklistSummariesResponse](
+		ctx, router, api.ListBusinessEmployeeChecklistSummariesRoutes(), &api.ListBusinessEmployeeChecklistSummariesHandler{Service: m.service},
+	)
 	serverHttp.RegisterPOSTWithValidation[api.CompleteChecklistItemRequest, api.CompleteChecklistItemResponse](
 		ctx, router, api.CompleteChecklistItemRoutes(), &api.CompleteChecklistItemHandler{Service: m.service},
 	)

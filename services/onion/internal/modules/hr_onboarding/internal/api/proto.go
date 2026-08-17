@@ -61,6 +61,21 @@ func employeeChecklistToProto(c domain.EmployeeChecklistRecord) *hronboardingv1.
 	}
 }
 
+func employeeChecklistSummaryToProto(s domain.EmployeeChecklistSummaryRecord) *hronboardingv1.EmployeeChecklistSummaryPayload {
+	return &hronboardingv1.EmployeeChecklistSummaryPayload{
+		EmployeeId:           s.EmployeeID,
+		ChecklistId:          s.ChecklistID,
+		TemplateId:           s.TemplateID,
+		Status:               s.Status,
+		TotalItems:           s.TotalItems,
+		CompletedItems:       s.CompletedItems,
+		CompletionPercentage: s.CompletionPercentage,
+		OverdueItemsCount:    s.OverdueItemsCount,
+		TriggeredAt:          s.TriggeredAt.Unix(),
+		UpdatedAt:            s.UpdatedAt.Unix(),
+	}
+}
+
 func employeeChecklistItemToProto(i domain.EmployeeChecklistItemRecord) *hronboardingv1.EmployeeChecklistItemPayload {
 	var completedAt *int64
 	if !i.CompletedAt.IsZero() {

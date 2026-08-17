@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/domain"
@@ -278,6 +279,29 @@ func (r *Repository) ListEmployeeChecklists(ctx context.Context, businessID, emp
 	return checklists, total, nil
 }
 
+func (r *Repository) ListBusinessEmployeeChecklistSummaries(ctx context.Context, businessID int64, limit, offset int32) ([]domain.EmployeeChecklistSummaryRecord, int64, error) {
+	total, err := r.queries.CountBusinessEmployeeChecklists(ctx, businessID)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	rows, err := r.queries.ListBusinessEmployeeChecklistSummaries(ctx, sqlc.ListBusinessEmployeeChecklistSummariesParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+
+	summaries := make([]domain.EmployeeChecklistSummaryRecord, 0, len(rows))
+	for _, row := range rows {
+		summaries = append(summaries, employeeChecklistSummaryFromRow(row))
+	}
+
+	return summaries, total, nil
+}
+
 func (r *Repository) UpdateEmployeeChecklistStatus(ctx context.Context, businessID, checklistID int64, status string) error {
 	return r.queries.UpdateEmployeeChecklistStatus(ctx, sqlc.UpdateEmployeeChecklistStatusParams{
 		Status:     status,
@@ -421,6 +445,26 @@ func employeeChecklistItemFromRow(row sqlc.HrOnboardingEmployeeChecklistItem) do
 		CompletedBy:          row.CompletedBy.Int64,
 		AttachmentURL:        row.AttachmentUrl.String,
 		CreatedAt:            row.CreatedAt,
+		UpdatedAt:            row.UpdatedAt,
+	}
+}
+
+func employeeChecklistSummaryFromRow(row sqlc.ListBusinessEmployeeChecklistSummariesRow) domain.EmployeeChecklistSummaryRecord {
+	var percentage int32
+	if row.TotalItems > 0 {
+		percentage = int32(math.Round(float64(row.CompletedItems) / float64(row.TotalItems) * 100))
+	}
+
+	return domain.EmployeeChecklistSummaryRecord{
+		ChecklistID:          row.ChecklistID,
+		EmployeeID:           row.EmployeeID,
+		TemplateID:           row.TemplateID,
+		Status:               row.Status,
+		TotalItems:           int32(row.TotalItems),
+		CompletedItems:       int32(row.CompletedItems),
+		CompletionPercentage: percentage,
+		OverdueItemsCount:    int32(row.OverdueItems),
+		TriggeredAt:          row.TriggeredAt,
 		UpdatedAt:            row.UpdatedAt,
 	}
 }

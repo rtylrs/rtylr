@@ -27,6 +27,7 @@ type repository interface {
 	TriggerChecklist(ctx context.Context, businessID, employeeID, templateID int64, triggerDate time.Time) (*domain.EmployeeChecklistRecord, error)
 	GetEmployeeChecklist(ctx context.Context, businessID, employeeID, checklistID int64) (*domain.EmployeeChecklistRecord, error)
 	ListEmployeeChecklists(ctx context.Context, businessID, employeeID int64, limit, offset int32) ([]domain.EmployeeChecklistRecord, int64, error)
+	ListBusinessEmployeeChecklistSummaries(ctx context.Context, businessID int64, limit, offset int32) ([]domain.EmployeeChecklistSummaryRecord, int64, error)
 	UpdateEmployeeChecklistStatus(ctx context.Context, businessID, checklistID int64, status string) error
 	CreateEmployeeChecklistItem(ctx context.Context, businessID, employeeChecklistID, checklistItemID, assignedToEmployeeID int64, dueDate string) error
 	GetChecklistItem(ctx context.Context, businessID, itemID int64) (*domain.EmployeeChecklistItemRecord, error)
@@ -170,6 +171,24 @@ func (s *Service) ListEmployeeChecklists(ctx context.Context, businessID, employ
 		func(ctx context.Context) (onboardingListResult[domain.EmployeeChecklistRecord], error) {
 			items, total, err := s.repo.ListEmployeeChecklists(ctx, businessID, employeeID, params.Limit, params.Offset)
 			return onboardingListResult[domain.EmployeeChecklistRecord]{Items: items, Total: total}, err
+		},
+		cacher.WithExpiry(ctx, hrOnboardingTTL),
+	)
+	return res.Items, res.Total, err
+}
+
+func (s *Service) ListBusinessEmployeeChecklistSummaries(ctx context.Context, businessID int64, params domain.ListBusinessEmployeeChecklistSummariesParams) ([]domain.EmployeeChecklistSummaryRecord, int64, error) {
+	if params.Limit <= 0 {
+		params.Limit = 20
+	}
+	if params.Limit > 100 {
+		params.Limit = 100
+	}
+	key := cacheKeys.Scoped(hrOnboardingScope, businessID, fmt.Sprintf("biz_cklst_summary|l=%d|o=%d", params.Limit, params.Offset))
+	res, err := cacher.Of[onboardingListResult[domain.EmployeeChecklistSummaryRecord]]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (onboardingListResult[domain.EmployeeChecklistSummaryRecord], error) {
+			items, total, err := s.repo.ListBusinessEmployeeChecklistSummaries(ctx, businessID, params.Limit, params.Offset)
+			return onboardingListResult[domain.EmployeeChecklistSummaryRecord]{Items: items, Total: total}, err
 		},
 		cacher.WithExpiry(ctx, hrOnboardingTTL),
 	)

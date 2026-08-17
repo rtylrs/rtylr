@@ -20,6 +20,7 @@ type Repository interface {
 	TriggerChecklist(ctx context.Context, ownerID, employeeID, templateID int64, triggerDate time.Time) (*EmployeeChecklistRecord, error)
 	GetEmployeeChecklist(ctx context.Context, ownerID, employeeID, checklistID int64) (*EmployeeChecklistRecord, error)
 	ListEmployeeChecklists(ctx context.Context, ownerID, employeeID int64, limit, offset int32) ([]EmployeeChecklistRecord, int64, error)
+	ListBusinessEmployeeChecklistSummaries(ctx context.Context, ownerID int64, limit, offset int32) ([]EmployeeChecklistSummaryRecord, int64, error)
 	UpdateEmployeeChecklistStatus(ctx context.Context, ownerID, checklistID int64, status string) error
 
 	// Employee Checklist Items

@@ -54,3 +54,30 @@ FROM hr_onboarding_employee_checklist_items
 WHERE business_id = ? AND employee_checklist_id = ?
 ORDER BY due_date ASC
 LIMIT 500;
+
+-- name: ListBusinessEmployeeChecklistSummaries :many
+-- Business-wide progress summary, one row per employee checklist. Overdue is
+-- computed against CURDATE() in the database so no caller has to re-derive it
+-- from raw due dates.
+SELECT
+    c.id AS checklist_id,
+    c.employee_id,
+    c.template_id,
+    c.status,
+    c.triggered_at,
+    c.updated_at,
+    COUNT(i.id) AS total_items,
+    COUNT(CASE WHEN i.status = 'complete' THEN 1 END) AS completed_items,
+    COUNT(CASE WHEN i.status <> 'complete' AND i.due_date < CURDATE() THEN 1 END) AS overdue_items
+FROM hr_onboarding_employee_checklists c
+LEFT JOIN hr_onboarding_employee_checklist_items i
+    ON i.employee_checklist_id = c.id AND i.business_id = c.business_id
+WHERE c.business_id = ?
+GROUP BY c.id, c.employee_id, c.template_id, c.status, c.triggered_at, c.updated_at
+ORDER BY c.employee_id ASC, c.triggered_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountBusinessEmployeeChecklists :one
+SELECT COUNT(*) AS total
+FROM hr_onboarding_employee_checklists
+WHERE business_id = ?;
