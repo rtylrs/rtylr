@@ -20,9 +20,13 @@ export function useCycles(workspaceId?: string): ReturnType<typeof useQuery<ApiC
 
 export function useCreateCycle() {
   const qc = useQueryClient();
+  const { activeWorkspaceId } = useFlowStore();
   return useMutation({
     mutationFn: (data: Partial<ApiCycle>) => {
-      return unwrap(flowApi.createCycle(data));
+      // Default to the active workspace so a cycle is never created in the wrong
+      // workspace when a caller forgets to pass one; an explicit workspaceId on
+      // `data` still overrides it.
+      return unwrap(flowApi.createCycle({ workspaceId: activeWorkspaceId, ...data }));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cycles'] }),
     onError: () => toast.error('Failed to create cycle'),
