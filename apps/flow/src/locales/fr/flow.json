@@ -178,9 +178,15 @@
       "onsite": "Sur site",
       "remote": "À distance",
       "hybrid": "Hybride"
-    }
+    },
+    "reportsPageTitle": "Rapports · rtylr",
+    "myDayPageTitle": "Ma journée · rtylr",
+    "teamPageTitle": "Équipe · rtylr"
   },
   "settings": {
+    "pageTitle": "Réglages · rtylr",
+    "chooseCustomColorLabel": "Choisir une couleur personnalisée",
+    "deleteLabelLabel": "Supprimer l'étiquette",
     "time": {
       "section": "Temps",
       "localOnlyWarning": "Ces réglages sont enregistrés dans ce navigateur uniquement. Ils passeront au niveau de l'espace de travail dès que le point d'accès aux réglages de temps existera ; d'ici là, les autres voient les valeurs par défaut.",
@@ -336,5 +342,22 @@
       "priority": "Priorité",
       "due": "Échéance"
     }
+  },
+  "calendar": {
+    "pageTitle": "Calendrier · rtylr"
+  },
+  "workspaceDashboard": {
+    "pageTitle": "Tableau de bord · rtylr"
+  },
+  "milestones": {
+    "pageTitle": "Jalons · rtylr",
+    "emptyTitle": "Aucun jalon pour l'instant"
+  },
+  "views": {
+    "pageTitle": "Vues · rtylr",
+    "newViewLabel": "Nouvelle vue",
+    "renameLabel": "Renommer",
+    "deleteLabel": "Supprimer",
+    "deleteViewLabel": "Supprimer la vue enregistrée"
   }
 }
