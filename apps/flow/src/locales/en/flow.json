@@ -111,7 +111,8 @@
     "cancelled": "Cancelled",
     "noPriority": "No priority",
     "subtaskAddPlaceholder": "Add subtask…",
-    "subtaskCount": "{{done}} of {{total}}"
+    "subtaskCount": "{{done}} of {{total}}",
+    "removeAttachmentLabel": "Remove attachment"
   },
   "time": {
     "heading": "Time",
@@ -241,7 +242,8 @@
       "namePlaceholder": "Workspace name",
       "color": "Color",
       "creating": "Creating…",
-      "createWorkspace": "Create workspace"
+      "createWorkspace": "Create workspace",
+      "chooseColorLabel": "Choose color {{color}}"
     },
     "team": {
       "section": "Team",
@@ -330,7 +332,9 @@
       "deleteLabel": "Delete label",
       "deleteConfirmPrefix": "Delete",
       "deleteConfirmSuffix": "? It is removed from every task it is attached to."
-    }
+    },
+    "chooseColorLabel": "Choose color {{color}}",
+    "deleteLabelLabel": "Delete label"
   },
   "presence": {
     "heading": "Who's in today",
@@ -456,7 +460,12 @@
       "descriptionPrefix": "Delete the",
       "descriptionSuffix": "view? The filters are lost; tasks themselves aren't affected.",
       "confirmLabel": "Delete view"
-    }
+    },
+    "newViewLabel": "New view",
+    "confirmRenameLabel": "Confirm rename",
+    "cancelRenameLabel": "Cancel rename",
+    "renameLabel": "Rename",
+    "deleteLabel": "Delete"
   },
   "calendar": {
     "heading": "Calendar",
@@ -468,7 +477,9 @@
     "titlePlaceholder": "Task title…",
     "cancel": "Cancel",
     "create": "Create",
-    "creating": "Creating…"
+    "creating": "Creating…",
+    "prevMonthLabel": "Previous month",
+    "nextMonthLabel": "Next month"
   },
   "milestones": {
     "heading": "Milestones",
@@ -557,7 +568,8 @@
     "createTask": "Create task"
   },
   "projectList": {
-    "pageTitle": "List · rtylr"
+    "pageTitle": "List · rtylr",
+    "toggleDoneLabel": "Mark done"
   },
   "projectOverview": {
     "pageTitle": "Overview · rtylr"
@@ -576,5 +588,8 @@
   "projectSettings": {
     "pageTitle": "Project settings · rtylr",
     "removeMemberLabel": "Remove"
+  },
+  "bulkEdit": {
+    "clearSelectionLabel": "Clear selection"
   }
 }
