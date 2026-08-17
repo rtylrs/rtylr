@@ -279,15 +279,6 @@ const toTrainingPayload = (task: Omit<OnboardingTask, 'id' | 'completed'>) => ({
   isRequired: true,
 });
 
-const toBenefitPayload = (data: Omit<BenefitEnrollment, 'id' | 'startedAt' | 'status'>) => ({
-  name: data.planName,
-  type: 'enrollment',
-  provider: '',
-  costEmployer: 0,
-  costEmployee: 0,
-  isActive: true,
-});
-
 const toSettingsPayload = (patch: Partial<HrSettings>): Partial<HrSettings> => ({
   workWeekStart: patch.workWeekStart,
   overtimeAfterHours: patch.overtimeAfterHours,
@@ -387,10 +378,13 @@ export const hrExtras = {
 
   // Benefits
   listBenefitPlans: () => safe.get<BenefitPlan[]>('/hr/benefits'),
+  // Legacy, per-employee admin view used by EmployeeProfile.tsx. Self-service
+  // enrollment now goes through hr.benefit.v1 (see useMyBenefitEnrollments /
+  // useEnrollInBenefit in useHrExtras.ts) - there is no onekit RPC yet for an
+  // admin to list a specific employee's enrollments, so this stays on the
+  // legacy REST path until one exists.
   listBenefitEnrollments: () =>
     safe.get<BenefitEnrollment[]>('/hr/benefits', { params: { type: 'enrollments' } }),
-  enrollBenefit: (data: Omit<BenefitEnrollment, 'id' | 'startedAt' | 'status'>) =>
-    safe.post<BenefitEnrollment>('/hr/benefits', toBenefitPayload(data)),
 
   // Training
   listCourses: () => safe.get<TrainingCourse[]>('/hr/training', { params: { type: 'courses' } }),
