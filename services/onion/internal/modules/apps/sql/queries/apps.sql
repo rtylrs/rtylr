@@ -14,7 +14,7 @@ WHERE user_id = ?
     business_id = ?
     OR (
       business_id IS NULL
-      AND owner_id = (SELECT b.owner_id FROM businesses b WHERE b.id = ? LIMIT 1)
+      AND owner_id = (SELECT b.owner_id FROM businesses b WHERE b.id = ? ORDER BY b.owner_id ASC LIMIT 1)
     )
   )
 LIMIT 1;
