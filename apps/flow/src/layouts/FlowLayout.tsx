@@ -54,7 +54,7 @@ import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useWorkspaces } from '../features/workspace-dashboard/useWorkspaces';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
 import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
-import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
+import { isApiWorkspaceId, PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 import type { Member, Workspace } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
 import { displayUserEmail, displayUserName } from '../shared/lib/userDisplay';
@@ -1233,7 +1233,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             toast.error(t('flow.shell.projectNameRequired'));
                             return;
                           }
-                          if (!currentWorkspaceId) return;
+                          if (!isApiWorkspaceId(currentWorkspaceId)) return;
                           createProject.mutate(
                             {
                               workspaceId: currentWorkspaceId,
@@ -1280,9 +1280,13 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   </button>
                   <button
                     type="button"
-                    disabled={!newProjectName.trim() || createProject.isPending}
+                    disabled={
+                      !newProjectName.trim() ||
+                      createProject.isPending ||
+                      !isApiWorkspaceId(currentWorkspaceId)
+                    }
                     onClick={() => {
-                      if (!newProjectName.trim() || !currentWorkspaceId) return;
+                      if (!newProjectName.trim() || !isApiWorkspaceId(currentWorkspaceId)) return;
                       createProject.mutate(
                         {
                           workspaceId: currentWorkspaceId,
