@@ -20,7 +20,10 @@
     "bulkDeleteFailed": "Impossible d'effectuer la suppression groupée",
     "selectProjectFirst": "Sélectionnez d'abord un projet",
     "invalidDuration": "Saisissez une durée valide, par exemple « 90m » ou « 1.5h »",
-    "moveFailed": "Échec du déplacement de la tâche"
+    "moveFailed": "Échec du déplacement de la tâche",
+    "titleRequired": "Le titre de la tâche est requis",
+    "linkCopied": "Lien copié",
+    "createdWithId": "Créé {{id}}"
   },
   "comment": {
     "postFailed": "Impossible de publier le commentaire",
@@ -50,12 +53,14 @@
   },
   "notification": {
     "markReadFailed": "Échec du marquage de la notification comme lue",
-    "markAllReadFailed": "Échec du marquage de toutes les notifications comme lues"
+    "markAllReadFailed": "Échec du marquage de toutes les notifications comme lues",
+    "savePreferencesFailed": "Échec de l'enregistrement des préférences de notification"
   },
   "column": {
     "createFailed": "Échec de la création de la colonne",
     "updateFailed": "Échec de la mise à jour de la colonne",
-    "deleteFailed": "Échec de la suppression de la colonne"
+    "deleteFailed": "Échec de la suppression de la colonne",
+    "nameRequired": "Le nom de la colonne est requis"
   },
   "projectMember": {
     "addFailed": "Échec de l'ajout du membre",
@@ -63,18 +68,41 @@
     "roleUpdateFailed": "Échec de la mise à jour du rôle",
     "transferFailed": "Échec du transfert de propriété",
     "invited": "Invitation envoyée",
-    "notFoundByEmail": "Aucun utilisateur trouvé avec cette adresse e-mail"
+    "notFoundByEmail": "Aucun utilisateur trouvé avec cette adresse e-mail",
+    "roleUpdated": "Rôle mis à jour",
+    "removed": "Membre supprimé",
+    "transferred": "Propriété transférée",
+    "selectNewOwner": "Sélectionnez un membre",
+    "enterEmail": "Saisissez une adresse e-mail"
   },
   "project": {
     "createFailed": "Échec de la création du projet",
     "updated": "Projet mis à jour",
     "updateFailed": "Impossible de mettre à jour le projet",
     "deleteFailed": "Échec de la suppression du projet",
-    "moveFailed": "Échec du déplacement du projet"
+    "moveFailed": "Échec du déplacement du projet",
+    "moved": "Projet déplacé",
+    "selectWorkspace": "Sélectionnez un espace de travail",
+    "deleted": "Projet supprimé"
   },
   "milestone": {
     "createFailed": "Échec de la création du jalon",
     "updateFailed": "Échec de la mise à jour du jalon"
+  },
+  "view": {
+    "renamed": "Vue renommée",
+    "renameFailed": "Échec du renommage de la vue",
+    "deleted": "Vue supprimée",
+    "deleteFailed": "Échec de la suppression de la vue",
+    "created": "Vue créée"
+  },
+  "weeklyReview": {
+    "logged": "Bilan hebdomadaire enregistré",
+    "streak_one": "{{count}} semaine de suite",
+    "streak_other": "{{count}} semaines de suite",
+    "alreadyLogged": "Déjà enregistré cette semaine",
+    "alreadyLoggedStreak_one": "Série : {{count}} semaine",
+    "alreadyLoggedStreak_other": "Série : {{count}} semaines"
   },
   "profile": {
     "updated": "Profil mis à jour",
@@ -88,7 +116,9 @@
     "noActive": "Aucun espace de travail actif",
     "createFailed": "Échec de la création de l'espace de travail",
     "updateFailed": "Échec de la mise à jour de l'espace de travail",
-    "deleteFailed": "Échec de la suppression de l'espace de travail"
+    "deleteFailed": "Échec de la suppression de l'espace de travail",
+    "nameRequired": "Le nom de l'espace de travail est requis",
+    "created": "Espace de travail créé"
   },
   "workspaceMember": {
     "invalidWorkspaceId": "Identifiant d'espace de travail invalide",
