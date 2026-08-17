@@ -275,29 +275,33 @@ const NotificationsSection: React.FC = () => {
   const items = [
     {
       key: 'taskAssigned' as const,
-      label: 'Task assigned to me',
-      desc: 'When someone assigns a task to you',
+      label: t('flow.settings.notifications.items.taskAssigned.label'),
+      desc: t('flow.settings.notifications.items.taskAssigned.desc'),
     },
     {
       key: 'taskComments' as const,
-      label: 'Comments on my tasks',
-      desc: 'When someone comments on your tasks',
+      label: t('flow.settings.notifications.items.taskComments.label'),
+      desc: t('flow.settings.notifications.items.taskComments.desc'),
     },
-    { key: 'mentions' as const, label: 'Mentions', desc: 'When someone @mentions you' },
+    {
+      key: 'mentions' as const,
+      label: t('flow.settings.notifications.items.mentions.label'),
+      desc: t('flow.settings.notifications.items.mentions.desc'),
+    },
     {
       key: 'statusChanges' as const,
-      label: 'Status changes',
-      desc: 'When a task you follow changes status',
+      label: t('flow.settings.notifications.items.statusChanges.label'),
+      desc: t('flow.settings.notifications.items.statusChanges.desc'),
     },
     {
       key: 'weeklyDigest' as const,
-      label: 'Weekly digest',
-      desc: 'A weekly summary of your activity',
+      label: t('flow.settings.notifications.items.weeklyDigest.label'),
+      desc: t('flow.settings.notifications.items.weeklyDigest.desc'),
     },
     {
       key: 'emailNotifications' as const,
-      label: 'Email notifications',
-      desc: 'Receive notifications via email',
+      label: t('flow.settings.notifications.items.emailNotifications.label'),
+      desc: t('flow.settings.notifications.items.emailNotifications.desc'),
     },
   ];
 
@@ -305,10 +309,10 @@ const NotificationsSection: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          Notifications
+          {t('common.settings.notifications')}
         </h2>
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          Control what you get notified about.
+          {t('flow.settings.notifications.subtitle')}
         </p>
       </div>
 
@@ -376,7 +380,7 @@ const LifeRhythmSection: React.FC = () => {
             className="block text-[12px] font-medium mb-1.5"
             style={{ color: 'var(--flow-text-muted)' }}
           >
-            Quiet hours start
+            {t('flow.settings.life.quietStart')}
           </label>
           <input
             type="time"
@@ -395,7 +399,7 @@ const LifeRhythmSection: React.FC = () => {
             className="block text-[12px] font-medium mb-1.5"
             style={{ color: 'var(--flow-text-muted)' }}
           >
-            Quiet hours end
+            {t('flow.settings.life.quietEnd')}
           </label>
           <input
             type="time"
@@ -416,7 +420,7 @@ const LifeRhythmSection: React.FC = () => {
           className="block text-[12px] font-medium mb-1.5"
           style={{ color: 'var(--flow-text-muted)' }}
         >
-          Preferred digest hour (local)
+          {t('flow.settings.life.digestHour')}
         </label>
         <select
           value={prefs.digestHour}
@@ -440,16 +444,17 @@ const LifeRhythmSection: React.FC = () => {
 };
 
 const AppearanceSection: React.FC = () => {
+  const { t } = useTranslation();
   const { theme, setTheme } = useThemeStore();
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          Appearance
+          {t('common.settings.appearance')}
         </h2>
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          Customize the look and feel of Flow.
+          {t('flow.settings.appearance.subtitle')}
         </p>
       </div>
 
@@ -458,16 +463,16 @@ const AppearanceSection: React.FC = () => {
           className="block text-[12px] font-medium mb-3"
           style={{ color: 'var(--flow-text-muted)' }}
         >
-          Theme
+          {t('flow.settings.appearance.theme')}
         </label>
         <div className="grid grid-cols-3 gap-3">
           {(
             [
-              { value: 'light', label: 'Light', preview: '#f4f4f5' },
-              { value: 'dark', label: 'Dark', preview: '#0a0a0a' },
+              { value: 'light', label: t('flow.shell.light'), preview: '#f4f4f5' },
+              { value: 'dark', label: t('flow.shell.dark'), preview: '#0a0a0a' },
               {
                 value: 'system',
-                label: 'System',
+                label: t('flow.shell.system'),
                 preview: 'linear-gradient(135deg, #f4f4f5 50%, #0a0a0a 50%)',
               },
             ] as const
@@ -493,31 +498,32 @@ const AppearanceSection: React.FC = () => {
 };
 
 const ShortcutsSection: React.FC = () => {
+  const { t } = useTranslation();
   const shortcuts = [
-    { keys: ['C'], desc: 'Create a new task' },
-    { keys: ['/'], desc: 'Open command bar / search' },
-    { keys: ['⌘', 'K'], desc: 'Open command bar' },
-    { keys: ['G', 'I'], desc: 'Go to Inbox' },
-    { keys: ['G', 'M'], desc: 'Go to My Issues' },
-    { keys: ['G', 'F'], desc: 'Go to Today (focus)' },
-    { keys: ['G', 'D'], desc: 'Go to Dashboard' },
-    { keys: ['G', 'C'], desc: 'Go to Calendar' },
-    { keys: ['G', 'T'], desc: 'Go to Timeline' },
-    { keys: ['G', 'R'], desc: 'Go to Roadmap' },
-    { keys: ['G', 'S'], desc: 'Go to Insights' },
-    { keys: ['G', 'Y'], desc: 'Go to Cycles' },
-    { keys: ['G', 'X'], desc: 'Go to Triage' },
-    { keys: ['Esc'], desc: 'Close any modal' },
-    { keys: ['⌘', '↵'], desc: 'Submit comment' },
+    { keys: ['C'], desc: t('flow.settings.shortcuts.items.createTask') },
+    { keys: ['/'], desc: t('flow.settings.shortcuts.items.openSearch') },
+    { keys: ['⌘', 'K'], desc: t('flow.settings.shortcuts.items.openCommandBar') },
+    { keys: ['G', 'I'], desc: t('flow.settings.shortcuts.items.goToInbox') },
+    { keys: ['G', 'M'], desc: t('flow.settings.shortcuts.items.goToMyIssues') },
+    { keys: ['G', 'F'], desc: t('flow.settings.shortcuts.items.goToToday') },
+    { keys: ['G', 'D'], desc: t('flow.settings.shortcuts.items.goToDashboard') },
+    { keys: ['G', 'C'], desc: t('flow.settings.shortcuts.items.goToCalendar') },
+    { keys: ['G', 'T'], desc: t('flow.settings.shortcuts.items.goToTimeline') },
+    { keys: ['G', 'R'], desc: t('flow.settings.shortcuts.items.goToRoadmap') },
+    { keys: ['G', 'S'], desc: t('flow.settings.shortcuts.items.goToInsights') },
+    { keys: ['G', 'Y'], desc: t('flow.settings.shortcuts.items.goToCycles') },
+    { keys: ['G', 'X'], desc: t('flow.settings.shortcuts.items.goToTriage') },
+    { keys: ['Esc'], desc: t('flow.settings.shortcuts.items.closeModal') },
+    { keys: ['⌘', '↵'], desc: t('flow.settings.shortcuts.items.submitComment') },
   ];
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          Keyboard Shortcuts
+          {t('common.settings.shortcuts')}
         </h2>
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          Move fast through Flow without touching the mouse.
+          {t('flow.settings.shortcuts.subtitle')}
         </p>
       </div>
       <div className="space-y-1">
@@ -613,10 +619,10 @@ const LabelsSection: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          Labels
+          {t('common.settings.labels')}
         </h2>
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          Manage labels for your workspace. Labels can be applied to any task.
+          {t('flow.settings.labels.subtitle')}
         </p>
       </div>
 
@@ -626,12 +632,12 @@ const LabelsSection: React.FC = () => {
         style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
       >
         <h3 className="text-[12px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-          New label
+          {t('flow.settings.labels.newLabel')}
         </h3>
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Label name"
+            placeholder={t('flow.settings.labels.namePlaceholder')}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
@@ -641,7 +647,7 @@ const LabelsSection: React.FC = () => {
         </div>
         <div>
           <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-muted)' }}>
-            Color
+            {t('flow.settings.labels.color')}
           </p>
           <div className="flex flex-wrap gap-2">
             <button
@@ -655,8 +661,8 @@ const LabelsSection: React.FC = () => {
                 boxShadow: !LABEL_COLORS.includes(newColor) ? '0 0 0 2px var(--flow-bg)' : 'none',
                 border: '1px solid var(--flow-border)',
               }}
-              title="Choose custom color"
-              aria-label="Choose custom color"
+              title={t('flow.settings.labels.chooseCustomColor')}
+              aria-label={t('flow.settings.labels.chooseCustomColor')}
             >
               <input
                 ref={customColorInputRef}
@@ -692,22 +698,24 @@ const LabelsSection: React.FC = () => {
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
-          {createLabel.isPending ? 'Creating…' : 'Create label'}
+          {createLabel.isPending
+            ? t('flow.settings.labels.creating')
+            : t('flow.settings.labels.createLabel')}
         </button>
       </div>
 
       {/* Existing labels */}
       <div>
         <h3 className="text-[12px] font-semibold mb-3" style={{ color: 'var(--flow-text-muted)' }}>
-          Workspace labels
+          {t('flow.settings.labels.workspaceLabels')}
         </h3>
         {isLoading ? (
           <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-            Loading…
+            {t('common.loading')}
           </p>
         ) : labels.length === 0 ? (
           <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-            No labels yet. Create one above.
+            {t('flow.settings.labels.emptyList')}
           </p>
         ) : (
           <div
@@ -733,7 +741,7 @@ const LabelsSection: React.FC = () => {
                   onClick={() => setPendingDeleteLabel({ id: label.id, name: label.name })}
                   className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-dim)' }}
-                  title="Delete label"
+                  title={t('flow.settings.labels.deleteLabel')}
                 >
                   <Trash2 size={13} />
                 </button>
@@ -747,14 +755,15 @@ const LabelsSection: React.FC = () => {
         onOpenChange={(o) => {
           if (!o) setPendingDeleteLabel(null);
         }}
-        title="Delete label"
+        title={t('flow.settings.labels.deleteLabel')}
         description={
           <>
-            Delete <strong>{pendingDeleteLabel?.name}</strong>? It is removed from every task it is
-            attached to.
+            {t('flow.settings.labels.deleteConfirmPrefix')}{' '}
+            <strong>{pendingDeleteLabel?.name}</strong>
+            {t('flow.settings.labels.deleteConfirmSuffix')}
           </>
         }
-        confirmLabel="Delete"
+        confirmLabel={t('common.delete')}
         pending={deleteLabel.isPending}
         onConfirm={() => {
           if (!pendingDeleteLabel) return;
@@ -1048,7 +1057,7 @@ const FlowSettings: React.FC = () => {
 
   return (
     <div className="flex h-full min-h-0 flex-col md:flex-row">
-      <HelmetContainer title="Settings · rtylr" />
+      <HelmetContainer title={`${t('nav.settings')} · Flow`} />
       {/* Settings sidebar */}
       <div className="w-full shrink-0 overflow-x-auto overflow-y-hidden border-b border-[var(--flow-border)] md:w-[236px] md:border-b-0 md:border-r md:border-[var(--flow-border)] md:overflow-y-auto">
         <div className="flex flex-row gap-1 p-3 md:flex-col md:gap-0 md:p-4">

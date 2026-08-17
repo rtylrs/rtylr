@@ -72,6 +72,8 @@ describe('flow locale parity', () => {
       'taskDetail.genericActivityNoValue',
       // "Description" is the same word in French too.
       'settings.workTypes.description',
+      // "Mentions" (as in @mentions) is the same word in French too.
+      'settings.notifications.items.mentions.label',
     ]);
 
     const copied = keyPaths(en).filter((path) => {
