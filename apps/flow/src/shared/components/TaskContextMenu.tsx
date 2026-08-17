@@ -87,7 +87,7 @@ export const TaskContextMenu: React.FC<{
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         onClick={() => {
           void navigator.clipboard.writeText(`${window.location.origin}/task/${menu.taskId}`);
-          toast.success('Link copied');
+          toast.success(t('toasts.task.linkCopied'));
           onClose();
         }}
       >
@@ -110,8 +110,8 @@ export const TaskContextMenu: React.FC<{
         onClick={() => {
           if (!canRemove) return;
           deleteTask.mutate(menu.taskId, {
-            onSuccess: () => toast.success('Task deleted'),
-            onError: () => toast.error('Failed to delete task'),
+            onSuccess: () => toast.success(t('toasts.task.deleted')),
+            onError: () => toast.error(t('toasts.task.deleteFailed')),
           });
           onClose();
         }}
