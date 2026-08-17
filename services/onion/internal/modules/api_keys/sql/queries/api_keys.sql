@@ -2,7 +2,8 @@
 SELECT id, owner_id, business_id, name, key_prefix, scopes, last_used_at, expires_at, is_active, created_at
 FROM hub_api_keys
 WHERE business_id = ? AND is_active = TRUE
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
 
 -- name: CreateAPIKey :execresult
 INSERT INTO hub_api_keys (owner_id, business_id, name, key_hash, key_prefix, scopes)
