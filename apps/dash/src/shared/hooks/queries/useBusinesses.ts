@@ -55,7 +55,15 @@ export const useCreateSubBusiness = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateSubBusinessRequest) =>
-      unwrap(safe.post<CreateSubBusinessResponse>('/hub/business/v1/businesses', data)),
+      unwrap(
+        safe.post<CreateSubBusinessResponse>('/hub/business/v1/businesses', {
+          name: data.name,
+          // OneKit wire-encodes int64 request fields as JSON strings. A bare
+          // number 400s with "cannot unmarshal number into Go struct field
+          // .parent_business_id of type string", same as switch-business.
+          parentBusinessId: String(data.parentBusinessId),
+        })
+      ),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['businesses', 'mine'] });
       void queryClient.invalidateQueries({ queryKey: ['business'] });
