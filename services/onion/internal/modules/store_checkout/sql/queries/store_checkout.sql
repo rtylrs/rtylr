@@ -6,4 +6,4 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 UPDATE store_checkouts SET status = 'completed' WHERE business_id = ? AND id = ?;
 
 -- name: GetCheckoutForComplete :one
-SELECT customer_email, total FROM store_checkouts WHERE business_id = ? AND id = ? LIMIT 1;
+SELECT customer_email, total FROM store_checkouts WHERE business_id = ? AND id = ? ORDER BY id ASC LIMIT 1;
