@@ -17,7 +17,7 @@ WHERE business_id = ? OR (is_personal = TRUE AND owner_id = ?);
 SELECT id, owner_id, business_id, name, description, icon, color, is_default, created_by, created_at, updated_at
 FROM flow_workspaces
 WHERE business_id = ? OR (is_personal = TRUE AND owner_id = ?)
-ORDER BY is_default DESC, created_at ASC
+ORDER BY is_default DESC, created_at ASC, id ASC
 LIMIT ? OFFSET ?;
 
 -- name: UpdateWorkspace :exec
