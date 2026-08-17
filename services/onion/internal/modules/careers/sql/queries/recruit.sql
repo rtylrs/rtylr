@@ -185,6 +185,7 @@ SELECT
     updated_at
 FROM careers_customizations
 WHERE slug = ?
+ORDER BY slug ASC
 LIMIT 1;
 
 -- name: UpsertCustomization :exec
