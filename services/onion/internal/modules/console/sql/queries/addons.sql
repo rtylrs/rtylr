@@ -29,6 +29,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?);
 SELECT user_id, business_id, addon_id, enabled_by_grant
 FROM manual_addon_grants
 WHERE id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: RevokeAddonGrant :exec
