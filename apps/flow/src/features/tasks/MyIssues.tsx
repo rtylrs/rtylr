@@ -23,6 +23,7 @@ const KANBAN_COLUMNS: { status: string; label: string; color: string }[] = [
 ];
 
 const MyIssues: React.FC = () => {
+  const { t } = useTranslation();
   const { data: rawTasks = [], isLoading } = useMyIssues();
   // GetMyTasks doesn't filter archived server-side, so exclude client-side
   // to match Triage/FocusToday/FlowLayout.
@@ -40,7 +41,7 @@ const MyIssues: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="My tasks · rtylr" />
+      <HelmetContainer title={t('flow.myIssues.pageTitle')} />
       <div
         className="flex items-center justify-between px-6 py-4 shrink-0"
         style={{ borderBottom: '1px solid var(--flow-border)' }}
@@ -60,7 +61,7 @@ const MyIssues: React.FC = () => {
       {tasks.length === 0 && !isLoading ? (
         <EmptyState
           icon={ListTodo}
-          title="No tasks assigned"
+          title={t('flow.myIssues.emptyTitle')}
           description="Nothing is on your plate right now. Nice work!"
         />
       ) : (
