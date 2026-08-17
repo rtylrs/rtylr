@@ -31,4 +31,4 @@ WHERE id = ? AND owner_email = ?;
 -- name: RevokeSelfHostLicense :execrows
 UPDATE self_host_licenses
 SET status = 'revoked', updated_by = ?, revoked_at = CURRENT_TIMESTAMP
-WHERE id = ?;
+WHERE id = ? AND owner_email = ?;
