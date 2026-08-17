@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useQueryClient, type QueryKey } from '@tanstack/react-query';
 import {
   createOneKitFetch,
   getOneKitApiBaseUrl,
@@ -74,4 +75,51 @@ export function useRealtimeStatus(): RealtimeStatus {
   const [status, setStatus] = useState<RealtimeStatus>(() => client.getStatus());
   useEffect(() => client.subscribeStatus(setStatus), []);
   return status;
+}
+
+/**
+ * Query keys broad enough to catch up on state that changed while the
+ * socket was down. Events carry no payload (see apps/flow/CLAUDE.md), so a
+ * reconnect can't replay what was missed - the shared client re-subscribes
+ * to the same topics on `ws.onopen` but never learns what fired while
+ * disconnected. Rather than trying to track exactly what was missed, we
+ * invalidate the lists every realtime consumer already keys off of.
+ */
+const RECONNECT_INVALIDATE_KEYS: readonly QueryKey[] = [
+  ['tasks'],
+  ['my-tasks'],
+  ['projects'],
+  ['workspaces'],
+  ['notifications'],
+];
+
+/**
+ * Invalidate the app's core query keys on *reconnect* - a transition back to
+ * `connected` from `reconnecting` - not on the initial connect, which has
+ * nothing to catch up on.
+ *
+ * `refetchOnWindowFocus` is off and `staleTime` is 60s (see main.tsx), so
+ * without this a tab left open across a network blip shows stale data
+ * indefinitely: the client resubscribes to the same topics, but any event
+ * that fired during the disconnect is gone for good.
+ *
+ * Mount once near the app root - `FlowLayout` does this alongside
+ * `useLayoutRealtime`.
+ */
+export function useRealtimeReconnectRefetch(): void {
+  const qc = useQueryClient();
+  const previousStatus = useRef<RealtimeStatus>(client.getStatus());
+
+  useEffect(
+    () =>
+      client.subscribeStatus((status) => {
+        if (status === 'connected' && previousStatus.current === 'reconnecting') {
+          for (const queryKey of RECONNECT_INVALIDATE_KEYS) {
+            qc.invalidateQueries({ queryKey });
+          }
+        }
+        previousStatus.current = status;
+      }),
+    [qc]
+  );
 }
