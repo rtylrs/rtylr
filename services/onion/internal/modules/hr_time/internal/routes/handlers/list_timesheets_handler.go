@@ -41,6 +41,13 @@ func (h *ListTimesheetsHandler) Serve(ctx context.Context, req *ListTimesheetsRe
 		return ListTimesheetsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	if req.Limit <= 0 {
+		req.Limit = 20
+	}
+	if req.Limit > 100 {
+		req.Limit = 100
+	}
+
 	timesheets, total, err := h.Service.ListTimesheets(ctx, businessID, domain.ListTimesheetsParams{
 		EmployeeID: req.EmployeeID,
 		Limit:      req.Limit,

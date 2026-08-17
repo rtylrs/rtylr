@@ -61,6 +61,8 @@ INSERT INTO hr_timesheet_approval_actions (
     owner_id, business_id, timesheet_id, approver_id, action, level, comment
 ) VALUES (?, ?, ?, ?, ?, ?, ?);
 
+-- The reminder job has no pagination contract; keep the endpoint bounded
+-- until it can page through employees instead of scanning them all at once.
 -- name: ListUnsubmittedEmployees :many
 SELECT DISTINCT e.employee_id
 FROM hr_time_entries e
@@ -69,4 +71,6 @@ LEFT JOIN hr_timesheets t ON t.business_id = e.business_id
     AND t.period_start = ?
 WHERE e.business_id = ?
     AND e.date >= ? AND e.date <= ?
-    AND (t.id IS NULL OR t.status = 'draft');
+    AND (t.id IS NULL OR t.status = 'draft')
+ORDER BY e.employee_id ASC
+LIMIT 500;
