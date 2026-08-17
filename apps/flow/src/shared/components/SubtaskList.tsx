@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Subtask } from '../stores/flowStore';
 
 interface SubtaskListProps {
@@ -15,6 +16,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
   onAdd,
   disabled,
 }) => {
+  const { t } = useTranslation();
   const [newTitle, setNewTitle] = useState('');
   const completed = subtasks.filter((s) => s.completed).length;
   const pct = subtasks.length > 0 ? Math.round((completed / subtasks.length) * 100) : 0;
@@ -31,7 +33,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
         <>
           <div className="flex items-center gap-2 mb-2">
             <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-              {completed} of {subtasks.length}
+              {t('flow.taskDetail.subtaskCount', { done: completed, total: subtasks.length })}
             </span>
             <div
               className="flex-1 h-1 rounded-full overflow-hidden"
@@ -84,7 +86,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submit()}
-          placeholder="Add subtask…"
+          placeholder={t('flow.taskDetail.subtaskAddPlaceholder')}
           disabled={disabled}
           className="flex-1 bg-transparent outline-none text-[12px] disabled:opacity-60"
           style={{ color: 'var(--flow-text)' }}

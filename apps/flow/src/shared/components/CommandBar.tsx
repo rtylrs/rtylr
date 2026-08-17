@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import { useFlowStore } from '../stores/flowStore';
 import { useTasks } from '../../features/tasks/useTasks';
 import { useProjects } from '../../features/projects/useProjects';
@@ -37,6 +38,7 @@ interface CommandItem {
 }
 
 export const CommandBar: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { commandBarOpen, setCommandBarOpen, setQuickCreateOpen, activeWorkspaceId } =
     useFlowStore();
@@ -75,7 +77,7 @@ export const CommandBar: React.FC = () => {
     const navItems: CommandItem[] = [
       {
         id: 'nav-inbox',
-        label: 'Go to Inbox',
+        label: t('flow.commandBar.goToInbox'),
         icon: Inbox,
         action: () => navigate({ to: '/inbox' }),
         group: 'nav',
@@ -83,7 +85,7 @@ export const CommandBar: React.FC = () => {
       },
       {
         id: 'nav-my',
-        label: 'My tasks',
+        label: t('flow.shell.myTasks'),
         icon: ListTodo,
         action: () => navigate({ to: '/my-issues' }),
         group: 'nav',
@@ -91,84 +93,84 @@ export const CommandBar: React.FC = () => {
       },
       {
         id: 'nav-dash',
-        label: 'Workspace Dashboard',
+        label: t('flow.commandBar.workspaceDashboard'),
         icon: LayoutGrid,
         action: () => navigate({ to: `/w/${activeWorkspaceId}` as string }),
         group: 'nav',
       },
       {
         id: 'nav-cal',
-        label: 'Calendar',
+        label: t('flow.shell.calendar'),
         icon: Calendar,
         action: () => navigate({ to: '/calendar' }),
         group: 'nav',
       },
       {
         id: 'nav-timeline',
-        label: 'Timeline',
+        label: t('flow.shell.timeline'),
         icon: Timer,
         action: () => navigate({ to: '/timeline' }),
         group: 'nav',
       },
       {
         id: 'nav-cycles',
-        label: 'Cycles',
+        label: t('flow.shell.cycles'),
         icon: Timer,
         action: () => navigate({ to: '/cycles' }),
         group: 'nav',
       },
       {
         id: 'nav-milestones',
-        label: 'Milestones',
+        label: t('flow.shell.milestones'),
         icon: Milestone,
         action: () => navigate({ to: '/milestones' }),
         group: 'nav',
       },
       {
         id: 'nav-roadmap',
-        label: 'Roadmap',
+        label: t('flow.shell.roadmap'),
         icon: Map,
         action: () => navigate({ to: '/roadmap' }),
         group: 'nav',
       },
       {
         id: 'nav-insights',
-        label: 'Insights',
+        label: t('flow.shell.insights'),
         icon: BarChart3,
         action: () => navigate({ to: '/insights' }),
         group: 'nav',
       },
       {
         id: 'nav-team',
-        label: 'Team',
+        label: t('flow.shell.team'),
         icon: Users,
         action: () => navigate({ to: '/team' }),
         group: 'nav',
       },
       {
         id: 'nav-triage',
-        label: 'Triage',
+        label: t('flow.shell.triage'),
         icon: Eye,
         action: () => navigate({ to: '/triage' }),
         group: 'nav',
       },
       {
         id: 'nav-archive',
-        label: 'Archive',
+        label: t('flow.shell.archive'),
         icon: Archive,
         action: () => navigate({ to: '/archive' }),
         group: 'nav',
       },
       {
         id: 'nav-views',
-        label: 'Views',
+        label: t('flow.shell.views'),
         icon: Eye,
         action: () => navigate({ to: '/views' }),
         group: 'nav',
       },
       {
         id: 'nav-settings',
-        label: 'Settings',
+        label: t('nav.settings'),
         icon: Settings,
         action: () => navigate({ to: '/settings' }),
         group: 'nav',
@@ -177,7 +179,7 @@ export const CommandBar: React.FC = () => {
     const actionItems: CommandItem[] = [
       {
         id: 'act-new-task',
-        label: 'New task',
+        label: t('flow.shell.newTask'),
         icon: Plus,
         hint: 'C',
         action: () => setQuickCreateOpen(true),
@@ -203,7 +205,7 @@ export const CommandBar: React.FC = () => {
       group: 'project',
     }));
     return [...actionItems, ...navItems, ...projectItems, ...taskItems];
-  }, [tasks, projects, activeWorkspaceId, navigate, setQuickCreateOpen, query, searchResults]);
+  }, [tasks, projects, activeWorkspaceId, navigate, setQuickCreateOpen, query, searchResults, t]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return items;
@@ -248,10 +250,10 @@ export const CommandBar: React.FC = () => {
   }, [filtered]);
 
   const groupLabels: Record<string, string> = {
-    action: 'Actions',
-    nav: 'Navigation',
-    project: 'Projects',
-    task: 'Tasks',
+    action: t('flow.commandBar.groupActions'),
+    nav: t('flow.commandBar.groupNavigation'),
+    project: t('nav.projects'),
+    task: t('nav.tasks'),
   };
 
   return (
@@ -290,7 +292,7 @@ export const CommandBar: React.FC = () => {
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Type a command or search…"
+                placeholder={t('flow.commandBar.searchPlaceholder')}
                 className="flex-1 bg-transparent outline-none text-[13px]"
                 style={{ color: 'var(--flow-text)' }}
               />
@@ -312,7 +314,7 @@ export const CommandBar: React.FC = () => {
                   className="text-[12px] text-center py-8"
                   style={{ color: 'var(--flow-text-dim)' }}
                 >
-                  No results
+                  {t('flow.commandBar.noResults')}
                 </div>
               )}
               {(['action', 'nav', 'project', 'task'] as const).map((g) => {

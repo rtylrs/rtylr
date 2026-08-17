@@ -109,7 +109,9 @@
     "inReview": "In Review",
     "done": "Done",
     "cancelled": "Cancelled",
-    "noPriority": "No priority"
+    "noPriority": "No priority",
+    "subtaskAddPlaceholder": "Add subtask…",
+    "subtaskCount": "{{done}} of {{total}}"
   },
   "time": {
     "heading": "Time",
@@ -532,5 +534,23 @@
     "noTasks": "No tasks",
     "quickAddPlaceholder": "Add a personal task and press Enter",
     "quickAddButton": "Add"
+  },
+  "commandBar": {
+    "goToInbox": "Go to Inbox",
+    "workspaceDashboard": "Workspace Dashboard",
+    "groupActions": "Actions",
+    "groupNavigation": "Navigation",
+    "searchPlaceholder": "Type a command or search…",
+    "noResults": "No results"
+  },
+  "quickCreate": {
+    "title": "New task",
+    "subtitle": "Add details, then create",
+    "titlePlaceholder": "Task name",
+    "unassigned": "Unassigned",
+    "noEffort": "None",
+    "descriptionPlaceholder": "What needs to be done?",
+    "creating": "Creating…",
+    "createTask": "Create task"
   }
 }

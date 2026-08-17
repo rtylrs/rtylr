@@ -2,5 +2,6 @@
   "low": "Faible",
   "medium": "Moyenne",
   "high": "Haute",
-  "urgent": "Urgente"
+  "urgent": "Urgente",
+  "noPriority": "Sans priorité"
 }

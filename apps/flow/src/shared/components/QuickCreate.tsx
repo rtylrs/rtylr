@@ -129,7 +129,7 @@ export const QuickCreate: React.FC = () => {
         >
           <motion.button
             type="button"
-            aria-label="Close"
+            aria-label={t('common.close')}
             className="flex-1 cursor-default border-0"
             style={{ background: 'rgba(0,0,0,0.45)' }}
             initial={{ opacity: 0 }}
@@ -165,10 +165,10 @@ export const QuickCreate: React.FC = () => {
                   className="text-[13px] font-semibold"
                   style={{ color: 'var(--flow-text)' }}
                 >
-                  New task
+                  {t('flow.quickCreate.title')}
                 </p>
                 <p className="text-[11px] mt-0.5" style={{ color: 'var(--flow-text-dim)' }}>
-                  Add details, then create
+                  {t('flow.quickCreate.subtitle')}
                 </p>
               </div>
               <button
@@ -176,7 +176,7 @@ export const QuickCreate: React.FC = () => {
                 onClick={() => setQuickCreateOpen(false)}
                 className="h-9 w-9 shrink-0 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-muted)' }}
-                aria-label="Close"
+                aria-label={t('common.close')}
               >
                 <ChevronRight size={18} strokeWidth={2} />
               </button>
@@ -194,14 +194,14 @@ export const QuickCreate: React.FC = () => {
                     submit();
                   }
                 }}
-                placeholder="Task name"
+                placeholder={t('flow.quickCreate.titlePlaceholder')}
                 rows={2}
                 className="w-full bg-transparent outline-none resize-none text-[20px] font-semibold leading-snug placeholder:opacity-40 mb-1"
                 style={{ color: 'var(--flow-text)' }}
               />
 
               <div className="mt-1">
-                <FieldRow label="Assignee" icon={User}>
+                <FieldRow label={t('common.assignee')} icon={User}>
                   <div className="flex items-center gap-2 flex-wrap">
                     <button
                       type="button"
@@ -242,12 +242,12 @@ export const QuickCreate: React.FC = () => {
                       }}
                     >
                       <CircleUser size={14} />
-                      Unassigned
+                      {t('flow.quickCreate.unassigned')}
                     </button>
                   </div>
                 </FieldRow>
 
-                <FieldRow label="Effort" icon={Gauge}>
+                <FieldRow label={t('flow.taskDetail.effort')} icon={Gauge}>
                   <div className="flex flex-wrap gap-1">
                     <button
                       type="button"
@@ -259,7 +259,7 @@ export const QuickCreate: React.FC = () => {
                         border: '1px solid var(--flow-border)',
                       }}
                     >
-                      ,
+                      {t('flow.quickCreate.noEffort')}
                     </button>
                     {EFFORT_PRESETS.map((m) => (
                       <button
@@ -282,7 +282,7 @@ export const QuickCreate: React.FC = () => {
                   </div>
                 </FieldRow>
 
-                <FieldRow label="Due date" icon={Calendar}>
+                <FieldRow label={t('common.dueDate')} icon={Calendar}>
                   <input
                     type="date"
                     value={dueDate}
@@ -295,13 +295,13 @@ export const QuickCreate: React.FC = () => {
                   />
                 </FieldRow>
 
-                <FieldRow label="Project" icon={FolderInput}>
+                <FieldRow label={t('flow.time.project')} icon={FolderInput}>
                   <div className="-ml-1">
                     <ProjectSelect value={projectId} onChange={setProjectId} />
                   </div>
                 </FieldRow>
 
-                <FieldRow label="Priority" icon={Flag}>
+                <FieldRow label={t('common.priority')} icon={Flag}>
                   <div className="flex items-center gap-1 flex-wrap">
                     {priorities.map((p) => (
                       <button
@@ -316,7 +316,7 @@ export const QuickCreate: React.FC = () => {
                               ? '1px solid var(--flow-border)'
                               : '1px solid transparent',
                         }}
-                        title={p}
+                        title={t(p === 'no_priority' ? 'priority.noPriority' : `priority.${p}`)}
                       >
                         <PriorityIcon priority={p} />
                       </button>
@@ -330,12 +330,12 @@ export const QuickCreate: React.FC = () => {
                   className="text-[11px] font-semibold uppercase tracking-wide mb-2"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
-                  Description
+                  {t('common.description')}
                 </p>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="What needs to be done?"
+                  placeholder={t('flow.quickCreate.descriptionPlaceholder')}
                   rows={6}
                   className="w-full rounded-lg px-3 py-2.5 text-[13px] leading-relaxed outline-none resize-y min-h-[120px] placeholder:opacity-45"
                   style={{
@@ -358,7 +358,7 @@ export const QuickCreate: React.FC = () => {
                 className="px-3 py-2 rounded-lg text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
@@ -367,7 +367,9 @@ export const QuickCreate: React.FC = () => {
                 className="px-4 py-2 rounded-lg text-[12px] font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
                 style={{ background: 'var(--accent)', color: '#0a0a0a' }}
               >
-                {createTaskMutation.isPending ? 'Creating…' : 'Create task'}
+                {createTaskMutation.isPending
+                  ? t('flow.quickCreate.creating')
+                  : t('flow.quickCreate.createTask')}
               </button>
             </div>
           </motion.aside>

@@ -109,7 +109,9 @@
     "inReview": "En revue",
     "done": "Terminé",
     "cancelled": "Annulé",
-    "noPriority": "Aucune priorité"
+    "noPriority": "Aucune priorité",
+    "subtaskAddPlaceholder": "Ajouter une sous-tâche…",
+    "subtaskCount": "{{done}} sur {{total}}"
   },
   "time": {
     "heading": "Temps",
@@ -532,5 +534,23 @@
     "noTasks": "Aucune tâche",
     "quickAddPlaceholder": "Ajoutez une tâche personnelle et appuyez sur Entrée",
     "quickAddButton": "Ajouter"
+  },
+  "commandBar": {
+    "goToInbox": "Aller à la boîte de réception",
+    "workspaceDashboard": "Tableau de bord de l'espace de travail",
+    "groupActions": "Actions",
+    "groupNavigation": "Navigation",
+    "searchPlaceholder": "Tapez une commande ou recherchez…",
+    "noResults": "Aucun résultat"
+  },
+  "quickCreate": {
+    "title": "Nouvelle tâche",
+    "subtitle": "Ajoutez des détails, puis créez",
+    "titlePlaceholder": "Nom de la tâche",
+    "unassigned": "Non assignée",
+    "noEffort": "Aucun",
+    "descriptionPlaceholder": "Que faut-il faire ?",
+    "creating": "Création…",
+    "createTask": "Créer la tâche"
   }
 }
