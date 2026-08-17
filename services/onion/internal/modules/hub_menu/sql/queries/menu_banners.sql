@@ -35,6 +35,7 @@ SELECT
     updated_at
 FROM hub_menu_banners
 WHERE business_id = ? AND id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: CreateMenuBanner :execresult
