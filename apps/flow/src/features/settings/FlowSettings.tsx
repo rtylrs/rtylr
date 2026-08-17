@@ -141,7 +141,7 @@ const WorkspacesSection: React.FC = () => {
           </h3>
           <input
             type="text"
-            placeholder="Workspace name"
+            placeholder={t('flow.settings.workspaceNamePlaceholder')}
             value={wsName}
             onChange={(e) => setWsName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
@@ -625,7 +625,7 @@ const LabelsSection: React.FC = () => {
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Label name"
+            placeholder={t('flow.settings.labelNamePlaceholder')}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
