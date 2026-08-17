@@ -77,6 +77,11 @@ describe('flow locale parity', () => {
       // "Actions" and "Navigation" are the same words in French too.
       'commandBar.groupActions',
       'commandBar.groupNavigation',
+      // "Minutes" is the same word in French too, same reasoning as "Date" above.
+      'time.add.minutes',
+      // Pure placeholder with no prose to translate, same as the duration
+      // placeholders above.
+      'time.add.noteCounter',
     ]);
 
     const copied = keyPaths(en).filter((path) => {
