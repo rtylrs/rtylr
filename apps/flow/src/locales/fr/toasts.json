@@ -57,5 +57,20 @@
   },
   "workspace": {
     "noActive": "Aucun espace de travail actif"
+  },
+  "workspaceMember": {
+    "invalidWorkspaceId": "Identifiant d'espace de travail invalide",
+    "invalidUserId": "Identifiant d'utilisateur invalide",
+    "addWorkspaceMemberFailed": "Échec de l'ajout du membre à l'espace de travail",
+    "removeWorkspaceMemberFailed": "Échec de la suppression du membre de l'espace de travail",
+    "updateRoleFailed": "Échec de la mise à jour du rôle du membre",
+    "roleUpdated": "Rôle mis à jour",
+    "roleUpdateFailed": "Échec de la mise à jour du rôle",
+    "cannotRemoveLastAdmin": "Impossible de supprimer le dernier administrateur",
+    "removed": "Membre supprimé",
+    "removeFailed": "Échec de la suppression du membre",
+    "selectMember": "Sélectionnez un membre de l'équipe",
+    "added": "Membre ajouté à l'espace de travail",
+    "addFailed": "Échec de l'ajout du membre"
   }
 }
