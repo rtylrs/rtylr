@@ -1,7 +1,8 @@
 -- name: ListGiftCardsByOwner :many
 SELECT id, owner_id, business_id, customer_id, code, initial_amount, current_balance,
        customer_name, customer_email, is_active, expires_at, created_at, updated_at
-FROM pos_gift_cards WHERE business_id = ? ORDER BY created_at DESC;
+FROM pos_gift_cards WHERE business_id = ? ORDER BY created_at DESC
+LIMIT 200;
 
 -- name: CreateGiftCard :execresult
 INSERT INTO pos_gift_cards (owner_id, business_id, customer_id, code, initial_amount, current_balance, customer_name, customer_email, expires_at)
