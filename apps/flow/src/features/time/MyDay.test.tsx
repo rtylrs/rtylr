@@ -1,14 +1,27 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { ApiProject } from '../../shared/services/flowApi';
+import type { ApiProject, ApiTask } from '../../shared/services/flowApi';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en-US' } }),
+  useTranslation: () => ({
+    t: (key: string, opts?: Record<string, unknown>) =>
+      opts ? `${key} ${JSON.stringify(opts)}` : key,
+    i18n: { language: 'en-US' },
+  }),
+}));
+
+vi.mock('@tanstack/react-router', () => ({
+  getRouteApi: () => ({ useSearch: () => ({}) }),
+  Link: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
 }));
 
 const upsertDayMutate = vi.hoisted(() => vi.fn());
+const upsertDayMutateAsync = vi.hoisted(() => vi.fn().mockResolvedValue({ workDay: { id: '9' } }));
 const createLineMutate = vi.hoisted(() => vi.fn());
+const createLineMutateAsync = vi.hoisted(() =>
+  vi.fn().mockResolvedValue({ line: { id: 'line-1' } })
+);
 const deleteLineMutate = vi.hoisted(() => vi.fn());
 
 const workDayState = vi.hoisted(() => ({
@@ -37,14 +50,23 @@ vi.mock('./useWorkDay', () => ({
   useWorkDay: () => workDayState.value,
   useWorkTypes: () => ({ data: { workTypes: [] } }),
   useWorkDaysRange: () => workDaysRangeState.value,
-  useUpsertWorkDay: () => ({ mutate: upsertDayMutate, isPending: false }),
-  useCreateWorkDayLine: () => ({ mutate: createLineMutate, isPending: false }),
+  useUpsertWorkDay: () => ({
+    mutate: upsertDayMutate,
+    mutateAsync: upsertDayMutateAsync,
+    isPending: false,
+  }),
+  useCreateWorkDayLine: () => ({
+    mutate: createLineMutate,
+    mutateAsync: createLineMutateAsync,
+    isPending: false,
+  }),
   useDeleteWorkDayLine: () => ({ mutate: deleteLineMutate, isPending: false }),
 }));
 
 vi.mock('../../shared/stores/timeSettingsStore', () => ({
-  useTimeSettingsStore: (selector: (s: { weekStart: 'monday' | 'sunday' }) => unknown) =>
-    selector({ weekStart: 'monday' }),
+  useTimeSettingsStore: (
+    selector: (s: { weekStart: 'monday' | 'sunday'; weeklyTargetMinutes: number }) => unknown
+  ) => selector({ weekStart: 'monday', weeklyTargetMinutes: 40 * 60 }),
 }));
 
 const projectsState = vi.hoisted(() => ({
@@ -53,6 +75,14 @@ const projectsState = vi.hoisted(() => ({
 
 vi.mock('../projects/useProjects', () => ({
   useProjects: () => projectsState.value,
+}));
+
+const tasksState = vi.hoisted(() => ({
+  value: { data: [] as ApiTask[] },
+}));
+
+vi.mock('../tasks/useTasks', () => ({
+  useTasks: () => tasksState.value,
 }));
 
 vi.mock('../../shared/stores/flowStore', () => ({
@@ -86,6 +116,7 @@ beforeEach(() => {
   };
   projectsState.value = { data: [project(), project({ id: '2', name: 'Warehouse racking' })] };
   workDaysRangeState.value = { data: { workDays: [] } };
+  tasksState.value = { data: [] };
 });
 
 describe('MyDay: week strip', () => {
@@ -106,45 +137,37 @@ describe('MyDay: week strip', () => {
   it('selecting a strip day changes which day is loaded', () => {
     render(<MyDay />);
     fireEvent.click(screen.getByRole('button', { name: /\b11\b/ }));
-    expect((screen.getByLabelText('flow.time.date') as HTMLInputElement).value).toBe('2026-08-11');
+    expect(
+      (screen.getByLabelText('flow.time.date', { selector: '#work-day-date' }) as HTMLInputElement)
+        .value
+    ).toBe('2026-08-11');
   });
 });
 
-describe('MyDay: Log time dialog', () => {
-  it('opens the log time dialog with a project picker showing the workspace projects', () => {
+describe('MyDay: Add Hours renders inline', () => {
+  it('renders the Add Hours form directly under What you worked on, with no dialog to open', () => {
     render(<MyDay />);
-    fireEvent.click(screen.getByRole('button', { name: 'flow.time.logAction' }));
+    expect(screen.getByText('flow.time.add.title')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'flow.time.logAction' })).not.toBeInTheDocument();
+  });
 
+  it('shows the workspace projects in the inline Project picker', () => {
+    render(<MyDay />);
     const select = screen.getByLabelText('flow.time.project') as HTMLSelectElement;
     expect(Array.from(select.options).map((o) => o.textContent)).toEqual([
-      'flow.time.selectProject',
+      'flow.time.add.projectPlaceholder',
       'Site fitout',
       'Warehouse racking',
     ]);
   });
 
-  it('keeps Add disabled until a project is chosen, even with a valid duration', () => {
+  it('changing the Add Hours date field moves the day strip - they are one value', () => {
     render(<MyDay />);
-    fireEvent.click(screen.getByRole('button', { name: 'flow.time.logAction' }));
-
-    fireEvent.change(screen.getByLabelText('flow.time.duration'), { target: { value: '1:30' } });
-    expect(screen.getByRole('button', { name: 'flow.time.logAmount' })).toBeDisabled();
-  });
-
-  it('enables Add once duration and project are both set, and sends projectId', () => {
-    render(<MyDay />);
-    fireEvent.click(screen.getByRole('button', { name: 'flow.time.logAction' }));
-
-    fireEvent.change(screen.getByLabelText('flow.time.duration'), { target: { value: '1:30' } });
-    fireEvent.change(screen.getByLabelText('flow.time.project'), { target: { value: '2' } });
-
-    const addButton = screen.getByRole('button', { name: 'flow.time.logAmount' });
-    expect(addButton).not.toBeDisabled();
-    fireEvent.click(addButton);
-
-    expect(createLineMutate).toHaveBeenCalledWith(
-      expect.objectContaining({ projectId: '2' }),
-      expect.anything()
-    );
+    const addHoursDate = screen.getByLabelText('flow.time.date', { selector: '#add-hours-date' });
+    fireEvent.change(addHoursDate, { target: { value: '2026-08-11' } });
+    expect(
+      (screen.getByLabelText('flow.time.date', { selector: '#work-day-date' }) as HTMLInputElement)
+        .value
+    ).toBe('2026-08-11');
   });
 });
