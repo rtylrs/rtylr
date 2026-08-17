@@ -486,8 +486,13 @@ export const flowApi = {
     safe.post<{ project: ApiProject }>('/flow/project/v1/projects', {
       // int64 fields are wire-encoded as JSON strings, matching every other
       // numeric id in this API - sending a bare number 400s with "cannot
-      // unmarshal number into Go struct field of type string". "0" is the
-      // sentinel for "my personal workspace", same as the "personal" id.
+      // unmarshal number into Go struct field of type string".
+      //
+      // The `|| 0` fallback is NOT a "my personal workspace" sentinel, despite
+      // what this comment used to claim: CreateProjectRequest declares
+      // `workspace_id: int64 @required @gt(0)`, so "0" is rejected with
+      // "workspace_id must be greater than 0". Callers must gate on
+      // isApiWorkspaceId() before reaching this.
       workspace_id: String(Number(data.workspaceId) || 0),
       name: data.name,
       description: data.description ?? '-',
