@@ -36,6 +36,7 @@
     "projectNamePlaceholder": "اسم المشروع",
     "projectDescriptionPlaceholder": "الوصف (اختياري)",
     "projectNameRequired": "اسم المشروع مطلوب",
+    "createNeedsWorkspace": "يجب تحميل مساحة عمل قبل أن تتمكن من إنشاء مشروع.",
     "creating": "جارٍ الإنشاء…",
     "assignedOpenTasks": "{{count}} مهام مفتوحة مكلّفة",
     "focusItems": "{{count}} عناصر مستحقة أو مثبّتة للتركيز",

@@ -36,6 +36,7 @@
     "projectNamePlaceholder": "Project name",
     "projectDescriptionPlaceholder": "Description (optional)",
     "projectNameRequired": "Project name is required",
+    "createNeedsWorkspace": "A workspace must load before you can create a project.",
     "creating": "Creating…",
     "assignedOpenTasks": "{{count}} assigned open tasks",
     "focusItems": "{{count}} due or pinned focus items",
