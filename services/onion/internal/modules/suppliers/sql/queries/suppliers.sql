@@ -18,6 +18,7 @@ SELECT id, owner_id, business_id, name, email, phone, address, city, country,
        tax_id, payment_terms, notes, is_active, created_at, updated_at
 FROM erp_suppliers
 WHERE business_id = ? AND id = ?
+ORDER BY id ASC
 LIMIT 1;
 
 -- name: CountSuppliers :one
