@@ -36,7 +36,8 @@ FROM pos_orders
 WHERE business_id = ? AND payment_status = 'paid'
   AND paid_at >= CURDATE()
   AND paid_at < CURDATE() + INTERVAL 1 DAY
-GROUP BY payment_method;
+GROUP BY payment_method
+LIMIT 200;
 
 -- name: GetPaymentBreakdownByDate :many
 SELECT payment_method, COALESCE(SUM(total), 0) AS method_total
