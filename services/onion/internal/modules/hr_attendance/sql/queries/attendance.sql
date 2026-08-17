@@ -50,7 +50,8 @@ SELECT id, owner_id, business_id, employee_id, location_id, date, clock_in_at, c
        is_late, late_minutes, status, created_at, updated_at
 FROM hr_attendance_records
 WHERE business_id = ? AND location_id = ? AND date = ?
-ORDER BY clock_in_at ASC;
+ORDER BY clock_in_at ASC
+LIMIT ? OFFSET ?;
 
 -- name: GetAttendanceConfig :one
 SELECT id, owner_id, business_id, app_enabled, qr_enabled, gps_enabled, pin_enabled,

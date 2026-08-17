@@ -38,10 +38,15 @@ func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequ
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	limit := req.Limit
+	if limit <= 0 || limit > 100 {
+		limit = 50
+	}
+
 	records, total, err := h.Service.GetMyAttendance(ctx, req.OwnerID, req.EmployeeID, domain.ListAttendanceParams{
 		DateFrom: req.DateFrom,
 		DateTo:   req.DateTo,
-		Limit:    req.Limit,
+		Limit:    limit,
 		Offset:   req.Offset,
 	})
 	if err != nil {
@@ -54,5 +59,5 @@ func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequ
 		payloads = append(payloads, attendanceToProto(r))
 	}
 
-	return GetAttendanceResponse{Records: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return GetAttendanceResponse{Records: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
 }

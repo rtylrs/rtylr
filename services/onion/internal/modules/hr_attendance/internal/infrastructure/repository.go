@@ -12,6 +12,11 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
+// maxDailyAttendanceRecords caps the rows GetDailyAttendance can return for a
+// single location/day so a pathologically large tenant cannot exhaust server
+// memory on an endpoint that has no client-facing pagination controls.
+const maxDailyAttendanceRecords = 1000
+
 type Repository struct {
 	queries *sqlc.Queries
 	pool    *sql.DB
@@ -184,6 +189,8 @@ func (r *Repository) GetDailyAttendance(ctx context.Context, businessID, locatio
 		BusinessID: businessID,
 		LocationID: locationID,
 		Date:       d,
+		Limit:      maxDailyAttendanceRecords,
+		Offset:     0,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to get daily attendance", logger.Any("business_id", businessID), logger.Error(err))
