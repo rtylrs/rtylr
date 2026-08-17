@@ -2,7 +2,8 @@
 SELECT id, owner_id, business_id, name, description, manager_staff_id, created_at, updated_at
 FROM hr_departments
 WHERE business_id = ?
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT 100;
 
 -- name: CreateDepartment :execresult
 INSERT INTO hr_departments (owner_id, business_id, name, description)
