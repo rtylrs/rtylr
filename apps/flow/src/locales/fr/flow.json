@@ -40,7 +40,9 @@
     "assignedOpenTasks": "{{count}} tâches ouvertes assignées",
     "focusItems": "{{count}} éléments dus ou épinglés",
     "quietHoursActive": "Les heures calmes sont actives",
-    "quietHoursNotice": "Heures calmes ({{start}}–{{end}}) : les rappels non urgents restent discrets. Digest : {{digestHour}}:00. Modifiez ce réglage dans Paramètres → Vie et rythme."
+    "quietHoursNotice": "Heures calmes ({{start}}–{{end}}) : les rappels non urgents restent discrets. Digest : {{digestHour}}:00. Modifiez ce réglage dans Paramètres → Vie et rythme.",
+    "realtimeReconnecting": "Reconnexion en cours…",
+    "realtimeDisconnected": "Non connecté. Rechargez pour voir les dernières données."
   },
   "taskDetail": {
     "loading": "Chargement de la tâche…",

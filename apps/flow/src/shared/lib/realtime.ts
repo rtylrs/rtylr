@@ -4,9 +4,11 @@ import {
   createOneKitFetch,
   getOneKitApiBaseUrl,
   getRealtimeClient,
+  type RealtimeDiagnosticEvent,
   type RealtimeEvent,
   type RealtimeStatus,
 } from '@voxire/api';
+import { Sentry } from '@voxire/observability';
 
 const oneKitFetch = createOneKitFetch('flow');
 
@@ -37,9 +39,27 @@ function resolveWsUrl(): string {
   return `${wsScheme}${stripped.replace(/^https?:\/\//, '')}/flow/ws`;
 }
 
+/**
+ * Reports the client's own non-fatal diagnostics as Sentry breadcrumbs.
+ * Nothing else in the suite consumes `onDiagnostic` yet - see the realtime
+ * section of apps/flow/CLAUDE.md for why Flow is first.
+ */
+function reportRealtimeDiagnostic(event: RealtimeDiagnosticEvent): void {
+  Sentry.addBreadcrumb({
+    category: 'realtime',
+    level: 'warning',
+    message:
+      event.type === 'malformed_message'
+        ? 'Dropped a malformed realtime message'
+        : `Realtime reconnect failed ${event.attempt} times in a row`,
+    data: event.type === 'repeated_reconnect_failures' ? { attempt: event.attempt } : undefined,
+  });
+}
+
 const client = getRealtimeClient({
   url: resolveWsUrl(),
   getTicket: getRealtimeTicket,
+  onDiagnostic: reportRealtimeDiagnostic,
 });
 
 /**
