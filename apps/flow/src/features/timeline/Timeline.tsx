@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useFlowStore, type Project, type Milestone } from '../../shared/stores/flowStore';
 import { useProjects } from '../projects/useProjects';
@@ -12,6 +13,7 @@ function parseDate(d: string): number {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const Timeline: React.FC = () => {
+  const { t } = useTranslation();
   const { activeWorkspaceId } = useFlowStore();
   const storeProjects = useFlowStore((s) => s.projects);
   const storeMilestones = useFlowStore((s) => s.milestones);
@@ -41,7 +43,7 @@ const Timeline: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <HelmetContainer title="Timeline · rtylr" />
+      <HelmetContainer title={t('flow.timeline.pageTitle')} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs items={[{ label: 'Timeline' }]} />
         <h1 className="text-[15px] font-semibold mt-1" style={{ color: 'var(--flow-text)' }}>
