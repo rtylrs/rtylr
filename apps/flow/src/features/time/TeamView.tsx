@@ -35,7 +35,7 @@ const TeamView = (): React.JSX.Element => {
 
   return (
     <div className="h-full overflow-y-auto">
-      <HelmetContainer title="Team · rtylr" />
+      <HelmetContainer title={`${t('flow.time.team')} · Flow`} />
       <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
         <header className="mb-6">
           <h1 className="text-[20px] font-bold" style={{ color: 'var(--flow-text)' }}>
