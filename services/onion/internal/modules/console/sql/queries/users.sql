@@ -36,4 +36,4 @@ SET is_banned = FALSE, ban_reason = NULL, banned_at = NULL
 WHERE id = ?;
 
 -- name: SetConsoleAdmin :exec
-UPDATE users SET is_console_admin = ? WHERE id = ?;
+UPDATE users SET is_console_admin = ? WHERE id = ? AND business_id = ?;
