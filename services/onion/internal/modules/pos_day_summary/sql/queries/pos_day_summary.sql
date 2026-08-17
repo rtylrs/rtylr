@@ -44,4 +44,6 @@ FROM pos_orders
 WHERE business_id = ? AND payment_status = 'paid'
   AND paid_at >= sqlc.arg(paid_at)
   AND paid_at < sqlc.arg(paid_at_end)
-GROUP BY payment_method;
+GROUP BY payment_method
+LIMIT 200;
+
