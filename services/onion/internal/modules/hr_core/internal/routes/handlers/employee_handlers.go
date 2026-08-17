@@ -73,9 +73,21 @@ func (h *ListEmployeesHandler) Serve(ctx context.Context, req *ListEmployeesRequ
 		return ListEmployeesResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	limit := req.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	offset := req.Offset
+	if offset < 0 {
+		offset = 0
+	}
+
 	// businessID is the tenant scope; device.User.UserID is the viewer whose
 	// compensation entitlement is resolved.
-	employees, total, err := h.Service.ListEmployeesForViewer(ctx, businessID, device.User.UserID, req.Limit, req.Offset)
+	employees, total, err := h.Service.ListEmployeesForViewer(ctx, businessID, device.User.UserID, limit, offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list employees", logger.Any("business_id", businessID), logger.Error(err))
 		return ListEmployeesResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list employees")
@@ -86,7 +98,7 @@ func (h *ListEmployeesHandler) Serve(ctx context.Context, req *ListEmployeesRequ
 		payloads = append(payloads, employeeToProto(e))
 	}
 
-	return ListEmployeesResponse{Employees: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return ListEmployeesResponse{Employees: payloads, Total: total, Limit: limit, Offset: offset}, nil
 }
 
 // --- Get Employee ---

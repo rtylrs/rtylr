@@ -1,8 +1,11 @@
+-- The generated list contract has no pagination fields; keep the endpoint
+-- bounded until the corresponding voxie contract can expose a page cursor.
 -- name: ListHRDepartments :many
 SELECT id, owner_id, business_id, location_id, parent_department_id, name, default_work_schedule_id, created_at, updated_at
 FROM hr_departments
 WHERE business_id = ?
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT 500;
 
 -- name: CreateHRDepartment :execresult
 INSERT INTO hr_departments (owner_id, business_id, location_id, parent_department_id, name, default_work_schedule_id)

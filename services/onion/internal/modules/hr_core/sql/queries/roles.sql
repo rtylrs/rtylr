@@ -1,8 +1,11 @@
+-- The generated list contract has no pagination fields; keep the endpoint
+-- bounded until the corresponding voxie contract can expose a page cursor.
 -- name: ListRoles :many
 SELECT id, owner_id, business_id, name, description, permissions, is_system, created_at, updated_at
 FROM hr_roles
 WHERE business_id = ?
-ORDER BY is_system DESC, name ASC;
+ORDER BY is_system DESC, name ASC
+LIMIT 500;
 
 -- name: GetRole :one
 SELECT id, owner_id, business_id, name, description, permissions, is_system, created_at, updated_at
