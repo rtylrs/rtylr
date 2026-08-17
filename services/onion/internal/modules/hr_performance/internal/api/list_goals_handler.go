@@ -36,10 +36,18 @@ func (h *ListGoalsHandler) Serve(ctx context.Context, req *ListGoalsRequest) (Li
 		return ListGoalsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	limit := req.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
 	goals, total, err := h.Service.ListGoals(ctx, device.User.UserID, domain.ListGoalsParams{
 		EmployeeID:    req.EmployeeID,
 		ReviewCycleID: req.ReviewCycleID,
-		Limit:         req.Limit,
+		Limit:         limit,
 		Offset:        req.Offset,
 	})
 	if err != nil {
@@ -52,5 +60,5 @@ func (h *ListGoalsHandler) Serve(ctx context.Context, req *ListGoalsRequest) (Li
 		payloads = append(payloads, goalToProto(g))
 	}
 
-	return ListGoalsResponse{Goals: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return ListGoalsResponse{Goals: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
 }

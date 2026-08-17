@@ -34,8 +34,16 @@ func (h *ListCyclesHandler) Serve(ctx context.Context, req *ListCyclesRequest) (
 		return ListCyclesResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	limit := req.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
 	cycles, total, err := h.Service.ListReviewCycles(ctx, device.User.UserID, domain.ListCyclesParams{
-		Limit:  req.Limit,
+		Limit:  limit,
 		Offset: req.Offset,
 	})
 	if err != nil {
@@ -48,5 +56,5 @@ func (h *ListCyclesHandler) Serve(ctx context.Context, req *ListCyclesRequest) (
 		payloads = append(payloads, cycleToProto(c))
 	}
 
-	return ListCyclesResponse{Cycles: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return ListCyclesResponse{Cycles: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
 }

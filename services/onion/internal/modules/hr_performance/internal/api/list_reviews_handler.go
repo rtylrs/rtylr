@@ -36,10 +36,18 @@ func (h *ListReviewsHandler) Serve(ctx context.Context, req *ListReviewsRequest)
 		return ListReviewsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	limit := req.Limit
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
 	reviews, total, err := h.Service.ListReviews(ctx, device.User.UserID, domain.ListReviewsParams{
 		CycleID:    req.CycleID,
 		EmployeeID: req.EmployeeID,
-		Limit:      req.Limit,
+		Limit:      limit,
 		Offset:     req.Offset,
 	})
 	if err != nil {
@@ -52,5 +60,5 @@ func (h *ListReviewsHandler) Serve(ctx context.Context, req *ListReviewsRequest)
 		payloads = append(payloads, reviewToProto(r))
 	}
 
-	return ListReviewsResponse{Reviews: payloads, Total: total, Limit: req.Limit, Offset: req.Offset}, nil
+	return ListReviewsResponse{Reviews: payloads, Total: total, Limit: limit, Offset: req.Offset}, nil
 }
