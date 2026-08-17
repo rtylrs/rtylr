@@ -66,11 +66,7 @@ export default defineConfig(() => ({
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
         manualChunks(id: string): string | undefined {
-          if (
-            /node_modules\/(react|react-dom|react-router-dom|@tanstack\/react-router|zustand)\//.test(
-              id
-            )
-          ) {
+          if (/node_modules\/(react|react-dom|@tanstack\/react-router|zustand)\//.test(id)) {
             return 'react-vendor';
           }
           if (/node_modules\/(motion|lucide-react)\//.test(id)) {
@@ -82,7 +78,7 @@ export default defineConfig(() => ({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'zustand', 'motion', 'lucide-react'],
+    include: ['react', 'react-dom', 'zustand', 'motion', 'lucide-react'],
     exclude: [
       '@voxire/ui',
       '@voxire/tailwind-config',
