@@ -1002,6 +1002,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             className="h-8 w-8 shrink-0 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--flow-hover)]"
                             style={{ color: 'var(--flow-text-muted)' }}
                             title={t('flow.shell.newProject')}
+                            aria-label={t('flow.shell.newProject')}
                             onClick={() => {
                               setNewProjectName('');
                               setNewProjectDescription('');
