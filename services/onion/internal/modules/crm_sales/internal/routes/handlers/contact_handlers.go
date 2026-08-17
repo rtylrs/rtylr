@@ -49,6 +49,13 @@ func (h *ListContactsHandler) Serve(ctx context.Context, req *ListContactsReques
 		return ListContactsResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	const maxContactPageSize int32 = 100
+	if req.Limit <= 0 || req.Limit > maxContactPageSize {
+		req.Limit = maxContactPageSize
+	}
+	if req.Offset < 0 {
+		req.Offset = 0
+	}
 	page, err := h.Service.ListContacts(ctx, businessID, req.LeadID, req.Limit, req.Offset)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list contacts", logger.Any("owner_id", device.User.UserID), logger.Error(err))
