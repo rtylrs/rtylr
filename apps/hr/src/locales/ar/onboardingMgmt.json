@@ -31,6 +31,9 @@
       "progress": "التقدم",
       "overdue": "العناصر المتأخرة",
       "triggeredAt": "تاريخ البدء"
+    },
+    "pagination": {
+      "range": "{{from}}–{{to}} من {{total}}"
     }
   },
   "templates": {
