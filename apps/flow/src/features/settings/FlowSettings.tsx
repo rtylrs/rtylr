@@ -76,6 +76,7 @@ function buildSections(
 }
 
 const WorkspacesSection: React.FC = () => {
+  const { t } = useTranslation();
   const { data: workspaces = [], isLoading } = useWorkspaces();
   const createWorkspace = useCreateWorkspace();
   const [showCreate, setShowCreate] = useState(false);
@@ -102,19 +103,19 @@ const WorkspacesSection: React.FC = () => {
   const handleCreate = (): void => {
     const name = wsName.trim();
     if (!name) {
-      toast.error('Workspace name is required');
+      toast.error(t('toasts.workspace.nameRequired'));
       return;
     }
     createWorkspace.mutate(
       { name, color: wsColor },
       {
         onSuccess: () => {
-          toast.success('Workspace created');
+          toast.success(t('toasts.workspace.created'));
           setWsName('');
           setWsColor('#64C5B9');
           setShowCreate(false);
         },
-        onError: () => toast.error('Failed to create workspace'),
+        onError: () => toast.error(t('toasts.workspace.createFailed')),
       }
     );
   };
@@ -234,6 +235,7 @@ const WorkspacesSection: React.FC = () => {
 };
 
 const NotificationsSection: React.FC = () => {
+  const { t } = useTranslation();
   const { data: remote } = useQuery({
     queryKey: ['flow-settings'],
     queryFn: () => unwrap(flowApi.getUserSettings()),
@@ -241,7 +243,7 @@ const NotificationsSection: React.FC = () => {
 
   const save = useMutation({
     mutationFn: (data: ApiUserSettings) => unwrap(flowApi.updateUserSettings(data)),
-    onError: () => toast.error('Failed to save notification preferences'),
+    onError: () => toast.error(t('toasts.notification.savePreferencesFailed')),
   });
 
   const [settings, setSettings] = useState<ApiUserSettings>({

@@ -255,7 +255,7 @@ const ProjectBoard: React.FC = () => {
   const handleAddColumn = () => {
     const name = newColumnName.trim();
     if (!name) {
-      toast.error('Column name is required');
+      toast.error(t('toasts.column.nameRequired'));
       return;
     }
     createColumn.mutate({

@@ -2,6 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { Link, useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import {
   CheckCircle2,
   Clock,
@@ -85,6 +86,7 @@ const statCard = (
 );
 
 const WorkspaceDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { workspaceId = PERSONAL_WORKSPACE_ID } = useParams({ strict: false });
   const { user } = useUserStore();
   const { tasks, projects, workspaces, members } = useFlowStore();
@@ -147,11 +149,15 @@ const WorkspaceDashboard: React.FC = () => {
     const { streak, alreadyLogged } = recordWeeklyReviewDone();
     setReviewStreak(streak);
     if (alreadyLogged) {
-      toast.message('Already logged this week', { description: `Streak: ${streak} week(s)` });
+      toast.message(t('toasts.weeklyReview.alreadyLogged'), {
+        description: t('toasts.weeklyReview.alreadyLoggedStreak', { count: streak }),
+      });
     } else {
-      toast.success('Weekly review logged', { description: `${streak} week streak` });
+      toast.success(t('toasts.weeklyReview.logged'), {
+        description: t('toasts.weeklyReview.streak', { count: streak }),
+      });
     }
-  }, []);
+  }, [t]);
 
   return (
     <>
