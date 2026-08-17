@@ -20,6 +20,7 @@ WHERE business_id = ?
   AND reporting_date <= ?
 GROUP BY day
 ORDER BY day ASC
+LIMIT 200
 `
 
 type GetRevenueSeriesParams struct {

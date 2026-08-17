@@ -7,7 +7,8 @@ WHERE business_id = ?
   AND reporting_date >= ?
   AND reporting_date <= ?
 GROUP BY day
-ORDER BY day ASC;
+ORDER BY day ASC
+LIMIT 200;
 
 -- name: SumPosRevenueMTD :one
 SELECT COALESCE(SUM(total), 0) AS total
