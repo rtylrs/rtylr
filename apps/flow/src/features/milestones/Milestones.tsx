@@ -135,7 +135,7 @@ const Milestones: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={() => {
-                if (!newName.trim()) {
+                if (!newName.trim() || !newDate) {
                   toast.error(t('errors.generic'));
                   return;
                 }
@@ -143,7 +143,7 @@ const Milestones: React.FC = () => {
                   {
                     workspaceId: activeWorkspaceId || undefined,
                     name: newName,
-                    targetDate: newDate || new Date().toISOString().slice(0, 10),
+                    targetDate: newDate,
                   },
                   {
                     onSuccess: () => {
@@ -156,7 +156,7 @@ const Milestones: React.FC = () => {
                   }
                 );
               }}
-              disabled={createMilestone.isPending || !newName.trim()}
+              disabled={createMilestone.isPending || !newName.trim() || !newDate}
               className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-50"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
