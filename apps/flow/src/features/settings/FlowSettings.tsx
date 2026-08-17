@@ -162,6 +162,8 @@ const WorkspacesSection: React.FC = () => {
                   key={c}
                   type="button"
                   onClick={() => setWsColor(c)}
+                  aria-label={t('flow.settings.workspaces.chooseColorLabel', { color: c })}
+                  aria-pressed={wsColor === c}
                   className="h-6 w-6 rounded-full transition-all"
                   style={{
                     background: c,
@@ -679,6 +681,8 @@ const LabelsSection: React.FC = () => {
                 key={c}
                 type="button"
                 onClick={() => setNewColor(c)}
+                aria-label={t('flow.settings.chooseColorLabel', { color: c })}
+                aria-pressed={newColor === c}
                 className="h-6 w-6 rounded-full transition-all"
                 style={{
                   background: c,
@@ -742,6 +746,7 @@ const LabelsSection: React.FC = () => {
                   className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-dim)' }}
                   title={t('flow.settings.labels.deleteLabel')}
+                  aria-label={t('flow.settings.deleteLabelLabel')}
                 >
                   <Trash2 size={13} />
                 </button>
