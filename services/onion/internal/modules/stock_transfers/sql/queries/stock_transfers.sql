@@ -2,7 +2,8 @@
 SELECT id, owner_id, business_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
 FROM erp_stock_transfers
 WHERE business_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT 200;
 
 -- name: ListStockTransfersPaged :many
 SELECT id, owner_id, business_id, from_warehouse_id, to_warehouse_id, status, notes, created_at, updated_at
