@@ -84,7 +84,8 @@ SELECT id, owner_id, business_id, lead_id, contact_id, type, outcome,
        COALESCE(notes,'') AS notes, next_follow_up, created_by, created_at
 FROM crm_touchpoints
 WHERE business_id = ? AND lead_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT 100;
 
 -- name: GetTouchpoint :one
 SELECT id, owner_id, business_id, lead_id, contact_id, type, outcome,
