@@ -1,5 +1,12 @@
 import { z } from 'zod';
 
+export const createDepartmentSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+});
+
+export type CreateDepartmentForm = z.infer<typeof createDepartmentSchema>;
+
 export const departmentSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(Number),
   name: z.string(),

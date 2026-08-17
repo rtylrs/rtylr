@@ -24,16 +24,18 @@ interface LogTimeDialogProps {
 }
 
 /**
- * Logging a line gets its own screen rather than an inline row: a business's
- * work-type tree can run two levels deep (a type, then its named sub-tasks),
- * and that only reads well with room - a picker this size does not belong
+ * Logging a line gets its own screen rather than an inline row: room to pick a
+ * project, a work type, and write what you actually did does not belong
  * squeezed under the day's clock figures.
  *
- * The first description is never typed: it is the breadcrumb of whatever
- * project and work type were picked, computed here and shown read-only. The
- * second is the person's own account of what they did. Two different kinds
- * of "what is this" - the classification and the account of it - collapsing
- * them into one field is what made the old inline row feel thin.
+ * Work type is a flat list (a dropdown, plus quick-pick buttons that update
+ * the same dropdown) - not the two-level category/child structure this
+ * screen used to have. "Task Description" is never typed: it is the work
+ * type's own stored description, shown read-only the moment one is picked.
+ * "Description" is the person's own account of what they did. Two different
+ * kinds of "what is this" - the classification's fixed explanation and the
+ * account of it - collapsing them into one field is what made the old inline
+ * row feel thin.
  */
 const LogTimeDialog: React.FC<LogTimeDialogProps> = ({
   open,
@@ -50,20 +52,13 @@ const LogTimeDialog: React.FC<LogTimeDialogProps> = ({
   const [duration, setDuration] = useState('');
   const [description, setDescription] = useState('');
   const [projectId, setProjectId] = useState('');
-  const [topLevelId, setTopLevelId] = useState('');
-  const [childId, setChildId] = useState('');
+  const [workTypeId, setWorkTypeId] = useState('');
 
-  const topLevelTypes = useMemo(() => workTypes.filter((wt) => !wt.parentId), [workTypes]);
-  const childTypes = useMemo(
-    () => workTypes.filter((wt) => wt.parentId === topLevelId),
-    [workTypes, topLevelId]
+  const selectedWorkType = useMemo(
+    () => workTypes.find((wt) => wt.id === workTypeId),
+    [workTypes, workTypeId]
   );
-
-  const selectedTopLevel = topLevelTypes.find((wt) => wt.id === topLevelId);
-  const selectedChild = childTypes.find((wt) => wt.id === childId);
-  const workTypeId = selectedChild?.id || selectedTopLevel?.id || '';
-
-  const taskDescription = [selectedTopLevel?.name, selectedChild?.name].filter(Boolean).join(' / ');
+  const taskDescription = selectedWorkType?.description ?? '';
 
   const canAddLine = parseDurationInput(duration) !== null && projectId !== '';
 
@@ -71,13 +66,7 @@ const LogTimeDialog: React.FC<LogTimeDialogProps> = ({
     setDuration('');
     setDescription('');
     setProjectId('');
-    setTopLevelId('');
-    setChildId('');
-  };
-
-  const pickTopLevel = (id: string): void => {
-    setTopLevelId(id);
-    setChildId('');
+    setWorkTypeId('');
   };
 
   const addLine = (): void => {
@@ -158,19 +147,39 @@ const LogTimeDialog: React.FC<LogTimeDialogProps> = ({
             </select>
           </div>
 
-          {topLevelTypes.length > 0 && (
+          {workTypes.length > 0 && (
             <div>
-              <span className={labelClass} style={{ color: 'var(--flow-text-muted)' }}>
+              <label
+                htmlFor="log-time-work-type"
+                className={labelClass}
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
                 {t('flow.time.workType')}
-              </span>
+              </label>
+              <select
+                id="log-time-work-type"
+                aria-label={t('flow.time.workType')}
+                value={workTypeId}
+                onChange={(e) => setWorkTypeId(e.target.value)}
+                className="flow-focus mb-2 min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
+                style={inputStyle}
+              >
+                <option value="">{t('flow.time.noWorkType')}</option>
+                {workTypes.map((wt) => (
+                  <option key={wt.id} value={wt.id}>
+                    {wt.name}
+                  </option>
+                ))}
+              </select>
+
               <div className="flex flex-wrap gap-1.5">
-                {topLevelTypes.map((wt) => {
-                  const active = wt.id === topLevelId;
+                {workTypes.map((wt) => {
+                  const active = wt.id === workTypeId;
                   return (
                     <button
                       key={wt.id}
                       type="button"
-                      onClick={() => pickTopLevel(wt.id ?? '')}
+                      onClick={() => setWorkTypeId(wt.id ?? '')}
                       className="flow-focus min-h-[44px] rounded-md px-3 text-[13px] font-medium md:min-h-0 md:py-1.5"
                       style={{
                         background: active ? 'var(--accent)' : 'var(--flow-hover)',
@@ -182,28 +191,6 @@ const LogTimeDialog: React.FC<LogTimeDialogProps> = ({
                   );
                 })}
               </div>
-
-              {childTypes.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {childTypes.map((wt) => {
-                    const active = wt.id === childId;
-                    return (
-                      <button
-                        key={wt.id}
-                        type="button"
-                        onClick={() => setChildId(wt.id ?? '')}
-                        className="flow-focus min-h-[44px] rounded-md px-3 text-[13px] font-medium md:min-h-0 md:py-1.5"
-                        style={{
-                          background: active ? 'var(--accent)' : 'var(--flow-hover)',
-                          color: active ? 'var(--flow-on-accent)' : 'var(--flow-text)',
-                        }}
-                      >
-                        {wt.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           )}
 

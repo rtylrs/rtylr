@@ -36,7 +36,7 @@ function project(over: Partial<ApiProject> = {}): ApiProject {
 }
 
 function workType(over: Partial<WorkType> = {}): WorkType {
-  return { id: '10', name: 'DEV', parentId: undefined, ...over } as WorkType;
+  return { id: '10', name: 'DEV', description: '', ...over } as WorkType;
 }
 
 const defaultProps = {
@@ -53,8 +53,8 @@ beforeEach(() => {
   projectsState.value = { data: [project()] };
 });
 
-describe('LogTimeDialog: work type quick-pick', () => {
-  it('renders top-level work types as buttons', () => {
+describe('LogTimeDialog: work type flat list', () => {
+  it('renders every work type as both a dropdown option and a quick-pick button', () => {
     render(
       <LogTimeDialog
         {...defaultProps}
@@ -63,45 +63,50 @@ describe('LogTimeDialog: work type quick-pick', () => {
     );
     expect(screen.getByRole('button', { name: 'DEV' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'ADMIN' })).toBeInTheDocument();
+    const select = screen.getByLabelText('flow.time.workType') as HTMLSelectElement;
+    expect(Array.from(select.options).map((o) => o.textContent)).toEqual(
+      expect.arrayContaining(['DEV', 'ADMIN'])
+    );
   });
 
-  it('reveals child buttons once a parent with children is picked, and selecting a child sets the breadcrumb', () => {
+  it("auto-fills Task Description read-only from the picked work type's own description", () => {
     render(
       <LogTimeDialog
         {...defaultProps}
         workTypes={[
-          workType({ id: '10', name: 'DEV', parentId: undefined }),
-          workType({ id: '11', name: 'Web Development', parentId: '10' }),
-          workType({ id: '12', name: 'Web Maintenance', parentId: '10' }),
+          workType({ id: '10', name: 'Development', description: 'Build / revamp websites' }),
         ]}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: 'DEV' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Web Development' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Development' }));
 
-    expect(screen.getByLabelText('flow.time.taskDescription')).toHaveValue('DEV / Web Development');
+    const taskDescription = screen.getByLabelText('flow.time.taskDescription') as HTMLInputElement;
+    expect(taskDescription).toHaveValue('Build / revamp websites');
+    expect(taskDescription).toHaveAttribute('readonly');
   });
 
-  it('sets the breadcrumb immediately for a top-level type with no children', () => {
+  it('quick-pick button and dropdown stay in sync', () => {
     render(
-      <LogTimeDialog {...defaultProps} workTypes={[workType({ id: '10', name: 'Meetings' })]} />
+      <LogTimeDialog
+        {...defaultProps}
+        workTypes={[workType({ id: '10', name: 'DEV' }), workType({ id: '20', name: 'ADMIN' })]}
+      />
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Meetings' }));
-    expect(screen.getByLabelText('flow.time.taskDescription')).toHaveValue('Meetings');
+    fireEvent.click(screen.getByRole('button', { name: 'ADMIN' }));
+    const select = screen.getByLabelText('flow.time.workType') as HTMLSelectElement;
+    expect(select).toHaveValue('20');
   });
 
-  it('sends the final leaf work type id and both descriptions on submit', () => {
+  it('sends the picked work type id and the employee-typed description separately on submit', () => {
     render(
       <LogTimeDialog
         {...defaultProps}
         workTypes={[
-          workType({ id: '10', name: 'DEV', parentId: undefined }),
-          workType({ id: '11', name: 'Web Development', parentId: '10' }),
+          workType({ id: '10', name: 'Development', description: 'Build / revamp websites' }),
         ]}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: 'DEV' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Web Development' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Development' }));
     fireEvent.change(screen.getByLabelText('flow.time.duration'), { target: { value: '1:00' } });
     fireEvent.change(screen.getByLabelText('flow.time.project'), { target: { value: '1' } });
     fireEvent.change(screen.getByLabelText('flow.time.description'), {
@@ -112,7 +117,7 @@ describe('LogTimeDialog: work type quick-pick', () => {
 
     expect(createLineMutate).toHaveBeenCalledWith(
       expect.objectContaining({
-        workTypeId: '11',
+        workTypeId: '10',
         description: 'Rebuilt the header',
         projectId: '1',
       }),

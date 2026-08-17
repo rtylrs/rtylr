@@ -97,15 +97,15 @@ const Cycles: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={() => {
-                if (!newName.trim()) {
+                if (!newName.trim() || !newStart || !newEnd) {
                   toast.error(t('errors.generic'));
                   return;
                 }
                 createCycle.mutate(
                   {
                     name: newName,
-                    startDate: newStart || new Date().toISOString().slice(0, 10),
-                    endDate: newEnd || new Date().toISOString().slice(0, 10),
+                    startDate: newStart,
+                    endDate: newEnd,
                   },
                   {
                     onSuccess: () => {
@@ -118,7 +118,7 @@ const Cycles: React.FC = () => {
                   }
                 );
               }}
-              disabled={createCycle.isPending || !newName.trim()}
+              disabled={createCycle.isPending || !newName.trim() || !newStart || !newEnd}
               className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-50"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import {
@@ -11,8 +11,10 @@ import {
   Truck,
   Plus,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Department } from '../../shared/services/hrApi';
 import { useDepartments } from './useDepartments';
+import CreateDepartmentForm from './CreateDepartmentForm';
 import { useIsMobile } from '../../shared/components/ui';
 import { useUserStore } from '@voxire/auth';
 import { canViewCompensation } from '../../shared/lib/hrPermissions';
@@ -47,11 +49,13 @@ const cardAnim: Record<string, any> = {
 };
 
 const Departments: React.FC = () => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile(900);
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const showCompensation = canViewCompensation(role);
   const { data: fetchedDepartments, isLoading: loading } = useDepartments(showCompensation);
   const departments: Department[] = fetchedDepartments || [];
+  const [createOpen, setCreateOpen] = useState(false);
 
   return (
     <>
@@ -81,6 +85,7 @@ const Departments: React.FC = () => {
             </p>
           </div>
           <button
+            onClick={() => setCreateOpen(true)}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -96,7 +101,7 @@ const Departments: React.FC = () => {
             }}
           >
             <Plus size={15} />
-            Add Department
+            {t('departments.addNew')}
           </button>
         </div>
 
@@ -312,6 +317,8 @@ const Departments: React.FC = () => {
           })}
         </motion.div>
       </div>
+
+      <CreateDepartmentForm open={createOpen} onClose={() => setCreateOpen(false)} />
     </>
   );
 };

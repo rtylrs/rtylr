@@ -1,10 +1,13 @@
-import { createOneKitClient, unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/client';
+import type {
+  CreateDepartmentRequest,
+  UpdateDepartmentBody,
+} from '@voxire/voxie/hr/department/v1/types';
 import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import { departmentSchema, type Department } from '../../shared/schemas/departments';
-import { hrApi, CreateDepartmentInput, UpdateDepartmentInput } from '../../shared/services/hrApi';
 
 const departmentClient = createOneKitClient(DepartmentServiceClient, 'hr');
 const staffClient = createOneKitClient(StaffServiceClient, 'hr');
@@ -52,13 +55,10 @@ export function useDepartments(includeCompensation = false) {
   });
 }
 
-// hr.department.v1 has no create/update consumers wired in the UI yet - these
-// remain on the legacy (currently 404ing) hrApi paths until a real screen
-// needs them.
 export function useCreateDepartment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateDepartmentInput) => unwrap(hrApi.createDepartment(data)),
+    mutationFn: (data: CreateDepartmentRequest) => departmentClient.createDepartment(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
     onError: () => toast.error('Failed to create department'),
   });
@@ -67,7 +67,8 @@ export function useCreateDepartment() {
 export function useUpdateDepartment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: UpdateDepartmentInput) => unwrap(hrApi.updateDepartment(data)),
+    mutationFn: (data: { id: string; body: UpdateDepartmentBody }) =>
+      departmentClient.updateDepartment(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
     onError: () => toast.error('Failed to update department'),
   });

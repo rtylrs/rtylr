@@ -1,0 +1,12 @@
+{
+  "addNew": "Ajouter un département",
+  "created": "Département créé avec succès",
+  "form": {
+    "title": "Nouveau département",
+    "name": "Nom",
+    "namePlaceholder": "ex. Cuisine",
+    "description": "Description",
+    "descriptionPlaceholder": "Que fait ce département ?",
+    "submit": "Créer le département"
+  }
+}

@@ -214,12 +214,14 @@ const toTaskCreatePayload = (data: {
   effortMinutes?: number;
   estimatedHours?: number;
 }) => ({
-  project_id: data.projectId ? Number(data.projectId) : 0,
-  workspace_id: Number(data.workspaceId) || 0,
+  // OneKit-generated contracts wire-encode int64 fields as JSON strings, even
+  // the personal-workspace/project sentinel value 0 - never send a bare number.
+  project_id: String(data.projectId ? Number(data.projectId) : 0),
+  workspace_id: String(Number(data.workspaceId) || 0),
   title: data.title,
   description: data.description ?? '-',
   priority: data.priority ?? 'medium',
-  assignee_id: data.assigneeId ? Number(data.assigneeId) : undefined,
+  assignee_id: data.assigneeId ? String(Number(data.assigneeId)) : undefined,
   due_date: data.dueDate ?? '-',
   start_date: '-',
   estimated_hours:
@@ -482,7 +484,11 @@ export const flowApi = {
     dueDate?: string;
   }) =>
     safe.post<{ project: ApiProject }>('/flow/project/v1/projects', {
-      workspace_id: Number(data.workspaceId) || 0,
+      // int64 fields are wire-encoded as JSON strings, matching every other
+      // numeric id in this API - sending a bare number 400s with "cannot
+      // unmarshal number into Go struct field of type string". "0" is the
+      // sentinel for "my personal workspace", same as the "personal" id.
+      workspace_id: String(Number(data.workspaceId) || 0),
       name: data.name,
       description: data.description ?? '-',
       icon: 'folder',
@@ -700,7 +706,12 @@ export const flowApi = {
       params: workspaceId ? { workspace_id: workspaceId } : undefined,
     }),
 
-  createLabel: (data: { workspace_id: number; name: string; color: string }) =>
+  // workspace_id is already a string end-to-end from the workspace store (see
+  // ApiWorkspace.id / activeWorkspaceId), so this passes it straight through -
+  // no Number()/String() round trip. int64 fields are wire-encoded as JSON
+  // strings, matching every other numeric id in this API; a bare number 400s
+  // with "cannot unmarshal number into Go struct field of type string".
+  createLabel: (data: { workspace_id: string; name: string; color: string }) =>
     safe.post<{ label: ApiLabel }>('/flow/label/v1/labels', data),
 
   updateLabel: (data: { id: number; name: string; color: string }) =>
@@ -711,8 +722,15 @@ export const flowApi = {
 
   deleteLabel: (id: number) => safe.delete<{ message: string }>(`/flow/label/v1/labels/${id}`),
 
+  // task_id/label_ids stay numbers up through the hook and UI layer (TaskDetail
+  // compares them against numeric ApiLabel.id values), so the string-on-the-wire
+  // conversion happens only here, at the boundary - same int64-as-string
+  // convention as createLabel above.
   setTaskLabels: (data: { task_id: number; label_ids: number[] }) =>
-    safe.put('/flow/label/v1/tasks/labels', data),
+    safe.put('/flow/label/v1/tasks/labels', {
+      task_id: String(data.task_id),
+      label_ids: data.label_ids.map((id) => String(id)),
+    }),
 
   /** @deprecated use listLabels(workspaceId) */
   getLabels: () => safe.get<{ labels: ApiLabel[] }>('/flow/label/v1/labels'),

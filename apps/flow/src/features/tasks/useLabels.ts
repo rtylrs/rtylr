@@ -22,7 +22,7 @@ export function useLabels(workspaceId?: string) {
 export function useCreateLabel() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { workspace_id: number; name: string; color: string }) =>
+    mutationFn: (data: { workspace_id: string; name: string; color: string }) =>
       unwrap(flowApi.createLabel(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
     onError: () => toast.error('Failed to create label'),

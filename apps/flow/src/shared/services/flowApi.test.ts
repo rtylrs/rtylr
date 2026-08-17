@@ -86,7 +86,7 @@ describe('flowApi', () => {
     const data = { workspaceId: '1', name: 'Project A' };
     flowApi.createProject(data);
     expect(safe.post).toHaveBeenCalledWith('/flow/project/v1/projects', {
-      workspace_id: 1,
+      workspace_id: '1',
       name: 'Project A',
       description: '-',
       icon: 'folder',
@@ -155,8 +155,8 @@ describe('flowApi', () => {
     const data = { projectId: '1', workspaceId: '1', title: 'Task 1' };
     flowApi.createTask(data);
     expect(safe.post).toHaveBeenCalledWith('/flow/task/v1/tasks', {
-      project_id: 1,
-      workspace_id: 1,
+      project_id: '1',
+      workspace_id: '1',
       title: 'Task 1',
       description: '-',
       priority: 'medium',
@@ -165,6 +165,35 @@ describe('flowApi', () => {
       start_date: '-',
       estimated_hours: undefined,
     });
+  });
+
+  // Personal tasks (My tasks quick-add) pass '' for both ids, meaning "my
+  // personal workspace/project". OneKit int64 fields wire-encode as JSON
+  // strings even for this sentinel value - a bare `0` gets rejected with
+  // "cannot unmarshal number into Go struct field .project_id of type string".
+  it('createTask sends the personal-task sentinel as a string, not a bare number', () => {
+    const data = { projectId: '', workspaceId: '', title: 'Personal task' };
+    flowApi.createTask(data);
+    expect(safe.post).toHaveBeenCalledWith('/flow/task/v1/tasks', {
+      project_id: '0',
+      workspace_id: '0',
+      title: 'Personal task',
+      description: '-',
+      priority: 'medium',
+      assignee_id: undefined,
+      due_date: '-',
+      start_date: '-',
+      estimated_hours: undefined,
+    });
+  });
+
+  it('createTask sends assignee_id as a string when provided', () => {
+    const data = { projectId: '1', workspaceId: '1', title: 'Task 1', assigneeId: '42' };
+    flowApi.createTask(data);
+    expect(safe.post).toHaveBeenCalledWith(
+      '/flow/task/v1/tasks',
+      expect.objectContaining({ assignee_id: '42' })
+    );
   });
 
   it('updateTask calls PUT /flow/task/v1/tasks/{id}', () => {

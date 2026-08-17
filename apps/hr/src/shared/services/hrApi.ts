@@ -34,16 +34,6 @@ export interface Department {
   color?: string;
 }
 
-export interface CreateDepartmentInput {
-  name: string;
-  description: string;
-  head: string;
-}
-
-export interface UpdateDepartmentInput extends Partial<CreateDepartmentInput> {
-  id: number;
-}
-
 export interface Shift {
   id: number;
   name: string;
@@ -117,17 +107,6 @@ const toStaffUpdatePayload = (data: UpdateStaffInput) => ({
   ...toStaffPayload(data),
 });
 
-const toDepartmentCreatePayload = (data: CreateDepartmentInput) => ({
-  name: data.name,
-  description: data.description,
-});
-
-const toDepartmentUpdatePayload = (data: UpdateDepartmentInput) => ({
-  id: data.id,
-  name: data.name,
-  description: data.description,
-});
-
 // The API binds request fields by their snake_case JSON tag. Its decoder tries
 // the tag, then a lower-first variant, then an all-lower variant, so camelCase
 // keys like startTime match nothing and arrive as zero values.
@@ -158,12 +137,6 @@ export const hrApi = {
     safe.post<{ success: boolean; time: string }>('/hr/staff/clock-in', { staffId }),
   clockOut: (staffId: number) =>
     safe.post<{ success: boolean; time: string }>('/hr/staff/clock-out', { staffId }),
-
-  // Departments
-  createDepartment: (data: CreateDepartmentInput) =>
-    safe.post<Department>('/hr/departments', toDepartmentCreatePayload(data)),
-  updateDepartment: (data: UpdateDepartmentInput) =>
-    safe.put<Department>('/hr/departments', toDepartmentUpdatePayload(data)),
 
   // Shifts
   listShifts: (params?: { day?: string; staffId?: number }) =>

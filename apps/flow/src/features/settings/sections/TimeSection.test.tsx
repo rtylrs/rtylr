@@ -22,6 +22,17 @@ vi.mock('../../../shared/hooks/queries/useFlowTeam', () => ({
   }),
 }));
 
+// WorkTypesSection pulls in useWorkDay, which imports the real i18next
+// singleton for toasts outside the component tree - that singleton calls
+// initReactI18next on import, which the react-i18next mock above doesn't
+// export. Mock the hook module itself, same as LogTimeDialog.test.tsx does.
+vi.mock('../../time/useWorkDay', () => ({
+  useWorkTypes: () => ({ data: [], isLoading: false }),
+  useCreateWorkType: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateWorkType: () => ({ mutate: vi.fn(), isPending: false }),
+  useDeleteWorkType: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 import TimeSection from './TimeSection';
 import {
   DEFAULT_TIME_SETTINGS,

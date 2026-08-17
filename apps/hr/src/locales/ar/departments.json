@@ -1,0 +1,12 @@
+{
+  "addNew": "إضافة قسم",
+  "created": "تم إنشاء القسم بنجاح",
+  "form": {
+    "title": "قسم جديد",
+    "name": "الاسم",
+    "namePlaceholder": "مثال: المطبخ",
+    "description": "الوصف",
+    "descriptionPlaceholder": "ما هي مهام هذا القسم؟",
+    "submit": "إنشاء القسم"
+  }
+}

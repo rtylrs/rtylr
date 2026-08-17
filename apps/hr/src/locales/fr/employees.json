@@ -39,7 +39,18 @@
     "userId": "ID utilisateur",
     "duplicateUserId": "ID utilisateur déjà existant",
     "departmentId": "Département",
+    "selectDepartment": "Sélectionner un département",
     "locationId": "Emplacement",
+    "createLocation": {
+      "trigger": "+ Nouvel emplacement",
+      "title": "Nouvel emplacement",
+      "name": "Nom",
+      "namePlaceholder": "ex. Succursale du centre-ville",
+      "address": "Adresse",
+      "addressPlaceholder": "Rue, ville",
+      "submit": "Créer l'emplacement",
+      "created": "Utilisation du nouvel emplacement : {{name}}"
+    },
     "managerId": "Responsable",
     "contractType": "Type de contrat",
     "status": "Statut",

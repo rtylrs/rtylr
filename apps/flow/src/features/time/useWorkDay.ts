@@ -50,10 +50,57 @@ export function useWorkDay(date: string) {
   });
 }
 
-export function useWorkTypes() {
+const workTypesKey = ['work-types'];
+
+export function useWorkTypes(includeArchived = false) {
   return useQuery({
-    queryKey: ['work-types'],
-    queryFn: () => timeClient.listWorkTypes({}),
+    queryKey: [...workTypesKey, includeArchived],
+    queryFn: () => timeClient.listWorkTypes({ includeArchived }),
+  });
+}
+
+interface WorkTypeInput {
+  name: string;
+  description: string;
+}
+
+export function useCreateWorkType() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: WorkTypeInput) =>
+      timeClient.createWorkType({ name: input.name, description: input.description }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: workTypesKey });
+    },
+    onError: () => toast.error(t('flow.settings.workTypes.saveFailed')),
+  });
+}
+
+export function useUpdateWorkType() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: WorkTypeInput & { id: string; archived: boolean }) =>
+      timeClient.updateWorkType({
+        id: input.id,
+        name: input.name,
+        description: input.description,
+        archived: input.archived,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: workTypesKey });
+    },
+    onError: () => toast.error(t('flow.settings.workTypes.saveFailed')),
+  });
+}
+
+export function useDeleteWorkType() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => timeClient.deleteWorkType({ id }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: workTypesKey });
+    },
+    onError: () => toast.error(t('flow.settings.workTypes.deleteFailed')),
   });
 }
 
