@@ -26,7 +26,7 @@ import { useLayoutRealtime } from './useLayoutRealtime';
 import { getCurrentUserId } from './currentUser';
 
 function mount(
-  workspaceId: string | undefined = 'w-1',
+  workspaceId: string | undefined = '1',
   userId: string | undefined = '42',
   enabled = true
 ) {
@@ -48,7 +48,7 @@ function keys(spy: InvalidateSpy): string[] {
 
 /** A teammate-authored event (actor 999 is not the current user, 42). */
 function event(overrides: Partial<RealtimeEvent> = {}): RealtimeEvent {
-  return { topic: 'workspace:w-1', type: 'project.created', actor_id: 999, ...overrides };
+  return { topic: 'workspace:1', type: 'project.created', actor_id: 999, ...overrides };
 }
 
 describe('useLayoutRealtime', () => {
@@ -60,8 +60,8 @@ describe('useLayoutRealtime', () => {
 
   describe('subscription topics', () => {
     it('subscribes to the workspace and the user topic', () => {
-      mount('w-1', '42');
-      expect(topics).toEqual(['workspace:w-1', 'user:42']);
+      mount('1', '42');
+      expect(topics).toEqual(['workspace:1', 'user:42']);
     });
 
     // 'personal' is a client-only sentinel so the layout can paint before the
@@ -72,7 +72,7 @@ describe('useLayoutRealtime', () => {
     });
 
     it('subscribes to nothing when disabled', () => {
-      mount('w-1', '42', false);
+      mount('1', '42', false);
       expect(topics).toEqual([]);
     });
   });
@@ -124,7 +124,7 @@ describe('useLayoutRealtime', () => {
     // actor_id arrives numeric from the server while the store holds a string.
     it('compares actor_id and user id as strings', () => {
       vi.mocked(getCurrentUserId).mockReturnValue('7');
-      const spy = mount('w-1', '7');
+      const spy = mount('1', '7');
       handler?.(event({ actor_id: 7 }));
       expect(spy).not.toHaveBeenCalled();
     });

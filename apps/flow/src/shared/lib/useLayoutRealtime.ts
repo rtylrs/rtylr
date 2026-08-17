@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { RealtimeEvent } from '@voxire/api';
 
 import { getCurrentUserId } from './currentUser';
-import { PERSONAL_WORKSPACE_ID } from './personalWorkspace';
+import { isApiWorkspaceId } from './personalWorkspace';
 import { useRealtime } from './realtime';
 
 /**
@@ -52,9 +52,10 @@ export function useLayoutRealtime(
 
   const topics = useMemo(() => {
     const t: string[] = [];
-    // Only subscribe to a numeric workspace id - "personal" is not a
-    // valid server-side topic (it's a client-only sentinel).
-    if (workspaceId && workspaceId !== PERSONAL_WORKSPACE_ID) {
+    // Only subscribe to a resolved workspace id - "personal" is a client-only
+    // sentinel, not a valid server-side topic. Same predicate the workspace
+    // queries gate on, so there is one definition of "real workspace id".
+    if (isApiWorkspaceId(workspaceId)) {
       t.push(`workspace:${workspaceId}`);
     }
     if (userId) t.push(`user:${userId}`);
