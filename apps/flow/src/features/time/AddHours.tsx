@@ -314,7 +314,10 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
       }}
       onKeyDown={handleFormKeyDown}
     >
-      {/* Header */}
+      {/* Header. No "Today X of Y" pill here - My day's own
+       * Clocked/Logged/Unaccounted strip directly above this form already
+       * shows the day's logged total, so a second copy of the same number
+       * in this header was pure duplication. */}
       <div
         className="flex flex-col gap-2 rounded-t-xl px-6 py-4 md:flex-row md:items-center md:justify-between"
         style={{ background: 'var(--flow-card)', borderBottom: '1px solid var(--flow-border)' }}
@@ -326,19 +329,6 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
           <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.add.subtitle', { day: dayLabel })}
           </p>
-        </div>
-        <div
-          className="flex h-8 items-center gap-1 self-start rounded-full px-3 text-[11px] md:self-auto"
-          style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
-        >
-          <span>{t('flow.time.add.today')}</span>
-          <strong className="tabular-nums font-semibold" style={{ color: 'var(--flow-text)' }}>
-            {formatDurationClock(dayLoggedMinutes)}
-          </strong>
-          <span>{t('flow.time.of')}</span>
-          <strong className="tabular-nums font-semibold" style={{ color: 'var(--flow-text)' }}>
-            {formatDurationClock(dayTargetMinutes)}
-          </strong>
         </div>
       </div>
 
