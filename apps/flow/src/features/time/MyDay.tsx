@@ -310,9 +310,15 @@ const MyDay = (): React.JSX.Element => {
                         style={{ color: 'var(--flow-text)' }}
                       >
                         {target && <span className="block font-semibold">{target}</span>}
-                        <span style={{ color: target ? 'var(--flow-text-muted)' : undefined }}>
-                          {line.description}
-                        </span>
+                        {/* Add Hours submits "-" for an empty note (the wire
+                         * requires a non-empty description) - showing that
+                         * placeholder here would read as a stray artifact
+                         * under the task name, not as "no note was left". */}
+                        {line.description && line.description !== '-' && (
+                          <span style={{ color: target ? 'var(--flow-text-muted)' : undefined }}>
+                            {line.description}
+                          </span>
+                        )}
                       </span>
                       <button
                         type="button"
