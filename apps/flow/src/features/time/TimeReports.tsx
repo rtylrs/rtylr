@@ -27,6 +27,7 @@ const TimeReports = (): React.JSX.Element => {
   const { t } = useTranslation();
   const today = todayLocalDate();
   const weekStart = useTimeSettingsStore((s) => s.weekStart);
+  const trackAttendance = useTimeSettingsStore((s) => s.trackAttendance);
   const [from, setFrom] = useState(startOfWeek(today, weekStart));
   const [to, setTo] = useState(endOfWeek(today, weekStart));
   const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
@@ -120,15 +121,19 @@ const TimeReports = (): React.JSX.Element => {
                   <th className="pb-2 text-start text-[10px] font-semibold uppercase tracking-wider">
                     {t('flow.time.reportsPerson')}
                   </th>
-                  <th className="pb-2 text-end text-[10px] font-semibold uppercase tracking-wider">
-                    {t('flow.time.clocked')}
-                  </th>
+                  {trackAttendance && (
+                    <th className="pb-2 text-end text-[10px] font-semibold uppercase tracking-wider">
+                      {t('flow.time.clocked')}
+                    </th>
+                  )}
                   <th className="pb-2 text-end text-[10px] font-semibold uppercase tracking-wider">
                     {t('flow.time.logged')}
                   </th>
-                  <th className="pb-2 text-end text-[10px] font-semibold uppercase tracking-wider">
-                    {t('flow.time.unaccounted')}
-                  </th>
+                  {trackAttendance && (
+                    <th className="pb-2 text-end text-[10px] font-semibold uppercase tracking-wider">
+                      {t('flow.time.unaccounted')}
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -144,15 +149,19 @@ const TimeReports = (): React.JSX.Element => {
                       <td className="py-2" style={{ color: 'var(--flow-text)' }}>
                         {member.name}
                       </td>
-                      <td className="py-2 text-end tabular-nums">
-                        {formatDurationClock(totals.clockedMinutes)}
-                      </td>
+                      {trackAttendance && (
+                        <td className="py-2 text-end tabular-nums">
+                          {formatDurationClock(totals.clockedMinutes)}
+                        </td>
+                      )}
                       <td className="py-2 text-end tabular-nums">
                         {formatDurationClock(totals.loggedMinutes)}
                       </td>
-                      <td className="py-2 text-end tabular-nums">
-                        {formatDurationClock(Math.abs(totals.gapMinutes))}
-                      </td>
+                      {trackAttendance && (
+                        <td className="py-2 text-end tabular-nums">
+                          {formatDurationClock(Math.abs(totals.gapMinutes))}
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
