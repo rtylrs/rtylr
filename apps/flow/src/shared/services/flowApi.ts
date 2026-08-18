@@ -43,6 +43,12 @@ export interface ApiWorkspace {
   memberCount?: number;
 }
 
+export interface ApiBusinessSummary {
+  id: string | number;
+  name: string;
+  isActive?: boolean;
+}
+
 export interface ApiProject {
   id: string;
   workspaceId: string;
@@ -392,6 +398,9 @@ export const flowApi = {
   // -- Workspaces ---------------------------------------------------------
 
   getWorkspaces: () => safe.get<{ workspaces: ApiWorkspace[] }>('/flow/workspace/v1/workspaces'),
+
+  getMyBusinesses: () =>
+    safe.get<{ businesses: ApiBusinessSummary[] }>('/hub/business/v1/businesses/mine'),
 
   createWorkspace: (data: { name: string; color: string; description?: string; icon?: string }) =>
     safe.post<{ workspace: ApiWorkspace }>('/flow/workspace/v1/workspaces', {
