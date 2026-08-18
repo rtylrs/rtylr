@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/tenant"
 	financebankaccountv1 "github.com/voxire/voxie/gen/go/finance/bank_account/v1"
 )
@@ -43,11 +44,15 @@ func (a *BankAccountAPI) CreateBankAccount(ctx context.Context, req *financebank
 	if err != nil {
 		return nil, err
 	}
+	balance, balanceErr := money.FromFloat64(req.GetBalance())
+	if balanceErr != nil {
+		return nil, bankAccountStatusError(http.StatusBadRequest, "invalid balance")
+	}
 	input := domain.BankAccountInput{
 		Name:        strings.TrimSpace(req.GetName()),
 		Institution: req.GetBankName(),
 		AccountType: req.GetAccountType(),
-		Balance:     req.GetBalance(),
+		Balance:     balance,
 		Currency:    req.GetCurrency(),
 		IsConnected: req.GetIsPrimary(),
 	}
@@ -60,7 +65,7 @@ func (a *BankAccountAPI) CreateBankAccount(ctx context.Context, req *financebank
 	}
 	account, getErr := a.Service.GetByID(ctx, businessID, id)
 	if getErr != nil {
-		return &financebankaccountv1.CreateBankAccountResponse{Account: &financebankaccountv1.BankAccount{Id: id, Name: input.Name, BankName: input.Institution, AccountType: input.AccountType, Balance: input.Balance, Currency: input.Currency, IsPrimary: input.IsConnected}}, nil
+		return &financebankaccountv1.CreateBankAccountResponse{Account: &financebankaccountv1.BankAccount{Id: id, Name: input.Name, BankName: input.Institution, AccountType: input.AccountType, Balance: input.Balance.Float64(), Currency: input.Currency, IsPrimary: input.IsConnected}}, nil
 	}
 	return &financebankaccountv1.CreateBankAccountResponse{Account: newBankAccountProto(account)}, nil
 }
@@ -86,7 +91,7 @@ func newBankAccountProto(account domain.BankAccount) *financebankaccountv1.BankA
 		Name:        account.Name,
 		BankName:    account.Institution,
 		AccountType: account.AccountType,
-		Balance:     account.Balance,
+		Balance:     account.Balance.Float64(),
 		Currency:    account.Currency,
 		IsPrimary:   account.IsConnected,
 		CreatedAt:   account.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),

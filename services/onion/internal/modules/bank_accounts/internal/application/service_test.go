@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/domain"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type mockRepo struct {
@@ -13,7 +14,7 @@ type mockRepo struct {
 	listErr      error
 	createID     int64
 	createErr    error
-	totalBalance float64
+	totalBalance money.Amount
 	totalBalErr  error
 	connectedCnt int64
 	connectedErr error
@@ -33,7 +34,7 @@ func (m *mockRepo) Create(_ context.Context, ownerID int64, input domain.BankAcc
 	return m.createID, m.createErr
 }
 
-func (m *mockRepo) TotalBalance(_ context.Context, _ int64) (float64, error) {
+func (m *mockRepo) TotalBalance(_ context.Context, _ int64) (money.Amount, error) {
 	return m.totalBalance, m.totalBalErr
 }
 
@@ -158,13 +159,13 @@ func TestCreate_ForwardsInput(t *testing.T) {
 }
 
 func TestTotalBalance_Delegates(t *testing.T) {
-	s := &Service{repo: &mockRepo{totalBalance: 9999.99}}
+	s := &Service{repo: &mockRepo{totalBalance: money.Amount(999999)}}
 	got, err := s.TotalBalance(context.Background(), 1)
 	if err != nil {
 		t.Fatalf("unexpected: %v", err)
 	}
-	if got != 9999.99 {
-		t.Errorf("expected 9999.99, got %f", got)
+	if got != money.Amount(999999) {
+		t.Errorf("expected 9999.99, got %s", got.String())
 	}
 }
 
@@ -180,7 +181,7 @@ func TestTotalBalance_ZeroWhenNoAccounts(t *testing.T) {
 	s := &Service{repo: &mockRepo{totalBalance: 0}}
 	got, err := s.TotalBalance(context.Background(), 1)
 	if err != nil || got != 0 {
-		t.Errorf("expected (0, nil), got (%f, %v)", got, err)
+		t.Errorf("expected (0, nil), got (%s, %v)", got.String(), err)
 	}
 }
 

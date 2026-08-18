@@ -6,6 +6,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/domain"
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -46,7 +47,7 @@ func TestCreate_BankAccount_ReturnsPositiveID(t *testing.T) {
 		Name:        "Test Checking",
 		Institution: "Test Bank",
 		AccountType: "checking",
-		Balance:     1500.00,
+		Balance: money.Amount(150000),
 		Currency:    "USD",
 		IsConnected: false,
 	}
@@ -68,7 +69,7 @@ func TestCreate_BankAccount_AppearsInList(t *testing.T) {
 	input := domain.BankAccountInput{
 		Name:        "List Check Account",
 		AccountType: "savings",
-		Balance:     500.00,
+		Balance: money.Amount(50000),
 		Currency:    "USD",
 	}
 
@@ -101,7 +102,7 @@ func TestCreate_BankAccount_DefaultCurrencyUSD(t *testing.T) {
 
 	input := domain.BankAccountInput{
 		Name:    "No Currency Account",
-		Balance: 0,
+		Balance: money.Amount(0),
 		// Currency intentionally blank -> should default to USD
 	}
 
@@ -131,7 +132,7 @@ func TestList_BankAccounts_ItemsHaveOwnerID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, _ = repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{Name: "owner-id-check", Balance: 0, Currency: "USD"})
+	_, _ = repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{Name: "owner-id-check", Balance: money.Amount(0), Currency: "USD"})
 
 	items, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
@@ -149,7 +150,7 @@ func TestList_BankAccounts_ItemsHaveNonEmptyName(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, _ = repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{Name: "named-account", Balance: 0, Currency: "USD"})
+	_, _ = repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{Name: "named-account", Balance: money.Amount(0), Currency: "USD"})
 
 	items, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
@@ -167,7 +168,7 @@ func TestList_BankAccounts_ItemsHaveNonZeroID(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	_, _ = repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{Name: "id-check", Balance: 0, Currency: "USD"})
+	_, _ = repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{Name: "id-check", Balance: money.Amount(0), Currency: "USD"})
 
 	items, err := repo.List(ctx, testutil.OwnerID)
 	if err != nil {
@@ -187,7 +188,7 @@ func TestCreate_BankAccount_BalanceRoundTrip(t *testing.T) {
 
 	input := domain.BankAccountInput{
 		Name:     "Balance Test",
-		Balance:  1234.56,
+		Balance: money.Amount(123456),
 		Currency: "EUR",
 	}
 
@@ -203,8 +204,8 @@ func TestCreate_BankAccount_BalanceRoundTrip(t *testing.T) {
 
 	for _, ba := range items {
 		if ba.ID == id {
-			if ba.Balance != 1234.56 {
-				t.Errorf("Balance = %f, want 1234.56", ba.Balance)
+			if ba.Balance != money.Amount(123456) {
+				t.Errorf("Balance = %s, want 1234.56", ba.Balance.String())
 			}
 			return
 		}
@@ -219,7 +220,7 @@ func TestCreate_BankAccount_ConnectedFlag(t *testing.T) {
 
 	input := domain.BankAccountInput{
 		Name:        "Connected Account",
-		Balance:     0,
+		Balance: money.Amount(0),
 		Currency:    "USD",
 		IsConnected: true,
 	}
@@ -280,7 +281,7 @@ func TestCreate_BankAccount_NameStored(t *testing.T) {
 	name := "Name Stored Account"
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     name,
-		Balance:  0,
+		Balance: money.Amount(0),
 		Currency: "USD",
 	})
 	if err != nil {
@@ -312,7 +313,7 @@ func TestCreate_BankAccount_IBANStored(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:        "IBAN Account",
 		Institution: institution,
-		Balance:     0,
+		Balance: money.Amount(0),
 		Currency:    "USD",
 	})
 	if err != nil {
@@ -348,7 +349,7 @@ func TestCreate_ThenList_FindsNewAccount(t *testing.T) {
 
 	_, err = repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     "New Account For List Check",
-		Balance:  0,
+		Balance: money.Amount(0),
 		Currency: "USD",
 	})
 	if err != nil {
@@ -372,7 +373,7 @@ func TestList_ScopedByOwner(t *testing.T) {
 	// Create one account for the fixture owner.
 	_, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     "Scoped Account",
-		Balance:  0,
+		Balance: money.Amount(0),
 		Currency: "USD",
 	})
 	if err != nil {
@@ -397,7 +398,7 @@ func TestCreate_BankAccount_AccountTypeStored(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:        "Type Stored Account",
 		AccountType: "savings",
-		Balance:     0,
+		Balance: money.Amount(0),
 		Currency:    "USD",
 	})
 	if err != nil {
@@ -427,7 +428,7 @@ func TestCreate_BankAccount_CurrencyEUR(t *testing.T) {
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     "EUR Account",
-		Balance:  500.00,
+		Balance: money.Amount(50000),
 		Currency: "EUR",
 	})
 	if err != nil {
@@ -458,7 +459,7 @@ func TestCreate_BankAccount_MultipleAccountsForOwner(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		_, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 			Name:     "Multi Account",
-			Balance:  float64(i * 100),
+			Balance:  money.Amount(i * 10000),
 			Currency: "USD",
 		})
 		if err != nil {
@@ -482,7 +483,7 @@ func TestCreate_BankAccount_ZeroBalance(t *testing.T) {
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     "Zero Balance Account",
-		Balance:  0,
+		Balance: money.Amount(0),
 		Currency: "USD",
 	})
 	if err != nil {
@@ -497,7 +498,7 @@ func TestCreate_BankAccount_ZeroBalance(t *testing.T) {
 	for _, ba := range items {
 		if ba.ID == id {
 			if ba.Balance != 0 {
-				t.Errorf("Balance = %f, want 0", ba.Balance)
+				t.Errorf("Balance = %s, want 0", ba.Balance.String())
 			}
 			return
 		}
@@ -515,7 +516,7 @@ func TestTotalBalance_NoError(t *testing.T) {
 		t.Fatalf("TotalBalance: %v", err)
 	}
 	if total < 0 {
-		t.Errorf("expected non-negative total, got %f", total)
+		t.Errorf("expected non-negative total, got %s", total.String())
 	}
 }
 
@@ -529,7 +530,7 @@ func TestTotalBalance_ZeroOwnerReturnsZero(t *testing.T) {
 		t.Fatalf("TotalBalance(ownerID=0): %v", err)
 	}
 	if total != 0 {
-		t.Errorf("expected 0 for ownerID=0, got %f", total)
+		t.Errorf("expected 0 for ownerID=0, got %s", total.String())
 	}
 }
 
@@ -540,7 +541,7 @@ func TestTotalBalance_ReflectsCreatedAccount(t *testing.T) {
 
 	_, err := repo.Create(ctx, testutil.OwnerID, domain.BankAccountInput{
 		Name:     "Balance Test Account",
-		Balance:  5000.00,
+		Balance: money.Amount(500000),
 		Currency: "USD",
 	})
 	if err != nil {
@@ -551,8 +552,8 @@ func TestTotalBalance_ReflectsCreatedAccount(t *testing.T) {
 	if err != nil {
 		t.Fatalf("TotalBalance: %v", err)
 	}
-	if total < 5000.00 {
-		t.Errorf("expected total >= 5000.00 after create, got %f", total)
+	if total < money.Amount(500000) {
+		t.Errorf("expected total >= 5000.00 after create, got %s", total.String())
 	}
 }
 

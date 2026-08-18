@@ -1,9 +1,13 @@
 package domain
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/voxire/onion/internal/platform/money"
+)
 
 func TestValidateBankAccountInput_HappyPath(t *testing.T) {
-	input := BankAccountInput{Name: "Main Checking", AccountType: "checking", Balance: 1000}
+	input := BankAccountInput{Name: "Main Checking", AccountType: "checking", Balance: money.Amount(100000)}
 	if err := ValidateBankAccountInput(input); err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -17,7 +21,7 @@ func TestValidateBankAccountInput_MissingName(t *testing.T) {
 }
 
 func TestValidateBankAccountInput_NegativeBalance(t *testing.T) {
-	input := BankAccountInput{Name: "Savings", Balance: -100}
+	input := BankAccountInput{Name: "Savings", Balance: money.Amount(-100)}
 	if err := ValidateBankAccountInput(input); err == nil {
 		t.Fatal("expected error for negative balance")
 	}
@@ -47,7 +51,7 @@ func TestValidateBankAccountInput_ValidAccountTypes(t *testing.T) {
 }
 
 func TestValidateBankAccountInput_ZeroBalanceOK(t *testing.T) {
-	input := BankAccountInput{Name: "New Account", Balance: 0}
+	input := BankAccountInput{Name: "New Account", Balance: money.Amount(0)}
 	if err := ValidateBankAccountInput(input); err != nil {
 		t.Errorf("unexpected error for zero balance: %v", err)
 	}

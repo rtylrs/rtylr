@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/domain"
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
@@ -19,7 +20,7 @@ const (
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.BankAccount, error)
 	Create(ctx context.Context, businessID int64, input domain.BankAccountInput) (int64, error)
-	TotalBalance(ctx context.Context, businessID int64) (float64, error)
+	TotalBalance(ctx context.Context, businessID int64) (money.Amount, error)
 	CountConnected(ctx context.Context, businessID int64) (int64, error)
 }
 
@@ -72,7 +73,7 @@ func (s *Service) Create(ctx context.Context, businessID int64, input domain.Ban
 // TotalBalance returns the aggregate balance across all bank accounts for the
 // owner. It queries the database directly (no cache) because balance data is
 // time-sensitive and should never be stale.
-func (s *Service) TotalBalance(ctx context.Context, businessID int64) (float64, error) {
+func (s *Service) TotalBalance(ctx context.Context, businessID int64) (money.Amount, error) {
 	return s.repo.TotalBalance(ctx, businessID)
 }
 

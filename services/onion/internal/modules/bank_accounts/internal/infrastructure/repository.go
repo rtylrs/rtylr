@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/domain"
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type Repository struct {
@@ -51,7 +51,7 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 		Name:        input.Name,
 		Institution: nullableString(input.Institution),
 		AccountType: nullableString(input.AccountType),
-		Balance:     nullableString(fmtFloat(input.Balance)),
+		Balance:     nullableString(input.Balance.String()),
 		Currency:    nullableString(currency),
 		IsConnected: sql.NullBool{Bool: input.IsConnected, Valid: true},
 	})
@@ -64,14 +64,14 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 }
 
 // TotalBalance returns the sum of all account balances for the owner.
-func (r *Repository) TotalBalance(ctx context.Context, businessID int64) (float64, error) {
+func (r *Repository) TotalBalance(ctx context.Context, businessID int64) (money.Amount, error) {
 	result, err := r.queries.SumBankAccountBalances(ctx, businessID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum bank account balances", logger.Error(err))
 		return 0, err
 	}
 
-	return toFloat64(result), nil
+	return toMoney(result), nil
 }
 
 // CountConnected returns the number of bank accounts with is_connected = TRUE.
@@ -97,7 +97,7 @@ func bankAccountFromSqlc(row sqlc.FinanceBankAccount) domain.BankAccount {
 		Name:        row.Name,
 		Institution: nullStr(row.Institution),
 		AccountType: nullStr(row.AccountType),
-		Balance:     parseFloatNull(row.Balance),
+		Balance:     parseMoneyNull(row.Balance),
 		Currency:    nullStr(row.Currency),
 		IsConnected: nullBool(row.IsConnected),
 		CreatedAt:   nullTime(row.CreatedAt),
@@ -132,20 +132,11 @@ func nullBool(b sql.NullBool) bool {
 
 func nullTime(t sql.NullTime) time.Time {
 	if t.Valid {
-		return t.Time
-	}
-	return time.Time{}
-}
-
-func fmtFloat(f float64) string {
-	return strconv.FormatFloat(f, 'f', 2, 64)
-}
-
-func parseFloatNull(s sql.NullString) float64 {
+func parseMoneyNull(s sql.NullString) money.Amount {
 	if !s.Valid {
 		return 0
 	}
-	v, err := strconv.ParseFloat(s.String, 64)
+	value, err := money.FromString(s.String)
 	if err != nil {
 		logger.Global().Warn("failed to parse bank account balance from database",
 			logger.String("value", s.String),
@@ -153,37 +144,46 @@ func parseFloatNull(s sql.NullString) float64 {
 		)
 		return 0
 	}
-	return v
+	return value
 }
 
-// toFloat64 converts the value returned by a COALESCE(SUM(...), 0) aggregate
-// (sqlc emits interface{} for DECIMAL aggregates) into a float64, handling the
-// driver representations MySQL may return for a DECIMAL column.
-func toFloat64(v interface{}) float64 {
+func toMoney(v interface{}) money.Amount {
 	if v == nil {
 		return 0
 	}
 	switch val := v.(type) {
-	case float64:
+	case money.Amount:
 		return val
+	case float64:
+		parsed, err := money.FromFloat64(val)
+		if err == nil {
+			return parsed
+		}
 	case float32:
-		return float64(val)
+		parsed, err := money.FromFloat64(float64(val))
+		if err == nil {
+			return parsed
+		}
 	case int64:
-		return float64(val)
+		parsed, err := money.FromFloat64(float64(val))
+		if err == nil {
+			return parsed
+		}
 	case []byte:
-		return parseFloatStr(string(val))
+		return parseMoneyString(string(val))
 	case string:
-		return parseFloatStr(val)
+		return parseMoneyString(val)
 	default:
-		return parseFloatStr(fmt.Sprintf("%v", val))
+		return parseMoneyString(fmt.Sprintf("%v", val))
 	}
+	return 0
 }
 
-func parseFloatStr(s string) float64 {
+func parseMoneyString(s string) money.Amount {
 	if s == "" {
 		return 0
 	}
-	v, err := strconv.ParseFloat(s, 64)
+	value, err := money.FromString(s)
 	if err != nil {
 		logger.Global().Warn("failed to parse bank account balance sum from database",
 			logger.String("value", s),
@@ -191,5 +191,5 @@ func parseFloatStr(s string) float64 {
 		)
 		return 0
 	}
-	return v
+	return value
 }

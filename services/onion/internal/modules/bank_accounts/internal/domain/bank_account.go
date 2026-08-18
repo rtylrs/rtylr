@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 var ErrBankAccountNotFound = errors.New("bank account not found")
@@ -15,7 +17,7 @@ type BankAccount struct {
 	Name         string    `json:"name"`
 	Institution  string    `json:"institution"`
 	AccountType  string    `json:"account_type"`
-	Balance      float64   `json:"balance"`
+	Balance      money.Amount `json:"balance"`
 	Currency     string    `json:"currency"`
 	IsConnected  bool      `json:"is_connected"`
 	LastSyncedAt time.Time `json:"last_synced_at"`
@@ -58,7 +60,7 @@ type BankAccountInput struct {
 	Name        string  `json:"name"`
 	Institution string  `json:"institution"`
 	AccountType string  `json:"account_type"`
-	Balance     float64 `json:"balance"`
+	Balance     money.Amount `json:"balance"`
 	Currency    string  `json:"currency"`
 	IsConnected bool    `json:"is_connected"`
 }
