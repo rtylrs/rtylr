@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
@@ -968,7 +969,7 @@ type AddonDTO struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Icon        string  `json:"icon"`
-	Price       float64 `json:"price"`
+	Price       money.Amount `json:"price"`
 	IsFree      bool    `json:"is_free"`
 	SortOrder   int64   `json:"sort_order"`
 }
@@ -982,7 +983,7 @@ type AddonGrantDTO struct {
 	BusinessName   string  `json:"business_name"`
 	AddonID        string  `json:"addon_id"`
 	AddonName      string  `json:"addon_name"`
-	AddonPrice     float64 `json:"addon_price"`
+	AddonPrice     money.Amount `json:"addon_price"`
 	GrantedBy      int64   `json:"granted_by"`
 	GranterName    string  `json:"granter_name"`
 	Note           string  `json:"note"`
@@ -1001,11 +1002,11 @@ type ListAddonGrantsResult struct {
 	Total  int64           `json:"total"`
 }
 
-func decimalStringToFloat(value string) float64 {
+func decimalStringToMoney(value string) money.Amount {
 	if value == "" {
 		return 0
 	}
-	parsed, err := strconv.ParseFloat(value, 64)
+	parsed, err := money.FromString(value)
 	if err != nil {
 		return 0
 	}
@@ -1016,7 +1017,7 @@ func toAddonDTO(a infrastructure.AddonCatalogRow) AddonDTO {
 	dto := AddonDTO{
 		ID:    a.ID,
 		Name:  a.Name,
-		Price: decimalStringToFloat(a.Price.String),
+		Price: decimalStringToMoney(a.Price.String),
 	}
 	if a.Description.Valid {
 		dto.Description = a.Description.String
@@ -1040,7 +1041,7 @@ func toAddonGrantDTO(g infrastructure.AddonGrantRow) AddonGrantDTO {
 		BusinessID:     g.BusinessID,
 		AddonID:        g.AddonID,
 		AddonName:      g.AddonName,
-		AddonPrice:     decimalStringToFloat(g.AddonPrice.String),
+		AddonPrice:     decimalStringToMoney(g.AddonPrice.String),
 		GrantedBy:      g.GrantedBy,
 		EnabledByGrant: g.EnabledByGrant,
 	}
