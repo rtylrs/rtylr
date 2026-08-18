@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ApiProject, ApiTask } from '../../shared/services/flowApi';
 
@@ -63,10 +63,17 @@ vi.mock('./useWorkDay', () => ({
   useDeleteWorkDayLine: () => ({ mutate: deleteLineMutate, isPending: false }),
 }));
 
+const timeSettingsState = vi.hoisted(() => ({
+  value: {
+    weekStart: 'monday' as 'monday' | 'sunday',
+    weeklyTargetMinutes: 40 * 60,
+    trackAttendance: true,
+  },
+}));
+
 vi.mock('../../shared/stores/timeSettingsStore', () => ({
-  useTimeSettingsStore: (
-    selector: (s: { weekStart: 'monday' | 'sunday'; weeklyTargetMinutes: number }) => unknown
-  ) => selector({ weekStart: 'monday', weeklyTargetMinutes: 40 * 60 }),
+  useTimeSettingsStore: (selector: (s: typeof timeSettingsState.value) => unknown) =>
+    selector(timeSettingsState.value),
 }));
 
 const projectsState = vi.hoisted(() => ({
@@ -105,6 +112,23 @@ function project(over: Partial<ApiProject> = {}): ApiProject {
   };
 }
 
+function task(over: Partial<ApiTask> = {}): ApiTask {
+  return {
+    id: 't1',
+    projectId: '1',
+    workspaceId: 'ws-1',
+    title: 'Fix the gate hinge',
+    status: 'todo',
+    priority: 'medium',
+    assignee: 'Ada',
+    assigneeInitials: 'A',
+    dueDate: '',
+    subtaskCount: 0,
+    projectName: 'Site fitout',
+    ...over,
+  };
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   workDayState.value = {
@@ -117,6 +141,11 @@ beforeEach(() => {
   projectsState.value = { data: [project(), project({ id: '2', name: 'Warehouse racking' })] };
   workDaysRangeState.value = { data: { workDays: [] } };
   tasksState.value = { data: [] };
+  timeSettingsState.value = {
+    weekStart: 'monday',
+    weeklyTargetMinutes: 40 * 60,
+    trackAttendance: true,
+  };
 });
 
 describe('MyDay: week strip', () => {
@@ -169,5 +198,70 @@ describe('MyDay: Add Hours renders inline', () => {
       (screen.getByLabelText('flow.time.date', { selector: '#work-day-date' }) as HTMLInputElement)
         .value
     ).toBe('2026-08-11');
+  });
+});
+
+describe('MyDay: trackAttendance gating', () => {
+  it('shows the attendance inputs and the three-figure strip by default', () => {
+    render(<MyDay />);
+    expect(screen.getByText('flow.time.theDay')).toBeInTheDocument();
+    expect(screen.getByLabelText('flow.time.workMode')).toBeInTheDocument();
+    expect(screen.getByText('flow.time.clocked')).toBeInTheDocument();
+    expect(screen.getByText('flow.time.logged')).toBeInTheDocument();
+    expect(screen.getByText('flow.time.unaccounted')).toBeInTheDocument();
+  });
+
+  it('hides the attendance inputs and collapses to a single Logged figure when off', () => {
+    timeSettingsState.value = { ...timeSettingsState.value, trackAttendance: false };
+    render(<MyDay />);
+    expect(screen.queryByText('flow.time.theDay')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('flow.time.workMode')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('flow.time.startTime')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('flow.time.endTime')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('flow.time.breakMinutes')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.time.clocked')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.time.unaccounted')).not.toBeInTheDocument();
+    expect(screen.getByText('flow.time.logged')).toBeInTheDocument();
+  });
+});
+
+describe('MyDay: entry list labels', () => {
+  it("shows the task's identifier and title for a line logged against a task", () => {
+    tasksState.value = { data: [task({ identifier: 'T-1' })] };
+    workDayState.value = {
+      data: {
+        workDay: {
+          id: '9',
+          workMode: 'onsite',
+          clockedMinutes: 0,
+          loggedMinutes: 90,
+          gapMinutes: 0,
+        },
+        lines: [
+          { id: 'line-1', durationMinutes: 90, description: '-', projectId: '1', taskId: 't1' },
+        ],
+      },
+      isLoading: false,
+    };
+    render(<MyDay />);
+    expect(screen.getByText('T-1 Fix the gate hinge')).toBeInTheDocument();
+  });
+
+  it('falls back to the project name for a line logged with no task', () => {
+    workDayState.value = {
+      data: {
+        workDay: {
+          id: '9',
+          workMode: 'onsite',
+          clockedMinutes: 0,
+          loggedMinutes: 90,
+          gapMinutes: 0,
+        },
+        lines: [{ id: 'line-1', durationMinutes: 90, description: '-', projectId: '2' }],
+      },
+      isLoading: false,
+    };
+    render(<MyDay />);
+    expect(within(screen.getByRole('list')).getByText('Warehouse racking')).toBeInTheDocument();
   });
 });

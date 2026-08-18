@@ -164,6 +164,31 @@ describe('TimeSection: rates', () => {
   });
 });
 
+describe('TimeSection: attendance tracking', () => {
+  it('defaults to on, preserving current My Day/reports behavior', () => {
+    render(<TimeSection />);
+
+    expect(useTimeSettingsStore.getState().trackAttendance).toBe(true);
+    expect(
+      screen.getByRole('switch', { name: 'flow.settings.time.trackAttendance' })
+    ).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('writes the toggle through to the store', () => {
+    render(<TimeSection />);
+
+    fireEvent.click(screen.getByRole('switch', { name: 'flow.settings.time.trackAttendance' }));
+
+    expect(useTimeSettingsStore.getState().trackAttendance).toBe(false);
+  });
+
+  it('explains what changes on My Day and reports in each direction', () => {
+    render(<TimeSection />);
+
+    expect(screen.getByText('flow.settings.time.trackAttendanceExplained')).toBeInTheDocument();
+  });
+});
+
 describe('TimeSection: the missing endpoint', () => {
   it('says plainly that these values are per-browser until the endpoint lands', () => {
     render(<TimeSection />);

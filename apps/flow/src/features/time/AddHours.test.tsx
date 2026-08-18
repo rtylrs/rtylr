@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ApiProject, ApiTask } from '../../shared/services/flowApi';
 import type { WorkDay } from './useWorkDay';
@@ -121,11 +121,15 @@ describe('AddHours: state 1, empty first load', () => {
     expect(logButton).toHaveAttribute('title', 'flow.time.add.reasonNoDuration');
   });
 
-  it("defaults Location to the day's own WHERE YOU WORKED value", () => {
+  it("defaults Location to the day's own WHERE YOU WORKED value, revealed behind the picker link", () => {
     workDayState.value = {
       data: { workDay: { id: '9', workMode: 'hybrid', loggedMinutes: 0 }, lines: [] },
     };
     render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
+    // The picker itself is not drawn until the reveal link is clicked - the
+    // default is applied silently, not shown.
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.time.add.differentLocation' }));
     expect(screen.getByRole('radio', { name: 'flow.time.mode.hybrid' })).toHaveAttribute(
       'aria-checked',
       'true'
@@ -315,5 +319,51 @@ describe('AddHours: task description box', () => {
     render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
     fillProjectAndTask();
     expect(screen.queryByText('flow.time.add.fromTheTask')).not.toBeInTheDocument();
+  });
+});
+
+describe('AddHours: Location progressive disclosure', () => {
+  it('shows a reveal link instead of the full picker, with no radiogroup on the page', () => {
+    render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
+    expect(
+      screen.getByRole('button', { name: 'flow.time.add.differentLocation' })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
+  });
+
+  it('reveals the radiogroup, with keyboard support intact, once the link is clicked', () => {
+    render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
+    fireEvent.click(screen.getByRole('button', { name: 'flow.time.add.differentLocation' }));
+
+    const group = screen.getByRole('radiogroup', { name: 'flow.time.add.location' });
+    expect(within(group).getByRole('radio', { name: 'flow.time.mode.onsite' })).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+
+    fireEvent.keyDown(group, { key: 'ArrowRight' });
+    expect(within(group).getByRole('radio', { name: 'flow.time.mode.remote' })).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('the reveal link is a real, focusable, keyboard-reachable button', () => {
+    render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
+    const link = screen.getByRole('button', { name: 'flow.time.add.differentLocation' });
+    expect(link.tagName).toBe('BUTTON');
+    link.focus();
+    expect(link).toHaveFocus();
+  });
+
+  it('keeps the picker visible (does not re-collapse) once an override is chosen', () => {
+    render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
+    fireEvent.click(screen.getByRole('button', { name: 'flow.time.add.differentLocation' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'flow.time.mode.remote' }));
+
+    expect(screen.getByRole('radiogroup', { name: 'flow.time.add.location' })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'flow.time.add.differentLocation' })
+    ).not.toBeInTheDocument();
   });
 });

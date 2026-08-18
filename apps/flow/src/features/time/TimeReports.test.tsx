@@ -12,6 +12,15 @@ vi.mock('../../shared/stores/flowStore', () => ({
     selector({ activeWorkspaceId: 'ws-1' }),
 }));
 
+const timeSettingsState = vi.hoisted(() => ({
+  value: { weekStart: 'monday' as 'monday' | 'sunday', trackAttendance: true },
+}));
+
+vi.mock('../../shared/stores/timeSettingsStore', () => ({
+  useTimeSettingsStore: (selector: (s: typeof timeSettingsState.value) => unknown) =>
+    selector(timeSettingsState.value),
+}));
+
 const membersState = vi.hoisted(() => ({
   value: { data: [] as ApiWorkspaceMember[], isLoading: false },
 }));
@@ -50,6 +59,7 @@ function member(over: Partial<ApiWorkspaceMember> = {}): ApiWorkspaceMember {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  timeSettingsState.value = { weekStart: 'monday', trackAttendance: true };
   membersState.value = {
     data: [member(), member({ id: '2', userId: '9', name: 'Sam Okafor' })],
     isLoading: false,
@@ -95,5 +105,26 @@ describe('TimeReports', () => {
     workDaysState.value = { data: undefined, isLoading: false, isError: true };
     render(<TimeReports />);
     expect(screen.getByText('flow.time.teamAccessDenied')).toBeInTheDocument();
+  });
+});
+
+describe('TimeReports: trackAttendance gating', () => {
+  it('shows Clocked and Unaccounted columns by default', () => {
+    render(<TimeReports />);
+    expect(screen.getByText('flow.time.clocked')).toBeInTheDocument();
+    expect(screen.getByText('flow.time.unaccounted')).toBeInTheDocument();
+    expect(screen.getByText('flow.time.logged')).toBeInTheDocument();
+  });
+
+  it('hides Clocked and Unaccounted, keeping only Logged, when attendance tracking is off', () => {
+    timeSettingsState.value = { ...timeSettingsState.value, trackAttendance: false };
+    render(<TimeReports />);
+    expect(screen.queryByText('flow.time.clocked')).not.toBeInTheDocument();
+    expect(screen.queryByText('flow.time.unaccounted')).not.toBeInTheDocument();
+    expect(screen.getByText('flow.time.logged')).toBeInTheDocument();
+
+    const mayaRow = screen.getByText('Maya Krishnan').closest('tr');
+    // 450 + 240 logged, with no clocked/gap columns to conflict with it.
+    expect(mayaRow?.textContent).toContain('11:30');
   });
 });
