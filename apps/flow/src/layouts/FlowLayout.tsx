@@ -753,8 +753,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   label={t('nav.focusToday')}
                   badge={todayFocusCount}
                 />
-                <SidebarLink to="/profile" icon={UserCircle} label={t('flow.profile.heading')} />
-                <SidebarLink to="/leave" icon={CalendarOff} label={t('flow.leave.heading')} />
+                {/* Profile and Leave moved into the account menu at the
+                    bottom (with the theme switcher and sign-out) - they are
+                    account-scoped destinations, not work-item triage like
+                    the entries around them. */}
                 <SidebarLink
                   to={`/w/${currentWorkspaceId}`}
                   icon={LayoutGrid}
@@ -1158,6 +1160,31 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         ))}
                       </div>
                     </div>
+                    <div
+                      style={{
+                        height: '1px',
+                        background: 'var(--flow-border)',
+                        margin: '4px 0',
+                      }}
+                    />
+                    <Link
+                      to="/profile"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
+                      style={{ color: 'var(--flow-text)' }}
+                    >
+                      <UserCircle size={13} />
+                      {t('flow.profile.heading')}
+                    </Link>
+                    <Link
+                      to="/leave"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
+                      style={{ color: 'var(--flow-text)' }}
+                    >
+                      <CalendarOff size={13} />
+                      {t('flow.leave.heading')}
+                    </Link>
                     <div
                       style={{
                         height: '1px',
