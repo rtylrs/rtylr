@@ -42,7 +42,10 @@ func configToPayload(c domain.HRCompanyConfigRecord) *HRConfigPayload {
 
 // --- Get HR Config ---
 
-func GetHRConfigRoutes() []string { return []string{"/hr/config"} }
+// The onboarding/setup config owns /hr/config. The full company config
+// API is exposed under /hr/company-config to avoid two handlers competing for
+// the same method and path.
+func GetHRConfigRoutes() []string { return []string{"/hr/company-config"} }
 
 type (
 	GetHRConfigHandler  struct{ Service *application.Service }
@@ -76,7 +79,7 @@ func (h *GetHRConfigHandler) Serve(ctx context.Context, _ *GetHRConfigRequest) (
 
 // --- Upsert HR Config ---
 
-func UpsertHRConfigRoutes() []string { return []string{"/hr/config"} }
+func UpsertHRConfigRoutes() []string { return []string{"/hr/company-config"} }
 
 type (
 	UpsertHRConfigHandler struct{ Service *application.Service }
