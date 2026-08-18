@@ -5,6 +5,7 @@ export interface FlowUser {
   id: string;
   name: string;
   email: string;
+  businessName?: string;
   avatar?: string;
   /** From API when `name` is assembled from parts */
   firstName?: string;

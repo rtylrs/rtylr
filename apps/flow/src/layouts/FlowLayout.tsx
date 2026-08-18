@@ -70,6 +70,7 @@ import { useNotifications } from '../features/inbox/useNotifications';
 import { apiProjectToProject, apiWorkspaceToWorkspace } from '../shared/lib/projectMapper';
 import { LicenseBanner } from '@voxire/components';
 import { safe } from '../shared/lib/api';
+import { useFlowBusinessName } from '../shared/hooks/useFlowBusinessName';
 import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useRealtimeReconnectRefetch, useRealtimeStatus } from '../shared/lib/realtime';
 import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
@@ -250,6 +251,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       id: authUser.id ?? authUser.userId ?? '',
       name: authUser.name ?? authUser.firstName ?? '',
       email: authUser.email ?? authUser.emailAddress ?? '',
+      businessName: authUser.businessName,
     });
   }, [authUser, setUser]);
   const { theme, setTheme } = useThemeStore();
@@ -275,6 +277,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // Zustand store to hydrate, because the store is populated via useEffect which
   // fires *after* render, causing a flash of "No workspace".
   const { data: apiWorkspaces, isLoading: workspacesLoading } = useWorkspaces();
+  const { data: businessName } = useFlowBusinessName();
 
   const PERSONAL_FALLBACK: Workspace = {
     id: PERSONAL_WORKSPACE_ID,
@@ -300,6 +303,16 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // Creating a project posts workspace_id, so it needs a resolved numeric id -
   // not the Personal sentinel this layout paints with before workspaces load.
   const canCreateProject = isApiWorkspaceId(currentWorkspaceId);
+
+  // Workspace-scoped routes are authoritative even when the workspace list
+  // request is unavailable. Keep the shared store aligned so screens without
+  // a workspace segment, such as Cycles and Settings, continue using the same
+  // workspace after client-side navigation.
+  useEffect(() => {
+    if (workspaceId && workspaceId !== PERSONAL_WORKSPACE_ID && activeWorkspaceId !== workspaceId) {
+      setActiveWorkspace(workspaceId);
+    }
+  }, [activeWorkspaceId, setActiveWorkspace, workspaceId]);
 
   // Resolves the caller's auto-provisioned personal project so it can be hidden
   // from the Projects list (its tasks surface in the global "My tasks" view).
@@ -407,7 +420,17 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   const activeWorkspace =
     liveWorkspaces.find((w) => w.id === currentWorkspaceId) ||
-    liveWorkspaces[0] ||
+    (currentWorkspaceId && currentWorkspaceId !== PERSONAL_WORKSPACE_ID
+      ? {
+          id: currentWorkspaceId,
+          name:
+            businessName ||
+            user?.businessName ||
+            authUser?.businessName ||
+            t('flow.shell.workspace'),
+          color: ACCENT_DEFAULT,
+        }
+      : liveWorkspaces[0]) ||
     (workspacesLoading ? { id: '', name: '', color: '#6b7280' } : PERSONAL_FALLBACK);
 
   // Sync --accent CSS vars to the active workspace color so every component
