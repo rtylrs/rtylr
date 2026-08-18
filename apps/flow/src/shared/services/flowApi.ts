@@ -213,6 +213,7 @@ const toTaskCreatePayload = (data: {
   dueDate?: string;
   effortMinutes?: number;
   estimatedHours?: number;
+  labels?: string[];
 }) => ({
   // OneKit-generated contracts wire-encode int64 fields as JSON strings, even
   // the personal-workspace/project sentinel value 0 - never send a bare number.
@@ -226,6 +227,7 @@ const toTaskCreatePayload = (data: {
   start_date: '-',
   estimated_hours:
     data.estimatedHours ?? (data.effortMinutes !== undefined ? data.effortMinutes / 60 : undefined),
+  labels: data.labels?.map((label) => String(Number(label))),
 });
 
 const toMilestoneCreatePayload = (data: Partial<ApiMilestone>) => ({
@@ -572,7 +574,7 @@ export const flowApi = {
   // Get-or-create the caller's personal "My Tasks" project board and return its
   // ids. Backs the My Tasks landing — we redirect to its project board.
   getMyTasksProject: () =>
-    safe.get<{ projectId: number; workspaceId: number }>('/flow/task/v1/tasks/my-project'),
+    safe.get<{ projectId: string; workspaceId: string }>('/flow/task/v1/tasks/my-project'),
 
   searchTasks: (q: string, workspaceId: string) =>
     safe.get<{ tasks: ApiTask[] }>('/flow/task/v1/tasks/search', {
@@ -596,6 +598,7 @@ export const flowApi = {
     dueDate?: string;
     effortMinutes?: number;
     estimatedHours?: number;
+    labels?: string[];
   }) => safe.post<{ task: ApiTask }>('/flow/task/v1/tasks', toTaskCreatePayload(data)),
 
   // Partial update: a key the caller did not supply must stay omitted. Undefined

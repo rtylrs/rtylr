@@ -1,0 +1,111 @@
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { toast } from 'sonner';
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
+vi.mock('@voxire/components', () => ({
+  HelmetContainer: () => null,
+}));
+
+vi.mock('sonner', () => ({
+  toast: { error: vi.fn(), success: vi.fn() },
+}));
+
+const myIssuesData = vi.hoisted(() => ({ data: [] as unknown[], isLoading: false }));
+vi.mock('./useMyIssues', () => ({
+  useMyIssues: () => myIssuesData,
+}));
+
+const createTaskMutate = vi.hoisted(() => vi.fn());
+vi.mock('./useTasks', () => ({
+  useCreateTask: () => ({ mutate: createTaskMutate, isPending: false }),
+}));
+
+const myTasksProjectData = vi.hoisted(() => ({
+  data: { projectId: '9', workspaceId: '3' } as
+    | { projectId: string; workspaceId: string }
+    | undefined,
+}));
+vi.mock('./useMyTasksProject', () => ({
+  useMyTasksProject: () => myTasksProjectData,
+}));
+
+const labelsData = vi.hoisted(() => ({ data: [] as { id: number; name: string }[] }));
+vi.mock('./useLabels', () => ({
+  useLabels: () => labelsData,
+}));
+
+vi.mock('../../shared/stores/flowStore', () => ({
+  useFlowStore: () => ({ selectedTaskIds: [], activeWorkspaceId: 'ws-1' }),
+}));
+
+vi.mock('../../shared/lib/currentUser', () => ({
+  getCurrentUserId: () => 'u1',
+}));
+
+import MyIssues from './MyIssues';
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  myIssuesData.data = [];
+  myIssuesData.isLoading = false;
+  myTasksProjectData.data = { projectId: '9', workspaceId: '3' };
+  labelsData.data = [];
+});
+
+describe('MyIssues QuickAddRow', () => {
+  it('blocks submit and shows an error toast when the workspace has no labels', () => {
+    labelsData.data = [];
+    render(<MyIssues />);
+
+    fireEvent.change(screen.getByPlaceholderText('flow.myIssues.quickAddPlaceholder'), {
+      target: { value: 'Ship the thing' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'flow.myIssues.quickAddButton' }));
+
+    expect(createTaskMutate).not.toHaveBeenCalled();
+    expect(toast.error).toHaveBeenCalledWith('errors.generic');
+  });
+
+  it('sends the first available label id in the create payload', () => {
+    labelsData.data = [
+      { id: 42, name: 'Bug' },
+      { id: 43, name: 'Feature' },
+    ];
+    render(<MyIssues />);
+
+    fireEvent.change(screen.getByPlaceholderText('flow.myIssues.quickAddPlaceholder'), {
+      target: { value: 'Ship the thing' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'flow.myIssues.quickAddButton' }));
+
+    expect(createTaskMutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        workspaceId: '3',
+        projectId: '9',
+        title: 'Ship the thing',
+        labels: ['42'],
+      }),
+      expect.anything()
+    );
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('blocks submit when the personal project has not resolved yet', () => {
+    myTasksProjectData.data = undefined;
+    labelsData.data = [{ id: 42, name: 'Bug' }];
+    render(<MyIssues />);
+
+    fireEvent.change(screen.getByPlaceholderText('flow.myIssues.quickAddPlaceholder'), {
+      target: { value: 'Ship the thing' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'flow.myIssues.quickAddButton' }));
+
+    expect(createTaskMutate).not.toHaveBeenCalled();
+    expect(toast.error).toHaveBeenCalledWith('errors.generic');
+  });
+});

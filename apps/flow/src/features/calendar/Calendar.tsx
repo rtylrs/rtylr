@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useTasks, useCreateTask } from '../tasks/useTasks';
+import { useLabels } from '../tasks/useLabels';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import PriorityIcon from '../../shared/components/PriorityIcon';
 import type { ApiTask } from '../../shared/services/flowApi';
@@ -22,11 +23,17 @@ const Calendar: React.FC = () => {
   const tasks = apiTasks as ApiTask[];
   const navigate = useNavigate();
   const { activeWorkspaceId, projects } = useFlowStore();
+  const { data: labels = [] } = useLabels(activeWorkspaceId || undefined);
   const createTask = useCreateTask();
   const [cursor, setCursor] = useState(() => new Date());
   const [createModal, setCreateModal] = useState<CreateModal | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [newProjectId, setNewProjectId] = useState('');
+  const [newLabelId, setNewLabelId] = useState('');
+
+  React.useEffect(() => {
+    if (!newLabelId && labels.length > 0) setNewLabelId(String(labels[0].id));
+  }, [labels, newLabelId]);
 
   const { days, monthLabel } = useMemo(() => {
     const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
@@ -71,6 +78,7 @@ const Calendar: React.FC = () => {
     setCreateModal({ date: iso });
     setNewTitle('');
     setNewProjectId(projects[0]?.id ?? '');
+    setNewLabelId(labels[0] ? String(labels[0].id) : '');
   };
 
   const submitCreate = () => {
@@ -79,7 +87,7 @@ const Calendar: React.FC = () => {
       return;
     }
     const projectId = newProjectId || projects[0]?.id;
-    if (!projectId || !activeWorkspaceId) {
+    if (!projectId || !activeWorkspaceId || !newLabelId) {
       toast.error(t('toasts.task.selectProjectFirst'));
       return;
     }
@@ -89,6 +97,7 @@ const Calendar: React.FC = () => {
         workspaceId: activeWorkspaceId,
         title: newTitle.trim(),
         dueDate: createModal!.date,
+        labels: [newLabelId],
       },
       {
         onSuccess: () => {
@@ -301,6 +310,29 @@ const Calendar: React.FC = () => {
                   ))}
                 </select>
               )}
+
+              <select
+                aria-label={t('common.settings.labels')}
+                value={newLabelId}
+                onChange={(e) => setNewLabelId(e.target.value)}
+                disabled={labels.length === 0}
+                className="w-full rounded-lg px-3 py-2 text-[12px] outline-none mb-4 disabled:opacity-50"
+                style={{
+                  background: 'var(--flow-input-bg)',
+                  border: '1px solid var(--flow-border)',
+                  color: 'var(--flow-text)',
+                }}
+              >
+                {labels.length === 0 ? (
+                  <option value="">{t('common.noData')}</option>
+                ) : (
+                  labels.map((label) => (
+                    <option key={label.id} value={label.id}>
+                      {label.name}
+                    </option>
+                  ))
+                )}
+              </select>
 
               <div className="flex justify-end gap-2">
                 <button

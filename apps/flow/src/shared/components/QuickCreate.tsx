@@ -2,8 +2,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import {
+  ChevronRight,
+  Calendar,
+  User,
+  CircleUser,
+  FolderInput,
+  Flag,
+  Gauge,
+  Tag,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { ChevronRight, Calendar, User, CircleUser, FolderInput, Flag, Gauge } from 'lucide-react';
 import { useFlowStore, Task, PRIORITY_LABELS } from '../stores/flowStore';
 import { useUserStore } from '../stores/userStore';
 import ProjectSelect from './ProjectSelect';
@@ -13,6 +22,7 @@ import { getCurrentUserId } from '../lib/currentUser';
 import { displayUserName } from '../lib/userDisplay';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../lib/effortPresets';
 import { useCreateTask } from '../../features/tasks/useTasks';
+import { useLabels } from '../../features/tasks/useLabels';
 
 function FieldRow({
   label,
@@ -47,6 +57,7 @@ export const QuickCreate: React.FC = () => {
     useFlowStore();
   const user = useUserStore((s) => s.user);
   const createTaskMutation = useCreateTask();
+  const { data: labels = [] } = useLabels(activeWorkspaceId || undefined);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -55,6 +66,7 @@ export const QuickCreate: React.FC = () => {
   const [dueDate, setDueDate] = useState('');
   const [assignToMe, setAssignToMe] = useState(true);
   const [effortMinutes, setEffortMinutes] = useState<number | undefined>(30);
+  const [labelId, setLabelId] = useState('');
 
   const titleRef = useRef<HTMLTextAreaElement>(null);
 
@@ -68,6 +80,7 @@ export const QuickCreate: React.FC = () => {
       setDueDate('');
       setAssignToMe(true);
       setEffortMinutes(30);
+      setLabelId('');
       setTimeout(() => titleRef.current?.focus(), 50);
       const prev = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -77,12 +90,20 @@ export const QuickCreate: React.FC = () => {
     }
   }, [quickCreateOpen, projects, activeWorkspaceId]);
 
+  useEffect(() => {
+    if (!labelId && labels.length > 0) setLabelId(String(labels[0].id));
+  }, [labelId, labels]);
+
   const submit = async () => {
     if (!title.trim()) {
       toast.error(t('toasts.task.titleRequired'));
       return;
     }
     if (!projectId) return;
+    if (!labelId) {
+      toast.error(t('errors.generic'));
+      return;
+    }
     const project = projects.find((p) => p.id === projectId);
     if (!project) return;
 
@@ -100,6 +121,7 @@ export const QuickCreate: React.FC = () => {
         dueDate: dueDate || undefined,
         assigneeId: assignToMe ? (uid ?? undefined) : undefined,
         effortMinutes,
+        labels: [labelId],
       });
       const task = res.task;
       const taskId = String(task.id);
@@ -323,6 +345,31 @@ export const QuickCreate: React.FC = () => {
                       </button>
                     ))}
                   </div>
+                </FieldRow>
+
+                <FieldRow label={t('common.settings.labels')} icon={Tag}>
+                  <select
+                    aria-label={t('common.settings.labels')}
+                    value={labelId}
+                    onChange={(e) => setLabelId(e.target.value)}
+                    disabled={labels.length === 0}
+                    className="w-full max-w-[240px] rounded-md px-2 py-1.5 text-[13px] outline-none disabled:opacity-50"
+                    style={{
+                      background: 'var(--flow-input-bg)',
+                      border: '1px solid var(--flow-border)',
+                      color: 'var(--flow-text)',
+                    }}
+                  >
+                    {labels.length === 0 ? (
+                      <option value="">{t('common.noData')}</option>
+                    ) : (
+                      labels.map((label) => (
+                        <option key={label.id} value={label.id}>
+                          {label.name}
+                        </option>
+                      ))
+                    )}
+                  </select>
                 </FieldRow>
               </div>
 
