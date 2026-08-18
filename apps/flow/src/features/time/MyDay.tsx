@@ -148,46 +148,53 @@ const MyDay = (): React.JSX.Element => {
           </p>
         ) : (
           <>
-            {trackAttendance && (
-              <section className="mb-6">
-                <h2
-                  className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
-                  style={{ color: 'var(--flow-text-muted)' }}
+            {/* Location is a separate concept from shift attendance - a
+             * workspace that doesn't clock in/out can still care where work
+             * happened, and Add Hours' own per-entry Location silently
+             * defaults to this value, so it has to stay visible even when
+             * trackAttendance is off. Only Started/Finished/Break (real
+             * clock-in/out) and the Clocked/Unaccounted figures below are
+             * gated - they have no meaning without a clock signal. */}
+            <section className="mb-6">
+              <h2
+                className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                {t('flow.time.theDay')}
+              </h2>
+
+              <div className={trackAttendance ? 'mb-4' : undefined}>
+                <span className={labelClass} style={{ color: 'var(--flow-text-muted)' }}>
+                  {t('flow.time.workMode')}
+                </span>
+                <div
+                  role="radiogroup"
+                  aria-label={t('flow.time.workMode')}
+                  className="flex flex-wrap gap-2"
                 >
-                  {t('flow.time.theDay')}
-                </h2>
-
-                <div className="mb-4">
-                  <span className={labelClass} style={{ color: 'var(--flow-text-muted)' }}>
-                    {t('flow.time.workMode')}
-                  </span>
-                  <div
-                    role="radiogroup"
-                    aria-label={t('flow.time.workMode')}
-                    className="flex flex-wrap gap-2"
-                  >
-                    {WORK_MODES.map((mode) => {
-                      const active = (day?.workMode ?? 'onsite') === mode;
-                      return (
-                        <button
-                          key={mode}
-                          type="button"
-                          role="radio"
-                          aria-checked={active}
-                          onClick={() => saveDay({ workMode: mode })}
-                          className="flow-focus min-h-[44px] rounded-md px-3 text-[13px] font-medium md:min-h-0 md:py-2"
-                          style={{
-                            background: active ? 'var(--accent)' : 'var(--flow-hover)',
-                            color: active ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
-                          }}
-                        >
-                          {t(`flow.time.mode.${mode}`)}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {WORK_MODES.map((mode) => {
+                    const active = (day?.workMode ?? 'onsite') === mode;
+                    return (
+                      <button
+                        key={mode}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => saveDay({ workMode: mode })}
+                        className="flow-focus min-h-[44px] rounded-md px-3 text-[13px] font-medium md:min-h-0 md:py-2"
+                        style={{
+                          background: active ? 'var(--accent)' : 'var(--flow-hover)',
+                          color: active ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
+                        }}
+                      >
+                        {t(`flow.time.mode.${mode}`)}
+                      </button>
+                    );
+                  })}
                 </div>
+              </div>
 
+              {trackAttendance && (
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div>
                     <label
@@ -245,8 +252,8 @@ const MyDay = (): React.JSX.Element => {
                     />
                   </div>
                 </div>
-              </section>
-            )}
+              )}
+            </section>
 
             {/* Clocked against logged. The gap is the most useful number here, so
              * it is shown plainly and never blocks: enforcing it produces

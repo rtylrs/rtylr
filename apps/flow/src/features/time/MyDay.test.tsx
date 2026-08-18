@@ -211,11 +211,14 @@ describe('MyDay: trackAttendance gating', () => {
     expect(screen.getByText('flow.time.unaccounted')).toBeInTheDocument();
   });
 
-  it('hides the attendance inputs and collapses to a single Logged figure when off', () => {
+  it('keeps Location visible but hides clock inputs and collapses to a single Logged figure when off', () => {
     timeSettingsState.value = { ...timeSettingsState.value, trackAttendance: false };
     render(<MyDay />);
-    expect(screen.queryByText('flow.time.theDay')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('flow.time.workMode')).not.toBeInTheDocument();
+    // Location is a separate concept from shift attendance - Add Hours' own
+    // per-entry Location silently defaults to this value, so "The day" and
+    // its Where-you-worked toggle must stay visible even with tracking off.
+    expect(screen.getByText('flow.time.theDay')).toBeInTheDocument();
+    expect(screen.getByLabelText('flow.time.workMode')).toBeInTheDocument();
     expect(screen.queryByLabelText('flow.time.startTime')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('flow.time.endTime')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('flow.time.breakMinutes')).not.toBeInTheDocument();
