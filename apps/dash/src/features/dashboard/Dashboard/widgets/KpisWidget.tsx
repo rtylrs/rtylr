@@ -24,10 +24,7 @@ function KpiCard({
   isLoading?: boolean;
 }) {
   return (
-    <div
-      className="dash-card p-4 rounded-xl flex items-center justify-between"
-      style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-    >
+    <div className="dash-card h-full p-4 flex items-center justify-between">
       <div>
         <p
           className="text-xs font-semibold uppercase tracking-wider mb-1"
