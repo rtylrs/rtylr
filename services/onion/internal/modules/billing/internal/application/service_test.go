@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/billing/internal/domain"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type mockRepo struct {
@@ -80,8 +81,8 @@ func TestListInvoices_Empty(t *testing.T) {
 
 func TestListInvoices_Delegates(t *testing.T) {
 	invoices := []domain.Invoice{
-		{ID: 1, Amount: 99.99, Currency: "USD", Status: "paid"},
-		{ID: 2, Amount: 149.0, Currency: "USD", Status: "pending"},
+		{ID: 1, Amount: money.Amount(9999), Currency: "USD", Status: "paid"},
+		{ID: 2, Amount: money.Amount(14900), Currency: "USD", Status: "pending"},
 	}
 	s := &Service{repo: &mockRepo{invoices: invoices}}
 	got, err := s.ListInvoices(context.Background(), 1)

@@ -1,6 +1,10 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"github.com/voxire/onion/internal/platform/money"
+)
 
 type BillingSummary struct {
 	Plan            string     `json:"plan"`
@@ -12,7 +16,7 @@ type BillingSummary struct {
 
 type Invoice struct {
 	ID       int64      `json:"id"`
-	Amount   float64    `json:"amount"`
+	Amount   money.Amount `json:"amount"`
 	Currency string     `json:"currency"`
 	Status   string     `json:"status"`
 	IssuedAt time.Time  `json:"issued_at"`

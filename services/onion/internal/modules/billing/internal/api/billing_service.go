@@ -57,7 +57,7 @@ func (a *BillingAPI) ListInvoices(ctx context.Context, _ *hubbillingv1.ListInvoi
 	for _, inv := range invoices {
 		iv := &hubbillingv1.Invoice{
 			Id:       inv.ID,
-			Amount:   inv.Amount,
+			Amount:   inv.Amount.Float64(),
 			Currency: inv.Currency,
 			Status:   inv.Status,
 			IssuedAt: inv.IssuedAt.Format("2006-01-02T15:04:05Z07:00"),
