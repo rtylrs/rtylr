@@ -18,8 +18,6 @@ type mockRepo struct {
 	checklist      *domain.EmployeeChecklistRecord
 	checklists     []domain.EmployeeChecklistRecord
 	totalCklst     int64
-	summaries      []domain.EmployeeChecklistSummaryRecord
-	totalSummaries int64
 	totalItems     int
 	completedItems int
 	err            error
@@ -59,10 +57,6 @@ func (m *mockRepo) GetEmployeeChecklist(_ context.Context, _, _, _ int64) (*doma
 
 func (m *mockRepo) ListEmployeeChecklists(_ context.Context, _, _ int64, _, _ int32) ([]domain.EmployeeChecklistRecord, int64, error) {
 	return m.checklists, m.totalCklst, m.err
-}
-
-func (m *mockRepo) ListBusinessEmployeeChecklistSummaries(_ context.Context, _ int64, _, _ int32) ([]domain.EmployeeChecklistSummaryRecord, int64, error) {
-	return m.summaries, m.totalSummaries, m.err
 }
 
 func (m *mockRepo) UpdateEmployeeChecklistStatus(_ context.Context, _, _ int64, _ string) error {
@@ -238,40 +232,6 @@ func TestListEmployeeChecklists_PropagatesRepoError(t *testing.T) {
 	_, _, err := s.ListEmployeeChecklists(context.Background(), 1, 5, domain.ListEmployeeChecklistsParams{Limit: 10})
 	if !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
-	}
-}
-
-// ---- ListBusinessEmployeeChecklistSummaries ----
-
-func TestListBusinessEmployeeChecklistSummaries_ReturnsDelegatedItems(t *testing.T) {
-	items := []domain.EmployeeChecklistSummaryRecord{
-		{ChecklistID: 1, EmployeeID: 5, CompletionPercentage: 50, OverdueItemsCount: 1},
-		{ChecklistID: 2, EmployeeID: 6, CompletionPercentage: 100, OverdueItemsCount: 0},
-	}
-	s := &Service{repo: &mockRepo{summaries: items, totalSummaries: 2}}
-	got, total, err := s.ListBusinessEmployeeChecklistSummaries(context.Background(), 1, domain.ListBusinessEmployeeChecklistSummariesParams{Limit: 10})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if len(got) != 2 || total != 2 {
-		t.Errorf("expected 2 items, got %d (total=%d)", len(got), total)
-	}
-}
-
-func TestListBusinessEmployeeChecklistSummaries_PropagatesRepoError(t *testing.T) {
-	want := errors.New("list error")
-	s := &Service{repo: &mockRepo{err: want}}
-	_, _, err := s.ListBusinessEmployeeChecklistSummaries(context.Background(), 1, domain.ListBusinessEmployeeChecklistSummariesParams{Limit: 10})
-	if !errors.Is(err, want) {
-		t.Errorf("expected sentinel, got %v", err)
-	}
-}
-
-func TestListBusinessEmployeeChecklistSummaries_DefaultsLimitWhenZero(t *testing.T) {
-	s := &Service{repo: &mockRepo{summaries: []domain.EmployeeChecklistSummaryRecord{{ChecklistID: 1}}}}
-	_, _, err := s.ListBusinessEmployeeChecklistSummaries(context.Background(), 1, domain.ListBusinessEmployeeChecklistSummariesParams{Limit: 0})
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
 	}
 }
 

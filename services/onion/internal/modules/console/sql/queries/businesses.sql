@@ -13,7 +13,7 @@ ORDER BY created_at ASC
 LIMIT 1;
 
 -- name: UpdateBusiness :exec
-UPDATE businesses SET name = ? WHERE id = ? AND owner_id = ?;
+UPDATE businesses SET name = ? WHERE id = ?;
 
 -- name: DeleteBusiness :exec
-DELETE FROM businesses WHERE id = ? AND owner_id = ?;
+DELETE FROM businesses WHERE id = ?;

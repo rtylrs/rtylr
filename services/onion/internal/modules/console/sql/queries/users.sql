@@ -21,15 +21,15 @@ VALUES (?, ?, ?, ?);
 -- name: UpdateUser :exec
 UPDATE users
 SET full_name = ?, email = ?, updated_at = NOW()
-WHERE id = ? AND business_id = ?;
+WHERE id = ?;
 
 -- name: DeleteUser :exec
-DELETE FROM users WHERE id = ? AND business_id = ?;
+DELETE FROM users WHERE id = ?;
 
 -- name: BanUser :exec
 UPDATE users
 SET is_banned = TRUE, ban_reason = ?, banned_at = NOW()
-WHERE id = ? AND business_id = ?;
+WHERE id = ?;
 
 -- name: UnbanUser :exec
 UPDATE users
@@ -37,4 +37,4 @@ SET is_banned = FALSE, ban_reason = NULL, banned_at = NULL
 WHERE id = ?;
 
 -- name: SetConsoleAdmin :exec
-UPDATE users SET is_console_admin = ? WHERE id = ? AND business_id = ?;
+UPDATE users SET is_console_admin = ? WHERE id = ?;

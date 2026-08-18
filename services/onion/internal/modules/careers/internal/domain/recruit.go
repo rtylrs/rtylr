@@ -50,8 +50,8 @@ type RecruitCareerInput struct {
 	Seniority      string
 	Details        string
 	Requirements   string
-	SalaryMin      float64
-	SalaryMax      float64
+	SalaryMin      money.Amount
+	SalaryMax      money.Amount
 	SalaryCurrency string
 	IsPublished    bool
 }

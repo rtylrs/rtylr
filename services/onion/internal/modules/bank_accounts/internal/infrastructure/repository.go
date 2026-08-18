@@ -132,6 +132,11 @@ func nullBool(b sql.NullBool) bool {
 
 func nullTime(t sql.NullTime) time.Time {
 	if t.Valid {
+		return t.Time
+	}
+	return time.Time{}
+}
+
 func parseMoneyNull(s sql.NullString) money.Amount {
 	if !s.Valid {
 		return 0

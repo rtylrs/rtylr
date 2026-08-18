@@ -45,10 +45,10 @@ UPDATE subscriptions
 SET plan_id = ?, status = ?, seat_count = ?, trial_ends_at = ?, next_billing_date = ?,
     current_period_ends_at = ?, paddle_subscription_id = ?, paddle_customer_id = ?,
     updated_at = NOW()
-WHERE id = ? AND owner_id = ?;
+WHERE id = ?;
 
 -- name: DeleteSubscription :exec
-DELETE FROM subscriptions WHERE id = ? AND owner_id = ?;
+DELETE FROM subscriptions WHERE id = ?;
 
 -- name: CountActiveSeatsForOwner :one
 SELECT COUNT(DISTINCT user_id)
