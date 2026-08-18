@@ -5,7 +5,11 @@ import { getRouteApi } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { addDays, formatWeekDayShort, startOfWeek } from '../../shared/lib/dateUtils';
+import { formatWorkEntryTarget } from '../../shared/lib/timeEntryLabel';
+import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
+import { useProjects } from '../projects/useProjects';
+import { useTasks } from '../tasks/useTasks';
 import AddHours from './AddHours';
 import { WORK_MODES } from './workModes';
 import {
@@ -59,6 +63,17 @@ const MyDay = (): React.JSX.Element => {
 
   const day = data?.workDay;
   const lines = useMemo(() => data?.lines ?? [], [data]);
+
+  // For labelling each line with what it was actually for - the same
+  // project/task data Add Hours already fetches for its own pickers.
+  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
+  const { data: projects } = useProjects(activeWorkspaceId);
+  const { data: tasks } = useTasks({});
+  const projectsById = useMemo(
+    () => new Map((projects ?? []).map((project) => [project.id, project])),
+    [projects]
+  );
+  const tasksById = useMemo(() => new Map((tasks ?? []).map((task) => [task.id, task])), [tasks]);
 
   const clocked = day?.clockedMinutes ?? 0;
   const logged = day?.loggedMinutes ?? 0;
@@ -274,37 +289,45 @@ const MyDay = (): React.JSX.Element => {
               )}
 
               <ul className="mb-4 space-y-1.5">
-                {lines.map((line) => (
-                  <li
-                    key={line.id}
-                    className="flex items-start gap-3 rounded-md p-2"
-                    style={{ background: 'var(--flow-hover)' }}
-                  >
-                    <span
-                      className="text-[13px] font-semibold tabular-nums"
-                      style={{ color: 'var(--accent-fg)' }}
+                {lines.map((line) => {
+                  const project = line.projectId ? projectsById.get(line.projectId) : undefined;
+                  const task = line.taskId ? tasksById.get(line.taskId) : undefined;
+                  const target = formatWorkEntryTarget(task, project);
+                  return (
+                    <li
+                      key={line.id}
+                      className="flex items-start gap-3 rounded-md p-2"
+                      style={{ background: 'var(--flow-hover)' }}
                     >
-                      {formatDurationClock(line.durationMinutes ?? 0)}
-                    </span>
-                    <span
-                      className="min-w-0 flex-1 text-[13px]"
-                      style={{ color: 'var(--flow-text)' }}
-                    >
-                      {line.description}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => line.id && deleteLine.mutate({ id: line.id, date })}
-                      aria-label={t('flow.time.deleteLineLabel', {
-                        duration: formatDurationClock(line.durationMinutes ?? 0),
-                      })}
-                      className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded md:h-8 md:w-8"
-                      style={{ color: 'var(--flow-text-muted)' }}
-                    >
-                      <Trash2 size={14} aria-hidden="true" />
-                    </button>
-                  </li>
-                ))}
+                      <span
+                        className="text-[13px] font-semibold tabular-nums"
+                        style={{ color: 'var(--accent-fg)' }}
+                      >
+                        {formatDurationClock(line.durationMinutes ?? 0)}
+                      </span>
+                      <span
+                        className="min-w-0 flex-1 text-[13px]"
+                        style={{ color: 'var(--flow-text)' }}
+                      >
+                        {target && <span className="block font-semibold">{target}</span>}
+                        <span style={{ color: target ? 'var(--flow-text-muted)' : undefined }}>
+                          {line.description}
+                        </span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => line.id && deleteLine.mutate({ id: line.id, date })}
+                        aria-label={t('flow.time.deleteLineLabel', {
+                          duration: formatDurationClock(line.durationMinutes ?? 0),
+                        })}
+                        className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded md:h-8 md:w-8"
+                        style={{ color: 'var(--flow-text-muted)' }}
+                      >
+                        <Trash2 size={14} aria-hidden="true" />
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
 
               {/* The old "+ Log time" button opened a modal (LogTimeDialog);

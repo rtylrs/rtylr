@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { CircleAlert } from 'lucide-react';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { formatFullDayLabel, formatEntryTimestamp } from '../../shared/lib/dateUtils';
+import { formatWorkEntryTarget } from '../../shared/lib/timeEntryLabel';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { useProjects } from '../projects/useProjects';
@@ -138,14 +139,10 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
   );
   const taskDescription = selectedTask?.description?.trim() ?? '';
 
-  const targetLabel = useMemo(() => {
-    if (selectedTask) {
-      return selectedTask.identifier
-        ? `${selectedTask.identifier} ${selectedTask.title}`
-        : selectedTask.title;
-    }
-    return selectedProject?.name ?? '';
-  }, [selectedTask, selectedProject]);
+  const targetLabel = useMemo(
+    () => formatWorkEntryTarget(selectedTask, selectedProject),
+    [selectedTask, selectedProject]
+  );
 
   const hoursInt = Number.parseInt(hours, 10) || 0;
   const minutesInt = Number.parseInt(minutesRaw, 10) || 0;
