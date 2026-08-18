@@ -637,7 +637,8 @@
   },
   "projectSettings": {
     "pageTitle": "Réglages du projet · rtylr",
-    "removeMemberLabel": "Supprimer"
+    "removeMemberLabel": "Supprimer",
+    "emailPlaceholder": "Adresse e-mail"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection"
