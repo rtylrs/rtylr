@@ -3,6 +3,7 @@ import { Package, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toFiniteNumber, unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
+import WidgetHeader from './WidgetHeader';
 
 interface StockItem {
   productName?: string;
@@ -33,15 +34,7 @@ const LowStockWidget: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="flex items-center gap-2 px-4 py-3"
-        style={{ borderBottom: '1px solid var(--dash-border)' }}
-      >
-        <Package size={14} style={{ color: 'var(--aging-critical)' }} />
-        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          Low stock
-        </p>
-      </div>
+      <WidgetHeader icon={Package} iconColor="var(--aging-critical)" title="Low stock" />
       <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
         {items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">

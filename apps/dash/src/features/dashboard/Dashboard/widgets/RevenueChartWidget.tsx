@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { BarChart3 } from 'lucide-react';
 import { useRevenueSeries } from '../../../../shared/hooks/queries/useRevenueSeries';
+import WidgetHeader from './WidgetHeader';
 
 /**
  * 7-day revenue bars. Data comes from `/insights/revenue` via
@@ -44,15 +45,7 @@ const RevenueChartWidget: React.FC = (): React.JSX.Element => {
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="flex items-center gap-2 px-4 py-3"
-        style={{ borderBottom: '1px solid var(--dash-border)' }}
-      >
-        <BarChart3 size={14} style={{ color: 'var(--accent)' }} />
-        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          Revenue (7 days)
-        </p>
-      </div>
+      <WidgetHeader icon={BarChart3} iconColor="var(--accent)" title="Revenue (7 days)" />
       <div className="flex-1 flex items-end gap-2 px-4 pb-4 pt-2">
         {buckets.map((b, i) => (
           <div key={`${b.label}-${i}`} className="flex-1 flex flex-col items-center gap-1">

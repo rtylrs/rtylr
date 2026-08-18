@@ -3,6 +3,7 @@ import { PieChart } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toFiniteNumber, unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
+import WidgetHeader from './WidgetHeader';
 
 interface AppSlice {
   app: string;
@@ -62,15 +63,7 @@ const RevenueByAppWidget: React.FC = (): React.JSX.Element => {
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="flex items-center gap-2 px-4 py-3"
-        style={{ borderBottom: '1px solid var(--dash-border)' }}
-      >
-        <PieChart size={14} style={{ color: 'var(--accent)' }} />
-        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          Revenue by app (MTD)
-        </p>
-      </div>
+      <WidgetHeader icon={PieChart} iconColor="var(--accent)" title="Revenue by app (MTD)" />
       {slices.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
           <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>

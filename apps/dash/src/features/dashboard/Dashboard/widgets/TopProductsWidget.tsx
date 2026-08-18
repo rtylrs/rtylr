@@ -3,6 +3,7 @@ import { ShoppingBag } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toFiniteNumber, unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
+import WidgetHeader from './WidgetHeader';
 
 interface WidgetProduct {
   productId?: number;
@@ -67,15 +68,7 @@ const TopProductsWidget: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="flex items-center gap-2 px-4 py-3"
-        style={{ borderBottom: '1px solid var(--dash-border)' }}
-      >
-        <ShoppingBag size={14} style={{ color: '#8b5cf6' }} />
-        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          Top products
-        </p>
-      </div>
+      <WidgetHeader icon={ShoppingBag} iconColor="#8b5cf6" title="Top products" />
       <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
         {products.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">

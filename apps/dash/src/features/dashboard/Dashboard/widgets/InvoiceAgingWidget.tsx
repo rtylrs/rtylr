@@ -3,6 +3,7 @@ import { Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toFiniteNumber, unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
+import WidgetHeader from './WidgetHeader';
 
 /**
  * Invoice aging buckets - accounts-receivable at a glance. Hits
@@ -61,15 +62,7 @@ const InvoiceAgingWidget: React.FC = (): React.JSX.Element => {
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="flex items-center gap-2 px-4 py-3"
-        style={{ borderBottom: '1px solid var(--dash-border)' }}
-      >
-        <Clock size={14} style={{ color: 'var(--dash-text-muted)' }} />
-        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          Invoice aging
-        </p>
-      </div>
+      <WidgetHeader icon={Clock} title="Invoice aging" />
       {isError ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
           <p className="text-xs text-red-500">Failed to load invoice aging data.</p>

@@ -14,6 +14,7 @@ import {
   Bell,
   LogOut,
   ChevronRight,
+  ChevronsUpDown,
   Sun,
   Moon,
   Monitor,
@@ -159,6 +160,7 @@ const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon, badge }) =
       )}
       <motion.span
         className="relative inline-flex shrink-0"
+        style={{ color: isActive ? 'var(--accent)' : undefined }}
         whileHover={{ scale: 1.18, rotate: -4 }}
         transition={{ type: 'spring', stiffness: 500, damping: 18 }}
       >
@@ -493,7 +495,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                       </span>
                     )}
                   </div>
-                  <ChevronRight
+                  <ChevronsUpDown
                     size={12}
                     className="shrink-0"
                     style={{ color: 'var(--dash-text-dim)' }}
@@ -612,10 +614,16 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                     color: 'var(--dash-text-muted)',
                     border: '1px solid var(--dash-border)',
                   }}
-                  aria-label="Open command palette"
+                  aria-label={t('nav.openCommandPalette', 'Open command palette')}
                 >
-                  <Search size={12} />
-                  <span className="text-[11px]">Search</span>
+                  <motion.span
+                    className="inline-flex"
+                    whileHover={{ scale: 1.18, rotate: -4 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+                  >
+                    <Search size={12} />
+                  </motion.span>
+                  <span className="text-[11px]">{t('nav.search', 'Search')}</span>
                   <kbd
                     className="hidden sm:inline-flex items-center px-1 py-0.5 rounded text-[9px] font-mono"
                     style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
@@ -629,15 +637,22 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}
                   aria-label={
-                    unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'
+                    unreadCount > 0
+                      ? t('nav.notificationsUnread', '{{count}} unread notifications', {
+                          count: unreadCount,
+                        })
+                      : t('nav.notifications', 'Notifications')
                   }
                 >
                   <Bell size={14} />
                   {unreadCount > 0 && (
                     <span
-                      className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full"
+                      className="absolute -top-0.5 -right-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full px-0.5 text-[9px] font-semibold leading-none text-white"
                       style={{ background: 'var(--status-cancelled)' }}
-                    />
+                      aria-hidden="true"
+                    >
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
                   )}
                 </button>
               </div>
