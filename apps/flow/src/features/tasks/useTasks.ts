@@ -66,6 +66,7 @@ export function useCreateTask() {
       dueDate?: string;
       effortMinutes?: number;
       estimatedHours?: number;
+      labels?: string[];
     }) => {
       return unwrap(flowApi.createTask(data));
     },
