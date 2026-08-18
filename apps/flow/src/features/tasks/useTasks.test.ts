@@ -128,6 +128,16 @@ describe('useCreateTask', () => {
     await act(() => result.current.mutateAsync(input));
     expect(flowApi.createTask).toHaveBeenCalledWith(input);
   });
+
+  it('passes labels through to createTask unchanged', async () => {
+    (flowApi.createTask as any).mockResolvedValue({ id: 't-new' });
+    const { result } = renderHook(() => useCreateTask(), {
+      wrapper: createWrapper(),
+    });
+    const input = { projectId: 'p-1', workspaceId: 'ws-1', title: 'New task', labels: ['5'] };
+    await act(() => result.current.mutateAsync(input));
+    expect(flowApi.createTask).toHaveBeenCalledWith(input);
+  });
 });
 
 describe('useUpdateTask', () => {
