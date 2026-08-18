@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
@@ -43,6 +43,7 @@ import {
 import { useLabels, useSetTaskLabels } from './useLabels';
 import { useTaskActivity } from './useTaskActivity';
 import { useTaskRealtime } from '../../shared/lib/useTaskRealtime';
+import { useCurrentProject } from '../projects/useCurrentProject';
 import TimePanel from './components/TimePanel';
 import { useFlowStore, Attachment, Task } from '../../shared/stores/flowStore';
 import type { ApiTask, ApiTaskDetail, ApiTaskActivity } from '../../shared/services/flowApi';
@@ -168,7 +169,10 @@ const TaskDetail: React.FC = () => {
   const addAttachmentMut = useAddAttachment();
   const removeAttachmentMut = useRemoveAttachment();
 
-  const { data: allLabels = [] } = useLabels();
+  const taskWorkspaceId = detail?.task?.workspaceId;
+  const taskProjectId = detail?.task?.projectId;
+  const { project: taskProject } = useCurrentProject(taskWorkspaceId, taskProjectId);
+  const { data: allLabels = [] } = useLabels(taskWorkspaceId);
   const {
     members,
     cycles,
@@ -179,8 +183,15 @@ const TaskDetail: React.FC = () => {
     tasks: allTasks,
     sections,
     customFieldDefinitions,
+    setActiveWorkspace,
   } = useFlowStore();
   const [labelPickerOpen, setLabelPickerOpen] = useState(false);
+
+  useEffect(() => {
+    if (taskWorkspaceId && taskWorkspaceId !== 'personal') {
+      setActiveWorkspace(taskWorkspaceId);
+    }
+  }, [setActiveWorkspace, taskWorkspaceId]);
 
   const updateTask = (taskId: string, patch: Partial<Task>) => {
     updateTaskMut.mutate({ id: taskId, data: patch as Partial<ApiTask> });
@@ -244,7 +255,7 @@ const TaskDetail: React.FC = () => {
     );
   }
 
-  const project = projects.find((p) => p.id === task.projectId);
+  const project = taskProject ?? projects.find((p) => p.id === task.projectId);
   const projectSections = sections
     .filter((s) => s.projectId === task.projectId)
     .sort((a, b) => a.order - b.order);
@@ -342,7 +353,7 @@ const TaskDetail: React.FC = () => {
             <Breadcrumbs
               items={[
                 {
-                  label: project?.name || t('flow.taskDetail.project'),
+                  label: project?.name || task.projectName || t('flow.taskDetail.project'),
                   to: `/w/${task.workspaceId}/p/${task.projectId}`,
                 },
                 { label: task.identifier ?? task.id },
