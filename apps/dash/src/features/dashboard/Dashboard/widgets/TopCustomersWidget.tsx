@@ -3,6 +3,7 @@ import { Crown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toFiniteNumber, unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
+import WidgetHeader from './WidgetHeader';
 
 interface TopCustomer {
   id: number;
@@ -58,15 +59,7 @@ const TopCustomersWidget: React.FC = (): React.JSX.Element => {
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="flex items-center gap-2 px-4 py-3"
-        style={{ borderBottom: '1px solid var(--dash-border)' }}
-      >
-        <Crown size={14} style={{ color: 'var(--accent)' }} />
-        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          Top customers
-        </p>
-      </div>
+      <WidgetHeader icon={Crown} iconColor="var(--accent)" title="Top customers" />
       {customers.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
           <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>

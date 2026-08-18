@@ -1,7 +1,8 @@
 import React from 'react';
-import { Users, ArrowUpRight } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { useTeam } from '../../../../shared/hooks/queries/useTeam';
+import WidgetHeader from './WidgetHeader';
 
 const TeamWidget: React.FC = () => {
   const navigate = useNavigate();
@@ -10,24 +11,11 @@ const TeamWidget: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="flex items-center justify-between px-4 py-3"
-        style={{ borderBottom: '1px solid var(--dash-border)' }}
-      >
-        <div className="flex items-center gap-2">
-          <Users size={14} style={{ color: 'var(--dash-text-muted)' }} />
-          <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-            Team
-          </p>
-        </div>
-        <button
-          onClick={() => navigate({ to: '/team' })}
-          className="flex items-center gap-1 text-xs font-medium"
-          style={{ color: '#4583C4' }}
-        >
-          Manage <ArrowUpRight size={11} />
-        </button>
-      </div>
+      <WidgetHeader
+        icon={Users}
+        title="Team"
+        action={{ label: 'Manage', onClick: () => navigate({ to: '/team' }) }}
+      />
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {members.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">

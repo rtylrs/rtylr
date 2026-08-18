@@ -3,6 +3,7 @@ import { Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../../../shared/lib/api';
+import WidgetHeader from './WidgetHeader';
 
 interface PendingRequest {
   staffName?: string;
@@ -30,15 +31,7 @@ const PendingWidget: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full">
-      <div
-        className="flex items-center gap-2 px-4 py-3"
-        style={{ borderBottom: '1px solid var(--dash-border)' }}
-      >
-        <Clock size={14} style={{ color: '#f59e0b' }} />
-        <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-          Pending HR approvals
-        </p>
-      </div>
+      <WidgetHeader icon={Clock} iconColor="var(--status-trial)" title="Pending HR approvals" />
       <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
         {isError ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
