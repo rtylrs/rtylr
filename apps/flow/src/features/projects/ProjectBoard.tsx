@@ -370,7 +370,7 @@ const ProjectBoard: React.FC = () => {
                     if (e.key === 'Enter') handleAddColumn();
                     if (e.key === 'Escape') setAddingColumn(false);
                   }}
-                  placeholder="Column name"
+                  placeholder={t('flow.board.columnName')}
                   className="w-full bg-transparent outline-none text-[12px] font-medium mb-1.5"
                   style={{ color: 'var(--flow-text)' }}
                 />
