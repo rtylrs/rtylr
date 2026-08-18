@@ -68,8 +68,16 @@ func PromptToolsForRequest(mode CaretMode, request, systemContext string) []Tool
 		return nil
 	}
 
-	text := normalizePromptToolText(request + " " + systemContext)
 	plan := ClassifyCaretRequest(request, systemContext)
+	if plan.Kind == IntentConversation {
+		// The classifier found no business domain, action, or freshness signal
+		// at all. Offering tools here just tempts the model into calling a
+		// business capability for small talk or general-knowledge questions
+		// that have nothing to do with this business's own data.
+		return nil
+	}
+
+	text := normalizePromptToolText(request + " " + systemContext)
 	scored := make([]promptToolScore, 0, len(tools))
 	for i, tool := range tools {
 		score := promptToolScoreForText(tool, text) + promptToolScoreForPlan(tool, plan)
@@ -78,7 +86,7 @@ func PromptToolsForRequest(mode CaretMode, request, systemContext string) []Tool
 		}
 	}
 
-	if len(scored) == 0 {
+	if len(scored) == 0 && plan.NeedsTool {
 		for i, tool := range tools {
 			if _, ok := promptToolGlobalNames[tool.Name]; ok {
 				scored = append(scored, promptToolScore{tool: tool, score: 1000, index: i})
@@ -106,7 +114,7 @@ func PromptToolsForRequest(mode CaretMode, request, systemContext string) []Tool
 
 func promptToolScoreForPlan(tool ToolDef, plan CaretRequestPlan) int {
 	score := 0
-	if plan.Kind == IntentSnapshot {
+	if plan.NeedsTool {
 		if _, ok := promptToolGlobalNames[tool.Name]; ok {
 			score += 700
 		}
@@ -131,9 +139,6 @@ func promptToolScoreForPlan(tool ToolDef, plan CaretRequestPlan) int {
 
 func promptToolScoreForText(tool ToolDef, text string) int {
 	score := 0
-	if _, ok := promptToolGlobalNames[tool.Name]; ok {
-		score += 900
-	}
 
 	module := strings.ToLower(tool.Module)
 	if keywords := promptToolModuleKeywords[module]; promptToolTextContainsAny(text, keywords) {
