@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 var ErrBillNotFound = errors.New("bill not found")
@@ -13,7 +15,7 @@ type Bill struct {
 	OwnerID     int64     `json:"owner_id"`
 	BusinessID  int64     `json:"business_id"`
 	SupplierID  int64     `json:"supplier_id"`
-	Amount      float64   `json:"amount"`
+	Amount      money.Amount   `json:"amount"`
 	Currency    string    `json:"currency"`
 	DueDate     time.Time `json:"due_date"`
 	Status      string    `json:"status"`
@@ -52,7 +54,7 @@ func (b *Bill) FromRow(row *sql.Rows) error {
 
 type BillInput struct {
 	SupplierID  int64   `json:"supplier_id"`
-	Amount      float64 `json:"amount"`
+	Amount      money.Amount `json:"amount"`
 	Currency    string  `json:"currency"`
 	DueDate     string  `json:"due_date"`
 	Status      string  `json:"status"`

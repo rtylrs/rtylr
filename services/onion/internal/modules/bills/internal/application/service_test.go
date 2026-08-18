@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type mockRepo struct {
@@ -202,13 +203,13 @@ func TestList_MultipleBills(t *testing.T) {
 }
 
 func TestGet_ReturnsFields(t *testing.T) {
-	bill := domain.Bill{ID: 7, OwnerID: 1, Amount: 500.0, Currency: "USD", Status: "open"}
+	bill := domain.Bill{ID: 7, OwnerID: 1, Amount: money.Amount(50000), Currency: "USD", Status: "open"}
 	s := &Service{repo: &mockRepo{getResult: bill}}
 	got, err := s.GetBill(context.Background(), 1, 7)
 	if err != nil {
 		t.Fatalf("unexpected: %v", err)
 	}
-	if got.Amount != 500.0 || got.Currency != "USD" || got.Status != "open" {
+	if got.Amount != money.Amount(50000) || got.Currency != "USD" || got.Status != "open" {
 		t.Errorf("fields wrong: %+v", got)
 	}
 }

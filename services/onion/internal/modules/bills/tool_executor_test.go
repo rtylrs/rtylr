@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 func TestParseRecordBillToolInput(t *testing.T) {
@@ -22,7 +23,7 @@ func TestParseRecordBillToolInput(t *testing.T) {
 	if parsed.SupplierID != 42 {
 		t.Fatalf("SupplierID = %d, want 42", parsed.SupplierID)
 	}
-	if parsed.Amount != 250.75 {
+	if parsed.Amount != money.Amount(25075) {
 		t.Fatalf("Amount = %v, want 250.75", parsed.Amount)
 	}
 	if parsed.Currency != "USD" {
@@ -110,7 +111,7 @@ func TestBillToolPayloadFormatsFields(t *testing.T) {
 	payload := billToolPayload(domain.Bill{
 		ID:          5,
 		SupplierID:  42,
-		Amount:      250.75,
+		Amount: money.Amount(25075),
 		Currency:    "USD",
 		DueDate:     dueDate,
 		Status:      "pending",

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/modules/bills/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
@@ -44,7 +45,7 @@ func TestCreate_Bill_ReturnsPositiveID(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.BillInput{
-		Amount:   250.00,
+		Amount: money.Amount(25000),
 		Currency: "USD",
 		DueDate:  "2026-12-31",
 		Status:   "pending",
@@ -65,7 +66,7 @@ func TestCreate_Bill_AppearsInList(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.BillInput{
-		Amount:   100.00,
+		Amount: money.Amount(10000),
 		Currency: "USD",
 		DueDate:  "2026-11-30",
 		Status:   "pending",
@@ -99,7 +100,7 @@ func TestGet_Bill_ReturnsBill(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.BillInput{
-		Amount:   75.50,
+		Amount: money.Amount(7550),
 		Currency: "USD",
 		DueDate:  "2026-10-15",
 		Status:   "pending",
@@ -125,7 +126,7 @@ func TestGet_Bill_WrongOwnerReturnsNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount: 50.00, Currency: "USD", DueDate: "2026-09-30", Status: "pending",
+		Amount: money.Amount(5000), Currency: "USD", DueDate: "2026-09-30", Status: "pending",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -154,14 +155,14 @@ func TestUpdate_Bill_ChangesAmount(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount: 100.00, Currency: "USD", DueDate: "2026-08-31", Status: "pending",
+		Amount: money.Amount(10000), Currency: "USD", DueDate: "2026-08-31", Status: "pending",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
 	}
 
 	if err := repo.Update(ctx, testutil.OwnerID, id, domain.BillInput{
-		Amount: 200.00, Currency: "USD", DueDate: "2026-08-31", Status: "pending",
+		Amount: money.Amount(20000), Currency: "USD", DueDate: "2026-08-31", Status: "pending",
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
@@ -170,8 +171,8 @@ func TestUpdate_Bill_ChangesAmount(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Get after update: %v", err)
 	}
-	if bill.Amount != 200.00 {
-		t.Errorf("Amount = %f, want 200.00", bill.Amount)
+	if bill.Amount != money.Amount(20000) {
+		t.Errorf("Amount = %s, want 200.00", bill.Amount.String())
 	}
 }
 
@@ -181,7 +182,7 @@ func TestDelete_Bill_NoError(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount: 300.00, Currency: "USD", DueDate: "2026-07-31", Status: "pending",
+		Amount: money.Amount(30000), Currency: "USD", DueDate: "2026-07-31", Status: "pending",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -198,7 +199,7 @@ func TestDelete_Bill_ThenNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount: 150.00, Currency: "USD", DueDate: "2026-06-30", Status: "pending",
+		Amount: money.Amount(15000), Currency: "USD", DueDate: "2026-06-30", Status: "pending",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -220,7 +221,7 @@ func TestDelete_Bill_WrongOwnerReturnsNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount: 90.00, Currency: "USD", DueDate: "2026-05-31", Status: "pending",
+		Amount: money.Amount(9000), Currency: "USD", DueDate: "2026-05-31", Status: "pending",
 	})
 	if err != nil {
 		t.Fatalf("Create: %v", err)
@@ -238,7 +239,7 @@ func TestList_Bills_ItemsHaveOwnerID(t *testing.T) {
 	ctx := context.Background()
 
 	_, _ = repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount: 10.00, Currency: "USD", DueDate: "2026-04-30", Status: "pending",
+		Amount: money.Amount(1000), Currency: "USD", DueDate: "2026-04-30", Status: "pending",
 	})
 
 	items, err := repo.List(ctx, testutil.OwnerID)
@@ -258,7 +259,7 @@ func TestCreate_Bill_DefaultCurrencyUSD(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount:  20.00,
+		Amount: money.Amount(2000),
 		DueDate: "2026-03-31",
 		Status:  "pending",
 		// Currency intentionally blank -> defaults to USD
@@ -296,7 +297,7 @@ func TestCreate_Bill_AmountStored(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount:   456.78,
+		Amount: money.Amount(45678),
 		Currency: "USD",
 		DueDate:  "2026-12-01",
 		Status:   "pending",
@@ -309,8 +310,8 @@ func TestCreate_Bill_AmountStored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Get: %v", err)
 	}
-	if bill.Amount != 456.78 {
-		t.Errorf("Amount = %f, want 456.78", bill.Amount)
+	if bill.Amount != money.Amount(45678) {
+		t.Errorf("Amount = %s, want 456.78", bill.Amount.String())
 	}
 }
 
@@ -321,7 +322,7 @@ func TestCreate_Bill_VendorStored(t *testing.T) {
 
 	desc := "Electricity bill"
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount:      200.00,
+		Amount: money.Amount(20000),
 		Currency:    "USD",
 		DueDate:     "2026-11-15",
 		Status:      "pending",
@@ -348,7 +349,7 @@ func TestCreate_Bill_WithSupplier(t *testing.T) {
 	// Use fixture supplier id=5101
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
 		SupplierID: 5101,
-		Amount:     350.00,
+		Amount: money.Amount(35000),
 		Currency:   "USD",
 		DueDate:    "2026-10-31",
 		Status:     "pending",
@@ -372,7 +373,7 @@ func TestUpdate_Bill_ChangesStatus(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount:  55.00,
+		Amount: money.Amount(5500),
 		DueDate: "2026-09-01",
 		Status:  "pending",
 	})
@@ -381,7 +382,7 @@ func TestUpdate_Bill_ChangesStatus(t *testing.T) {
 	}
 
 	if err := repo.Update(ctx, testutil.OwnerID, id, domain.BillInput{
-		Amount:  55.00,
+		Amount: money.Amount(5500),
 		DueDate: "2026-09-01",
 		Status:  "paid",
 	}); err != nil {
@@ -403,7 +404,7 @@ func TestUpdate_Bill_ChangesDescription(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount:      60.00,
+		Amount: money.Amount(6000),
 		Currency:    "USD",
 		DueDate:     "2026-08-15",
 		Status:      "pending",
@@ -414,7 +415,7 @@ func TestUpdate_Bill_ChangesDescription(t *testing.T) {
 	}
 
 	if err := repo.Update(ctx, testutil.OwnerID, id, domain.BillInput{
-		Amount:      60.00,
+		Amount: money.Amount(6000),
 		Currency:    "USD",
 		DueDate:     "2026-08-15",
 		Status:      "pending",
@@ -439,7 +440,7 @@ func TestCreate_Bill_DefaultStatusPending(t *testing.T) {
 
 	// Omit status; repository should default to "pending".
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount:  35.00,
+		Amount: money.Amount(3500),
 		DueDate: "2026-07-01",
 	})
 	if err != nil {
@@ -461,7 +462,7 @@ func TestList_Bills_ItemsHaveNonZeroID(t *testing.T) {
 	ctx := context.Background()
 
 	_, _ = repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount: 11.00, DueDate: "2026-06-01", Status: "pending",
+		Amount: money.Amount(1100), DueDate: "2026-06-01", Status: "pending",
 	})
 
 	items, err := repo.List(ctx, testutil.OwnerID)
@@ -481,7 +482,7 @@ func TestCreate_Bill_CurrencyEUR(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount:   80.00,
+		Amount: money.Amount(8000),
 		Currency: "EUR",
 		DueDate:  "2026-05-31",
 		Status:   "pending",
@@ -511,7 +512,7 @@ func TestCreate_ThenList_FindsNewBill(t *testing.T) {
 	beforeCount := len(beforeItems)
 
 	_, err = repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount:  999.00,
+		Amount: money.Amount(99900),
 		DueDate: "2026-12-31",
 		Status:  "pending",
 	})
@@ -537,8 +538,8 @@ func TestSumByStatus_NoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SumByStatus: %v", err)
 	}
-	if sum < 0 {
-		t.Errorf("expected non-negative sum, got %f", sum)
+	if sum < money.Amount(0) {
+		t.Errorf("expected non-negative sum, got %s", sum.String())
 	}
 }
 
@@ -551,8 +552,8 @@ func TestSumByStatus_ZeroOwnerReturnsZero(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SumByStatus(ownerID=0): %v", err)
 	}
-	if sum != 0 {
-		t.Errorf("expected 0 for ownerID=0, got %f", sum)
+	if sum != money.Amount(0) {
+		t.Errorf("expected 0 for ownerID=0, got %s", sum.String())
 	}
 }
 
@@ -562,7 +563,7 @@ func TestSumByStatus_ReflectsCreatedBill(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount:  123.45,
+		Amount: money.Amount(12345),
 		DueDate: "2026-12-31",
 		Status:  "pending",
 	})
@@ -575,8 +576,8 @@ func TestSumByStatus_ReflectsCreatedBill(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SumByStatus: %v", err)
 	}
-	if sum < 123.45 {
-		t.Errorf("expected sum >= 123.45, got %f", sum)
+	if sum < money.Amount(12345) {
+		t.Errorf("expected sum >= 123.45, got %s", sum.String())
 	}
 }
 
@@ -612,7 +613,7 @@ func TestCountByStatus_ReflectsCreatedBill(t *testing.T) {
 	ctx := context.Background()
 
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BillInput{
-		Amount:  50.00,
+		Amount: money.Amount(5000),
 		DueDate: "2026-11-30",
 		Status:  "pending",
 	})

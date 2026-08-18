@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	financebillv1 "github.com/voxire/voxie/gen/go/finance/bill/v1"
@@ -53,9 +54,13 @@ func (a *BillAPI) CreateBill(ctx context.Context, req *financebillv1.CreateBillR
 	if err != nil {
 		return nil, err
 	}
+	amount, amountErr := money.FromFloat64(req.GetAmount())
+	if amountErr != nil {
+		return nil, billStatusError(http.StatusBadRequest, "amount must be a valid monetary value")
+	}
 	input := domain.BillInput{
 		SupplierID:  req.GetSupplierId(),
-		Amount:      req.GetAmount(),
+		Amount:      amount,
 		Currency:    req.GetCurrency(),
 		DueDate:     req.GetDueDate(),
 		Status:      req.GetStatus(),
@@ -80,9 +85,13 @@ func (a *BillAPI) UpdateBill(ctx context.Context, req *financebillv1.UpdateBillR
 	if body == nil {
 		return nil, billStatusError(http.StatusBadRequest, "Bill body is required")
 	}
+	amount, amountErr := money.FromFloat64(body.GetAmount())
+	if amountErr != nil {
+		return nil, billStatusError(http.StatusBadRequest, "amount must be a valid monetary value")
+	}
 	input := domain.BillInput{
 		SupplierID:  body.GetSupplierId(),
-		Amount:      body.GetAmount(),
+		Amount:      amount,
 		Currency:    body.GetCurrency(),
 		DueDate:     body.GetDueDate(),
 		Status:      body.GetStatus(),
@@ -139,7 +148,7 @@ func newBillProto(bill domain.Bill) *financebillv1.Bill {
 		Id:          bill.ID,
 		OwnerId:     bill.OwnerID,
 		SupplierId:  bill.SupplierID,
-		Amount:      bill.Amount,
+		Amount:      bill.Amount.Float64(),
 		Currency:    bill.Currency,
 		DueDate:     bill.DueDate.Format("2006-01-02"),
 		Status:      bill.Status,

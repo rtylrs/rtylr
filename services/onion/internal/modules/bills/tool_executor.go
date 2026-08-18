@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -118,7 +119,11 @@ func parseRecordBillToolInput(input map[string]any) (domain.BillInput, error) {
 		return domain.BillInput{}, errors.New("supplier_id is required")
 	}
 
-	amount, err := billToolFloat64(input["amount"])
+	amountValue, err := billToolFloat64(input["amount"])
+	if err != nil {
+		return domain.BillInput{}, fmt.Errorf("invalid amount: %w", err)
+	}
+	amount, err := money.FromFloat64(amountValue)
 	if err != nil {
 		return domain.BillInput{}, fmt.Errorf("invalid amount: %w", err)
 	}

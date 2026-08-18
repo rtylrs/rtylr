@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/bills/internal/domain"
 	"github.com/voxire/onion/internal/modules/bills/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type Repository struct {
@@ -110,7 +111,7 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 		OwnerID:     businessID,
 		BusinessID:  businessID,
 		SupplierID:  sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
-		Amount:      fmtFloat(input.Amount),
+		Amount:      formatAmount(input.Amount),
 		Currency:    nullableString(currency),
 		DueDate:     dueDate,
 		Status:      sqlc.NullFinanceBillsStatus{FinanceBillsStatus: sqlc.FinanceBillsStatus(status), Valid: true},
@@ -133,7 +134,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 
 	err = r.queries.UpdateBill(ctx, sqlc.UpdateBillParams{
 		SupplierID:  sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
-		Amount:      fmtFloat(input.Amount),
+		Amount:      formatAmount(input.Amount),
 		Currency:    nullableString(input.Currency),
 		DueDate:     dueDate,
 		Status:      sqlc.NullFinanceBillsStatus{FinanceBillsStatus: sqlc.FinanceBillsStatus(input.Status), Valid: input.Status != ""},
@@ -151,7 +152,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 
 // SumByStatus returns the total bill amount for a given status and owner.
 // It returns 0 when the owner has no bills with that status.
-func (r *Repository) SumByStatus(ctx context.Context, businessID int64, status string) (float64, error) {
+func (r *Repository) SumByStatus(ctx context.Context, businessID int64, status string) (money.Amount, error) {
 	total, err := r.queries.SumBillsByStatus(ctx, sqlc.SumBillsByStatusParams{
 		BusinessID: businessID,
 		Status:     sqlc.NullFinanceBillsStatus{FinanceBillsStatus: sqlc.FinanceBillsStatus(status), Valid: true},
@@ -229,15 +230,15 @@ func toInt64(i sql.NullInt64) int64 {
 	return 0
 }
 
-func fmtFloat(f float64) string {
-	return strconv.FormatFloat(f, 'f', 2, 64)
+func formatAmount(value money.Amount) string {
+	return value.String()
 }
 
-func parseFloat(s string) float64 {
+func parseFloat(s string) money.Amount {
 	if s == "" {
 		return 0
 	}
-	v, err := strconv.ParseFloat(s, 64)
+	v, err := money.FromString(s)
 	if err != nil {
 		logger.Global().Warn("failed to parse decimal amount from database", logger.String("value", s), logger.Error(err))
 		return 0
@@ -245,16 +246,24 @@ func parseFloat(s string) float64 {
 	return v
 }
 
-func parseFloatAny(v any) float64 {
+func parseFloatAny(v any) money.Amount {
 	switch val := v.(type) {
 	case nil:
 		return 0
 	case float64:
-		return val
+		parsed, err := money.FromFloat64(val)
+		if err != nil {
+			return 0
+		}
+		return parsed
 	case float32:
-		return float64(val)
+		parsed, err := money.FromFloat64(float64(val))
+		if err != nil {
+			return 0
+		}
+		return parsed
 	case int64:
-		return float64(val)
+		return parseFloat(strconv.FormatInt(val, 10))
 	case []byte:
 		return parseFloat(string(val))
 	case string:
