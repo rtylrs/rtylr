@@ -3,11 +3,11 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/booking_services/internal/domain"
 	"github.com/voxire/onion/internal/modules/booking_services/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type Repository struct {
@@ -38,7 +38,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Boo
 		OwnerID: ownerID, BusinessID: ownerID, Name: input.Name,
 		Description:     sql.NullString{String: input.Description, Valid: input.Description != ""},
 		DurationMinutes: int32(input.DurationMinutes),
-		Price:           strconv.FormatFloat(input.Price, 'f', 2, 64),
+		Price:           input.Price.String(),
 		Color:           sql.NullString{String: input.Color, Valid: input.Color != ""},
 		IsActive:        sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
@@ -59,7 +59,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		Name:            input.Name,
 		Description:     sql.NullString{String: input.Description, Valid: input.Description != ""},
 		DurationMinutes: int32(input.DurationMinutes),
-		Price:           strconv.FormatFloat(input.Price, 'f', 2, 64),
+		Price:           input.Price.String(),
 		Color:           sql.NullString{String: input.Color, Valid: input.Color != ""},
 		IsActive:        sql.NullBool{Bool: input.IsActive, Valid: true},
 		BusinessID:      businessID, ID: id,
@@ -85,7 +85,7 @@ func fromRow(ctx context.Context, row sqlc.BookingService) domain.BookingService
 	if row.Description.Valid {
 		s.Description = row.Description.String
 	}
-	if price, err := strconv.ParseFloat(row.Price, 64); err != nil {
+	if price, err := money.FromString(row.Price); err != nil {
 		logger.Ctx(ctx).Warn("failed to parse price from database",
 			logger.String("price_str", row.Price),
 			logger.Error(err),

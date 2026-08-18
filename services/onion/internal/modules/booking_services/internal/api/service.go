@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/booking_services/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/tenant"
 	bookingservicev1 "github.com/voxire/voxie/gen/go/booking/service/v1"
 )
@@ -109,14 +110,18 @@ func newBookingServiceInput(name, description string, durationMinutes int32, pri
 	if durationMinutes <= 0 {
 		return domain.BookingServiceInput{}, onekiterrors.New(http.StatusBadRequest, "duration_minutes must be greater than 0")
 	}
-	if price < 0 {
+	amount, amountErr := money.FromFloat64(price)
+	if amountErr != nil {
+		return domain.BookingServiceInput{}, onekiterrors.New(http.StatusBadRequest, "price must be a valid monetary amount")
+	}
+	if amount < 0 {
 		return domain.BookingServiceInput{}, onekiterrors.New(http.StatusBadRequest, "price must not be negative")
 	}
 	return domain.BookingServiceInput{
 		Name:            name,
 		Description:     description,
 		DurationMinutes: int(durationMinutes),
-		Price:           price,
+		Price:           amount,
 		Color:           color,
 		IsActive:        isActive,
 	}, nil
@@ -132,7 +137,7 @@ func newBookingServices(items []domain.BookingService) []*bookingservicev1.Booki
 			Name:            item.Name,
 			Description:     item.Description,
 			DurationMinutes: int32(item.DurationMinutes),
-			Price:           item.Price,
+			Price:           item.Price.Float64(),
 			Color:           item.Color,
 			IsActive:        item.IsActive,
 			CreatedAt:       formatTime(item.CreatedAt),

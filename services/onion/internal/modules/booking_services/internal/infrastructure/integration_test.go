@@ -6,6 +6,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/booking_services/internal/domain"
 	"github.com/voxire/onion/internal/modules/booking_services/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -45,7 +46,7 @@ func TestCreateBookingService_PersistsAndReturnsID(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BookingServiceInput{
 		Name:            "Haircut",
 		DurationMinutes: 30,
-		Price:           25.00,
+		Price:           money.Amount(2500),
 		IsActive:        true,
 		Color:           "#ff0000",
 	})
@@ -66,7 +67,7 @@ func TestCreateBookingService_NameIsStored(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BookingServiceInput{
 		Name:            "Massage",
 		DurationMinutes: 60,
-		Price:           80.00,
+		Price:           money.Amount(8000),
 		IsActive:        true,
 	})
 	if err != nil {
@@ -97,7 +98,7 @@ func TestCreateBookingService_DurationMinutesIsStored(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BookingServiceInput{
 		Name:            "Facial",
 		DurationMinutes: 45,
-		Price:           60.00,
+		Price:           money.Amount(6000),
 		IsActive:        true,
 	})
 	if err != nil {
@@ -128,7 +129,7 @@ func TestCreateBookingService_PriceIsStored(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BookingServiceInput{
 		Name:            "Pedicure",
 		DurationMinutes: 50,
-		Price:           45.50,
+		Price:           money.Amount(4550),
 		IsActive:        true,
 	})
 	if err != nil {
@@ -142,8 +143,8 @@ func TestCreateBookingService_PriceIsStored(t *testing.T) {
 	}
 	for _, s := range items {
 		if s.ID == id {
-			if s.Price != 45.50 {
-				t.Errorf("expected price 45.50, got %f", s.Price)
+			if s.Price != money.Amount(4550) {
+				t.Errorf("expected price 45.50, got %s", s.Price.String())
 			}
 			return
 		}
@@ -159,7 +160,7 @@ func TestCreateBookingService_IsActiveIsStored(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BookingServiceInput{
 		Name:            "Waxing",
 		DurationMinutes: 20,
-		Price:           30.00,
+		Price:           money.Amount(3000),
 		IsActive:        true,
 	})
 	if err != nil {
@@ -190,7 +191,7 @@ func TestCreateBookingService_ColorIsStored(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BookingServiceInput{
 		Name:            "Manicure",
 		DurationMinutes: 30,
-		Price:           25.00,
+		Price:           money.Amount(2500),
 		Color:           "#00ff00",
 		IsActive:        true,
 	})
@@ -222,7 +223,7 @@ func TestUpdateBookingService_ChangesName(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BookingServiceInput{
 		Name:            "OldServiceName",
 		DurationMinutes: 30,
-		Price:           20.00,
+		Price:           money.Amount(2000),
 		IsActive:        true,
 	})
 	if err != nil {
@@ -233,7 +234,7 @@ func TestUpdateBookingService_ChangesName(t *testing.T) {
 	if err := repo.Update(ctx, testutil.OwnerID, id, domain.BookingServiceInput{
 		Name:            "NewServiceName",
 		DurationMinutes: 30,
-		Price:           20.00,
+		Price:           money.Amount(2000),
 		IsActive:        true,
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
@@ -258,7 +259,7 @@ func TestUpdateBookingService_ChangesPrice(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BookingServiceInput{
 		Name:            "PriceService",
 		DurationMinutes: 30,
-		Price:           10.00,
+		Price:           money.Amount(1000),
 		IsActive:        true,
 	})
 	if err != nil {
@@ -269,7 +270,7 @@ func TestUpdateBookingService_ChangesPrice(t *testing.T) {
 	if err := repo.Update(ctx, testutil.OwnerID, id, domain.BookingServiceInput{
 		Name:            "PriceService",
 		DurationMinutes: 30,
-		Price:           99.99,
+		Price:           money.Amount(9999),
 		IsActive:        true,
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
@@ -280,8 +281,8 @@ func TestUpdateBookingService_ChangesPrice(t *testing.T) {
 		t.Fatalf("List: %v", err)
 	}
 	for _, s := range items {
-		if s.ID == id && s.Price != 99.99 {
-			t.Errorf("expected price 99.99, got %f", s.Price)
+		if s.ID == id && s.Price != money.Amount(9999) {
+			t.Errorf("expected price 99.99, got %s", s.Price.String())
 		}
 	}
 }
@@ -294,7 +295,7 @@ func TestDeleteBookingService_RemovesRow(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BookingServiceInput{
 		Name:            "ToDelete",
 		DurationMinutes: 15,
-		Price:           5.00,
+		Price:           money.Amount(500),
 		IsActive:        true,
 	})
 	if err != nil {
@@ -334,7 +335,7 @@ func TestCreate_ThenList_FindsService(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BookingServiceInput{
 		Name:            "FindMe",
 		DurationMinutes: 60,
-		Price:           75.00,
+		Price:           money.Amount(7500),
 		IsActive:        true,
 	})
 	if err != nil {
@@ -367,7 +368,7 @@ func TestListBookingServices_AfterCreate_CountIncreases(t *testing.T) {
 	id, err := repo.Create(ctx, testutil.OwnerID, domain.BookingServiceInput{
 		Name:            "CountIncrease",
 		DurationMinutes: 30,
-		Price:           15.00,
+		Price:           money.Amount(1500),
 		IsActive:        true,
 	})
 	if err != nil {

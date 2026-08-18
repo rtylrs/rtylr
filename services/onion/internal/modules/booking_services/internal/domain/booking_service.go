@@ -1,6 +1,10 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"github.com/voxire/onion/internal/platform/money"
+)
 
 type BookingService struct {
 	ID              int64     `json:"id"`
@@ -9,7 +13,7 @@ type BookingService struct {
 	Name            string    `json:"name"`
 	Description     string    `json:"description"`
 	DurationMinutes int       `json:"duration_minutes"`
-	Price           float64   `json:"price"`
+	Price           money.Amount `json:"price"`
 	Color           string    `json:"color"`
 	IsActive        bool      `json:"is_active"`
 	CreatedAt       time.Time `json:"created_at"`
@@ -20,7 +24,7 @@ type BookingServiceInput struct {
 	Name            string  `json:"name"`
 	Description     string  `json:"description"`
 	DurationMinutes int     `json:"duration_minutes"`
-	Price           float64 `json:"price"`
+	Price           money.Amount `json:"price"`
 	Color           string  `json:"color"`
 	IsActive        bool    `json:"is_active"`
 }
