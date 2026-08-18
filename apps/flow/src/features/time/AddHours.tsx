@@ -180,6 +180,12 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
   // request fails. Native <select> and <button> have no readOnly attribute,
   // so this guards their handlers instead of graying the control out.
   const locked = phase === 'submitting';
+  // Fields are left populated after a success (state 5's own "Log another"
+  // keeps date/project/task/location on purpose - see resetForLogAnother).
+  // Without this, the still-filled, still-enabled form invites clicking
+  // "Log hours" a second time on data that already logged, silently filing
+  // a duplicate entry. Success only clears via the banner's own actions.
+  const submitBlocked = locked || phase === 'success';
 
   const resetForLogAnother = useCallback((): void => {
     setHours('0');
@@ -192,7 +198,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
   }, []);
 
   const handleSubmit = useCallback(async (): Promise<void> => {
-    if (!canSubmit || locked) return;
+    if (!canSubmit || submitBlocked) return;
     setPhase('submitting');
     try {
       let workDayId = day?.id;
@@ -236,7 +242,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
     }
   }, [
     canSubmit,
-    locked,
+    submitBlocked,
     day,
     upsertDay,
     date,
@@ -765,16 +771,25 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
           </p>
         )}
 
-        <p aria-live="polite" className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-          <span>{t('flow.time.add.footerLoggingPrefix')}</span>{' '}
-          <strong className="tabular-nums font-semibold" style={{ color: 'var(--flow-text)' }}>
-            {formatDurationClock(durationMinutes)}
-          </strong>{' '}
-          <span>{t('flow.time.add.footerMiddle', { day: dayLabel })}</span>{' '}
-          <strong className="tabular-nums font-semibold" style={{ color: 'var(--flow-text)' }}>
-            {formatDurationClock(projectedTotalMinutes)}
-          </strong>
-        </p>
+        {phase !== 'success' && (
+          // Once logged, this "if you submit this, it becomes..." preview
+          // would double-count: dayLoggedMinutes already includes the entry
+          // just written, and the duration fields are still sitting at what
+          // was just submitted (see submitBlocked above), so the two summed
+          // together overstate the real total. The success banner already
+          // states the real, frozen total - this line only makes sense while
+          // something is still pending submission.
+          <p aria-live="polite" className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+            <span>{t('flow.time.add.footerLoggingPrefix')}</span>{' '}
+            <strong className="tabular-nums font-semibold" style={{ color: 'var(--flow-text)' }}>
+              {formatDurationClock(durationMinutes)}
+            </strong>{' '}
+            <span>{t('flow.time.add.footerMiddle', { day: dayLabel })}</span>{' '}
+            <strong className="tabular-nums font-semibold" style={{ color: 'var(--flow-text)' }}>
+              {formatDurationClock(projectedTotalMinutes)}
+            </strong>
+          </p>
+        )}
       </div>
 
       {/* Footer */}
@@ -800,7 +815,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
           <button
             type="button"
             onClick={() => void handleSubmit()}
-            disabled={!canSubmit || locked}
+            disabled={!canSubmit || submitBlocked}
             title={disabledReason || undefined}
             aria-describedby={disabledReason ? 'add-hours-log-reason' : undefined}
             className="flow-focus flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg px-4 text-[12px] font-bold disabled:opacity-40 disabled:cursor-not-allowed md:flex-none md:h-[38px] md:min-h-0"
