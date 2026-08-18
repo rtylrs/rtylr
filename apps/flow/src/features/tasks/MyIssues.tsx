@@ -6,7 +6,10 @@ import { ListTodo, Plus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useMyIssues } from './useMyIssues';
 import { useCreateTask } from './useTasks';
+import { useMyTasksProject } from './useMyTasksProject';
+import { useLabels } from './useLabels';
 import { useFlowStore } from '../../shared/stores/flowStore';
+import { getCurrentUserId } from '../../shared/lib/currentUser';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import TaskCard from '../../shared/components/TaskCard';
 import EmptyState from '../../shared/components/EmptyState';
@@ -145,6 +148,12 @@ const QuickAddRow: React.FC = () => {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const createTask = useCreateTask();
+  const { activeWorkspaceId } = useFlowStore();
+  const { data: myTasksProject } = useMyTasksProject();
+  const myTasksWorkspaceId = myTasksProject?.workspaceId
+    ? String(myTasksProject.workspaceId)
+    : activeWorkspaceId;
+  const { data: labels = [] } = useLabels(myTasksWorkspaceId || undefined);
 
   const submit = (): void => {
     const trimmed = title.trim();
@@ -152,10 +161,21 @@ const QuickAddRow: React.FC = () => {
       toast.error(t('toasts.task.titleRequired'));
       return;
     }
+    if (!myTasksProject || labels.length === 0) {
+      toast.error(t('errors.generic'));
+      return;
+    }
     // Personal tasks land in Backlog so the leftmost column actually
     // collects new captures instead of jamming them into Todo.
     createTask.mutate(
-      { workspaceId: '', projectId: '', title: trimmed, status: 'backlog' },
+      {
+        workspaceId: String(myTasksProject.workspaceId),
+        projectId: String(myTasksProject.projectId),
+        title: trimmed,
+        status: 'backlog',
+        assigneeId: getCurrentUserId() ?? undefined,
+        labels: [String(labels[0].id)],
+      },
       { onSuccess: () => setTitle('') }
     );
   };
