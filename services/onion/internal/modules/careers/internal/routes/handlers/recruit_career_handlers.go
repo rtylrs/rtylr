@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -60,8 +61,8 @@ func toRecruitCareerPayload(c domain.RecruitCareer) *RecruitCareerPayload {
 		Seniority:      c.Seniority,
 		Details:        c.Details,
 		Requirements:   c.Requirements,
-		SalaryMin:      c.SalaryMin,
-		SalaryMax:      c.SalaryMax,
+		SalaryMin:      c.SalaryMin.Float64(),
+		SalaryMax:      c.SalaryMax.Float64(),
 		SalaryCurrency: c.SalaryCurrency,
 		IsPublished:    c.IsPublished,
 		IsActive:       c.IsActive,
@@ -157,6 +158,11 @@ func (h *CreateRecruitCareerHandler) Serve(ctx context.Context, req *CreateRecru
 		return CreateRecruitCareerResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	salaryMin, salaryMax, salaryErr := recruitSalaryAmounts(req.SalaryMin, req.SalaryMax)
+	if salaryErr != nil {
+		return CreateRecruitCareerResponse{}, salaryErr
+	}
+
 	input := domain.RecruitCareerInput{
 		OwnerID:        authUser.UserID,
 		BusinessID:     businessID,
@@ -169,8 +175,8 @@ func (h *CreateRecruitCareerHandler) Serve(ctx context.Context, req *CreateRecru
 		Seniority:      req.Seniority,
 		Details:        req.Details,
 		Requirements:   req.Requirements,
-		SalaryMin:      req.SalaryMin,
-		SalaryMax:      req.SalaryMax,
+		SalaryMin:      salaryMin,
+		SalaryMax:      salaryMax,
 		SalaryCurrency: req.SalaryCurrency,
 		IsPublished:    req.IsPublished,
 	}
@@ -241,6 +247,11 @@ func (h *UpdateRecruitCareerHandler) Serve(ctx context.Context, req *UpdateRecru
 		return UpdateRecruitCareerResponse{}, onekiterrors.PermissionDenied()
 	}
 
+	salaryMin, salaryMax, salaryErr := recruitSalaryAmounts(req.SalaryMin, req.SalaryMax)
+	if salaryErr != nil {
+		return UpdateRecruitCareerResponse{}, salaryErr
+	}
+
 	input := domain.RecruitCareerInput{
 		ID:             req.ID,
 		OwnerID:        authUser.UserID,
@@ -254,8 +265,8 @@ func (h *UpdateRecruitCareerHandler) Serve(ctx context.Context, req *UpdateRecru
 		Seniority:      req.Seniority,
 		Details:        req.Details,
 		Requirements:   req.Requirements,
-		SalaryMin:      req.SalaryMin,
-		SalaryMax:      req.SalaryMax,
+		SalaryMin:      salaryMin,
+		SalaryMax:      salaryMax,
 		SalaryCurrency: req.SalaryCurrency,
 		IsPublished:    req.IsPublished,
 	}
@@ -308,4 +319,17 @@ func (h *DeleteRecruitCareerHandler) Serve(ctx context.Context, req *DeleteRecru
 	}
 	invalidatePublicCareersCache(ctx, businessID)
 	return DeleteRecruitCareerResponse{Message: "Career archived"}, nil
+}
+
+ 
+func recruitSalaryAmounts(min, max float64) (money.Amount, money.Amount, error) {
+	salaryMin, err := money.FromFloat64(min)
+	if err != nil {
+		return 0, 0, onekiterrors.New(http.StatusBadRequest, "salary_min must be a valid monetary amount")
+	}
+	salaryMax, err := money.FromFloat64(max)
+	if err != nil {
+		return 0, 0, onekiterrors.New(http.StatusBadRequest, "salary_max must be a valid monetary amount")
+	}
+	return salaryMin, salaryMax, nil
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	"github.com/voxire/onion/internal/modules/careers/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -420,4 +421,41 @@ func TestCareers_ListCareers_PublishedOnlyFilter(t *testing.T) {
 			t.Error("unpublished career appeared in publishedOnly=true list")
 		}
 	}
+}
+
+ 
+func TestCareers_CareerSalary_RoundTripsExactCents(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const slug = "salary-exact-cents"
+	id, err := repo.CreateCareer(ctx, domain.RecruitCareerInput{
+		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
+		Slug:           slug,
+		Title:          "Exact Salary Role",
+		SalaryMin:      money.Amount(123456),
+		SalaryMax:      money.Amount(234567),
+	})
+	if err != nil {
+		t.Fatalf("CreateCareer: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM careers WHERE id = ?", id)
+	})
+
+	careers, err := repo.ListCareers(ctx, testutil.BusinessID, false)
+	if err != nil {
+		t.Fatalf("ListCareers: %v", err)
+	}
+	for _, career := range careers {
+		if career.ID == id {
+			if career.SalaryMin != money.Amount(123456) || career.SalaryMax != money.Amount(234567) {
+				t.Fatalf("salary = (%s, %s), want (1234.56, 2345.67)", career.SalaryMin.String(), career.SalaryMax.String())
+			}
+			return
+		}
+	}
+	t.Fatalf("career id=%d not found", id)
 }

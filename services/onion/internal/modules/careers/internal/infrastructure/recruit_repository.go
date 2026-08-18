@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	"github.com/voxire/onion/internal/modules/careers/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 // ErrCareerNotFound / ErrCustomizationNotFound are sentinel errors the
@@ -395,20 +395,20 @@ func nullStr(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: true}
 }
 
-func nullDecimal(f float64) sql.NullString {
-	if f == 0 {
+func nullDecimal(amount money.Amount) sql.NullString {
+	if amount.IsZero() {
 		return sql.NullString{}
 	}
-	return sql.NullString{String: strconv.FormatFloat(f, 'f', 2, 64), Valid: true}
+	return sql.NullString{String: amount.String(), Valid: true}
 }
 
-func parseSalary(v string) float64 {
+func parseSalary(v string) money.Amount {
 	if v == "" {
 		return 0
 	}
-	f, err := strconv.ParseFloat(v, 64)
+	amount, err := money.FromString(v)
 	if err != nil {
 		return 0
 	}
-	return f
+	return amount
 }
