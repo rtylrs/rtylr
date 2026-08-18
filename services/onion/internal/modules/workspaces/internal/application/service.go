@@ -101,16 +101,14 @@ type workspacesPage struct {
 	Total      int64
 }
 
-func (s *Service) ListWorkspaces(ctx context.Context, businessID, userID, page, limit int64) ([]domain.Workspace, int64, error) {
+func (s *Service) ListWorkspaces(ctx context.Context, businessID, page, limit int64) ([]domain.Workspace, int64, error) {
 	offset := (page - 1) * limit
 	result, err := cacher.Of[workspacesPage]().GetOrComputeSingle(ctx,
 		// page/limit are part of the cache key, not just the fetch - otherwise
-		// page 2 would return page 1's cached rows until the TTL expires. userID
-		// is too: a caller's own personal workspace (business_id-agnostic) must
-		// not leak into another caller's cached page for the same business.
-		cacheKeys.Scoped(workspacesScope, businessID, fmt.Sprintf("list:user=%d:page=%d:limit=%d", userID, page, limit)),
+		// page 2 would return page 1's cached rows until the TTL expires.
+		cacheKeys.Scoped(workspacesScope, businessID, fmt.Sprintf("list:page=%d:limit=%d", page, limit)),
 		func(ctx context.Context) (workspacesPage, error) {
-			workspaces, total, fetchErr := s.repo.GetWorkspacesByOwner(ctx, businessID, userID, limit, offset)
+			workspaces, total, fetchErr := s.repo.GetWorkspacesByOwner(ctx, businessID, limit, offset)
 			return workspacesPage{Workspaces: workspaces, Total: total}, fetchErr
 		},
 		cacher.WithExpiry(ctx, workspacesTTL),
