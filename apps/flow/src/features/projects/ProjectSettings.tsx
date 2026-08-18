@@ -224,7 +224,7 @@ const ProjectSettings: React.FC = () => {
               >
                 <input
                   type="email"
-                  placeholder="Email address"
+                  placeholder={t('flow.projectSettings.emailPlaceholder')}
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
                   className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
