@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
@@ -12,6 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type Repository struct {
@@ -506,7 +506,7 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 		BusinessID:   businessID,
 		LeadID:       req.LeadID,
 		Plan:         plan,
-		Mrr:          strconv.FormatFloat(req.MRR, 'g', -1, 64),
+		Mrr:          req.MRR.String(),
 		Seats:        int32(seats),
 		SignedAt:     nullableDatePtr(req.SignedAt),
 		SignedByName: nullableString(req.SignedByName),
@@ -572,7 +572,7 @@ func (r *Repository) UpdateContract(ctx context.Context, id, businessID int64, r
 	}
 	err := r.queries.UpdateContract(ctx, sqlc.UpdateContractParams{
 		Plan:         req.Plan,
-		Mrr:          strconv.FormatFloat(req.MRR, 'g', -1, 64),
+		Mrr:          req.MRR.String(),
 		Seats:        int32(seats),
 		SignedAt:     nullableDatePtr(req.SignedAt),
 		SignedByName: nullableString(req.SignedByName),
@@ -632,8 +632,8 @@ func leadFromFields(
 		l.AssignedTo = &assignedTo.Int64
 	}
 	if mrrPotential.Valid && mrrPotential.String != "" {
-		if f, err := strconv.ParseFloat(mrrPotential.String, 64); err == nil {
-			l.MRRPotential = &f
+		if amount, err := money.FromString(mrrPotential.String); err == nil {
+			l.MRRPotential = &amount
 		}
 	}
 	return l
@@ -784,36 +784,32 @@ func contractFromFields(
 	return c
 }
 
-func parsePipelineMRR(v interface{}) float64 {
+func parsePipelineMRR(v interface{}) money.Amount {
 	switch n := v.(type) {
-	case float64:
+	case money.Amount:
 		return n
+	case float64:
+		amount, err := money.FromFloat64(n)
+		if err == nil {
+			return amount
+		}
 	case []byte:
-		f, err := strconv.ParseFloat(string(n), 64)
-		if err != nil {
-			return 0
-		}
-		return f
+		return parseDecimalString(string(n))
 	case string:
-		f, err := strconv.ParseFloat(n, 64)
-		if err != nil {
-			return 0
-		}
-		return f
-	default:
-		return 0
+		return parseDecimalString(n)
 	}
+	return 0
 }
 
-func parseDecimalString(s string) float64 {
+func parseDecimalString(s string) money.Amount {
 	if s == "" {
 		return 0
 	}
-	f, err := strconv.ParseFloat(s, 64)
+	amount, err := money.FromString(s)
 	if err != nil {
 		return 0
 	}
-	return f
+	return amount
 }
 
 // ---------------------------------------------------------------------------
@@ -846,9 +842,9 @@ func nullableInt64Value(v int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: v, Valid: v != 0}
 }
 
-func nullableDecimalString(v *float64) sql.NullString {
+func nullableDecimalString(v *money.Amount) sql.NullString {
 	if v == nil {
 		return sql.NullString{}
 	}
-	return sql.NullString{String: strconv.FormatFloat(*v, 'g', -1, 64), Valid: true}
+	return sql.NullString{String: v.String(), Valid: true}
 }

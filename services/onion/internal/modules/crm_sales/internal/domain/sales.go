@@ -3,6 +3,8 @@ package domain
 import (
 	"errors"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 var (
@@ -34,7 +36,7 @@ type Lead struct {
 	Source       string    `json:"source"`
 	Stage        LeadStage `json:"stage"`
 	AssignedTo   *int64    `json:"assigned_to"`
-	MRRPotential *float64  `json:"mrr_potential"`
+	MRRPotential *money.Amount  `json:"mrr_potential"`
 	Notes        string    `json:"notes"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
@@ -47,7 +49,7 @@ type CreateLeadRequest struct {
 	Source       string    `json:"source"`
 	Stage        LeadStage `json:"stage"`
 	AssignedTo   *int64    `json:"assigned_to"`
-	MRRPotential *float64  `json:"mrr_potential"`
+	MRRPotential *money.Amount  `json:"mrr_potential"`
 	Notes        string    `json:"notes"`
 }
 
@@ -58,7 +60,7 @@ type UpdateLeadRequest struct {
 	Source       string    `json:"source"`
 	Stage        LeadStage `json:"stage"`
 	AssignedTo   *int64    `json:"assigned_to"`
-	MRRPotential *float64  `json:"mrr_potential"`
+	MRRPotential *money.Amount  `json:"mrr_potential"`
 	Notes        string    `json:"notes"`
 }
 
@@ -129,7 +131,7 @@ type Contract struct {
 	BusinessID   int64     `json:"business_id"`
 	LeadID       int64     `json:"lead_id"`
 	Plan         string    `json:"plan"`
-	MRR          float64   `json:"mrr"`
+	MRR          money.Amount   `json:"mrr"`
 	Seats        int       `json:"seats"`
 	SignedAt     *string   `json:"signed_at"`
 	SignedByName string    `json:"signed_by_name"`
@@ -142,7 +144,7 @@ type Contract struct {
 type CreateContractRequest struct {
 	LeadID       int64   `json:"lead_id"`
 	Plan         string  `json:"plan"`
-	MRR          float64 `json:"mrr"`
+	MRR          money.Amount `json:"mrr"`
 	Seats        int     `json:"seats"`
 	SignedAt     *string `json:"signed_at"`
 	SignedByName string  `json:"signed_by_name"`
@@ -152,7 +154,7 @@ type CreateContractRequest struct {
 
 type UpdateContractRequest struct {
 	Plan         string  `json:"plan"`
-	MRR          float64 `json:"mrr"`
+	MRR          money.Amount `json:"mrr"`
 	Seats        int     `json:"seats"`
 	SignedAt     *string `json:"signed_at"`
 	SignedByName string  `json:"signed_by_name"`
@@ -163,7 +165,7 @@ type UpdateContractRequest struct {
 type PipelineSummary struct {
 	Stage    string  `json:"stage"`
 	Count    int     `json:"count"`
-	TotalMRR float64 `json:"total_mrr"`
+	TotalMRR money.Amount `json:"total_mrr"`
 }
 
 // LeadPage is a single page of leads plus pagination metadata.

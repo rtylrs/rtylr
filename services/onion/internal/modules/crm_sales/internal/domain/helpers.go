@@ -1,5 +1,7 @@
 package domain
 
+import "github.com/voxire/onion/internal/platform/money"
+
 // AllStages returns the ordered list of lead stages from earliest to latest.
 func AllStages() []LeadStage {
 	return []LeadStage{
@@ -34,8 +36,8 @@ func (l *Lead) HasMRR() bool {
 }
 
 // TotalPipelineMRR sums the MRR across a set of pipeline summaries.
-func TotalPipelineMRR(summaries []PipelineSummary) float64 {
-	var total float64
+func TotalPipelineMRR(summaries []PipelineSummary) money.Amount {
+	var total money.Amount
 	for _, s := range summaries {
 		total += s.TotalMRR
 	}

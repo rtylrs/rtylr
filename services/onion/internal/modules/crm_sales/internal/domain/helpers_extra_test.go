@@ -1,6 +1,10 @@
 package domain
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/voxire/onion/internal/platform/money"
+)
 
 func TestHasNotes_WhenSet(t *testing.T) {
 	l := Lead{Notes: "Follow up Tuesday"}
@@ -53,14 +57,14 @@ func TestValidateCreateContractRequest_EmptyPlan(t *testing.T) {
 }
 
 func TestHasMRRValue_WhenPositive(t *testing.T) {
-	c := Contract{MRR: 500.0}
+	c := Contract{MRR: money.Amount(50000)}
 	if !c.HasMRRValue() {
 		t.Error("expected HasMRRValue=true when MRR > 0")
 	}
 }
 
 func TestHasMRRValue_WhenZero(t *testing.T) {
-	c := Contract{MRR: 0}
+	c := Contract{MRR: money.Amount(0)}
 	if c.HasMRRValue() {
 		t.Error("expected HasMRRValue=false when MRR = 0")
 	}
@@ -81,7 +85,7 @@ func TestHasSignedBy_WhenEmpty(t *testing.T) {
 }
 
 func TestHasMRR_WhenSet_AndIsWon(t *testing.T) {
-	mrr := 999.0
+	mrr := money.Amount(99900)
 	l := Lead{MRRPotential: &mrr, Stage: LeadStageContracted}
 	if !l.HasMRR() {
 		t.Error("expected HasMRR=true")

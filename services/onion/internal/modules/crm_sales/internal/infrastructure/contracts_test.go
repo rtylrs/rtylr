@@ -1,6 +1,7 @@
 package infrastructure_test
 
 import (
+	"github.com/voxire/onion/internal/platform/money"
 	"context"
 	"testing"
 
@@ -25,7 +26,7 @@ func TestCreateContract_PersistsAndReturnsID(t *testing.T) {
 	contract, err := repo.CreateContract(ctx, testutil.OwnerID, domain.CreateContractRequest{
 		LeadID: lead.ID,
 		Plan:   "pro",
-		MRR:    999.00,
+		MRR:    money.Amount(99900),
 		Seats:  5,
 	})
 	if err != nil {
@@ -52,7 +53,7 @@ func TestCreateContract_PlanIsStored(t *testing.T) {
 	contract, err := repo.CreateContract(ctx, testutil.OwnerID, domain.CreateContractRequest{
 		LeadID: lead.ID,
 		Plan:   "enterprise",
-		MRR:    5000.00,
+		MRR:    money.Amount(500000),
 		Seats:  20,
 	})
 	if err != nil {
@@ -79,14 +80,14 @@ func TestCreateContract_MRRIsStored(t *testing.T) {
 	contract, err := repo.CreateContract(ctx, testutil.OwnerID, domain.CreateContractRequest{
 		LeadID: lead.ID,
 		Plan:   "pro",
-		MRR:    1234.56,
+		MRR:    money.Amount(123456),
 		Seats:  3,
 	})
 	if err != nil {
 		t.Fatalf("CreateContract: %v", err)
 	}
-	if contract.MRR != 1234.56 {
-		t.Errorf("MRR = %f, want 1234.56", contract.MRR)
+	if contract.MRR != money.Amount(123456) {
+		t.Errorf("MRR = %s, want 1234.56", contract.MRR.String())
 	}
 }
 
@@ -117,7 +118,7 @@ func TestGetContract_WrongOwner_Errors(t *testing.T) {
 	contract, err := repo.CreateContract(ctx, testutil.OwnerID, domain.CreateContractRequest{
 		LeadID: lead.ID,
 		Plan:   "pro",
-		MRR:    500,
+		MRR:    money.Amount(50000),
 		Seats:  1,
 	})
 	if err != nil {
@@ -146,7 +147,7 @@ func TestUpdateContract_ChangesPlan(t *testing.T) {
 	contract, err := repo.CreateContract(ctx, testutil.OwnerID, domain.CreateContractRequest{
 		LeadID: lead.ID,
 		Plan:   "starter",
-		MRR:    99,
+		MRR:    money.Amount(9900),
 		Seats:  1,
 	})
 	if err != nil {
@@ -155,7 +156,7 @@ func TestUpdateContract_ChangesPlan(t *testing.T) {
 
 	updated, err := repo.UpdateContract(ctx, contract.ID, testutil.OwnerID, domain.UpdateContractRequest{
 		Plan:  "pro",
-		MRR:   299,
+		MRR:   money.Amount(29900),
 		Seats: 3,
 	})
 	if err != nil {
@@ -182,7 +183,7 @@ func TestListContracts_AfterCreate_ContainsNew(t *testing.T) {
 	contract, err := repo.CreateContract(ctx, testutil.OwnerID, domain.CreateContractRequest{
 		LeadID: lead.ID,
 		Plan:   "pro",
-		MRR:    500,
+		MRR:    money.Amount(50000),
 		Seats:  2,
 	})
 	if err != nil {

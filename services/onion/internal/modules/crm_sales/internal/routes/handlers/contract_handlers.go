@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -75,7 +76,7 @@ type CreateContractHandler struct{ Service *application.Service }
 type CreateContractRequest struct {
 	LeadID       int64   `json:"lead_id"`
 	Plan         string  `json:"plan"`
-	MRR          float64 `json:"mrr"`
+	MRR          money.Amount `json:"mrr"`
 	Seats        int     `json:"seats"`
 	SignedAt     *string `json:"signed_at"`
 	SignedByName string  `json:"signed_by_name"`
@@ -182,7 +183,7 @@ type UpdateContractHandler struct{ Service *application.Service }
 
 type UpdateContractRequest struct {
 	Plan         string  `json:"plan"`
-	MRR          float64 `json:"mrr"`
+	MRR          money.Amount `json:"mrr"`
 	Seats        int     `json:"seats"`
 	SignedAt     *string `json:"signed_at"`
 	SignedByName string  `json:"signed_by_name"`

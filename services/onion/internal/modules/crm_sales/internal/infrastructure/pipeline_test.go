@@ -1,6 +1,7 @@
 package infrastructure_test
 
 import (
+	"github.com/voxire/onion/internal/platform/money"
 	"context"
 	"testing"
 
@@ -95,7 +96,7 @@ func TestUpdateLead_MRRPotentialIsStored(t *testing.T) {
 		t.Fatalf("CreateLead: %v", err)
 	}
 
-	mrr := 1500.0
+	mrr := money.Amount(150000)
 	updated, err := repo.UpdateLead(ctx, created.ID, testutil.OwnerID, domain.UpdateLeadRequest{
 		CompanyName:  "MRR Corp",
 		Stage:        domain.LeadStageCold,
@@ -104,7 +105,7 @@ func TestUpdateLead_MRRPotentialIsStored(t *testing.T) {
 	if err != nil {
 		t.Fatalf("UpdateLead: %v", err)
 	}
-	if updated.MRRPotential == nil || *updated.MRRPotential != 1500.0 {
+	if updated.MRRPotential == nil || *updated.MRRPotential != money.Amount(150000) {
 		t.Errorf("MRRPotential = %v, want 1500.0", updated.MRRPotential)
 	}
 }

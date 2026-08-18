@@ -1,6 +1,10 @@
 package domain
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/voxire/onion/internal/platform/money"
+)
 
 func TestIsOpen_WhenCold(t *testing.T) {
 	l := Lead{Stage: LeadStageCold}
@@ -52,7 +56,7 @@ func TestIsLost_WhenContacted(t *testing.T) {
 }
 
 func TestHasMRR_WhenSet(t *testing.T) {
-	mrr := 999.0
+	mrr := money.Amount(99900)
 	l := Lead{MRRPotential: &mrr}
 	if !l.HasMRR() {
 		t.Error("expected HasMRR=true when MRRPotential is set")
@@ -67,7 +71,7 @@ func TestHasMRR_WhenNil(t *testing.T) {
 }
 
 func TestHasMRR_WhenZero(t *testing.T) {
-	mrr := 0.0
+	mrr := money.Amount(0)
 	l := Lead{MRRPotential: &mrr}
 	if l.HasMRR() {
 		t.Error("expected HasMRR=false when MRRPotential is 0")
@@ -76,18 +80,18 @@ func TestHasMRR_WhenZero(t *testing.T) {
 
 func TestTotalPipelineMRR_Sum(t *testing.T) {
 	summaries := []PipelineSummary{
-		{Stage: "cold", Count: 3, TotalMRR: 500},
-		{Stage: "contacted", Count: 2, TotalMRR: 1000},
-		{Stage: "contracted", Count: 1, TotalMRR: 2000},
+		{Stage: "cold", Count: 3, TotalMRR: money.Amount(50000)},
+		{Stage: "contacted", Count: 2, TotalMRR: money.Amount(100000)},
+		{Stage: "contracted", Count: 1, TotalMRR: money.Amount(200000)},
 	}
-	if got := TotalPipelineMRR(summaries); got != 3500 {
-		t.Errorf("TotalPipelineMRR = %f, want 3500", got)
+	if got := TotalPipelineMRR(summaries); got != money.Amount(350000) {
+		t.Errorf("TotalPipelineMRR = %s, want 3500", got.String())
 	}
 }
 
 func TestTotalPipelineMRR_Empty(t *testing.T) {
-	if got := TotalPipelineMRR(nil); got != 0 {
-		t.Errorf("expected 0 for empty summaries, got %f", got)
+	if got := TotalPipelineMRR(nil); got != money.Amount(0) {
+		t.Errorf("expected 0 for empty summaries, got %s", got.String())
 	}
 }
 

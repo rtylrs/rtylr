@@ -13,6 +13,7 @@ import (
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -106,7 +107,7 @@ type CreateLeadRequest struct {
 	Source       string           `json:"source"`
 	Stage        domain.LeadStage `json:"stage"`
 	AssignedTo   *int64           `json:"assigned_to"`
-	MRRPotential *float64         `json:"mrr_potential"`
+	MRRPotential *money.Amount         `json:"mrr_potential"`
 	Notes        string           `json:"notes"`
 }
 
@@ -208,7 +209,7 @@ type UpdateLeadRequest struct {
 	Source       string           `json:"source"`
 	Stage        domain.LeadStage `json:"stage"`
 	AssignedTo   *int64           `json:"assigned_to"`
-	MRRPotential *float64         `json:"mrr_potential"`
+	MRRPotential *money.Amount         `json:"mrr_potential"`
 	Notes        string           `json:"notes"`
 }
 

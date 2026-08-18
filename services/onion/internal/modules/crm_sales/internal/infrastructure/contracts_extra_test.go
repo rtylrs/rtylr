@@ -1,6 +1,7 @@
 package infrastructure_test
 
 import (
+	"github.com/voxire/onion/internal/platform/money"
 	"context"
 	"errors"
 	"testing"
@@ -26,7 +27,7 @@ func TestCreateContract_SignedByNameIsStored(t *testing.T) {
 	contract, err := repo.CreateContract(ctx, testutil.OwnerID, domain.CreateContractRequest{
 		LeadID:       lead.ID,
 		Plan:         "pro",
-		MRR:          500.0,
+		MRR:          money.Amount(50000),
 		Seats:        1,
 		SignedByName: "CEO Jane Smith",
 	})
@@ -130,7 +131,7 @@ func TestUpdateContract_ChangesMRR(t *testing.T) {
 	contract, err := repo.CreateContract(ctx, testutil.OwnerID, domain.CreateContractRequest{
 		LeadID: lead.ID,
 		Plan:   "pro",
-		MRR:    1000.0,
+		MRR:    money.Amount(100000),
 	})
 	if err != nil {
 		t.Fatalf("CreateContract: %v", err)
@@ -138,7 +139,7 @@ func TestUpdateContract_ChangesMRR(t *testing.T) {
 
 	_, err = repo.UpdateContract(ctx, contract.ID, testutil.OwnerID, domain.UpdateContractRequest{
 		Plan: "pro",
-		MRR:  1500.0,
+		MRR:  money.Amount(150000),
 	})
 	if err != nil {
 		t.Fatalf("UpdateContract: %v", err)
@@ -148,7 +149,7 @@ func TestUpdateContract_ChangesMRR(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetContract: %v", err)
 	}
-	if got.MRR != 1500.0 {
-		t.Errorf("MRR = %f, want 1500.0", got.MRR)
+	if got.MRR != money.Amount(150000) {
+		t.Errorf("MRR = %s, want 1500.0", got.MRR.String())
 	}
 }
