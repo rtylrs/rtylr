@@ -167,7 +167,7 @@ func TestListAll_PriceIsNonNegative(t *testing.T) {
 	}
 	for i, a := range addons {
 		if a.Price < 0 {
-			t.Errorf("addons[%d].Price = %f, expected >= 0", i, a.Price)
+			t.Errorf("addons[%d].Price = %s, expected >= 0", i, a.Price.String())
 		}
 	}
 }

@@ -28,7 +28,7 @@ func (p *hubAddonProvider) ListForBusiness(ctx context.Context, businessID int64
 			Name:        a.Name,
 			Description: a.Description,
 			Icon:        a.Icon,
-			Price:       a.Price,
+			Price:       a.Price.Float64(),
 			IsFree:      a.IsFree,
 			IsEnabled:   a.IsEnabled,
 			EnabledAt:   a.EnabledAt,

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/addons/internal/domain"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type mockRepo struct {
@@ -57,7 +58,7 @@ func TestListAll_HidesLegacyAIChatAddon(t *testing.T) {
 
 func TestListForBusiness_MergesCatalogWithEnabled(t *testing.T) {
 	all := []domain.Addon{
-		{ID: "a", Name: "Addon A", Price: 10, IsFree: false},
+		{ID: "a", Name: "Addon A", Price: money.Amount(1000), IsFree: false},
 		{ID: "b", Name: "Addon B", Price: 0, IsFree: true},
 	}
 	enabled := []domain.BusinessAddon{

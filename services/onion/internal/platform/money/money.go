@@ -1,0 +1,171 @@
+package money
+
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+	"math"
+	"strconv"
+	"strings"
+)
+
+var ErrInvalidAmount = errors.New("invalid monetary amount")
+
+// Amount stores money in the smallest currency unit (normally cents).
+// Keeping the value as an integer avoids floating-point rounding drift while
+// custom JSON/SQL encodings preserve the existing decimal API shape.
+type Amount int64
+
+func FromString(value string) (Amount, error) {
+	s := strings.TrimSpace(value)
+	if s == "" {
+		return 0, ErrInvalidAmount
+	}
+	if strings.ContainsAny(s, "eE") {
+		return 0, ErrInvalidAmount
+	}
+
+	sign := int64(1)
+	if s[0] == '-' || s[0] == '+' {
+		if s[0] == '-' {
+			sign = -1
+		}
+		s = s[1:]
+	}
+	if s == "" {
+		return 0, ErrInvalidAmount
+	}
+
+	whole, fraction := s, ""
+	if dot := strings.IndexByte(s, '.'); dot >= 0 {
+		whole, fraction = s[:dot], s[dot+1:]
+		if strings.Contains(fraction, ".") || len(fraction) > 2 {
+			return 0, ErrInvalidAmount
+		}
+	}
+	if whole == "" {
+		whole = "0"
+	}
+	if fraction == "" {
+		fraction = "00"
+	} else if len(fraction) == 1 {
+		fraction += "0"
+	}
+	wholeValue, err := strconv.ParseInt(whole, 10, 64)
+	if err != nil || wholeValue < 0 {
+		return 0, ErrInvalidAmount
+	}
+	fractionValue, err := strconv.ParseInt(fraction, 10, 64)
+	if err != nil {
+		return 0, ErrInvalidAmount
+	}
+	if wholeValue > math.MaxInt64/100 {
+		return 0, ErrInvalidAmount
+	}
+	cents := wholeValue*100 + fractionValue
+	if cents < 0 || cents > math.MaxInt64 {
+		return 0, ErrInvalidAmount
+	}
+	if sign < 0 {
+		return Amount(-cents), nil
+	}
+	return Amount(cents), nil
+}
+
+func FromFloat64(value float64) (Amount, error) {
+	if math.IsNaN(value) || math.IsInf(value, 0) {
+		return 0, ErrInvalidAmount
+	}
+	return FromString(strconv.FormatFloat(value, 'f', -1, 64))
+}
+
+func (a Amount) String() string {
+	value := int64(a)
+	if value < 0 {
+		return "-" + formatCents(-value)
+	}
+	return formatCents(value)
+}
+
+func formatCents(value int64) string {
+	return strconv.FormatInt(value/100, 10) + "." + leftPad2(strconv.FormatInt(value%100, 10))
+}
+
+func leftPad2(value string) string {
+	if len(value) == 1 {
+		return "0" + value
+	}
+	return value
+}
+
+func (a Amount) Float64() float64 {
+	return float64(a) / 100
+}
+
+func (a Amount) IsZero() bool {
+	return a == 0
+}
+
+func (a Amount) MarshalJSON() ([]byte, error) {
+	return []byte(a.String()), nil
+}
+
+func (a *Amount) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		*a = 0
+		return nil
+	}
+	var value string
+	if len(data) > 0 && data[0] == '"' {
+		if err := json.Unmarshal(data, &value); err != nil {
+			return err
+		}
+	} else {
+		value = string(data)
+	}
+	parsed, err := FromString(value)
+	if err != nil {
+		return err
+	}
+	*a = parsed
+	return nil
+}
+
+func (a *Amount) Scan(value any) error {
+	if value == nil {
+		*a = 0
+		return nil
+	}
+	switch v := value.(type) {
+	case []byte:
+		parsed, err := FromString(string(v))
+		if err != nil {
+			return err
+		}
+		*a = parsed
+		return nil
+	case string:
+		parsed, err := FromString(v)
+		if err != nil {
+			return err
+		}
+		*a = parsed
+		return nil
+	case int64:
+		*a = Amount(v * 100)
+		return nil
+	case float64:
+		parsed, err := FromFloat64(v)
+		if err != nil {
+			return err
+		}
+		*a = parsed
+		return nil
+	default:
+		return ErrInvalidAmount
+	}
+}
+
+func (a Amount) Value() (driver.Value, error) {
+	return a.String(), nil
+}

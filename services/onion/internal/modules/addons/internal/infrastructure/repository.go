@@ -3,11 +3,11 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/addons/internal/domain"
 	"github.com/voxire/onion/internal/modules/addons/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type Repository struct {
@@ -84,14 +84,14 @@ func (r *Repository) Disable(ctx context.Context, businessID int64, addonID stri
 	})
 }
 
-// parseDecimal converts a decimal string from the database into a float64.
+// parseDecimal converts a decimal string from the database into exact minor units.
 // On a corrupt (non-numeric) value it logs at Warn and returns 0 rather than
 // silently discarding the error — see CLAUDE.md §4 Error Handling Pattern.
-func parseDecimal(s string) float64 {
+func parseDecimal(s string) money.Amount {
 	if s == "" {
 		return 0
 	}
-	v, err := strconv.ParseFloat(s, 64)
+	v, err := money.FromString(s)
 	if err != nil {
 		logger.Global().Warn("failed to parse decimal value from database",
 			logger.String("value", s),
