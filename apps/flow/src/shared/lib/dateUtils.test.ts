@@ -11,6 +11,7 @@ import {
   formatDateShort,
   formatEntryTimestamp,
   formatWeekDayShort,
+  formatFullDayLabel,
   addDays,
   startOfWeek,
   endOfWeek,
@@ -182,6 +183,20 @@ describe('formatWeekDayShort', () => {
   it('keeps Latin numerals in Arabic', () => {
     const formatted = formatWeekDayShort('2026-08-11', 'ar');
     expect(formatted).toMatch(/11/);
+    expect(formatted).not.toMatch(/[٠-٩]/);
+  });
+});
+
+describe('formatFullDayLabel', () => {
+  it('renders the full weekday, day and month, in the locale-native order', () => {
+    // Locale order, not the mock's day-month order - same divergence
+    // formatDateShort already documents ('Tue, Aug 11' for en-US).
+    expect(formatFullDayLabel('2026-11-12', 'en-US')).toBe('Thursday, November 12');
+  });
+
+  it('keeps Latin numerals in Arabic', () => {
+    const formatted = formatFullDayLabel('2026-11-12', 'ar');
+    expect(formatted).toMatch(/12/);
     expect(formatted).not.toMatch(/[٠-٩]/);
   });
 });

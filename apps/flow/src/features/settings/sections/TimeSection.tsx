@@ -274,6 +274,29 @@ const TimeSection = (): React.JSX.Element => {
         </div>
       </section>
 
+      <section>
+        <h2
+          className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
+          style={{ color: 'var(--flow-text-muted)' }}
+        >
+          {t('flow.settings.time.attendance')}
+        </h2>
+
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] leading-snug" style={{ color: 'var(--flow-text)' }}>
+              {t('flow.settings.time.trackAttendanceExplained')}
+            </p>
+          </div>
+          <Switch
+            checked={settings.trackAttendance}
+            onCheckedChange={settings.setTrackAttendance}
+            aria-label={t('flow.settings.time.trackAttendance')}
+            className="mt-0.5 shrink-0"
+          />
+        </div>
+      </section>
+
       <WorkTypesSection />
 
       <section>

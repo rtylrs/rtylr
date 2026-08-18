@@ -144,7 +144,17 @@ interface UpsertDayInput {
   breakMinutes: number;
 }
 
-export function useUpsertWorkDay() {
+interface MutationOptions {
+  /**
+   * Suppresses the default toast. Add Hours shows its own inline failure
+   * banner per its design (never a toast on top of a persistent banner), so
+   * it opts into silence and handles the error itself; every other caller
+   * keeps today's toast behaviour unchanged.
+   */
+  silent?: boolean;
+}
+
+export function useUpsertWorkDay(options?: MutationOptions) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: UpsertDayInput) =>
@@ -160,7 +170,9 @@ export function useUpsertWorkDay() {
       void queryClient.invalidateQueries({ queryKey: workDayKey(input.date) });
       void queryClient.invalidateQueries({ queryKey: ['work-days-range'] });
     },
-    onError: () => toast.error(t('flow.time.daySaveFailed')),
+    onError: () => {
+      if (!options?.silent) toast.error(t('flow.time.daySaveFailed'));
+    },
   });
 }
 
@@ -177,7 +189,7 @@ interface CreateLineInput {
   isBillable: boolean;
 }
 
-export function useCreateWorkDayLine() {
+export function useCreateWorkDayLine(options?: MutationOptions) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CreateLineInput) =>
@@ -196,7 +208,9 @@ export function useCreateWorkDayLine() {
       void queryClient.invalidateQueries({ queryKey: workDayKey(input.date) });
       void queryClient.invalidateQueries({ queryKey: ['work-days-range'] });
     },
-    onError: () => toast.error(t('flow.time.lineSaveFailed')),
+    onError: () => {
+      if (!options?.silent) toast.error(t('flow.time.lineSaveFailed'));
+    },
   });
 }
 

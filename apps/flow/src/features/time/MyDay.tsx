@@ -1,22 +1,26 @@
 import React, { useMemo, useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getRouteApi } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { addDays, formatWeekDayShort, startOfWeek } from '../../shared/lib/dateUtils';
+import { formatWorkEntryTarget } from '../../shared/lib/timeEntryLabel';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
-import LogTimeDialog from './LogTimeDialog';
+import { useProjects } from '../projects/useProjects';
+import { useTasks } from '../tasks/useTasks';
+import AddHours from './AddHours';
+import { WORK_MODES } from './workModes';
 import {
   todayLocalDate,
   useDeleteWorkDayLine,
   useUpsertWorkDay,
   useWorkDay,
   useWorkDaysRange,
-  useWorkTypes,
 } from './useWorkDay';
 
-const WORK_MODES = ['onsite', 'remote', 'hybrid'] as const;
+const routeApi = getRouteApi('/time');
 
 const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-wider';
 const inputStyle: React.CSSProperties = {
@@ -35,16 +39,15 @@ const inputStyle: React.CSSProperties = {
  */
 const MyDay = (): React.JSX.Element => {
   const { t, i18n } = useTranslation();
-  const [date, setDate] = useState(todayLocalDate());
+  const { date: datePrefill } = routeApi.useSearch();
+  const [date, setDate] = useState(datePrefill ?? todayLocalDate());
 
   const { data, isLoading } = useWorkDay(date);
-  const { data: workTypesData } = useWorkTypes();
-  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
   const upsertDay = useUpsertWorkDay();
   const deleteLine = useDeleteWorkDayLine();
-  const [logTimeOpen, setLogTimeOpen] = useState(false);
 
   const weekStart = useTimeSettingsStore((s) => s.weekStart);
+  const trackAttendance = useTimeSettingsStore((s) => s.trackAttendance);
   const weekDays = useMemo(() => {
     const start = startOfWeek(date, weekStart);
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
@@ -60,7 +63,17 @@ const MyDay = (): React.JSX.Element => {
 
   const day = data?.workDay;
   const lines = useMemo(() => data?.lines ?? [], [data]);
-  const workTypes = workTypesData?.workTypes ?? [];
+
+  // For labelling each line with what it was actually for - the same
+  // project/task data Add Hours already fetches for its own pickers.
+  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
+  const { data: projects } = useProjects(activeWorkspaceId);
+  const { data: tasks } = useTasks({});
+  const projectsById = useMemo(
+    () => new Map((projects ?? []).map((project) => [project.id, project])),
+    [projects]
+  );
+  const tasksById = useMemo(() => new Map((tasks ?? []).map((task) => [task.id, task])), [tasks]);
 
   const clocked = day?.clockedMinutes ?? 0;
   const logged = day?.loggedMinutes ?? 0;
@@ -81,7 +94,7 @@ const MyDay = (): React.JSX.Element => {
   return (
     <div className="h-full overflow-y-auto">
       <HelmetContainer title={`${t('flow.time.myDay')} · Flow`} />
-      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6">
         <header className="mb-6">
           <h1 className="text-[20px] font-bold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.time.myDay')}
@@ -135,6 +148,13 @@ const MyDay = (): React.JSX.Element => {
           </p>
         ) : (
           <>
+            {/* Location is a separate concept from shift attendance - a
+             * workspace that doesn't clock in/out can still care where work
+             * happened, and Add Hours' own per-entry Location silently
+             * defaults to this value, so it has to stay visible even when
+             * trackAttendance is off. Only Started/Finished/Break (real
+             * clock-in/out) and the Clocked/Unaccounted figures below are
+             * gated - they have no meaning without a clock signal. */}
             <section className="mb-6">
               <h2
                 className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
@@ -143,7 +163,7 @@ const MyDay = (): React.JSX.Element => {
                 {t('flow.time.theDay')}
               </h2>
 
-              <div className="mb-4">
+              <div className={trackAttendance ? 'mb-4' : undefined}>
                 <span className={labelClass} style={{ color: 'var(--flow-text-muted)' }}>
                   {t('flow.time.workMode')}
                 </span>
@@ -174,80 +194,91 @@ const MyDay = (): React.JSX.Element => {
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3">
-                <div>
-                  <label
-                    htmlFor="day-start"
-                    className={labelClass}
-                    style={{ color: 'var(--flow-text-muted)' }}
-                  >
-                    {t('flow.time.startTime')}
-                  </label>
-                  <input
-                    id="day-start"
-                    key={`day-start-${date}`}
-                    type="time"
-                    defaultValue={day?.startTime ?? ''}
-                    onBlur={(e) => saveDay({ startTime: e.target.value })}
-                    className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-                    style={inputStyle}
-                  />
+              {trackAttendance && (
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div>
+                    <label
+                      htmlFor="day-start"
+                      className={labelClass}
+                      style={{ color: 'var(--flow-text-muted)' }}
+                    >
+                      {t('flow.time.startTime')}
+                    </label>
+                    <input
+                      id="day-start"
+                      key={`day-start-${date}`}
+                      type="time"
+                      defaultValue={day?.startTime ?? ''}
+                      onBlur={(e) => saveDay({ startTime: e.target.value })}
+                      className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="day-end"
+                      className={labelClass}
+                      style={{ color: 'var(--flow-text-muted)' }}
+                    >
+                      {t('flow.time.endTime')}
+                    </label>
+                    <input
+                      id="day-end"
+                      key={`day-end-${date}`}
+                      type="time"
+                      defaultValue={day?.endTime ?? ''}
+                      onBlur={(e) => saveDay({ endTime: e.target.value })}
+                      className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="day-break"
+                      className={labelClass}
+                      style={{ color: 'var(--flow-text-muted)' }}
+                    >
+                      {t('flow.time.breakMinutes')}
+                    </label>
+                    <input
+                      id="day-break"
+                      key={`day-break-${date}`}
+                      type="number"
+                      min={0}
+                      defaultValue={day?.breakMinutes ?? 0}
+                      onBlur={(e) => saveDay({ breakMinutes: Number(e.target.value) || 0 })}
+                      className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
+                      style={inputStyle}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label
-                    htmlFor="day-end"
-                    className={labelClass}
-                    style={{ color: 'var(--flow-text-muted)' }}
-                  >
-                    {t('flow.time.endTime')}
-                  </label>
-                  <input
-                    id="day-end"
-                    key={`day-end-${date}`}
-                    type="time"
-                    defaultValue={day?.endTime ?? ''}
-                    onBlur={(e) => saveDay({ endTime: e.target.value })}
-                    className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-                    style={inputStyle}
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="day-break"
-                    className={labelClass}
-                    style={{ color: 'var(--flow-text-muted)' }}
-                  >
-                    {t('flow.time.breakMinutes')}
-                  </label>
-                  <input
-                    id="day-break"
-                    key={`day-break-${date}`}
-                    type="number"
-                    min={0}
-                    defaultValue={day?.breakMinutes ?? 0}
-                    onBlur={(e) => saveDay({ breakMinutes: Number(e.target.value) || 0 })}
-                    className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-                    style={inputStyle}
-                  />
-                </div>
-              </div>
+              )}
             </section>
 
             {/* Clocked against logged. The gap is the most useful number here, so
              * it is shown plainly and never blocks: enforcing it produces
-             * invented lines rather than an honest total. */}
+             * invented lines rather than an honest total. When attendance
+             * tracking is off there is no clock signal to compare against, so
+             * this collapses to the one figure that still means something
+             * rather than two permanently-empty cells beside it. */}
             <section
               className="mb-6 flex flex-wrap items-baseline gap-x-6 gap-y-2 rounded-md p-3"
               style={{ background: 'var(--flow-hover)' }}
               aria-live="polite"
             >
-              <Figure label={t('flow.time.clocked')} value={formatDurationClock(clocked)} />
-              <Figure label={t('flow.time.logged')} value={formatDurationClock(logged)} />
-              <Figure
-                label={t('flow.time.unaccounted')}
-                value={formatDurationClock(Math.abs(gap))}
-                tone={gap === 0 ? undefined : 'var(--flow-status-pending)'}
-              />
+              {trackAttendance ? (
+                <>
+                  <Figure label={t('flow.time.clocked')} value={formatDurationClock(clocked)} />
+                  <Figure label={t('flow.time.logged')} value={formatDurationClock(logged)} />
+                  <Figure
+                    label={t('flow.time.unaccounted')}
+                    value={formatDurationClock(Math.abs(gap))}
+                    tone={gap === 0 ? undefined : 'var(--flow-status-pending)'}
+                  />
+                </>
+              ) : (
+                <Figure label={t('flow.time.logged')} value={formatDurationClock(logged)} />
+              )}
             </section>
 
             <section>
@@ -265,69 +296,62 @@ const MyDay = (): React.JSX.Element => {
               )}
 
               <ul className="mb-4 space-y-1.5">
-                {lines.map((line) => (
-                  <li
-                    key={line.id}
-                    className="flex items-start gap-3 rounded-md p-2"
-                    style={{ background: 'var(--flow-hover)' }}
-                  >
-                    <span
-                      className="text-[13px] font-semibold tabular-nums"
-                      style={{ color: 'var(--accent-fg)' }}
+                {lines.map((line) => {
+                  const project = line.projectId ? projectsById.get(line.projectId) : undefined;
+                  const task = line.taskId ? tasksById.get(line.taskId) : undefined;
+                  const target = formatWorkEntryTarget(task, project);
+                  return (
+                    <li
+                      key={line.id}
+                      className="flex items-start gap-3 rounded-md p-2"
+                      style={{ background: 'var(--flow-hover)' }}
                     >
-                      {formatDurationClock(line.durationMinutes ?? 0)}
-                    </span>
-                    <span
-                      className="min-w-0 flex-1 text-[13px]"
-                      style={{ color: 'var(--flow-text)' }}
-                    >
-                      {line.description}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => line.id && deleteLine.mutate({ id: line.id, date })}
-                      aria-label={t('flow.time.deleteLineLabel', {
-                        duration: formatDurationClock(line.durationMinutes ?? 0),
-                      })}
-                      className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded md:h-8 md:w-8"
-                      style={{ color: 'var(--flow-text-muted)' }}
-                    >
-                      <Trash2 size={14} aria-hidden="true" />
-                    </button>
-                  </li>
-                ))}
+                      <span
+                        className="text-[13px] font-semibold tabular-nums"
+                        style={{ color: 'var(--accent-fg)' }}
+                      >
+                        {formatDurationClock(line.durationMinutes ?? 0)}
+                      </span>
+                      <span
+                        className="min-w-0 flex-1 text-[13px]"
+                        style={{ color: 'var(--flow-text)' }}
+                      >
+                        {target && <span className="block font-semibold">{target}</span>}
+                        {/* Add Hours submits "-" for an empty note (the wire
+                         * requires a non-empty description) - showing that
+                         * placeholder here would read as a stray artifact
+                         * under the task name, not as "no note was left". */}
+                        {line.description && line.description !== '-' && (
+                          <span style={{ color: target ? 'var(--flow-text-muted)' : undefined }}>
+                            {line.description}
+                          </span>
+                        )}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => line.id && deleteLine.mutate({ id: line.id, date })}
+                        aria-label={t('flow.time.deleteLineLabel', {
+                          duration: formatDurationClock(line.durationMinutes ?? 0),
+                        })}
+                        className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded md:h-8 md:w-8"
+                        style={{ color: 'var(--flow-text-muted)' }}
+                      >
+                        <Trash2 size={14} aria-hidden="true" />
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
 
-              {/* The day has to exist before work can be filed under it, which is
-               * what the upsert above creates. */}
-              {!day?.id ? (
-                <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
-                  {t('flow.time.setTheDayFirst')}
-                </p>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setLogTimeOpen(true)}
-                  className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded px-4 text-[13px] font-semibold md:min-h-0 md:py-2.5"
-                  style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
-                >
-                  <Plus size={14} aria-hidden="true" />
-                  {t('flow.time.logAction')}
-                </button>
-              )}
+              {/* The old "+ Log time" button opened a modal (LogTimeDialog);
+               * that dialog and its own day-must-exist gate are gone. Add
+               * Hours renders inline instead, and creates the work day itself
+               * on first submit if one doesn't exist yet for this date. */}
+              <AddHours date={date} onDateChange={setDate} />
             </section>
           </>
         )}
       </div>
-
-      <LogTimeDialog
-        open={logTimeOpen}
-        onOpenChange={setLogTimeOpen}
-        date={date}
-        workDayId={day?.id ?? ''}
-        workspaceId={activeWorkspaceId}
-        workTypes={workTypes}
-      />
     </div>
   );
 };

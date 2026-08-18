@@ -269,3 +269,16 @@
   outline: 2px solid var(--flow-focus-ring);
   outline-offset: 2px;
 }
+
+/* Add Hours' own submitting spinner: 0.7s reads faster than the shared
+ * animate-spin-slow (0.8s), appropriately for a control this small.
+ * currentColor so it inherits the accent button's foreground - no new
+ * color literal. */
+@keyframes flow-add-hours-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.flow-add-hours-spinner {
+  animation: flow-add-hours-spin 0.7s linear infinite;
+}

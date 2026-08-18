@@ -36,6 +36,11 @@ interface TimeSettingsState {
   approvalLocksEntry: boolean;
   /** Entries auto-lock this many days after the week closes, either way. */
   autoLockDays: number;
+  /** On: My Day and reports show Clocked/Unaccounted (shift attendance) alongside
+   * Logged. Off: task-based logging only. Different businesses want different
+   * defaults here - a restaurant needs shift reconciliation, a law firm billing
+   * by task usually doesn't. */
+  trackAttendance: boolean;
   categories: TimeCategory[];
   /** userId to hourly rate. `null` is explicitly unset, never zero. */
   ratesByUserId: Record<string, number | null>;
@@ -48,6 +53,7 @@ interface TimeSettingsActions {
   setOvertimeThresholdMinutes: (value: number) => void;
   setApprovalLocksEntry: (value: boolean) => void;
   setAutoLockDays: (value: number) => void;
+  setTrackAttendance: (value: boolean) => void;
   addCategory: (name: string, billable: boolean) => void;
   renameCategory: (id: string, name: string) => void;
   setCategoryBillable: (id: string, billable: boolean) => void;
@@ -69,6 +75,7 @@ export const DEFAULT_TIME_SETTINGS: TimeSettingsState = {
   overtimeThresholdMinutes: 45 * 60,
   approvalLocksEntry: true,
   autoLockDays: 7,
+  trackAttendance: true,
   categories: [
     { id: 'development', name: 'Development', billable: true },
     { id: 'review', name: 'Review', billable: true },
@@ -93,6 +100,7 @@ export const useTimeSettingsStore = create<TimeSettingsState & TimeSettingsActio
       setOvertimeThresholdMinutes: (overtimeThresholdMinutes) => set({ overtimeThresholdMinutes }),
       setApprovalLocksEntry: (approvalLocksEntry) => set({ approvalLocksEntry }),
       setAutoLockDays: (autoLockDays) => set({ autoLockDays }),
+      setTrackAttendance: (trackAttendance) => set({ trackAttendance }),
 
       addCategory: (name, billable) => {
         const trimmed = name.trim();
