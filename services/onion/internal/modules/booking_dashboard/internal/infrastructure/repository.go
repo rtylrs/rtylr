@@ -3,11 +3,13 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type Repository struct {
@@ -69,7 +71,7 @@ func (r *Repository) GetMonthCounts(ctx context.Context, businessID int64, start
 	return int(total64), int(cancelled64), nil
 }
 
-func (r *Repository) GetMonthRevenue(ctx context.Context, businessID int64, start time.Time) (float64, error) {
+func (r *Repository) GetMonthRevenue(ctx context.Context, businessID int64, start time.Time) (money.Amount, error) {
 	revenue, err := r.queries.SumMonthRevenue(ctx, sqlc.SumMonthRevenueParams{
 		BusinessID: businessID,
 		StartTime:  start,
@@ -78,28 +80,32 @@ func (r *Repository) GetMonthRevenue(ctx context.Context, businessID int64, star
 		logger.Ctx(ctx).Error("Failed to get revenue in repo", logger.Error(err))
 		return 0, err
 	}
-	return interfaceToFloat64(revenue), nil
+	return interfaceToMoney(revenue), nil
 }
 
-func interfaceToFloat64(v interface{}) float64 {
+func interfaceToMoney(v interface{}) money.Amount {
 	switch val := v.(type) {
 	case float64:
-		return val
+		parsed, err := money.FromFloat64(val)
+		if err != nil {
+			return 0
+		}
+		return parsed
 	case int64:
-		return float64(val)
+		return parseMoneyString(strconv.FormatInt(val, 10))
 	case []byte:
-		f, err := strconv.ParseFloat(string(val), 64)
-		if err != nil {
-			return 0
-		}
-		return f
+		return parseMoneyString(string(val))
 	case string:
-		f, err := strconv.ParseFloat(val, 64)
-		if err != nil {
-			return 0
-		}
-		return f
+		return parseMoneyString(val)
 	default:
+		return parseMoneyString(fmt.Sprintf("%v", val))
+	}
+}
+
+func parseMoneyString(s string) money.Amount {
+	value, err := money.FromString(s)
+	if err != nil {
 		return 0
 	}
+	return value
 }

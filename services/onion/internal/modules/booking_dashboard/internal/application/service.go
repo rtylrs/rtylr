@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/domain"
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
+	"github.com/voxire/onion/internal/platform/money"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 )
 
@@ -46,7 +47,7 @@ func (s *Service) fetchDashboard(ctx context.Context, businessID int64) (domain.
 		upcomingCount  int
 		totalMonth     int
 		cancelledMonth int
-		revenue        float64
+		revenue        money.Amount
 	)
 
 	group, groupCtx := errgroup.WithContext(ctx)

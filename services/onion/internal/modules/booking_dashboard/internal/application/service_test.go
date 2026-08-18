@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_dashboard/internal/domain"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type mockDashboardRepo struct {
@@ -15,7 +16,7 @@ type mockDashboardRepo struct {
 	upcomingCount  int
 	totalMonth     int
 	cancelledMonth int
-	revenue        float64
+	revenue        money.Amount
 	err            error
 	// per-method override
 	errToday    error
@@ -57,7 +58,7 @@ func (m *mockDashboardRepo) GetMonthCounts(_ context.Context, _ int64, _ time.Ti
 	return m.totalMonth, m.cancelledMonth, m.err
 }
 
-func (m *mockDashboardRepo) GetMonthRevenue(_ context.Context, _ int64, _ time.Time) (float64, error) {
+func (m *mockDashboardRepo) GetMonthRevenue(_ context.Context, _ int64, _ time.Time) (money.Amount, error) {
 	done := m.trackCall()
 	defer done()
 
@@ -92,7 +93,7 @@ func newDashboardService(r domain.Repository) *Service {
 }
 
 func TestFetchDashboard_HappyPath(t *testing.T) {
-	repo := &mockDashboardRepo{todayCount: 5, upcomingCount: 10, totalMonth: 20, cancelledMonth: 4, revenue: 1500.0}
+	repo := &mockDashboardRepo{todayCount: 5, upcomingCount: 10, totalMonth: 20, cancelledMonth: 4, revenue: money.Amount(150000)}
 	svc := newDashboardService(repo)
 	data, err := svc.fetchDashboard(context.Background(), 1)
 	if err != nil {
@@ -112,7 +113,7 @@ func TestFetchDashboardRunsIndependentQueriesConcurrently(t *testing.T) {
 		upcomingCount:  10,
 		totalMonth:     20,
 		cancelledMonth: 4,
-		revenue:        1500.0,
+		revenue: money.Amount(150000),
 		delay:          20 * time.Millisecond,
 	}
 	svc := newDashboardService(repo)
@@ -127,7 +128,7 @@ func TestFetchDashboardRunsIndependentQueriesConcurrently(t *testing.T) {
 }
 
 func TestFetchDashboard_CancellationRateCalculated(t *testing.T) {
-	repo := &mockDashboardRepo{totalMonth: 10, cancelledMonth: 2, revenue: 500}
+	repo := &mockDashboardRepo{totalMonth: 10, cancelledMonth: 2, revenue: money.Amount(50000)}
 	svc := newDashboardService(repo)
 	data, err := svc.fetchDashboard(context.Background(), 1)
 	if err != nil {
@@ -140,7 +141,7 @@ func TestFetchDashboard_CancellationRateCalculated(t *testing.T) {
 }
 
 func TestFetchDashboard_ZeroTotalMonthNoCancellationRate(t *testing.T) {
-	repo := &mockDashboardRepo{totalMonth: 0, cancelledMonth: 0, revenue: 0}
+	repo := &mockDashboardRepo{totalMonth: 0, cancelledMonth: 0, revenue: money.Amount(0)}
 	svc := newDashboardService(repo)
 	data, err := svc.fetchDashboard(context.Background(), 1)
 	if err != nil {
@@ -152,14 +153,14 @@ func TestFetchDashboard_ZeroTotalMonthNoCancellationRate(t *testing.T) {
 }
 
 func TestFetchDashboard_RevenuePopulated(t *testing.T) {
-	repo := &mockDashboardRepo{revenue: 9999.99}
+	repo := &mockDashboardRepo{revenue: money.Amount(999999)}
 	svc := newDashboardService(repo)
 	data, err := svc.fetchDashboard(context.Background(), 1)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if data.Revenue != 9999.99 {
-		t.Errorf("expected Revenue=9999.99, got %.2f", data.Revenue)
+	if data.Revenue != money.Amount(999999) {
+		t.Errorf("expected Revenue=9999.99, got %s", data.Revenue.String())
 	}
 }
 
@@ -206,13 +207,13 @@ func TestFetchDashboard_AllZeros(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if data.TodayCount != 0 || data.UpcomingCount != 0 || data.Revenue != 0 || data.CancellationRate != 0 {
+	if data.TodayCount != 0 || data.UpcomingCount != 0 || data.Revenue != money.Amount(0) || data.CancellationRate != 0 {
 		t.Errorf("expected all zeros, got %+v", data)
 	}
 }
 
 func TestFetchDashboard_FullCancellationRate(t *testing.T) {
-	repo := &mockDashboardRepo{totalMonth: 5, cancelledMonth: 5, revenue: 0}
+	repo := &mockDashboardRepo{totalMonth: 5, cancelledMonth: 5, revenue: money.Amount(0)}
 	svc := newDashboardService(repo)
 	data, err := svc.fetchDashboard(context.Background(), 1)
 	if err != nil {
@@ -224,7 +225,7 @@ func TestFetchDashboard_FullCancellationRate(t *testing.T) {
 }
 
 func TestFetchDashboard_PartialCancellationRate(t *testing.T) {
-	repo := &mockDashboardRepo{totalMonth: 4, cancelledMonth: 1, revenue: 200}
+	repo := &mockDashboardRepo{totalMonth: 4, cancelledMonth: 1, revenue: money.Amount(20000)}
 	svc := newDashboardService(repo)
 	data, err := svc.fetchDashboard(context.Background(), 1)
 	if err != nil {

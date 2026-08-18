@@ -39,6 +39,6 @@ func (a *DashboardAPI) GetDashboard(ctx context.Context, _ *bookingdashboardv1.G
 		TodayCount:       int32(data.TodayCount),
 		UpcomingCount:    int32(data.UpcomingCount),
 		CancellationRate: data.CancellationRate,
-		Revenue:          data.Revenue,
+		Revenue:          data.Revenue.Float64(),
 	}, nil
 }
