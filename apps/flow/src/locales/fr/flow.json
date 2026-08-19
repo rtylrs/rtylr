@@ -524,6 +524,7 @@
     "subtitle": "Tâches organisées par date d'échéance · Cliquez sur un jour pour ajouter une tâche",
     "today": "Aujourd'hui",
     "addHint": "+ ajouter",
+    "addTaskLabel": "Ajouter une tâche le {{date}}",
     "moreCount": "+{{count}} de plus",
     "newTaskFor": "Nouvelle tâche pour",
     "titlePlaceholder": "Titre de la tâche…",

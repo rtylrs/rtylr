@@ -196,12 +196,24 @@ const Calendar: React.FC = () => {
                     {c.date.getDate()}
                   </span>
                   {c.inMonth && (
-                    <span
-                      className="text-[9px] opacity-0 group-hover:opacity-60 transition-opacity"
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openCreate(c.date, c.inMonth);
+                      }}
+                      aria-label={t('flow.calendar.addTaskLabel', {
+                        date: c.date.toLocaleDateString(i18n.language, {
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric',
+                        }),
+                      })}
+                      className="text-[9px] rounded px-0.5 opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]"
                       style={{ color: 'var(--flow-text-dim)' }}
                     >
                       {t('flow.calendar.addHint')}
-                    </span>
+                    </button>
                   )}
                 </div>
                 <div className="space-y-0.5">
