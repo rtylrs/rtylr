@@ -26,9 +26,10 @@ import { HelmetContainer } from '@voxire/components';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@voxire/ui';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
+import GateNotice from '../../shared/components/GateNotice';
 import AddProjectMemberDialog from './components/AddProjectMemberDialog';
-import type { ApiProjectMember } from '../../shared/services/flowApi';
 import { displayDescription } from '../../shared/lib/stringUtils';
+import { useCanDeleteResource } from '../../shared/lib/currentUser';
 
 const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
   admin: { icon: <Crown size={10} />, color: '#f59e0b' },
@@ -65,6 +66,14 @@ const ProjectSettings: React.FC = () => {
   const removeMember = useRemoveProjectMember(projectId ?? '');
   const updateRole = useUpdateProjectMemberRole(projectId ?? '');
   const transferOwnership = useTransferProjectOwnership();
+
+  // Every write on this screen (rename, delete, transfer, member management)
+  // is project-structural, so all of it is gated the same way ProjectBoard
+  // gates board management: project admin+ only. A project viewer or member
+  // reaching this screen sees it, but every control on it is disabled with
+  // a GateNotice rather than actually usable - this is the fix for #793,
+  // where none of these actions had any check at all.
+  const canManageProject = useCanDeleteResource(projectId);
 
   const transferRef = useRef<HTMLSelectElement>(null);
   const [targetWorkspaceId, setTargetWorkspaceId] = useState('');
@@ -138,11 +147,19 @@ const ProjectSettings: React.FC = () => {
         {/* ── General ── */}
         {tab === 'general' && (
           <>
+            {!canManageProject && (
+              <GateNotice
+                id="flow-project-general-gate"
+                reason={t('flow.projectSettings.generalGateReason')}
+              />
+            )}
             <Field label="Name">
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-md px-3 py-2 text-[12px] outline-none"
+                disabled={!canManageProject}
+                aria-describedby={canManageProject ? undefined : 'flow-project-general-gate'}
+                className="w-full rounded-md px-3 py-2 text-[12px] outline-none disabled:opacity-60"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border)',
@@ -156,7 +173,9 @@ const ProjectSettings: React.FC = () => {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder={t('flow.projectSettings.descriptionPlaceholder')}
                 rows={3}
-                className="w-full rounded-md px-3 py-2 text-[12px] outline-none resize-none"
+                disabled={!canManageProject}
+                aria-describedby={canManageProject ? undefined : 'flow-project-general-gate'}
+                className="w-full rounded-md px-3 py-2 text-[12px] outline-none resize-none disabled:opacity-60"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border)',
@@ -165,7 +184,8 @@ const ProjectSettings: React.FC = () => {
               />
             </Field>
             <button
-              onClick={() =>
+              onClick={() => {
+                if (!canManageProject) return;
                 updateProject.mutate(
                   {
                     id: projectId!,
@@ -191,10 +211,10 @@ const ProjectSettings: React.FC = () => {
                     onSuccess: () => toast.success(t('toasts.project.updated')),
                     onError: () => toast.error(t('toasts.project.updateFailed')),
                   }
-                )
-              }
-              disabled={updateProject.isPending}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
+                );
+              }}
+              disabled={updateProject.isPending || !canManageProject}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-40"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               <Save size={11} /> {updateProject.isPending ? 'Saving...' : 'Save changes'}
@@ -205,6 +225,9 @@ const ProjectSettings: React.FC = () => {
         {/* ── Members ── */}
         {tab === 'members' && (
           <div className="space-y-3">
+            {!canManageProject && (
+              <GateNotice reason={t('flow.projectSettings.membersGateReason')} />
+            )}
             <div className="flex items-center justify-between">
               <p
                 className="text-[11px] font-semibold uppercase tracking-wider"
@@ -212,20 +235,24 @@ const ProjectSettings: React.FC = () => {
               >
                 {members.length} member{members.length !== 1 ? 's' : ''}
               </p>
-              <button
-                onClick={() => setShowAddMember(true)}
-                className="flex items-center gap-1 text-[11px] px-2 py-1 rounded"
-                style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
-              >
-                <Plus size={10} /> Add
-              </button>
+              {canManageProject && (
+                <button
+                  onClick={() => setShowAddMember(true)}
+                  className="flex items-center gap-1 text-[11px] px-2 py-1 rounded"
+                  style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
+                >
+                  <Plus size={10} /> Add
+                </button>
+              )}
             </div>
 
-            <AddProjectMemberDialog
-              open={showAddMember}
-              onOpenChange={setShowAddMember}
-              projectId={projectId}
-            />
+            {canManageProject && (
+              <AddProjectMemberDialog
+                open={showAddMember}
+                onOpenChange={setShowAddMember}
+                projectId={projectId}
+              />
+            )}
 
             {membersLoading ? (
               <div className="space-y-2">
@@ -288,7 +315,12 @@ const ProjectSettings: React.FC = () => {
                         {roleMeta.icon}
                         <select
                           value={m.role}
-                          onChange={(e) =>
+                          disabled={!canManageProject}
+                          aria-label={t('flow.projectSettings.roleSelectLabel', {
+                            name: m.name || m.email,
+                          })}
+                          onChange={(e) => {
+                            if (!canManageProject) return;
                             updateRole.mutate(
                               {
                                 project_id: Number(projectId),
@@ -301,9 +333,9 @@ const ProjectSettings: React.FC = () => {
                                 onError: () =>
                                   toast.error(t('toasts.projectMember.roleUpdateFailed')),
                               }
-                            )
-                          }
-                          className="text-[11px] outline-none bg-transparent cursor-pointer"
+                            );
+                          }}
+                          className="text-[11px] outline-none bg-transparent cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                           style={{ color: roleMeta.color }}
                         >
                           <option value="admin">Admin</option>
@@ -312,18 +344,22 @@ const ProjectSettings: React.FC = () => {
                         </select>
                       </div>
                       <button
-                        onClick={() =>
+                        onClick={() => {
+                          if (!canManageProject) return;
                           removeMember.mutate(
                             { project_id: Number(projectId), user_id: Number(m.userId) },
                             {
                               onSuccess: () => toast.success(t('toasts.projectMember.removed')),
                               onError: () => toast.error(t('toasts.projectMember.removeFailed')),
                             }
-                          )
-                        }
-                        className="h-6 w-6 rounded flex items-center justify-center shrink-0"
+                          );
+                        }}
+                        disabled={!canManageProject}
+                        className="h-6 w-6 rounded flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
                         style={{ color: 'var(--flow-text-dim)' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
+                        onMouseEnter={(e) => {
+                          if (canManageProject) e.currentTarget.style.color = '#ef4444';
+                        }}
                         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
                         title={t('flow.projectSettings.removeMemberLabel')}
                         aria-label={t('flow.projectSettings.removeMemberLabel')}
@@ -349,14 +385,21 @@ const ProjectSettings: React.FC = () => {
                   <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-dim)' }}>
                     Move this project (and all its tasks) to a different workspace.
                   </p>
+                  {!canManageProject && (
+                    <GateNotice
+                      className="mb-2"
+                      reason={t('flow.projectSettings.moveGateReason')}
+                    />
+                  )}
                   <div className="flex gap-2">
                     <select
                       value={targetWorkspaceId}
+                      disabled={!canManageProject}
                       onChange={(e) => {
                         setTargetWorkspaceId(e.target.value);
                         setConfirmMove(false);
                       }}
-                      className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
+                      className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none disabled:opacity-60"
                       style={{
                         background: 'var(--flow-input-bg)',
                         border: '1px solid var(--flow-border)',
@@ -374,6 +417,7 @@ const ProjectSettings: React.FC = () => {
                       <>
                         <button
                           onClick={() => {
+                            if (!canManageProject) return;
                             moveProject.mutate(
                               {
                                 project_id: Number(projectId),
@@ -391,8 +435,8 @@ const ProjectSettings: React.FC = () => {
                               }
                             );
                           }}
-                          disabled={moveProject.isPending}
-                          className="px-3 py-1.5 rounded text-[11px] font-semibold"
+                          disabled={moveProject.isPending || !canManageProject}
+                          className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-40"
                           style={{ background: '#ef4444', color: '#fff' }}
                         >
                           {moveProject.isPending ? 'Moving…' : 'Confirm'}
@@ -408,11 +452,13 @@ const ProjectSettings: React.FC = () => {
                     ) : (
                       <button
                         onClick={() => {
+                          if (!canManageProject) return;
                           if (!targetWorkspaceId)
                             return toast.error(t('toasts.project.selectWorkspace'));
                           setConfirmMove(true);
                         }}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold"
+                        disabled={!canManageProject}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-40"
                         style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
                       >
                         <ArrowRightLeft size={10} /> Move
@@ -438,12 +484,21 @@ const ProjectSettings: React.FC = () => {
                 <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-dim)' }}>
                   Transfer ownership to any org member. You'll remain a member.
                 </p>
+                {!canManageProject && (
+                  <GateNotice
+                    id="flow-project-transfer-gate"
+                    className="mb-2"
+                    reason={t('flow.projectSettings.transferGateReason')}
+                  />
+                )}
                 <div className="flex gap-2">
                   <select
                     ref={transferRef}
                     id="transfer-select"
+                    disabled={!canManageProject}
+                    aria-describedby={canManageProject ? undefined : 'flow-project-transfer-gate'}
                     onChange={() => setConfirmTransfer(false)}
-                    className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
+                    className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none disabled:opacity-60"
                     style={{
                       background: 'var(--flow-input-bg)',
                       border: '1px solid var(--flow-border)',
@@ -464,6 +519,7 @@ const ProjectSettings: React.FC = () => {
                     <>
                       <button
                         onClick={() => {
+                          if (!canManageProject) return;
                           const newOwnerId = Number(transferRef.current?.value);
                           transferOwnership.mutate(
                             { project_id: Number(projectId), new_owner_id: newOwnerId },
@@ -479,8 +535,8 @@ const ProjectSettings: React.FC = () => {
                             }
                           );
                         }}
-                        disabled={transferOwnership.isPending}
-                        className="px-3 py-1.5 rounded text-[11px] font-semibold"
+                        disabled={transferOwnership.isPending || !canManageProject}
+                        className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-40"
                         style={{ background: '#ef4444', color: '#fff' }}
                       >
                         {transferOwnership.isPending ? 'Transferring…' : 'Confirm'}
@@ -496,12 +552,14 @@ const ProjectSettings: React.FC = () => {
                   ) : (
                     <button
                       onClick={() => {
+                        if (!canManageProject) return;
                         const newOwnerId = Number(transferRef.current?.value);
                         if (!newOwnerId)
                           return toast.error(t('toasts.projectMember.selectNewOwner'));
                         setConfirmTransfer(true);
                       }}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold"
+                      disabled={!canManageProject}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-40"
                       style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
                     >
                       <ArrowRightLeft size={10} /> Transfer
@@ -562,30 +620,43 @@ const ProjectSettings: React.FC = () => {
 
         {/* ── Danger Zone ── */}
         {tab === 'danger' && (
-          <div
-            className="rounded-md p-4 flex items-start gap-3"
-            style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.25)' }}
-          >
-            <Trash2 size={14} style={{ color: '#ef4444' }} className="mt-0.5" />
-            <div className="flex-1">
-              <p className="text-[12px] font-semibold" style={{ color: '#ef4444' }}>
-                Delete this project
-              </p>
-              <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-                Once deleted, tasks are archived and cannot be restored.
-              </p>
-            </div>
-            <button
-              className="px-3 py-1 rounded text-[11px] font-semibold"
-              style={{ background: '#ef4444', color: '#fff' }}
-              disabled={deleteProject.isPending}
-              onClick={() => {
-                setDeleteTypedName('');
-                setConfirmDelete(true);
+          <div className="space-y-2">
+            {!canManageProject && (
+              <GateNotice
+                id="flow-project-delete-gate"
+                reason={t('flow.projectSettings.deleteGateReason')}
+              />
+            )}
+            <div
+              className="rounded-md p-4 flex items-start gap-3"
+              style={{
+                background: 'rgba(239,68,68,0.06)',
+                border: '1px solid rgba(239,68,68,0.25)',
               }}
             >
-              {deleteProject.isPending ? 'Deleting...' : 'Delete'}
-            </button>
+              <Trash2 size={14} style={{ color: '#ef4444' }} className="mt-0.5" />
+              <div className="flex-1">
+                <p className="text-[12px] font-semibold" style={{ color: '#ef4444' }}>
+                  Delete this project
+                </p>
+                <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                  Once deleted, tasks are archived and cannot be restored.
+                </p>
+              </div>
+              <button
+                className="px-3 py-1 rounded text-[11px] font-semibold disabled:opacity-40"
+                style={{ background: '#ef4444', color: '#fff' }}
+                disabled={deleteProject.isPending || !canManageProject}
+                aria-describedby={canManageProject ? undefined : 'flow-project-delete-gate'}
+                onClick={() => {
+                  if (!canManageProject) return;
+                  setDeleteTypedName('');
+                  setConfirmDelete(true);
+                }}
+              >
+                {deleteProject.isPending ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
           </div>
         )}
 
@@ -633,9 +704,12 @@ const ProjectSettings: React.FC = () => {
               <button
                 type="button"
                 disabled={
-                  deleteTypedName.trim() !== (project?.name ?? '') || deleteProject.isPending
+                  deleteTypedName.trim() !== (project?.name ?? '') ||
+                  deleteProject.isPending ||
+                  !canManageProject
                 }
                 onClick={() => {
+                  if (!canManageProject) return;
                   deleteProject.mutate(projectId, {
                     onSuccess: () => {
                       toast.success(t('toasts.project.deleted'));
