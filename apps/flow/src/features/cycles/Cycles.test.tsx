@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ApiCycle } from '../../shared/services/flowApi';
 
@@ -18,13 +18,15 @@ vi.mock('../../shared/stores/flowStore', () => ({
   useFlowStore: () => ({ activeWorkspaceId: 'ws-1' }),
 }));
 
+const mutateSpy = vi.fn();
+
 const cyclesState = vi.hoisted(() => ({
   value: { data: [] as ApiCycle[], isLoading: false },
 }));
 
 vi.mock('./useCycles', () => ({
   useCycles: () => cyclesState.value,
-  useCreateCycle: () => ({ mutate: vi.fn(), isPending: false }),
+  useCreateCycle: () => ({ mutate: mutateSpy, isPending: false }),
 }));
 
 import Cycles from './Cycles';
@@ -46,6 +48,7 @@ function cycle(over: Partial<ApiCycle> = {}): ApiCycle {
 describe('Cycles', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    cyclesState.value = { data: [], isLoading: false };
   });
 
   it('shows a real empty state with a create CTA when the workspace has zero cycles', () => {
@@ -73,5 +76,45 @@ describe('Cycles', () => {
     expect(screen.getAllByText('Active Sprint').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Next Sprint').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Past Sprint').length).toBeGreaterThan(0);
+  });
+});
+
+describe('Cycles create form', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    cyclesState.value = { data: [], isLoading: false };
+  });
+
+  it('gives the start and end date inputs accessible names', () => {
+    render(<Cycles />);
+
+    fireEvent.click(screen.getByText('flow.cycles.newCycle'));
+
+    expect(screen.getByLabelText('flow.cycles.startDate')).toHaveAttribute('type', 'date');
+    expect(screen.getByLabelText('flow.cycles.endDate')).toHaveAttribute('type', 'date');
+  });
+
+  it('submits the exact start and end dates picked by the user', () => {
+    render(<Cycles />);
+
+    fireEvent.click(screen.getByText('flow.cycles.newCycle'));
+    fireEvent.change(screen.getByPlaceholderText('flow.cycles.namePlaceholder'), {
+      target: { value: 'Sprint 1' },
+    });
+    fireEvent.change(screen.getByLabelText('flow.cycles.startDate'), {
+      target: { value: '2026-09-01' },
+    });
+    fireEvent.change(screen.getByLabelText('flow.cycles.endDate'), {
+      target: { value: '2026-09-14' },
+    });
+
+    fireEvent.click(screen.getByText('flow.cycles.create'));
+
+    expect(mutateSpy).toHaveBeenCalledTimes(1);
+    expect(mutateSpy.mock.calls[0][0]).toMatchObject({
+      name: 'Sprint 1',
+      startDate: '2026-09-01',
+      endDate: '2026-09-14',
+    });
   });
 });

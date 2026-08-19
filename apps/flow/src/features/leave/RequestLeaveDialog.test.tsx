@@ -53,6 +53,57 @@ describe('RequestLeaveDialog', () => {
     expect(screen.getByRole('button', { name: 'flow.leave.submit' })).toBeDisabled();
   });
 
+  it('disables the type field and submit with a reason when no leave types are configured', () => {
+    render(<RequestLeaveDialog {...defaultProps} leaveTypes={[]} />);
+
+    const select = screen.getByLabelText('flow.leave.leaveType') as HTMLSelectElement;
+    const submit = screen.getByRole('button', { name: 'flow.leave.submit' });
+
+    expect(select).toBeDisabled();
+    expect(submit).toBeDisabled();
+    expect(submit).toHaveAttribute('title', 'flow.leave.noLeaveTypesReason');
+
+    const describedBy = submit.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    expect(document.getElementById(describedBy as string)).toHaveTextContent(
+      'flow.leave.noLeaveTypesReason'
+    );
+
+    // Filling in both dates cannot enable submit either - there is no real
+    // type to select, so the gate stays in effect regardless of other fields.
+    fireEvent.change(screen.getByLabelText('flow.leave.startDate'), {
+      target: { value: '2027-01-04' },
+    });
+    fireEvent.change(screen.getByLabelText('flow.leave.endDate'), {
+      target: { value: '2027-01-06' },
+    });
+    expect(submit).toBeDisabled();
+    expect(createRequestMutate).not.toHaveBeenCalled();
+  });
+
+  it('enables submit normally once at least one real leave type exists', () => {
+    render(<RequestLeaveDialog {...defaultProps} />);
+
+    const select = screen.getByLabelText('flow.leave.leaveType') as HTMLSelectElement;
+    const submit = screen.getByRole('button', { name: 'flow.leave.submit' });
+
+    expect(select).not.toBeDisabled();
+    expect(submit).not.toHaveAttribute('title');
+    expect(submit).not.toHaveAttribute('aria-describedby');
+
+    fireEvent.change(select, { target: { value: '1' } });
+    fireEvent.change(screen.getByLabelText('flow.leave.startDate'), {
+      target: { value: '2027-01-04' },
+    });
+    fireEvent.change(screen.getByLabelText('flow.leave.endDate'), {
+      target: { value: '2027-01-06' },
+    });
+
+    expect(submit).not.toBeDisabled();
+    fireEvent.click(submit);
+    expect(createRequestMutate).toHaveBeenCalledTimes(1);
+  });
+
   it("submits the caller's own employeeId, the picked type, and computed total days", () => {
     render(<RequestLeaveDialog {...defaultProps} />);
 

@@ -413,6 +413,7 @@
     "heading": "دليل الموظفين",
     "searchPlaceholder": "ابحث بالاسم",
     "noResults": "لا يوجد أحد يطابق بحثك.",
+    "noMembersYet": "لا يوجد أحد في الدليل بعد.",
     "loadFailedTitle": "تعذّر تحميل دليل الموظفين",
     "loadFailedDescription": "قد يحدث هذا إذا كان دورك لا يملك صلاحية الاطلاع عليه، أو تعذّر الوصول إلى الدليل. اطلب من أحد المدراء إن كنت تظن أن هذا خطأ."
   },
@@ -429,6 +430,7 @@
     "newRequest": "طلب إجازة",
     "leaveType": "النوع",
     "selectLeaveType": "اختر نوعاً",
+    "noLeaveTypesReason": "اطلب من أحد المسؤولين إعداد أنواع الإجازات قبل أن تتمكن من تقديم طلب إجازة.",
     "startDate": "تاريخ البدء",
     "endDate": "تاريخ الانتهاء",
     "totalDays": "عدد الأيام",
@@ -448,6 +450,7 @@
   },
   "profile": {
     "heading": "الملف الشخصي",
+    "hrDetails": "بيانات الموارد البشرية",
     "noRecordTitle": "لا يوجد سجل موارد بشرية مرتبط بعد",
     "noRecordDescription": "حسابك غير مرتبط بسجل موظف في الموارد البشرية بعد. اطلب من أحد المدراء ربطه.",
     "role": "الدور",
@@ -541,6 +544,7 @@
     "subtitle": "المهام مرتبة حسب تاريخ الاستحقاق · انقر على يوم لإضافة مهمة",
     "today": "اليوم",
     "addHint": "+ إضافة",
+    "addTaskLabel": "إضافة مهمة في {{date}}",
     "moreCount": "+{{count}} أخرى",
     "newTaskFor": "مهمة جديدة لـ",
     "titlePlaceholder": "عنوان المهمة…",
@@ -563,6 +567,7 @@
     "emptyDescription": "تتبع أهداف التسليم الرئيسية عبر مشاريعك.",
     "createFirst": "إنشاء أول معلم",
     "namePlaceholder": "اسم المعلم",
+    "targetDate": "التاريخ المستهدف",
     "creating": "جارٍ الإنشاء...",
     "create": "إنشاء",
     "cancel": "إلغاء",
@@ -611,6 +616,8 @@
     "subtitle": "دورات تسليم مدتها أسبوعان",
     "newCycle": "دورة جديدة",
     "namePlaceholder": "اسم الدورة",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
     "creating": "جارٍ الإنشاء...",
     "create": "إنشاء",
     "cancel": "إلغاء",
@@ -676,7 +683,8 @@
   "projectSettings": {
     "pageTitle": "إعدادات المشروع · rtylr",
     "removeMemberLabel": "إزالة",
-    "emailPlaceholder": "البريد الإلكتروني"
+    "emailPlaceholder": "البريد الإلكتروني",
+    "descriptionPlaceholder": "أضف وصفًا…"
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد"

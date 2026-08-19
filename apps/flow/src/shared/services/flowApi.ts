@@ -168,6 +168,9 @@ export interface ApiView {
   id: string;
   name: string;
   icon: string;
+  // App-facing shape. The wire contract (flow/view/v1) encodes this as a JSON
+  // string - see toViewPayload/toViewUpdatePayload for the encode side and
+  // decodeApiView for the decode side.
   filters: Record<string, unknown>;
   groupBy?: string;
   sortBy?: string;
@@ -271,7 +274,11 @@ const toViewPayload = (data: Partial<ApiView> & { workspaceId?: string }) => ({
   workspaceId: data.workspaceId,
   name: data.name,
   icon: data.icon,
-  filters: data.filters,
+  // The flow/view/v1 contract wire-encodes `filters` as a JSON string (the
+  // .onk model documents it as "JSON-encoded filter criteria"; the generated
+  // Go struct field is `Filters string`) - sending the raw object fails
+  // json.Unmarshal server-side and 400s on every request.
+  filters: data.filters !== undefined ? JSON.stringify(data.filters) : undefined,
   groupBy: data.groupBy,
   sortBy: data.sortBy,
   sortDir: data.sortDir,
@@ -280,11 +287,31 @@ const toViewPayload = (data: Partial<ApiView> & { workspaceId?: string }) => ({
 const toViewUpdatePayload = (data: Partial<ApiView>) => ({
   name: data.name,
   icon: data.icon,
-  filters: data.filters,
+  filters: data.filters !== undefined ? JSON.stringify(data.filters) : undefined,
   groupBy: data.groupBy,
   sortBy: data.sortBy,
   sortDir: data.sortDir,
 });
+
+// Reverses toViewPayload's filters encoding. The backend always returns
+// `filters` as the same JSON string it stores; parse it back into an object
+// so the rest of the app can keep treating SavedView.filters as structured
+// data. Tolerates an already-decoded object (defensive) and falls back to {}
+// on missing/invalid data rather than throwing.
+const decodeApiView = (view: ApiView): ApiView => {
+  const raw = view.filters as unknown;
+  let filters: Record<string, unknown> = {};
+  if (raw && typeof raw === 'object') {
+    filters = raw as Record<string, unknown>;
+  } else if (typeof raw === 'string' && raw.length > 0) {
+    try {
+      filters = JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      filters = {};
+    }
+  }
+  return { ...view, filters };
+};
 
 const toUserSettingsPayload = (data: ApiUserSettings) => {
   const source = data as ApiUserSettings & {
@@ -799,10 +826,16 @@ export const flowApi = {
 
   // -- Views --------------------------------------------------------------
 
-  getViews: () => safe.get<{ views: ApiView[] }>('/flow/view/v1/views'),
+  getViews: () =>
+    safe.get<{ views: ApiView[] }>('/flow/view/v1/views').map((res) => ({
+      ...res,
+      views: (res.views ?? []).map(decodeApiView),
+    })),
 
   createView: (data: Partial<ApiView>) =>
-    safe.post<{ view: ApiView }>('/flow/view/v1/views', toViewPayload(data)),
+    safe
+      .post<{ view: ApiView }>('/flow/view/v1/views', toViewPayload(data))
+      .map((res) => ({ ...res, view: res.view ? decodeApiView(res.view) : res.view })),
 
   updateView: (id: string, data: Partial<ApiView>) =>
     safe.put<{ message: string }>(`/flow/view/v1/views/${id}`, toViewUpdatePayload(data)),

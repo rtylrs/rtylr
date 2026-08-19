@@ -132,6 +132,7 @@ const Milestones: React.FC = () => {
             type="date"
             value={newDate}
             onChange={(e) => setNewDate(e.target.value)}
+            aria-label={t('flow.milestones.targetDate')}
             className="rounded-md px-3 py-2 text-[12px] outline-none"
             style={{
               background: 'var(--flow-input-bg)',

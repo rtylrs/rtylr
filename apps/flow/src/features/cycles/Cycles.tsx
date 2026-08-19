@@ -76,6 +76,7 @@ const Cycles: React.FC = () => {
               type="date"
               value={newStart}
               onChange={(e) => setNewStart(e.target.value)}
+              aria-label={t('flow.cycles.startDate')}
               className="rounded-md px-3 py-2 text-[12px] outline-none"
               style={{
                 background: 'var(--flow-input-bg)',
@@ -87,6 +88,7 @@ const Cycles: React.FC = () => {
               type="date"
               value={newEnd}
               onChange={(e) => setNewEnd(e.target.value)}
+              aria-label={t('flow.cycles.endDate')}
               className="rounded-md px-3 py-2 text-[12px] outline-none"
               style={{
                 background: 'var(--flow-input-bg)',

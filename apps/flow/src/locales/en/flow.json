@@ -402,6 +402,7 @@
     "heading": "Directory",
     "searchPlaceholder": "Search by name",
     "noResults": "No one matches your search.",
+    "noMembersYet": "No one in the directory yet.",
     "loadFailedTitle": "Couldn't load the directory",
     "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or the directory couldn't be reached. Ask an admin if you think this is wrong."
   },
@@ -418,6 +419,7 @@
     "newRequest": "Request time off",
     "leaveType": "Type",
     "selectLeaveType": "Select a type",
+    "noLeaveTypesReason": "Ask an admin to set up leave types before you can request time off.",
     "startDate": "Start date",
     "endDate": "End date",
     "totalDays": "Days",
@@ -437,6 +439,7 @@
   },
   "profile": {
     "heading": "Profile",
+    "hrDetails": "HR details",
     "noRecordTitle": "No HR record linked yet",
     "noRecordDescription": "Your account isn't linked to a staff record in HR yet. Ask an admin to link it.",
     "role": "Role",
@@ -526,6 +529,7 @@
     "subtitle": "Tasks organized by due date · Click a day to add a task",
     "today": "Today",
     "addHint": "+ add",
+    "addTaskLabel": "Add task on {{date}}",
     "moreCount": "+{{count}} more",
     "newTaskFor": "New task for",
     "titlePlaceholder": "Task title…",
@@ -544,6 +548,7 @@
     "emptyDescription": "Track major delivery targets across your projects.",
     "createFirst": "Create first milestone",
     "namePlaceholder": "Milestone name",
+    "targetDate": "Target date",
     "creating": "Creating...",
     "create": "Create",
     "cancel": "Cancel",
@@ -584,6 +589,8 @@
     "subtitle": "Two-week delivery sprints",
     "newCycle": "New cycle",
     "namePlaceholder": "Cycle name",
+    "startDate": "Start date",
+    "endDate": "End date",
     "creating": "Creating...",
     "create": "Create",
     "cancel": "Cancel",
@@ -645,7 +652,8 @@
   "projectSettings": {
     "pageTitle": "Project settings · rtylr",
     "removeMemberLabel": "Remove",
-    "emailPlaceholder": "Email address"
+    "emailPlaceholder": "Email address",
+    "descriptionPlaceholder": "Add a description…"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection"
