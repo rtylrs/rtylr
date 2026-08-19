@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@voxire/ui';
+import GateNotice from '../../shared/components/GateNotice';
 import type { LeaveTypePayload } from './useLeave';
 import { useCreateLeaveRequest } from './useLeave';
 
@@ -44,8 +45,21 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
     [startDate, endDate]
   );
 
+  // A workspace that has not configured any leave types yet leaves the Type
+  // field with nothing real to select - the placeholder is its only option.
+  // Root CLAUDE.md rule 12 ("a control that cannot store its value is either
+  // absent or disabled with the reason beside it") applies here: the field
+  // and the submit button both surface this specific reason rather than
+  // rendering as though a normal, fillable form.
+  const hasLeaveTypes = leaveTypes.length > 0;
+  const noLeaveTypesReason = hasLeaveTypes ? '' : t('flow.leave.noLeaveTypesReason');
+
   const canSubmit =
-    leaveTypeId !== '' && startDate !== '' && endDate !== '' && endDate >= startDate;
+    hasLeaveTypes &&
+    leaveTypeId !== '' &&
+    startDate !== '' &&
+    endDate !== '' &&
+    endDate >= startDate;
 
   const reset = (): void => {
     setLeaveTypeId('');
@@ -107,8 +121,14 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
               value={leaveTypeId}
               onChange={(e) => setLeaveTypeId(e.target.value)}
               required
-              className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-              style={inputStyle}
+              disabled={!hasLeaveTypes}
+              aria-describedby={noLeaveTypesReason ? 'leave-type-gate' : undefined}
+              className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] disabled:cursor-not-allowed md:min-h-0 md:py-1.5 md:text-[13px]"
+              style={{
+                ...inputStyle,
+                background: hasLeaveTypes ? inputStyle.background : 'var(--flow-hover)',
+                color: hasLeaveTypes ? inputStyle.color : 'var(--flow-text-muted)',
+              }}
             >
               <option value="">{t('flow.leave.selectLeaveType')}</option>
               {leaveTypes.map((type) => (
@@ -117,6 +137,7 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
                 </option>
               ))}
             </select>
+            <GateNotice id="leave-type-gate" className="mt-1" reason={noLeaveTypesReason} />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -189,7 +210,9 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
               type="button"
               onClick={submit}
               disabled={!canSubmit || createRequest.isPending}
-              className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded px-4 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2.5"
+              title={noLeaveTypesReason || undefined}
+              aria-describedby={noLeaveTypesReason ? 'leave-type-gate' : undefined}
+              className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded px-4 text-[13px] font-semibold disabled:cursor-not-allowed disabled:opacity-40 md:min-h-0 md:py-2.5"
               style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {t('flow.leave.submit')}

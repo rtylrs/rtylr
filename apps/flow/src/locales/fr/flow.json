@@ -415,6 +415,7 @@
     "newRequest": "Demander un congé",
     "leaveType": "Type",
     "selectLeaveType": "Sélectionner un type",
+    "noLeaveTypesReason": "Demandez à un administrateur de configurer les types de congés avant de pouvoir faire une demande.",
     "startDate": "Date de début",
     "endDate": "Date de fin",
     "totalDays": "Jours",

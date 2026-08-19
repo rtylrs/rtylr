@@ -426,6 +426,7 @@
     "newRequest": "طلب إجازة",
     "leaveType": "النوع",
     "selectLeaveType": "اختر نوعاً",
+    "noLeaveTypesReason": "اطلب من أحد المسؤولين إعداد أنواع الإجازات قبل أن تتمكن من تقديم طلب إجازة.",
     "startDate": "تاريخ البدء",
     "endDate": "تاريخ الانتهاء",
     "totalDays": "عدد الأيام",
