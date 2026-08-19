@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useRoadmap } from './useRoadmap';
 import { formatDate } from '../../shared/lib/utils';
+import { displayDescription } from '../../shared/lib/stringUtils';
 import { AvatarStack } from '../../shared/components/AssigneeAvatar';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 
@@ -60,9 +61,11 @@ const Roadmap: React.FC = () => {
                     <p className="text-[14px] font-bold" style={{ color: 'var(--flow-text)' }}>
                       {p.name}
                     </p>
-                    <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-                      {p.description}
-                    </p>
+                    {displayDescription(p.description) && (
+                      <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                        {displayDescription(p.description)}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <AvatarStack
