@@ -435,6 +435,7 @@
   },
   "profile": {
     "heading": "Profil",
+    "hrDetails": "Détails RH",
     "noRecordTitle": "Aucune fiche RH associée pour l'instant",
     "noRecordDescription": "Votre compte n'est pas encore associé à une fiche employé dans RH. Demandez à un administrateur de l'associer.",
     "role": "Poste",
