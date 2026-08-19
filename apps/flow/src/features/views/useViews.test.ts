@@ -61,6 +61,23 @@ const createWrapper = () => {
 describe('useViews (remote mode)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
+  });
+
+  it('falls back to the active workspace from the store when no workspaceId is given', async () => {
+    (flowApi.getViews as any).mockResolvedValue({ views: [] });
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useViews(), { wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(flowApi.getViews).toHaveBeenCalledWith('ws-store');
+  });
+
+  it('uses an explicit workspaceId over the store value', async () => {
+    (flowApi.getViews as any).mockResolvedValue({ views: [] });
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useViews('ws-explicit'), { wrapper });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(flowApi.getViews).toHaveBeenCalledWith('ws-explicit');
   });
 
   it('unwraps the enveloped { views: [...] } shape', async () => {

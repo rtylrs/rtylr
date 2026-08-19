@@ -15,11 +15,13 @@ import {
 
 const t = (key: string): string => i18next.t(key) as string;
 
-export function useViews() {
+export function useViews(workspaceId?: string) {
+  const { activeWorkspaceId } = useFlowStore();
+  const wsId = workspaceId ?? activeWorkspaceId;
   return useQuery<SavedView[]>({
-    queryKey: ['views'],
+    queryKey: ['views', wsId],
     queryFn: async () => {
-      const res = await unwrap(flowApi.getViews());
+      const res = await unwrap(flowApi.getViews(wsId));
       return unwrapListResponse<SavedView>(res, 'views');
     },
   });

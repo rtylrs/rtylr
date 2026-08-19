@@ -375,9 +375,18 @@ describe('flowApi', () => {
   });
 
   // Views
-  it('getViews calls GET /flow/view/v1/views', () => {
+  it('getViews without workspaceId passes undefined params', () => {
     flowApi.getViews();
-    expect(safe.get).toHaveBeenCalledWith('/flow/view/v1/views');
+    expect(safe.get).toHaveBeenCalledWith('/flow/view/v1/views', { params: undefined });
+  });
+
+  // Regression guard for #779: getViews never sent workspace_id, so the
+  // backend returned no `views` key at all and created views never displayed.
+  it('getViews with workspaceId sends workspace_id param', () => {
+    flowApi.getViews('ws-1');
+    expect(safe.get).toHaveBeenCalledWith('/flow/view/v1/views', {
+      params: { workspace_id: 'ws-1' },
+    });
   });
 
   // Regression guard for #750: the flow/view/v1 contract wire-encodes
