@@ -20,6 +20,7 @@ import { cn, formatDate } from '../../shared/lib/utils';
 import { useTasks, useUpdateTaskStatus } from '../tasks/useTasks';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import { useCurrentProject } from './useCurrentProject';
+import { useStatusLabels } from '../../shared/hooks/useStatusLabels';
 import { TaskContextMenu, ContextMenuState } from '../../shared/components/TaskContextMenu';
 
 const PRIORITY_ICONS: Record<string, { color: string; label: string }> = {
@@ -30,11 +31,20 @@ const PRIORITY_ICONS: Record<string, { color: string; label: string }> = {
   no_priority: { color: '#4b5563', label: 'No priority' },
 };
 
-const STATUS_GROUPS: { id: Task['status']; label: string; color: string }[] = [
-  { id: 'todo', label: 'Todo', color: '#6b7280' },
-  { id: 'in_progress', label: 'In Progress', color: '#3b82f6' },
-  { id: 'in_review', label: 'In Review', color: '#f59e0b' },
-  { id: 'done', label: 'Done', color: '#22c55e' },
+interface StatusGroupDef {
+  id: Task['status'];
+  label: string;
+  color: string;
+}
+
+// Labels are filled in from useStatusLabels() at render time (the single
+// i18n-backed source of truth - see constantsFlow.ts's STATUS_LABEL_KEYS) so
+// this view can never hardcode a different string than the rest of the app.
+const STATUS_GROUP_COLORS: { id: Task['status']; color: string }[] = [
+  { id: 'todo', color: '#6b7280' },
+  { id: 'in_progress', color: '#3b82f6' },
+  { id: 'in_review', color: '#f59e0b' },
+  { id: 'done', color: '#22c55e' },
 ];
 
 interface TaskRowProps {
@@ -159,8 +169,8 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
   );
 };
 
-const StatusGroup: React.FC<{
-  group: (typeof STATUS_GROUPS)[number];
+export const StatusGroup: React.FC<{
+  group: StatusGroupDef;
   tasks: Task[];
 }> = ({ group, tasks }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -225,6 +235,11 @@ const StatusGroup: React.FC<{
 const ProjectList: React.FC = () => {
   const { t } = useTranslation();
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = 'p-web' } = useParams({ strict: false });
+  const statusLabels = useStatusLabels();
+  const STATUS_GROUPS: StatusGroupDef[] = useMemo(
+    () => STATUS_GROUP_COLORS.map((def) => ({ ...def, label: statusLabels[def.id] })),
+    [statusLabels]
+  );
 
   useProjectRealtime(projectId);
 
