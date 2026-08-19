@@ -645,7 +645,8 @@
   "projectSettings": {
     "pageTitle": "Réglages du projet · rtylr",
     "removeMemberLabel": "Supprimer",
-    "emailPlaceholder": "Adresse e-mail"
+    "emailPlaceholder": "Adresse e-mail",
+    "descriptionPlaceholder": "Ajouter une description…"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection"
