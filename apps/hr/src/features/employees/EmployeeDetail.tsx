@@ -3,7 +3,9 @@ import { useParams, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft } from 'lucide-react';
+import { useUserStore } from '@voxire/auth';
 import { useGetEmployee } from '../../shared/hooks/queries/useEmployees';
+import { canViewCompensation } from '../../shared/lib/hrPermissions';
 import DocumentVault from '../documents/DocumentVault';
 
 type Tab = 'personal' | 'employment' | 'documents';
@@ -15,6 +17,8 @@ const EmployeeDetail = (): React.JSX.Element => {
   const employeeId = id ? Number(id) : undefined;
   const { data: employee, isLoading } = useGetEmployee(employeeId);
   const [activeTab, setActiveTab] = useState<Tab>('personal');
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const showCompensation = canViewCompensation(role);
 
   if (isLoading) {
     return (
@@ -143,14 +147,15 @@ const EmployeeDetail = (): React.JSX.Element => {
               )}
               {infoRow(t('employees.hireDate'), employee.hireDate)}
               {infoRow(t('employees.form.probationEndDate'), employee.probationEndDate)}
-              {infoRow(
-                t('employees.salary'),
-                employee.monthlySalary != null && employee.currency
-                  ? `${employee.monthlySalary} ${employee.currency}/mo`
-                  : employee.hourlyRate != null && employee.currency
-                    ? `${employee.hourlyRate} ${employee.currency}/hr`
-                    : '-'
-              )}
+              {showCompensation &&
+                infoRow(
+                  t('employees.salary'),
+                  employee.monthlySalary != null && employee.currency
+                    ? `${employee.monthlySalary} ${employee.currency}/mo`
+                    : employee.hourlyRate != null && employee.currency
+                      ? `${employee.hourlyRate} ${employee.currency}/hr`
+                      : '-'
+                )}
               {infoRow(t('employees.form.accountCreationMode'), employee.accountCreationMode)}
             </div>
           )}
