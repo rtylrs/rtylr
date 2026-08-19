@@ -59,6 +59,7 @@ import LabelChip from '../../shared/components/LabelChip';
 import DueDatePicker from '../../shared/components/DueDatePicker';
 import { getInitials } from '../../shared/lib/utils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
+import { TASK_STATUSES, STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -302,22 +303,7 @@ const TaskDetail: React.FC = () => {
   const estimatedHours = task.estimatedHours ?? task.estimate ?? null;
 
   const priorities: Task['priority'][] = ['urgent', 'high', 'medium', 'low', 'no_priority'];
-  const statuses: Task['status'][] = [
-    'backlog',
-    'todo',
-    'in_progress',
-    'in_review',
-    'done',
-    'cancelled',
-  ];
-  const statusLabelKeys: Record<Task['status'], string> = {
-    backlog: 'backlog',
-    todo: 'todo',
-    in_progress: 'inProgress',
-    in_review: 'inReview',
-    done: 'done',
-    cancelled: 'cancelled',
-  };
+  const statuses = TASK_STATUSES;
 
   // Handle set labels via new API
   const handleToggleLabel = (labelId: number) => {
@@ -582,7 +568,7 @@ const TaskDetail: React.FC = () => {
           >
             {statuses.map((s) => (
               <option key={s} value={s} style={{ background: 'var(--flow-card)' }}>
-                {t(`flow.taskDetail.${statusLabelKeys[s]}`)}
+                {t(STATUS_LABEL_KEYS[s])}
               </option>
             ))}
           </select>
