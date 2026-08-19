@@ -41,7 +41,9 @@ import type { SettingsSectionId } from '../../shared/schemas/settings';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useLabels, useCreateLabel, useDeleteLabel } from '../../features/tasks/useLabels';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import GateNotice from '../../shared/components/GateNotice';
 import TimeSection from './sections/TimeSection';
+import { canInviteMembers, toFlowMemberRole } from '../../shared/lib/roleUtils';
 import {
   useWorkspaces,
   useCreateWorkspace,
@@ -55,10 +57,13 @@ interface SettingsSection {
 
 function buildSections(
   t: (key: string) => string,
-  canManageWorkspaces: boolean
+  canManageWorkspaces: boolean,
+  canManageTeam: boolean
 ): SettingsSection[] {
   const sections: SettingsSection[] = [
-    { id: 'team', label: t('common.settings.team'), icon: Users },
+    // Owner/admin only: grants and revokes Flow access for other business
+    // members, gated the same way canInviteMembers gates it everywhere else.
+    ...(canManageTeam ? [{ id: 'team', label: t('common.settings.team'), icon: Users }] : []),
     { id: 'notifications', label: t('common.settings.notifications'), icon: Bell },
     // Admin/owner only: rates and the approval lock change what the whole
     // workspace can edit. Gated on the same role check as Workspaces.
@@ -798,12 +803,25 @@ const LabelsSection: React.FC = () => {
 
 // ── Team Section ─────────────────────────────────────────────────────────────
 
-const TeamSection: React.FC = () => {
+// Exported (only) so its own canInviteMembers gate - the defense-in-depth
+// check described above - can be unit-tested directly, independent of the
+// buildSections-level gate that normally keeps a non-privileged role from
+// ever mounting this component at all.
+export const TeamSection: React.FC = () => {
   const { t } = useTranslation();
   const { data: allMembers = [], isLoading } = useFlowTeam();
   const grant = useFlowGrantAccess();
   const deactivate = useFlowDeactivateMember();
   const { data: sub } = useFlowSubscription();
+
+  // buildSections already keeps a non-privileged role from ever selecting this
+  // tab, but that gate lives one component up. Re-checking here means a stale
+  // `activeSection` (or a future caller that renders this section directly)
+  // still can't grant or revoke Flow access - the mutations stay closed even
+  // if the outer gate is ever bypassed.
+  const token = getCookie('token');
+  const role = useMemo(() => getRoleFromToken(token), [token]);
+  const canManageTeam = canInviteMembers(toFlowMemberRole(role));
 
   // The /team/members endpoint returns the entire business team. Flow
   // is one of several apps a member can have access to; we split here
@@ -821,6 +839,7 @@ const TeamSection: React.FC = () => {
   };
 
   const handleGrant = (): void => {
+    if (!canManageTeam) return;
     const member = candidates.find((m) => String(m.id) === selectedUserId);
     if (!member) return;
     grant.mutate(
@@ -845,8 +864,10 @@ const TeamSection: React.FC = () => {
         </p>
       </div>
 
+      {!canManageTeam && <GateNotice reason={t('flow.settings.team.gateReason')} />}
+
       {/* Grant Flow access to an existing business member */}
-      {showInvite ? (
+      {canManageTeam && showInvite ? (
         <div
           className="rounded-xl p-4 space-y-3"
           style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
@@ -933,15 +954,17 @@ const TeamSection: React.FC = () => {
           </div>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => setShowInvite(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
-          style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-        >
-          <UserPlus size={12} />
-          {t('flow.settings.team.addMember')}
-        </button>
+        canManageTeam && (
+          <button
+            type="button"
+            onClick={() => setShowInvite(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
+            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+          >
+            <UserPlus size={12} />
+            {t('flow.settings.team.addMember')}
+          </button>
+        )
       )}
 
       {/* Members list */}
@@ -996,8 +1019,12 @@ const TeamSection: React.FC = () => {
               <button
                 type="button"
                 aria-label={t('flow.settings.team.removeMemberLabel', { name: m.name })}
-                onClick={() => deactivate.mutate(m.id)}
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-[var(--flow-hover)] transition-colors shrink-0"
+                onClick={() => {
+                  if (!canManageTeam) return;
+                  deactivate.mutate(m.id);
+                }}
+                disabled={!canManageTeam}
+                className="h-7 w-7 flex items-center justify-center rounded hover:bg-[var(--flow-hover)] transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <UserMinus size={13} />
@@ -1025,7 +1052,7 @@ const SECTION_CONTENT: Record<string, React.FC> = {
 
 const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {
   const { t } = useTranslation();
-  const sections = buildSections(t, false);
+  const sections = buildSections(t, false, false);
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
@@ -1048,7 +1075,9 @@ function getRoleFromToken(token: string | null): string {
   }
 }
 
-const MANAGE_WORKSPACE_ROLES = new Set(['owner', 'admin', 'manager']);
+// 'manager' isn't a role Flow (or any business type) actually issues - dead
+// entry, kept out so this set matches the real role vocabulary.
+const MANAGE_WORKSPACE_ROLES = new Set(['owner', 'admin']);
 
 // getRouteApi takes a route id, which for a top-level route is its path.
 const settingsRouteApi = getRouteApi('/settings');
@@ -1058,15 +1087,31 @@ const FlowSettings: React.FC = () => {
   const token = getCookie('token');
   const role = useMemo(() => getRoleFromToken(token), [token]);
   const canManageWorkspaces = MANAGE_WORKSPACE_ROLES.has(role);
-  // ?section=time makes a section linkable, so the sidebar can point at one.
+  // canInviteMembers expects Flow's own Member['role'] vocabulary, not the raw
+  // business-wide role string a non-Flow business type can hand back.
+  const canManageTeam = canInviteMembers(toFlowMemberRole(role));
+  const sections = useMemo(
+    () => buildSections(t, canManageWorkspaces, canManageTeam),
+    [t, canManageWorkspaces, canManageTeam]
+  );
+  const isAccessibleSection = (id: string): boolean => sections.some((s) => s.id === id);
+  // ?section=time makes a section linkable, so the sidebar can point at one -
+  // but the search param is user-controlled, so it must be checked against
+  // the same gate that hides the tab, not rendered on faith (#793).
   const { section } = settingsRouteApi.useSearch();
-  const [activeSection, setActiveSection] = useState<SettingsSectionId | string>(
-    section ?? (canManageWorkspaces ? 'workspaces' : 'team')
+  const [activeSection, setActiveSection] = useState<SettingsSectionId | string>(() =>
+    section && isAccessibleSection(section) ? section : (sections[0]?.id ?? 'notifications')
   );
   useEffect(() => {
-    if (section) setActiveSection(section);
+    if (section && isAccessibleSection(section)) {
+      setActiveSection(section);
+    }
+    // If `section` names an id this role can't reach, deliberately fall
+    // through without updating state - activeSection stays at whatever
+    // already-valid value it held (the initializer above already resolved
+    // that for first render).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section]);
-  const sections = buildSections(t, canManageWorkspaces);
 
   const ActiveComponent =
     SECTION_CONTENT[activeSection] || (() => <PlaceholderSection id={activeSection} />);
