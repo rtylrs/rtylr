@@ -414,6 +414,7 @@
     "newRequest": "Request time off",
     "leaveType": "Type",
     "selectLeaveType": "Select a type",
+    "noLeaveTypesReason": "Ask an admin to set up leave types before you can request time off.",
     "startDate": "Start date",
     "endDate": "End date",
     "totalDays": "Days",
