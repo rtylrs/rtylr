@@ -614,7 +614,10 @@
     "taskCount": "{{done}} من {{total}} مهام منجزة",
     "sectionUpcoming": "القادمة",
     "sectionCompleted": "المكتملة",
-    "dateRange": "{{start}} إلى {{end}}"
+    "dateRange": "{{start}} إلى {{end}}",
+    "emptyTitle": "لا توجد دورات بعد",
+    "emptyDescription": "ابدأ أول دورة تسليم مدتها أسبوعان لتتبع النطاق والتقدم.",
+    "createFirst": "إنشاء أول دورة"
   },
   "myIssues": {
     "loading": "جارٍ التحميل…",

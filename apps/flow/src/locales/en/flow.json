@@ -587,7 +587,10 @@
     "taskCount": "{{done}} of {{total}} tasks done",
     "sectionUpcoming": "Upcoming",
     "sectionCompleted": "Completed",
-    "dateRange": "{{start}} to {{end}}"
+    "dateRange": "{{start}} to {{end}}",
+    "emptyTitle": "No cycles yet",
+    "emptyDescription": "Start your first two-week sprint to track scope and progress.",
+    "createFirst": "Create first cycle"
   },
   "myIssues": {
     "loading": "Loading…",

@@ -587,7 +587,10 @@
     "taskCount": "{{done}} sur {{total}} tâches terminées",
     "sectionUpcoming": "À venir",
     "sectionCompleted": "Terminés",
-    "dateRange": "{{start}} au {{end}}"
+    "dateRange": "{{start}} au {{end}}",
+    "emptyTitle": "Aucun cycle pour le moment",
+    "emptyDescription": "Démarrez votre premier sprint de livraison de deux semaines pour suivre le périmètre et la progression.",
+    "createFirst": "Créer le premier cycle"
   },
   "myIssues": {
     "loading": "Chargement…",
