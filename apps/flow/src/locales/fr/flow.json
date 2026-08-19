@@ -172,6 +172,8 @@
     "reportsRangeTo": "au",
     "reportsPerson": "Personne",
     "reportsScopeNote": "Totaux par personne sur la période. Le regroupement par projet ou type de travail nécessite un point d'accès qui n'existe pas encore.",
+    "reportsEmptyTitle": "Rien à signaler pour l'instant",
+    "reportsEmptyDescription": "Personne dans cet espace de travail n'a de temps à afficher pour cette période.",
     "project": "Projet",
     "selectProject": "Sélectionner un projet",
     "workType": "Type de travail",

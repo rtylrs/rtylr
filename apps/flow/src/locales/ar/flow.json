@@ -176,6 +176,8 @@
     "reportsRangeTo": "إلى",
     "reportsPerson": "الشخص",
     "reportsScopeNote": "الإجماليات لكل شخص خلال الفترة المحددة. التجميع حسب المشروع أو نوع العمل يتطلب نقطة وصول غير متوفرة بعد.",
+    "reportsEmptyTitle": "لا يوجد شيء لعرضه بعد",
+    "reportsEmptyDescription": "لا يملك أحد في مساحة العمل هذه وقتًا لعرضه خلال هذه الفترة.",
     "project": "المشروع",
     "selectProject": "اختر مشروعاً",
     "workType": "نوع العمل",
