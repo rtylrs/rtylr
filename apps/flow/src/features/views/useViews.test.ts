@@ -26,6 +26,16 @@ vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((val) => val),
 }));
 
+vi.mock('../../shared/stores/flowStore', async () => {
+  const actual = await vi.importActual<typeof import('../../shared/stores/flowStore')>(
+    '../../shared/stores/flowStore'
+  );
+  return {
+    ...actual,
+    useFlowStore: vi.fn(() => ({ activeWorkspaceId: 'ws-store' })),
+  };
+});
+
 import {
   useViews,
   useCreateView,
@@ -34,6 +44,7 @@ import {
   useFilteredTasks,
 } from './useViews';
 import { flowApi } from '../../shared/services/flowApi';
+import { useFlowStore } from '../../shared/stores/flowStore';
 import { toast } from 'sonner';
 
 const createWrapper = () => {
@@ -74,17 +85,31 @@ describe('useViews (remote mode)', () => {
 describe('useCreateView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
   });
 
-  it('calls createView with the given data and invalidates views on success', async () => {
+  it('defaults workspaceId to the active workspace when the caller omits it', async () => {
     (flowApi.createView as any).mockResolvedValue({ id: 'v-new' });
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useCreateView(), { wrapper });
     const input = { name: 'New view', icon: 'star' };
     await act(() => result.current.mutateAsync(input));
-    expect(flowApi.createView).toHaveBeenCalledWith(input);
+    expect(flowApi.createView).toHaveBeenCalledWith({ workspaceId: 'ws-store', ...input });
     expect(spy).toHaveBeenCalledWith({ queryKey: ['views'] });
+  });
+
+  it('lets an explicit workspaceId on the payload override the active workspace default', async () => {
+    (flowApi.createView as any).mockResolvedValue({ id: 'v-new' });
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useCreateView(), { wrapper });
+    await act(() =>
+      result.current.mutateAsync({ workspaceId: 'ws-explicit', name: 'New view' } as any)
+    );
+    expect(flowApi.createView).toHaveBeenCalledWith({
+      workspaceId: 'ws-explicit',
+      name: 'New view',
+    });
   });
 
   it('shows an error toast and does not invalidate when the create call fails', async () => {
