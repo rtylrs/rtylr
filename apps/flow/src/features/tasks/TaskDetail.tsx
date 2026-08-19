@@ -58,6 +58,7 @@ import AssigneeAvatar from '../../shared/components/AssigneeAvatar';
 import LabelChip from '../../shared/components/LabelChip';
 import DueDatePicker from '../../shared/components/DueDatePicker';
 import { getInitials } from '../../shared/lib/utils';
+import { displayDescription } from '../../shared/lib/stringUtils';
 import { EFFORT_PRESETS, formatEffortMinutes } from '../../shared/lib/effortPresets';
 import { TASK_STATUSES, STATUS_LABEL_KEYS } from '../../shared/lib/constantsFlow';
 
@@ -433,7 +434,7 @@ const TaskDetail: React.FC = () => {
             />
             {/* Description */}
             <textarea
-              value={task.description || ''}
+              value={displayDescription(task.description)}
               onChange={(e) => updateTask(task.id, { description: e.target.value })}
               placeholder={t('flow.taskDetail.descriptionPlaceholder')}
               rows={5}

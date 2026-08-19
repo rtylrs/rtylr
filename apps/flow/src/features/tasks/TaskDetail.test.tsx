@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { ApiTask, ApiTaskDetail } from '../../shared/services/flowApi';
@@ -46,8 +46,9 @@ vi.mock('./useTask', () => ({
   useTask: () => taskDetailData,
 }));
 
+const updateTaskMutate = vi.hoisted(() => vi.fn());
 vi.mock('./useTasks', () => ({
-  useUpdateTask: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateTask: () => ({ mutate: updateTaskMutate, isPending: false }),
   useDeleteTask: () => ({ mutate: vi.fn(), isPending: false }),
   useAddComment: () => ({ mutate: vi.fn(), isPending: false }),
   useAddSubtask: () => ({ mutate: vi.fn(), isPending: false }),
@@ -114,6 +115,7 @@ function renderTaskDetail() {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  updateTaskMutate.mockClear();
   useLabelsSpy.mockReturnValue({ data: [] });
   useCurrentProjectSpy.mockReturnValue({ project: undefined, isLoading: false });
   useFlowStore.setState({
@@ -197,5 +199,68 @@ describe('TaskDetail cross-workspace sync', () => {
     expect(
       screen.getByText((_, element) => element?.textContent === 'Other workspace project / t-1')
     ).toBeTruthy();
+  });
+});
+
+describe('TaskDetail description sentinel display', () => {
+  it('renders a "-" sentinel description as an empty field with placeholder text, not a literal dash', () => {
+    taskDetailData.data = {
+      task: apiTask({ description: '-' }),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    };
+
+    renderTaskDetail();
+
+    const descriptionField = screen.getByPlaceholderText('flow.taskDetail.descriptionPlaceholder');
+    expect(descriptionField).toHaveValue('');
+  });
+
+  it('renders a real description normally', () => {
+    taskDetailData.data = {
+      task: apiTask({ description: 'Investigate the flaky checkout test' }),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    };
+
+    renderTaskDetail();
+
+    const descriptionField = screen.getByPlaceholderText('flow.taskDetail.descriptionPlaceholder');
+    expect(descriptionField).toHaveValue('Investigate the flaky checkout test');
+  });
+
+  it('does not send an update when the sentinel-stripped description is only displayed, never edited', () => {
+    taskDetailData.data = {
+      task: apiTask({ description: '-' }),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    };
+
+    renderTaskDetail();
+
+    expect(updateTaskMutate).not.toHaveBeenCalled();
+  });
+
+  it('sends a typed description as-is when editing a task that had no real description', () => {
+    taskDetailData.data = {
+      task: apiTask({ description: '-' }),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    };
+
+    renderTaskDetail();
+
+    fireEvent.change(screen.getByPlaceholderText('flow.taskDetail.descriptionPlaceholder'), {
+      target: { value: 'New real description' },
+    });
+
+    expect(updateTaskMutate).toHaveBeenCalledWith({
+      id: 't-1',
+      data: { description: 'New real description' },
+    });
   });
 });
