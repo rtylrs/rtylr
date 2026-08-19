@@ -684,6 +684,8 @@
     "pageTitle": "إعدادات المشروع · rtylr",
     "removeMemberLabel": "إزالة",
     "emailPlaceholder": "البريد الإلكتروني",
+    "roleLabel": "الدور",
+    "addMemberHeading": "إضافة عضو إلى هذا المشروع",
     "descriptionPlaceholder": "أضف وصفًا…"
   },
   "bulkEdit": {

@@ -653,6 +653,8 @@
     "pageTitle": "Réglages du projet · rtylr",
     "removeMemberLabel": "Supprimer",
     "emailPlaceholder": "Adresse e-mail",
+    "roleLabel": "Rôle",
+    "addMemberHeading": "Ajouter un membre à ce projet",
     "descriptionPlaceholder": "Ajouter une description…"
   },
   "bulkEdit": {
