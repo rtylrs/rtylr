@@ -70,7 +70,14 @@ const DirectoryScreen = (): React.JSX.Element => {
         )}
 
         {!isLoading && !isError && (members?.length ?? 0) === 0 && (
-          <EmptyState icon={Users} title={t('flow.directory.noResults')} />
+          <EmptyState
+            icon={Users}
+            title={
+              search.trim().length > 0
+                ? t('flow.directory.noResults')
+                : t('flow.directory.noMembersYet')
+            }
+          />
         )}
 
         {!isLoading && !isError && members && members.length > 0 && (
