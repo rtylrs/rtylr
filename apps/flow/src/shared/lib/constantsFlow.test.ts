@@ -6,6 +6,7 @@ import {
   OPEN_STATUSES,
   CLOSED_STATUSES,
   ACTIVE_STATUSES,
+  STATUS_LABEL_KEYS,
   DEFAULT_PAGE_SIZE,
   MAX_TASK_TITLE_LENGTH,
   MAX_PROJECT_NAME_LENGTH,
@@ -63,6 +64,29 @@ describe('ACTIVE_STATUSES', () => {
   it('includes in_progress and in_review', () => {
     expect(ACTIVE_STATUSES).toContain('in_progress');
     expect(ACTIVE_STATUSES).toContain('in_review');
+  });
+});
+
+describe('STATUS_LABEL_KEYS', () => {
+  it('has an i18n key for every task status', () => {
+    for (const status of TASK_STATUSES) {
+      expect(STATUS_LABEL_KEYS[status]).toBeTruthy();
+    }
+  });
+
+  it('resolves the "todo" status to the same i18n key used by the task detail status picker', () => {
+    // Regression guard for issue #756: the project List view and the task
+    // detail status picker each used to hardcode their own "todo" label
+    // ("Todo" vs "To Do") instead of sharing this map. Anyone reading a
+    // status label must go through STATUS_LABEL_KEYS so the two can't
+    // drift apart again.
+    expect(STATUS_LABEL_KEYS.todo).toBe('flow.taskDetail.todo');
+  });
+
+  it('points every status at the flow.taskDetail namespace', () => {
+    for (const status of TASK_STATUSES) {
+      expect(STATUS_LABEL_KEYS[status]).toMatch(/^flow\.taskDetail\./);
+    }
   });
 });
 

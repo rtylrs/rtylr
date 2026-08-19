@@ -28,6 +28,24 @@ export const CLOSED_STATUSES: Task['status'][] = ['done', 'cancelled'];
 /** Statuses that represent active work in flight. */
 export const ACTIVE_STATUSES: Task['status'][] = ['in_progress', 'in_review'];
 
+/**
+ * i18n key for each task status's display label (all under the `flow`
+ * locale namespace's `taskDetail.*` path - see locales/en/flow.json).
+ * This is the single source of truth for status text: every view that
+ * shows a status label must resolve through this map instead of hardcoding
+ * its own string, so two views can never drift apart again (issue #756,
+ * where the project List view hardcoded "Todo" while the rest of the app
+ * used the i18n-backed "To Do").
+ */
+export const STATUS_LABEL_KEYS: Record<Task['status'], string> = {
+  backlog: 'flow.taskDetail.backlog',
+  todo: 'flow.taskDetail.todo',
+  in_progress: 'flow.taskDetail.inProgress',
+  in_review: 'flow.taskDetail.inReview',
+  done: 'flow.taskDetail.done',
+  cancelled: 'flow.taskDetail.cancelled',
+};
+
 /** Default page size for task lists. */
 export const DEFAULT_PAGE_SIZE = 25;
 
