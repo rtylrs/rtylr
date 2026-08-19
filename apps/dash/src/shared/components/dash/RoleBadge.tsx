@@ -12,6 +12,7 @@ const LABELS: Record<string, string> = {
   operator: 'Operator',
   billing: 'Billing',
   menu_manager: 'Menu Manager',
+  store_manager: 'Store Manager',
   staff: 'Staff',
   viewer: 'Viewer',
 };
@@ -33,6 +34,11 @@ const COLORS: Record<string, { bg: string; fg: string; border: string }> = {
     bg: 'rgba(100,197,185,0.14)',
     fg: 'var(--app-flow)',
     border: 'rgba(100,197,185,0.3)',
+  },
+  store_manager: {
+    bg: 'color-mix(in srgb, var(--app-pos) 14%, transparent)',
+    fg: 'var(--app-pos)',
+    border: 'color-mix(in srgb, var(--app-pos) 30%, transparent)',
   },
   staff: {
     bg: 'var(--status-active-bg)',
