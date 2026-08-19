@@ -537,6 +537,7 @@
     "subtitle": "المهام مرتبة حسب تاريخ الاستحقاق · انقر على يوم لإضافة مهمة",
     "today": "اليوم",
     "addHint": "+ إضافة",
+    "addTaskLabel": "إضافة مهمة في {{date}}",
     "moreCount": "+{{count}} أخرى",
     "newTaskFor": "مهمة جديدة لـ",
     "titlePlaceholder": "عنوان المهمة…",
