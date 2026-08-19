@@ -37,6 +37,7 @@
     "projectDescriptionPlaceholder": "الوصف (اختياري)",
     "projectNameRequired": "اسم المشروع مطلوب",
     "createNeedsWorkspace": "يجب تحميل مساحة عمل قبل أن تتمكن من إنشاء مشروع.",
+    "createNeedsRole": "لا يمكن للمشاهدين إنشاء مشاريع. اطلب من مسؤول مساحة العمل منحك الصلاحية.",
     "creating": "جارٍ الإنشاء…",
     "assignedOpenTasks": "{{count}} مهام مفتوحة مكلّفة",
     "focusItems": "{{count}} عناصر مستحقة أو مثبّتة للتركيز",
@@ -323,7 +324,8 @@
       "grantAccessAction": "منح الوصول",
       "addMember": "إضافة عضو",
       "noMembersYet": "لا يوجد أعضاء في الفريق بعد.",
-      "removeMemberLabel": "إزالة {{name}}"
+      "removeMemberLabel": "إزالة {{name}}",
+      "gateReason": "يمكن فقط لملاك مساحة العمل والمسؤولين منح صلاحية الوصول إلى Flow أو إزالتها."
     },
     "sectionNotAvailable": "هذا القسم غير متاح بعد.",
     "notifications": {
@@ -685,8 +687,14 @@
     "removeMemberLabel": "إزالة",
     "emailPlaceholder": "البريد الإلكتروني",
     "roleLabel": "الدور",
+    "roleSelectLabel": "تغيير دور {{name}}",
     "addMemberHeading": "إضافة عضو إلى هذا المشروع",
-    "descriptionPlaceholder": "أضف وصفًا…"
+    "descriptionPlaceholder": "أضف وصفًا…",
+    "generalGateReason": "يمكن لمسؤولي المشروع فقط إعادة تسمية المشروع أو تعديل وصفه.",
+    "membersGateReason": "يمكن لمسؤولي المشروع فقط إضافة أعضاء المشروع أو إزالتهم أو تغيير أدوارهم.",
+    "moveGateReason": "يمكن لمسؤولي المشروع فقط نقل هذا المشروع إلى مساحة عمل أخرى.",
+    "transferGateReason": "يمكن لمسؤولي المشروع فقط نقل ملكية هذا المشروع.",
+    "deleteGateReason": "يمكن لمسؤولي المشروع فقط حذف هذا المشروع."
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد"
