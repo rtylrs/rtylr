@@ -398,6 +398,7 @@
     "heading": "Directory",
     "searchPlaceholder": "Search by name",
     "noResults": "No one matches your search.",
+    "noMembersYet": "No one in the directory yet.",
     "loadFailedTitle": "Couldn't load the directory",
     "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or the directory couldn't be reached. Ask an admin if you think this is wrong."
   },
