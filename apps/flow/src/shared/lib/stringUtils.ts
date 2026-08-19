@@ -63,3 +63,14 @@ export function pluralize(word: string, count: number, plural?: string): string 
 export function countLabel(count: number, singular: string, plural?: string): string {
   return `${count} ${pluralize(singular, count, plural)}`;
 }
+
+/**
+ * flowApi substitutes '-' for a description omitted at write time, because
+ * several contracts mark the field @required. That sentinel is a wire-format
+ * workaround only - never render it back to the user as if it were real
+ * content. Use this wherever a description read from the API is displayed.
+ */
+export function displayDescription(description: string | undefined | null): string {
+  if (!description || description === '-') return '';
+  return description;
+}
