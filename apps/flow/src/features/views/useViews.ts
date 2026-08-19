@@ -6,7 +6,12 @@ import i18next from '../../shared/services/i18next';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiView } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
-import { PRIORITY_ORDER, type SavedView, type Task } from '../../shared/stores/flowStore';
+import {
+  useFlowStore,
+  PRIORITY_ORDER,
+  type SavedView,
+  type Task,
+} from '../../shared/stores/flowStore';
 
 const t = (key: string): string => i18next.t(key) as string;
 
@@ -22,9 +27,17 @@ export function useViews() {
 
 export function useCreateView() {
   const qc = useQueryClient();
+  const { activeWorkspaceId } = useFlowStore();
   return useMutation({
     mutationFn: (data: Partial<SavedView>) => {
-      return unwrap(flowApi.createView(data as Partial<ApiView>));
+      // Default to the active workspace so a view is never created without one
+      // when a caller forgets to pass it; an explicit workspaceId on `data`
+      // still overrides it. Mirrors useCreateCycle's handling.
+      return unwrap(
+        flowApi.createView({ workspaceId: activeWorkspaceId, ...data } as Partial<ApiView> & {
+          workspaceId?: string;
+        })
+      );
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
     onError: () => toast.error(t('errors.generic')),

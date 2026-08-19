@@ -129,18 +129,20 @@ describe('countLabel', () => {
 });
 
 describe('displayDescription', () => {
-  it('strips the write-time "-" sentinel', () => {
+  it('strips the write-time "-" sentinel to an empty string', () => {
     expect(displayDescription('-')).toBe('');
   });
 
-  it('returns undefined/null as empty string', () => {
+  it('passes a real description through unchanged', () => {
+    expect(displayDescription('Migrate the billing service')).toBe('Migrate the billing service');
+  });
+
+  it('treats undefined and null as empty', () => {
     expect(displayDescription(undefined)).toBe('');
     expect(displayDescription(null)).toBe('');
   });
 
-  it('returns a real description unchanged', () => {
-    expect(displayDescription('Investigate the flaky checkout test')).toBe(
-      'Investigate the flaky checkout test'
-    );
+  it('treats an already-empty string as empty', () => {
+    expect(displayDescription('')).toBe('');
   });
 });

@@ -93,4 +93,11 @@ describe('TeamView', () => {
     render(<TeamView />);
     expect(screen.getByText('flow.time.teamAccessDenied')).toBeInTheDocument();
   });
+
+  it('shows a real empty state instead of a blank list when the workspace has no members', () => {
+    membersState.value = { data: [], isLoading: false };
+    render(<TeamView />);
+    expect(screen.getByText('flow.time.teamEmptyTitle')).toBeInTheDocument();
+    expect(screen.getByText('flow.time.teamEmptyDescription')).toBeInTheDocument();
+  });
 });

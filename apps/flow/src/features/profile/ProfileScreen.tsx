@@ -52,11 +52,17 @@ const Field = ({ label, value }: FieldProps): React.JSX.Element | null => {
  * Read-only: editing an HR record stays in HR, full stop. This screen shows
  * the caller their own record and their own Flow activity - it never writes
  * either back.
+ *
+ * Basic account info (name, email, avatar) comes from the auth/user session
+ * and renders unconditionally - it has nothing to do with HR linkage. Only
+ * the HR-specific section below it is gated behind the staff lookup, so a
+ * user with no HR record (or a token lacking HR read access, e.g. a 403)
+ * still sees their own profile instead of a blank page.
  */
 const ProfileScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const authUserId = useUserStore((s) => s.user?.id);
-  const { data: staff, isLoading } = useMyStaffRecord(authUserId);
+  const user = useUserStore((s) => s.user);
+  const { data: staff, isLoading: isStaffLoading } = useMyStaffRecord(user?.id);
   const { data: detail } = useMyProfileDetail(staff?.id);
 
   const weekStart = useTimeSettingsStore((s) => s.weekStart);
@@ -70,23 +76,10 @@ const ProfileScreen = (): React.JSX.Element => {
     [weekData]
   );
 
-  if (isLoading) {
-    return <CardSkeleton />;
-  }
-
-  if (!staff) {
-    return (
-      <EmptyState
-        icon={UserCircle}
-        title={t('flow.profile.noRecordTitle')}
-        description={t('flow.profile.noRecordDescription')}
-      />
-    );
-  }
-
-  const fullName = `${staff.firstName ?? ''} ${staff.lastName ?? ''}`.trim();
+  const displayName = user?.name ?? '';
+  const subtitle = staff?.role || user?.email;
   const emergencyContact =
-    staff.emergencyContactName && staff.emergencyContactPhone
+    staff?.emergencyContactName && staff?.emergencyContactPhone
       ? `${staff.emergencyContactName} · ${staff.emergencyContactPhone}`
       : undefined;
 
@@ -95,37 +88,61 @@ const ProfileScreen = (): React.JSX.Element => {
       <HelmetContainer title={`${t('flow.profile.heading')} · Flow`} />
       <div className="mx-auto max-w-2xl p-4 sm:p-6">
         <div className="mb-6 flex items-center gap-3">
-          <Avatar src={detail?.photoUrl} initials={initials(fullName)} size="lg" />
+          <Avatar
+            src={detail?.photoUrl ?? user?.avatar}
+            initials={initials(displayName)}
+            size="lg"
+          />
           <div>
             <h1 className="text-lg font-semibold" style={{ color: 'var(--flow-text)' }}>
-              {fullName}
+              {displayName}
             </h1>
-            <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
-              {staff.role}
-            </p>
+            {subtitle && (
+              <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
+                {subtitle}
+              </p>
+            )}
           </div>
         </div>
 
         <section className="mb-4 rounded-lg p-4" style={cardStyle}>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Field label={t('flow.profile.department')} value={staff.departmentName} />
-            <Field label={t('flow.profile.employmentType')} value={staff.employmentType} />
-            <Field label={t('flow.profile.status')} value={staff.status} />
-            <Field label={t('flow.profile.startDate')} value={staff.startDate} />
-            <Field label={t('flow.profile.email')} value={staff.email} />
-            <Field label={t('flow.profile.phone')} value={staff.phone} />
-            <Field label={t('flow.profile.address')} value={staff.address} />
-            <Field label={t('flow.profile.emergencyContact')} value={emergencyContact} />
-          </div>
-          {detail?.bio && (
-            <div className="mt-3">
-              <span className={labelClass} style={{ color: 'var(--flow-text-muted)' }}>
-                {t('flow.profile.bio')}
-              </span>
-              <p className="text-[13px]" style={{ color: 'var(--flow-text)' }}>
-                {detail.bio}
-              </p>
-            </div>
+          <h2
+            className="mb-2 text-[13px] font-semibold uppercase tracking-wider"
+            style={{ color: 'var(--flow-text-muted)' }}
+          >
+            {t('flow.profile.hrDetails')}
+          </h2>
+          {isStaffLoading ? (
+            <CardSkeleton />
+          ) : staff ? (
+            <>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label={t('flow.profile.department')} value={staff.departmentName} />
+                <Field label={t('flow.profile.employmentType')} value={staff.employmentType} />
+                <Field label={t('flow.profile.status')} value={staff.status} />
+                <Field label={t('flow.profile.startDate')} value={staff.startDate} />
+                <Field label={t('flow.profile.email')} value={staff.email} />
+                <Field label={t('flow.profile.phone')} value={staff.phone} />
+                <Field label={t('flow.profile.address')} value={staff.address} />
+                <Field label={t('flow.profile.emergencyContact')} value={emergencyContact} />
+              </div>
+              {detail?.bio && (
+                <div className="mt-3">
+                  <span className={labelClass} style={{ color: 'var(--flow-text-muted)' }}>
+                    {t('flow.profile.bio')}
+                  </span>
+                  <p className="text-[13px]" style={{ color: 'var(--flow-text)' }}>
+                    {detail.bio}
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <EmptyState
+              icon={UserCircle}
+              title={t('flow.profile.noRecordTitle')}
+              description={t('flow.profile.noRecordDescription')}
+            />
           )}
         </section>
 

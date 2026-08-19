@@ -21,13 +21,14 @@ import {
   useRemoveProjectMember,
   useUpdateProjectMemberRole,
   useTransferProjectOwnership,
-  useInviteProjectMember,
 } from './useProjectMembers';
 import { HelmetContainer } from '@voxire/components';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@voxire/ui';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
+import AddProjectMemberDialog from './components/AddProjectMemberDialog';
 import type { ApiProjectMember } from '../../shared/services/flowApi';
+import { displayDescription } from '../../shared/lib/stringUtils';
 
 const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
   admin: { icon: <Crown size={10} />, color: '#f59e0b' },
@@ -43,7 +44,7 @@ const ProjectSettings: React.FC = () => {
   const project = projects.find((p) => p.id === projectId);
 
   const [name, setName] = useState(project?.name || '');
-  const [description, setDescription] = useState(project?.description || '');
+  const [description, setDescription] = useState(displayDescription(project?.description));
   const [tab, setTab] = useState<'general' | 'members' | 'integrations' | 'danger'>('general');
 
   // Projects load async into the store and the same component instance is
@@ -51,7 +52,7 @@ const ProjectSettings: React.FC = () => {
   useEffect(() => {
     if (project) {
       setName(project.name);
-      setDescription(project.description || '');
+      setDescription(displayDescription(project.description));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project?.id]);
@@ -61,7 +62,6 @@ const ProjectSettings: React.FC = () => {
   const moveProject = useMoveProject();
   const { data: members = [], isLoading: membersLoading } = useProjectMembers(projectId);
   const { data: orgMembers = [] } = useFlowTeam();
-  const inviteMember = useInviteProjectMember(projectId ?? '');
   const removeMember = useRemoveProjectMember(projectId ?? '');
   const updateRole = useUpdateProjectMemberRole(projectId ?? '');
   const transferOwnership = useTransferProjectOwnership();
@@ -72,8 +72,6 @@ const ProjectSettings: React.FC = () => {
   const [confirmTransfer, setConfirmTransfer] = useState(false);
 
   const [showAddMember, setShowAddMember] = useState(false);
-  const [newEmail, setNewEmail] = useState('');
-  const [newRole, setNewRole] = useState<'admin' | 'member' | 'viewer'>('member');
 
   // Type-to-confirm modal state for project deletion. Native confirm()
   // is too easy to click through; the user has to retype the project
@@ -156,6 +154,7 @@ const ProjectSettings: React.FC = () => {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                placeholder={t('flow.projectSettings.descriptionPlaceholder')}
                 rows={3}
                 className="w-full rounded-md px-3 py-2 text-[12px] outline-none resize-none"
                 style={{
@@ -175,7 +174,12 @@ const ProjectSettings: React.FC = () => {
                       // untouched snapshot fields so a name/description edit
                       // cannot erase dates or other persisted settings.
                       name,
-                      description,
+                      // UpdateProjectBody.description is @required, so a
+                      // cleared/never-entered field must still resolve to the
+                      // '-' sentinel on the wire - the same convention
+                      // createProject uses. The field only ever displays as
+                      // empty; it must not save as an empty string.
+                      description: description.trim() || '-',
                       icon: project.icon ?? 'folder',
                       color: project.color,
                       status: project.status ?? 'active',
@@ -209,7 +213,7 @@ const ProjectSettings: React.FC = () => {
                 {members.length} member{members.length !== 1 ? 's' : ''}
               </p>
               <button
-                onClick={() => setShowAddMember((v) => !v)}
+                onClick={() => setShowAddMember(true)}
                 className="flex items-center gap-1 text-[11px] px-2 py-1 rounded"
                 style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
               >
@@ -217,58 +221,11 @@ const ProjectSettings: React.FC = () => {
               </button>
             </div>
 
-            {showAddMember && (
-              <div
-                className="flex gap-2 p-3 rounded-lg"
-                style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
-              >
-                <input
-                  type="email"
-                  placeholder={t('flow.projectSettings.emailPlaceholder')}
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
-                  style={{
-                    background: 'var(--flow-input-bg)',
-                    border: '1px solid var(--flow-border)',
-                    color: 'var(--flow-text)',
-                  }}
-                />
-                <select
-                  value={newRole}
-                  onChange={(e) => setNewRole(e.target.value as 'admin' | 'member' | 'viewer')}
-                  className="rounded px-2 py-1.5 text-[11px] outline-none"
-                  style={{
-                    background: 'var(--flow-input-bg)',
-                    border: '1px solid var(--flow-border)',
-                    color: 'var(--flow-text)',
-                  }}
-                >
-                  <option value="admin">Admin</option>
-                  <option value="member">Member</option>
-                  <option value="viewer">Viewer</option>
-                </select>
-                <button
-                  onClick={() => {
-                    if (!newEmail.trim()) return toast.error(t('toasts.projectMember.enterEmail'));
-                    inviteMember.mutate(
-                      { email: newEmail.trim(), role: newRole },
-                      {
-                        onSuccess: () => {
-                          setNewEmail('');
-                          setShowAddMember(false);
-                        },
-                      }
-                    );
-                  }}
-                  disabled={inviteMember.isPending}
-                  className="px-3 py-1.5 rounded text-[11px] font-semibold"
-                  style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-                >
-                  Invite
-                </button>
-              </div>
-            )}
+            <AddProjectMemberDialog
+              open={showAddMember}
+              onOpenChange={setShowAddMember}
+              projectId={projectId}
+            />
 
             {membersLoading ? (
               <div className="space-y-2">

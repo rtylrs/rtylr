@@ -14,10 +14,15 @@ vi.mock('@tanstack/react-router', () => ({
   ),
 }));
 
-const userState = vi.hoisted(() => ({ value: { id: 'u1' } }));
+const userState = vi.hoisted(() => ({
+  value: { id: 'u1', name: 'Jane Doe', email: 'jane@example.com' },
+}));
 vi.mock('../../shared/stores/userStore', () => ({
-  useUserStore: (selector: (s: { user: { id: string } | undefined }) => unknown) =>
-    selector({ user: userState.value }),
+  useUserStore: (
+    selector: (s: {
+      user: { id: string; name: string; email: string; avatar?: string } | undefined;
+    }) => unknown
+  ) => selector({ user: userState.value }),
 }));
 
 vi.mock('../../shared/stores/timeSettingsStore', () => ({
@@ -42,7 +47,7 @@ const staffState = vi.hoisted(() => ({
       address: '',
       emergencyContactName: '',
       emergencyContactPhone: '',
-    } as Record<string, unknown> | null,
+    } as Record<string, unknown> | null | undefined,
     isLoading: false,
   },
 }));
@@ -67,7 +72,7 @@ import ProfileScreen from './ProfileScreen';
 
 beforeEach(() => {
   vi.clearAllMocks();
-  userState.value = { id: 'u1' };
+  userState.value = { id: 'u1', name: 'Jane Doe', email: 'jane@example.com' };
   staffState.value = {
     data: {
       id: '9',
@@ -115,16 +120,47 @@ describe('ProfileScreen: HR record', () => {
     expect(screen.getByText('12 Cedar St')).toBeInTheDocument();
   });
 
-  it('shows an empty state when no HR record is linked to the account', () => {
-    staffState.value = { data: null, isLoading: false };
-    render(<ProfileScreen />);
-    expect(screen.getByText('flow.profile.noRecordTitle')).toBeInTheDocument();
-  });
-
   it('shows bio once the profile-detail endpoint returns one', () => {
     detailState.value = { data: { bio: 'Builds things.' } };
     render(<ProfileScreen />);
     expect(screen.getByText('Builds things.')).toBeInTheDocument();
+  });
+});
+
+describe('ProfileScreen: basic account info renders independently of HR', () => {
+  it('shows the account name and email even when no HR record is linked', () => {
+    staffState.value = { data: null, isLoading: false };
+    render(<ProfileScreen />);
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    expect(screen.getByText('jane@example.com')).toBeInTheDocument();
+    expect(screen.getByText('flow.profile.noRecordTitle')).toBeInTheDocument();
+  });
+
+  it('shows the account name and email when the HR staff lookup fails (e.g. a 403)', () => {
+    // A failed query settles with data undefined, mirroring react-query's
+    // behaviour when `hr/staff/v1/staff` returns 403.
+    staffState.value = { data: undefined, isLoading: false };
+    render(<ProfileScreen />);
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    expect(screen.getByText('jane@example.com')).toBeInTheDocument();
+    expect(screen.getByText('flow.profile.noRecordTitle')).toBeInTheDocument();
+  });
+
+  it('shows the account name and email while the HR staff lookup is still loading', () => {
+    staffState.value = { data: null, isLoading: true };
+    render(<ProfileScreen />);
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    expect(screen.getByText('jane@example.com')).toBeInTheDocument();
+  });
+
+  it("still shows this week's logged hours when the HR staff lookup fails", () => {
+    staffState.value = { data: undefined, isLoading: false };
+    render(<ProfileScreen />);
+    expect(screen.getByText(/flow\.profile\.hoursLoggedThisWeek/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'flow.profile.viewMyDay' })).toHaveAttribute(
+      'href',
+      '/time'
+    );
   });
 });
 

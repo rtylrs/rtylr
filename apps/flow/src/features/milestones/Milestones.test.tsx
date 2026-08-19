@@ -27,7 +27,7 @@ describe('Milestones create form', () => {
       target: { value: 'Launch' },
     });
 
-    const dateInput = document.querySelector('input[type="date"]') as HTMLInputElement;
+    const dateInput = screen.getByLabelText('flow.milestones.targetDate') as HTMLInputElement;
     fireEvent.change(dateInput, { target: { value: '2026-08-31' } });
 
     fireEvent.click(screen.getByText('flow.milestones.create'));
@@ -51,5 +51,13 @@ describe('Milestones create form', () => {
 
     fireEvent.click(createButton);
     expect(mutateSpy).not.toHaveBeenCalled();
+  });
+
+  it('gives the target date input an accessible name', () => {
+    render(<Milestones />);
+
+    fireEvent.click(screen.getByText('flow.milestones.createFirst'));
+
+    expect(screen.getByLabelText('flow.milestones.targetDate')).toHaveAttribute('type', 'date');
   });
 });

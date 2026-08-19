@@ -106,6 +106,13 @@ describe('TimeReports', () => {
     render(<TimeReports />);
     expect(screen.getByText('flow.time.teamAccessDenied')).toBeInTheDocument();
   });
+
+  it('shows a real empty state instead of a headers-only table when the workspace has no members', () => {
+    membersState.value = { data: [], isLoading: false };
+    render(<TimeReports />);
+    expect(screen.getByText('flow.time.reportsEmptyTitle')).toBeInTheDocument();
+    expect(screen.getByText('flow.time.reportsEmptyDescription')).toBeInTheDocument();
+  });
 });
 
 describe('TimeReports: trackAttendance gating', () => {
