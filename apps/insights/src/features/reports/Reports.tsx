@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion, type Variants } from 'motion/react';
 import { FileText, Download, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useUserStore } from '@voxire/auth';
 import {
   useReportTemplates,
   useGenerateRevenueReport,
@@ -11,6 +12,7 @@ import {
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
 import EmptyState from '../../shared/components/EmptyState';
+import { canInsightsPermission } from '../../shared/lib/insightsPermissions';
 
 const containerVariants: Variants = {
   hidden: {},
@@ -27,6 +29,8 @@ const Reports: React.FC = (): React.JSX.Element => {
   const { data, isLoading, isError, refetch } = useReportTemplates();
   const generateRevenue = useGenerateRevenueReport();
   const exportRevenue = useExportRevenueReport();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canExportReports = canInsightsPermission(role, 'insights:reports:export');
 
   if (isError) {
     return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
@@ -47,21 +51,23 @@ const Reports: React.FC = (): React.JSX.Element => {
           {t('insights.reports.title')}
         </h1>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => exportRevenue.mutate({})}
-            disabled={exportRevenue.isPending}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium min-h-[44px]"
-            style={{ background: 'var(--hub-active)', color: 'var(--hub-text)' }}
-            aria-label={t('insights.reports.exportRevenue')}
-          >
-            {exportRevenue.isPending ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : (
-              <Download size={14} />
-            )}
-            {t('insights.reports.exportRevenue')}
-          </button>
+          {canExportReports && (
+            <button
+              type="button"
+              onClick={() => exportRevenue.mutate({})}
+              disabled={exportRevenue.isPending}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium min-h-[44px]"
+              style={{ background: 'var(--hub-active)', color: 'var(--hub-text)' }}
+              aria-label={t('insights.reports.exportRevenue')}
+            >
+              {exportRevenue.isPending ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Download size={14} />
+              )}
+              {t('insights.reports.exportRevenue')}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => generateRevenue.mutate({})}
