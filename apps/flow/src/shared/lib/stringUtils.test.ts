@@ -11,6 +11,7 @@ import {
   initials,
   pluralize,
   countLabel,
+  displayDescription,
 } from './stringUtils';
 
 describe('capitalize', () => {
@@ -124,5 +125,22 @@ describe('countLabel', () => {
 
   it('returns plural label for other counts', () => {
     expect(countLabel(3, 'task')).toBe('3 tasks');
+  });
+});
+
+describe('displayDescription', () => {
+  it('strips the write-time "-" sentinel', () => {
+    expect(displayDescription('-')).toBe('');
+  });
+
+  it('returns undefined/null as empty string', () => {
+    expect(displayDescription(undefined)).toBe('');
+    expect(displayDescription(null)).toBe('');
+  });
+
+  it('returns a real description unchanged', () => {
+    expect(displayDescription('Investigate the flaky checkout test')).toBe(
+      'Investigate the flaky checkout test'
+    );
   });
 });
