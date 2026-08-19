@@ -380,6 +380,97 @@ describe('flowApi', () => {
     expect(safe.get).toHaveBeenCalledWith('/flow/view/v1/views');
   });
 
+  // Regression guard for #750: the flow/view/v1 contract wire-encodes
+  // `filters` as a JSON string (Go struct field `Filters string`, per the
+  // .onk model's "JSON-encoded filter criteria" doc comment). Sending the
+  // raw object fails json.Unmarshal server-side and 400s on every request -
+  // this was the actual cause of "New view" always failing.
+  it('createView JSON-encodes filters as a string on the wire', () => {
+    flowApi.createView({ name: 'New view', icon: 'eye', filters: { status: ['done'] } });
+    expect(safe.post).toHaveBeenCalledWith(
+      '/flow/view/v1/views',
+      expect.objectContaining({ filters: '{"status":["done"]}' })
+    );
+  });
+
+  it('createView omits filters entirely when not supplied', () => {
+    flowApi.createView({ name: 'New view' });
+    expect(safe.post).toHaveBeenCalledWith(
+      '/flow/view/v1/views',
+      expect.objectContaining({ filters: undefined })
+    );
+  });
+
+  it('createView passes workspaceId through as a plain string (view/v1 declares it as string, not int64)', () => {
+    flowApi.createView({ name: 'New view', workspaceId: 'ws-1' } as any);
+    expect(safe.post).toHaveBeenCalledWith(
+      '/flow/view/v1/views',
+      expect.objectContaining({ workspaceId: 'ws-1' })
+    );
+  });
+
+  it('updateView JSON-encodes filters as a string on the wire', () => {
+    flowApi.updateView('v-1', { filters: { priority: ['urgent'] } });
+    expect(safe.put).toHaveBeenCalledWith(
+      '/flow/view/v1/views/v-1',
+      expect.objectContaining({ filters: '{"priority":["urgent"]}' })
+    );
+  });
+
+  it('getViews decodes each view’s filters back from a JSON string into an object', async () => {
+    (safe.get as any).mockReturnValue(
+      ResultAsync.fromPromise(
+        Promise.resolve({
+          views: [{ id: 'v-1', name: 'My view', filters: '{"status":["done"]}' }],
+        }),
+        () => ({}) as any
+      )
+    );
+    const decoded = await flowApi.getViews().match(
+      (res) => res,
+      () => null
+    );
+    expect(decoded?.views[0].filters).toEqual({ status: ['done'] });
+  });
+
+  it('getViews falls back to an empty object when filters is missing or invalid JSON', async () => {
+    (safe.get as any).mockReturnValue(
+      ResultAsync.fromPromise(
+        Promise.resolve({
+          views: [
+            { id: 'v-1', name: 'No filters' },
+            { id: 'v-2', name: 'Bad filters', filters: 'not json' },
+          ],
+        }),
+        () => ({}) as any
+      )
+    );
+    const decoded = await flowApi.getViews().match(
+      (res) => res,
+      () => null
+    );
+    expect(decoded?.views[0].filters).toEqual({});
+    expect(decoded?.views[1].filters).toEqual({});
+  });
+
+  it('createView decodes the created view’s filters back into an object', async () => {
+    (safe.post as any).mockReturnValue(
+      ResultAsync.fromPromise(
+        Promise.resolve({
+          view: { id: 'v-new', name: 'New view', filters: '{"status":["done"]}' },
+        }),
+        () => ({}) as any
+      )
+    );
+    const decoded = await flowApi
+      .createView({ name: 'New view', filters: { status: ['done'] } })
+      .match(
+        (res) => res,
+        () => null
+      );
+    expect(decoded?.view?.filters).toEqual({ status: ['done'] });
+  });
+
   it('deleteView calls DELETE /flow/view/v1/views/:id', () => {
     flowApi.deleteView('v-1');
     expect(safe.delete).toHaveBeenCalledWith('/flow/view/v1/views/v-1');

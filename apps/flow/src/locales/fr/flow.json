@@ -150,6 +150,8 @@
     "team": "Équipe",
     "teamNotStarted": "Pas commencé",
     "teamAccessDenied": "Vous n'avez pas accès au temps de l'équipe. Cela nécessite le rôle admin sur l'espace de travail.",
+    "teamEmptyTitle": "Personne à afficher pour l'instant",
+    "teamEmptyDescription": "Ajoutez des coéquipiers à cet espace de travail pour voir leur temps ici.",
     "workMode": "Où vous avez travaillé",
     "startTime": "Début",
     "endTime": "Fin",
@@ -170,6 +172,8 @@
     "reportsRangeTo": "au",
     "reportsPerson": "Personne",
     "reportsScopeNote": "Totaux par personne sur la période. Le regroupement par projet ou type de travail nécessite un point d'accès qui n'existe pas encore.",
+    "reportsEmptyTitle": "Rien à signaler pour l'instant",
+    "reportsEmptyDescription": "Personne dans cet espace de travail n'a de temps à afficher pour cette période.",
     "project": "Projet",
     "selectProject": "Sélectionner un projet",
     "workType": "Type de travail",
@@ -398,6 +402,7 @@
     "heading": "Annuaire",
     "searchPlaceholder": "Rechercher par nom",
     "noResults": "Personne ne correspond à votre recherche.",
+    "noMembersYet": "Personne dans l'annuaire pour l'instant.",
     "loadFailedTitle": "Impossible de charger l'annuaire",
     "loadFailedDescription": "Cela peut arriver si votre rôle n'a pas la permission de le voir, ou si l'annuaire n'a pas pu être atteint. Demandez à un administrateur si vous pensez que c'est une erreur."
   },
@@ -414,6 +419,7 @@
     "newRequest": "Demander un congé",
     "leaveType": "Type",
     "selectLeaveType": "Sélectionner un type",
+    "noLeaveTypesReason": "Demandez à un administrateur de configurer les types de congés avant de pouvoir faire une demande.",
     "startDate": "Date de début",
     "endDate": "Date de fin",
     "totalDays": "Jours",
@@ -433,6 +439,7 @@
   },
   "profile": {
     "heading": "Profil",
+    "hrDetails": "Détails RH",
     "noRecordTitle": "Aucune fiche RH associée pour l'instant",
     "noRecordDescription": "Votre compte n'est pas encore associé à une fiche employé dans RH. Demandez à un administrateur de l'associer.",
     "role": "Poste",
@@ -522,6 +529,7 @@
     "subtitle": "Tâches organisées par date d'échéance · Cliquez sur un jour pour ajouter une tâche",
     "today": "Aujourd'hui",
     "addHint": "+ ajouter",
+    "addTaskLabel": "Ajouter une tâche le {{date}}",
     "moreCount": "+{{count}} de plus",
     "newTaskFor": "Nouvelle tâche pour",
     "titlePlaceholder": "Titre de la tâche…",
@@ -540,6 +548,7 @@
     "emptyDescription": "Suivez les principaux objectifs de livraison de vos projets.",
     "createFirst": "Créer le premier jalon",
     "namePlaceholder": "Nom du jalon",
+    "targetDate": "Date cible",
     "creating": "Création...",
     "create": "Créer",
     "cancel": "Annuler",
@@ -580,6 +589,8 @@
     "subtitle": "Sprints de livraison de deux semaines",
     "newCycle": "Nouveau cycle",
     "namePlaceholder": "Nom du cycle",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
     "creating": "Création...",
     "create": "Créer",
     "cancel": "Annuler",
@@ -587,7 +598,10 @@
     "taskCount": "{{done}} sur {{total}} tâches terminées",
     "sectionUpcoming": "À venir",
     "sectionCompleted": "Terminés",
-    "dateRange": "{{start}} au {{end}}"
+    "dateRange": "{{start}} au {{end}}",
+    "emptyTitle": "Aucun cycle pour le moment",
+    "emptyDescription": "Démarrez votre premier sprint de livraison de deux semaines pour suivre le périmètre et la progression.",
+    "createFirst": "Créer le premier cycle"
   },
   "myIssues": {
     "loading": "Chargement…",
@@ -640,7 +654,8 @@
     "removeMemberLabel": "Supprimer",
     "emailPlaceholder": "Adresse e-mail",
     "roleLabel": "Rôle",
-    "addMemberHeading": "Ajouter un membre à ce projet"
+    "addMemberHeading": "Ajouter un membre à ce projet",
+    "descriptionPlaceholder": "Ajouter une description…"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection"

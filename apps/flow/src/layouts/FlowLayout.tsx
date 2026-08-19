@@ -73,6 +73,7 @@ import { safe } from '../shared/lib/api';
 import { useFlowBusinessName } from '../shared/hooks/useFlowBusinessName';
 import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useRealtimeReconnectRefetch, useRealtimeStatus } from '../shared/lib/realtime';
+import { routeNeedsRealtime } from '../shared/lib/realtimeRouteGate';
 import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../shared/lib/memberUtils';
 import RealtimeConnectionIndicator from '../shared/components/RealtimeConnectionIndicator';
@@ -371,13 +372,17 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // useLayoutRealtime, alongside useTaskRealtime and useProjectRealtime.
   const userId = user?.id;
   const caretUserId = Number(userId) || 0;
-  const shouldUseRealtime = !location.pathname.startsWith('/settings');
+  const shouldUseRealtime = routeNeedsRealtime(location.pathname);
   useLayoutRealtime(currentWorkspaceId, userId, shouldUseRealtime);
   // Reconnect can happen regardless of which topics are currently active, so
   // this runs unconditionally rather than gated by shouldUseRealtime.
   useRealtimeReconnectRefetch();
   // Same connection this drives - surfaced here so a dropped socket is
-  // visible from anywhere in the shell, not just inside TimePanel.
+  // visible from anywhere in the shell, not just inside TimePanel. Gated by
+  // shouldUseRealtime below at both render sites: on a route that never asks
+  // the socket to connect (Settings), the status is "disconnected" in the
+  // narrow sense but nothing on screen is stale, so showing the indicator
+  // there is a false alarm, not a real one (issue #761).
   const realtimeStatus = useRealtimeStatus();
 
   const sidebarRef = useRef<HTMLDivElement | null>(null);
@@ -608,7 +613,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           >
             <Plus size={20} strokeWidth={2} />
           </button>
-          <RealtimeConnectionIndicator status={realtimeStatus} compact />
+          {shouldUseRealtime && <RealtimeConnectionIndicator status={realtimeStatus} compact />}
           <CaretButton />
         </header>
 
@@ -1095,7 +1100,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             className={cn('flex flex-col gap-1.5 py-2', sx)}
             style={{ borderTop: '1px solid var(--flow-border)' }}
           >
-            <RealtimeConnectionIndicator status={realtimeStatus} />
+            {shouldUseRealtime && <RealtimeConnectionIndicator status={realtimeStatus} />}
             <SidebarLink to="/settings" icon={Settings} label={t('nav.settings')} />
             <CaretButton className="w-full justify-start" />
 

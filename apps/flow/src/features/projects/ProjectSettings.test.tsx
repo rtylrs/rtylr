@@ -40,7 +40,7 @@ vi.mock('../../shared/hooks/queries/useFlowTeam', () => ({
 import ProjectSettings from './ProjectSettings';
 import { useFlowStore } from '../../shared/stores/flowStore';
 
-function renderProjectSettings() {
+function renderProjectSettings(description = 'Existing description') {
   useFlowStore.setState({
     projects: [
       {
@@ -51,7 +51,7 @@ function renderProjectSettings() {
         taskCount: 0,
         completedCount: 0,
         memberAvatars: [],
-        description: 'Existing description',
+        description,
         status: 'archived',
         health: 'on_track',
         progress: 0,
@@ -113,6 +113,54 @@ describe('ProjectSettings integrations tab', () => {
         onSuccess: expect.any(Function),
         onError: expect.any(Function),
       })
+    );
+  });
+
+  it('renders a "-" sentinel description as an empty field with placeholder text, not a literal dash', () => {
+    renderProjectSettings('-');
+
+    const descriptionField = screen.getByPlaceholderText(
+      'flow.projectSettings.descriptionPlaceholder'
+    );
+
+    expect(descriptionField).toHaveValue('');
+  });
+
+  it('renders a real description normally', () => {
+    renderProjectSettings('A project about onboarding flows');
+
+    const descriptionField = screen.getByPlaceholderText(
+      'flow.projectSettings.descriptionPlaceholder'
+    );
+
+    expect(descriptionField).toHaveValue('A project about onboarding flows');
+  });
+
+  it('saves the "-" sentinel (not an empty string) when the description was never filled in', () => {
+    renderProjectSettings('-');
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    expect(updateProjectMutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ description: '-' }),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('saves a typed description as-is', () => {
+    renderProjectSettings('-');
+
+    fireEvent.change(screen.getByPlaceholderText('flow.projectSettings.descriptionPlaceholder'), {
+      target: { value: 'New real description' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    expect(updateProjectMutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ description: 'New real description' }),
+      }),
+      expect.anything()
     );
   });
 });

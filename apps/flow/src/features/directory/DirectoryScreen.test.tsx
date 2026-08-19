@@ -84,10 +84,21 @@ describe('DirectoryScreen', () => {
     expect(useDirectoryMock).toHaveBeenLastCalledWith('jane');
   });
 
-  it('shows a no-results state for an empty roster', () => {
+  it('shows a true-empty state for a zero-member workspace with no search typed', () => {
     directoryState.value = { data: [], isLoading: false, isError: false };
     render(<DirectoryScreen />);
+    expect(screen.getByText('flow.directory.noMembersYet')).toBeInTheDocument();
+    expect(screen.queryByText('flow.directory.noResults')).not.toBeInTheDocument();
+  });
+
+  it('shows a filtered no-results state once a search term matches nothing', () => {
+    directoryState.value = { data: [], isLoading: false, isError: false };
+    render(<DirectoryScreen />);
+    fireEvent.change(screen.getByLabelText('flow.directory.searchPlaceholder'), {
+      target: { value: 'nobody' },
+    });
     expect(screen.getByText('flow.directory.noResults')).toBeInTheDocument();
+    expect(screen.queryByText('flow.directory.noMembersYet')).not.toBeInTheDocument();
   });
 
   it('shows a load-failed state, not a crash, when listStaff denies the caller', () => {

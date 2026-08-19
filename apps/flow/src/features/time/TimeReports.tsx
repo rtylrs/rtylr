@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { BarChart3 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { useWorkspaceMembers } from '../workspace-manager/useWorkspaceManager';
 import GateNotice from '../../shared/components/GateNotice';
+import EmptyState from '../../shared/components/EmptyState';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { startOfWeek, endOfWeek } from '../../shared/lib/dateUtils';
 import { todayLocalDate, useWorkDaysForWorkspace } from './useWorkDay';
@@ -113,6 +115,12 @@ const TimeReports = (): React.JSX.Element => {
           <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.loadingDay')}
           </p>
+        ) : (members ?? []).length === 0 ? (
+          <EmptyState
+            icon={BarChart3}
+            title={t('flow.time.reportsEmptyTitle')}
+            description={t('flow.time.reportsEmptyDescription')}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-[13px]">

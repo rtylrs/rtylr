@@ -154,6 +154,8 @@
     "team": "الفريق",
     "teamNotStarted": "لم يبدأ",
     "teamAccessDenied": "لا تملك صلاحية الاطلاع على وقت الفريق. هذا يتطلب صلاحية المدير على مساحة العمل.",
+    "teamEmptyTitle": "لا يوجد أحد لعرضه بعد",
+    "teamEmptyDescription": "أضف أعضاء إلى مساحة العمل هذه لرؤية وقتهم هنا.",
     "workMode": "أين عملت",
     "startTime": "البداية",
     "endTime": "النهاية",
@@ -174,6 +176,8 @@
     "reportsRangeTo": "إلى",
     "reportsPerson": "الشخص",
     "reportsScopeNote": "الإجماليات لكل شخص خلال الفترة المحددة. التجميع حسب المشروع أو نوع العمل يتطلب نقطة وصول غير متوفرة بعد.",
+    "reportsEmptyTitle": "لا يوجد شيء لعرضه بعد",
+    "reportsEmptyDescription": "لا يملك أحد في مساحة العمل هذه وقتًا لعرضه خلال هذه الفترة.",
     "project": "المشروع",
     "selectProject": "اختر مشروعاً",
     "workType": "نوع العمل",
@@ -409,6 +413,7 @@
     "heading": "دليل الموظفين",
     "searchPlaceholder": "ابحث بالاسم",
     "noResults": "لا يوجد أحد يطابق بحثك.",
+    "noMembersYet": "لا يوجد أحد في الدليل بعد.",
     "loadFailedTitle": "تعذّر تحميل دليل الموظفين",
     "loadFailedDescription": "قد يحدث هذا إذا كان دورك لا يملك صلاحية الاطلاع عليه، أو تعذّر الوصول إلى الدليل. اطلب من أحد المدراء إن كنت تظن أن هذا خطأ."
   },
@@ -425,6 +430,7 @@
     "newRequest": "طلب إجازة",
     "leaveType": "النوع",
     "selectLeaveType": "اختر نوعاً",
+    "noLeaveTypesReason": "اطلب من أحد المسؤولين إعداد أنواع الإجازات قبل أن تتمكن من تقديم طلب إجازة.",
     "startDate": "تاريخ البدء",
     "endDate": "تاريخ الانتهاء",
     "totalDays": "عدد الأيام",
@@ -444,6 +450,7 @@
   },
   "profile": {
     "heading": "الملف الشخصي",
+    "hrDetails": "بيانات الموارد البشرية",
     "noRecordTitle": "لا يوجد سجل موارد بشرية مرتبط بعد",
     "noRecordDescription": "حسابك غير مرتبط بسجل موظف في الموارد البشرية بعد. اطلب من أحد المدراء ربطه.",
     "role": "الدور",
@@ -537,6 +544,7 @@
     "subtitle": "المهام مرتبة حسب تاريخ الاستحقاق · انقر على يوم لإضافة مهمة",
     "today": "اليوم",
     "addHint": "+ إضافة",
+    "addTaskLabel": "إضافة مهمة في {{date}}",
     "moreCount": "+{{count}} أخرى",
     "newTaskFor": "مهمة جديدة لـ",
     "titlePlaceholder": "عنوان المهمة…",
@@ -559,6 +567,7 @@
     "emptyDescription": "تتبع أهداف التسليم الرئيسية عبر مشاريعك.",
     "createFirst": "إنشاء أول معلم",
     "namePlaceholder": "اسم المعلم",
+    "targetDate": "التاريخ المستهدف",
     "creating": "جارٍ الإنشاء...",
     "create": "إنشاء",
     "cancel": "إلغاء",
@@ -607,6 +616,8 @@
     "subtitle": "دورات تسليم مدتها أسبوعان",
     "newCycle": "دورة جديدة",
     "namePlaceholder": "اسم الدورة",
+    "startDate": "تاريخ البدء",
+    "endDate": "تاريخ الانتهاء",
     "creating": "جارٍ الإنشاء...",
     "create": "إنشاء",
     "cancel": "إلغاء",
@@ -614,7 +625,10 @@
     "taskCount": "{{done}} من {{total}} مهام منجزة",
     "sectionUpcoming": "القادمة",
     "sectionCompleted": "المكتملة",
-    "dateRange": "{{start}} إلى {{end}}"
+    "dateRange": "{{start}} إلى {{end}}",
+    "emptyTitle": "لا توجد دورات بعد",
+    "emptyDescription": "ابدأ أول دورة تسليم مدتها أسبوعان لتتبع النطاق والتقدم.",
+    "createFirst": "إنشاء أول دورة"
   },
   "myIssues": {
     "loading": "جارٍ التحميل…",
@@ -671,7 +685,8 @@
     "removeMemberLabel": "إزالة",
     "emailPlaceholder": "البريد الإلكتروني",
     "roleLabel": "الدور",
-    "addMemberHeading": "إضافة عضو إلى هذا المشروع"
+    "addMemberHeading": "إضافة عضو إلى هذا المشروع",
+    "descriptionPlaceholder": "أضف وصفًا…"
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد"

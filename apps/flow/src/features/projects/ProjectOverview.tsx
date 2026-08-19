@@ -15,6 +15,7 @@ import { useProjectOverview } from './useProjectOverview';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { AvatarStack } from '../../shared/components/AssigneeAvatar';
 import { formatDate } from '../../shared/lib/utils';
+import { displayDescription } from '../../shared/lib/stringUtils';
 import ProjectViewTabs from './ProjectViewTabs';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
@@ -82,13 +83,13 @@ const ProjectOverview: React.FC = () => {
         }
       />
 
-      {project.description && (
+      {displayDescription(project.description) && (
         <div
           className="px-5 py-3 shrink-0"
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
           <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-            {project.description}
+            {displayDescription(project.description)}
           </p>
         </div>
       )}

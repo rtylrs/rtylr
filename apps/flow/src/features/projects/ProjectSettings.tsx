@@ -28,6 +28,7 @@ import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import AddProjectMemberDialog from './components/AddProjectMemberDialog';
 import type { ApiProjectMember } from '../../shared/services/flowApi';
+import { displayDescription } from '../../shared/lib/stringUtils';
 
 const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
   admin: { icon: <Crown size={10} />, color: '#f59e0b' },
@@ -43,7 +44,7 @@ const ProjectSettings: React.FC = () => {
   const project = projects.find((p) => p.id === projectId);
 
   const [name, setName] = useState(project?.name || '');
-  const [description, setDescription] = useState(project?.description || '');
+  const [description, setDescription] = useState(displayDescription(project?.description));
   const [tab, setTab] = useState<'general' | 'members' | 'integrations' | 'danger'>('general');
 
   // Projects load async into the store and the same component instance is
@@ -51,7 +52,7 @@ const ProjectSettings: React.FC = () => {
   useEffect(() => {
     if (project) {
       setName(project.name);
-      setDescription(project.description || '');
+      setDescription(displayDescription(project.description));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [project?.id]);
@@ -153,6 +154,7 @@ const ProjectSettings: React.FC = () => {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                placeholder={t('flow.projectSettings.descriptionPlaceholder')}
                 rows={3}
                 className="w-full rounded-md px-3 py-2 text-[12px] outline-none resize-none"
                 style={{
@@ -172,7 +174,12 @@ const ProjectSettings: React.FC = () => {
                       // untouched snapshot fields so a name/description edit
                       // cannot erase dates or other persisted settings.
                       name,
-                      description,
+                      // UpdateProjectBody.description is @required, so a
+                      // cleared/never-entered field must still resolve to the
+                      // '-' sentinel on the wire - the same convention
+                      // createProject uses. The field only ever displays as
+                      // empty; it must not save as an empty string.
+                      description: description.trim() || '-',
                       icon: project.icon ?? 'folder',
                       color: project.color,
                       status: project.status ?? 'active',
