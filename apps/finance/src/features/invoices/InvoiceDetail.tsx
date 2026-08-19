@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { getRouteApi, useNavigate } from '@tanstack/react-router';
+import { useUserStore } from '@voxire/auth';
 
 const routeApi = getRouteApi('/layout/invoices/$id');
 import { motion } from 'motion/react';
@@ -18,6 +19,7 @@ import RecordPaymentModal from '../../shared/components/RecordPaymentModal';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { ACCENT, cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
+import { canFinancePermission } from '../../shared/lib/financePermissions';
 
 const InvoiceDetail: React.FC = () => {
   const { id } = routeApi.useParams();
@@ -27,6 +29,8 @@ const InvoiceDetail: React.FC = () => {
   const [showSend, setShowSend] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [showVoid, setShowVoid] = useState(false);
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canSendInvoice = canFinancePermission(role, 'finance:invoices:send');
 
   if (isLoading || !invoice) {
     return (
@@ -84,10 +88,12 @@ const InvoiceDetail: React.FC = () => {
                 <CreditCard size={13} /> Record Payment
               </button>
             )}
-            <button style={primaryBtn} onClick={() => setShowSend(true)}>
-              <Send size={13} /> Send
-            </button>
-            {invoice.status !== 'Paid' && (
+            {canSendInvoice && (
+              <button style={primaryBtn} onClick={() => setShowSend(true)}>
+                <Send size={13} /> Send
+              </button>
+            )}
+            {canSendInvoice && invoice.status !== 'Paid' && (
               <button
                 style={{
                   ...ghostBtn,

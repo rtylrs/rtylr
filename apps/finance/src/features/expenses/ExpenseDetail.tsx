@@ -1,6 +1,7 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams } from '@tanstack/react-router';
+import { useUserStore } from '@voxire/auth';
 import { motion } from 'motion/react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
@@ -11,6 +12,7 @@ import { useExpenseById } from './useExpenseById';
 import { useExpenseCategories } from './useExpenses';
 import { useApproveExpense, useRejectExpense } from '../../shared/hooks/queries/useExpenses';
 import { cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
+import { canFinancePermission } from '../../shared/lib/financePermissions';
 
 const statusStyle: Record<string, React.CSSProperties> = {
   pending: {
@@ -34,6 +36,8 @@ const ExpenseDetail: React.FC = () => {
   const approveMut = useApproveExpense();
   const rejectMut = useRejectExpense();
   const [receipt, setReceipt] = React.useState<string | null>(null);
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canApproveExpense = canFinancePermission(role, 'finance:expenses:approve');
 
   const categoryName = React.useMemo(() => {
     if (expense?.categoryId == null) return 'Uncategorized';
@@ -86,26 +90,28 @@ const ExpenseDetail: React.FC = () => {
         }
         breadcrumbs={[{ label: 'Expenses', to: '/expenses' }, { label: expense.id }]}
         actions={
-          <>
-            <button
-              style={{
-                ...ghostBtn,
-                color: 'var(--finance-error)',
-                borderColor: 'color-mix(in srgb, var(--finance-error) 30%, transparent)',
-              }}
-              disabled={rejectMut.isPending}
-              onClick={() => rejectMut.mutate(expense.id)}
-            >
-              <XCircle size={13} /> Reject
-            </button>
-            <button
-              style={primaryBtn}
-              disabled={approveMut.isPending}
-              onClick={() => approveMut.mutate(expense.id)}
-            >
-              <CheckCircle size={13} /> Approve
-            </button>
-          </>
+          canApproveExpense ? (
+            <>
+              <button
+                style={{
+                  ...ghostBtn,
+                  color: 'var(--finance-error)',
+                  borderColor: 'color-mix(in srgb, var(--finance-error) 30%, transparent)',
+                }}
+                disabled={rejectMut.isPending}
+                onClick={() => rejectMut.mutate(expense.id)}
+              >
+                <XCircle size={13} /> Reject
+              </button>
+              <button
+                style={primaryBtn}
+                disabled={approveMut.isPending}
+                onClick={() => approveMut.mutate(expense.id)}
+              >
+                <CheckCircle size={13} /> Approve
+              </button>
+            </>
+          ) : undefined
         }
       />
 

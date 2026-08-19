@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   signOut: vi.fn(),
   router: { pathname: '/invoices', searchStr: '' },
+  role: 'admin' as string | null,
 }));
 
 vi.mock('@tanstack/react-router', () => ({
@@ -24,8 +25,13 @@ vi.mock('@tanstack/react-router', () => ({
 vi.mock('@voxire/api', () => ({ unwrap: (value: unknown) => value }));
 vi.mock('@voxire/auth', () => ({
   signOut: mocks.signOut,
-  useUserStore: (select: (state: { user: Record<string, string> }) => unknown) =>
-    select({ user: { id: '1', name: 'Test User', email: 'test@example.com' } }),
+  useUserStore: (
+    select: (state: { user: Record<string, string | null>; role: string | null }) => unknown
+  ) =>
+    select({
+      user: { id: '1', name: 'Test User', email: 'test@example.com', role: mocks.role },
+      role: mocks.role,
+    }),
 }));
 vi.mock('@voxire/components', () => ({ LicenseBanner: () => null }));
 vi.mock('@voxire/config', () => ({ getAvatarUrl: () => '' }));
@@ -73,6 +79,7 @@ describe('Finance mobile navigation', () => {
     mocks.router.pathname = '/invoices';
     mocks.navigate.mockClear();
     mocks.signOut.mockClear();
+    mocks.role = 'admin';
   });
 
   it('provides a mobile menu button and opens the sidebar drawer', () => {
@@ -100,5 +107,45 @@ describe('Finance mobile navigation', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open navigation menu' }));
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(screen.getByRole('complementary', { name: 'Primary navigation' })).toHaveClass('hidden');
+  });
+});
+
+describe('Finance sidebar permission filtering', () => {
+  beforeEach(() => {
+    mocks.router.pathname = '/invoices';
+    mocks.navigate.mockClear();
+    mocks.signOut.mockClear();
+  });
+
+  it('hides admin-tier nav items for a role without those permissions', () => {
+    mocks.role = 'staff';
+    render(<DefaultLayout />);
+
+    expect(screen.queryByText('Bank Feeds')).not.toBeInTheDocument();
+    expect(screen.queryByText('Reconcile')).not.toBeInTheDocument();
+    expect(screen.queryByText('Accounts')).not.toBeInTheDocument();
+    expect(screen.queryByText('Tax Config')).not.toBeInTheDocument();
+    // Ungated items in the same groups remain visible.
+    expect(screen.getByText('Journal')).toBeInTheDocument();
+  });
+
+  it('shows every nav item for admin', () => {
+    mocks.role = 'admin';
+    render(<DefaultLayout />);
+
+    expect(screen.getByText('Bank Feeds')).toBeInTheDocument();
+    expect(screen.getByText('Reconcile')).toBeInTheDocument();
+    expect(screen.getByText('Accounts')).toBeInTheDocument();
+    expect(screen.getByText('Tax Config')).toBeInTheDocument();
+  });
+
+  it('shows every nav item for owner', () => {
+    mocks.role = 'owner';
+    render(<DefaultLayout />);
+
+    expect(screen.getByText('Bank Feeds')).toBeInTheDocument();
+    expect(screen.getByText('Reconcile')).toBeInTheDocument();
+    expect(screen.getByText('Accounts')).toBeInTheDocument();
+    expect(screen.getByText('Tax Config')).toBeInTheDocument();
   });
 });

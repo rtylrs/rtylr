@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useUserStore } from '@voxire/auth';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
@@ -10,6 +11,7 @@ import AccountTypeBadge, { AccountType } from '../../shared/components/AccountTy
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { useChartOfAccounts, useCreateAccount } from '../../shared/hooks/useChartOfAccounts';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, ACCENT } from '../../shared/lib/tokens';
+import { canFinancePermission } from '../../shared/lib/financePermissions';
 
 const TYPES: (AccountType | 'all')[] = [
   'all',
@@ -32,8 +34,14 @@ const ChartOfAccounts: React.FC = () => {
   const [newName, setNewName] = useState('');
   const [newType, setNewType] = useState<(typeof ACCOUNT_TYPES)[number]>('asset');
   const [newCode, setNewCode] = useState('');
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  // There is no dedicated chart-of-accounts resource in the permission matrix;
+  // creating a ledger account is an accounts-management action, so it is
+  // gated on the same 'finance:accounts' resource used for bank accounts.
+  const canCreateAccount = canFinancePermission(role, 'finance:accounts');
 
   const handleCreate = async (): Promise<void> => {
+    if (!canCreateAccount) return;
     if (!newName.trim()) {
       toast.error(t('accounts.nameRequired'));
       return;
@@ -74,9 +82,11 @@ const ChartOfAccounts: React.FC = () => {
         title={t('accounts.title')}
         subtitle={t('accounts.count', { count: filtered.length })}
         actions={
-          <button style={primaryBtn} onClick={() => setShowCreate(true)}>
-            <Plus size={13} /> {t('accounts.new')}
-          </button>
+          canCreateAccount ? (
+            <button style={primaryBtn} onClick={() => setShowCreate(true)}>
+              <Plus size={13} /> {t('accounts.new')}
+            </button>
+          ) : undefined
         }
       />
 
@@ -198,7 +208,7 @@ const ChartOfAccounts: React.FC = () => {
           </table>
         </div>
       )}
-      {showCreate && (
+      {showCreate && canCreateAccount && (
         <div
           style={{
             position: 'fixed',
