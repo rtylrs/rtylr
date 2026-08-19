@@ -21,12 +21,12 @@ import {
   useRemoveProjectMember,
   useUpdateProjectMemberRole,
   useTransferProjectOwnership,
-  useInviteProjectMember,
 } from './useProjectMembers';
 import { HelmetContainer } from '@voxire/components';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@voxire/ui';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
+import AddProjectMemberDialog from './components/AddProjectMemberDialog';
 import type { ApiProjectMember } from '../../shared/services/flowApi';
 
 const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
@@ -61,7 +61,6 @@ const ProjectSettings: React.FC = () => {
   const moveProject = useMoveProject();
   const { data: members = [], isLoading: membersLoading } = useProjectMembers(projectId);
   const { data: orgMembers = [] } = useFlowTeam();
-  const inviteMember = useInviteProjectMember(projectId ?? '');
   const removeMember = useRemoveProjectMember(projectId ?? '');
   const updateRole = useUpdateProjectMemberRole(projectId ?? '');
   const transferOwnership = useTransferProjectOwnership();
@@ -72,8 +71,6 @@ const ProjectSettings: React.FC = () => {
   const [confirmTransfer, setConfirmTransfer] = useState(false);
 
   const [showAddMember, setShowAddMember] = useState(false);
-  const [newEmail, setNewEmail] = useState('');
-  const [newRole, setNewRole] = useState<'admin' | 'member' | 'viewer'>('member');
 
   // Type-to-confirm modal state for project deletion. Native confirm()
   // is too easy to click through; the user has to retype the project
@@ -209,7 +206,7 @@ const ProjectSettings: React.FC = () => {
                 {members.length} member{members.length !== 1 ? 's' : ''}
               </p>
               <button
-                onClick={() => setShowAddMember((v) => !v)}
+                onClick={() => setShowAddMember(true)}
                 className="flex items-center gap-1 text-[11px] px-2 py-1 rounded"
                 style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
               >
@@ -217,58 +214,11 @@ const ProjectSettings: React.FC = () => {
               </button>
             </div>
 
-            {showAddMember && (
-              <div
-                className="flex gap-2 p-3 rounded-lg"
-                style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
-              >
-                <input
-                  type="email"
-                  placeholder={t('flow.projectSettings.emailPlaceholder')}
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                  className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none"
-                  style={{
-                    background: 'var(--flow-input-bg)',
-                    border: '1px solid var(--flow-border)',
-                    color: 'var(--flow-text)',
-                  }}
-                />
-                <select
-                  value={newRole}
-                  onChange={(e) => setNewRole(e.target.value as 'admin' | 'member' | 'viewer')}
-                  className="rounded px-2 py-1.5 text-[11px] outline-none"
-                  style={{
-                    background: 'var(--flow-input-bg)',
-                    border: '1px solid var(--flow-border)',
-                    color: 'var(--flow-text)',
-                  }}
-                >
-                  <option value="admin">Admin</option>
-                  <option value="member">Member</option>
-                  <option value="viewer">Viewer</option>
-                </select>
-                <button
-                  onClick={() => {
-                    if (!newEmail.trim()) return toast.error(t('toasts.projectMember.enterEmail'));
-                    inviteMember.mutate(
-                      { email: newEmail.trim(), role: newRole },
-                      {
-                        onSuccess: () => {
-                          setNewEmail('');
-                          setShowAddMember(false);
-                        },
-                      }
-                    );
-                  }}
-                  disabled={inviteMember.isPending}
-                  className="px-3 py-1.5 rounded text-[11px] font-semibold"
-                  style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-                >
-                  Invite
-                </button>
-              </div>
-            )}
+            <AddProjectMemberDialog
+              open={showAddMember}
+              onOpenChange={setShowAddMember}
+              projectId={projectId}
+            />
 
             {membersLoading ? (
               <div className="space-y-2">
