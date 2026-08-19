@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { cdnImageUrl } from '@voxire/config';
+import { useUserStore } from '@voxire/auth';
 import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown, Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from '@voxire/utils';
@@ -28,6 +29,7 @@ import { SkeletonRow } from '../../shared/components/Skeleton';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import PageHeader from '../../shared/components/PageHeader';
 import { formatCurrency } from '../../shared/lib/format';
+import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
 import { Link } from '@tanstack/react-router';
 
@@ -79,6 +81,8 @@ const Products: React.FC = () => {
   const { data: categories = [] } = useCategories();
   const deleteMut = useDeleteProduct();
   const createProduct = useCreateProduct();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canDeleteProduct = canErpPermission(role, 'erp:products:delete');
   const categoryNameById = useMemo(() => {
     const map = new Map<string, string>();
     categories.forEach((category) => map.set(String(category.id), category.name ?? ''));
@@ -482,7 +486,7 @@ const Products: React.FC = () => {
       <BulkActionBar
         count={selected.size}
         onClear={() => setSelected(new Set())}
-        onDelete={handleBulkDelete}
+        onDelete={canDeleteProduct ? handleBulkDelete : undefined}
         onExport={() => {
           const rows = products.filter((p) => selected.has(p.id ?? ''));
           if (rows.length === 0) return;

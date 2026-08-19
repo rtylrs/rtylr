@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
+import { useUserStore } from '@voxire/auth';
 import {
   Settings as SettingsIcon,
   Bell,
@@ -26,6 +27,7 @@ import {
   centsToDisplay,
   computeSeatProration,
 } from '../../shared/hooks/queries/useErpSubscription';
+import { canErpPermission } from '../../shared/lib/erpPermissions';
 
 type TabId = 'general' | 'team';
 
@@ -304,6 +306,9 @@ const TeamTab: React.FC = () => {
   const invite = useErpInviteMember();
   const deactivate = useErpDeactivateMember();
   const { data: sub } = useErpSubscription();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canInviteMember = canErpPermission(role, 'hub:team:invite');
+  const canRemoveMember = canErpPermission(role, 'hub:team:remove');
 
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -344,102 +349,103 @@ const TeamTab: React.FC = () => {
         </p>
       </div>
 
-      {showInvite ? (
-        <div
-          className="rounded-xl p-4 space-y-3"
-          style={{ border: '1px solid var(--hub-border)', background: 'var(--hub-card)' }}
-        >
-          <h3 className="text-[13px] font-semibold" style={{ color: 'var(--hub-text)' }}>
-            Invite someone to ERP
-          </h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label
-                className="block text-[11px] font-medium mb-1"
+      {canInviteMember &&
+        (showInvite ? (
+          <div
+            className="rounded-xl p-4 space-y-3"
+            style={{ border: '1px solid var(--hub-border)', background: 'var(--hub-card)' }}
+          >
+            <h3 className="text-[13px] font-semibold" style={{ color: 'var(--hub-text)' }}>
+              Invite someone to ERP
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  className="block text-[11px] font-medium mb-1"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                >
+                  Full name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Jane Smith"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className={inputCls}
+                  style={inputSt}
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-[11px] font-medium mb-1"
+                  style={{ color: 'var(--hub-text-muted)' }}
+                >
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="jane@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleInvite();
+                  }}
+                  className={inputCls}
+                  style={inputSt}
+                />
+              </div>
+            </div>
+            {sub &&
+              (sub.pricePerSeatCents ?? 0) > 0 &&
+              (() => {
+                const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
+                  computeSeatProration(sub.pricePerSeatCents ?? 0);
+                return (
+                  <p className="text-[11px]" style={{ color: 'var(--hub-text-muted)' }}>
+                    Adding this member costs{' '}
+                    <span className="font-semibold" style={{ color: 'var(--hub-text)' }}>
+                      {centsToDisplay(proratedCents)}
+                    </span>{' '}
+                    this month ({daysRemaining}/{daysInMonth} days), then{' '}
+                    <span className="font-semibold" style={{ color: 'var(--hub-text)' }}>
+                      {centsToDisplay(sub.pricePerSeatCents ?? 0)}/mo
+                    </span>{' '}
+                    from {nextMonthName} 1st.
+                  </p>
+                );
+              })()}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={!email.trim() || !fullName.trim() || invite.isPending}
+                onClick={handleInvite}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
+                style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
+              >
+                <UserPlus size={12} />
+                {invite.isPending ? 'Sending…' : 'Send invite'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowInvite(false)}
+                className="px-3 py-1.5 rounded-lg text-[12px] font-medium"
                 style={{ color: 'var(--hub-text-muted)' }}
               >
-                Full name
-              </label>
-              <input
-                type="text"
-                placeholder="Jane Smith"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className={inputCls}
-                style={inputSt}
-              />
-            </div>
-            <div>
-              <label
-                className="block text-[11px] font-medium mb-1"
-                style={{ color: 'var(--hub-text-muted)' }}
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="jane@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleInvite();
-                }}
-                className={inputCls}
-                style={inputSt}
-              />
+                Cancel
+              </button>
             </div>
           </div>
-          {sub &&
-            (sub.pricePerSeatCents ?? 0) > 0 &&
-            (() => {
-              const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
-                computeSeatProration(sub.pricePerSeatCents ?? 0);
-              return (
-                <p className="text-[11px]" style={{ color: 'var(--hub-text-muted)' }}>
-                  Adding this member costs{' '}
-                  <span className="font-semibold" style={{ color: 'var(--hub-text)' }}>
-                    {centsToDisplay(proratedCents)}
-                  </span>{' '}
-                  this month ({daysRemaining}/{daysInMonth} days), then{' '}
-                  <span className="font-semibold" style={{ color: 'var(--hub-text)' }}>
-                    {centsToDisplay(sub.pricePerSeatCents ?? 0)}/mo
-                  </span>{' '}
-                  from {nextMonthName} 1st.
-                </p>
-              );
-            })()}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={!email.trim() || !fullName.trim() || invite.isPending}
-              onClick={handleInvite}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
-              style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
-            >
-              <UserPlus size={12} />
-              {invite.isPending ? 'Sending…' : 'Send invite'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowInvite(false)}
-              className="px-3 py-1.5 rounded-lg text-[12px] font-medium"
-              style={{ color: 'var(--hub-text-muted)' }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setShowInvite(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
-          style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
-        >
-          <UserPlus size={12} />
-          Invite member
-        </button>
-      )}
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowInvite(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
+            style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}
+          >
+            <UserPlus size={12} />
+            Invite member
+          </button>
+        ))}
 
       {isLoading ? (
         <div className="space-y-2">
@@ -486,22 +492,24 @@ const TeamTab: React.FC = () => {
               >
                 {m.role}
               </span>
-              <button
-                type="button"
-                aria-label={`Remove ${m.name}`}
-                onClick={() => {
-                  deactivate.mutate(m.id);
-                }}
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-[var(--hub-hover)] transition-colors shrink-0"
-                style={{
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                  color: 'var(--hub-text-muted)',
-                }}
-              >
-                <UserMinus size={13} />
-              </button>
+              {canRemoveMember && (
+                <button
+                  type="button"
+                  aria-label={`Remove ${m.name}`}
+                  onClick={() => {
+                    deactivate.mutate(m.id);
+                  }}
+                  className="h-7 w-7 flex items-center justify-center rounded hover:bg-[var(--hub-hover)] transition-colors shrink-0"
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    color: 'var(--hub-text-muted)',
+                  }}
+                >
+                  <UserMinus size={13} />
+                </button>
+              )}
             </div>
           ))}
         </div>

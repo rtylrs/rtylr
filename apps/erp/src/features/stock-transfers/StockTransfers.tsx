@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight, Trash2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { useUserStore } from '@voxire/auth';
 import { useStockTransfers, useCreateStockTransfer } from './useStockTransfers';
+import { canErpPermission } from '../../shared/lib/erpPermissions';
 import {
   stockTransferStatusLabel,
   toStockTransferItems,
@@ -63,6 +65,8 @@ const StockTransfers: React.FC = () => {
   const { data: productResult, isLoading: productsLoading } = useProducts({ pageSize: 100 });
   const products = productResult?.products ?? [];
   const createMut = useCreateStockTransfer();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canCreateTransfer = canErpPermission(role, 'erp:inventory:transfer');
   const [showCreate, setShowCreate] = useState(false);
   const [fromWarehouseId, setFromWarehouseId] = useState('');
   const [toWarehouseId, setToWarehouseId] = useState('');
@@ -117,13 +121,15 @@ const StockTransfers: React.FC = () => {
         title="Stock Transfers"
         description="Move inventory between warehouses"
         actions={
-          <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
-          >
-            <Plus size={14} /> New Transfer
-          </button>
+          canCreateTransfer && (
+            <button
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            >
+              <Plus size={14} /> New Transfer
+            </button>
+          )
         }
       />
 

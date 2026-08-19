@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useParams, Link, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
+import { useUserStore } from '@voxire/auth';
 import { ArrowLeft, Edit3, Trash2, Package, TrendingUp, Clock, Truck } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +19,7 @@ import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatCurrency } from '../../shared/lib/format';
 import { useCategories } from '../categories/useCategories';
 import { useBrands } from '../brands/useBrands';
+import { canErpPermission } from '../../shared/lib/erpPermissions';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -76,6 +78,9 @@ const ProductDetail: React.FC = () => {
   const deleteProduct = useDeleteProduct();
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canDeleteProduct = canErpPermission(role, 'erp:products:delete');
+  const canAdjustInventory = canErpPermission(role, 'erp:inventory:adjust');
   const categoryNameById = useMemo(() => {
     const map = new Map<string, string>();
     categories.forEach((category) => map.set(String(category.id), category.name ?? ''));
@@ -179,20 +184,22 @@ const ProductDetail: React.FC = () => {
             <Edit3 size={12} />
             {t('erp.products.detail.edit')}
           </button>
-          <button
-            data-testid="product-delete-button"
-            onClick={() => setConfirmDelete(true)}
-            disabled={deleteProduct.isPending}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-            style={{
-              color: 'var(--erp-danger)',
-              border: '1px solid color-mix(in srgb, var(--erp-danger) 30%, transparent)',
-              opacity: deleteProduct.isPending ? 0.6 : 1,
-            }}
-          >
-            <Trash2 size={12} />
-            {t('erp.products.detail.delete')}
-          </button>
+          {canDeleteProduct && (
+            <button
+              data-testid="product-delete-button"
+              onClick={() => setConfirmDelete(true)}
+              disabled={deleteProduct.isPending}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+              style={{
+                color: 'var(--erp-danger)',
+                border: '1px solid color-mix(in srgb, var(--erp-danger) 30%, transparent)',
+                opacity: deleteProduct.isPending ? 0.6 : 1,
+              }}
+            >
+              <Trash2 size={12} />
+              {t('erp.products.detail.delete')}
+            </button>
+          )}
         </div>
       </div>
 
@@ -293,10 +300,16 @@ const ProductDetail: React.FC = () => {
                   Stock
                 </p>
                 <div className="mt-0.5">
-                  <QuickStockAdjust
-                    productId={product.id ?? ''}
-                    currentStock={product.stockQuantity ?? 0}
-                  />
+                  {canAdjustInventory ? (
+                    <QuickStockAdjust
+                      productId={product.id ?? ''}
+                      currentStock={product.stockQuantity ?? 0}
+                    />
+                  ) : (
+                    <p className="text-lg font-bold" style={{ color: 'var(--hub-text)' }}>
+                      {product.stockQuantity ?? 0}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
