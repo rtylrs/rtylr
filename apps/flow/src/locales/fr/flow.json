@@ -150,6 +150,8 @@
     "team": "Équipe",
     "teamNotStarted": "Pas commencé",
     "teamAccessDenied": "Vous n'avez pas accès au temps de l'équipe. Cela nécessite le rôle admin sur l'espace de travail.",
+    "teamEmptyTitle": "Personne à afficher pour l'instant",
+    "teamEmptyDescription": "Ajoutez des coéquipiers à cet espace de travail pour voir leur temps ici.",
     "workMode": "Où vous avez travaillé",
     "startTime": "Début",
     "endTime": "Fin",

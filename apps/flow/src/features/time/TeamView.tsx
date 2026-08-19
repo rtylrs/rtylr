@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Users } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useWorkspaceMembers } from '../workspace-manager/useWorkspaceManager';
 import GateNotice from '../../shared/components/GateNotice';
+import EmptyState from '../../shared/components/EmptyState';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { todayLocalDate, useWorkDaysForWorkspace, type WorkDay } from './useWorkDay';
 
@@ -64,6 +66,12 @@ const TeamView = (): React.JSX.Element => {
           <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.loadingDay')}
           </p>
+        ) : (members ?? []).length === 0 ? (
+          <EmptyState
+            icon={Users}
+            title={t('flow.time.teamEmptyTitle')}
+            description={t('flow.time.teamEmptyDescription')}
+          />
         ) : (
           <ul className="space-y-1.5">
             {(members ?? []).map((member) => {
