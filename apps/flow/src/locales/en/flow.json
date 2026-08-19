@@ -639,7 +639,8 @@
     "pageTitle": "Project settings · rtylr",
     "removeMemberLabel": "Remove",
     "emailPlaceholder": "Email address",
-    "roleLabel": "Role"
+    "roleLabel": "Role",
+    "addMemberHeading": "Add a member to this project"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection"

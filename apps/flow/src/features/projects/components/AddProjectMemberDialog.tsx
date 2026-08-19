@@ -56,7 +56,9 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
         style={{ background: 'var(--flow-card)', color: 'var(--flow-text)' }}
       >
         <DialogHeader>
-          <DialogTitle style={{ color: 'var(--flow-text)' }}>Add member</DialogTitle>
+          <DialogTitle style={{ color: 'var(--flow-text)' }}>
+            {t('flow.projectSettings.addMemberHeading')}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="flex gap-2">
