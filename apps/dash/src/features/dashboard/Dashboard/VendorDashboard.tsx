@@ -415,8 +415,12 @@ const StaffDashboard: React.FC<{ userApps: string[] }> = ({ userApps }) => {
 // ─── Root ───────────────────────────────────────────────────────────────────
 
 const VendorDashboard: React.FC = () => {
-  const { user, role } = useUserStore();
-  const isAdmin = role === 'admin' || role === 'owner' || !role;
+  const { user } = useUserStore();
+  // Real role lives on user.role (populated by BusinessRoute's setUser()).
+  // An absent/unknown role must fall through to the restrictive StaffDashboard,
+  // never fail open into AdminDashboard.
+  const role = (user?.role ?? '').toLowerCase();
+  const isAdmin = role === 'admin' || role === 'owner';
   const userApps: string[] = (user?.apps as string[] | undefined) ?? [];
   if (!isAdmin) return <StaffDashboard userApps={userApps} />;
   return (
