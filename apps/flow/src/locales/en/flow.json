@@ -433,6 +433,7 @@
   },
   "profile": {
     "heading": "Profile",
+    "hrDetails": "HR details",
     "noRecordTitle": "No HR record linked yet",
     "noRecordDescription": "Your account isn't linked to a staff record in HR yet. Ask an admin to link it.",
     "role": "Role",
