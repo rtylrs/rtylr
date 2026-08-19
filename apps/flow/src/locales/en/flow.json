@@ -522,6 +522,7 @@
     "subtitle": "Tasks organized by due date · Click a day to add a task",
     "today": "Today",
     "addHint": "+ add",
+    "addTaskLabel": "Add task on {{date}}",
     "moreCount": "+{{count}} more",
     "newTaskFor": "New task for",
     "titlePlaceholder": "Task title…",
