@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useUserStore } from '@voxire/auth';
 import {
   Users,
   Star,
@@ -21,6 +22,7 @@ import {
   useCreateSegment,
 } from '../../shared/hooks/queries/useSegments';
 import { ConfirmModal } from '../../shared/components/ui';
+import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 const ACCENT = '#3b82f6';
 
@@ -348,12 +350,14 @@ function SegmentCard({
   onClick,
   onDelete,
   deletePending,
+  canDelete,
 }: {
   segment: Segment;
   index: number;
   onClick?: () => void;
   onDelete: () => void;
   deletePending: boolean;
+  canDelete: boolean;
 }) {
   const Icon = segment.icon;
   return (
@@ -473,27 +477,29 @@ function SegmentCard({
           <span>View Customers</span>
           <ChevronRight size={13} />
         </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          disabled={deletePending}
-          aria-label="Delete segment"
-          style={{
-            padding: '6px 10px',
-            borderRadius: '8px',
-            background: 'rgba(239,68,68,0.08)',
-            border: '1px solid rgba(239,68,68,0.25)',
-            color: '#ef4444',
-            cursor: deletePending ? 'not-allowed' : 'pointer',
-            opacity: deletePending ? 0.6 : 1,
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <Trash2 size={12} />
-        </button>
+        {canDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            disabled={deletePending}
+            aria-label="Delete segment"
+            style={{
+              padding: '6px 10px',
+              borderRadius: '8px',
+              background: 'rgba(239,68,68,0.08)',
+              border: '1px solid rgba(239,68,68,0.25)',
+              color: '#ef4444',
+              cursor: deletePending ? 'not-allowed' : 'pointer',
+              opacity: deletePending ? 0.6 : 1,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <Trash2 size={12} />
+          </button>
+        )}
       </div>
     </motion.div>
   );
@@ -509,6 +515,11 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 
 const Segments: React.FC = () => {
   const navigate = useNavigate();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  // Segment deletion has no dedicated resource; `crm:segments` is the operator-tier
+  // resource that already covers this asset, consistent with customer deletion being
+  // gated at operator-tier (`crm:customers:manage`) rather than walled off to admin.
+  const canDeleteSegment = canCrmPermission(role, 'crm:segments');
   const { data: fetchedSegments, isLoading } = useListSegments();
   const removeSegment = useDeleteSegment();
   const createSegment = useCreateSegment();
@@ -599,6 +610,7 @@ const Segments: React.FC = () => {
               onClick={() => navigate({ to: `/segments/${segment.id}` })}
               onDelete={() => setConfirmDeleteId(segment.id)}
               deletePending={removeSegment.isPending}
+              canDelete={canDeleteSegment}
             />
           ))}
         </div>

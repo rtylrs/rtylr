@@ -379,6 +379,9 @@ importers:
       '@voxire/observability':
         specifier: workspace:*
         version: link:../../packages/observability
+      '@voxire/permissions':
+        specifier: workspace:*
+        version: link:../../packages/permissions
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
+import { useUserStore } from '@voxire/auth';
 import { Award, Check, Pencil, X } from 'lucide-react';
 import { useLoyaltyTiers, useUpsertTier } from '../../shared/hooks/queries/useLoyalty';
 import { type LoyaltyTier } from '../../shared/schemas/loyalty';
 import { PageHeader, Card, SkeletonList } from '../../shared/components/ui';
+import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 interface TierEditFormProps {
   tier: LoyaltyTier;
@@ -154,6 +156,8 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
 };
 
 const LoyaltyTiers: React.FC = () => {
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canConfigureLoyalty = canCrmPermission(role, 'crm:loyalty:configure');
   const { data: fetched, isLoading } = useLoyaltyTiers();
   const tiers = (fetched ?? []).sort((a, b) => a.threshold - b.threshold);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -220,25 +224,27 @@ const LoyaltyTiers: React.FC = () => {
                   >
                     <Award size={22} />
                   </div>
-                  <button
-                    aria-label={`Edit ${t.name} tier`}
-                    onClick={() => setEditingId(editingId === t.id ? null : t.id)}
-                    style={{
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: '6px',
-                      border: '1px solid var(--hub-border)',
-                      background: 'var(--hub-hover)',
-                      color: 'var(--hub-text-muted)',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {editingId === t.id ? <X size={13} /> : <Pencil size={13} />}
-                  </button>
+                  {canConfigureLoyalty && (
+                    <button
+                      aria-label={`Edit ${t.name} tier`}
+                      onClick={() => setEditingId(editingId === t.id ? null : t.id)}
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--hub-border)',
+                        background: 'var(--hub-hover)',
+                        color: 'var(--hub-text-muted)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {editingId === t.id ? <X size={13} /> : <Pencil size={13} />}
+                    </button>
+                  )}
                 </div>
                 <h3
                   style={{
