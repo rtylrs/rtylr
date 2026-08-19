@@ -150,6 +150,8 @@
     "team": "Équipe",
     "teamNotStarted": "Pas commencé",
     "teamAccessDenied": "Vous n'avez pas accès au temps de l'équipe. Cela nécessite le rôle admin sur l'espace de travail.",
+    "teamEmptyTitle": "Personne à afficher pour l'instant",
+    "teamEmptyDescription": "Ajoutez des coéquipiers à cet espace de travail pour voir leur temps ici.",
     "workMode": "Où vous avez travaillé",
     "startTime": "Début",
     "endTime": "Fin",
@@ -170,6 +172,8 @@
     "reportsRangeTo": "au",
     "reportsPerson": "Personne",
     "reportsScopeNote": "Totaux par personne sur la période. Le regroupement par projet ou type de travail nécessite un point d'accès qui n'existe pas encore.",
+    "reportsEmptyTitle": "Rien à signaler pour l'instant",
+    "reportsEmptyDescription": "Personne dans cet espace de travail n'a de temps à afficher pour cette période.",
     "project": "Projet",
     "selectProject": "Sélectionner un projet",
     "workType": "Type de travail",
@@ -594,7 +598,10 @@
     "taskCount": "{{done}} sur {{total}} tâches terminées",
     "sectionUpcoming": "À venir",
     "sectionCompleted": "Terminés",
-    "dateRange": "{{start}} au {{end}}"
+    "dateRange": "{{start}} au {{end}}",
+    "emptyTitle": "Aucun cycle pour le moment",
+    "emptyDescription": "Démarrez votre premier sprint de livraison de deux semaines pour suivre le périmètre et la progression.",
+    "createFirst": "Créer le premier cycle"
   },
   "myIssues": {
     "loading": "Chargement…",

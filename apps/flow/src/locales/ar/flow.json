@@ -154,6 +154,8 @@
     "team": "الفريق",
     "teamNotStarted": "لم يبدأ",
     "teamAccessDenied": "لا تملك صلاحية الاطلاع على وقت الفريق. هذا يتطلب صلاحية المدير على مساحة العمل.",
+    "teamEmptyTitle": "لا يوجد أحد لعرضه بعد",
+    "teamEmptyDescription": "أضف أعضاء إلى مساحة العمل هذه لرؤية وقتهم هنا.",
     "workMode": "أين عملت",
     "startTime": "البداية",
     "endTime": "النهاية",
@@ -174,6 +176,8 @@
     "reportsRangeTo": "إلى",
     "reportsPerson": "الشخص",
     "reportsScopeNote": "الإجماليات لكل شخص خلال الفترة المحددة. التجميع حسب المشروع أو نوع العمل يتطلب نقطة وصول غير متوفرة بعد.",
+    "reportsEmptyTitle": "لا يوجد شيء لعرضه بعد",
+    "reportsEmptyDescription": "لا يملك أحد في مساحة العمل هذه وقتًا لعرضه خلال هذه الفترة.",
     "project": "المشروع",
     "selectProject": "اختر مشروعاً",
     "workType": "نوع العمل",
@@ -621,7 +625,10 @@
     "taskCount": "{{done}} من {{total}} مهام منجزة",
     "sectionUpcoming": "القادمة",
     "sectionCompleted": "المكتملة",
-    "dateRange": "{{start}} إلى {{end}}"
+    "dateRange": "{{start}} إلى {{end}}",
+    "emptyTitle": "لا توجد دورات بعد",
+    "emptyDescription": "ابدأ أول دورة تسليم مدتها أسبوعان لتتبع النطاق والتقدم.",
+    "createFirst": "إنشاء أول دورة"
   },
   "myIssues": {
     "loading": "جارٍ التحميل…",

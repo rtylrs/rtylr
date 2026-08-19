@@ -150,6 +150,8 @@
     "team": "Team",
     "teamNotStarted": "Not started",
     "teamAccessDenied": "You don't have access to see the team's time. This needs admin on the workspace.",
+    "teamEmptyTitle": "No one to show yet",
+    "teamEmptyDescription": "Add teammates to this workspace to see their time here.",
     "workMode": "Where you worked",
     "startTime": "Started",
     "endTime": "Finished",
@@ -170,6 +172,8 @@
     "reportsRangeTo": "to",
     "reportsPerson": "Person",
     "reportsScopeNote": "Totals per person for the range. Grouping by project or type of work needs an endpoint that doesn't exist yet.",
+    "reportsEmptyTitle": "Nothing to report yet",
+    "reportsEmptyDescription": "No one on this workspace has time to show for this range.",
     "project": "Project",
     "selectProject": "Select a project",
     "workType": "Type of work",
@@ -594,7 +598,10 @@
     "taskCount": "{{done}} of {{total}} tasks done",
     "sectionUpcoming": "Upcoming",
     "sectionCompleted": "Completed",
-    "dateRange": "{{start}} to {{end}}"
+    "dateRange": "{{start}} to {{end}}",
+    "emptyTitle": "No cycles yet",
+    "emptyDescription": "Start your first two-week sprint to track scope and progress.",
+    "createFirst": "Create first cycle"
   },
   "myIssues": {
     "loading": "Loading…",
