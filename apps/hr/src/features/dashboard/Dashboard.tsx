@@ -20,6 +20,7 @@ import {
   Timer,
   GripVertical,
 } from 'lucide-react';
+import { useUserStore } from '@voxire/auth';
 import { useGetDashboard, useUpdateWidgetLayout } from './useDashboard';
 import { useHRDashboard } from './useDashboard';
 import { useStaff } from '../staff/useStaff';
@@ -29,6 +30,7 @@ import {
   useHrSettings,
 } from '../../shared/hooks/useHrExtras';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
+import { canViewCompensation } from '../../shared/lib/hrPermissions';
 import { ErrorBoundary } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import BirthdayWidget from '../../shared/components/BirthdayWidget';
@@ -210,6 +212,8 @@ const Dashboard: React.FC = () => {
   const isMobile = useIsMobile(900);
   const config = useHRConfigStore((s) => s.config);
   const { data: settings } = useHrSettings();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const showCompensation = canViewCompensation(role);
 
   const { data: dashboardResponse, isLoading: widgetsLoading } = useGetDashboard();
   const { data: legacyDashboard, isLoading: statsLoading } = useHRDashboard();
@@ -221,11 +225,15 @@ const Dashboard: React.FC = () => {
   const loading = widgetsLoading || statsLoading;
 
   const widgets = useMemo((): DashboardWidget[] => {
-    if (dashboardResponse?.widgets && dashboardResponse.widgets.length > 0) {
-      return dashboardResponse.widgets;
-    }
-    return DEFAULT_WIDGETS;
-  }, [dashboardResponse]);
+    const source =
+      dashboardResponse?.widgets && dashboardResponse.widgets.length > 0
+        ? dashboardResponse.widgets
+        : DEFAULT_WIDGETS;
+    // Defense in depth: a stored layout (default or previously saved) must
+    // never surface the payroll widget to a role that can't view compensation,
+    // even if the layout itself predates this permission check.
+    return showCompensation ? source : source.filter((w) => w.widgetType !== 'payroll_cost');
+  }, [dashboardResponse, showCompensation]);
 
   const widgetData = useMemo((): Record<string, unknown> => {
     return (dashboardResponse?.data ?? {}) as Record<string, unknown>;
@@ -313,14 +321,18 @@ const Dashboard: React.FC = () => {
       icon: Briefcase,
       color: 'var(--hr-status-pending)',
     },
-    {
-      label: t('dashboard.stats.monthlyPayroll'),
-      value: loading ? '…' : formatCurrency(dashData.monthlyPayroll, settings?.currency),
-      change: '',
-      trend: 'up' as const,
-      icon: DollarSign,
-      color: 'var(--hr-shift-blue)',
-    },
+    ...(showCompensation
+      ? [
+          {
+            label: t('dashboard.stats.monthlyPayroll'),
+            value: loading ? '…' : formatCurrency(dashData.monthlyPayroll, settings?.currency),
+            change: '',
+            trend: 'up' as const,
+            icon: DollarSign,
+            color: 'var(--hr-shift-blue)',
+          },
+        ]
+      : []),
   ];
 
   const renderWidget = (w: DashboardWidget): React.ReactNode => {
@@ -361,6 +373,9 @@ const Dashboard: React.FC = () => {
           />
         );
       case 'payroll_cost':
+        // Defense in depth: even if a widget layout somehow carries this
+        // widget for a role that can't view compensation, never render it.
+        if (!showCompensation) return null;
         return (
           <PayrollCostWidget data={parseWidgetData(wData, 'payroll_cost')} isLoading={loading} />
         );
