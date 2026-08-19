@@ -19,6 +19,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { useFeatureFlag, FLAG_KEYS } from '@voxire/config';
 import {
   useFlowTeam,
   useFlowGrantAccess,
@@ -501,6 +502,7 @@ const AppearanceSection: React.FC = () => {
 
 const ShortcutsSection: React.FC = () => {
   const { t } = useTranslation();
+  const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
   const shortcuts = [
     { keys: ['C'], desc: t('flow.settings.shortcuts.items.createTask') },
     { keys: ['/'], desc: t('flow.settings.shortcuts.items.openSearch') },
@@ -510,9 +512,18 @@ const ShortcutsSection: React.FC = () => {
     { keys: ['G', 'F'], desc: t('flow.settings.shortcuts.items.goToToday') },
     { keys: ['G', 'D'], desc: t('flow.settings.shortcuts.items.goToDashboard') },
     { keys: ['G', 'C'], desc: t('flow.settings.shortcuts.items.goToCalendar') },
-    { keys: ['G', 'T'], desc: t('flow.settings.shortcuts.items.goToTimeline') },
-    { keys: ['G', 'R'], desc: t('flow.settings.shortcuts.items.goToRoadmap') },
-    { keys: ['G', 'S'], desc: t('flow.settings.shortcuts.items.goToInsights') },
+    // Timeline/Roadmap/Insights are gated behind the same preview-routes flag
+    // as their sidebar links and routes (see FlowLayout.tsx, router.tsx) - the
+    // key presses still fire, but land on PreviewRouteUnavailable when the
+    // flag is off, so the reference list should only claim them when the
+    // sidebar itself does.
+    ...(showPreviewRoutes
+      ? [
+          { keys: ['G', 'T'], desc: t('flow.settings.shortcuts.items.goToTimeline') },
+          { keys: ['G', 'R'], desc: t('flow.settings.shortcuts.items.goToRoadmap') },
+          { keys: ['G', 'S'], desc: t('flow.settings.shortcuts.items.goToInsights') },
+        ]
+      : []),
     { keys: ['G', 'Y'], desc: t('flow.settings.shortcuts.items.goToCycles') },
     { keys: ['G', 'X'], desc: t('flow.settings.shortcuts.items.goToTriage') },
     { keys: ['Esc'], desc: t('flow.settings.shortcuts.items.closeModal') },
