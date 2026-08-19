@@ -69,7 +69,7 @@ const wrap = (children: React.ReactNode) => (
 
 const requireAdminOrOwner = () => {
   const user = useUserStore.getState().user;
-  const role = useUserStore.getState().role || user?.role;
+  const role = user?.role;
   if (role && role.toLowerCase() !== 'admin' && role.toLowerCase() !== 'owner') {
     throw redirect({ to: '/' });
   }
