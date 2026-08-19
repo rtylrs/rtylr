@@ -86,6 +86,19 @@ const ALL_APPS = [
   },
 ];
 
+// Route path prefixes that billing/menu_manager may reach in addition to
+// staffAllowedPaths, derived from their canonical resource grants in
+// packages/permissions/src/matrix.ts (billing: 'hub:billing'; menu_manager:
+// 'app:menu' + 'hub:design') and their invite descriptions in InviteUser.tsx.
+// This is a route-level approximation of that matrix - Dash's router does not
+// yet check resources per-route - so keep it narrow: it must not grow to
+// include Team management, business deletion, or any other settings surface,
+// which stay admin/owner (and operator, see hasManagementRole below) only.
+const ROLE_SCOPED_PATHS: Record<string, string[]> = {
+  billing: ['/settings/billing'],
+  menu_manager: ['/menu', '/create-item', '/create-banner', '/qr-codes', '/design'],
+};
+
 function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
   const userApps: string[] = user?.apps ?? [];
   const businessName = user?.businessName || '';
@@ -458,12 +471,18 @@ function BusinessRoute(): React.JSX.Element | null {
     return <CreateBusinessOnboarding />;
   }
 
-  // Non-owner staff without management roles or app assignments see the app cards launcher.
-  // Admins, managers, billing/menu roles, and members with app assignments access authorized routes.
+  // Non-owner staff without a management role, and without a path scoped to
+  // their role, see the app cards launcher. Everyone else reaches the route.
   const role = (user?.role ?? '').toLowerCase();
-  const hasManagementRole = ['admin', 'manager', 'billing', 'menu_manager'].includes(role);
-  const hasAssignedApps = Array.isArray(user?.apps) && user.apps.length > 0;
-  const staffAllowedPaths = ['/settings/account'];
+  // 'operator' (not the never-assigned 'manager') gets full route access,
+  // same as admin: its stated scope ("day-to-day operations across assigned
+  // apps") includes hub:team and hub:activity per matrix.ts, wider than any
+  // single path group below.
+  // store_manager is intentionally excluded: its elevated powers are
+  // POS-location-scoped (see the store_manager comment in matrix.ts), not
+  // global to Dash, so it falls through to the same launcher as staff/viewer.
+  const hasManagementRole = ['admin', 'operator'].includes(role);
+  const staffAllowedPaths = ['/settings/account', ...(ROLE_SCOPED_PATHS[role] ?? [])];
 
   if (
     user &&
@@ -474,7 +493,8 @@ function BusinessRoute(): React.JSX.Element | null {
     return <StaffView user={user} />;
   }
 
-  // Owners, admins, and authorized roles get full route access.
+  // Owners, admins/operators, and role-scoped members (on their allowed
+  // paths above) reach here.
   return <Outlet />;
 }
 
