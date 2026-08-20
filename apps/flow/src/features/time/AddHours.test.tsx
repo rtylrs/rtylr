@@ -111,6 +111,7 @@ function fillProjectAndTask(projectValue = '1', taskValue = 't1'): void {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.clear();
   workDayState.value = {
     data: {
       workDay: { id: '9', workMode: 'onsite', loggedMinutes: 0, breakMinutes: 0 },
@@ -136,15 +137,11 @@ describe('AddHours: state 1, empty first load', () => {
     expect(logButton).toHaveAttribute('title', 'flow.time.add.reasonNoDuration');
   });
 
-  it("defaults Location to the day's own WHERE YOU WORKED value, revealed behind the picker link", () => {
+  it("defaults Location to the day's own WHERE YOU WORKED value, shown directly", () => {
     workDayState.value = {
       data: { workDay: { id: '9', workMode: 'hybrid', loggedMinutes: 0 }, lines: [] },
     };
     render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
-    // The picker itself is not drawn until the reveal link is clicked - the
-    // default is applied silently, not shown.
-    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'flow.time.add.differentLocation' }));
     expect(screen.getByRole('radio', { name: 'flow.time.mode.hybrid' })).toHaveAttribute(
       'aria-checked',
       'true'
@@ -361,18 +358,17 @@ describe('AddHours: task description box', () => {
   });
 });
 
-describe('AddHours: Location progressive disclosure', () => {
-  it('shows a reveal link instead of the full picker, with no radiogroup on the page', () => {
+describe('AddHours: Location picker is always visible', () => {
+  it('draws the radiogroup directly, with no reveal link on the page', () => {
     render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
+    expect(screen.getByRole('radiogroup', { name: 'flow.time.add.location' })).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: 'flow.time.add.differentLocation' })
-    ).toBeInTheDocument();
-    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
+      screen.queryByRole('button', { name: 'flow.time.add.differentLocation' })
+    ).not.toBeInTheDocument();
   });
 
-  it('reveals the radiogroup, with keyboard support intact, once the link is clicked', () => {
+  it('keyboard arrow keys cycle the selection', () => {
     render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
-    fireEvent.click(screen.getByRole('button', { name: 'flow.time.add.differentLocation' }));
 
     const group = screen.getByRole('radiogroup', { name: 'flow.time.add.location' });
     expect(within(group).getByRole('radio', { name: 'flow.time.mode.onsite' })).toHaveAttribute(
@@ -386,23 +382,50 @@ describe('AddHours: Location progressive disclosure', () => {
       'true'
     );
   });
+});
 
-  it('the reveal link is a real, focusable, keyboard-reachable button', () => {
+describe('AddHours: Location remembers the last submitted entry', () => {
+  it("defaults to today's own WHERE YOU WORKED value over any remembered location", () => {
+    localStorage.setItem('flow.addHours.lastLocation', 'remote');
+    workDayState.value = {
+      data: { workDay: { id: '9', workMode: 'hybrid', loggedMinutes: 0 }, lines: [] },
+    };
     render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
-    const link = screen.getByRole('button', { name: 'flow.time.add.differentLocation' });
-    expect(link.tagName).toBe('BUTTON');
-    link.focus();
-    expect(link).toHaveFocus();
+    expect(screen.getByRole('radio', { name: 'flow.time.mode.hybrid' })).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
   });
 
-  it('keeps the picker visible (does not re-collapse) once an override is chosen', () => {
+  it('falls back to the last submitted location when this day has none yet', () => {
+    localStorage.setItem('flow.addHours.lastLocation', 'remote');
+    workDayState.value = { data: undefined };
     render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
-    fireEvent.click(screen.getByRole('button', { name: 'flow.time.add.differentLocation' }));
+    expect(screen.getByRole('radio', { name: 'flow.time.mode.remote' })).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('falls back to onsite when neither the day nor any remembered location exists', () => {
+    workDayState.value = { data: undefined };
+    render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
+    expect(screen.getByRole('radio', { name: 'flow.time.mode.onsite' })).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('remembers the submitted location for the next entry', async () => {
+    workDayState.value = { data: undefined };
+    render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
+    fillProjectAndTask();
+    fireEvent.change(screen.getByLabelText('flow.time.add.hours'), { target: { value: '1' } });
     fireEvent.click(screen.getByRole('radio', { name: 'flow.time.mode.remote' }));
 
-    expect(screen.getByRole('radiogroup', { name: 'flow.time.add.location' })).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'flow.time.add.differentLocation' })
-    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /flow\.time\.add\.logHours$/ }));
+
+    await waitFor(() => expect(createLineMutateAsync).toHaveBeenCalled());
+    expect(localStorage.getItem('flow.addHours.lastLocation')).toBe('remote');
   });
 });
