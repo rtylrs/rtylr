@@ -4,7 +4,9 @@ import { useUserStore } from '@voxire/auth';
 import { motion } from 'motion/react';
 import { Link2, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { getOneKitErrorMessage, unwrap } from '@voxire/api';
+import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { useBankTransactions } from '../../shared/hooks/useBankAccounts';
@@ -21,7 +23,8 @@ interface Candidate {
 }
 
 const Reconcile: React.FC = () => {
-  const { data: transactions = [] } = useBankTransactions();
+  const { t } = useTranslation();
+  const { data: transactions = [], refetch: refetchTransactions } = useBankTransactions();
   const { data: invoicesResp } = useListInvoices({ page: 1, pageSize: 200, status: 'sent' });
   const candidates: Candidate[] = (invoicesResp?.invoices ?? []).map((inv) => ({
     id: String(inv.id),
@@ -157,17 +160,15 @@ const Reconcile: React.FC = () => {
           </div>
         ))}
         {unmatched.length === 0 && (
-          <div
-            style={{
-              ...cardStyle,
-              padding: 30,
-              textAlign: 'center',
-              color: 'var(--hub-text-muted)',
-              fontSize: 13,
+          <EmptyState
+            icon={CheckCheck}
+            title={t('reconcile.emptyTitle')}
+            description={t('reconcile.emptyDescription')}
+            action={{
+              label: t('common.refresh'),
+              onClick: () => void refetchTransactions(),
             }}
-          >
-            All transactions reconciled.
-          </div>
+          />
         )}
       </div>
     </motion.div>
