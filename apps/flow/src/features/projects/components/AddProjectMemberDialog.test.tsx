@@ -51,7 +51,7 @@ describe('AddProjectMemberDialog', () => {
     fireEvent.change(screen.getByLabelText('flow.projectSettings.roleLabel'), {
       target: { value: 'admin' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Invite' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.invite' }));
 
     expect(inviteMemberMutate).toHaveBeenCalledWith(
       { email: 'new.hire@example.com', role: 'admin' },
@@ -67,9 +67,15 @@ describe('AddProjectMemberDialog', () => {
   it('shows an error toast and does not submit when the email is blank', () => {
     renderDialog();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Invite' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.invite' }));
 
     expect(inviteMemberMutate).not.toHaveBeenCalled();
     expect(toast.error).toHaveBeenCalledWith('toasts.projectMember.enterEmail');
+  });
+
+  it('labels the email input for screen readers', () => {
+    renderDialog();
+
+    expect(screen.getByLabelText('flow.projectSettings.emailPlaceholder')).toBeInTheDocument();
   });
 });

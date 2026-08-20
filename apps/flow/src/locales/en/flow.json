@@ -660,6 +660,7 @@
     "roleLabel": "Role",
     "roleSelectLabel": "Change role for {{name}}",
     "addMemberHeading": "Add a member to this project",
+    "invite": "Invite",
     "descriptionPlaceholder": "Add a description…",
     "generalGateReason": "Only project admins can rename or describe this project.",
     "membersGateReason": "Only project admins can add, remove, or change the role of project members.",

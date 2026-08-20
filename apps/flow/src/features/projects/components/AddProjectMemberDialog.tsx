@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@voxire/ui';
 import { useInviteProjectMember } from '../useProjectMembers';
+import { roleLabel } from '../../../shared/lib/roleUtils';
+
+const PROJECT_MEMBER_ROLES: Array<'admin' | 'member' | 'viewer'> = ['admin', 'member', 'viewer'];
 
 interface AddProjectMemberDialogProps {
   open: boolean;
@@ -65,6 +68,7 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
           <input
             autoFocus
             type="email"
+            aria-label={t('flow.projectSettings.emailPlaceholder')}
             placeholder={t('flow.projectSettings.emailPlaceholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -92,17 +96,19 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
               color: 'var(--flow-text)',
             }}
           >
-            <option value="admin">Admin</option>
-            <option value="member">Member</option>
-            <option value="viewer">Viewer</option>
+            {PROJECT_MEMBER_ROLES.map((r) => (
+              <option key={r} value={r}>
+                {t(roleLabel(r))}
+              </option>
+            ))}
           </select>
           <button
             onClick={handleInvite}
             disabled={inviteMember.isPending}
-            className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-40"
-            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+            className="min-h-[44px] px-3 rounded text-[11px] font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
+            style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
-            Invite
+            {t('flow.projectSettings.invite')}
           </button>
         </div>
       </DialogContent>

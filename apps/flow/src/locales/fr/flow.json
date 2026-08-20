@@ -660,6 +660,7 @@
     "roleLabel": "Rôle",
     "roleSelectLabel": "Modifier le rôle de {{name}}",
     "addMemberHeading": "Ajouter un membre à ce projet",
+    "invite": "Inviter",
     "descriptionPlaceholder": "Ajouter une description…",
     "generalGateReason": "Seuls les administrateurs du projet peuvent renommer ou modifier la description de ce projet.",
     "membersGateReason": "Seuls les administrateurs du projet peuvent ajouter, retirer ou modifier le rôle des membres du projet.",
