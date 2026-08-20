@@ -25,6 +25,17 @@
   /* Typography - swapped per-business by loadFontPairing(). */
   --recruit-font-body: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
   --recruit-font-display: 'Plus Jakarta Sans', Inter, system-ui, sans-serif;
+
+  /* Admin console chrome - the operator-facing /admin screens are a
+     fixed dark UI, unrelated to the --recruit-* template tokens above
+     (which theme the public careers page and are swapped per business). */
+  --recruit-admin-bg: #0a0a0a;
+  --recruit-admin-surface: #0f0f0f;
+  --recruit-admin-fg: #fafaf9;
+  --recruit-admin-border: #1f1f1f;
+  --recruit-admin-border-strong: #2a2a2a;
+  --recruit-admin-selected-border: #ffffff;
+  --recruit-admin-success: #10b981;
 }
 
 html,
