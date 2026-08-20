@@ -11,6 +11,7 @@
   "placeOrder": "Place Order",
   "submitting": "Placing Order...",
   "emptyCart": "Your cart is empty",
+  "backToMenu": "Back to Menu",
   "nameRequired": "Please enter your name.",
   "phoneRequired": "Please enter your phone number.",
   "emailInvalid": "Please enter a valid email address.",

@@ -11,6 +11,7 @@
   "placeOrder": "Passer la commande",
   "submitting": "Commande en cours...",
   "emptyCart": "Votre panier est vide",
+  "backToMenu": "Retour au menu",
   "nameRequired": "Veuillez entrer votre nom.",
   "phoneRequired": "Veuillez entrer votre numéro de téléphone.",
   "emailInvalid": "Veuillez entrer une adresse e-mail valide.",
