@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	flowlabelv1 "github.com/voxire/voxie/gen/go/flow/label/v1"
 )
 
@@ -127,11 +128,15 @@ func (a *LabelAPI) SetTaskLabels(ctx context.Context, req *flowlabelv1.SetTaskLa
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
 	// Setting a task's labels is a task mutation, so it takes the same tier as
 	// the handlers in task_service.go. The repository guard below only checks
 	// workspace membership, which admits a viewer.
-	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

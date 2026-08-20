@@ -188,9 +188,10 @@ const workspaceMemberCap = 500
 
 // ListWorkDaysForWorkspace returns work days across every member of a
 // workspace, for the team view. callerID must hold at least FlowRoleAdmin on
-// the workspace - this is Flow's own tested role gate, not a business-wide
-// permission that (as of this writing) nothing in the backend actually
-// enforces.
+// the workspace - this is Flow's own tested role gate. RequireWorkspaceRole
+// additionally admits a business-wide Owner/Admin/Operator regardless of any
+// Flow-level role, when a hub profile resolver is wired (see
+// hubProfileBypasses).
 //
 // WorkDaysForDate resolves one date's WorkDay for an arbitrary set of
 // employee ids, keyed by employee id for O(1) lookup. Used by Flow's
@@ -217,7 +218,7 @@ func (s *Service) WorkDaysForDate(ctx context.Context, ownerID, businessID int64
 // with no matching HR record simply contributes no rows - not an error, the
 // same way an employee with no day yet contributes none.
 func (s *Service) ListWorkDaysForWorkspace(ctx context.Context, callerID, workspaceID, ownerID, businessID int64, from, to string, limit int32, offset int64) ([]domain.WorkDay, int64, error) {
-	if err := s.RequireWorkspaceRole(ctx, workspaceID, callerID, domain.FlowRoleAdmin); err != nil {
+	if err := s.RequireWorkspaceRole(ctx, workspaceID, callerID, businessID, domain.FlowRoleAdmin); err != nil {
 		return nil, 0, err
 	}
 

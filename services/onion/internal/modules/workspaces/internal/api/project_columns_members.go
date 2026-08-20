@@ -59,11 +59,11 @@ func toProjectMember(m domain.ProjectMember) *flowprojectv1.ProjectMember {
 }
 
 func (a *ProjectAPI) ListProjectColumns(ctx context.Context, req *flowprojectv1.ListProjectColumnsRequest) (*flowprojectv1.ListProjectColumnsResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
+	businessID, authUser, err := a.resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
 	}
-	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleViewer); err != nil {
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, businessID, domain.FlowRoleViewer); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -83,11 +83,11 @@ func (a *ProjectAPI) ListProjectColumns(ctx context.Context, req *flowprojectv1.
 }
 
 func (a *ProjectAPI) CreateProjectColumn(ctx context.Context, req *flowprojectv1.CreateProjectColumnRequest) (*flowprojectv1.CreateProjectColumnResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
+	businessID, authUser, err := a.resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
 	}
-	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleMember); err != nil {
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, businessID, domain.FlowRoleMember); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	workspaceID := a.Service.GetProjectWorkspace(ctx, req.GetProjectId())
@@ -202,11 +202,11 @@ func (a *ProjectAPI) ListProjectMembers(ctx context.Context, req *flowprojectv1.
 }
 
 func (a *ProjectAPI) AddProjectMember(ctx context.Context, req *flowprojectv1.AddProjectMemberRequest) (*flowprojectv1.AddProjectMemberResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
+	businessID, authUser, err := a.resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
 	}
-	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, businessID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -230,11 +230,11 @@ func (a *ProjectAPI) AddProjectMember(ctx context.Context, req *flowprojectv1.Ad
 }
 
 func (a *ProjectAPI) RemoveProjectMember(ctx context.Context, req *flowprojectv1.RemoveProjectMemberRequest) (*flowprojectv1.RemoveProjectMemberResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
+	businessID, authUser, err := a.resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
 	}
-	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, businessID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -248,15 +248,15 @@ func (a *ProjectAPI) RemoveProjectMember(ctx context.Context, req *flowprojectv1
 }
 
 func (a *ProjectAPI) UpdateProjectMemberRole(ctx context.Context, req *flowprojectv1.UpdateProjectMemberRoleRequest) (*flowprojectv1.UpdateProjectMemberRoleResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
+	businessID, authUser, err := a.resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
 	}
 	role, ok := domain.CanonicalFlowMemberRole(req.GetRole())
 	if !ok {
 		return nil, onekiterrors.New(http.StatusBadRequest, "role must be admin, member, or viewer")
 	}
-	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, businessID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -271,11 +271,11 @@ func (a *ProjectAPI) UpdateProjectMemberRole(ctx context.Context, req *flowproje
 }
 
 func (a *ProjectAPI) InviteProjectMember(ctx context.Context, req *flowprojectv1.InviteProjectMemberRequest) (*flowprojectv1.InviteProjectMemberResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
+	businessID, authUser, err := a.resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
 	}
-	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, domain.FlowRoleAdmin); err != nil {
+	if err := a.Service.RequireProjectRole(ctx, req.GetProjectId(), authUser.UserID, businessID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

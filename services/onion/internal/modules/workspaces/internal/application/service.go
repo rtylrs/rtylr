@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/hubprofile"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/wsbus"
 )
@@ -82,6 +83,14 @@ func assigneeID(id *int64) int64 {
 
 type Service struct {
 	repo *infrastructure.Repository
+
+	// hubProfiles resolves a caller's business-wide (hub) profile - the
+	// Owner/Admin/Operator role that lives above Flow's own project/workspace
+	// roles entirely. Optional: nil until SetHubProfileResolver is called, in
+	// which case the bypass in RequireProjectRole/RequireTaskRole/
+	// RequireWorkspaceRole is simply skipped and those functions behave exactly
+	// as before.
+	hubProfiles hubprofile.Resolver
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
@@ -90,6 +99,14 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
 		repo: repo,
 	}
+}
+
+// SetHubProfileResolver wires the business-wide hub profile lookup consulted
+// by RequireProjectRole, RequireTaskRole and RequireWorkspaceRole before
+// falling back to Flow's own project/workspace-membership checks. See those
+// functions' docs for why the bypass exists.
+func (s *Service) SetHubProfileResolver(r hubprofile.Resolver) {
+	s.hubProfiles = r
 }
 
 // ─────────────────────────────────────────────
@@ -266,10 +283,41 @@ func (s *Service) workspaceRoleFor(ctx context.Context, workspaceID, userID int6
 	return role
 }
 
+// hubProfileBypasses reports whether userID's business-wide hub profile on
+// businessID should grant full Flow access on its own, independent of any
+// Flow-internal project/workspace role. Flow only ever resolves a caller's
+// role through a flow_project_members row, project ownership, or
+// flow_workspace_members membership - a business-wide Owner/Admin/Operator
+// account (a role from the hub/business level entirely separate from Flow's
+// own project/workspace roles) has no path through any of those three, so an
+// otherwise-legitimate owner of the business can be denied access to their
+// own business's projects and tasks.
+//
+// A missing resolver (SetHubProfileResolver never called) or any resolver
+// error is NOT a bypass - the caller falls straight through to the ordinary
+// project/workspace-role logic below, which still applies and can still
+// authorize the request through its own paths. This function must never be
+// the sole reason a request is denied; it only ever grants, never revokes.
+func (s *Service) hubProfileBypasses(ctx context.Context, userID, businessID int64) bool {
+	if s.hubProfiles == nil {
+		return false
+	}
+	profile, err := s.hubProfiles.GetProfile(ctx, userID, businessID)
+	if err != nil {
+		return false
+	}
+	return profile.IsOwner || profile.Role == "admin" || profile.Role == "operator"
+}
+
 // RequireProjectRole reports whether userID holds at least minRole on a
 // project, returning domain.ErrUnauthorized when they do not. The API layer
-// maps that to a permission-denied response.
-func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID int64, minRole string) error {
+// maps that to a permission-denied response. A caller whose business-wide hub
+// profile is Owner/Admin/Operator is admitted unconditionally - see
+// hubProfileBypasses.
+func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID, businessID int64, minRole string) error {
+	if s.hubProfileBypasses(ctx, userID, businessID) {
+		return nil
+	}
 	if domain.RoleAllows(s.projectRoleFor(ctx, projectID, userID), minRole) {
 		return nil
 	}
@@ -277,8 +325,13 @@ func (s *Service) RequireProjectRole(ctx context.Context, projectID, userID int6
 }
 
 // RequireWorkspaceRole reports whether userID holds at least minRole on a
-// workspace, including the workspace owner who has no membership row.
-func (s *Service) RequireWorkspaceRole(ctx context.Context, workspaceID, userID int64, minRole string) error {
+// workspace, including the workspace owner who has no membership row. A
+// caller whose business-wide hub profile is Owner/Admin/Operator is admitted
+// unconditionally - see hubProfileBypasses.
+func (s *Service) RequireWorkspaceRole(ctx context.Context, workspaceID, userID, businessID int64, minRole string) error {
+	if s.hubProfileBypasses(ctx, userID, businessID) {
+		return nil
+	}
 	if domain.RoleAllows(s.workspaceRoleFor(ctx, workspaceID, userID), minRole) {
 		return nil
 	}
@@ -287,8 +340,13 @@ func (s *Service) RequireWorkspaceRole(ctx context.Context, workspaceID, userID 
 
 // RequireTaskRole is RequireProjectRole addressed by task rather than project.
 // A task need not belong to a project, so the fallback order mirrors
-// IsTaskMember: project, then workspace, then sole ownership.
-func (s *Service) RequireTaskRole(ctx context.Context, taskID, userID int64, minRole string) error {
+// IsTaskMember: project, then workspace, then sole ownership. A caller whose
+// business-wide hub profile is Owner/Admin/Operator is admitted
+// unconditionally - see hubProfileBypasses.
+func (s *Service) RequireTaskRole(ctx context.Context, taskID, userID, businessID int64, minRole string) error {
+	if s.hubProfileBypasses(ctx, userID, businessID) {
+		return nil
+	}
 	if taskID == 0 || userID == 0 {
 		return domain.ErrUnauthorized
 	}
@@ -298,7 +356,7 @@ func (s *Service) RequireTaskRole(ctx context.Context, taskID, userID int64, min
 	}
 
 	if task.ProjectID != 0 {
-		return s.RequireProjectRole(ctx, task.ProjectID, userID, minRole)
+		return s.RequireProjectRole(ctx, task.ProjectID, userID, businessID, minRole)
 	}
 	if task.WorkspaceID != 0 {
 		if domain.RoleAllows(s.workspaceRoleFor(ctx, task.WorkspaceID, userID), minRole) {
@@ -313,30 +371,30 @@ func (s *Service) RequireTaskRole(ctx context.Context, taskID, userID int64, min
 }
 
 // RequireCommentRole authorizes against the project owning a comment's task.
-func (s *Service) RequireCommentRole(ctx context.Context, commentID, userID int64, minRole string) error {
+func (s *Service) RequireCommentRole(ctx context.Context, commentID, userID, businessID int64, minRole string) error {
 	taskID, err := s.repo.GetCommentTaskID(ctx, commentID)
 	if err != nil {
 		return domain.ErrUnauthorized
 	}
-	return s.RequireTaskRole(ctx, taskID, userID, minRole)
+	return s.RequireTaskRole(ctx, taskID, userID, businessID, minRole)
 }
 
 // RequireAttachmentRole authorizes against the project owning an attachment's task.
-func (s *Service) RequireAttachmentRole(ctx context.Context, attachmentID, userID int64, minRole string) error {
+func (s *Service) RequireAttachmentRole(ctx context.Context, attachmentID, userID, businessID int64, minRole string) error {
 	taskID, err := s.repo.GetAttachmentTaskID(ctx, attachmentID)
 	if err != nil {
 		return domain.ErrUnauthorized
 	}
-	return s.RequireTaskRole(ctx, taskID, userID, minRole)
+	return s.RequireTaskRole(ctx, taskID, userID, businessID, minRole)
 }
 
 // RequireTimeLogRole authorizes against the project owning a time log's task.
-func (s *Service) RequireTimeLogRole(ctx context.Context, timeLogID, userID int64, minRole string) error {
+func (s *Service) RequireTimeLogRole(ctx context.Context, timeLogID, userID, businessID int64, minRole string) error {
 	taskID, err := s.repo.GetTimeLogTaskID(ctx, timeLogID)
 	if err != nil {
 		return domain.ErrUnauthorized
 	}
-	return s.RequireTaskRole(ctx, taskID, userID, minRole)
+	return s.RequireTaskRole(ctx, taskID, userID, businessID, minRole)
 }
 
 // ─────────────────────────────────────────────

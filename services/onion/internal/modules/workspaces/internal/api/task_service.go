@@ -111,7 +111,7 @@ func (a *TaskAPI) CreateTask(ctx context.Context, req *flowtaskv1.CreateTaskRequ
 		projectID = myTasksID
 	}
 
-	if roleErr := a.Service.RequireProjectRole(ctx, projectID, authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+	if roleErr := a.Service.RequireProjectRole(ctx, projectID, authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -188,7 +188,7 @@ func (a *TaskAPI) UpdateTask(ctx context.Context, req *flowtaskv1.UpdateTaskRequ
 		return nil, err
 	}
 
-	if roleErr := a.Service.RequireTaskRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetId(), authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -244,7 +244,7 @@ func (a *TaskAPI) UpdateTaskStatus(ctx context.Context, req *flowtaskv1.UpdateTa
 		return nil, err
 	}
 
-	if roleErr := a.Service.RequireTaskRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetId(), authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -277,7 +277,7 @@ func (a *TaskAPI) DeleteTask(ctx context.Context, req *flowtaskv1.DeleteTaskRequ
 		return nil, err
 	}
 
-	if roleErr := a.Service.RequireTaskRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); roleErr != nil {
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetId(), authUser.UserID, businessID, domain.FlowRoleAdmin); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -311,7 +311,7 @@ func (a *TaskAPI) CreateSubtask(ctx context.Context, req *flowtaskv1.CreateSubta
 	// Gate on the parent task's scope. Project and workspace IDs are derived
 	// from the trusted parent row so a child cannot be persisted into a
 	// different tenant or project hierarchy.
-	if roleErr := a.Service.RequireTaskRole(ctx, parentID, authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+	if roleErr := a.Service.RequireTaskRole(ctx, parentID, authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	if req.GetProjectId() != 0 && req.GetProjectId() != parentProjectID {
@@ -358,7 +358,7 @@ func (a *TaskAPI) CreateAttachment(ctx context.Context, req *flowtaskv1.CreateAt
 		return nil, err
 	}
 
-	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -400,15 +400,15 @@ func (a *TaskAPI) GetSubtasks(ctx context.Context, req *flowtaskv1.GetSubtasksRe
 }
 
 func (a *TaskAPI) AddComment(ctx context.Context, req *flowtaskv1.AddCommentRequest) (*flowtaskv1.AddCommentResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
+	authUser, businessID, err := a.resolveAuth(ctx)
+	if err != nil {
+		return nil, err
 	}
 	if !a.Service.IsTaskMember(ctx, authUser.UserID, req.GetTaskId()) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -422,12 +422,12 @@ func (a *TaskAPI) AddComment(ctx context.Context, req *flowtaskv1.AddCommentRequ
 }
 
 func (a *TaskAPI) DeleteComment(ctx context.Context, req *flowtaskv1.DeleteCommentRequest) (*flowtaskv1.DeleteCommentResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
+	authUser, businessID, err := a.resolveAuth(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	if roleErr := a.Service.RequireCommentRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); roleErr != nil {
+	if roleErr := a.Service.RequireCommentRole(ctx, req.GetId(), authUser.UserID, businessID, domain.FlowRoleAdmin); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -486,7 +486,7 @@ func (a *TaskAPI) DeleteAttachment(ctx context.Context, req *flowtaskv1.DeleteAt
 		return nil, err
 	}
 
-	if roleErr := a.Service.RequireAttachmentRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); roleErr != nil {
+	if roleErr := a.Service.RequireAttachmentRole(ctx, req.GetId(), authUser.UserID, businessID, domain.FlowRoleAdmin); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -508,7 +508,7 @@ func (a *TaskAPI) CreateTimeLog(ctx context.Context, req *flowtaskv1.CreateTimeL
 		return nil, onekiterrors.New(http.StatusBadRequest, "task_id is required")
 	}
 
-	if roleErr := a.Service.RequireTaskRole(ctx, taskID, authUser.UserID, domain.FlowRoleMember); roleErr != nil {
+	if roleErr := a.Service.RequireTaskRole(ctx, taskID, authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -549,12 +549,12 @@ func (a *TaskAPI) GetTimeLogs(ctx context.Context, req *flowtaskv1.GetTimeLogsRe
 }
 
 func (a *TaskAPI) DeleteTimeLog(ctx context.Context, req *flowtaskv1.DeleteTimeLogRequest) (*flowtaskv1.DeleteTimeLogResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
+	authUser, businessID, err := a.resolveAuth(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	if roleErr := a.Service.RequireTimeLogRole(ctx, req.GetId(), authUser.UserID, domain.FlowRoleAdmin); roleErr != nil {
+	if roleErr := a.Service.RequireTimeLogRole(ctx, req.GetId(), authUser.UserID, businessID, domain.FlowRoleAdmin); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
