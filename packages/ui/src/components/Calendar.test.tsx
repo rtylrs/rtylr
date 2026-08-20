@@ -68,9 +68,7 @@ describe('Calendar', () => {
     const { rerender } = render(<Calendar value="2026-08-16" onChange={handleChange} />);
     expect(screen.queryByText('Today')).not.toBeInTheDocument();
 
-    rerender(
-      <Calendar value="2026-08-16" onChange={handleChange} labels={{ today: 'Today' }} />
-    );
+    rerender(<Calendar value="2026-08-16" onChange={handleChange} labels={{ today: 'Today' }} />);
     fireEvent.click(screen.getByText('Today'));
     expect(handleChange).toHaveBeenCalledWith(todayISODate());
   });

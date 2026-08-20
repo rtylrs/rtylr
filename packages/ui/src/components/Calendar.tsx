@@ -51,7 +51,9 @@ function buildMonthGrid(year: number, month: number, weekStartsOn: 0 | 1): strin
 function weekdayLabels(locale: string | undefined, weekStartsOn: 0 | 1): string[] {
   const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
   // 1970-01-04 was a Sunday - a fixed, DST-free reference week to read labels from.
-  return Array.from({ length: 7 }, (_, i) => formatter.format(new Date(1970, 0, 4 + weekStartsOn + i)));
+  return Array.from({ length: 7 }, (_, i) =>
+    formatter.format(new Date(1970, 0, 4 + weekStartsOn + i))
+  );
 }
 
 export interface CalendarLabels {
@@ -156,8 +158,7 @@ const Calendar = ({
       }
       case 'End': {
         event.preventDefault();
-        const offsetToWeekEnd =
-          6 - ((parseISODate(focused).getUTCDay() - weekStartsOn + 7) % 7);
+        const offsetToWeekEnd = 6 - ((parseISODate(focused).getUTCDay() - weekStartsOn + 7) % 7);
         moveFocus(offsetToWeekEnd);
         break;
       }
