@@ -54,6 +54,7 @@ export type Resource =
   | 'erp:inventory:transfer'
   | 'erp:suppliers'
   | 'erp:purchase_orders'
+  | 'erp:purchase_orders:approve'
   | 'erp:stock_takes'
   // HR operations
   | 'hr:staff'

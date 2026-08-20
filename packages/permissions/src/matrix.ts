@@ -91,6 +91,7 @@ const DIRECT_PERMISSIONS: PermissionMatrix = {
     'erp:products:delete',
     'erp:inventory:adjust',
     'erp:inventory:transfer',
+    'erp:purchase_orders:approve',
     'erp:stock_takes',
     'hr:staff:manage',
     'hr:payroll',
