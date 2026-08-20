@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { Search, Grid3x3 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { Input } from '../../shared/components/ui';
-import { AppCard, Breadcrumbs, SkeletonGrid, EmptyState } from '../../shared/components/dash';
+import { AppCard, Breadcrumbs, SkeletonGrid } from '../../shared/components/dash';
 import { useApps } from '../../shared/hooks/queries/useApps';
 import { useUserStore } from '../../shared/stores/userStore';
 
@@ -19,6 +21,7 @@ const CATEGORIES: {
 ];
 
 const Apps: React.FC = () => {
+  const { t } = useTranslation();
   const { data: apps = [], isLoading } = useApps();
   const { user } = useUserStore();
   const [query, setQuery] = useState('');
@@ -107,8 +110,15 @@ const Apps: React.FC = () => {
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={Grid3x3}
-            title="No apps found"
-            description="Try a different search or category."
+            title={t('apps.emptyTitle')}
+            description={t('apps.emptyDescription')}
+            action={{
+              label: t('common.clearFilters'),
+              onClick: () => {
+                setQuery('');
+                setCategory('all');
+              },
+            }}
           />
         ) : (
           <div className="dash-app-grid grid gap-4">
