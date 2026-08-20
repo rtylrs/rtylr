@@ -6,6 +6,14 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en-US' } }),
 }));
 
+interface DirectoryQueryState {
+  data: Array<Record<string, unknown>> | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  isPaused?: boolean;
+  failureCount?: number;
+}
+
 const directoryState = vi.hoisted(() => ({
   value: {
     data: [
@@ -27,10 +35,10 @@ const directoryState = vi.hoisted(() => ({
         email: 'sam@example.com',
         phone: '+1-555-0101',
       },
-    ] as Array<Record<string, unknown>> | undefined,
+    ],
     isLoading: false,
     isError: false,
-  },
+  } as DirectoryQueryState,
 }));
 
 const useDirectoryMock = vi.hoisted(() => vi.fn());
@@ -105,5 +113,31 @@ describe('DirectoryScreen', () => {
     directoryState.value = { data: undefined, isLoading: false, isError: true };
     render(<DirectoryScreen />);
     expect(screen.getByText('flow.directory.loadFailedTitle')).toBeInTheDocument();
+  });
+
+  it('shows the load-failed state for a query stuck paused after a failed attempt, not the empty state', () => {
+    directoryState.value = {
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      isPaused: true,
+      failureCount: 1,
+    };
+    render(<DirectoryScreen />);
+    expect(screen.getByText('flow.directory.loadFailedTitle')).toBeInTheDocument();
+    expect(screen.queryByText('flow.directory.noMembersYet')).not.toBeInTheDocument();
+  });
+
+  it('does not treat a query merely paused before its first attempt as failed', () => {
+    directoryState.value = {
+      data: undefined,
+      isLoading: false,
+      isError: false,
+      isPaused: true,
+      failureCount: 0,
+    };
+    render(<DirectoryScreen />);
+    expect(screen.getByText('flow.directory.noMembersYet')).toBeInTheDocument();
+    expect(screen.queryByText('flow.directory.loadFailedTitle')).not.toBeInTheDocument();
   });
 });
