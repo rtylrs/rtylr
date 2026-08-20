@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { ExternalLink, Plus, Search, UtensilsCrossed } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useGetAllMenus } from '../../shared/hooks/queries/useMenu';
 import { Badge, Button } from '../../shared/components/ui';
@@ -39,6 +41,7 @@ function formatDate(value?: string): string {
 }
 
 const Menus: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { userId } = useUserStore();
   const [searchTerm, setSearchTerm] = useState('');
@@ -183,31 +186,21 @@ const Menus: React.FC = () => {
               ))}
             </div>
           ) : filteredMenus.length === 0 ? (
-            <div className="flex min-h-64 flex-col items-center justify-center px-4 py-16 text-center">
-              <div
-                className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg"
-                style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
-              >
-                <UtensilsCrossed size={22} />
-              </div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                No menus found
-              </p>
-              <p className="mt-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-                {searchTerm ? 'Try another search.' : 'No menu items yet.'}
-              </p>
-              {!searchTerm && (
-                <Button
-                  className="mt-4"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate({ to: '/create-item' })}
-                >
-                  <Plus size={14} />
-                  Item
-                </Button>
-              )}
-            </div>
+            <EmptyState
+              icon={UtensilsCrossed}
+              title={t('menu.emptyNoMenusTitle')}
+              description={
+                searchTerm ? t('menu.emptyTryAnotherSearch') : t('menu.emptyNoMenuItemsYet')
+              }
+              action={
+                searchTerm
+                  ? { label: t('common.clearSearch'), onClick: () => setSearchTerm('') }
+                  : {
+                      label: t('menu.createItem'),
+                      onClick: () => navigate({ to: '/create-item' }),
+                    }
+              }
+            />
           ) : (
             <div>
               {filteredMenus.map((menu, index) => {
