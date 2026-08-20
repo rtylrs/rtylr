@@ -424,6 +424,35 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const [newProjectDescription, setNewProjectDescription] = useState('');
   const [newProjectColor, setNewProjectColor] = useState('#64C5B9');
 
+  // Account menu (avatar/name trigger in the sidebar footer): closes on an
+  // outside click and on Escape, scoped to this menu only - it must not
+  // interfere with the unrelated "New Project" modal's own Escape handling
+  // further down in this file.
+  //
+  // packages/utils's useClickOutside takes RefObject<T> (non-nullable
+  // `current`), which React 19's useRef<T | null>(null) can't satisfy
+  // without an unsafe cast, so the listener is hand-rolled here instead.
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handlePointerDown = (e: MouseEvent | TouchEvent): void => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') setUserMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [userMenuOpen]);
+
   useEffect(() => {
     setMobileNavOpen(false);
   }, [location.pathname]);
@@ -1120,7 +1149,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             <SidebarLink to="/settings" icon={Settings} label={t('nav.settings')} />
             <CaretButton className="w-full justify-start" />
 
-            <div className="relative">
+            <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen((o) => !o)}
                 className="flex items-center gap-2.5 w-full px-3 py-2 rounded-md transition-colors hover:bg-[var(--flow-hover)]"
