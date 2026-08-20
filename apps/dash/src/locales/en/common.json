@@ -7,6 +7,10 @@
   "confirm": "Confirm",
   "delete": "Delete",
   "edit": "Edit",
+  "refresh": "Refresh",
+  "clearSearch": "Clear search",
+  "clearFilters": "Clear filters",
+  "goBack": "Go back",
   "roleLabels": {
     "owner": "Owner",
     "admin": "Admin",
