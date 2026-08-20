@@ -32,7 +32,6 @@ interface UserState {
   user: StoredUser | null;
   token: string | null;
   isAuthenticated: boolean;
-  role: string | null;
   userId: string | null;
   addons: Addons;
   visits: any[];
@@ -43,7 +42,6 @@ interface UserActions {
   logout: () => void;
   setToken: (token: string) => void;
   setUser: (user: StoredUser) => void;
-  setRole: (role: string) => void;
   setUserId: (userId: string) => void;
   setAddons: (addons: Addons) => void;
   setVisits: (visits: any[]) => void;
@@ -53,7 +51,6 @@ const initialState: UserState = {
   user: null,
   token: null,
   isAuthenticated: false,
-  role: null,
   userId: null,
   addons: { feedback: false, about: false, contact: false, landing: false },
   visits: [],
@@ -78,8 +75,6 @@ export const useUserStore = create<UserState & UserActions>()(
 
       setUser: (user) => set({ user }),
 
-      setRole: (role) => set({ role }),
-
       setUserId: (userId) => set({ userId }),
 
       setAddons: (addons) => set({ addons }),
@@ -91,7 +86,6 @@ export const useUserStore = create<UserState & UserActions>()(
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
-        role: state.role,
         userId: state.userId,
       }),
     }

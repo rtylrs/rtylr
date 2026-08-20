@@ -9,7 +9,6 @@ beforeEach(() => {
     user: null,
     token: null,
     isAuthenticated: false,
-    role: null,
     userId: null,
     addons: { feedback: false, about: false, contact: false, landing: false },
     visits: [],
@@ -21,7 +20,6 @@ describe('userStore (dash)', () => {
     expect(getState().user).toBeNull();
     expect(getState().token).toBeNull();
     expect(getState().isAuthenticated).toBe(false);
-    expect(getState().role).toBeNull();
     expect(getState().userId).toBeNull();
     expect(getState().visits).toEqual([]);
   });
@@ -45,7 +43,6 @@ describe('userStore (dash)', () => {
   it('logout clears user state', () => {
     getState().login({ name: 'John' });
     getState().setToken('abc');
-    getState().setRole('admin');
     getState().setUserId('u1');
 
     getState().logout();
@@ -53,7 +50,6 @@ describe('userStore (dash)', () => {
     expect(getState().user).toBeNull();
     expect(getState().isAuthenticated).toBe(false);
     expect(getState().token).toBeNull();
-    expect(getState().role).toBeNull();
     expect(getState().userId).toBeNull();
   });
 
@@ -75,11 +71,6 @@ describe('userStore (dash)', () => {
     const user = { id: 1, name: 'Test' };
     getState().setUser(user);
     expect(getState().user).toEqual(user);
-  });
-
-  it('setRole updates role', () => {
-    getState().setRole('admin');
-    expect(getState().role).toBe('admin');
   });
 
   it('setUserId updates userId', () => {

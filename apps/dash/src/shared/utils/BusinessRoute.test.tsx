@@ -6,6 +6,7 @@ import { useUserStore } from '../stores/userStore';
 
 const mockGet = vi.fn();
 const mockPost = vi.fn();
+const routerState = vi.hoisted(() => ({ pathname: '/' }));
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((promise) => promise),
@@ -36,7 +37,7 @@ vi.mock('lucide-react', () => ({
 vi.mock('@tanstack/react-router', () => ({
   Outlet: () => <div data-testid="outlet">Outlet Content</div>,
   useRouterState: ({ select }: { select?: (s: any) => any } = {}) =>
-    select ? select({ location: { pathname: '/' } }) : '/',
+    select ? select({ location: { pathname: routerState.pathname } }) : routerState.pathname,
 }));
 
 vi.mock('../../features/onboarding/CreateBusinessOnboarding', () => ({
@@ -48,6 +49,7 @@ describe('BusinessRoute', () => {
     vi.clearAllMocks();
     useUserStore.setState({ user: null, token: null });
     document.cookie = 'token=test-token; path=/';
+    routerState.pathname = '/';
   });
 
   it('renders onboarding if user has no businessId', async () => {
@@ -108,6 +110,147 @@ describe('BusinessRoute', () => {
       }
       return Promise.resolve({ business: {} });
     });
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Welcome/i)).toBeTruthy();
+    });
+  });
+
+  it('renders Outlet for a non-owner operator on an unscoped route (full route access)', async () => {
+    mockGet.mockImplementation((url: string) => {
+      if (url === '/hub/user/v1/users/me') {
+        return Promise.resolve({
+          id: 3,
+          email: 'op@example.com',
+          businessId: 10,
+          isOwner: false,
+          role: 'operator',
+          apps: [],
+        });
+      }
+      return Promise.resolve({ business: {} });
+    });
+    routerState.pathname = '/team';
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('outlet')).toBeTruthy();
+    });
+  });
+
+  it('renders StaffView for a non-owner billing user on an out-of-scope route', async () => {
+    mockGet.mockImplementation((url: string) => {
+      if (url === '/hub/user/v1/users/me') {
+        return Promise.resolve({
+          id: 4,
+          email: 'billing@example.com',
+          fullName: 'Billing User',
+          businessId: 10,
+          isOwner: false,
+          role: 'billing',
+          apps: [],
+        });
+      }
+      return Promise.resolve({ business: {} });
+    });
+    routerState.pathname = '/team';
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Welcome/i)).toBeTruthy();
+    });
+  });
+
+  it('renders Outlet for a non-owner billing user on their scoped billing route', async () => {
+    mockGet.mockImplementation((url: string) => {
+      if (url === '/hub/user/v1/users/me') {
+        return Promise.resolve({
+          id: 5,
+          email: 'billing@example.com',
+          businessId: 10,
+          isOwner: false,
+          role: 'billing',
+          apps: [],
+        });
+      }
+      return Promise.resolve({ business: {} });
+    });
+    routerState.pathname = '/settings/billing';
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('outlet')).toBeTruthy();
+    });
+  });
+
+  it('renders StaffView for a non-owner menu_manager user on an out-of-scope route', async () => {
+    mockGet.mockImplementation((url: string) => {
+      if (url === '/hub/user/v1/users/me') {
+        return Promise.resolve({
+          id: 6,
+          email: 'menu@example.com',
+          fullName: 'Menu Manager User',
+          businessId: 10,
+          isOwner: false,
+          role: 'menu_manager',
+          apps: [],
+        });
+      }
+      return Promise.resolve({ business: {} });
+    });
+    routerState.pathname = '/settings/billing';
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Welcome/i)).toBeTruthy();
+    });
+  });
+
+  it('renders Outlet for a non-owner menu_manager user on their scoped design route', async () => {
+    mockGet.mockImplementation((url: string) => {
+      if (url === '/hub/user/v1/users/me') {
+        return Promise.resolve({
+          id: 7,
+          email: 'menu@example.com',
+          businessId: 10,
+          isOwner: false,
+          role: 'menu_manager',
+          apps: [],
+        });
+      }
+      return Promise.resolve({ business: {} });
+    });
+    routerState.pathname = '/design';
+
+    render(<BusinessRoute />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('outlet')).toBeTruthy();
+    });
+  });
+
+  it('renders StaffView for a non-owner store_manager user (POS-location-scoped, not global to Dash)', async () => {
+    mockGet.mockImplementation((url: string) => {
+      if (url === '/hub/user/v1/users/me') {
+        return Promise.resolve({
+          id: 8,
+          email: 'store@example.com',
+          fullName: 'Store Manager User',
+          businessId: 10,
+          isOwner: false,
+          role: 'store_manager',
+          apps: [],
+        });
+      }
+      return Promise.resolve({ business: {} });
+    });
+    routerState.pathname = '/team';
 
     render(<BusinessRoute />);
 

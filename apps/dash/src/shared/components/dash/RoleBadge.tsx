@@ -1,20 +1,11 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 
 export interface RoleBadgeProps {
   role: string;
   className?: string;
 }
-
-const LABELS: Record<string, string> = {
-  owner: 'Owner',
-  admin: 'Admin',
-  operator: 'Operator',
-  billing: 'Billing',
-  menu_manager: 'Menu Manager',
-  staff: 'Staff',
-  viewer: 'Viewer',
-};
 
 const COLORS: Record<string, { bg: string; fg: string; border: string }> = {
   owner: {
@@ -34,6 +25,11 @@ const COLORS: Record<string, { bg: string; fg: string; border: string }> = {
     fg: 'var(--app-flow)',
     border: 'rgba(100,197,185,0.3)',
   },
+  store_manager: {
+    bg: 'color-mix(in srgb, var(--app-pos) 14%, transparent)',
+    fg: 'var(--app-pos)',
+    border: 'color-mix(in srgb, var(--app-pos) 30%, transparent)',
+  },
   staff: {
     bg: 'var(--status-active-bg)',
     fg: 'var(--status-active)',
@@ -49,7 +45,10 @@ const DEFAULT = {
 };
 
 export const RoleBadge: React.FC<RoleBadgeProps> = ({ role, className }) => {
-  const c = COLORS[role.toLowerCase()] ?? DEFAULT;
+  const { t } = useTranslation();
+  const key = role.toLowerCase();
+  const c = COLORS[key] ?? DEFAULT;
+  const label = t(`common.roleLabels.${key}`, { defaultValue: role });
   return (
     <span
       className={cn(
@@ -58,7 +57,7 @@ export const RoleBadge: React.FC<RoleBadgeProps> = ({ role, className }) => {
       )}
       style={{ background: c.bg, color: c.fg, border: `1px solid ${c.border}` }}
     >
-      {LABELS[role.toLowerCase()] ?? role}
+      {label}
     </span>
   );
 };
