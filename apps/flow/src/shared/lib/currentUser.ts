@@ -1,10 +1,12 @@
 import { useQueries } from '@tanstack/react-query';
 import { useUserStore } from '../stores/userStore';
+import { useFlowStore } from '../stores/flowStore';
 import { canEditTask, canDelete, mostRestrictiveProjectRole } from './roleUtils';
 import {
   projectMembersQueryOptions,
   useProjectMembers,
 } from '../../features/projects/useProjectMembers';
+import { useWorkspaceMembers } from '../../features/workspace-manager/useWorkspaceManager';
 import type { ApiProjectMember, FlowProjectRole } from '../services/flowApi';
 
 /** Fallback user id when no authenticated user is available (dev only) */
@@ -88,10 +90,33 @@ export function useMostRestrictiveProjectRole(projectIds: string[]): FlowProject
   return mostRestrictiveProjectRole(roles);
 }
 
+/**
+ * The signed-in user's role in the active workspace's member list
+ * (`flow_workspace_members`), scoped to `useCanEditTask` below as a
+ * fallback only - never a standalone permission source.
+ *
+ * onion's own task-update authorization (`RequireProjectRole` /
+ * `projectRoleFor`) already admits any member of a project's workspace,
+ * not just explicit `flow_project_members` rows. Without this fallback,
+ * the frontend was stricter than the backend it talks to: a workspace
+ * member who was never individually added to one of that workspace's
+ * projects saw every edit control disabled here, even though the same
+ * write would have succeeded had the button not been disabled.
+ */
+function useCurrentWorkspaceRole(): string | undefined {
+  const userId = useCurrentUserId();
+  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
+  const { data: members } = useWorkspaceMembers(activeWorkspaceId);
+  if (!members || userId === null) return undefined;
+  return members.find((m) => String(m.userId) === String(userId))?.role;
+}
+
 /** Whether the current user can edit task fields (title, status, assignee, etc) in a project. */
 export function useCanEditTask(projectId?: string): boolean {
-  const role = useCurrentProjectRole(projectId);
-  return role !== undefined && canEditTask(role);
+  const projectRole = useCurrentProjectRole(projectId);
+  const workspaceRole = useCurrentWorkspaceRole();
+  if (projectRole !== undefined) return canEditTask(projectRole);
+  return workspaceRole !== undefined && workspaceRole !== 'viewer';
 }
 
 /** Whether the current user can delete resources in a project (project admins only). */

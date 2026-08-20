@@ -1,6 +1,25 @@
-import { describe, it, expect } from 'vitest';
+// @vitest-environment happy-dom
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 
-import { findProjectRole } from './currentUser';
+vi.mock('../services/flowApi', () => ({
+  flowApi: {
+    getProjectMembers: vi.fn(),
+    getWorkspaceMembers: vi.fn(),
+  },
+}));
+
+vi.mock('@voxire/api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@voxire/api')>();
+  return { ...actual, unwrap: vi.fn((val: unknown) => val) };
+});
+
+import { findProjectRole, useCanEditTask } from './currentUser';
+import { flowApi } from '../services/flowApi';
+import { useUserStore } from '../stores/userStore';
+import { useFlowStore } from '../stores/flowStore';
 import type { ApiProjectMember } from '../services/flowApi';
 
 function makeProjectMember(overrides: Partial<ApiProjectMember>): ApiProjectMember {
@@ -43,5 +62,108 @@ describe('findProjectRole', () => {
     // as a string, so a project role must not be missed on a type mismatch.
     const members = [{ ...makeProjectMember({ role: 'admin' }), userId: 7 as unknown as string }];
     expect(findProjectRole(members, '7')).toBe('admin');
+  });
+});
+
+describe('useCanEditTask', () => {
+  const createWrapper = () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    return ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client }, children);
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useUserStore.setState({
+      user: { id: '7', name: 'Ada', email: 'ada@example.com' },
+      token: 'tok',
+      isAuthenticated: true,
+    });
+    useFlowStore.setState({ activeWorkspaceId: 'ws-1' });
+  });
+
+  it('grants edit from an explicit project role above viewer', async () => {
+    (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({
+      members: [makeProjectMember({ userId: '7', role: 'member' })],
+    });
+    (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
+
+    const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current).toBe(true));
+  });
+
+  it('denies edit when the explicit project role is viewer, even if the workspace role would allow it', async () => {
+    (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({
+      members: [makeProjectMember({ userId: '7', role: 'viewer' })],
+    });
+    (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({
+      members: [
+        {
+          id: 'wm1',
+          workspaceId: 'ws-1',
+          userId: '7',
+          name: 'Ada',
+          email: '',
+          role: 'admin',
+          joinedAt: '',
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
+    await waitFor(() => expect(flowApi.getProjectMembers).toHaveBeenCalled());
+    await waitFor(() => expect(result.current).toBe(false));
+  });
+
+  it('falls back to the workspace role when the user has no explicit project membership', async () => {
+    (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({
+      members: [makeProjectMember({ userId: '99', role: 'member' })],
+    });
+    (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({
+      members: [
+        {
+          id: 'wm1',
+          workspaceId: 'ws-1',
+          userId: '7',
+          name: 'Ada',
+          email: '',
+          role: 'admin',
+          joinedAt: '',
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current).toBe(true));
+  });
+
+  it('still denies when the user has neither a project role nor a workspace role', async () => {
+    (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
+    (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
+
+    const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
+    await waitFor(() => expect(flowApi.getWorkspaceMembers).toHaveBeenCalled());
+    expect(result.current).toBe(false);
+  });
+
+  it('denies when the fallback workspace role is itself viewer', async () => {
+    (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
+    (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({
+      members: [
+        {
+          id: 'wm1',
+          workspaceId: 'ws-1',
+          userId: '7',
+          name: 'Ada',
+          email: '',
+          role: 'viewer',
+          joinedAt: '',
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
+    await waitFor(() => expect(flowApi.getWorkspaceMembers).toHaveBeenCalled());
+    expect(result.current).toBe(false);
   });
 });
