@@ -64,7 +64,7 @@ vi.mock('../../shared/components/BarcodeSvg', () => ({ default: () => null }));
 vi.mock('../../shared/components/QuickStockAdjust', () => ({
   default: () => <div data-testid="quick-stock-adjust" />,
 }));
-vi.mock('../../shared/components/EmptyState', () => ({ default: () => null }));
+vi.mock('@voxire/ui', () => ({ EmptyState: () => null }));
 vi.mock('../../shared/components/Skeleton', () => ({ Skeleton: () => null }));
 vi.mock('../../shared/components/QuickAddProductModal', () => ({ default: () => null }));
 vi.mock('../../shared/components/ConfirmModal', () => ({ default: () => null }));
