@@ -5,8 +5,10 @@ import { Alert, Avatar, Switch } from '@voxire/ui';
 import {
   type RoundingMinutes,
   type WeekStart,
+  getWeeklyTargetMinutes,
   useTimeSettingsStore,
 } from '../../../shared/stores/timeSettingsStore';
+import { DAY_KEYS, type DayKey } from '../../../shared/lib/dateUtils';
 import { useFlowTeam } from '../../../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../../../shared/lib/memberUtils';
 import { formatDurationClock } from '../../../shared/lib/durationUtils';
@@ -15,6 +17,18 @@ import WorkTypesSection from './WorkTypesSection';
 
 const ROUNDING_OPTIONS: RoundingMinutes[] = [0, 5, 10, 15, 30];
 const UNDO_WINDOW_MS = 2000;
+// i18n keys for each day already exist as flow.settings.time.<day> (used by
+// the week-start dropdown), so daily targets reuse the same keys rather than
+// duplicating the seven day names under a new namespace.
+const DAY_LABEL_KEYS: Record<DayKey, string> = {
+  sun: 'sunday',
+  mon: 'monday',
+  tue: 'tuesday',
+  wed: 'wednesday',
+  thu: 'thursday',
+  fri: 'friday',
+  sat: 'saturday',
+};
 
 const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-wider';
 const inputClass =
@@ -139,34 +153,55 @@ const TimeSection = (): React.JSX.Element => {
               ))}
             </select>
           </div>
+        </div>
 
-          <div>
-            <label
-              htmlFor="time-weekly-target"
-              className={labelClass}
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              {t('flow.settings.time.weeklyTarget')}
-            </label>
-            <input
-              id="time-weekly-target"
-              type="number"
-              min={1}
-              max={168}
-              value={Math.round(settings.weeklyTargetMinutes / 60)}
-              onChange={(e) => {
-                const hours = Number(e.target.value);
-                if (!Number.isFinite(hours) || hours <= 0) return;
-                settings.setWeeklyTargetMinutes(hours * 60);
-              }}
-              className={inputClass}
-              style={inputStyle()}
-            />
-            <p className="mt-1 text-[10px]" style={{ color: 'var(--flow-text-muted)' }}>
-              {formatDurationClock(settings.weeklyTargetMinutes)}
-            </p>
+        {/* Daily targets: fully independent per day, not a weekly figure split
+         * evenly - a 4-day week, a short Friday, or a non-working Sunday are
+         * real shapes a business has, not deviations from a uniform one. */}
+        <div className="mt-6">
+          <label
+            className={labelClass}
+            style={{ color: 'var(--flow-text-muted)' }}
+            id="time-daily-targets-label"
+          >
+            {t('flow.settings.time.dailyTargets')}
+          </label>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+            {DAY_KEYS.map((day) => (
+              <div key={day}>
+                <label
+                  htmlFor={`time-daily-target-${day}`}
+                  className="mb-1 block text-[10px] font-medium"
+                  style={{ color: 'var(--flow-text-muted)' }}
+                >
+                  {t(`flow.settings.time.${DAY_LABEL_KEYS[day]}`)}
+                </label>
+                <input
+                  id={`time-daily-target-${day}`}
+                  type="number"
+                  min={0}
+                  max={24}
+                  step={0.5}
+                  value={settings.dailyTargetMinutes[day] / 60}
+                  onChange={(e) => {
+                    const hours = Number(e.target.value);
+                    if (!Number.isFinite(hours) || hours < 0) return;
+                    settings.setDailyTargetMinutes(day, Math.round(hours * 60));
+                  }}
+                  className={inputClass}
+                  style={inputStyle()}
+                />
+              </div>
+            ))}
           </div>
+          <p className="mt-2 text-[10px]" style={{ color: 'var(--flow-text-muted)' }}>
+            {t('flow.settings.time.weeklyTargetSummary', {
+              total: formatDurationClock(getWeeklyTargetMinutes(settings.dailyTargetMinutes)),
+            })}
+          </p>
+        </div>
 
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div>
             <label
               htmlFor="time-overtime"
@@ -187,7 +222,8 @@ const TimeSection = (): React.JSX.Element => {
                 if (!Number.isFinite(hours) || hours <= 0) return;
                 // A threshold under the target would warn on a normal week, so
                 // the field reverts and says why rather than accepting it.
-                if (hours * 60 < settings.weeklyTargetMinutes) {
+                const weeklyTargetMinutes = getWeeklyTargetMinutes(settings.dailyTargetMinutes);
+                if (hours * 60 < weeklyTargetMinutes) {
                   setOvertimeError(true);
                   return;
                 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import Milestones from './Milestones';
 
 const mutateSpy = vi.fn();
@@ -16,7 +16,13 @@ vi.mock('../../shared/stores/flowStore', () => ({
 
 describe('Milestones create form', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
     mutateSpy.mockClear();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('submits the exact date picked by the user, not the current date', () => {
@@ -27,8 +33,8 @@ describe('Milestones create form', () => {
       target: { value: 'Launch' },
     });
 
-    const dateInput = screen.getByLabelText('flow.milestones.targetDate') as HTMLInputElement;
-    fireEvent.change(dateInput, { target: { value: '2026-08-31' } });
+    fireEvent.click(screen.getByLabelText('flow.milestones.targetDate'));
+    fireEvent.click(screen.getByRole('gridcell', { name: /august 31, 2026/i }));
 
     fireEvent.click(screen.getByText('flow.milestones.create'));
 
@@ -53,11 +59,12 @@ describe('Milestones create form', () => {
     expect(mutateSpy).not.toHaveBeenCalled();
   });
 
-  it('gives the target date input an accessible name', () => {
+  it('gives the target date picker an accessible name that opens a calendar', () => {
     render(<Milestones />);
 
     fireEvent.click(screen.getByText('flow.milestones.createFirst'));
 
-    expect(screen.getByLabelText('flow.milestones.targetDate')).toHaveAttribute('type', 'date');
+    fireEvent.click(screen.getByLabelText('flow.milestones.targetDate'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

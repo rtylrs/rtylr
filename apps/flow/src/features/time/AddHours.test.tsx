@@ -35,9 +35,24 @@ vi.mock('./useWorkDay', () => ({
   useDeleteWorkDayLine: () => ({ mutate: deleteLineMutate, isPending: false }),
 }));
 
+// 2026-11-12 (the date every test in this file renders against, unless
+// overridden) is a Thursday, so `thu: 8 * 60` is the target the
+// over-capacity test below exercises.
 vi.mock('../../shared/stores/timeSettingsStore', () => ({
-  useTimeSettingsStore: (selector: (s: { weeklyTargetMinutes: number }) => unknown) =>
-    selector({ weeklyTargetMinutes: 40 * 60 }),
+  useTimeSettingsStore: (
+    selector: (s: { dailyTargetMinutes: Record<string, number> }) => unknown
+  ) =>
+    selector({
+      dailyTargetMinutes: {
+        sun: 0,
+        mon: 8 * 60,
+        tue: 8 * 60,
+        wed: 8 * 60,
+        thu: 8 * 60,
+        fri: 8 * 60,
+        sat: 4 * 60,
+      },
+    }),
 }));
 
 vi.mock('../../shared/stores/flowStore', () => ({
@@ -142,6 +157,30 @@ describe('AddHours: state 1, empty first load', () => {
 
     fireEvent.change(screen.getByLabelText('flow.time.project'), { target: { value: '1' } });
     expect(screen.getByLabelText('flow.time.add.task')).not.toBeDisabled();
+  });
+});
+
+describe('AddHours: header pill against the day’s own target', () => {
+  it('shows logged of target for the date’s actual day of week', () => {
+    workDayState.value = {
+      data: { workDay: { id: '9', workMode: 'onsite', loggedMinutes: 90 }, lines: [] },
+    };
+    // 2026-11-12 is a Thursday -> 8h target from the mocked store above.
+    render(<AddHours date="2026-11-12" onDateChange={onDateChange} />);
+
+    const pill = screen.getByText('flow.time.add.today').parentElement as HTMLElement;
+    expect(within(pill).getByText('1:30')).toBeInTheDocument();
+    expect(within(pill).getByText('8:00')).toBeInTheDocument();
+  });
+
+  it('reads a shorter Saturday target and a non-working Sunday as zero', () => {
+    workDayState.value = {
+      data: { workDay: { id: '9', workMode: 'onsite', loggedMinutes: 0 }, lines: [] },
+    };
+    // 2026-11-14 is a Saturday -> 4h target.
+    render(<AddHours date="2026-11-14" onDateChange={onDateChange} />);
+    const pill = screen.getByText('flow.time.add.today').parentElement as HTMLElement;
+    expect(within(pill).getByText('4:00')).toBeInTheDocument();
   });
 });
 

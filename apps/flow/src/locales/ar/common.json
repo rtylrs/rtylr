@@ -58,7 +58,10 @@
     "nextWeek": "الأسبوع القادم",
     "in2Weeks": "بعد أسبوعين",
     "setDate": "تحديد التاريخ",
-    "clearDate": "مسح التاريخ"
+    "clearDate": "مسح التاريخ",
+    "previousMonth": "الشهر السابق",
+    "nextMonth": "الشهر التالي",
+    "pickDate": "اختر تاريخاً"
   },
   "insights": {
     "burndown": "منحنى الإنجاز (الدورة النشطة)",

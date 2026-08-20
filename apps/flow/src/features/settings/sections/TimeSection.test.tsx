@@ -65,14 +65,26 @@ describe('TimeSection: week and targets', () => {
     expect(useTimeSettingsStore.getState().roundingMinutes).toBe(30);
   });
 
-  it('stores the weekly target in minutes while accepting hours', () => {
+  it('stores one day’s target in minutes while accepting hours, without touching the others', () => {
     render(<TimeSection />);
 
-    fireEvent.change(screen.getByLabelText('flow.settings.time.weeklyTarget'), {
-      target: { value: '35' },
+    fireEvent.change(screen.getByLabelText('flow.settings.time.saturday'), {
+      target: { value: '6' },
     });
 
-    expect(useTimeSettingsStore.getState().weeklyTargetMinutes).toBe(35 * 60);
+    const { dailyTargetMinutes } = useTimeSettingsStore.getState();
+    expect(dailyTargetMinutes.sat).toBe(6 * 60);
+    expect(dailyTargetMinutes.mon).toBe(8 * 60);
+  });
+
+  it('accepts a zero target, for a genuinely non-working day', () => {
+    render(<TimeSection />);
+
+    fireEvent.change(screen.getByLabelText('flow.settings.time.friday'), {
+      target: { value: '0' },
+    });
+
+    expect(useTimeSettingsStore.getState().dailyTargetMinutes.fri).toBe(0);
   });
 
   it('refuses an overtime threshold below the weekly target', () => {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Calendar, X } from 'lucide-react';
+import { Calendar as CalendarIcon, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Calendar as CalendarGrid, todayISODate } from '@voxire/ui';
 import { formatDate } from '../lib/utils';
 
 interface DueDatePickerProps {
@@ -10,7 +11,7 @@ interface DueDatePickerProps {
 }
 
 export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, disabled }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const overdue = value && new Date(value) < new Date();
 
@@ -34,7 +35,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
           disabled={disabled}
           className="flex items-center gap-1.5 px-2 py-1 rounded transition-colors hover:bg-[var(--flow-hover)] disabled:opacity-60 disabled:hover:bg-transparent"
         >
-          <Calendar size={12} />
+          <CalendarIcon size={12} />
           {value ? formatDate(value) : t('common.datePicker.setDate')}
         </button>
         {value && !disabled && (
@@ -79,19 +80,20 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
             );
           })}
           <div style={{ borderTop: '1px solid var(--flow-border)', margin: '4px 0' }} />
-          <div className="px-3 py-1.5">
-            <input
-              type="date"
-              value={value || ''}
-              min={new Date().toISOString().split('T')[0]}
-              onChange={(e) => {
-                onChange(e.target.value);
-                setOpen(false);
-              }}
-              className="bg-transparent text-[12px] w-full outline-none"
-              style={{ color: 'var(--flow-text)' }}
-            />
-          </div>
+          <CalendarGrid
+            value={value}
+            onChange={(date) => {
+              onChange(date);
+              setOpen(false);
+            }}
+            minDate={todayISODate()}
+            locale={i18n.language}
+            weekStartsOn={1}
+            labels={{
+              previousMonth: t('common.datePicker.previousMonth'),
+              nextMonth: t('common.datePicker.nextMonth'),
+            }}
+          />
         </div>
       )}
     </div>
