@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { Plug2, Search, ExternalLink, Check } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { Input } from '../../shared/components/ui';
 import {
   useIntegrations,
@@ -18,6 +20,7 @@ const CATEGORIES = [
 ] as const;
 
 const Integrations: React.FC = () => {
+  const { t } = useTranslation();
   const { data = [], isLoading } = useIntegrations();
   const connect = useConnectIntegration();
   const disconnect = useDisconnectIntegration();
@@ -98,12 +101,17 @@ const Integrations: React.FC = () => {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Plug2 size={28} className="mb-2" style={{ color: 'var(--dash-text-dim)' }} />
-            <p className="text-sm font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-              No integrations match your search
-            </p>
-          </div>
+          <EmptyState
+            icon={Plug2}
+            title={t('integrations.emptyMatchTitle')}
+            action={{
+              label: t('common.clearFilters'),
+              onClick: () => {
+                setSearchTerm('');
+                setCat('all');
+              },
+            }}
+          />
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {filtered.map((i) => {
