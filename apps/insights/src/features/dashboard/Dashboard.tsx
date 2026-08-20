@@ -8,10 +8,12 @@ import {
   Percent,
   ArrowUpRight,
   ArrowDownRight,
+  BarChart3,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Bar } from 'react-chartjs-2';
 import type { ChartOptions } from 'chart.js';
+import { EmptyState } from '@voxire/ui';
 import { useInsightsDashboard } from '../../shared/hooks/queries/useInsightsDashboard';
 import { useRevenueSeries } from '../../shared/hooks/queries/useRevenue';
 import { useInsightsSettings } from '../../shared/hooks/queries/useInsightsSettings';
@@ -19,7 +21,6 @@ import { formatMoney, type Currency } from '../../shared/utils/money';
 import { formatNumber, formatPercent } from '../../shared/lib/format';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
-import EmptyState from '../../shared/components/EmptyState';
 import CaretAskBar from '../../shared/components/CaretAskBar';
 
 const containerVariants: Variants = {
@@ -209,8 +210,10 @@ const Dashboard: React.FC = (): React.JSX.Element => {
 
       {!isLoading && isEmpty && (
         <EmptyState
+          icon={BarChart3}
           title={t('insights.dashboard.emptyTitle')}
           description={t('insights.dashboard.emptyDescription')}
+          action={{ label: t('common.refresh'), onClick: () => refetch() }}
         />
       )}
     </motion.div>

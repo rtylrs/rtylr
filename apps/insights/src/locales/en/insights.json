@@ -24,8 +24,14 @@
     "difference": "Difference",
     "trend": "Revenue Trend",
     "byApp": "Revenue by App",
-    "emptyTrend": "Revenue data will appear here once transactions are recorded.",
-    "emptyByApp": "Breakdown by app will appear here."
+    "emptyTrend": {
+      "title": "No revenue trend yet",
+      "description": "Revenue data will appear here once transactions are recorded."
+    },
+    "emptyByApp": {
+      "title": "No revenue breakdown yet",
+      "description": "A breakdown by app will appear once revenue comes in from more than one app."
+    }
   },
   "customers": {
     "title": "Customers",
@@ -38,7 +44,18 @@
     "top": "Top Customers",
     "ltv": "Lifetime Value Distribution",
     "churn": "Churn Rates",
-    "empty": "No customer data yet."
+    "emptyTop": {
+      "title": "No top customers yet",
+      "description": "Your highest-spending customers will appear here once orders start coming in."
+    },
+    "emptyLtv": {
+      "title": "No lifetime value data yet",
+      "description": "Lifetime value segments will appear once customers build up an order history."
+    },
+    "emptyChurn": {
+      "title": "No churn data yet",
+      "description": "Churn rates will appear once there is enough customer history to measure retention."
+    }
   },
   "products": {
     "title": "Products",
@@ -52,14 +69,40 @@
     "margins": "Margin Distribution",
     "slowMovers": "Slow Movers",
     "categoryMix": "Category Mix",
-    "empty": "No product data yet."
+    "emptyBestSellers": {
+      "title": "No best sellers yet",
+      "description": "Your top-selling products will appear here once orders start coming in."
+    },
+    "emptyMargins": {
+      "title": "No margin data yet",
+      "description": "Margin distribution will appear once product costs and sales are recorded."
+    },
+    "emptySlowMovers": {
+      "title": "No slow movers yet",
+      "description": "Products with low turnover will appear here once you have enough sales history."
+    },
+    "emptyCategoryMix": {
+      "title": "No category data yet",
+      "description": "A breakdown by category will appear once products are assigned to categories and sold."
+    }
   },
   "financial": {
     "title": "Financial",
     "cashFlow": "Cash Flow",
     "expenses": "Expenses by Category",
     "aging": "Invoice Aging",
-    "empty": "No financial data yet."
+    "emptyExpenses": {
+      "title": "No expense data yet",
+      "description": "Expenses will appear here once they are categorized and recorded."
+    },
+    "emptyAging": {
+      "title": "No invoice aging data yet",
+      "description": "Outstanding invoices will appear here once invoices are issued."
+    },
+    "emptyCashFlow": {
+      "title": "No cash flow data yet",
+      "description": "Cash flow will appear here once inflows and outflows are recorded."
+    }
   },
   "operations": {
     "title": "Operations",
@@ -73,7 +116,22 @@
     "shifts": "Shift Metrics",
     "timeOff": "Time-Off",
     "utilization": "Utilization",
-    "empty": "No operations data yet."
+    "emptyHeadcount": {
+      "title": "No headcount data yet",
+      "description": "Headcount will appear here once staff records are added."
+    },
+    "emptyUtilization": {
+      "title": "No utilization data yet",
+      "description": "Utilization will appear here once shifts are scheduled and worked."
+    },
+    "emptyShifts": {
+      "title": "No shift data yet",
+      "description": "Shift metrics will appear here once shifts are scheduled."
+    },
+    "emptyTimeOff": {
+      "title": "No time-off data yet",
+      "description": "Time-off requests will appear here once staff submit them."
+    }
   },
   "reports": {
     "title": "Reports",
@@ -81,7 +139,10 @@
     "exportRevenue": "Export Revenue CSV",
     "generateRevenue": "Generate Revenue Report",
     "generateQueued": "Report queued",
-    "empty": "No report templates available."
+    "empty": {
+      "title": "No report templates yet",
+      "description": "Report templates will appear here once they are made available for this workspace."
+    }
   },
   "settings": {
     "title": "Insights Settings",
@@ -96,7 +157,10 @@
       "created": "Scheduled report created",
       "updated": "Scheduled report updated",
       "deleted": "Scheduled report deleted",
-      "empty": "No scheduled reports yet."
+      "empty": {
+        "title": "No scheduled reports yet",
+        "description": "Reports you schedule for recurring delivery will appear here."
+      }
     },
     "saved": "Settings saved"
   }

@@ -1,8 +1,9 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion, type Variants } from 'motion/react';
-import { Package, TrendingDown, BarChart3 } from 'lucide-react';
+import { Package, TrendingDown, BarChart3, Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import {
   useProductKPIs,
   useBestSellers,
@@ -15,7 +16,6 @@ import { formatMoney, type Currency } from '../../shared/utils/money';
 import { formatNumber } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
-import EmptyState from '../../shared/components/EmptyState';
 
 const containerVariants: Variants = {
   hidden: {},
@@ -30,10 +30,26 @@ const itemVariants: Variants = {
 const Products: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: kpis, isLoading: kpisLoading, isError, refetch } = useProductKPIs();
-  const { data: bestRes, isLoading: bestLoading } = useBestSellers({ limit: 10 });
-  const { data: slowRes, isLoading: slowLoading } = useSlowMovers({ days: 60 });
-  const { data: marginRes, isLoading: marginLoading } = useProductMargins();
-  const { data: catRes, isLoading: catLoading } = useProductCategoryMix();
+  const {
+    data: bestRes,
+    isLoading: bestLoading,
+    refetch: refetchBest,
+  } = useBestSellers({ limit: 10 });
+  const {
+    data: slowRes,
+    isLoading: slowLoading,
+    refetch: refetchSlow,
+  } = useSlowMovers({ days: 60 });
+  const {
+    data: marginRes,
+    isLoading: marginLoading,
+    refetch: refetchMargins,
+  } = useProductMargins();
+  const {
+    data: catRes,
+    isLoading: catLoading,
+    refetch: refetchCategories,
+  } = useProductCategoryMix();
   const { data: settings } = useInsightsSettings();
   const currency = (settings?.defaultCurrency as Currency) || 'USD';
 
@@ -139,7 +155,12 @@ const Products: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         ) : best.length === 0 ? (
-          <EmptyState title="" description={t('insights.products.empty')} />
+          <EmptyState
+            icon={Package}
+            title={t('insights.products.emptyBestSellers.title')}
+            description={t('insights.products.emptyBestSellers.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetchBest() }}
+          />
         ) : (
           <div className="space-y-1">
             {best.map((p, i) => (
@@ -189,7 +210,12 @@ const Products: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         ) : margins.length === 0 ? (
-          <EmptyState title="" description={t('insights.products.empty')} />
+          <EmptyState
+            icon={BarChart3}
+            title={t('insights.products.emptyMargins.title')}
+            description={t('insights.products.emptyMargins.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetchMargins() }}
+          />
         ) : (
           <div className="space-y-1">
             {margins.map((b) => (
@@ -225,7 +251,12 @@ const Products: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         ) : slow.length === 0 ? (
-          <EmptyState title="" description={t('insights.products.empty')} />
+          <EmptyState
+            icon={TrendingDown}
+            title={t('insights.products.emptySlowMovers.title')}
+            description={t('insights.products.emptySlowMovers.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetchSlow() }}
+          />
         ) : (
           <div className="space-y-1">
             {slow.map((p) => (
@@ -261,7 +292,12 @@ const Products: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         ) : categories.length === 0 ? (
-          <EmptyState title="" description={t('insights.products.empty')} />
+          <EmptyState
+            icon={Layers}
+            title={t('insights.products.emptyCategoryMix.title')}
+            description={t('insights.products.emptyCategoryMix.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetchCategories() }}
+          />
         ) : (
           <div className="space-y-1">
             {categories.map((c) => (

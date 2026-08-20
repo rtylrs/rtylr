@@ -24,8 +24,14 @@
     "difference": "Difference",
     "trend": "Revenue Trend",
     "byApp": "Revenue by App",
-    "emptyTrend": "Revenue data will appear here once transactions are recorded.",
-    "emptyByApp": "Breakdown by app will appear here."
+    "emptyTrend": {
+      "title": "Aucune tendance de revenus pour l’instant",
+      "description": "Les données de revenus s’afficheront ici une fois les transactions enregistrées."
+    },
+    "emptyByApp": {
+      "title": "Aucune répartition des revenus pour l’instant",
+      "description": "Une répartition par application s’affichera une fois que les revenus proviendront de plusieurs applications."
+    }
   },
   "customers": {
     "title": "Customers",
@@ -38,7 +44,18 @@
     "top": "Top Customers",
     "ltv": "Lifetime Value Distribution",
     "churn": "Churn Rates",
-    "empty": "No customer data yet."
+    "emptyTop": {
+      "title": "Aucun client principal pour l’instant",
+      "description": "Vos clients qui dépensent le plus apparaîtront ici une fois les premières commandes reçues."
+    },
+    "emptyLtv": {
+      "title": "Aucune donnée de valeur à vie pour l’instant",
+      "description": "Les segments de valeur à vie apparaîtront une fois que les clients auront un historique de commandes."
+    },
+    "emptyChurn": {
+      "title": "Aucune donnée d’attrition pour l’instant",
+      "description": "Les taux d’attrition apparaîtront une fois qu’il y aura suffisamment d’historique client pour mesurer la fidélisation."
+    }
   },
   "products": {
     "title": "Products",
@@ -52,14 +69,40 @@
     "margins": "Margin Distribution",
     "slowMovers": "Slow Movers",
     "categoryMix": "Category Mix",
-    "empty": "No product data yet."
+    "emptyBestSellers": {
+      "title": "Aucun best-seller pour l’instant",
+      "description": "Vos produits les plus vendus apparaîtront ici une fois les premières commandes reçues."
+    },
+    "emptyMargins": {
+      "title": "Aucune donnée de marge pour l’instant",
+      "description": "La répartition des marges apparaîtra une fois les coûts et les ventes des produits enregistrés."
+    },
+    "emptySlowMovers": {
+      "title": "Aucun produit à rotation lente pour l’instant",
+      "description": "Les produits à faible rotation apparaîtront ici une fois que vous aurez suffisamment d’historique de ventes."
+    },
+    "emptyCategoryMix": {
+      "title": "Aucune donnée de catégorie pour l’instant",
+      "description": "Une répartition par catégorie apparaîtra une fois les produits assignés à des catégories et vendus."
+    }
   },
   "financial": {
     "title": "Financial",
     "cashFlow": "Cash Flow",
     "expenses": "Expenses by Category",
     "aging": "Invoice Aging",
-    "empty": "No financial data yet."
+    "emptyExpenses": {
+      "title": "Aucune donnée de dépenses pour l’instant",
+      "description": "Les dépenses apparaîtront ici une fois catégorisées et enregistrées."
+    },
+    "emptyAging": {
+      "title": "Aucune donnée d’échéance de factures pour l’instant",
+      "description": "Les factures impayées apparaîtront ici une fois émises."
+    },
+    "emptyCashFlow": {
+      "title": "Aucune donnée de trésorerie pour l’instant",
+      "description": "Les flux de trésorerie apparaîtront ici une fois les entrées et sorties enregistrées."
+    }
   },
   "operations": {
     "title": "Operations",
@@ -73,7 +116,22 @@
     "shifts": "Shift Metrics",
     "timeOff": "Time-Off",
     "utilization": "Utilization",
-    "empty": "No operations data yet."
+    "emptyHeadcount": {
+      "title": "Aucune donnée d’effectifs pour l’instant",
+      "description": "Les effectifs apparaîtront ici une fois les fiches du personnel ajoutées."
+    },
+    "emptyUtilization": {
+      "title": "Aucune donnée d’utilisation pour l’instant",
+      "description": "Le taux d’utilisation apparaîtra une fois les quarts planifiés et effectués."
+    },
+    "emptyShifts": {
+      "title": "Aucune donnée de quarts pour l’instant",
+      "description": "Les indicateurs de quarts apparaîtront une fois les quarts planifiés."
+    },
+    "emptyTimeOff": {
+      "title": "Aucune donnée de congés pour l’instant",
+      "description": "Les demandes de congé apparaîtront ici une fois soumises par le personnel."
+    }
   },
   "reports": {
     "title": "Reports",
@@ -81,7 +139,10 @@
     "exportRevenue": "Export Revenue CSV",
     "generateRevenue": "Generate Revenue Report",
     "generateQueued": "Report queued",
-    "empty": "No report templates available."
+    "empty": {
+      "title": "Aucun modèle de rapport pour l’instant",
+      "description": "Les modèles de rapport apparaîtront ici une fois disponibles pour cet espace de travail."
+    }
   },
   "settings": {
     "title": "Insights Settings",
@@ -96,7 +157,10 @@
       "created": "Scheduled report created",
       "updated": "Scheduled report updated",
       "deleted": "Scheduled report deleted",
-      "empty": "No scheduled reports yet."
+      "empty": {
+        "title": "Aucun rapport programmé pour l’instant",
+        "description": "Les rapports que vous programmez pour un envoi récurrent apparaîtront ici."
+      }
     },
     "saved": "Settings saved"
   }

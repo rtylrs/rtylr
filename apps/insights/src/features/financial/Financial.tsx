@@ -1,8 +1,9 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion, type Variants } from 'motion/react';
-import { Clock } from 'lucide-react';
+import { Clock, Receipt, ArrowLeftRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import {
   useCashFlow,
   useExpensesByCategory,
@@ -13,7 +14,6 @@ import { formatMoney, type Currency } from '../../shared/utils/money';
 import { formatNumber } from '../../shared/lib/format';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
-import EmptyState from '../../shared/components/EmptyState';
 
 const containerVariants: Variants = {
   hidden: {},
@@ -28,8 +28,8 @@ const itemVariants: Variants = {
 const Financial: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: cfRes, isLoading: cfLoading, isError, refetch } = useCashFlow();
-  const { data: expRes, isLoading: expLoading } = useExpensesByCategory();
-  const { data: agingRes, isLoading: agingLoading } = useInvoiceAging();
+  const { data: expRes, isLoading: expLoading, refetch: refetchExpenses } = useExpensesByCategory();
+  const { data: agingRes, isLoading: agingLoading, refetch: refetchAging } = useInvoiceAging();
   const { data: settings } = useInsightsSettings();
   const currency = (settings?.defaultCurrency as Currency) || 'USD';
 
@@ -71,7 +71,13 @@ const Financial: React.FC = (): React.JSX.Element => {
               ))}
             </div>
           ) : expenses.length === 0 ? (
-            <EmptyState title="" description={t('insights.financial.empty')} />
+            <EmptyState
+              icon={Receipt}
+              title={t('insights.financial.emptyExpenses.title')}
+              description={t('insights.financial.emptyExpenses.description')}
+              action={{ label: t('common.refresh'), onClick: () => refetchExpenses() }}
+              size="compact"
+            />
           ) : (
             <div className="space-y-1">
               {expenses.map((e) => (
@@ -110,7 +116,13 @@ const Financial: React.FC = (): React.JSX.Element => {
               ))}
             </div>
           ) : buckets.length === 0 ? (
-            <EmptyState title="" description={t('insights.financial.emptyAging')} />
+            <EmptyState
+              icon={Clock}
+              title={t('insights.financial.emptyAging.title')}
+              description={t('insights.financial.emptyAging.description')}
+              action={{ label: t('common.refresh'), onClick: () => refetchAging() }}
+              size="compact"
+            />
           ) : (
             <div className="space-y-1">
               {buckets.map((b) => (
@@ -152,7 +164,12 @@ const Financial: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         ) : cashFlow.length === 0 ? (
-          <EmptyState title="" description={t('insights.financial.emptyCashFlow')} />
+          <EmptyState
+            icon={ArrowLeftRight}
+            title={t('insights.financial.emptyCashFlow.title')}
+            description={t('insights.financial.emptyCashFlow.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetch() }}
+          />
         ) : (
           <div className="space-y-1">
             {cashFlow.map((c) => {

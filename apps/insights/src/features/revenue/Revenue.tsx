@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion, type Variants } from 'motion/react';
-import { TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, ArrowUpRight, ArrowDownRight, PieChart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Line, Bar } from 'react-chartjs-2';
 import type { ChartOptions } from 'chart.js';
+import { EmptyState } from '@voxire/ui';
 import {
   useRevenueSeries,
   useRevenueByApp,
@@ -15,7 +16,6 @@ import { formatMoney, type Currency } from '../../shared/utils/money';
 import { formatPercent } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonBlock } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
-import EmptyState from '../../shared/components/EmptyState';
 
 const containerVariants: Variants = {
   hidden: {},
@@ -30,7 +30,7 @@ const itemVariants: Variants = {
 const Revenue: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: series, isLoading, isError, refetch } = useRevenueSeries();
-  const { data: byApp, isLoading: byAppLoading } = useRevenueByApp();
+  const { data: byApp, isLoading: byAppLoading, refetch: refetchByApp } = useRevenueByApp();
   const { data: comparison, isLoading: compLoading } = useRevenueComparison();
   const { data: settings } = useInsightsSettings();
   const currency = (settings?.defaultCurrency as Currency) || 'USD';
@@ -256,7 +256,12 @@ const Revenue: React.FC = (): React.JSX.Element => {
         {isLoading ? (
           <SkeletonBlock className="h-56 w-full" />
         ) : seriesRows.length === 0 ? (
-          <EmptyState title="" description={t('insights.revenue.emptyTrend')} />
+          <EmptyState
+            icon={TrendingUp}
+            title={t('insights.revenue.emptyTrend.title')}
+            description={t('insights.revenue.emptyTrend.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetch() }}
+          />
         ) : (
           <div style={{ height: 220 }} aria-label="Revenue trend chart">
             <Line data={areaData} options={areaOptions} />
@@ -275,7 +280,12 @@ const Revenue: React.FC = (): React.JSX.Element => {
         {byAppLoading ? (
           <SkeletonBlock className="h-44 w-full" />
         ) : appRows.length === 0 ? (
-          <EmptyState title="" description={t('insights.revenue.emptyByApp')} />
+          <EmptyState
+            icon={PieChart}
+            title={t('insights.revenue.emptyByApp.title')}
+            description={t('insights.revenue.emptyByApp.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetchByApp() }}
+          />
         ) : (
           <div style={{ height: 180 }} aria-label="Revenue by app chart">
             <Bar data={barData} options={barOptions} />
