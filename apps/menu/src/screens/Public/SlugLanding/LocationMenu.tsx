@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
-import { useParams, useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
+import { useParams, useNavigate, useRouter } from '@tanstack/react-router';
 import { FullScreenLoader, HelmetContainer } from '@voxire/components';
 import { GridLayout, MenuCategoryData, BusinessInfo } from '@voxire/menu';
+import { EmptyState } from '@voxire/ui';
+import { SearchX, MapPinOff, UtensilsCrossed } from 'lucide-react';
 import { usePublicBusinessBySlug, usePublicMenu } from '../../../shared/hooks/usePublicMenu';
 import { useCartStore } from '../../../shared/stores/cartStore';
 
@@ -16,8 +19,10 @@ import { useCartStore } from '../../../shared/stores/cartStore';
 const onlineOrderingEnabled = import.meta.env.VITE_ONLINE_ORDERING_ENABLED === 'true';
 
 const LocationMenu: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation('locationmenu');
   const { slug: rawSlug, location: rawLoc } = useParams({ strict: false });
   const navigate = useNavigate();
+  const router = useRouter();
   const slug = (rawSlug ?? '').toLowerCase();
   const locationSlug = (rawLoc ?? '').toLowerCase();
 
@@ -53,18 +58,44 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
   if (bizLoading || menuLoading) return <FullScreenLoader />;
   if (bizError || !biz) {
     return (
-      <div style={{ padding: 32, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600 }}>Business not found</h1>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '0 20px',
+        }}
+      >
+        <EmptyState
+          icon={SearchX}
+          title={t('businessNotFoundTitle')}
+          description={t('businessNotFoundDescription')}
+          action={{ label: t('goBack'), onClick: () => router.history.back() }}
+        />
       </div>
     );
   }
   if (!location) {
     return (
-      <div style={{ padding: 32, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600 }}>Location not found</h1>
-        <p style={{ fontSize: 13, opacity: 0.7 }}>
-          <a href={`/${slug}`}>Back to {biz.business.name}</a>
-        </p>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '0 20px',
+        }}
+      >
+        <EmptyState
+          icon={MapPinOff}
+          title={t('locationNotFoundTitle')}
+          description={t('locationNotFoundDescription')}
+          action={{
+            label: t('backToBusiness', { businessName: biz.business.name }),
+            onClick: () => void navigate({ to: '/$slug', params: { slug } }),
+          }}
+        />
       </div>
     );
   }
@@ -84,11 +115,24 @@ const LocationMenu: React.FC = (): React.JSX.Element => {
   const hasItems = categories.some((cat) => cat.items && cat.items.length > 0);
   if (!hasItems) {
     return (
-      <div style={{ padding: 48, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>No menu items available</h1>
-        <p style={{ fontSize: 14, opacity: 0.7 }}>
-          This menu is currently empty. Please check back later.
-        </p>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '0 20px',
+        }}
+      >
+        <EmptyState
+          icon={UtensilsCrossed}
+          title={t('noItemsTitle')}
+          description={t('noItemsDescription')}
+          action={{
+            label: t('backToBusiness', { businessName: biz.business.name }),
+            onClick: () => void navigate({ to: '/$slug', params: { slug } }),
+          }}
+        />
       </div>
     );
   }
