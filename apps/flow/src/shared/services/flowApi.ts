@@ -826,11 +826,15 @@ export const flowApi = {
 
   // -- Views --------------------------------------------------------------
 
-  getViews: () =>
-    safe.get<{ views: ApiView[] }>('/flow/view/v1/views').map((res) => ({
-      ...res,
-      views: (res.views ?? []).map(decodeApiView),
-    })),
+  getViews: (workspaceId?: string) =>
+    safe
+      .get<{ views: ApiView[] }>('/flow/view/v1/views', {
+        params: workspaceId ? { workspace_id: workspaceId } : undefined,
+      })
+      .map((res) => ({
+        ...res,
+        views: (res.views ?? []).map(decodeApiView),
+      })),
 
   createView: (data: Partial<ApiView>) =>
     safe
