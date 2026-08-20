@@ -3,6 +3,7 @@ import { Users, Plus, Trash2, Shield, Eye, Crown } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { toast } from 'sonner';
 import { useParams } from '@tanstack/react-router';
 import {
@@ -193,9 +194,14 @@ const WorkspaceManager: React.FC = () => {
             ))}
           </div>
         ) : members.length === 0 ? (
-          <div className="text-center py-12 text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-            {t('workspaceManager.noMembersEmpty')}
-          </div>
+          <EmptyState
+            icon={Users}
+            title={t('workspaceManager.noMembersEmpty')}
+            action={{
+              label: t('workspaceManager.addMember'),
+              onClick: () => setShowInvite(true),
+            }}
+          />
         ) : (
           <div className="space-y-2 group">
             {members.map((m) => (

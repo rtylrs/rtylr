@@ -16,11 +16,14 @@ interface LeaveQueryState {
   isError?: boolean;
   isPaused?: boolean;
   failureCount?: number;
+  refetch?: () => void;
 }
 
 const leaveTypesState = vi.hoisted(() => ({
   value: { data: [{ id: '1', name: 'Annual Leave', isPaid: true, requiresApproval: true }] },
 }));
+const balancesRefetch = vi.hoisted(() => vi.fn());
+const requestsRefetch = vi.hoisted(() => vi.fn());
 const balancesState = vi.hoisted(() => ({
   value: {
     data: [
@@ -35,6 +38,7 @@ const balancesState = vi.hoisted(() => ({
         remainingDays: 13,
       },
     ],
+    refetch: balancesRefetch,
   } as LeaveQueryState,
 }));
 const requestsState = vi.hoisted(() => ({
@@ -51,6 +55,7 @@ const requestsState = vi.hoisted(() => ({
         currentApprovalLevel: 0,
       },
     ],
+    refetch: requestsRefetch,
   } as LeaveQueryState,
 }));
 const cancelMutate = vi.hoisted(() => vi.fn());
@@ -107,31 +112,85 @@ describe('LeaveScreen', () => {
     expect(screen.getByTestId('request-leave-dialog')).toBeInTheDocument();
   });
 
-  it('shows an empty balances message when nothing is configured', () => {
-    balancesState.value = { data: [] };
+  it('shows an empty balances message when nothing is configured, with a request-time-off CTA', () => {
+    balancesState.value = { data: [], refetch: balancesRefetch };
     leaveTypesState.value = { data: [] };
     render(<LeaveScreen />);
     expect(screen.getByText('flow.leave.noBalances')).toBeInTheDocument();
+    const requestButtons = screen.getAllByRole('button', { name: 'flow.leave.newRequest' });
+    expect(requestButtons.length).toBe(2);
+    fireEvent.click(requestButtons[1]);
+    expect(screen.getByTestId('request-leave-dialog')).toBeInTheDocument();
   });
 
   it('shows the load-failed state for balances stuck paused after a failed attempt, not the empty state', () => {
-    balancesState.value = { data: [], isError: false, isPaused: true, failureCount: 1 };
+    balancesState.value = {
+      data: [],
+      isError: false,
+      isPaused: true,
+      failureCount: 1,
+      refetch: balancesRefetch,
+    };
     render(<LeaveScreen />);
     expect(screen.getByText('flow.leave.loadBalancesFailedTitle')).toBeInTheDocument();
     expect(screen.queryByText('flow.leave.noBalances')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.leave.retryCta' }));
+    expect(balancesRefetch).toHaveBeenCalled();
   });
 
   it('does not treat balances merely paused before their first attempt as failed', () => {
-    balancesState.value = { data: [], isError: false, isPaused: true, failureCount: 0 };
+    balancesState.value = {
+      data: [],
+      isError: false,
+      isPaused: true,
+      failureCount: 0,
+      refetch: balancesRefetch,
+    };
     render(<LeaveScreen />);
     expect(screen.getByText('flow.leave.noBalances')).toBeInTheDocument();
     expect(screen.queryByText('flow.leave.loadBalancesFailedTitle')).not.toBeInTheDocument();
   });
 
+  it('shows an empty requests message with a request-time-off CTA', () => {
+    // Explicitly non-empty: an earlier test in this file can leave
+    // balancesState.value pointed at an empty/paused state, which would add
+    // a second "Request time off" CTA into the balances card too.
+    balancesState.value = {
+      data: [
+        {
+          id: 'b1',
+          employeeId: '4201',
+          leaveTypeId: '1',
+          year: 2027,
+          entitledDays: 20,
+          usedDays: 5,
+          pendingDays: 2,
+          remainingDays: 13,
+        },
+      ],
+      refetch: balancesRefetch,
+    };
+    requestsState.value = { data: [], refetch: requestsRefetch };
+    render(<LeaveScreen />);
+    expect(screen.getByText('flow.leave.noRequests')).toBeInTheDocument();
+    const requestButtons = screen.getAllByRole('button', { name: 'flow.leave.newRequest' });
+    expect(requestButtons.length).toBe(2);
+    fireEvent.click(requestButtons[1]);
+    expect(screen.getByTestId('request-leave-dialog')).toBeInTheDocument();
+  });
+
   it('shows the load-failed state for requests stuck paused after a failed attempt, not the empty state', () => {
-    requestsState.value = { data: [], isError: false, isPaused: true, failureCount: 1 };
+    requestsState.value = {
+      data: [],
+      isError: false,
+      isPaused: true,
+      failureCount: 1,
+      refetch: requestsRefetch,
+    };
     render(<LeaveScreen />);
     expect(screen.getByText('flow.leave.loadRequestsFailedTitle')).toBeInTheDocument();
     expect(screen.queryByText('flow.leave.noRequests')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'flow.leave.retryCta' }));
+    expect(requestsRefetch).toHaveBeenCalled();
   });
 });

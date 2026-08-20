@@ -4,10 +4,9 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Milestone as MilestoneIcon, Plus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { DatePicker } from '@voxire/ui';
+import { DatePicker, EmptyState } from '@voxire/ui';
 import { useMilestones, useCreateMilestone } from './useMilestones';
 import { formatDate } from '../../shared/lib/utils';
-import EmptyState from '../../shared/components/EmptyState';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
@@ -76,14 +75,11 @@ const Milestones: React.FC = () => {
             icon={MilestoneIcon}
             title={t('flow.milestones.emptyTitle')}
             description={t('flow.milestones.emptyDescription')}
+            action={{
+              label: t('flow.milestones.createFirst'),
+              onClick: () => setShowCreate(true),
+            }}
           />
-          <button
-            onClick={() => setShowCreate(true)}
-            className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-semibold"
-            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-          >
-            <Plus size={13} /> {t('flow.milestones.createFirst')}
-          </button>
         </div>
       </div>
     );

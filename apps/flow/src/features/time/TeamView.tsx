@@ -2,11 +2,11 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { DatePicker } from '@voxire/ui';
+import { DatePicker, EmptyState } from '@voxire/ui';
+import { useNavigate } from '@tanstack/react-router';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useWorkspaceMembers } from '../workspace-manager/useWorkspaceManager';
 import GateNotice from '../../shared/components/GateNotice';
-import EmptyState from '../../shared/components/EmptyState';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { todayLocalDate, useWorkDaysForWorkspace, type WorkDay } from './useWorkDay';
 
@@ -22,6 +22,7 @@ const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-wide
  */
 const TeamView = (): React.JSX.Element => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [date, setDate] = useState(todayLocalDate());
   const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
 
@@ -72,6 +73,14 @@ const TeamView = (): React.JSX.Element => {
             icon={Users}
             title={t('flow.time.teamEmptyTitle')}
             description={t('flow.time.teamEmptyDescription')}
+            action={{
+              label: t('flow.time.teamEmptyCta'),
+              onClick: () =>
+                navigate({
+                  to: '/w/$workspaceId/members',
+                  params: { workspaceId: activeWorkspaceId },
+                }),
+            }}
           />
         ) : (
           <ul className="space-y-1.5">

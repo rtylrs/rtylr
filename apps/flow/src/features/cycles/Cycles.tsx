@@ -4,12 +4,11 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Timer, ArrowRight, Plus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { DatePicker } from '@voxire/ui';
+import { DatePicker, EmptyState } from '@voxire/ui';
 import { useCycles, useCreateCycle } from './useCycles';
 import { type ApiCycle } from '../../shared/services/flowApi';
 import { formatDate } from '../../shared/lib/utils';
 import CycleBadge from '../../shared/components/CycleBadge';
-import EmptyState from '../../shared/components/EmptyState';
 
 const Cycles: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -150,14 +149,11 @@ const Cycles: React.FC = () => {
             icon={Timer}
             title={t('flow.cycles.emptyTitle')}
             description={t('flow.cycles.emptyDescription')}
+            action={{
+              label: t('flow.cycles.createFirst'),
+              onClick: () => setShowCreate(true),
+            }}
           />
-          <button
-            onClick={() => setShowCreate(true)}
-            className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-semibold"
-            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-          >
-            <Plus size={13} /> {t('flow.cycles.createFirst')}
-          </button>
         </div>
       ) : (
         <div className="p-6 max-w-4xl space-y-8">

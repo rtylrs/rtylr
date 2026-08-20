@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Sun, Pin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useFlowStore, Task, Project } from '../../shared/stores/flowStore';
 import { useMyIssues } from '../tasks/useMyIssues';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
@@ -17,6 +18,7 @@ const ACCENT_VAR = 'var(--accent)';
 
 const FocusToday: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { projects, activeWorkspaceId } = useFlowStore();
   const { data: myTasks } = useMyIssues();
   const tasks: Task[] = (myTasks ?? []).map(apiTaskToTask);
@@ -84,14 +86,15 @@ const FocusToday: React.FC = () => {
         style={{ borderColor: 'var(--flow-border)', background: 'var(--flow-card)' }}
       >
         {focusTasks.length === 0 ? (
-          <div className="p-10 text-center">
-            <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
-              {t('common.focusToday.emptyTitle')}
-            </p>
-            <p className="text-[12px] max-w-sm mx-auto" style={{ color: 'var(--flow-text-dim)' }}>
-              {t('common.focusToday.emptyHint')}
-            </p>
-          </div>
+          <EmptyState
+            icon={Sun}
+            title={t('common.focusToday.emptyTitle')}
+            description={t('common.focusToday.emptyHint')}
+            action={{
+              label: t('flow.shell.myTasks'),
+              onClick: () => navigate({ to: '/my-issues' }),
+            }}
+          />
         ) : (
           <ul className="divide-y" style={{ borderColor: 'var(--flow-border)' }}>
             {focusTasks.map((t, i) => (

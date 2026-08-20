@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { ListTodo } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
@@ -107,7 +109,16 @@ const ProjectDashboard: React.FC = () => {
         {/* Status breakdown bar */}
         <Card title={t('flow.projectDashboard.statusBreakdown')}>
           {stats.total === 0 ? (
-            <EmptyCopy>No tasks yet. Add a task to populate the dashboard.</EmptyCopy>
+            <EmptyState
+              icon={ListTodo}
+              title={t('flow.projectDashboard.noTasksYet')}
+              description={t('flow.projectDashboard.noTasksYetDescription')}
+              action={{
+                label: t('flow.projectDashboard.addTaskCta'),
+                onClick: () => useFlowStore.getState().setQuickCreateOpen(true),
+              }}
+              size="compact"
+            />
           ) : (
             <>
               <div
@@ -169,7 +180,15 @@ const ProjectDashboard: React.FC = () => {
         {/* Assignee distribution */}
         <Card title={t('flow.projectDashboard.byAssignee')}>
           {stats.byAssignee.length === 0 ? (
-            <EmptyCopy>No tasks yet.</EmptyCopy>
+            <EmptyState
+              icon={ListTodo}
+              title={t('flow.projectDashboard.noTasksYet')}
+              action={{
+                label: t('flow.projectDashboard.addTaskCta'),
+                onClick: () => useFlowStore.getState().setQuickCreateOpen(true),
+              }}
+              size="compact"
+            />
           ) : (
             <div className="space-y-2">
               {stats.byAssignee.slice(0, 8).map((a) => (
@@ -256,12 +275,6 @@ const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, c
     </h3>
     {children}
   </section>
-);
-
-const EmptyCopy: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-    {children}
-  </p>
 );
 
 export default ProjectDashboard;

@@ -10,6 +10,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useTranslation } from '@voxire/i18n';
 import type { TFunction } from 'i18next';
 import {
@@ -123,7 +124,7 @@ const NotificationRow: React.FC<{
 
 const Inbox: React.FC = () => {
   const { t } = useTranslation();
-  const { data: notifications = [], isLoading } = useNotifications();
+  const { data: notifications = [], isLoading, refetch } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -210,18 +211,23 @@ const Inbox: React.FC = () => {
         ) : (
           <AnimatePresence>
             {filtered.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center py-20"
-              >
-                <Bell size={32} style={{ color: 'var(--flow-text-dim)' }} className="mb-3" />
-                <p className="text-[14px] font-medium" style={{ color: 'var(--flow-text-muted)' }}>
-                  {t('inbox.emptyTitle')}
-                </p>
-                <p className="text-[12px] mt-1" style={{ color: 'var(--flow-text-dim)' }}>
-                  {t('inbox.emptyDescription')}
-                </p>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-10">
+                <EmptyState
+                  icon={Bell}
+                  title={t('inbox.emptyTitle')}
+                  description={t('inbox.emptyDescription')}
+                  action={
+                    activeFilter !== 'all'
+                      ? {
+                          label: t('inbox.filters.all'),
+                          onClick: () => setActiveFilter('all'),
+                        }
+                      : {
+                          label: t('inbox.refreshCta'),
+                          onClick: () => void refetch(),
+                        }
+                  }
+                />
               </motion.div>
             ) : (
               filtered.map((n) => (

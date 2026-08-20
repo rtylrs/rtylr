@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
-import { useParams } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
+import { CalendarClock } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
@@ -19,6 +21,7 @@ import { useCurrentProject } from './useCurrentProject';
  */
 const ProjectTimeline: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
   useProjectRealtime(projectId);
@@ -162,14 +165,19 @@ const ProjectTimeline: React.FC = () => {
 
           {/* Scheduled rows */}
           {scheduled.length === 0 ? (
-            <div
-              className="flex items-center justify-center py-16"
-              style={{ color: 'var(--flow-text-dim)' }}
-            >
-              <p className="text-[12px]">
-                No tasks with due dates yet. Add due dates to see the timeline.
-              </p>
-            </div>
+            <EmptyState
+              icon={CalendarClock}
+              title={t('flow.projectTimeline.emptyTitle')}
+              description={t('flow.projectTimeline.emptyDescription')}
+              action={{
+                label: t('flow.projectTimeline.goToBoardCta'),
+                onClick: () =>
+                  navigate({
+                    to: '/w/$workspaceId/p/$projectId/board',
+                    params: { workspaceId, projectId },
+                  }),
+              }}
+            />
           ) : (
             scheduled.map((t) => {
               const dueDate = new Date(t.dueDate!);

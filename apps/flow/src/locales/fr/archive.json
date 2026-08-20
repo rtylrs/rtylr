@@ -4,6 +4,7 @@
   "count_other": "{{count}} tâches archivées",
   "emptyTitle": "Rien n'est archivé",
   "emptyDescription": "Les tâches archivées apparaîtront ici.",
+  "emptyCta": "Aller à Mes tâches",
   "restore": "Restaurer",
   "restoreTitle": "Restaurer la tâche"
 }

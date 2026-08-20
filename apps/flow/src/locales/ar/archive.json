@@ -4,6 +4,7 @@
   "count_other": "{{count}} مهمة مؤرشفة",
   "emptyTitle": "لا توجد عناصر مؤرشفة",
   "emptyDescription": "ستظهر المهام المؤرشفة هنا.",
+  "emptyCta": "الانتقال إلى مهامي",
   "restore": "استعادة",
   "restoreTitle": "استعادة المهمة"
 }

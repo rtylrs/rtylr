@@ -8,6 +8,7 @@
   "roleLabel": "Role",
   "searchPlaceholder": "Search by name or email...",
   "noOrgMembersFound": "No org members found. Only existing team members can be added to workspaces.",
+  "clearSearchCta": "Clear search",
   "addToWorkspace": "Add to workspace",
   "adding": "Adding...",
   "noMembersEmpty": "No members yet. Add someone to get started.",
