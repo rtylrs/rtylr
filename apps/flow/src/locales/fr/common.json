@@ -124,5 +124,10 @@
       "viewAll": "Voir tout",
       "percentDone": "{{percent}}% terminé"
     }
+  },
+  "taskRow": {
+    "openTask": "Ouvrir la tâche {{identifier}} : {{title}}",
+    "selectTask": "Sélectionner la tâche",
+    "deselectTask": "Désélectionner la tâche"
   }
 }

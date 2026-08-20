@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { Task, useFlowStore } from '../stores/flowStore';
 import { formatDate, cn } from '../lib/utils';
 import PriorityIcon from './PriorityIcon';
@@ -12,17 +13,31 @@ interface TaskRowProps {
   task: Task;
   showProject?: boolean;
   selected?: boolean;
-  onSelect?: (e: React.MouseEvent) => void;
+  onSelect?: (e: React.MouseEvent | React.KeyboardEvent) => void;
 }
 
 export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, onSelect }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { labels, projects, toggleSelectTask } = useFlowStore();
   const taskLabels = labels.filter((l) => task.labelIds?.includes(l.id));
   const project = projects.find((p) => p.id === task.projectId);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
   const overdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'done';
+
+  // Shared by mouse click and Enter/Space keydown so the row opens the task
+  // (or toggles selection with a modifier held) the same way for both input
+  // methods - see the "Select task" checkbox below for the matching guard
+  // that keeps its own activation from bubbling into this handler.
+  const activateRow = (e: React.MouseEvent | React.KeyboardEvent) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) {
+      toggleSelectTask(task.id);
+      onSelect?.(e);
+    } else {
+      navigate({ to: `/task/${task.id}` as string });
+    }
+  };
 
   const handleCheckbox = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -44,17 +59,22 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
   return (
     <>
       <div
-        onClick={(e) => {
-          if (e.metaKey || e.ctrlKey || e.shiftKey) {
-            toggleSelectTask(task.id);
-            onSelect?.(e);
-          } else {
-            navigate({ to: `/task/${task.id}` as string });
+        onClick={activateRow}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            activateRow(e);
           }
         }}
         onContextMenu={handleContextMenu}
+        role="button"
+        tabIndex={0}
+        aria-label={t('common.taskRow.openTask', {
+          identifier: task.identifier,
+          title: task.title,
+        })}
         className={cn(
-          'group flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors',
+          'flow-focus group flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors',
           'hover:bg-[var(--flow-hover)]'
         )}
         style={{
@@ -62,18 +82,21 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
           background: selected ? 'var(--accent-muted)' : undefined,
         }}
       >
-        {/* Checkbox, always visible when selected, appears on row hover otherwise */}
+        {/* Checkbox, always visible when selected, appears on row hover otherwise.
+            Its own click/keydown stop propagation so activating it never also
+            triggers the row's activateRow (open task), and vice versa. */}
         <button
           onClick={handleCheckbox}
+          onKeyDown={(e) => e.stopPropagation()}
           className={cn(
-            'shrink-0 h-4 w-4 rounded border flex items-center justify-center transition-all',
+            'flow-focus shrink-0 h-4 w-4 rounded border flex items-center justify-center transition-all',
             selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           )}
           style={{
             borderColor: selected ? 'var(--accent)' : 'var(--flow-border)',
             background: selected ? 'var(--accent)' : 'transparent',
           }}
-          aria-label={selected ? 'Deselect task' : 'Select task'}
+          aria-label={selected ? t('common.taskRow.deselectTask') : t('common.taskRow.selectTask')}
         >
           {selected && <Check size={9} color="#0a0a0a" strokeWidth={3} />}
         </button>

@@ -128,5 +128,10 @@
       "viewAll": "عرض الكل",
       "percentDone": "{{percent}}% منجز"
     }
+  },
+  "taskRow": {
+    "openTask": "فتح المهمة {{identifier}}: {{title}}",
+    "selectTask": "تحديد المهمة",
+    "deselectTask": "إلغاء تحديد المهمة"
   }
 }

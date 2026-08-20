@@ -124,5 +124,10 @@
       "viewAll": "View all",
       "percentDone": "{{percent}}% done"
     }
+  },
+  "taskRow": {
+    "openTask": "Open task {{identifier}}: {{title}}",
+    "selectTask": "Select task",
+    "deselectTask": "Deselect task"
   }
 }
