@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Plus, Search, Trash2, Eye } from 'lucide-react';
+import { AlertCircle, Plus, Search, Trash2, UserPlus, Eye } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
+import { EmptyState } from '@voxire/ui';
 import { useLeads, useDeleteLead } from '../../shared/hooks/queries/useSales';
 import type { Lead, LeadStage } from '../../shared/hooks/queries/useSales';
-import {
-  Button,
-  PageHeader,
-  EmptyState,
-  SkeletonList,
-  ConfirmModal,
-} from '../../shared/components/ui';
+import { Button, PageHeader, SkeletonList, ConfirmModal } from '../../shared/components/ui';
 import CreateLeadModal from './components/CreateLeadModal';
 
 const STAGE_LABELS: Record<LeadStage, string> = {
@@ -67,10 +63,17 @@ const StageBadge: React.FC<{ stage: LeadStage }> = ({ stage }) => {
 
 const Leads: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
   const [loadedLeads, setLoadedLeads] = useState<Lead[]>([]);
-  const { data: fetchedLeads, isLoading, isFetching, isError } = useLeads(pageSize, offset);
+  const {
+    data: fetchedLeads,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useLeads(pageSize, offset);
   const deleteLead = useDeleteLead();
 
   useEffect(() => {
@@ -230,32 +233,24 @@ const Leads: React.FC = () => {
             </div>
           ) : isError && leads.length === 0 ? (
             <EmptyState
-              icon={Search}
-              title="Unable to load leads"
-              description="Refresh and try again."
+              icon={AlertCircle}
+              title={t('crm.leads.loadFailedTitle')}
+              description={t('errors.refreshAndTryAgain')}
+              action={{ label: t('crm.actions.retry'), onClick: () => refetch() }}
             />
           ) : filtered.length === 0 ? (
             <EmptyState
-              icon={Search}
-              title="No leads found"
+              icon={UserPlus}
+              title={t('crm.leads.empty')}
               description={
-                search ? `No leads match "${search}"` : 'Create your first lead to get started.'
+                search
+                  ? t('crm.leads.emptySearchDescription', { search })
+                  : t('crm.leads.createFirstDescription')
               }
               action={
-                hasMore ? (
-                  <Button
-                    variant="outline"
-                    onClick={() => setOffset((current) => current + pageSize)}
-                    disabled={isFetching}
-                  >
-                    {isFetching ? 'Loading…' : 'Load more leads'}
-                  </Button>
-                ) : (
-                  <Button variant="primary" onClick={() => setCreateOpen(true)}>
-                    <Plus size={13} />
-                    New lead
-                  </Button>
-                )
+                search
+                  ? { label: t('crm.actions.clearSearch'), onClick: () => setSearch('') }
+                  : { label: t('crm.leads.new'), onClick: () => setCreateOpen(true) }
               }
             />
           ) : (
