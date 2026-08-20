@@ -6,5 +6,8 @@
   "paymentRecorded": "Paiement enregistré",
   "statusUpdated": "Statut de la facture mis à jour",
   "markedPaid": "{{id}} marquée comme payée",
-  "markPaidFailed": "Impossible de marquer {{id}} comme payée"
+  "markPaidFailed": "Impossible de marquer {{id}} comme payée",
+  "emptyTitle": "Aucune facture pour le moment",
+  "emptyDescription": "Créez votre première facture pour commencer à facturer vos clients.",
+  "emptyCta": "Nouvelle facture"
 }

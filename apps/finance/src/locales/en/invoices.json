@@ -6,5 +6,8 @@
   "paymentRecorded": "Payment recorded",
   "statusUpdated": "Invoice status updated",
   "markedPaid": "Marked {{id}} paid",
-  "markPaidFailed": "Failed to mark {{id}} paid"
+  "markPaidFailed": "Failed to mark {{id}} paid",
+  "emptyTitle": "No invoices yet",
+  "emptyDescription": "Create your first invoice to start billing clients.",
+  "emptyCta": "New Invoice"
 }
