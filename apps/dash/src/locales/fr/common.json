@@ -7,6 +7,16 @@
   "confirm": "Confirmer",
   "delete": "Supprimer",
   "edit": "Modifier",
+  "roleLabels": {
+    "owner": "Propriétaire",
+    "admin": "Administrateur",
+    "operator": "Opérateur",
+    "billing": "Facturation",
+    "menu_manager": "Gestionnaire de menu",
+    "store_manager": "Gestionnaire de magasin",
+    "staff": "Personnel",
+    "viewer": "Observateur"
+  },
   "teamMembers": "Membres de l'équipe",
   "allApps": "Toutes les applications",
   "activityLog": "Journal d'activité",

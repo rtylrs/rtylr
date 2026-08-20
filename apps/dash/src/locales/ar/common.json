@@ -7,6 +7,16 @@
   "confirm": "تأكيد",
   "delete": "حذف",
   "edit": "تعديل",
+  "roleLabels": {
+    "owner": "المالك",
+    "admin": "المسؤول",
+    "operator": "المشغل",
+    "billing": "الفوترة",
+    "menu_manager": "مدير القائمة",
+    "store_manager": "مدير المتجر",
+    "staff": "الموظف",
+    "viewer": "المشاهد"
+  },
   "close": "إغلاق",
   "teamMembers": "أعضاء الفريق",
   "allApps": "جميع التطبيقات",

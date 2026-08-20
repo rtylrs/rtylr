@@ -7,6 +7,16 @@
   "confirm": "Confirm",
   "delete": "Delete",
   "edit": "Edit",
+  "roleLabels": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "operator": "Operator",
+    "billing": "Billing",
+    "menu_manager": "Menu Manager",
+    "store_manager": "Store Manager",
+    "staff": "Staff",
+    "viewer": "Viewer"
+  },
   "toasts": {
     "twoFactorEnabled": "Two-factor enabled",
     "twoFactorDisabled": "Two-factor disabled",
