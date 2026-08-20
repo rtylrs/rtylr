@@ -41,7 +41,6 @@ const MyDay = (): React.JSX.Element => {
     return set;
   }, [weekData]);
 
-  const day = data?.workDay;
   const lines = useMemo(() => data?.lines ?? [], [data]);
 
   // For labelling each line with what it was actually for - the same
@@ -54,8 +53,6 @@ const MyDay = (): React.JSX.Element => {
     [projects]
   );
   const tasksById = useMemo(() => new Map((tasks ?? []).map((task) => [task.id, task])), [tasks]);
-
-  const logged = day?.loggedMinutes ?? 0;
 
   return (
     <div className="h-full overflow-y-auto">
@@ -118,14 +115,6 @@ const MyDay = (): React.JSX.Element => {
           </p>
         ) : (
           <>
-            <section
-              className="mb-6 flex flex-wrap items-baseline gap-x-6 gap-y-2 rounded-md p-3"
-              style={{ background: 'var(--flow-hover)' }}
-              aria-live="polite"
-            >
-              <Figure label={t('flow.time.logged')} value={formatDurationClock(logged)} />
-            </section>
-
             <section>
               <h2
                 className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
@@ -200,30 +189,5 @@ const MyDay = (): React.JSX.Element => {
     </div>
   );
 };
-
-const Figure = ({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone?: string;
-}): React.JSX.Element => (
-  <div>
-    <span
-      className="block text-[10px] font-semibold uppercase tracking-wider"
-      style={{ color: 'var(--flow-text-muted)' }}
-    >
-      {label}
-    </span>
-    <span
-      className="text-[18px] font-semibold tabular-nums"
-      style={{ color: tone ?? 'var(--flow-text)' }}
-    >
-      {value}
-    </span>
-  </div>
-);
 
 export default MyDay;
