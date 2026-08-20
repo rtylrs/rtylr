@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { CheckCircle, Edit2, Plus, Tag, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
-import EmptyState from '../../shared/components/EmptyState';
 import Modal from '../../shared/components/Modal';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -19,6 +20,7 @@ import { DEFAULT_CATEGORY_COLOR } from '../../shared/lib/settings';
 import type { ExpenseCategory } from '../../shared/services/financeApi';
 
 const Categories: React.FC = () => {
+  const { t } = useTranslation();
   const { data = [], isLoading } = useExpenseCategories();
   const createCategory = useCreateExpenseCategory();
   const updateCategory = useUpdateExpenseCategory();
@@ -119,8 +121,12 @@ const Categories: React.FC = () => {
       ) : data.length === 0 ? (
         <EmptyState
           icon={Tag}
-          title="No categories yet"
-          description="Create categories to organize expenses and set budgets."
+          title={t('categories.emptyTitle')}
+          description={t('categories.emptyDescription')}
+          action={{
+            label: t('categories.emptyCta'),
+            onClick: () => setShowCreate(true),
+          }}
         />
       ) : (
         <div
