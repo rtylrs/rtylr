@@ -101,7 +101,7 @@ func (c *CampaignServiceClient) GetCampaignDetail(ctx context.Context, req *GetC
 		}
 	}
 	path := "/crm/campaign/v1/campaigns/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -137,7 +137,7 @@ func (c *CampaignServiceClient) GetCampaignStats(ctx context.Context, req *GetCa
 		}
 	}
 	path := "/crm/campaign/v1/campaigns/{campaign_id}/stats"
-	path = strings.ReplaceAll(path, "{campaign_id}", fmt.Sprintf("%v", req.CampaignId))
+	path = strings.ReplaceAll(path, "{campaign_id}", url.PathEscape(fmt.Sprintf("%v", req.CampaignId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -173,7 +173,7 @@ func (c *CampaignServiceClient) UpdateCampaign(ctx context.Context, req *UpdateC
 		}
 	}
 	path := "/crm/campaign/v1/campaigns/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

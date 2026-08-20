@@ -107,7 +107,7 @@ func (c *LeaveServiceClient) ApproveLeave(ctx context.Context, req *ApproveLeave
 		}
 	}
 	path := "/hr/leave/v1/requests/{request_id}/approve"
-	path = strings.ReplaceAll(path, "{request_id}", fmt.Sprintf("%v", req.RequestId))
+	path = strings.ReplaceAll(path, "{request_id}", url.PathEscape(fmt.Sprintf("%v", req.RequestId)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -144,7 +144,7 @@ func (c *LeaveServiceClient) CancelLeaveRequest(ctx context.Context, req *Cancel
 		}
 	}
 	path := "/hr/leave/v1/requests/{request_id}/cancel"
-	path = strings.ReplaceAll(path, "{request_id}", fmt.Sprintf("%v", req.RequestId))
+	path = strings.ReplaceAll(path, "{request_id}", url.PathEscape(fmt.Sprintf("%v", req.RequestId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -252,7 +252,7 @@ func (c *LeaveServiceClient) UpdateLeaveType(ctx context.Context, req *UpdateLea
 		}
 	}
 	path := "/hr/leave/v1/types/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

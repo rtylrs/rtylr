@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -239,16 +256,18 @@ func RegisterSupplierServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /erp/supplier/v1/suppliers", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListSuppliersRequest)
-		if r.URL.Query().Get("page") != "" {
-			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+		if values := r.URL.Query()["page"]; len(values) > 0 {
+			value := values[0]
+			parsedPage, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
 				return
 			}
 			req.Page = parsedPage
 		}
-		if r.URL.Query().Get("page_size") != "" {
-			parsedPageSize, err := parseInt32(r.URL.Query().Get("page_size"))
+		if values := r.URL.Query()["page_size"]; len(values) > 0 {
+			value := values[0]
+			parsedPageSize, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page_size: "+err.Error())
 				return

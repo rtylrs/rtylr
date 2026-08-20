@@ -103,7 +103,7 @@ func (c *NotificationServiceClient) MarkNotificationRead(ctx context.Context, re
 		}
 	}
 	path := "/hub/notification/v1/notifications/{id}/read"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

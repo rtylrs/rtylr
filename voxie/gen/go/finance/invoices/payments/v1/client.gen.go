@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -28,7 +29,7 @@ func (c *InvoicePaymentServiceClient) RecordPayment(ctx context.Context, req *Re
 		}
 	}
 	path := "/finance/invoices/payments/v1/invoices/{invoice_id}/payment"
-	path = strings.ReplaceAll(path, "{invoice_id}", fmt.Sprintf("%v", req.InvoiceId))
+	path = strings.ReplaceAll(path, "{invoice_id}", url.PathEscape(fmt.Sprintf("%v", req.InvoiceId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

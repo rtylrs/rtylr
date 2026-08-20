@@ -44,13 +44,18 @@ func (m *Task) MarshalJSON() ([]byte, error) {
 	type alias Task
 	aux := struct {
 		*alias
-		Id          string   `json:"id,omitempty"`
-		ProjectId   string   `json:"project_id,omitempty"`
-		WorkspaceId string   `json:"workspace_id,omitempty"`
-		OwnerId     string   `json:"owner_id,omitempty"`
-		ReporterId  string   `json:"reporter_id,omitempty"`
-		SortOrder   string   `json:"sort_order,omitempty"`
-		Labels      []string `json:"labels,omitempty"`
+		Id           string   `json:"id,omitempty"`
+		ProjectId    string   `json:"project_id,omitempty"`
+		WorkspaceId  string   `json:"workspace_id,omitempty"`
+		OwnerId      string   `json:"owner_id,omitempty"`
+		ReporterId   string   `json:"reporter_id,omitempty"`
+		SortOrder    string   `json:"sort_order,omitempty"`
+		ParentTaskId *string  `json:"parent_task_id,omitempty"`
+		AssigneeId   *string  `json:"assignee_id,omitempty"`
+		SectionId    *string  `json:"section_id,omitempty"`
+		CycleId      *string  `json:"cycle_id,omitempty"`
+		MilestoneId  *string  `json:"milestone_id,omitempty"`
+		Labels       []string `json:"labels,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
@@ -58,6 +63,26 @@ func (m *Task) MarshalJSON() ([]byte, error) {
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.ReporterId = strconv.FormatInt(m.ReporterId, 10)
 	aux.SortOrder = strconv.FormatInt(m.SortOrder, 10)
+	if m.ParentTaskId != nil {
+		encodedParentTaskId := strconv.FormatInt(*m.ParentTaskId, 10)
+		aux.ParentTaskId = &encodedParentTaskId
+	}
+	if m.AssigneeId != nil {
+		encodedAssigneeId := strconv.FormatInt(*m.AssigneeId, 10)
+		aux.AssigneeId = &encodedAssigneeId
+	}
+	if m.SectionId != nil {
+		encodedSectionId := strconv.FormatInt(*m.SectionId, 10)
+		aux.SectionId = &encodedSectionId
+	}
+	if m.CycleId != nil {
+		encodedCycleId := strconv.FormatInt(*m.CycleId, 10)
+		aux.CycleId = &encodedCycleId
+	}
+	if m.MilestoneId != nil {
+		encodedMilestoneId := strconv.FormatInt(*m.MilestoneId, 10)
+		aux.MilestoneId = &encodedMilestoneId
+	}
 	aux.Labels = make([]string, len(m.Labels))
 	for i, v := range m.Labels {
 		aux.Labels[i] = strconv.FormatInt(v, 10)
@@ -69,13 +94,18 @@ func (m *Task) UnmarshalJSON(data []byte) error {
 	type alias Task
 	aux := struct {
 		*alias
-		Id          string   `json:"id,omitempty"`
-		ProjectId   string   `json:"project_id,omitempty"`
-		WorkspaceId string   `json:"workspace_id,omitempty"`
-		OwnerId     string   `json:"owner_id,omitempty"`
-		ReporterId  string   `json:"reporter_id,omitempty"`
-		SortOrder   string   `json:"sort_order,omitempty"`
-		Labels      []string `json:"labels,omitempty"`
+		Id           string   `json:"id,omitempty"`
+		ProjectId    string   `json:"project_id,omitempty"`
+		WorkspaceId  string   `json:"workspace_id,omitempty"`
+		OwnerId      string   `json:"owner_id,omitempty"`
+		ReporterId   string   `json:"reporter_id,omitempty"`
+		SortOrder    string   `json:"sort_order,omitempty"`
+		ParentTaskId *string  `json:"parent_task_id,omitempty"`
+		AssigneeId   *string  `json:"assignee_id,omitempty"`
+		SectionId    *string  `json:"section_id,omitempty"`
+		CycleId      *string  `json:"cycle_id,omitempty"`
+		MilestoneId  *string  `json:"milestone_id,omitempty"`
+		Labels       []string `json:"labels,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -121,6 +151,41 @@ func (m *Task) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.SortOrder = v
+	}
+	if aux.ParentTaskId != nil {
+		v, err := strconv.ParseInt(*aux.ParentTaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ParentTaskId = &v
+	}
+	if aux.AssigneeId != nil {
+		v, err := strconv.ParseInt(*aux.AssigneeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.AssigneeId = &v
+	}
+	if aux.SectionId != nil {
+		v, err := strconv.ParseInt(*aux.SectionId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.SectionId = &v
+	}
+	if aux.CycleId != nil {
+		v, err := strconv.ParseInt(*aux.CycleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CycleId = &v
+	}
+	if aux.MilestoneId != nil {
+		v, err := strconv.ParseInt(*aux.MilestoneId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.MilestoneId = &v
 	}
 	if aux.Labels != nil {
 		m.Labels = make([]int64, len(aux.Labels))
@@ -993,6 +1058,51 @@ type ListTasksRequest struct {
 	SortDir     string  `json:"sort_dir,omitempty"`
 }
 
+func (m *ListTasksRequest) MarshalJSON() ([]byte, error) {
+	type alias ListTasksRequest
+	aux := struct {
+		*alias
+		ProjectId  *string `json:"project_id,omitempty"`
+		AssigneeId *string `json:"assignee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
+	if m.AssigneeId != nil {
+		encodedAssigneeId := strconv.FormatInt(*m.AssigneeId, 10)
+		aux.AssigneeId = &encodedAssigneeId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListTasksRequest) UnmarshalJSON(data []byte) error {
+	type alias ListTasksRequest
+	aux := struct {
+		*alias
+		ProjectId  *string `json:"project_id,omitempty"`
+		AssigneeId *string `json:"assignee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ProjectId = &v
+	}
+	if aux.AssigneeId != nil {
+		v, err := strconv.ParseInt(*aux.AssigneeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.AssigneeId = &v
+	}
+	return nil
+}
+
 func (x *ListTasksRequest) GetProjectId() int64 {
 	if x == nil {
 		var zero int64
@@ -1317,12 +1427,22 @@ func (m *CreateTaskRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateTaskRequest
 	aux := struct {
 		*alias
-		ProjectId   string   `json:"project_id,omitempty"`
-		WorkspaceId string   `json:"workspace_id,omitempty"`
-		Labels      []string `json:"labels,omitempty"`
+		ProjectId    string   `json:"project_id,omitempty"`
+		WorkspaceId  string   `json:"workspace_id,omitempty"`
+		ParentTaskId *string  `json:"parent_task_id,omitempty"`
+		AssigneeId   *string  `json:"assignee_id,omitempty"`
+		Labels       []string `json:"labels,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
 	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
+	if m.ParentTaskId != nil {
+		encodedParentTaskId := strconv.FormatInt(*m.ParentTaskId, 10)
+		aux.ParentTaskId = &encodedParentTaskId
+	}
+	if m.AssigneeId != nil {
+		encodedAssigneeId := strconv.FormatInt(*m.AssigneeId, 10)
+		aux.AssigneeId = &encodedAssigneeId
+	}
 	aux.Labels = make([]string, len(m.Labels))
 	for i, v := range m.Labels {
 		aux.Labels[i] = strconv.FormatInt(v, 10)
@@ -1334,9 +1454,11 @@ func (m *CreateTaskRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateTaskRequest
 	aux := struct {
 		*alias
-		ProjectId   string   `json:"project_id,omitempty"`
-		WorkspaceId string   `json:"workspace_id,omitempty"`
-		Labels      []string `json:"labels,omitempty"`
+		ProjectId    string   `json:"project_id,omitempty"`
+		WorkspaceId  string   `json:"workspace_id,omitempty"`
+		ParentTaskId *string  `json:"parent_task_id,omitempty"`
+		AssigneeId   *string  `json:"assignee_id,omitempty"`
+		Labels       []string `json:"labels,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -1354,6 +1476,20 @@ func (m *CreateTaskRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.WorkspaceId = v
+	}
+	if aux.ParentTaskId != nil {
+		v, err := strconv.ParseInt(*aux.ParentTaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ParentTaskId = &v
+	}
+	if aux.AssigneeId != nil {
+		v, err := strconv.ParseInt(*aux.AssigneeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.AssigneeId = &v
 	}
 	if aux.Labels != nil {
 		m.Labels = make([]int64, len(aux.Labels))
@@ -1576,8 +1712,13 @@ func (m *UpdateTaskBody) MarshalJSON() ([]byte, error) {
 	type alias UpdateTaskBody
 	aux := struct {
 		*alias
-		Labels []string `json:"labels,omitempty"`
+		AssigneeId *string  `json:"assignee_id,omitempty"`
+		Labels     []string `json:"labels,omitempty"`
 	}{alias: (*alias)(m)}
+	if m.AssigneeId != nil {
+		encodedAssigneeId := strconv.FormatInt(*m.AssigneeId, 10)
+		aux.AssigneeId = &encodedAssigneeId
+	}
 	aux.Labels = make([]string, len(m.Labels))
 	for i, v := range m.Labels {
 		aux.Labels[i] = strconv.FormatInt(v, 10)
@@ -1589,10 +1730,18 @@ func (m *UpdateTaskBody) UnmarshalJSON(data []byte) error {
 	type alias UpdateTaskBody
 	aux := struct {
 		*alias
-		Labels []string `json:"labels,omitempty"`
+		AssigneeId *string  `json:"assignee_id,omitempty"`
+		Labels     []string `json:"labels,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
+	}
+	if aux.AssigneeId != nil {
+		v, err := strconv.ParseInt(*aux.AssigneeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.AssigneeId = &v
 	}
 	if aux.Labels != nil {
 		m.Labels = make([]int64, len(aux.Labels))
@@ -1893,13 +2042,18 @@ func (m *CreateSubtaskRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateSubtaskRequest
 	aux := struct {
 		*alias
-		ParentTaskId string `json:"parent_task_id,omitempty"`
-		ProjectId    string `json:"project_id,omitempty"`
-		WorkspaceId  string `json:"workspace_id,omitempty"`
+		ParentTaskId string  `json:"parent_task_id,omitempty"`
+		ProjectId    string  `json:"project_id,omitempty"`
+		WorkspaceId  string  `json:"workspace_id,omitempty"`
+		AssigneeId   *string `json:"assignee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.ParentTaskId = strconv.FormatInt(m.ParentTaskId, 10)
 	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
 	aux.WorkspaceId = strconv.FormatInt(m.WorkspaceId, 10)
+	if m.AssigneeId != nil {
+		encodedAssigneeId := strconv.FormatInt(*m.AssigneeId, 10)
+		aux.AssigneeId = &encodedAssigneeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1907,9 +2061,10 @@ func (m *CreateSubtaskRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateSubtaskRequest
 	aux := struct {
 		*alias
-		ParentTaskId string `json:"parent_task_id,omitempty"`
-		ProjectId    string `json:"project_id,omitempty"`
-		WorkspaceId  string `json:"workspace_id,omitempty"`
+		ParentTaskId string  `json:"parent_task_id,omitempty"`
+		ProjectId    string  `json:"project_id,omitempty"`
+		WorkspaceId  string  `json:"workspace_id,omitempty"`
+		AssigneeId   *string `json:"assignee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -1934,6 +2089,13 @@ func (m *CreateSubtaskRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.WorkspaceId = v
+	}
+	if aux.AssigneeId != nil {
+		v, err := strconv.ParseInt(*aux.AssigneeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.AssigneeId = &v
 	}
 	return nil
 }

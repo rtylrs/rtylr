@@ -106,7 +106,7 @@ func (c *CustomerServiceClient) GetCustomer(ctx context.Context, req *GetCustome
 		}
 	}
 	path := "/crm/customer/v1/customers/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -142,7 +142,7 @@ func (c *CustomerServiceClient) UpdateCustomer(ctx context.Context, req *UpdateC
 		}
 	}
 	path := "/crm/customer/v1/customers/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -179,7 +179,7 @@ func (c *CustomerServiceClient) DeleteCustomer(ctx context.Context, req *DeleteC
 		}
 	}
 	path := "/crm/customer/v1/customers/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

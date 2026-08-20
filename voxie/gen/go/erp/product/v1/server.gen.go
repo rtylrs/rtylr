@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -246,27 +263,31 @@ func RegisterProductServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /erp/product/v1/products", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListProductsRequest)
-		if r.URL.Query().Get("search") != "" {
-			req.Search = r.URL.Query().Get("search")
+		if values := r.URL.Query()["search"]; len(values) > 0 {
+			value := values[0]
+			req.Search = value
 		}
-		if r.URL.Query().Get("category_id") != "" {
-			parsedCategoryId, err := parseInt64(r.URL.Query().Get("category_id"))
+		if values := r.URL.Query()["category_id"]; len(values) > 0 {
+			value := values[0]
+			parsedCategoryId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter category_id: "+err.Error())
 				return
 			}
 			req.CategoryId = parsedCategoryId
 		}
-		if r.URL.Query().Get("limit") != "" {
-			parsedLimit, err := parseInt64(r.URL.Query().Get("limit"))
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
 				return
 			}
 			req.Limit = parsedLimit
 		}
-		if r.URL.Query().Get("offset") != "" {
-			parsedOffset, err := parseInt64(r.URL.Query().Get("offset"))
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
 				return
@@ -476,8 +497,9 @@ func RegisterProductServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "ProductService", Method: "listReorderSuggestions", HTTPMethod: "GET", Route: "/erp/product/v1/reorder-suggestions", AuthSchemes: nil}))
 	mux.Handle("GET /erp/product/v1/expiry", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListExpiringItemsRequest)
-		if r.URL.Query().Get("days_ahead") != "" {
-			parsedDaysAhead, err := parseInt32(r.URL.Query().Get("days_ahead"))
+		if values := r.URL.Query()["days_ahead"]; len(values) > 0 {
+			value := values[0]
+			parsedDaysAhead, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter days_ahead: "+err.Error())
 				return

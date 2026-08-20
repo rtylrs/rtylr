@@ -100,7 +100,7 @@ func (c *RunsServiceClient) ApprovePayrollRun(ctx context.Context, req *ApproveP
 		}
 	}
 	path := "/hr/employees/payroll/runs/v1/runs/{id}/approve"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

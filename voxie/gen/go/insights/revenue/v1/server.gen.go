@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -238,8 +255,9 @@ func RegisterRevenueServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /insights/revenue/v1/overview", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetRevenueOverviewRequest)
-		if r.URL.Query().Get("period") != "" {
-			req.Period = r.URL.Query().Get("period")
+		if values := r.URL.Query()["period"]; len(values) > 0 {
+			value := values[0]
+			req.Period = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
@@ -257,8 +275,9 @@ func RegisterRevenueServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "RevenueService", Method: "getRevenueOverview", HTTPMethod: "GET", Route: "/insights/revenue/v1/overview", AuthSchemes: nil}))
 	mux.Handle("GET /insights/revenue/v1/by-app", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetRevenueByAppRequest)
-		if r.URL.Query().Get("period") != "" {
-			req.Period = r.URL.Query().Get("period")
+		if values := r.URL.Query()["period"]; len(values) > 0 {
+			value := values[0]
+			req.Period = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
@@ -276,11 +295,13 @@ func RegisterRevenueServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "RevenueService", Method: "getRevenueByApp", HTTPMethod: "GET", Route: "/insights/revenue/v1/by-app", AuthSchemes: nil}))
 	mux.Handle("GET /insights/revenue/v1/comparison", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetRevenueComparisonRequest)
-		if r.URL.Query().Get("period") != "" {
-			req.Period = r.URL.Query().Get("period")
+		if values := r.URL.Query()["period"]; len(values) > 0 {
+			value := values[0]
+			req.Period = value
 		}
-		if r.URL.Query().Get("compare_to") != "" {
-			req.CompareTo = r.URL.Query().Get("compare_to")
+		if values := r.URL.Query()["compare_to"]; len(values) > 0 {
+			value := values[0]
+			req.CompareTo = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

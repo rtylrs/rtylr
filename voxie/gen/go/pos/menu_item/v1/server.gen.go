@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -255,16 +272,18 @@ func RegisterMenuItemServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "MenuItemService", Method: "listMenuItems", HTTPMethod: "GET", Route: "/pos/menu-item/v1/menu-items", AuthSchemes: nil}))
 	mux.Handle("GET /pos/menu-item/v1/menu-items/public", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListPublicMenuItemsRequest)
-		if r.URL.Query().Get("business_id") != "" {
-			parsedBusinessId, err := parseInt64(r.URL.Query().Get("business_id"))
+		if values := r.URL.Query()["business_id"]; len(values) > 0 {
+			value := values[0]
+			parsedBusinessId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter business_id: "+err.Error())
 				return
 			}
 			req.BusinessId = parsedBusinessId
 		}
-		if r.URL.Query().Get("location_id") != "" {
-			parsedLocationId, err := parseInt64(r.URL.Query().Get("location_id"))
+		if values := r.URL.Query()["location_id"]; len(values) > 0 {
+			value := values[0]
+			parsedLocationId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter location_id: "+err.Error())
 				return

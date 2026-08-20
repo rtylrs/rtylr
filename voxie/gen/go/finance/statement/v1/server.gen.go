@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -253,8 +270,9 @@ func RegisterStatementServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "StatementService", Method: "getBalanceSheet", HTTPMethod: "GET", Route: "/finance/statement/v1/balance-sheet", AuthSchemes: nil}))
 	mux.Handle("GET /finance/statement/v1/cash-flow", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetCashFlowRequest)
-		if r.URL.Query().Get("period") != "" {
-			req.Period = r.URL.Query().Get("period")
+		if values := r.URL.Query()["period"]; len(values) > 0 {
+			value := values[0]
+			req.Period = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

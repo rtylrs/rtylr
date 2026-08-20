@@ -100,7 +100,7 @@ func (c *DocumentServiceClient) DeleteDocument(ctx context.Context, req *DeleteD
 		}
 	}
 	path := "/hr/document/v1/documents/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

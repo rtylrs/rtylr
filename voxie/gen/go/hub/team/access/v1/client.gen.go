@@ -100,7 +100,7 @@ func (c *AccessServiceClient) ApproveAccessRequest(ctx context.Context, req *App
 		}
 	}
 	path := "/hub/team/access/v1/requests/{id}/approve"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

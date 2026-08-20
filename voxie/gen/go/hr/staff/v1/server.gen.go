@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -243,14 +260,17 @@ func RegisterStaffServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /hr/staff/v1/staff", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListStaffRequest)
-		if r.URL.Query().Get("search") != "" {
-			req.Search = r.URL.Query().Get("search")
+		if values := r.URL.Query()["search"]; len(values) > 0 {
+			value := values[0]
+			req.Search = value
 		}
-		if r.URL.Query().Get("department_id") != "" {
-			req.DepartmentId = r.URL.Query().Get("department_id")
+		if values := r.URL.Query()["department_id"]; len(values) > 0 {
+			value := values[0]
+			req.DepartmentId = value
 		}
-		if r.URL.Query().Get("status") != "" {
-			req.Status = r.URL.Query().Get("status")
+		if values := r.URL.Query()["status"]; len(values) > 0 {
+			value := values[0]
+			req.Status = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
@@ -406,16 +426,18 @@ func RegisterStaffServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "StaffService", Method: "clockOut", HTTPMethod: "POST", Route: "/hr/staff/v1/staff/clock-out", AuthSchemes: nil}))
 	mux.Handle("GET /hr/staff/v1/staff/directory", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListStaffDirectoryRequest)
-		if r.URL.Query().Get("page") != "" {
-			parsedPage, err := parseInt64(r.URL.Query().Get("page"))
+		if values := r.URL.Query()["page"]; len(values) > 0 {
+			value := values[0]
+			parsedPage, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
 				return
 			}
 			req.Page = parsedPage
 		}
-		if r.URL.Query().Get("page_size") != "" {
-			parsedPageSize, err := parseInt64(r.URL.Query().Get("page_size"))
+		if values := r.URL.Query()["page_size"]; len(values) > 0 {
+			value := values[0]
+			parsedPageSize, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page_size: "+err.Error())
 				return

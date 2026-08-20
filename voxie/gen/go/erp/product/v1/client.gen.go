@@ -105,7 +105,7 @@ func (c *ProductServiceClient) GetProductByBarcode(ctx context.Context, req *Get
 		}
 	}
 	path := "/erp/product/v1/barcodes/{code}/product"
-	path = strings.ReplaceAll(path, "{code}", fmt.Sprintf("%v", req.Code))
+	path = strings.ReplaceAll(path, "{code}", url.PathEscape(fmt.Sprintf("%v", req.Code)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -141,7 +141,7 @@ func (c *ProductServiceClient) GetProduct(ctx context.Context, req *GetProductRe
 		}
 	}
 	path := "/erp/product/v1/products/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -177,7 +177,7 @@ func (c *ProductServiceClient) GetProductFull(ctx context.Context, req *GetProdu
 		}
 	}
 	path := "/erp/product/v1/products/{id}/full"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -213,7 +213,7 @@ func (c *ProductServiceClient) ListProductAttributes(ctx context.Context, req *L
 		}
 	}
 	path := "/erp/product/v1/products/{id}/attributes"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -249,7 +249,7 @@ func (c *ProductServiceClient) UpdateProduct(ctx context.Context, req *UpdatePro
 		}
 	}
 	path := "/erp/product/v1/products/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -286,7 +286,7 @@ func (c *ProductServiceClient) DeleteProduct(ctx context.Context, req *DeletePro
 		}
 	}
 	path := "/erp/product/v1/products/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

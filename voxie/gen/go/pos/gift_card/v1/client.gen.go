@@ -100,7 +100,7 @@ func (c *GiftCardServiceClient) RedeemGiftCard(ctx context.Context, req *RedeemG
 		}
 	}
 	path := "/pos/gift-card/v1/gift-cards/{code}/redeem"
-	path = strings.ReplaceAll(path, "{code}", fmt.Sprintf("%v", req.Code))
+	path = strings.ReplaceAll(path, "{code}", url.PathEscape(fmt.Sprintf("%v", req.Code)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -137,7 +137,7 @@ func (c *GiftCardServiceClient) GetGiftCardByCode(ctx context.Context, req *GetG
 		}
 	}
 	path := "/pos/gift-card/v1/gift-cards/{code}"
-	path = strings.ReplaceAll(path, "{code}", fmt.Sprintf("%v", req.Code))
+	path = strings.ReplaceAll(path, "{code}", url.PathEscape(fmt.Sprintf("%v", req.Code)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

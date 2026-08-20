@@ -184,7 +184,7 @@ func (c *TimeEntryServiceClient) ApproveTimesheet(ctx context.Context, req *Appr
 		}
 	}
 	path := "/hr/time-entry/v1/timesheets/{id}/approve"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

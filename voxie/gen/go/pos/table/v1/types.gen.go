@@ -21,11 +21,16 @@ func (m *Table) MarshalJSON() ([]byte, error) {
 	type alias Table
 	aux := struct {
 		*alias
-		Id      string `json:"id,omitempty"`
-		OwnerId string `json:"owner_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
 	return json.Marshal(aux)
 }
 
@@ -33,8 +38,9 @@ func (m *Table) UnmarshalJSON(data []byte) error {
 	type alias Table
 	aux := struct {
 		*alias
-		Id      string `json:"id,omitempty"`
-		OwnerId string `json:"owner_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -52,6 +58,13 @@ func (m *Table) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.OwnerId = v
+	}
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LocationId = &v
 	}
 	return nil
 }
@@ -145,6 +158,38 @@ type CreateTableRequest struct {
 	Seats      int32  `json:"seats,omitempty"`
 }
 
+func (m *CreateTableRequest) MarshalJSON() ([]byte, error) {
+	type alias CreateTableRequest
+	aux := struct {
+		*alias
+		LocationId *string `json:"location_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *CreateTableRequest) UnmarshalJSON(data []byte) error {
+	type alias CreateTableRequest
+	aux := struct {
+		*alias
+		LocationId *string `json:"location_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LocationId = &v
+	}
+	return nil
+}
+
 func (x *CreateTableRequest) GetLocationId() int64 {
 	if x == nil {
 		var zero int64
@@ -228,6 +273,38 @@ type UpdateTableBody struct {
 	Label      string `json:"label,omitempty"`
 	Seats      int32  `json:"seats,omitempty"`
 	Status     string `json:"status,omitempty"`
+}
+
+func (m *UpdateTableBody) MarshalJSON() ([]byte, error) {
+	type alias UpdateTableBody
+	aux := struct {
+		*alias
+		LocationId *string `json:"location_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *UpdateTableBody) UnmarshalJSON(data []byte) error {
+	type alias UpdateTableBody
+	aux := struct {
+		*alias
+		LocationId *string `json:"location_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LocationId = &v
+	}
+	return nil
 }
 
 func (x *UpdateTableBody) GetLocationId() int64 {

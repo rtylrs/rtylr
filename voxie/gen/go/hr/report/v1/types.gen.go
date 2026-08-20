@@ -16,6 +16,64 @@ type ReportRequestPayload struct {
 	Format       string `json:"format,omitempty"`
 }
 
+func (m *ReportRequestPayload) MarshalJSON() ([]byte, error) {
+	type alias ReportRequestPayload
+	aux := struct {
+		*alias
+		LocationId   *string `json:"location_id,omitempty"`
+		DepartmentId *string `json:"department_id,omitempty"`
+		EmployeeId   *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
+	if m.DepartmentId != nil {
+		encodedDepartmentId := strconv.FormatInt(*m.DepartmentId, 10)
+		aux.DepartmentId = &encodedDepartmentId
+	}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ReportRequestPayload) UnmarshalJSON(data []byte) error {
+	type alias ReportRequestPayload
+	aux := struct {
+		*alias
+		LocationId   *string `json:"location_id,omitempty"`
+		DepartmentId *string `json:"department_id,omitempty"`
+		EmployeeId   *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LocationId = &v
+	}
+	if aux.DepartmentId != nil {
+		v, err := strconv.ParseInt(*aux.DepartmentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DepartmentId = &v
+	}
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = &v
+	}
+	return nil
+}
+
 func (x *ReportRequestPayload) GetReportType() string {
 	if x == nil {
 		var zero string

@@ -106,7 +106,7 @@ func (c *ReportServiceClient) GetReportTemplate(ctx context.Context, req *GetRep
 		}
 	}
 	path := "/insights/report/v1/templates/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -217,7 +217,7 @@ func (c *ReportServiceClient) UpdateScheduledReport(ctx context.Context, req *Up
 		}
 	}
 	path := "/insights/report/v1/scheduled/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -254,7 +254,7 @@ func (c *ReportServiceClient) DeleteScheduledReport(ctx context.Context, req *De
 		}
 	}
 	path := "/insights/report/v1/scheduled/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

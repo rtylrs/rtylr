@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -256,8 +273,9 @@ func RegisterAccessServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "AccessService", Method: "getMyLocations", HTTPMethod: "GET", Route: "/pos/access/v1/my-locations", AuthSchemes: nil}))
 	mux.Handle("GET /pos/access/v1/member-locations", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetMemberLocationsRequest)
-		if r.URL.Query().Get("user_id") != "" {
-			parsedUserId, err := parseInt64(r.URL.Query().Get("user_id"))
+		if values := r.URL.Query()["user_id"]; len(values) > 0 {
+			value := values[0]
+			parsedUserId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter user_id: "+err.Error())
 				return
@@ -280,8 +298,9 @@ func RegisterAccessServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "AccessService", Method: "getMemberLocations", HTTPMethod: "GET", Route: "/pos/access/v1/member-locations", AuthSchemes: nil}))
 	mux.Handle("GET /pos/access/v1/location-roster", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetLocationRosterRequest)
-		if r.URL.Query().Get("location_id") != "" {
-			parsedLocationId, err := parseInt64(r.URL.Query().Get("location_id"))
+		if values := r.URL.Query()["location_id"]; len(values) > 0 {
+			value := values[0]
+			parsedLocationId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter location_id: "+err.Error())
 				return

@@ -100,7 +100,7 @@ func (c *CategoryServiceClient) UpdateCategory(ctx context.Context, req *UpdateC
 		}
 	}
 	path := "/erp/category/v1/categories/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -137,7 +137,7 @@ func (c *CategoryServiceClient) DeleteCategory(ctx context.Context, req *DeleteC
 		}
 	}
 	path := "/erp/category/v1/categories/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

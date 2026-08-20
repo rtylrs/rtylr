@@ -172,7 +172,7 @@ func (c *FeatureServiceClient) DeleteFlag(ctx context.Context, req *DeleteFlagRe
 		}
 	}
 	path := "/hub/feature/v1/features/admin/flags/{key}"
-	path = strings.ReplaceAll(path, "{key}", fmt.Sprintf("%v", req.Key))
+	path = strings.ReplaceAll(path, "{key}", url.PathEscape(fmt.Sprintf("%v", req.Key)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -280,8 +280,8 @@ func (c *FeatureServiceClient) DeleteTarget(ctx context.Context, req *DeleteTarg
 		}
 	}
 	path := "/hub/feature/v1/features/admin/targets/{feature_key}/{owner_id}"
-	path = strings.ReplaceAll(path, "{feature_key}", fmt.Sprintf("%v", req.FeatureKey))
-	path = strings.ReplaceAll(path, "{owner_id}", fmt.Sprintf("%v", req.OwnerId))
+	path = strings.ReplaceAll(path, "{feature_key}", url.PathEscape(fmt.Sprintf("%v", req.FeatureKey)))
+	path = strings.ReplaceAll(path, "{owner_id}", url.PathEscape(fmt.Sprintf("%v", req.OwnerId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -425,7 +425,7 @@ func (c *FeatureServiceClient) DeleteRule(ctx context.Context, req *DeleteRuleRe
 		}
 	}
 	path := "/hub/feature/v1/features/admin/rules/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

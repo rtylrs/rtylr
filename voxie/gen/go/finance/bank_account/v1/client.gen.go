@@ -105,7 +105,7 @@ func (c *BankAccountServiceClient) GetBankAccount(ctx context.Context, req *GetB
 		}
 	}
 	path := "/finance/bank-account/v1/bank-accounts/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

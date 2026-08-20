@@ -103,7 +103,7 @@ func (c *RecurringInvoiceServiceClient) GetRecurringInvoice(ctx context.Context,
 		}
 	}
 	path := "/finance/recurring-invoice/v1/recurring-invoices/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -139,7 +139,7 @@ func (c *RecurringInvoiceServiceClient) UpdateRecurringInvoice(ctx context.Conte
 		}
 	}
 	path := "/finance/recurring-invoice/v1/recurring-invoices/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -176,7 +176,7 @@ func (c *RecurringInvoiceServiceClient) PauseRecurringInvoice(ctx context.Contex
 		}
 	}
 	path := "/finance/recurring-invoice/v1/recurring-invoices/{id}/pause"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -213,7 +213,7 @@ func (c *RecurringInvoiceServiceClient) ResumeRecurringInvoice(ctx context.Conte
 		}
 	}
 	path := "/finance/recurring-invoice/v1/recurring-invoices/{id}/resume"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

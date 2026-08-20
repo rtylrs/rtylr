@@ -226,7 +226,7 @@ func (c *ShiftServiceClient) GetRoster(ctx context.Context, req *GetRosterReques
 		}
 	}
 	path := "/hr/shift/v1/roster/{location_id}"
-	path = strings.ReplaceAll(path, "{location_id}", fmt.Sprintf("%v", req.LocationId))
+	path = strings.ReplaceAll(path, "{location_id}", url.PathEscape(fmt.Sprintf("%v", req.LocationId)))
 	query := url.Values{}
 	query.Set("week_start", req.WeekStart)
 	if len(query) > 0 {
@@ -388,7 +388,7 @@ func (c *ShiftServiceClient) DeleteAvailability(ctx context.Context, req *Delete
 		}
 	}
 	path := "/hr/shift/v1/availability/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

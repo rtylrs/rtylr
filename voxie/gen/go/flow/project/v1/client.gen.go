@@ -106,7 +106,7 @@ func (c *ProjectServiceClient) UpdateProject(ctx context.Context, req *UpdatePro
 		}
 	}
 	path := "/flow/project/v1/projects/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -143,7 +143,7 @@ func (c *ProjectServiceClient) DeleteProject(ctx context.Context, req *DeletePro
 		}
 	}
 	path := "/flow/project/v1/projects/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -255,7 +255,7 @@ func (c *ProjectServiceClient) UpdateProjectColumn(ctx context.Context, req *Upd
 		}
 	}
 	path := "/flow/project/v1/projects/columns/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -292,7 +292,7 @@ func (c *ProjectServiceClient) DeleteProjectColumn(ctx context.Context, req *Del
 		}
 	}
 	path := "/flow/project/v1/projects/columns/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

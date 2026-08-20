@@ -26,17 +26,27 @@ func (m *ApprovalChainLevelPayload) MarshalJSON() ([]byte, error) {
 	type alias ApprovalChainLevelPayload
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		OwnerId   string `json:"owner_id,omitempty"`
-		ChainId   string `json:"chain_id,omitempty"`
-		CreatedAt string `json:"created_at,omitempty"`
-		UpdatedAt string `json:"updated_at,omitempty"`
+		Id                 string  `json:"id,omitempty"`
+		OwnerId            string  `json:"owner_id,omitempty"`
+		ChainId            string  `json:"chain_id,omitempty"`
+		CreatedAt          string  `json:"created_at,omitempty"`
+		UpdatedAt          string  `json:"updated_at,omitempty"`
+		ApproverRoleId     *string `json:"approver_role_id,omitempty"`
+		ApproverEmployeeId *string `json:"approver_employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.ChainId = strconv.FormatInt(m.ChainId, 10)
 	aux.CreatedAt = strconv.FormatInt(m.CreatedAt, 10)
 	aux.UpdatedAt = strconv.FormatInt(m.UpdatedAt, 10)
+	if m.ApproverRoleId != nil {
+		encodedApproverRoleId := strconv.FormatInt(*m.ApproverRoleId, 10)
+		aux.ApproverRoleId = &encodedApproverRoleId
+	}
+	if m.ApproverEmployeeId != nil {
+		encodedApproverEmployeeId := strconv.FormatInt(*m.ApproverEmployeeId, 10)
+		aux.ApproverEmployeeId = &encodedApproverEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -44,11 +54,13 @@ func (m *ApprovalChainLevelPayload) UnmarshalJSON(data []byte) error {
 	type alias ApprovalChainLevelPayload
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		OwnerId   string `json:"owner_id,omitempty"`
-		ChainId   string `json:"chain_id,omitempty"`
-		CreatedAt string `json:"created_at,omitempty"`
-		UpdatedAt string `json:"updated_at,omitempty"`
+		Id                 string  `json:"id,omitempty"`
+		OwnerId            string  `json:"owner_id,omitempty"`
+		ChainId            string  `json:"chain_id,omitempty"`
+		CreatedAt          string  `json:"created_at,omitempty"`
+		UpdatedAt          string  `json:"updated_at,omitempty"`
+		ApproverRoleId     *string `json:"approver_role_id,omitempty"`
+		ApproverEmployeeId *string `json:"approver_employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -87,6 +99,20 @@ func (m *ApprovalChainLevelPayload) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.UpdatedAt = v
+	}
+	if aux.ApproverRoleId != nil {
+		v, err := strconv.ParseInt(*aux.ApproverRoleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ApproverRoleId = &v
+	}
+	if aux.ApproverEmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.ApproverEmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ApproverEmployeeId = &v
 	}
 	return nil
 }

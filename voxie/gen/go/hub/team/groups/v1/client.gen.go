@@ -100,7 +100,7 @@ func (c *GroupsServiceClient) GetGroupDetail(ctx context.Context, req *GetGroupD
 		}
 	}
 	path := "/hub/team/groups/v1/groups/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -136,7 +136,7 @@ func (c *GroupsServiceClient) UpdateGroup(ctx context.Context, req *UpdateGroupR
 		}
 	}
 	path := "/hub/team/groups/v1/groups/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -173,7 +173,7 @@ func (c *GroupsServiceClient) DeleteGroup(ctx context.Context, req *DeleteGroupR
 		}
 	}
 	path := "/hub/team/groups/v1/groups/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -209,7 +209,7 @@ func (c *GroupsServiceClient) AddGroupMembers(ctx context.Context, req *AddGroup
 		}
 	}
 	path := "/hub/team/groups/v1/groups/{id}/members"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -246,8 +246,8 @@ func (c *GroupsServiceClient) RemoveGroupMember(ctx context.Context, req *Remove
 		}
 	}
 	path := "/hub/team/groups/v1/groups/{id}/members/{user_id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
-	path = strings.ReplaceAll(path, "{user_id}", fmt.Sprintf("%v", req.UserId))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
+	path = strings.ReplaceAll(path, "{user_id}", url.PathEscape(fmt.Sprintf("%v", req.UserId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -283,7 +283,7 @@ func (c *GroupsServiceClient) GetUserGroups(ctx context.Context, req *GetUserGro
 		}
 	}
 	path := "/hub/team/groups/v1/users/{user_id}/groups"
-	path = strings.ReplaceAll(path, "{user_id}", fmt.Sprintf("%v", req.UserId))
+	path = strings.ReplaceAll(path, "{user_id}", url.PathEscape(fmt.Sprintf("%v", req.UserId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

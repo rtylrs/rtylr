@@ -29,7 +29,7 @@ func (c *OrderHoldServiceClient) HoldOrder(ctx context.Context, req *HoldOrderRe
 		}
 	}
 	path := "/pos/orders/holds/v1/orders/{order_id}/hold"
-	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
+	path = strings.ReplaceAll(path, "{order_id}", url.PathEscape(fmt.Sprintf("%v", req.OrderId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

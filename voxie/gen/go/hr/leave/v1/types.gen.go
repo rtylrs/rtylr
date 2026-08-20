@@ -577,6 +577,38 @@ type ListLeaveRequestsRequest struct {
 	Status     *string `json:"status,omitempty"`
 }
 
+func (m *ListLeaveRequestsRequest) MarshalJSON() ([]byte, error) {
+	type alias ListLeaveRequestsRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListLeaveRequestsRequest) UnmarshalJSON(data []byte) error {
+	type alias ListLeaveRequestsRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = &v
+	}
+	return nil
+}
+
 func (x *ListLeaveRequestsRequest) GetEmployeeId() int64 {
 	if x == nil {
 		var zero int64
@@ -1192,6 +1224,38 @@ func (x *UpdateLeaveTypeResponse) GetLeaveType() *LeaveTypePayload {
 type ListLeaveBalancesRequest struct {
 	EmployeeId *int64 `json:"employee_id,omitempty"`
 	Year       *int32 `json:"year,omitempty"`
+}
+
+func (m *ListLeaveBalancesRequest) MarshalJSON() ([]byte, error) {
+	type alias ListLeaveBalancesRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListLeaveBalancesRequest) UnmarshalJSON(data []byte) error {
+	type alias ListLeaveBalancesRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = &v
+	}
+	return nil
 }
 
 func (x *ListLeaveBalancesRequest) GetEmployeeId() int64 {

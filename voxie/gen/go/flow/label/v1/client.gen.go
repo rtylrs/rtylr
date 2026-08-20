@@ -106,7 +106,7 @@ func (c *LabelServiceClient) UpdateLabel(ctx context.Context, req *UpdateLabelRe
 		}
 	}
 	path := "/flow/label/v1/labels/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -143,7 +143,7 @@ func (c *LabelServiceClient) DeleteLabel(ctx context.Context, req *DeleteLabelRe
 		}
 	}
 	path := "/flow/label/v1/labels/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

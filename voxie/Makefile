@@ -1,7 +1,14 @@
 .PHONY: clean generate install-onek install-js typecheck
 
-# Use the merged OneKit status generator plus legacy-contract compatibility.
-ONK_VERSION := 09856d9bfdc14f8eb96c19224d878debd67267a0
+# v0.6.0: fixes optional int64/uint64 fields (e.g. project_id, task_id on
+# flow.time.v1.CreateWorkDayLineRequest) never getting the wire-string
+# MarshalJSON/UnmarshalJSON treatment that required int64 fields already get -
+# onek's needsInt64StringEncoding excluded any field with f.Optional set, so
+# every consumer sending those fields as strings (the platform-wide int64
+# convention documented in this repo's own CLAUDE.md) got a 400 back from Go's
+# plain json.Unmarshal expecting a number. See internal/gengo/jsonmapping.go
+# in 1homsi/onekit@7011894.
+ONK_VERSION := 70118946d1c20146cd7f720365ef6ef11d8066f6
 
 # Clean generated code
 clean:

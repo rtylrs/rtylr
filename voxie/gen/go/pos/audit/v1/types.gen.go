@@ -24,15 +24,25 @@ func (m *AuditLog) MarshalJSON() ([]byte, error) {
 	type alias AuditLog
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
-		BranchId   string `json:"branch_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		BusinessId string  `json:"business_id,omitempty"`
+		BranchId   string  `json:"branch_id,omitempty"`
+		EmployeeId string  `json:"employee_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		EntityId   *string `json:"entity_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
 	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
 	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.TerminalId != nil {
+		encodedTerminalId := strconv.FormatInt(*m.TerminalId, 10)
+		aux.TerminalId = &encodedTerminalId
+	}
+	if m.EntityId != nil {
+		encodedEntityId := strconv.FormatInt(*m.EntityId, 10)
+		aux.EntityId = &encodedEntityId
+	}
 	return json.Marshal(aux)
 }
 
@@ -40,10 +50,12 @@ func (m *AuditLog) UnmarshalJSON(data []byte) error {
 	type alias AuditLog
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
-		BranchId   string `json:"branch_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		BusinessId string  `json:"business_id,omitempty"`
+		BranchId   string  `json:"branch_id,omitempty"`
+		EmployeeId string  `json:"employee_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		EntityId   *string `json:"entity_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -75,6 +87,20 @@ func (m *AuditLog) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.EmployeeId = v
+	}
+	if aux.TerminalId != nil {
+		v, err := strconv.ParseInt(*aux.TerminalId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TerminalId = &v
+	}
+	if aux.EntityId != nil {
+		v, err := strconv.ParseInt(*aux.EntityId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EntityId = &v
 	}
 	return nil
 }

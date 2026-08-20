@@ -19,15 +19,20 @@ func (m *SetupWizardStepPayload) MarshalJSON() ([]byte, error) {
 	type alias SetupWizardStepPayload
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		OwnerId   string `json:"owner_id,omitempty"`
-		CreatedAt string `json:"created_at,omitempty"`
-		UpdatedAt string `json:"updated_at,omitempty"`
+		Id          string  `json:"id,omitempty"`
+		OwnerId     string  `json:"owner_id,omitempty"`
+		CreatedAt   string  `json:"created_at,omitempty"`
+		UpdatedAt   string  `json:"updated_at,omitempty"`
+		CompletedAt *string `json:"completed_at,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.CreatedAt = strconv.FormatInt(m.CreatedAt, 10)
 	aux.UpdatedAt = strconv.FormatInt(m.UpdatedAt, 10)
+	if m.CompletedAt != nil {
+		encodedCompletedAt := strconv.FormatInt(*m.CompletedAt, 10)
+		aux.CompletedAt = &encodedCompletedAt
+	}
 	return json.Marshal(aux)
 }
 
@@ -35,10 +40,11 @@ func (m *SetupWizardStepPayload) UnmarshalJSON(data []byte) error {
 	type alias SetupWizardStepPayload
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		OwnerId   string `json:"owner_id,omitempty"`
-		CreatedAt string `json:"created_at,omitempty"`
-		UpdatedAt string `json:"updated_at,omitempty"`
+		Id          string  `json:"id,omitempty"`
+		OwnerId     string  `json:"owner_id,omitempty"`
+		CreatedAt   string  `json:"created_at,omitempty"`
+		UpdatedAt   string  `json:"updated_at,omitempty"`
+		CompletedAt *string `json:"completed_at,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -70,6 +76,13 @@ func (m *SetupWizardStepPayload) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.UpdatedAt = v
+	}
+	if aux.CompletedAt != nil {
+		v, err := strconv.ParseInt(*aux.CompletedAt, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CompletedAt = &v
 	}
 	return nil
 }
@@ -145,15 +158,20 @@ func (m *HRCompanyConfigPayload) MarshalJSON() ([]byte, error) {
 	type alias HRCompanyConfigPayload
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		OwnerId   string `json:"owner_id,omitempty"`
-		CreatedAt string `json:"created_at,omitempty"`
-		UpdatedAt string `json:"updated_at,omitempty"`
+		Id               string  `json:"id,omitempty"`
+		OwnerId          string  `json:"owner_id,omitempty"`
+		CreatedAt        string  `json:"created_at,omitempty"`
+		UpdatedAt        string  `json:"updated_at,omitempty"`
+		SetupCompletedAt *string `json:"setup_completed_at,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.CreatedAt = strconv.FormatInt(m.CreatedAt, 10)
 	aux.UpdatedAt = strconv.FormatInt(m.UpdatedAt, 10)
+	if m.SetupCompletedAt != nil {
+		encodedSetupCompletedAt := strconv.FormatInt(*m.SetupCompletedAt, 10)
+		aux.SetupCompletedAt = &encodedSetupCompletedAt
+	}
 	return json.Marshal(aux)
 }
 
@@ -161,10 +179,11 @@ func (m *HRCompanyConfigPayload) UnmarshalJSON(data []byte) error {
 	type alias HRCompanyConfigPayload
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		OwnerId   string `json:"owner_id,omitempty"`
-		CreatedAt string `json:"created_at,omitempty"`
-		UpdatedAt string `json:"updated_at,omitempty"`
+		Id               string  `json:"id,omitempty"`
+		OwnerId          string  `json:"owner_id,omitempty"`
+		CreatedAt        string  `json:"created_at,omitempty"`
+		UpdatedAt        string  `json:"updated_at,omitempty"`
+		SetupCompletedAt *string `json:"setup_completed_at,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -196,6 +215,13 @@ func (m *HRCompanyConfigPayload) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.UpdatedAt = v
+	}
+	if aux.SetupCompletedAt != nil {
+		v, err := strconv.ParseInt(*aux.SetupCompletedAt, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.SetupCompletedAt = &v
 	}
 	return nil
 }

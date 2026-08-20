@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -28,7 +29,7 @@ func (c *OrderSplitServiceClient) SplitOrder(ctx context.Context, req *SplitOrde
 		}
 	}
 	path := "/pos/orders/splits/v1/orders/{order_id}/split"
-	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
+	path = strings.ReplaceAll(path, "{order_id}", url.PathEscape(fmt.Sprintf("%v", req.OrderId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

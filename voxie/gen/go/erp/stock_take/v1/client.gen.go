@@ -103,7 +103,7 @@ func (c *StockTakeServiceClient) UpdateStockTake(ctx context.Context, req *Updat
 		}
 	}
 	path := "/erp/stock-take/v1/stock-takes/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

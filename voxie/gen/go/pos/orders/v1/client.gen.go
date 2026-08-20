@@ -144,7 +144,7 @@ func (c *OrderServiceClient) GetPublicOrderStatus(ctx context.Context, req *GetP
 		}
 	}
 	path := "/pos/orders/v1/orders/{order_id}/public-status"
-	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
+	path = strings.ReplaceAll(path, "{order_id}", url.PathEscape(fmt.Sprintf("%v", req.OrderId)))
 	query := url.Values{}
 	query.Set("business_id", strconv.FormatInt(int64(req.BusinessId), 10))
 	if len(query) > 0 {
@@ -181,7 +181,7 @@ func (c *OrderServiceClient) GetOrderDetail(ctx context.Context, req *GetOrderDe
 		}
 	}
 	path := "/pos/orders/v1/orders/{order_id}"
-	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
+	path = strings.ReplaceAll(path, "{order_id}", url.PathEscape(fmt.Sprintf("%v", req.OrderId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -217,7 +217,7 @@ func (c *OrderServiceClient) UpdateOrderStatus(ctx context.Context, req *UpdateO
 		}
 	}
 	path := "/pos/orders/v1/orders/{order_id}/status"
-	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
+	path = strings.ReplaceAll(path, "{order_id}", url.PathEscape(fmt.Sprintf("%v", req.OrderId)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -254,7 +254,7 @@ func (c *OrderServiceClient) VoidOrder(ctx context.Context, req *VoidOrderReques
 		}
 	}
 	path := "/pos/orders/v1/orders/{order_id}/void"
-	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
+	path = strings.ReplaceAll(path, "{order_id}", url.PathEscape(fmt.Sprintf("%v", req.OrderId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

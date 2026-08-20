@@ -173,7 +173,7 @@ func (c *BusinessServiceClient) GetBusiness(ctx context.Context, req *GetBusines
 		}
 	}
 	path := "/hub/business/v1/businesses/{business_id}"
-	path = strings.ReplaceAll(path, "{business_id}", fmt.Sprintf("%v", req.BusinessId))
+	path = strings.ReplaceAll(path, "{business_id}", url.PathEscape(fmt.Sprintf("%v", req.BusinessId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -317,7 +317,7 @@ func (c *BusinessServiceClient) UpdateBusiness(ctx context.Context, req *UpdateB
 		}
 	}
 	path := "/hub/business/v1/businesses/{business_id}"
-	path = strings.ReplaceAll(path, "{business_id}", fmt.Sprintf("%v", req.BusinessId))
+	path = strings.ReplaceAll(path, "{business_id}", url.PathEscape(fmt.Sprintf("%v", req.BusinessId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -354,7 +354,7 @@ func (c *BusinessServiceClient) RenameBusiness(ctx context.Context, req *RenameB
 		}
 	}
 	path := "/hub/business/v1/businesses/{business_id}/name"
-	path = strings.ReplaceAll(path, "{business_id}", fmt.Sprintf("%v", req.BusinessId))
+	path = strings.ReplaceAll(path, "{business_id}", url.PathEscape(fmt.Sprintf("%v", req.BusinessId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -391,7 +391,7 @@ func (c *BusinessServiceClient) SetLogo(ctx context.Context, req *SetLogoRequest
 		}
 	}
 	path := "/hub/business/v1/businesses/{business_id}/logo"
-	path = strings.ReplaceAll(path, "{business_id}", fmt.Sprintf("%v", req.BusinessId))
+	path = strings.ReplaceAll(path, "{business_id}", url.PathEscape(fmt.Sprintf("%v", req.BusinessId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -428,7 +428,7 @@ func (c *BusinessServiceClient) DeleteBusiness(ctx context.Context, req *DeleteB
 		}
 	}
 	path := "/hub/business/v1/businesses/{business_id}"
-	path = strings.ReplaceAll(path, "{business_id}", fmt.Sprintf("%v", req.BusinessId))
+	path = strings.ReplaceAll(path, "{business_id}", url.PathEscape(fmt.Sprintf("%v", req.BusinessId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

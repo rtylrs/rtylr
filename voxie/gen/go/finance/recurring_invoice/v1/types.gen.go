@@ -496,6 +496,38 @@ type UpdateRecurringInvoiceBody struct {
 	IsActive          *bool   `json:"is_active,omitempty"`
 }
 
+func (m *UpdateRecurringInvoiceBody) MarshalJSON() ([]byte, error) {
+	type alias UpdateRecurringInvoiceBody
+	aux := struct {
+		*alias
+		TemplateInvoiceId *string `json:"template_invoice_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.TemplateInvoiceId != nil {
+		encodedTemplateInvoiceId := strconv.FormatInt(*m.TemplateInvoiceId, 10)
+		aux.TemplateInvoiceId = &encodedTemplateInvoiceId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *UpdateRecurringInvoiceBody) UnmarshalJSON(data []byte) error {
+	type alias UpdateRecurringInvoiceBody
+	aux := struct {
+		*alias
+		TemplateInvoiceId *string `json:"template_invoice_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.TemplateInvoiceId != nil {
+		v, err := strconv.ParseInt(*aux.TemplateInvoiceId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TemplateInvoiceId = &v
+	}
+	return nil
+}
+
 func (x *UpdateRecurringInvoiceBody) GetTemplateInvoiceId() int64 {
 	if x == nil {
 		var zero int64

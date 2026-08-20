@@ -100,7 +100,7 @@ func (c *WaitlistServiceClient) UpdateEntry(ctx context.Context, req *UpdateEntr
 		}
 	}
 	path := "/booking/waitlist/v1/entries/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

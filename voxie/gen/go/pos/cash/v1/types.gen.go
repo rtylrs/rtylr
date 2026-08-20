@@ -24,17 +24,27 @@ func (m *CashMovement) MarshalJSON() ([]byte, error) {
 	type alias CashMovement
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
-		BranchId   string `json:"branch_id,omitempty"`
-		SessionId  string `json:"session_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		BusinessId string  `json:"business_id,omitempty"`
+		BranchId   string  `json:"branch_id,omitempty"`
+		SessionId  string  `json:"session_id,omitempty"`
+		EmployeeId string  `json:"employee_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		ApprovedBy *string `json:"approved_by,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
 	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
 	aux.SessionId = strconv.FormatInt(m.SessionId, 10)
 	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.TerminalId != nil {
+		encodedTerminalId := strconv.FormatInt(*m.TerminalId, 10)
+		aux.TerminalId = &encodedTerminalId
+	}
+	if m.ApprovedBy != nil {
+		encodedApprovedBy := strconv.FormatInt(*m.ApprovedBy, 10)
+		aux.ApprovedBy = &encodedApprovedBy
+	}
 	return json.Marshal(aux)
 }
 
@@ -42,11 +52,13 @@ func (m *CashMovement) UnmarshalJSON(data []byte) error {
 	type alias CashMovement
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
-		BranchId   string `json:"branch_id,omitempty"`
-		SessionId  string `json:"session_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		BusinessId string  `json:"business_id,omitempty"`
+		BranchId   string  `json:"branch_id,omitempty"`
+		SessionId  string  `json:"session_id,omitempty"`
+		EmployeeId string  `json:"employee_id,omitempty"`
+		TerminalId *string `json:"terminal_id,omitempty"`
+		ApprovedBy *string `json:"approved_by,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -85,6 +97,20 @@ func (m *CashMovement) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.EmployeeId = v
+	}
+	if aux.TerminalId != nil {
+		v, err := strconv.ParseInt(*aux.TerminalId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TerminalId = &v
+	}
+	if aux.ApprovedBy != nil {
+		v, err := strconv.ParseInt(*aux.ApprovedBy, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ApprovedBy = &v
 	}
 	return nil
 }

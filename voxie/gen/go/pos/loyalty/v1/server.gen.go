@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -279,8 +296,9 @@ func RegisterLoyaltyServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "LoyaltyService", Method: "updateLoyaltyConfig", HTTPMethod: "PUT", Route: "/pos/loyalty/v1/config", AuthSchemes: nil}))
 	mux.Handle("GET /pos/loyalty/v1/transactions", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListLoyaltyTransactionsRequest)
-		if r.URL.Query().Get("customer_id") != "" {
-			parsedCustomerId, err := parseInt64(r.URL.Query().Get("customer_id"))
+		if values := r.URL.Query()["customer_id"]; len(values) > 0 {
+			value := values[0]
+			parsedCustomerId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter customer_id: "+err.Error())
 				return
@@ -347,8 +365,9 @@ func RegisterLoyaltyServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "LoyaltyService", Method: "redeemPoints", HTTPMethod: "POST", Route: "/pos/loyalty/v1/redeem", AuthSchemes: nil}))
 	mux.Handle("GET /pos/loyalty/v1/balance", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetLoyaltyBalanceRequest)
-		if r.URL.Query().Get("customer_id") != "" {
-			parsedCustomerId, err := parseInt64(r.URL.Query().Get("customer_id"))
+		if values := r.URL.Query()["customer_id"]; len(values) > 0 {
+			value := values[0]
+			parsedCustomerId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter customer_id: "+err.Error())
 				return

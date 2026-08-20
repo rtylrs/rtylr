@@ -101,7 +101,7 @@ func (c *SegmentServiceClient) GetSegmentDetail(ctx context.Context, req *GetSeg
 		}
 	}
 	path := "/crm/segment/v1/segments/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -137,7 +137,7 @@ func (c *SegmentServiceClient) GetSegmentCustomers(ctx context.Context, req *Get
 		}
 	}
 	path := "/crm/segment/v1/segments/{segment_id}/customers"
-	path = strings.ReplaceAll(path, "{segment_id}", fmt.Sprintf("%v", req.SegmentId))
+	path = strings.ReplaceAll(path, "{segment_id}", url.PathEscape(fmt.Sprintf("%v", req.SegmentId)))
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
 	query.Set("page_size", strconv.FormatInt(int64(req.PageSize), 10))
@@ -175,7 +175,7 @@ func (c *SegmentServiceClient) UpdateSegment(ctx context.Context, req *UpdateSeg
 		}
 	}
 	path := "/crm/segment/v1/segments/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -212,7 +212,7 @@ func (c *SegmentServiceClient) DeleteSegment(ctx context.Context, req *DeleteSeg
 		}
 	}
 	path := "/crm/segment/v1/segments/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

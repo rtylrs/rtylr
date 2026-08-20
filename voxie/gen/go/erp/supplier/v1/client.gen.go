@@ -103,7 +103,7 @@ func (c *SupplierServiceClient) UpdateSupplier(ctx context.Context, req *UpdateS
 		}
 	}
 	path := "/erp/supplier/v1/suppliers/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -140,7 +140,7 @@ func (c *SupplierServiceClient) DeleteSupplier(ctx context.Context, req *DeleteS
 		}
 	}
 	path := "/erp/supplier/v1/suppliers/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

@@ -112,7 +112,7 @@ func (c *EmployeeServiceClient) UpdateEmployee(ctx context.Context, req *UpdateE
 		}
 	}
 	path := "/hr/employee/v1/employees/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

@@ -100,7 +100,7 @@ func (c *TableServiceClient) UpdateTable(ctx context.Context, req *UpdateTableRe
 		}
 	}
 	path := "/pos/table/v1/tables/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -137,7 +137,7 @@ func (c *TableServiceClient) DeleteTable(ctx context.Context, req *DeleteTableRe
 		}
 	}
 	path := "/pos/table/v1/tables/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

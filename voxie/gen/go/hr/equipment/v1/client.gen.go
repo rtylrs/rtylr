@@ -148,7 +148,7 @@ func (c *EquipmentServiceClient) ApproveEquipment(ctx context.Context, req *Appr
 		}
 	}
 	path := "/hr/equipment/v1/requests/{equipment_request_id}/approve"
-	path = strings.ReplaceAll(path, "{equipment_request_id}", fmt.Sprintf("%v", req.EquipmentRequestId))
+	path = strings.ReplaceAll(path, "{equipment_request_id}", url.PathEscape(fmt.Sprintf("%v", req.EquipmentRequestId)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

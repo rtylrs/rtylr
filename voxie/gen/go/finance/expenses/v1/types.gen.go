@@ -29,11 +29,16 @@ func (m *Expense) MarshalJSON() ([]byte, error) {
 	type alias Expense
 	aux := struct {
 		*alias
-		Id      string `json:"id,omitempty"`
-		OwnerId string `json:"owner_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		CategoryId *string `json:"category_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
+	if m.CategoryId != nil {
+		encodedCategoryId := strconv.FormatInt(*m.CategoryId, 10)
+		aux.CategoryId = &encodedCategoryId
+	}
 	return json.Marshal(aux)
 }
 
@@ -41,8 +46,9 @@ func (m *Expense) UnmarshalJSON(data []byte) error {
 	type alias Expense
 	aux := struct {
 		*alias
-		Id      string `json:"id,omitempty"`
-		OwnerId string `json:"owner_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		CategoryId *string `json:"category_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -60,6 +66,13 @@ func (m *Expense) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.OwnerId = v
+	}
+	if aux.CategoryId != nil {
+		v, err := strconv.ParseInt(*aux.CategoryId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CategoryId = &v
 	}
 	return nil
 }
@@ -295,6 +308,38 @@ type CreateExpenseRequest struct {
 	TaxAmount       float64 `json:"tax_amount,omitempty"`
 	Notes           string  `json:"notes,omitempty"`
 	ExpenseDate     string  `json:"expense_date,omitempty"`
+}
+
+func (m *CreateExpenseRequest) MarshalJSON() ([]byte, error) {
+	type alias CreateExpenseRequest
+	aux := struct {
+		*alias
+		CategoryId *string `json:"category_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.CategoryId != nil {
+		encodedCategoryId := strconv.FormatInt(*m.CategoryId, 10)
+		aux.CategoryId = &encodedCategoryId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *CreateExpenseRequest) UnmarshalJSON(data []byte) error {
+	type alias CreateExpenseRequest
+	aux := struct {
+		*alias
+		CategoryId *string `json:"category_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.CategoryId != nil {
+		v, err := strconv.ParseInt(*aux.CategoryId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CategoryId = &v
+	}
+	return nil
 }
 
 func (x *CreateExpenseRequest) GetCategoryId() int64 {
@@ -632,6 +677,38 @@ type UpdateExpenseBody struct {
 	TaxAmount       float64 `json:"tax_amount,omitempty"`
 	Notes           string  `json:"notes,omitempty"`
 	ExpenseDate     string  `json:"expense_date,omitempty"`
+}
+
+func (m *UpdateExpenseBody) MarshalJSON() ([]byte, error) {
+	type alias UpdateExpenseBody
+	aux := struct {
+		*alias
+		CategoryId *string `json:"category_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.CategoryId != nil {
+		encodedCategoryId := strconv.FormatInt(*m.CategoryId, 10)
+		aux.CategoryId = &encodedCategoryId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *UpdateExpenseBody) UnmarshalJSON(data []byte) error {
+	type alias UpdateExpenseBody
+	aux := struct {
+		*alias
+		CategoryId *string `json:"category_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.CategoryId != nil {
+		v, err := strconv.ParseInt(*aux.CategoryId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CategoryId = &v
+	}
+	return nil
 }
 
 func (x *UpdateExpenseBody) GetCategoryId() int64 {

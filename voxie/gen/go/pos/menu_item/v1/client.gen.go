@@ -138,7 +138,7 @@ func (c *MenuItemServiceClient) UpdateMenuItem(ctx context.Context, req *UpdateM
 		}
 	}
 	path := "/pos/menu-item/v1/menu-items/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

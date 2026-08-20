@@ -207,7 +207,7 @@ func (c *DeveloperServiceClient) UpdateWebhook(ctx context.Context, req *UpdateW
 		}
 	}
 	path := "/hub/developer/v1/webhooks/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -244,7 +244,7 @@ func (c *DeveloperServiceClient) DeleteWebhook(ctx context.Context, req *DeleteW
 		}
 	}
 	path := "/hub/developer/v1/webhooks/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

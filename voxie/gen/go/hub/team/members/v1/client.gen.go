@@ -63,7 +63,7 @@ func (c *MembersServiceClient) GetMember(ctx context.Context, req *GetMemberRequ
 		}
 	}
 	path := "/hub/team/members/v1/members/{user_id}"
-	path = strings.ReplaceAll(path, "{user_id}", fmt.Sprintf("%v", req.UserId))
+	path = strings.ReplaceAll(path, "{user_id}", url.PathEscape(fmt.Sprintf("%v", req.UserId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -99,7 +99,7 @@ func (c *MembersServiceClient) RemoveMember(ctx context.Context, req *RemoveMemb
 		}
 	}
 	path := "/hub/team/members/v1/members/{user_id}"
-	path = strings.ReplaceAll(path, "{user_id}", fmt.Sprintf("%v", req.UserId))
+	path = strings.ReplaceAll(path, "{user_id}", url.PathEscape(fmt.Sprintf("%v", req.UserId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

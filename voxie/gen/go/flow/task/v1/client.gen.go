@@ -231,7 +231,7 @@ func (c *TaskServiceClient) GetTaskDetail(ctx context.Context, req *GetTaskDetai
 		}
 	}
 	path := "/flow/task/v1/tasks/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -267,7 +267,7 @@ func (c *TaskServiceClient) UpdateTask(ctx context.Context, req *UpdateTaskReque
 		}
 	}
 	path := "/flow/task/v1/tasks/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -304,7 +304,7 @@ func (c *TaskServiceClient) UpdateTaskStatus(ctx context.Context, req *UpdateTas
 		}
 	}
 	path := "/flow/task/v1/tasks/{id}/status"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -341,7 +341,7 @@ func (c *TaskServiceClient) DeleteTask(ctx context.Context, req *DeleteTaskReque
 		}
 	}
 	path := "/flow/task/v1/tasks/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -413,7 +413,7 @@ func (c *TaskServiceClient) GetSubtasks(ctx context.Context, req *GetSubtasksReq
 		}
 	}
 	path := "/flow/task/v1/tasks/{task_id}/subtasks"
-	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
+	path = strings.ReplaceAll(path, "{task_id}", url.PathEscape(fmt.Sprintf("%v", req.TaskId)))
 	query := url.Values{}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
@@ -453,7 +453,7 @@ func (c *TaskServiceClient) AddComment(ctx context.Context, req *AddCommentReque
 		}
 	}
 	path := "/flow/task/v1/tasks/{task_id}/comments"
-	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
+	path = strings.ReplaceAll(path, "{task_id}", url.PathEscape(fmt.Sprintf("%v", req.TaskId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -490,7 +490,7 @@ func (c *TaskServiceClient) DeleteComment(ctx context.Context, req *DeleteCommen
 		}
 	}
 	path := "/flow/task/v1/tasks/comments/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -526,7 +526,7 @@ func (c *TaskServiceClient) GetTaskActivity(ctx context.Context, req *GetTaskAct
 		}
 	}
 	path := "/flow/task/v1/tasks/{task_id}/activity"
-	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
+	path = strings.ReplaceAll(path, "{task_id}", url.PathEscape(fmt.Sprintf("%v", req.TaskId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -598,7 +598,7 @@ func (c *TaskServiceClient) GetAttachments(ctx context.Context, req *GetAttachme
 		}
 	}
 	path := "/flow/task/v1/tasks/{task_id}/attachments"
-	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
+	path = strings.ReplaceAll(path, "{task_id}", url.PathEscape(fmt.Sprintf("%v", req.TaskId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -634,7 +634,7 @@ func (c *TaskServiceClient) DeleteAttachment(ctx context.Context, req *DeleteAtt
 		}
 	}
 	path := "/flow/task/v1/tasks/attachments/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -670,7 +670,7 @@ func (c *TaskServiceClient) CreateTimeLog(ctx context.Context, req *CreateTimeLo
 		}
 	}
 	path := "/flow/task/v1/tasks/{task_id}/time-logs"
-	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
+	path = strings.ReplaceAll(path, "{task_id}", url.PathEscape(fmt.Sprintf("%v", req.TaskId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -707,7 +707,7 @@ func (c *TaskServiceClient) GetTimeLogs(ctx context.Context, req *GetTimeLogsReq
 		}
 	}
 	path := "/flow/task/v1/tasks/{task_id}/time-logs"
-	path = strings.ReplaceAll(path, "{task_id}", fmt.Sprintf("%v", req.TaskId))
+	path = strings.ReplaceAll(path, "{task_id}", url.PathEscape(fmt.Sprintf("%v", req.TaskId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -743,7 +743,7 @@ func (c *TaskServiceClient) DeleteTimeLog(ctx context.Context, req *DeleteTimeLo
 		}
 	}
 	path := "/flow/task/v1/tasks/time-logs/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

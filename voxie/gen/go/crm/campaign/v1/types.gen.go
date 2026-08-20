@@ -31,13 +31,14 @@ func (m *Campaign) MarshalJSON() ([]byte, error) {
 	type alias Campaign
 	aux := struct {
 		*alias
-		Id             string `json:"id,omitempty"`
-		OwnerId        string `json:"owner_id,omitempty"`
-		AudienceCount  string `json:"audience_count,omitempty"`
-		SentCount      string `json:"sent_count,omitempty"`
-		DeliveredCount string `json:"delivered_count,omitempty"`
-		OpenedCount    string `json:"opened_count,omitempty"`
-		ClickedCount   string `json:"clicked_count,omitempty"`
+		Id             string  `json:"id,omitempty"`
+		OwnerId        string  `json:"owner_id,omitempty"`
+		AudienceCount  string  `json:"audience_count,omitempty"`
+		SentCount      string  `json:"sent_count,omitempty"`
+		DeliveredCount string  `json:"delivered_count,omitempty"`
+		OpenedCount    string  `json:"opened_count,omitempty"`
+		ClickedCount   string  `json:"clicked_count,omitempty"`
+		SegmentId      *string `json:"segment_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
@@ -46,6 +47,10 @@ func (m *Campaign) MarshalJSON() ([]byte, error) {
 	aux.DeliveredCount = strconv.FormatInt(m.DeliveredCount, 10)
 	aux.OpenedCount = strconv.FormatInt(m.OpenedCount, 10)
 	aux.ClickedCount = strconv.FormatInt(m.ClickedCount, 10)
+	if m.SegmentId != nil {
+		encodedSegmentId := strconv.FormatInt(*m.SegmentId, 10)
+		aux.SegmentId = &encodedSegmentId
+	}
 	return json.Marshal(aux)
 }
 
@@ -53,13 +58,14 @@ func (m *Campaign) UnmarshalJSON(data []byte) error {
 	type alias Campaign
 	aux := struct {
 		*alias
-		Id             string `json:"id,omitempty"`
-		OwnerId        string `json:"owner_id,omitempty"`
-		AudienceCount  string `json:"audience_count,omitempty"`
-		SentCount      string `json:"sent_count,omitempty"`
-		DeliveredCount string `json:"delivered_count,omitempty"`
-		OpenedCount    string `json:"opened_count,omitempty"`
-		ClickedCount   string `json:"clicked_count,omitempty"`
+		Id             string  `json:"id,omitempty"`
+		OwnerId        string  `json:"owner_id,omitempty"`
+		AudienceCount  string  `json:"audience_count,omitempty"`
+		SentCount      string  `json:"sent_count,omitempty"`
+		DeliveredCount string  `json:"delivered_count,omitempty"`
+		OpenedCount    string  `json:"opened_count,omitempty"`
+		ClickedCount   string  `json:"clicked_count,omitempty"`
+		SegmentId      *string `json:"segment_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -112,6 +118,13 @@ func (m *Campaign) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.ClickedCount = v
+	}
+	if aux.SegmentId != nil {
+		v, err := strconv.ParseInt(*aux.SegmentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.SegmentId = &v
 	}
 	return nil
 }
@@ -456,6 +469,38 @@ type CreateCampaignRequest struct {
 	ScheduledAt string `json:"scheduled_at,omitempty"`
 }
 
+func (m *CreateCampaignRequest) MarshalJSON() ([]byte, error) {
+	type alias CreateCampaignRequest
+	aux := struct {
+		*alias
+		SegmentId *string `json:"segment_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.SegmentId != nil {
+		encodedSegmentId := strconv.FormatInt(*m.SegmentId, 10)
+		aux.SegmentId = &encodedSegmentId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *CreateCampaignRequest) UnmarshalJSON(data []byte) error {
+	type alias CreateCampaignRequest
+	aux := struct {
+		*alias
+		SegmentId *string `json:"segment_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.SegmentId != nil {
+		v, err := strconv.ParseInt(*aux.SegmentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.SegmentId = &v
+	}
+	return nil
+}
+
 func (x *CreateCampaignRequest) GetName() string {
 	if x == nil {
 		var zero string
@@ -713,6 +758,38 @@ type UpdateCampaignBody struct {
 	Subject     string `json:"subject,omitempty"`
 	Content     string `json:"content,omitempty"`
 	ScheduledAt string `json:"scheduled_at,omitempty"`
+}
+
+func (m *UpdateCampaignBody) MarshalJSON() ([]byte, error) {
+	type alias UpdateCampaignBody
+	aux := struct {
+		*alias
+		SegmentId *string `json:"segment_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.SegmentId != nil {
+		encodedSegmentId := strconv.FormatInt(*m.SegmentId, 10)
+		aux.SegmentId = &encodedSegmentId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *UpdateCampaignBody) UnmarshalJSON(data []byte) error {
+	type alias UpdateCampaignBody
+	aux := struct {
+		*alias
+		SegmentId *string `json:"segment_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.SegmentId != nil {
+		v, err := strconv.ParseInt(*aux.SegmentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.SegmentId = &v
+	}
+	return nil
 }
 
 func (x *UpdateCampaignBody) GetName() string {

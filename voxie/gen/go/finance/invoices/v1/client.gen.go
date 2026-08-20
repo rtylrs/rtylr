@@ -107,7 +107,7 @@ func (c *InvoicesServiceClient) GetInvoice(ctx context.Context, req *GetInvoiceR
 		}
 	}
 	path := "/finance/invoices/v1/invoices/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -143,7 +143,7 @@ func (c *InvoicesServiceClient) UpdateInvoice(ctx context.Context, req *UpdateIn
 		}
 	}
 	path := "/finance/invoices/v1/invoices/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -180,7 +180,7 @@ func (c *InvoicesServiceClient) UpdateInvoiceStatus(ctx context.Context, req *Up
 		}
 	}
 	path := "/finance/invoices/v1/invoices/{id}/status"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -217,7 +217,7 @@ func (c *InvoicesServiceClient) DeleteInvoice(ctx context.Context, req *DeleteIn
 		}
 	}
 	path := "/finance/invoices/v1/invoices/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -253,7 +253,7 @@ func (c *InvoicesServiceClient) SendInvoice(ctx context.Context, req *SendInvoic
 		}
 	}
 	path := "/finance/invoices/v1/invoices/{id}/send"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

@@ -67,7 +67,7 @@ func (c *MemoryServiceClient) GetChatMessages(ctx context.Context, req *GetChatM
 		}
 	}
 	path := "/hub/memory/v1/chats/{session_id}/messages"
-	path = strings.ReplaceAll(path, "{session_id}", fmt.Sprintf("%v", req.SessionId))
+	path = strings.ReplaceAll(path, "{session_id}", url.PathEscape(fmt.Sprintf("%v", req.SessionId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -103,7 +103,7 @@ func (c *MemoryServiceClient) DeleteChat(ctx context.Context, req *DeleteChatReq
 		}
 	}
 	path := "/hub/memory/v1/chats/{session_id}"
-	path = strings.ReplaceAll(path, "{session_id}", fmt.Sprintf("%v", req.SessionId))
+	path = strings.ReplaceAll(path, "{session_id}", url.PathEscape(fmt.Sprintf("%v", req.SessionId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -139,7 +139,7 @@ func (c *MemoryServiceClient) RenameChat(ctx context.Context, req *RenameChatReq
 		}
 	}
 	path := "/hub/memory/v1/chats/{session_id}"
-	path = strings.ReplaceAll(path, "{session_id}", fmt.Sprintf("%v", req.SessionId))
+	path = strings.ReplaceAll(path, "{session_id}", url.PathEscape(fmt.Sprintf("%v", req.SessionId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -176,7 +176,7 @@ func (c *MemoryServiceClient) PinChat(ctx context.Context, req *PinChatRequest) 
 		}
 	}
 	path := "/hub/memory/v1/chats/{session_id}/pin"
-	path = strings.ReplaceAll(path, "{session_id}", fmt.Sprintf("%v", req.SessionId))
+	path = strings.ReplaceAll(path, "{session_id}", url.PathEscape(fmt.Sprintf("%v", req.SessionId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

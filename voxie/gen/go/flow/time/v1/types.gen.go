@@ -23,9 +23,19 @@ func (m *WorkType) MarshalJSON() ([]byte, error) {
 	type alias WorkType
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id           string  `json:"id,omitempty"`
+		ParentId     *string `json:"parent_id,omitempty"`
+		HrCategoryId *string `json:"hr_category_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
+	if m.ParentId != nil {
+		encodedParentId := strconv.FormatInt(*m.ParentId, 10)
+		aux.ParentId = &encodedParentId
+	}
+	if m.HrCategoryId != nil {
+		encodedHrCategoryId := strconv.FormatInt(*m.HrCategoryId, 10)
+		aux.HrCategoryId = &encodedHrCategoryId
+	}
 	return json.Marshal(aux)
 }
 
@@ -33,7 +43,9 @@ func (m *WorkType) UnmarshalJSON(data []byte) error {
 	type alias WorkType
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id           string  `json:"id,omitempty"`
+		ParentId     *string `json:"parent_id,omitempty"`
+		HrCategoryId *string `json:"hr_category_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -44,6 +56,20 @@ func (m *WorkType) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.Id = v
+	}
+	if aux.ParentId != nil {
+		v, err := strconv.ParseInt(*aux.ParentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ParentId = &v
+	}
+	if aux.HrCategoryId != nil {
+		v, err := strconv.ParseInt(*aux.HrCategoryId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.HrCategoryId = &v
 	}
 	return nil
 }
@@ -155,11 +181,31 @@ func (m *WorkDay) MarshalJSON() ([]byte, error) {
 	type alias WorkDay
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		EmployeeId string  `json:"employee_id,omitempty"`
+		UserId     *string `json:"user_id,omitempty"`
+		LoggedBy   *string `json:"logged_by,omitempty"`
+		ApprovedBy *string `json:"approved_by,omitempty"`
+		ReopenedBy *string `json:"reopened_by,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
+	if m.UserId != nil {
+		encodedUserId := strconv.FormatInt(*m.UserId, 10)
+		aux.UserId = &encodedUserId
+	}
+	if m.LoggedBy != nil {
+		encodedLoggedBy := strconv.FormatInt(*m.LoggedBy, 10)
+		aux.LoggedBy = &encodedLoggedBy
+	}
+	if m.ApprovedBy != nil {
+		encodedApprovedBy := strconv.FormatInt(*m.ApprovedBy, 10)
+		aux.ApprovedBy = &encodedApprovedBy
+	}
+	if m.ReopenedBy != nil {
+		encodedReopenedBy := strconv.FormatInt(*m.ReopenedBy, 10)
+		aux.ReopenedBy = &encodedReopenedBy
+	}
 	return json.Marshal(aux)
 }
 
@@ -167,8 +213,12 @@ func (m *WorkDay) UnmarshalJSON(data []byte) error {
 	type alias WorkDay
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		EmployeeId string  `json:"employee_id,omitempty"`
+		UserId     *string `json:"user_id,omitempty"`
+		LoggedBy   *string `json:"logged_by,omitempty"`
+		ApprovedBy *string `json:"approved_by,omitempty"`
+		ReopenedBy *string `json:"reopened_by,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -186,6 +236,34 @@ func (m *WorkDay) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.EmployeeId = v
+	}
+	if aux.UserId != nil {
+		v, err := strconv.ParseInt(*aux.UserId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.UserId = &v
+	}
+	if aux.LoggedBy != nil {
+		v, err := strconv.ParseInt(*aux.LoggedBy, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LoggedBy = &v
+	}
+	if aux.ApprovedBy != nil {
+		v, err := strconv.ParseInt(*aux.ApprovedBy, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ApprovedBy = &v
+	}
+	if aux.ReopenedBy != nil {
+		v, err := strconv.ParseInt(*aux.ReopenedBy, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ReopenedBy = &v
 	}
 	return nil
 }
@@ -403,11 +481,31 @@ func (m *WorkDayLine) MarshalJSON() ([]byte, error) {
 	type alias WorkDayLine
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		WorkDayId string `json:"work_day_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		WorkDayId  string  `json:"work_day_id,omitempty"`
+		ProjectId  *string `json:"project_id,omitempty"`
+		TaskId     *string `json:"task_id,omitempty"`
+		WorkTypeId *string `json:"work_type_id,omitempty"`
+		LoggedBy   *string `json:"logged_by,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.WorkDayId = strconv.FormatInt(m.WorkDayId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
+	if m.TaskId != nil {
+		encodedTaskId := strconv.FormatInt(*m.TaskId, 10)
+		aux.TaskId = &encodedTaskId
+	}
+	if m.WorkTypeId != nil {
+		encodedWorkTypeId := strconv.FormatInt(*m.WorkTypeId, 10)
+		aux.WorkTypeId = &encodedWorkTypeId
+	}
+	if m.LoggedBy != nil {
+		encodedLoggedBy := strconv.FormatInt(*m.LoggedBy, 10)
+		aux.LoggedBy = &encodedLoggedBy
+	}
 	return json.Marshal(aux)
 }
 
@@ -415,8 +513,12 @@ func (m *WorkDayLine) UnmarshalJSON(data []byte) error {
 	type alias WorkDayLine
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		WorkDayId string `json:"work_day_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		WorkDayId  string  `json:"work_day_id,omitempty"`
+		ProjectId  *string `json:"project_id,omitempty"`
+		TaskId     *string `json:"task_id,omitempty"`
+		WorkTypeId *string `json:"work_type_id,omitempty"`
+		LoggedBy   *string `json:"logged_by,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -434,6 +536,34 @@ func (m *WorkDayLine) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.WorkDayId = v
+	}
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ProjectId = &v
+	}
+	if aux.TaskId != nil {
+		v, err := strconv.ParseInt(*aux.TaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TaskId = &v
+	}
+	if aux.WorkTypeId != nil {
+		v, err := strconv.ParseInt(*aux.WorkTypeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.WorkTypeId = &v
+	}
+	if aux.LoggedBy != nil {
+		v, err := strconv.ParseInt(*aux.LoggedBy, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LoggedBy = &v
 	}
 	return nil
 }
@@ -575,6 +705,38 @@ type GetWorkDayRequest struct {
 	EmployeeId *int64 `json:"employee_id,omitempty"`
 }
 
+func (m *GetWorkDayRequest) MarshalJSON() ([]byte, error) {
+	type alias GetWorkDayRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *GetWorkDayRequest) UnmarshalJSON(data []byte) error {
+	type alias GetWorkDayRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = &v
+	}
+	return nil
+}
+
 func (x *GetWorkDayRequest) GetDate() string {
 	if x == nil {
 		var zero string
@@ -624,6 +786,38 @@ type UpsertWorkDayRequest struct {
 	EndTime      *string `json:"end_time,omitempty"`
 	BreakMinutes int32   `json:"break_minutes,omitempty"`
 	EmployeeId   *int64  `json:"employee_id,omitempty"`
+}
+
+func (m *UpsertWorkDayRequest) MarshalJSON() ([]byte, error) {
+	type alias UpsertWorkDayRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *UpsertWorkDayRequest) UnmarshalJSON(data []byte) error {
+	type alias UpsertWorkDayRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = &v
+	}
+	return nil
 }
 
 func (x *UpsertWorkDayRequest) GetDate() string {
@@ -712,6 +906,38 @@ type ListWorkDaysRequest struct {
 	EmployeeId *int64 `json:"employee_id,omitempty"`
 	Page       int32  `json:"page,omitempty"`
 	Limit      int32  `json:"limit,omitempty"`
+}
+
+func (m *ListWorkDaysRequest) MarshalJSON() ([]byte, error) {
+	type alias ListWorkDaysRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListWorkDaysRequest) UnmarshalJSON(data []byte) error {
+	type alias ListWorkDaysRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = &v
+	}
+	return nil
 }
 
 func (x *ListWorkDaysRequest) GetFrom() string {
@@ -893,9 +1119,24 @@ func (m *CreateWorkDayLineRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateWorkDayLineRequest
 	aux := struct {
 		*alias
-		WorkDayId string `json:"work_day_id,omitempty"`
+		WorkDayId  string  `json:"work_day_id,omitempty"`
+		ProjectId  *string `json:"project_id,omitempty"`
+		TaskId     *string `json:"task_id,omitempty"`
+		WorkTypeId *string `json:"work_type_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.WorkDayId = strconv.FormatInt(m.WorkDayId, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
+	if m.TaskId != nil {
+		encodedTaskId := strconv.FormatInt(*m.TaskId, 10)
+		aux.TaskId = &encodedTaskId
+	}
+	if m.WorkTypeId != nil {
+		encodedWorkTypeId := strconv.FormatInt(*m.WorkTypeId, 10)
+		aux.WorkTypeId = &encodedWorkTypeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -903,7 +1144,10 @@ func (m *CreateWorkDayLineRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateWorkDayLineRequest
 	aux := struct {
 		*alias
-		WorkDayId string `json:"work_day_id,omitempty"`
+		WorkDayId  string  `json:"work_day_id,omitempty"`
+		ProjectId  *string `json:"project_id,omitempty"`
+		TaskId     *string `json:"task_id,omitempty"`
+		WorkTypeId *string `json:"work_type_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -914,6 +1158,27 @@ func (m *CreateWorkDayLineRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.WorkDayId = v
+	}
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ProjectId = &v
+	}
+	if aux.TaskId != nil {
+		v, err := strconv.ParseInt(*aux.TaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TaskId = &v
+	}
+	if aux.WorkTypeId != nil {
+		v, err := strconv.ParseInt(*aux.WorkTypeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.WorkTypeId = &v
 	}
 	return nil
 }
@@ -1033,9 +1298,24 @@ func (m *UpdateWorkDayLineRequest) MarshalJSON() ([]byte, error) {
 	type alias UpdateWorkDayLineRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		ProjectId  *string `json:"project_id,omitempty"`
+		TaskId     *string `json:"task_id,omitempty"`
+		WorkTypeId *string `json:"work_type_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
+	}
+	if m.TaskId != nil {
+		encodedTaskId := strconv.FormatInt(*m.TaskId, 10)
+		aux.TaskId = &encodedTaskId
+	}
+	if m.WorkTypeId != nil {
+		encodedWorkTypeId := strconv.FormatInt(*m.WorkTypeId, 10)
+		aux.WorkTypeId = &encodedWorkTypeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1043,7 +1323,10 @@ func (m *UpdateWorkDayLineRequest) UnmarshalJSON(data []byte) error {
 	type alias UpdateWorkDayLineRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		ProjectId  *string `json:"project_id,omitempty"`
+		TaskId     *string `json:"task_id,omitempty"`
+		WorkTypeId *string `json:"work_type_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -1054,6 +1337,27 @@ func (m *UpdateWorkDayLineRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.Id = v
+	}
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ProjectId = &v
+	}
+	if aux.TaskId != nil {
+		v, err := strconv.ParseInt(*aux.TaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TaskId = &v
+	}
+	if aux.WorkTypeId != nil {
+		v, err := strconv.ParseInt(*aux.WorkTypeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.WorkTypeId = &v
 	}
 	return nil
 }
@@ -1235,6 +1539,51 @@ type CreateWorkTypeRequest struct {
 	SortOrder    int32  `json:"sort_order,omitempty"`
 }
 
+func (m *CreateWorkTypeRequest) MarshalJSON() ([]byte, error) {
+	type alias CreateWorkTypeRequest
+	aux := struct {
+		*alias
+		ParentId     *string `json:"parent_id,omitempty"`
+		HrCategoryId *string `json:"hr_category_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.ParentId != nil {
+		encodedParentId := strconv.FormatInt(*m.ParentId, 10)
+		aux.ParentId = &encodedParentId
+	}
+	if m.HrCategoryId != nil {
+		encodedHrCategoryId := strconv.FormatInt(*m.HrCategoryId, 10)
+		aux.HrCategoryId = &encodedHrCategoryId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *CreateWorkTypeRequest) UnmarshalJSON(data []byte) error {
+	type alias CreateWorkTypeRequest
+	aux := struct {
+		*alias
+		ParentId     *string `json:"parent_id,omitempty"`
+		HrCategoryId *string `json:"hr_category_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.ParentId != nil {
+		v, err := strconv.ParseInt(*aux.ParentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ParentId = &v
+	}
+	if aux.HrCategoryId != nil {
+		v, err := strconv.ParseInt(*aux.HrCategoryId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.HrCategoryId = &v
+	}
+	return nil
+}
+
 func (x *CreateWorkTypeRequest) GetName() string {
 	if x == nil {
 		var zero string
@@ -1309,9 +1658,19 @@ func (m *UpdateWorkTypeRequest) MarshalJSON() ([]byte, error) {
 	type alias UpdateWorkTypeRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id           string  `json:"id,omitempty"`
+		ParentId     *string `json:"parent_id,omitempty"`
+		HrCategoryId *string `json:"hr_category_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
+	if m.ParentId != nil {
+		encodedParentId := strconv.FormatInt(*m.ParentId, 10)
+		aux.ParentId = &encodedParentId
+	}
+	if m.HrCategoryId != nil {
+		encodedHrCategoryId := strconv.FormatInt(*m.HrCategoryId, 10)
+		aux.HrCategoryId = &encodedHrCategoryId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1319,7 +1678,9 @@ func (m *UpdateWorkTypeRequest) UnmarshalJSON(data []byte) error {
 	type alias UpdateWorkTypeRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id           string  `json:"id,omitempty"`
+		ParentId     *string `json:"parent_id,omitempty"`
+		HrCategoryId *string `json:"hr_category_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -1330,6 +1691,20 @@ func (m *UpdateWorkTypeRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.Id = v
+	}
+	if aux.ParentId != nil {
+		v, err := strconv.ParseInt(*aux.ParentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ParentId = &v
+	}
+	if aux.HrCategoryId != nil {
+		v, err := strconv.ParseInt(*aux.HrCategoryId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.HrCategoryId = &v
 	}
 	return nil
 }

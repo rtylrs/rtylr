@@ -104,7 +104,7 @@ func (c *OnboardingServiceClient) UpdateChecklistTemplate(ctx context.Context, r
 		}
 	}
 	path := "/hr/onboarding/v1/templates/{role_id}"
-	path = strings.ReplaceAll(path, "{role_id}", fmt.Sprintf("%v", req.RoleId))
+	path = strings.ReplaceAll(path, "{role_id}", url.PathEscape(fmt.Sprintf("%v", req.RoleId)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -141,7 +141,7 @@ func (c *OnboardingServiceClient) AddItemToChecklistTemplate(ctx context.Context
 		}
 	}
 	path := "/hr/onboarding/v1/templates/{role_id}/items"
-	path = strings.ReplaceAll(path, "{role_id}", fmt.Sprintf("%v", req.RoleId))
+	path = strings.ReplaceAll(path, "{role_id}", url.PathEscape(fmt.Sprintf("%v", req.RoleId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -220,7 +220,7 @@ func (c *OnboardingServiceClient) GetEmployeeChecklist(ctx context.Context, req 
 		}
 	}
 	path := "/hr/onboarding/v1/employees/{employee_id}"
-	path = strings.ReplaceAll(path, "{employee_id}", fmt.Sprintf("%v", req.EmployeeId))
+	path = strings.ReplaceAll(path, "{employee_id}", url.PathEscape(fmt.Sprintf("%v", req.EmployeeId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

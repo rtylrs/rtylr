@@ -214,13 +214,14 @@ func (m *PerformanceReviewPayload) MarshalJSON() ([]byte, error) {
 	type alias PerformanceReviewPayload
 	aux := struct {
 		*alias
-		Id                 string `json:"id,omitempty"`
-		OwnerId            string `json:"owner_id,omitempty"`
-		EmployeeId         string `json:"employee_id,omitempty"`
-		ReviewCycleId      string `json:"review_cycle_id,omitempty"`
-		ReviewerEmployeeId string `json:"reviewer_employee_id,omitempty"`
-		CreatedAt          string `json:"created_at,omitempty"`
-		UpdatedAt          string `json:"updated_at,omitempty"`
+		Id                   string  `json:"id,omitempty"`
+		OwnerId              string  `json:"owner_id,omitempty"`
+		EmployeeId           string  `json:"employee_id,omitempty"`
+		ReviewCycleId        string  `json:"review_cycle_id,omitempty"`
+		ReviewerEmployeeId   string  `json:"reviewer_employee_id,omitempty"`
+		CreatedAt            string  `json:"created_at,omitempty"`
+		UpdatedAt            string  `json:"updated_at,omitempty"`
+		SharedWithEmployeeAt *string `json:"shared_with_employee_at,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
@@ -229,6 +230,10 @@ func (m *PerformanceReviewPayload) MarshalJSON() ([]byte, error) {
 	aux.ReviewerEmployeeId = strconv.FormatInt(m.ReviewerEmployeeId, 10)
 	aux.CreatedAt = strconv.FormatInt(m.CreatedAt, 10)
 	aux.UpdatedAt = strconv.FormatInt(m.UpdatedAt, 10)
+	if m.SharedWithEmployeeAt != nil {
+		encodedSharedWithEmployeeAt := strconv.FormatInt(*m.SharedWithEmployeeAt, 10)
+		aux.SharedWithEmployeeAt = &encodedSharedWithEmployeeAt
+	}
 	return json.Marshal(aux)
 }
 
@@ -236,13 +241,14 @@ func (m *PerformanceReviewPayload) UnmarshalJSON(data []byte) error {
 	type alias PerformanceReviewPayload
 	aux := struct {
 		*alias
-		Id                 string `json:"id,omitempty"`
-		OwnerId            string `json:"owner_id,omitempty"`
-		EmployeeId         string `json:"employee_id,omitempty"`
-		ReviewCycleId      string `json:"review_cycle_id,omitempty"`
-		ReviewerEmployeeId string `json:"reviewer_employee_id,omitempty"`
-		CreatedAt          string `json:"created_at,omitempty"`
-		UpdatedAt          string `json:"updated_at,omitempty"`
+		Id                   string  `json:"id,omitempty"`
+		OwnerId              string  `json:"owner_id,omitempty"`
+		EmployeeId           string  `json:"employee_id,omitempty"`
+		ReviewCycleId        string  `json:"review_cycle_id,omitempty"`
+		ReviewerEmployeeId   string  `json:"reviewer_employee_id,omitempty"`
+		CreatedAt            string  `json:"created_at,omitempty"`
+		UpdatedAt            string  `json:"updated_at,omitempty"`
+		SharedWithEmployeeAt *string `json:"shared_with_employee_at,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -295,6 +301,13 @@ func (m *PerformanceReviewPayload) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.UpdatedAt = v
+	}
+	if aux.SharedWithEmployeeAt != nil {
+		v, err := strconv.ParseInt(*aux.SharedWithEmployeeAt, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.SharedWithEmployeeAt = &v
 	}
 	return nil
 }
@@ -699,6 +712,51 @@ func (x *OpenReviewCycleResponse) GetCycle() *ReviewCyclePayload {
 type ListGoalsRequest struct {
 	EmployeeId    *int64 `json:"employee_id,omitempty"`
 	ReviewCycleId *int64 `json:"review_cycle_id,omitempty"`
+}
+
+func (m *ListGoalsRequest) MarshalJSON() ([]byte, error) {
+	type alias ListGoalsRequest
+	aux := struct {
+		*alias
+		EmployeeId    *string `json:"employee_id,omitempty"`
+		ReviewCycleId *string `json:"review_cycle_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	if m.ReviewCycleId != nil {
+		encodedReviewCycleId := strconv.FormatInt(*m.ReviewCycleId, 10)
+		aux.ReviewCycleId = &encodedReviewCycleId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListGoalsRequest) UnmarshalJSON(data []byte) error {
+	type alias ListGoalsRequest
+	aux := struct {
+		*alias
+		EmployeeId    *string `json:"employee_id,omitempty"`
+		ReviewCycleId *string `json:"review_cycle_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = &v
+	}
+	if aux.ReviewCycleId != nil {
+		v, err := strconv.ParseInt(*aux.ReviewCycleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ReviewCycleId = &v
+	}
+	return nil
 }
 
 func (x *ListGoalsRequest) GetEmployeeId() int64 {

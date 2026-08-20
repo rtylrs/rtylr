@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -421,8 +438,9 @@ func RegisterAuthServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "AuthService", Method: "inviteAccept", HTTPMethod: "POST", Route: "/common/auth/v1/invite/accept", AuthSchemes: nil}))
 	mux.Handle("GET /common/auth/v1/email-exists", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CheckEmailExistsRequest)
-		if r.URL.Query().Get("email") != "" {
-			req.Email = r.URL.Query().Get("email")
+		if values := r.URL.Query()["email"]; len(values) > 0 {
+			value := values[0]
+			req.Email = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
@@ -440,8 +458,9 @@ func RegisterAuthServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "AuthService", Method: "checkEmailExists", HTTPMethod: "GET", Route: "/common/auth/v1/email-exists", AuthSchemes: nil}))
 	mux.Handle("GET /common/auth/v1/social/authorize", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(SocialAuthorizeRequest)
-		if r.URL.Query().Get("provider") != "" {
-			req.Provider = r.URL.Query().Get("provider")
+		if values := r.URL.Query()["provider"]; len(values) > 0 {
+			value := values[0]
+			req.Provider = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

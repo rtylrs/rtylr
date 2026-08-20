@@ -99,7 +99,7 @@ func (c *AppServiceClient) AddonStatus(ctx context.Context, req *AddonStatusRequ
 		}
 	}
 	path := "/hub/app/v1/addons/{addon_id}/status"
-	path = strings.ReplaceAll(path, "{addon_id}", fmt.Sprintf("%v", req.AddonId))
+	path = strings.ReplaceAll(path, "{addon_id}", url.PathEscape(fmt.Sprintf("%v", req.AddonId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -135,7 +135,7 @@ func (c *AppServiceClient) EnableAddon(ctx context.Context, req *EnableAddonRequ
 		}
 	}
 	path := "/hub/app/v1/addons/{addon_id}/enable"
-	path = strings.ReplaceAll(path, "{addon_id}", fmt.Sprintf("%v", req.AddonId))
+	path = strings.ReplaceAll(path, "{addon_id}", url.PathEscape(fmt.Sprintf("%v", req.AddonId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -172,7 +172,7 @@ func (c *AppServiceClient) DisableAddon(ctx context.Context, req *DisableAddonRe
 		}
 	}
 	path := "/hub/app/v1/addons/{addon_id}/disable"
-	path = strings.ReplaceAll(path, "{addon_id}", fmt.Sprintf("%v", req.AddonId))
+	path = strings.ReplaceAll(path, "{addon_id}", url.PathEscape(fmt.Sprintf("%v", req.AddonId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

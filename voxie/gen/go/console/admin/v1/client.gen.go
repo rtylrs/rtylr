@@ -107,7 +107,7 @@ func (c *ConsoleAdminServiceClient) GetUser(ctx context.Context, req *GetUserReq
 		}
 	}
 	path := "/console/admin/v1/console/users/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -179,7 +179,7 @@ func (c *ConsoleAdminServiceClient) UpdateUser(ctx context.Context, req *UpdateU
 		}
 	}
 	path := "/console/admin/v1/console/users/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -216,7 +216,7 @@ func (c *ConsoleAdminServiceClient) DeleteUser(ctx context.Context, req *DeleteU
 		}
 	}
 	path := "/console/admin/v1/console/users/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -252,7 +252,7 @@ func (c *ConsoleAdminServiceClient) BanUser(ctx context.Context, req *BanUserReq
 		}
 	}
 	path := "/console/admin/v1/console/users/{id}/ban"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -289,7 +289,7 @@ func (c *ConsoleAdminServiceClient) UnbanUser(ctx context.Context, req *UnbanUse
 		}
 	}
 	path := "/console/admin/v1/console/users/{id}/unban"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -326,7 +326,7 @@ func (c *ConsoleAdminServiceClient) SetConsoleAdmin(ctx context.Context, req *Se
 		}
 	}
 	path := "/console/admin/v1/console/users/{id}/set-console-admin"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -363,7 +363,7 @@ func (c *ConsoleAdminServiceClient) GetUserSubscription(ctx context.Context, req
 		}
 	}
 	path := "/console/admin/v1/console/users/{user_id}/subscription"
-	path = strings.ReplaceAll(path, "{user_id}", fmt.Sprintf("%v", req.UserId))
+	path = strings.ReplaceAll(path, "{user_id}", url.PathEscape(fmt.Sprintf("%v", req.UserId)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -443,7 +443,7 @@ func (c *ConsoleAdminServiceClient) UpdateBusiness(ctx context.Context, req *Upd
 		}
 	}
 	path := "/console/admin/v1/console/businesses/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -480,7 +480,7 @@ func (c *ConsoleAdminServiceClient) DeleteBusiness(ctx context.Context, req *Del
 		}
 	}
 	path := "/console/admin/v1/console/businesses/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -626,7 +626,7 @@ func (c *ConsoleAdminServiceClient) DeleteSubscription(ctx context.Context, req 
 		}
 	}
 	path := "/console/admin/v1/console/subscriptions/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -697,7 +697,7 @@ func (c *ConsoleAdminServiceClient) UpdatePlan(ctx context.Context, req *UpdateP
 		}
 	}
 	path := "/console/admin/v1/console/plans/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

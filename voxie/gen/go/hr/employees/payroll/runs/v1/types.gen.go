@@ -225,17 +225,27 @@ func (m *PayrollRunPayload) MarshalJSON() ([]byte, error) {
 	type alias PayrollRunPayload
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		OwnerId   string `json:"owner_id,omitempty"`
-		CreatedBy string `json:"created_by,omitempty"`
-		CreatedAt string `json:"created_at,omitempty"`
-		UpdatedAt string `json:"updated_at,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		CreatedBy  string  `json:"created_by,omitempty"`
+		CreatedAt  string  `json:"created_at,omitempty"`
+		UpdatedAt  string  `json:"updated_at,omitempty"`
+		ApprovedBy *string `json:"approved_by,omitempty"`
+		ExportedAt *string `json:"exported_at,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.CreatedBy = strconv.FormatInt(m.CreatedBy, 10)
 	aux.CreatedAt = strconv.FormatInt(m.CreatedAt, 10)
 	aux.UpdatedAt = strconv.FormatInt(m.UpdatedAt, 10)
+	if m.ApprovedBy != nil {
+		encodedApprovedBy := strconv.FormatInt(*m.ApprovedBy, 10)
+		aux.ApprovedBy = &encodedApprovedBy
+	}
+	if m.ExportedAt != nil {
+		encodedExportedAt := strconv.FormatInt(*m.ExportedAt, 10)
+		aux.ExportedAt = &encodedExportedAt
+	}
 	return json.Marshal(aux)
 }
 
@@ -243,11 +253,13 @@ func (m *PayrollRunPayload) UnmarshalJSON(data []byte) error {
 	type alias PayrollRunPayload
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		OwnerId   string `json:"owner_id,omitempty"`
-		CreatedBy string `json:"created_by,omitempty"`
-		CreatedAt string `json:"created_at,omitempty"`
-		UpdatedAt string `json:"updated_at,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		CreatedBy  string  `json:"created_by,omitempty"`
+		CreatedAt  string  `json:"created_at,omitempty"`
+		UpdatedAt  string  `json:"updated_at,omitempty"`
+		ApprovedBy *string `json:"approved_by,omitempty"`
+		ExportedAt *string `json:"exported_at,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -286,6 +298,20 @@ func (m *PayrollRunPayload) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.UpdatedAt = v
+	}
+	if aux.ApprovedBy != nil {
+		v, err := strconv.ParseInt(*aux.ApprovedBy, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ApprovedBy = &v
+	}
+	if aux.ExportedAt != nil {
+		v, err := strconv.ParseInt(*aux.ExportedAt, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ExportedAt = &v
 	}
 	return nil
 }

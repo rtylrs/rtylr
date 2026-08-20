@@ -100,7 +100,7 @@ func (c *WarehouseServiceClient) UpdateWarehouse(ctx context.Context, req *Updat
 		}
 	}
 	path := "/erp/warehouse/v1/warehouses/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -137,7 +137,7 @@ func (c *WarehouseServiceClient) DeleteWarehouse(ctx context.Context, req *Delet
 		}
 	}
 	path := "/erp/warehouse/v1/warehouses/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

@@ -187,7 +187,7 @@ func (c *TimeServiceClient) CreateWorkDayLine(ctx context.Context, req *CreateWo
 		}
 	}
 	path := "/flow/time/v1/work-days/{work_day_id}/lines"
-	path = strings.ReplaceAll(path, "{work_day_id}", fmt.Sprintf("%v", req.WorkDayId))
+	path = strings.ReplaceAll(path, "{work_day_id}", url.PathEscape(fmt.Sprintf("%v", req.WorkDayId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -224,7 +224,7 @@ func (c *TimeServiceClient) UpdateWorkDayLine(ctx context.Context, req *UpdateWo
 		}
 	}
 	path := "/flow/time/v1/work-days/lines/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -261,7 +261,7 @@ func (c *TimeServiceClient) DeleteWorkDayLine(ctx context.Context, req *DeleteWo
 		}
 	}
 	path := "/flow/time/v1/work-days/lines/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -369,7 +369,7 @@ func (c *TimeServiceClient) UpdateWorkType(ctx context.Context, req *UpdateWorkT
 		}
 	}
 	path := "/flow/time/v1/work-types/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -406,7 +406,7 @@ func (c *TimeServiceClient) DeleteWorkType(ctx context.Context, req *DeleteWorkT
 		}
 	}
 	path := "/flow/time/v1/work-types/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

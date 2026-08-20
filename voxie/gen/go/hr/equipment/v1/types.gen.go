@@ -26,17 +26,27 @@ func (m *EquipmentRequestPayload) MarshalJSON() ([]byte, error) {
 	type alias EquipmentRequestPayload
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		OwnerId    string `json:"owner_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
-		CreatedAt  string `json:"created_at,omitempty"`
-		UpdatedAt  string `json:"updated_at,omitempty"`
+		Id          string  `json:"id,omitempty"`
+		OwnerId     string  `json:"owner_id,omitempty"`
+		EmployeeId  string  `json:"employee_id,omitempty"`
+		CreatedAt   string  `json:"created_at,omitempty"`
+		UpdatedAt   string  `json:"updated_at,omitempty"`
+		ApprovedBy  *string `json:"approved_by,omitempty"`
+		DeliveredAt *string `json:"delivered_at,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.EmployeeId = strconv.FormatInt(m.EmployeeId, 10)
 	aux.CreatedAt = strconv.FormatInt(m.CreatedAt, 10)
 	aux.UpdatedAt = strconv.FormatInt(m.UpdatedAt, 10)
+	if m.ApprovedBy != nil {
+		encodedApprovedBy := strconv.FormatInt(*m.ApprovedBy, 10)
+		aux.ApprovedBy = &encodedApprovedBy
+	}
+	if m.DeliveredAt != nil {
+		encodedDeliveredAt := strconv.FormatInt(*m.DeliveredAt, 10)
+		aux.DeliveredAt = &encodedDeliveredAt
+	}
 	return json.Marshal(aux)
 }
 
@@ -44,11 +54,13 @@ func (m *EquipmentRequestPayload) UnmarshalJSON(data []byte) error {
 	type alias EquipmentRequestPayload
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		OwnerId    string `json:"owner_id,omitempty"`
-		EmployeeId string `json:"employee_id,omitempty"`
-		CreatedAt  string `json:"created_at,omitempty"`
-		UpdatedAt  string `json:"updated_at,omitempty"`
+		Id          string  `json:"id,omitempty"`
+		OwnerId     string  `json:"owner_id,omitempty"`
+		EmployeeId  string  `json:"employee_id,omitempty"`
+		CreatedAt   string  `json:"created_at,omitempty"`
+		UpdatedAt   string  `json:"updated_at,omitempty"`
+		ApprovedBy  *string `json:"approved_by,omitempty"`
+		DeliveredAt *string `json:"delivered_at,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -87,6 +99,20 @@ func (m *EquipmentRequestPayload) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.UpdatedAt = v
+	}
+	if aux.ApprovedBy != nil {
+		v, err := strconv.ParseInt(*aux.ApprovedBy, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ApprovedBy = &v
+	}
+	if aux.DeliveredAt != nil {
+		v, err := strconv.ParseInt(*aux.DeliveredAt, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DeliveredAt = &v
 	}
 	return nil
 }
@@ -382,6 +408,38 @@ type ListAssetsRequest struct {
 	Condition  *string `json:"condition,omitempty"`
 }
 
+func (m *ListAssetsRequest) MarshalJSON() ([]byte, error) {
+	type alias ListAssetsRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListAssetsRequest) UnmarshalJSON(data []byte) error {
+	type alias ListAssetsRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = &v
+	}
+	return nil
+}
+
 func (x *ListAssetsRequest) GetEmployeeId() int64 {
 	if x == nil {
 		var zero int64
@@ -448,6 +506,38 @@ func (x *ListAssetsResponse) GetOffset() int32 {
 type ListEquipmentRequestsRequest struct {
 	EmployeeId *int64  `json:"employee_id,omitempty"`
 	Status     *string `json:"status,omitempty"`
+}
+
+func (m *ListEquipmentRequestsRequest) MarshalJSON() ([]byte, error) {
+	type alias ListEquipmentRequestsRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListEquipmentRequestsRequest) UnmarshalJSON(data []byte) error {
+	type alias ListEquipmentRequestsRequest
+	aux := struct {
+		*alias
+		EmployeeId *string `json:"employee_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = &v
+	}
+	return nil
 }
 
 func (x *ListEquipmentRequestsRequest) GetEmployeeId() int64 {

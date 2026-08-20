@@ -104,7 +104,7 @@ func (c *StaffServiceClient) GetStaff(ctx context.Context, req *GetStaffRequest)
 		}
 	}
 	path := "/hr/staff/v1/staff/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -140,7 +140,7 @@ func (c *StaffServiceClient) UpdateStaff(ctx context.Context, req *UpdateStaffRe
 		}
 	}
 	path := "/hr/staff/v1/staff/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -177,7 +177,7 @@ func (c *StaffServiceClient) DeleteStaff(ctx context.Context, req *DeleteStaffRe
 		}
 	}
 	path := "/hr/staff/v1/staff/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

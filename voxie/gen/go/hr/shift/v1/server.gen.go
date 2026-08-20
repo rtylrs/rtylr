@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -245,40 +262,46 @@ func RegisterShiftServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /hr/shift/v1/shifts", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListShiftsRequest)
-		if r.URL.Query().Get("location_id") != "" {
-			parsedLocationId, err := parseInt64(r.URL.Query().Get("location_id"))
+		if values := r.URL.Query()["location_id"]; len(values) > 0 {
+			value := values[0]
+			parsedLocationId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter location_id: "+err.Error())
 				return
 			}
 			req.LocationId = &parsedLocationId
 		}
-		if r.URL.Query().Get("staff_id") != "" {
-			parsedStaffId, err := parseInt64(r.URL.Query().Get("staff_id"))
+		if values := r.URL.Query()["staff_id"]; len(values) > 0 {
+			value := values[0]
+			parsedStaffId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter staff_id: "+err.Error())
 				return
 			}
 			req.StaffId = &parsedStaffId
 		}
-		if r.URL.Query().Get("date") != "" {
-			dateVal := r.URL.Query().Get("date")
+		if values := r.URL.Query()["date"]; len(values) > 0 {
+			value := values[0]
+			dateVal := value
 			req.Date = &dateVal
 		}
-		if r.URL.Query().Get("kind") != "" {
-			kindVal := r.URL.Query().Get("kind")
+		if values := r.URL.Query()["kind"]; len(values) > 0 {
+			value := values[0]
+			kindVal := value
 			req.Kind = &kindVal
 		}
-		if r.URL.Query().Get("limit") != "" {
-			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
 				return
 			}
 			req.Limit = &parsedLimit
 		}
-		if r.URL.Query().Get("offset") != "" {
-			parsedOffset, err := parseInt32(r.URL.Query().Get("offset"))
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
 				return
@@ -389,8 +412,9 @@ func RegisterShiftServiceServer(first any, rest ...any) error {
 			return
 		}
 		req.LocationId = parsedLocationId
-		if r.URL.Query().Get("week_start") != "" {
-			req.WeekStart = r.URL.Query().Get("week_start")
+		if values := r.URL.Query()["week_start"]; len(values) > 0 {
+			value := values[0]
+			req.WeekStart = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
@@ -430,40 +454,46 @@ func RegisterShiftServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "ShiftService", Method: "publishRoster", HTTPMethod: "POST", Route: "/hr/shift/v1/roster/publish", AuthSchemes: nil}))
 	mux.Handle("GET /hr/shift/v1/availability", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListAvailabilityRequest)
-		if r.URL.Query().Get("staff_id") != "" {
-			parsedStaffId, err := parseInt64(r.URL.Query().Get("staff_id"))
+		if values := r.URL.Query()["staff_id"]; len(values) > 0 {
+			value := values[0]
+			parsedStaffId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter staff_id: "+err.Error())
 				return
 			}
 			req.StaffId = &parsedStaffId
 		}
-		if r.URL.Query().Get("day_of_week") != "" {
-			parsedDayOfWeek, err := parseInt32(r.URL.Query().Get("day_of_week"))
+		if values := r.URL.Query()["day_of_week"]; len(values) > 0 {
+			value := values[0]
+			parsedDayOfWeek, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter day_of_week: "+err.Error())
 				return
 			}
 			req.DayOfWeek = &parsedDayOfWeek
 		}
-		if r.URL.Query().Get("date_from") != "" {
-			dateFromVal := r.URL.Query().Get("date_from")
+		if values := r.URL.Query()["date_from"]; len(values) > 0 {
+			value := values[0]
+			dateFromVal := value
 			req.DateFrom = &dateFromVal
 		}
-		if r.URL.Query().Get("date_to") != "" {
-			dateToVal := r.URL.Query().Get("date_to")
+		if values := r.URL.Query()["date_to"]; len(values) > 0 {
+			value := values[0]
+			dateToVal := value
 			req.DateTo = &dateToVal
 		}
-		if r.URL.Query().Get("limit") != "" {
-			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
 				return
 			}
 			req.Limit = &parsedLimit
 		}
-		if r.URL.Query().Get("offset") != "" {
-			parsedOffset, err := parseInt32(r.URL.Query().Get("offset"))
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
 				return

@@ -64,8 +64,8 @@ func (c *KDSServiceClient) UpdateKDSItemStatus(ctx context.Context, req *UpdateK
 		}
 	}
 	path := "/pos/kds/v1/{order_id}/items/{item_id}"
-	path = strings.ReplaceAll(path, "{order_id}", fmt.Sprintf("%v", req.OrderId))
-	path = strings.ReplaceAll(path, "{item_id}", fmt.Sprintf("%v", req.ItemId))
+	path = strings.ReplaceAll(path, "{order_id}", url.PathEscape(fmt.Sprintf("%v", req.OrderId)))
+	path = strings.ReplaceAll(path, "{item_id}", url.PathEscape(fmt.Sprintf("%v", req.ItemId)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

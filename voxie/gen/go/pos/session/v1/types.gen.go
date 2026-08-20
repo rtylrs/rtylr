@@ -24,11 +24,21 @@ func (m *Session) MarshalJSON() ([]byte, error) {
 	type alias Session
 	aux := struct {
 		*alias
-		Id      string `json:"id,omitempty"`
-		OwnerId string `json:"owner_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
+		StaffId    *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
 	return json.Marshal(aux)
 }
 
@@ -36,8 +46,10 @@ func (m *Session) UnmarshalJSON(data []byte) error {
 	type alias Session
 	aux := struct {
 		*alias
-		Id      string `json:"id,omitempty"`
-		OwnerId string `json:"owner_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		LocationId *string `json:"location_id,omitempty"`
+		StaffId    *string `json:"staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -55,6 +67,20 @@ func (m *Session) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.OwnerId = v
+	}
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LocationId = &v
+	}
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.StaffId = &v
 	}
 	return nil
 }

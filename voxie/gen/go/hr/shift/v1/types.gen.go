@@ -32,17 +32,37 @@ func (m *ShiftPayload) MarshalJSON() ([]byte, error) {
 	type alias ShiftPayload
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		OwnerId    string `json:"owner_id,omitempty"`
-		LocationId string `json:"location_id,omitempty"`
-		CreatedAt  string `json:"created_at,omitempty"`
-		UpdatedAt  string `json:"updated_at,omitempty"`
+		Id           string  `json:"id,omitempty"`
+		OwnerId      string  `json:"owner_id,omitempty"`
+		LocationId   string  `json:"location_id,omitempty"`
+		CreatedAt    string  `json:"created_at,omitempty"`
+		UpdatedAt    string  `json:"updated_at,omitempty"`
+		StaffId      *string `json:"staff_id,omitempty"`
+		DepartmentId *string `json:"department_id,omitempty"`
+		ClockInAt    *string `json:"clock_in_at,omitempty"`
+		ClockOutAt   *string `json:"clock_out_at,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.LocationId = strconv.FormatInt(m.LocationId, 10)
 	aux.CreatedAt = strconv.FormatInt(m.CreatedAt, 10)
 	aux.UpdatedAt = strconv.FormatInt(m.UpdatedAt, 10)
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
+	if m.DepartmentId != nil {
+		encodedDepartmentId := strconv.FormatInt(*m.DepartmentId, 10)
+		aux.DepartmentId = &encodedDepartmentId
+	}
+	if m.ClockInAt != nil {
+		encodedClockInAt := strconv.FormatInt(*m.ClockInAt, 10)
+		aux.ClockInAt = &encodedClockInAt
+	}
+	if m.ClockOutAt != nil {
+		encodedClockOutAt := strconv.FormatInt(*m.ClockOutAt, 10)
+		aux.ClockOutAt = &encodedClockOutAt
+	}
 	return json.Marshal(aux)
 }
 
@@ -50,11 +70,15 @@ func (m *ShiftPayload) UnmarshalJSON(data []byte) error {
 	type alias ShiftPayload
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		OwnerId    string `json:"owner_id,omitempty"`
-		LocationId string `json:"location_id,omitempty"`
-		CreatedAt  string `json:"created_at,omitempty"`
-		UpdatedAt  string `json:"updated_at,omitempty"`
+		Id           string  `json:"id,omitempty"`
+		OwnerId      string  `json:"owner_id,omitempty"`
+		LocationId   string  `json:"location_id,omitempty"`
+		CreatedAt    string  `json:"created_at,omitempty"`
+		UpdatedAt    string  `json:"updated_at,omitempty"`
+		StaffId      *string `json:"staff_id,omitempty"`
+		DepartmentId *string `json:"department_id,omitempty"`
+		ClockInAt    *string `json:"clock_in_at,omitempty"`
+		ClockOutAt   *string `json:"clock_out_at,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -93,6 +117,34 @@ func (m *ShiftPayload) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.UpdatedAt = v
+	}
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.StaffId = &v
+	}
+	if aux.DepartmentId != nil {
+		v, err := strconv.ParseInt(*aux.DepartmentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DepartmentId = &v
+	}
+	if aux.ClockInAt != nil {
+		v, err := strconv.ParseInt(*aux.ClockInAt, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ClockInAt = &v
+	}
+	if aux.ClockOutAt != nil {
+		v, err := strconv.ParseInt(*aux.ClockOutAt, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ClockOutAt = &v
 	}
 	return nil
 }
@@ -452,6 +504,51 @@ type ListShiftsRequest struct {
 	Offset     *int32  `json:"offset,omitempty"`
 }
 
+func (m *ListShiftsRequest) MarshalJSON() ([]byte, error) {
+	type alias ListShiftsRequest
+	aux := struct {
+		*alias
+		LocationId *string `json:"location_id,omitempty"`
+		StaffId    *string `json:"staff_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListShiftsRequest) UnmarshalJSON(data []byte) error {
+	type alias ListShiftsRequest
+	aux := struct {
+		*alias
+		LocationId *string `json:"location_id,omitempty"`
+		StaffId    *string `json:"staff_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LocationId = &v
+	}
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.StaffId = &v
+	}
+	return nil
+}
+
 func (x *ListShiftsRequest) GetLocationId() int64 {
 	if x == nil {
 		var zero int64
@@ -575,6 +672,64 @@ type CreateShiftRequest struct {
 	BreakDurationMinutes *int32  `json:"break_duration_minutes,omitempty"`
 	Status               *string `json:"status,omitempty"`
 	Notes                *string `json:"notes,omitempty"`
+}
+
+func (m *CreateShiftRequest) MarshalJSON() ([]byte, error) {
+	type alias CreateShiftRequest
+	aux := struct {
+		*alias
+		LocationId   *string `json:"location_id,omitempty"`
+		StaffId      *string `json:"staff_id,omitempty"`
+		DepartmentId *string `json:"department_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
+	if m.DepartmentId != nil {
+		encodedDepartmentId := strconv.FormatInt(*m.DepartmentId, 10)
+		aux.DepartmentId = &encodedDepartmentId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *CreateShiftRequest) UnmarshalJSON(data []byte) error {
+	type alias CreateShiftRequest
+	aux := struct {
+		*alias
+		LocationId   *string `json:"location_id,omitempty"`
+		StaffId      *string `json:"staff_id,omitempty"`
+		DepartmentId *string `json:"department_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LocationId = &v
+	}
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.StaffId = &v
+	}
+	if aux.DepartmentId != nil {
+		v, err := strconv.ParseInt(*aux.DepartmentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DepartmentId = &v
+	}
+	return nil
 }
 
 func (x *CreateShiftRequest) GetLocationId() int64 {
@@ -731,9 +886,19 @@ func (m *UpdateShiftRequest) MarshalJSON() ([]byte, error) {
 	type alias UpdateShiftRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id           string  `json:"id,omitempty"`
+		LocationId   *string `json:"location_id,omitempty"`
+		DepartmentId *string `json:"department_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
+	if m.DepartmentId != nil {
+		encodedDepartmentId := strconv.FormatInt(*m.DepartmentId, 10)
+		aux.DepartmentId = &encodedDepartmentId
+	}
 	return json.Marshal(aux)
 }
 
@@ -741,7 +906,9 @@ func (m *UpdateShiftRequest) UnmarshalJSON(data []byte) error {
 	type alias UpdateShiftRequest
 	aux := struct {
 		*alias
-		Id string `json:"id,omitempty"`
+		Id           string  `json:"id,omitempty"`
+		LocationId   *string `json:"location_id,omitempty"`
+		DepartmentId *string `json:"department_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -752,6 +919,20 @@ func (m *UpdateShiftRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.Id = v
+	}
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LocationId = &v
+	}
+	if aux.DepartmentId != nil {
+		v, err := strconv.ParseInt(*aux.DepartmentId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DepartmentId = &v
 	}
 	return nil
 }
@@ -1115,6 +1296,38 @@ type PublishRosterRequest struct {
 	WeekStart  string `json:"week_start,omitempty"`
 }
 
+func (m *PublishRosterRequest) MarshalJSON() ([]byte, error) {
+	type alias PublishRosterRequest
+	aux := struct {
+		*alias
+		LocationId *string `json:"location_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.LocationId != nil {
+		encodedLocationId := strconv.FormatInt(*m.LocationId, 10)
+		aux.LocationId = &encodedLocationId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *PublishRosterRequest) UnmarshalJSON(data []byte) error {
+	type alias PublishRosterRequest
+	aux := struct {
+		*alias
+		LocationId *string `json:"location_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.LocationId != nil {
+		v, err := strconv.ParseInt(*aux.LocationId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.LocationId = &v
+	}
+	return nil
+}
+
 func (x *PublishRosterRequest) GetLocationId() int64 {
 	if x == nil {
 		var zero int64
@@ -1326,6 +1539,38 @@ type ListAvailabilityRequest struct {
 	Offset    *int32  `json:"offset,omitempty"`
 }
 
+func (m *ListAvailabilityRequest) MarshalJSON() ([]byte, error) {
+	type alias ListAvailabilityRequest
+	aux := struct {
+		*alias
+		StaffId *string `json:"staff_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.StaffId != nil {
+		encodedStaffId := strconv.FormatInt(*m.StaffId, 10)
+		aux.StaffId = &encodedStaffId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListAvailabilityRequest) UnmarshalJSON(data []byte) error {
+	type alias ListAvailabilityRequest
+	aux := struct {
+		*alias
+		StaffId *string `json:"staff_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.StaffId != nil {
+		v, err := strconv.ParseInt(*aux.StaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.StaffId = &v
+	}
+	return nil
+}
+
 func (x *ListAvailabilityRequest) GetStaffId() int64 {
 	if x == nil {
 		var zero int64
@@ -1451,9 +1696,14 @@ func (m *SetAvailabilityRequest) MarshalJSON() ([]byte, error) {
 	type alias SetAvailabilityRequest
 	aux := struct {
 		*alias
-		StaffId string `json:"staff_id,omitempty"`
+		StaffId string  `json:"staff_id,omitempty"`
+		Id      *string `json:"id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.StaffId = strconv.FormatInt(m.StaffId, 10)
+	if m.Id != nil {
+		encodedId := strconv.FormatInt(*m.Id, 10)
+		aux.Id = &encodedId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1461,7 +1711,8 @@ func (m *SetAvailabilityRequest) UnmarshalJSON(data []byte) error {
 	type alias SetAvailabilityRequest
 	aux := struct {
 		*alias
-		StaffId string `json:"staff_id,omitempty"`
+		StaffId string  `json:"staff_id,omitempty"`
+		Id      *string `json:"id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -1472,6 +1723,13 @@ func (m *SetAvailabilityRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.StaffId = v
+	}
+	if aux.Id != nil {
+		v, err := strconv.ParseInt(*aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = &v
 	}
 	return nil
 }

@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -239,30 +256,35 @@ func RegisterViewServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /flow/view/v1/views", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListViewsRequest)
-		if r.URL.Query().Get("workspace_id") != "" {
-			req.WorkspaceId = r.URL.Query().Get("workspace_id")
+		if values := r.URL.Query()["workspace_id"]; len(values) > 0 {
+			value := values[0]
+			req.WorkspaceId = value
 		}
-		if r.URL.Query().Get("page") != "" {
-			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+		if values := r.URL.Query()["page"]; len(values) > 0 {
+			value := values[0]
+			parsedPage, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
 				return
 			}
 			req.Page = parsedPage
 		}
-		if r.URL.Query().Get("limit") != "" {
-			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
 				return
 			}
 			req.Limit = parsedLimit
 		}
-		if r.URL.Query().Get("sort_by") != "" {
-			req.SortBy = r.URL.Query().Get("sort_by")
+		if values := r.URL.Query()["sort_by"]; len(values) > 0 {
+			value := values[0]
+			req.SortBy = value
 		}
-		if r.URL.Query().Get("sort_dir") != "" {
-			req.SortDir = r.URL.Query().Get("sort_dir")
+		if values := r.URL.Query()["sort_dir"]; len(values) > 0 {
+			value := values[0]
+			req.SortDir = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

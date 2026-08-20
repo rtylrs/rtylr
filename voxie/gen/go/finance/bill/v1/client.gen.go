@@ -103,7 +103,7 @@ func (c *BillServiceClient) UpdateBill(ctx context.Context, req *UpdateBillReque
 		}
 	}
 	path := "/finance/bill/v1/bills/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
@@ -140,7 +140,7 @@ func (c *BillServiceClient) GetBill(ctx context.Context, req *GetBillRequest) (*
 		}
 	}
 	path := "/finance/bill/v1/bills/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
@@ -176,7 +176,7 @@ func (c *BillServiceClient) DeleteBill(ctx context.Context, req *DeleteBillReque
 		}
 	}
 	path := "/finance/bill/v1/bills/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

@@ -24,15 +24,25 @@ func (m *StockMovement) MarshalJSON() ([]byte, error) {
 	type alias StockMovement
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
-		BranchId   string `json:"branch_id,omitempty"`
-		ProductId  string `json:"product_id,omitempty"`
+		Id          string  `json:"id,omitempty"`
+		BusinessId  string  `json:"business_id,omitempty"`
+		BranchId    string  `json:"branch_id,omitempty"`
+		ProductId   string  `json:"product_id,omitempty"`
+		ReferenceId *string `json:"reference_id,omitempty"`
+		EmployeeId  *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
 	aux.BranchId = strconv.FormatInt(m.BranchId, 10)
 	aux.ProductId = strconv.FormatInt(m.ProductId, 10)
+	if m.ReferenceId != nil {
+		encodedReferenceId := strconv.FormatInt(*m.ReferenceId, 10)
+		aux.ReferenceId = &encodedReferenceId
+	}
+	if m.EmployeeId != nil {
+		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
+		aux.EmployeeId = &encodedEmployeeId
+	}
 	return json.Marshal(aux)
 }
 
@@ -40,10 +50,12 @@ func (m *StockMovement) UnmarshalJSON(data []byte) error {
 	type alias StockMovement
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
-		BranchId   string `json:"branch_id,omitempty"`
-		ProductId  string `json:"product_id,omitempty"`
+		Id          string  `json:"id,omitempty"`
+		BusinessId  string  `json:"business_id,omitempty"`
+		BranchId    string  `json:"branch_id,omitempty"`
+		ProductId   string  `json:"product_id,omitempty"`
+		ReferenceId *string `json:"reference_id,omitempty"`
+		EmployeeId  *string `json:"employee_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -75,6 +87,20 @@ func (m *StockMovement) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.ProductId = v
+	}
+	if aux.ReferenceId != nil {
+		v, err := strconv.ParseInt(*aux.ReferenceId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ReferenceId = &v
+	}
+	if aux.EmployeeId != nil {
+		v, err := strconv.ParseInt(*aux.EmployeeId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.EmployeeId = &v
 	}
 	return nil
 }

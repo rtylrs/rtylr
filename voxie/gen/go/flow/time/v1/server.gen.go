@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -246,11 +263,13 @@ func RegisterTimeServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /flow/time/v1/work-days", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetWorkDayRequest)
-		if r.URL.Query().Get("date") != "" {
-			req.Date = r.URL.Query().Get("date")
+		if values := r.URL.Query()["date"]; len(values) > 0 {
+			value := values[0]
+			req.Date = value
 		}
-		if r.URL.Query().Get("employee_id") != "" {
-			parsedEmployeeId, err := parseInt64(r.URL.Query().Get("employee_id"))
+		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
+			value := values[0]
+			parsedEmployeeId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter employee_id: "+err.Error())
 				return
@@ -295,30 +314,35 @@ func RegisterTimeServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "TimeService", Method: "upsertWorkDay", HTTPMethod: "PUT", Route: "/flow/time/v1/work-days", AuthSchemes: nil}))
 	mux.Handle("GET /flow/time/v1/work-days/range", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListWorkDaysRequest)
-		if r.URL.Query().Get("from") != "" {
-			req.From = r.URL.Query().Get("from")
+		if values := r.URL.Query()["from"]; len(values) > 0 {
+			value := values[0]
+			req.From = value
 		}
-		if r.URL.Query().Get("to") != "" {
-			req.To = r.URL.Query().Get("to")
+		if values := r.URL.Query()["to"]; len(values) > 0 {
+			value := values[0]
+			req.To = value
 		}
-		if r.URL.Query().Get("employee_id") != "" {
-			parsedEmployeeId, err := parseInt64(r.URL.Query().Get("employee_id"))
+		if values := r.URL.Query()["employee_id"]; len(values) > 0 {
+			value := values[0]
+			parsedEmployeeId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter employee_id: "+err.Error())
 				return
 			}
 			req.EmployeeId = &parsedEmployeeId
 		}
-		if r.URL.Query().Get("page") != "" {
-			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+		if values := r.URL.Query()["page"]; len(values) > 0 {
+			value := values[0]
+			parsedPage, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
 				return
 			}
 			req.Page = parsedPage
 		}
-		if r.URL.Query().Get("limit") != "" {
-			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
 				return
@@ -341,30 +365,35 @@ func RegisterTimeServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "TimeService", Method: "listWorkDays", HTTPMethod: "GET", Route: "/flow/time/v1/work-days/range", AuthSchemes: nil}))
 	mux.Handle("GET /flow/time/v1/work-days/team", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListWorkDaysForWorkspaceRequest)
-		if r.URL.Query().Get("workspace_id") != "" {
-			parsedWorkspaceId, err := parseInt64(r.URL.Query().Get("workspace_id"))
+		if values := r.URL.Query()["workspace_id"]; len(values) > 0 {
+			value := values[0]
+			parsedWorkspaceId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter workspace_id: "+err.Error())
 				return
 			}
 			req.WorkspaceId = parsedWorkspaceId
 		}
-		if r.URL.Query().Get("from") != "" {
-			req.From = r.URL.Query().Get("from")
+		if values := r.URL.Query()["from"]; len(values) > 0 {
+			value := values[0]
+			req.From = value
 		}
-		if r.URL.Query().Get("to") != "" {
-			req.To = r.URL.Query().Get("to")
+		if values := r.URL.Query()["to"]; len(values) > 0 {
+			value := values[0]
+			req.To = value
 		}
-		if r.URL.Query().Get("page") != "" {
-			parsedPage, err := parseInt32(r.URL.Query().Get("page"))
+		if values := r.URL.Query()["page"]; len(values) > 0 {
+			value := values[0]
+			parsedPage, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
 				return
 			}
 			req.Page = parsedPage
 		}
-		if r.URL.Query().Get("limit") != "" {
-			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
 				return
@@ -465,8 +494,9 @@ func RegisterTimeServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "TimeService", Method: "deleteWorkDayLine", HTTPMethod: "DELETE", Route: "/flow/time/v1/work-days/lines/{id}", AuthSchemes: nil}))
 	mux.Handle("GET /flow/time/v1/work-types", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListWorkTypesRequest)
-		if r.URL.Query().Get("include_archived") != "" {
-			parsedIncludeArchived, err := parseBool(r.URL.Query().Get("include_archived"))
+		if values := r.URL.Query()["include_archived"]; len(values) > 0 {
+			value := values[0]
+			parsedIncludeArchived, err := parseBool(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter include_archived: "+err.Error())
 				return

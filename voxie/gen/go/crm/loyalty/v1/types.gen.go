@@ -251,12 +251,13 @@ func (m *LoyaltyTransaction) MarshalJSON() ([]byte, error) {
 	type alias LoyaltyTransaction
 	aux := struct {
 		*alias
-		Id            string `json:"id,omitempty"`
-		OwnerId       string `json:"owner_id,omitempty"`
-		CustomerId    string `json:"customer_id,omitempty"`
-		Points        string `json:"points,omitempty"`
-		BalanceBefore string `json:"balance_before,omitempty"`
-		BalanceAfter  string `json:"balance_after,omitempty"`
+		Id            string  `json:"id,omitempty"`
+		OwnerId       string  `json:"owner_id,omitempty"`
+		CustomerId    string  `json:"customer_id,omitempty"`
+		Points        string  `json:"points,omitempty"`
+		BalanceBefore string  `json:"balance_before,omitempty"`
+		BalanceAfter  string  `json:"balance_after,omitempty"`
+		ReferenceId   *string `json:"reference_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
@@ -264,6 +265,10 @@ func (m *LoyaltyTransaction) MarshalJSON() ([]byte, error) {
 	aux.Points = strconv.FormatInt(m.Points, 10)
 	aux.BalanceBefore = strconv.FormatInt(m.BalanceBefore, 10)
 	aux.BalanceAfter = strconv.FormatInt(m.BalanceAfter, 10)
+	if m.ReferenceId != nil {
+		encodedReferenceId := strconv.FormatInt(*m.ReferenceId, 10)
+		aux.ReferenceId = &encodedReferenceId
+	}
 	return json.Marshal(aux)
 }
 
@@ -271,12 +276,13 @@ func (m *LoyaltyTransaction) UnmarshalJSON(data []byte) error {
 	type alias LoyaltyTransaction
 	aux := struct {
 		*alias
-		Id            string `json:"id,omitempty"`
-		OwnerId       string `json:"owner_id,omitempty"`
-		CustomerId    string `json:"customer_id,omitempty"`
-		Points        string `json:"points,omitempty"`
-		BalanceBefore string `json:"balance_before,omitempty"`
-		BalanceAfter  string `json:"balance_after,omitempty"`
+		Id            string  `json:"id,omitempty"`
+		OwnerId       string  `json:"owner_id,omitempty"`
+		CustomerId    string  `json:"customer_id,omitempty"`
+		Points        string  `json:"points,omitempty"`
+		BalanceBefore string  `json:"balance_before,omitempty"`
+		BalanceAfter  string  `json:"balance_after,omitempty"`
+		ReferenceId   *string `json:"reference_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -322,6 +328,13 @@ func (m *LoyaltyTransaction) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.BalanceAfter = v
+	}
+	if aux.ReferenceId != nil {
+		v, err := strconv.ParseInt(*aux.ReferenceId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ReferenceId = &v
 	}
 	return nil
 }
@@ -573,11 +586,16 @@ func (m *AwardPointsRequest) MarshalJSON() ([]byte, error) {
 	type alias AwardPointsRequest
 	aux := struct {
 		*alias
-		CustomerId string `json:"customer_id,omitempty"`
-		Points     string `json:"points,omitempty"`
+		CustomerId  string  `json:"customer_id,omitempty"`
+		Points      string  `json:"points,omitempty"`
+		ReferenceId *string `json:"reference_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.CustomerId = strconv.FormatInt(m.CustomerId, 10)
 	aux.Points = strconv.FormatInt(m.Points, 10)
+	if m.ReferenceId != nil {
+		encodedReferenceId := strconv.FormatInt(*m.ReferenceId, 10)
+		aux.ReferenceId = &encodedReferenceId
+	}
 	return json.Marshal(aux)
 }
 
@@ -585,8 +603,9 @@ func (m *AwardPointsRequest) UnmarshalJSON(data []byte) error {
 	type alias AwardPointsRequest
 	aux := struct {
 		*alias
-		CustomerId string `json:"customer_id,omitempty"`
-		Points     string `json:"points,omitempty"`
+		CustomerId  string  `json:"customer_id,omitempty"`
+		Points      string  `json:"points,omitempty"`
+		ReferenceId *string `json:"reference_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -604,6 +623,13 @@ func (m *AwardPointsRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.Points = v
+	}
+	if aux.ReferenceId != nil {
+		v, err := strconv.ParseInt(*aux.ReferenceId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ReferenceId = &v
 	}
 	return nil
 }
@@ -1010,11 +1036,16 @@ func (m *RedeemPointsRequest) MarshalJSON() ([]byte, error) {
 	type alias RedeemPointsRequest
 	aux := struct {
 		*alias
-		CustomerId string `json:"customer_id,omitempty"`
-		Points     string `json:"points,omitempty"`
+		CustomerId  string  `json:"customer_id,omitempty"`
+		Points      string  `json:"points,omitempty"`
+		ReferenceId *string `json:"reference_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.CustomerId = strconv.FormatInt(m.CustomerId, 10)
 	aux.Points = strconv.FormatInt(m.Points, 10)
+	if m.ReferenceId != nil {
+		encodedReferenceId := strconv.FormatInt(*m.ReferenceId, 10)
+		aux.ReferenceId = &encodedReferenceId
+	}
 	return json.Marshal(aux)
 }
 
@@ -1022,8 +1053,9 @@ func (m *RedeemPointsRequest) UnmarshalJSON(data []byte) error {
 	type alias RedeemPointsRequest
 	aux := struct {
 		*alias
-		CustomerId string `json:"customer_id,omitempty"`
-		Points     string `json:"points,omitempty"`
+		CustomerId  string  `json:"customer_id,omitempty"`
+		Points      string  `json:"points,omitempty"`
+		ReferenceId *string `json:"reference_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -1041,6 +1073,13 @@ func (m *RedeemPointsRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.Points = v
+	}
+	if aux.ReferenceId != nil {
+		v, err := strconv.ParseInt(*aux.ReferenceId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ReferenceId = &v
 	}
 	return nil
 }

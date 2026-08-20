@@ -66,7 +66,7 @@ func (c *CustomerServiceClient) GetCustomer(ctx context.Context, req *GetCustome
 		}
 	}
 	path := "/support/customer/v1/customers/{id}"
-	path = strings.ReplaceAll(path, "{id}", fmt.Sprintf("%v", req.Id))
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
 	query := url.Values{}
 	if len(query) > 0 {
 		path += "?" + query.Encode()

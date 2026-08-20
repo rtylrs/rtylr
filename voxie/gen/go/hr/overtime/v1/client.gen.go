@@ -107,7 +107,7 @@ func (c *OvertimeServiceClient) ApproveOvertime(ctx context.Context, req *Approv
 		}
 	}
 	path := "/hr/overtime/v1/requests/{overtime_request_id}/approve"
-	path = strings.ReplaceAll(path, "{overtime_request_id}", fmt.Sprintf("%v", req.OvertimeRequestId))
+	path = strings.ReplaceAll(path, "{overtime_request_id}", url.PathEscape(fmt.Sprintf("%v", req.OvertimeRequestId)))
 	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -240,36 +257,41 @@ func RegisterEmployeeServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /hr/employee/v1/employees", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListEmployeesRequest)
-		if r.URL.Query().Get("department_id") != "" {
-			parsedDepartmentId, err := parseInt64(r.URL.Query().Get("department_id"))
+		if values := r.URL.Query()["department_id"]; len(values) > 0 {
+			value := values[0]
+			parsedDepartmentId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter department_id: "+err.Error())
 				return
 			}
 			req.DepartmentId = &parsedDepartmentId
 		}
-		if r.URL.Query().Get("location_id") != "" {
-			parsedLocationId, err := parseInt64(r.URL.Query().Get("location_id"))
+		if values := r.URL.Query()["location_id"]; len(values) > 0 {
+			value := values[0]
+			parsedLocationId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter location_id: "+err.Error())
 				return
 			}
 			req.LocationId = &parsedLocationId
 		}
-		if r.URL.Query().Get("status") != "" {
-			statusVal := r.URL.Query().Get("status")
+		if values := r.URL.Query()["status"]; len(values) > 0 {
+			value := values[0]
+			statusVal := value
 			req.Status = &statusVal
 		}
-		if r.URL.Query().Get("limit") != "" {
-			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
 				return
 			}
 			req.Limit = parsedLimit
 		}
-		if r.URL.Query().Get("offset") != "" {
-			parsedOffset, err := parseInt32(r.URL.Query().Get("offset"))
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
 				return

@@ -183,15 +183,20 @@ func (m *ChecklistTemplatePayload) MarshalJSON() ([]byte, error) {
 	type alias ChecklistTemplatePayload
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		OwnerId   string `json:"owner_id,omitempty"`
-		CreatedAt string `json:"created_at,omitempty"`
-		UpdatedAt string `json:"updated_at,omitempty"`
+		Id        string  `json:"id,omitempty"`
+		OwnerId   string  `json:"owner_id,omitempty"`
+		CreatedAt string  `json:"created_at,omitempty"`
+		UpdatedAt string  `json:"updated_at,omitempty"`
+		RoleId    *string `json:"role_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.CreatedAt = strconv.FormatInt(m.CreatedAt, 10)
 	aux.UpdatedAt = strconv.FormatInt(m.UpdatedAt, 10)
+	if m.RoleId != nil {
+		encodedRoleId := strconv.FormatInt(*m.RoleId, 10)
+		aux.RoleId = &encodedRoleId
+	}
 	return json.Marshal(aux)
 }
 
@@ -199,10 +204,11 @@ func (m *ChecklistTemplatePayload) UnmarshalJSON(data []byte) error {
 	type alias ChecklistTemplatePayload
 	aux := struct {
 		*alias
-		Id        string `json:"id,omitempty"`
-		OwnerId   string `json:"owner_id,omitempty"`
-		CreatedAt string `json:"created_at,omitempty"`
-		UpdatedAt string `json:"updated_at,omitempty"`
+		Id        string  `json:"id,omitempty"`
+		OwnerId   string  `json:"owner_id,omitempty"`
+		CreatedAt string  `json:"created_at,omitempty"`
+		UpdatedAt string  `json:"updated_at,omitempty"`
+		RoleId    *string `json:"role_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -234,6 +240,13 @@ func (m *ChecklistTemplatePayload) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.UpdatedAt = v
+	}
+	if aux.RoleId != nil {
+		v, err := strconv.ParseInt(*aux.RoleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.RoleId = &v
 	}
 	return nil
 }
@@ -324,13 +337,14 @@ func (m *EmployeeChecklistItemPayload) MarshalJSON() ([]byte, error) {
 	type alias EmployeeChecklistItemPayload
 	aux := struct {
 		*alias
-		Id                   string `json:"id,omitempty"`
-		OwnerId              string `json:"owner_id,omitempty"`
-		EmployeeChecklistId  string `json:"employee_checklist_id,omitempty"`
-		ChecklistItemId      string `json:"checklist_item_id,omitempty"`
-		AssignedToEmployeeId string `json:"assigned_to_employee_id,omitempty"`
-		CreatedAt            string `json:"created_at,omitempty"`
-		UpdatedAt            string `json:"updated_at,omitempty"`
+		Id                   string  `json:"id,omitempty"`
+		OwnerId              string  `json:"owner_id,omitempty"`
+		EmployeeChecklistId  string  `json:"employee_checklist_id,omitempty"`
+		ChecklistItemId      string  `json:"checklist_item_id,omitempty"`
+		AssignedToEmployeeId string  `json:"assigned_to_employee_id,omitempty"`
+		CreatedAt            string  `json:"created_at,omitempty"`
+		UpdatedAt            string  `json:"updated_at,omitempty"`
+		CompletedAt          *string `json:"completed_at,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
@@ -339,6 +353,10 @@ func (m *EmployeeChecklistItemPayload) MarshalJSON() ([]byte, error) {
 	aux.AssignedToEmployeeId = strconv.FormatInt(m.AssignedToEmployeeId, 10)
 	aux.CreatedAt = strconv.FormatInt(m.CreatedAt, 10)
 	aux.UpdatedAt = strconv.FormatInt(m.UpdatedAt, 10)
+	if m.CompletedAt != nil {
+		encodedCompletedAt := strconv.FormatInt(*m.CompletedAt, 10)
+		aux.CompletedAt = &encodedCompletedAt
+	}
 	return json.Marshal(aux)
 }
 
@@ -346,13 +364,14 @@ func (m *EmployeeChecklistItemPayload) UnmarshalJSON(data []byte) error {
 	type alias EmployeeChecklistItemPayload
 	aux := struct {
 		*alias
-		Id                   string `json:"id,omitempty"`
-		OwnerId              string `json:"owner_id,omitempty"`
-		EmployeeChecklistId  string `json:"employee_checklist_id,omitempty"`
-		ChecklistItemId      string `json:"checklist_item_id,omitempty"`
-		AssignedToEmployeeId string `json:"assigned_to_employee_id,omitempty"`
-		CreatedAt            string `json:"created_at,omitempty"`
-		UpdatedAt            string `json:"updated_at,omitempty"`
+		Id                   string  `json:"id,omitempty"`
+		OwnerId              string  `json:"owner_id,omitempty"`
+		EmployeeChecklistId  string  `json:"employee_checklist_id,omitempty"`
+		ChecklistItemId      string  `json:"checklist_item_id,omitempty"`
+		AssignedToEmployeeId string  `json:"assigned_to_employee_id,omitempty"`
+		CreatedAt            string  `json:"created_at,omitempty"`
+		UpdatedAt            string  `json:"updated_at,omitempty"`
+		CompletedAt          *string `json:"completed_at,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -405,6 +424,13 @@ func (m *EmployeeChecklistItemPayload) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.UpdatedAt = v
+	}
+	if aux.CompletedAt != nil {
+		v, err := strconv.ParseInt(*aux.CompletedAt, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CompletedAt = &v
 	}
 	return nil
 }
@@ -728,6 +754,38 @@ type CreateChecklistTemplateRequest struct {
 	Name        string  `json:"name,omitempty"`
 	TriggerType *string `json:"trigger_type,omitempty"`
 	RoleId      *int64  `json:"role_id,omitempty"`
+}
+
+func (m *CreateChecklistTemplateRequest) MarshalJSON() ([]byte, error) {
+	type alias CreateChecklistTemplateRequest
+	aux := struct {
+		*alias
+		RoleId *string `json:"role_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.RoleId != nil {
+		encodedRoleId := strconv.FormatInt(*m.RoleId, 10)
+		aux.RoleId = &encodedRoleId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *CreateChecklistTemplateRequest) UnmarshalJSON(data []byte) error {
+	type alias CreateChecklistTemplateRequest
+	aux := struct {
+		*alias
+		RoleId *string `json:"role_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.RoleId != nil {
+		v, err := strconv.ParseInt(*aux.RoleId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.RoleId = &v
+	}
+	return nil
 }
 
 func (x *CreateChecklistTemplateRequest) GetName() string {

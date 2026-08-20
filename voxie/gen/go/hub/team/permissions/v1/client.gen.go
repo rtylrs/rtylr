@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -28,7 +29,7 @@ func (c *PermissionsServiceClient) UpdatePermissions(ctx context.Context, req *U
 		}
 	}
 	path := "/hub/team/permissions/v1/permissions/{user_id}"
-	path = strings.ReplaceAll(path, "{user_id}", fmt.Sprintf("%v", req.UserId))
+	path = strings.ReplaceAll(path, "{user_id}", url.PathEscape(fmt.Sprintf("%v", req.UserId)))
 	body, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)

@@ -165,7 +165,12 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 		}
 		if o.authorizer != nil {
 			if err := o.authorizer(ctx, metadata, r); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				var statusErr interface{ HTTPStatusCode() int }
+				if errors.As(err, &statusErr) {
+					writeHandlerError(w, err)
+				} else {
+					writeJSONError(w, http.StatusUnauthorized, err.Error())
+				}
 				return
 			}
 		}
@@ -185,13 +190,25 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 
 type statusResponseWriter struct {
 	http.ResponseWriter
-	statusCode int
+	statusCode  int
+	wroteHeader bool
 }
 
 func (w *statusResponseWriter) WriteHeader(statusCode int) {
+	if w.wroteHeader {
+		return
+	}
+	w.wroteHeader = true
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
+func (w *statusResponseWriter) Write(data []byte) (int, error) {
+	if !w.wroteHeader {
+		w.WriteHeader(http.StatusOK)
+	}
+	return w.ResponseWriter.Write(data)
+}
+func (w *statusResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 func (w *statusResponseWriter) Flush() {
 	if flusher, ok := w.ResponseWriter.(http.Flusher); ok {
 		flusher.Flush()
@@ -270,35 +287,40 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "ConsoleAdminService", Method: "getStats", HTTPMethod: "GET", Route: "/console/admin/v1/console/stats", AuthSchemes: nil}))
 	mux.Handle("GET /console/admin/v1/console/users", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListUsersRequest)
-		if r.URL.Query().Get("limit") != "" {
-			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
 				return
 			}
 			req.Limit = parsedLimit
 		}
-		if r.URL.Query().Get("offset") != "" {
-			parsedOffset, err := parseInt32(r.URL.Query().Get("offset"))
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
 				return
 			}
 			req.Offset = parsedOffset
 		}
-		if r.URL.Query().Get("id") != "" {
-			parsedId, err := parseInt64(r.URL.Query().Get("id"))
+		if values := r.URL.Query()["id"]; len(values) > 0 {
+			value := values[0]
+			parsedId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter id: "+err.Error())
 				return
 			}
 			req.Id = &parsedId
 		}
-		if r.URL.Query().Get("email") != "" {
-			req.Email = r.URL.Query().Get("email")
+		if values := r.URL.Query()["email"]; len(values) > 0 {
+			value := values[0]
+			req.Email = value
 		}
-		if r.URL.Query().Get("name") != "" {
-			req.Name = r.URL.Query().Get("name")
+		if values := r.URL.Query()["name"]; len(values) > 0 {
+			value := values[0]
+			req.Name = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
@@ -516,35 +538,40 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "ConsoleAdminService", Method: "getUserSubscription", HTTPMethod: "GET", Route: "/console/admin/v1/console/users/{user_id}/subscription", AuthSchemes: nil}))
 	mux.Handle("GET /console/admin/v1/console/businesses", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListBusinessesRequest)
-		if r.URL.Query().Get("limit") != "" {
-			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
 				return
 			}
 			req.Limit = parsedLimit
 		}
-		if r.URL.Query().Get("offset") != "" {
-			parsedOffset, err := parseInt32(r.URL.Query().Get("offset"))
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
 				return
 			}
 			req.Offset = parsedOffset
 		}
-		if r.URL.Query().Get("id") != "" {
-			parsedId, err := parseInt64(r.URL.Query().Get("id"))
+		if values := r.URL.Query()["id"]; len(values) > 0 {
+			value := values[0]
+			parsedId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter id: "+err.Error())
 				return
 			}
 			req.Id = &parsedId
 		}
-		if r.URL.Query().Get("name") != "" {
-			req.Name = r.URL.Query().Get("name")
+		if values := r.URL.Query()["name"]; len(values) > 0 {
+			value := values[0]
+			req.Name = value
 		}
-		if r.URL.Query().Get("owner_id") != "" {
-			parsedOwnerId, err := parseInt64(r.URL.Query().Get("owner_id"))
+		if values := r.URL.Query()["owner_id"]; len(values) > 0 {
+			value := values[0]
+			parsedOwnerId, err := parseInt64(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter owner_id: "+err.Error())
 				return
@@ -639,24 +666,27 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "ConsoleAdminService", Method: "createBusinessOwner", HTTPMethod: "POST", Route: "/console/admin/v1/console/internal-onboarding/business-owner", AuthSchemes: nil}))
 	mux.Handle("GET /console/admin/v1/console/subscriptions", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListSubscriptionsRequest)
-		if r.URL.Query().Get("limit") != "" {
-			parsedLimit, err := parseInt32(r.URL.Query().Get("limit"))
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
 				return
 			}
 			req.Limit = parsedLimit
 		}
-		if r.URL.Query().Get("offset") != "" {
-			parsedOffset, err := parseInt32(r.URL.Query().Get("offset"))
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt32(value)
 			if err != nil {
 				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
 				return
 			}
 			req.Offset = parsedOffset
 		}
-		if r.URL.Query().Get("status") != "" {
-			req.Status = r.URL.Query().Get("status")
+		if values := r.URL.Query()["status"]; len(values) > 0 {
+			value := values[0]
+			req.Status = value
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
