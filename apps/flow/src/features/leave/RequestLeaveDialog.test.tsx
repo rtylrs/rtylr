@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { LeaveTypePayload } from './useLeave';
 
 vi.mock('react-i18next', () => ({
@@ -26,8 +26,24 @@ const defaultProps = {
 };
 
 beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-08-20T12:00:00.000Z'));
   vi.clearAllMocks();
 });
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+// Both pickers default to the pinned "today" above (August 2026), so reaching
+// January 2027 always takes exactly 5 "next month" clicks.
+function pickLeaveDate(pickerLabel: string, dayAriaLabel: string): void {
+  fireEvent.click(screen.getByLabelText(pickerLabel));
+  for (let i = 0; i < 5; i++) {
+    fireEvent.click(screen.getByRole('button', { name: 'common.datePicker.nextMonth' }));
+  }
+  fireEvent.click(screen.getByRole('gridcell', { name: dayAriaLabel }));
+}
 
 describe('RequestLeaveDialog', () => {
   it('renders the configured leave types in the picker', () => {
@@ -71,12 +87,8 @@ describe('RequestLeaveDialog', () => {
 
     // Filling in both dates cannot enable submit either - there is no real
     // type to select, so the gate stays in effect regardless of other fields.
-    fireEvent.change(screen.getByLabelText('flow.leave.startDate'), {
-      target: { value: '2027-01-04' },
-    });
-    fireEvent.change(screen.getByLabelText('flow.leave.endDate'), {
-      target: { value: '2027-01-06' },
-    });
+    pickLeaveDate('flow.leave.startDate', 'Monday, January 4, 2027');
+    pickLeaveDate('flow.leave.endDate', 'Wednesday, January 6, 2027');
     expect(submit).toBeDisabled();
     expect(createRequestMutate).not.toHaveBeenCalled();
   });
@@ -92,12 +104,8 @@ describe('RequestLeaveDialog', () => {
     expect(submit).not.toHaveAttribute('aria-describedby');
 
     fireEvent.change(select, { target: { value: '1' } });
-    fireEvent.change(screen.getByLabelText('flow.leave.startDate'), {
-      target: { value: '2027-01-04' },
-    });
-    fireEvent.change(screen.getByLabelText('flow.leave.endDate'), {
-      target: { value: '2027-01-06' },
-    });
+    pickLeaveDate('flow.leave.startDate', 'Monday, January 4, 2027');
+    pickLeaveDate('flow.leave.endDate', 'Wednesday, January 6, 2027');
 
     expect(submit).not.toBeDisabled();
     fireEvent.click(submit);
@@ -108,12 +116,8 @@ describe('RequestLeaveDialog', () => {
     render(<RequestLeaveDialog {...defaultProps} />);
 
     fireEvent.change(screen.getByLabelText('flow.leave.leaveType'), { target: { value: '1' } });
-    fireEvent.change(screen.getByLabelText('flow.leave.startDate'), {
-      target: { value: '2027-01-04' },
-    });
-    fireEvent.change(screen.getByLabelText('flow.leave.endDate'), {
-      target: { value: '2027-01-06' },
-    });
+    pickLeaveDate('flow.leave.startDate', 'Monday, January 4, 2027');
+    pickLeaveDate('flow.leave.endDate', 'Wednesday, January 6, 2027');
 
     const submit = screen.getByRole('button', { name: 'flow.leave.submit' });
     expect(submit).not.toBeDisabled();

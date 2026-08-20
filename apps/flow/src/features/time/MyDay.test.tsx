@@ -166,10 +166,10 @@ describe('MyDay: week strip', () => {
   it('selecting a strip day changes which day is loaded', () => {
     render(<MyDay />);
     fireEvent.click(screen.getByRole('button', { name: /\b11\b/ }));
-    expect(
-      (screen.getByLabelText('flow.time.date', { selector: '#work-day-date' }) as HTMLInputElement)
-        .value
-    ).toBe('2026-08-11');
+    expect(screen.getByLabelText('flow.time.date', { selector: '#work-day-date' })).toHaveAttribute(
+      'data-value',
+      '2026-08-11'
+    );
   });
 });
 
@@ -192,12 +192,12 @@ describe('MyDay: Add Hours renders inline', () => {
 
   it('changing the Add Hours date field moves the day strip - they are one value', () => {
     render(<MyDay />);
-    const addHoursDate = screen.getByLabelText('flow.time.date', { selector: '#add-hours-date' });
-    fireEvent.change(addHoursDate, { target: { value: '2026-08-11' } });
-    expect(
-      (screen.getByLabelText('flow.time.date', { selector: '#work-day-date' }) as HTMLInputElement)
-        .value
-    ).toBe('2026-08-11');
+    fireEvent.click(screen.getByLabelText('flow.time.date', { selector: '#add-hours-date' }));
+    fireEvent.click(screen.getByRole('gridcell', { name: 'Tuesday, August 11, 2026' }));
+    expect(screen.getByLabelText('flow.time.date', { selector: '#work-day-date' })).toHaveAttribute(
+      'data-value',
+      '2026-08-11'
+    );
   });
 });
 
