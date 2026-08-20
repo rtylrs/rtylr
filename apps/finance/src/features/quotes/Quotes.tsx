@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
-import { Plus, ArrowRight, CheckCircle } from 'lucide-react';
+import { Plus, ArrowRight, CheckCircle, FileSignature } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
-import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
@@ -205,8 +205,13 @@ const Quotes: React.FC = () => {
         </div>
       ) : data.length === 0 ? (
         <EmptyState
-          title="No quotes yet"
-          description="Send estimates to clients and convert them to invoices when accepted."
+          icon={FileSignature}
+          title={t('quotes.emptyTitle')}
+          description={t('quotes.emptyDescription')}
+          action={{
+            label: t('quotes.emptyCta'),
+            onClick: () => setShowCreate(true),
+          }}
         />
       ) : (
         <div style={{ ...cardStyle, overflow: 'hidden' }}>

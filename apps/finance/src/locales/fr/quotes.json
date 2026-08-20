@@ -1,4 +1,7 @@
 {
   "created": "Quote created",
-  "markedAccepted": "Marked {{id}} as accepted"
+  "markedAccepted": "Marked {{id}} as accepted",
+  "emptyTitle": "Aucun devis pour le moment",
+  "emptyDescription": "Envoyez des devis à vos clients et convertissez-les en factures une fois acceptés.",
+  "emptyCta": "Nouveau devis"
 }
