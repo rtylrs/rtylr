@@ -10,5 +10,13 @@
   "favicon": "Select a favicon",
   "icon": "Select a Logo",
   "name": "Name",
-  "slogan": "Slogan"
+  "slogan": "Slogan",
+  "businessType": {
+    "noIndustriesMatchTitle": "No industries match \"{{search}}\"",
+    "noIndustriesMatchDescription": "Try a different search term."
+  },
+  "account": {
+    "noLoginActivityTitle": "No login activity yet",
+    "noLoginActivityDescription": "Sign-ins to your account will show up here."
+  }
 }
