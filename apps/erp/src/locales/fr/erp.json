@@ -117,7 +117,8 @@
     "title": "Inventory",
     "addProduct": "Add Product",
     "search": "Search products…",
-    "empty": "No products found."
+    "empty": "No products found.",
+    "clearSearch": "Effacer la recherche"
   },
   "suppliers": {
     "title": "Suppliers",
@@ -173,6 +174,7 @@
       "title": "Aucune commande à recevoir",
       "description": "Toutes les commandes ont été reçues"
     },
+    "goToPurchasing": "Aller aux bons de commande",
     "orderSummary": "{{count}} articles / Prévu le {{date}}",
     "validation": { "overReceived": "Impossible de recevoir plus d'unités que commandé" },
     "toast": {
@@ -180,5 +182,93 @@
       "completedVariance": "Réception terminée avec un écart de {{count}} unités",
       "updateFailed": "Échec de la mise à jour de la réception"
     }
+  },
+  "reorder": {
+    "empty": {
+      "title": "Aucune suggestion",
+      "description": "Tous les niveaux de stock sont sains"
+    },
+    "refresh": "Actualiser"
+  },
+  "variants": {
+    "empty": {
+      "title": "Aucune variante",
+      "description": "Ajoutez des variantes pour différencier vos produits"
+    },
+    "addVariant": "Ajouter une variante"
+  },
+  "priceLists": {
+    "empty": {
+      "title": "Aucune liste de prix",
+      "description": "Créez votre première liste de prix pour activer la tarification par palier"
+    },
+    "newPriceList": "Nouvelle liste de prix",
+    "refresh": "Actualiser"
+  },
+  "brands": {
+    "empty": {
+      "title": "Pas encore de marques",
+      "description": "Ajoutez votre première marque pour regrouper les produits."
+    },
+    "newBrand": "Nouvelle marque"
+  },
+  "expiry": {
+    "empty": {
+      "title": "Aucun article arrivant à expiration",
+      "description": "Aucun lot avec des dates d'expiration suivies"
+    },
+    "refresh": "Actualiser"
+  },
+  "stockTransfers": {
+    "empty": {
+      "title": "Aucun transfert",
+      "description": "Créez votre premier transfert de stock"
+    },
+    "newTransfer": "Nouveau transfert",
+    "refresh": "Actualiser"
+  },
+  "lowStockAlerts": {
+    "empty": {
+      "title": "Tous les niveaux de stock sont sains",
+      "description": "Rien ne nécessite de réapprovisionnement pour le moment."
+    },
+    "viewInventory": "Voir l'inventaire"
+  },
+  "stockTakes": {
+    "empty": {
+      "title": "Aucun inventaire physique",
+      "description": "Lancez un comptage pour détecter les écarts"
+    },
+    "newStockTake": "Nouvel inventaire",
+    "refresh": "Actualiser"
+  },
+  "categories": {
+    "empty": {
+      "title": "Pas encore de catégories",
+      "description": "Créez votre première catégorie pour organiser les produits"
+    },
+    "addCategory": "Ajouter une catégorie"
+  },
+  "settings": {
+    "team": {
+      "empty": { "title": "Pas encore de membres d'équipe." },
+      "invite": "Inviter un membre",
+      "refresh": "Actualiser"
+    }
+  },
+  "barcodes": {
+    "previewEmpty": {
+      "title": "Sélectionnez des produits pour prévisualiser les étiquettes",
+      "description": "Choisissez un ou plusieurs produits dans la liste pour voir leurs étiquettes de codes-barres ici."
+    },
+    "selectFirst": "Sélectionner le premier produit",
+    "goToProducts": "Aller aux produits"
+  },
+  "valuation": {
+    "empty": {
+      "title": "Aucune donnée de valorisation disponible",
+      "description": "La valorisation apparaît une fois que l'inventaire est suivi dans un entrepôt."
+    },
+    "refresh": "Actualiser"
   }
 }
