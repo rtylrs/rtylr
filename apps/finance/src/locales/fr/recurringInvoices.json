@@ -1,4 +1,7 @@
 {
   "created": "Facture récurrente créée",
-  "updated": "Facture récurrente mise à jour"
+  "updated": "Facture récurrente mise à jour",
+  "emptyTitle": "Aucune facture récurrente pour le moment",
+  "emptyDescription": "Créez un abonnement pour facturer automatiquement vos clients selon un calendrier.",
+  "emptyCta": "Créer un abonnement"
 }

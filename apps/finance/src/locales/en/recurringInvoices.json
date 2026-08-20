@@ -1,4 +1,7 @@
 {
   "created": "Recurring invoice created",
-  "updated": "Recurring invoice updated"
+  "updated": "Recurring invoice updated",
+  "emptyTitle": "No recurring invoices yet",
+  "emptyDescription": "Create a subscription to automatically bill customers on a schedule.",
+  "emptyCta": "Create subscription"
 }
