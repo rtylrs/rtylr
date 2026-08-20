@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { ShoppingBag, Clock, CheckCircle2, Loader2, Info } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useOrders,
   useUpdateOrderStatus,
@@ -50,21 +52,26 @@ const tabIcons: Record<string, React.ReactNode> = {
   completed: <CheckCircle2 size={13} />,
 };
 
-const EmptyState: React.FC<{ label: string }> = ({ label }) => (
-  <TableRow>
-    <TableCell colSpan={7}>
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <ShoppingBag size={32} className="mb-3" style={{ color: 'var(--dash-text-dim)' }} />
-        <p className="text-sm font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-          No {label} orders
-        </p>
-        <p className="text-xs mt-1" style={{ color: 'var(--dash-text-dim)' }}>
-          Orders will appear here once placed by customers
-        </p>
-      </div>
-    </TableCell>
-  </TableRow>
-);
+const OrdersEmptyRow: React.FC<{ label: string; onRefresh: () => void }> = ({
+  label,
+  onRefresh,
+}) => {
+  const { t } = useTranslation();
+  return (
+    <TableRow>
+      <TableCell colSpan={7}>
+        <EmptyState
+          icon={ShoppingBag}
+          title={
+            label ? t('orders.emptyTitleFiltered', { status: label }) : t('orders.emptyTitleAll')
+          }
+          description={t('orders.emptyDescription')}
+          action={{ label: t('common.refresh'), onClick: onRefresh }}
+        />
+      </TableCell>
+    </TableRow>
+  );
+};
 
 function formatTime(iso: string): string {
   if (!iso) return '';
@@ -76,7 +83,8 @@ const OrdersTable: React.FC<{
   orders: HubOrder[];
   emptyLabel: string;
   onSelectOrder: (order: HubOrder) => void;
-}> = ({ orders, emptyLabel, onSelectOrder }) => (
+  onRefresh: () => void;
+}> = ({ orders, emptyLabel, onSelectOrder, onRefresh }) => (
   <Table>
     <TableHeader>
       <TableRow>
@@ -91,7 +99,7 @@ const OrdersTable: React.FC<{
     </TableHeader>
     <TableBody>
       {orders.length === 0 ? (
-        <EmptyState label={emptyLabel} />
+        <OrdersEmptyRow label={emptyLabel} onRefresh={onRefresh} />
       ) : (
         orders.map((order) => (
           <TableRow key={order.id}>
@@ -120,7 +128,7 @@ const OrdersTable: React.FC<{
 const Orders: React.FC = () => {
   const [tab, setTab] = useState<OrderStatus>('all');
   const [selectedOrder, setSelectedOrder] = useState<HubOrder | null>(null);
-  const { data: allOrders = [], isLoading, isError } = useOrders();
+  const { data: allOrders = [], isLoading, isError, refetch } = useOrders();
   const updateStatusMutation = useUpdateOrderStatus();
 
   const handleStatusUpdate = (newStatus: string) => {
@@ -289,6 +297,7 @@ const Orders: React.FC = () => {
               orders={ordersForTab[tab]}
               emptyLabel={tab === 'all' ? '' : tab.replace('_', ' ')}
               onSelectOrder={setSelectedOrder}
+              onRefresh={() => void refetch()}
             />
           </CardContent>
         </Card>

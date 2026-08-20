@@ -1,0 +1,5 @@
+{
+  "emptyTitleAll": "No orders yet",
+  "emptyTitleFiltered": "No {{status}} orders",
+  "emptyDescription": "Orders will appear here once placed by customers."
+}
