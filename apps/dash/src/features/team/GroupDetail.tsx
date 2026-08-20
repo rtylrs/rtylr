@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Save, Users, Plus, X } from 'lucide-react';
+import { ArrowLeft, Save, Users, Plus, UserCheck, X } from 'lucide-react';
 import { motion } from 'motion/react';
+import { EmptyState } from '@voxire/ui';
 import { Button, Input } from '../../shared/components/ui';
-import { EmptyState, SkeletonList } from '../../shared/components/dash';
+import { SkeletonList } from '../../shared/components/dash';
 import {
   useGroup,
   useCreateGroup,
@@ -387,8 +388,10 @@ const GroupDetail = (): React.JSX.Element => {
                     icon={Users}
                     title={t('team.groupDetail.noMembersTitle')}
                     description={t('team.groupDetail.noMembersDescription')}
-                    actionLabel={t('team.groupDetail.addMembersButton')}
-                    onAction={() => setShowAddMembers(true)}
+                    action={{
+                      label: t('team.groupDetail.addMembersButton'),
+                      onClick: () => setShowAddMembers(true),
+                    }}
                   />
                 </div>
               ) : (
@@ -439,9 +442,15 @@ const GroupDetail = (): React.JSX.Element => {
                   {t('team.groupDetail.addMembersTitle')}
                 </p>
                 {addableMembersList.length === 0 ? (
-                  <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-                    {t('team.groupDetail.allMembersInGroup')}
-                  </p>
+                  <EmptyState
+                    icon={UserCheck}
+                    title={t('team.groupDetail.allMembersInGroup')}
+                    action={{
+                      label: t('common.close'),
+                      onClick: () => setShowAddMembers(false),
+                    }}
+                    size="compact"
+                  />
                 ) : (
                   <div className="space-y-1 max-h-48 overflow-y-auto">
                     {addableMembersList.map((m) => {
