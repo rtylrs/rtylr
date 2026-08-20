@@ -73,7 +73,10 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
 
         <div
           className="mt-8 overflow-hidden rounded-lg border"
-          style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+          style={{
+            borderColor: 'var(--recruit-admin-border)',
+            background: 'var(--recruit-admin-surface)',
+          }}
         >
           {isLoading ? (
             <div className="p-10 text-center text-sm text-white/60">Loading…</div>
@@ -84,7 +87,7 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="border-b" style={{ borderColor: '#1f1f1f' }}>
+                <tr className="border-b" style={{ borderColor: 'var(--recruit-admin-border)' }}>
                   <Th>Title</Th>
                   <Th>Department</Th>
                   <Th>Location</Th>
@@ -97,7 +100,7 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                   <tr
                     key={c.id}
                     className="border-b transition hover:bg-white/5"
-                    style={{ borderColor: '#1f1f1f' }}
+                    style={{ borderColor: 'var(--recruit-admin-border)' }}
                   >
                     <td className="px-4 py-3 font-medium">{c.title}</td>
                     <td className="px-4 py-3 text-sm text-white/70">{c.department || '-'}</td>
@@ -107,9 +110,11 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                         className="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium"
                         style={{
                           background: c.isPublished
-                            ? 'rgba(16,185,129,0.15)'
+                            ? 'color-mix(in srgb, var(--recruit-admin-success) 15%, transparent)'
                             : 'rgba(255,255,255,0.08)',
-                          color: c.isPublished ? '#10b981' : 'rgba(255,255,255,0.6)',
+                          color: c.isPublished
+                            ? 'var(--recruit-admin-success)'
+                            : 'rgba(255,255,255,0.6)',
                         }}
                       >
                         {c.isPublished ? 'Published' : 'Draft'}

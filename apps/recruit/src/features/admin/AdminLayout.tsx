@@ -15,7 +15,7 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
 
   if (user && !isOwnerOrAdmin) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a0a] p-6 text-center text-white/70">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--recruit-admin-bg)] p-6 text-center text-white/70">
         <h2 className="text-xl font-semibold text-white">Access Denied</h2>
         <p className="mt-2 text-sm text-white/60">
           Owner or Admin permission is required to access Recruit administration and candidate data.
@@ -32,11 +32,17 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0a0a', color: '#fafaf9' }}>
+    <div
+      className="min-h-screen"
+      style={{ background: 'var(--recruit-admin-bg)', color: 'var(--recruit-admin-fg)' }}
+    >
       {/* Mobile Top Bar */}
       <div
         className="flex items-center justify-between border-b px-4 py-3 md:hidden"
-        style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+        style={{
+          borderColor: 'var(--recruit-admin-border)',
+          background: 'var(--recruit-admin-surface)',
+        }}
       >
         <div className="text-base font-semibold">Recruit Admin</div>
         <button
@@ -53,7 +59,10 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
       {mobileNavOpen && (
         <div
           className="border-b px-3 py-3 md:hidden"
-          style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+          style={{
+            borderColor: 'var(--recruit-admin-border)',
+            background: 'var(--recruit-admin-surface)',
+          }}
         >
           <nav className="space-y-1">
             {navItems.map((item) => (
@@ -66,7 +75,10 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
               />
             ))}
           </nav>
-          <div className="mt-3 border-t pt-3" style={{ borderColor: '#1f1f1f' }}>
+          <div
+            className="mt-3 border-t pt-3"
+            style={{ borderColor: 'var(--recruit-admin-border)' }}
+          >
             <button
               type="button"
               onClick={() => signOut('recruit')}
@@ -82,7 +94,10 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
       {/* Desktop Sidebar */}
       <aside
         className="hidden md:fixed md:left-0 md:top-0 md:flex md:h-screen md:w-56 md:flex-col md:border-r"
-        style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+        style={{
+          borderColor: 'var(--recruit-admin-border)',
+          background: 'var(--recruit-admin-surface)',
+        }}
       >
         <div className="px-5 py-5 text-lg font-semibold">Recruit</div>
         <nav className="flex-1 space-y-1 px-3">

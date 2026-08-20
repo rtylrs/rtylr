@@ -83,7 +83,10 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
   return (
     <div
       className="rounded-lg border p-5"
-      style={{ borderColor: '#2a2a2a', background: 'rgba(255,255,255,0.02)' }}
+      style={{
+        borderColor: 'var(--recruit-admin-border-strong)',
+        background: 'rgba(255,255,255,0.02)',
+      }}
     >
       <div className="mb-4 flex items-center justify-between">
         <div>
@@ -99,7 +102,7 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
       ) : fields.length === 0 ? (
         <div
           className="mb-4 rounded-md border border-dashed p-4 text-center text-xs text-white/50"
-          style={{ borderColor: '#2a2a2a' }}
+          style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
         >
           No custom questions yet.
         </div>
@@ -214,7 +217,10 @@ const FormFieldRow: React.FC<{
   }
 
   return (
-    <li className="rounded-md border p-3" style={{ borderColor: '#2a2a2a' }}>
+    <li
+      className="rounded-md border p-3"
+      style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
+    >
       <div className="flex items-center gap-2">
         <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-2 py-1 text-xs text-white/70">
           {meta?.icon}
@@ -225,7 +231,7 @@ const FormFieldRow: React.FC<{
           onChange={(e) => setLabel(e.target.value)}
           onBlur={commit}
           className="flex-1 rounded-md border bg-black/40 px-2.5 py-1.5 text-sm outline-none focus:border-white/40"
-          style={{ borderColor: '#2a2a2a' }}
+          style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
           placeholder="Question label"
         />
         <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-white/70">
@@ -270,7 +276,7 @@ const FormFieldRow: React.FC<{
             onChange={(e) => setPlaceholder(e.target.value)}
             onBlur={commit}
             className="w-full rounded-md border bg-black/40 px-2.5 py-1.5 text-xs outline-none focus:border-white/40"
-            style={{ borderColor: '#2a2a2a' }}
+            style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
             placeholder="Placeholder (optional)"
           />
         </div>
@@ -288,7 +294,7 @@ const FormFieldRow: React.FC<{
                 }}
                 onBlur={commit}
                 className="flex-1 rounded-md border bg-black/40 px-2.5 py-1.5 text-xs outline-none focus:border-white/40"
-                style={{ borderColor: '#2a2a2a' }}
+                style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
                 placeholder={`Option ${i + 1}`}
               />
               <button

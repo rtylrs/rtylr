@@ -57,7 +57,10 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
 
         <div
           className="mt-6 overflow-hidden rounded-lg border"
-          style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+          style={{
+            borderColor: 'var(--recruit-admin-border)',
+            background: 'var(--recruit-admin-surface)',
+          }}
         >
           {isLoading ? (
             <div className="p-10 text-center text-sm text-white/60">Loading…</div>
@@ -67,7 +70,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
             </div>
           ) : (
             <>
-              <ul className="divide-y" style={{ borderColor: '#1f1f1f' }}>
+              <ul className="divide-y" style={{ borderColor: 'var(--recruit-admin-border)' }}>
                 {submissions.map((s) => (
                   <li
                     key={s.id}
@@ -162,7 +165,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                         );
                       }}
                       className="rounded-md border bg-black/40 px-3 py-1.5 text-sm outline-none focus:border-white/40"
-                      style={{ borderColor: '#2a2a2a' }}
+                      style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
                     >
                       {STATUSES.map((opt) => (
                         <option key={opt} value={opt}>
@@ -176,7 +179,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
               {submissions.length > 0 && (
                 <div
                   className="flex items-center justify-between border-t px-6 py-3 text-xs text-white/60"
-                  style={{ borderColor: '#1f1f1f' }}
+                  style={{ borderColor: 'var(--recruit-admin-border)' }}
                 >
                   <span>Page {page + 1}</span>
                   <div className="flex gap-2">
@@ -184,7 +187,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                       disabled={page === 0}
                       onClick={() => setPage((p) => Math.max(0, p - 1))}
                       className="rounded border px-3 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"
-                      style={{ borderColor: '#1f1f1f' }}
+                      style={{ borderColor: 'var(--recruit-admin-border)' }}
                     >
                       Previous
                     </button>
@@ -192,7 +195,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                       disabled={submissions.length < PAGE_SIZE}
                       onClick={() => setPage((p) => p + 1)}
                       className="rounded border px-3 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"
-                      style={{ borderColor: '#1f1f1f' }}
+                      style={{ borderColor: 'var(--recruit-admin-border)' }}
                     >
                       Next
                     </button>
@@ -233,7 +236,7 @@ const CustomAnswers: React.FC<{ submission: Submission }> = ({ submission }) => 
   return (
     <div
       className="mt-3 space-y-1.5 rounded-md border p-3"
-      style={{ borderColor: '#1f1f1f', background: 'rgba(255,255,255,0.02)' }}
+      style={{ borderColor: 'var(--recruit-admin-border)', background: 'rgba(255,255,255,0.02)' }}
     >
       {ids.map((id) => {
         const field = byId.get(id);
