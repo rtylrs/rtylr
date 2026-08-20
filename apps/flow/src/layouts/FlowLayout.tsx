@@ -1282,7 +1282,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 transition={{ duration: 0.15 }}
               >
                 <p className="text-[14px] font-semibold mb-4" style={{ color: 'var(--flow-text)' }}>
-                  New project
+                  {t('flow.shell.newProject')}
                 </p>
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center gap-2">
