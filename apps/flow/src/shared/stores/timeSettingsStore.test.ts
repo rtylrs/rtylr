@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   DEFAULT_TIME_SETTINGS,
   TIME_SETTINGS_STORAGE_KEY,
+  getWeeklyTargetMinutes,
+  migrateTimeSettingsV0,
   roundLoggedMinutes,
   useTimeSettingsStore,
 } from './timeSettingsStore';
@@ -17,7 +19,16 @@ describe('time settings defaults', () => {
 
     expect(s.weekStart).toBe('monday');
     expect(s.roundingMinutes).toBe(15);
-    expect(s.weeklyTargetMinutes).toBe(40 * 60);
+    expect(s.dailyTargetMinutes).toEqual({
+      sun: 0,
+      mon: 8 * 60,
+      tue: 8 * 60,
+      wed: 8 * 60,
+      thu: 8 * 60,
+      fri: 8 * 60,
+      sat: 4 * 60,
+    });
+    expect(getWeeklyTargetMinutes(s.dailyTargetMinutes)).toBe(44 * 60);
     expect(s.overtimeThresholdMinutes).toBe(45 * 60);
     expect(s.approvalLocksEntry).toBe(true);
     expect(s.autoLockDays).toBe(7);
@@ -27,6 +38,64 @@ describe('time settings defaults', () => {
     const names = useTimeSettingsStore.getState().categories.map((c) => c.name);
 
     expect(names).toEqual(['Development', 'Review', 'Meeting', 'Admin']);
+  });
+});
+
+describe('daily targets', () => {
+  it('writes one day without touching the others', () => {
+    useTimeSettingsStore.getState().setDailyTargetMinutes('sat', 6 * 60);
+
+    const { dailyTargetMinutes } = useTimeSettingsStore.getState();
+    expect(dailyTargetMinutes.sat).toBe(6 * 60);
+    expect(dailyTargetMinutes.mon).toBe(8 * 60);
+    expect(dailyTargetMinutes.sun).toBe(0);
+  });
+
+  it('allows a day to be set to zero, for a genuinely non-working day', () => {
+    useTimeSettingsStore.getState().setDailyTargetMinutes('fri', 0);
+
+    expect(useTimeSettingsStore.getState().dailyTargetMinutes.fri).toBe(0);
+  });
+
+  it('sums every day for the weekly total', () => {
+    useTimeSettingsStore.getState().setDailyTargetMinutes('sat', 0);
+
+    expect(getWeeklyTargetMinutes(useTimeSettingsStore.getState().dailyTargetMinutes)).toBe(
+      5 * 8 * 60
+    );
+  });
+});
+
+describe('migrateTimeSettingsV0', () => {
+  it('spreads a flat weekly target evenly across Mon-Fri, leaving weekends at zero', () => {
+    const migrated = migrateTimeSettingsV0({ weeklyTargetMinutes: 35 * 60 }) as {
+      dailyTargetMinutes: Record<string, number>;
+    };
+
+    expect(migrated.dailyTargetMinutes).toEqual({
+      sun: 0,
+      mon: 7 * 60,
+      tue: 7 * 60,
+      wed: 7 * 60,
+      thu: 7 * 60,
+      fri: 7 * 60,
+      sat: 0,
+    });
+  });
+
+  it('falls back to the 40h default when the old field is missing', () => {
+    const migrated = migrateTimeSettingsV0({}) as { dailyTargetMinutes: Record<string, number> };
+
+    expect(migrated.dailyTargetMinutes.mon).toBe(8 * 60);
+  });
+
+  it('preserves every other field untouched', () => {
+    const migrated = migrateTimeSettingsV0({
+      weeklyTargetMinutes: 40 * 60,
+      weekStart: 'sunday',
+    }) as { weekStart: string };
+
+    expect(migrated.weekStart).toBe('sunday');
   });
 });
 

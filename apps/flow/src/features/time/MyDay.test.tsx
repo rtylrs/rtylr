@@ -66,7 +66,15 @@ vi.mock('./useWorkDay', () => ({
 const timeSettingsState = vi.hoisted(() => ({
   value: {
     weekStart: 'monday' as 'monday' | 'sunday',
-    weeklyTargetMinutes: 40 * 60,
+    dailyTargetMinutes: {
+      sun: 0,
+      mon: 8 * 60,
+      tue: 8 * 60,
+      wed: 8 * 60,
+      thu: 8 * 60,
+      fri: 8 * 60,
+      sat: 4 * 60,
+    } as Record<string, number>,
     trackAttendance: true,
   },
 }));
@@ -143,7 +151,15 @@ beforeEach(() => {
   tasksState.value = { data: [] };
   timeSettingsState.value = {
     weekStart: 'monday',
-    weeklyTargetMinutes: 40 * 60,
+    dailyTargetMinutes: {
+      sun: 0,
+      mon: 8 * 60,
+      tue: 8 * 60,
+      wed: 8 * 60,
+      thu: 8 * 60,
+      fri: 8 * 60,
+      sat: 4 * 60,
+    },
     trackAttendance: true,
   };
 });
@@ -201,29 +217,23 @@ describe('MyDay: Add Hours renders inline', () => {
   });
 });
 
-describe('MyDay: trackAttendance gating', () => {
-  it('shows the attendance inputs and the three-figure strip by default', () => {
+describe('MyDay: day-level attendance controls removed', () => {
+  it('shows only the Logged figure, with no Where-you-worked picker or clock inputs', () => {
     render(<MyDay />);
-    expect(screen.getByText('flow.time.theDay')).toBeInTheDocument();
-    expect(screen.getByLabelText('flow.time.workMode')).toBeInTheDocument();
-    expect(screen.getByText('flow.time.clocked')).toBeInTheDocument();
-    expect(screen.getByText('flow.time.logged')).toBeInTheDocument();
-    expect(screen.getByText('flow.time.unaccounted')).toBeInTheDocument();
-  });
-
-  it('keeps Location visible but hides clock inputs and collapses to a single Logged figure when off', () => {
-    timeSettingsState.value = { ...timeSettingsState.value, trackAttendance: false };
-    render(<MyDay />);
-    // Location is a separate concept from shift attendance - Add Hours' own
-    // per-entry Location silently defaults to this value, so "The day" and
-    // its Where-you-worked toggle must stay visible even with tracking off.
-    expect(screen.getByText('flow.time.theDay')).toBeInTheDocument();
-    expect(screen.getByLabelText('flow.time.workMode')).toBeInTheDocument();
+    expect(screen.queryByText('flow.time.theDay')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('flow.time.workMode')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('flow.time.startTime')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('flow.time.endTime')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('flow.time.breakMinutes')).not.toBeInTheDocument();
     expect(screen.queryByText('flow.time.clocked')).not.toBeInTheDocument();
     expect(screen.queryByText('flow.time.unaccounted')).not.toBeInTheDocument();
+    expect(screen.getByText('flow.time.logged')).toBeInTheDocument();
+  });
+
+  it('stays that way regardless of the trackAttendance setting', () => {
+    timeSettingsState.value = { ...timeSettingsState.value, trackAttendance: false };
+    render(<MyDay />);
+    expect(screen.queryByText('flow.time.theDay')).not.toBeInTheDocument();
     expect(screen.getByText('flow.time.logged')).toBeInTheDocument();
   });
 });
