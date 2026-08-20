@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { getOneKitErrorMessage, uploadAsset } from '@voxire/api';
+import { useUserStore } from '@voxire/auth';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -33,6 +34,7 @@ import {
   centsToDisplay,
   computeSeatProration,
 } from '../../shared/hooks/queries/useFinanceSubscription';
+import { canFinancePermission } from '../../shared/lib/financePermissions';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -267,12 +269,16 @@ const TeamTab: React.FC = () => {
   const invite = useFinanceInviteMember();
   const deactivate = useFinanceDeactivateMember();
   const { data: sub } = useFinanceSubscription();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canInviteMember = canFinancePermission(role, 'hub:team:invite');
+  const canRemoveMember = canFinancePermission(role, 'hub:team:remove');
 
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [showInvite, setShowInvite] = useState(false);
 
   const handleInvite = (): void => {
+    if (!canInviteMember) return;
     if (!email.trim() || !fullName.trim()) {
       toast.error('Email and full name are required');
       return;
@@ -304,7 +310,7 @@ const TeamTab: React.FC = () => {
         </div>
       </div>
 
-      {showInvite ? (
+      {showInvite && canInviteMember ? (
         <div
           style={{ ...cardStyle, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}
         >
@@ -372,12 +378,14 @@ const TeamTab: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div>
-          <button type="button" onClick={() => setShowInvite(true)} style={primaryBtn}>
-            <UserPlus size={13} />
-            Invite member
-          </button>
-        </div>
+        canInviteMember && (
+          <div>
+            <button type="button" onClick={() => setShowInvite(true)} style={primaryBtn}>
+              <UserPlus size={13} />
+              Invite member
+            </button>
+          </div>
+        )
       )}
 
       {isLoading ? (
@@ -469,32 +477,34 @@ const TeamTab: React.FC = () => {
               >
                 {m.role}
               </span>
-              <button
-                type="button"
-                aria-label={`Remove ${m.name}`}
-                onClick={() => {
-                  deactivate.mutate(m.id, {
-                    onSuccess: () => toast.success(`${m.name} removed`),
-                    onError: (error) =>
-                      toast.error(getOneKitErrorMessage(error, `Failed to remove ${m.name}`)),
-                  });
-                }}
-                style={{
-                  height: 28,
-                  width: 28,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 6,
-                  border: 'none',
-                  background: 'transparent',
-                  color: 'var(--hub-text-muted)',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                }}
-              >
-                <UserMinus size={13} />
-              </button>
+              {canRemoveMember && (
+                <button
+                  type="button"
+                  aria-label={`Remove ${m.name}`}
+                  onClick={() => {
+                    deactivate.mutate(m.id, {
+                      onSuccess: () => toast.success(`${m.name} removed`),
+                      onError: (error) =>
+                        toast.error(getOneKitErrorMessage(error, `Failed to remove ${m.name}`)),
+                    });
+                  }}
+                  style={{
+                    height: 28,
+                    width: 28,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: 'transparent',
+                    color: 'var(--hub-text-muted)',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                >
+                  <UserMinus size={13} />
+                </button>
+              )}
             </div>
           ))}
         </div>

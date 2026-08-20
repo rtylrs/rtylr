@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useUserStore } from '@voxire/auth';
 import { motion } from 'motion/react';
 import { Download, Settings, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -7,6 +8,7 @@ import { getOneKitErrorMessage } from '@voxire/api';
 import { TaxPeriod } from '../../shared/services/financeApi';
 import { useTaxReport, useTaxConfig, useCreateTaxConfig } from '../../shared/hooks/useTax';
 import { exportTaxSummaryCsv } from '../../shared/lib/exports';
+import { canFinancePermission } from '../../shared/lib/financePermissions';
 
 const ACCENT = 'var(--finance-accent)';
 
@@ -51,6 +53,8 @@ const Tax: React.FC = () => {
   const [showConfig, setShowConfig] = useState(false);
   const { data: taxConfigData } = useTaxConfig();
   const saveRates = useCreateTaxConfig();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManageTax = canFinancePermission(role, 'finance:tax');
 
   // Derive editable rates from real data; fall back to empty list while loading
   const serverRates: TaxConfig[] = (taxConfigData ?? []).map((c) => ({
@@ -87,24 +91,26 @@ const Tax: React.FC = () => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={() => setShowConfig(!showConfig)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '7px 14px',
-              borderRadius: 8,
-              border: '1px solid var(--hub-border)',
-              background: showConfig ? 'var(--hub-active)' : 'var(--hub-hover)',
-              color: 'var(--hub-text-muted)',
-              fontSize: 13,
-              cursor: 'pointer',
-            }}
-          >
-            <Settings size={14} />
-            Tax Rates
-          </button>
+          {canManageTax && (
+            <button
+              onClick={() => setShowConfig(!showConfig)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '7px 14px',
+                borderRadius: 8,
+                border: '1px solid var(--hub-border)',
+                background: showConfig ? 'var(--hub-active)' : 'var(--hub-hover)',
+                color: 'var(--hub-text-muted)',
+                fontSize: 13,
+                cursor: 'pointer',
+              }}
+            >
+              <Settings size={14} />
+              Tax Rates
+            </button>
+          )}
           <button
             style={{
               display: 'flex',
@@ -234,7 +240,7 @@ const Tax: React.FC = () => {
       )}
 
       {/* Tax rate config */}
-      {showConfig && (
+      {showConfig && canManageTax && (
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}

@@ -38,6 +38,7 @@ import {
   X,
 } from 'lucide-react';
 import GlobalSearch from '../shared/components/GlobalSearch';
+import { canFinancePermission, type FinancePermission } from '../shared/lib/financePermissions';
 
 const ACCENT = 'var(--finance-accent)';
 
@@ -45,6 +46,12 @@ interface NavItem {
   label: string;
   path: string;
   icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
+  // Resource required to see this nav item. Bank feeds, reconciliation, the
+  // chart of accounts and tax configuration are admin-tier resources in
+  // packages/permissions/src/matrix.ts (not granted to billing/operator/staff
+  // even for viewing), so their nav entries are hidden rather than shown to a
+  // role that cannot open the underlying screen's primary action.
+  requiredPermission?: FinancePermission;
 }
 
 interface NavGroup {
@@ -76,8 +83,18 @@ const navGroups: NavGroup[] = [
   {
     title: 'Banking',
     items: [
-      { label: 'Bank Feeds', path: '/bank', icon: Building2 },
-      { label: 'Reconcile', path: '/reconcile', icon: Shuffle },
+      {
+        label: 'Bank Feeds',
+        path: '/bank',
+        icon: Building2,
+        requiredPermission: 'finance:accounts',
+      },
+      {
+        label: 'Reconcile',
+        path: '/reconcile',
+        icon: Shuffle,
+        requiredPermission: 'finance:reconcile',
+      },
     ],
   },
   {
@@ -93,8 +110,13 @@ const navGroups: NavGroup[] = [
     title: 'Accounting',
     items: [
       { label: 'Journal', path: '/journal', icon: BookOpen },
-      { label: 'Accounts', path: '/accounts', icon: FileText },
-      { label: 'Tax Config', path: '/tax', icon: Calculator },
+      {
+        label: 'Accounts',
+        path: '/accounts',
+        icon: FileText,
+        requiredPermission: 'finance:accounts',
+      },
+      { label: 'Tax Config', path: '/tax', icon: Calculator, requiredPermission: 'finance:tax' },
     ],
   },
 ];
@@ -211,10 +233,24 @@ const DefaultLayout: React.FC = () => {
   const sidebarRef = useRef<HTMLElement | null>(null);
   const financeUser = useUserStore((s) => s.user);
   const setAuthUser = useUserStore((s) => s.setUser);
+  const role = useUserStore((s) => s.user?.role ?? s.role);
   const userId = Number(financeUser?.id) || 0;
   const userEmail = financeUser?.email || financeUser?.emailAddress || null;
   const userName = financeUser?.name || financeUser?.firstName || userEmail || 'User';
   const { isOpen: caretOpen } = useCaretStore();
+  const visibleNavGroups = React.useMemo(
+    () =>
+      navGroups
+        .map((group) => ({
+          ...group,
+          items: group.items.filter(
+            (item) =>
+              !item.requiredPermission || canFinancePermission(role, item.requiredPermission)
+          ),
+        }))
+        .filter((group) => group.items.length > 0),
+    [role]
+  );
 
   useEffect(() => {
     if (financeUser?.name || financeUser?.email) return;
@@ -403,7 +439,7 @@ const DefaultLayout: React.FC = () => {
               gap: 8,
             }}
           >
-            {navGroups.map((group) => (
+            {visibleNavGroups.map((group) => (
               <div key={group.title} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <p
                   style={{

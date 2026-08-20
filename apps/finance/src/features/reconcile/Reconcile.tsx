@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useUserStore } from '@voxire/auth';
 import { motion } from 'motion/react';
 import { Link2, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
@@ -10,6 +11,7 @@ import { useBankTransactions } from '../../shared/hooks/useBankAccounts';
 import { useListInvoices } from '../../shared/hooks/queries/useInvoices';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 import { safe } from '../../shared/lib/api';
+import { canFinancePermission } from '../../shared/lib/financePermissions';
 import { findExactMatches } from './reconcileHelper';
 
 interface Candidate {
@@ -27,12 +29,15 @@ const Reconcile: React.FC = () => {
     amount: inv.total ?? 0,
   }));
   const [matches, setMatches] = useState<Record<string, string>>({});
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canReconcile = canFinancePermission(role, 'finance:reconcile');
 
   const unmatched = transactions.filter((t) => !t.matched && !matches[t.id ?? '']);
 
   const [autoMatching, setAutoMatching] = useState(false);
 
   const match = async (txId: string, candidateId: string): Promise<void> => {
+    if (!canReconcile) return;
     try {
       await unwrap(
         safe.post('/finance/reconcile/match', {
@@ -49,6 +54,7 @@ const Reconcile: React.FC = () => {
   };
 
   const handleAutoMatch = async (): Promise<void> => {
+    if (!canReconcile) return;
     setAutoMatching(true);
     try {
       const exactMatches = findExactMatches(
@@ -92,9 +98,11 @@ const Reconcile: React.FC = () => {
         title="Reconciliation"
         subtitle={`${unmatched.length} transactions awaiting match`}
         actions={
-          <button style={primaryBtn} onClick={handleAutoMatch} disabled={autoMatching}>
-            <CheckCheck size={13} /> {autoMatching ? 'Matching…' : 'Auto-match all'}
-          </button>
+          canReconcile ? (
+            <button style={primaryBtn} onClick={handleAutoMatch} disabled={autoMatching}>
+              <CheckCheck size={13} /> {autoMatching ? 'Matching…' : 'Auto-match all'}
+            </button>
+          ) : undefined
         }
       />
 
@@ -127,23 +135,25 @@ const Reconcile: React.FC = () => {
                 <MoneyDisplay amount={t.amount ?? 0} signed />
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {candidates
-                .filter(
-                  (c) =>
-                    Math.abs(c.amount) === Math.abs(t.amount ?? 0) ||
-                    Math.abs(Math.abs(c.amount) - Math.abs(t.amount ?? 0)) < 500
-                )
-                .map((c) => (
-                  <button
-                    key={c.id}
-                    style={{ ...ghostBtn, padding: '6px 12px' }}
-                    onClick={() => match(t.id ?? '', c.id)}
-                  >
-                    <Link2 size={12} /> {c.label}
-                  </button>
-                ))}
-            </div>
+            {canReconcile && (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {candidates
+                  .filter(
+                    (c) =>
+                      Math.abs(c.amount) === Math.abs(t.amount ?? 0) ||
+                      Math.abs(Math.abs(c.amount) - Math.abs(t.amount ?? 0)) < 500
+                  )
+                  .map((c) => (
+                    <button
+                      key={c.id}
+                      style={{ ...ghostBtn, padding: '6px 12px' }}
+                      onClick={() => match(t.id ?? '', c.id)}
+                    >
+                      <Link2 size={12} /> {c.label}
+                    </button>
+                  ))}
+              </div>
+            )}
           </div>
         ))}
         {unmatched.length === 0 && (

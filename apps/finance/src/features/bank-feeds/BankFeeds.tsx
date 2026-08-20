@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useUserStore } from '@voxire/auth';
 import { motion } from 'motion/react';
 import { CheckCircle, Link as LinkIcon, Building2, CreditCard, PiggyBank } from 'lucide-react';
 import PageHeader from '../../shared/components/PageHeader';
@@ -19,6 +20,7 @@ import {
   primaryBtn,
   ACCENT,
 } from '../../shared/lib/tokens';
+import { canFinancePermission } from '../../shared/lib/financePermissions';
 
 const iconFor: Record<
   string,
@@ -43,10 +45,13 @@ const BankFeeds: React.FC = () => {
     currency: 'USD',
   });
   const { data: transactions = [] } = useBankTransactions(selected);
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManageAccounts = canFinancePermission(role, 'finance:accounts');
 
   const total = accounts.reduce((s: number, a) => s + (a.balance ?? 0), 0);
 
   const handleCreateAccount = (): void => {
+    if (!canManageAccounts) return;
     if (!form.name.trim() || !form.bankName.trim() || form.lastFour.length !== 4) return;
 
     createAccount.mutate(
@@ -90,9 +95,11 @@ const BankFeeds: React.FC = () => {
           </>
         }
         actions={
-          <button style={primaryBtn} onClick={() => setShowConnect(true)}>
-            <LinkIcon size={13} /> Connect Account
-          </button>
+          canManageAccounts ? (
+            <button style={primaryBtn} onClick={() => setShowConnect(true)}>
+              <LinkIcon size={13} /> Connect Account
+            </button>
+          ) : undefined
         }
       />
 
@@ -259,7 +266,7 @@ const BankFeeds: React.FC = () => {
       )}
 
       <Modal
-        open={showConnect}
+        open={showConnect && canManageAccounts}
         onClose={() => setShowConnect(false)}
         title="Add Bank Account"
         footer={
