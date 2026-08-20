@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion, type Variants } from 'motion/react';
-import { Users, UserPlus, UserMinus, Star } from 'lucide-react';
+import { Users, UserPlus, UserMinus, Star, DollarSign } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Bar } from 'react-chartjs-2';
 import type { ChartOptions } from 'chart.js';
+import { EmptyState } from '@voxire/ui';
 import {
   useCustomerKPIs,
   useTopCustomers,
@@ -16,7 +17,6 @@ import { formatMoney, type Currency } from '../../shared/utils/money';
 import { formatNumber } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonBlock, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
-import EmptyState from '../../shared/components/EmptyState';
 
 const containerVariants: Variants = {
   hidden: {},
@@ -31,9 +31,13 @@ const itemVariants: Variants = {
 const Customers: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: kpis, isLoading: kpisLoading, isError, refetch } = useCustomerKPIs();
-  const { data: topRes, isLoading: topLoading } = useTopCustomers({ limit: 10 });
-  const { data: churnRes, isLoading: churnLoading } = useCustomerChurn();
-  const { data: ltvRes, isLoading: ltvLoading } = useCustomerLTV();
+  const {
+    data: topRes,
+    isLoading: topLoading,
+    refetch: refetchTop,
+  } = useTopCustomers({ limit: 10 });
+  const { data: churnRes, isLoading: churnLoading, refetch: refetchChurn } = useCustomerChurn();
+  const { data: ltvRes, isLoading: ltvLoading, refetch: refetchLtv } = useCustomerLTV();
   const { data: settings } = useInsightsSettings();
   const currency = (settings?.defaultCurrency as Currency) || 'USD';
 
@@ -181,7 +185,12 @@ const Customers: React.FC = (): React.JSX.Element => {
         {topLoading ? (
           <SkeletonBlock className="h-64 w-full" />
         ) : topList.length === 0 ? (
-          <EmptyState title="" description={t('insights.customers.empty')} />
+          <EmptyState
+            icon={Users}
+            title={t('insights.customers.emptyTop.title')}
+            description={t('insights.customers.emptyTop.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetchTop() }}
+          />
         ) : (
           <div
             style={{ height: Math.max(180, topList.length * 36) }}
@@ -207,7 +216,12 @@ const Customers: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         ) : ltvBuckets.length === 0 ? (
-          <EmptyState title="" description={t('insights.customers.empty')} />
+          <EmptyState
+            icon={DollarSign}
+            title={t('insights.customers.emptyLtv.title')}
+            description={t('insights.customers.emptyLtv.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetchLtv() }}
+          />
         ) : (
           <div className="space-y-1">
             {ltvBuckets.map((b) => (
@@ -243,7 +257,12 @@ const Customers: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         ) : churnWindows.length === 0 ? (
-          <EmptyState title="" description={t('insights.customers.empty')} />
+          <EmptyState
+            icon={UserMinus}
+            title={t('insights.customers.emptyChurn.title')}
+            description={t('insights.customers.emptyChurn.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetchChurn() }}
+          />
         ) : (
           <div className="space-y-1">
             {churnWindows.map((w) => (

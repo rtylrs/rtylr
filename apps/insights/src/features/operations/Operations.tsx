@@ -1,8 +1,9 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion, type Variants } from 'motion/react';
-import { Users, Calendar, Clock, Activity } from 'lucide-react';
+import { Users, Calendar, Clock, Activity, Gauge } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import {
   useOperationsKPIs,
   useHeadcount,
@@ -13,7 +14,6 @@ import {
 import { formatNumber, formatPercent } from '../../shared/lib/format';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
-import EmptyState from '../../shared/components/EmptyState';
 
 const containerVariants: Variants = {
   hidden: {},
@@ -28,10 +28,18 @@ const itemVariants: Variants = {
 const Operations: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: kpis, isLoading: kpisLoading, isError, refetch } = useOperationsKPIs();
-  const { data: headcount, isLoading: headcountLoading } = useHeadcount();
-  const { data: shifts, isLoading: shiftsLoading } = useShiftMetrics();
-  const { data: timeOff, isLoading: timeOffLoading } = useTimeOff();
-  const { data: utilization, isLoading: utilLoading } = useUtilization();
+  const {
+    data: headcount,
+    isLoading: headcountLoading,
+    refetch: refetchHeadcount,
+  } = useHeadcount();
+  const { data: shifts, isLoading: shiftsLoading, refetch: refetchShifts } = useShiftMetrics();
+  const { data: timeOff, isLoading: timeOffLoading, refetch: refetchTimeOff } = useTimeOff();
+  const {
+    data: utilization,
+    isLoading: utilLoading,
+    refetch: refetchUtilization,
+  } = useUtilization();
 
   if (isError) {
     return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
@@ -123,7 +131,13 @@ const Operations: React.FC = (): React.JSX.Element => {
           {headcountLoading ? (
             <SkeletonRow cols={2} />
           ) : !headcount ? (
-            <EmptyState title="" description={t('insights.operations.empty')} />
+            <EmptyState
+              icon={Users}
+              title={t('insights.operations.emptyHeadcount.title')}
+              description={t('insights.operations.emptyHeadcount.description')}
+              action={{ label: t('common.refresh'), onClick: () => refetchHeadcount() }}
+              size="compact"
+            />
           ) : (
             <div className="space-y-3">
               <div className="flex items-baseline gap-3">
@@ -154,7 +168,13 @@ const Operations: React.FC = (): React.JSX.Element => {
           {utilLoading ? (
             <SkeletonRow cols={2} />
           ) : !utilization ? (
-            <EmptyState title="" description={t('insights.operations.empty')} />
+            <EmptyState
+              icon={Gauge}
+              title={t('insights.operations.emptyUtilization.title')}
+              description={t('insights.operations.emptyUtilization.description')}
+              action={{ label: t('common.refresh'), onClick: () => refetchUtilization() }}
+              size="compact"
+            />
           ) : (
             <div className="space-y-2">
               <p className="text-3xl font-bold" style={{ color: 'var(--hub-text)' }}>
@@ -179,7 +199,13 @@ const Operations: React.FC = (): React.JSX.Element => {
           {shiftsLoading ? (
             <SkeletonRow cols={2} />
           ) : !shifts ? (
-            <EmptyState title="" description={t('insights.operations.empty')} />
+            <EmptyState
+              icon={Calendar}
+              title={t('insights.operations.emptyShifts.title')}
+              description={t('insights.operations.emptyShifts.description')}
+              action={{ label: t('common.refresh'), onClick: () => refetchShifts() }}
+              size="compact"
+            />
           ) : (
             <div className="space-y-2 text-xs" style={{ color: 'var(--hub-text)' }}>
               <div className="flex justify-between">
@@ -221,7 +247,13 @@ const Operations: React.FC = (): React.JSX.Element => {
           {timeOffLoading ? (
             <SkeletonRow cols={2} />
           ) : !timeOff ? (
-            <EmptyState title="" description={t('insights.operations.empty')} />
+            <EmptyState
+              icon={Clock}
+              title={t('insights.operations.emptyTimeOff.title')}
+              description={t('insights.operations.emptyTimeOff.description')}
+              action={{ label: t('common.refresh'), onClick: () => refetchTimeOff() }}
+              size="compact"
+            />
           ) : (
             <div className="space-y-2 text-xs" style={{ color: 'var(--hub-text)' }}>
               <div className="flex justify-between">

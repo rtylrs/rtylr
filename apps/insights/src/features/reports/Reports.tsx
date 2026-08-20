@@ -4,6 +4,7 @@ import { motion, type Variants } from 'motion/react';
 import { FileText, Download, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useUserStore } from '@voxire/auth';
+import { EmptyState } from '@voxire/ui';
 import {
   useReportTemplates,
   useGenerateRevenueReport,
@@ -11,7 +12,6 @@ import {
 } from '../../shared/hooks/queries/useInsightsReports';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
-import EmptyState from '../../shared/components/EmptyState';
 import { canInsightsPermission } from '../../shared/lib/insightsPermissions';
 
 const containerVariants: Variants = {
@@ -105,7 +105,12 @@ const Reports: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         ) : templates.length === 0 ? (
-          <EmptyState title="" description={t('insights.reports.empty')} />
+          <EmptyState
+            icon={FileText}
+            title={t('insights.reports.empty.title')}
+            description={t('insights.reports.empty.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetch() }}
+          />
         ) : (
           <div className="space-y-1">
             {templates.map((tpl) => (

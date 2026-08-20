@@ -24,8 +24,14 @@
     "difference": "Difference",
     "trend": "Revenue Trend",
     "byApp": "Revenue by App",
-    "emptyTrend": "Revenue data will appear here once transactions are recorded.",
-    "emptyByApp": "Breakdown by app will appear here."
+    "emptyTrend": {
+      "title": "لا توجد بيانات اتجاه إيرادات حتى الآن",
+      "description": "ستظهر بيانات الإيرادات هنا بعد تسجيل المعاملات."
+    },
+    "emptyByApp": {
+      "title": "لا يوجد توزيع للإيرادات حتى الآن",
+      "description": "سيظهر التوزيع حسب التطبيق بعد ورود إيرادات من أكثر من تطبيق واحد."
+    }
   },
   "customers": {
     "title": "Customers",
@@ -38,7 +44,18 @@
     "top": "Top Customers",
     "ltv": "Lifetime Value Distribution",
     "churn": "Churn Rates",
-    "empty": "No customer data yet."
+    "emptyTop": {
+      "title": "لا يوجد عملاء بارزون حتى الآن",
+      "description": "سيظهر هنا العملاء الأعلى إنفاقًا بعد بدء استقبال الطلبات."
+    },
+    "emptyLtv": {
+      "title": "لا توجد بيانات قيمة دائمة حتى الآن",
+      "description": "ستظهر شرائح القيمة الدائمة بعد تراكم سجل طلبات للعملاء."
+    },
+    "emptyChurn": {
+      "title": "لا توجد بيانات تسرب حتى الآن",
+      "description": "ستظهر معدلات التسرب بعد توفر سجل كافٍ من نشاط العملاء لقياس الاحتفاظ بهم."
+    }
   },
   "products": {
     "title": "Products",
@@ -52,14 +69,40 @@
     "margins": "Margin Distribution",
     "slowMovers": "Slow Movers",
     "categoryMix": "Category Mix",
-    "empty": "No product data yet."
+    "emptyBestSellers": {
+      "title": "لا توجد أفضل المبيعات حتى الآن",
+      "description": "ستظهر هنا منتجاتك الأكثر مبيعًا بعد بدء استقبال الطلبات."
+    },
+    "emptyMargins": {
+      "title": "لا توجد بيانات هامش ربح حتى الآن",
+      "description": "سيظهر توزيع هامش الربح بعد تسجيل تكاليف المنتجات ومبيعاتها."
+    },
+    "emptySlowMovers": {
+      "title": "لا توجد منتجات بطيئة الحركة حتى الآن",
+      "description": "ستظهر هنا المنتجات ذات الدوران المنخفض بعد توفر سجل مبيعات كافٍ."
+    },
+    "emptyCategoryMix": {
+      "title": "لا توجد بيانات تصنيف حتى الآن",
+      "description": "سيظهر التوزيع حسب الفئة بعد تعيين المنتجات إلى فئات وبيعها."
+    }
   },
   "financial": {
     "title": "Financial",
     "cashFlow": "Cash Flow",
     "expenses": "Expenses by Category",
     "aging": "Invoice Aging",
-    "empty": "No financial data yet."
+    "emptyExpenses": {
+      "title": "لا توجد بيانات مصروفات حتى الآن",
+      "description": "ستظهر المصروفات هنا بعد تصنيفها وتسجيلها."
+    },
+    "emptyAging": {
+      "title": "لا توجد بيانات تقادم فواتير حتى الآن",
+      "description": "ستظهر الفواتير المستحقة هنا بعد إصدارها."
+    },
+    "emptyCashFlow": {
+      "title": "لا توجد بيانات تدفق نقدي حتى الآن",
+      "description": "سيظهر التدفق النقدي هنا بعد تسجيل التدفقات الداخلة والخارجة."
+    }
   },
   "operations": {
     "title": "Operations",
@@ -73,7 +116,22 @@
     "shifts": "Shift Metrics",
     "timeOff": "Time-Off",
     "utilization": "Utilization",
-    "empty": "No operations data yet."
+    "emptyHeadcount": {
+      "title": "لا توجد بيانات عن عدد الموظفين حتى الآن",
+      "description": "سيظهر عدد الموظفين هنا بعد إضافة سجلات الموظفين."
+    },
+    "emptyUtilization": {
+      "title": "لا توجد بيانات استخدام حتى الآن",
+      "description": "سيظهر معدل الاستخدام بعد جدولة المناوبات وتنفيذها."
+    },
+    "emptyShifts": {
+      "title": "لا توجد بيانات مناوبات حتى الآن",
+      "description": "ستظهر مقاييس المناوبات هنا بعد جدولتها."
+    },
+    "emptyTimeOff": {
+      "title": "لا توجد بيانات إجازات حتى الآن",
+      "description": "ستظهر طلبات الإجازة هنا بعد تقديمها من الموظفين."
+    }
   },
   "reports": {
     "title": "Reports",
@@ -81,7 +139,10 @@
     "exportRevenue": "Export Revenue CSV",
     "generateRevenue": "Generate Revenue Report",
     "generateQueued": "Report queued",
-    "empty": "No report templates available."
+    "empty": {
+      "title": "لا توجد قوالب تقارير حتى الآن",
+      "description": "ستظهر قوالب التقارير هنا بعد توفرها لمساحة العمل هذه."
+    }
   },
   "settings": {
     "title": "Insights Settings",
@@ -96,7 +157,10 @@
       "created": "Scheduled report created",
       "updated": "Scheduled report updated",
       "deleted": "Scheduled report deleted",
-      "empty": "No scheduled reports yet."
+      "empty": {
+        "title": "لا توجد تقارير مجدولة حتى الآن",
+        "description": "ستظهر هنا التقارير التي تجدولها للتسليم الدوري."
+      }
     },
     "saved": "Settings saved"
   }

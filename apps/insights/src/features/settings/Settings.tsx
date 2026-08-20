@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { motion, type Variants } from 'motion/react';
 import { Clock, Loader2, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import {
   useInsightsSettings,
   useUpdateInsightsSettings,
@@ -11,7 +12,6 @@ import {
 } from '../../shared/hooks/queries/useInsightsSettings';
 import { CardSkeleton, SkeletonRow } from '../../shared/components/Skeleton';
 import ErrorState from '../../shared/components/ErrorState';
-import EmptyState from '../../shared/components/EmptyState';
 
 const containerVariants: Variants = {
   hidden: {},
@@ -27,7 +27,11 @@ const Settings: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: settings, isLoading: settingsLoading, isError, refetch } = useInsightsSettings();
   const updateSettings = useUpdateInsightsSettings();
-  const { data: scheduledRes, isLoading: schedLoading } = useScheduledReports();
+  const {
+    data: scheduledRes,
+    isLoading: schedLoading,
+    refetch: refetchScheduled,
+  } = useScheduledReports();
   const deleteScheduled = useDeleteScheduledReport();
 
   const [defaultCurrency, setDefaultCurrency] = useState<string>('');
@@ -186,7 +190,12 @@ const Settings: React.FC = (): React.JSX.Element => {
             ))}
           </div>
         ) : scheduledList.length === 0 ? (
-          <EmptyState title="" description={t('insights.settings.scheduledReports.empty')} />
+          <EmptyState
+            icon={Clock}
+            title={t('insights.settings.scheduledReports.empty.title')}
+            description={t('insights.settings.scheduledReports.empty.description')}
+            action={{ label: t('common.refresh'), onClick: () => refetchScheduled() }}
+          />
         ) : (
           <div className="space-y-1">
             {scheduledList.map((s) => (

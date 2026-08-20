@@ -1,22 +1,10 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import i18next from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import enInsights from '../../locales/en/insights.json';
+import { initTestI18n } from '../../shared/testUtils/i18nTestSetup';
 import Reports from './Reports';
 
-// This app's i18n bootstrap (`shared/services/i18next.ts`) merges every
-// locales/en/*.json file into a single 'translation' namespace keyed by
-// filename, so `t('insights.reports.exportRevenue')` resolves as a dot-path
-// within that namespace. Reproduce that here with the real, shipped English
-// copy so assertions check actual production strings, not raw i18n keys.
-void i18next.use(initReactI18next).init({
-  lng: 'en',
-  fallbackLng: 'en',
-  resources: { en: { translation: { insights: enInsights } } },
-  interpolation: { escapeValue: false },
-});
+initTestI18n();
 
 interface MockUserState {
   user: { role: string | null } | null;
@@ -94,5 +82,50 @@ describe('Reports export gating', () => {
     render(<Reports />);
 
     expect(screen.getByRole('button', { name: 'Export Revenue CSV' })).toBeInTheDocument();
+  });
+});
+
+describe('Reports empty state', () => {
+  beforeEach(() => {
+    mocks.role = null;
+    mocks.useGenerateRevenueReport.mockReturnValue({ mutate: vi.fn(), isPending: false });
+    mocks.useExportRevenueReport.mockReturnValue({ mutate: vi.fn(), isPending: false });
+  });
+
+  it('shows the illustration, real title/description and a refresh action when there are no templates', () => {
+    const refetch = vi.fn();
+    mocks.useReportTemplates.mockReturnValue({
+      data: { templates: [] },
+      isLoading: false,
+      isError: false,
+      refetch,
+    });
+
+    render(<Reports />);
+
+    expect(screen.getByText('No report templates yet')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Report templates will appear here once they are made available for this workspace.'
+      )
+    ).toBeInTheDocument();
+
+    const refreshButton = screen.getByRole('button', { name: 'Refresh' });
+    fireEvent.click(refreshButton);
+
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show the empty state when templates exist', () => {
+    mocks.useReportTemplates.mockReturnValue({
+      data: { templates: [{ id: '1', name: 'Weekly Revenue', description: '' }] },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+
+    render(<Reports />);
+
+    expect(screen.queryByText('No report templates yet')).not.toBeInTheDocument();
   });
 });
