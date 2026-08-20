@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { ListTodo } from 'lucide-react';
 import {
   Button,
   Input,
@@ -15,6 +16,7 @@ import {
   WidgetErrorFallback,
   isDynamicImportError,
   recoverFromDynamicImportError,
+  EmptyState,
 } from '../index';
 
 // Component that throws for testing ErrorBoundary
@@ -204,6 +206,40 @@ describe('@voxire/ui components', () => {
       render(<Avatar initials="SO" />);
 
       expect(screen.getByText('SO').parentElement?.className ?? '').toContain('h-9');
+    });
+  });
+
+  describe('EmptyState', () => {
+    it('renders the icon, title, description and a required call-to-action', () => {
+      const handleAction = vi.fn();
+      render(
+        <EmptyState
+          icon={ListTodo}
+          title="No tasks assigned"
+          description="Nothing is on your plate right now."
+          action={{ label: 'Add your first task', onClick: handleAction }}
+        />
+      );
+
+      expect(screen.getByText('No tasks assigned')).toBeDefined();
+      expect(screen.getByText('Nothing is on your plate right now.')).toBeDefined();
+
+      const cta = screen.getByRole('button', { name: 'Add your first task' });
+      fireEvent.click(cta);
+      expect(handleAction).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders without a description when none is given', () => {
+      render(
+        <EmptyState
+          icon={ListTodo}
+          title="No results"
+          action={{ label: 'Clear filters', onClick: vi.fn() }}
+        />
+      );
+
+      expect(screen.getByText('No results')).toBeDefined();
+      expect(screen.getByRole('button', { name: 'Clear filters' })).toBeDefined();
     });
   });
 });

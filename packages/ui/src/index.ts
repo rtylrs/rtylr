@@ -17,6 +17,9 @@ export { Switch } from './components/Switch';
 export { Avatar } from './components/Avatar';
 export type { AvatarProps, AvatarSize } from './components/Avatar';
 
+export { EmptyState } from './components/EmptyState';
+export type { EmptyStateProps, EmptyStateAction } from './components/EmptyState';
+
 export {
   Dialog,
   DialogTrigger,
