@@ -16,7 +16,8 @@ vi.mock('@voxire/api', async (importOriginal) => {
   return { ...actual, unwrap: vi.fn((val: unknown) => val) };
 });
 
-import { findProjectRole, useCanEditTask } from './currentUser';
+import { useUserStore as useAuthUserStore } from '@voxire/auth';
+import { findProjectRole, useCanEditTask, useCanDeleteResource } from './currentUser';
 import { flowApi } from '../services/flowApi';
 import { useUserStore } from '../stores/userStore';
 import { useFlowStore } from '../stores/flowStore';
@@ -80,6 +81,9 @@ describe('useCanEditTask', () => {
       isAuthenticated: true,
     });
     useFlowStore.setState({ activeWorkspaceId: 'ws-1' });
+    // No business-wide role by default - each test that needs the bypass sets
+    // it explicitly, so a leftover role from a previous test can't leak in.
+    useAuthUserStore.setState({ role: null });
   });
 
   it('grants edit from an explicit project role above viewer', async () => {
@@ -164,6 +168,69 @@ describe('useCanEditTask', () => {
 
     const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
     await waitFor(() => expect(flowApi.getWorkspaceMembers).toHaveBeenCalled());
+    expect(result.current).toBe(false);
+  });
+
+  it.each(['owner', 'admin', 'operator'] as const)(
+    'grants edit for a business-wide %s with no project role and no workspace role',
+    async (businessRole) => {
+      useAuthUserStore.setState({ role: businessRole });
+      (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
+      (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
+
+      const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
+      await waitFor(() => expect(result.current).toBe(true));
+    }
+  );
+
+  it('does not bypass for a business-wide staff role with no project role and no workspace role', async () => {
+    useAuthUserStore.setState({ role: 'staff' });
+    (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
+    (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
+
+    const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
+    await waitFor(() => expect(flowApi.getWorkspaceMembers).toHaveBeenCalled());
+    expect(result.current).toBe(false);
+  });
+});
+
+describe('useCanDeleteResource', () => {
+  const createWrapper = () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    return ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client }, children);
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useUserStore.setState({
+      user: { id: '7', name: 'Ada', email: 'ada@example.com' },
+      token: 'tok',
+      isAuthenticated: true,
+    });
+    useFlowStore.setState({ activeWorkspaceId: 'ws-1' });
+    useAuthUserStore.setState({ role: null });
+  });
+
+  it.each(['owner', 'admin', 'operator'] as const)(
+    'grants delete for a business-wide %s with no project membership at all',
+    async (businessRole) => {
+      useAuthUserStore.setState({ role: businessRole });
+      (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
+
+      const { result } = renderHook(() => useCanDeleteResource('p1'), {
+        wrapper: createWrapper(),
+      });
+      await waitFor(() => expect(result.current).toBe(true));
+    }
+  );
+
+  it('does not bypass delete for a business-wide staff role with no project membership', async () => {
+    useAuthUserStore.setState({ role: 'staff' });
+    (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
+
+    const { result } = renderHook(() => useCanDeleteResource('p1'), { wrapper: createWrapper() });
+    await waitFor(() => expect(flowApi.getProjectMembers).toHaveBeenCalled());
     expect(result.current).toBe(false);
   });
 });

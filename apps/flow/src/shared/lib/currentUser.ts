@@ -1,4 +1,5 @@
 import { useQueries } from '@tanstack/react-query';
+import { useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../stores/userStore';
 import { useFlowStore } from '../stores/flowStore';
 import { canEditTask, canDelete, mostRestrictiveProjectRole } from './roleUtils';
@@ -111,16 +112,32 @@ function useCurrentWorkspaceRole(): string | undefined {
   return members.find((m) => String(m.userId) === String(userId))?.role;
 }
 
+/**
+ * A business-wide owner/admin/operator should never be blocked from acting on
+ * their own business's data by a per-project or per-workspace membership gap -
+ * onion's authorization is gaining the same owner/admin/operator bypass, so
+ * withholding it here would only recreate the disabled-but-would-succeed
+ * mismatch this codebase otherwise guards against, just in the other direction.
+ */
+function useHasBusinessRoleBypass(): boolean {
+  const businessRole = useAuthUserStore((s) => s.role);
+  return businessRole === 'owner' || businessRole === 'admin' || businessRole === 'operator';
+}
+
 /** Whether the current user can edit task fields (title, status, assignee, etc) in a project. */
 export function useCanEditTask(projectId?: string): boolean {
+  const hasBusinessRoleBypass = useHasBusinessRoleBypass();
   const projectRole = useCurrentProjectRole(projectId);
   const workspaceRole = useCurrentWorkspaceRole();
+  if (hasBusinessRoleBypass) return true;
   if (projectRole !== undefined) return canEditTask(projectRole);
   return workspaceRole !== undefined && workspaceRole !== 'viewer';
 }
 
 /** Whether the current user can delete resources in a project (project admins only). */
 export function useCanDeleteResource(projectId?: string): boolean {
+  const hasBusinessRoleBypass = useHasBusinessRoleBypass();
   const role = useCurrentProjectRole(projectId);
+  if (hasBusinessRoleBypass) return true;
   return role !== undefined && canDelete(role);
 }
