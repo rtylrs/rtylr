@@ -647,6 +647,7 @@
     "taskCount_other": "{{count}} مهمة مسندة إليك",
     "emptyTitle": "لا توجد مهام مسندة",
     "emptyDescription": "لا يوجد شيء في قائمتك الآن. عمل رائع!",
+    "emptyCta": "أضف مهمتك الأولى",
     "noTasks": "لا توجد مهام",
     "quickAddPlaceholder": "أضف مهمة شخصية واضغط Enter",
     "quickAddButton": "إضافة",

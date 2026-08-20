@@ -616,6 +616,7 @@
     "taskCount_other": "{{count}} tasks assigned to you",
     "emptyTitle": "No tasks assigned",
     "emptyDescription": "Nothing is on your plate right now. Nice work!",
+    "emptyCta": "Add your first task",
     "noTasks": "No tasks",
     "quickAddPlaceholder": "Add a personal task and press Enter",
     "quickAddButton": "Add",
