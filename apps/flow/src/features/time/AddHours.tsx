@@ -53,6 +53,30 @@ function randomReference(): string {
   return `TL-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 }
 
+const LAST_LOCATION_STORAGE_KEY = 'flow.addHours.lastLocation';
+
+/** The location from the person's last submitted entry, in this browser - a
+ * plain convenience default, not a setting, so it needs no seam disclosure:
+ * nothing server-side is ever decided from it, only which button starts
+ * selected on the next entry. */
+function getLastUsedLocation(): Location | null {
+  try {
+    const stored = localStorage.getItem(LAST_LOCATION_STORAGE_KEY);
+    return (LOCATIONS as readonly string[]).includes(stored ?? '') ? (stored as Location) : null;
+  } catch {
+    return null;
+  }
+}
+
+function rememberLastUsedLocation(location: Location): void {
+  try {
+    localStorage.setItem(LAST_LOCATION_STORAGE_KEY, location);
+  } catch {
+    // Best-effort only - a full storage quota or disabled storage shouldn't
+    // block logging hours.
+  }
+}
+
 /**
  * The inline form that replaced the "+ Log time" dialog on My day. One entry,
  * one commit per submit (Log another is the loop for a second entry) - no
@@ -93,22 +117,15 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
   const [hours, setHours] = useState('0');
   const [minutesRaw, setMinutesRaw] = useState('00');
   const [minutesTouched, setMinutesTouched] = useState(false);
-  // The entry silently defaults to the day's own location - a hybrid day
-  // genuinely can have some entries logged differently, but that is the
-  // exception, not the common case, so the picker starts collapsed behind a
-  // reveal link (see showLocationPicker below) rather than repeating the
-  // day-level "Where you worked" toggle on every single entry.
-  const [defaultLocation] = useState<Location>(() => {
+  // Defaults to today's own recorded location if this day already has one,
+  // else to whatever location this person's last submitted entry used (any
+  // day) - a hybrid day genuinely can have some entries logged differently,
+  // but repeating the previous pick is right far more often than 'onsite' is.
+  const [location, setLocation] = useState<Location>(() => {
     const fromDay = day?.workMode;
-    return (LOCATIONS as readonly string[]).includes(fromDay ?? '')
-      ? (fromDay as Location)
-      : 'onsite';
+    if ((LOCATIONS as readonly string[]).includes(fromDay ?? '')) return fromDay as Location;
+    return getLastUsedLocation() ?? 'onsite';
   });
-  const [location, setLocation] = useState<Location>(defaultLocation);
-  const [locationRevealed, setLocationRevealed] = useState(false);
-  // Revealed either because the link was clicked, or because the value has
-  // already diverged from the day's default - never hide an active choice.
-  const showLocationPicker = locationRevealed || location !== defaultLocation;
   const [projectId, setProjectId] = useState(search.project ?? '');
   const [taskId, setTaskId] = useState(search.task ?? '');
   const [note, setNote] = useState('');
@@ -240,6 +257,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
       });
 
       setLastLineId(result.line?.id ?? null);
+      rememberLastUsedLocation(location);
       setSuccessInfo({
         durationMinutes,
         target: targetLabel,
@@ -463,59 +481,41 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
               <span className={labelClass} style={{ color: 'var(--flow-text-muted)' }}>
                 {t('flow.time.add.location')}
               </span>
-              {/* Collapsed behind a reveal link by default: the entry already
-               * silently inherits the day's location, and always drawing the
-               * full three-button picker here duplicated My day's own "Where
-               * you worked" toggle directly above this form. An active
-               * override (location changed from the day's default, or the
-               * link already clicked) stays visible rather than hiding a
-               * choice the person made. */}
-              {showLocationPicker ? (
-                <div
-                  role="radiogroup"
-                  aria-label={t('flow.time.add.location')}
-                  className="grid grid-cols-3 gap-2 md:flex md:flex-wrap"
-                  onKeyDown={(e) => {
-                    if (locked) return;
-                    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-                    e.preventDefault();
-                    const i = LOCATIONS.indexOf(location);
-                    const dir = e.key === 'ArrowRight' ? 1 : -1;
-                    setLocation(LOCATIONS[(i + dir + LOCATIONS.length) % LOCATIONS.length]);
-                  }}
-                >
-                  {LOCATIONS.map((loc) => {
-                    const active = loc === location;
-                    return (
-                      <button
-                        key={loc}
-                        type="button"
-                        role="radio"
-                        aria-checked={active}
-                        tabIndex={active ? 0 : -1}
-                        aria-disabled={locked}
-                        onClick={() => !locked && setLocation(loc)}
-                        className="flow-focus min-h-[44px] h-auto rounded-xl px-4 py-2 text-[13px] font-semibold whitespace-normal md:min-h-0 md:h-[38px] md:py-0"
-                        style={{
-                          background: active ? 'var(--accent)' : 'var(--flow-hover)',
-                          color: active ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
-                        }}
-                      >
-                        {t(`flow.time.mode.${loc}`)}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setLocationRevealed(true)}
-                  className="flow-focus min-h-[44px] rounded-lg text-start text-[12px] font-medium underline-offset-2 hover:underline md:min-h-0"
-                  style={{ color: 'var(--flow-text-muted)' }}
-                >
-                  {t('flow.time.add.differentLocation')}
-                </button>
-              )}
+              <div
+                role="radiogroup"
+                aria-label={t('flow.time.add.location')}
+                className="grid grid-cols-3 gap-2 md:flex md:flex-wrap"
+                onKeyDown={(e) => {
+                  if (locked) return;
+                  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+                  e.preventDefault();
+                  const i = LOCATIONS.indexOf(location);
+                  const dir = e.key === 'ArrowRight' ? 1 : -1;
+                  setLocation(LOCATIONS[(i + dir + LOCATIONS.length) % LOCATIONS.length]);
+                }}
+              >
+                {LOCATIONS.map((loc) => {
+                  const active = loc === location;
+                  return (
+                    <button
+                      key={loc}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      tabIndex={active ? 0 : -1}
+                      aria-disabled={locked}
+                      onClick={() => !locked && setLocation(loc)}
+                      className="flow-focus min-h-[44px] h-auto rounded-xl px-4 py-2 text-[13px] font-semibold whitespace-normal md:min-h-0 md:h-[38px] md:py-0"
+                      style={{
+                        background: active ? 'var(--accent)' : 'var(--flow-hover)',
+                        color: active ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
+                      }}
+                    >
+                      {t(`flow.time.mode.${loc}`)}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
