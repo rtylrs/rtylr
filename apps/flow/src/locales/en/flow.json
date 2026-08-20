@@ -618,7 +618,8 @@
     "emptyDescription": "Nothing is on your plate right now. Nice work!",
     "noTasks": "No tasks",
     "quickAddPlaceholder": "Add a personal task and press Enter",
-    "quickAddButton": "Add"
+    "quickAddButton": "Add",
+    "quickAddNoLabelsReason": "Add a label in Settings before creating tasks."
   },
   "commandBar": {
     "goToInbox": "Go to Inbox",

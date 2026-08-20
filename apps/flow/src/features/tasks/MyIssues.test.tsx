@@ -34,7 +34,10 @@ vi.mock('./useMyTasksProject', () => ({
   useMyTasksProject: () => myTasksProjectData,
 }));
 
-const labelsData = vi.hoisted(() => ({ data: [] as { id: number; name: string }[] }));
+const labelsData = vi.hoisted(() => ({
+  data: [] as { id: number; name: string }[],
+  isLoading: false,
+}));
 vi.mock('./useLabels', () => ({
   useLabels: () => labelsData,
 }));
@@ -55,20 +58,46 @@ beforeEach(() => {
   myIssuesData.isLoading = false;
   myTasksProjectData.data = { projectId: '9', workspaceId: '3' };
   labelsData.data = [];
+  labelsData.isLoading = false;
 });
 
 describe('MyIssues QuickAddRow', () => {
-  it('blocks submit and shows an error toast when the workspace has no labels', () => {
+  it('blocks submit and shows an actionable toast when the workspace has no labels', () => {
+    labelsData.data = [];
+    render(<MyIssues />);
+
+    const input = screen.getByPlaceholderText('flow.myIssues.quickAddPlaceholder');
+    fireEvent.change(input, { target: { value: 'Ship the thing' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(createTaskMutate).not.toHaveBeenCalled();
+    expect(toast.error).toHaveBeenCalledWith('flow.myIssues.quickAddNoLabelsReason');
+  });
+
+  it('disables the Add button with an explanatory title when the workspace has no labels', () => {
     labelsData.data = [];
     render(<MyIssues />);
 
     fireEvent.change(screen.getByPlaceholderText('flow.myIssues.quickAddPlaceholder'), {
       target: { value: 'Ship the thing' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'flow.myIssues.quickAddButton' }));
+    const button = screen.getByRole('button', { name: 'flow.myIssues.quickAddButton' });
 
-    expect(createTaskMutate).not.toHaveBeenCalled();
-    expect(toast.error).toHaveBeenCalledWith('errors.generic');
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('title', 'flow.myIssues.quickAddNoLabelsReason');
+  });
+
+  it('leaves the Add button enabled while labels are still loading', () => {
+    labelsData.data = [];
+    labelsData.isLoading = true;
+    render(<MyIssues />);
+
+    fireEvent.change(screen.getByPlaceholderText('flow.myIssues.quickAddPlaceholder'), {
+      target: { value: 'Ship the thing' },
+    });
+    const button = screen.getByRole('button', { name: 'flow.myIssues.quickAddButton' });
+
+    expect(button).not.toBeDisabled();
   });
 
   it('sends the first available label id in the create payload', () => {
