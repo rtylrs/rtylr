@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
-import { Plus, CheckCircle, Clock } from 'lucide-react';
+import { Plus, CheckCircle, Clock, Receipt } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
-import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
@@ -223,7 +223,15 @@ const Bills: React.FC = () => {
           <SkeletonRow />
         </div>
       ) : data.length === 0 ? (
-        <EmptyState title={t('bills.empty')} description={t('bills.emptyDescription')} />
+        <EmptyState
+          icon={Receipt}
+          title={t('bills.empty')}
+          description={t('bills.emptyDescription')}
+          action={{
+            label: t('bills.new'),
+            onClick: () => setShowCreate(true),
+          }}
+        />
       ) : (
         <div style={{ ...cardStyle, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
