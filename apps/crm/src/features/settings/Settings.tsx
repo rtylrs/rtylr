@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
 import { Save, Users, Settings2, UserPlus, UserMinus } from 'lucide-react';
 import { motion } from 'motion/react';
+import { EmptyState } from '@voxire/ui';
 import { useCrmSettings, useUpdateCrmSettings } from '../../shared/hooks/queries/useCrmSettings';
 import { PageHeader, Card, Input, Select, Button, ACCENT } from '../../shared/components/ui';
 import type { Settings } from '../../shared/schemas/settings';
@@ -179,10 +181,11 @@ const GeneralTab: React.FC = () => {
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 
 const TeamTab: React.FC = () => {
+  const { t } = useTranslation();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canInvite = canCrmPermission(role, 'hub:team:invite');
   const canRemove = canCrmPermission(role, 'hub:team:remove');
-  const { data: members = [], isLoading } = useCrmTeam();
+  const { data: members = [], isLoading, refetch } = useCrmTeam();
   const invite = useCrmInviteMember();
   const deactivate = useCrmDeactivateMember();
   const { data: sub } = useCrmSubscription();
@@ -341,10 +344,15 @@ const TeamTab: React.FC = () => {
           ))}
         </div>
       ) : members.length === 0 ? (
-        <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--hub-text-muted)' }}>
-          <Users size={24} style={{ margin: '0 auto 8px', opacity: 0.4, display: 'block' }} />
-          <p style={{ fontSize: 13, margin: 0 }}>No team members yet.</p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title={t('crm.team.emptyTitle')}
+          action={
+            canInvite
+              ? { label: t('crm.team.inviteMember'), onClick: () => setShowInvite(true) }
+              : { label: t('crm.actions.refresh'), onClick: () => refetch() }
+          }
+        />
       ) : (
         <Card padded={false}>
           {members.map((m, idx) => (
