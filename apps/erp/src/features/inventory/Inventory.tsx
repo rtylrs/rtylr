@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { cdnImageUrl } from '@voxire/config';
-import { Package, Search, Plus } from 'lucide-react';
+import { Package, Search, SearchX, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import { useDebounce } from '@voxire/utils';
 import {
   getProductStockStatus,
@@ -180,12 +181,17 @@ const Inventory: React.FC = () => {
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => <SkeletonTableRow key={i} />)
               ) : products.length === 0 ? (
-                <div
-                  className="px-4 py-8 text-center text-sm"
-                  style={{ color: 'var(--hub-text-muted)' }}
-                >
-                  No products found.
-                </div>
+                <EmptyState
+                  icon={SearchX}
+                  title={t('erp.inventory.empty')}
+                  action={{
+                    label: t('erp.inventory.clearSearch'),
+                    onClick: () => {
+                      setPage(1);
+                      setSearch('');
+                    },
+                  }}
+                />
               ) : (
                 products.map((product) => {
                   const status = getProductStockStatus(product);

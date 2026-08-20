@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
+import { useNavigate } from '@tanstack/react-router';
 import { PackageCheck, Check, X as XIcon, Plus, Minus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { usePurchaseOrders, useUpdatePurchaseOrderStatus } from './usePurchaseOrders';
 import type { PurchaseOrder } from './usePurchaseOrders';
 import { useSuppliers } from '../suppliers/useSuppliers';
 import PageHeader from '../../shared/components/PageHeader';
-import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
 import { toast } from 'sonner';
@@ -23,6 +24,7 @@ interface ReceiveLine {
 }
 
 const Receiving: React.FC = () => {
+  const navigate = useNavigate();
   const { data: ordersResult, isLoading } = usePurchaseOrders();
   const { data: supplierResult } = useSuppliers();
   const orders = ordersResult?.purchaseOrders ?? [];
@@ -189,6 +191,10 @@ const Receiving: React.FC = () => {
           icon={PackageCheck}
           title={t('receiving.empty.title')}
           description={t('receiving.empty.description')}
+          action={{
+            label: t('receiving.goToPurchasing'),
+            onClick: () => navigate({ to: '/purchasing' }),
+          }}
         />
       ) : (
         <div className="space-y-2">

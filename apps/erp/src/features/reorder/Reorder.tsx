@@ -1,16 +1,18 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, TrendingUp } from 'lucide-react';
+import { CheckCircle2, Sparkles, TrendingUp } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
+import { useTranslation } from 'react-i18next';
 import { useReorderSuggestions } from './useReorderSuggestions';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import EmptyState from '../../shared/components/EmptyState';
 
 const AMBER = 'var(--erp-accent)';
 
 const Reorder: React.FC = () => {
-  const { data, isLoading } = useReorderSuggestions();
+  const { t } = useTranslation('erp');
+  const { data, isLoading, refetch } = useReorderSuggestions();
   const suggestions = data?.suggestions ?? [];
 
   return (
@@ -67,7 +69,12 @@ const Reorder: React.FC = () => {
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)
         ) : suggestions.length === 0 ? (
-          <EmptyState title="No suggestions" description="All stock levels are healthy" />
+          <EmptyState
+            icon={CheckCircle2}
+            title={t('reorder.empty.title')}
+            description={t('reorder.empty.description')}
+            action={{ label: t('reorder.refresh'), onClick: () => void refetch() }}
+          />
         ) : (
           suggestions.map((s) => {
             const confColor =

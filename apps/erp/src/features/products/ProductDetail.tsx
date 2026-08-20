@@ -3,16 +3,25 @@ import { useParams, Link, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { useUserStore } from '@voxire/auth';
-import { ArrowLeft, Edit3, Trash2, Package, TrendingUp, Clock, Truck } from 'lucide-react';
+import {
+  ArrowLeft,
+  Edit3,
+  Trash2,
+  Package,
+  PackageX,
+  TrendingUp,
+  Clock,
+  Truck,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import { useDeleteProduct, useProductFull } from './useProducts';
 import VariantMatrix from './components/VariantMatrix';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import StockBadge from '../../shared/components/StockBadge';
 import BarcodeSvg from '../../shared/components/BarcodeSvg';
 import QuickStockAdjust from '../../shared/components/QuickStockAdjust';
-import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import ConfirmModal from '../../shared/components/ConfirmModal';
@@ -118,21 +127,13 @@ const ProductDetail: React.FC = () => {
   if (!product) {
     return (
       <EmptyState
+        icon={PackageX}
         title={t('erp.products.detail.notFound')}
         description={t('erp.products.detail.notFoundDescription')}
-        action={
-          <Link
-            to="/inventory"
-            className="px-3 py-2 rounded-lg text-xs font-semibold"
-            style={{
-              background: AMBER,
-              color: 'var(--erp-accent-foreground)',
-              textDecoration: 'none',
-            }}
-          >
-            {t('erp.products.detail.backToInventory')}
-          </Link>
-        }
+        action={{
+          label: t('erp.products.detail.backToInventory'),
+          onClick: () => navigate({ to: '/inventory' }),
+        }}
       />
     );
   }

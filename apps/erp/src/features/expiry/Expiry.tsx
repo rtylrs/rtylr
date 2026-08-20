@@ -2,15 +2,17 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { CalendarX } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
+import { useTranslation } from 'react-i18next';
 import { useExpiry } from './useExpiry';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import EmptyState from '../../shared/components/EmptyState';
 import { formatDate, daysUntil } from '../../shared/lib/format';
 const AMBER = 'var(--erp-accent)';
 
 const Expiry: React.FC = () => {
-  const { data: items = [], isLoading } = useExpiry();
+  const { t } = useTranslation('erp');
+  const { data: items = [], isLoading, refetch } = useExpiry();
 
   const sorted = [...items].sort(
     (a, b) => daysUntil(a.expiryDate ?? '') - daysUntil(b.expiryDate ?? '')
@@ -52,8 +54,9 @@ const Expiry: React.FC = () => {
         ) : sorted.length === 0 ? (
           <EmptyState
             icon={CalendarX}
-            title="No expiring items"
-            description="No batches with expiry dates tracked"
+            title={t('expiry.empty.title')}
+            description={t('expiry.empty.description')}
+            action={{ label: t('expiry.refresh'), onClick: () => void refetch() }}
           />
         ) : (
           sorted.map((item, i) => {

@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
+import { useNavigate } from '@tanstack/react-router';
 import { Printer, Check } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
+import { useTranslation } from 'react-i18next';
 import { useProducts } from '../products/useProducts';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
@@ -11,6 +14,8 @@ import { toast } from 'sonner';
 const AMBER = 'var(--erp-accent)';
 
 const Barcodes: React.FC = () => {
+  const { t } = useTranslation('erp');
+  const navigate = useNavigate();
   const { data: productResult, isLoading } = useProducts();
   const products = productResult?.products ?? [];
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -124,9 +129,23 @@ const Barcodes: React.FC = () => {
               className="h-full rounded-xl flex items-center justify-center"
               style={{ background: 'var(--hub-card)', border: '1px dashed var(--hub-border)' }}
             >
-              <p className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
-                Select products to preview labels
-              </p>
+              <EmptyState
+                icon={Printer}
+                title={t('barcodes.previewEmpty.title')}
+                description={t('barcodes.previewEmpty.description')}
+                size="compact"
+                action={
+                  products.length > 0
+                    ? {
+                        label: t('barcodes.selectFirst'),
+                        onClick: () => toggle(products[0]?.id ?? ''),
+                      }
+                    : {
+                        label: t('barcodes.goToProducts'),
+                        onClick: () => navigate({ to: '/products' }),
+                      }
+                }
+              />
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
