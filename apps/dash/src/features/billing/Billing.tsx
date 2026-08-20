@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import {
   AlertCircle,
   ArrowRight,
@@ -19,6 +20,7 @@ import {
 import { toast } from 'sonner';
 import { APP_CONFIG, APP_URLS } from '@voxire/config';
 import type { AppId } from '@voxire/config';
+import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '../../shared/stores/userStore';
 import {
   useBillingDetail,
@@ -794,7 +796,9 @@ function addonLineDetail(item: BillingLineItem): string {
 const CurrentChargesSection: React.FC<{
   billing: BillingDetailPayload | null | undefined;
   loading: boolean;
-}> = ({ billing, loading }) => {
+  onRefresh: () => void;
+}> = ({ billing, loading, onRefresh }) => {
+  const { t } = useTranslation();
   const isGranted = Boolean(billing?.isGranted);
   return (
     <section className="space-y-3">
@@ -814,9 +818,12 @@ const CurrentChargesSection: React.FC<{
             ))}
           </div>
         ) : !billing || billing.lineItems.length === 0 ? (
-          <div className="px-5 py-8 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-            No billable usage recorded this month.
-          </div>
+          <EmptyState
+            icon={ReceiptText}
+            title={t('billing.emptyNoUsageTitle')}
+            action={{ label: t('common.refresh'), onClick: onRefresh }}
+            size="compact"
+          />
         ) : (
           <div>
             {isGranted || billing.includedSeatLimit > 0 ? (
@@ -886,107 +893,118 @@ const CurrentChargesSection: React.FC<{
   );
 };
 
-const InvoiceHistorySection: React.FC<{ history: BillingHistoryMonth[]; loading: boolean }> = ({
-  history,
-  loading,
-}) => (
-  <section className="space-y-3">
-    <SectionHeader
-      title="Invoice history"
-      description="Monthly billing totals and invoice status."
-    />
-    <div
-      className="rounded-xl overflow-hidden"
-      style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
-    >
-      {loading ? (
-        <div className="p-5 space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-12 rounded-lg animate-pulse"
-              style={{ background: 'var(--dash-hover)' }}
-            />
-          ))}
-        </div>
-      ) : history.length === 0 ? (
-        <div className="px-5 py-12 flex flex-col items-center text-center">
-          <Download size={28} style={{ color: 'var(--dash-text-dim)', marginBottom: 12 }} />
-          <p className="text-sm font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-            No invoices yet
-          </p>
-          <p className="text-xs mt-1" style={{ color: 'var(--dash-text-dim)' }}>
-            Your first invoice will appear after a billing cycle closes.
-          </p>
-        </div>
-      ) : (
-        <div>
-          <div
-            className="hidden sm:grid grid-cols-[1fr_auto_auto] gap-4 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider"
-            style={{ color: 'var(--dash-text-dim)', borderBottom: '1px solid var(--dash-border)' }}
-          >
-            <span>Month</span>
-            <span className="text-right">Status</span>
-            <span className="text-right">Total</span>
-          </div>
-          {history.map((month, idx) => {
-            const lineItems = month.lineItems ?? [];
-            const seatItems = lineItems.filter((item: BillingLineItem) => item.type !== 'addon');
-            const periodCount = seatItems.length;
-            const averageSeats =
-              periodCount > 0
-                ? Math.round(seatItems.reduce((sum, item) => sum + item.seatCount, 0) / periodCount)
-                : 0;
-            const addonCount = lineItems.length - seatItems.length;
-
-            return (
+const InvoiceHistorySection: React.FC<{
+  history: BillingHistoryMonth[];
+  loading: boolean;
+  onRefresh: () => void;
+}> = ({ history, loading, onRefresh }) => {
+  const { t } = useTranslation();
+  return (
+    <section className="space-y-3">
+      <SectionHeader
+        title="Invoice history"
+        description="Monthly billing totals and invoice status."
+      />
+      <div
+        className="rounded-xl overflow-hidden"
+        style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
+      >
+        {loading ? (
+          <div className="p-5 space-y-3">
+            {[1, 2, 3].map((i) => (
               <div
-                key={month.month || idx}
-                className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 sm:gap-4 px-5 py-4 items-center"
-                style={{ borderBottom: '1px solid var(--dash-border)' }}
-              >
-                <div>
-                  <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
-                    {formatMonth(month.month)}
-                  </p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
-                    {averageSeats} avg seat{averageSeats !== 1 ? 's' : ''} · {periodCount} period
-                    {periodCount !== 1 ? 's' : ''}
-                    {addonCount > 0 ? ` · ${addonCount} addon${addonCount !== 1 ? 's' : ''}` : ''}
+                key={i}
+                className="h-12 rounded-lg animate-pulse"
+                style={{ background: 'var(--dash-hover)' }}
+              />
+            ))}
+          </div>
+        ) : history.length === 0 ? (
+          <EmptyState
+            icon={Download}
+            title={t('billing.emptyNoInvoicesTitle')}
+            description={t('billing.emptyNoInvoicesDescription')}
+            action={{ label: t('common.refresh'), onClick: onRefresh }}
+          />
+        ) : (
+          <div>
+            <div
+              className="hidden sm:grid grid-cols-[1fr_auto_auto] gap-4 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-wider"
+              style={{
+                color: 'var(--dash-text-dim)',
+                borderBottom: '1px solid var(--dash-border)',
+              }}
+            >
+              <span>Month</span>
+              <span className="text-right">Status</span>
+              <span className="text-right">Total</span>
+            </div>
+            {history.map((month, idx) => {
+              const lineItems = month.lineItems ?? [];
+              const seatItems = lineItems.filter((item: BillingLineItem) => item.type !== 'addon');
+              const periodCount = seatItems.length;
+              const averageSeats =
+                periodCount > 0
+                  ? Math.round(
+                      seatItems.reduce((sum, item) => sum + item.seatCount, 0) / periodCount
+                    )
+                  : 0;
+              const addonCount = lineItems.length - seatItems.length;
+
+              return (
+                <div
+                  key={month.month || idx}
+                  className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 sm:gap-4 px-5 py-4 items-center"
+                  style={{ borderBottom: '1px solid var(--dash-border)' }}
+                >
+                  <div>
+                    <p className="text-sm font-medium" style={{ color: 'var(--dash-text)' }}>
+                      {formatMonth(month.month)}
+                    </p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--dash-text-dim)' }}>
+                      {averageSeats} avg seat{averageSeats !== 1 ? 's' : ''} · {periodCount} period
+                      {periodCount !== 1 ? 's' : ''}
+                      {addonCount > 0 ? ` · ${addonCount} addon${addonCount !== 1 ? 's' : ''}` : ''}
+                    </p>
+                  </div>
+                  <span
+                    className="w-fit sm:justify-self-end text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize"
+                    style={{
+                      background:
+                        month.status === 'paid'
+                          ? 'var(--status-active-bg)'
+                          : 'var(--status-trial-bg)',
+                      color:
+                        month.status === 'paid' ? 'var(--status-active)' : 'var(--status-trial)',
+                    }}
+                  >
+                    {month.status}
+                  </span>
+                  <p
+                    className="text-sm font-semibold sm:text-right"
+                    style={{ color: 'var(--dash-text)' }}
+                  >
+                    {centsToDisplay(month.totalCents)}
                   </p>
                 </div>
-                <span
-                  className="w-fit sm:justify-self-end text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize"
-                  style={{
-                    background:
-                      month.status === 'paid'
-                        ? 'var(--status-active-bg)'
-                        : 'var(--status-trial-bg)',
-                    color: month.status === 'paid' ? 'var(--status-active)' : 'var(--status-trial)',
-                  }}
-                >
-                  {month.status}
-                </span>
-                <p
-                  className="text-sm font-semibold sm:text-right"
-                  style={{ color: 'var(--dash-text)' }}
-                >
-                  {centsToDisplay(month.totalCents)}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  </section>
-);
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
 
 const Billing: React.FC = (): React.JSX.Element => {
   const { data: sub, isLoading: subLoading } = useMySubscription();
-  const { data: billing, isLoading: billingLoading } = useBillingDetail();
+  const { data: billing, isLoading: billingLoading, refetch: refetchBilling } = useBillingDetail();
   const { data: plans = [], isLoading: plansLoading } = useListPlans();
-  const { data: history = [], isLoading: historyLoading } = useBillingHistory();
+  const {
+    data: history = [],
+    isLoading: historyLoading,
+    refetch: refetchHistory,
+  } = useBillingHistory();
 
   return (
     <>
@@ -1015,10 +1033,18 @@ const Billing: React.FC = (): React.JSX.Element => {
           <BillingSummary sub={sub} billing={billing} />
         )}
 
-        <CurrentChargesSection billing={billing} loading={billingLoading} />
+        <CurrentChargesSection
+          billing={billing}
+          loading={billingLoading}
+          onRefresh={() => void refetchBilling()}
+        />
         <PlansSection sub={sub} billing={billing} plans={plans} loading={plansLoading} />
         <PaymentMethodsSection sub={sub} />
-        <InvoiceHistorySection history={history} loading={historyLoading} />
+        <InvoiceHistorySection
+          history={history}
+          loading={historyLoading}
+          onRefresh={() => void refetchHistory()}
+        />
       </div>
     </>
   );
