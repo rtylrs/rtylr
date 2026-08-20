@@ -1,3 +1,5 @@
 {
-  "configUpdated": "Tax configuration updated"
+  "configUpdated": "Tax configuration updated",
+  "reportEmptyTitle": "No tax periods available yet",
+  "reportEmptyDescription": "Tax periods will appear here once invoices start generating tax activity."
 }

@@ -1,3 +1,5 @@
 {
-  "configUpdated": "Configuration fiscale mise à jour"
+  "configUpdated": "Configuration fiscale mise à jour",
+  "reportEmptyTitle": "Aucune période fiscale disponible pour le moment",
+  "reportEmptyDescription": "Les périodes fiscales apparaîtront ici une fois que les factures génèreront une activité fiscale."
 }
