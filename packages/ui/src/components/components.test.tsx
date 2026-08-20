@@ -241,5 +241,19 @@ describe('@voxire/ui components', () => {
       expect(screen.getByText('No results')).toBeDefined();
       expect(screen.getByRole('button', { name: 'Clear filters' })).toBeDefined();
     });
+
+    it('shrinks the illustration, text and button for compact placements', () => {
+      render(
+        <EmptyState
+          icon={ListTodo}
+          title="No activity yet"
+          action={{ label: 'Refresh', onClick: vi.fn() }}
+          size="compact"
+        />
+      );
+
+      expect(screen.getByText('No activity yet').className).toContain('text-xs');
+      expect(screen.getByRole('button', { name: 'Refresh' }).className).toContain('h-[30px]');
+    });
   });
 });
