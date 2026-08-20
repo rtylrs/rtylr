@@ -229,6 +229,27 @@ describe('@voxire/ui components', () => {
       expect(handleAction).toHaveBeenCalledTimes(1);
     });
 
+    it('keeps the CTA at a 44px touch target on mobile, both sizes', () => {
+      render(
+        <EmptyState
+          icon={ListTodo}
+          title="No tasks"
+          action={{ label: 'Add task', onClick: vi.fn() }}
+        />
+      );
+      render(
+        <EmptyState
+          icon={ListTodo}
+          title="No activity"
+          action={{ label: 'Refresh', onClick: vi.fn() }}
+          size="compact"
+        />
+      );
+
+      expect(screen.getByRole('button', { name: 'Add task' }).className).toContain('h-11');
+      expect(screen.getByRole('button', { name: 'Refresh' }).className).toContain('h-11');
+    });
+
     it('renders without a description when none is given', () => {
       render(
         <EmptyState

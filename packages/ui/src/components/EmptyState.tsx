@@ -92,7 +92,15 @@ const EmptyState = ({
         {description}
       </p>
     )}
-    <Button variant="accent" size={size === 'compact' ? 'xs' : 'sm'} onClick={action.onClick}>
+    {/* Button's own xs/sm sizes are 30/32px tall - short of the 44px
+       touch-target minimum. Override the height explicitly on mobile and
+       let it shrink back down from md: up, where a mouse doesn't need it. */}
+    <Button
+      variant="accent"
+      size={size === 'compact' ? 'xs' : 'sm'}
+      onClick={action.onClick}
+      className={size === 'compact' ? 'h-11 md:h-[30px]' : 'h-11 md:h-8'}
+    >
       {action.label}
     </Button>
   </div>
