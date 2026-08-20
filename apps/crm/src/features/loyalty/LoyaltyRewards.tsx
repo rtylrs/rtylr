@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
 import { Gift, Package, Plus, X } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useLoyaltyRewards, useUpsertReward } from '../../shared/hooks/queries/useLoyalty';
-import { PageHeader, Card, EmptyState, Button, SkeletonList } from '../../shared/components/ui';
+import { PageHeader, Card, Button, SkeletonList } from '../../shared/components/ui';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 interface RewardForm {
@@ -171,9 +173,10 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 };
 
 const LoyaltyRewards: React.FC = () => {
+  const { t } = useTranslation();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canConfigureLoyalty = canCrmPermission(role, 'crm:loyalty:configure');
-  const { data: fetched, isLoading } = useLoyaltyRewards();
+  const { data: fetched, isLoading, refetch } = useLoyaltyRewards();
   const rewards = fetched ?? [];
   const [showAdd, setShowAdd] = useState(false);
 
@@ -204,8 +207,13 @@ const LoyaltyRewards: React.FC = () => {
           <Card>
             <EmptyState
               icon={Gift}
-              title="No rewards yet"
-              description="Add your first reward to the catalog."
+              title={t('crm.rewards.empty')}
+              description={t('crm.rewards.emptyDescription')}
+              action={
+                canConfigureLoyalty
+                  ? { label: t('crm.rewards.addReward'), onClick: () => setShowAdd(true) }
+                  : { label: t('crm.actions.refresh'), onClick: () => refetch() }
+              }
             />
           </Card>
         ) : (
