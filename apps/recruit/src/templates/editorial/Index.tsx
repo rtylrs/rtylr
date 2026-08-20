@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
-import { MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { MapPin, Briefcase } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 
 import Header from '../shared/Header';
 import Sections from '../shared/Sections';
@@ -11,6 +13,7 @@ import { cleanMojibake } from '../../shared/lib/sanitize';
 // hero panel with the tagline blown up. For businesses that want their
 // careers page to read like a feature story rather than a job board.
 const EditorialIndex: React.FC<IndexProps> = ({ careers, customization, sections }) => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-white">
       <Header customization={customization} />
@@ -52,9 +55,14 @@ const EditorialIndex: React.FC<IndexProps> = ({ careers, customization, sections
           </h2>
           <div className="mt-10 divide-y" style={{ borderColor: 'var(--recruit-border)' }}>
             {careers.length === 0 ? (
-              <div className="py-12 text-center text-sm" style={{ color: 'var(--recruit-muted)' }}>
-                No open roles right now. Check back soon.
-              </div>
+              <EmptyState
+                icon={Briefcase}
+                title={t('emptyStates.publicRolesNone')}
+                action={{
+                  label: t('emptyStates.checkAgain'),
+                  onClick: () => window.location.reload(),
+                }}
+              />
             ) : (
               careers.map((c) => (
                 <Link

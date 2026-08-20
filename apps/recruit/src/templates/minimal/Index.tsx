@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, MapPin, Briefcase } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 
 import Header from '../shared/Header';
 import Sections from '../shared/Sections';
@@ -11,6 +13,7 @@ import { cleanMojibake } from '../../shared/lib/sanitize';
 // hierarchy. Works for every business without customisation; the
 // default template choice for new customers.
 const MinimalIndex: React.FC<IndexProps> = ({ careers, customization, sections }) => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen">
       <Header customization={customization} />
@@ -35,11 +38,15 @@ const MinimalIndex: React.FC<IndexProps> = ({ careers, customization, sections }
 
         <div className="mt-10 space-y-2">
           {careers.length === 0 ? (
-            <div
-              className="rounded-lg border p-8 text-center text-sm"
-              style={{ borderColor: 'var(--recruit-border)', color: 'var(--recruit-muted)' }}
-            >
-              No open roles right now. Check back soon.
+            <div className="rounded-lg border" style={{ borderColor: 'var(--recruit-border)' }}>
+              <EmptyState
+                icon={Briefcase}
+                title={t('emptyStates.publicRolesNone')}
+                action={{
+                  label: t('emptyStates.checkAgain'),
+                  onClick: () => window.location.reload(),
+                }}
+              />
             </div>
           ) : (
             careers.map((c) => (

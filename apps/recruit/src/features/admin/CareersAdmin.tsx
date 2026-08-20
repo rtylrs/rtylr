@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { Plus, Trash2, ExternalLink, Edit3 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Plus, Trash2, ExternalLink, Edit3, Briefcase } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 
 import {
   useAdminCareers,
@@ -22,6 +24,7 @@ import CareerEditor from './CareerEditor';
  * list stays visible (and rank-ordered by created_at) while editing.
  */
 const CareersAdmin: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const { data: careersData, isLoading } = useAdminCareers();
   const { data: customData } = useAdminCustomization();
   const { data: submissionsData } = useAdminSubmissions();
@@ -78,9 +81,11 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
           {isLoading ? (
             <div className="p-10 text-center text-sm text-white/60">Loading…</div>
           ) : careers.length === 0 ? (
-            <div className="p-10 text-center text-sm text-white/60">
-              No roles yet. Click "New role" to create your first posting.
-            </div>
+            <EmptyState
+              icon={Briefcase}
+              title={t('emptyStates.rolesNone')}
+              action={{ label: t('emptyStates.createRole'), onClick: () => setCreating(true) }}
+            />
           ) : (
             <table className="w-full">
               <thead>

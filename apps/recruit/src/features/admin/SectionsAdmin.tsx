@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { uploadAsset } from '@voxire/api';
 import {
   Plus,
@@ -17,8 +18,10 @@ import {
   Star,
   MousePointerClick,
   Upload,
+  LayoutPanelTop,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 
 import {
   useAdminSections,
@@ -101,6 +104,7 @@ function lookupMeta(kind: string): (typeof KIND_META)[KnownKind] | undefined {
 }
 
 const SectionsAdmin: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const { data, isLoading } = useAdminSections();
   const create = useCreateSection();
   const update = useUpdateSection();
@@ -188,9 +192,11 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
           {isLoading ? (
             <div className="p-10 text-center text-sm text-white/60">Loading…</div>
           ) : localOrder.length === 0 ? (
-            <div className="p-10 text-center text-sm text-white/60">
-              No sections yet. Click "Add section" to drop one in.
-            </div>
+            <EmptyState
+              icon={LayoutPanelTop}
+              title={t('emptyStates.sectionsNone')}
+              action={{ label: t('emptyStates.addSection'), onClick: () => setAdding(true) }}
+            />
           ) : (
             <ul>
               {localOrder.map((s) => (

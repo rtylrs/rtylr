@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { cn } from '@voxire/ui';
+import { cn, EmptyState } from '@voxire/ui';
 import { toast } from 'sonner';
-import { Mail, Phone, FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Mail, Phone, FileText, Inbox } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 
 import {
@@ -23,9 +24,10 @@ const STATUSES = ['new', 'reviewed', 'interviewing', 'offered', 'hired', 'reject
 const PAGE_SIZE = 20;
 
 const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<string>('');
   const [page, setPage] = useState<number>(0);
-  const { data, isLoading } = useAdminSubmissions(filter, PAGE_SIZE, page * PAGE_SIZE);
+  const { data, isLoading, refetch } = useAdminSubmissions(filter, PAGE_SIZE, page * PAGE_SIZE);
   const update = useUpdateSubmissionStatus();
   const submissions = data?.submissions ?? [];
 
@@ -62,9 +64,17 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
           {isLoading ? (
             <div className="p-10 text-center text-sm text-white/60">Loading…</div>
           ) : submissions.length === 0 ? (
-            <div className="p-10 text-center text-sm text-white/60">
-              No applications yet{filter && ` at this stage`}.
-            </div>
+            <EmptyState
+              icon={Inbox}
+              title={
+                filter ? t('emptyStates.submissionsNoneFiltered') : t('emptyStates.submissionsNone')
+              }
+              action={
+                filter
+                  ? { label: t('emptyStates.clearFilter'), onClick: () => handleFilterChange('') }
+                  : { label: t('emptyStates.refresh'), onClick: () => void refetch() }
+              }
+            />
           ) : (
             <>
               <ul className="divide-y" style={{ borderColor: '#1f1f1f' }}>

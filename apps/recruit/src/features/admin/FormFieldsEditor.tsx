@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import {
   Plus,
   Trash2,
@@ -9,7 +10,9 @@ import {
   CheckSquare,
   Link as LinkIcon,
   ToggleRight,
+  HelpCircle,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 
 import {
   useAdminFormFields,
@@ -73,12 +76,24 @@ interface Props {
 }
 
 const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
+  const { t } = useTranslation();
   const { data, isLoading } = useAdminFormFields(careerId);
   const create = useCreateFormField();
   const update = useUpdateFormField();
   const del = useDeleteFormField();
 
   const fields = data?.fields ?? [];
+
+  function addDefaultQuestion(): void {
+    const kind = KIND_ORDER[0];
+    create.mutate(
+      { careerId, kind, label: defaultLabelFor(kind), required: false },
+      {
+        onSuccess: () => toast.success(`${KIND_META[kind].label} added`),
+        onError: () => toast.error("Couldn't add"),
+      }
+    );
+  }
 
   return (
     <div
@@ -97,11 +112,13 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
       {isLoading ? (
         <div className="py-6 text-center text-sm text-white/50">Loading…</div>
       ) : fields.length === 0 ? (
-        <div
-          className="mb-4 rounded-md border border-dashed p-4 text-center text-xs text-white/50"
-          style={{ borderColor: '#2a2a2a' }}
-        >
-          No custom questions yet.
+        <div className="mb-4">
+          <EmptyState
+            icon={HelpCircle}
+            title={t('emptyStates.questionsNone')}
+            action={{ label: t('emptyStates.addQuestion'), onClick: addDefaultQuestion }}
+            size="compact"
+          />
         </div>
       ) : (
         <ul className="mb-4 space-y-2">

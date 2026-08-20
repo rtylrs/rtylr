@@ -10,5 +10,19 @@
   "success": "Application submitted successfully!",
   "error": "Failed to submit application. Please try again.",
   "retry": "Retry",
-  "back": "Back to Careers"
+  "back": "Back to Careers",
+  "emptyStates": {
+    "submissionsNone": "No applications yet.",
+    "submissionsNoneFiltered": "No applications yet at this stage.",
+    "clearFilter": "Clear filter",
+    "refresh": "Refresh",
+    "rolesNone": "No roles yet. Create your first posting to start receiving applications.",
+    "createRole": "New role",
+    "sectionsNone": "No sections yet. Add one to start building this page.",
+    "addSection": "Add section",
+    "questionsNone": "No custom questions yet. Add one to start collecting more from applicants.",
+    "addQuestion": "Add question",
+    "publicRolesNone": "No open roles right now. Check back soon.",
+    "checkAgain": "Check again"
+  }
 }
