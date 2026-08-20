@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
@@ -85,5 +85,19 @@ describe('CustomerProfile delete gating', () => {
     mocks.role = 'viewer';
     renderProfile();
     expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
+  });
+});
+
+describe('CustomerProfile tags empty state', () => {
+  it('shows the empty state and focuses the tag input when the call-to-action is clicked', () => {
+    mocks.role = 'operator';
+    renderProfile();
+
+    expect(screen.getByText('crm.customerProfile.noTagsTitle')).toBeInTheDocument();
+    const addTag = screen.getByRole('button', { name: 'crm.customerProfile.addTag' });
+
+    fireEvent.click(addTag);
+
+    expect(screen.getByPlaceholderText('Add tag...')).toHaveFocus();
   });
 });
