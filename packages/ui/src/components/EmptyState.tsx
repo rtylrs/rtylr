@@ -83,7 +83,12 @@ const EmptyState = ({
       {title}
     </h3>
     {description && (
-      <p className={cn('mb-3 max-w-sm opacity-60', size === 'compact' ? 'text-[11px]' : 'text-xs mb-4')}>
+      <p
+        className={cn(
+          'mb-3 max-w-sm opacity-60',
+          size === 'compact' ? 'text-[11px]' : 'text-xs mb-4'
+        )}
+      >
         {description}
       </p>
     )}
