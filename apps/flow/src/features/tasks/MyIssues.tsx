@@ -2,8 +2,9 @@ import React, { useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
-import { Plus } from 'lucide-react';
+import { ListTodo, Plus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useMyIssues } from './useMyIssues';
 import { useCreateTask } from './useTasks';
 import { useMyTasksProject } from './useMyTasksProject';
@@ -12,7 +13,6 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 import { getCurrentUserId } from '../../shared/lib/currentUser';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import TaskCard from '../../shared/components/TaskCard';
-import MyTasksEmptyIllustration from './components/MyTasksEmptyIllustration';
 
 // Backlog lives here as the leftmost column instead of as its own
 // sidebar tab - keeping unscheduled work next to active work means a
@@ -65,22 +65,15 @@ const MyIssues: React.FC = () => {
       <QuickAddRow inputRef={quickAddInputRef} />
 
       {tasks.length === 0 && !isLoading ? (
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
-          <MyTasksEmptyIllustration />
-          <h3 className="text-[14px] font-semibold mt-4 mb-1" style={{ color: 'var(--flow-text)' }}>
-            {t('flow.myIssues.emptyTitle')}
-          </h3>
-          <p className="text-[12px] max-w-sm mb-4" style={{ color: 'var(--flow-text-muted)' }}>
-            {t('flow.myIssues.emptyDescription')}
-          </p>
-          <button
-            onClick={() => quickAddInputRef.current?.focus()}
-            className="flow-focus flex min-h-[44px] items-center gap-1.5 rounded-lg px-4 text-[12px] font-semibold md:min-h-0 md:py-2"
-            style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
-          >
-            <Plus size={13} /> {t('flow.myIssues.emptyCta')}
-          </button>
-        </div>
+        <EmptyState
+          icon={ListTodo}
+          title={t('flow.myIssues.emptyTitle')}
+          description={t('flow.myIssues.emptyDescription')}
+          action={{
+            label: t('flow.myIssues.emptyCta'),
+            onClick: () => quickAddInputRef.current?.focus(),
+          }}
+        />
       ) : (
         <div className="flex-1 overflow-x-auto overflow-y-hidden">
           <div className="flex gap-3 h-full p-4 min-w-max">
