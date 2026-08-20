@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Webhook as WebhookIcon, Plus } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   Button,
   Dialog,
@@ -16,7 +18,6 @@ import {
 import {
   Breadcrumbs,
   ConfirmDialog,
-  EmptyState,
   PermissionCheckbox,
   SkeletonList,
   WebhookRow,
@@ -40,6 +41,7 @@ const EVENTS = [
 ];
 
 const Webhooks: React.FC = () => {
+  const { t } = useTranslation();
   const { data = [], isLoading } = useWebhooks();
   const create = useCreateWebhook();
   const remove = useDeleteWebhook();
@@ -114,10 +116,12 @@ const Webhooks: React.FC = () => {
             <div className="p-4">
               <EmptyState
                 icon={WebhookIcon}
-                title="No webhooks configured"
-                description="Create your first webhook endpoint to start receiving events."
-                actionLabel="New webhook"
-                onAction={() => setCreateOpen(true)}
+                title={t('developer.webhooks.emptyTitle')}
+                description={t('developer.webhooks.emptyDescription')}
+                action={{
+                  label: t('developer.webhooks.newWebhook'),
+                  onClick: () => setCreateOpen(true),
+                }}
               />
             </div>
           ) : (
