@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { EmptyState } from '@voxire/ui';
 import { safe } from '../../../../shared/lib/api';
 import WidgetHeader from './WidgetHeader';
 
@@ -13,7 +15,12 @@ interface PendingRequest {
 }
 
 const PendingWidget: React.FC = () => {
-  const { data: raw, isError } = useQuery({
+  const { t } = useTranslation();
+  const {
+    data: raw,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ['pending-widget'],
     queryFn: async (): Promise<PendingRequest[]> => {
       const res = await unwrap(
@@ -38,11 +45,13 @@ const PendingWidget: React.FC = () => {
             <p className="text-xs text-red-500">Failed to load pending approvals</p>
           </div>
         ) : requests.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
-              Nothing pending
-            </p>
-          </div>
+          <EmptyState
+            icon={Clock}
+            title={t('dashboard.pendingWidget.emptyTitle')}
+            description={t('dashboard.pendingWidget.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+            size="compact"
+          />
         ) : (
           requests.map((r, i) => (
             <div

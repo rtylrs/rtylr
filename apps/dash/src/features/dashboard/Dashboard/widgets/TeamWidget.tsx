@@ -1,10 +1,13 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
+import { EmptyState } from '@voxire/ui';
 import { useTeam } from '../../../../shared/hooks/queries/useTeam';
 import WidgetHeader from './WidgetHeader';
 
 const TeamWidget: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data } = useTeam({ pageSize: 50 });
   const members = data?.members ?? [];
@@ -18,18 +21,15 @@ const TeamWidget: React.FC = () => {
       />
       <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {members.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
-              No team members yet
-            </p>
-            <button
-              onClick={() => navigate({ to: '/team/invite' })}
-              className="text-xs font-medium mt-2"
-              style={{ color: '#4583C4' }}
-            >
-              Invite someone
-            </button>
-          </div>
+          <EmptyState
+            icon={Users}
+            title={t('dashboard.teamWidget.emptyTitle')}
+            action={{
+              label: t('dashboard.teamWidget.inviteSomeone'),
+              onClick: () => navigate({ to: '/team/invite' }),
+            }}
+            size="compact"
+          />
         ) : (
           members.slice(0, 5).map((m) => (
             <div key={m.id} className="flex items-center gap-3 px-2 py-1.5">

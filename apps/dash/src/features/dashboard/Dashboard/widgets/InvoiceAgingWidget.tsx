@@ -1,7 +1,9 @@
 import React from 'react';
-import { Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Clock, CheckCircle2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toFiniteNumber, unwrap } from '@voxire/api';
+import { EmptyState } from '@voxire/ui';
 import { safe } from '../../../../shared/lib/api';
 import WidgetHeader from './WidgetHeader';
 
@@ -44,7 +46,12 @@ function formatMoney(minor: number): string {
 }
 
 const InvoiceAgingWidget: React.FC = (): React.JSX.Element => {
-  const { data: raw, isError } = useQuery({
+  const { t } = useTranslation();
+  const {
+    data: raw,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ['insights-invoice-aging'],
     queryFn: async (): Promise<Bucket[]> => {
       const res = await unwrap(safe.get<ApiResponse>('/insights/financial/v1/invoice-aging'));
@@ -68,11 +75,13 @@ const InvoiceAgingWidget: React.FC = (): React.JSX.Element => {
           <p className="text-xs text-red-500">Failed to load invoice aging data.</p>
         </div>
       ) : buckets.length === 0 || allEmpty ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
-          <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-            All outstanding invoices current.
-          </p>
-        </div>
+        <EmptyState
+          icon={CheckCircle2}
+          title={t('dashboard.invoiceAgingWidget.emptyTitle')}
+          description={t('dashboard.invoiceAgingWidget.emptyDescription')}
+          action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+          size="compact"
+        />
       ) : (
         <div className="flex-1 flex flex-col gap-2 p-4">
           {buckets.map((b) => {

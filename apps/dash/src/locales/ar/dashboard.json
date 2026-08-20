@@ -1,0 +1,34 @@
+{
+  "activityWidget": {
+    "emptyTitle": "لا يوجد نشاط بعد",
+    "emptyDescription": "ستظهر الإجراءات هنا"
+  },
+  "teamWidget": {
+    "emptyTitle": "لا يوجد أعضاء فريق بعد",
+    "inviteSomeone": "دعوة شخص"
+  },
+  "revenueByAppWidget": {
+    "emptyTitle": "لا توجد إيرادات بعد",
+    "emptyDescription": "ابدأ البيع لرؤية التوزيع بين تطبيقاتك."
+  },
+  "invoiceAgingWidget": {
+    "emptyTitle": "لا يوجد جديد",
+    "emptyDescription": "جميع الفواتير المستحقة ضمن موعدها."
+  },
+  "pendingWidget": {
+    "emptyTitle": "لا يوجد شيء معلّق",
+    "emptyDescription": "ستظهر هنا طلبات الإجازة المنتظرة للموافقة."
+  },
+  "topProductsWidget": {
+    "emptyTitle": "لا توجد منتجات بعد",
+    "emptyDescription": "ستظهر منتجاتك الأكثر مبيعًا هنا."
+  },
+  "lowStockWidget": {
+    "emptyTitle": "مستويات المخزون جيدة",
+    "emptyDescription": "ستظهر العناصر المنخفضة هنا."
+  },
+  "topCustomersWidget": {
+    "emptyTitle": "لا يوجد عملاء بعد",
+    "emptyDescription": "سيظهر أفضل عملائك هنا بعد تكرار الطلبات."
+  }
+}

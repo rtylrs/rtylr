@@ -1,13 +1,16 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Activity } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
+import { EmptyState } from '@voxire/ui';
 import { useActivity } from '../../../../shared/hooks/queries/useActivity';
 import { ActivityEntryRow } from '../../../../shared/components/dash';
 import WidgetHeader from './WidgetHeader';
 
 const ActivityWidget: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: raw = [] } = useActivity(5);
+  const { data: raw = [], refetch } = useActivity(5);
   const activity = Array.isArray(raw) ? raw : [];
 
   return (
@@ -19,14 +22,13 @@ const ActivityWidget: React.FC = () => {
       />
       <div className="flex-1 overflow-y-auto p-2">
         {activity.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center py-6">
-            <p className="text-xs font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-              No activity yet
-            </p>
-            <p className="text-[11px] mt-1" style={{ color: 'var(--dash-text-dim)' }}>
-              Actions will appear here
-            </p>
-          </div>
+          <EmptyState
+            icon={Activity}
+            title={t('dashboard.activityWidget.emptyTitle')}
+            description={t('dashboard.activityWidget.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+            size="compact"
+          />
         ) : (
           activity.map((e, i) => <ActivityEntryRow key={e.id} entry={e} index={i} />)
         )}

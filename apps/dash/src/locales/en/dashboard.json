@@ -1,0 +1,34 @@
+{
+  "activityWidget": {
+    "emptyTitle": "No activity yet",
+    "emptyDescription": "Actions will appear here"
+  },
+  "teamWidget": {
+    "emptyTitle": "No team members yet",
+    "inviteSomeone": "Invite someone"
+  },
+  "revenueByAppWidget": {
+    "emptyTitle": "No revenue yet",
+    "emptyDescription": "Start selling to see the split across your apps."
+  },
+  "invoiceAgingWidget": {
+    "emptyTitle": "All caught up",
+    "emptyDescription": "All outstanding invoices are current."
+  },
+  "pendingWidget": {
+    "emptyTitle": "Nothing pending",
+    "emptyDescription": "Time-off requests waiting on approval will appear here."
+  },
+  "topProductsWidget": {
+    "emptyTitle": "No products yet",
+    "emptyDescription": "Your best sellers will appear here."
+  },
+  "lowStockWidget": {
+    "emptyTitle": "Stock levels are healthy",
+    "emptyDescription": "Items running low will appear here."
+  },
+  "topCustomersWidget": {
+    "emptyTitle": "No customers yet",
+    "emptyDescription": "Your VIPs show up here once repeat orders start rolling."
+  }
+}
