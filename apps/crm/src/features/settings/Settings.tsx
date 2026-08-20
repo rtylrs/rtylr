@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
+import { useUserStore } from '@voxire/auth';
 import { Save, Users, Settings2, UserPlus, UserMinus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCrmSettings, useUpdateCrmSettings } from '../../shared/hooks/queries/useCrmSettings';
@@ -16,6 +17,7 @@ import {
   centsToDisplay,
   computeSeatProration,
 } from '../../shared/hooks/queries/useCrmSubscription';
+import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 type TabId = 'general' | 'team';
 
@@ -177,6 +179,9 @@ const GeneralTab: React.FC = () => {
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 
 const TeamTab: React.FC = () => {
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canInvite = canCrmPermission(role, 'hub:team:invite');
+  const canRemove = canCrmPermission(role, 'hub:team:remove');
   const { data: members = [], isLoading } = useCrmTeam();
   const invite = useCrmInviteMember();
   const deactivate = useCrmDeactivateMember();
@@ -226,7 +231,7 @@ const TeamTab: React.FC = () => {
         </p>
       </div>
 
-      {showInvite ? (
+      {canInvite && showInvite ? (
         <Card>
           <h3
             style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)', margin: '0 0 12px' }}
@@ -313,14 +318,14 @@ const TeamTab: React.FC = () => {
             </Button>
           </div>
         </Card>
-      ) : (
+      ) : canInvite ? (
         <div>
           <Button variant="primary" onClick={() => setShowInvite(true)}>
             <UserPlus size={13} />
             Invite member
           </Button>
         </div>
-      )}
+      ) : null}
 
       {isLoading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -410,28 +415,30 @@ const TeamTab: React.FC = () => {
               >
                 {m.role}
               </span>
-              <button
-                type="button"
-                aria-label={`Remove ${m.fullName || m.email}`}
-                onClick={() => {
-                  deactivate.mutate(m.id ?? '');
-                }}
-                style={{
-                  height: 28,
-                  width: 28,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 6,
-                  border: 'none',
-                  background: 'transparent',
-                  color: 'var(--hub-text-muted)',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                }}
-              >
-                <UserMinus size={13} />
-              </button>
+              {canRemove && (
+                <button
+                  type="button"
+                  aria-label={`Remove ${m.fullName || m.email}`}
+                  onClick={() => {
+                    deactivate.mutate(m.id ?? '');
+                  }}
+                  style={{
+                    height: 28,
+                    width: 28,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: 'transparent',
+                    color: 'var(--hub-text-muted)',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                  }}
+                >
+                  <UserMinus size={13} />
+                </button>
+              )}
             </div>
           ))}
         </Card>

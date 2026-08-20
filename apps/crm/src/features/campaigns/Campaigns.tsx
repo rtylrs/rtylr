@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useUserStore } from '@voxire/auth';
 import {
   Plus,
   Mail,
@@ -25,6 +26,7 @@ import {
   type Campaign as CampaignPayload,
 } from '../../shared/schemas/campaigns';
 import { ConfirmModal } from '../../shared/components/ui';
+import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 const ACCENT = '#3b82f6';
 
@@ -173,6 +175,8 @@ function CampaignCard({
   onDelete,
   statusPending,
   deletePending,
+  canSend,
+  canManage,
 }: {
   campaign: Campaign;
   index: number;
@@ -183,6 +187,8 @@ function CampaignCard({
   onDelete: () => void;
   statusPending: boolean;
   deletePending: boolean;
+  canSend: boolean;
+  canManage: boolean;
 }) {
   const ChannelIcon = channelIcon[campaign.channel];
 
@@ -304,7 +310,7 @@ function CampaignCard({
           Updated {campaign.updatedAt}
         </span>
         <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
-          {campaign.status === 'Draft' && (
+          {campaign.status === 'Draft' && canSend && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -326,7 +332,7 @@ function CampaignCard({
               {statusPending ? 'Activating…' : 'Activate'}
             </button>
           )}
-          {campaign.status === 'Active' && (
+          {campaign.status === 'Active' && canManage && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -348,47 +354,55 @@ function CampaignCard({
               {statusPending ? 'Pausing…' : 'Pause'}
             </button>
           )}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-            style={{
-              padding: '6px 14px',
-              borderRadius: '7px',
-              fontSize: '12px',
-              fontWeight: 500,
-              background: 'var(--hub-hover)',
-              color: 'var(--hub-text-muted)',
-              border: '1px solid var(--hub-border)',
-              cursor: 'pointer',
-            }}
-          >
-            {campaign.status === 'Completed' ? 'View Report' : 'Edit'}
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            disabled={deletePending}
-            aria-label="Delete campaign"
-            style={{
-              padding: '6px 10px',
-              borderRadius: '7px',
-              fontSize: '12px',
-              fontWeight: 500,
-              background: 'rgba(239,68,68,0.08)',
-              color: '#ef4444',
-              border: '1px solid rgba(239,68,68,0.25)',
-              cursor: deletePending ? 'not-allowed' : 'pointer',
-              opacity: deletePending ? 0.6 : 1,
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <Trash2 size={12} />
-          </button>
+          {/* Viewing the report of a finished campaign is read-only; only editing a live one is gated. */}
+          {(campaign.status === 'Completed' ||
+            campaign.status === 'Sent' ||
+            campaign.status === 'Cancelled' ||
+            canManage) && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '7px',
+                fontSize: '12px',
+                fontWeight: 500,
+                background: 'var(--hub-hover)',
+                color: 'var(--hub-text-muted)',
+                border: '1px solid var(--hub-border)',
+                cursor: 'pointer',
+              }}
+            >
+              {campaign.status === 'Completed' ? 'View Report' : 'Edit'}
+            </button>
+          )}
+          {canManage && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              disabled={deletePending}
+              aria-label="Delete campaign"
+              style={{
+                padding: '6px 10px',
+                borderRadius: '7px',
+                fontSize: '12px',
+                fontWeight: 500,
+                background: 'rgba(239,68,68,0.08)',
+                color: '#ef4444',
+                border: '1px solid rgba(239,68,68,0.25)',
+                cursor: deletePending ? 'not-allowed' : 'pointer',
+                opacity: deletePending ? 0.6 : 1,
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Trash2 size={12} />
+            </button>
+          )}
         </div>
       </div>
     </motion.div>
@@ -397,6 +411,9 @@ function CampaignCard({
 
 const Campaigns: React.FC = () => {
   const navigate = useNavigate();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManageCampaigns = canCrmPermission(role, 'crm:campaigns');
+  const canSendCampaigns = canCrmPermission(role, 'crm:campaigns:send');
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
   const [loadedCampaigns, setLoadedCampaigns] = useState<CampaignPayload[]>([]);
@@ -499,44 +516,46 @@ const Campaigns: React.FC = () => {
               {campaigns.filter((c) => c.status === 'Active').length} active campaigns
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              onClick={() => navigate({ to: '/campaigns/sms' })}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 14px',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 600,
-                background: 'transparent',
-                color: 'var(--hub-text)',
-                border: '1px solid var(--hub-border)',
-                cursor: 'pointer',
-              }}
-            >
-              <MessageSquare size={14} /> New SMS
-            </button>
-            <button
-              onClick={() => navigate({ to: '/campaigns/email' })}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 600,
-                background: ACCENT,
-                color: '#fff',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              <Plus size={15} /> New email campaign
-            </button>
-          </div>
+          {canManageCampaigns && (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => navigate({ to: '/campaigns/sms' })}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  background: 'transparent',
+                  color: 'var(--hub-text)',
+                  border: '1px solid var(--hub-border)',
+                  cursor: 'pointer',
+                }}
+              >
+                <MessageSquare size={14} /> New SMS
+              </button>
+              <button
+                onClick={() => navigate({ to: '/campaigns/email' })}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  background: ACCENT,
+                  color: '#fff',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <Plus size={15} /> New email campaign
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Filter tabs */}
@@ -610,6 +629,8 @@ const Campaigns: React.FC = () => {
                 onDelete={() => setConfirmDeleteId(c.id)}
                 statusPending={updateStatus.isPending}
                 deletePending={removeCampaign.isPending}
+                canSend={canSendCampaigns}
+                canManage={canManageCampaigns}
               />
             ))}
           </AnimatePresence>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useUserStore } from '@voxire/auth';
 import {
   useLoyaltyConfig,
   useLoyaltyTransactions,
@@ -9,6 +10,7 @@ import {
 import { motion } from 'motion/react';
 import { Gift, Star, Trophy, Crown, Award, ToggleLeft, ToggleRight, Clock } from 'lucide-react';
 import { type LoyaltyTransaction, type LoyaltyTier } from '../../shared/schemas/loyalty';
+import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 const ACCENT = '#3b82f6';
 
@@ -26,6 +28,8 @@ const activityColor: Record<string, string> = {
 };
 
 const Loyalty: React.FC = () => {
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canConfigureLoyalty = canCrmPermission(role, 'crm:loyalty:configure');
   const { data: config } = useLoyaltyConfig();
   const { data: transactions } = useLoyaltyTransactions();
   const { data: tiersData } = useLoyaltyTiers();
@@ -61,35 +65,37 @@ const Loyalty: React.FC = () => {
               Configure tiers, point rules, and member rewards
             </p>
           </div>
-          <button
-            onClick={() => {
-              const next = !programEnabled;
-              updateConfig.mutate(
-                { programEnabled: next },
-                {
-                  onSuccess: () => setProgramEnabled(next),
-                  onError: () => setProgramEnabled(!next),
-                }
-              );
-            }}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: 600,
-              background: programEnabled ? 'rgba(16,185,129,0.12)' : 'var(--hub-card)',
-              color: programEnabled ? '#10b981' : 'var(--hub-text-muted)',
-              border: `1px solid ${programEnabled ? 'rgba(16,185,129,0.3)' : 'var(--hub-border)'}`,
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-          >
-            {programEnabled ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
-            {programEnabled ? 'Program Active' : 'Program Paused'}
-          </button>
+          {canConfigureLoyalty && (
+            <button
+              onClick={() => {
+                const next = !programEnabled;
+                updateConfig.mutate(
+                  { programEnabled: next },
+                  {
+                    onSuccess: () => setProgramEnabled(next),
+                    onError: () => setProgramEnabled(!next),
+                  }
+                );
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                background: programEnabled ? 'rgba(16,185,129,0.12)' : 'var(--hub-card)',
+                color: programEnabled ? '#10b981' : 'var(--hub-text-muted)',
+                border: `1px solid ${programEnabled ? 'rgba(16,185,129,0.3)' : 'var(--hub-border)'}`,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              {programEnabled ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
+              {programEnabled ? 'Program Active' : 'Program Paused'}
+            </button>
+          )}
         </div>
 
         {/* Config section */}
@@ -230,25 +236,27 @@ const Loyalty: React.FC = () => {
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-            <button
-              onClick={() => updateConfig.mutate({ pointsPerDollar, pointsExpiry })}
-              disabled={updateConfig.isPending}
-              style={{
-                padding: '8px 20px',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 600,
-                background: ACCENT,
-                color: '#fff',
-                border: 'none',
-                cursor: updateConfig.isPending ? 'not-allowed' : 'pointer',
-                opacity: updateConfig.isPending ? 0.7 : 1,
-              }}
-            >
-              {updateConfig.isPending ? 'Saving…' : 'Save'}
-            </button>
-          </div>
+          {canConfigureLoyalty && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+              <button
+                onClick={() => updateConfig.mutate({ pointsPerDollar, pointsExpiry })}
+                disabled={updateConfig.isPending}
+                style={{
+                  padding: '8px 20px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  background: ACCENT,
+                  color: '#fff',
+                  border: 'none',
+                  cursor: updateConfig.isPending ? 'not-allowed' : 'pointer',
+                  opacity: updateConfig.isPending ? 0.7 : 1,
+                }}
+              >
+                {updateConfig.isPending ? 'Saving…' : 'Save'}
+              </button>
+            </div>
+          )}
         </motion.div>
 
         {/* Tier cards */}

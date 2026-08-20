@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
+import { useUserStore } from '@voxire/auth';
 import { Gift, Package, Plus, X } from 'lucide-react';
 import { useLoyaltyRewards, useUpsertReward } from '../../shared/hooks/queries/useLoyalty';
 import { PageHeader, Card, EmptyState, Button, SkeletonList } from '../../shared/components/ui';
+import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 interface RewardForm {
   name: string;
@@ -169,6 +171,8 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 };
 
 const LoyaltyRewards: React.FC = () => {
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canConfigureLoyalty = canCrmPermission(role, 'crm:loyalty:configure');
   const { data: fetched, isLoading } = useLoyaltyRewards();
   const rewards = fetched ?? [];
   const [showAdd, setShowAdd] = useState(false);
@@ -181,10 +185,12 @@ const LoyaltyRewards: React.FC = () => {
           title="Rewards catalog"
           subtitle="What customers can redeem their points for"
           actions={
-            <Button variant="primary" aria-label="Add reward" onClick={() => setShowAdd(true)}>
-              <Plus size={13} />
-              Add reward
-            </Button>
+            canConfigureLoyalty ? (
+              <Button variant="primary" aria-label="Add reward" onClick={() => setShowAdd(true)}>
+                <Plus size={13} />
+                Add reward
+              </Button>
+            ) : undefined
           }
         />
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
+import { useUserStore } from '@voxire/auth';
 import { Zap, Plus, Play, Pause, Trash2, Cake, UserPlus, RotateCcw, Star } from 'lucide-react';
 import {
   useListAutomations,
@@ -16,9 +17,12 @@ import {
   SkeletonList,
   ConfirmModal,
 } from '../../shared/components/ui';
+import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 const Automations: React.FC = () => {
   const navigate = useNavigate();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManageAutomations = canCrmPermission(role, 'crm:automations');
   const { data: fetched, isLoading } = useListAutomations();
   const updateAutomation = useUpdateAutomation();
   const removeAutomation = useDeleteAutomation();
@@ -179,7 +183,7 @@ const Automations: React.FC = () => {
                         ) : null}
                         {a.status.toUpperCase()}
                       </span>
-                      {a.status !== 'draft' && (
+                      {a.status !== 'draft' && canManageAutomations && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -204,27 +208,29 @@ const Automations: React.FC = () => {
                           {a.status === 'active' ? <Pause size={11} /> : <Play size={11} />}
                         </button>
                       )}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setConfirmDeleteId(a.id);
-                        }}
-                        disabled={removeAutomation.isPending}
-                        aria-label="Delete automation"
-                        style={{
-                          padding: '4px 6px',
-                          borderRadius: '6px',
-                          background: 'rgba(239,68,68,0.08)',
-                          border: '1px solid rgba(239,68,68,0.25)',
-                          color: '#ef4444',
-                          cursor: removeAutomation.isPending ? 'not-allowed' : 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          opacity: removeAutomation.isPending ? 0.6 : 1,
-                        }}
-                      >
-                        <Trash2 size={11} />
-                      </button>
+                      {canManageAutomations && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setConfirmDeleteId(a.id);
+                          }}
+                          disabled={removeAutomation.isPending}
+                          aria-label="Delete automation"
+                          style={{
+                            padding: '4px 6px',
+                            borderRadius: '6px',
+                            background: 'rgba(239,68,68,0.08)',
+                            border: '1px solid rgba(239,68,68,0.25)',
+                            color: '#ef4444',
+                            cursor: removeAutomation.isPending ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            opacity: removeAutomation.isPending ? 0.6 : 1,
+                          }}
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      )}
                     </div>
                   </div>
                   <div>

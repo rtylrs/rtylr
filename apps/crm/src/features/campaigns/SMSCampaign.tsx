@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
+import { useUserStore } from '@voxire/auth';
 import { Save, Send } from 'lucide-react';
 import {
   useCreateCampaign,
@@ -13,11 +14,15 @@ import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import { useListCustomers } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
 import { CustomerAvatar, SMSComposer } from '../../shared/components/crm';
+import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 const DEFAULT_SMS_BODY = 'Flash sale today! {{first_name}}, enjoy 20% off. Reply STOP to opt out.';
 
 const SMSCampaign: React.FC = () => {
   const navigate = useNavigate();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManageCampaigns = canCrmPermission(role, 'crm:campaigns');
+  const canSendCampaigns = canCrmPermission(role, 'crm:campaigns:send');
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const searchParams = new URLSearchParams(searchStr);
   const campaignId = Number(searchParams.get('id') || 0) || undefined;
@@ -113,22 +118,26 @@ const SMSCampaign: React.FC = () => {
           title={isEditing ? 'Edit SMS campaign' : 'New SMS campaign'}
           actions={
             <>
-              <Button
-                variant="outline"
-                onClick={() => handleSave(false)}
-                disabled={pending || !name.trim()}
-              >
-                <Save size={13} />
-                {pending ? 'Saving…' : 'Save draft'}
-              </Button>
-              <Button
-                variant="primary"
-                onClick={() => handleSave(true)}
-                disabled={pending || !name.trim() || !body.trim()}
-              >
-                <Send size={13} />
-                {pending ? 'Activating…' : 'Save & activate'}
-              </Button>
+              {canManageCampaigns && (
+                <Button
+                  variant="outline"
+                  onClick={() => handleSave(false)}
+                  disabled={pending || !name.trim()}
+                >
+                  <Save size={13} />
+                  {pending ? 'Saving…' : 'Save draft'}
+                </Button>
+              )}
+              {canSendCampaigns && (
+                <Button
+                  variant="primary"
+                  onClick={() => handleSave(true)}
+                  disabled={pending || !name.trim() || !body.trim()}
+                >
+                  <Send size={13} />
+                  {pending ? 'Activating…' : 'Save & activate'}
+                </Button>
+              )}
             </>
           }
         />

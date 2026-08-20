@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import { useUserStore } from '@voxire/auth';
 import {
   ArrowLeft,
   Mail,
@@ -20,6 +21,7 @@ import {
   useDeleteCustomer,
   useExportCustomers,
 } from '../../shared/hooks/queries/useCustomers';
+import { canCrmPermission } from '../../shared/lib/crmPermissions';
 import {
   useAwardPoints,
   useRedeemPoints,
@@ -41,6 +43,8 @@ import { getCustomerTier, pointsToNextTier, thresholdsFromConfig } from '../../s
 const CustomerProfile: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canDeleteCustomer = canCrmPermission(role, 'crm:customers:manage');
   const customerId = Number(id);
   const { data: fetched, isLoading, isError } = useGetCustomerFull(customerId);
   const [timelineCursor, setTimelineCursor] = useState<string>();
@@ -293,15 +297,17 @@ const CustomerProfile: React.FC = () => {
               <Users size={13} />
               Merge
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => setConfirmDelete(true)}
-              disabled={remove.isPending}
-              style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}
-            >
-              <Trash2 size={13} />
-              {remove.isPending ? 'Deleting…' : 'Delete'}
-            </Button>
+            {canDeleteCustomer && (
+              <Button
+                variant="outline"
+                onClick={() => setConfirmDelete(true)}
+                disabled={remove.isPending}
+                style={{ color: '#ef4444', borderColor: 'rgba(239,68,68,0.3)' }}
+              >
+                <Trash2 size={13} />
+                {remove.isPending ? 'Deleting…' : 'Delete'}
+              </Button>
+            )}
           </div>
         </motion.div>
 
