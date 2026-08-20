@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
-import { useParams, useRouterState } from '@tanstack/react-router';
+import { useParams, useRouterState, useNavigate } from '@tanstack/react-router';
+import { EmptyState } from '@voxire/ui';
+import { PackageX } from 'lucide-react';
 import api from '../../shared/lib/api';
 import { useCartStore } from '../../shared/stores/cartStore';
 
@@ -54,6 +57,7 @@ const isTerminal = (s: string | null): boolean =>
   s != null && (isCancelled(s) || stepForStatus(s) === STATUS_STEPS.length - 1);
 
 const OrderStatus = (): React.JSX.Element => {
+  const { t } = useTranslation('orderstatus');
   const { id } = useParams({ strict: false });
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const { clearCart } = useCartStore();
@@ -120,7 +124,7 @@ const OrderStatus = (): React.JSX.Element => {
     }
     const slug = new URLSearchParams(searchStr).get('slug');
     if (slug) {
-      void navigate({ to: `/${slug}` });
+      void navigate({ to: '/$slug', params: { slug } });
       return;
     }
     void navigate({ to: '/' });
@@ -238,14 +242,12 @@ const OrderStatus = (): React.JSX.Element => {
 
         {/* Not Found state */}
         {notFound && (
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ color: '#dc2626', fontSize: '15px', fontWeight: 600, marginBottom: 8 }}>
-              Order not found
-            </p>
-            <p style={{ color: 'rgba(0,0,0,0.5)', fontSize: '13px', marginBottom: 16 }}>
-              We could not find an order matching this ID. Please check your order link.
-            </p>
-          </div>
+          <EmptyState
+            icon={PackageX}
+            title={t('notFoundTitle')}
+            description={t('notFoundDescription')}
+            action={{ label: t('backToMenu'), onClick: handleOrderAnother }}
+          />
         )}
 
         {/* Loading state */}
@@ -277,7 +279,7 @@ const OrderStatus = (): React.JSX.Element => {
         )}
 
         {/* Poll notice */}
-        {!isTerminal(status) && !fetchError && (
+        {!isTerminal(status) && !fetchError && !notFound && (
           <p
             style={{
               fontSize: '12px',
@@ -291,24 +293,26 @@ const OrderStatus = (): React.JSX.Element => {
         )}
 
         {/* Order another */}
-        <button
-          onClick={handleOrderAnother}
-          style={{
-            marginTop: 'auto',
-            background: 'transparent',
-            border: '2px solid var(--menu-accent, #03aed2)',
-            color: 'var(--menu-accent, #03aed2)',
-            borderRadius: 14,
-            padding: '14px 32px',
-            fontSize: '16px',
-            fontWeight: 700,
-            cursor: 'pointer',
-            minHeight: 48,
-            width: '100%',
-          }}
-        >
-          Order Another
-        </button>
+        {!notFound && (
+          <button
+            onClick={handleOrderAnother}
+            style={{
+              marginTop: 'auto',
+              background: 'transparent',
+              border: '2px solid var(--menu-accent, #03aed2)',
+              color: 'var(--menu-accent, #03aed2)',
+              borderRadius: 14,
+              padding: '14px 32px',
+              fontSize: '16px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              minHeight: 48,
+              width: '100%',
+            }}
+          >
+            Order Another
+          </button>
+        )}
       </div>
     </>
   );
