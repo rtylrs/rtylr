@@ -4,7 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { CircleAlert } from 'lucide-react';
 import { DatePicker } from '@voxire/ui';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
-import { formatFullDayLabel, formatEntryTimestamp } from '../../shared/lib/dateUtils';
+import {
+  dayKeyForDate,
+  formatFullDayLabel,
+  formatEntryTimestamp,
+} from '../../shared/lib/dateUtils';
 import { formatWorkEntryTarget } from '../../shared/lib/timeEntryLabel';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
@@ -66,17 +70,16 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
   const { t, i18n } = useTranslation();
   const search = routeApi.useSearch();
   const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
-  const weeklyTargetMinutes = useTimeSettingsStore((s) => s.weeklyTargetMinutes);
+  const dailyTargetMinutes = useTimeSettingsStore((s) => s.dailyTargetMinutes);
 
   const { data } = useWorkDay(date);
   const day: WorkDay | undefined = data?.workDay;
 
-  // There is no daily-target field - only a weekly one - so this divides the
-  // workspace's weekly target across a five-day week. It is a derived
-  // approximation stated as such, not a value read from a real per-day
-  // setting; see the settings-store seam pattern in
+  // Each calendar day has its own configured target (Settings > Time), not a
+  // weekly figure divided evenly - a non-working day is genuinely 0, not a
+  // fifth of the week. See the settings-store seam pattern in
   // shared/stores/timeSettingsStore.ts.
-  const dayTargetMinutes = Math.max(1, Math.round(weeklyTargetMinutes / 5));
+  const dayTargetMinutes = dailyTargetMinutes[dayKeyForDate(date)] ?? 0;
   const dayLoggedMinutes = day?.loggedMinutes ?? 0;
 
   // The only real lock signal available is this day's own server-reported
@@ -322,10 +325,9 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
       }}
       onKeyDown={handleFormKeyDown}
     >
-      {/* Header. No "Today X of Y" pill here - My day's own
-       * Clocked/Logged/Unaccounted strip directly above this form already
-       * shows the day's logged total, so a second copy of the same number
-       * in this header was pure duplication. */}
+      {/* Header. My day's own totals strip only ever shows Logged now (no
+       * target comparison lives there), so this pill is the one place that
+       * shows today's progress against its configured target. */}
       <div
         className="flex flex-col gap-2 rounded-t-xl px-6 py-4 md:flex-row md:items-center md:justify-between"
         style={{ background: 'var(--flow-card)', borderBottom: '1px solid var(--flow-border)' }}
@@ -337,6 +339,19 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
           <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.time.add.subtitle', { day: dayLabel })}
           </p>
+        </div>
+        <div
+          className="flex h-8 items-center gap-1 self-start rounded-full px-3 text-[11px] md:self-auto"
+          style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
+        >
+          <span>{t('flow.time.add.today')}</span>
+          <strong className="tabular-nums font-semibold" style={{ color: 'var(--flow-text)' }}>
+            {formatDurationClock(dayLoggedMinutes)}
+          </strong>
+          <span>{t('flow.time.of')}</span>
+          <strong className="tabular-nums font-semibold" style={{ color: 'var(--flow-text)' }}>
+            {formatDurationClock(dayTargetMinutes)}
+          </strong>
         </div>
       </div>
 
@@ -480,11 +495,10 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
                         tabIndex={active ? 0 : -1}
                         aria-disabled={locked}
                         onClick={() => !locked && setLocation(loc)}
-                        className="flow-focus min-h-[44px] h-auto rounded-lg px-5 py-2 text-[12px] font-semibold whitespace-normal md:h-[38px] md:min-h-0 md:py-0"
+                        className="flow-focus min-h-[44px] h-auto rounded-xl px-4 py-2 text-[13px] font-semibold whitespace-normal md:min-h-0 md:h-[38px] md:py-0"
                         style={{
                           background: active ? 'var(--accent)' : 'var(--flow-hover)',
                           color: active ? 'var(--flow-on-accent)' : 'var(--flow-text-muted)',
-                          border: `1px solid ${active ? 'var(--accent)' : 'var(--flow-border)'}`,
                         }}
                       >
                         {t(`flow.time.mode.${loc}`)}
