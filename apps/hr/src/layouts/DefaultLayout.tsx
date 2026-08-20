@@ -180,11 +180,14 @@ const navSections: NavSection[] = [
         permission: 'hr:payroll',
       },
       {
+        // No `permission` here: `/hr/payroll/my-runs` already scopes to the
+        // caller's own employee id server-side, so every HR app user should
+        // see their own pay slips regardless of role - see the comment on
+        // `myPayslipsWrap` in `router.tsx`.
         i18nKey: 'nav.myPaySlips',
         path: '/payroll/my-payslips',
         icon: Receipt,
         configGuard: (_m, cfg) => isPayrollConfigured(cfg),
-        permission: 'hr:payroll',
       },
       {
         i18nKey: 'nav.payrollConfig',

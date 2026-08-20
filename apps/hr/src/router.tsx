@@ -116,6 +116,16 @@ const wrap = (screen: React.ReactNode, permission?: HRPermission): React.JSX.Ele
 const payrollWrap = (screen: React.ReactNode): React.JSX.Element =>
   wrap(<PayrollConfigGuard>{screen}</PayrollConfigGuard>, 'hr:payroll');
 
+// `/hr/payroll/my-runs*` already resolves the caller's own employee id from
+// the session and 404s on a run that isn't theirs (see the comment on
+// `useListMyPayrollRuns` in `usePayroll.ts`), so there is nothing left for a
+// role permission to enforce here. Gating this behind `hr:payroll` (an
+// admin-tier permission `staff` doesn't have) blocked employees from their
+// own pay slips for no security reason - `AppGuard` already confirms the
+// user has HR app access before this route tree even mounts.
+const myPayslipsWrap = (screen: React.ReactNode): React.JSX.Element =>
+  wrap(<PayrollConfigGuard>{screen}</PayrollConfigGuard>);
+
 const configWrap = (
   screen: React.ReactNode,
   enabled: (config: FeatureConfig) => boolean,
@@ -367,7 +377,7 @@ const myPaySlipsRoute = createRoute({
   getParentRoute: () => hrConfigRoute,
   path: '/payroll/my-payslips',
   component: () =>
-    payrollWrap(
+    myPayslipsWrap(
       <Suspense fallback={<PageLoader />}>
         <MyPaySlips />
       </Suspense>
@@ -379,7 +389,7 @@ const paySlipViewRoute = createRoute({
   path: '/payroll/my-payslips/view',
   validateSearch: paySlipSearchSchema,
   component: () =>
-    payrollWrap(
+    myPayslipsWrap(
       <Suspense fallback={<PageLoader />}>
         <PaySlip />
       </Suspense>
