@@ -17,5 +17,6 @@
   "total": "Total",
   "currency": "Devise",
   "saving": "Enregistrement…",
-  "creating": "Création…"
+  "creating": "Création…",
+  "refresh": "Actualiser"
 }
