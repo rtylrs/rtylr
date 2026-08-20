@@ -616,6 +616,7 @@
     "taskCount_other": "{{count}} tâches qui vous sont assignées",
     "emptyTitle": "Aucune tâche assignée",
     "emptyDescription": "Rien sur votre assiette pour le moment. Bon travail !",
+    "emptyCta": "Ajouter votre première tâche",
     "noTasks": "Aucune tâche",
     "quickAddPlaceholder": "Ajoutez une tâche personnelle et appuyez sur Entrée",
     "quickAddButton": "Ajouter",

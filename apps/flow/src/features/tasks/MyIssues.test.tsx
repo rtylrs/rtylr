@@ -50,6 +50,10 @@ vi.mock('../../shared/lib/currentUser', () => ({
   getCurrentUserId: () => 'u1',
 }));
 
+vi.mock('../../shared/components/TaskCard', () => ({
+  default: ({ task }: { task: { title: string } }) => <div>{task.title}</div>,
+}));
+
 import MyIssues from './MyIssues';
 
 beforeEach(() => {
@@ -136,5 +140,32 @@ describe('MyIssues QuickAddRow', () => {
 
     expect(createTaskMutate).not.toHaveBeenCalled();
     expect(toast.error).toHaveBeenCalledWith('errors.generic');
+  });
+});
+
+describe('MyIssues empty state', () => {
+  it('shows the illustration, title and a call-to-action when there are no tasks', () => {
+    myIssuesData.data = [];
+    render(<MyIssues />);
+
+    expect(screen.getByText('flow.myIssues.emptyTitle')).toBeInTheDocument();
+    expect(screen.getByText('flow.myIssues.emptyDescription')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'flow.myIssues.emptyCta' })).toBeInTheDocument();
+  });
+
+  it('focuses the quick-add input when the call-to-action is clicked', () => {
+    myIssuesData.data = [];
+    render(<MyIssues />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'flow.myIssues.emptyCta' }));
+
+    expect(screen.getByPlaceholderText('flow.myIssues.quickAddPlaceholder')).toHaveFocus();
+  });
+
+  it('does not show the empty state when there are tasks', () => {
+    myIssuesData.data = [{ id: '1', title: 'Ship the thing', status: 'todo' }];
+    render(<MyIssues />);
+
+    expect(screen.queryByText('flow.myIssues.emptyTitle')).not.toBeInTheDocument();
   });
 });
