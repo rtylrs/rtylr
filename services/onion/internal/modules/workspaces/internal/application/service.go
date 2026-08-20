@@ -778,7 +778,9 @@ func (s *Service) GetMyTasks(ctx context.Context, userID, page, limit int64) ([]
 		// page 2 would return page 1's cached rows until the 2-minute TTL expires.
 		cacheKeys.Scoped("user", userID, fmt.Sprintf("workspace_tasks:page=%d:limit=%d", page, limit)),
 		func(ctx context.Context) (myTasksPage, error) {
-			tasks, total, fetchErr := s.repo.GetMyTasks(ctx, userID, limit, offset)
+			// workspaceID=0: this is the cross-workspace "My tasks" board, which
+			// intentionally spans every workspace the user belongs to.
+			tasks, total, fetchErr := s.repo.GetMyTasks(ctx, userID, 0, limit, offset)
 			return myTasksPage{Tasks: tasks, Total: total}, fetchErr
 		},
 		cacher.WithExpiry(ctx, workspacesTTL),
@@ -840,7 +842,9 @@ func (s *Service) GetDashboard(ctx context.Context, workspaceID, businessID, use
 		return domain.DashboardStats{}, err
 	}
 
-	myTasks, _, err := s.repo.GetMyTasks(ctx, userID, internalListCap, 0)
+	// Scope "my tasks" to this workspace so the dashboard never surfaces work
+	// assigned in a different workspace (issue #783).
+	myTasks, _, err := s.repo.GetMyTasks(ctx, userID, workspaceID, internalListCap, 0)
 	if err != nil {
 		return domain.DashboardStats{}, err
 	}

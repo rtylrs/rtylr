@@ -116,7 +116,7 @@ func TestWorkspaces_GetMyTasks_PaginationAndTotal(t *testing.T) {
 		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteTask(ctx, id, testutil.OwnerID) } }(taskID))
 	}
 
-	page1, total1, err := repo.GetMyTasks(ctx, assignee, 2, 0)
+	page1, total1, err := repo.GetMyTasks(ctx, assignee, 0, 2, 0)
 	if err != nil {
 		t.Fatalf("GetMyTasks page1: %v", err)
 	}
@@ -127,7 +127,7 @@ func TestWorkspaces_GetMyTasks_PaginationAndTotal(t *testing.T) {
 		t.Fatalf("expected 2 tasks on page1, got %d", len(page1))
 	}
 
-	page2, total2, err := repo.GetMyTasks(ctx, assignee, 2, 2)
+	page2, total2, err := repo.GetMyTasks(ctx, assignee, 0, 2, 2)
 	if err != nil {
 		t.Fatalf("GetMyTasks page2: %v", err)
 	}
@@ -145,7 +145,7 @@ func TestWorkspaces_GetMyTasks_PaginationAndTotal(t *testing.T) {
 		}
 	}
 
-	page3, total3, err := repo.GetMyTasks(ctx, assignee, 2, 4)
+	page3, total3, err := repo.GetMyTasks(ctx, assignee, 0, 2, 4)
 	if err != nil {
 		t.Fatalf("GetMyTasks page3: %v", err)
 	}
@@ -154,6 +154,104 @@ func TestWorkspaces_GetMyTasks_PaginationAndTotal(t *testing.T) {
 	}
 	if len(page3) != 1 {
 		t.Errorf("expected 1 remainder task on page3, got %d", len(page3))
+	}
+}
+
+// TestWorkspaces_GetMyTasks_ScopedByWorkspace guards against regressing to the
+// bug in rtylr issue #783: the dashboard's "My tasks" widget called GetMyTasks
+// without a workspace filter, so it rendered tasks the same user had assigned
+// to them in a completely different workspace. GetMyTasks must exclude a task
+// from workspace B when queried with workspace A's ID, while workspaceID=0
+// (the cross-workspace "My tasks" board) must still return both.
+func TestWorkspaces_GetMyTasks_ScopedByWorkspace(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Sentinel assignee ID unlikely to collide with tasks created by other tests.
+	const assignee = int64(929292929)
+
+	wsA, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
+		OwnerID: testutil.OwnerID, Name: "ScopedMyTasksWS-A", CreatedBy: testutil.OwnerID,
+	}, false)
+	if err != nil {
+		t.Fatalf("CreateWorkspace A: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsA, testutil.OwnerID) })
+
+	wsB, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
+		OwnerID: testutil.OwnerID, Name: "ScopedMyTasksWS-B", CreatedBy: testutil.OwnerID,
+	}, false)
+	if err != nil {
+		t.Fatalf("CreateWorkspace B: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsB, testutil.OwnerID) })
+
+	projA, err := repo.CreateProject(ctx, domain.ProjectInput{
+		WorkspaceID: wsA, OwnerID: testutil.OwnerID, Name: "ScopedMyTasks Project A", CreatedBy: testutil.OwnerID,
+	})
+	if err != nil {
+		t.Fatalf("CreateProject A: %v", err)
+	}
+
+	projB, err := repo.CreateProject(ctx, domain.ProjectInput{
+		WorkspaceID: wsB, OwnerID: testutil.OwnerID, Name: "ScopedMyTasks Project B", CreatedBy: testutil.OwnerID,
+	})
+	if err != nil {
+		t.Fatalf("CreateProject B: %v", err)
+	}
+
+	taskA, err := repo.CreateTask(ctx, domain.TaskInput{
+		ProjectID: projA, WorkspaceID: wsA, OwnerID: testutil.OwnerID,
+		Title: "ScopedMyTasks Task A", ReporterID: testutil.OwnerID,
+		AssigneeID: int64Ptr(assignee),
+	})
+	if err != nil {
+		t.Fatalf("CreateTask A: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteTask(ctx, taskA, testutil.OwnerID) })
+
+	taskB, err := repo.CreateTask(ctx, domain.TaskInput{
+		ProjectID: projB, WorkspaceID: wsB, OwnerID: testutil.OwnerID,
+		Title: "ScopedMyTasks Task B", ReporterID: testutil.OwnerID,
+		AssigneeID: int64Ptr(assignee),
+	})
+	if err != nil {
+		t.Fatalf("CreateTask B: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteTask(ctx, taskB, testutil.OwnerID) })
+
+	scopedToA, totalA, err := repo.GetMyTasks(ctx, assignee, wsA, 10, 0)
+	if err != nil {
+		t.Fatalf("GetMyTasks scoped to A: %v", err)
+	}
+	if totalA != 1 {
+		t.Fatalf("expected 1 task when scoped to workspace A, got %d", totalA)
+	}
+	if len(scopedToA) != 1 || scopedToA[0].ID != taskA {
+		t.Errorf("expected only task A when scoped to workspace A, got %+v", scopedToA)
+	}
+
+	scopedToB, totalB, err := repo.GetMyTasks(ctx, assignee, wsB, 10, 0)
+	if err != nil {
+		t.Fatalf("GetMyTasks scoped to B: %v", err)
+	}
+	if totalB != 1 {
+		t.Fatalf("expected 1 task when scoped to workspace B, got %d", totalB)
+	}
+	if len(scopedToB) != 1 || scopedToB[0].ID != taskB {
+		t.Errorf("expected only task B when scoped to workspace B, got %+v", scopedToB)
+	}
+
+	unscoped, totalAll, err := repo.GetMyTasks(ctx, assignee, 0, 10, 0)
+	if err != nil {
+		t.Fatalf("GetMyTasks unscoped: %v", err)
+	}
+	if totalAll != 2 {
+		t.Fatalf("expected 2 tasks across both workspaces when unscoped, got %d", totalAll)
+	}
+	if len(unscoped) != 2 {
+		t.Errorf("expected both tasks when unscoped, got %+v", unscoped)
 	}
 }
 

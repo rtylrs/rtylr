@@ -452,7 +452,11 @@ func (r *Repository) GetSubtasks(ctx context.Context, parentTaskID, limit, offse
 const myTasksDoneWindowDays = 14
 
 // dynamic-query: squirrel
-func (r *Repository) GetMyTasks(ctx context.Context, userID, limit, offset int64) ([]domain.Task, int64, error) {
+//
+// workspaceID scopes the result to a single workspace when non-zero. Pass 0
+// for the global "My tasks" board, which intentionally spans every workspace
+// the user belongs to.
+func (r *Repository) GetMyTasks(ctx context.Context, userID, workspaceID, limit, offset int64) ([]domain.Task, int64, error) {
 	// All active work assigned to the user, plus tasks they completed within the
 	// recent window so the board's Done column isn't always empty. Cancelled tasks
 	// stay hidden. completed_at is stamped by both the status and partial-update
@@ -468,6 +472,9 @@ func (r *Repository) GetMyTasks(ctx context.Context, userID, limit, offset int64
 				sq.GtOrEq{"t.completed_at": doneCutoff},
 			},
 		},
+	}
+	if workspaceID != 0 {
+		conds = append(conds, sq.Eq{"t.workspace_id": workspaceID})
 	}
 
 	total, err := r.countTasks(ctx, conds)
