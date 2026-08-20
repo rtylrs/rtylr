@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { DAY_KEYS, type DayKey } from '../lib/dateUtils';
 
 /**
  * Workspace time settings.
@@ -30,7 +31,10 @@ interface TimeCategory {
 interface TimeSettingsState {
   weekStart: WeekStart;
   roundingMinutes: RoundingMinutes;
-  weeklyTargetMinutes: number;
+  /** Expected work minutes per calendar day - fully independent per day, not a
+   * weekly figure split evenly, because a 4-day week or a short Saturday is a
+   * real shape a business has, not an edge case of a uniform one. */
+  dailyTargetMinutes: Record<DayKey, number>;
   overtimeThresholdMinutes: number;
   /** On: an approved entry is read-only until a manager unapproves it. */
   approvalLocksEntry: boolean;
@@ -49,7 +53,7 @@ interface TimeSettingsState {
 interface TimeSettingsActions {
   setWeekStart: (value: WeekStart) => void;
   setRoundingMinutes: (value: RoundingMinutes) => void;
-  setWeeklyTargetMinutes: (value: number) => void;
+  setDailyTargetMinutes: (day: DayKey, minutes: number) => void;
   setOvertimeThresholdMinutes: (value: number) => void;
   setApprovalLocksEntry: (value: boolean) => void;
   setAutoLockDays: (value: number) => void;
@@ -63,6 +67,12 @@ interface TimeSettingsActions {
 
 export const TIME_SETTINGS_STORAGE_KEY = 'flow.timeSettings-v1';
 
+/** Returns the sum of every day's target - the "weekly target" a flat single
+ * number used to be, now derived from the seven independent day values. */
+export function getWeeklyTargetMinutes(dailyTargetMinutes: Record<DayKey, number>): number {
+  return DAY_KEYS.reduce((sum, day) => sum + (dailyTargetMinutes[day] ?? 0), 0);
+}
+
 /**
  * The four seeded categories are a starting point, not a taxonomy - a workspace
  * is expected to rewrite them. Admin defaults to non-billable because internal
@@ -71,7 +81,15 @@ export const TIME_SETTINGS_STORAGE_KEY = 'flow.timeSettings-v1';
 export const DEFAULT_TIME_SETTINGS: TimeSettingsState = {
   weekStart: 'monday',
   roundingMinutes: 15,
-  weeklyTargetMinutes: 40 * 60,
+  dailyTargetMinutes: {
+    sun: 0,
+    mon: 8 * 60,
+    tue: 8 * 60,
+    wed: 8 * 60,
+    thu: 8 * 60,
+    fri: 8 * 60,
+    sat: 4 * 60,
+  },
   overtimeThresholdMinutes: 45 * 60,
   approvalLocksEntry: true,
   autoLockDays: 7,
@@ -89,6 +107,29 @@ function slugify(name: string): string {
   return name.trim().toLowerCase().replace(/\s+/g, '-');
 }
 
+/**
+ * v0 stored a single flat weeklyTargetMinutes. Preserve a workspace's choice
+ * by spreading it evenly across Mon-Fri (the old implicit assumption in
+ * AddHours' own dayTargetMinutes math) rather than silently reverting a
+ * customized value back to the shipped default.
+ */
+export function migrateTimeSettingsV0(persisted: object): object {
+  const old = persisted as { weeklyTargetMinutes?: number };
+  const perWeekday = Math.max(1, Math.round((old.weeklyTargetMinutes ?? 40 * 60) / 5));
+  return {
+    ...persisted,
+    dailyTargetMinutes: {
+      sun: 0,
+      mon: perWeekday,
+      tue: perWeekday,
+      wed: perWeekday,
+      thu: perWeekday,
+      fri: perWeekday,
+      sat: 0,
+    },
+  };
+}
+
 export const useTimeSettingsStore = create<TimeSettingsState & TimeSettingsActions>()(
   persist(
     (set, get) => ({
@@ -96,7 +137,8 @@ export const useTimeSettingsStore = create<TimeSettingsState & TimeSettingsActio
 
       setWeekStart: (weekStart) => set({ weekStart }),
       setRoundingMinutes: (roundingMinutes) => set({ roundingMinutes }),
-      setWeeklyTargetMinutes: (weeklyTargetMinutes) => set({ weeklyTargetMinutes }),
+      setDailyTargetMinutes: (day, minutes) =>
+        set({ dailyTargetMinutes: { ...get().dailyTargetMinutes, [day]: minutes } }),
       setOvertimeThresholdMinutes: (overtimeThresholdMinutes) => set({ overtimeThresholdMinutes }),
       setApprovalLocksEntry: (approvalLocksEntry) => set({ approvalLocksEntry }),
       setAutoLockDays: (autoLockDays) => set({ autoLockDays }),
@@ -136,7 +178,12 @@ export const useTimeSettingsStore = create<TimeSettingsState & TimeSettingsActio
 
       setRate: (userId, rate) => set({ ratesByUserId: { ...get().ratesByUserId, [userId]: rate } }),
     }),
-    { name: TIME_SETTINGS_STORAGE_KEY }
+    {
+      name: TIME_SETTINGS_STORAGE_KEY,
+      version: 1,
+      migrate: (persisted, version) =>
+        version >= 1 ? persisted : migrateTimeSettingsV0(persisted as object),
+    }
   )
 );
 
