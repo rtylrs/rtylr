@@ -4,10 +4,16 @@ import StockTransfers from './StockTransfers';
 
 const mocks = vi.hoisted(() => ({
   createTransfer: vi.fn(),
+  role: 'admin' as string,
 }));
 
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
+}));
+
+vi.mock('@voxire/auth', () => ({
+  useUserStore: (select: (state: { user: { role: string } }) => unknown) =>
+    select({ user: { role: mocks.role } }),
 }));
 
 vi.mock('./useStockTransfers', () => ({
@@ -41,6 +47,14 @@ describe('StockTransfers', () => {
   beforeEach(() => {
     mocks.createTransfer.mockReset();
     mocks.createTransfer.mockResolvedValue({ transferId: '1' });
+    mocks.role = 'admin';
+  });
+
+  it('hides the New Transfer action for an operator, who lacks erp:inventory:transfer', () => {
+    mocks.role = 'operator';
+    render(<StockTransfers />);
+
+    expect(screen.queryByRole('button', { name: 'New Transfer' })).not.toBeInTheDocument();
   });
 
   it('submits the selected product and positive quantity instead of an empty draft', async () => {

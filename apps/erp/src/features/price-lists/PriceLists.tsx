@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Tags, Star } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { useUserStore } from '@voxire/auth';
 import { usePriceLists, useCreatePriceList } from './usePriceLists';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
 import EmptyState from '../../shared/components/EmptyState';
+import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
 
 const AMBER = 'var(--erp-accent)';
@@ -25,6 +27,8 @@ const inputStyle: React.CSSProperties = {
 const PriceLists: React.FC = () => {
   const { data: lists = [], isLoading } = usePriceLists();
   const createMut = useCreatePriceList();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManagePriceLists = canErpPermission(role, 'erp:purchase_orders');
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newCurrency, setNewCurrency] = useState('USD');
@@ -62,13 +66,15 @@ const PriceLists: React.FC = () => {
         title="Price Lists"
         description="Currency-based pricing strategies"
         actions={
-          <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
-          >
-            <Plus size={14} /> New Price List
-          </button>
+          canManagePriceLists && (
+            <button
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            >
+              <Plus size={14} /> New Price List
+            </button>
+          )
         }
       />
 

@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, ClipboardList, CheckCircle2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { useUserStore } from '@voxire/auth';
 import { useStockTakes, useCreateStockTake, useUpdateStockTake } from './useStockTakes';
+import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { stockTakeStatusLabel, stockTakeProgress, stockTakeVariance } from './stockTakeSchema';
 import type { UpdateStockTakeItemBody } from '@voxire/voxie/erp/stock_take/v1/types';
 import { useWarehouses } from '../warehouses/useWarehouses';
@@ -43,6 +45,8 @@ const StockTakes: React.FC = () => {
   } = useInventoryReport();
   const createMut = useCreateStockTake();
   const updateMut = useUpdateStockTake();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManageStockTakes = canErpPermission(role, 'erp:stock_takes');
   const [showCreate, setShowCreate] = useState(false);
   const [newWarehouseId, setNewWarehouseId] = useState('');
   const [newNotes, setNewNotes] = useState('');
@@ -115,13 +119,15 @@ const StockTakes: React.FC = () => {
         title="Stock Takes"
         description="Periodic inventory counts and variance reports"
         actions={
-          <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
-          >
-            <Plus size={14} /> New Stock Take
-          </button>
+          canManageStockTakes && (
+            <button
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+            >
+              <Plus size={14} /> New Stock Take
+            </button>
+          )
         }
       />
 
@@ -174,7 +180,7 @@ const StockTakes: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {st.status !== 'completed' && (
+                    {st.status !== 'completed' && canManageStockTakes && (
                       <button
                         aria-label="Complete stock take"
                         onClick={() =>

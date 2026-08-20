@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { Plus, Mail, Phone, MapPin, BarChart3 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { useUserStore } from '@voxire/auth';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import type { Supplier } from './useSuppliers';
@@ -9,6 +10,7 @@ import { useSuppliers, useCreateSupplier } from './useSuppliers';
 import SupplierScorecard from '../../shared/components/SupplierScorecard';
 import ExportButton from '../../shared/components/ExportButton';
 import PaginationControls from '../../shared/components/PaginationControls';
+import { canErpPermission } from '../../shared/lib/erpPermissions';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -94,6 +96,8 @@ const Suppliers: React.FC = () => {
   const suppliers = supplierResult?.suppliers ?? [];
   const hasMore = supplierResult?.hasMore ?? false;
   const createMut = useCreateSupplier();
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canManageSuppliers = canErpPermission(role, 'erp:suppliers');
   const [showScorecards, setShowScorecards] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -180,21 +184,23 @@ const Suppliers: React.FC = () => {
             }))}
             filename="suppliers.csv"
           />
-          <button
-            data-testid="suppliers-add-button"
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-opacity"
-            style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.opacity = '0.9';
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.opacity = '1';
-            }}
-          >
-            <Plus size={14} />
-            {t('erp.suppliers.add')}
-          </button>
+          {canManageSuppliers && (
+            <button
+              data-testid="suppliers-add-button"
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-opacity"
+              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.opacity = '0.9';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.opacity = '1';
+              }}
+            >
+              <Plus size={14} />
+              {t('erp.suppliers.add')}
+            </button>
+          )}
         </div>
       </motion.div>
 

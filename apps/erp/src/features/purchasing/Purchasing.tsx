@@ -10,6 +10,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { useUserStore } from '@voxire/auth';
 import {
   type PurchaseOrder,
   usePurchaseOrders,
@@ -31,6 +32,7 @@ import { useProducts } from '../products/useProducts';
 import PrintPOButton from '../../shared/components/PrintPOButton';
 import ExportButton from '../../shared/components/ExportButton';
 import PaginationControls from '../../shared/components/PaginationControls';
+import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
 
 const AMBER = 'var(--erp-accent)';
@@ -115,6 +117,8 @@ const Purchasing: React.FC = () => {
   const suppliers = supplierResult?.suppliers ?? [];
   const { data: productResult } = useProducts();
   const products = productResult?.products ?? [];
+  const role = useUserStore((state) => state.user?.role ?? state.role);
+  const canApprovePO = canErpPermission(role, 'erp:purchase_orders:approve');
   const [showCreate, setShowCreate] = useState(false);
   const [newSupplierId, setNewSupplierId] = useState('');
   const [newPoNumber, setNewPoNumber] = useState('');
@@ -349,7 +353,7 @@ const Purchasing: React.FC = () => {
                       </span>
                     </span>
                     <div className="flex items-center gap-1">
-                      {status === 'Sent' && (
+                      {status === 'Sent' && canApprovePO && (
                         <button
                           onClick={() => handleApprove(order.id ?? '')}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
