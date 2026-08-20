@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, X } from 'lucide-react';
+import { AlertCircle, Plus, X } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { useMyEmployeeId } from '../../shared/hooks/useMyEmployeeId';
 import { CardSkeleton } from '../../shared/components/Skeleton';
+import EmptyState from '../../shared/components/EmptyState';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import {
   useCancelLeaveRequest,
   useListLeaveTypes,
@@ -34,8 +36,12 @@ const LeaveScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: employeeId, isLoading: employeeLoading } = useMyEmployeeId();
   const { data: leaveTypes = [] } = useListLeaveTypes();
-  const { data: balances = [] } = useMyLeaveBalances(employeeId);
-  const { data: requests = [] } = useMyLeaveRequests(employeeId);
+  const balancesQuery = useMyLeaveBalances(employeeId);
+  const requestsQuery = useMyLeaveRequests(employeeId);
+  const balances = balancesQuery.data ?? [];
+  const requests = requestsQuery.data ?? [];
+  const balancesFailed = hasQueryFailed(balancesQuery);
+  const requestsFailed = hasQueryFailed(requestsQuery);
   const cancelRequest = useCancelLeaveRequest();
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -68,7 +74,13 @@ const LeaveScreen = (): React.JSX.Element => {
           <h2 className={sectionHeadingClass} style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.leave.balanceHeading')}
           </h2>
-          {balances.length === 0 ? (
+          {balancesFailed ? (
+            <EmptyState
+              icon={AlertCircle}
+              title={t('flow.leave.loadBalancesFailedTitle')}
+              description={t('flow.leave.loadBalancesFailedDescription')}
+            />
+          ) : balances.length === 0 ? (
             <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.leave.noBalances')}
             </p>
@@ -121,7 +133,13 @@ const LeaveScreen = (): React.JSX.Element => {
           <h2 className={sectionHeadingClass} style={{ color: 'var(--flow-text-muted)' }}>
             {t('flow.leave.requestsHeading')}
           </h2>
-          {requests.length === 0 ? (
+          {requestsFailed ? (
+            <EmptyState
+              icon={AlertCircle}
+              title={t('flow.leave.loadRequestsFailedTitle')}
+              description={t('flow.leave.loadRequestsFailedDescription')}
+            />
+          ) : requests.length === 0 ? (
             <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.leave.noRequests')}
             </p>

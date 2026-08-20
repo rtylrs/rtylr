@@ -11,6 +11,13 @@ vi.mock('../../shared/hooks/useMyEmployeeId', () => ({
   useMyEmployeeId: () => employeeIdState.value,
 }));
 
+interface LeaveQueryState {
+  data: Array<Record<string, unknown>>;
+  isError?: boolean;
+  isPaused?: boolean;
+  failureCount?: number;
+}
+
 const leaveTypesState = vi.hoisted(() => ({
   value: { data: [{ id: '1', name: 'Annual Leave', isPaid: true, requiresApproval: true }] },
 }));
@@ -28,7 +35,7 @@ const balancesState = vi.hoisted(() => ({
         remainingDays: 13,
       },
     ],
-  },
+  } as LeaveQueryState,
 }));
 const requestsState = vi.hoisted(() => ({
   value: {
@@ -44,7 +51,7 @@ const requestsState = vi.hoisted(() => ({
         currentApprovalLevel: 0,
       },
     ],
-  },
+  } as LeaveQueryState,
 }));
 const cancelMutate = vi.hoisted(() => vi.fn());
 
@@ -105,5 +112,26 @@ describe('LeaveScreen', () => {
     leaveTypesState.value = { data: [] };
     render(<LeaveScreen />);
     expect(screen.getByText('flow.leave.noBalances')).toBeInTheDocument();
+  });
+
+  it('shows the load-failed state for balances stuck paused after a failed attempt, not the empty state', () => {
+    balancesState.value = { data: [], isError: false, isPaused: true, failureCount: 1 };
+    render(<LeaveScreen />);
+    expect(screen.getByText('flow.leave.loadBalancesFailedTitle')).toBeInTheDocument();
+    expect(screen.queryByText('flow.leave.noBalances')).not.toBeInTheDocument();
+  });
+
+  it('does not treat balances merely paused before their first attempt as failed', () => {
+    balancesState.value = { data: [], isError: false, isPaused: true, failureCount: 0 };
+    render(<LeaveScreen />);
+    expect(screen.getByText('flow.leave.noBalances')).toBeInTheDocument();
+    expect(screen.queryByText('flow.leave.loadBalancesFailedTitle')).not.toBeInTheDocument();
+  });
+
+  it('shows the load-failed state for requests stuck paused after a failed attempt, not the empty state', () => {
+    requestsState.value = { data: [], isError: false, isPaused: true, failureCount: 1 };
+    render(<LeaveScreen />);
+    expect(screen.getByText('flow.leave.loadRequestsFailedTitle')).toBeInTheDocument();
+    expect(screen.queryByText('flow.leave.noRequests')).not.toBeInTheDocument();
   });
 });

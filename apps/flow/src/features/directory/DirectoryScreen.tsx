@@ -5,6 +5,7 @@ import { HelmetContainer } from '@voxire/components';
 import { Avatar } from '@voxire/ui';
 import EmptyState from '../../shared/components/EmptyState';
 import { CardSkeleton } from '../../shared/components/Skeleton';
+import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { useDirectory } from './useDirectory';
 
 const inputStyle: React.CSSProperties = {
@@ -31,7 +32,9 @@ function initials(name: string): string {
 const DirectoryScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
-  const { data: members, isLoading, isError } = useDirectory(search);
+  const directoryQuery = useDirectory(search);
+  const { data: members, isLoading } = directoryQuery;
+  const isError = hasQueryFailed(directoryQuery);
 
   return (
     <>
