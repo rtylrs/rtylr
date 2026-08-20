@@ -153,12 +153,19 @@ const QuickAddRow: React.FC = () => {
   const myTasksWorkspaceId = myTasksProject?.workspaceId
     ? String(myTasksProject.workspaceId)
     : activeWorkspaceId;
-  const { data: labels = [] } = useLabels(myTasksWorkspaceId || undefined);
+  const { data: labels = [], isLoading: labelsLoading } = useLabels(
+    myTasksWorkspaceId || undefined
+  );
+  const hasNoLabels = !labelsLoading && labels.length === 0;
 
   const submit = (): void => {
     const trimmed = title.trim();
     if (!trimmed) {
       toast.error(t('toasts.task.titleRequired'));
+      return;
+    }
+    if (hasNoLabels) {
+      toast.error(t('flow.myIssues.quickAddNoLabelsReason'));
       return;
     }
     if (!myTasksProject || labels.length === 0) {
@@ -203,9 +210,10 @@ const QuickAddRow: React.FC = () => {
       {title.trim().length > 0 && (
         <button
           onClick={submit}
-          disabled={createTask.isPending}
+          disabled={createTask.isPending || hasNoLabels}
+          title={hasNoLabels ? t('flow.myIssues.quickAddNoLabelsReason') : undefined}
           className="text-[11px] font-semibold px-2.5 py-1 rounded transition-opacity hover:opacity-90 disabled:opacity-50"
-          style={{ background: 'var(--accent)', color: '#ffffff' }}
+          style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
         >
           {t('flow.myIssues.quickAddButton')}
         </button>

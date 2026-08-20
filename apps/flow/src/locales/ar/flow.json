@@ -649,7 +649,8 @@
     "emptyDescription": "لا يوجد شيء في قائمتك الآن. عمل رائع!",
     "noTasks": "لا توجد مهام",
     "quickAddPlaceholder": "أضف مهمة شخصية واضغط Enter",
-    "quickAddButton": "إضافة"
+    "quickAddButton": "إضافة",
+    "quickAddNoLabelsReason": "أضف تصنيفاً في الإعدادات قبل إنشاء المهام."
   },
   "commandBar": {
     "goToInbox": "الذهاب إلى صندوق الوارد",
