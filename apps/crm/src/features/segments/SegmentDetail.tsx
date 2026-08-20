@@ -1,17 +1,20 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Mail, MessageSquare, PieChart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { ArrowLeft, FileQuestion, Mail, MessageSquare, PieChart, Users } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useGetSegment, useSegmentCustomers } from '../../shared/hooks/queries/useSegments';
-import { Breadcrumbs, Button, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
+import { Breadcrumbs, Button, Card, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge } from '../../shared/components/crm';
 import { getCustomerTier } from '../../shared/lib/tiers';
 
 const SegmentDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data: fetched, isLoading: segmentLoading, error: segmentError } = useGetSegment(id);
-  const { data: fetchedCustomers, isLoading } = useSegmentCustomers(id);
+  const { data: fetchedCustomers, isLoading, refetch: refetchCustomers } = useSegmentCustomers(id);
   const segment = fetched;
   const customers = fetchedCustomers ?? [];
 
@@ -27,9 +30,13 @@ const SegmentDetail: React.FC = () => {
     return (
       <div style={{ maxWidth: '1100px' }}>
         <EmptyState
-          icon={PieChart}
-          title="Segment not found"
-          description="This segment could not be loaded."
+          icon={FileQuestion}
+          title={t('crm.segmentDetail.notFoundTitle')}
+          description={t('crm.segmentDetail.notFoundDescription')}
+          action={{
+            label: t('crm.segmentDetail.backToSegments'),
+            onClick: () => navigate({ to: '/segments' }),
+          }}
         />
       </div>
     );
@@ -180,7 +187,12 @@ const SegmentDetail: React.FC = () => {
               <SkeletonList count={5} />
             </div>
           ) : customers.length === 0 ? (
-            <EmptyState icon={PieChart} title="No customers" description="This segment is empty." />
+            <EmptyState
+              icon={Users}
+              title={t('crm.segmentDetail.noCustomersTitle')}
+              description={t('crm.segmentDetail.noCustomersDescription')}
+              action={{ label: t('crm.actions.refresh'), onClick: () => refetchCustomers() }}
+            />
           ) : (
             <div>
               {customers.map((c, i) => (
