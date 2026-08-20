@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
@@ -9,12 +10,14 @@ import {
   Mail,
   MessageSquare,
   Bell,
+  Megaphone,
   Users,
   Send,
   Eye,
   TrendingUp,
   Trash2,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useListCampaigns,
   useUpdateCampaignStatus,
@@ -411,6 +414,7 @@ function CampaignCard({
 
 const Campaigns: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canManageCampaigns = canCrmPermission(role, 'crm:campaigns');
   const canSendCampaigns = canCrmPermission(role, 'crm:campaigns:send');
@@ -422,6 +426,7 @@ const Campaigns: React.FC = () => {
     isLoading,
     isFetching,
     isError,
+    refetch,
   } = useListCampaigns(pageSize, offset);
   const { data: fetchedSegments } = useListSegments();
   const updateStatus = useUpdateCampaignStatus();
@@ -635,18 +640,39 @@ const Campaigns: React.FC = () => {
             ))}
           </AnimatePresence>
           {filtered.length === 0 && !isLoading && !isError && (
-            <div
-              style={{
-                padding: '60px',
-                textAlign: 'center',
-                color: 'var(--hub-text-muted)',
-                fontSize: '13px',
-              }}
-            >
-              {hasMore
-                ? 'Load more campaigns to continue searching.'
-                : 'No campaigns in this status.'}
-            </div>
+            <EmptyState
+              icon={Megaphone}
+              title={
+                hasMore
+                  ? t('crm.campaigns.loadMoreToSearch')
+                  : statusFilter !== 'All'
+                    ? t('crm.campaigns.emptyStatus')
+                    : t('crm.campaigns.emptyAllTitle')
+              }
+              description={
+                !hasMore && statusFilter === 'All'
+                  ? t('crm.campaigns.emptyAllDescription')
+                  : undefined
+              }
+              action={
+                hasMore
+                  ? {
+                      label: t('crm.campaigns.loadMore'),
+                      onClick: () => setOffset((current) => current + pageSize),
+                    }
+                  : statusFilter !== 'All'
+                    ? {
+                        label: t('crm.campaigns.viewAllCampaigns'),
+                        onClick: () => setStatusFilter('All'),
+                      }
+                    : canManageCampaigns
+                      ? {
+                          label: t('crm.campaigns.newEmailCampaign'),
+                          onClick: () => navigate({ to: '/campaigns/email' }),
+                        }
+                      : { label: t('crm.actions.refresh'), onClick: () => refetch() }
+              }
+            />
           )}
           {hasMore && (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 8px' }}>
