@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useUserStore } from '@voxire/auth';
 import { motion } from 'motion/react';
-import { Download, Settings, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { Download, Settings, CheckCircle, Clock, AlertTriangle, Landmark } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { getOneKitErrorMessage } from '@voxire/api';
+import { EmptyState } from '@voxire/ui';
 import { TaxPeriod } from '../../shared/services/financeApi';
 import { useTaxReport, useTaxConfig, useCreateTaxConfig } from '../../shared/hooks/useTax';
 import { exportTaxSummaryCsv } from '../../shared/lib/exports';
@@ -50,6 +52,7 @@ interface TaxConfig {
 }
 
 const Tax: React.FC = () => {
+  const { t } = useTranslation();
   const [showConfig, setShowConfig] = useState(false);
   const { data: taxConfigData } = useTaxConfig();
   const saveRates = useCreateTaxConfig();
@@ -256,9 +259,16 @@ const Tax: React.FC = () => {
             Tax Rate Configuration
           </h3>
           {editableRates.length === 0 && (
-            <p style={{ fontSize: 13, color: 'var(--hub-text-muted)', margin: '0 0 10px' }}>
-              No tax rates configured yet.
-            </p>
+            <EmptyState
+              size="compact"
+              icon={Landmark}
+              title={t('tax.ratesEmptyTitle')}
+              description={t('tax.ratesEmptyDescription')}
+              action={{
+                label: t('tax.ratesEmptyCta'),
+                onClick: () => setRates([...editableRates, { name: '', rate: 0 }]),
+              }}
+            />
           )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {editableRates.map((r, i) => (

@@ -1,5 +1,8 @@
 {
   "configUpdated": "Configuration fiscale mise à jour",
   "reportEmptyTitle": "Aucune période fiscale disponible pour le moment",
-  "reportEmptyDescription": "Les périodes fiscales apparaîtront ici une fois que les factures génèreront une activité fiscale."
+  "reportEmptyDescription": "Les périodes fiscales apparaîtront ici une fois que les factures génèreront une activité fiscale.",
+  "ratesEmptyTitle": "Aucun taux de taxe configuré",
+  "ratesEmptyDescription": "Ajoutez un taux de taxe pour commencer à calculer la taxe sur les factures et devis.",
+  "ratesEmptyCta": "Ajouter un taux de taxe"
 }
