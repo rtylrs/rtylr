@@ -1,4 +1,7 @@
 {
   "created": "Quote created",
-  "markedAccepted": "Marked {{id}} as accepted"
+  "markedAccepted": "Marked {{id}} as accepted",
+  "emptyTitle": "No quotes yet",
+  "emptyDescription": "Send estimates to clients and convert them to invoices when accepted.",
+  "emptyCta": "New Quote"
 }

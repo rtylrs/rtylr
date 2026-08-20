@@ -6,5 +6,8 @@
   "paymentRecorded": "تم تسجيل الدفعة",
   "statusUpdated": "تم تحديث حالة الفاتورة",
   "markedPaid": "تم تسجيل {{id}} كمدفوعة",
-  "markPaidFailed": "تعذّر تسجيل {{id}} كمدفوعة"
+  "markPaidFailed": "تعذّر تسجيل {{id}} كمدفوعة",
+  "emptyTitle": "لا توجد فواتير حتى الآن",
+  "emptyDescription": "أنشئ فاتورتك الأولى لبدء إصدار الفواتير للعملاء.",
+  "emptyCta": "فاتورة جديدة"
 }

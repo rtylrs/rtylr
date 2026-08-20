@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Invoices from './Invoices';
 
@@ -14,13 +14,18 @@ const invoice = {
   issuedDate: '2026-08-01',
 };
 
+const { navigateMock, useInvoicesMock } = vi.hoisted(() => ({
+  navigateMock: vi.fn(),
+  useInvoicesMock: vi.fn(),
+}));
+
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
 
 vi.mock('@tanstack/react-router', () => ({
   Link: ({ children }: { children?: React.ReactNode }) => <a href="#">{children}</a>,
-  useNavigate: () => vi.fn(),
+  useNavigate: () => navigateMock,
 }));
 
 vi.mock('motion/react', () => ({
@@ -36,10 +41,7 @@ vi.mock('react-i18next', () => ({
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 vi.mock('./useInvoices', () => ({
-  useInvoices: () => ({
-    data: { invoices: [invoice], hasMore: false },
-    isLoading: false,
-  }),
+  useInvoices: useInvoicesMock,
   useUpdateInvoiceStatus: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
@@ -51,7 +53,6 @@ vi.mock('../../shared/components/MoneyDisplay', () => ({
   default: ({ amount }: { amount: number }) => <span>{amount}</span>,
 }));
 
-vi.mock('../../shared/components/EmptyState', () => ({ default: () => null }));
 vi.mock('../../shared/components/Skeleton', () => ({ SkeletonRow: () => null }));
 vi.mock('../../shared/components/InvoiceStatusFilter', () => ({
   default: () => null,
@@ -68,6 +69,10 @@ vi.mock('../../shared/lib/exports', () => ({
 describe('Invoices table layout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useInvoicesMock.mockReturnValue({
+      data: { invoices: [invoice], hasMore: false },
+      isLoading: false,
+    });
   });
 
   it('keeps the wide table horizontally scrollable for RTL layouts', () => {
@@ -79,5 +84,24 @@ describe('Invoices table layout', () => {
     expect(scrollContainer).not.toBeNull();
     expect(scrollContainer).toHaveStyle({ overflowX: 'auto' });
     expect(table).toHaveStyle({ minWidth: '720px' });
+  });
+});
+
+describe('Invoices empty state', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useInvoicesMock.mockReturnValue({
+      data: { invoices: [], hasMore: false },
+      isLoading: false,
+    });
+  });
+
+  it('renders the shared EmptyState CTA and navigates to the new invoice screen on click', () => {
+    render(<Invoices />);
+
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'invoices.emptyCta' }));
+
+    expect(navigateMock).toHaveBeenCalledWith({ to: '/invoices/new' });
   });
 });

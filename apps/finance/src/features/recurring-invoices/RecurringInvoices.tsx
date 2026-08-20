@@ -3,9 +3,10 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Play, Pause, RotateCcw, Repeat } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { getOneKitErrorMessage } from '@voxire/api';
+import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
-import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import {
@@ -144,6 +145,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
 };
 
 const RecurringInvoices: React.FC = () => {
+  const { t } = useTranslation();
   const { data = [], isLoading } = useRecurringInvoices();
   const setStatus = useSetRecurringStatus();
   const runNow = useRunRecurringInvoiceNow();
@@ -194,17 +196,13 @@ const RecurringInvoices: React.FC = () => {
         </div>
       ) : data.length === 0 ? (
         <EmptyState
-          title="No recurring invoices yet"
-          description="Create a subscription to automatically bill customers on a schedule."
-          action={
-            <button
-              style={primaryBtn}
-              aria-label="Create subscription"
-              onClick={() => setShowCreate(true)}
-            >
-              Create subscription
-            </button>
-          }
+          icon={Repeat}
+          title={t('recurringInvoices.emptyTitle')}
+          description={t('recurringInvoices.emptyDescription')}
+          action={{
+            label: t('recurringInvoices.emptyCta'),
+            onClick: () => setShowCreate(true),
+          }}
         />
       ) : (
         <div style={{ ...cardStyle, overflow: 'hidden' }}>

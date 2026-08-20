@@ -1,14 +1,17 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
-import { FileSpreadsheet, Download } from 'lucide-react';
+import { FileSpreadsheet, Download, Landmark } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { cardStyle, ghostBtn, ACCENT } from '../../shared/lib/tokens';
 import { useTaxReport } from '../../shared/hooks/useTax';
 
 const TaxReport: React.FC = () => {
-  const { data: taxReport, isLoading } = useTaxReport();
+  const { t } = useTranslation();
+  const { data: taxReport, isLoading, refetch } = useTaxReport();
 
   const totalCollected = taxReport?.taxCollected ?? 0;
   const totalOwed = taxReport?.taxOwed ?? 0;
@@ -79,16 +82,15 @@ const TaxReport: React.FC = () => {
             Loading tax periods…
           </div>
         ) : rows.length === 0 ? (
-          <div
-            style={{
-              padding: '32px 20px',
-              textAlign: 'center',
-              color: 'var(--hub-text-muted)',
-              fontSize: 13,
+          <EmptyState
+            icon={Landmark}
+            title={t('tax.reportEmptyTitle')}
+            description={t('tax.reportEmptyDescription')}
+            action={{
+              label: t('common.refresh'),
+              onClick: () => void refetch(),
             }}
-          >
-            No tax periods available yet.
-          </div>
+          />
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>

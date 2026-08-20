@@ -6,11 +6,11 @@ import { Plus, Send, CheckCircle, Eye, FileText, Download, FileSpreadsheet } fro
 import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import { Invoice } from '../../shared/services/financeApi';
 import { useInvoices, useUpdateInvoiceStatus } from './useInvoices';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
-import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import InvoiceStatusFilter, {
   InvoiceFilterValue,
@@ -130,13 +130,13 @@ const Invoices: React.FC = () => {
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          title="No invoices yet"
-          description="Create your first invoice to start billing clients."
-          action={
-            <button style={primaryBtn} onClick={() => navigate({ to: '/invoices/new' })}>
-              <Plus size={13} /> New Invoice
-            </button>
-          }
+          icon={FileText}
+          title={t('invoices.emptyTitle')}
+          description={t('invoices.emptyDescription')}
+          action={{
+            label: t('invoices.emptyCta'),
+            onClick: () => navigate({ to: '/invoices/new' }),
+          }}
         />
       ) : (
         <div style={{ ...cardStyle, overflowX: 'auto' }}>
