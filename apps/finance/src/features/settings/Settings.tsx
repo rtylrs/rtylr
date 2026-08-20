@@ -4,6 +4,7 @@ import { getOneKitErrorMessage, uploadAsset } from '@voxire/api';
 import { useUserStore } from '@voxire/auth';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import {
   RotateCcw,
   Save,
@@ -13,6 +14,7 @@ import {
   UserPlus,
   UserMinus,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
 import { useSettings } from '../../shared/lib/settings';
 import { CURRENCY_OPTIONS, type Currency } from '../../shared/lib/money';
@@ -265,7 +267,8 @@ const GeneralTab: React.FC = () => {
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 
 const TeamTab: React.FC = () => {
-  const { data: members = [], isLoading } = useFinanceTeam();
+  const { t } = useTranslation();
+  const { data: members = [], isLoading, refetch: refetchMembers } = useFinanceTeam();
   const invite = useFinanceInviteMember();
   const deactivate = useFinanceDeactivateMember();
   const { data: sub } = useFinanceSubscription();
@@ -403,10 +406,16 @@ const TeamTab: React.FC = () => {
           ))}
         </div>
       ) : members.length === 0 ? (
-        <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--hub-text-muted)' }}>
-          <Users size={24} style={{ margin: '0 auto 8px', opacity: 0.4, display: 'block' }} />
-          <p style={{ fontSize: 13 }}>No team members yet.</p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title={t('settings.teamEmptyTitle')}
+          description={t('settings.teamEmptyDescription')}
+          action={
+            canInviteMember
+              ? { label: t('settings.teamEmptyCta'), onClick: () => setShowInvite(true) }
+              : { label: t('common.refresh'), onClick: () => void refetchMembers() }
+          }
+        />
       ) : (
         <div style={{ ...cardStyle, overflow: 'hidden' }}>
           {members.map((m, idx) => (
