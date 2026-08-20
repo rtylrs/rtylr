@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart3 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { DatePicker } from '@voxire/ui';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { useWorkspaceMembers } from '../workspace-manager/useWorkspaceManager';
@@ -26,7 +27,7 @@ interface PersonTotals {
  * screen's data source swaps once it does; its layout does not have to.
  */
 const TimeReports = (): React.JSX.Element => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const today = todayLocalDate();
   const weekStart = useTimeSettingsStore((s) => s.weekStart);
   const trackAttendance = useTimeSettingsStore((s) => s.trackAttendance);
@@ -73,17 +74,17 @@ const TimeReports = (): React.JSX.Element => {
             <label htmlFor="reports-from" className="sr-only">
               {t('flow.time.reportsFrom')}
             </label>
-            <input
+            <DatePicker
               id="reports-from"
-              type="date"
               value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="flow-focus min-h-[44px] rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-              style={{
-                background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border)',
-                color: 'var(--flow-text)',
+              onChange={setFrom}
+              maxDate={to || undefined}
+              locale={i18n.language}
+              labels={{
+                previousMonth: t('common.datePicker.previousMonth'),
+                nextMonth: t('common.datePicker.nextMonth'),
               }}
+              className="w-auto text-[13px]"
             />
             <span className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
               {t('flow.time.reportsRangeTo')}
@@ -91,17 +92,17 @@ const TimeReports = (): React.JSX.Element => {
             <label htmlFor="reports-to" className="sr-only">
               {t('flow.time.reportsTo')}
             </label>
-            <input
+            <DatePicker
               id="reports-to"
-              type="date"
               value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="flow-focus min-h-[44px] rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-              style={{
-                background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border)',
-                color: 'var(--flow-text)',
+              onChange={setTo}
+              minDate={from || undefined}
+              locale={i18n.language}
+              labels={{
+                previousMonth: t('common.datePicker.previousMonth'),
+                nextMonth: t('common.datePicker.nextMonth'),
               }}
+              className="w-auto text-[13px]"
             />
           </div>
           <p className="mt-2 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>

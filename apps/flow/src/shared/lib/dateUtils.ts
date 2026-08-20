@@ -3,6 +3,22 @@ export function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** Short day-of-week key, Sunday first to match `Date#getUTCDay()`'s own indexing. */
+export type DayKey = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
+
+export const DAY_KEYS: readonly DayKey[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+/**
+ * Returns the day-of-week key for an ISO date string, anchored to UTC like
+ * every other date helper here - parsing a bare "YYYY-MM-DD" without an
+ * explicit UTC anchor lets the runtime's local offset shift midnight-ish
+ * dates onto the wrong calendar day.
+ */
+export function dayKeyForDate(date: string): DayKey {
+  const dt = new Date(date + 'T00:00:00Z');
+  return DAY_KEYS[dt.getUTCDay()];
+}
+
 /** Returns true if the date string is before today. */
 export function isPast(date: string): boolean {
   return date < todayIso();

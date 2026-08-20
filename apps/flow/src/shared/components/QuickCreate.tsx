@@ -13,6 +13,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { DatePicker } from '@voxire/ui';
 import { useFlowStore, Task, PRIORITY_LABELS } from '../stores/flowStore';
 import { useUserStore } from '../stores/userStore';
 import ProjectSelect from './ProjectSelect';
@@ -51,7 +52,7 @@ function FieldRow({
 }
 
 export const QuickCreate: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { quickCreateOpen, setQuickCreateOpen, projects, activeWorkspaceId, sections } =
     useFlowStore();
@@ -305,14 +306,17 @@ export const QuickCreate: React.FC = () => {
                 </FieldRow>
 
                 <FieldRow label={t('common.dueDate')} icon={Calendar}>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full max-w-[200px] bg-transparent outline-none rounded-md px-2 py-1.5 text-[13px]"
-                    style={{
-                      border: '1px solid var(--flow-border)',
-                      color: 'var(--flow-text)',
+                    onChange={setDueDate}
+                    locale={i18n.language}
+                    aria-label={t('common.dueDate')}
+                    wrapperClassName="max-w-[200px]"
+                    className="h-9 min-h-0 py-1.5 text-[13px]"
+                    labels={{
+                      placeholder: t('common.dueDate'),
+                      previousMonth: t('common.datePicker.previousMonth'),
+                      nextMonth: t('common.datePicker.nextMonth'),
                     }}
                   />
                 </FieldRow>

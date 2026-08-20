@@ -54,7 +54,10 @@
     "nextWeek": "Semaine prochaine",
     "in2Weeks": "Dans 2 semaines",
     "setDate": "Définir la date",
-    "clearDate": "Effacer la date"
+    "clearDate": "Effacer la date",
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "pickDate": "Choisir une date"
   },
   "insights": {
     "burndown": "Burndown (itération active)",
