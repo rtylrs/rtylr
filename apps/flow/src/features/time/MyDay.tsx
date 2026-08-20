@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getRouteApi } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
+import { DatePicker } from '@voxire/ui';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { addDays, formatWeekDayShort, startOfWeek } from '../../shared/lib/dateUtils';
 import { formatWorkEntryTarget } from '../../shared/lib/timeEntryLabel';
@@ -102,13 +103,17 @@ const MyDay = (): React.JSX.Element => {
           <label htmlFor="work-day-date" className="sr-only">
             {t('flow.time.date')}
           </label>
-          <input
+          <DatePicker
             id="work-day-date"
-            type="date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="flow-focus mt-2 min-h-[44px] rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-            style={inputStyle}
+            onChange={setDate}
+            locale={i18n.language}
+            wrapperClassName="mt-2"
+            className="w-auto"
+            labels={{
+              previousMonth: t('common.datePicker.previousMonth'),
+              nextMonth: t('common.datePicker.nextMonth'),
+            }}
           />
         </header>
 

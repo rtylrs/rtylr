@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Users } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { DatePicker } from '@voxire/ui';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useWorkspaceMembers } from '../workspace-manager/useWorkspaceManager';
 import GateNotice from '../../shared/components/GateNotice';
@@ -20,7 +21,7 @@ const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-wide
  * nobody logged anything.
  */
 const TeamView = (): React.JSX.Element => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [date, setDate] = useState(todayLocalDate());
   const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
 
@@ -46,16 +47,16 @@ const TeamView = (): React.JSX.Element => {
           <label htmlFor="team-view-date" className="sr-only">
             {t('flow.time.date')}
           </label>
-          <input
+          <DatePicker
             id="team-view-date"
-            type="date"
             value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="flow-focus mt-2 min-h-[44px] rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-            style={{
-              background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border)',
-              color: 'var(--flow-text)',
+            onChange={setDate}
+            locale={i18n.language}
+            wrapperClassName="mt-2"
+            className="w-auto"
+            labels={{
+              previousMonth: t('common.datePicker.previousMonth'),
+              nextMonth: t('common.datePicker.nextMonth'),
             }}
           />
         </header>

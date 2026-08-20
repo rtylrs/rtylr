@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, getRouteApi } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { CircleAlert } from 'lucide-react';
+import { DatePicker } from '@voxire/ui';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { formatFullDayLabel, formatEntryTimestamp } from '../../shared/lib/dateUtils';
 import { formatWorkEntryTarget } from '../../shared/lib/timeEntryLabel';
@@ -351,19 +352,20 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
             >
               {t('flow.time.date')}
             </label>
-            <input
+            <DatePicker
               id="add-hours-date"
-              type="date"
               value={date}
               readOnly={locked}
-              onChange={(e) => e.target.value && onDateChange(e.target.value)}
+              onChange={(next) => next && onDateChange(next)}
+              locale={i18n.language}
+              error={!!dateError}
               className={`flow-focus tabular-nums ${fieldSizing}`}
-              style={{
-                ...fieldStyle,
-                borderColor: dateError ? 'var(--flow-danger-fg)' : undefined,
-              }}
               aria-describedby={dateError ? 'add-hours-date-error' : undefined}
               aria-invalid={dateError ? true : undefined}
+              labels={{
+                previousMonth: t('common.datePicker.previousMonth'),
+                nextMonth: t('common.datePicker.nextMonth'),
+              }}
             />
             {dateError && (
               <p

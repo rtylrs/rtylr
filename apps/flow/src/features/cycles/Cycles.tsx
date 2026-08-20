@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Timer, ArrowRight, Plus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { DatePicker } from '@voxire/ui';
 import { useCycles, useCreateCycle } from './useCycles';
 import { type ApiCycle } from '../../shared/services/flowApi';
 import { formatDate } from '../../shared/lib/utils';
@@ -11,7 +12,7 @@ import CycleBadge from '../../shared/components/CycleBadge';
 import EmptyState from '../../shared/components/EmptyState';
 
 const Cycles: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: cycles = [], isLoading } = useCycles();
   const createCycle = useCreateCycle();
   const [showCreate, setShowCreate] = useState(false);
@@ -72,29 +73,30 @@ const Cycles: React.FC = () => {
             autoFocus
           />
           <div className="flex gap-2">
-            <input
-              type="date"
+            <DatePicker
               value={newStart}
-              onChange={(e) => setNewStart(e.target.value)}
+              onChange={setNewStart}
+              locale={i18n.language}
               aria-label={t('flow.cycles.startDate')}
-              className="rounded-md px-3 py-2 text-[12px] outline-none"
-              style={{
-                background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border)',
-                color: 'var(--flow-text)',
+              labels={{
+                placeholder: t('flow.cycles.startDate'),
+                previousMonth: t('common.datePicker.previousMonth'),
+                nextMonth: t('common.datePicker.nextMonth'),
               }}
+              className="text-[12px]"
             />
-            <input
-              type="date"
+            <DatePicker
               value={newEnd}
-              onChange={(e) => setNewEnd(e.target.value)}
+              onChange={setNewEnd}
+              minDate={newStart || undefined}
+              locale={i18n.language}
               aria-label={t('flow.cycles.endDate')}
-              className="rounded-md px-3 py-2 text-[12px] outline-none"
-              style={{
-                background: 'var(--flow-input-bg)',
-                border: '1px solid var(--flow-border)',
-                color: 'var(--flow-text)',
+              labels={{
+                placeholder: t('flow.cycles.endDate'),
+                previousMonth: t('common.datePicker.previousMonth'),
+                nextMonth: t('common.datePicker.nextMonth'),
               }}
+              className="text-[12px]"
             />
           </div>
           <div className="flex gap-2">

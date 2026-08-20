@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Milestone as MilestoneIcon, Plus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { DatePicker } from '@voxire/ui';
 import { useMilestones, useCreateMilestone } from './useMilestones';
 import { formatDate } from '../../shared/lib/utils';
 import EmptyState from '../../shared/components/EmptyState';
@@ -26,7 +27,7 @@ const STATUS_LABEL_KEYS: Record<string, string> = {
 import { useFlowStore } from '../../shared/stores/flowStore';
 
 const Milestones: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { activeWorkspaceId } = useFlowStore();
   const { data: milestones = [], isLoading } = useMilestones({
     workspaceId: activeWorkspaceId || undefined,
@@ -128,17 +129,17 @@ const Milestones: React.FC = () => {
             }}
             autoFocus
           />
-          <input
-            type="date"
+          <DatePicker
             value={newDate}
-            onChange={(e) => setNewDate(e.target.value)}
+            onChange={setNewDate}
+            locale={i18n.language}
             aria-label={t('flow.milestones.targetDate')}
-            className="rounded-md px-3 py-2 text-[12px] outline-none"
-            style={{
-              background: 'var(--flow-input-bg)',
-              border: '1px solid var(--flow-border)',
-              color: 'var(--flow-text)',
+            labels={{
+              placeholder: t('flow.milestones.targetDate'),
+              previousMonth: t('common.datePicker.previousMonth'),
+              nextMonth: t('common.datePicker.nextMonth'),
             }}
+            className="text-[12px]"
           />
           <div className="flex gap-2">
             <button

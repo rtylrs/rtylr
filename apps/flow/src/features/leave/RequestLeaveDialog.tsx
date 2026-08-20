@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@voxire/ui';
+import { DatePicker, Dialog, DialogContent, DialogHeader, DialogTitle } from '@voxire/ui';
 import GateNotice from '../../shared/components/GateNotice';
 import type { LeaveTypePayload } from './useLeave';
 import { useCreateLeaveRequest } from './useLeave';
@@ -32,7 +32,7 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
   employeeId,
   leaveTypes,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const createRequest = useCreateLeaveRequest();
 
   const [leaveTypeId, setLeaveTypeId] = useState('');
@@ -149,14 +149,16 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
               >
                 {t('flow.leave.startDate')}
               </label>
-              <input
+              <DatePicker
                 id="leave-start-date"
-                aria-label={t('flow.leave.startDate')}
-                type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-                style={inputStyle}
+                onChange={setStartDate}
+                maxDate={endDate || undefined}
+                locale={i18n.language}
+                labels={{
+                  previousMonth: t('common.datePicker.previousMonth'),
+                  nextMonth: t('common.datePicker.nextMonth'),
+                }}
               />
             </div>
             <div>
@@ -167,14 +169,16 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
               >
                 {t('flow.leave.endDate')}
               </label>
-              <input
+              <DatePicker
                 id="leave-end-date"
-                aria-label={t('flow.leave.endDate')}
-                type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="flow-focus min-h-[44px] w-full rounded px-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
-                style={inputStyle}
+                onChange={setEndDate}
+                minDate={startDate || undefined}
+                locale={i18n.language}
+                labels={{
+                  previousMonth: t('common.datePicker.previousMonth'),
+                  nextMonth: t('common.datePicker.nextMonth'),
+                }}
               />
             </div>
           </div>
