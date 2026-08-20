@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { ChevronDown, ChevronUp, Plus, FileText } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronUp, Plus, FileText } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
+import { EmptyState } from '@voxire/ui';
 import { useContracts, useLeads, useCreateContract } from '../../shared/hooks/queries/useSales';
 import type { Contract, ContractPlan } from '../../shared/hooks/queries/useSales';
 import {
   Button,
   PageHeader,
-  EmptyState,
   SkeletonList,
   Modal,
   Input,
@@ -51,10 +52,17 @@ const PlanBadge: React.FC<{ plan: ContractPlan }> = ({ plan }) => {
 };
 
 const Contracts: React.FC = () => {
+  const { t } = useTranslation();
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
   const [loadedContracts, setLoadedContracts] = useState<Contract[]>([]);
-  const { data: fetchedContracts, isLoading, isFetching, isError } = useContracts(pageSize, offset);
+  const {
+    data: fetchedContracts,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useContracts(pageSize, offset);
   const { data: leads } = useLeads();
   const createContract = useCreateContract();
 
@@ -207,21 +215,17 @@ const Contracts: React.FC = () => {
             </div>
           ) : isError && contracts.length === 0 ? (
             <EmptyState
-              icon={FileText}
-              title="Unable to load contracts"
-              description="Refresh and try again."
+              icon={AlertCircle}
+              title={t('crm.contracts.loadFailedTitle')}
+              description={t('errors.refreshAndTryAgain')}
+              action={{ label: t('crm.actions.retry'), onClick: () => refetch() }}
             />
           ) : contracts.length === 0 ? (
             <EmptyState
               icon={FileText}
-              title="No contracts yet"
-              description="Signed contracts will appear here once you close a deal."
-              action={
-                <Button variant="primary" onClick={() => setCreateOpen(true)}>
-                  <Plus size={13} />
-                  New contract
-                </Button>
-              }
+              title={t('crm.contracts.empty')}
+              description={t('crm.contracts.emptyDescription')}
+              action={{ label: t('crm.contracts.new'), onClick: () => setCreateOpen(true) }}
             />
           ) : (
             <div>
