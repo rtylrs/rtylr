@@ -217,8 +217,8 @@ describe('MyDay: Add Hours renders inline', () => {
   });
 });
 
-describe('MyDay: day-level attendance controls removed', () => {
-  it('shows only the Logged figure, with no Where-you-worked picker or clock inputs', () => {
+describe('MyDay: day-level attendance and summary controls removed', () => {
+  it('shows no Where-you-worked picker, clock inputs, or standalone Logged figure', () => {
     render(<MyDay />);
     expect(screen.queryByText('flow.time.theDay')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('flow.time.workMode')).not.toBeInTheDocument();
@@ -227,14 +227,18 @@ describe('MyDay: day-level attendance controls removed', () => {
     expect(screen.queryByLabelText('flow.time.breakMinutes')).not.toBeInTheDocument();
     expect(screen.queryByText('flow.time.clocked')).not.toBeInTheDocument();
     expect(screen.queryByText('flow.time.unaccounted')).not.toBeInTheDocument();
-    expect(screen.getByText('flow.time.logged')).toBeInTheDocument();
+    // Add Hours' own "Today X of Y" pill already shows this, with the
+    // added context of the day's target - a second, bare copy here was
+    // dead weight (and a full-width empty bar once the other two figures
+    // it used to sit beside were removed).
+    expect(screen.queryByText('flow.time.logged')).not.toBeInTheDocument();
   });
 
   it('stays that way regardless of the trackAttendance setting', () => {
     timeSettingsState.value = { ...timeSettingsState.value, trackAttendance: false };
     render(<MyDay />);
     expect(screen.queryByText('flow.time.theDay')).not.toBeInTheDocument();
-    expect(screen.getByText('flow.time.logged')).toBeInTheDocument();
+    expect(screen.queryByText('flow.time.logged')).not.toBeInTheDocument();
   });
 });
 
