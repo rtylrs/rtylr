@@ -37,6 +37,7 @@
     "projectDescriptionPlaceholder": "Description (facultatif)",
     "projectNameRequired": "Le nom du projet est obligatoire",
     "createNeedsWorkspace": "Un espace de travail doit être chargé avant de pouvoir créer un projet.",
+    "createNeedsRole": "Les observateurs ne peuvent pas créer de projets. Demandez l'accès à un administrateur de l'espace de travail.",
     "creating": "Création…",
     "assignedOpenTasks": "{{count}} tâches ouvertes assignées",
     "focusItems": "{{count}} éléments dus ou épinglés",
@@ -314,7 +315,8 @@
       "grantAccessAction": "Accorder l'accès",
       "addMember": "Ajouter un membre",
       "noMembersYet": "Aucun membre d'équipe pour l'instant.",
-      "removeMemberLabel": "Supprimer {{name}}"
+      "removeMemberLabel": "Supprimer {{name}}",
+      "gateReason": "Seuls les propriétaires et administrateurs de l'espace de travail peuvent accorder ou retirer l'accès à Flow."
     },
     "sectionNotAvailable": "Cette section n'est pas encore disponible.",
     "notifications": {
@@ -656,8 +658,14 @@
     "removeMemberLabel": "Supprimer",
     "emailPlaceholder": "Adresse e-mail",
     "roleLabel": "Rôle",
+    "roleSelectLabel": "Modifier le rôle de {{name}}",
     "addMemberHeading": "Ajouter un membre à ce projet",
-    "descriptionPlaceholder": "Ajouter une description…"
+    "descriptionPlaceholder": "Ajouter une description…",
+    "generalGateReason": "Seuls les administrateurs du projet peuvent renommer ou modifier la description de ce projet.",
+    "membersGateReason": "Seuls les administrateurs du projet peuvent ajouter, retirer ou modifier le rôle des membres du projet.",
+    "moveGateReason": "Seuls les administrateurs du projet peuvent déplacer ce projet vers un autre espace de travail.",
+    "transferGateReason": "Seuls les administrateurs du projet peuvent transférer la propriété de ce projet.",
+    "deleteGateReason": "Seuls les administrateurs du projet peuvent supprimer ce projet."
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection"

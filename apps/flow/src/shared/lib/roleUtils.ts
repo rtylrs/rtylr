@@ -76,6 +76,25 @@ export function canInviteMembers(role: Member['role']): boolean {
   return role === 'owner' || role === 'admin';
 }
 
+/**
+ * Maps a raw business-wide role string (as decoded from the auth token, or as
+ * returned by the team API for a member) onto Flow's own `Member['role']`
+ * vocabulary. Flow only understands owner/admin/member/viewer; a business type
+ * that isn't Flow-shaped can hand back roles like `operator`, `staff`,
+ * `billing`, `menu_manager` or `store_manager`.
+ *
+ * Roles Flow doesn't recognize default to `viewer`, not `member`: an
+ * unrecognized role carries no evidence the holder should be able to create
+ * projects or invite members, and `canCreateProject`/`canInviteMembers` both
+ * read the result of this mapping, so the default is a real permission
+ * decision, not a display fallback.
+ */
+export function toFlowMemberRole(role: string): Member['role'] {
+  return role === 'owner' || role === 'admin' || role === 'member' || role === 'viewer'
+    ? role
+    : 'viewer';
+}
+
 /** Returns the numeric priority of a role (owner highest). */
 export function rolePriority(role: Member['role']): number {
   const priorities: Record<Member['role'], number> = {

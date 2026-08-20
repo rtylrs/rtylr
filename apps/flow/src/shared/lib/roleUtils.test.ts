@@ -8,6 +8,7 @@ import {
   canDelete,
   mostRestrictiveProjectRole,
   canInviteMembers,
+  toFlowMemberRole,
   rolePriority,
   sortMembersByRole,
   membersByRole,
@@ -117,10 +118,38 @@ describe('mostRestrictiveProjectRole', () => {
 describe('canInviteMembers', () => {
   it('returns true for owner and admin', () => {
     expect(canInviteMembers('owner')).toBe(true);
+    expect(canInviteMembers('admin')).toBe(true);
   });
 
-  it('returns false for member', () => {
+  it('returns false for member and viewer', () => {
     expect(canInviteMembers('member')).toBe(false);
+    expect(canInviteMembers('viewer')).toBe(false);
+  });
+});
+
+describe('toFlowMemberRole', () => {
+  it('passes through the four roles Flow knows', () => {
+    expect(toFlowMemberRole('owner')).toBe('owner');
+    expect(toFlowMemberRole('admin')).toBe('admin');
+    expect(toFlowMemberRole('member')).toBe('member');
+    expect(toFlowMemberRole('viewer')).toBe('viewer');
+  });
+
+  it('defaults an unrecognized business-wide role to viewer, not member', () => {
+    // operator/staff/billing/menu_manager/store_manager are real business-wide
+    // roles for non-Flow business types - none of them imply Flow permissions.
+    expect(toFlowMemberRole('operator')).toBe('viewer');
+    expect(toFlowMemberRole('staff')).toBe('viewer');
+    expect(toFlowMemberRole('billing')).toBe('viewer');
+    expect(toFlowMemberRole('menu_manager')).toBe('viewer');
+    expect(toFlowMemberRole('store_manager')).toBe('viewer');
+    expect(toFlowMemberRole('')).toBe('viewer');
+  });
+
+  it('an unrecognized role therefore cannot create projects or invite members', () => {
+    const role = toFlowMemberRole('operator');
+    expect(canCreateProject(role)).toBe(false);
+    expect(canInviteMembers(role)).toBe(false);
   });
 });
 

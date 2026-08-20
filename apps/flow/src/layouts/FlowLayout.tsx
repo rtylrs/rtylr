@@ -58,6 +58,10 @@ import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
 import { isApiWorkspaceId, PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 import type { Member, Workspace } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
+import {
+  canCreateProject as canCreateProjectRole,
+  toFlowMemberRole,
+} from '../shared/lib/roleUtils';
 import { displayUserEmail, displayUserName } from '../shared/lib/userDisplay';
 import { useSidebarSections } from '../shared/hooks/useSidebarSections';
 import {
@@ -263,6 +267,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     setActiveWorkspace,
     setWorkspaces,
     setProjects,
+    members,
     setMembers,
     tasks,
     setCommandBarOpen,
@@ -303,7 +308,19 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   // Creating a project posts workspace_id, so it needs a resolved numeric id -
   // not the Personal sentinel this layout paints with before workspaces load.
-  const canCreateProject = isApiWorkspaceId(currentWorkspaceId);
+  const workspaceReady = isApiWorkspaceId(currentWorkspaceId);
+  // The business-wide role, read from the same `members` list the assignee
+  // picker uses. `canCreateProject` (roleUtils) is owner/admin/member only -
+  // a workspace viewer must not see project creation as available just
+  // because a workspace happens to be resolved.
+  const currentMemberRole = members.find((m) => String(m.id) === String(user?.id))?.role;
+  const canCreateProject =
+    workspaceReady && currentMemberRole !== undefined && canCreateProjectRole(currentMemberRole);
+  const createProjectGateReason = !workspaceReady
+    ? t('flow.shell.createNeedsWorkspace')
+    : !canCreateProject
+      ? t('flow.shell.createNeedsRole')
+      : '';
 
   // Workspace-scoped routes are authoritative even when the workspace list
   // request is unavailable. Keep the shared store aligned so screens without
@@ -353,8 +370,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     const mapped: Member[] = teamMembers
       .filter((m) => m.isActive)
       .map((m) => {
-        const role: Member['role'] =
-          m.role === 'owner' || m.role === 'admin' || m.role === 'viewer' ? m.role : 'member';
+        const role = toFlowMemberRole(m.role);
         return {
           id: String(m.id),
           name: m.name,
@@ -1333,7 +1349,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 <div className="mt-5 flex flex-col gap-2">
                   <GateNotice
                     id="flow-new-project-gate"
-                    reason={canCreateProject ? '' : t('flow.shell.createNeedsWorkspace')}
+                    reason={createProjectGateReason}
                     className="justify-end text-end"
                   />
                   <div className="flex justify-end gap-2">

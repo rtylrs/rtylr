@@ -37,6 +37,7 @@
     "projectDescriptionPlaceholder": "Description (optional)",
     "projectNameRequired": "Project name is required",
     "createNeedsWorkspace": "A workspace must load before you can create a project.",
+    "createNeedsRole": "Viewers can't create projects. Ask a workspace admin for access.",
     "creating": "Creating…",
     "assignedOpenTasks": "{{count}} assigned open tasks",
     "focusItems": "{{count}} due or pinned focus items",
@@ -314,7 +315,8 @@
       "grantAccessAction": "Grant access",
       "addMember": "Add member",
       "noMembersYet": "No team members yet.",
-      "removeMemberLabel": "Remove {{name}}"
+      "removeMemberLabel": "Remove {{name}}",
+      "gateReason": "Only workspace owners and admins can grant or remove Flow access."
     },
     "sectionNotAvailable": "This section is not yet available.",
     "notifications": {
@@ -656,8 +658,14 @@
     "removeMemberLabel": "Remove",
     "emailPlaceholder": "Email address",
     "roleLabel": "Role",
+    "roleSelectLabel": "Change role for {{name}}",
     "addMemberHeading": "Add a member to this project",
-    "descriptionPlaceholder": "Add a description…"
+    "descriptionPlaceholder": "Add a description…",
+    "generalGateReason": "Only project admins can rename or describe this project.",
+    "membersGateReason": "Only project admins can add, remove, or change the role of project members.",
+    "moveGateReason": "Only project admins can move this project to another workspace.",
+    "transferGateReason": "Only project admins can transfer ownership of this project.",
+    "deleteGateReason": "Only project admins can delete this project."
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection"
