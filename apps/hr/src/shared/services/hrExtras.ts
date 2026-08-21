@@ -5,19 +5,6 @@ import { safe } from '../lib/api';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-export interface EmployeeProfile {
-  id: number;
-  photoUrl?: string;
-  phone?: string;
-  address?: string;
-  birthday?: string;
-  hiredAt?: string;
-  emergency?: { name: string; relation: string; phone: string };
-  bio?: string;
-  managerId?: number;
-  skills?: string[];
-}
-
 export interface TimeOffEntry {
   id: number;
   staffId: number;
@@ -205,15 +192,6 @@ export interface HrSettings {
   industry?: string;
 }
 
-const toProfilePayload = (p: EmployeeProfile) => ({
-  id: p.id,
-  phone: p.phone,
-  address: p.address,
-  emergencyContactName: p.emergency?.name,
-  emergencyContactPhone: p.emergency?.phone,
-  notes: p.bio,
-});
-
 const toTimeOffPayload = (data: Omit<TimeOffEntry, 'id' | 'status' | 'createdAt'>) => ({
   staffId: data.staffId,
   type: data.type,
@@ -287,11 +265,6 @@ export const hrExtras = {
   // id-space from the hub auth user id - this is the only correct way for the
   // frontend to resolve "my own employee_id" for leave/overtime/equipment forms.
   getMyEmployee: () => safe.get<{ employee: { id: number | string } }>('/hr/employees/me'),
-
-  // Profiles
-  getProfile: (id: number) => safe.get<EmployeeProfile>(`/hr/staff/detail`, { params: { id } }),
-  upsertProfile: (p: EmployeeProfile) =>
-    safe.put<EmployeeProfile>('/hr/staff', toProfilePayload(p)),
 
   // Time Off
   listTimeOff: () => safe.get<TimeOffEntry[]>('/hr/time-off'),

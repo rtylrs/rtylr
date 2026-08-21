@@ -10,7 +10,7 @@ import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { todayLocalDate, useWorkDaysRange } from '../time/useWorkDay';
 import { addDays, startOfWeek } from '../../shared/lib/dateUtils';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
-import { useMyProfileDetail, useMyStaffRecord } from './useProfile';
+import { useMyStaffRecord } from './useProfile';
 
 const cardStyle: React.CSSProperties = {
   background: 'var(--flow-card)',
@@ -66,7 +66,6 @@ const ProfileScreen = (): React.JSX.Element => {
     isLoading: isStaffLoading,
     refetch: refetchStaff,
   } = useMyStaffRecord(user?.id);
-  const { data: detail } = useMyProfileDetail(staff?.id);
 
   const weekStart = useTimeSettingsStore((s) => s.weekStart);
   const weekRange = useMemo(() => {
@@ -91,11 +90,7 @@ const ProfileScreen = (): React.JSX.Element => {
       <HelmetContainer title={`${t('flow.profile.heading')} · Flow`} />
       <div className="mx-auto max-w-2xl p-4 sm:p-6">
         <div className="mb-6 flex items-center gap-3">
-          <Avatar
-            src={detail?.photoUrl ?? user?.avatar}
-            initials={initials(displayName)}
-            size="lg"
-          />
+          <Avatar src={user?.avatar} initials={initials(displayName)} size="lg" />
           <div>
             <h1 className="text-lg font-semibold" style={{ color: 'var(--flow-text)' }}>
               {displayName}
@@ -129,16 +124,6 @@ const ProfileScreen = (): React.JSX.Element => {
                 <Field label={t('flow.profile.address')} value={staff.address} />
                 <Field label={t('flow.profile.emergencyContact')} value={emergencyContact} />
               </div>
-              {detail?.bio && (
-                <div className="mt-3">
-                  <span className={labelClass} style={{ color: 'var(--flow-text-muted)' }}>
-                    {t('flow.profile.bio')}
-                  </span>
-                  <p className="text-[13px]" style={{ color: 'var(--flow-text)' }}>
-                    {detail.bio}
-                  </p>
-                </div>
-              )}
             </>
           ) : (
             <EmptyState

@@ -51,13 +51,8 @@ const staffState = vi.hoisted(() => ({
     isLoading: false,
   },
 }));
-const detailState = vi.hoisted(() => ({
-  value: { data: undefined as { bio?: string } | undefined },
-}));
-
 vi.mock('./useProfile', () => ({
   useMyStaffRecord: () => staffState.value,
-  useMyProfileDetail: () => detailState.value,
 }));
 
 const weekDaysState = vi.hoisted(() => ({
@@ -92,7 +87,6 @@ beforeEach(() => {
     },
     isLoading: false,
   };
-  detailState.value = { data: undefined };
   weekDaysState.value = { data: { workDays: [{ date: '2026-08-11', loggedMinutes: 120 }] } };
 });
 
@@ -118,12 +112,6 @@ describe('ProfileScreen: HR record', () => {
     };
     render(<ProfileScreen />);
     expect(screen.getByText('12 Cedar St')).toBeInTheDocument();
-  });
-
-  it('shows bio once the profile-detail endpoint returns one', () => {
-    detailState.value = { data: { bio: 'Builds things.' } };
-    render(<ProfileScreen />);
-    expect(screen.getByText('Builds things.')).toBeInTheDocument();
   });
 });
 

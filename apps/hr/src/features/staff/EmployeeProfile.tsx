@@ -9,7 +9,6 @@ import {
   Calendar,
   Briefcase,
   FileText,
-  Heart,
   Shield,
   ChevronLeft,
   GraduationCap,
@@ -17,7 +16,6 @@ import {
 import { EmptyState } from '@voxire/ui';
 import {
   useStaffById,
-  useEmployeeProfile,
   useDocuments,
   useTrainingProgress,
   useBenefitEnrollments,
@@ -40,8 +38,11 @@ const EmployeeProfile: React.FC = () => {
   const isMobile = useIsMobile(900);
   const { id } = useParams({ strict: false });
   const staffId = id != null ? Number(id) : undefined;
+  // Everything this screen shows comes from getStaff. It used to also call
+  // /hr/staff/detail, which no onion module serves, for phone, address,
+  // start date and the emergency contact - all of which getStaff already
+  // returns. See #875.
   const { data: staff, isLoading } = useStaffById(staffId);
-  const { data: profile } = useEmployeeProfile(staffId);
   const { data: docs = [] } = useDocuments();
   const { data: training = [] } = useTrainingProgress();
   const { data: enrollments = [] } = useBenefitEnrollments();
@@ -143,16 +144,16 @@ const EmployeeProfile: React.FC = () => {
                 <Mail size={13} style={{ color: 'var(--hr-text-muted)' }} />
                 <span style={{ color: 'var(--hr-text)' }}>{staff.email}</span>
               </div>
-              {profile?.phone && (
+              {staff.phone && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Phone size={13} style={{ color: 'var(--hr-text-muted)' }} />
-                  <span style={{ color: 'var(--hr-text)' }}>{profile.phone}</span>
+                  <span style={{ color: 'var(--hr-text)' }}>{staff.phone}</span>
                 </div>
               )}
-              {profile?.address && (
+              {staff.address && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <MapPin size={13} style={{ color: 'var(--hr-text-muted)' }} />
-                  <span style={{ color: 'var(--hr-text)' }}>{profile.address}</span>
+                  <span style={{ color: 'var(--hr-text)' }}>{staff.address}</span>
                 </div>
               )}
             </div>
@@ -169,61 +170,41 @@ const EmployeeProfile: React.FC = () => {
                 fontSize: 12,
               }}
             >
-              {profile?.hiredAt && (
+              {staff.startDate && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Calendar size={13} style={{ color: 'var(--hr-text-muted)' }} />
-                  <span style={{ color: 'var(--hr-text)' }}>Hired {profile.hiredAt}</span>
-                </div>
-              )}
-              {profile?.birthday && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Heart size={13} style={{ color: 'var(--hr-text-muted)' }} />
-                  <span style={{ color: 'var(--hr-text)' }}>Birthday {profile.birthday}</span>
+                  <span style={{ color: 'var(--hr-text)' }}>
+                    {t('staff.profile.hiredOn', { date: staff.startDate })}
+                  </span>
                 </div>
               )}
             </div>
           </Card>
         </div>
 
-        {/* Emergency contact + bio */}
-        <div
-          style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}
-        >
+        {/* Emergency contact. The "About" card that sat beside this one is gone:
+            it rendered bio and skills, and neither has a field in any contract or
+            a column in any schema, so it only ever showed the hardcoded "No bio."
+            The bio half returns when hr.staff.v1 carries it (see #875); skills is
+            a separate feature that was never built. */}
+        <div>
           <Card>
-            <SectionHeader title="Emergency contact" />
-            {profile?.emergency ? (
+            <SectionHeader title={t('staff.profile.emergencyHeading')} />
+            {staff.emergencyContactName || staff.emergencyContactPhone ? (
               <div style={{ marginTop: 12, fontSize: 12, lineHeight: 1.7 }}>
-                <div style={{ color: 'var(--hr-text)', fontWeight: 600 }}>
-                  {profile.emergency.name}
-                </div>
-                <div style={{ color: 'var(--hr-text-muted)' }}>{profile.emergency.relation}</div>
-                <div style={{ color: 'var(--hr-text-muted)' }}>{profile.emergency.phone}</div>
+                {staff.emergencyContactName && (
+                  <div style={{ color: 'var(--hr-text)', fontWeight: 600 }}>
+                    {staff.emergencyContactName}
+                  </div>
+                )}
+                {staff.emergencyContactPhone && (
+                  <div style={{ color: 'var(--hr-text-muted)' }}>{staff.emergencyContactPhone}</div>
+                )}
               </div>
             ) : (
               <p style={{ fontSize: 11, color: 'var(--hr-text-muted)', marginTop: 12 }}>
-                Not provided
+                {t('staff.profile.emergencyNotProvided')}
               </p>
-            )}
-          </Card>
-
-          <Card>
-            <SectionHeader title="About" />
-            <p
-              style={{
-                margin: '10px 0 0',
-                fontSize: 12,
-                color: 'var(--hr-text-muted)',
-                lineHeight: 1.6,
-              }}
-            >
-              {profile?.bio ?? 'No bio.'}
-            </p>
-            {profile?.skills && profile.skills.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 12 }}>
-                {profile.skills.map((s) => (
-                  <Pill key={s}>{s}</Pill>
-                ))}
-              </div>
             )}
           </Card>
         </div>

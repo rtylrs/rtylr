@@ -7,7 +7,7 @@ import { BenefitServiceClient } from '@voxire/voxie/hr/benefit/v1/client';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { hrExtras } from '../services/hrExtras';
-import { staffMemberSchema } from '../schemas/staff';
+import { staffDetailSchema } from '../schemas/staff';
 import { timeOffEntrySchema } from '../schemas/timeOff';
 import {
   scheduleShiftSchema,
@@ -26,12 +26,7 @@ import {
 } from '../schemas/benefits';
 import { toTitleCase } from '../lib/hrStringUtils';
 import { trainingCourseSchema, trainingProgressSchema } from '../schemas/training';
-import {
-  birthdaySchema,
-  anniversarySchema,
-  employeeProfileSchema,
-  myEmployeeSchema,
-} from '../schemas/staff';
+import { birthdaySchema, anniversarySchema, myEmployeeSchema } from '../schemas/staff';
 import { hrSettingsSchema } from '../schemas/settings';
 
 const staffClient = createOneKitClient(StaffServiceClient, 'hr');
@@ -71,7 +66,10 @@ export function useStaffById(id: number | undefined) {
       const department = (departmentsResponse.departments ?? []).find(
         (item) => item.id === staff.departmentId
       );
-      return staffMemberSchema.parse({
+      // Keep the contact fields getStaff already returned. Dropping them here
+      // is what sent the detail screen to /hr/staff/detail for values it was
+      // holding all along.
+      return staffDetailSchema.parse({
         id: staff.id,
         name: `${staff.firstName ?? ''} ${staff.lastName ?? ''}`.trim(),
         role: staff.role ?? '',
@@ -79,6 +77,11 @@ export function useStaffById(id: number | undefined) {
         email: staff.email ?? '',
         employmentType: staff.employmentType,
         status: staff.status,
+        phone: staff.phone || undefined,
+        address: staff.address || undefined,
+        startDate: staff.startDate || undefined,
+        emergencyContactName: staff.emergencyContactName || undefined,
+        emergencyContactPhone: staff.emergencyContactPhone || undefined,
       });
     },
   });
@@ -512,17 +515,5 @@ export function useUpdateHrSettings() {
       unwrap(hrExtras.updateSettings(patch)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['settings'] }),
     onError: () => toast.error('Failed to save settings'),
-  });
-}
-
-export function useEmployeeProfile(id: number | undefined) {
-  return useQuery({
-    queryKey: ['profile', id],
-    enabled: id !== undefined,
-    queryFn: async () => {
-      if (id === undefined) return null;
-      const res = await unwrap(hrExtras.getProfile(id));
-      return employeeProfileSchema.parse(res);
-    },
   });
 }

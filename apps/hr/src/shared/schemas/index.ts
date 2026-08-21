@@ -1,10 +1,5 @@
-export {
-  staffMemberSchema,
-  employeeProfileSchema,
-  birthdaySchema,
-  anniversarySchema,
-} from './staff';
-export type { StaffMember, EmployeeProfile, Birthday, Anniversary } from './staff';
+export { staffMemberSchema, staffDetailSchema, birthdaySchema, anniversarySchema } from './staff';
+export type { StaffMember, StaffDetail, Birthday, Anniversary } from './staff';
 
 export { hrDashboardStatsSchema } from './dashboard';
 export type { HRDashboardStats } from './dashboard';

@@ -1,10 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { createOneKitClient, unwrap } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import { DepartmentServiceClient } from '@voxire/voxie/hr/department/v1/client';
 import type { Staff } from '@voxire/voxie/hr/staff/v1/types';
-import { safe } from '../../shared/lib/api';
-import { profileDetailSchema } from '../../shared/schemas/profile';
 
 const staffClient = createOneKitClient(StaffServiceClient, 'flow');
 const departmentClient = createOneKitClient(DepartmentServiceClient, 'flow');
@@ -38,16 +36,5 @@ export function useMyStaffRecord(authUserId: string | undefined) {
       return { ...staff, departmentName: department?.name };
     },
     enabled: !!authUserId,
-  });
-}
-
-export function useMyProfileDetail(staffId: string | undefined) {
-  return useQuery({
-    queryKey: ['my-profile-detail', staffId],
-    queryFn: async () => {
-      const res = await unwrap(safe.get<unknown>('/hr/staff/detail', { params: { id: staffId } }));
-      return profileDetailSchema.parse(res);
-    },
-    enabled: !!staffId,
   });
 }
