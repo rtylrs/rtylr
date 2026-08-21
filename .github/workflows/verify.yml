@@ -15,10 +15,15 @@ concurrency:
   group: verify-${{ github.ref }}
   cancel-in-progress: true
 
+# Every workflow in this repository runs on the Blacksmith runner and the
+# Version workflow succeeds on it. GitHub-hosted labels such as ubuntu-latest
+# get no runner here: the job dies before its first step, reporting a failure
+# with no step detail at all, which is exactly how this workflow failed twice
+# before the label was corrected.
 jobs:
   verify:
     name: Typecheck, build, lint and test
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       # Submodules are recursive on purpose: packages/ carries packages/voxie
       # nested inside it, and the generated contracts every app imports live
@@ -68,7 +73,7 @@ jobs:
 
   known-broken:
     name: Apps with missing contracts (non-blocking)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     # Non-blocking on purpose. crm and finance cannot build until the
     # */compat/v1 contracts they import are either authored in voxie or their
     # callers are moved back to REST (#894). Reporting instead of blocking keeps
