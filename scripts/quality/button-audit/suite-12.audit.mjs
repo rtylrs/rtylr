@@ -103,5 +103,6 @@ export const cases = [
   ["apps/insights/src/features/reports/Reports.test.tsx", "audit-batch-101-suite-12"],
   ["apps/menu/src/screens/Public/Extras/NoMatch.tsx", "audit-batch-102-suite-12"],
   ["apps/recruit/src/shared/components/SemanticContent.tsx", "audit-batch-103-suite-12"],
+  ["apps/auth/src/main.tsx", "audit-batch-104-suite-12"],
 ];
 
