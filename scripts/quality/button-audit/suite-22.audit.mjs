@@ -288,5 +288,6 @@ export const cases = [
   ["apps/dash/src/features/addons/Addons.tsx", "audit-batch-286-suite-22"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/RevenueChartWidget.tsx", "audit-batch-287-suite-22"],
   ["apps/dash/src/features/notifications/Notifications.tsx", "audit-batch-288-suite-22"],
+  ["apps/dash/src/features/team/Groups.tsx", "audit-batch-289-suite-22"],
 ];
 
