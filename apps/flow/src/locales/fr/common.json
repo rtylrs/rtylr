@@ -109,6 +109,7 @@
       "title": "Charge de la semaine (vos tâches dues cette semaine)",
       "scheduled": "h planifiées",
       "capacity": "sur ~{{hours}}h de capacité",
+      "capacityUnknown": "Capacité non définie",
       "description": "Utilise les puces d'effort ou les heures estimées sur les tâches. Le backlog planifié reste visible dans les projets ; ceci est seulement ce que vous avez déjà programmé pour la semaine."
     },
     "reviewStreak": {
