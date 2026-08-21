@@ -483,6 +483,7 @@
     "phone": "الهاتف",
     "address": "العنوان",
     "emergencyContact": "جهة الاتصال في حالات الطوارئ",
+    "bio": "نبذة",
     "activity": "نشاط Flow",
     "hoursLoggedThisWeek": "{{hours}} مسجّلة هذا الأسبوع",
     "viewMyDay": "عرض يومي"
