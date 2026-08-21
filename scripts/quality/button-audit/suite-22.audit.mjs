@@ -54,5 +54,6 @@ export const cases = [
   ["apps/auth/src/features/reset-password/ResetPassword.tsx", "audit-batch-052-suite-22"],
   ["apps/crm/src/features/customers/MergeCustomers.tsx", "audit-batch-053-suite-22"],
   ["apps/crm/src/features/templates/Templates.test.tsx", "audit-batch-054-suite-22"],
+  ["apps/dash/src/features/dashboard/Dashboard/VendorDashboard.tsx", "audit-batch-055-suite-22"],
 ];
 

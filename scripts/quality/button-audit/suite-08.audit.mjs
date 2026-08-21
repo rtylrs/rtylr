@@ -54,5 +54,6 @@ export const cases = [
   ["apps/recruit/src/templates/publicIndexEmptyState.test.tsx", "audit-batch-052-suite-08"],
   ["apps/crm/src/features/automations/Automations.test.tsx", "audit-batch-053-suite-08"],
   ["apps/crm/src/features/sales/Contracts.test.tsx", "audit-batch-054-suite-08"],
+  ["apps/dash/src/features/activity/Audit.tsx", "audit-batch-055-suite-08"],
 ];
 
