@@ -164,5 +164,6 @@ export const cases = [
   ["apps/dash/src/shared/components/ui/tabs.tsx", "audit-batch-162-suite-24"],
   ["apps/erp/src/features/low-stock-alerts/LowStockAlerts.tsx", "audit-batch-163-suite-24"],
   ["apps/erp/src/features/variants/Variants.tsx", "audit-batch-164-suite-24"],
+  ["apps/erp/src/shared/components/ProductTagInput.tsx", "audit-batch-165-suite-24"],
 ];
 

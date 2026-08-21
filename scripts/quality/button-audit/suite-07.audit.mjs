@@ -164,5 +164,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/SearchCommand.tsx", "audit-batch-162-suite-07"],
   ["apps/dash/src/shared/hooks/queries/usePOSAccess.test.tsx", "audit-batch-163-suite-07"],
   ["apps/erp/src/features/products/components/VariantMatrix.tsx", "audit-batch-164-suite-07"],
+  ["apps/erp/src/shared/components/Breadcrumbs.tsx", "audit-batch-165-suite-07"],
 ];
 
