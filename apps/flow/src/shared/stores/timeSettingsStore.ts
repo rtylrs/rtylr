@@ -47,7 +47,6 @@ interface TimeSettingsState {
   trackAttendance: boolean;
   categories: TimeCategory[];
   /** userId to hourly rate. `null` is explicitly unset, never zero. */
-  ratesByUserId: Record<string, number | null>;
 }
 
 interface TimeSettingsActions {
@@ -62,7 +61,6 @@ interface TimeSettingsActions {
   renameCategory: (id: string, name: string) => void;
   setCategoryBillable: (id: string, billable: boolean) => void;
   deleteCategory: (id: string) => void;
-  setRate: (userId: string, rate: number | null) => void;
 }
 
 export const TIME_SETTINGS_STORAGE_KEY = 'flow.timeSettings-v1';
@@ -100,7 +98,6 @@ export const DEFAULT_TIME_SETTINGS: TimeSettingsState = {
     { id: 'meeting', name: 'Meeting', billable: true },
     { id: 'admin', name: 'Admin', billable: false },
   ],
-  ratesByUserId: {},
 };
 
 function slugify(name: string): string {
@@ -128,6 +125,23 @@ export function migrateTimeSettingsV0(persisted: object): object {
       sat: 0,
     },
   };
+}
+
+/**
+ * v1 stored ratesByUserId: a per-member hourly rate typed into Flow's settings
+ * screen. Nothing ever read it back except the input that wrote it, so it bought
+ * nothing, and HR already owns the rate (hr.employee.v1's hourly_rate). See
+ * tryrtylr/rtylr#867.
+ *
+ * This deletes the key from the persisted blob rather than just dropping it from
+ * the type. Leaving it would strand colleagues' pay rates in every existing
+ * browser's localStorage indefinitely, which is the part of this worth
+ * hurrying: the value was sensitive, unencrypted and useless at the same time.
+ */
+export function migrateTimeSettingsV1(persisted: object): object {
+  const { ratesByUserId: _dropped, ...rest } = persisted as Record<string, unknown>;
+
+  return rest;
 }
 
 export const useTimeSettingsStore = create<TimeSettingsState & TimeSettingsActions>()(
@@ -175,14 +189,18 @@ export const useTimeSettingsStore = create<TimeSettingsState & TimeSettingsActio
         if (remaining.length === 0) return;
         set({ categories: remaining });
       },
-
-      setRate: (userId, rate) => set({ ratesByUserId: { ...get().ratesByUserId, [userId]: rate } }),
     }),
     {
       name: TIME_SETTINGS_STORAGE_KEY,
-      version: 1,
-      migrate: (persisted, version) =>
-        version >= 1 ? persisted : migrateTimeSettingsV0(persisted as object),
+      version: 2,
+      // Chained on purpose: a browser last written by v0 needs both steps, so
+      // v0's weekday spread runs first and then v1's key removal.
+      migrate: (persisted, version) => {
+        const afterV0 =
+          version >= 1 ? (persisted as object) : migrateTimeSettingsV0(persisted as object);
+
+        return version >= 2 ? afterV0 : migrateTimeSettingsV1(afterV0);
+      },
     }
   )
 );
