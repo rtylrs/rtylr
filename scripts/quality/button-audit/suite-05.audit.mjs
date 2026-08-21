@@ -131,5 +131,6 @@ export const cases = [
   ["apps/recruit/src/shared/components/SemanticContent.tsx", "audit-batch-129-suite-05"],
   ["apps/auth/src/main.tsx", "audit-batch-130-suite-05"],
   ["apps/crm/src/features/feedback/Feedback.tsx", "audit-batch-131-suite-05"],
+  ["apps/crm/src/router.tsx", "audit-batch-132-suite-05"],
 ];
 

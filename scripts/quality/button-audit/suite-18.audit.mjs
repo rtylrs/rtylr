@@ -131,5 +131,6 @@ export const cases = [
   ["apps/auth/src/features/email-verification/VerifyEmail.tsx", "audit-batch-129-suite-18"],
   ["apps/crm/src/features/campaigns/EmailCampaign.tsx", "audit-batch-130-suite-18"],
   ["apps/crm/src/features/sales/Pipeline.tsx", "audit-batch-131-suite-18"],
+  ["apps/dash/src/features/apps/Apps.tsx", "audit-batch-132-suite-18"],
 ];
 
