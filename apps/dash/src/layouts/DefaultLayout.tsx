@@ -519,7 +519,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                         { value: 'system', icon: Monitor, label: 'System' },
                       ] as const
                     ).map(({ value, icon: Icon, label }) => (
-                      <button
+                      <button type="button"
                         key={value}
                         onClick={() => setTheme(value)}
                         className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"

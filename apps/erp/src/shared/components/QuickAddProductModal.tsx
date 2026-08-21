@@ -688,7 +688,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
           >
             {t('common.cancel')}
           </button>
-          <button
+          <button type="button"
             data-testid="qap-submit"
             onClick={handleSubmit}
             disabled={pending}

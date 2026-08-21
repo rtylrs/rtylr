@@ -164,7 +164,7 @@ const Integrations: React.FC = () => {
 
                   <div className="flex items-center justify-end">
                     {i.status === 'coming_soon' ? (
-                      <button
+                      <button type="button"
                         disabled
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold opacity-50 cursor-not-allowed"
                         style={{

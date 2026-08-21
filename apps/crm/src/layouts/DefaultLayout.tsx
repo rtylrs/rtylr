@@ -533,7 +533,7 @@ const DefaultLayout: React.FC = () => {
                   <div
                     style={{ height: '1px', background: 'var(--hub-border)', margin: '4px 0' }}
                   />
-                  <button
+                  <button type="button"
                     onClick={handleLogout}
                     style={{
                       display: 'flex',

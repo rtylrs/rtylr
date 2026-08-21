@@ -671,7 +671,7 @@ const GroupByPicker: React.FC<{
           }}
         >
           {GROUP_OPTIONS.map((o) => (
-            <button
+            <button type="button"
               key={o.key}
               onClick={() => {
                 onChange(o.key);

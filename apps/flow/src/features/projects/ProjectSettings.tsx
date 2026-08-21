@@ -535,7 +535,7 @@ const ProjectSettings: React.FC = () => {
                   </select>
                   {confirmTransfer ? (
                     <>
-                      <button
+                      <button type="button"
                         onClick={() => {
                           if (!canManageProject) return;
                           const newOwnerId = Number(transferRef.current?.value);

@@ -763,7 +763,7 @@ const LeadDetail: React.FC = () => {
                       </p>
                     )}
                   </div>
-                  <button
+                  <button type="button"
                     aria-label="Delete contact"
                     onClick={() => setDeleteContactId(c.id)}
                     style={{

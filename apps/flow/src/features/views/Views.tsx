@@ -167,7 +167,7 @@ const Views: React.FC = () => {
                       <span className="truncate">{v.name}</span>
                     </button>
                     <div className="flex items-center gap-0.5 pr-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
+                      <button type="button"
                         onClick={(e) => startEdit(v, e)}
                         className="h-5 w-5 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                         style={{ color: 'var(--flow-text-dim)' }}

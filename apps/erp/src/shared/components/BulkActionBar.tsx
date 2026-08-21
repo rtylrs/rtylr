@@ -44,7 +44,7 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({
             {count} selected
           </span>
           {onEdit && (
-            <button
+            <button type="button"
               onClick={onEdit}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
               style={{ color: 'var(--hub-text-muted)' }}

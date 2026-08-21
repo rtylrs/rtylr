@@ -627,7 +627,7 @@ const DefaultLayout: React.FC = () => {
                 >
                   <SearchIcon size={14} />
                 </button>
-                <button
+                <button type="button"
                   onClick={undefined}
                   aria-label="Notifications"
                   style={{

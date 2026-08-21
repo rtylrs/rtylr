@@ -553,7 +553,7 @@ const Purchasing: React.FC = () => {
               >
                 Cancel
               </button>
-              <button
+              <button type="button"
                 onClick={handleCreatePO}
                 disabled={createMut.isPending || !newSupplierId || !newPoNumber.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"

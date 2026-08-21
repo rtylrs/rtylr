@@ -158,7 +158,7 @@ export const Button: React.FC<
     base.color = 'var(--hr-text-muted)';
   }
   return (
-    <button style={{ ...base, ...style }} {...rest}>
+    <button type="button" style={{ ...base, ...style }} {...rest}>
       {icon}
       {children}
     </button>

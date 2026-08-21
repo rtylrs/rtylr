@@ -246,7 +246,7 @@ const Invoices: React.FC = () => {
                       </Link>
                       <DownloadPdfButton invoiceId={inv.id} label="PDF" />
                       {inv.status === 'Draft' && (
-                        <button
+                        <button type="button"
                           style={{
                             ...ghostBtn,
                             padding: '4px 10px',

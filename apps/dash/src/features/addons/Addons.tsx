@@ -423,7 +423,7 @@ const Addons: React.FC = () => {
                         {isTrialMode ? 'Trial mode' : 'Disable'}
                       </button>
                     ) : (
-                      <button
+                      <button type="button"
                         onClick={() => {
                           if (!isTrialMode) enableMutation.mutate(addon.id);
                         }}

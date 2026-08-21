@@ -250,7 +250,7 @@ const GroupDetail = (): React.JSX.Element => {
             style={{ borderBottom: '1px solid var(--dash-border)' }}
           >
             {(['apps', 'members'] as const).map((tabKey) => (
-              <button
+              <button type="button"
                 key={tabKey}
                 onClick={() => setTab(tabKey)}
                 className="px-4 py-2 text-sm font-medium transition-colors"

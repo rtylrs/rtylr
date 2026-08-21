@@ -235,7 +235,7 @@ const Categories: React.FC = () => {
         title="New Expense Category"
         footer={
           <>
-            <button
+            <button type="button"
               style={ghostBtn}
               onClick={() => setShowCreate(false)}
               disabled={createCategory.isPending}

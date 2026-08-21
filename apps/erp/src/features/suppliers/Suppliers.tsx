@@ -159,7 +159,7 @@ const Suppliers: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setShowScorecards((v) => !v)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium"
             style={{
