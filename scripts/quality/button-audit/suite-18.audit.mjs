@@ -332,5 +332,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/steps/RolesPermissionsStep.tsx", "audit-batch-330-suite-18"],
   ["apps/hr/src/shared/components/BenefitPlanCard.tsx", "audit-batch-331-suite-18"],
   ["apps/insights/src/features/financial/Financial.test.tsx", "audit-batch-332-suite-18"],
+  ["apps/menu/src/layouts/Public/PublicHeader.tsx", "audit-batch-333-suite-18"],
 ];
 

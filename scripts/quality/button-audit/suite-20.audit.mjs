@@ -332,5 +332,6 @@ export const cases = [
   ["apps/hr/src/features/shifts/RosterBuilder.tsx", "audit-batch-330-suite-20"],
   ["apps/hr/src/shared/components/ClockInOutButton.tsx", "audit-batch-331-suite-20"],
   ["apps/insights/src/features/operations/Operations.test.tsx", "audit-batch-332-suite-20"],
+  ["apps/menu/src/main.tsx", "audit-batch-333-suite-20"],
 ];
 
