@@ -56,5 +56,6 @@ export const cases = [
   ["apps/crm/src/features/templates/Templates.test.tsx", "audit-batch-054-suite-22"],
   ["apps/dash/src/features/dashboard/Dashboard/VendorDashboard.tsx", "audit-batch-055-suite-22"],
   ["apps/dash/src/features/developer/Webhooks.test.tsx", "audit-batch-056-suite-22"],
+  ["apps/dash/src/features/settings/Settings/components/Account/Account.tsx", "audit-batch-057-suite-22"],
 ];
 
