@@ -325,5 +325,6 @@ export const cases = [
   ["apps/flow/src/features/leave/RequestLeaveDialog.test.tsx", "audit-batch-323-suite-16"],
   ["apps/flow/src/features/projects/components/BoardSettingsPanel.tsx", "audit-batch-324-suite-16"],
   ["apps/flow/src/features/triage/Triage.tsx", "audit-batch-325-suite-16"],
+  ["apps/flow/src/shared/components/DueDatePicker.tsx", "audit-batch-326-suite-16"],
 ];
 

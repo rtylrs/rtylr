@@ -325,5 +325,6 @@ export const cases = [
   ["apps/flow/src/features/projects/ProjectBoard.tsx", "audit-batch-323-suite-24"],
   ["apps/flow/src/features/tasks/MyIssues.test.tsx", "audit-batch-324-suite-24"],
   ["apps/flow/src/layouts/FlowLayout.test.tsx", "audit-batch-325-suite-24"],
+  ["apps/flow/src/shared/components/QuickCreate.test.tsx", "audit-batch-326-suite-24"],
 ];
 
