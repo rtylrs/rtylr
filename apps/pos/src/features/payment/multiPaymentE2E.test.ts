@@ -1,9 +1,9 @@
 /**
  * End-to-end: split-tender (multi-payment) → charge → receipt → drawer.
  *
- * Customer pays $30 cash + $20 card on a $50 order.
+ * Customer pays $33 cash + $22 card on a $50 order + $5 tip ($55 due).
  * The backend takes a single {payment_method, amount_paid} so the dominant
- * method (cash, $30) is selected and the full amount including tip is summed.
+ * method (cash, $33) is selected and the tendered amounts are charged as-is.
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { finalizeMultiPayment } from './multiPaymentWorkflow';
@@ -56,10 +56,10 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('split-tender checkout: $30 cash + $20 card', () => {
+describe('split-tender checkout: $33 cash + $22 card', () => {
   const payments = [
-    { id: 'p1', method: 'cash' as const, amount: 30, createdAt: '2026-05-06T00:00:00.000Z' },
-    { id: 'p2', method: 'card' as const, amount: 20, createdAt: '2026-05-06T00:00:00.000Z' },
+    { id: 'p1', method: 'cash' as const, amount: 33, createdAt: '2026-05-06T00:00:00.000Z' },
+    { id: 'p2', method: 'card' as const, amount: 22, createdAt: '2026-05-06T00:00:00.000Z' },
   ];
 
   it('finalizeMultiPayment calls chargeOrder with collapsed dominant-method payload', async () => {
@@ -68,12 +68,10 @@ describe('split-tender checkout: $30 cash + $20 card', () => {
     await finalizeMultiPayment({
       orderId: '99',
       payments,
-      tip: 5,
-      total: 55,
       chargeOrder,
     });
 
-    // cash ($30) dominates card ($20); total = 30+20+5 tip = 55
+    // cash ($33) dominates card ($22); tenders already cover the tip-inclusive total
     expect(chargeOrder).toHaveBeenCalledWith({
       orderId: '99',
       paymentMethod: 'cash',
@@ -88,8 +86,6 @@ describe('split-tender checkout: $30 cash + $20 card', () => {
       finalizeMultiPayment({
         orderId: undefined,
         payments,
-        tip: 0,
-        total: 50,
         chargeOrder,
       }),
     ).rejects.toThrow('Select a valid order before charging.');
@@ -102,7 +98,7 @@ describe('split-tender checkout: $30 cash + $20 card', () => {
     vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
     vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'ok' });
 
-    await finalizeMultiPayment({ orderId: '99', payments, tip: 5, total: 55, chargeOrder });
+    await finalizeMultiPayment({ orderId: '99', payments, chargeOrder });
 
     const hardwareResult = await printReceiptAndOpenDrawer({
       printer,

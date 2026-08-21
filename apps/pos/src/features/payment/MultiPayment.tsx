@@ -103,8 +103,12 @@ const MultiPaymentScreen: React.FC = () => {
   const removePayment = (id: string) => setPayments((prev) => prev.filter((p) => p.id !== id));
 
   const finalize = async () => {
-    if (remaining > 0.001) {
+    if (paid + 0.001 < total) {
       toast.error('Remaining balance not covered');
+      return;
+    }
+    if (paid > total + 0.001) {
+      toast.error('Collected payments exceed the amount due');
       return;
     }
     setBusy(true);
@@ -112,8 +116,6 @@ const MultiPaymentScreen: React.FC = () => {
       await finalizeMultiPayment({
         orderId,
         payments,
-        tip: appliedTip,
-        total,
         chargeOrder: async (payload) => {
           await orderPaymentClient.processPayment(payload);
         },

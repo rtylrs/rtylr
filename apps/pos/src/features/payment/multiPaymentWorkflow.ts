@@ -4,8 +4,6 @@ import type { ProcessPaymentRequest } from '@voxire/voxie/pos/orders/payments/v1
 interface FinalizeMultiPaymentParams {
   orderId: string | undefined;
   payments: PaymentEntry[];
-  tip: number;
-  total: number;
   chargeOrder: (payload: ProcessPaymentRequest) => Promise<void>;
 }
 
@@ -19,11 +17,12 @@ function parseOrderId(orderId: string | undefined): number {
 
 // The backend payment endpoint accepts a single { payment_method, amount_paid }.
 // A split tender is recorded as one payment for the combined amount under the
-// method that covered the largest share.
+// method that covered the largest share. The tip is already collected as part
+// of the tender amounts (the screen requires payments to cover the tip-inclusive
+// total), so it must NOT be added again here.
 export function collapsePayments(
   orderId: string,
-  payments: PaymentEntry[],
-  tip: number
+  payments: PaymentEntry[]
 ): ProcessPaymentRequest {
   if (payments.length === 0) {
     throw new Error('Add at least one payment before charging.');
@@ -53,16 +52,15 @@ export function collapsePayments(
   return {
     orderId,
     paymentMethod: dominantMethod,
-    amountPaid: amountPaid + (Number.isFinite(tip) && tip > 0 ? tip : 0),
+    amountPaid,
   };
 }
 
 export async function finalizeMultiPayment({
   orderId,
   payments,
-  tip,
   chargeOrder,
 }: FinalizeMultiPaymentParams): Promise<void> {
   const parsedOrderId = parseOrderId(orderId);
-  await chargeOrder(collapsePayments(String(parsedOrderId), payments, tip));
+  await chargeOrder(collapsePayments(String(parsedOrderId), payments));
 }
