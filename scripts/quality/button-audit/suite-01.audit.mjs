@@ -234,5 +234,6 @@ export const cases = [
   ["apps/recruit/src/router.tsx", "audit-batch-232-suite-01"],
   ["apps/auth/src/layouts/Public/public.tsx", "audit-batch-233-suite-01"],
   ["apps/crm/src/features/feedback/Feedback.test.tsx", "audit-batch-234-suite-01"],
+  ["apps/crm/src/main.tsx", "audit-batch-235-suite-01"],
 ];
 

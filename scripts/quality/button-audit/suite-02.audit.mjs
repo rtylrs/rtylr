@@ -234,5 +234,6 @@ export const cases = [
   ["apps/recruit/src/shared/components/SemanticContent.tsx", "audit-batch-232-suite-02"],
   ["apps/auth/src/main.tsx", "audit-batch-233-suite-02"],
   ["apps/crm/src/features/feedback/Feedback.tsx", "audit-batch-234-suite-02"],
+  ["apps/crm/src/router.tsx", "audit-batch-235-suite-02"],
 ];
 

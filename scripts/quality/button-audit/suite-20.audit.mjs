@@ -234,5 +234,6 @@ export const cases = [
   ["apps/auth/src/features/oauth/OAuthConsent.tsx", "audit-batch-232-suite-20"],
   ["apps/crm/src/features/customers/Customers.test.tsx", "audit-batch-233-suite-20"],
   ["apps/crm/src/features/segments/Segments.tsx", "audit-batch-234-suite-20"],
+  ["apps/dash/src/features/chat/Chat.test.tsx", "audit-batch-235-suite-20"],
 ];
 
