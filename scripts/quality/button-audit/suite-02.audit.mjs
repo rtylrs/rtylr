@@ -273,5 +273,6 @@ export const cases = [
   ["apps/finance/src/shared/components/MoneyDisplay.tsx", "audit-batch-271-suite-02"],
   ["apps/flow/src/features/insights/Insights.tsx", "audit-batch-272-suite-02"],
   ["apps/flow/src/features/projects/components/AddProjectMemberDialog.test.tsx", "audit-batch-273-suite-02"],
+  ["apps/flow/src/features/time/TimeReports.test.tsx", "audit-batch-274-suite-02"],
 ];
 

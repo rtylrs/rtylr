@@ -273,5 +273,6 @@ export const cases = [
   ["apps/flow/src/features/calendar/Calendar.tsx", "audit-batch-271-suite-18"],
   ["apps/flow/src/features/projects/ProjectList.tsx", "audit-batch-272-suite-18"],
   ["apps/flow/src/features/tasks/components/TimePanel.test.tsx", "audit-batch-273-suite-18"],
+  ["apps/flow/src/shared/components/ActivityFeed.tsx", "audit-batch-274-suite-18"],
 ];
 

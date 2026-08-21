@@ -273,5 +273,6 @@ export const cases = [
   ["apps/finance/src/shared/components/Skeleton.tsx", "audit-batch-271-suite-12"],
   ["apps/flow/src/features/profile/ProfileScreen.tsx", "audit-batch-272-suite-12"],
   ["apps/flow/src/features/settings/sections/WorkTypesSection.tsx", "audit-batch-273-suite-12"],
+  ["apps/flow/src/features/workspace-manager/WorkspaceManager.tsx", "audit-batch-274-suite-12"],
 ];
 

@@ -273,5 +273,6 @@ export const cases = [
   ["apps/flow/src/features/directory/DirectoryScreen.test.tsx", "audit-batch-271-suite-21"],
   ["apps/flow/src/features/projects/ProjectSettings.test.tsx", "audit-batch-272-suite-21"],
   ["apps/flow/src/features/time/AddHours.test.tsx", "audit-batch-273-suite-21"],
+  ["apps/flow/src/shared/components/Breadcrumbs.tsx", "audit-batch-274-suite-21"],
 ];
 
