@@ -335,5 +335,6 @@ export const cases = [
   ["apps/insights/src/layouts/DefaultLayout.tsx", "audit-batch-333-suite-05"],
   ["apps/recruit/src/features/admin/AdminLayout.tsx", "audit-batch-334-suite-05"],
   ["apps/recruit/src/templates/minimal/Job.tsx", "audit-batch-335-suite-05"],
+  ["apps/crm/src/features/automations/AutomationBuilder.tsx", "audit-batch-336-suite-05"],
 ];
 
