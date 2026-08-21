@@ -311,5 +311,6 @@ export const cases = [
   ["apps/auth/src/features/register/Register.test.tsx", "audit-batch-309-suite-25"],
   ["apps/crm/src/features/customers/Customers.tsx", "audit-batch-310-suite-25"],
   ["apps/crm/src/features/settings/Settings.test.tsx", "audit-batch-311-suite-25"],
+  ["apps/dash/src/features/chat/Chat.tsx", "audit-batch-312-suite-25"],
 ];
 
