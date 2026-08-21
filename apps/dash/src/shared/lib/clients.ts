@@ -21,9 +21,7 @@ import { RevenueServiceClient } from '@voxire/voxie/insights/revenue/v1/client';
 import { InventoryServiceClient } from '@voxire/voxie/erp/inventory/v1/client';
 import { TimeOffServiceClient } from '@voxire/voxie/hr/time_off/v1/client';
 import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
-import { CompatibilityServiceClient as OrdersCompatibilityServiceClient } from '@voxire/voxie/pos/orders/compat/v1/client';
 import { TableServiceClient } from '@voxire/voxie/pos/table/v1/client';
-import { CompatibilityServiceClient as EmailCompatibilityServiceClient } from '@voxire/voxie/hub/settings/compat/v1/client';
 
 export const aiClient = createOneKitClient(AiServiceClient, 'dash');
 export const appClient = createOneKitClient(AppServiceClient, 'dash');
@@ -47,12 +45,11 @@ export const revenueClient = createOneKitClient(RevenueServiceClient, 'dash');
 export const inventoryClient = createOneKitClient(InventoryServiceClient, 'dash');
 export const timeOffClient = createOneKitClient(TimeOffServiceClient, 'dash');
 export const orderClient = createOneKitClient(OrderServiceClient, 'dash');
-export const ordersCompatibilityClient = createOneKitClient(
-  OrdersCompatibilityServiceClient,
-  'dash'
-);
 export const tableClient = createOneKitClient(TableServiceClient, 'dash');
 // licenseClient lives in ./api as a REST adapter: license/v1 has no contract
 // in voxie (#894).
 export { licenseClient } from './api';
-export const emailCompatibilityClient = createOneKitClient(EmailCompatibilityServiceClient, 'dash');
+
+// pos/orders/compat/v1 and hub/settings/compat/v1 have no contract in voxie
+// (#894). useOrders and the SMTP test use the REST transport in ./api, which is
+// what they used before the oneKit migration.
