@@ -24,5 +24,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/steps/RolesPermissionsStep.test.tsx", "audit-batch-022-suite-01"],
   ["apps/hr/src/shared/components/ApprovalButtons.tsx", "audit-batch-023-suite-01"],
   ["apps/insights/src/features/dashboard/Dashboard.tsx", "audit-batch-024-suite-01"],
+  ["apps/menu/src/layouts/Public/PublicFooter/PublicFooter.tsx", "audit-batch-025-suite-01"],
 ];
 

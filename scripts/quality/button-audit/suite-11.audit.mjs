@@ -24,5 +24,6 @@ export const cases = [
   ["apps/hr/src/features/time-logging/TimeEntryForm.tsx", "audit-batch-022-suite-11"],
   ["apps/hr/src/shared/components/HRPermissionGuard.tsx", "audit-batch-023-suite-11"],
   ["apps/insights/src/features/revenue/Revenue.tsx", "audit-batch-024-suite-11"],
+  ["apps/menu/src/screens/Public/SlugLanding/LocationMenu.tsx", "audit-batch-025-suite-11"],
 ];
 

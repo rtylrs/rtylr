@@ -24,5 +24,6 @@ export const cases = [
   ["apps/hr/src/features/time-off/TimeOffNew.tsx", "audit-batch-022-suite-15"],
   ["apps/hr/src/shared/components/RatingStars.tsx", "audit-batch-023-suite-15"],
   ["apps/insights/src/main.tsx", "audit-batch-024-suite-15"],
+  ["apps/recruit/src/features/admin/CareerEditor.tsx", "audit-batch-025-suite-15"],
 ];
 
