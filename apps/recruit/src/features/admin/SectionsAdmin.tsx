@@ -187,7 +187,10 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
 
         <div
           className="mt-6 overflow-hidden rounded-lg border"
-          style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+          style={{
+            borderColor: 'var(--recruit-admin-border)',
+            background: 'var(--recruit-admin-surface)',
+          }}
         >
           {isLoading ? (
             <div className="p-10 text-center text-sm text-white/60">Loading…</div>
@@ -208,7 +211,7 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
                   onDragEnd={onDragEnd}
                   className="border-b last:border-b-0"
                   style={{
-                    borderColor: '#1f1f1f',
+                    borderColor: 'var(--recruit-admin-border)',
                     opacity: dragId === s.id ? 0.4 : 1,
                   }}
                 >
@@ -280,7 +283,7 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
                   {expandedId === s.id && (
                     <div
                       className="border-t bg-black/40 px-4 py-5"
-                      style={{ borderColor: '#1f1f1f' }}
+                      style={{ borderColor: 'var(--recruit-admin-border)' }}
                     >
                       <SectionEditor
                         section={s}
@@ -311,7 +314,10 @@ const AddSectionPicker: React.FC<{
 }> = ({ onPick, onCancel }) => (
   <div
     className="mt-6 rounded-lg border p-5"
-    style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+    style={{
+      borderColor: 'var(--recruit-admin-border)',
+      background: 'var(--recruit-admin-surface)',
+    }}
   >
     <div className="flex items-center justify-between">
       <div className="text-sm font-medium">Pick a section kind</div>
@@ -330,7 +336,7 @@ const AddSectionPicker: React.FC<{
             key={k}
             onClick={() => onPick(k)}
             className="flex flex-col items-start rounded-md border p-3 text-left transition hover:-translate-y-0.5 hover:border-white/30"
-            style={{ borderColor: '#2a2a2a' }}
+            style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
           >
             <span className="mb-2 text-white/70">{meta.icon}</span>
             <span className="text-sm font-medium">{meta.label}</span>
@@ -562,7 +568,11 @@ const FaqEditor: React.FC<{
     <div className="mb-2 text-xs font-medium uppercase tracking-wider text-white/70">Q&A</div>
     <div className="space-y-2">
       {items.map((f, i) => (
-        <div key={i} className="rounded-md border p-3" style={{ borderColor: '#2a2a2a' }}>
+        <div
+          key={i}
+          className="rounded-md border p-3"
+          style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
+        >
           <Input
             value={f.question}
             onChange={(v) => onChange(items.map((x, j) => (i === j ? { ...x, question: v } : x)))}
@@ -662,7 +672,7 @@ const Input: React.FC<{
     onChange={(e) => onChange(e.target.value)}
     placeholder={placeholder}
     className="w-full rounded-md border bg-black/40 px-3 py-2 text-sm outline-none focus:border-white/40"
-    style={{ borderColor: '#2a2a2a' }}
+    style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
   />
 );
 
@@ -676,7 +686,7 @@ const Textarea: React.FC<{
     onChange={(e) => onChange(e.target.value)}
     rows={rows}
     className="w-full rounded-md border bg-black/40 px-3 py-2 text-sm leading-relaxed outline-none focus:border-white/40"
-    style={{ borderColor: '#2a2a2a' }}
+    style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
   />
 );
 

@@ -224,7 +224,10 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
         {/* Header - title + preview link. Stays pinned above the tabs. */}
         <div
           className="sticky top-0 z-20 border-b px-10 py-6"
-          style={{ borderColor: '#1f1f1f', background: '#0a0a0a' }}
+          style={{
+            borderColor: 'var(--recruit-admin-border)',
+            background: 'var(--recruit-admin-bg)',
+          }}
         >
           <div className="flex items-baseline justify-between">
             <div>
@@ -355,8 +358,14 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                       onClick={() => setTemplate(t.id)}
                       className="block rounded-lg border p-4 text-left transition"
                       style={{
-                        borderColor: template === t.id ? '#fff' : '#1f1f1f',
-                        background: template === t.id ? 'rgba(255,255,255,0.06)' : '#0f0f0f',
+                        borderColor:
+                          template === t.id
+                            ? 'var(--recruit-admin-selected-border)'
+                            : 'var(--recruit-admin-border)',
+                        background:
+                          template === t.id
+                            ? 'rgba(255,255,255,0.06)'
+                            : 'var(--recruit-admin-surface)',
                       }}
                     >
                       <div className="font-semibold">{t.name}</div>
@@ -417,8 +426,14 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                       onClick={() => setFontPairing(p.id)}
                       className="block w-full rounded-lg border p-5 text-left transition"
                       style={{
-                        borderColor: fontPairing === p.id ? '#fff' : '#1f1f1f',
-                        background: fontPairing === p.id ? 'rgba(255,255,255,0.06)' : '#0f0f0f',
+                        borderColor:
+                          fontPairing === p.id
+                            ? 'var(--recruit-admin-selected-border)'
+                            : 'var(--recruit-admin-border)',
+                        background:
+                          fontPairing === p.id
+                            ? 'rgba(255,255,255,0.06)'
+                            : 'var(--recruit-admin-surface)',
                       }}
                     >
                       <div className="flex items-center justify-between">
@@ -560,7 +575,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                       src={cdnImageUrl(heroImageUrl)}
                       alt="Hero preview"
                       className="mt-3 h-40 w-full rounded-md object-cover"
-                      style={{ background: '#1f1f1f' }}
+                      style={{ background: 'var(--recruit-admin-border)' }}
                     />
                   )}
                 </Field>
@@ -572,7 +587,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                       src={cdnImageUrl(faviconUrl)}
                       alt="Favicon preview"
                       className="mt-3 h-10 w-10 rounded"
-                      style={{ background: '#1f1f1f' }}
+                      style={{ background: 'var(--recruit-admin-border)' }}
                     />
                   )}
                 </Field>
@@ -590,7 +605,7 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
                       src={`${APP_URLS.api}/recruit/public/og?slug=${slug}&_=${Date.now()}`}
                       alt="OG card"
                       className="w-full rounded-md border"
-                      style={{ borderColor: '#1f1f1f' }}
+                      style={{ borderColor: 'var(--recruit-admin-border)' }}
                     />
                     <p className="mt-1.5 text-xs text-white/40">
                       Refreshes after you save. This is the card LinkedIn, Slack, and iMessage use.
@@ -603,7 +618,10 @@ const CustomizationAdmin: React.FC = (): React.JSX.Element => {
 
           <div
             className="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t px-10 py-4"
-            style={{ borderColor: '#1f1f1f', background: '#0a0a0a' }}
+            style={{
+              borderColor: 'var(--recruit-admin-border)',
+              background: 'var(--recruit-admin-bg)',
+            }}
           >
             <button
               type="submit"
@@ -683,7 +701,7 @@ const Input: React.FC<{
     onChange={(e) => onChange(e.target.value)}
     required={required}
     className="w-full rounded-md border bg-black/40 px-3 py-2.5 text-sm outline-none focus:border-white/40"
-    style={{ borderColor: '#2a2a2a' }}
+    style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
   />
 );
 
@@ -697,7 +715,7 @@ const Textarea: React.FC<{
     onChange={(e) => onChange(e.target.value)}
     rows={rows}
     className="w-full rounded-md border bg-black/40 px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-white/40"
-    style={{ borderColor: '#2a2a2a' }}
+    style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
   />
 );
 
@@ -714,7 +732,7 @@ const ColorField: React.FC<{
         value={value || '#000000'}
         onChange={(e) => onChange(e.target.value)}
         className="h-10 w-16 rounded-md border"
-        style={{ borderColor: '#2a2a2a' }}
+        style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
       />
       <Input value={value} onChange={onChange} />
     </div>
@@ -737,7 +755,7 @@ const PalettePreview: React.FC<{
 }> = ({ primary, accent, bg, fg, muted, brandName }) => (
   <div
     className="rounded-lg border p-5 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
-    style={{ borderColor: '#1f1f1f', background: bg }}
+    style={{ borderColor: 'var(--recruit-admin-border)', background: bg }}
   >
     <div className="text-[10px] uppercase tracking-[0.3em]" style={{ color: accent }}>
       Careers · {brandName}
