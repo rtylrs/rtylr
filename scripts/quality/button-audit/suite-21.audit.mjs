@@ -182,5 +182,6 @@ export const cases = [
   ["apps/recruit/src/templates/minimal/Index.tsx", "audit-batch-180-suite-21"],
   ["apps/auth/src/shared/components/PasswordStrengthMeter.tsx", "audit-batch-181-suite-21"],
   ["apps/crm/src/features/loyalty/LoyaltyRewards.tsx", "audit-batch-182-suite-21"],
+  ["apps/crm/src/shared/components/ui.tsx", "audit-batch-183-suite-21"],
 ];
 

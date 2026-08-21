@@ -182,5 +182,6 @@ export const cases = [
   ["apps/recruit/src/features/public/RootLanding.tsx", "audit-batch-180-suite-13"],
   ["apps/auth/src/features/reset-password/ResetPasswordConfirm.tsx", "audit-batch-181-suite-13"],
   ["apps/crm/src/features/dashboard/Dashboard.test.tsx", "audit-batch-182-suite-13"],
+  ["apps/crm/src/features/templates/Templates.tsx", "audit-batch-183-suite-13"],
 ];
 
