@@ -66,11 +66,16 @@ const OAuthConsent: React.FC = (): React.JSX.Element => {
     if (!params.clientId || !params.redirectUri || !params.codeChallenge) {
       return 'Invalid authorization request - missing required parameters.';
     }
+    // An empty scope would render a consent screen approving no permissions
+    // at all - the server must be told what access is being granted.
+    if (scopes.length === 0) {
+      return 'Invalid authorization request - no scopes requested.';
+    }
     if (!isAllowedOAuthRedirect(params.redirectUri)) {
       return 'Invalid redirect URI - must belong to an authorized domain.';
     }
     return null;
-  }, [params]);
+  }, [params, scopes]);
 
   useEffect((): void => {
     if (isInvalidRequest) {
