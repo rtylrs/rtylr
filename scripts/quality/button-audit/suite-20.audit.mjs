@@ -256,5 +256,6 @@ export const cases = [
   ["apps/hr/src/shared/components/DocumentUpload.tsx", "audit-batch-254-suite-20"],
   ["apps/insights/src/features/reports/Reports.test.tsx", "audit-batch-255-suite-20"],
   ["apps/menu/src/screens/Public/Extras/NoMatch.tsx", "audit-batch-256-suite-20"],
+  ["apps/recruit/src/shared/components/SemanticContent.tsx", "audit-batch-257-suite-20"],
 ];
 

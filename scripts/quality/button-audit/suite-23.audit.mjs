@@ -256,5 +256,6 @@ export const cases = [
   ["apps/hr/src/shared/components/HRPermissionGuard.tsx", "audit-batch-254-suite-23"],
   ["apps/insights/src/features/revenue/Revenue.tsx", "audit-batch-255-suite-23"],
   ["apps/menu/src/screens/Public/SlugLanding/LocationMenu.tsx", "audit-batch-256-suite-23"],
+  ["apps/recruit/src/templates/editorial/Index.tsx", "audit-batch-257-suite-23"],
 ];
 
