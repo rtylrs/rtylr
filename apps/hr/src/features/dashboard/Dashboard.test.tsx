@@ -45,6 +45,7 @@ vi.mock('@voxire/components', () => ({
 
 vi.mock('@voxire/ui', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  EmptyState: ({ title }: { title: string }) => <div>{title}</div>,
 }));
 
 vi.mock('react-i18next', () => ({
@@ -55,6 +56,7 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>
   ),
+  useNavigate: () => vi.fn(),
 }));
 
 vi.mock('motion/react', () => ({

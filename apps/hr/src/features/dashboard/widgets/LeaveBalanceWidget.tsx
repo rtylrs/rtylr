@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Palmtree } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import WidgetShell from './WidgetShell';
 
 interface LeaveBalance {
@@ -12,22 +13,33 @@ interface LeaveBalance {
 interface LeaveBalanceWidgetProps {
   data: LeaveBalance[] | null;
   isLoading: boolean;
+  onRefresh: () => void;
 }
 
-const LeaveBalanceWidget = ({ data, isLoading }: LeaveBalanceWidgetProps): React.JSX.Element => {
+const LeaveBalanceWidget = ({
+  data,
+  isLoading,
+  onRefresh,
+}: LeaveBalanceWidgetProps): React.JSX.Element => {
   const { t } = useTranslation();
+  const isEmpty = !data || data.length === 0;
 
   return (
     <WidgetShell
       title={t('dashboard.widgets.leaveBalance')}
       icon={<Palmtree size={14} />}
       isLoading={isLoading}
-      isEmpty={!data || data.length === 0}
-      emptyMessage={t('dashboard.widgets.noLeaveTypes')}
     >
-      {data && (
+      {isEmpty ? (
+        <EmptyState
+          icon={Palmtree}
+          title={t('dashboard.widgets.noLeaveTypes')}
+          action={{ label: t('common.refresh'), onClick: onRefresh }}
+          size="compact"
+        />
+      ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {data.map((b) => {
+          {(data ?? []).map((b) => {
             const remaining = b.entitled - b.used;
             const pct = b.entitled > 0 ? (b.used / b.entitled) * 100 : 0;
             return (

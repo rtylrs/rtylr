@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useState } from 'react';
 import { motion } from 'motion/react';
 import type { Variants } from 'motion/react';
 import { useTranslation } from 'react-i18next';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import {
   Users,
   Clock,
@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   Timer,
   GripVertical,
+  Activity,
 } from 'lucide-react';
 import { useUserStore } from '@voxire/auth';
 import { useGetDashboard, useUpdateWidgetLayout } from './useDashboard';
@@ -31,7 +32,7 @@ import {
 } from '../../shared/hooks/useHrExtras';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import { canViewCompensation } from '../../shared/lib/hrPermissions';
-import { ErrorBoundary } from '@voxire/ui';
+import { ErrorBoundary, EmptyState } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import BirthdayWidget from '../../shared/components/BirthdayWidget';
 import AnniversaryWidget from '../../shared/components/AnniversaryWidget';
@@ -209,14 +210,23 @@ const quickActionDefs = [
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile(900);
   const config = useHRConfigStore((s) => s.config);
   const { data: settings } = useHrSettings();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const showCompensation = canViewCompensation(role);
 
-  const { data: dashboardResponse, isLoading: widgetsLoading } = useGetDashboard();
-  const { data: legacyDashboard, isLoading: statsLoading } = useHRDashboard();
+  const {
+    data: dashboardResponse,
+    isLoading: widgetsLoading,
+    refetch: refetchDashboardWidgets,
+  } = useGetDashboard();
+  const {
+    data: legacyDashboard,
+    isLoading: statsLoading,
+    refetch: refetchLegacyDashboard,
+  } = useHRDashboard();
   const { data: staff = [] } = useStaff();
   const { data: expiring = [] } = useExpiringDocuments(30);
   const { data: overtimeAlerts = [] } = useOvertimeAlerts();
@@ -363,13 +373,18 @@ const Dashboard: React.FC = () => {
         );
       case 'leave_balance':
         return (
-          <LeaveBalanceWidget data={parseWidgetData(wData, 'leave_balance')} isLoading={loading} />
+          <LeaveBalanceWidget
+            data={parseWidgetData(wData, 'leave_balance')}
+            isLoading={loading}
+            onRefresh={() => refetchDashboardWidgets()}
+          />
         );
       case 'upcoming_shifts':
         return (
           <UpcomingShiftsWidget
             data={parseWidgetData(wData, 'upcoming_shifts')}
             isLoading={loading}
+            onRefresh={() => refetchDashboardWidgets()}
           />
         );
       case 'payroll_cost':
@@ -593,17 +608,15 @@ const Dashboard: React.FC = () => {
             </div>
             <div>
               {recentActivity.length === 0 && !loading && (
-                <p
-                  style={{
-                    padding: '24px 20px',
-                    margin: 0,
-                    fontSize: 12,
-                    color: 'var(--hr-text-muted)',
-                    textAlign: 'center',
+                <EmptyState
+                  icon={Activity}
+                  title={t('dashboard.noActivity')}
+                  action={{
+                    label: t('common.refresh'),
+                    onClick: () => refetchLegacyDashboard(),
                   }}
-                >
-                  {t('dashboard.noActivity')}
-                </p>
+                  size="compact"
+                />
               )}
               {loading && (
                 <div
@@ -853,9 +866,15 @@ const Dashboard: React.FC = () => {
               </h3>
             </div>
             {recentHires.length === 0 ? (
-              <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                {t('dashboard.noRecentHires')}
-              </p>
+              <EmptyState
+                icon={UserPlus}
+                title={t('dashboard.noRecentHires')}
+                action={{
+                  label: t('staff.inviteStaff'),
+                  onClick: () => navigate({ to: '/employees/new' }),
+                }}
+                size="compact"
+              />
             ) : (
               <ul
                 style={{
