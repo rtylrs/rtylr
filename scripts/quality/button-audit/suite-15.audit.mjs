@@ -295,5 +295,6 @@ export const cases = [
   ["apps/erp/src/features/warehouses/Warehouses.test.tsx", "audit-batch-293-suite-15"],
   ["apps/erp/src/shared/components/QuickAddProductModal.tsx", "audit-batch-294-suite-15"],
   ["apps/finance/src/features/invoices/Invoices.tsx", "audit-batch-295-suite-15"],
+  ["apps/finance/src/shared/components/InvoicePreview.tsx", "audit-batch-296-suite-15"],
 ];
 
