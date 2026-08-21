@@ -24,6 +24,7 @@ import {
   benefitEnrollmentSchema,
   myBenefitEnrollmentSchema,
 } from '../schemas/benefits';
+import { toTitleCase } from '../lib/hrStringUtils';
 import { trainingCourseSchema, trainingProgressSchema } from '../schemas/training';
 import {
   birthdaySchema,
@@ -314,9 +315,17 @@ export function useBenefits() {
   return useQuery({
     queryKey: ['benefits', 'plans'],
     queryFn: async () => {
-      const res = await unwrap(hrExtras.listBenefitPlans());
-      const raw = res ?? [];
-      return z.array(benefitPlanSchema).parse(Array.isArray(raw) ? raw : []);
+      const res = await benefitClient.listBenefits({});
+      const raw = res.plans ?? [];
+      return z.array(benefitPlanSchema).parse(
+        raw.map((plan) => ({
+          id: plan.id ?? '',
+          name: plan.name ?? '',
+          category: toTitleCase(plan.type ?? ''),
+          carrier: plan.provider ?? '',
+          monthlyCost: plan.costEmployee ?? 0,
+        }))
+      );
     },
   });
 }
