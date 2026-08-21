@@ -8,5 +8,6 @@ export const cases = [
   ["apps/dash/src/features/qr-codes/QrCodes.tsx", "audit-batch-006-suite-07"],
   ["apps/dash/src/layouts/DefaultLayout.tsx", "audit-batch-007-suite-07"],
   ["apps/dash/src/shared/components/ui/dialog.tsx", "audit-batch-008-suite-07"],
+  ["apps/erp/src/features/categories/Categories.test.tsx", "audit-batch-009-suite-07"],
 ];
 

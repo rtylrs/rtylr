@@ -8,5 +8,6 @@ export const cases = [
   ["apps/dash/src/features/settings/Settings/components/Businesses/Businesses.test.tsx", "audit-batch-006-suite-15"],
   ["apps/dash/src/shared/components/dash/ApiKeyRow.tsx", "audit-batch-007-suite-15"],
   ["apps/dash/src/shared/components/ui/table.tsx", "audit-batch-008-suite-15"],
+  ["apps/erp/src/features/low-stock-alerts/LowStockAlerts.test.tsx", "audit-batch-009-suite-15"],
 ];
 
