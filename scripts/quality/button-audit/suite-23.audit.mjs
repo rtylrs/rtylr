@@ -12,5 +12,6 @@ export const cases = [
   ["apps/erp/src/shared/components/BarcodeSvg.tsx", "audit-batch-010-suite-23"],
   ["apps/erp/src/shared/components/TaxRateSelector.tsx", "audit-batch-011-suite-23"],
   ["apps/finance/src/features/quotes/Quotes.tsx", "audit-batch-012-suite-23"],
+  ["apps/finance/src/shared/components/OverdueInvoicesWidget.tsx", "audit-batch-013-suite-23"],
 ];
 
