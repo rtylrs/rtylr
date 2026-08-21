@@ -271,5 +271,6 @@ export const cases = [
   ["apps/finance/src/features/profit-loss/ProfitLoss.test.tsx", "audit-batch-269-suite-25"],
   ["apps/finance/src/shared/components/LineItemRow.tsx", "audit-batch-270-suite-25"],
   ["apps/flow/src/features/inbox/Inbox.test.tsx", "audit-batch-271-suite-25"],
+  ["apps/flow/src/features/projects/ProjectViewTabs.test.tsx", "audit-batch-272-suite-25"],
 ];
 
