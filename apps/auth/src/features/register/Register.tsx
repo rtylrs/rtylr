@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { AlertCircle } from 'lucide-react';
 import { FaGoogle, FaGithub, FaMicrosoft, FaApple } from 'react-icons/fa';
@@ -45,14 +45,20 @@ const Register: React.FC = (): React.JSX.Element => {
   const matchError = getPasswordMatchError(password, confirmPassword);
 
   // Check email availability once the field is filled and well-formed, so the
-  // user sees "email already exists" before submitting.
+  // user sees "email already exists" before submitting. A sequence counter
+  // guards against out-of-order responses: only the newest lookup may update
+  // `emailTaken`, otherwise a slow response for a previous email could
+  // wrongly disable submission.
+  const emailCheckSeq = useRef(0);
   const checkEmailAvailable = async (): Promise<void> => {
     if (getEmailError(email)) return;
+    const seq = ++emailCheckSeq.current;
     try {
       const { exists } = await checkEmailExists(email);
-      setEmailTaken(exists);
+      if (seq === emailCheckSeq.current) setEmailTaken(exists);
     } catch {
-      setEmailTaken(false); // never block signup on a lookup failure
+      // never block signup on a lookup failure
+      if (seq === emailCheckSeq.current) setEmailTaken(false);
     }
   };
   const pwScore = scorePassword(password);
