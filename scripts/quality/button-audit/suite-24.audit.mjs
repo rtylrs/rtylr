@@ -228,5 +228,6 @@ export const cases = [
   ["apps/hr/src/features/settings/LeavePolicySettings.tsx", "audit-batch-226-suite-24"],
   ["apps/hr/src/features/shifts/Schedule.tsx", "audit-batch-227-suite-24"],
   ["apps/hr/src/shared/components/CommandPalette.tsx", "audit-batch-228-suite-24"],
+  ["apps/insights/src/features/operations/Operations.tsx", "audit-batch-229-suite-24"],
 ];
 
