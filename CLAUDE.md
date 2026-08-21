@@ -106,7 +106,7 @@ rtylr/
 ├── docs/             Architecture docs + ADRs (authoritative)
 ├── e2e/              Playwright e2e tests (one spec per app area)
 ├── test/             Shared test utilities
-├── scripts/          audit-request-contracts.mjs - audits request shapes against voxie contracts
+├── scripts/          audit-request-contracts.mjs - audits OneKit client calls (no type assertions, valid voxie imports)
 ├── eslint.config.mjs Flat ESLint config (root)
 ├── pnpm-workspace.yaml
 ├── turbo.json
@@ -505,7 +505,7 @@ table in `docs/flow-time-tracking.md`.
   `import type { ClockInRequest } from '@voxire/voxie/hr/attendance/v1/attendance_clock_in'`
 - `@voxire/types` contains non-proto types (legacy and shared domain types).
 - Never copy-paste type shapes from contracts. Import them.
-- Run `pnpm contracts:audit-requests` to verify request shapes used in apps still match the contracts.
+- Run `pnpm contracts:audit-requests` to verify every app API call goes through a generated client with intact .onk typing.
 
 ---
 
@@ -884,7 +884,7 @@ git submodule update --init --recursive
 
 ```bash
 pnpm contracts:sync             # typechecks the @voxire/voxie package
-pnpm contracts:audit-requests   # audits app request shapes against the contracts
+pnpm contracts:audit-requests   # audits OneKit client call sites for contract-typing bypasses
 ```
 
 ### Cloudflare Pages deployment
