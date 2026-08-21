@@ -93,5 +93,6 @@ export const cases = [
   ["apps/finance/src/shared/components/PageHeader.tsx", "audit-batch-091-suite-04"],
   ["apps/flow/src/features/leave/RequestLeaveDialog.test.tsx", "audit-batch-092-suite-04"],
   ["apps/flow/src/features/projects/components/BoardSettingsPanel.tsx", "audit-batch-093-suite-04"],
+  ["apps/flow/src/features/triage/Triage.tsx", "audit-batch-094-suite-04"],
 ];
 

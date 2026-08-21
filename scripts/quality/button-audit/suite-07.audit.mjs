@@ -93,5 +93,6 @@ export const cases = [
   ["apps/finance/src/shared/components/PeriodSelector.tsx", "audit-batch-091-suite-07"],
   ["apps/flow/src/features/milestones/Milestones.tsx", "audit-batch-092-suite-07"],
   ["apps/flow/src/features/settings/FlowSettings.tsx", "audit-batch-093-suite-07"],
+  ["apps/flow/src/features/workspace-dashboard/WorkspaceDashboard.tsx", "audit-batch-094-suite-07"],
 ];
 

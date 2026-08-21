@@ -93,5 +93,6 @@ export const cases = [
   ["apps/flow/src/features/focus-today/FocusToday.test.tsx", "audit-batch-091-suite-22"],
   ["apps/flow/src/features/projects/ProjectTimeline.test.tsx", "audit-batch-092-suite-22"],
   ["apps/flow/src/features/time/MyDay.test.tsx", "audit-batch-093-suite-22"],
+  ["apps/flow/src/shared/components/CommandBar.tsx", "audit-batch-094-suite-22"],
 ];
 
