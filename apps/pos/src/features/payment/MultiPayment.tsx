@@ -13,12 +13,19 @@ import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
 import { OrderPaymentServiceClient } from '@voxire/voxie/pos/orders/payments/v1/client';
 import { finalizeMultiPayment } from './multiPaymentWorkflow';
 import { useSettingsStore } from '../../shared/stores/settingsStore';
+import { isOrderFinalized } from '../../shared/utils/orderStatus';
+import type { OrderStatus } from '../../shared/types/pos';
 
 const orderClient = createOneKitClient(OrderServiceClient, 'pos');
 const orderPaymentClient = createOneKitClient(OrderPaymentServiceClient, 'pos');
 
 function lineTotal(item: OrderItem): number {
   return item.total || (item.unitPrice ?? 0) * (item.quantity ?? 0);
+}
+
+/** Settled orders ('completed' is a legacy server value) must never be re-charged. */
+function isSettled(status: string | undefined): boolean {
+  return isOrderFinalized((status ?? '') as OrderStatus) || status === 'completed';
 }
 
 const MultiPaymentScreen: React.FC = () => {
@@ -103,6 +110,12 @@ const MultiPaymentScreen: React.FC = () => {
   const removePayment = (id: string) => setPayments((prev) => prev.filter((p) => p.id !== id));
 
   const finalize = async () => {
+    if (order && isSettled(order.status)) {
+      toast.error(
+        `Order #${order.orderNumber || order.id} is already ${order.status} — no charge was made`,
+      );
+      return;
+    }
     if (paid + 0.001 < total) {
       toast.error('Remaining balance not covered');
       return;
@@ -296,7 +309,7 @@ const MultiPaymentScreen: React.FC = () => {
           </ul>
           <button
             onClick={finalize}
-            disabled={busy || remaining > 0.001}
+            disabled={busy || remaining > 0.001 || isSettled(order.status)}
             className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold disabled:opacity-50"
           >
             {busy ? 'Processing…' : `Finalize ${formatCurrency(total)}`}

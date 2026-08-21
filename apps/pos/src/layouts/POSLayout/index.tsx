@@ -43,6 +43,7 @@ const POS_ROUTE_LABELS: Record<string, string> = {
   '/orders': 'Orders',
   '/tables': 'Tables',
   '/close-session': 'Close Session',
+  '/offline': 'Offline Queue',
   '/settings': 'Settings',
   '/held-orders': 'Held Orders',
   '/cash-drop': 'Cash Drop',

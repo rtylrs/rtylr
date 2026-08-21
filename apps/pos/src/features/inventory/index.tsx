@@ -71,6 +71,9 @@ function ActionModal({
     try {
       await onSubmit(item.itemId, action, qty, reason, Number(toBranchId) || null);
       onClose();
+    } catch {
+      // Failures are toasted by the parent; the modal stays open so the
+      // entered quantity and reason are not lost.
     } finally {
       setBusy(false);
     }
@@ -115,7 +118,7 @@ function ActionModal({
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs text-pos-muted">Reason / note (optional)</label>
+          <label className="text-xs text-pos-muted">Reason / note</label>
           <input
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -132,7 +135,7 @@ function ActionModal({
           </button>
           <button
             onClick={submit}
-            disabled={busy || !qty || (needsDestination && !toBranchId)}
+            disabled={busy || !qty || !reason.trim() || (needsDestination && !toBranchId)}
             className={`flex-1 h-11 rounded-lg text-white text-sm font-semibold transition disabled:opacity-50 ${ACTION_COLORS[action]}`}
           >
             {busy ? 'Saving…' : ACTION_LABELS[action]}
@@ -224,9 +227,10 @@ const InventoryScreen: React.FC = () => {
       toast.success(`${ACTION_LABELS[action]} recorded`);
       void load();
     } catch (err) {
-      // The toast informs the user; rethrowing turned every failed submit
-      // into an unhandled promise rejection from the modal's onClick.
+      // Toast the failure and rethrow so the modal stays open (its submit
+      // swallows the rejection) instead of silently discarding the input.
       toast.error(err instanceof Error ? err.message : 'Action failed');
+      throw err;
     }
   };
 

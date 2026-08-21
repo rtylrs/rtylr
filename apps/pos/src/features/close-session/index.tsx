@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatCurrency } from '../../shared/utils/format';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import { useDaySummary } from '../day-summary/useDaySummary';
@@ -23,6 +24,7 @@ const CloseSessionScreen: React.FC = () => {
   const enqueueSessionClose = useSessionCloseQueueStore((s) => s.enqueue);
   const [actualCash, setActualCash] = useState('');
   const [busy, setBusy] = useState(false);
+  const [confirmZero, setConfirmZero] = useState(false);
 
   let variance = 0;
   try {
@@ -40,7 +42,7 @@ const CloseSessionScreen: React.FC = () => {
       const result = await closeSessionWithFallback({
         payload: buildCloseSessionPayload({
           expected: expectedCash,
-          actualInput: actualCash,
+          actualInput: actualCash || '0',
         }),
         closeSession: async (payload) => {
           await sessionClient.closeSession(payload);
@@ -59,6 +61,25 @@ const CloseSessionScreen: React.FC = () => {
     } finally {
       setBusy(false);
     }
+  };
+
+  // An empty input coerces to $0, so it must be an explicit confirmation —
+  // never a silent default.
+  const requestClose = () => {
+    if (!actualCash.trim()) {
+      setConfirmZero(true);
+      return;
+    }
+    const parsed = Number(actualCash);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      toast.error('Enter a valid counted cash amount.');
+      return;
+    }
+    if (parsed === 0) {
+      setConfirmZero(true);
+      return;
+    }
+    void close();
   };
 
   return (
@@ -105,13 +126,25 @@ const CloseSessionScreen: React.FC = () => {
           Variance: {formatCurrency(variance)}
         </div>
         <button
-          onClick={close}
+          onClick={requestClose}
           disabled={busy}
           className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold disabled:opacity-50"
         >
           {busy ? 'Closing…' : 'Close Session'}
         </button>
       </div>
+      <ConfirmModal
+        open={confirmZero}
+        title="Close with $0.00 counted cash?"
+        message={`No counted cash was entered. This records a closing float of ${formatCurrency(0)} against an expected ${formatCurrency(expectedCash)}.`}
+        confirmText="Close anyway"
+        danger
+        onCancel={() => setConfirmZero(false)}
+        onConfirm={() => {
+          setConfirmZero(false);
+          void close();
+        }}
+      />
     </ScreenLayout>
   );
 };

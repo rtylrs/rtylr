@@ -31,13 +31,14 @@ describe('buildRefundRequest', () => {
     ).toThrow('Select a valid order before refunding.');
   });
 
-  it('builds a partial refund request and caps local cash drawer adjustment to cash paid', () => {
+  it('builds a partial refund request and records drawer cash for a confirmed cash refund', () => {
     const result = buildRefundRequest({
       orderId: '7',
       fullRefund: false,
       amountInput: '15.50',
       reason: 'Wrong item',
       receipt,
+      refundMethod: 'cash',
     });
 
     expect(result).toEqual({
@@ -48,6 +49,53 @@ describe('buildRefundRequest', () => {
       },
       cashRefundAmount: 15.5,
     });
+  });
+
+  it('does not touch the cash drawer when the confirmed method is not cash', () => {
+    const result = buildRefundRequest({
+      orderId: '7',
+      fullRefund: false,
+      amountInput: '15.50',
+      reason: 'Wrong item',
+      receipt,
+      refundMethod: 'card',
+    });
+
+    expect(result.cashRefundAmount).toBe(0);
+  });
+
+  it('uses the server order total for a full refund before falling back to the receipt', () => {
+    const fromOrder = buildRefundRequest({
+      orderId: '7',
+      fullRefund: true,
+      amountInput: '',
+      reason: 'Customer complaint',
+      orderTotal: 55,
+      refundMethod: 'cash',
+    });
+    expect(fromOrder.payload.amount).toBe(55);
+
+    const fromReceipt = buildRefundRequest({
+      orderId: '7',
+      fullRefund: true,
+      amountInput: '',
+      reason: 'Customer complaint',
+      receipt,
+      refundMethod: 'cash',
+    });
+    expect(fromReceipt.payload.amount).toBe(42);
+  });
+
+  it('throws an honest error when neither the order nor a receipt has a total', () => {
+    expect(() =>
+      buildRefundRequest({
+        orderId: '7',
+        fullRefund: true,
+        amountInput: '',
+        reason: 'Customer complaint',
+        refundMethod: 'cash',
+      })
+    ).toThrow('Cannot determine order total for full refund.');
   });
 });
 
@@ -61,7 +109,8 @@ describe('processRefund', () => {
       fullRefund: true,
       amountInput: '',
       reason: 'Customer complaint',
-      receipt,
+      orderTotal: 42,
+      refundMethod: 'cash',
       refundOrder,
       recordCashRefund,
     });

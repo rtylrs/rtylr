@@ -12,9 +12,15 @@ import Skeleton from '../../shared/components/Skeleton';
 import OrderStatusBadge from '../../shared/components/OrderStatusBadge';
 import type { OrderStatus } from '../../shared/types/pos';
 import { formatCurrency, formatDate } from '../../shared/utils/format';
-import { isVoidable, orderStatusLabel } from '../../shared/utils/orderStatus';
+import { isOrderFinalized, isVoidable, orderStatusLabel } from '../../shared/utils/orderStatus';
 import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
 import type { Order } from '@voxire/voxie/pos/orders/v1/types';
+import { resolveOpenSessionId } from '../close-session/closeSessionWorkflow';
+
+/** Orders cannot be charged again once settled ('completed' is a legacy server value). */
+function isSettled(status: string | undefined): boolean {
+  return isOrderFinalized((status ?? '') as OrderStatus) || status === 'completed';
+}
 
 const FILTERS = ['all', 'pending', 'preparing', 'ready', 'paid', 'voided', 'refunded'] as const;
 type OrderFilter = (typeof FILTERS)[number];
@@ -46,6 +52,7 @@ const OrdersScreen: React.FC = () => {
   const [hasMore, setHasMore] = useState(false);
   const [reopening, setReopening] = useState<string | null>(null);
   const [voiding, setVoiding] = useState<string | null>(null);
+  const [noSession, setNoSession] = useState(false);
   const navigate = useNavigate();
   const [params] = useSearchParams();
   // Reopening PAID orders is a manager capability, not a URL toggle: without
@@ -57,9 +64,13 @@ const OrdersScreen: React.FC = () => {
     (async () => {
       setLoading(true);
       setError(null);
+      setNoSession(false);
       try {
+        // ListOrdersRequest.session_id must be a real open register session;
+        // there is no "current" alias, so resolve it before listing.
+        const sessionId = String(await resolveOpenSessionId());
         const res = await orderClient.listOrders({
-          sessionId: '0',
+          sessionId,
           status: filter !== 'all' ? filter : '',
           dateFrom: '',
           dateTo: '',
@@ -72,6 +83,13 @@ const OrdersScreen: React.FC = () => {
         setTotal(res.total ?? 0);
         setHasMore(res.hasMore ?? false);
       } catch (e) {
+        if (e instanceof Error && e.message.includes('No open register session')) {
+          setNoSession(true);
+          setOrders([]);
+          setTotal(0);
+          setHasMore(false);
+          return;
+        }
         const err = e as {
           response?: { data?: { message?: string } };
           message?: string;
@@ -160,6 +178,12 @@ const OrdersScreen: React.FC = () => {
         </div>
         {loading ? (
           <Skeleton rows={8} />
+        ) : noSession ? (
+          <EmptyState
+            icon={AlertTriangle}
+            title="No active session"
+            message="Open a register session to view orders."
+          />
         ) : error ? (
           <EmptyState icon={AlertTriangle} title="Failed to load" message={error} />
         ) : orders.length === 0 ? (
@@ -169,12 +193,23 @@ const OrdersScreen: React.FC = () => {
             <ul className="space-y-2">
               {orders.map((o) => {
                 const preview = orderItemsPreview(o);
+                // Settled orders must not re-enter the payment flow; reopening
+                // a paid order is the explicit manager exception.
+                const settled = isSettled(o.status as string);
 
                 return (
                   <li
                     key={o.id}
                     className="p-4 rounded-xl bg-pos-card border border-pos-border hover:border-white/20 cursor-pointer transition"
-                    onClick={() => !reopenMode && navigate(`/payment/${o.id}`)}
+                    title={
+                      settled && !reopenMode
+                        ? 'This order is already settled and cannot be charged again'
+                        : undefined
+                    }
+                    onClick={() => {
+                      if (reopenMode || settled) return;
+                      navigate(`/payment/${o.id}`);
+                    }}
                   >
                     <div className="flex justify-between items-center gap-4">
                       <div className="flex items-center gap-3 min-w-0">

@@ -63,6 +63,34 @@ describe('useKeyboardShortcuts', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  it('does not charge with Enter while a focused button would handle the key', () => {
+    useCartStore.setState({ items: [item()] });
+    renderHook(() => useKeyboardShortcuts());
+
+    const button = document.createElement('button');
+    document.body.append(button);
+    button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('does not charge with Enter while a modal overlay is open', () => {
+    useCartStore.setState({ items: [item()] });
+    renderHook(() => useKeyboardShortcuts());
+
+    const overlay = document.createElement('div');
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    document.body.append(overlay);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+    expect(navigate).not.toHaveBeenCalled();
+
+    overlay.remove();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    expect(navigate).toHaveBeenCalledWith('/payment');
+  });
+
   it('routes discount and refund shortcuts to the synced server order when available', () => {
     useCartStore.setState({ serverOrderId: 42, orderId: null });
     renderHook(() => useKeyboardShortcuts());

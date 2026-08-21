@@ -91,6 +91,18 @@ const CommandPalette: React.FC = () => {
         action: () => navigate('/day-summary'),
       },
       {
+        id: 'nav-close-session',
+        label: 'Close Session',
+        category: 'Navigate',
+        action: () => navigate('/close-session'),
+      },
+      {
+        id: 'nav-offline',
+        label: 'Offline Queue',
+        category: 'Navigate',
+        action: () => navigate('/offline'),
+      },
+      {
         id: 'nav-settings',
         label: 'Settings',
         category: 'Navigate',

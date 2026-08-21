@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CirclePause } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
 import type { Order as ServerHeldOrder } from '@voxire/voxie/pos/orders/v1/types';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 import { useHeldOrdersStore } from '../../shared/stores/heldOrdersStore';
 import { useCartStore } from '../../shared/stores/cartStore';
 import { formatDate, formatCurrency } from '../../shared/utils/format';
@@ -30,6 +31,7 @@ const HeldOrdersScreen: React.FC = () => {
   const setServerOrderId = useCartStore((s) => s.setServerOrderId);
 
   const queryClient = useQueryClient();
+  const [discarding, setDiscarding] = useState<string | null>(null);
   const { data: serverOrders = [] } = useQuery<ServerHeldOrder[]>({
     queryKey: ['pos', 'held-orders'],
     queryFn: async () => {
@@ -159,7 +161,7 @@ const HeldOrdersScreen: React.FC = () => {
                           Release
                         </button>
                         <button
-                          onClick={() => remove(o.id)}
+                          onClick={() => setDiscarding(o.id)}
                           className="h-10 px-4 rounded-lg bg-destructive text-white font-semibold text-sm"
                         >
                           Discard
@@ -173,6 +175,18 @@ const HeldOrdersScreen: React.FC = () => {
           </>
         )}
       </div>
+      <ConfirmModal
+        open={discarding !== null}
+        title="Discard held order?"
+        message="The held items will be permanently removed from this terminal."
+        confirmText="Discard"
+        danger
+        onCancel={() => setDiscarding(null)}
+        onConfirm={() => {
+          if (discarding) remove(discarding);
+          setDiscarding(null);
+        }}
+      />
     </ScreenLayout>
   );
 };

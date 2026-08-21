@@ -35,8 +35,24 @@ const OfflineQueueScreen: React.FC = () => {
       } else {
         toast.success('Queue synced');
       }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? `Sync failed: ${error.message}` : 'Sync failed. Try again.',
+      );
     } finally {
       setFlushing(false);
+    }
+  };
+
+  const retryWithFeedback = async (id: string, retryFn: (id: string) => Promise<boolean>) => {
+    try {
+      if (await retryFn(id)) {
+        toast.success('Entry synced');
+      } else {
+        toast.error('Retry failed — the entry stays queued');
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Retry failed — the entry stays queued');
     }
   };
 
@@ -99,7 +115,7 @@ const OfflineQueueScreen: React.FC = () => {
                     )}
                   </div>
                   <button
-                    onClick={() => retry(q.id)}
+                    onClick={() => void retryWithFeedback(q.id, retry)}
                     disabled={!online}
                     className="h-10 px-3 rounded-lg bg-white/10 text-pos-text text-xs font-semibold disabled:opacity-50"
                   >
@@ -127,7 +143,7 @@ const OfflineQueueScreen: React.FC = () => {
                     Variance {formatCurrency(Number(q.payload.variance ?? 0))}
                   </div>
                   <button
-                    onClick={() => retrySessionClose(q.id)}
+                    onClick={() => void retryWithFeedback(q.id, retrySessionClose)}
                     disabled={!online}
                     className="h-10 px-3 rounded-lg bg-white/10 text-pos-text text-xs font-semibold disabled:opacity-50"
                   >
@@ -160,7 +176,7 @@ const OfflineQueueScreen: React.FC = () => {
                     {formatCurrency(q.payload.amount ?? 0)}
                   </div>
                   <button
-                    onClick={() => retryCashMovement(q.id)}
+                    onClick={() => void retryWithFeedback(q.id, retryCashMovement)}
                     disabled={!online}
                     className="h-10 px-3 rounded-lg bg-white/10 text-pos-text text-xs font-semibold disabled:opacity-50"
                   >

@@ -1,43 +1,13 @@
 /**
  * End-to-end: processRefund chains API call → cash drawer adjustment.
- * Covers full refund, partial refund, and cash-vs-card split behaviour.
+ * Cash drawer movement is driven by the tender the cashier confirms in the
+ * Refund UI, and the full-refund total comes from server order data first.
  */
 import { describe, expect, it, vi } from 'vitest';
 import { processRefund } from './refundWorkflow';
-import type { Receipt } from '../../shared/types/pos';
-
-const cashReceipt: Receipt = {
-  id: 'receipt-1',
-  orderId: 'order-1',
-  total: 50,
-  printedAt: '2026-05-13T10:00:00.000Z',
-  items: [],
-  payments: [{ id: 'p-1', method: 'cash', amount: 50, createdAt: '2026-05-13T10:00:00.000Z' }],
-};
-
-const cardReceipt: Receipt = {
-  id: 'receipt-2',
-  orderId: 'order-2',
-  total: 50,
-  printedAt: '2026-05-13T10:00:00.000Z',
-  items: [],
-  payments: [{ id: 'p-2', method: 'card', amount: 50, createdAt: '2026-05-13T10:00:00.000Z' }],
-};
-
-const splitReceipt: Receipt = {
-  id: 'receipt-3',
-  orderId: 'order-3',
-  total: 80,
-  printedAt: '2026-05-13T10:00:00.000Z',
-  items: [],
-  payments: [
-    { id: 'p-3a', method: 'cash', amount: 30, createdAt: '2026-05-13T10:00:00.000Z' },
-    { id: 'p-3b', method: 'card', amount: 50, createdAt: '2026-05-13T10:00:00.000Z' },
-  ],
-};
 
 describe('processRefund - full cash refund', () => {
-  it('calls API with receipt total and triggers cash drawer adjustment', async () => {
+  it('calls API with the confirmed order total and triggers cash drawer adjustment', async () => {
     const refundOrder = vi.fn(async () => undefined);
     const recordCashRefund = vi.fn();
 
@@ -46,7 +16,8 @@ describe('processRefund - full cash refund', () => {
       fullRefund: true,
       amountInput: '',
       reason: 'Customer changed mind',
-      receipt: cashReceipt,
+      orderTotal: 50,
+      refundMethod: 'cash',
       refundOrder,
       recordCashRefund,
     });
@@ -61,7 +32,7 @@ describe('processRefund - full cash refund', () => {
 });
 
 describe('processRefund - full card refund', () => {
-  it('calls API with receipt total but does not trigger cash drawer', async () => {
+  it('calls API with the confirmed total but does not trigger cash drawer', async () => {
     const refundOrder = vi.fn(async () => undefined);
     const recordCashRefund = vi.fn();
 
@@ -70,7 +41,8 @@ describe('processRefund - full card refund', () => {
       fullRefund: true,
       amountInput: '',
       reason: 'Wrong item',
-      receipt: cardReceipt,
+      orderTotal: 50,
+      refundMethod: 'card',
       refundOrder,
       recordCashRefund,
     });
@@ -82,7 +54,7 @@ describe('processRefund - full card refund', () => {
 });
 
 describe('processRefund - partial refund', () => {
-  it('sends only the partial amount and adjusts drawer accordingly', async () => {
+  it('sends only the partial amount and adjusts drawer for a confirmed cash refund', async () => {
     const refundOrder = vi.fn(async () => undefined);
     const recordCashRefund = vi.fn();
 
@@ -91,7 +63,7 @@ describe('processRefund - partial refund', () => {
       fullRefund: false,
       amountInput: '20',
       reason: 'Partial complaint',
-      receipt: cashReceipt,
+      refundMethod: 'cash',
       refundOrder,
       recordCashRefund,
     });
@@ -110,7 +82,7 @@ describe('processRefund - partial refund', () => {
         fullRefund: false,
         amountInput: '0',
         reason: 'Test',
-        receipt: cashReceipt,
+        refundMethod: 'cash',
         refundOrder,
         recordCashRefund,
       }),
@@ -118,27 +90,21 @@ describe('processRefund - partial refund', () => {
 
     expect(refundOrder).not.toHaveBeenCalled();
   });
-});
 
-describe('processRefund - split payment receipt', () => {
-  it('caps cash drawer refund to cash portion when partial refund exceeds it', async () => {
+  it('does not adjust the drawer when no method was confirmed', async () => {
     const refundOrder = vi.fn(async () => undefined);
     const recordCashRefund = vi.fn();
 
-    // $40 refund on an order where only $30 was paid cash
     await processRefund({
-      orderId: '3',
+      orderId: '1',
       fullRefund: false,
-      amountInput: '40',
-      reason: 'Partial',
-      receipt: splitReceipt,
+      amountInput: '20',
+      reason: 'Partial complaint',
       refundOrder,
       recordCashRefund,
     });
 
-    expect(refundOrder).toHaveBeenCalledWith({ orderId: '3', amount: 40, reason: 'Partial' });
-    // Cash drawer only gets back the $30 that was cash - not the card portion
-    expect(recordCashRefund).toHaveBeenCalledWith(30, '3');
+    expect(recordCashRefund).not.toHaveBeenCalled();
   });
 });
 
@@ -155,7 +121,7 @@ describe('processRefund - API failure', () => {
         fullRefund: false,
         amountInput: '15',
         reason: 'Test failure',
-        receipt: cashReceipt,
+        refundMethod: 'cash',
         refundOrder,
         recordCashRefund,
       }),

@@ -10,8 +10,8 @@ import { useCapabilities } from '../../shared/hooks/useCapabilities';
 // self-gate too (defence in depth), so this menu is purely navigational.
 const ACTIONS: { id: string; label: string; route: string; cap: keyof ReturnType<typeof useCapabilities> }[] = [
   { id: 'void', label: 'Void order', route: '/orders?reopen=1', cap: 'canVoid' },
-  { id: 'refund', label: 'Process refund', route: '/refund/current', cap: 'canRefund' },
-  { id: 'discount', label: 'Apply discount', route: '/discount/current', cap: 'canApplyDiscount' },
+  { id: 'refund', label: 'Process refund', route: '/orders', cap: 'canRefund' },
+  { id: 'discount', label: 'Apply discount', route: '/orders', cap: 'canApplyDiscount' },
   { id: 'reopen', label: 'Reopen paid order', route: '/orders?reopen=1', cap: 'canVoid' },
 ];
 

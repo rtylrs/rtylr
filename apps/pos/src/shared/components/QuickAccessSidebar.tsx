@@ -13,6 +13,7 @@ import {
   ReceiptText,
   Settings,
   User,
+  WifiOff,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useSettingsStore } from '../stores/settingsStore';
@@ -41,6 +42,7 @@ const LINKS: QuickLink[] = [
   { to: '/receipts', label: 'Receipts', icon: Calculator },
   { to: '/day-summary', label: 'Day', icon: ChartNoAxesCombined },
   { to: '/held-orders', label: 'Held', icon: CirclePause },
+  { to: '/offline', label: 'Offline', icon: WifiOff },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 

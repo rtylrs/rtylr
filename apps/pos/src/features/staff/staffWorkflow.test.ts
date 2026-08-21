@@ -80,13 +80,15 @@ describe('buildStaffUpdate', () => {
       name: 'Alice',
       role: 'manager',
       isActive: true,
-      hourlyRate: 0,
       maxDiscountPct: 50,
       canVoid: true,
       canRefund: true,
       canOpenDrawer: true,
       canApplyDiscount: true,
     });
+    // The rate is unknown (list response has no hourlyRate), so it must be
+    // omitted rather than zeroed on every edit.
+    expect('hourlyRate' in payload).toBe(false);
   });
 
   it('includes pin only when a new one is provided', () => {

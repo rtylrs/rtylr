@@ -6,7 +6,11 @@ interface BuildRefundRequestParams {
   fullRefund: boolean;
   amountInput: string;
   reason: string;
+  /** Order total from server order data; preferred over the local receipt. */
+  orderTotal?: number;
   receipt?: Receipt;
+  /** Tender the cashier confirmed in the Refund UI ('cash' moves the drawer). */
+  refundMethod?: string;
 }
 
 interface BuiltRefundRequest {
@@ -30,10 +34,13 @@ function parseOrderId(orderId: string | undefined): number {
 function parseRefundAmount(
   fullRefund: boolean,
   amountInput: string,
+  orderTotal: number | undefined,
   receipt: Receipt | undefined,
 ): number {
   if (fullRefund) {
-    const total = receipt?.total ?? 0;
+    // Server order total first; local receipts are keyed by local refs and
+    // are usually absent for server orders.
+    const total = orderTotal && orderTotal > 0 ? orderTotal : (receipt?.total ?? 0);
     if (total <= 0) throw new Error('Cannot determine order total for full refund.');
     return total;
   }
@@ -44,12 +51,11 @@ function parseRefundAmount(
   return amount;
 }
 
-function cashPaid(receipt: Receipt | undefined): number {
-  return (
-    receipt?.payments
-      .filter((payment) => payment.method === 'cash')
-      .reduce((sum, payment) => sum + payment.amount, 0) ?? 0
-  );
+// Cash handed back is recorded from what the cashier confirmed (amount +
+// method), not from receipt lookups — stored receipts are keyed by local
+// refs and never match server order ids.
+function confirmedCashPortion(amount: number, refundMethod: string | undefined): number {
+  return refundMethod === 'cash' ? amount : 0;
 }
 
 export function buildRefundRequest({
@@ -57,11 +63,12 @@ export function buildRefundRequest({
   fullRefund,
   amountInput,
   reason,
+  orderTotal,
   receipt,
+  refundMethod,
 }: BuildRefundRequestParams): BuiltRefundRequest {
   const numericOrderId = parseOrderId(orderId);
-  const amount = parseRefundAmount(fullRefund, amountInput, receipt);
-  const cashTendered = cashPaid(receipt);
+  const amount = parseRefundAmount(fullRefund, amountInput, orderTotal, receipt);
 
   return {
     payload: {
@@ -69,7 +76,7 @@ export function buildRefundRequest({
       amount,
       reason,
     },
-    cashRefundAmount: Math.min(amount, cashTendered),
+    cashRefundAmount: confirmedCashPortion(amount, refundMethod),
   };
 }
 

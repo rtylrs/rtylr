@@ -62,6 +62,8 @@ export interface StaffEdits {
 /**
  * Builds the generated updatePOSUser payload from edited staff fields. A blank
  * newPin is omitted so an edit that doesn't touch the PIN leaves it unchanged.
+ * hourlyRate is omitted too: the list response carries no rate, and sending a
+ * hardcoded 0 would zero out the employee's real rate on every role/PIN edit.
  */
 export const STAFF_PIN_LENGTH = 4;
 
@@ -80,7 +82,6 @@ export function buildStaffUpdate(
     ...(pin ? { pin } : {}),
     role: edits.role,
     isActive: edits.isActive,
-    hourlyRate: 0,
     maxDiscountPct: edits.maxDiscountPct,
     canVoid: edits.canVoid,
     canRefund: edits.canRefund,
