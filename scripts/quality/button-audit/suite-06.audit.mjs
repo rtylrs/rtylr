@@ -168,5 +168,6 @@ export const cases = [
   ["apps/erp/src/shared/components/TaxRateSelector.tsx", "audit-batch-166-suite-06"],
   ["apps/finance/src/features/quotes/Quotes.tsx", "audit-batch-167-suite-06"],
   ["apps/finance/src/shared/components/OverdueInvoicesWidget.tsx", "audit-batch-168-suite-06"],
+  ["apps/flow/src/features/leave/LeaveScreen.test.tsx", "audit-batch-169-suite-06"],
 ];
 
