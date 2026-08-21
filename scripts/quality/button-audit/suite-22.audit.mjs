@@ -50,5 +50,6 @@ export const cases = [
   ["apps/hr/src/shared/components/ClockInOutButton.tsx", "audit-batch-048-suite-22"],
   ["apps/insights/src/features/operations/Operations.test.tsx", "audit-batch-049-suite-22"],
   ["apps/menu/src/main.tsx", "audit-batch-050-suite-22"],
+  ["apps/recruit/src/features/public/NotFound.tsx", "audit-batch-051-suite-22"],
 ];
 
