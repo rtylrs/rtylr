@@ -1,0 +1,8 @@
+package flow.dashboard.v2
+
+/// DashboardService aggregates business-wide counts for the caller. The
+/// workspace parameter is gone; there is exactly one scope, the caller's
+/// business, resolved from auth.
+service DashboardService {
+  getFlowDashboard(GetFlowDashboardRequest) -> GetFlowDashboardResponse @get("/dashboard")
+}

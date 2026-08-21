@@ -1,0 +1,12 @@
+package flow.insights.v2
+
+/// InsightsService aggregates business-wide delivery metrics. Every request
+/// implicitly scopes to the caller's business; per-user visibility of named
+/// projects (roadmap, workload drill-downs) is applied server-side.
+service InsightsService {
+  getInsights(GetInsightsRequest) -> GetInsightsResponse @get("/overview")
+
+  getTeamWorkload(GetTeamWorkloadRequest) -> GetTeamWorkloadResponse @get("/team/workload")
+
+  getRoadmap(GetRoadmapRequest) -> GetRoadmapResponse @get("/roadmap")
+}

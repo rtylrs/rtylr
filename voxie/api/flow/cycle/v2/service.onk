@@ -1,0 +1,9 @@
+package flow.cycle.v2
+
+service CycleService {
+  listCycles(ListCyclesRequest) -> ListCyclesResponse @get("/cycles")
+
+  createCycle(CreateCycleRequest) -> CreateCycleResponse @post("/cycles")
+
+  updateCycle(UpdateCycleRequest) -> UpdateCycleResponse @put("/cycles/{id}")
+}
