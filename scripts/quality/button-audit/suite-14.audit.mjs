@@ -123,5 +123,6 @@ export const cases = [
   ["apps/flow/src/shared/components/TaskContextMenu.tsx", "audit-batch-121-suite-14"],
   ["apps/hr/src/features/documents/DocumentVault.tsx", "audit-batch-122-suite-14"],
   ["apps/hr/src/features/payroll/Payroll.tsx", "audit-batch-123-suite-14"],
+  ["apps/hr/src/features/setup-wizard/steps/CompanyProfileStep.tsx", "audit-batch-124-suite-14"],
 ];
 

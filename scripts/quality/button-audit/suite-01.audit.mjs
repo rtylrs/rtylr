@@ -123,5 +123,6 @@ export const cases = [
   ["apps/flow/src/shared/components/PreviewRouteUnavailable.test.tsx", "audit-batch-121-suite-01"],
   ["apps/hr/src/features/dashboard/widgets/HoursThisWeekWidget.tsx", "audit-batch-122-suite-01"],
   ["apps/hr/src/features/leave/LeaveCalendar.tsx", "audit-batch-123-suite-01"],
+  ["apps/hr/src/features/reviews/Reviews.tsx", "audit-batch-124-suite-01"],
 ];
 
