@@ -233,5 +233,6 @@ export const cases = [
   ["apps/recruit/src/features/public/ApplyPage.test.tsx", "audit-batch-231-suite-19"],
   ["apps/auth/src/features/not-found/NotFound.tsx", "audit-batch-232-suite-19"],
   ["apps/crm/src/features/customers/CustomerProfile.tsx", "audit-batch-233-suite-19"],
+  ["apps/crm/src/features/segments/SegmentDetail.tsx", "audit-batch-234-suite-19"],
 ];
 
