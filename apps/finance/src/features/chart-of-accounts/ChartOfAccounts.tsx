@@ -260,7 +260,7 @@ const ChartOfAccounts: React.FC = () => {
               ))}
             </select>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button style={ghostBtn} onClick={() => setShowCreate(false)}>
+              <button type="button" style={ghostBtn} onClick={() => setShowCreate(false)}>
                 {t('common.cancel')}
               </button>
               <button type="button" style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>

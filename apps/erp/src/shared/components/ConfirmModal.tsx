@@ -92,7 +92,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           >
             {cancelLabel}
           </button>
-          <button
+          <button type="button"
             data-testid="confirm-modal-confirm"
             onClick={onConfirm}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold"

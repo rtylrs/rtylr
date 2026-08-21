@@ -56,7 +56,7 @@ const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({
       >
         {stock}
       </span>
-      <button
+      <button type="button"
         onClick={() => bump(1)}
         aria-label="Increase stock"
         className="h-11 w-11 rounded flex items-center justify-center"

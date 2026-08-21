@@ -210,7 +210,7 @@ const Menu: React.FC<{}> = () => {
             )}
           </div>
           <div className="flex gap-2">
-            <button
+            <button type="button"
               className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
               onClick={() =>
                 deleteCategory((parentCategory.itemId || parentCategory._id) as string)

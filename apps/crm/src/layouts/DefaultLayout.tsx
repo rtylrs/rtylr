@@ -313,7 +313,7 @@ const DefaultLayout: React.FC = () => {
               alt="rtylr"
               className="h-9 w-auto"
             />
-            <button
+            <button type="button"
               onClick={() => setSidebarOpen(false)}
               className="h-7 w-7 rounded-lg flex md:hidden items-center justify-center"
               style={{ color: 'var(--hub-text-muted)' }}

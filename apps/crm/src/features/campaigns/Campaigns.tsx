@@ -541,7 +541,7 @@ const Campaigns: React.FC = () => {
               >
                 <MessageSquare size={14} /> New SMS
               </button>
-              <button
+              <button type="button"
                 onClick={() => navigate({ to: '/campaigns/email' })}
                 style={{
                   display: 'flex',

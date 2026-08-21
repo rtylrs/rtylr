@@ -436,7 +436,7 @@ const ProjectSettings: React.FC = () => {
                     </select>
                     {confirmMove ? (
                       <>
-                        <button
+                        <button type="button"
                           onClick={() => {
                             if (!canManageProject) return;
                             moveProject.mutate(

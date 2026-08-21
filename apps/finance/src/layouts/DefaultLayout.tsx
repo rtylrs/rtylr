@@ -477,7 +477,7 @@ const DefaultLayout: React.FC = () => {
             </Link>
             <CaretButton className="w-full justify-start mb-1" />
             <div className="relative">
-              <button
+              <button type="button"
                 onClick={() => setShowUserMenu((v) => !v)}
                 className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150"
                 style={{ background: 'transparent' }}

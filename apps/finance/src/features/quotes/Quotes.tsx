@@ -282,7 +282,7 @@ const Quotes: React.FC = () => {
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     {q.status === 'Accepted' ? (
-                      <button
+                      <button type="button"
                         style={{
                           ...ghostBtn,
                           padding: '4px 10px',

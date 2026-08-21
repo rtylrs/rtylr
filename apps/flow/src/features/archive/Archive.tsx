@@ -48,7 +48,7 @@ const Archive: React.FC = () => {
               style={{ borderBottom: '1px solid var(--flow-border)' }}
             >
               <PriorityIcon priority={task.priority} size={12} />
-              <button
+              <button type="button"
                 onClick={() => navigate({ to: `/task/${task.id}` as string })}
                 className="flex-1 text-left text-[12px] truncate"
                 style={{ color: 'var(--flow-text-muted)', textDecoration: 'line-through' }}

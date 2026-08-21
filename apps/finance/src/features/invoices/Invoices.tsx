@@ -106,7 +106,7 @@ const Invoices: React.FC = () => {
                 <Send size={13} /> Send {selected.size}
               </button>
             )}
-            <button style={ghostBtn} onClick={() => exportQuickbooksInvoices(exportPayload)}>
+            <button type="button" style={ghostBtn} onClick={() => exportQuickbooksInvoices(exportPayload)}>
               <FileSpreadsheet size={13} /> QuickBooks
             </button>
             <button type="button" style={ghostBtn} onClick={() => exportXeroInvoices(exportPayload)}>

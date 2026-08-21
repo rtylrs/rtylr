@@ -939,7 +939,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 </kbd>
               )}
             </button>
-            <button
+            <button type="button"
               style={{
                 height: isMobile ? '36px' : '28px',
                 width: isMobile ? '36px' : '28px',

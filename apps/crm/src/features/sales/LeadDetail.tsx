@@ -256,7 +256,7 @@ const LeadDetail: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px' }}>
         {/* Back + header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button
+          <button type="button"
             aria-label="Back to leads"
             onClick={() => navigate({ to: '/sales/leads' })}
             style={{

@@ -296,7 +296,7 @@ const DefaultLayout: React.FC = () => {
           </button>
 
           <div className="relative">
-            <button
+            <button type="button"
               onClick={() => setShowUserMenu((v) => !v)}
               aria-haspopup="menu"
               aria-expanded={showUserMenu}

@@ -541,7 +541,7 @@ const PerksEditor: React.FC<{
             onChange={(v) => onChange(items.map((x, j) => (i === j ? { ...x, blurb: v } : x)))}
             placeholder="blurb"
           />
-          <button
+          <button type="button"
             onClick={() => onChange(items.filter((_, j) => j !== i))}
             className="rounded-md p-2 text-white/60 hover:bg-white/10 hover:text-red-400"
           >

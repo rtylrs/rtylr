@@ -139,7 +139,7 @@ const Views: React.FC = () => {
                       className="flex-1 bg-transparent text-[12px] outline-none"
                       style={{ color: 'var(--flow-text)' }}
                     />
-                    <button
+                    <button type="button"
                       onClick={() => commitEdit(v)}
                       aria-label={t('flow.views.confirmRenameLabel')}
                       className="h-4 w-4 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"

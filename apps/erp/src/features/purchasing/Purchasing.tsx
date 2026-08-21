@@ -354,7 +354,7 @@ const Purchasing: React.FC = () => {
                     </span>
                     <div className="flex items-center gap-1">
                       {status === 'Sent' && canApprovePO && (
-                        <button
+                        <button type="button"
                           onClick={() => handleApprove(order.id ?? '')}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
                           style={{

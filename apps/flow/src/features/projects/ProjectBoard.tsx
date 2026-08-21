@@ -549,7 +549,7 @@ const KanbanColumn: React.FC<{
           >
             <Plus size={11} />
           </button>
-          <button
+          <button type="button"
             onClick={onDelete}
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] hover:text-red-400"
             style={{ color: 'var(--flow-text-dim)' }}
