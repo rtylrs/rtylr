@@ -318,5 +318,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/Breadcrumbs.tsx", "audit-batch-316-suite-09"],
   ["apps/dash/src/shared/hooks/queries/useAiQuota.test.tsx", "audit-batch-317-suite-09"],
   ["apps/erp/src/features/price-lists/PriceLists.tsx", "audit-batch-318-suite-09"],
+  ["apps/erp/src/features/warehouses/Warehouses.tsx", "audit-batch-319-suite-09"],
 ];
 

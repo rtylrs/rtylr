@@ -318,5 +318,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/DangerZone.tsx", "audit-batch-316-suite-11"],
   ["apps/dash/src/shared/hooks/queries/useBusiness.test.tsx", "audit-batch-317-suite-11"],
   ["apps/erp/src/features/products/ProductDetail.tsx", "audit-batch-318-suite-11"],
+  ["apps/erp/src/main.tsx", "audit-batch-319-suite-11"],
 ];
 

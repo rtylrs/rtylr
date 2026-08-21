@@ -318,5 +318,6 @@ export const cases = [
   ["apps/dash/src/router.tsx", "audit-batch-316-suite-01"],
   ["apps/dash/src/shared/components/ui/label.tsx", "audit-batch-317-suite-01"],
   ["apps/erp/src/features/dashboard/Dashboard.tsx", "audit-batch-318-suite-01"],
+  ["apps/erp/src/features/stock-transfers/StockTransfers.test.tsx", "audit-batch-319-suite-01"],
 ];
 

@@ -318,5 +318,6 @@ export const cases = [
   ["apps/dash/src/shared/components/ui/avatar.tsx", "audit-batch-316-suite-19"],
   ["apps/erp/src/features/barcodes/Barcodes.test.tsx", "audit-batch-317-suite-19"],
   ["apps/erp/src/features/purchasing/Receiving.tsx", "audit-batch-318-suite-19"],
+  ["apps/erp/src/shared/components/ConfirmModal.tsx", "audit-batch-319-suite-19"],
 ];
 

@@ -318,5 +318,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/NotificationItem.tsx", "audit-batch-316-suite-12"],
   ["apps/dash/src/shared/hooks/queries/useBusinesses.test.tsx", "audit-batch-317-suite-12"],
   ["apps/erp/src/features/products/Products.test.tsx", "audit-batch-318-suite-12"],
+  ["apps/erp/src/router.tsx", "audit-batch-319-suite-12"],
 ];
 
