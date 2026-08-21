@@ -242,5 +242,6 @@ export const cases = [
   ["apps/dash/src/shared/hooks/queries/useKpis.test.tsx", "audit-batch-240-suite-09"],
   ["apps/erp/src/features/products/Products.tsx", "audit-batch-241-suite-09"],
   ["apps/erp/src/shared/components/BarcodeInput.tsx", "audit-batch-242-suite-09"],
+  ["apps/erp/src/shared/components/SupplierSelect.tsx", "audit-batch-243-suite-09"],
 ];
 
