@@ -221,7 +221,7 @@ const AdminDashboard: React.FC = () => {
                     >
                       <GripVertical size={12} />
                     </div>
-                    <button
+                    <button type="button"
                       onClick={() => removeWidget(widgetId)}
                       className="h-6 w-6 rounded-md flex items-center justify-center"
                       style={{

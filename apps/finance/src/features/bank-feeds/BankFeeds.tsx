@@ -278,7 +278,7 @@ const BankFeeds: React.FC = () => {
             >
               Cancel
             </button>
-            <button
+            <button type="button"
               style={{ ...primaryBtn, opacity: createAccount.isPending ? 0.6 : 1 }}
               onClick={handleCreateAccount}
               disabled={

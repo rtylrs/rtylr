@@ -572,7 +572,7 @@ const DefaultLayout: React.FC = () => {
                     cmd+k
                   </kbd>
                 </button>
-                <button
+                <button type="button"
                   onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
                   aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
                   className="h-11 w-11 rounded-lg flex items-center justify-center"

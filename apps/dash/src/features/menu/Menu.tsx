@@ -84,7 +84,7 @@ const Menu: React.FC<{}> = () => {
                 ${(toFiniteNumber(item.details.price) / 100).toFixed(2)}
               </span>
             )}
-            <button
+            <button type="button"
               className="text-xs text-blue-500 hover:underline px-2 py-1"
               onClick={() => {
                 navigate({

@@ -285,7 +285,7 @@ const RecurringInvoices: React.FC = () => {
                         {r.isActive ? <Pause size={12} /> : <Play size={12} />}
                         {r.isActive ? 'Pause' : 'Resume'}
                       </button>
-                      <button
+                      <button type="button"
                         style={{
                           ...ghostBtn,
                           padding: '4px 10px',

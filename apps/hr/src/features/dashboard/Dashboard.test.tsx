@@ -57,7 +57,7 @@ vi.mock('@voxire/ui', () => ({
   }) => (
     <div>
       <span>{title}</span>
-      <button onClick={action.onClick}>{action.label}</button>
+      <button type="button" onClick={action.onClick}>{action.label}</button>
     </div>
   ),
 }));

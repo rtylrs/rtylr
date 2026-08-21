@@ -291,7 +291,7 @@ const OrderStatus = (): React.JSX.Element => {
 
         {/* Order another */}
         {!notFound && (
-          <button
+          <button type="button"
             onClick={handleOrderAnother}
             style={{
               marginTop: 'auto',

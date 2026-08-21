@@ -1151,7 +1151,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             <CaretButton className="w-full justify-start" />
 
             <div className="relative" ref={userMenuRef}>
-              <button
+              <button type="button"
                 onClick={() => setUserMenuOpen((o) => !o)}
                 className="flex items-center gap-2.5 w-full px-3 py-2 rounded-md transition-colors hover:bg-[var(--flow-hover)]"
               >

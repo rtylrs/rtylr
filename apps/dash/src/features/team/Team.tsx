@@ -561,7 +561,7 @@ const Team: React.FC = (): React.JSX.Element => {
                     >
                       Prev
                     </button>
-                    <button
+                    <button type="button"
                       onClick={() => setPage(page + 1)}
                       disabled={page >= totalPages - 1}
                       className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"

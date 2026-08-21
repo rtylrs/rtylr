@@ -366,7 +366,7 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
 
   return (
     <div style={{ position: 'relative' }}>
-      <button
+      <button type="button"
         onClick={() => setOpen((o) => !o)}
         style={{
           display: 'flex',

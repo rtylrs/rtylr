@@ -139,7 +139,7 @@ const Receiving: React.FC = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button
+                    <button type="button"
                       onClick={() => adjust(line.sku, -1)}
                       aria-label={`Decrease received quantity for ${line.name}`}
                       className="h-11 w-11 rounded flex items-center justify-center"

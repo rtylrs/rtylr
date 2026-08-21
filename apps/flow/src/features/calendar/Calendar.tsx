@@ -147,7 +147,7 @@ const Calendar: React.FC = () => {
           >
             <ChevronRight size={13} />
           </button>
-          <button
+          <button type="button"
             onClick={() => setCursor(new Date())}
             className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)] font-medium"
             style={{ color: 'var(--flow-text-muted)' }}

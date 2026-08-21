@@ -230,7 +230,7 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
                         {!s.enabled && ' · hidden'}
                       </div>
                     </div>
-                    <button
+                    <button type="button"
                       onClick={() =>
                         update.mutate(
                           {

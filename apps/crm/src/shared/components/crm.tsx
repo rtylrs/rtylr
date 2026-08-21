@@ -405,7 +405,7 @@ export const SMSComposer: React.FC<{
           Insert:
         </span>
         {['first_name', 'points', 'business_name'].map((v) => (
-          <button
+          <button type="button"
             key={v}
             onClick={() => onChange(body + ` {{${v}}}`)}
             style={{

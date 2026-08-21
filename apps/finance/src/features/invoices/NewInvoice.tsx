@@ -308,7 +308,7 @@ const NewInvoice: React.FC = () => {
                   ))}
                 </tbody>
               </table>
-              <button style={{ ...ghostBtn, marginTop: 12 }} onClick={addItem}>
+              <button type="button" style={{ ...ghostBtn, marginTop: 12 }} onClick={addItem}>
                 <Plus size={13} /> Add line item
               </button>
             </div>

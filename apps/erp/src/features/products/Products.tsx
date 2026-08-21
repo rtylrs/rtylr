@@ -212,7 +212,7 @@ const Products: React.FC = () => {
             }}
           />
         </div>
-        <button
+        <button type="button"
           onClick={() => setDrawerOpen(true)}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium"
           style={{

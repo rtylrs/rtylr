@@ -118,7 +118,7 @@ const ProjectCalendar: React.FC = () => {
             {monthLabel}
           </h2>
         </div>
-        <button
+        <button type="button"
           onClick={() => {
             const d = new Date();
             d.setDate(1);
