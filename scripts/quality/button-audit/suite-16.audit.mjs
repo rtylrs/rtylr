@@ -181,5 +181,6 @@ export const cases = [
   ["apps/menu/src/screens/Public/Extras/NoMatch.tsx", "audit-batch-179-suite-16"],
   ["apps/recruit/src/shared/components/SemanticContent.tsx", "audit-batch-180-suite-16"],
   ["apps/auth/src/main.tsx", "audit-batch-181-suite-16"],
+  ["apps/crm/src/features/feedback/Feedback.tsx", "audit-batch-182-suite-16"],
 ];
 
