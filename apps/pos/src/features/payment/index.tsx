@@ -36,17 +36,17 @@ const fmt = (n: number): string =>
 
 const Payment: React.FC = () => {
   const navigate = useNavigate();
-  const {
-    items,
-    total,
-    clearCart,
-    newOrder,
-    customerId,
-    customerName,
-    orderType,
-    tableId,
-    notes,
-  } = useCartStore();
+  // Slice selectors keep the checkout screen from re-rendering on unrelated
+  // cart writes (branchId, kitchen notes, persisted-hydration).
+  const items = useCartStore((s) => s.items);
+  const total = useCartStore((s) => s.total);
+  const clearCart = useCartStore((s) => s.clearCart);
+  const newOrder = useCartStore((s) => s.newOrder);
+  const customerId = useCartStore((s) => s.customerId);
+  const customerName = useCartStore((s) => s.customerName);
+  const orderType = useCartStore((s) => s.orderType);
+  const tableId = useCartStore((s) => s.tableId);
+  const notes = useCartStore((s) => s.notes);
   const locationId = useTerminalContextStore((s) => s.locationId);
   // Stable local reference for the QR panel - regenerating it per render
   // would change the QR code under the customer's camera.
