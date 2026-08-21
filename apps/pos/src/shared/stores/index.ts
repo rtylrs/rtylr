@@ -1,4 +1,3 @@
-export { useConfigStore } from './configStore';
 export { useUserStore } from './userStore';
 export { useThemeStore } from './themeStore';
 export { useSettingsStore } from './settingsStore';
@@ -11,7 +10,6 @@ export { useShortcutStore } from './shortcutStore';
 export { useCartStore } from './cartStore';
 export { useCashMovementQueueStore } from './cashMovementQueueStore';
 export { useEmployeeSessionStore } from './employeeSessionStore';
-export { useFullscreenStore } from './fullscreenStore';
 export { useSessionCloseQueueStore } from './sessionCloseQueueStore';
 export { useTerminalContextStore } from './terminalContextStore';
 export { useServerStore } from './serverStore';
