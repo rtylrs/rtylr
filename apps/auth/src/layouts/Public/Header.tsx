@@ -4,7 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 
 import Logo from '../../shared/components/Logo';
 import { selectLanguage } from '../../shared/services/i18next';
-import { getCookie } from '/auth';
+import { getCookie } from '@voxire/auth';
 
 const Header: React.FC = () => {
   const [languageDropdown, setLanguageDropdown] = useState(false);

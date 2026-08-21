@@ -5,7 +5,7 @@ const mockRemoveCookie = vi.fn();
 const mockSetCookie = vi.fn();
 const mockGetDefaultCookieDomain = vi.fn(() => undefined);
 
-vi.mock('/auth', () => ({
+vi.mock('@voxire/auth', () => ({
   setCookie: (...args: unknown[]) => mockSetCookie(...args),
   removeCookie: (...args: unknown[]) => mockRemoveCookie(...args),
   getCookie: (...args: unknown[]) => mockGetCookie(...args),

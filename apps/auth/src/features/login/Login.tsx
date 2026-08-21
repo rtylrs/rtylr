@@ -16,7 +16,7 @@ import { licenseClient } from '../../shared/lib/clients';
 import { Button, HelmetContainer, LicenseBanner } from '@voxire/components';
 import AuthShell from '../../shared/components/AuthShell';
 
-import { getCookie } from '/auth';
+import { getCookie } from '@voxire/auth';
 import { getEmailError } from '../../shared/lib/validation';
 
 const userClient = createOneKitClient(UserServiceClient, 'auth');
