@@ -121,5 +121,6 @@ export const cases = [
   ["apps/flow/src/features/settings/sections/TimeSection.test.tsx", "audit-batch-119-suite-01"],
   ["apps/flow/src/features/workspace-manager/AddWorkspaceMemberDialog.test.tsx", "audit-batch-120-suite-01"],
   ["apps/flow/src/shared/components/PreviewRouteUnavailable.test.tsx", "audit-batch-121-suite-01"],
+  ["apps/hr/src/features/dashboard/widgets/HoursThisWeekWidget.tsx", "audit-batch-122-suite-01"],
 ];
 
