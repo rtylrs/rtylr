@@ -16,6 +16,7 @@ architectural or pattern-level thing.
 | Document                          | What it covers                                                                                                                                                                                                                                                                                                                        |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [cross-app/](cross-app/README.md) | **Cross-app data sharing audit** (2026-08-21). Every piece of data shared, shareable or needing to be shared across the ten apps and twelve backend domains: a full inventory, the entity and identity graph, a 132-cell domain matrix, 21 connection proposals with 18 documented rejections, draft contract changes, and a roadmap. |
+| [cross-app/flow-deep-dive.md](cross-app/flow-deep-dive.md) | **Flow cross-app follow-up** (2026-08-21). A second, Flow-centric round over the same subject: both inventory directions for Flow alone, gap classes A to D, the worked project-cost example end to end, and six findings the platform-wide round did not reach. Its section 10 reconciles the two. |
 
 ### Patterns proposed by the cross-app audit
 
