@@ -27,5 +27,6 @@ export const cases = [
   ["apps/menu/src/screens/Public/Extras/NoMatch.tsx", "audit-batch-025-suite-08"],
   ["apps/recruit/src/shared/components/SemanticContent.tsx", "audit-batch-026-suite-08"],
   ["apps/auth/src/main.tsx", "audit-batch-027-suite-08"],
+  ["apps/crm/src/features/feedback/Feedback.tsx", "audit-batch-028-suite-08"],
 ];
 
