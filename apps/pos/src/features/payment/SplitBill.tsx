@@ -21,8 +21,26 @@ const SplitBillScreen: React.FC = () => {
   const [mode, setMode] = useState<SplitMode>('seat');
   const [seats, setSeats] = useState(2);
   const [assignments, setAssignments] = useState<Record<string, number>>({});
-  const [amountSplits, setAmountSplits] = useState<number[]>([total / 2, total / 2]);
+  // Raw per-split inputs; empty entries fall back to the even split of the
+  // CURRENT total so the fields never go stale after cart changes.
+  const [amountInputs, setAmountInputs] = useState<string[]>([]);
   const [confirming, setConfirming] = useState(false);
+
+  const evenSplit = total / seats;
+
+  const amountSplits = useMemo(
+    () =>
+      amountInputs.length === seats
+        ? amountInputs
+        : Array.from({ length: seats }, () => evenSplit.toFixed(2)),
+    [amountInputs, seats, evenSplit]
+  );
+
+  const amountSum = useMemo(
+    () => amountSplits.reduce((sum, raw) => sum + (Number.parseFloat(raw) || 0), 0),
+    [amountSplits]
+  );
+  const amountMatchesTotal = total > 0 && Math.abs(amountSum - total) < 0.005;
 
   const seatTotals = useMemo(() => {
     const result: number[] = Array.from({ length: seats }, () => 0);
@@ -33,18 +51,20 @@ const SplitBillScreen: React.FC = () => {
     return result;
   }, [items, assignments, seats]);
 
-  const evenSplit = total / seats;
-
   const setSplitCount = (n: number) => {
     setSeats(n);
-    setAmountSplits(Array.from({ length: n }, () => total / n));
+    setAmountInputs([]);
   };
 
-  const updateAmount = (idx: number, value: number) => {
-    setAmountSplits((prev) => prev.map((v, i) => (i === idx ? value : v)));
+  const updateAmount = (idx: number, raw: string) => {
+    setAmountInputs(amountSplits.map((v, i) => (i === idx ? raw : v)));
   };
 
   const confirm = async (): Promise<void> => {
+    if (mode !== 'seat') {
+      toast.error('Only seat-based splits can be confirmed right now.');
+      return;
+    }
     let request: ReturnType<typeof buildSplitBillRequest>;
     try {
       request = buildSplitBillRequest({
@@ -60,8 +80,8 @@ const SplitBillScreen: React.FC = () => {
     }
 
     if (request.localOnly) {
-      toast.success(`Split into ${seats} ticket${seats === 1 ? '' : 's'} (local)`);
-      navigate(-1);
+      // Nothing is persisted for a purely local cart - do not pretend success.
+      toast.warning('Sync this order with the server before splitting it.');
       return;
     }
     setConfirming(true);
@@ -163,20 +183,24 @@ const SplitBillScreen: React.FC = () => {
 
           {mode === 'amount' && (
             <div className="space-y-2">
-              {amountSplits.map((amt, idx) => (
+              {amountSplits.map((raw, idx) => (
                 <div key={idx} className="flex items-center gap-3">
                   <span className="text-sm text-pos-muted w-20">Split {idx + 1}</span>
                   <input
                     type="number"
-                    value={amt.toFixed(2)}
-                    onChange={(e) => updateAmount(idx, Number(e.target.value))}
+                    value={raw}
+                    onChange={(e) => updateAmount(idx, e.target.value)}
                     className="flex-1 h-11 px-3 rounded-lg bg-white/10 text-pos-text"
                   />
                 </div>
               ))}
-              <p className="text-xs text-pos-muted mt-2">
-                Sum: {formatCurrency(amountSplits.reduce((a, b) => a + b, 0))} /{' '}
-                {formatCurrency(total)}
+              <p
+                className={`text-xs mt-2 ${
+                  amountMatchesTotal ? 'text-pos-muted' : 'text-amber-300'
+                }`}
+              >
+                Sum: {formatCurrency(amountSum)} / {formatCurrency(total)}
+                {amountMatchesTotal ? '' : ' - must match the total'}
               </p>
             </div>
           )}
@@ -189,8 +213,9 @@ const SplitBillScreen: React.FC = () => {
           )}
         </div>
         <button
-          onClick={confirm}
-          disabled={confirming}
+          onClick={() => void confirm()}
+          disabled={confirming || mode !== 'seat'}
+          title={mode !== 'seat' ? 'Switch to By seat to confirm the split' : undefined}
           className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold text-base hover:opacity-90 transition disabled:opacity-40"
         >
           {confirming ? 'Splitting…' : 'Confirm Split'}
