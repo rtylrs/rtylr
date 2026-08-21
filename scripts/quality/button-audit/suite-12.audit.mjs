@@ -254,5 +254,6 @@ export const cases = [
   ["apps/hr/src/features/reports/ReportTable.tsx", "audit-batch-252-suite-12"],
   ["apps/hr/src/features/setup-wizard/steps/PayrollConfigStep.tsx", "audit-batch-253-suite-12"],
   ["apps/hr/src/shared/components/AnniversaryWidget.tsx", "audit-batch-254-suite-12"],
+  ["apps/insights/src/features/dashboard/Dashboard.test.tsx", "audit-batch-255-suite-12"],
 ];
 
