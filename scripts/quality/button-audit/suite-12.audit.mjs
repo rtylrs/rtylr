@@ -143,5 +143,6 @@ export const cases = [
   ["apps/finance/src/features/quotes/Quotes.test.tsx", "audit-batch-141-suite-12"],
   ["apps/finance/src/shared/components/MoneyDisplay.tsx", "audit-batch-142-suite-12"],
   ["apps/flow/src/features/insights/Insights.tsx", "audit-batch-143-suite-12"],
+  ["apps/flow/src/features/projects/components/AddProjectMemberDialog.test.tsx", "audit-batch-144-suite-12"],
 ];
 
