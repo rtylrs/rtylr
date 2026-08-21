@@ -88,5 +88,6 @@ export const cases = [
   ["apps/erp/src/features/categories/Categories.test.tsx", "audit-batch-086-suite-11"],
   ["apps/erp/src/features/settings/Settings.tsx", "audit-batch-087-suite-11"],
   ["apps/erp/src/shared/components/FilterDrawer.tsx", "audit-batch-088-suite-11"],
+  ["apps/finance/src/features/categories/Categories.tsx", "audit-batch-089-suite-11"],
 ];
 

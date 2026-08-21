@@ -88,5 +88,6 @@ export const cases = [
   ["apps/dash/src/shared/hooks/queries/useKpis.test.tsx", "audit-batch-086-suite-01"],
   ["apps/erp/src/features/products/Products.tsx", "audit-batch-087-suite-01"],
   ["apps/erp/src/shared/components/BarcodeInput.tsx", "audit-batch-088-suite-01"],
+  ["apps/erp/src/shared/components/SupplierSelect.tsx", "audit-batch-089-suite-01"],
 ];
 
