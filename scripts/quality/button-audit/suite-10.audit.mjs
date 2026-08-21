@@ -151,5 +151,6 @@ export const cases = [
   ["apps/hr/src/features/performance/GoalsList.tsx", "audit-batch-149-suite-10"],
   ["apps/hr/src/features/setup-wizard/steps/LocationsStep.test.tsx", "audit-batch-150-suite-10"],
   ["apps/hr/src/layouts/DefaultLayout.tsx", "audit-batch-151-suite-10"],
+  ["apps/hr/src/shared/hooks/queries/useRoles.test.tsx", "audit-batch-152-suite-10"],
 ];
 
