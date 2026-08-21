@@ -465,7 +465,7 @@ const Team: React.FC = (): React.JSX.Element => {
 
                         {/* Actions */}
                         <div className="col-span-1 flex justify-end relative">
-                          <button
+                          <button type="button"
                             aria-label="Member actions"
                             onClick={(e) => {
                               e.stopPropagation();

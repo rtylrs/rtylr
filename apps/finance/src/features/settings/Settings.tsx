@@ -95,7 +95,7 @@ const GeneralTab: React.FC = () => {
         <button style={ghostBtn} onClick={handleReset}>
           <RotateCcw size={13} /> Reset
         </button>
-        <button style={primaryBtn} onClick={handleSave}>
+        <button type="button" style={primaryBtn} onClick={handleSave}>
           <Save size={13} /> Save
         </button>
       </div>

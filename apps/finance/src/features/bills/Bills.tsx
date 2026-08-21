@@ -205,7 +205,7 @@ const Bills: React.FC = () => {
         actions={
           <>
             {selected.size > 0 && (
-              <button style={primaryBtn} onClick={payAll}>
+              <button type="button" style={primaryBtn} onClick={payAll}>
                 <CheckCircle size={13} /> Pay selected ({selected.size})
               </button>
             )}

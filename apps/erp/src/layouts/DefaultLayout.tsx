@@ -375,7 +375,7 @@ const DefaultLayout: React.FC = () => {
               alt="rtylr"
               className="h-9 w-auto"
             />
-            <button
+            <button type="button"
               onClick={() => setSidebarOpen(false)}
               aria-label="Close navigation menu"
               className="h-11 w-11 rounded-lg flex md:hidden items-center justify-center"

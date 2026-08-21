@@ -361,7 +361,7 @@ const TaskDetail: React.FC = () => {
               <Copy size={11} />
               <span className="hidden sm:inline">{t('flow.taskDetail.copyId')}</span>
             </button>
-            <button
+            <button type="button"
               onClick={() => {
                 updateTaskMut.mutate(
                   { id: task.id, data: { archived: true } },

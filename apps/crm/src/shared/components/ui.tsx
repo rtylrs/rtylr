@@ -80,7 +80,7 @@ export const Button: React.FC<
     danger: { background: '#ef4444', color: '#fff' },
   };
   return (
-    <button {...props} style={{ ...base, ...variants[variant], ...style }}>
+    <button type="button" {...props} style={{ ...base, ...variants[variant], ...style }}>
       {children}
     </button>
   );

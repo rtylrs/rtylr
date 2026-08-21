@@ -155,7 +155,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       </span>
 
       {/* More */}
-      <button
+      <button type="button"
         onClick={handleMoreClick}
         aria-label="More options"
         className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"

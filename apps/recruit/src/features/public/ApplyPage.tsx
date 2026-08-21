@@ -215,7 +215,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
             Thanks for applying to <span className="font-medium">{career.title}</span>. The{' '}
             {customization.brandName} team will review and reach out if there's a fit.
           </p>
-          <button
+          <button type="button"
             onClick={() => navigate({ to: `/${slug}` as any })}
             className="mt-8 inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium"
             style={{ borderColor: 'var(--recruit-border)' }}

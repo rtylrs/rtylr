@@ -167,7 +167,7 @@ function SectionCard({
         overflow: 'hidden',
       }}
     >
-      <button
+      <button type="button"
         onClick={() => setOpen((v) => !v)}
         style={{
           width: '100%',

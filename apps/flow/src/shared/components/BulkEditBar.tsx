@@ -98,7 +98,7 @@ export const BulkEditBar: React.FC = () => {
         >
           <Flag size={11} /> Set urgent
         </button>
-        <button
+        <button type="button"
           disabled={isPending || !canEdit}
           title={!canEdit ? t('common.readOnlyAccess') : undefined}
           onClick={() =>

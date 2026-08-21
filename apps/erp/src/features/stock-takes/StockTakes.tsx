@@ -122,7 +122,7 @@ const StockTakes: React.FC = () => {
         description="Periodic inventory counts and variance reports"
         actions={
           canManageStockTakes && (
-            <button
+            <button type="button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
               style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}

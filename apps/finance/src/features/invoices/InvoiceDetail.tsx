@@ -84,7 +84,7 @@ const InvoiceDetail: React.FC = () => {
               <Copy size={13} /> Clone
             </button>
             {invoice.status !== 'Paid' && (
-              <button style={ghostBtn} onClick={() => setShowPayment(true)}>
+              <button type="button" style={ghostBtn} onClick={() => setShowPayment(true)}>
                 <CreditCard size={13} /> Record Payment
               </button>
             )}

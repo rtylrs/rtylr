@@ -243,7 +243,7 @@ const Employees = (): React.JSX.Element => {
                     <span className="text-xs" style={{ color: 'var(--hr-text-dim)' }}>
                       {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} / {total}
                     </span>
-                    <button
+                    <button type="button"
                       disabled={offset + PAGE_SIZE >= total}
                       onClick={() => setOffset(offset + PAGE_SIZE)}
                       className="rounded px-3 py-1 text-sm disabled:opacity-40"

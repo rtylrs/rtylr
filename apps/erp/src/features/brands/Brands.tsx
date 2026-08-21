@@ -129,7 +129,7 @@ const Brands: React.FC = () => {
                   </p>
                 </div>
                 <Tag size={14} style={{ color: 'var(--hub-text-dim)' }} />
-                <button
+                <button type="button"
                   aria-label="Delete brand"
                   onClick={() => setConfirmDeleteId(b.id ?? null)}
                   className="h-7 w-7 rounded-lg flex items-center justify-center"

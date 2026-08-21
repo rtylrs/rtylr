@@ -284,7 +284,7 @@ function RuleBuilder({
               </div>
             ))}
           </div>
-          <button
+          <button type="button"
             onClick={addRule}
             style={{
               display: 'flex',

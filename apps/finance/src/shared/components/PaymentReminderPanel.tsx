@@ -42,7 +42,7 @@ const PaymentReminderPanel: React.FC = () => {
             <BellRing size={13} style={{ color: r.enabled ? ACCENT : 'var(--hub-text-dim)' }} />
             <span style={{ fontSize: 13, color: 'var(--hub-text)' }}>{r.label}</span>
           </div>
-          <button
+          <button type="button"
             onClick={() => toggle(r.id)}
             style={{
               padding: '3px 10px',
