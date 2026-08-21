@@ -51,5 +51,6 @@ export const cases = [
   ["apps/hr/src/shared/components/ShiftCell.tsx", "audit-batch-049-suite-09"],
   ["apps/insights/src/router.tsx", "audit-batch-050-suite-09"],
   ["apps/recruit/src/features/admin/CareersAdmin.test.tsx", "audit-batch-051-suite-09"],
+  ["apps/recruit/src/templates/resolver.tsx", "audit-batch-052-suite-09"],
 ];
 
