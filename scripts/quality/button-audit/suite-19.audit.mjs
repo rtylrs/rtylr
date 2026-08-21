@@ -252,5 +252,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/PayrollCostWidget.tsx", "audit-batch-250-suite-19"],
   ["apps/hr/src/features/onboarding/Offboarding.tsx", "audit-batch-251-suite-19"],
   ["apps/hr/src/features/settings/Settings.tsx", "audit-batch-252-suite-19"],
+  ["apps/hr/src/features/staff/EmployeeProfile.test.tsx", "audit-batch-253-suite-19"],
 ];
 

@@ -252,5 +252,6 @@ export const cases = [
   ["apps/flow/src/shared/components/TaskRow.tsx", "audit-batch-250-suite-05"],
   ["apps/hr/src/features/documents/Documents.tsx", "audit-batch-251-suite-05"],
   ["apps/hr/src/features/payroll/PayrollRunDetail.tsx", "audit-batch-252-suite-05"],
+  ["apps/hr/src/features/setup-wizard/steps/EmployeesStep.test.tsx", "audit-batch-253-suite-05"],
 ];
 

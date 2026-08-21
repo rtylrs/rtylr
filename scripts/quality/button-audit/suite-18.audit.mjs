@@ -252,5 +252,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.tsx", "audit-batch-250-suite-18"],
   ["apps/hr/src/features/onboarding/ChecklistTemplates.tsx", "audit-batch-251-suite-18"],
   ["apps/hr/src/features/settings/Settings.test.tsx", "audit-batch-252-suite-18"],
+  ["apps/hr/src/features/shifts/Shifts.tsx", "audit-batch-253-suite-18"],
 ];
 
