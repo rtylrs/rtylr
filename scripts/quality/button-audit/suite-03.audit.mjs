@@ -263,5 +263,6 @@ export const cases = [
   ["apps/dash/src/features/addons/Addons.test.tsx", "audit-batch-261-suite-03"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/RevenueByAppWidget.tsx", "audit-batch-262-suite-03"],
   ["apps/dash/src/features/notifications/Notifications.test.tsx", "audit-batch-263-suite-03"],
+  ["apps/dash/src/features/team/Groups.test.tsx", "audit-batch-264-suite-03"],
 ];
 
