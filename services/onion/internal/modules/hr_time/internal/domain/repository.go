@@ -25,8 +25,8 @@ type Repository interface {
 	ListUnsubmittedEmployees(ctx context.Context, businessID int64, periodStart, periodEnd string) ([]int64, error)
 
 	ListApprovedBillableEntries(ctx context.Context, businessID int64) ([]TimeEntryRecord, error)
-	MarkEntryExported(ctx context.Context, businessID, entryID, billableInvoiceID int64) error
-	ExportApprovedBillableEntries(ctx context.Context, businessID, billableInvoiceID int64) ([]TimeEntryRecord, error)
+	MarkEntryExported(ctx context.Context, businessID, entryID, exportBatchID int64) error
+	ExportApprovedBillableEntries(ctx context.Context, businessID, exportBatchID int64) ([]TimeEntryRecord, error)
 }
 
 type ApprovalChainProvider interface {

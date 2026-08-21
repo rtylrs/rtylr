@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
@@ -161,12 +162,18 @@ func TestExportApprovedBillableEntries_MarksOneBatch(t *testing.T) {
 	}
 
 	for _, id := range createdIDs {
-		entry, err := repo.GetTimeEntry(ctx, testutil.OwnerID, id)
-		if err != nil {
-			t.Fatalf("GetTimeEntry(%d): %v", id, err)
+		var invoiceID, exportBatchID sql.NullInt64
+		if err := db.QueryRowContext(ctx,
+			"SELECT billable_invoice_id, export_batch_id FROM hr_time_entries WHERE id = ? AND business_id = ?",
+			id, testutil.OwnerID,
+		).Scan(&invoiceID, &exportBatchID); err != nil {
+			t.Fatalf("read export markers for entry %d: %v", id, err)
 		}
-		if entry.BillableInvoiceID != batchID {
-			t.Errorf("entry %d batch id = %d, want %d", id, entry.BillableInvoiceID, batchID)
+		if invoiceID.Valid {
+			t.Errorf("entry %d billable_invoice_id = %d, want NULL before invoicing", id, invoiceID.Int64)
+		}
+		if !exportBatchID.Valid || exportBatchID.Int64 != batchID {
+			t.Errorf("entry %d export_batch_id = %v, want %d", id, exportBatchID, batchID)
 		}
 	}
 }
