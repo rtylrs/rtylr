@@ -159,7 +159,7 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
               Content blocks between the hero and the jobs list. Drag to reorder.
             </p>
           </div>
-          <button
+          <button type="button"
             onClick={() => setAdding(true)}
             className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90"
           >

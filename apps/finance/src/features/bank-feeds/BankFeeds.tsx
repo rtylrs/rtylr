@@ -271,7 +271,7 @@ const BankFeeds: React.FC = () => {
         title="Add Bank Account"
         footer={
           <>
-            <button
+            <button type="button"
               style={ghostBtn}
               onClick={() => setShowConnect(false)}
               disabled={createAccount.isPending}

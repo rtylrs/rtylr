@@ -748,7 +748,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   }}
                 >
                   {liveWorkspaces.map((ws) => (
-                    <button
+                    <button type="button"
                       key={ws.id}
                       onClick={() => {
                         setActiveWorkspace(ws.id);

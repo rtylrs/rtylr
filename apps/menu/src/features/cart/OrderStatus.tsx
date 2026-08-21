@@ -258,7 +258,7 @@ const OrderStatus = (): React.JSX.Element => {
             <p style={{ color: '#dc2626', fontSize: '15px', marginBottom: 12 }}>
               Could not load order status.
             </p>
-            <button
+            <button type="button"
               onClick={() => void fetchStatus()}
               style={{
                 background: 'transparent',

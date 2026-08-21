@@ -301,7 +301,7 @@ const Customers: React.FC = () => {
             }}
           >
             {tierFilters.map((t) => (
-              <button
+              <button type="button"
                 key={t}
                 onClick={() => setTierFilter(t)}
                 style={{

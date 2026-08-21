@@ -553,7 +553,7 @@ const DefaultLayout: React.FC = () => {
                 {pageTitle}
               </h1>
               <div className="flex items-center gap-1">
-                <button
+                <button type="button"
                   onClick={() => setPaletteOpen(true)}
                   aria-label="Open search"
                   className="flex items-center gap-2 h-11 px-3 rounded-lg text-xs"

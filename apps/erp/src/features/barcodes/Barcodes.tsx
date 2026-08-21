@@ -89,7 +89,7 @@ const Barcodes: React.FC = () => {
           {isLoading
             ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 mb-1" />)
             : products.map((p) => (
-                <button
+                <button type="button"
                   key={p.id}
                   onClick={() => toggle(p.id ?? '')}
                   className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left"

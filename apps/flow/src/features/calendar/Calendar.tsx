@@ -139,7 +139,7 @@ const Calendar: React.FC = () => {
           >
             {monthLabel}
           </span>
-          <button
+          <button type="button"
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
             aria-label={t('flow.calendar.nextMonthLabel')}
             className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"

@@ -167,7 +167,7 @@ const AdminDashboard: React.FC = () => {
             {today}
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={() => setShowCatalog(true)}
           className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
           style={{ color: 'var(--dash-text-muted)', border: '1px solid var(--dash-border)' }}

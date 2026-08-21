@@ -191,7 +191,7 @@ const NewInvoice: React.FC = () => {
       <div style={{ ...cardStyle, padding: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
         {STEPS.map((s, i) => (
           <React.Fragment key={s}>
-            <button
+            <button type="button"
               onClick={() => setStep(i)}
               style={{
                 display: 'flex',

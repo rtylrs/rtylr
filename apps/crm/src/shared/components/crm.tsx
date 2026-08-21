@@ -338,7 +338,7 @@ export const EmailEditor: React.FC<{
           Insert:
         </span>
         {['first_name', 'last_name', 'points', 'tier', 'business_name'].map((v) => (
-          <button
+          <button type="button"
             key={v}
             onClick={() => insertVar(v)}
             style={{

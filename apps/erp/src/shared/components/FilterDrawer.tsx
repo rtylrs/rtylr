@@ -69,7 +69,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
                   {title}
                 </h3>
               </div>
-              <button onClick={onClose} aria-label="Close filters">
+              <button type="button" onClick={onClose} aria-label="Close filters">
                 <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
               </button>
             </div>

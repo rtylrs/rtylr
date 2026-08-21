@@ -149,7 +149,7 @@ const Expenses: React.FC = () => {
             Monthly total: <strong style={{ color: 'var(--hub-text)' }}>{fmt(grandTotal)}</strong>
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={() => navigate({ to: '/expenses/new' })}
           style={{
             display: 'flex',

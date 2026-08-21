@@ -105,7 +105,7 @@ const ApprovalButtons: React.FC<Props> = ({
       >
         <Check size={12} /> {t('common.approve', { defaultValue: 'Approve' })}
       </button>
-      <button
+      <button type="button"
         onClick={() => (allowNote ? setOpen(true) : onReject())}
         style={{
           padding: pad,

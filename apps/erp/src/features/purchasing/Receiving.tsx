@@ -113,7 +113,7 @@ const Receiving: React.FC = () => {
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               {t('receiving.receiveFor', { id: selectedId })}
             </h3>
-            <button
+            <button type="button"
               onClick={() => setSelectedId(null)}
               aria-label={t('receiving.closeDetails')}
               className="h-11 w-11 rounded-lg flex items-center justify-center"

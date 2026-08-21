@@ -64,7 +64,7 @@ const Notifications: React.FC = () => {
 
         <div className="flex items-center gap-1">
           {TABS.map((t) => (
-            <button
+            <button type="button"
               key={t}
               onClick={() => setTab(t)}
               className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors"

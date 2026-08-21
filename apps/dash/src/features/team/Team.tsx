@@ -553,7 +553,7 @@ const Team: React.FC = (): React.JSX.Element => {
                         )}
                   </p>
                   <div className="flex items-center gap-1">
-                    <button
+                    <button type="button"
                       onClick={() => setPage(Math.max(0, page - 1))}
                       disabled={page === 0}
                       className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"

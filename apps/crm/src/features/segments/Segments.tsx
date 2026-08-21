@@ -478,7 +478,7 @@ function SegmentCard({
           <ChevronRight size={13} />
         </button>
         {canDelete && (
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
