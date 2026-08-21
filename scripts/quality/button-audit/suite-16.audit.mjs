@@ -59,5 +59,6 @@ export const cases = [
   ["apps/dash/src/features/qr-codes/QrCode.tsx", "audit-batch-057-suite-16"],
   ["apps/dash/src/layouts/AppLayout.tsx", "audit-batch-058-suite-16"],
   ["apps/dash/src/shared/components/ui/button.tsx", "audit-batch-059-suite-16"],
+  ["apps/erp/src/features/brands/Brands.test.tsx", "audit-batch-060-suite-16"],
 ];
 

@@ -59,5 +59,6 @@ export const cases = [
   ["apps/dash/src/features/menu/Components/CreateBanner.tsx", "audit-batch-057-suite-04"],
   ["apps/dash/src/features/settings/Settings/components/Email/Email.tsx", "audit-batch-058-suite-04"],
   ["apps/dash/src/shared/components/dash/Breadcrumbs.tsx", "audit-batch-059-suite-04"],
+  ["apps/dash/src/shared/hooks/queries/useAiQuota.test.tsx", "audit-batch-060-suite-04"],
 ];
 
