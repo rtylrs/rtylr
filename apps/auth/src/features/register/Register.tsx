@@ -14,6 +14,7 @@ import AuthShell from '../../shared/components/AuthShell';
 import PasswordStrengthMeter, {
   scorePassword,
 } from '../../shared/components/PasswordStrengthMeter';
+import { getCookie } from '../../shared/lib/cookies';
 import { getEmailError, getPasswordMatchError } from '../../shared/lib/validation';
 
 const DEFAULT_SIGNUP_PLAN_SLUG = 'free';
@@ -62,7 +63,7 @@ const Register: React.FC = (): React.JSX.Element => {
     }
   };
   const pwScore = scorePassword(password);
-  const { isAuthenticated, loading, error, role, clearError } = useUserStore();
+  const { isAuthenticated, loading, error, clearError } = useUserStore();
   const registerMutation = useRegisterRestaurant();
 
   const redirectParam = useMemo((): string | null => {
@@ -108,11 +109,10 @@ const Register: React.FC = (): React.JSX.Element => {
   }, [clearError]);
 
   useEffect((): void => {
-    const hasToken = document.cookie.split(';').some((c) => c.trim().startsWith('token='));
-    if (isAuthenticated && hasToken) {
+    if (isAuthenticated && getCookie('token')) {
       window.location.href = getRedirectUrl(redirectParam);
     }
-  }, [isAuthenticated, navigate, role, redirectParam]);
+  }, [isAuthenticated, redirectParam]);
 
   const errorMessage =
     error &&
