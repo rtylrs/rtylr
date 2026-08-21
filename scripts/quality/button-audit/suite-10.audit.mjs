@@ -48,5 +48,6 @@ export const cases = [
   ["apps/hr/src/features/payroll/Payroll.tsx", "audit-batch-046-suite-10"],
   ["apps/hr/src/features/setup-wizard/steps/CompanyProfileStep.tsx", "audit-batch-047-suite-10"],
   ["apps/hr/src/features/timesheets/TimesheetsList.tsx", "audit-batch-048-suite-10"],
+  ["apps/hr/src/shared/components/TimeOffBadge.tsx", "audit-batch-049-suite-10"],
 ];
 

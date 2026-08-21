@@ -48,5 +48,6 @@ export const cases = [
   ["apps/hr/src/features/overtime/OvertimeRequestForm.tsx", "audit-batch-046-suite-07"],
   ["apps/hr/src/features/setup-wizard/SetupWizard.tsx", "audit-batch-047-suite-07"],
   ["apps/hr/src/features/time-off/TimeOff.tsx", "audit-batch-048-suite-07"],
+  ["apps/hr/src/shared/components/PayrollConfigGuard.tsx", "audit-batch-049-suite-07"],
 ];
 
