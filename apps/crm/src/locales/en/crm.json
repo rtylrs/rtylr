@@ -5,6 +5,7 @@
     "import": "Import",
     "exportCsv": "Export CSV",
     "empty": "No customers found",
+    "emptySearchDescription": "No customers match \"{{search}}\"",
     "createFirst": "Create your first customer to get started.",
     "created": "Customer created",
     "createFailed": "Failed to create customer",
@@ -35,6 +36,39 @@
     "pointsAwarded": "Points awarded",
     "pointsRedeemed": "Points redeemed"
   },
+  "leads": {
+    "loadFailedTitle": "Unable to load leads",
+    "empty": "No leads found",
+    "emptySearchDescription": "No leads match \"{{search}}\"",
+    "createFirstDescription": "Create your first lead to get started.",
+    "new": "New lead"
+  },
+  "contracts": {
+    "loadFailedTitle": "Unable to load contracts",
+    "empty": "No contracts yet",
+    "emptyDescription": "Signed contracts will appear here once you close a deal.",
+    "new": "New contract"
+  },
+  "loyaltyMembers": {
+    "loadFailedTitle": "Unable to load members",
+    "empty": "No members found",
+    "searchEmptyDescription": "Try a different search term.",
+    "trueEmptyDescription": "Members will appear here once customers join your loyalty program."
+  },
+  "rewards": {
+    "empty": "No rewards yet",
+    "emptyDescription": "Add your first reward to the catalog.",
+    "addReward": "Add reward"
+  },
+  "feedback": {
+    "empty": "No feedback yet",
+    "emptyDescription": "Feedback will appear here once collected."
+  },
+  "templates": {
+    "empty": "No templates",
+    "emptyDescription": "Create one to get started.",
+    "new": "New template"
+  },
   "campaigns": {
     "created": "Campaign created",
     "updated": "Campaign updated",
@@ -49,7 +83,19 @@
     "sent": "Campaign sent",
     "sendFailed": "Failed to send campaign",
     "draftSaved": "Draft saved",
-    "draftFailed": "Failed to save draft"
+    "draftFailed": "Failed to save draft",
+    "loadMoreToSearch": "Load more campaigns to continue searching.",
+    "emptyStatus": "No campaigns in this status.",
+    "emptyAllTitle": "No campaigns yet",
+    "emptyAllDescription": "Create a campaign to reach your customers.",
+    "viewAllCampaigns": "View all campaigns",
+    "loadMore": "Load more campaigns",
+    "newEmailCampaign": "New email campaign"
+  },
+  "campaignDetail": {
+    "notFoundTitle": "Campaign not found",
+    "notFoundDescription": "This campaign could not be loaded.",
+    "backToCampaigns": "Back to campaigns"
   },
   "segments": {
     "created": "Segment created",
@@ -58,6 +104,13 @@
     "deleted": "Segment deleted",
     "deleteFailed": "Failed to delete segment",
     "deleteConfirmTitle": "Delete segment?"
+  },
+  "segmentDetail": {
+    "notFoundTitle": "Segment not found",
+    "notFoundDescription": "This segment could not be loaded.",
+    "backToSegments": "Back to segments",
+    "noCustomersTitle": "No customers",
+    "noCustomersDescription": "This segment is empty."
   },
   "automations": {
     "created": "Automation created",
@@ -69,7 +122,10 @@
     "saveFailed": "Failed to save automation",
     "paused": "Automation paused",
     "resumed": "Automation resumed",
-    "updateFailed": "Failed to update automation"
+    "updateFailed": "Failed to update automation",
+    "emptyTitle": "No automations yet",
+    "emptyDescription": "Set up drip campaigns, birthday greetings, and win-back flows.",
+    "createOne": "Create one"
   },
   "settings": {
     "updated": "Settings updated"
@@ -78,7 +134,26 @@
     "inviteSent": "Invitation sent",
     "inviteFailed": "Failed to send invitation",
     "memberRemoved": "Member removed",
-    "removeFailed": "Failed to remove member"
+    "removeFailed": "Failed to remove member",
+    "emptyTitle": "No team members yet",
+    "inviteMember": "Invite member"
+  },
+  "customerProfile": {
+    "noTagsTitle": "No tags yet",
+    "addTag": "Add tag"
+  },
+  "leadDetail": {
+    "noTouchpointsTitle": "No touchpoints yet",
+    "noTouchpointsDescription": "Log the first one to start this lead's activity timeline.",
+    "logTouchpoint": "Log touchpoint",
+    "noContactsTitle": "No contacts yet",
+    "noContactsDescription": "Add a contact to keep track of who you're talking to.",
+    "addContact": "Add contact"
+  },
+  "dashboard": {
+    "atRiskEmptyTitle": "No at-risk customers right now",
+    "campaignPerformanceUnavailableTitle": "Campaign performance is unavailable",
+    "campaignPerformanceUnavailableDescription": "This data couldn't be loaded from the CRM dashboard API."
   },
   "actions": {
     "launch": "Launch",
@@ -86,7 +161,11 @@
     "resume": "Resume",
     "edit": "Edit",
     "delete": "Delete",
-    "viewReport": "View Report"
+    "viewReport": "View Report",
+    "retry": "Retry",
+    "refresh": "Refresh",
+    "viewCustomers": "View customers",
+    "clearSearch": "Clear search"
   },
   "states": {
     "launching": "Launching…",

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -14,11 +15,12 @@ import {
   Users as UsersIcon,
   Tag as TagIcon,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useListCustomers, useUpdateCustomer } from '../../shared/hooks/queries/useCustomers';
 import { useLoyaltyConfig } from '../../shared/hooks/queries/useLoyalty';
 import { type Customer } from '../../shared/schemas/customers';
 import { getCustomerTier, thresholdsFromConfig, Tier, tierColor } from '../../shared/lib/tiers';
-import { Button, EmptyState, PageHeader, SkeletonList } from '../../shared/components/ui';
+import { Button, PageHeader, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, TagChip } from '../../shared/components/crm';
 
 const ACCENT = '#3b82f6';
@@ -92,6 +94,7 @@ function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () =
 
 const Customers: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [tierFilter, setTierFilter] = useState<Tier | 'All'>('All');
   const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -388,27 +391,27 @@ const Customers: React.FC = () => {
           ) : filtered.length === 0 ? (
             <EmptyState
               icon={UsersIcon}
-              title="No customers found"
+              title={t('crm.customers.empty')}
               description={
                 search
-                  ? `No customers match "${search}"`
-                  : 'Create your first customer to get started.'
+                  ? t('crm.customers.emptySearchDescription', { search })
+                  : t('crm.customers.createFirst')
               }
               action={
-                hasMore ? (
-                  <Button
-                    variant="outline"
-                    onClick={() => setOffset((current) => current + pageSize)}
-                    disabled={isFetching}
-                  >
-                    {isFetching ? 'Loading…' : 'Load more customers'}
-                  </Button>
-                ) : (
-                  <Button variant="primary" onClick={() => navigate({ to: '/customers/new' })}>
-                    <Plus size={13} />
-                    New customer
-                  </Button>
-                )
+                search
+                  ? {
+                      label: t('crm.actions.clearSearch'),
+                      onClick: () => {
+                        setSearch('');
+                        setOffset(0);
+                        setLoadedCustomers([]);
+                        setSelected(new Set());
+                      },
+                    }
+                  : {
+                      label: t('crm.customers.new'),
+                      onClick: () => navigate({ to: '/customers/new' }),
+                    }
               }
             />
           ) : (

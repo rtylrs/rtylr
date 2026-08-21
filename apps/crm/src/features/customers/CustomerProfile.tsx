@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
@@ -14,6 +15,7 @@ import {
   Download,
   Users,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useGetCustomerFull,
   useCustomerTimeline,
@@ -43,6 +45,8 @@ import { getCustomerTier, pointsToNextTier, thresholdsFromConfig } from '../../s
 const CustomerProfile: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
+  const { t } = useTranslation();
+  const newTagInputRef = useRef<HTMLInputElement>(null);
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canDeleteCustomer = canCrmPermission(role, 'crm:customers:manage');
   const customerId = Number(id);
@@ -375,17 +379,24 @@ const CustomerProfile: React.FC = () => {
                 </h4>
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                {tags.map((t) => (
-                  <TagChip key={t} label={t} onRemove={() => handleRemoveTag(t)} />
+                {tags.map((tag) => (
+                  <TagChip key={tag} label={tag} onRemove={() => handleRemoveTag(tag)} />
                 ))}
-                {tags.length === 0 && (
-                  <span style={{ fontSize: '12px', color: 'var(--hub-text-dim)' }}>
-                    No tags yet
-                  </span>
-                )}
               </div>
+              {tags.length === 0 && (
+                <EmptyState
+                  size="compact"
+                  icon={TagIcon}
+                  title={t('crm.customerProfile.noTagsTitle')}
+                  action={{
+                    label: t('crm.customerProfile.addTag'),
+                    onClick: () => newTagInputRef.current?.focus(),
+                  }}
+                />
+              )}
               <div style={{ display: 'flex', gap: '6px' }}>
                 <input
+                  ref={newTagInputRef}
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}

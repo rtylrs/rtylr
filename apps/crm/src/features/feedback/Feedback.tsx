@@ -1,11 +1,14 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { MessageSquare, Star } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useListFeedback } from '../../shared/hooks/queries/useFeedback';
-import { PageHeader, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
+import { PageHeader, Card, SkeletonList } from '../../shared/components/ui';
 
 const Feedback: React.FC = () => {
-  const { data: fetched, isLoading } = useListFeedback();
+  const { t } = useTranslation();
+  const { data: fetched, isLoading, refetch } = useListFeedback();
   const feedback = fetched ?? [];
 
   const npsResponses = feedback.filter((f) => f.type === 'nps');
@@ -136,8 +139,9 @@ const Feedback: React.FC = () => {
           ) : feedback.length === 0 ? (
             <EmptyState
               icon={MessageSquare}
-              title="No feedback yet"
-              description="Feedback will appear here once collected."
+              title={t('crm.feedback.empty')}
+              description={t('crm.feedback.emptyDescription')}
+              action={{ label: t('crm.actions.refresh'), onClick: () => refetch() }}
             />
           ) : (
             <div>

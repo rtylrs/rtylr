@@ -1,24 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { Search } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
+import { AlertCircle, Search } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useLoyaltyMembers } from '../../shared/hooks/queries/useLoyalty';
 import type { LoyaltyMember } from '../../shared/hooks/queries/useLoyalty';
-import {
-  Button,
-  PageHeader,
-  Card,
-  Input,
-  EmptyState,
-  SkeletonList,
-} from '../../shared/components/ui';
+import { Button, PageHeader, Card, Input, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, PointsBadge } from '../../shared/components/crm';
 import { Users } from 'lucide-react';
 
 const LoyaltyMembers: React.FC = () => {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
   const [loadedMembers, setLoadedMembers] = useState<LoyaltyMember[]>([]);
-  const { data: fetched, isLoading, isFetching, isError } = useLoyaltyMembers(pageSize, offset);
+  const {
+    data: fetched,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useLoyaltyMembers(pageSize, offset);
   const [search, setSearch] = useState('');
   useEffect(() => {
     if (!fetched) return;
@@ -77,25 +81,27 @@ const LoyaltyMembers: React.FC = () => {
             </div>
           ) : isError && members.length === 0 ? (
             <EmptyState
-              icon={Users}
-              title="Unable to load members"
-              description="Refresh and try again."
+              icon={AlertCircle}
+              title={t('crm.loyaltyMembers.loadFailedTitle')}
+              description={t('errors.refreshAndTryAgain')}
+              action={{ label: t('crm.actions.retry'), onClick: () => refetch() }}
             />
           ) : filtered.length === 0 ? (
             <EmptyState
               icon={Users}
-              title="No members found"
-              description="Try a different search term."
+              title={t('crm.loyaltyMembers.empty')}
+              description={
+                search
+                  ? t('crm.loyaltyMembers.searchEmptyDescription')
+                  : t('crm.loyaltyMembers.trueEmptyDescription')
+              }
               action={
-                hasMore ? (
-                  <Button
-                    variant="outline"
-                    onClick={() => setOffset((current) => current + pageSize)}
-                    disabled={isFetching}
-                  >
-                    {isFetching ? 'Loading…' : 'Load more members'}
-                  </Button>
-                ) : undefined
+                search
+                  ? { label: t('crm.actions.clearSearch'), onClick: () => setSearch('') }
+                  : {
+                      label: t('crm.actions.viewCustomers'),
+                      onClick: () => navigate({ to: '/customers' }),
+                    }
               }
             />
           ) : (

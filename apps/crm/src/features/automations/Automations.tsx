@@ -1,26 +1,22 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
 import { Zap, Plus, Play, Pause, Trash2, Cake, UserPlus, RotateCcw, Star } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useListAutomations,
   useUpdateAutomation,
   useDeleteAutomation,
 } from '../../shared/hooks/queries/useAutomations';
-import {
-  PageHeader,
-  Card,
-  Button,
-  EmptyState,
-  SkeletonList,
-  ConfirmModal,
-} from '../../shared/components/ui';
+import { PageHeader, Card, Button, SkeletonList, ConfirmModal } from '../../shared/components/ui';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
 
 const Automations: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canManageAutomations = canCrmPermission(role, 'crm:automations');
   const { data: fetched, isLoading } = useListAutomations();
@@ -86,14 +82,12 @@ const Automations: React.FC = () => {
           <Card>
             <EmptyState
               icon={Zap}
-              title="No automations yet"
-              description="Set up drip campaigns, birthday greetings, and win-back flows."
-              action={
-                <Button variant="primary" onClick={() => navigate({ to: '/automations/new' })}>
-                  <Plus size={13} />
-                  Create one
-                </Button>
-              }
+              title={t('crm.automations.emptyTitle')}
+              description={t('crm.automations.emptyDescription')}
+              action={{
+                label: t('crm.automations.createOne'),
+                onClick: () => navigate({ to: '/automations/new' }),
+              }}
             />
           </Card>
         ) : (

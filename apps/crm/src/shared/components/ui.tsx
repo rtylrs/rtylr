@@ -335,52 +335,6 @@ export const ConfirmModal: React.FC<{
   </Modal>
 );
 
-// ── EmptyState ───────────────────────────────────────────────────
-export const EmptyState: React.FC<{
-  icon?: React.ComponentType<{ size?: number; className?: string }>;
-  title: string;
-  description?: string;
-  action?: React.ReactNode;
-}> = ({ icon: Icon, title, description, action }) => (
-  <div
-    style={{
-      padding: '48px 24px',
-      textAlign: 'center',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '8px',
-    }}
-  >
-    {Icon && (
-      <div
-        style={{
-          width: '48px',
-          height: '48px',
-          borderRadius: '12px',
-          background: 'rgba(59,130,246,0.1)',
-          color: ACCENT,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: '4px',
-        }}
-      >
-        <Icon size={22} />
-      </div>
-    )}
-    <h4 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
-      {title}
-    </h4>
-    {description && (
-      <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: 0, maxWidth: '340px' }}>
-        {description}
-      </p>
-    )}
-    {action && <div style={{ marginTop: '8px' }}>{action}</div>}
-  </div>
-);
-
 // ── Skeleton ─────────────────────────────────────────────────────
 export const Skeleton: React.FC<{
   width?: string | number;

@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { FileText, Mail, MessageSquare, Plus, Copy } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useTemplates, useCreateTemplate } from '../../shared/hooks/queries/useTemplates';
-import { PageHeader, Card, Button, EmptyState, SkeletonList } from '../../shared/components/ui';
+import { PageHeader, Card, Button, SkeletonList } from '../../shared/components/ui';
 
 const Templates: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data: fetched, isLoading } = useTemplates();
   const createMut = useCreateTemplate();
   const templates = fetched ?? [];
@@ -112,8 +115,9 @@ const Templates: React.FC = () => {
           <Card>
             <EmptyState
               icon={FileText}
-              title="No templates"
-              description="Create one to get started."
+              title={t('crm.templates.empty')}
+              description={t('crm.templates.emptyDescription')}
+              action={{ label: t('crm.templates.new'), onClick: () => setShowCreate(true) }}
             />
           </Card>
         ) : (

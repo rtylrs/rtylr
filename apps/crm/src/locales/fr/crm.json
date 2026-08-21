@@ -5,6 +5,7 @@
     "import": "Import",
     "exportCsv": "Export CSV",
     "empty": "No customers found",
+    "emptySearchDescription": "Aucun client ne correspond à \"{{search}}\"",
     "createFirst": "Create your first customer to get started.",
     "created": "Customer created",
     "createFailed": "Failed to create customer",
@@ -35,6 +36,39 @@
     "pointsAwarded": "Points awarded",
     "pointsRedeemed": "Points redeemed"
   },
+  "leads": {
+    "loadFailedTitle": "Impossible de charger les prospects",
+    "empty": "Aucun prospect trouvé",
+    "emptySearchDescription": "Aucun prospect ne correspond à \"{{search}}\"",
+    "createFirstDescription": "Créez votre premier prospect pour commencer.",
+    "new": "Nouveau prospect"
+  },
+  "contracts": {
+    "loadFailedTitle": "Impossible de charger les contrats",
+    "empty": "Aucun contrat pour le moment",
+    "emptyDescription": "Les contrats signés apparaîtront ici une fois une affaire conclue.",
+    "new": "Nouveau contrat"
+  },
+  "loyaltyMembers": {
+    "loadFailedTitle": "Impossible de charger les membres",
+    "empty": "Aucun membre trouvé",
+    "searchEmptyDescription": "Essayez un autre terme de recherche.",
+    "trueEmptyDescription": "Les membres apparaîtront ici dès que des clients rejoindront votre programme de fidélité."
+  },
+  "rewards": {
+    "empty": "Aucune récompense pour le moment",
+    "emptyDescription": "Ajoutez votre première récompense au catalogue.",
+    "addReward": "Ajouter une récompense"
+  },
+  "feedback": {
+    "empty": "Aucun avis pour le moment",
+    "emptyDescription": "Les avis apparaîtront ici une fois collectés."
+  },
+  "templates": {
+    "empty": "Aucun modèle",
+    "emptyDescription": "Créez-en un pour commencer.",
+    "new": "Nouveau modèle"
+  },
   "campaigns": {
     "created": "Campaign created",
     "updated": "Campaign updated",
@@ -49,7 +83,19 @@
     "sent": "Campaign sent",
     "sendFailed": "Failed to send campaign",
     "draftSaved": "Draft saved",
-    "draftFailed": "Failed to save draft"
+    "draftFailed": "Failed to save draft",
+    "loadMoreToSearch": "Chargez plus de campagnes pour continuer la recherche.",
+    "emptyStatus": "Aucune campagne dans ce statut.",
+    "emptyAllTitle": "Aucune campagne pour le moment",
+    "emptyAllDescription": "Créez une campagne pour toucher vos clients.",
+    "viewAllCampaigns": "Voir toutes les campagnes",
+    "loadMore": "Charger plus de campagnes",
+    "newEmailCampaign": "Nouvelle campagne e-mail"
+  },
+  "campaignDetail": {
+    "notFoundTitle": "Campagne introuvable",
+    "notFoundDescription": "Cette campagne n'a pas pu être chargée.",
+    "backToCampaigns": "Retour aux campagnes"
   },
   "segments": {
     "created": "Segment created",
@@ -58,6 +104,13 @@
     "deleted": "Segment deleted",
     "deleteFailed": "Failed to delete segment",
     "deleteConfirmTitle": "Delete segment?"
+  },
+  "segmentDetail": {
+    "notFoundTitle": "Segment introuvable",
+    "notFoundDescription": "Ce segment n'a pas pu être chargé.",
+    "backToSegments": "Retour aux segments",
+    "noCustomersTitle": "Aucun client",
+    "noCustomersDescription": "Ce segment est vide."
   },
   "automations": {
     "created": "Automation created",
@@ -69,7 +122,10 @@
     "saveFailed": "Failed to save automation",
     "paused": "Automation paused",
     "resumed": "Automation resumed",
-    "updateFailed": "Failed to update automation"
+    "updateFailed": "Failed to update automation",
+    "emptyTitle": "Aucune automatisation pour le moment",
+    "emptyDescription": "Configurez des campagnes au compte-gouttes, des vœux d'anniversaire et des flux de reconquête.",
+    "createOne": "En créer une"
   },
   "settings": {
     "updated": "Settings updated"
@@ -78,7 +134,26 @@
     "inviteSent": "Invitation sent",
     "inviteFailed": "Failed to send invitation",
     "memberRemoved": "Member removed",
-    "removeFailed": "Failed to remove member"
+    "removeFailed": "Failed to remove member",
+    "emptyTitle": "Aucun membre d'équipe pour le moment",
+    "inviteMember": "Inviter un membre"
+  },
+  "customerProfile": {
+    "noTagsTitle": "Aucune étiquette pour le moment",
+    "addTag": "Ajouter une étiquette"
+  },
+  "leadDetail": {
+    "noTouchpointsTitle": "Aucun point de contact pour le moment",
+    "noTouchpointsDescription": "Enregistrez le premier pour démarrer la chronologie d'activité de ce prospect.",
+    "logTouchpoint": "Enregistrer un point de contact",
+    "noContactsTitle": "Aucun contact pour le moment",
+    "noContactsDescription": "Ajoutez un contact pour garder une trace de vos interlocuteurs.",
+    "addContact": "Ajouter un contact"
+  },
+  "dashboard": {
+    "atRiskEmptyTitle": "Aucun client à risque pour le moment",
+    "campaignPerformanceUnavailableTitle": "Les performances des campagnes ne sont pas disponibles",
+    "campaignPerformanceUnavailableDescription": "Ces données n'ont pas pu être chargées depuis l'API du tableau de bord CRM."
   },
   "actions": {
     "launch": "Launch",
@@ -86,7 +161,11 @@
     "resume": "Resume",
     "edit": "Edit",
     "delete": "Delete",
-    "viewReport": "View Report"
+    "viewReport": "View Report",
+    "retry": "Réessayer",
+    "refresh": "Actualiser",
+    "viewCustomers": "Voir les clients",
+    "clearSearch": "Effacer la recherche"
   },
   "states": {
     "launching": "Launching…",
