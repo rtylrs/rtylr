@@ -229,5 +229,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/steps/EmployeesStep.test.tsx", "audit-batch-227-suite-12"],
   ["apps/hr/src/features/timesheets/approvals/TimesheetApprovals.tsx", "audit-batch-228-suite-12"],
   ["apps/hr/src/shared/components/TrainingProgress.tsx", "audit-batch-229-suite-12"],
+  ["apps/insights/src/shared/components/CaretAskBar.tsx", "audit-batch-230-suite-12"],
 ];
 

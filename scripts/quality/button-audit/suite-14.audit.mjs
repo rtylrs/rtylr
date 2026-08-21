@@ -229,5 +229,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/steps/LocationsStep.test.tsx", "audit-batch-227-suite-14"],
   ["apps/hr/src/layouts/DefaultLayout.tsx", "audit-batch-228-suite-14"],
   ["apps/hr/src/shared/hooks/queries/useRoles.test.tsx", "audit-batch-229-suite-14"],
+  ["apps/insights/src/shared/components/Skeleton.tsx", "audit-batch-230-suite-14"],
 ];
 
