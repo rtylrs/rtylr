@@ -18,6 +18,22 @@ var ErrOwnerLookupFailed = errors.New("failed to resolve business owner")
 // tenants, and writing rows under a zero scope would corrupt isolation.
 var ErrNoBusinessScope = errors.New("no business scope for request")
 
+const businessAccessQuery = `
+SELECT 1
+FROM businesses b
+WHERE b.id = ?
+  AND COALESCE(b.is_active, TRUE) = TRUE
+  AND (
+    b.owner_id = ?
+    OR EXISTS (
+      SELECT 1
+      FROM user_business_access uba
+      WHERE uba.user_id = ?
+        AND uba.business_id = b.id
+    )
+  )
+LIMIT 1`
+
 func tenantQueries(db *sql.DB) *tenantsqlc.Queries {
 	return tenantsqlc.New(db)
 }
@@ -61,27 +77,59 @@ func ResolveOwnerID(ctx context.Context, businessID, fallbackUserID int64) (int6
 // owner down to one shared owner id and is reserved for billing aggregation),
 // this keeps each business isolated.
 //
-// It prefers the business_id carried on the token. For older tokens or owner
-// accounts without a selected business it falls back to the user's default
-// business (users.business_id). If neither yields a positive business id it
-// returns ErrNoBusinessScope — callers must treat that as a denial. It never
-// returns a usable id of 0, so tenant data can never be scoped to (or written
-// under) the fail-open "business_id = 0" bucket.
+// It accepts the business_id carried on the token only after verifying that the
+// authenticated user owns or is granted access to that active business. For
+// older tokens or accounts without a selected business it falls back to the
+// user's default business (users.business_id), then applies the same check. If
+// the database, membership, or business row cannot be verified it returns
+// ErrNoBusinessScope — callers must treat that as a denial. It never returns a
+// usable id of 0, so tenant data can never be scoped to (or written under) the
+// fail-open "business_id = 0" bucket.
 func ResolveBusinessID(ctx context.Context, businessID, fallbackUserID int64) (int64, error) {
-	if businessID > 0 {
-		return businessID, nil
+	return resolveBusinessID(ctx, dbclient.Pool(), businessID, fallbackUserID)
+}
+
+func resolveBusinessID(ctx context.Context, db *sql.DB, businessID, fallbackUserID int64) (int64, error) {
+	if db == nil || fallbackUserID <= 0 {
+		return 0, ErrNoBusinessScope
 	}
 
-	if fallbackUserID > 0 {
-		if db := dbclient.Pool(); db != nil {
-			resolved, err := tenantQueries(db).GetUserDefaultBusinessID(ctx, fallbackUserID)
-			if err == nil && resolved.Valid && resolved.Int64 > 0 {
-				return resolved.Int64, nil
-			}
+	resolvedBusinessID := businessID
+	if resolvedBusinessID <= 0 {
+		resolved, err := tenantQueries(db).GetUserDefaultBusinessID(ctx, fallbackUserID)
+		if err != nil {
+			logger.Ctx(ctx).Error("failed to resolve default business for user",
+				logger.Any("user_id", fallbackUserID),
+				logger.Error(err),
+			)
+			return 0, ErrNoBusinessScope
 		}
+		if !resolved.Valid || resolved.Int64 <= 0 {
+			return 0, ErrNoBusinessScope
+		}
+		resolvedBusinessID = resolved.Int64
 	}
 
-	return 0, ErrNoBusinessScope
+	var authorized int
+	err := db.QueryRowContext(
+		dbclient.WithTag(ctx, dbclient.TagMain),
+		businessAccessQuery,
+		resolvedBusinessID,
+		fallbackUserID,
+		fallbackUserID,
+	).Scan(&authorized)
+	if err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			logger.Ctx(ctx).Error("failed to verify business access",
+				logger.Any("business_id", resolvedBusinessID),
+				logger.Any("user_id", fallbackUserID),
+				logger.Error(err),
+			)
+		}
+		return 0, ErrNoBusinessScope
+	}
+
+	return resolvedBusinessID, nil
 }
 
 // ResolveOwnedConfigBusinessID returns the business id an owner may read config
