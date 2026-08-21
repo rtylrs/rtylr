@@ -15,6 +15,18 @@ vi.mock('@voxire/api', () => ({
   createOneKitClient: () => mockClient,
   getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
   unwrap: (val: unknown) => Promise.resolve(val),
+  oneKitResult: (op: () => Promise<unknown>) => op(),
+  // clients.ts reaches @voxire/api through shared/lib/api for the six calls no
+  // contract declares, so the mock has to cover the REST path as well as the
+  // generated one.
+  createApiClient: () => ({}),
+  safeFetch: () => ({
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+  }),
 }));
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));

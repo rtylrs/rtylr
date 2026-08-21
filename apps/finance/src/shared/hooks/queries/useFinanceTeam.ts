@@ -2,7 +2,7 @@ import { getOneKitErrorMessage, oneKitResult, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { teamCompatibilityClient } from '../../lib/clients';
+import { teamInvitationsClient, teamMembersClient } from '../../lib/clients';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -32,9 +32,9 @@ export const useFinanceTeam = (): UseQueryResult<FinanceTeamMember[]> =>
   useQuery<FinanceTeamMember[]>({
     queryKey: ['finance-team'],
     queryFn: async (): Promise<FinanceTeamMember[]> => {
-      const res = await unwrap(
-        oneKitResult(() => teamCompatibilityClient.listMembers({}) as Promise<ListMembersResponse>)
-      );
+      const res = (await unwrap(
+        oneKitResult(() => teamMembersClient.listTeam({}))
+      )) as ListMembersResponse;
       const raw: FinanceTeamMember[] = res?.users ?? res?.members ?? [];
       return raw.map((m) => ({ ...m, name: (m.name as string) || (m.email as string) }));
     },
@@ -46,11 +46,7 @@ export const useFinanceInviteMember = (): UseMutationResult<unknown, unknown, In
   return useMutation<unknown, unknown, InvitePayload>({
     mutationFn: (payload: InvitePayload): Promise<unknown> =>
       unwrap(
-        oneKitResult(() =>
-          teamCompatibilityClient.inviteMember({
-            body: { ...payload, apps: ['finance'] },
-          })
-        )
+        oneKitResult(() => teamInvitationsClient.inviteUser({ ...payload, apps: ['finance'] }))
       ),
     onSuccess: (): void => {
       toast.success('Invitation sent');
@@ -66,7 +62,10 @@ export const useFinanceDeactivateMember = (): UseMutationResult<unknown, unknown
   const qc = useQueryClient();
   return useMutation<unknown, unknown, string>({
     mutationFn: (id: string): Promise<unknown> =>
-      unwrap(oneKitResult(() => teamCompatibilityClient.deactivateMember({ id, body: {} }))),
+      // removeMember, not a deactivate call. No route named deactivate exists
+      // in onion or in any contract, so the previous
+      // PATCH /team/members/{id}/deactivate had always 404'd (#910).
+      unwrap(oneKitResult(() => teamMembersClient.removeMember({ userId: id }))),
     onSuccess: (): void => {
       toast.success('Member removed');
       void qc.invalidateQueries({ queryKey: ['finance-team'] });
