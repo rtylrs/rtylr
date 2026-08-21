@@ -2817,7 +2817,6 @@ type PosUser struct {
 	UserID           int64            `db:"user_id" json:"user_id"`
 	LocationID       int64            `db:"location_id" json:"location_id"`
 	Name             string           `db:"name" json:"name"`
-	Pin              string           `db:"pin" json:"pin"`
 	PinHash          sql.NullString   `db:"pin_hash" json:"pin_hash"`
 	Role             NullPosUsersRole `db:"role" json:"role"`
 	IsActive         sql.NullBool     `db:"is_active" json:"is_active"`

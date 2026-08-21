@@ -91,8 +91,6 @@ func TestPOSUserToolPayloadOmitsSecrets(t *testing.T) {
 		UserID:           11,
 		LocationID:       4,
 		Name:             "Maya",
-		PIN:              "1234",
-		PINHash:          "hash",
 		Role:             domain.RoleCashier,
 		IsActive:         true,
 		HourlyRate:       42,

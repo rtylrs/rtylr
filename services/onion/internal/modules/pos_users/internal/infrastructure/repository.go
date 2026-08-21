@@ -32,7 +32,7 @@ func (r *Repository) ListByOwner(ctx context.Context, businessID int64) ([]domai
 	}
 	out := make([]domain.POSUser, 0, len(rows))
 	for _, row := range rows {
-		out = append(out, fromRow(row))
+		out = append(out, fromOwnerRow(row))
 	}
 	return out, nil
 }
@@ -45,7 +45,7 @@ func (r *Repository) ListByLocation(ctx context.Context, businessID, locationID 
 	}
 	out := make([]domain.POSUser, 0, len(rows))
 	for _, row := range rows {
-		out = append(out, fromRow(row))
+		out = append(out, fromLocationRow(row))
 	}
 	return out, nil
 }
@@ -100,8 +100,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	})
 }
 
-// UpdatePINHash stores a bcrypt hash for the given user and clears the
-// legacy plaintext column in the same statement.
+// UpdatePINHash stores a bcrypt hash for the given user.
 func (r *Repository) UpdatePINHash(ctx context.Context, businessID, id int64, hashedPIN string) error {
 	if hashedPIN == "" {
 		return errors.New("refusing to write empty pin hash")
@@ -119,9 +118,9 @@ func (r *Repository) Deactivate(ctx context.Context, businessID, id int64) error
 	return q.DeactivatePOSUser(ctx, sqlc.DeactivatePOSUserParams{BusinessID: businessID, ID: id})
 }
 
-// FindForVerify looks up the single active pos_user PIN row for a team member
-// at a location. The row carries the hashed PIN so the service can verify it;
-// the caller zeroes secrets before returning anything to the transport layer.
+// FindForVerify looks up the non-secret POS-user profile used for PIN
+// verification. The hash is fetched separately by GetPINHash so list/profile
+// queries never carry credential material.
 func (r *Repository) FindForVerify(ctx context.Context, businessID, locationID, userID int64) (*domain.POSUser, error) {
 	q := sqlc.New(r.pool)
 	row, err := q.FindPOSUserForPINVerify(ctx, sqlc.FindPOSUserForPINVerifyParams{BusinessID: businessID, LocationID: locationID, UserID: userID})
@@ -131,12 +130,24 @@ func (r *Repository) FindForVerify(ctx context.Context, businessID, locationID, 
 		}
 		return nil, err
 	}
-	u := fromRow(row)
+	u := fromVerifyRow(row)
 	return &u, nil
 }
 
-// FindByUserAndLocation returns a member's PIN row at a location regardless of
-// active state, used to decide whether SetPIN creates or rotates.
+func (r *Repository) GetPINHash(ctx context.Context, businessID, id int64) (string, error) {
+	q := sqlc.New(r.pool)
+	hash, err := q.GetPINHash(ctx, sqlc.GetPINHashParams{BusinessID: businessID, ID: id})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", ErrUserNotFound
+		}
+		return "", err
+	}
+	return hash.String, nil
+}
+
+// FindByUserAndLocation returns a member's POS-user row at a location
+// regardless of active state, used to decide whether SetPIN creates or rotates.
 func (r *Repository) FindByUserAndLocation(ctx context.Context, businessID, userID, locationID int64) (*domain.POSUser, error) {
 	q := sqlc.New(r.pool)
 	row, err := q.FindPOSUserByUserAndLocation(ctx, sqlc.FindPOSUserByUserAndLocationParams{BusinessID: businessID, UserID: userID, LocationID: locationID})
@@ -146,7 +157,7 @@ func (r *Repository) FindByUserAndLocation(ctx context.Context, businessID, user
 		}
 		return nil, err
 	}
-	u := fromRow(row)
+	u := fromUserLocationRow(row)
 	return &u, nil
 }
 
@@ -178,7 +189,40 @@ func (r *Repository) GetMemberLocationAccess(ctx context.Context, businessID, us
 	}, nil
 }
 
-func fromRow(row sqlc.PosUser) domain.POSUser {
+func fromOwnerRow(row sqlc.ListPOSUsersByOwnerRow) domain.POSUser {
+	return domain.POSUser{
+		ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, UserID: row.UserID,
+		LocationID: row.LocationID, Name: row.Name, Role: domain.POSUserRole(row.Role.PosUsersRole),
+		IsActive: row.IsActive.Bool, HourlyRate: parseFloat(row.HourlyRate.String),
+		MaxDiscountPct: parseFloat(row.MaxDiscountPct.String), CanVoid: row.CanVoid.Bool, CanRefund: row.CanRefund.Bool,
+		CanOpenDrawer: row.CanOpenDrawer.Bool, CanApplyDiscount: row.CanApplyDiscount.Bool,
+		CreatedBy: row.CreatedBy.Int64, CreatedAt: row.CreatedAt.Time, UpdatedAt: row.UpdatedAt.Time,
+	}
+}
+
+func fromLocationRow(row sqlc.ListPOSUsersByLocationRow) domain.POSUser {
+	return domain.POSUser{
+		ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, UserID: row.UserID,
+		LocationID: row.LocationID, Name: row.Name, Role: domain.POSUserRole(row.Role.PosUsersRole),
+		IsActive: row.IsActive.Bool, HourlyRate: parseFloat(row.HourlyRate.String),
+		MaxDiscountPct: parseFloat(row.MaxDiscountPct.String), CanVoid: row.CanVoid.Bool, CanRefund: row.CanRefund.Bool,
+		CanOpenDrawer: row.CanOpenDrawer.Bool, CanApplyDiscount: row.CanApplyDiscount.Bool,
+		CreatedBy: row.CreatedBy.Int64, CreatedAt: row.CreatedAt.Time, UpdatedAt: row.UpdatedAt.Time,
+	}
+}
+
+func fromVerifyRow(row sqlc.FindPOSUserForPINVerifyRow) domain.POSUser {
+	return domain.POSUser{
+		ID: row.ID, OwnerID: row.OwnerID, BusinessID: row.BusinessID, UserID: row.UserID,
+		LocationID: row.LocationID, Name: row.Name, Role: domain.POSUserRole(row.Role.PosUsersRole),
+		IsActive: row.IsActive.Bool, HourlyRate: parseFloat(row.HourlyRate.String),
+		MaxDiscountPct: parseFloat(row.MaxDiscountPct.String), CanVoid: row.CanVoid.Bool, CanRefund: row.CanRefund.Bool,
+		CanOpenDrawer: row.CanOpenDrawer.Bool, CanApplyDiscount: row.CanApplyDiscount.Bool,
+		CreatedBy: row.CreatedBy.Int64, CreatedAt: row.CreatedAt.Time, UpdatedAt: row.UpdatedAt.Time,
+	}
+}
+
+func fromUserLocationRow(row sqlc.FindPOSUserByUserAndLocationRow) domain.POSUser {
 	return domain.POSUser{
 		ID:               row.ID,
 		OwnerID:          row.OwnerID,
@@ -186,8 +230,6 @@ func fromRow(row sqlc.PosUser) domain.POSUser {
 		UserID:           row.UserID,
 		LocationID:       row.LocationID,
 		Name:             row.Name,
-		PIN:              row.Pin,
-		PINHash:          row.PinHash.String,
 		Role:             domain.POSUserRole(row.Role.PosUsersRole),
 		IsActive:         row.IsActive.Bool,
 		HourlyRate:       parseFloat(row.HourlyRate.String),

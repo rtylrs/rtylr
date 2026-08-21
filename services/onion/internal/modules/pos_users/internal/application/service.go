@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"crypto/subtle"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -49,7 +48,7 @@ func (s *Service) ListByOwner(ctx context.Context, businessID int64) ([]domain.P
 			if err != nil {
 				return nil, err
 			}
-			return scrubSecrets(users), nil
+			return users, nil
 		},
 		cacher.WithExpiry(ctx, posUsersTTL),
 	)
@@ -63,7 +62,7 @@ func (s *Service) ListByLocation(ctx context.Context, businessID, locationID int
 			if err != nil {
 				return nil, err
 			}
-			return scrubSecrets(users), nil
+			return users, nil
 		},
 		cacher.WithExpiry(ctx, posUsersTTL),
 	)
@@ -216,11 +215,15 @@ func (s *Service) VerifyPIN(ctx context.Context, businessID, locationID, userID 
 		return nil, err
 	}
 
-	if err := s.verifyAndMigratePIN(ctx, businessID, user, pin); err != nil {
-		if errors.Is(err, domain.ErrInvalidPIN) {
+	hash, err := s.repo.GetPINHash(ctx, businessID, user.ID)
+	if err != nil {
+		if errors.Is(err, infrastructure.ErrUserNotFound) {
 			return nil, domain.ErrInvalidPIN
 		}
 		return nil, err
+	}
+	if hash == "" || !passwordutils.CheckPINHash(pin, hash) {
+		return nil, domain.ErrInvalidPIN
 	}
 
 	return &domain.VerifiedPOSUser{
@@ -237,41 +240,4 @@ func (s *Service) VerifyPIN(ctx context.Context, businessID, locationID, userID 
 			MaxDiscountPct:   user.MaxDiscountPct,
 		},
 	}, nil
-}
-
-func (s *Service) verifyAndMigratePIN(ctx context.Context, businessID int64, user *domain.POSUser, pin string) error {
-	hashMatches := user.PINHash != "" && passwordutils.CheckPINHash(pin, user.PINHash)
-	legacyPIN := strings.TrimSpace(user.PIN)
-	legacyMatches := legacyPIN != "" && subtle.ConstantTimeCompare([]byte(legacyPIN), []byte(pin)) == 1
-
-	if !hashMatches && !legacyMatches {
-		return domain.ErrInvalidPIN
-	}
-
-	// Live rows created before hashed PINs may still have plaintext in the
-	// legacy column. Accept the matching PIN once and clear it immediately.
-	if legacyPIN != "" {
-		hash := user.PINHash
-		if !hashMatches {
-			var err error
-			hash, err = passwordutils.HashPIN(pin)
-			if err != nil {
-				return err
-			}
-		}
-		if err := s.repo.UpdatePINHash(ctx, businessID, user.ID, hash); err != nil {
-			return err
-		}
-		invalidatePosUsersScope(ctx, businessID)
-	}
-
-	return nil
-}
-
-func scrubSecrets(users []domain.POSUser) []domain.POSUser {
-	for i := range users {
-		users[i].PIN = ""
-		users[i].PINHash = ""
-	}
-	return users
 }

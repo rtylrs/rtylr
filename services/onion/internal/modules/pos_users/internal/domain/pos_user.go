@@ -45,8 +45,6 @@ type POSUser struct {
 	UserID           int64
 	LocationID       int64
 	Name             string
-	PIN              string // legacy plaintext — empty once migrated
-	PINHash          string // bcrypt hash; empty for unmigrated legacy rows
 	Role             POSUserRole
 	IsActive         bool
 	HourlyRate       float64
