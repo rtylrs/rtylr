@@ -22,6 +22,8 @@ emergencyContactName?: string;
 emergencyContactPhone?: string;
 apps?: string;
 notes?: string;
+photoUrl?: string;
+bio?: string;
 createdAt?: string;
 updatedAt?: string;
 }
@@ -50,6 +52,8 @@ emergencyContactName: v.emergency_contact_name,
 emergencyContactPhone: v.emergency_contact_phone,
 apps: v.apps,
 notes: v.notes,
+photoUrl: v.photo_url,
+bio: v.bio,
 createdAt: v.created_at,
 updatedAt: v.updated_at,
 };
@@ -78,6 +82,8 @@ if (v.emergencyContactName !== undefined) { out.emergency_contact_name = v.emerg
 if (v.emergencyContactPhone !== undefined) { out.emergency_contact_phone = v.emergencyContactPhone; }
 if (v.apps !== undefined) { out.apps = v.apps; }
 if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.photoUrl !== undefined) { out.photo_url = v.photoUrl; }
+if (v.bio !== undefined) { out.bio = v.bio; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
 if (v.updatedAt !== undefined) { out.updated_at = v.updatedAt; }
 return out;
@@ -159,6 +165,8 @@ emergencyContactName: string;
 emergencyContactPhone: string;
 apps: string;
 notes?: string;
+photoUrl?: string;
+bio?: string;
 }
 
 export function decodeCreateStaffRequest(v: any): CreateStaffRequest {
@@ -183,6 +191,8 @@ emergencyContactName: v.emergency_contact_name,
 emergencyContactPhone: v.emergency_contact_phone,
 apps: v.apps,
 notes: v.notes,
+photoUrl: v.photo_url,
+bio: v.bio,
 };
 }
 
@@ -207,6 +217,8 @@ if (v.emergencyContactName !== undefined) { out.emergency_contact_name = v.emerg
 if (v.emergencyContactPhone !== undefined) { out.emergency_contact_phone = v.emergencyContactPhone; }
 if (v.apps !== undefined) { out.apps = v.apps; }
 if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.photoUrl !== undefined) { out.photo_url = v.photoUrl; }
+if (v.bio !== undefined) { out.bio = v.bio; }
 return out;
 }
 
@@ -321,6 +333,8 @@ emergencyContactName: string;
 emergencyContactPhone: string;
 apps: string;
 notes?: string;
+photoUrl?: string;
+bio?: string;
 }
 
 export function decodeUpdateStaffBody(v: any): UpdateStaffBody {
@@ -343,6 +357,8 @@ emergencyContactName: v.emergency_contact_name,
 emergencyContactPhone: v.emergency_contact_phone,
 apps: v.apps,
 notes: v.notes,
+photoUrl: v.photo_url,
+bio: v.bio,
 };
 }
 
@@ -365,6 +381,8 @@ if (v.emergencyContactName !== undefined) { out.emergency_contact_name = v.emerg
 if (v.emergencyContactPhone !== undefined) { out.emergency_contact_phone = v.emergencyContactPhone; }
 if (v.apps !== undefined) { out.apps = v.apps; }
 if (v.notes !== undefined) { out.notes = v.notes; }
+if (v.photoUrl !== undefined) { out.photo_url = v.photoUrl; }
+if (v.bio !== undefined) { out.bio = v.bio; }
 return out;
 }
 

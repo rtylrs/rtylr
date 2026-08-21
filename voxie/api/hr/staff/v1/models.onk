@@ -24,6 +24,17 @@ message Staff {
   emergency_contact_phone: string
   apps: string
   notes: string
+  /// A URL to the staff member's profile photo. Optional and unset by default:
+  /// consumers fall back to the hub account avatar, which is what Flow's profile
+  /// screen already does.
+  photo_url: string
+  /// A short self-description shown on a profile screen.
+  ///
+  /// Deliberately separate from `notes`. `notes` is HR-admin commentary about a
+  /// person and must never be rendered as an "About" section; a dead write path
+  /// in the HR app mapped bio onto notes, and that mapping was wrong. See
+  /// tryrtylr/rtylr#875.
+  bio: string
   /// When the record was created.
   created_at: string
   /// When the record was last updated.
@@ -62,6 +73,17 @@ message CreateStaffRequest {
   emergency_contact_phone: string @required
   apps: string @required
   notes: string
+  /// A URL to the staff member's profile photo. Optional and unset by default:
+  /// consumers fall back to the hub account avatar, which is what Flow's profile
+  /// screen already does.
+  photo_url: string
+  /// A short self-description shown on a profile screen.
+  ///
+  /// Deliberately separate from `notes`. `notes` is HR-admin commentary about a
+  /// person and must never be rendered as an "About" section; a dead write path
+  /// in the HR app mapped bio onto notes, and that mapping was wrong. See
+  /// tryrtylr/rtylr#875.
+  bio: string
 }
 
 message CreateStaffResponse {
@@ -95,6 +117,17 @@ message UpdateStaffBody {
   emergency_contact_phone: string @required
   apps: string @required
   notes: string
+  /// A URL to the staff member's profile photo. Optional and unset by default:
+  /// consumers fall back to the hub account avatar, which is what Flow's profile
+  /// screen already does.
+  photo_url: string
+  /// A short self-description shown on a profile screen.
+  ///
+  /// Deliberately separate from `notes`. `notes` is HR-admin commentary about a
+  /// person and must never be rendered as an "About" section; a dead write path
+  /// in the HR app mapped bio onto notes, and that mapping was wrong. See
+  /// tryrtylr/rtylr#875.
+  bio: string
 }
 
 message UpdateStaffRequest {

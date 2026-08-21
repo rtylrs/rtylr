@@ -28,6 +28,8 @@ type Staff struct {
 	EmergencyContactPhone string  `json:"emergency_contact_phone,omitempty"`
 	Apps                  string  `json:"apps,omitempty"`
 	Notes                 string  `json:"notes,omitempty"`
+	PhotoUrl              string  `json:"photo_url,omitempty"`
+	Bio                   string  `json:"bio,omitempty"`
 	CreatedAt             string  `json:"created_at,omitempty"`
 	UpdatedAt             string  `json:"updated_at,omitempty"`
 }
@@ -259,6 +261,22 @@ func (x *Staff) GetNotes() string {
 	return x.Notes
 }
 
+func (x *Staff) GetPhotoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PhotoUrl
+}
+
+func (x *Staff) GetBio() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Bio
+}
+
 func (x *Staff) GetCreatedAt() string {
 	if x == nil {
 		var zero string
@@ -337,6 +355,8 @@ type CreateStaffRequest struct {
 	EmergencyContactPhone string  `json:"emergency_contact_phone,omitempty"`
 	Apps                  string  `json:"apps,omitempty"`
 	Notes                 string  `json:"notes,omitempty"`
+	PhotoUrl              string  `json:"photo_url,omitempty"`
+	Bio                   string  `json:"bio,omitempty"`
 }
 
 func (m *CreateStaffRequest) MarshalJSON() ([]byte, error) {
@@ -530,6 +550,22 @@ func (x *CreateStaffRequest) GetNotes() string {
 	return x.Notes
 }
 
+func (x *CreateStaffRequest) GetPhotoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PhotoUrl
+}
+
+func (x *CreateStaffRequest) GetBio() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Bio
+}
+
 type CreateStaffResponse struct {
 	Id int64 `json:"id,omitempty"`
 }
@@ -642,6 +678,8 @@ type UpdateStaffBody struct {
 	EmergencyContactPhone string  `json:"emergency_contact_phone,omitempty"`
 	Apps                  string  `json:"apps,omitempty"`
 	Notes                 string  `json:"notes,omitempty"`
+	PhotoUrl              string  `json:"photo_url,omitempty"`
+	Bio                   string  `json:"bio,omitempty"`
 }
 
 func (m *UpdateStaffBody) MarshalJSON() ([]byte, error) {
@@ -807,6 +845,22 @@ func (x *UpdateStaffBody) GetNotes() string {
 		return zero
 	}
 	return x.Notes
+}
+
+func (x *UpdateStaffBody) GetPhotoUrl() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PhotoUrl
+}
+
+func (x *UpdateStaffBody) GetBio() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Bio
 }
 
 type UpdateStaffRequest struct {
