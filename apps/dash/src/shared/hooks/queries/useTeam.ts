@@ -90,9 +90,9 @@ export const useTeam = (params: UseTeamParams = {}) => {
   return useQuery<TeamListResult>({
     queryKey: ['team', { page, pageSize }],
     queryFn: async (): Promise<TeamListResult> => {
-      const res = await membersClient.listTeam({ page, pageSize } as any);
+      const res = await membersClient.listTeam({ page, pageSize });
       const allMembers = (res.users ?? []).map(fromApiMember);
-      const total = (res as any).total ?? allMembers.length;
+      const total = res.total ?? allMembers.length;
       const hasMore = page * pageSize < total;
       return {
         members: allMembers,

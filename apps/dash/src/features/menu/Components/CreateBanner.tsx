@@ -38,7 +38,7 @@ const CreateBanner = (): React.JSX.Element => {
       let bannerImageUrl = '';
       if (formData.image) {
         const res = await uploadAsset(formData.image);
-        bannerImageUrl = (res as any)?.url || (res as any)?.path || '';
+        bannerImageUrl = res.url || '';
       }
 
       const bannerObj = {
