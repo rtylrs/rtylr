@@ -23,7 +23,10 @@ type Step = 'roster' | 'enter' | 'setup';
 
 const PinLogin: React.FC = () => {
   const locationId = useTerminalContextStore((s) => s.locationId);
-  const { authenticatePin, loading, error, clearError } = useEmployeeSessionStore();
+  const authenticatePin = useEmployeeSessionStore((s) => s.authenticatePin);
+  const loading = useEmployeeSessionStore((s) => s.loading);
+  const error = useEmployeeSessionStore((s) => s.error);
+  const clearError = useEmployeeSessionStore((s) => s.clearError);
 
   const [roster, setRoster] = useState<RosterMember[]>([]);
   const [rosterLoading, setRosterLoading] = useState(true);

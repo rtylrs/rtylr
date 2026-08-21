@@ -1,6 +1,6 @@
 import { createOneKitClient } from '@voxire/api';
 import { DaySummaryServiceClient } from '@voxire/voxie/pos/day_summary/v1/client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
 import type { DaySummary } from '../../shared/types/pos';
 import { buildLocalDaySummary, normalizeDaySummaryResponse } from './cashDrawerSummary';
@@ -13,9 +13,12 @@ export function useDaySummary(date?: string) {
   const [error, setError] = useState<string | null>(null);
   const openingFloat = useCashDrawerStore((s) => s.openingFloat);
   const movements = useCashDrawerStore((s) => s.movements);
-  const expectedCash = useCashDrawerStore((s) => s.expectedCash());
+  const expectedCashFn = useCashDrawerStore((s) => s.expectedCash);
+  // Compute from selected slices instead of running a reduce inside the
+  // store selector on every notification.
+  const expectedCash = useMemo(() => expectedCashFn(), [expectedCashFn, movements, openingFloat]);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -27,8 +30,7 @@ export function useDaySummary(date?: string) {
       });
       setSummary(mapped);
     } catch (e) {
-      const err = e as { response?: { data?: { message?: string } }; message?: string };
-      setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load day summary');
+      setError(e instanceof Error && e.message ? e.message : 'Failed to load day summary');
       setSummary(
         buildLocalDaySummary({
           date: date ?? new Date().toISOString().slice(0, 10),
@@ -40,12 +42,11 @@ export function useDaySummary(date?: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [date, openingFloat, movements, expectedCash]);
 
   useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date]);
+    void load();
+  }, [load]);
 
   return { summary, loading, error, reload: load };
 }

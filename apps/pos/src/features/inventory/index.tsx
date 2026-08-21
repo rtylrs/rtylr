@@ -144,7 +144,7 @@ function ActionModal({
 }
 
 const InventoryScreen: React.FC = () => {
-  const { locationId } = useTerminalContextStore();
+  const locationId = useTerminalContextStore((s) => s.locationId);
   const employee = useEmployeeSessionStore((s) => s.employee);
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [lowStock, setLowStock] = useState<InventoryItem[]>([]);

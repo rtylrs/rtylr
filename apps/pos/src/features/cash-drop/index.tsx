@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import { useCashDrawerStore } from '../../shared/stores/cashDrawerStore';
@@ -11,8 +11,14 @@ import { useEmployeeSessionStore } from '../../shared/stores/employeeSessionStor
 import { resolveOpenSessionId } from '../close-session/closeSessionWorkflow';
 
 const CashDropScreen: React.FC = () => {
-  const { movements, openingFloat, openDrawer, cashDrop, paidOut, paidIn, expectedCash } =
-    useCashDrawerStore();
+  const movements = useCashDrawerStore((s) => s.movements);
+  const openingFloat = useCashDrawerStore((s) => s.openingFloat);
+  const openDrawer = useCashDrawerStore((s) => s.openDrawer);
+  const cashDrop = useCashDrawerStore((s) => s.cashDrop);
+  const paidOut = useCashDrawerStore((s) => s.paidOut);
+  const paidIn = useCashDrawerStore((s) => s.paidIn);
+  const expectedCashFn = useCashDrawerStore((s) => s.expectedCash);
+  const expectedCash = useMemo(() => expectedCashFn(), [expectedCashFn, movements, openingFloat]);
   const enqueueMovement = useCashMovementQueueStore((s) => s.enqueue);
   const branchId = useTerminalContextStore((s) => s.locationId);
   const terminalId = useTerminalContextStore((s) => s.terminalId);
@@ -64,7 +70,7 @@ const CashDropScreen: React.FC = () => {
           </div>
           <div className="p-4 rounded-xl bg-pos-card border border-pos-border">
             <div className="text-xs text-pos-muted uppercase">Expected cash</div>
-            <div className="text-2xl font-bold text-pos-text">{formatCurrency(expectedCash())}</div>
+            <div className="text-2xl font-bold text-pos-text">{formatCurrency(expectedCash)}</div>
           </div>
         </div>
         <div className="rounded-xl bg-pos-card border border-pos-border p-4 space-y-3">

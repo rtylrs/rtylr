@@ -25,7 +25,11 @@ export interface RedeemResult {
 }
 
 export function useGiftCards() {
-  const store = useGiftCardStore();
+  // Slice selectors: the hook must not re-render on unrelated store writes.
+  const cards = useGiftCardStore((s) => s.cards);
+  const issue = useGiftCardStore((s) => s.issue);
+  const addBalance = useGiftCardStore((s) => s.addBalance);
+  const deactivate = useGiftCardStore((s) => s.deactivate);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,14 +97,14 @@ export function useGiftCards() {
   }, []);
 
   return {
-    cards: store.cards,
+    cards,
     loading,
     error,
     refresh,
-    issue: store.issue,
+    issue,
     redeem: redeemCard,
     checkBalance,
-    addBalance: store.addBalance,
-    deactivate: store.deactivate,
+    addBalance,
+    deactivate,
   };
 }
