@@ -203,5 +203,6 @@ export const cases = [
   ["apps/hr/src/features/reviews/OneOnOnes.tsx", "audit-batch-201-suite-03"],
   ["apps/hr/src/features/setup-wizard/steps/RolesPermissionsStep.tsx", "audit-batch-202-suite-03"],
   ["apps/hr/src/shared/components/BenefitPlanCard.tsx", "audit-batch-203-suite-03"],
+  ["apps/insights/src/features/financial/Financial.test.tsx", "audit-batch-204-suite-03"],
 ];
 
