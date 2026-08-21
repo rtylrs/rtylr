@@ -1,0 +1,772 @@
+from,to,kind,count,files
+customers,platform/auth,module-to-platform,25,internal/modules/customers/internal/api/loyalty_service.go internal/modules/customers/internal/routes/handlers/authorization.go internal/modules/customers/internal/routes/handlers/campaign_handler.go internal/modules/customers/internal/routes/handlers/campaign_stats_handler.go internal/modules/customers/internal/routes/handlers/customer_create_handler.go internal/modules/customers/internal/routes/handlers/customer_delete_handler.go
+insights,platform/logger,module-to-platform,24,internal/modules/insights/internal/application/settings.go internal/modules/insights/internal/infrastructure/customers.go internal/modules/insights/internal/infrastructure/customers_churn.go internal/modules/insights/internal/infrastructure/customers_ltv.go internal/modules/insights/internal/infrastructure/customers_top.go internal/modules/insights/internal/infrastructure/dashboard.go
+customers,platform/onekiterrors,module-to-platform,23,internal/modules/customers/internal/api/loyalty_service.go internal/modules/customers/internal/routes/handlers/authorization.go internal/modules/customers/internal/routes/handlers/campaign_handler.go internal/modules/customers/internal/routes/handlers/campaign_stats_handler.go internal/modules/customers/internal/routes/handlers/customer_create_handler.go internal/modules/customers/internal/routes/handlers/customer_delete_handler.go
+customers,platform/tenant,module-to-platform,23,internal/modules/customers/internal/api/loyalty_service.go internal/modules/customers/internal/routes/handlers/campaign_handler.go internal/modules/customers/internal/routes/handlers/campaign_stats_handler.go internal/modules/customers/internal/routes/handlers/customer_create_handler.go internal/modules/customers/internal/routes/handlers/customer_delete_handler.go internal/modules/customers/internal/routes/handlers/customer_detail_full_handler.go
+insights,platform/cache,module-to-platform,21,internal/modules/insights/internal/application/customers.go internal/modules/insights/internal/application/customers_churn.go internal/modules/insights/internal/application/customers_ltv.go internal/modules/insights/internal/application/customers_top.go internal/modules/insights/internal/application/dashboard.go internal/modules/insights/internal/application/financial_cash_flow.go
+invoices,platform/onekiterrors,module-to-platform,21,internal/modules/invoices/internal/api/create_expense_handler.go internal/modules/invoices/internal/api/create_invoice_handler.go internal/modules/invoices/internal/api/dashboard_handler.go internal/modules/invoices/internal/api/dashboard_service.go internal/modules/invoices/internal/api/delete_expense_handler.go internal/modules/invoices/internal/api/delete_invoice_handler.go
+workspaces,platform/auth,module-to-platform,20,internal/modules/workspaces/internal/api/cycle_service.go internal/modules/workspaces/internal/api/dashboard_service.go internal/modules/workspaces/internal/api/helpers.go internal/modules/workspaces/internal/api/insights_service.go internal/modules/workspaces/internal/api/label_service.go internal/modules/workspaces/internal/api/milestone_service.go
+invoices,platform/auth,module-to-platform,19,internal/modules/invoices/internal/api/create_expense_handler.go internal/modules/invoices/internal/api/create_invoice_handler.go internal/modules/invoices/internal/api/dashboard_handler.go internal/modules/invoices/internal/api/delete_expense_handler.go internal/modules/invoices/internal/api/delete_invoice_handler.go internal/modules/invoices/internal/api/expense_categories_handler.go
+invoices,platform/tenant,module-to-platform,19,internal/modules/invoices/internal/api/create_expense_handler.go internal/modules/invoices/internal/api/create_invoice_handler.go internal/modules/invoices/internal/api/dashboard_handler.go internal/modules/invoices/internal/api/delete_expense_handler.go internal/modules/invoices/internal/api/delete_invoice_handler.go internal/modules/invoices/internal/api/expense_categories_handler.go
+workspaces,platform/onekiterrors,module-to-platform,16,internal/modules/workspaces/internal/api/cycle_service.go internal/modules/workspaces/internal/api/dashboard_service.go internal/modules/workspaces/internal/api/helpers.go internal/modules/workspaces/internal/api/insights_service.go internal/modules/workspaces/internal/api/label_service.go internal/modules/workspaces/internal/api/milestone_service.go
+hr_performance,platform/logger,module-to-platform,14,internal/modules/hr_performance/internal/api/create_cycle_handler.go internal/modules/hr_performance/internal/api/create_goal_handler.go internal/modules/hr_performance/internal/api/get_config_handler.go internal/modules/hr_performance/internal/api/get_cycle_handler.go internal/modules/hr_performance/internal/api/list_cycles_handler.go internal/modules/hr_performance/internal/api/list_goals_handler.go
+hr_time,platform/logger,module-to-platform,13,internal/modules/hr_time/internal/application/service.go internal/modules/hr_time/internal/infrastructure/repository.go internal/modules/hr_time/internal/routes/handlers/approve_timesheet_handler.go internal/modules/hr_time/internal/routes/handlers/create_time_entry_handler.go internal/modules/hr_time/internal/routes/handlers/delete_time_entry_handler.go internal/modules/hr_time/internal/routes/handlers/export_billable_handler.go
+hr_core,platform/logger,module-to-platform,12,internal/modules/hr_core/internal/api/work_schedule_service.go internal/modules/hr_core/internal/application/permissions.go internal/modules/hr_core/internal/application/service.go internal/modules/hr_core/internal/application/write_gate.go internal/modules/hr_core/internal/infrastructure/repository.go internal/modules/hr_core/internal/routes/handlers/config_handlers.go
+hr_performance,platform/auth,module-to-platform,12,internal/modules/hr_performance/internal/api/create_cycle_handler.go internal/modules/hr_performance/internal/api/create_goal_handler.go internal/modules/hr_performance/internal/api/get_config_handler.go internal/modules/hr_performance/internal/api/get_cycle_handler.go internal/modules/hr_performance/internal/api/list_cycles_handler.go internal/modules/hr_performance/internal/api/list_goals_handler.go
+hr_performance,platform/onekiterrors,module-to-platform,12,internal/modules/hr_performance/internal/api/create_cycle_handler.go internal/modules/hr_performance/internal/api/create_goal_handler.go internal/modules/hr_performance/internal/api/get_config_handler.go internal/modules/hr_performance/internal/api/get_cycle_handler.go internal/modules/hr_performance/internal/api/list_cycles_handler.go internal/modules/hr_performance/internal/api/list_goals_handler.go
+hr_shifts,platform/logger,module-to-platform,12,internal/modules/hr_shifts/internal/application/availability_service.go internal/modules/hr_shifts/internal/application/service.go internal/modules/hr_shifts/internal/infrastructure/availability_repository.go internal/modules/hr_shifts/internal/infrastructure/repository.go internal/modules/hr_shifts/internal/routes/handlers/availability_handlers.go internal/modules/hr_shifts/internal/routes/handlers/create_shift_assignment_handler.go
+hr_time,platform/auth,module-to-platform,12,internal/modules/hr_time/internal/routes/handlers/approve_timesheet_handler.go internal/modules/hr_time/internal/routes/handlers/create_time_entry_handler.go internal/modules/hr_time/internal/routes/handlers/delete_time_entry_handler.go internal/modules/hr_time/internal/routes/handlers/export_billable_handler.go internal/modules/hr_time/internal/routes/handlers/get_timesheet_by_id_handler.go internal/modules/hr_time/internal/routes/handlers/get_timesheet_handler.go
+hr_time,platform/tenant,module-to-platform,12,internal/modules/hr_time/internal/routes/handlers/approve_timesheet_handler.go internal/modules/hr_time/internal/routes/handlers/create_time_entry_handler.go internal/modules/hr_time/internal/routes/handlers/delete_time_entry_handler.go internal/modules/hr_time/internal/routes/handlers/export_billable_handler.go internal/modules/hr_time/internal/routes/handlers/get_timesheet_by_id_handler.go internal/modules/hr_time/internal/routes/handlers/get_timesheet_handler.go
+workspaces,platform/tenant,module-to-platform,12,internal/modules/workspaces/internal/api/cycle_service.go internal/modules/workspaces/internal/api/dashboard_service.go internal/modules/workspaces/internal/api/label_service.go internal/modules/workspaces/internal/api/milestone_service.go internal/modules/workspaces/internal/api/project_service.go internal/modules/workspaces/internal/api/task_service.go
+hr_leave,platform/logger,module-to-platform,11,internal/modules/hr_leave/internal/api/approve_leave_handler.go internal/modules/hr_leave/internal/api/cancel_leave_request_handler.go internal/modules/hr_leave/internal/api/create_leave_request_handler.go internal/modules/hr_leave/internal/api/create_leave_type_handler.go internal/modules/hr_leave/internal/api/get_leave_balances_handler.go internal/modules/hr_leave/internal/api/get_leave_calendar_handler.go
+hr_payroll,platform/logger,module-to-platform,11,internal/modules/hr_payroll/internal/application/service.go internal/modules/hr_payroll/internal/infrastructure/repository.go internal/modules/hr_payroll/internal/routes/handlers/approve_payroll_run_handler.go internal/modules/hr_payroll/internal/routes/handlers/export_payroll_handler.go internal/modules/hr_payroll/internal/routes/handlers/get_my_payroll_run_handler.go internal/modules/hr_payroll/internal/routes/handlers/get_payroll_config_handler.go
+hr_payroll,platform/auth,module-to-platform,11,internal/modules/hr_payroll/internal/routes/handlers/approve_payroll_run_handler.go internal/modules/hr_payroll/internal/routes/handlers/export_payroll_handler.go internal/modules/hr_payroll/internal/routes/handlers/get_my_payroll_run_handler.go internal/modules/hr_payroll/internal/routes/handlers/get_payroll_config_handler.go internal/modules/hr_payroll/internal/routes/handlers/get_payroll_run_handler.go internal/modules/hr_payroll/internal/routes/handlers/list_my_payroll_runs_handler.go
+hr_time,platform/onekiterrors,module-to-platform,11,internal/modules/hr_time/internal/routes/handlers/approve_timesheet_handler.go internal/modules/hr_time/internal/routes/handlers/create_time_entry_handler.go internal/modules/hr_time/internal/routes/handlers/delete_time_entry_handler.go internal/modules/hr_time/internal/routes/handlers/export_billable_handler.go internal/modules/hr_time/internal/routes/handlers/get_timesheet_by_id_handler.go internal/modules/hr_time/internal/routes/handlers/get_timesheet_handler.go
+crm_sales,platform/money,module-to-platform,10,internal/modules/crm_sales/internal/domain/helpers_extra_test.go internal/modules/crm_sales/internal/domain/helpers_test.go internal/modules/crm_sales/internal/domain/sales.go internal/modules/crm_sales/internal/domain/sales_money_test.go internal/modules/crm_sales/internal/infrastructure/contracts_extra_test.go internal/modules/crm_sales/internal/infrastructure/contracts_test.go
+hr_leave,platform/auth,module-to-platform,10,internal/modules/hr_leave/internal/api/approve_leave_handler.go internal/modules/hr_leave/internal/api/cancel_leave_request_handler.go internal/modules/hr_leave/internal/api/create_leave_request_handler.go internal/modules/hr_leave/internal/api/create_leave_type_handler.go internal/modules/hr_leave/internal/api/get_leave_balances_handler.go internal/modules/hr_leave/internal/api/get_leave_calendar_handler.go
+careers,platform/onekiterrors,module-to-platform,9,internal/modules/careers/internal/routes/handlers/apply_handler.go internal/modules/careers/internal/routes/handlers/get_careers_handler.go internal/modules/careers/internal/routes/handlers/recruit_career_handlers.go internal/modules/careers/internal/routes/handlers/recruit_customization_handlers.go internal/modules/careers/internal/routes/handlers/recruit_form_fields_handlers.go internal/modules/careers/internal/routes/handlers/recruit_public_handlers.go
+hr_core,platform/auth,module-to-platform,9,internal/modules/hr_core/internal/api/work_schedule_service.go internal/modules/hr_core/internal/routes/handlers/config_handlers.go internal/modules/hr_core/internal/routes/handlers/department_handlers.go internal/modules/hr_core/internal/routes/handlers/employee_handlers.go internal/modules/hr_core/internal/routes/handlers/invite_handlers.go internal/modules/hr_core/internal/routes/handlers/location_handlers.go
+hr_core,platform/tenant,module-to-platform,9,internal/modules/hr_core/internal/api/work_schedule_service.go internal/modules/hr_core/internal/application/write_gate.go internal/modules/hr_core/internal/routes/handlers/config_handlers.go internal/modules/hr_core/internal/routes/handlers/department_handlers.go internal/modules/hr_core/internal/routes/handlers/employee_handlers.go internal/modules/hr_core/internal/routes/handlers/invite_handlers.go
+hr_equipment,platform/logger,module-to-platform,9,internal/modules/hr_equipment/internal/api/approve_equipment_request_handler.go internal/modules/hr_equipment/internal/api/assign_asset_handler.go internal/modules/hr_equipment/internal/api/create_asset_handler.go internal/modules/hr_equipment/internal/api/create_equipment_request_handler.go internal/modules/hr_equipment/internal/api/equipment_service.go internal/modules/hr_equipment/internal/api/list_assets_handler.go
+hr_leave,platform/onekiterrors,module-to-platform,9,internal/modules/hr_leave/internal/api/approve_leave_handler.go internal/modules/hr_leave/internal/api/cancel_leave_request_handler.go internal/modules/hr_leave/internal/api/create_leave_request_handler.go internal/modules/hr_leave/internal/api/create_leave_type_handler.go internal/modules/hr_leave/internal/api/get_leave_balances_handler.go internal/modules/hr_leave/internal/api/get_leave_calendar_handler.go
+hr_onboarding,platform/auth,module-to-platform,9,internal/modules/hr_onboarding/internal/api/add_item_to_template_handler.go internal/modules/hr_onboarding/internal/api/complete_checklist_item_handler.go internal/modules/hr_onboarding/internal/api/create_template_handler.go internal/modules/hr_onboarding/internal/api/get_employee_checklist_handler.go internal/modules/hr_onboarding/internal/api/list_employee_checklists_handler.go internal/modules/hr_onboarding/internal/api/list_templates_handler.go
+hr_onboarding,platform/logger,module-to-platform,9,internal/modules/hr_onboarding/internal/api/add_item_to_template_handler.go internal/modules/hr_onboarding/internal/api/complete_checklist_item_handler.go internal/modules/hr_onboarding/internal/api/create_template_handler.go internal/modules/hr_onboarding/internal/api/get_employee_checklist_handler.go internal/modules/hr_onboarding/internal/api/list_employee_checklists_handler.go internal/modules/hr_onboarding/internal/api/list_templates_handler.go
+hr_onboarding,platform/onekiterrors,module-to-platform,9,internal/modules/hr_onboarding/internal/api/add_item_to_template_handler.go internal/modules/hr_onboarding/internal/api/complete_checklist_item_handler.go internal/modules/hr_onboarding/internal/api/create_template_handler.go internal/modules/hr_onboarding/internal/api/get_employee_checklist_handler.go internal/modules/hr_onboarding/internal/api/list_employee_checklists_handler.go internal/modules/hr_onboarding/internal/api/list_templates_handler.go
+hr_payroll,platform/onekiterrors,module-to-platform,9,internal/modules/hr_payroll/internal/routes/handlers/approve_payroll_run_handler.go internal/modules/hr_payroll/internal/routes/handlers/export_payroll_handler.go internal/modules/hr_payroll/internal/routes/handlers/get_my_payroll_run_handler.go internal/modules/hr_payroll/internal/routes/handlers/get_payroll_config_handler.go internal/modules/hr_payroll/internal/routes/handlers/get_payroll_run_handler.go internal/modules/hr_payroll/internal/routes/handlers/list_my_payroll_runs_handler.go
+insights,platform/onekiterrors,module-to-platform,9,internal/modules/insights/internal/api/common.go internal/modules/insights/internal/api/customer_service.go internal/modules/insights/internal/api/financial_service.go internal/modules/insights/internal/api/operation_service.go internal/modules/insights/internal/api/product_service.go internal/modules/insights/internal/api/report_service.go
+pos_orders,platform/onekiterrors,module-to-platform,9,internal/modules/pos_orders/internal/routes/handlers/dashboard_service.go internal/modules/pos_orders/internal/routes/handlers/location_handlers.go internal/modules/pos_orders/internal/routes/handlers/order_ext_handlers.go internal/modules/pos_orders/internal/routes/handlers/order_handlers.go internal/modules/pos_orders/internal/routes/handlers/order_service.go internal/modules/pos_orders/internal/routes/handlers/order_subservices.go
+hr_attendance,platform/auth,module-to-platform,8,internal/modules/hr_attendance/internal/api/attendance_service.go internal/modules/hr_attendance/internal/api/attendance_service_test.go internal/modules/hr_attendance/internal/api/clock_out_handler.go internal/modules/hr_attendance/internal/api/generate_qr_handler.go internal/modules/hr_attendance/internal/api/get_attendance_handler.go internal/modules/hr_attendance/internal/api/get_location_attendance_handler.go
+hr_core,platform/onekiterrors,module-to-platform,8,internal/modules/hr_core/internal/api/work_schedule_service.go internal/modules/hr_core/internal/routes/handlers/config_handlers.go internal/modules/hr_core/internal/routes/handlers/department_handlers.go internal/modules/hr_core/internal/routes/handlers/employee_handlers.go internal/modules/hr_core/internal/routes/handlers/invite_handlers.go internal/modules/hr_core/internal/routes/handlers/location_handlers.go
+hr_equipment,platform/auth,module-to-platform,8,internal/modules/hr_equipment/internal/api/approve_equipment_request_handler.go internal/modules/hr_equipment/internal/api/assign_asset_handler.go internal/modules/hr_equipment/internal/api/create_asset_handler.go internal/modules/hr_equipment/internal/api/create_equipment_request_handler.go internal/modules/hr_equipment/internal/api/equipment_service.go internal/modules/hr_equipment/internal/api/list_assets_handler.go
+hr_equipment,platform/onekiterrors,module-to-platform,8,internal/modules/hr_equipment/internal/api/approve_equipment_request_handler.go internal/modules/hr_equipment/internal/api/assign_asset_handler.go internal/modules/hr_equipment/internal/api/create_asset_handler.go internal/modules/hr_equipment/internal/api/create_equipment_request_handler.go internal/modules/hr_equipment/internal/api/equipment_service.go internal/modules/hr_equipment/internal/api/list_assets_handler.go
+hr_shifts,platform/auth,module-to-platform,8,internal/modules/hr_shifts/internal/routes/handlers/availability_handlers.go internal/modules/hr_shifts/internal/routes/handlers/create_shift_assignment_handler.go internal/modules/hr_shifts/internal/routes/handlers/create_shift_handler.go internal/modules/hr_shifts/internal/routes/handlers/delete_shift_handler.go internal/modules/hr_shifts/internal/routes/handlers/get_roster_handler.go internal/modules/hr_shifts/internal/routes/handlers/list_shifts_handler.go
+hr_shifts,platform/onekiterrors,module-to-platform,8,internal/modules/hr_shifts/internal/routes/handlers/availability_handlers.go internal/modules/hr_shifts/internal/routes/handlers/create_shift_assignment_handler.go internal/modules/hr_shifts/internal/routes/handlers/create_shift_handler.go internal/modules/hr_shifts/internal/routes/handlers/delete_shift_handler.go internal/modules/hr_shifts/internal/routes/handlers/get_roster_handler.go internal/modules/hr_shifts/internal/routes/handlers/list_shifts_handler.go
+hr_shifts,platform/tenant,module-to-platform,8,internal/modules/hr_shifts/internal/routes/handlers/availability_handlers.go internal/modules/hr_shifts/internal/routes/handlers/create_shift_assignment_handler.go internal/modules/hr_shifts/internal/routes/handlers/create_shift_handler.go internal/modules/hr_shifts/internal/routes/handlers/delete_shift_handler.go internal/modules/hr_shifts/internal/routes/handlers/get_roster_handler.go internal/modules/hr_shifts/internal/routes/handlers/list_shifts_handler.go
+voxhire,platform/logger,module-to-platform,8,internal/modules/voxhire/internal/application/cv_extraction.go internal/modules/voxhire/internal/application/recruit_emails.go internal/modules/voxhire/internal/application/service.go internal/modules/voxhire/internal/infrastructure/recruit_repository.go internal/modules/voxhire/internal/infrastructure/repository.go internal/modules/voxhire/internal/routes/handlers/applications_handler.go
+bank_accounts,platform/money,module-to-platform,7,internal/modules/bank_accounts/internal/api/bank_account_service.go internal/modules/bank_accounts/internal/application/service.go internal/modules/bank_accounts/internal/application/service_test.go internal/modules/bank_accounts/internal/domain/bank_account.go internal/modules/bank_accounts/internal/domain/validation_test.go internal/modules/bank_accounts/internal/infrastructure/integration_test.go
+bills,platform/money,module-to-platform,7,internal/modules/bills/internal/api/bill_service.go internal/modules/bills/internal/application/service_test.go internal/modules/bills/internal/domain/bill.go internal/modules/bills/internal/infrastructure/integration_test.go internal/modules/bills/internal/infrastructure/repository.go internal/modules/bills/tool_executor.go
+hr_attendance,platform/onekiterrors,module-to-platform,7,internal/modules/hr_attendance/internal/api/attendance_service.go internal/modules/hr_attendance/internal/api/clock_in_handler.go internal/modules/hr_attendance/internal/api/clock_out_handler.go internal/modules/hr_attendance/internal/api/generate_qr_handler.go internal/modules/hr_attendance/internal/api/get_attendance_handler.go internal/modules/hr_attendance/internal/api/get_location_attendance_handler.go
+hr_attendance,platform/logger,module-to-platform,7,internal/modules/hr_attendance/internal/api/clock_in_handler.go internal/modules/hr_attendance/internal/api/clock_out_handler.go internal/modules/hr_attendance/internal/api/generate_qr_handler.go internal/modules/hr_attendance/internal/api/get_attendance_handler.go internal/modules/hr_attendance/internal/api/get_location_attendance_handler.go internal/modules/hr_attendance/internal/api/set_pin_handler.go
+quotes,platform/auth,module-to-platform,7,internal/modules/quotes/internal/api/convert_quote_handler.go internal/modules/quotes/internal/api/delete_quote_handler.go internal/modules/quotes/internal/api/handlers.go internal/modules/quotes/internal/api/quote_service.go internal/modules/quotes/internal/api/update_quote_handler.go internal/modules/quotes/internal/api/update_quote_status_handler.go
+quotes,platform/onekiterrors,module-to-platform,7,internal/modules/quotes/internal/api/convert_quote_handler.go internal/modules/quotes/internal/api/delete_quote_handler.go internal/modules/quotes/internal/api/handlers.go internal/modules/quotes/internal/api/quote_service.go internal/modules/quotes/internal/api/update_quote_handler.go internal/modules/quotes/internal/api/update_quote_status_handler.go
+quotes,platform/tenant,module-to-platform,7,internal/modules/quotes/internal/api/convert_quote_handler.go internal/modules/quotes/internal/api/delete_quote_handler.go internal/modules/quotes/internal/api/handlers.go internal/modules/quotes/internal/api/quote_service.go internal/modules/quotes/internal/api/update_quote_handler.go internal/modules/quotes/internal/api/update_quote_status_handler.go
+user,platform/utils,module-to-platform,7,internal/modules/user/internal/application/google_auth_service.go internal/modules/user/internal/application/password_reset_service.go internal/modules/user/internal/application/service.go internal/modules/user/internal/application/service_token_test.go internal/modules/user/internal/infrastructure/repository.go internal/modules/user/module.go
+workspaces,platform/wsbus,module-to-platform,7,internal/modules/workspaces/internal/api/project_columns_members.go internal/modules/workspaces/internal/api/project_service.go internal/modules/workspaces/internal/api/task_convert.go internal/modules/workspaces/internal/api/workspace_service.go internal/modules/workspaces/internal/application/assignee_events_test.go internal/modules/workspaces/internal/application/service.go
+careers,platform/auth,module-to-platform,6,internal/modules/careers/internal/routes/handlers/recruit_career_handlers.go internal/modules/careers/internal/routes/handlers/recruit_customization_handlers.go internal/modules/careers/internal/routes/handlers/recruit_form_fields_handlers.go internal/modules/careers/internal/routes/handlers/recruit_sections_handlers.go internal/modules/careers/internal/routes/handlers/recruit_submission_handlers.go internal/modules/careers/internal/routes/handlers/recruit_upload_handlers.go
+careers,platform/tenant,module-to-platform,6,internal/modules/careers/internal/routes/handlers/recruit_career_handlers.go internal/modules/careers/internal/routes/handlers/recruit_customization_handlers.go internal/modules/careers/internal/routes/handlers/recruit_form_fields_handlers.go internal/modules/careers/internal/routes/handlers/recruit_sections_handlers.go internal/modules/careers/internal/routes/handlers/recruit_submission_handlers.go internal/modules/careers/internal/routes/handlers/recruit_upload_handlers.go
+echo,platform/auth,module-to-platform,6,internal/modules/echo/internal/application/business_snapshot_tool_executor.go internal/modules/echo/internal/application/grounding_test.go internal/modules/echo/internal/application/pending_tool_approval.go internal/modules/echo/internal/handlers/sse_handler.go internal/modules/echo/internal/handlers/tools_handler.go internal/modules/echo/internal/handlers/tools_handler_test.go
+hr_onboarding,platform/tenant,module-to-platform,6,internal/modules/hr_onboarding/internal/api/add_item_to_template_handler.go internal/modules/hr_onboarding/internal/api/complete_checklist_item_handler.go internal/modules/hr_onboarding/internal/api/create_template_handler.go internal/modules/hr_onboarding/internal/api/get_employee_checklist_handler.go internal/modules/hr_onboarding/internal/api/list_employee_checklists_handler.go internal/modules/hr_onboarding/internal/api/onboarding_service.go
+hr_overtime,platform/auth,module-to-platform,6,internal/modules/hr_overtime/internal/api/approve_overtime_handler.go internal/modules/hr_overtime/internal/api/create_overtime_request_handler.go internal/modules/hr_overtime/internal/api/get_overtime_config_handler.go internal/modules/hr_overtime/internal/api/list_overtime_requests_handler.go internal/modules/hr_overtime/internal/api/upsert_overtime_config_handler.go internal/modules/hr_overtime/tool_executor.go
+hr_overtime,platform/logger,module-to-platform,6,internal/modules/hr_overtime/internal/api/approve_overtime_handler.go internal/modules/hr_overtime/internal/api/create_overtime_request_handler.go internal/modules/hr_overtime/internal/api/list_overtime_requests_handler.go internal/modules/hr_overtime/internal/api/upsert_overtime_config_handler.go internal/modules/hr_overtime/internal/application/service.go internal/modules/hr_overtime/internal/infrastructure/repository.go
+team,platform/auth,module-to-platform,6,internal/modules/team/internal/api/access_service.go internal/modules/team/internal/api/context.go internal/modules/team/internal/api/invitations_service.go internal/modules/team/internal/api/members_service.go internal/modules/team/internal/api/onboarding_service.go internal/modules/team/internal/api/permissions_service.go
+team,platform/onekiterrors,module-to-platform,6,internal/modules/team/internal/api/access_service.go internal/modules/team/internal/api/groups_service.go internal/modules/team/internal/api/invitations_service.go internal/modules/team/internal/api/members_service.go internal/modules/team/internal/api/onboarding_service.go internal/modules/team/internal/api/permissions_service.go
+user,platform/logger,module-to-platform,6,internal/modules/user/internal/api/async_hooks.go internal/modules/user/internal/api/auth_service.go internal/modules/user/internal/application/google_auth_service.go internal/modules/user/internal/application/password_reset_service.go internal/modules/user/internal/application/service.go internal/modules/user/internal/infrastructure/repository.go
+workspaces,platform/cache,module-to-platform,6,internal/modules/workspaces/internal/application/mytasks_cache_scope_test.go internal/modules/workspaces/internal/application/mytasks_cache_test.go internal/modules/workspaces/internal/application/service.go
+workspaces,platform/logger,module-to-platform,6,internal/modules/workspaces/internal/application/service.go internal/modules/workspaces/internal/infrastructure/features_repository.go internal/modules/workspaces/internal/infrastructure/repository.go internal/modules/workspaces/internal/infrastructure/worktime_repository.go internal/modules/workspaces/internal/realtime/realtime_handler.go internal/modules/workspaces/module.go
+booking_appointments,platform/cache,module-to-platform,5,internal/modules/booking_appointments/internal/api/appointment_service.go internal/modules/booking_appointments/internal/application/service.go internal/modules/booking_appointments/tool_executor.go
+booking_dashboard,platform/money,module-to-platform,5,internal/modules/booking_dashboard/internal/application/service.go internal/modules/booking_dashboard/internal/application/service_test.go internal/modules/booking_dashboard/internal/domain/dashboard.go internal/modules/booking_dashboard/internal/domain/dashboard_test.go internal/modules/booking_dashboard/internal/infrastructure/repository.go
+business,platform/auth,module-to-platform,5,internal/modules/business/internal/api/business_service.go internal/modules/business/internal/api/create_sub_business_handler.go internal/modules/business/internal/api/handlers.go internal/modules/business/internal/api/list_my_businesses_handler.go internal/modules/business/internal/api/slug_handlers.go
+business,platform/onekiterrors,module-to-platform,5,internal/modules/business/internal/api/business_service.go internal/modules/business/internal/api/create_sub_business_handler.go internal/modules/business/internal/api/handlers.go internal/modules/business/internal/api/list_my_businesses_handler.go internal/modules/business/internal/api/slug_handlers.go
+config,platform/auth,module-to-platform,5,internal/modules/config/internal/api/config_service.go internal/modules/config/internal/api/create_config_handler.go internal/modules/config/internal/api/get_config_by_owner_handler.go internal/modules/config/internal/api/get_config_by_owner_handler_test.go internal/modules/config/internal/api/update_config_handler.go
+crm_sales,platform/auth,module-to-platform,5,internal/modules/crm_sales/internal/infrastructure/repository.go internal/modules/crm_sales/internal/routes/handlers/contact_handlers.go internal/modules/crm_sales/internal/routes/handlers/contract_handlers.go internal/modules/crm_sales/internal/routes/handlers/lead_handlers.go internal/modules/crm_sales/internal/routes/handlers/touchpoint_handlers.go
+crm_sales,platform/logger,module-to-platform,5,internal/modules/crm_sales/internal/infrastructure/repository.go internal/modules/crm_sales/internal/routes/handlers/contact_handlers.go internal/modules/crm_sales/internal/routes/handlers/contract_handlers.go internal/modules/crm_sales/internal/routes/handlers/lead_handlers.go internal/modules/crm_sales/internal/routes/handlers/touchpoint_handlers.go
+echo,platform/logger,module-to-platform,5,internal/modules/echo/internal/application/grounding.go internal/modules/echo/internal/application/grounding_snapshot.go internal/modules/echo/internal/application/service.go internal/modules/echo/internal/handlers/sse_handler.go internal/modules/echo/internal/handlers/tools_handler.go
+hr_documents,platform/auth,module-to-platform,5,internal/modules/hr_documents/internal/routes/handlers/delete_document_handler.go internal/modules/hr_documents/internal/routes/handlers/get_document_handler.go internal/modules/hr_documents/internal/routes/handlers/list_documents_handler.go internal/modules/hr_documents/internal/routes/handlers/list_expiring_documents_handler.go internal/modules/hr_documents/internal/routes/handlers/upload_document_handler.go
+hr_documents,platform/logger,module-to-platform,5,internal/modules/hr_documents/internal/routes/handlers/delete_document_handler.go internal/modules/hr_documents/internal/routes/handlers/get_document_handler.go internal/modules/hr_documents/internal/routes/handlers/list_documents_handler.go internal/modules/hr_documents/internal/routes/handlers/list_expiring_documents_handler.go internal/modules/hr_documents/internal/routes/handlers/upload_document_handler.go
+hr_documents,platform/onekiterrors,module-to-platform,5,internal/modules/hr_documents/internal/routes/handlers/delete_document_handler.go internal/modules/hr_documents/internal/routes/handlers/get_document_handler.go internal/modules/hr_documents/internal/routes/handlers/list_documents_handler.go internal/modules/hr_documents/internal/routes/handlers/list_expiring_documents_handler.go internal/modules/hr_documents/internal/routes/handlers/upload_document_handler.go
+hr_documents,platform/tenant,module-to-platform,5,internal/modules/hr_documents/internal/routes/handlers/delete_document_handler.go internal/modules/hr_documents/internal/routes/handlers/get_document_handler.go internal/modules/hr_documents/internal/routes/handlers/list_documents_handler.go internal/modules/hr_documents/internal/routes/handlers/list_expiring_documents_handler.go internal/modules/hr_documents/internal/routes/handlers/upload_document_handler.go
+hr_equipment,platform/tenant,module-to-platform,5,internal/modules/hr_equipment/internal/api/approve_equipment_request_handler.go internal/modules/hr_equipment/internal/api/assign_asset_handler.go internal/modules/hr_equipment/internal/api/create_asset_handler.go internal/modules/hr_equipment/internal/api/create_equipment_request_handler.go internal/modules/hr_equipment/internal/api/equipment_service.go
+hr_overtime,platform/onekiterrors,module-to-platform,5,internal/modules/hr_overtime/internal/api/approve_overtime_handler.go internal/modules/hr_overtime/internal/api/create_overtime_request_handler.go internal/modules/hr_overtime/internal/api/get_overtime_config_handler.go internal/modules/hr_overtime/internal/api/list_overtime_requests_handler.go internal/modules/hr_overtime/internal/api/upsert_overtime_config_handler.go
+hr_overtime,platform/tenant,module-to-platform,5,internal/modules/hr_overtime/internal/api/approve_overtime_handler.go internal/modules/hr_overtime/internal/api/create_overtime_request_handler.go internal/modules/hr_overtime/internal/api/get_overtime_config_handler.go internal/modules/hr_overtime/internal/api/list_overtime_requests_handler.go internal/modules/hr_overtime/internal/api/upsert_overtime_config_handler.go
+hr_setup,platform/auth,module-to-platform,5,internal/modules/hr_setup/internal/api/complete_setup_step_handler.go internal/modules/hr_setup/internal/api/get_hr_config_handler.go internal/modules/hr_setup/internal/api/get_setup_status_handler.go internal/modules/hr_setup/internal/api/setup_service.go internal/modules/hr_setup/internal/api/upsert_hr_config_handler.go
+hr_setup,platform/logger,module-to-platform,5,internal/modules/hr_setup/internal/api/complete_setup_step_handler.go internal/modules/hr_setup/internal/api/get_hr_config_handler.go internal/modules/hr_setup/internal/api/get_setup_status_handler.go internal/modules/hr_setup/internal/api/setup_service.go internal/modules/hr_setup/internal/api/upsert_hr_config_handler.go
+hr_setup,platform/onekiterrors,module-to-platform,5,internal/modules/hr_setup/internal/api/complete_setup_step_handler.go internal/modules/hr_setup/internal/api/get_hr_config_handler.go internal/modules/hr_setup/internal/api/get_setup_status_handler.go internal/modules/hr_setup/internal/api/setup_service.go internal/modules/hr_setup/internal/api/upsert_hr_config_handler.go
+quotes,platform/logger,module-to-platform,5,internal/modules/quotes/internal/api/convert_quote_handler.go internal/modules/quotes/internal/api/delete_quote_handler.go internal/modules/quotes/internal/api/quote_service.go internal/modules/quotes/internal/api/update_quote_handler.go internal/modules/quotes/internal/infrastructure/repository.go
+team,platform/logger,module-to-platform,5,internal/modules/team/internal/api/access_service.go internal/modules/team/internal/api/invitations_service.go internal/modules/team/internal/api/seat_changes.go internal/modules/team/internal/application/service.go internal/modules/team/internal/infrastructure/repository.go
+accounts,platform/financeaccounts,module-to-platform,4,internal/modules/accounts/internal/application/service.go internal/modules/accounts/internal/application/service_test.go internal/modules/accounts/internal/infrastructure/repository.go internal/modules/accounts/module.go
+apps,platform/cache,module-to-platform,4,internal/modules/apps/internal/api/app_service.go internal/modules/apps/internal/application/service.go
+automations,platform/cache,module-to-platform,4,internal/modules/automations/internal/application/service.go internal/modules/automations/internal/routes/handlers/automation_handler.go
+benefits,platform/cache,module-to-platform,4,internal/modules/benefits/internal/application/enrollment_service.go internal/modules/benefits/internal/application/service.go
+booking_services,platform/money,module-to-platform,4,internal/modules/booking_services/internal/api/service.go internal/modules/booking_services/internal/domain/booking_service.go internal/modules/booking_services/internal/infrastructure/integration_test.go internal/modules/booking_services/internal/infrastructure/repository.go
+campaigns,platform/auth,module-to-platform,4,internal/modules/campaigns/internal/routes/handlers/authorization.go internal/modules/campaigns/internal/routes/handlers/campaign_delete_handler.go internal/modules/campaigns/internal/routes/handlers/campaign_handlers.go internal/modules/campaigns/tool_executor.go
+careers,platform/money,module-to-platform,4,internal/modules/careers/internal/domain/recruit.go internal/modules/careers/internal/infrastructure/integration_test.go internal/modules/careers/internal/infrastructure/recruit_repository.go internal/modules/careers/internal/routes/handlers/recruit_career_handlers.go
+careers,platform/storage,module-to-platform,4,internal/modules/careers/internal/routes/handlers/apply_handler.go internal/modules/careers/internal/routes/handlers/recruit_public_handlers.go internal/modules/careers/internal/routes/handlers/recruit_public_handlers_test.go internal/modules/careers/internal/routes/handlers/recruit_upload_handlers.go
+config,platform/onekiterrors,module-to-platform,4,internal/modules/config/internal/api/config_service.go internal/modules/config/internal/api/create_config_handler.go internal/modules/config/internal/api/get_config_by_owner_handler.go internal/modules/config/internal/api/update_config_handler.go
+config,platform/tenant,module-to-platform,4,internal/modules/config/internal/api/config_service.go internal/modules/config/internal/api/create_config_handler.go internal/modules/config/internal/api/get_config_by_owner_handler.go internal/modules/config/internal/api/update_config_handler.go
+crm_sales,platform/onekiterrors,module-to-platform,4,internal/modules/crm_sales/internal/routes/handlers/contact_handlers.go internal/modules/crm_sales/internal/routes/handlers/contract_handlers.go internal/modules/crm_sales/internal/routes/handlers/lead_handlers.go internal/modules/crm_sales/internal/routes/handlers/touchpoint_handlers.go
+crm_sales,platform/tenant,module-to-platform,4,internal/modules/crm_sales/internal/routes/handlers/contact_handlers.go internal/modules/crm_sales/internal/routes/handlers/contract_handlers.go internal/modules/crm_sales/internal/routes/handlers/lead_handlers.go internal/modules/crm_sales/internal/routes/handlers/touchpoint_handlers.go
+echo,platform/snips,module-to-platform,4,internal/modules/echo/internal/application/grounding.go internal/modules/echo/internal/application/service.go internal/modules/echo/internal/handlers/sse_handler.go internal/modules/echo/internal/handlers/sse_handler_test.go
+journal,platform/financeaccounts,module-to-platform,4,internal/modules/journal/internal/application/service.go internal/modules/journal/internal/application/service_test.go internal/modules/journal/internal/infrastructure/repository.go internal/modules/journal/module.go
+loyalty,platform/auth,module-to-platform,4,internal/modules/loyalty/internal/routes/handlers/authorization.go internal/modules/loyalty/internal/routes/handlers/loyalty_handlers.go internal/modules/loyalty/internal/routes/handlers/members_handlers.go internal/modules/loyalty/tool_executor.go
+pos_orders,platform/logger,module-to-platform,4,internal/modules/pos_orders/internal/application/service.go internal/modules/pos_orders/internal/infrastructure/repository.go internal/modules/pos_orders/internal/routes/handlers/webhook_handlers.go internal/modules/pos_orders/internal/routes/handlers/ws_handler.go
+voxhire,platform/storage,module-to-platform,4,internal/modules/voxhire/internal/application/cv_extraction.go internal/modules/voxhire/internal/application/recruit_service.go internal/modules/voxhire/internal/routes/handlers/applications_handler.go internal/modules/voxhire/internal/routes/handlers/career_apply_handler.go
+addons,platform/money,module-to-platform,3,internal/modules/addons/internal/application/service_test.go internal/modules/addons/internal/domain/addon.go internal/modules/addons/internal/infrastructure/repository.go
+api_keys,platform/hubdeveloper,module-to-platform,3,internal/modules/api_keys/hub_api_keys_provider.go internal/modules/api_keys/internal/api/developer_service.go internal/modules/api_keys/module.go
+benefits,platform/auth,module-to-platform,3,internal/modules/benefits/internal/api/benefit_service.go internal/modules/benefits/internal/api/enrollment_service.go internal/modules/benefits/internal/api/enrollment_service_test.go
+benefits,platform/logger,module-to-platform,3,internal/modules/benefits/internal/api/enrollment_service.go internal/modules/benefits/internal/infrastructure/enrollment_repository.go internal/modules/benefits/internal/infrastructure/repository.go
+business,platform/logger,module-to-platform,3,internal/modules/business/internal/api/business_service.go internal/modules/business/internal/api/slug_handlers.go internal/modules/business/internal/infrastructure/repository.go
+campaigns,platform/onekiterrors,module-to-platform,3,internal/modules/campaigns/internal/routes/handlers/authorization.go internal/modules/campaigns/internal/routes/handlers/campaign_delete_handler.go internal/modules/campaigns/internal/routes/handlers/campaign_handlers.go
+careers,platform/logger,module-to-platform,3,internal/modules/careers/internal/application/apply_service.go internal/modules/careers/internal/application/emails.go internal/modules/careers/internal/routes/handlers/apply_handler.go
+careers,platform/cache,module-to-platform,3,internal/modules/careers/internal/application/service.go internal/modules/careers/internal/routes/handlers/recruit_public_handlers.go
+config,platform/utils,module-to-platform,3,internal/modules/config/internal/domain/config.go internal/modules/config/internal/domain/theme.go internal/modules/config/internal/infrastructure/repository.go
+console,platform/auth,module-to-platform,3,internal/modules/console/internal/api/admin_service.go internal/modules/console/internal/routes/handlers/handlers.go internal/modules/console/internal/routes/routes.go
+console,platform/onekiterrors,module-to-platform,3,internal/modules/console/internal/api/admin_service.go internal/modules/console/internal/routes/handlers/handlers.go internal/modules/console/internal/routes/routes.go
+hr_payroll,platform/labourcost,module-to-platform,3,internal/modules/hr_payroll/internal/application/service.go internal/modules/hr_payroll/internal/infrastructure/repository.go internal/modules/hr_payroll/module.go
+hr_setup,hr_core,module-to-module,3,internal/modules/hr_setup/internal/api/get_hr_config_handler.go internal/modules/hr_setup/internal/api/upsert_hr_config_handler.go internal/modules/hr_setup/module.go
+invoices,platform/cache,module-to-platform,3,internal/modules/invoices/internal/application/service.go internal/modules/invoices/internal/application/service_test.go
+loyalty,platform/onekiterrors,module-to-platform,3,internal/modules/loyalty/internal/routes/handlers/authorization.go internal/modules/loyalty/internal/routes/handlers/loyalty_handlers.go internal/modules/loyalty/internal/routes/handlers/members_handlers.go
+memory,platform/auth,module-to-platform,3,internal/modules/memory/internal/api/legacy_memory_handlers.go internal/modules/memory/internal/api/memory_service.go internal/modules/memory/tool_executor.go
+notifications,platform/auth,module-to-platform,3,internal/modules/notifications/internal/routes/handlers/handlers.go internal/modules/notifications/internal/routes/handlers/notification_service.go internal/modules/notifications/internal/routes/handlers/ws_handler.go
+pos_audit,platform/cursor,module-to-platform,3,internal/modules/pos_audit/internal/api/audit_service.go internal/modules/pos_audit/internal/application/service.go internal/modules/pos_audit/internal/application/service_test.go
+pos_orders,platform/cache,module-to-platform,3,internal/modules/pos_orders/internal/application/service.go
+pos_orders,platform/auth,module-to-platform,3,internal/modules/pos_orders/internal/routes/handlers/tenant_helpers.go internal/modules/pos_orders/internal/routes/handlers/ws_handler.go internal/modules/pos_orders/tool_executor.go
+purchase_orders,platform/stock_core,module-to-platform,3,internal/modules/purchase_orders/internal/api/error_mapping.go internal/modules/purchase_orders/internal/api/purchase_order_service_test.go internal/modules/purchase_orders/internal/infrastructure/repository.go
+recurring_invoices,platform/jobs,module-to-platform,3,internal/modules/recurring_invoices/internal/jobs/jobs.go internal/modules/recurring_invoices/internal/jobs/jobs_test.go internal/modules/recurring_invoices/module.go
+stock_takes,platform/stock_core,module-to-platform,3,internal/modules/stock_takes/internal/api/error_mapping.go internal/modules/stock_takes/internal/api/stock_take_service_test.go internal/modules/stock_takes/internal/infrastructure/repository.go
+stock_transfers,platform/stock_core,module-to-platform,3,internal/modules/stock_transfers/internal/api/error_mapping.go internal/modules/stock_transfers/internal/api/stock_transfer_service_test.go internal/modules/stock_transfers/internal/infrastructure/repository.go
+subscriptions,platform/paddle,module-to-platform,3,internal/modules/subscriptions/internal/api/paddle_webhook.go internal/modules/subscriptions/internal/application/service.go internal/modules/subscriptions/internal/application/service_test.go
+user,platform/auth,module-to-platform,3,internal/modules/user/internal/api/auth_service.go internal/modules/user/internal/api/user_service.go internal/modules/user/module.go
+user,platform/hubprofile,module-to-platform,3,internal/modules/user/internal/api/user_service.go internal/modules/user/internal/api/user_service_test.go internal/modules/user/module.go
+user,platform/cache,module-to-platform,3,internal/modules/user/internal/application/password_reset_service.go internal/modules/user/internal/application/service.go
+websitelead,platform/logger,module-to-platform,3,internal/modules/websitelead/internal/application/service.go internal/modules/websitelead/internal/infrastructure/repository.go internal/modules/websitelead/internal/routes/handlers/analytics_handler.go
+accounts,platform/logger,module-to-platform,2,internal/modules/accounts/internal/api/account_service.go internal/modules/accounts/internal/infrastructure/repository.go
+accounts,platform/cache,module-to-platform,2,internal/modules/accounts/internal/application/service.go
+addons,platform/cache,module-to-platform,2,internal/modules/addons/internal/application/service.go
+aiquota,platform/logger,module-to-platform,2,internal/modules/aiquota/internal/application/service.go internal/modules/aiquota/internal/infrastructure/repository.go
+api_keys,platform/cache,module-to-platform,2,internal/modules/api_keys/internal/application/service.go
+apps,platform/auth,module-to-platform,2,internal/modules/apps/internal/api/app_service.go internal/modules/apps/internal/api/payload.go
+apps,platform/hubapp,module-to-platform,2,internal/modules/apps/internal/api/app_service.go internal/modules/apps/module.go
+apps,platform/onekiterrors,module-to-platform,2,internal/modules/apps/internal/api/app_service.go internal/modules/apps/internal/api/payload.go
+bank_accounts,platform/auth,module-to-platform,2,internal/modules/bank_accounts/internal/api/bank_account_service.go internal/modules/bank_accounts/tool_executor.go
+bank_accounts,platform/tenant,module-to-platform,2,internal/modules/bank_accounts/internal/api/bank_account_service.go internal/modules/bank_accounts/tool_executor.go
+bank_accounts,platform/cache,module-to-platform,2,internal/modules/bank_accounts/internal/application/service.go
+benefits,platform/onekiterrors,module-to-platform,2,internal/modules/benefits/internal/api/benefit_service.go internal/modules/benefits/internal/api/enrollment_service.go
+benefits,platform/tenant,module-to-platform,2,internal/modules/benefits/internal/api/benefit_service.go internal/modules/benefits/internal/api/enrollment_service.go
+billing,platform/cache,module-to-platform,2,internal/modules/billing/internal/application/service.go
+billing,platform/money,module-to-platform,2,internal/modules/billing/internal/application/service_test.go internal/modules/billing/internal/domain/domain.go
+bills,platform/auth,module-to-platform,2,internal/modules/bills/internal/api/bill_service.go internal/modules/bills/tool_executor.go
+bills,platform/logger,module-to-platform,2,internal/modules/bills/internal/api/bill_service.go internal/modules/bills/internal/infrastructure/repository.go
+bills,platform/tenant,module-to-platform,2,internal/modules/bills/internal/api/bill_service.go internal/modules/bills/tool_executor.go
+bills,platform/cache,module-to-platform,2,internal/modules/bills/internal/application/service.go
+booking_appointments,platform/auth,module-to-platform,2,internal/modules/booking_appointments/internal/api/appointment_service.go internal/modules/booking_appointments/tool_executor.go
+booking_appointments,platform/tenant,module-to-platform,2,internal/modules/booking_appointments/internal/api/appointment_service.go internal/modules/booking_appointments/tool_executor.go
+booking_calendar,platform/auth,module-to-platform,2,internal/modules/booking_calendar/internal/api/calendar_service.go internal/modules/booking_calendar/tool_executor.go
+booking_calendar,platform/tenant,module-to-platform,2,internal/modules/booking_calendar/internal/api/calendar_service.go internal/modules/booking_calendar/tool_executor.go
+booking_calendar,platform/cache,module-to-platform,2,internal/modules/booking_calendar/internal/application/service.go
+booking_dashboard,platform/auth,module-to-platform,2,internal/modules/booking_dashboard/internal/api/dashboard_service.go internal/modules/booking_dashboard/tool_executor.go
+booking_dashboard,platform/tenant,module-to-platform,2,internal/modules/booking_dashboard/internal/api/dashboard_service.go internal/modules/booking_dashboard/tool_executor.go
+booking_dashboard,platform/cache,module-to-platform,2,internal/modules/booking_dashboard/internal/application/service.go
+booking_reminders,platform/auth,module-to-platform,2,internal/modules/booking_reminders/internal/api/reminder_service.go internal/modules/booking_reminders/tool_executor.go
+booking_reminders,platform/tenant,module-to-platform,2,internal/modules/booking_reminders/internal/api/reminder_service.go internal/modules/booking_reminders/tool_executor.go
+booking_reminders,platform/cache,module-to-platform,2,internal/modules/booking_reminders/internal/application/service.go
+booking_resources,platform/auth,module-to-platform,2,internal/modules/booking_resources/internal/api/resource_service.go internal/modules/booking_resources/tool_executor.go
+booking_resources,platform/tenant,module-to-platform,2,internal/modules/booking_resources/internal/api/resource_service.go internal/modules/booking_resources/tool_executor.go
+booking_services,platform/auth,module-to-platform,2,internal/modules/booking_services/internal/api/service.go internal/modules/booking_services/tool_executor.go
+booking_waitlist,platform/auth,module-to-platform,2,internal/modules/booking_waitlist/internal/api/waitlist_service.go internal/modules/booking_waitlist/tool_executor.go
+brands,platform/auth,module-to-platform,2,internal/modules/brands/internal/api/brand_service.go internal/modules/brands/tool_executor.go
+brands,platform/tenant,module-to-platform,2,internal/modules/brands/internal/api/brand_service.go internal/modules/brands/tool_executor.go
+business,user,module-to-module,2,internal/modules/business/internal/api/business_service.go internal/modules/business/module.go
+business,platform/cache,module-to-platform,2,internal/modules/business/internal/application/service.go
+campaigns,platform/cache,module-to-platform,2,internal/modules/campaigns/internal/application/service.go
+campaigns,platform/tenant,module-to-platform,2,internal/modules/campaigns/internal/routes/handlers/campaign_delete_handler.go internal/modules/campaigns/internal/routes/handlers/campaign_handlers.go
+careers,platform/email,module-to-platform,2,internal/modules/careers/internal/application/apply_service.go internal/modules/careers/internal/application/emails.go
+careers,platform/server,module-to-platform,2,internal/modules/careers/internal/routes/handlers/apply_handler.go internal/modules/careers/internal/routes/routes.go
+categories,platform/auth,module-to-platform,2,internal/modules/categories/internal/api/category_service.go internal/modules/categories/tool_executor.go
+categories,platform/tenant,module-to-platform,2,internal/modules/categories/internal/api/category_service.go internal/modules/categories/tool_executor.go
+config,custom_domains,module-to-module,2,internal/modules/config/internal/api/config_service.go internal/modules/config/module.go
+config,platform/cache,module-to-platform,2,internal/modules/config/internal/application/service.go
+console,platform/money,module-to-platform,2,internal/modules/console/internal/application/addon_money_test.go internal/modules/console/internal/application/service.go
+console,platform/cache,module-to-platform,2,internal/modules/console/internal/application/service.go
+console,platform/logger,module-to-platform,2,internal/modules/console/internal/application/service.go internal/modules/console/internal/routes/routes.go
+crm_sales,platform/cache,module-to-platform,2,internal/modules/crm_sales/internal/application/service.go
+crm_settings,platform/cache,module-to-platform,2,internal/modules/crm_settings/internal/application/service.go
+customers,platform/cache,module-to-platform,2,internal/modules/customers/internal/application/service.go
+customers,platform/logger,module-to-platform,2,internal/modules/customers/internal/application/service.go internal/modules/customers/internal/infrastructure/repository.go
+departments,platform/cache,module-to-platform,2,internal/modules/departments/internal/application/service.go
+documents,platform/cache,module-to-platform,2,internal/modules/documents/internal/application/service.go
+echo,platform/aicache,module-to-platform,2,internal/modules/echo/internal/application/cache_plan.go internal/modules/echo/internal/handlers/sse_handler.go
+echo,platform/onekiterrors,module-to-platform,2,internal/modules/echo/internal/handlers/sse_handler.go internal/modules/echo/internal/handlers/tools_handler.go
+echo,platform/server,module-to-platform,2,internal/modules/echo/internal/handlers/sse_handler.go internal/modules/echo/module.go
+emailtest,platform/auth,module-to-platform,2,internal/modules/emailtest/module.go internal/modules/emailtest/module_test.go
+emailtest,platform/config,module-to-platform,2,internal/modules/emailtest/module.go internal/modules/emailtest/module_test.go
+expenses,platform/auth,module-to-platform,2,internal/modules/expenses/internal/api/expense_service.go internal/modules/expenses/tool_executor.go
+expenses,platform/tenant,module-to-platform,2,internal/modules/expenses/internal/api/expense_service.go internal/modules/expenses/tool_executor.go
+expenses,platform/cache,module-to-platform,2,internal/modules/expenses/internal/application/service.go
+featuresupport,platform/cache,module-to-platform,2,internal/modules/featuresupport/internal/application/service.go
+feedback,platform/cache,module-to-platform,2,internal/modules/feedback/internal/application/service.go
+finance_bank_feeds,platform/cache,module-to-platform,2,internal/modules/finance_bank_feeds/internal/application/service.go
+finance_bank_feeds,platform/auth,module-to-platform,2,internal/modules/finance_bank_feeds/internal/routes/handlers/handlers.go internal/modules/finance_bank_feeds/tool_executor.go
+finance_bank_feeds,platform/tenant,module-to-platform,2,internal/modules/finance_bank_feeds/internal/routes/handlers/handlers.go internal/modules/finance_bank_feeds/tool_executor.go
+finance_reconciliation,platform/auth,module-to-platform,2,internal/modules/finance_reconciliation/internal/api/reconciliation_service.go internal/modules/finance_reconciliation/tool_executor.go
+finance_reconciliation,platform/tenant,module-to-platform,2,internal/modules/finance_reconciliation/internal/api/reconciliation_service.go internal/modules/finance_reconciliation/tool_executor.go
+finance_reconciliation,platform/cache,module-to-platform,2,internal/modules/finance_reconciliation/internal/application/service.go
+finance_reports,platform/auth,module-to-platform,2,internal/modules/finance_reports/internal/api/statement_service.go internal/modules/finance_reports/tool_executor.go
+finance_reports,platform/tenant,module-to-platform,2,internal/modules/finance_reports/internal/api/statement_service.go internal/modules/finance_reports/tool_executor.go
+finance_reports,platform/cache,module-to-platform,2,internal/modules/finance_reports/internal/application/service.go
+flow_insights,platform/cache,module-to-platform,2,internal/modules/flow_insights/internal/application/service.go
+flow_insights,platform/auth,module-to-platform,2,internal/modules/flow_insights/internal/routes/handlers/insights_handlers.go internal/modules/flow_insights/tool_executor.go
+flow_insights,platform/tenant,module-to-platform,2,internal/modules/flow_insights/internal/routes/handlers/insights_handlers.go internal/modules/flow_insights/tool_executor.go
+hr_core,platform/cache,module-to-platform,2,internal/modules/hr_core/internal/application/service.go
+hr_dashboard,platform/cache,module-to-platform,2,internal/modules/hr_dashboard/internal/application/service.go
+hr_documents,platform/cache,module-to-platform,2,internal/modules/hr_documents/internal/application/service.go
+hr_equipment,platform/cache,module-to-platform,2,internal/modules/hr_equipment/internal/application/service.go
+hr_leave,platform/cache,module-to-platform,2,internal/modules/hr_leave/internal/application/service.go
+hr_leave,platform/jobs,module-to-platform,2,internal/modules/hr_leave/internal/jobs/jobs.go internal/modules/hr_leave/module.go
+hr_onboarding,platform/cache,module-to-platform,2,internal/modules/hr_onboarding/internal/application/service.go
+hr_overtime,platform/cache,module-to-platform,2,internal/modules/hr_overtime/internal/application/service.go
+hr_overtime,platform/jobs,module-to-platform,2,internal/modules/hr_overtime/internal/jobs/jobs.go internal/modules/hr_overtime/module.go
+hr_payroll,platform/cache,module-to-platform,2,internal/modules/hr_payroll/internal/application/service.go
+hr_payroll,platform/jobs,module-to-platform,2,internal/modules/hr_payroll/internal/jobs/jobs.go internal/modules/hr_payroll/module.go
+hr_performance,platform/cache,module-to-platform,2,internal/modules/hr_performance/internal/application/service.go
+hr_reports,platform/cache,module-to-platform,2,internal/modules/hr_reports/internal/application/service.go
+hr_setup,platform/tenant,module-to-platform,2,internal/modules/hr_setup/internal/api/get_hr_config_handler.go internal/modules/hr_setup/internal/api/upsert_hr_config_handler.go
+hr_setup,platform/cache,module-to-platform,2,internal/modules/hr_setup/internal/application/service.go
+hr_shifts,platform/cache,module-to-platform,2,internal/modules/hr_shifts/internal/application/service.go
+hr_time,platform/cache,module-to-platform,2,internal/modules/hr_time/internal/application/service.go
+hr_time,platform/jobs,module-to-platform,2,internal/modules/hr_time/internal/jobs/jobs.go internal/modules/hr_time/module.go
+insights,platform/auth,module-to-platform,2,internal/modules/insights/internal/api/common.go internal/modules/insights/tool_executor.go
+insights,platform/tenant,module-to-platform,2,internal/modules/insights/internal/api/common.go internal/modules/insights/tool_executor.go
+insights,flow_insights,module-to-module,2,internal/modules/insights/internal/api/dashboard_flow_test.go internal/modules/insights/internal/api/setting_service.go
+integrations,platform/cache,module-to-platform,2,internal/modules/integrations/internal/application/service.go
+inventory,platform/auth,module-to-platform,2,internal/modules/inventory/internal/api/inventory_service.go internal/modules/inventory/tool_executor.go
+inventory,platform/tenant,module-to-platform,2,internal/modules/inventory/internal/api/inventory_service.go internal/modules/inventory/tool_executor.go
+inventory,platform/cache,module-to-platform,2,internal/modules/inventory/internal/application/service.go
+inventory,platform/logger,module-to-platform,2,internal/modules/inventory/internal/application/service.go internal/modules/inventory/internal/infrastructure/repository.go
+invoices,platform/logger,module-to-platform,2,internal/modules/invoices/internal/application/service.go internal/modules/invoices/internal/infrastructure/repository.go
+journal,platform/auth,module-to-platform,2,internal/modules/journal/internal/api/journal_service.go internal/modules/journal/tool_executor.go
+journal,platform/tenant,module-to-platform,2,internal/modules/journal/internal/api/journal_service.go internal/modules/journal/tool_executor.go
+journal,platform/cache,module-to-platform,2,internal/modules/journal/internal/application/service.go
+journal,platform/financejournal,module-to-platform,2,internal/modules/journal/internal/domain/journal.go internal/modules/journal/module.go
+kpis,platform/auth,module-to-platform,2,internal/modules/kpis/internal/api/dashboard_service.go internal/modules/kpis/tool_executor.go
+kpis,platform/tenant,module-to-platform,2,internal/modules/kpis/internal/api/dashboard_service.go internal/modules/kpis/tool_executor.go
+kpis,platform/cache,module-to-platform,2,internal/modules/kpis/internal/application/service.go
+loyalty,platform/cache,module-to-platform,2,internal/modules/loyalty/internal/application/service.go
+loyalty,platform/tenant,module-to-platform,2,internal/modules/loyalty/internal/routes/handlers/loyalty_handlers.go internal/modules/loyalty/internal/routes/handlers/members_handlers.go
+memory,platform/onekiterrors,module-to-platform,2,internal/modules/memory/internal/api/legacy_memory_handlers.go internal/modules/memory/internal/api/memory_service.go
+memory,platform/cache,module-to-platform,2,internal/modules/memory/internal/application/service.go
+memory,platform/logger,module-to-platform,2,internal/modules/memory/internal/application/service.go internal/modules/memory/internal/infrastructure/repository.go
+notifications,platform/cache,module-to-platform,2,internal/modules/notifications/internal/application/service.go
+notifications,platform/cursor,module-to-platform,2,internal/modules/notifications/internal/application/service.go internal/modules/notifications/internal/routes/handlers/notification_service.go
+notifications,platform/logger,module-to-platform,2,internal/modules/notifications/internal/infrastructure/repository.go internal/modules/notifications/internal/routes/handlers/ws_handler.go
+notifications,platform/onekiterrors,module-to-platform,2,internal/modules/notifications/internal/routes/handlers/handlers.go internal/modules/notifications/internal/routes/handlers/notification_service.go
+notifications,platform/tenant,module-to-platform,2,internal/modules/notifications/internal/routes/handlers/handlers.go internal/modules/notifications/internal/routes/handlers/notification_service.go
+oauth,platform/utils,module-to-platform,2,internal/modules/oauth/internal/application/service.go internal/modules/oauth/internal/application/service_test.go
+one_on_ones,platform/cache,module-to-platform,2,internal/modules/one_on_ones/internal/application/service.go
+payroll,platform/cache,module-to-platform,2,internal/modules/payroll/internal/application/service.go
+payroll,platform/logger,module-to-platform,2,internal/modules/payroll/internal/application/service.go internal/modules/payroll/internal/infrastructure/repository.go
+pos_audit,platform/cache,module-to-platform,2,internal/modules/pos_audit/internal/application/service.go
+pos_cash_movements,platform/auth,module-to-platform,2,internal/modules/pos_cash_movements/internal/api/cash_service.go internal/modules/pos_cash_movements/tool_executor.go
+pos_cash_movements,platform/cache,module-to-platform,2,internal/modules/pos_cash_movements/internal/application/service.go
+pos_combos,platform/cache,module-to-platform,2,internal/modules/pos_combos/internal/application/service.go
+pos_customers,platform/cache,module-to-platform,2,internal/modules/pos_customers/internal/application/service.go
+pos_day_summary,platform/auth,module-to-platform,2,internal/modules/pos_day_summary/internal/api/day_summary_service.go internal/modules/pos_day_summary/tool_executor.go
+pos_day_summary,platform/tenant,module-to-platform,2,internal/modules/pos_day_summary/internal/api/day_summary_service.go internal/modules/pos_day_summary/tool_executor.go
+pos_day_summary,platform/cache,module-to-platform,2,internal/modules/pos_day_summary/internal/application/service.go
+pos_floors,platform/auth,module-to-platform,2,internal/modules/pos_floors/internal/api/floor_service.go internal/modules/pos_floors/tool_executor.go
+pos_floors,platform/cache,module-to-platform,2,internal/modules/pos_floors/internal/application/service.go
+pos_gift_cards,platform/logger,module-to-platform,2,internal/modules/pos_gift_cards/internal/api/gift_card_service.go internal/modules/pos_gift_cards/internal/infrastructure/repository.go
+pos_gift_cards,platform/cache,module-to-platform,2,internal/modules/pos_gift_cards/internal/application/service.go
+pos_kds,platform/cache,module-to-platform,2,internal/modules/pos_kds/internal/application/service.go
+pos_locations,platform/auth,module-to-platform,2,internal/modules/pos_locations/internal/api/location_service.go internal/modules/pos_locations/tool_executor.go
+pos_locations,platform/onekiterrors,module-to-platform,2,internal/modules/pos_locations/internal/api/location_service.go internal/modules/pos_locations/tool_executor.go
+pos_locations,platform/tenant,module-to-platform,2,internal/modules/pos_locations/internal/api/location_service.go internal/modules/pos_locations/tool_executor.go
+pos_locations,platform/cache,module-to-platform,2,internal/modules/pos_locations/internal/application/service.go
+pos_loyalty,platform/cache,module-to-platform,2,internal/modules/pos_loyalty/internal/application/service.go
+pos_member_locations,platform/cache,module-to-platform,2,internal/modules/pos_member_locations/internal/application/service.go
+pos_menu,platform/auth,module-to-platform,2,internal/modules/pos_menu/internal/api/menu_item_service.go internal/modules/pos_menu/tool_executor.go
+pos_menu,platform/tenant,module-to-platform,2,internal/modules/pos_menu/internal/api/menu_item_service.go internal/modules/pos_menu/tool_executor.go
+pos_menu,platform/cache,module-to-platform,2,internal/modules/pos_menu/internal/application/service.go
+pos_modifiers,platform/auth,module-to-platform,2,internal/modules/pos_modifiers/internal/api/modifier_service.go internal/modules/pos_modifiers/tool_executor.go
+pos_modifiers,platform/tenant,module-to-platform,2,internal/modules/pos_modifiers/internal/api/modifier_service.go internal/modules/pos_modifiers/tool_executor.go
+pos_modifiers,platform/cache,module-to-platform,2,internal/modules/pos_modifiers/internal/application/service.go
+pos_orders,pos_settings,module-to-module,2,internal/modules/pos_orders/internal/application/service.go internal/modules/pos_orders/internal/application/service_test.go
+pos_orders,platform/paddle,module-to-platform,2,internal/modules/pos_orders/internal/application/service.go internal/modules/pos_orders/internal/routes/handlers/webhook_handlers.go
+pos_orders,platform/wsbus,module-to-platform,2,internal/modules/pos_orders/internal/application/service.go internal/modules/pos_orders/internal/routes/handlers/ws_handler.go
+pos_orders,platform/tenant,module-to-platform,2,internal/modules/pos_orders/internal/routes/handlers/tenant_helpers.go internal/modules/pos_orders/tool_executor.go
+pos_receipts,platform/cache,module-to-platform,2,internal/modules/pos_receipts/internal/application/service.go
+pos_sessions,platform/auth,module-to-platform,2,internal/modules/pos_sessions/internal/api/session_service.go internal/modules/pos_sessions/tool_executor.go
+pos_sessions,platform/tenant,module-to-platform,2,internal/modules/pos_sessions/internal/api/session_service.go internal/modules/pos_sessions/tool_executor.go
+pos_sessions,platform/cache,module-to-platform,2,internal/modules/pos_sessions/internal/application/service.go
+pos_settings,platform/cache,module-to-platform,2,internal/modules/pos_settings/internal/application/service.go
+pos_stock_movements,platform/auth,module-to-platform,2,internal/modules/pos_stock_movements/internal/api/stock_service.go internal/modules/pos_stock_movements/tool_executor.go
+pos_stock_movements,platform/tenant,module-to-platform,2,internal/modules/pos_stock_movements/internal/api/stock_service.go internal/modules/pos_stock_movements/tool_executor.go
+pos_stock_movements,platform/cache,module-to-platform,2,internal/modules/pos_stock_movements/internal/application/service.go
+pos_tables,platform/auth,module-to-platform,2,internal/modules/pos_tables/internal/api/table_service.go internal/modules/pos_tables/tool_executor.go
+pos_tables,platform/tenant,module-to-platform,2,internal/modules/pos_tables/internal/api/table_service.go internal/modules/pos_tables/tool_executor.go
+pos_tables,platform/cache,module-to-platform,2,internal/modules/pos_tables/internal/application/service.go
+pos_terminals,platform/auth,module-to-platform,2,internal/modules/pos_terminals/internal/api/terminal_service.go internal/modules/pos_terminals/tool_executor.go
+pos_terminals,platform/cache,module-to-platform,2,internal/modules/pos_terminals/internal/application/service.go
+pos_users,platform/auth,module-to-platform,2,internal/modules/pos_users/internal/api/user_service.go internal/modules/pos_users/tool_executor.go
+pos_users,platform/logger,module-to-platform,2,internal/modules/pos_users/internal/api/user_service.go internal/modules/pos_users/internal/infrastructure/repository.go
+pos_users,platform/cache,module-to-platform,2,internal/modules/pos_users/internal/application/service.go
+price_lists,platform/cache,module-to-platform,2,internal/modules/price_lists/internal/application/service.go
+products,platform/auth,module-to-platform,2,internal/modules/products/internal/api/product_service.go internal/modules/products/tool_executor.go
+products,platform/tenant,module-to-platform,2,internal/modules/products/internal/api/product_service.go internal/modules/products/tool_executor.go
+products,platform/cache,module-to-platform,2,internal/modules/products/internal/application/service.go
+products,platform/logger,module-to-platform,2,internal/modules/products/internal/infrastructure/dashboard_repo.go internal/modules/products/internal/infrastructure/repository.go
+purchase_orders,platform/auth,module-to-platform,2,internal/modules/purchase_orders/internal/api/purchase_order_service.go internal/modules/purchase_orders/tool_executor.go
+purchase_orders,platform/tenant,module-to-platform,2,internal/modules/purchase_orders/internal/api/purchase_order_service.go internal/modules/purchase_orders/tool_executor.go
+quotes,platform/cache,module-to-platform,2,internal/modules/quotes/internal/application/service.go
+recurring_invoices,platform/cache,module-to-platform,2,internal/modules/recurring_invoices/internal/application/service.go
+reviews,platform/auth,module-to-platform,2,internal/modules/reviews/internal/api/review_service.go internal/modules/reviews/tool_executor.go
+reviews,platform/onekiterrors,module-to-platform,2,internal/modules/reviews/internal/api/review_service.go internal/modules/reviews/tool_executor.go
+reviews,platform/tenant,module-to-platform,2,internal/modules/reviews/internal/api/review_service.go internal/modules/reviews/tool_executor.go
+reviews,platform/cache,module-to-platform,2,internal/modules/reviews/internal/application/service.go
+roles,platform/cache,module-to-platform,2,internal/modules/roles/internal/application/service.go
+security,platform/auth,module-to-platform,2,internal/modules/security/internal/api/handlers.go internal/modules/security/internal/api/security_service.go
+security,platform/onekiterrors,module-to-platform,2,internal/modules/security/internal/api/handlers.go internal/modules/security/internal/api/security_service.go
+security,platform/cache,module-to-platform,2,internal/modules/security/internal/application/service.go
+segments,platform/auth,module-to-platform,2,internal/modules/segments/internal/api/segment_service.go internal/modules/segments/tool_executor.go
+segments,platform/tenant,module-to-platform,2,internal/modules/segments/internal/api/segment_service.go internal/modules/segments/tool_executor.go
+segments,platform/cache,module-to-platform,2,internal/modules/segments/internal/application/service.go
+staff,platform/logger,module-to-platform,2,internal/modules/staff/internal/application/service.go internal/modules/staff/internal/infrastructure/repository.go
+stock_takes,platform/cache,module-to-platform,2,internal/modules/stock_takes/internal/application/service.go
+stock_transfers,platform/auth,module-to-platform,2,internal/modules/stock_transfers/internal/api/stock_transfer_service.go internal/modules/stock_transfers/tool_executor.go
+stock_transfers,platform/tenant,module-to-platform,2,internal/modules/stock_transfers/internal/api/stock_transfer_service.go internal/modules/stock_transfers/tool_executor.go
+stock_transfers,platform/cache,module-to-platform,2,internal/modules/stock_transfers/internal/application/service.go
+store_categories,platform/auth,module-to-platform,2,internal/modules/store_categories/internal/routes/handlers/handlers.go internal/modules/store_categories/tool_executor.go
+store_categories,platform/tenant,module-to-platform,2,internal/modules/store_categories/internal/routes/handlers/handlers.go internal/modules/store_categories/tool_executor.go
+store_checkout,platform/cache,module-to-platform,2,internal/modules/store_checkout/internal/application/service.go
+store_orders,platform/auth,module-to-platform,2,internal/modules/store_orders/internal/routes/handlers/handlers.go internal/modules/store_orders/tool_executor.go
+store_orders,platform/tenant,module-to-platform,2,internal/modules/store_orders/internal/routes/handlers/handlers.go internal/modules/store_orders/tool_executor.go
+store_payments,platform/cache,module-to-platform,2,internal/modules/store_payments/internal/application/service.go
+store_products,platform/auth,module-to-platform,2,internal/modules/store_products/internal/routes/handlers/handlers.go internal/modules/store_products/tool_executor.go
+store_products,platform/onekiterrors,module-to-platform,2,internal/modules/store_products/internal/routes/handlers/handlers.go internal/modules/store_products/tool_executor.go
+store_products,platform/tenant,module-to-platform,2,internal/modules/store_products/internal/routes/handlers/handlers.go internal/modules/store_products/tool_executor.go
+subscriptions,platform/logger,module-to-platform,2,internal/modules/subscriptions/internal/api/paddle_webhook.go internal/modules/subscriptions/internal/api/subscription_service.go
+subscriptions,platform/cache,module-to-platform,2,internal/modules/subscriptions/internal/application/service.go
+suppliers,platform/auth,module-to-platform,2,internal/modules/suppliers/internal/api/supplier_service.go internal/modules/suppliers/tool_executor.go
+suppliers,platform/onekiterrors,module-to-platform,2,internal/modules/suppliers/internal/api/supplier_service.go internal/modules/suppliers/tool_executor.go
+suppliers,platform/tenant,module-to-platform,2,internal/modules/suppliers/internal/api/supplier_service.go internal/modules/suppliers/tool_executor.go
+support_canned,platform/auth,module-to-platform,2,internal/modules/support_canned/internal/api/canned_service.go internal/modules/support_canned/tool_executor.go
+support_canned,platform/cache,module-to-platform,2,internal/modules/support_canned/internal/application/service.go
+support_customers,platform/auth,module-to-platform,2,internal/modules/support_customers/internal/api/customer_service.go internal/modules/support_customers/tool_executor.go
+support_customers,platform/cache,module-to-platform,2,internal/modules/support_customers/internal/application/service.go
+support_inbox,platform/auth,module-to-platform,2,internal/modules/support_inbox/internal/api/inbox_service.go internal/modules/support_inbox/tool_executor.go
+support_inbox,platform/cache,module-to-platform,2,internal/modules/support_inbox/internal/application/service.go
+support_knowledge,platform/auth,module-to-platform,2,internal/modules/support_knowledge/internal/api/knowledge_service.go internal/modules/support_knowledge/tool_executor.go
+support_knowledge,platform/cache,module-to-platform,2,internal/modules/support_knowledge/internal/application/service.go
+support_settings,platform/cache,module-to-platform,2,internal/modules/support_settings/internal/application/service.go
+support_tickets,platform/cache,module-to-platform,2,internal/modules/support_tickets/internal/application/service.go
+support_tickets,platform/logger,module-to-platform,2,internal/modules/support_tickets/internal/infrastructure/repository.go internal/modules/support_tickets/internal/routes/handlers/ticket_handlers.go
+support_tickets,platform/auth,module-to-platform,2,internal/modules/support_tickets/internal/routes/handlers/ticket_handlers.go internal/modules/support_tickets/tool_executor.go
+tax,platform/auth,module-to-platform,2,internal/modules/tax/internal/api/tax_service.go internal/modules/tax/tool_executor.go
+tax,platform/tenant,module-to-platform,2,internal/modules/tax/internal/api/tax_service.go internal/modules/tax/tool_executor.go
+tax,platform/cache,module-to-platform,2,internal/modules/tax/internal/application/service.go
+team,platform/config,module-to-platform,2,internal/modules/team/internal/api/invitations_service.go internal/modules/team/internal/application/service.go
+team,platform/cache,module-to-platform,2,internal/modules/team/internal/application/service.go
+team,platform/utils,module-to-platform,2,internal/modules/team/internal/application/service.go internal/modules/team/internal/infrastructure/repository.go
+templates,platform/cache,module-to-platform,2,internal/modules/templates/internal/application/service.go
+time_off,platform/cache,module-to-platform,2,internal/modules/time_off/internal/application/service.go
+timesheets,platform/cache,module-to-platform,2,internal/modules/timesheets/internal/application/service.go
+training,platform/cache,module-to-platform,2,internal/modules/training/internal/application/service.go
+user,platform/email,module-to-platform,2,internal/modules/user/internal/application/password_reset_service.go internal/modules/user/internal/application/service.go
+voxhire,platform/email,module-to-platform,2,internal/modules/voxhire/internal/application/recruit_emails.go internal/modules/voxhire/internal/application/service.go
+voxhire,platform/utils,module-to-platform,2,internal/modules/voxhire/internal/application/recruit_service.go
+voxhire,platform/jobs,module-to-platform,2,internal/modules/voxhire/internal/jobs/jobs.go internal/modules/voxhire/module.go
+voxhire,platform/onekiterrors,module-to-platform,2,internal/modules/voxhire/internal/routes/handlers/applications_handler.go internal/modules/voxhire/internal/routes/handlers/contact_handler.go
+voxhire,platform/server,module-to-platform,2,internal/modules/voxhire/internal/routes/handlers/applications_handler.go internal/modules/voxhire/internal/routes/routes.go
+warehouses,platform/auth,module-to-platform,2,internal/modules/warehouses/internal/api/warehouse_service.go internal/modules/warehouses/tool_executor.go
+warehouses,platform/tenant,module-to-platform,2,internal/modules/warehouses/internal/api/warehouse_service.go internal/modules/warehouses/tool_executor.go
+webhooks,platform/cache,module-to-platform,2,internal/modules/webhooks/internal/application/service.go
+websitelead,platform/onekiterrors,module-to-platform,2,internal/modules/websitelead/internal/routes/handlers/contact_handler.go internal/modules/websitelead/internal/routes/handlers/handler.go
+workspaces,platform/hubprofile,module-to-platform,2,internal/modules/workspaces/internal/application/hub_profile_bypass_test.go internal/modules/workspaces/internal/application/service.go
+workspaces,platform/labourcost,module-to-platform,2,internal/modules/workspaces/internal/application/labour_cost_test.go internal/modules/workspaces/internal/application/service.go
+workspaces,hr_core,module-to-module,2,internal/modules/workspaces/module.go internal/modules/workspaces/presence_test.go
+workspaces,hr_leave,module-to-module,2,internal/modules/workspaces/module.go internal/modules/workspaces/presence_test.go
+accounts,platform/auth,module-to-platform,1,internal/modules/accounts/internal/api/account_service.go
+accounts,platform/onekiterrors,module-to-platform,1,internal/modules/accounts/internal/api/account_service.go
+accounts,platform/tenant,module-to-platform,1,internal/modules/accounts/internal/api/account_service.go
+activity,platform/auth,module-to-platform,1,internal/modules/activity/internal/api/activity_service.go
+activity,platform/onekiterrors,module-to-platform,1,internal/modules/activity/internal/api/activity_service.go
+activity,platform/tenant,module-to-platform,1,internal/modules/activity/internal/api/activity_service.go
+activity,platform/cache,module-to-platform,1,internal/modules/activity/internal/application/service.go
+activity,platform/logger,module-to-platform,1,internal/modules/activity/internal/infrastructure/repository.go
+addons,platform/hubapp,module-to-platform,1,internal/modules/addons/hub_addon_provider.go
+addons,platform/logger,module-to-platform,1,internal/modules/addons/internal/infrastructure/repository.go
+aiquery,platform/tenant,module-to-platform,1,internal/modules/aiquery/internal/application/service.go
+aiquery,platform/database,module-to-platform,1,internal/modules/aiquery/internal/infrastructure/executor.go
+aiquota,platform/auth,module-to-platform,1,internal/modules/aiquota/internal/api/ai_service.go
+aiquota,platform/onekiterrors,module-to-platform,1,internal/modules/aiquota/internal/api/ai_service.go
+aiquota,platform/config,module-to-platform,1,internal/modules/aiquota/internal/application/service.go
+aiquota,platform/tenant,module-to-platform,1,internal/modules/aiquota/internal/infrastructure/repository.go
+api_keys,platform/auth,module-to-platform,1,internal/modules/api_keys/internal/api/developer_service.go
+api_keys,platform/onekiterrors,module-to-platform,1,internal/modules/api_keys/internal/api/developer_service.go
+api_keys,platform/tenant,module-to-platform,1,internal/modules/api_keys/internal/api/developer_service.go
+api_keys,platform/securekey,module-to-platform,1,internal/modules/api_keys/internal/application/service.go
+api_keys,platform/logger,module-to-platform,1,internal/modules/api_keys/internal/infrastructure/repository.go
+apps,platform/logger,module-to-platform,1,internal/modules/apps/internal/infrastructure/repository.go
+apps,platform/tenant,module-to-platform,1,internal/modules/apps/internal/infrastructure/repository.go
+automations,platform/logger,module-to-platform,1,internal/modules/automations/internal/infrastructure/repository.go
+automations,platform/auth,module-to-platform,1,internal/modules/automations/internal/routes/handlers/automation_handler.go
+automations,platform/onekiterrors,module-to-platform,1,internal/modules/automations/internal/routes/handlers/automation_handler.go
+automations,platform/tenant,module-to-platform,1,internal/modules/automations/internal/routes/handlers/automation_handler.go
+automations,platform/server,module-to-platform,1,internal/modules/automations/internal/routes/routes.go
+bank_accounts,platform/onekiterrors,module-to-platform,1,internal/modules/bank_accounts/internal/api/bank_account_service.go
+bank_accounts,platform/logger,module-to-platform,1,internal/modules/bank_accounts/internal/infrastructure/repository.go
+billing,platform/auth,module-to-platform,1,internal/modules/billing/internal/api/billing_service.go
+billing,platform/onekiterrors,module-to-platform,1,internal/modules/billing/internal/api/billing_service.go
+bills,platform/onekiterrors,module-to-platform,1,internal/modules/bills/internal/api/bill_service.go
+bills,platform/pagination,module-to-platform,1,internal/modules/bills/internal/application/service.go
+booking_appointments,platform/onekiterrors,module-to-platform,1,internal/modules/booking_appointments/internal/api/appointment_service.go
+booking_appointments,platform/customer_sync,module-to-platform,1,internal/modules/booking_appointments/internal/infrastructure/repository.go
+booking_appointments,platform/logger,module-to-platform,1,internal/modules/booking_appointments/internal/infrastructure/repository.go
+booking_calendar,platform/onekiterrors,module-to-platform,1,internal/modules/booking_calendar/internal/api/calendar_service.go
+booking_calendar,platform/logger,module-to-platform,1,internal/modules/booking_calendar/internal/infrastructure/repository.go
+booking_dashboard,platform/onekiterrors,module-to-platform,1,internal/modules/booking_dashboard/internal/api/dashboard_service.go
+booking_dashboard,platform/logger,module-to-platform,1,internal/modules/booking_dashboard/internal/infrastructure/repository.go
+booking_reminders,platform/onekiterrors,module-to-platform,1,internal/modules/booking_reminders/internal/api/reminder_service.go
+booking_reminders,platform/logger,module-to-platform,1,internal/modules/booking_reminders/internal/infrastructure/repository.go
+booking_resources,platform/onekiterrors,module-to-platform,1,internal/modules/booking_resources/internal/api/resource_service.go
+booking_resources,platform/cache,module-to-platform,1,internal/modules/booking_resources/internal/application/service.go
+booking_resources,platform/logger,module-to-platform,1,internal/modules/booking_resources/internal/infrastructure/repository.go
+booking_services,platform/onekiterrors,module-to-platform,1,internal/modules/booking_services/internal/api/service.go
+booking_services,platform/tenant,module-to-platform,1,internal/modules/booking_services/internal/api/service.go
+booking_services,platform/cache,module-to-platform,1,internal/modules/booking_services/internal/application/service.go
+booking_services,platform/logger,module-to-platform,1,internal/modules/booking_services/internal/infrastructure/repository.go
+booking_waitlist,platform/onekiterrors,module-to-platform,1,internal/modules/booking_waitlist/internal/api/waitlist_service.go
+booking_waitlist,platform/tenant,module-to-platform,1,internal/modules/booking_waitlist/internal/api/waitlist_service.go
+booking_waitlist,platform/cache,module-to-platform,1,internal/modules/booking_waitlist/internal/application/service.go
+booking_waitlist,platform/customer_sync,module-to-platform,1,internal/modules/booking_waitlist/internal/infrastructure/repository.go
+booking_waitlist,platform/logger,module-to-platform,1,internal/modules/booking_waitlist/internal/infrastructure/repository.go
+brands,platform/onekiterrors,module-to-platform,1,internal/modules/brands/internal/api/brand_service.go
+brands,platform/audit,module-to-platform,1,internal/modules/brands/internal/application/service.go
+brands,platform/cache,module-to-platform,1,internal/modules/brands/internal/application/service.go
+brands,platform/logger,module-to-platform,1,internal/modules/brands/internal/infrastructure/repository.go
+campaigns,platform/logger,module-to-platform,1,internal/modules/campaigns/internal/infrastructure/repository.go
+campaigns,platform/server,module-to-platform,1,internal/modules/campaigns/internal/routes/routes.go
+careers,platform/utils,module-to-platform,1,internal/modules/careers/internal/domain/career.go
+categories,platform/onekiterrors,module-to-platform,1,internal/modules/categories/internal/api/category_service.go
+categories,platform/audit,module-to-platform,1,internal/modules/categories/internal/application/service.go
+categories,platform/cache,module-to-platform,1,internal/modules/categories/internal/application/service.go
+categories,platform/logger,module-to-platform,1,internal/modules/categories/internal/infrastructure/repository.go
+config,platform/emailqueue,module-to-platform,1,internal/modules/config/internal/api/config_service.go
+config,platform/logger,module-to-platform,1,internal/modules/config/internal/infrastructure/repository.go
+config,platform/securekey,module-to-platform,1,internal/modules/config/internal/infrastructure/repository.go
+console,platform/config,module-to-platform,1,internal/modules/console/internal/application/self_host_licenses.go
+console,platform/license,module-to-platform,1,internal/modules/console/internal/application/self_host_licenses.go
+console,platform/utils,module-to-platform,1,internal/modules/console/internal/application/service.go
+console,platform/searchutil,module-to-platform,1,internal/modules/console/internal/infrastructure/self_host_licenses.go
+console,platform/aicache,module-to-platform,1,internal/modules/console/internal/routes/handlers/handlers.go
+console,platform/server,module-to-platform,1,internal/modules/console/internal/routes/routes.go
+crm_sales,platform/customer_sync,module-to-platform,1,internal/modules/crm_sales/internal/infrastructure/repository.go
+crm_sales,platform/server,module-to-platform,1,internal/modules/crm_sales/internal/routes/routes.go
+crm_settings,platform/auth,module-to-platform,1,internal/modules/crm_settings/internal/api/settings_service.go
+crm_settings,platform/onekiterrors,module-to-platform,1,internal/modules/crm_settings/internal/api/settings_service.go
+crm_settings,platform/tenant,module-to-platform,1,internal/modules/crm_settings/internal/api/settings_service.go
+crm_settings,platform/logger,module-to-platform,1,internal/modules/crm_settings/internal/infrastructure/repository.go
+custom_domains,platform/auth,module-to-platform,1,internal/modules/custom_domains/internal/api/service.go
+custom_domains,platform/onekiterrors,module-to-platform,1,internal/modules/custom_domains/internal/api/service.go
+custom_domains,platform/tenant,module-to-platform,1,internal/modules/custom_domains/internal/api/service.go
+customers,campaigns,module-to-module,1,internal/modules/customers/internal/infrastructure/repository.go
+customers,segments,module-to-module,1,internal/modules/customers/internal/infrastructure/repository.go
+customers,platform/searchutil,module-to-platform,1,internal/modules/customers/internal/infrastructure/repository.go
+customers,platform/segmentrules,module-to-platform,1,internal/modules/customers/internal/infrastructure/repository.go
+customers,platform/server,module-to-platform,1,internal/modules/customers/internal/routes/routes.go
+departments,platform/auth,module-to-platform,1,internal/modules/departments/internal/api/department_service.go
+departments,platform/onekiterrors,module-to-platform,1,internal/modules/departments/internal/api/department_service.go
+departments,platform/tenant,module-to-platform,1,internal/modules/departments/internal/api/department_service.go
+departments,platform/logger,module-to-platform,1,internal/modules/departments/internal/infrastructure/repository.go
+documents,platform/auth,module-to-platform,1,internal/modules/documents/internal/api/document_service.go
+documents,platform/onekiterrors,module-to-platform,1,internal/modules/documents/internal/api/document_service.go
+documents,platform/tenant,module-to-platform,1,internal/modules/documents/internal/api/document_service.go
+documents,platform/logger,module-to-platform,1,internal/modules/documents/internal/infrastructure/repository.go
+emailtest,platform/email,module-to-platform,1,internal/modules/emailtest/module.go
+emailtest,platform/logger,module-to-platform,1,internal/modules/emailtest/module.go
+emailtest,platform/onekiterrors,module-to-platform,1,internal/modules/emailtest/module.go
+emailtest,platform/server,module-to-platform,1,internal/modules/emailtest/module.go
+expenses,platform/onekiterrors,module-to-platform,1,internal/modules/expenses/internal/api/expense_service.go
+expenses,platform/logger,module-to-platform,1,internal/modules/expenses/internal/infrastructure/repository.go
+featuresupport,platform/auth,module-to-platform,1,internal/modules/featuresupport/internal/api/feature_service.go
+featuresupport,platform/onekiterrors,module-to-platform,1,internal/modules/featuresupport/internal/api/feature_service.go
+featuresupport,platform/logger,module-to-platform,1,internal/modules/featuresupport/internal/infrastructure/repository.go
+feedback,platform/auth,module-to-platform,1,internal/modules/feedback/internal/api/feedback_service.go
+feedback,platform/onekiterrors,module-to-platform,1,internal/modules/feedback/internal/api/feedback_service.go
+feedback,platform/tenant,module-to-platform,1,internal/modules/feedback/internal/api/feedback_service.go
+feedback,platform/logger,module-to-platform,1,internal/modules/feedback/internal/infrastructure/repository.go
+finance_bank_feeds,platform/logger,module-to-platform,1,internal/modules/finance_bank_feeds/internal/infrastructure/repository.go
+finance_bank_feeds,platform/onekiterrors,module-to-platform,1,internal/modules/finance_bank_feeds/internal/routes/handlers/handlers.go
+finance_bank_feeds,platform/server,module-to-platform,1,internal/modules/finance_bank_feeds/internal/routes/routes.go
+finance_reconciliation,platform/onekiterrors,module-to-platform,1,internal/modules/finance_reconciliation/internal/api/reconciliation_service.go
+finance_reconciliation,platform/logger,module-to-platform,1,internal/modules/finance_reconciliation/internal/infrastructure/repository.go
+finance_reports,platform/onekiterrors,module-to-platform,1,internal/modules/finance_reports/internal/api/statement_service.go
+finance_reports,platform/logger,module-to-platform,1,internal/modules/finance_reports/internal/infrastructure/repository.go
+flow_insights,platform/logger,module-to-platform,1,internal/modules/flow_insights/internal/infrastructure/repository.go
+flow_insights,platform/onekiterrors,module-to-platform,1,internal/modules/flow_insights/internal/routes/handlers/insights_handlers.go
+flow_insights,platform/server,module-to-platform,1,internal/modules/flow_insights/internal/routes/routes.go
+hr_attendance,platform/tenant,module-to-platform,1,internal/modules/hr_attendance/internal/api/attendance_service.go
+hr_attendance,platform/cache,module-to-platform,1,internal/modules/hr_attendance/internal/application/service.go
+hr_attendance,platform/utils,module-to-platform,1,internal/modules/hr_attendance/internal/application/service.go
+hr_attendance,hr_core,module-to-module,1,internal/modules/hr_attendance/module.go
+hr_core,platform/server,module-to-platform,1,internal/modules/hr_core/internal/routes/routes.go
+hr_dashboard,platform/auth,module-to-platform,1,internal/modules/hr_dashboard/internal/api/dashboard_service.go
+hr_dashboard,platform/logger,module-to-platform,1,internal/modules/hr_dashboard/internal/api/dashboard_service.go
+hr_dashboard,platform/onekiterrors,module-to-platform,1,internal/modules/hr_dashboard/internal/api/dashboard_service.go
+hr_dashboard,platform/tenant,module-to-platform,1,internal/modules/hr_dashboard/internal/api/dashboard_service.go
+hr_documents,platform/server,module-to-platform,1,internal/modules/hr_documents/internal/routes/routes.go
+hr_equipment,hr_core,module-to-module,1,internal/modules/hr_equipment/module.go
+hr_leave,hr_core,module-to-module,1,internal/modules/hr_leave/module.go
+hr_leave,platform/server,module-to-platform,1,internal/modules/hr_leave/module.go
+hr_onboarding,platform/server,module-to-platform,1,internal/modules/hr_onboarding/module.go
+hr_overtime,hr_core,module-to-module,1,internal/modules/hr_overtime/module.go
+hr_overtime,platform/server,module-to-platform,1,internal/modules/hr_overtime/module.go
+hr_payroll,platform/financejournal,module-to-platform,1,internal/modules/hr_payroll/internal/domain/repository.go
+hr_payroll,platform/server,module-to-platform,1,internal/modules/hr_payroll/internal/routes/routes.go
+hr_payroll,hr_core,module-to-module,1,internal/modules/hr_payroll/module.go
+hr_performance,platform/server,module-to-platform,1,internal/modules/hr_performance/module.go
+hr_reports,platform/auth,module-to-platform,1,internal/modules/hr_reports/internal/routes/handlers/generate_report_handler.go
+hr_reports,platform/logger,module-to-platform,1,internal/modules/hr_reports/internal/routes/handlers/generate_report_handler.go
+hr_reports,platform/onekiterrors,module-to-platform,1,internal/modules/hr_reports/internal/routes/handlers/generate_report_handler.go
+hr_reports,platform/server,module-to-platform,1,internal/modules/hr_reports/internal/routes/handlers/generate_report_handler.go
+hr_reports,platform/tenant,module-to-platform,1,internal/modules/hr_reports/internal/routes/handlers/generate_report_handler.go
+hr_setup,platform/server,module-to-platform,1,internal/modules/hr_setup/module.go
+hr_shifts,platform/server,module-to-platform,1,internal/modules/hr_shifts/internal/routes/routes.go
+hr_shifts,hr_core,module-to-module,1,internal/modules/hr_shifts/module.go
+hr_time,platform/utils,module-to-platform,1,internal/modules/hr_time/internal/routes/handlers/list_time_entries_handler.go
+hr_time,platform/server,module-to-platform,1,internal/modules/hr_time/internal/routes/routes.go
+hr_time,hr_core,module-to-module,1,internal/modules/hr_time/module.go
+hub_menu,platform/auth,module-to-platform,1,internal/modules/hub_menu/internal/api/menu_service.go
+hub_menu,platform/onekiterrors,module-to-platform,1,internal/modules/hub_menu/internal/api/menu_service.go
+hub_menu,platform/tenant,module-to-platform,1,internal/modules/hub_menu/internal/api/menu_service.go
+hub_menu,platform/logger,module-to-platform,1,internal/modules/hub_menu/internal/infrastructure/repository.go
+integrations,platform/auth,module-to-platform,1,internal/modules/integrations/internal/api/integration_service.go
+integrations,platform/onekiterrors,module-to-platform,1,internal/modules/integrations/internal/api/integration_service.go
+integrations,platform/tenant,module-to-platform,1,internal/modules/integrations/internal/api/integration_service.go
+integrations,platform/logger,module-to-platform,1,internal/modules/integrations/internal/infrastructure/repository.go
+inventory,platform/onekiterrors,module-to-platform,1,internal/modules/inventory/internal/api/inventory_service.go
+inventory,platform/stock_core,module-to-platform,1,internal/modules/inventory/internal/infrastructure/repository.go
+invoices,platform/email,module-to-platform,1,internal/modules/invoices/internal/application/service.go
+invoices,platform/pagination,module-to-platform,1,internal/modules/invoices/internal/application/service.go
+invoices,platform/customer_sync,module-to-platform,1,internal/modules/invoices/internal/infrastructure/repository.go
+invoices,platform/searchutil,module-to-platform,1,internal/modules/invoices/internal/infrastructure/repository.go
+journal,platform/onekiterrors,module-to-platform,1,internal/modules/journal/internal/api/journal_service.go
+journal,platform/logger,module-to-platform,1,internal/modules/journal/internal/infrastructure/repository.go
+kpis,platform/onekiterrors,module-to-platform,1,internal/modules/kpis/internal/api/dashboard_service.go
+kpis,platform/logger,module-to-platform,1,internal/modules/kpis/internal/infrastructure/repository.go
+loyalty,platform/logger,module-to-platform,1,internal/modules/loyalty/internal/infrastructure/repository.go
+loyalty,platform/server,module-to-platform,1,internal/modules/loyalty/internal/routes/routes.go
+memory,platform/snips,module-to-platform,1,internal/modules/memory/internal/application/service.go
+memory,platform/utils,module-to-platform,1,internal/modules/memory/internal/domain/memory.go
+memory,platform/searchutil,module-to-platform,1,internal/modules/memory/internal/infrastructure/repository.go
+memory,platform/server,module-to-platform,1,internal/modules/memory/module.go
+notifications,platform/wsbus,module-to-platform,1,internal/modules/notifications/internal/routes/handlers/ws_handler.go
+oauth,platform/auth,module-to-platform,1,internal/modules/oauth/internal/api/oauth_service.go
+oauth,platform/logger,module-to-platform,1,internal/modules/oauth/internal/api/oauth_service.go
+oauth,platform/onekiterrors,module-to-platform,1,internal/modules/oauth/internal/api/oauth_service.go
+oauth,platform/cache,module-to-platform,1,internal/modules/oauth/internal/application/service.go
+one_on_ones,platform/auth,module-to-platform,1,internal/modules/one_on_ones/internal/api/one_on_one_service.go
+one_on_ones,platform/onekiterrors,module-to-platform,1,internal/modules/one_on_ones/internal/api/one_on_one_service.go
+one_on_ones,platform/tenant,module-to-platform,1,internal/modules/one_on_ones/internal/api/one_on_one_service.go
+one_on_ones,platform/logger,module-to-platform,1,internal/modules/one_on_ones/internal/infrastructure/repository.go
+payroll,platform/auth,module-to-platform,1,internal/modules/payroll/internal/api/payroll_service.go
+payroll,platform/onekiterrors,module-to-platform,1,internal/modules/payroll/internal/api/payroll_service.go
+payroll,platform/tenant,module-to-platform,1,internal/modules/payroll/internal/api/payroll_service.go
+payroll,hr_core,module-to-module,1,internal/modules/payroll/module.go
+pos_audit,platform/auth,module-to-platform,1,internal/modules/pos_audit/internal/api/audit_service.go
+pos_audit,platform/onekiterrors,module-to-platform,1,internal/modules/pos_audit/internal/api/audit_service.go
+pos_audit,platform/logger,module-to-platform,1,internal/modules/pos_audit/internal/infrastructure/repository.go
+pos_cash_movements,platform/onekiterrors,module-to-platform,1,internal/modules/pos_cash_movements/internal/api/cash_service.go
+pos_cash_movements,platform/logger,module-to-platform,1,internal/modules/pos_cash_movements/internal/infrastructure/repository.go
+pos_combos,platform/auth,module-to-platform,1,internal/modules/pos_combos/internal/api/combo_service.go
+pos_combos,platform/onekiterrors,module-to-platform,1,internal/modules/pos_combos/internal/api/combo_service.go
+pos_combos,platform/tenant,module-to-platform,1,internal/modules/pos_combos/internal/api/combo_service.go
+pos_combos,platform/logger,module-to-platform,1,internal/modules/pos_combos/internal/infrastructure/repository.go
+pos_customers,platform/auth,module-to-platform,1,internal/modules/pos_customers/internal/api/customer_service.go
+pos_customers,platform/onekiterrors,module-to-platform,1,internal/modules/pos_customers/internal/api/customer_service.go
+pos_customers,platform/tenant,module-to-platform,1,internal/modules/pos_customers/internal/api/customer_service.go
+pos_customers,platform/logger,module-to-platform,1,internal/modules/pos_customers/internal/infrastructure/repository.go
+pos_customers,platform/searchutil,module-to-platform,1,internal/modules/pos_customers/internal/infrastructure/repository.go
+pos_day_summary,platform/onekiterrors,module-to-platform,1,internal/modules/pos_day_summary/internal/api/day_summary_service.go
+pos_day_summary,platform/logger,module-to-platform,1,internal/modules/pos_day_summary/internal/infrastructure/repository.go
+pos_floors,platform/onekiterrors,module-to-platform,1,internal/modules/pos_floors/internal/api/floor_service.go
+pos_floors,platform/logger,module-to-platform,1,internal/modules/pos_floors/internal/infrastructure/repository.go
+pos_gift_cards,platform/auth,module-to-platform,1,internal/modules/pos_gift_cards/internal/api/gift_card_service.go
+pos_gift_cards,platform/onekiterrors,module-to-platform,1,internal/modules/pos_gift_cards/internal/api/gift_card_service.go
+pos_gift_cards,platform/tenant,module-to-platform,1,internal/modules/pos_gift_cards/internal/api/gift_card_service.go
+pos_gift_cards,platform/customer_sync,module-to-platform,1,internal/modules/pos_gift_cards/internal/infrastructure/repository.go
+pos_kds,platform/auth,module-to-platform,1,internal/modules/pos_kds/internal/api/kds_service.go
+pos_kds,platform/onekiterrors,module-to-platform,1,internal/modules/pos_kds/internal/api/kds_service.go
+pos_kds,platform/tenant,module-to-platform,1,internal/modules/pos_kds/internal/api/kds_service.go
+pos_kds,platform/wsbus,module-to-platform,1,internal/modules/pos_kds/internal/application/service.go
+pos_kds,platform/logger,module-to-platform,1,internal/modules/pos_kds/internal/infrastructure/repository.go
+pos_locations,platform/logger,module-to-platform,1,internal/modules/pos_locations/internal/infrastructure/repository.go
+pos_loyalty,platform/auth,module-to-platform,1,internal/modules/pos_loyalty/internal/api/loyalty_service.go
+pos_loyalty,platform/onekiterrors,module-to-platform,1,internal/modules/pos_loyalty/internal/api/loyalty_service.go
+pos_loyalty,platform/tenant,module-to-platform,1,internal/modules/pos_loyalty/internal/api/loyalty_service.go
+pos_loyalty,platform/logger,module-to-platform,1,internal/modules/pos_loyalty/internal/infrastructure/repository.go
+pos_manager,platform/auth,module-to-platform,1,internal/modules/pos_manager/internal/api/manager_service.go
+pos_manager,platform/onekiterrors,module-to-platform,1,internal/modules/pos_manager/internal/api/manager_service.go
+pos_manager,platform/tenant,module-to-platform,1,internal/modules/pos_manager/internal/api/manager_service.go
+pos_manager,platform/logger,module-to-platform,1,internal/modules/pos_manager/internal/infrastructure/repository.go
+pos_member_locations,platform/auth,module-to-platform,1,internal/modules/pos_member_locations/internal/api/access_service.go
+pos_member_locations,platform/onekiterrors,module-to-platform,1,internal/modules/pos_member_locations/internal/api/access_service.go
+pos_member_locations,platform/tenant,module-to-platform,1,internal/modules/pos_member_locations/internal/api/access_service.go
+pos_menu,platform/onekiterrors,module-to-platform,1,internal/modules/pos_menu/internal/api/menu_item_service.go
+pos_menu,platform/logger,module-to-platform,1,internal/modules/pos_menu/internal/infrastructure/repository.go
+pos_modifiers,platform/onekiterrors,module-to-platform,1,internal/modules/pos_modifiers/internal/api/modifier_service.go
+pos_modifiers,platform/logger,module-to-platform,1,internal/modules/pos_modifiers/internal/infrastructure/repository.go
+pos_orders,platform/customer_sync,module-to-platform,1,internal/modules/pos_orders/internal/infrastructure/repository.go
+pos_orders,platform/searchutil,module-to-platform,1,internal/modules/pos_orders/internal/infrastructure/repository.go
+pos_orders,platform/stock_core,module-to-platform,1,internal/modules/pos_orders/internal/infrastructure/repository.go
+pos_orders,platform/server,module-to-platform,1,internal/modules/pos_orders/internal/routes/routes.go
+pos_receipts,platform/auth,module-to-platform,1,internal/modules/pos_receipts/internal/api/receipt_service.go
+pos_receipts,platform/onekiterrors,module-to-platform,1,internal/modules/pos_receipts/internal/api/receipt_service.go
+pos_receipts,platform/tenant,module-to-platform,1,internal/modules/pos_receipts/internal/api/receipt_service.go
+pos_receipts,platform/email,module-to-platform,1,internal/modules/pos_receipts/internal/application/service.go
+pos_receipts,platform/logger,module-to-platform,1,internal/modules/pos_receipts/internal/infrastructure/repository.go
+pos_sessions,platform/onekiterrors,module-to-platform,1,internal/modules/pos_sessions/internal/api/session_service.go
+pos_sessions,platform/logger,module-to-platform,1,internal/modules/pos_sessions/internal/infrastructure/repository.go
+pos_settings,platform/auth,module-to-platform,1,internal/modules/pos_settings/internal/api/settings_service.go
+pos_settings,platform/onekiterrors,module-to-platform,1,internal/modules/pos_settings/internal/api/settings_service.go
+pos_settings,platform/logger,module-to-platform,1,internal/modules/pos_settings/internal/infrastructure/repository.go
+pos_stock_movements,platform/onekiterrors,module-to-platform,1,internal/modules/pos_stock_movements/internal/api/stock_service.go
+pos_stock_movements,platform/logger,module-to-platform,1,internal/modules/pos_stock_movements/internal/infrastructure/repository.go
+pos_stock_movements,platform/stock_core,module-to-platform,1,internal/modules/pos_stock_movements/internal/infrastructure/repository.go
+pos_tables,platform/onekiterrors,module-to-platform,1,internal/modules/pos_tables/internal/api/table_service.go
+pos_tables,platform/logger,module-to-platform,1,internal/modules/pos_tables/internal/infrastructure/repository.go
+pos_terminals,platform/onekiterrors,module-to-platform,1,internal/modules/pos_terminals/internal/api/terminal_service.go
+pos_terminals,platform/logger,module-to-platform,1,internal/modules/pos_terminals/internal/infrastructure/repository.go
+pos_users,platform/onekiterrors,module-to-platform,1,internal/modules/pos_users/internal/api/user_service.go
+pos_users,platform/tenant,module-to-platform,1,internal/modules/pos_users/internal/api/user_service.go
+pos_users,platform/utils,module-to-platform,1,internal/modules/pos_users/internal/application/service.go
+price_lists,platform/auth,module-to-platform,1,internal/modules/price_lists/internal/api/price_list_service.go
+price_lists,platform/onekiterrors,module-to-platform,1,internal/modules/price_lists/internal/api/price_list_service.go
+price_lists,platform/tenant,module-to-platform,1,internal/modules/price_lists/internal/api/price_list_service.go
+price_lists,platform/logger,module-to-platform,1,internal/modules/price_lists/internal/infrastructure/repository.go
+products,platform/onekiterrors,module-to-platform,1,internal/modules/products/internal/api/product_service.go
+products,platform/audit,module-to-platform,1,internal/modules/products/internal/application/service.go
+products,platform/searchutil,module-to-platform,1,internal/modules/products/internal/infrastructure/repository.go
+products,platform/stock_core,module-to-platform,1,internal/modules/products/internal/infrastructure/repository.go
+purchase_orders,platform/onekiterrors,module-to-platform,1,internal/modules/purchase_orders/internal/api/purchase_order_service.go
+purchase_orders,platform/audit,module-to-platform,1,internal/modules/purchase_orders/internal/application/service.go
+purchase_orders,platform/cache,module-to-platform,1,internal/modules/purchase_orders/internal/application/service.go
+purchase_orders,platform/logger,module-to-platform,1,internal/modules/purchase_orders/internal/infrastructure/repository.go
+quotes,platform/customer_sync,module-to-platform,1,internal/modules/quotes/internal/infrastructure/repository.go
+recurring_invoices,platform/auth,module-to-platform,1,internal/modules/recurring_invoices/internal/api/recurring_invoice_service.go
+recurring_invoices,platform/onekiterrors,module-to-platform,1,internal/modules/recurring_invoices/internal/api/recurring_invoice_service.go
+recurring_invoices,platform/tenant,module-to-platform,1,internal/modules/recurring_invoices/internal/api/recurring_invoice_service.go
+recurring_invoices,platform/logger,module-to-platform,1,internal/modules/recurring_invoices/internal/infrastructure/repository.go
+reviews,platform/logger,module-to-platform,1,internal/modules/reviews/internal/infrastructure/repository.go
+roles,platform/auth,module-to-platform,1,internal/modules/roles/internal/api/permission_service.go
+roles,platform/onekiterrors,module-to-platform,1,internal/modules/roles/internal/api/permission_service.go
+roles,platform/tenant,module-to-platform,1,internal/modules/roles/internal/api/permission_service.go
+roles,platform/logger,module-to-platform,1,internal/modules/roles/internal/infrastructure/repository.go
+security,platform/logger,module-to-platform,1,internal/modules/security/internal/infrastructure/repository.go
+segments,platform/onekiterrors,module-to-platform,1,internal/modules/segments/internal/api/segment_service.go
+segments,platform/logger,module-to-platform,1,internal/modules/segments/internal/infrastructure/repository.go
+segments,platform/segmentrules,module-to-platform,1,internal/modules/segments/internal/infrastructure/repository.go
+staff,platform/auth,module-to-platform,1,internal/modules/staff/internal/api/staff_service.go
+staff,platform/onekiterrors,module-to-platform,1,internal/modules/staff/internal/api/staff_service.go
+staff,platform/tenant,module-to-platform,1,internal/modules/staff/internal/api/staff_service.go
+staff,platform/cache,module-to-platform,1,internal/modules/staff/internal/application/service.go
+staff,platform/searchutil,module-to-platform,1,internal/modules/staff/internal/infrastructure/repository.go
+staff,hr_core,module-to-module,1,internal/modules/staff/module.go
+stock_takes,platform/auth,module-to-platform,1,internal/modules/stock_takes/internal/api/stock_take_service.go
+stock_takes,platform/onekiterrors,module-to-platform,1,internal/modules/stock_takes/internal/api/stock_take_service.go
+stock_takes,platform/tenant,module-to-platform,1,internal/modules/stock_takes/internal/api/stock_take_service.go
+stock_takes,platform/audit,module-to-platform,1,internal/modules/stock_takes/internal/application/service.go
+stock_takes,platform/logger,module-to-platform,1,internal/modules/stock_takes/internal/infrastructure/repository.go
+stock_transfers,platform/onekiterrors,module-to-platform,1,internal/modules/stock_transfers/internal/api/stock_transfer_service.go
+stock_transfers,platform/audit,module-to-platform,1,internal/modules/stock_transfers/internal/application/service.go
+stock_transfers,platform/logger,module-to-platform,1,internal/modules/stock_transfers/internal/infrastructure/repository.go
+store_categories,platform/cache,module-to-platform,1,internal/modules/store_categories/internal/application/service.go
+store_categories,platform/logger,module-to-platform,1,internal/modules/store_categories/internal/infrastructure/repository.go
+store_categories,platform/onekiterrors,module-to-platform,1,internal/modules/store_categories/internal/routes/handlers/handlers.go
+store_categories,platform/server,module-to-platform,1,internal/modules/store_categories/internal/routes/routes.go
+store_checkout,platform/customer_sync,module-to-platform,1,internal/modules/store_checkout/internal/infrastructure/repository.go
+store_checkout,platform/logger,module-to-platform,1,internal/modules/store_checkout/internal/infrastructure/repository.go
+store_checkout,platform/auth,module-to-platform,1,internal/modules/store_checkout/internal/routes/handlers/handlers.go
+store_checkout,platform/onekiterrors,module-to-platform,1,internal/modules/store_checkout/internal/routes/handlers/handlers.go
+store_checkout,platform/tenant,module-to-platform,1,internal/modules/store_checkout/internal/routes/handlers/handlers.go
+store_checkout,platform/server,module-to-platform,1,internal/modules/store_checkout/internal/routes/routes.go
+store_orders,platform/cache,module-to-platform,1,internal/modules/store_orders/internal/application/service.go
+store_orders,platform/logger,module-to-platform,1,internal/modules/store_orders/internal/infrastructure/repository.go
+store_orders,platform/stock_core,module-to-platform,1,internal/modules/store_orders/internal/infrastructure/repository.go
+store_orders,platform/onekiterrors,module-to-platform,1,internal/modules/store_orders/internal/routes/handlers/handlers.go
+store_orders,platform/server,module-to-platform,1,internal/modules/store_orders/internal/routes/routes.go
+store_payments,platform/logger,module-to-platform,1,internal/modules/store_payments/internal/infrastructure/repository.go
+store_payments,platform/auth,module-to-platform,1,internal/modules/store_payments/internal/routes/handlers/handlers.go
+store_payments,platform/onekiterrors,module-to-platform,1,internal/modules/store_payments/internal/routes/handlers/handlers.go
+store_payments,platform/tenant,module-to-platform,1,internal/modules/store_payments/internal/routes/handlers/handlers.go
+store_payments,platform/server,module-to-platform,1,internal/modules/store_payments/internal/routes/routes.go
+store_products,platform/cache,module-to-platform,1,internal/modules/store_products/internal/application/service.go
+store_products,platform/logger,module-to-platform,1,internal/modules/store_products/internal/infrastructure/repository.go
+store_products,platform/server,module-to-platform,1,internal/modules/store_products/internal/routes/routes.go
+store_shipping,platform/cache,module-to-platform,1,internal/modules/store_shipping/internal/application/service.go
+store_shipping,platform/logger,module-to-platform,1,internal/modules/store_shipping/internal/infrastructure/repository.go
+store_shipping,platform/auth,module-to-platform,1,internal/modules/store_shipping/internal/routes/handlers/handlers.go
+store_shipping,platform/onekiterrors,module-to-platform,1,internal/modules/store_shipping/internal/routes/handlers/handlers.go
+store_shipping,platform/tenant,module-to-platform,1,internal/modules/store_shipping/internal/routes/handlers/handlers.go
+store_shipping,platform/server,module-to-platform,1,internal/modules/store_shipping/internal/routes/routes.go
+store_themes,platform/cache,module-to-platform,1,internal/modules/store_themes/internal/application/service.go
+store_themes,platform/logger,module-to-platform,1,internal/modules/store_themes/internal/infrastructure/repository.go
+store_themes,platform/auth,module-to-platform,1,internal/modules/store_themes/internal/routes/handlers/handlers.go
+store_themes,platform/onekiterrors,module-to-platform,1,internal/modules/store_themes/internal/routes/handlers/handlers.go
+store_themes,platform/tenant,module-to-platform,1,internal/modules/store_themes/internal/routes/handlers/handlers.go
+store_themes,platform/server,module-to-platform,1,internal/modules/store_themes/internal/routes/routes.go
+storefronts,platform/cache,module-to-platform,1,internal/modules/storefronts/internal/application/service.go
+storefronts,platform/logger,module-to-platform,1,internal/modules/storefronts/internal/infrastructure/repository.go
+storefronts,platform/auth,module-to-platform,1,internal/modules/storefronts/internal/routes/handlers/handlers.go
+storefronts,platform/onekiterrors,module-to-platform,1,internal/modules/storefronts/internal/routes/handlers/handlers.go
+storefronts,platform/tenant,module-to-platform,1,internal/modules/storefronts/internal/routes/handlers/handlers.go
+storefronts,platform/server,module-to-platform,1,internal/modules/storefronts/internal/routes/routes.go
+subscriptions,platform/auth,module-to-platform,1,internal/modules/subscriptions/internal/api/subscription_service.go
+subscriptions,platform/onekiterrors,module-to-platform,1,internal/modules/subscriptions/internal/api/subscription_service.go
+suppliers,platform/audit,module-to-platform,1,internal/modules/suppliers/internal/application/service.go
+suppliers,platform/cache,module-to-platform,1,internal/modules/suppliers/internal/application/service.go
+suppliers,platform/logger,module-to-platform,1,internal/modules/suppliers/internal/infrastructure/repository.go
+support_canned,platform/onekiterrors,module-to-platform,1,internal/modules/support_canned/internal/api/canned_service.go
+support_canned,platform/logger,module-to-platform,1,internal/modules/support_canned/internal/infrastructure/repository.go
+support_customers,platform/onekiterrors,module-to-platform,1,internal/modules/support_customers/internal/api/customer_service.go
+support_customers,platform/logger,module-to-platform,1,internal/modules/support_customers/internal/infrastructure/repository.go
+support_inbox,platform/onekiterrors,module-to-platform,1,internal/modules/support_inbox/internal/api/inbox_service.go
+support_inbox,platform/logger,module-to-platform,1,internal/modules/support_inbox/internal/infrastructure/repository.go
+support_knowledge,platform/onekiterrors,module-to-platform,1,internal/modules/support_knowledge/internal/api/knowledge_service.go
+support_knowledge,platform/logger,module-to-platform,1,internal/modules/support_knowledge/internal/infrastructure/repository.go
+support_settings,platform/auth,module-to-platform,1,internal/modules/support_settings/internal/api/settings_service.go
+support_settings,platform/onekiterrors,module-to-platform,1,internal/modules/support_settings/internal/api/settings_service.go
+support_settings,platform/logger,module-to-platform,1,internal/modules/support_settings/internal/infrastructure/repository.go
+support_tickets,platform/customer_sync,module-to-platform,1,internal/modules/support_tickets/internal/infrastructure/repository.go
+support_tickets,platform/onekiterrors,module-to-platform,1,internal/modules/support_tickets/internal/routes/handlers/ticket_handlers.go
+support_tickets,platform/server,module-to-platform,1,internal/modules/support_tickets/internal/routes/routes.go
+tax,platform/onekiterrors,module-to-platform,1,internal/modules/tax/internal/api/tax_service.go
+tax,platform/logger,module-to-platform,1,internal/modules/tax/internal/infrastructure/repository.go
+team,platform/hubprofile,module-to-platform,1,internal/modules/team/hub_profile_resolver.go
+team,platform/email,module-to-platform,1,internal/modules/team/internal/application/service.go
+templates,platform/auth,module-to-platform,1,internal/modules/templates/internal/api/template_service.go
+templates,platform/onekiterrors,module-to-platform,1,internal/modules/templates/internal/api/template_service.go
+templates,platform/tenant,module-to-platform,1,internal/modules/templates/internal/api/template_service.go
+templates,platform/logger,module-to-platform,1,internal/modules/templates/internal/infrastructure/repository.go
+time_off,platform/auth,module-to-platform,1,internal/modules/time_off/internal/api/time_off_handlers.go
+time_off,platform/onekiterrors,module-to-platform,1,internal/modules/time_off/internal/api/time_off_handlers.go
+time_off,platform/tenant,module-to-platform,1,internal/modules/time_off/internal/api/time_off_handlers.go
+time_off,platform/logger,module-to-platform,1,internal/modules/time_off/internal/infrastructure/repository.go
+time_off,platform/server,module-to-platform,1,internal/modules/time_off/module.go
+timesheets,platform/auth,module-to-platform,1,internal/modules/timesheets/internal/api/timesheet_service.go
+timesheets,platform/onekiterrors,module-to-platform,1,internal/modules/timesheets/internal/api/timesheet_service.go
+timesheets,platform/tenant,module-to-platform,1,internal/modules/timesheets/internal/api/timesheet_service.go
+timesheets,platform/logger,module-to-platform,1,internal/modules/timesheets/internal/infrastructure/repository.go
+training,platform/auth,module-to-platform,1,internal/modules/training/internal/api/training_service.go
+training,platform/onekiterrors,module-to-platform,1,internal/modules/training/internal/api/training_service.go
+training,platform/tenant,module-to-platform,1,internal/modules/training/internal/api/training_service.go
+training,platform/logger,module-to-platform,1,internal/modules/training/internal/infrastructure/repository.go
+user,platform/onekiterrors,module-to-platform,1,internal/modules/user/internal/api/user_service.go
+user,platform/config,module-to-platform,1,internal/modules/user/internal/application/password_reset_service.go
+variants,platform/auth,module-to-platform,1,internal/modules/variants/internal/api/variant_service.go
+variants,platform/onekiterrors,module-to-platform,1,internal/modules/variants/internal/api/variant_service.go
+variants,platform/tenant,module-to-platform,1,internal/modules/variants/internal/api/variant_service.go
+variants,platform/cache,module-to-platform,1,internal/modules/variants/internal/application/service.go
+variants,platform/logger,module-to-platform,1,internal/modules/variants/internal/infrastructure/repository.go
+voxhire,careers,module-to-module,1,internal/modules/voxhire/internal/application/recruit_service.go
+voxhire,platform/config,module-to-platform,1,internal/modules/voxhire/internal/application/recruit_service.go
+warehouses,platform/onekiterrors,module-to-platform,1,internal/modules/warehouses/internal/api/warehouse_service.go
+warehouses,platform/audit,module-to-platform,1,internal/modules/warehouses/internal/application/service.go
+warehouses,platform/cache,module-to-platform,1,internal/modules/warehouses/internal/application/service.go
+warehouses,platform/logger,module-to-platform,1,internal/modules/warehouses/internal/infrastructure/repository.go
+webhooks,platform/hubdeveloper,module-to-platform,1,internal/modules/webhooks/hub_webhooks_provider.go
+webhooks,platform/logger,module-to-platform,1,internal/modules/webhooks/internal/infrastructure/repository.go
+websitelead,platform/email,module-to-platform,1,internal/modules/websitelead/internal/application/service.go
+websitelead,platform/sheets,module-to-platform,1,internal/modules/websitelead/internal/application/service.go
+websitelead,platform/server,module-to-platform,1,internal/modules/websitelead/internal/routes/routes.go
+workspaces,platform/searchutil,module-to-platform,1,internal/modules/workspaces/internal/infrastructure/repository.go
+workspaces,platform/server,module-to-platform,1,internal/modules/workspaces/module.go
