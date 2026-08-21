@@ -327,5 +327,6 @@ export const cases = [
   ["apps/flow/src/features/time/TimeReports.test.tsx", "audit-batch-325-suite-13"],
   ["apps/flow/src/shared/components/ConfirmDialog.tsx", "audit-batch-326-suite-13"],
   ["apps/hr/src/features/attendance/ClockInWidget.tsx", "audit-batch-327-suite-13"],
+  ["apps/hr/src/features/employees/Employees.tsx", "audit-batch-328-suite-13"],
 ];
 
