@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Avatar, Switch } from '@voxire/ui';
+import { Alert, Switch } from '@voxire/ui';
 import {
   type RoundingMinutes,
   type WeekStart,
@@ -9,8 +9,6 @@ import {
   useTimeSettingsStore,
 } from '../../../shared/stores/timeSettingsStore';
 import { DAY_KEYS, type DayKey } from '../../../shared/lib/dateUtils';
-import { useFlowTeam } from '../../../shared/hooks/queries/useFlowTeam';
-import { initialsFromName } from '../../../shared/lib/memberUtils';
 import { formatDurationClock } from '../../../shared/lib/durationUtils';
 import GateNotice from '../../../shared/components/GateNotice';
 import WorkTypesSection from './WorkTypesSection';
@@ -56,7 +54,6 @@ function inputStyle(): React.CSSProperties {
 const TimeSection = (): React.JSX.Element => {
   const { t } = useTranslation();
   const settings = useTimeSettingsStore();
-  const { data: team = [] } = useFlowTeam();
 
   const [overtimeError, setOvertimeError] = useState(false);
   const [newCategory, setNewCategory] = useState('');
@@ -404,73 +401,6 @@ const TimeSection = (): React.JSX.Element => {
             {t('flow.settings.time.addCategory')}
           </button>
         </div>
-      </section>
-
-      <section>
-        <h2
-          className="mb-3 text-[11px] font-semibold uppercase tracking-wider"
-          style={{ color: 'var(--flow-text-muted)' }}
-        >
-          {t('flow.settings.time.billableRates')}
-        </h2>
-        <p className="mb-3 text-[11px] leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
-          {t('flow.settings.time.ratesOnePerPerson')}
-        </p>
-
-        <ul className="space-y-1.5">
-          {team.map((member) => {
-            const rate = settings.ratesByUserId[member.id];
-            const hasRate = typeof rate === 'number';
-            return (
-              <li
-                key={member.id}
-                className="flex flex-col gap-2 rounded-md p-2 sm:flex-row sm:items-center sm:gap-3"
-                style={{ background: 'var(--flow-hover)' }}
-              >
-                <div className="flex min-w-0 flex-1 items-center gap-2">
-                  <Avatar size="sm" initials={initialsFromName(member.name)} aria-hidden="true" />
-                  <span className="truncate text-[13px]" style={{ color: 'var(--flow-text)' }}>
-                    {member.name}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    aria-label={t('flow.settings.time.rateFor', { name: member.name })}
-                    value={hasRate ? rate : ''}
-                    onChange={(e) => {
-                      const raw = e.target.value.trim();
-                      // Empty clears back to unset. A zero rate silently bills
-                      // nothing, so it is never the fallback for a blank field.
-                      if (raw === '') {
-                        settings.setRate(member.id, null);
-                        return;
-                      }
-                      const next = Number(raw);
-                      if (!Number.isFinite(next) || next < 0) return;
-                      settings.setRate(member.id, next);
-                    }}
-                    className="flow-focus min-h-[44px] w-24 rounded px-2 text-[16px] md:min-h-0 md:py-1 md:text-[13px]"
-                    style={inputStyle()}
-                  />
-                  {!hasRate && (
-                    <span className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-                      {t('flow.settings.time.rateNotSet')}
-                    </span>
-                  )}
-                </div>
-                {/* The per-project override column ships empty on purpose: rates
-                 * arrive per project as a value in this cell, not a rewrite. */}
-                {/* Reserves the per-project override column without drawing a
-                 * value in it. Nothing is there yet, and a placeholder glyph
-                 * would read as a value of "none" rather than "not built". */}
-                <span className="hidden sm:block sm:w-28" aria-hidden="true" />
-              </li>
-            );
-          })}
-        </ul>
       </section>
     </div>
   );

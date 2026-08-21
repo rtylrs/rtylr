@@ -273,11 +273,7 @@
       "removeCategoryLabel": "Supprimer la catégorie {{name}}",
       "newCategoryName": "Nom de la nouvelle catégorie",
       "newCategoryPlaceholder": "Ajouter une catégorie",
-      "addCategory": "Ajouter une catégorie",
-      "billableRates": "Tarifs facturables",
-      "ratesOnePerPerson": "Un tarif par personne. La colonne par projet est vide à dessein : les tarifs par projet arriveront comme une valeur dans cette cellule, pas comme une refonte de ce tableau.",
-      "rateFor": "Tarif horaire de {{name}}",
-      "rateNotSet": "Non défini"
+      "addCategory": "Ajouter une catégorie"
     },
     "workTypes": {
       "section": "Types de travail",

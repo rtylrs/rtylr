@@ -273,11 +273,7 @@
       "removeCategoryLabel": "Remove the {{name}} category",
       "newCategoryName": "New category name",
       "newCategoryPlaceholder": "Add a category",
-      "addCategory": "Add category",
-      "billableRates": "Billable rates",
-      "ratesOnePerPerson": "One rate per person. The per-project column is deliberately empty: per-project rates arrive as a value in that cell, not as a rewrite of this table.",
-      "rateFor": "Hourly rate for {{name}}",
-      "rateNotSet": "Not set"
+      "addCategory": "Add category"
     },
     "workTypes": {
       "section": "Work types",
