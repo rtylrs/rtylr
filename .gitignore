@@ -61,3 +61,7 @@ apps/*/.next
 # Playwright artifacts
 /playwright-report/
 /test-results/
+
+# AI agent config: local to each machine, never committed
+.opencode/
+opencode.jsonc
