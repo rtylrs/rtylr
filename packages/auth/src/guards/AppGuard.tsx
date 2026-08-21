@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { resolveAppUrl, resolveAuthUrl } from '@voxire/config';
+import { Sentry } from '@voxire/observability';
 import { getCookie } from '../cookies';
 import { signOut } from '../signOut';
 import { useUserStore } from '../store';
@@ -184,6 +185,18 @@ export function AppGuard({
         // the apps array; only a present-but-unknown value denies.
         const roleWasSent = data.role !== undefined && data.role !== null && data.role !== '';
         if (roleWasSent && role === null) {
+          // Report before denying. A role the frontend cannot interpret means
+          // the backend knows about one this build does not, and without this
+          // the only symptom is a user seeing an access-denied screen they
+          // cannot explain (#795).
+          //
+          // The value is a role name, not user data, so it is safe to send.
+          // captureMessage is a no-op when Sentry has not initialised, which is
+          // why this does not need to know whether boot has run.
+          Sentry.captureMessage('AppGuard: unrecognised user role', {
+            level: 'error',
+            extra: { appId, role: String(data.role) },
+          });
           setStatus('denied');
           return;
         }

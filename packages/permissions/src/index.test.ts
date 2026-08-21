@@ -29,6 +29,18 @@ describe('ROLE_PARENT and ROLE_TIERS agree', () => {
     expect(chain).toEqual([...ROLE_TIERS].reverse());
   });
 
+  it('store_manager resolves to exactly staff, on purpose', () => {
+    // Not a placeholder. A store manager's extra powers are location-scoped via
+    // pos_member_locations and the PIN-verify capability flags, so none of them
+    // is a platform-wide grant (#795). If this ever fails because someone added
+    // permissions to store_manager, check that the intent really changed rather
+    // than making the test agree with the code: granting globally what is meant
+    // to be granted per location is the failure mode.
+    expect([...getPermissions('store_manager')].sort()).toEqual(
+      [...getPermissions('staff')].sort()
+    );
+  });
+
   it('every lateral role names a base outside the lateral set', () => {
     const laterals: PlatformRole[] = ['billing', 'menu_manager', 'store_manager'];
     for (const lateral of laterals) {

@@ -38,10 +38,19 @@ export const ROLE_PARENT: Record<PlatformRole, PlatformRole | null> = {
   admin: 'operator',
   owner: 'admin',
 
-  // store_manager is a POS floor role, so staff is the right base. It declares
-  // no global permissions of its own on purpose: its elevated powers (staff
-  // PINs, voids, refunds, reports) are location-scoped and enforced per-location
-  // via pos_member_locations plus the capability flags returned at PIN verify.
+  // store_manager is a POS floor role, so staff is the right base.
+  //
+  // It resolves to exactly staff's permission set, and that is correct rather
+  // than an oversight. Everything that makes a store manager different from
+  // staff - managing staff PINs, voids, refunds, reports - is location-scoped
+  // and enforced per-location through pos_member_locations plus the capability
+  // flags returned at PIN verify. None of it is a platform-wide grant, so there
+  // is nothing for DIRECT_PERMISSIONS to hold.
+  //
+  // Confirmed as the intent on #795. There is a test asserting the two sets are
+  // identical, because "store_manager has the same permissions as staff" reads
+  // like a bug and the obvious repair is to hand it more, which would grant
+  // globally what is meant to be granted per location.
   store_manager: 'staff',
 
   // menu_manager keeps staff as its base, which is what it resolved to before
